@@ -185,17 +185,18 @@ INVAL_COMMANDS_SILENT = {
 }
 
 PLOT_COMMANDS = [
-    "NPLO",
+    "APLO",
     "EPLO",
     "KPLO",
     "LPLO",
-    "APLO",
-    "VPLO",
-    "PLNS",
+    "NPLO",
     "PLES",
+    "PLNS",
     "PSDG",
+    "SECP",
     "SPGR",
     "TBPL",
+    "VPLO",
 ]
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
 
@@ -1141,7 +1142,9 @@ class _MapdlCore(Commands):
 
             if self._dpf_result is None:
                 # create a DPFResult object
-                self._dpf_result = DPFResult(None, mapdl=self, logger=self._log)
+                self._dpf_result = DPFResult(
+                    rst_file=None, mapdl=self, logger=self._log
+                )
 
             return self._dpf_result
 

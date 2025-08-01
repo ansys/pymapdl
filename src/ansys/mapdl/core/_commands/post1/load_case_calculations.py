@@ -99,7 +99,7 @@ class LoadCaseCalculations:
         ----------
         lcno : str
             Arbitrary pointer number (1-99) to be assigned to the load case specified by ``LSTEP``,
-            ``SBSTEP`` and by the ``FILE`` command. Defaults to 1 + previous value.
+            ``SBSTEP`` and by the :ref:`file` command. Defaults to 1 + previous value.
 
         lstep : str
             Load step number to be defined as the load case. Defaults to one.

@@ -97,9 +97,9 @@ class SetUp:
 
         Valid item and component labels for element nodal results are listed in :ref:`ANSOL_tab_1`.
 
-        :ref:`ansol` defines element nodal results data to be stored from a results file ( ``FILE`` ). Not
-        all items are valid for all nodes. See the input and output summary tables of each element attached
-        to the node for the available items.
+        :ref:`ansol` defines element nodal results data to be stored from a results file ( :ref:`file` ).
+        Not all items are valid for all nodes. See the input and output summary tables of each element
+        attached to the node for the available items.
 
         If `nodal-averaged results
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost>`_ (
@@ -540,7 +540,7 @@ class SetUp:
         See :ref:`ESOL_tab_1` for a list of item and component labels for element (excluding line element)
         results. See :ref:`ESOL_tab_2` for a list of valid selected result ( ``Item`` = SRES) components.
 
-        :ref:`esol` defines element results data to be stored from a results file ( ``FILE`` ). Not all
+        :ref:`esol` defines element results data to be stored from a results file ( :ref:`file` ). Not all
         items are valid for all elements. To see the available items for a given element, refer to the input
         and output summary tables in the documentation for that element.
 

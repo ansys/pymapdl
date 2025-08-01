@@ -25,7 +25,16 @@ import os
 import pathlib
 import socket
 import tempfile
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Literal
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Iterable,
+    Literal,
+    ParamSpec,
+    TypeAlias,
+    Union,
+)
 import weakref
 
 # from ansys.dpf import post
@@ -35,16 +44,39 @@ from ansys.mapdl.core import _HAS_DPF, _HAS_PYVISTA, LOG, Logger, Mapdl  # type:
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import check_valid_ip, get_local_ip, parse_ip_route
 
-COMPONENTS: list[str] = ["X", "Y", "Z", "XY", "YZ", "XZ"]
-
 if _HAS_DPF:
     from ansys.dpf import core as dpf
     from ansys.dpf.core import Model
     from ansys.dpf.core.errors import DPFServerException
 
-
 if TYPE_CHECKING and _HAS_PYVISTA:
     import pyvista as pv
+
+## Types
+Rnum: TypeAlias = Union[int, float, Iterable[int], Iterable[float], None]
+Ids: TypeAlias = Union[int, Iterable[int], None]
+Locations: TypeAlias = Literal["Nodal", "Elemental"]
+
+Entities: TypeAlias = str | int | Iterable[str | int] | None
+EntityType: TypeAlias = Literal["Nodal", "Elemental", "ElementalNodal"]
+
+ResultField: TypeAlias = str  # To be defined later.. Eg "displacement" etc...
+SolutionType: TypeAlias = str
+ComponentsDirections: TypeAlias = Literal["X", "Y", "Z", "XY", "YZ", "XZ"]
+
+Nodes: TypeAlias = str | int | Iterable[int | str] | None
+Elements: TypeAlias = str | int | Iterable[int | str] | None
+MAPDLComponents: TypeAlias = str | Iterable[int | str] | None
+
+ReturnData: TypeAlias = tuple[
+    np.ndarray[Any, np.dtype[np.floating[Any]]],
+    np.ndarray[Any, np.dtype[np.floating[Any]]],
+]
+Kwargs: TypeAlias = dict[Any, Any]
+P = ParamSpec("P")
+
+## Globals
+COMPONENTS: list[str] = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 
 LOCATION_MAPPING: dict[str, str] = {
     "NODE": "Nodal",
@@ -117,9 +149,22 @@ If you still want to use it, you can switch to 'pymapdl-reader' backend."""
 
 
 class ResultNotFound(MapdlRuntimeError):
-    """Results not found"""
+    """Exception raised when a result is not found.
+
+    Parameters
+    ----------
+    msg
+        Error message to display.
+    """
 
     def __init__(self, msg: str = ""):
+        """Initialize ResultNotFound exception.
+
+        Parameters
+        ----------
+        msg
+            Error message to display.
+        """
         MapdlRuntimeError.__init__(self, msg)
 
 
@@ -130,13 +175,17 @@ def update_result(function: Callable[..., Any]) -> Callable[..., Any]:
 
     Parameters
     ----------
-    update : bool, optional
-        If ``True``, the class information is updated by calling ``/STATUS``
-        before accessing the methods. By default ``False``
+    function : callable
+        Function to decorate.
+
+    Returns
+    -------
+    Callable[..., Any]
+        Decorated function
     """
 
     @wraps(function)
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self, *args: P.args, **kwargs: P.kwargs):
         if self._update_required or not self._loaded or self._cached_dpf_model is None:
             self.update()
             self.logger.debug("RST file updated.")
@@ -156,7 +205,7 @@ class DPFResult:
 
     Parameters
     ----------
-    rst_file_path : str
+    rst_file : str
         Path to the RST file.
 
     mapdl : _MapdlCore
@@ -167,16 +216,36 @@ class DPFResult:
         If False, the RST file is located on the local machine, and it will be
         uploaded to the DPF server
 
+    logger
+        Logger instance to use for logging.
     """
 
     def __init__(
         self,
-        rst_file_path: str | None = None,
+        *,
+        rst_file: str | None = None,
         mapdl: "Mapdl | None" = None,
         rst_is_on_remote: bool = False,
         logger: Logger | None = None,
     ) -> None:
-        """Initialize Result instance"""
+        """Initialize Result instance
+
+        Parameters
+        ----------
+        rst_file
+            Path to the RST file.
+
+        mapdl
+            Mapdl instantiated object.
+
+        rst_is_on_remote
+            If True, the RST file is located on the remote server already.
+            If False, the RST file is located on the local machine, and it will be
+            uploaded to the DPF server.
+
+        logger
+            Logger instance to use for logging.
+        """
 
         if not _HAS_DPF:
             raise ModuleNotFoundError(
@@ -192,25 +261,25 @@ class DPFResult:
         self.__rst_name: str | None = None
         self._mode_rst: bool
 
-        if rst_file_path is not None and mapdl is not None:
+        if rst_file is not None and mapdl is not None:
             raise ValueError(
-                "Only one the arguments must be supplied: 'rst_file_path' or 'mapdl'."
+                "Only one the arguments must be supplied: 'rst_file' or 'mapdl'."
             )
 
-        elif rst_file_path is not None:
+        elif rst_file is not None:
             # Using RST file only allows for one RST file at the time.
-            if not rst_is_on_remote and not os.path.exists(rst_file_path):
+            if not rst_is_on_remote and not os.path.exists(rst_file):
                 raise FileNotFoundError(
-                    f"The RST file '{rst_file_path}' could not be found."
+                    f"The RST file '{rst_file}' could not be found."
                 )
             elif rst_is_on_remote:
-                self._server_file_path = rst_file_path
+                self._server_file_path = rst_file
 
             self.logger.debug("Initializing DPFResult class in RST mode.")
             self._mode_rst = True
 
-            self.__rst_directory = os.path.dirname(rst_file_path)
-            self.__rst_name = os.path.basename(rst_file_path)
+            self.__rst_directory = os.path.dirname(rst_file)
+            self.__rst_name = os.path.basename(rst_file)
 
         elif mapdl is not None:
             # Using MAPDL instance allows to switch between RST files.
@@ -223,7 +292,7 @@ class DPFResult:
 
         else:
             raise ValueError(
-                "One of the following kwargs must be supplied: 'rst_file_path' or 'mapdl'"
+                "One of the following kwargs must be supplied: 'rst_file' or 'mapdl'"
             )
 
         # dpf
@@ -251,7 +320,13 @@ class DPFResult:
         # self._update() # Loads the RST file and sets the dpf model
 
     def _get_is_remote(self) -> bool:
-        """Check if the DPF server is running on a remote machine."""
+        """Check if the DPF server is running on a remote machine.
+
+        Returns
+        -------
+        bool
+            True if the DPF server is running on a remote machine, False otherwise.
+        """
         if not hasattr(self.server, "ip"):
             return False
 
@@ -263,6 +338,10 @@ class DPFResult:
         """
         Check if the MAPDL and the DPF instances are running on the same machine.
 
+        Returns
+        -------
+        bool | None
+            True if MAPDL and DPF are running on the same machine, False otherwise.
         """
         if self.mapdl is None:
             self.logger.warning(
@@ -502,36 +581,73 @@ class DPFResult:
 
     @property
     def dpf_is_remote(self) -> bool:
-        """Returns True if we are connected to the DPF Server using a gRPC connection to a remote IP."""
+        """Returns True if we are connected to the DPF Server using a gRPC connection to a remote IP.
+
+        Returns
+        -------
+        bool
+            True if we are connected to the DPF Server using a gRPC connection to a remote IP, False otherwise.
+        """
         if self._dpf_is_remote is None:
             self._dpf_is_remote = self._get_is_remote()
         return self._dpf_is_remote
 
     @property
     def _mapdl(self) -> "Mapdl | None":
-        """Return the weakly referenced instance of MAPDL"""
+        """Return the weakly referenced instance of MAPDL.
+
+        Returns
+        -------
+        Mapdl | None
+            The weakly referenced instance of MAPDL, or None if it is not applicable.
+        """
         if self._mapdl_weakref:
             return self._mapdl_weakref()
 
     @property
     def mapdl(self):
-        """Return the MAPDL instance"""
+        """Return the MAPDL instance
+
+        Returns
+        -------
+        Mapdl | None
+            The weakly referenced instance of MAPDL, or None if it is not applicable.
+        """
         return self._mapdl
 
     @property
     def _log(self) -> Logger:
-        """Alias for mapdl logger"""
+        """Alias for mapdl logger.
+
+        Returns
+        -------
+        Logger
+            The logger instance.
+        """
         if self._logger is None:
             self._logger = LOG
         return self._logger
 
     @property
     def logger(self) -> Logger:
-        """Logger property"""
+        """Logger instance
+
+        Returns
+        -------
+        Logger
+            The logger instance.
+        """
         return self._log
 
     @logger.setter
     def logger(self, logger: Logger) -> None:
+        """Set the logger instance.
+
+        Parameters
+        ----------
+        logger : Logger
+            The logger instance to set.
+        """
         if self.mode_mapdl:
             raise ValueError(
                 "Cannot set logger in MAPDL mode. Use the MAPDL instance methods to set the logger instead."
@@ -539,49 +655,87 @@ class DPFResult:
         self._logger = logger
 
     @property
-    def mode(self):
+    def mode(self) -> str:
+        """Return the current mode.
+
+        Returns
+        -------
+        str
+            The current mode. Either RST or MAPDL
+        """
         return "RST" if self._mode_rst else "MAPDL"
 
     @property
-    def mode_rst(self):
+    def mode_rst(self) -> bool:
+        """Return True if the current mode is RST.
+
+        Returns
+        -------
+        bool
+            True if the current mode is RST, False otherwise.
+        """
         return bool(self._mode_rst)
 
     @property
-    def mode_mapdl(self):
+    def mode_mapdl(self) -> bool:
+        """Return True if the current mode is MAPDL.
+
+        Returns
+        -------
+        bool
+            True if the current mode is MAPDL, False otherwise.
+        """
         return not self._mode_rst
 
     @property
-    def _mapdl_dpf_on_same_machine(self):
-        """True if the DPF server is running on the same machine as MAPDL"""
+    def _mapdl_dpf_on_same_machine(self) -> bool:
+        """True if the DPF server is running on the same machine as MAPDL.
+
+        Returns
+        -------
+        bool
+            True if the DPF server is running on the same machine as MAPDL, False otherwise.
+        """
         if self.__mapdl_and_dpf_on_same_machine is None:
             self.__mapdl_and_dpf_on_same_machine = self._get_is_same_machine()
         return self.__mapdl_and_dpf_on_same_machine
 
     @property
-    def _is_thermal(self):
-        """Return True if there are TEMP DOF in the solution."""
+    def _is_thermal(self) -> bool:
+        """Return True if there are TEMP DOF in the solution.
+
+        Returns
+        -------
+        bool
+            True if there are TEMP results in the solution, False otherwise.
+        """
         return hasattr(self.model.results, "temperature")
 
     @property
-    def _is_distributed(self):
+    def _is_distributed(self) -> bool:
         # raise NotImplementedError("To be implemented by DPF")
         return False  # Hardcoded until DPF exposure
 
     @property
-    def is_distributed(self):
+    def is_distributed(self) -> bool:
         """True when this result file is part of a distributed result
 
         Only True when Global number of nodes does not equal the
         number of nodes in this file.
 
+        Returns
+        -------
+        bool
+            True if the result file is distributed, False otherwise.
+
         Notes
         -----
-        Not a reliabile indicator if a cyclic result.
+        Not a reliable indicator if a cyclic result.
         """
         return self._is_distributed
 
     @property
-    def _rst(self):
+    def _rst(self) -> str:
         if self.mode_mapdl:
             # because it might be remote
             return self.mapdl.result_file
@@ -590,9 +744,17 @@ class DPFResult:
             return os.path.join(self._rst_directory, self._rst_name)
 
     @property
-    def mapdl_is_local(self):
-        if self.mapdl:
+    def mapdl_is_local(self) -> bool | None:
+        """Return True if the MAPDL instance is local.
+
+        Returns
+        -------
+        bool | None
+            True if the MAPDL instance is local, False otherwise. If the MAPDL instance is not set, None is returned.
+        """
+        if self._mapdl is not None:
             return self._mapdl.is_local
+        return None
 
     @property
     def _rst_directory(self) -> str:
@@ -620,7 +782,7 @@ class DPFResult:
         chunk_size : int, optional
             Number of items to process per chunk. If None, the default chunk size is used.
         """
-        return self._update(progress_bar=progress_bar, chunk_size=chunk_size)
+        self._update(progress_bar=progress_bar, chunk_size=chunk_size)
 
     def _update(
         self, progress_bar: bool | None = None, chunk_size: int | None = None
@@ -668,13 +830,13 @@ class DPFResult:
 
         Parameters
         ----------
-        progress_bar: bool
+        progress_bar
             Whether print or not the progress bar during the RST file uploading
 
-        chunk_size: int
+        chunk_size
             The value of the size of the chunk used to upload the file.
 
-        save: bool
+        save
             Whether save the model or not before update the RST file
         """
         # Saving model
@@ -715,7 +877,13 @@ class DPFResult:
 
     @property
     def model(self):
-        """Returns the DPF model object."""
+        """Returns the DPF model object.
+
+        Returns
+        -------
+        dpf.model.Model
+            DPF model object.
+        """
         if self._cached_dpf_model is None or self._update_required:
             self._update()
 
@@ -723,11 +891,24 @@ class DPFResult:
 
     @property
     def metadata(self) -> "dpf.model.Metadata":
+        """Metadata from DPF model.
+
+        Returns
+        -------
+        dpf.model.Metadata
+            Metadata from DPF model.
+        """
         return self.model.metadata
 
     @property
     def mesh(self) -> "dpf.MeshedRegion":
-        """Mesh from result file."""
+        """Mesh from result file.
+
+        Returns
+        -------
+        dpf.MeshedRegion
+            Mesh from result file.
+        """
         # TODO: this should be a class equivalent to reader.mesh class.
         return self.model.metadata.meshed_region
 
@@ -737,8 +918,8 @@ class DPFResult:
 
     def _get_entities_ids(
         self,
-        entities: str | int | float | Iterable[str | int | float] | None,
-        entity_type: str = "Nodal",
+        entities: Entities,
+        entity_type: EntityType = "Nodal",
     ) -> Iterable[int | float] | None:
         """Get entities ids given their ids, or component names.
 
@@ -747,7 +928,7 @@ class DPFResult:
 
         Parameters
         ----------
-        entities : str | int | float | Iterable[str | int | float]
+        entities : str | int | Iterable[str | int]
             Entities ids or components. If a mix of strings and numbers is
             provided in the iterable, a ValueError will be raised.
 
@@ -775,7 +956,7 @@ class DPFResult:
                 "The argument 'entity_type' can only be 'Nodal' or 'Elemental'. "
             )
         else:
-            entity_type = entity_type.title()  # Sanity check
+            entity_type_ = entity_type.title()  # Sanity check
 
         if entities is None:
             return None
@@ -808,9 +989,9 @@ class DPFResult:
                 )
 
             scoping = self.mesh.named_selection(each_named_selection)
-            if scoping.location != entity_type:
+            if scoping.location != entity_type_:
                 raise ValueError(
-                    f"The named selection '{each_named_selection}' does not contain {entity_type} information."
+                    f"The named selection '{each_named_selection}' does not contain {entity_type_} information."
                 )
 
             entities_.extend(scoping.ids.tolist())
@@ -847,10 +1028,8 @@ class DPFResult:
             )
         )
 
-    def _extract_data(
-        self, op: "dpf.Operator"
-    ) -> tuple[np.ndarray[Any, Any], np.ndarray[Any, Any]]:
-        fc = op.outputs.fields_as_fields_container()[
+    def _extract_data(self, op: "dpf.Operator") -> ReturnData:
+        fc: dpf.Field = op.outputs.fields_as_fields_container()[  # type: ignore
             0
         ]  # This index 0 is the step indexing.
 
@@ -860,7 +1039,7 @@ class DPFResult:
         return ids, data
 
     def _set_rescope(self, op: "dpf.Operator", scope_ids: list[int]) -> "dpf.Operator":
-        fc = op.outputs.fields_container()
+        fc: dpf.FieldsContainer = op.outputs.fields_container()
 
         rescope = dpf.operators.scoping.rescope()
         rescope.inputs.mesh_scoping(sorted(scope_ids))
@@ -871,8 +1050,8 @@ class DPFResult:
         self,
         op: "dpf.Operator",
         mesh: "dpf.MeshedRegion",
-        requested_location: Literal["nodal", "elemental_nodal", "elemental"],
-        scope_ids: list[int] | None = None,
+        requested_location: EntityType,
+        scope_ids: Iterable[int | float] | None = None,
     ):
 
         scop = dpf.Scoping()
@@ -901,7 +1080,7 @@ class DPFResult:
         op.inputs.mesh_scoping.connect(scop)
         return scop.ids
 
-    def _set_element_results(self, op, mesh):
+    def _set_element_results(self, op: "dpf.Operator", mesh: "dpf.MeshedRegion"):
 
         fc = op.outputs.fields_container()
 
@@ -911,7 +1090,7 @@ class DPFResult:
 
         return op2
 
-    def _set_input_timestep_scope(self, op, rnum):
+    def _set_input_timestep_scope(self, op: "dpf.Operator", rnum: Rnum):
 
         if not rnum:
             rnum = [int(1)]
@@ -928,7 +1107,7 @@ class DPFResult:
 
         op.inputs.time_scoping.connect(my_time_scoping)
 
-    def _get_operator(self, result_field):
+    def _get_operator(self, result_field: ResultField):
         if not hasattr(self.model.results, result_field):
             list_results = "\n    ".join(
                 [each for each in dir(self.model.results) if not each.startswith("_")]
@@ -943,11 +1122,11 @@ class DPFResult:
 
     def _get_nodes_result(
         self,
-        rnum,
-        result_type,
-        in_nodal_coord_sys=False,
-        nodes=None,
-        return_operator=False,
+        rnum: Rnum,
+        result_type: ResultField,
+        in_nodal_coord_sys: bool | None = False,
+        nodes: Nodes = None,
+        return_operator: bool = False,
     ):
         return self._get_result(
             rnum,
@@ -960,11 +1139,11 @@ class DPFResult:
 
     def _get_elem_result(
         self,
-        rnum,
-        result_type,
-        in_element_coord_sys=False,
-        elements=None,
-        return_operator=False,
+        rnum: Rnum,
+        result_type: ResultField,
+        in_element_coord_sys: bool = False,
+        elements: Elements = None,
+        return_operator: bool = False,
     ):
         return self._get_result(
             rnum,
@@ -977,11 +1156,11 @@ class DPFResult:
 
     def _get_elemnodal_result(
         self,
-        rnum,
-        result_type,
-        in_element_coord_sys=False,
-        elements=None,
-        return_operator=False,
+        rnum: Rnum,
+        result_type: ResultField,
+        in_element_coord_sys: bool = False,
+        elements: Elements = None,
+        return_operator: bool = False,
     ):
         return self._get_result(
             rnum,
@@ -995,29 +1174,34 @@ class DPFResult:
     @update_result
     def _get_result(
         self,
-        rnum,
-        result_field,
-        requested_location="Nodal",
-        scope_ids=None,
-        result_in_entity_cs=False,
-        return_operator=False,
-    ):
+        rnum: Rnum,
+        result_field: ResultField,
+        requested_location: Locations = "Nodal",
+        scope_ids: Ids = None,
+        result_in_entity_cs: bool = False,
+        return_operator: bool = False,
+    ) -> "dpf.Operator | ReturnData":
         """
         Get elemental/nodal/elementalnodal results.
 
         Parameters
         ----------
-        rnum : int
+        rnum
             Result step/set
-        result_field : str
+
+        result_field
             Result type, for example "stress", "strain", "displacement", etc.
-        requested_location : str, optional
+
+        requested_location
             Results given at which type of entity, by default "Nodal"
-        scope_ids : Union([int, floats, List[int]]), optional
+
+        scope_ids
             List of entities (nodal/elements) to get the results from, by default None
-        result_in_entity_cs : bool, optional
+
+        result_in_entity_cs
             Obtain the results in the entity coordinate system, by default False
-        return_operator : bool, optional
+
+        return_operator
             Return the last used operator (most of the times it will be a Rescope operator).
             Defaults to ``False``.
 
@@ -1047,7 +1231,7 @@ class DPFResult:
         """
 
         # todo: accepts components in nodes.
-        mesh: dpf.MeshedRegion = self.metadata.meshed_region
+        mesh: dpf.MeshedRegion = self.metadata.meshed_region  # type: ignore
 
         if isinstance(scope_ids, np.ndarray):
             scope_ids = scope_ids.tolist()
@@ -1064,10 +1248,10 @@ class DPFResult:
         self._set_input_timestep_scope(op, rnum)
 
         # getting the ids of the entities scope
-        scope_ids = self._get_entities_ids(scope_ids, requested_location)
+        scope_ids_ = self._get_entities_ids(scope_ids, requested_location)
 
         # Set type of return
-        ids = self._set_mesh_scoping(op, mesh, requested_location, scope_ids)
+        ids = self._set_mesh_scoping(op, mesh, requested_location, scope_ids_)  # type: ignore
 
         if requested_location.lower() == "elemental":
             op = self._set_element_results(
@@ -1082,21 +1266,23 @@ class DPFResult:
 
         return op if return_operator else self._extract_data(op)
 
-    def nodal_displacement(self, rnum, in_nodal_coord_sys=None, nodes=None):
+    def nodal_displacement(
+        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+    ) -> ReturnData:
         """Returns the DOF solution for each node in the global
         cartesian coordinate system or nodal coordinate system.
 
         Parameters
         ----------
-        rnum : int or list
+        rnum
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        in_nodal_coord_sys : bool, optional
+        in_nodal_coord_sys
             When ``True``, returns results in the nodal coordinate
             system.  Default ``False``.
 
-        nodes : str, sequence of int or str, optional
+        nodes
             Select a limited subset of nodes.  Can be a nodal
             component or array of node numbers.  For example
 
@@ -1106,10 +1292,10 @@ class DPFResult:
 
         Returns
         -------
-        nnum : int np.ndarray
+        int np.ndarray
             Node numbers associated with the results.
 
-        result : float np.ndarray
+        float np.ndarray
             Array of nodal displacements.  Array
             is (``nnod`` x ``sumdof``), the number of nodes by the
             number of degrees of freedom which includes ``numdof`` and
@@ -1142,8 +1328,12 @@ class DPFResult:
         return self._get_nodes_result(rnum, "displacement", in_nodal_coord_sys, nodes)
 
     def nodal_solution(
-        self, rnum, in_nodal_coord_sys=None, nodes=None, return_temperature=False
-    ):
+        self,
+        rnum: Rnum,
+        in_nodal_coord_sys: bool = False,
+        nodes: Nodes = None,
+        return_temperature: bool = False,
+    ) -> ReturnData:
         """Returns the DOF solution for each node in the global
         cartesian coordinate system or nodal coordinate system.
 
@@ -1152,15 +1342,15 @@ class DPFResult:
 
         Parameters
         ----------
-        rnum : int or list
+        rnum
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        in_nodal_coord_sys : bool, optional
+        in_nodal_coord_sys
             When ``True``, returns results in the nodal coordinate
             system.  Default ``False``.
 
-        nodes : str, sequence of int or str, optional
+        nodes
             Select a limited subset of nodes.  Can be a nodal
             component or array of node numbers.  For example
 
@@ -1168,16 +1358,16 @@ class DPFResult:
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
 
-        return_temperature: bool, optional
+        return_temperature
             When ``True``, returns the nodal temperature instead of
             the displacement.  Default ``False``.
 
         Returns
         -------
-        nnum : int np.ndarray
+        int np.ndarray
             Node numbers associated with the results.
 
-        result : float np.ndarray
+        float np.ndarray
             Array of nodal displacements or nodal temperatures.  Array
             is (``nnod`` x ``sumdof``), the number of nodes by the
             number of degrees of freedom which includes ``numdof`` and
@@ -1217,7 +1407,7 @@ class DPFResult:
                 "The current analysis does not have 'displacement' or 'temperature' results."
             )
 
-    def nodal_temperature(self, rnum, nodes=None):
+    def nodal_temperature(self, rnum: Rnum, nodes: Nodes = None) -> ReturnData:
         """Retrieves the temperature for each node in the
         solution.
 
@@ -1262,11 +1452,12 @@ class DPFResult:
         Return the temperature just for the nodes from 20 through 50.
 
         >>> nnum, temp = rst.nodal_solution(0, nodes=range(20, 51))
-
         """
-        return self._get_nodes_result(rnum, "temperature", nodes)
+        return self._get_nodes_result(rnum, "temperature", nodes=nodes)
 
-    def nodal_voltage(self, rnum, in_nodal_coord_sys=None, nodes=None):
+    def nodal_voltage(
+        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+    ) -> ReturnData:
         """Retrieves the voltage for each node in the
         solution.
 
@@ -1277,11 +1468,15 @@ class DPFResult:
 
         Parameters
         ----------
-        rnum : int or list
+        rnum
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        nodes : str, sequence of int or str, optional
+        in_nodal_coord_sys
+            When ``True``, returns results in the nodal coordinate
+            system.  Default ``False``.
+
+        nodes
             Select a limited subset of nodes.  Can be a nodal
             component or array of node numbers.  For example
 
@@ -1291,11 +1486,11 @@ class DPFResult:
 
         Returns
         -------
-        nnum : numpy.ndarray
+        numpy.ndarray
             Node numbers of the result.
 
-        voltage : numpy.ndarray
-            voltage at each node.
+        numpy.ndarray
+            Voltage at each node.
 
         Examples
         --------
@@ -1307,14 +1502,18 @@ class DPFResult:
         ``'MY_COMPONENT'``.
 
         >>> nnum, temp = rst.nodal_stress(0, nodes='MY_COMPONENT')
-
         """
         return self._get_nodes_result(
             rnum, "electric_potential", in_nodal_coord_sys, nodes
         )
 
     def element_stress(
-        self, rnum, principal=None, in_element_coord_sys=None, elements=None, **kwargs
+        self,
+        rnum: Rnum,
+        principal: bool = False,
+        in_element_coord_sys: bool = False,
+        elements: Elements = None,
+        **kwargs: Kwargs,
     ):
         """Retrieves the element component stresses.
 
@@ -1329,6 +1528,10 @@ class DPFResult:
         principal : bool, optional
             Returns principal stresses instead of component stresses.
             Default False.
+
+        in_element_coord_sys : bool, optional
+            When ``True``, returns results in the element coordinate
+            system.  Default ``False``.
 
         in_element_coord_sys : bool, optional
             Returns the results in the element coordinate system.
@@ -1376,6 +1579,11 @@ class DPFResult:
         layers.  Results are ordered such that the top layer and then
         the bottom layer is reported.
         """
+        if kwargs:
+            raise NotImplementedError(
+                "Hidden options for distributed result files are not implemented."
+            )
+
         if principal:
             op = self._get_elem_result(
                 rnum,
@@ -1383,34 +1591,36 @@ class DPFResult:
                 in_element_coord_sys=in_element_coord_sys,
                 elements=elements,
                 return_operator=True,
-                **kwargs,
             )
             return self._get_principal(op)
-        return self._get_elem_result(
-            rnum, "stress", in_element_coord_sys, elements, **kwargs
-        )
+        return self._get_elem_result(rnum, "stress", in_element_coord_sys, elements)
 
     def element_nodal_stress(
-        self, rnum, principal=None, in_element_coord_sys=None, elements=None, **kwargs
+        self,
+        rnum: Rnum,
+        principal: bool = False,
+        in_element_coord_sys: bool = False,
+        elements: Elements = None,
+        **kwargs: Kwargs,
     ):
         """Retrieves the nodal stresses for each element.
 
         Parameters
         ----------
-        rnum : int or list
+        rnum
             Cumulative result number with zero based indexing, or a list containing
             (step, substep) of the requested result.
 
-        principal : bool, optional
+        principal
             Returns principal stresses instead of component stresses.
             Default False.
 
-        in_element_coord_sys : bool, optional
+        in_element_coord_sys
             Returns the results in the element coordinate system if ``True``.
             Else, it returns the results in the global coordinate system.
             Default False
 
-        elements : str, sequence of int or str, optional
+        elements
             Select a limited subset of elements.  Can be a element
             component or array of element numbers.  For example:
 
@@ -1418,20 +1628,20 @@ class DPFResult:
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
 
-        **kwargs : optional keyword arguments
+        **kwargs
             Hidden options for distributed result files.
 
         Returns
         -------
-        enum : np.ndarray
+        np.ndarray
             ANSYS element numbers corresponding to each element.
 
-        element_stress : list
+        list
             Stresses at each element for each node for Sx Sy Sz Sxy
             Syz Sxz or SIGMA1, SIGMA2, SIGMA3, SINT, SEQV when
             principal is True.
 
-        enode : list
+        list
             Node numbers corresponding to each element's stress
             results.  One list entry for each element.
 
@@ -1451,6 +1661,11 @@ class DPFResult:
         layers.  Results are ordered such that the top layer and then
         the bottom layer is reported.
         """
+        if kwargs:
+            raise NotImplementedError(
+                "Hidden options for distributed result files are not implemented."
+            )
+
         if principal:
             op = self._get_elemnodal_result(
                 rnum,
@@ -1458,14 +1673,15 @@ class DPFResult:
                 in_element_coord_sys=in_element_coord_sys,
                 elements=elements,
                 return_operator=True,
-                **kwargs,
             )
             return self._get_principal(op)
         return self._get_elemnodal_result(
-            rnum, "stress", in_element_coord_sys, elements, **kwargs
+            rnum, "stress", in_element_coord_sys, elements
         )
 
-    def nodal_elastic_strain(self, rnum, in_nodal_coord_sys=False, nodes=None):
+    def nodal_elastic_strain(
+        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+    ) -> ReturnData:
         """Nodal component elastic strains.  This record contains
         strains in the order ``X, Y, Z, XY, YZ, XZ, EQV``.
 
@@ -1477,11 +1693,15 @@ class DPFResult:
 
         Parameters
         ----------
-        rnum : int or list
+        rnum
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        nodes : str, sequence of int or str, optional
+        in_nodal_coord_sys
+            When ``True``, returns results in the nodal coordinate
+            system.  Default False.
+
+        nodes
             Select a limited subset of nodes.  Can be a nodal
             component or array of node numbers.  For example
 
@@ -1491,10 +1711,10 @@ class DPFResult:
 
         Returns
         -------
-        nnum : np.ndarray
+        np.ndarray
             MAPDL node numbers.
 
-        elastic_strain : np.ndarray
+        np.ndarray
             Nodal component elastic strains.  Array is in the order
             ``X, Y, Z, XY, YZ, XZ, EQV``.
 
@@ -1530,7 +1750,9 @@ class DPFResult:
             rnum, "elastic_strain", in_nodal_coord_sys=in_nodal_coord_sys, nodes=nodes
         )
 
-    def nodal_plastic_strain(self, rnum, in_nodal_coord_sys=False, nodes=None):
+    def nodal_plastic_strain(
+        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+    ) -> ReturnData:
         """Nodal component plastic strains.
 
         This record contains strains in the order:
@@ -1541,11 +1763,15 @@ class DPFResult:
 
         Parameters
         ----------
-        rnum : int or list
+        rnum
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        nodes : str, sequence of int or str, optional
+        in_nodal_coord_sys
+            When ``True``, returns results in the nodal coordinate
+            system.  Default False.
+
+        nodes
             Select a limited subset of nodes.  Can be a nodal
             component or array of node numbers.  For example
 
@@ -1555,10 +1781,10 @@ class DPFResult:
 
         Returns
         -------
-        nnum : np.ndarray
+        np.ndarray
             MAPDL node numbers.
 
-        plastic_strain : np.ndarray
+        np.ndarray
             Nodal component plastic strains.  Array is in the order
             ``X, Y, Z, XY, YZ, XZ, EQV``.
 
@@ -1579,29 +1805,38 @@ class DPFResult:
         through 50.
 
         >>> nnum, plastic_strain = rst.nodal_plastic_strain(0, nodes=range(20, 51))
-
         """
         return self._get_nodes_result(rnum, "plastic_strain", in_nodal_coord_sys, nodes)
 
-    def nodal_acceleration(self, rnum, in_nodal_coord_sys=None, nodes=None):
+    def nodal_acceleration(
+        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+    ) -> ReturnData:
         """Nodal velocities for a given result set.
 
         Parameters
         ----------
-        rnum : int or list
+        rnum
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        in_nodal_coord_sys : bool, optional
+        in_nodal_coord_sys
             When ``True``, returns results in the nodal coordinate
             system.  Default False.
 
+        nodes
+            Select a limited subset of nodes.  Can be a nodal
+            component or array of node numbers.  For example
+
+            * ``"MY_COMPONENT"``
+            * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+            * ``np.arange(1000, 2001)``
+
         Returns
         -------
-        nnum : int np.ndarray
+        np.ndarray
             Node numbers associated with the results.
 
-        result : float np.ndarray
+        np.ndarray
             Array of nodal accelerations.  Array is (``nnod`` x
             ``sumdof``), the number of nodes by the number of degrees
             of freedom which includes ``numdof`` and ``nfldof``
@@ -1620,30 +1855,39 @@ class DPFResult:
         """
         return self._get_nodes_result(rnum, "acceleration", in_nodal_coord_sys, nodes)
 
-    def nodal_reaction_forces(self, rnum, in_nodal_coord_sys=False, nodes=None):
+    def nodal_reaction_forces(
+        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+    ) -> ReturnData:
         """Nodal reaction forces.
 
         Parameters
         ----------
-        rnum : int or list
+        rnum
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
+        in_nodal_coord_sys
+            When ``True``, returns results in the nodal coordinate
+            system.  Default False.
+
+        nodes
+            Select a limited subset of nodes.  Can be a nodal
+            component or array of node numbers.  For example
+
+            * ``"MY_COMPONENT"``
+            * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+            * ``np.arange(1000, 2001)``
+
         Returns
         -------
-        rforces : np.ndarray
-            Nodal reaction forces for each degree of freedom.
-
-        nnum : np.ndarray
+        np.ndarray
             Node numbers corresponding to the reaction forces.  Node
             numbers may be repeated if there is more than one degree
             of freedom for each node.
 
-        dof : np.ndarray
+        np.ndarray
             Degree of freedom corresponding to each node using the
-            MAPDL degree of freedom reference table.  See
-            ``rst.result_dof`` for the corresponding degrees of
-            freedom for a given solution.
+            MAPDL degree of freedom reference table.
 
         Examples
         --------
@@ -1659,11 +1903,12 @@ class DPFResult:
          array([4142, 4142, 4142]),
          array([1, 2, 3], dtype=int32),
          ['UX', 'UY', 'UZ'])
-
         """
         return self._get_nodes_result(rnum, "reaction_force", in_nodal_coord_sys, nodes)
 
-    def nodal_stress(self, rnum, in_nodal_coord_sys=False, nodes=None):
+    def nodal_stress(
+        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+    ) -> ReturnData:
         """Retrieves the component stresses for each node in the
         solution.
 
@@ -1677,11 +1922,15 @@ class DPFResult:
 
         Parameters
         ----------
-        rnum : int or list
+        rnum
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        nodes : str, sequence of int or str, optional
+        in_nodal_coord_sys
+            When ``True``, returns results in the nodal coordinate
+            system.  Default False.
+
+        nodes
             Select a limited subset of nodes.  Can be a nodal
             component or array of node numbers.  For example
 
@@ -1720,7 +1969,9 @@ class DPFResult:
         """
         return self._get_nodes_result(rnum, "stress", in_nodal_coord_sys, nodes)
 
-    def nodal_thermal_strain(self, rnum, in_nodal_coord_sys=False, nodes=None):
+    def nodal_thermal_strain(
+        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+    ) -> ReturnData:
         """Nodal component thermal strain.
 
         This record contains strains in the order X, Y, Z, XY, YZ, XZ,
@@ -1732,11 +1983,15 @@ class DPFResult:
 
         Parameters
         ----------
-        rnum : int or list
+        rnum
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        nodes : str, sequence of int or str, optional
+        in_nodal_coord_sys
+            When ``True``, returns results in the nodal coordinate
+            system.  Default False.
+
+        nodes
             Select a limited subset of nodes.  Can be a nodal
             component or array of node numbers.  For example
 
@@ -1746,10 +2001,10 @@ class DPFResult:
 
         Returns
         -------
-        nnum : np.ndarray
+        np.ndarray
             MAPDL node numbers.
 
-        thermal_strain : np.ndarray
+        np.ndarray
             Nodal component plastic strains.  Array is in the order
             ``X, Y, Z, XY, YZ, XZ, EQV, ESWELL``
 
@@ -1772,18 +2027,28 @@ class DPFResult:
         """
         return self._get_nodes_result(rnum, "thermal_strain", in_nodal_coord_sys, nodes)
 
-    def nodal_velocity(self, rnum, in_nodal_coord_sys=False, nodes=None):
+    def nodal_velocity(
+        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+    ) -> ReturnData:
         """Nodal velocities for a given result set.
 
         Parameters
         ----------
-        rnum : int or list
+        rnum
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        in_nodal_coord_sys : bool, optional
+        in_nodal_coord_sys
             When ``True``, returns results in the nodal coordinate
             system.  Default False.
+
+        nodes
+            Select a limited subset of nodes.  Can be a nodal
+            component or array of node numbers.  For example
+
+            * ``"MY_COMPONENT"``
+            * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+            * ``np.arange(1000, 2001)``
 
         Returns
         -------
@@ -1809,7 +2074,9 @@ class DPFResult:
         """
         return self._get_nodes_result(rnum, "velocity", in_nodal_coord_sys, nodes)
 
-    def nodal_static_forces(self, rnum, in_nodal_coord_sys=False, nodes=None):
+    def nodal_static_forces(
+        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+    ) -> ReturnData:
         """Return the nodal forces averaged at the nodes.
 
         Nodal forces are computed on an element by element basis, and
@@ -1818,11 +2085,15 @@ class DPFResult:
 
         Parameters
         ----------
-        rnum : int or list
+        rnum
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
-        nodes : str, sequence of int or str, optional
+        in_nodal_coord_sys
+            When ``True``, returns results in the nodal coordinate
+            system.  Default False.
+
+        nodes
             Select a limited subset of nodes.  Can be a nodal
             component or array of node numbers.  For example
 
@@ -1832,10 +2103,10 @@ class DPFResult:
 
         Returns
         -------
-        nnum : np.ndarray
+        np.ndarray
             MAPDL node numbers.
 
-        forces : np.ndarray
+        np.ndarray
            Averaged nodal forces.  Array is sized ``[nnod x numdof]``
            where ``nnod`` is the number of nodes and ``numdof`` is the
            number of degrees of freedom for this solution.
@@ -1866,22 +2137,35 @@ class DPFResult:
         """
         return self._get_nodes_result(rnum, "nodal_force", in_nodal_coord_sys, nodes)
 
-    def principal_nodal_stress(self, rnum, in_nodal_coord_sys=False, nodes=None):
+    def principal_nodal_stress(
+        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+    ) -> ReturnData:
         """Computes the principal component stresses for each node in
         the solution.
 
         Parameters
         ----------
-        rnum : int or list
+        rnum
             Cumulative result number with zero based indexing, or a
             list containing (step, substep) of the requested result.
 
+        in_nodal_coord_sys
+            If True, return the results in the nodal coordinate system.
+
+        nodes
+            Select a limited subset of nodes. Can be a nodal
+            component or array of node numbers. For example
+
+            * ``"MY_COMPONENT"``
+            * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+            * ``np.arange(1000, 2001)``
+
         Returns
         -------
-        nodenum : numpy.ndarray
+        numpy.ndarray
             Node numbers of the result.
 
-        pstress : numpy.ndarray
+        numpy.ndarray
             Principal stresses, stress intensity, and equivalent stress.
             [sigma1, sigma2, sigma3, sint, seqv]
 
@@ -1908,7 +2192,6 @@ class DPFResult:
 
         See the MAPDL ``AVPRIN`` command for more details.
         ``ansys-mapdl-reader`` uses the default ``AVPRIN, 0`` option.
-
         """
         op = self._get_nodes_result(
             rnum,
@@ -1920,26 +2203,66 @@ class DPFResult:
         return self._get_principal(op)
 
     @property
-    def n_results(self):
-        """Number of results"""
+    def n_results(self) -> int:
+        """Number of results.
+
+        Returns
+        -------
+        int
+            The number of results.
+        """
         return self.model.metadata.result_info.n_results
 
     @property
     def filename(self) -> str:
-        """String form of the filename. This property is read-only."""
+        """String form of the filename.
+
+        This property can not be changed.
+
+        Returns
+        -------
+        str
+            The string form of the filename.
+        """
         return self._rst  # in the reader, this contains the complete path.
 
     @property
     def pathlib_filename(self) -> pathlib.Path:
-        """Return the ``pathlib.Path`` version of the filename. This property can not be set."""
+        """Return the ``pathlib.Path`` version of the filename.
+
+        This property can not be changed.
+
+        Returns
+        -------
+        pathlib.Path
+            The ``pathlib.Path`` version of the filename.
+        """
         return pathlib.Path(self._rst)
 
     @property
-    def nsets(self):
+    def nsets(self) -> int:
+        """Number of result sets.
+
+        Returns
+        -------
+        int
+            The number of result sets.
+        """
         return self.metadata.time_freq_support.n_sets
 
-    def parse_step_substep(self, user_input):
-        """Converts (step, substep) to a cumulative index"""
+    def parse_step_substep(self, user_input: int | list[int] | tuple[int, int]) -> int:
+        """Converts (step, substep) to a cumulative index.
+
+        Parameters
+        ----------
+        user_input : int | list[int] | tuple[int, int]
+            The input to convert, either a single step number or a (step, substep) tuple.
+
+        Returns
+        -------
+        int
+            The cumulative index corresponding to the input.
+        """
         if isinstance(user_input, int):
             return self.metadata.time_freq_support.get_cumulative_index(
                 user_input
@@ -1954,8 +2277,13 @@ class DPFResult:
             raise TypeError("Input must be either an int or a list")
 
     @property
-    def version(self):
+    def version(self) -> float:
         """The version of MAPDL used to generate this result file.
+
+        Returns
+        -------
+        float
+            The version of MAPDL used to generate this result file.
 
         Examples
         --------
@@ -1965,12 +2293,17 @@ class DPFResult:
         return float(self.model.metadata.result_info.solver_version)
 
     @property
-    def available_results(self):
+    def available_results(self) -> str:
         """Available result types.
 
         .. versionchanged:: 0.64
            From 0.64, the MAPDL data labels (i.e. NSL for nodal displacements,
            ENS for nodal stresses, etc) are not included in the output of this command.
+
+        Returns
+        -------
+        str
+            A list of available result types.
 
         Examples
         --------
@@ -2009,31 +2342,70 @@ class DPFResult:
         return text
 
     @property
-    def n_sector(self):
-        """Number of sectors"""
+    def n_sector(self) -> int | None:
+        """Number of sectors.
+
+        Returns
+        -------
+        int | None
+            The number of sectors, or None if not applicable.
+        """
         if self.model.metadata.result_info.has_cyclic:
             return self.model.metadata.result_info.cyclic_support.num_sectors()
 
     @property
-    def num_stages(self):
-        """Number of cyclic stages in the model"""
+    def num_stages(self) -> int | None:
+        """Number of cyclic stages in the model.
+
+        Returns
+        -------
+        int | None
+            The number of cyclic stages, or None if not applicable.
+        """
         if self.model.metadata.result_info.has_cyclic:
             return self.model.metadata.result_info.cyclic_support.num_stages
 
     @property
-    def title(self):
-        """Title of model in database"""
+    def title(self) -> str:
+        """Title of model in database
+
+        Returns
+        -------
+        str
+            The title of the model.
+        """
         return self.model.metadata.result_info.main_title
 
     @property
-    def is_cyclic(self):
+    def is_cyclic(self) -> bool:
+        """Indicates if the model is cyclic.
+
+        Returns
+        -------
+        bool
+            True if the model is cyclic, False otherwise.
+        """
         return self.model.metadata.result_info.has_cyclic
 
     @property
-    def units(self):
+    def units(self) -> str:
+        """Units of the model.
+
+        Returns
+        -------
+        str
+            The unit system name.
+        """
         return self.model.metadata.result_info.unit_system_name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Representation of the result object.
+
+        Returns
+        -------
+        str
+            A string representation of the result object.
+        """
         if self.is_distributed:
             rst_info = ["PyMAPDL Reader Distributed Result"]
         else:
@@ -2056,7 +2428,9 @@ class DPFResult:
         rst_info.append(self.available_results)
         return "\n".join(rst_info)
 
-    def nodal_time_history(self, solution_type="NSL", in_nodal_coord_sys=None):
+    def nodal_time_history(
+        self, solution_type: SolutionType = "NSL", in_nodal_coord_sys: bool = False
+    ) -> ReturnData:
         """The DOF solution for each node for all result sets.
 
         The nodal results are returned returned in the global
@@ -2064,51 +2438,55 @@ class DPFResult:
 
         Parameters
         ----------
-        solution_type: str, optional
+        solution_type
             The solution type.  Must be either nodal displacements
             (``'NSL'``), nodal velocities (``'VEL'``) or nodal
             accelerations (``'ACC'``).
+            Default is ``'NSL'``.
 
-        in_nodal_coord_sys : bool, optional
+        in_nodal_coord_sys
             When ``True``, returns results in the nodal coordinate system.
             Default ``False``.
 
         Returns
         -------
-        nnum : int np.ndarray
+        np.ndarray
             Node numbers associated with the results.
 
-        result : float np.ndarray
+        np.ndarray
             Nodal solution for all result sets.  Array is sized
             ``rst.nsets x nnod x Sumdof``, which is the number of
             time steps by number of nodes by degrees of freedom.
         """
-        if not isinstance(solution_type, str):
-            raise TypeError("Solution type must be a string")
-
         if solution_type == "NSL":
-            func = self.nodal_solution
+            func = self.nodal_solution  # type: ignore
         elif solution_type == "VEL":
-            func = self.nodal_velocity
+            func = self.nodal_velocity  # type: ignore
         elif solution_type == "ACC":
-            func = self.nodal_acceleration
+            func = self.nodal_acceleration  # type: ignore
         else:
             raise ValueError(
                 "Argument 'solution type' must be either 'NSL', " "'VEL', or 'ACC'"
             )
 
         # size based on the first result
-        nnum, sol = func(0, in_nodal_coord_sys)
+        nnum, sol = func(0, in_nodal_coord_sys=in_nodal_coord_sys)
         data = np.empty((self.nsets, sol.shape[0], sol.shape[1]), np.float64)
         data[0] = sol
         for i in range(1, self.nsets):
-            data[i] = func(i, in_nodal_coord_sys)[1]
+            data[i] = func(i, in_nodal_coord_sys=in_nodal_coord_sys)[1]
 
         return nnum, data
 
     @property
-    def time_values(self):
-        "Values for the time/frequency"
+    def time_values(self) -> list[float]:
+        """Values for the time/frequency.
+
+        Returns
+        -------
+        list[float]
+            The time or frequency values.
+        """
         return self.metadata.time_freq_support.time_frequencies.data_as_list
 
     @property
@@ -2229,7 +2607,6 @@ class DPFResult:
         >>> rst = pymapdl_reader.read_binary(examples.rstfile)
         >>> rst.materials
         {1: {'EX': 16900000.0, 'NUXY': 0.31, 'DENS': 0.00041408}}
-
         """
         mats = self.mesh.property_field("mat")
         mat_prop = dpf.operators.result.mapdl_material_properties()
@@ -2259,15 +2636,15 @@ class DPFResult:
 
     def plot_nodal_stress(
         self,
-        rnum,
-        comp=None,
-        show_displacement=False,
-        displacement_factor=1,
-        node_components=None,
-        element_components=None,
-        sel_type_all=True,
-        treat_nan_as_zero=True,
-        **kwargs,
+        rnum: Rnum,
+        comp: ComponentsDirections | None = None,
+        show_displacement: bool = False,
+        displacement_factor: int = 1,
+        node_components: MAPDLComponents | None = None,
+        element_components: MAPDLComponents | None = None,
+        sel_type_all: bool = True,
+        treat_nan_as_zero: bool = True,
+        **kwargs: Kwargs,
     ):
         """Plots the stresses at each node in the solution.
 
@@ -2285,6 +2662,13 @@ class DPFResult:
             - ``"XY"``
             - ``"YZ"``
             - ``"XZ"``
+
+        show_displacement
+            If True, displays the displacement along with the stress
+            plot. Default is False.
+
+        displacement_factor
+            Factor by which to scale the displacement plot. Default is 1.
 
         node_components : list, optional
             Accepts either a string or a list strings of node
@@ -2304,7 +2688,7 @@ class DPFResult:
             Treat NAN values (i.e. stresses at midside nodes) as zero
             when plotting.
 
-        kwargs : keyword arguments
+        **kwargs
             Additional keyword arguments.  See ``help(pyvista.plot)``
 
         Returns
@@ -2338,8 +2722,19 @@ class DPFResult:
     def _elements(self):
         return self.mesh.elements.scoping.ids
 
-    def element_lookup(self, element_id):
-        """Index of the element within the result mesh"""
+    def element_lookup(self, element_id: int) -> int:
+        """Index of the element within the result mesh.
+
+        Parameters
+        ----------
+        element_id : int
+            The element ID to look up.
+
+        Returns
+        -------
+        int
+            The index of the element within the result mesh.
+        """
         mapping = dict(zip(self._elements, np.arange(self.mesh.elements.n_elements)))
         if element_id not in mapping:
             raise KeyError(
@@ -2349,7 +2744,13 @@ class DPFResult:
 
         return mapping[element_id]
 
-    def overwrite_element_solution_record(self, data, rnum, solution_type, element_id):
+    def overwrite_element_solution_record(
+        self,
+        data: list[float] | np.ndarray,
+        rnum: Rnum,
+        solution_type: str,
+        element_id: int,
+    ):
         """Overwrite element solution record.
 
         This method replaces solution data for of an element at a
@@ -2421,7 +2822,9 @@ class DPFResult:
             NOT_AVAILABLE_METHOD.format(method="overwrite_element_solution_record")
         )
 
-    def overwrite_element_solution_records(self, element_data, rnum, solution_type):
+    def overwrite_element_solution_records(
+        self, element_data: dict[int, np.ndarray], rnum: Rnum, solution_type: str
+    ):
         """Overwrite element solution record.
 
         This method replaces solution data for a set of elements at a
@@ -2491,7 +2894,7 @@ class DPFResult:
             NOT_AVAILABLE_METHOD.format(method="overwrite_element_solution_records")
         )
 
-    def read_record(self, pointer, return_bufsize=False):
+    def read_record(self, pointer: int, return_bufsize: bool = False):
         """Reads a record at a given position.
 
         Because ANSYS 19.0+ uses compression by default, you must use
@@ -2516,12 +2919,17 @@ class DPFResult:
         bufsize : float, optional
             When ``return_bufsize`` is enabled, returns the number of
             words read.
-
         """
         raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="read_record"))
 
-    def text_result_table(self, rnum):
-        """Returns a text result table for plotting"""
+    def text_result_table(self, rnum: Rnum):
+        """Returns a text result table for plotting.
+
+        Parameters
+        ----------
+        rnum
+            The result number to retrieve the table for.
+        """
         raise NotImplementedError(
             NOT_AVAILABLE_METHOD.format(method="text_result_table")
         )
@@ -2540,7 +2948,7 @@ class DPFResult:
         """
         raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="write_tables"))
 
-    def cs_4x4(self, cs_cord, as_vtk_matrix=False):
+    def cs_4x4(self, cs_cord: int, as_vtk_matrix: bool = False):
         """Return a 4x4 transformation matrix for a given coordinate system.
 
         Parameters
@@ -2581,11 +2989,10 @@ class DPFResult:
                [ 0.,  0., -1.,  0.],
                [ 0.,  1.,  0.,  0.],
                [ 0.,  0.,  0.,  1.]])
-
         """
         raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="cs_4x4"))
 
-    def solution_info(self, rnum):
+    def solution_info(self, rnum: Rnum):
         """Return an informative dictionary of solution data for a
         result.
 
@@ -2673,8 +3080,21 @@ class DPFResult:
     def subtitle(self):
         raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="subtitle"))
 
-    def _get_comp_dict(self, entity: str):
-        """Get a dictionary of components given an entity"""
+    def _get_comp_dict(self, entity: str) -> dict[str, tuple[int]]:
+        """Get a dictionary of components given an entity
+
+        Parameters
+        ----------
+        entity
+            The entity type to retrieve components for. Valid options are
+            "NODE" and "ELEM".
+
+        Returns
+        -------
+        dict
+            Dictionary of components.  Keys are the component names,
+            and values are tuples of the entity IDs in the component.
+        """
         entity_comp = {}
         for each_comp in self.mesh.available_named_selections:
             scoping = self.mesh.named_selection(each_comp)
@@ -2684,8 +3104,14 @@ class DPFResult:
         return entity_comp
 
     @property
-    def node_components(self):
+    def node_components(self) -> dict[str, np.ndarray]:
         """Dictionary of ansys node components from the result file.
+
+        Returns
+        -------
+        dict
+            Dictionary of node components.  Keys are the component
+            names, and values are the node numbers in the component.
 
         Examples
         --------
@@ -2701,8 +3127,14 @@ class DPFResult:
         return self._get_comp_dict("NODE")
 
     @property
-    def element_components(self):
+    def element_components(self) -> dict[str, np.ndarray]:
         """Dictionary of ansys element components from the result file.
+
+        Returns
+        -------
+        dict
+            Dictionary of element components.  Keys are the component
+            names, and values are the element numbers in the component.
 
         Examples
         --------
@@ -2719,7 +3151,9 @@ class DPFResult:
         """
         return self._get_comp_dict("ELEM")
 
-    def element_solution_data(self, rnum, datatype, sort=True, **kwargs):
+    def element_solution_data(
+        self, rnum: Rnum, datatype: str, sort: bool = True, **kwargs: Kwargs
+    ):
         """Retrieves element solution data.  Similar to ETABLE.
 
         Parameters
@@ -2820,7 +3254,7 @@ class DPFResult:
             NOT_AVAILABLE_METHOD.format(method="element_solution_data")
         )
 
-    def result_dof(self, rnum):
+    def result_dof(self, rnum: Rnum):
         """Return a list of degrees of freedom for a given result number.
 
         Parameters
@@ -2842,7 +3276,7 @@ class DPFResult:
         # To be done later
         raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="result_dof"))
 
-    def nodal_input_force(self, rnum):
+    def nodal_input_force(self, rnum: Rnum):
         """Nodal input force for a given result number.
 
         Nodal input force is generally set with the APDL command

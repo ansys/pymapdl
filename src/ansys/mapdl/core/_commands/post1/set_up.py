@@ -572,6 +572,63 @@ class SetUp:
         command = f"DNSOL,{node},{item},{comp},{v1},{v2},{v3},{v4},{v5},{v6},{datakey}"
         return self.run(command, **kwargs)
 
+    def file(self, fname: str = "", ext: str = "", **kwargs):
+        r"""Specifies the data file where results are to be found.
+
+        Mechanical APDL Command: `FILE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FILE.html>`_
+
+        Parameters
+        ----------
+        fname : str
+            File name and directory path (248 characters maximum, including the characters needed for the
+            directory path). An unspecified directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name. The file name defaults to :file:`Jobname`.
+
+        ext : str
+            Filename extension (eight-character maximum). If ``Fname`` is blank, the extension defaults to
+            RST (for structural, fluid, or coupled-field analyses), to RTH (for thermal or electrical
+            analyses), or to RMG (for magnetic analyses). For postprocessing contact results corresponding
+            to the initial contact state in POST1, use the RCN extension. For postprocessing modal
+            coordinates results in POST1, use the RDSP or RFRQ extension.
+
+        Notes
+        -----
+
+        .. _FILE_notes:
+
+        Specifies the Mechanical APDL data file where the results are to be found for postprocessing.
+
+        Issuing the :ref:`file` command with ``Ext`` = RSDP or RFRQ in POST1 specifies the :file:`.rsdp` or
+        :file:`.rfrq` file used by the :ref:`prmc` and :ref:`plmc` commands. (See :ref:`POST1 example
+        below.) <FILE_POST1example>`
+
+        **Example Usage**
+
+        .. _FILE_examples:
+
+        .. _FILE_POST1example:
+
+        POST1
+        ^^^^^
+
+        .. code:: apdl
+
+           /POST1
+           FILE,,rdsp   !Choose file Jobname.rdsp from a previous MSUP transient solution
+           PRMC,2,1     !Plot Modal coordinates from rdsp file (loadstep and substep specified as arguments)
+           FILE,,rst    !Choose file Jobname.rst
+           SET,1,1      !Load results from chosen.rst file into database
+           PRNSOL,u,x   !Plot Nodal displacements (loadstep and substep specified using the SET command)
+           FINISH       !Exit POST1
+
+        .. _FILE_POST26example:
+
+        POST26
+        ^^^^^^
+        """
+        command = f"FILE,{fname},{ext}"
+        return self.run(command, **kwargs)
+
     def hrcplx(
         self,
         loadstep: str = "",
@@ -811,8 +868,8 @@ class SetUp:
         :ref:`reswrite` to write the data set into a new results file. The new results file will essentially
         contain the current set of results data for the entire (that is, global) model.
 
-        Upon completion of a :ref:`rescombine` operation, the current file for postprocessing ( ``FILE`` )
-        is set to the last local results file specified via :ref:`rescombine`. For example, if reading in
+        Upon completion of a :ref:`rescombine` operation, the current file for postprocessing ( :ref:`file`
+        ) is set to the last local results file specified via :ref:`rescombine`. For example, if reading in
         four local results files, the results file for POST1 is specified as :file:`Jobname3.RST` when
         :ref:`rescombine` is complete. Therefore, be aware that some downstream postprocessing actions (such
         as :ref:`set` ) may be operating on only this one local results file.

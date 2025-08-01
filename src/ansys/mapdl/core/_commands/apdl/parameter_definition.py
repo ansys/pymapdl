@@ -1080,7 +1080,7 @@ class ParameterDefinition:
              - Description
            * - MAT
              - ``Sect1``
-             - ``Item2`` = 0 or blank; ``IT2NUM`` = ``Sect2``. Material ID to be used for general contact between ``Sect1`` and ``Sect2``. Alternative get function: SECTOMAT( ``Sect1``, ``Sect2`` ).
+             - ``Item2`` = 0 or blank; ``IT2NUM`` = ``Sect2``. Material ID to be used for general contact between ``Sect1`` and ``Sect2`` . Alternative get function: SECTOMAT( ``Sect1``, ``Sect2`` ).
            * - REAL
              - ``Sect1``
              - ``Item2`` = 0 or blank; ``IT2NUM`` = ``Sect2``. Real constant ID to be used for general contact between ``Sect1`` and ``Sect2`` . Alternative get function: SECTOREAL( ``Sect1``, ``Sect2`` ).
@@ -3017,11 +3017,11 @@ class ParameterDefinition:
 
           * ``JOBNAME`` - Returns the current ``Jobname``.
 
-          * ``RSTDIR`` - Returns rst directory ( ``FILE`` command).
+          * ``RSTDIR`` - Returns rst directory ( :ref:`file` command).
 
-          * ``RSTFILE`` - Returns rst file name ( ``FILE`` command).
+          * ``RSTFILE`` - Returns rst file name ( :ref:`file` command).
 
-          * ``RSTEXT`` - Returns rst file extension ( ``FILE`` command).
+          * ``RSTEXT`` - Returns rst file extension ( :ref:`file` command).
 
           * ``PSEARCH`` - Returns path used for "unknown command" macro ( :ref:`psearch` command).
 
