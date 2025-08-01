@@ -24,7 +24,7 @@ from functools import wraps
 import os
 import pathlib
 import tempfile
-from typing import Union
+from typing import ParamSpec, Union
 import warnings
 
 import numpy as np
@@ -54,9 +54,20 @@ from ansys.mapdl.core.plotting import GraphicsBackend
 
 TMP_VAR = "__tmpvar__"
 
+P = ParamSpec("P")
+
 
 class _MapdlCommandExtended(_MapdlCore):
-    """Class that extended MAPDL capabilities by wrapping or overwriting commands"""
+    """Class that extended MAPDL capabilities by wrapping or overwriting commands
+
+    Parameters
+    ----------
+    *args : list
+        Positional arguments to pass to the base class.
+
+    **kwargs : dict
+        Keyword arguments to pass to the base class.
+    """
 
     def __init__(self, *args, **kwargs):
         """Initialize the MAPDL command extended class.
@@ -73,7 +84,9 @@ class _MapdlCommandExtended(_MapdlCore):
         self._graphics_backend = GraphicsBackend.PYVISTA
 
     @wraps(_MapdlCore.file)
-    def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
+    def file(
+        self, fname: str = "", ext: str = "", **kwargs
+    ) -> str:  # numpydoc ignore=RT01,PR01
         """Wraps file to upload the file to the MAPDL working directory."""
         fname = self._get_file_name(fname, ext, "cdb")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
@@ -85,7 +98,7 @@ class _MapdlCommandExtended(_MapdlCore):
             return super().file(fname=file_, ext=ext_, **kwargs)
 
     @wraps(_MapdlCore.lsread)
-    def lsread(self, *args, **kwargs):
+    def lsread(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         """Wraps the ``LSREAD`` which does not work in interactive mode."""
         self._log.debug("Forcing 'LSREAD' to run in non-interactive mode.")
         with self.non_interactive:
@@ -93,7 +106,7 @@ class _MapdlCommandExtended(_MapdlCore):
         return self._response.strip()
 
     @wraps(_MapdlCore.use)
-    def use(self, *args, **kwargs):
+    def use(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the use command."""
         # Because of `name` can be a macro file or a macro block on a macro library
         # file, we are going to test if the file exists locally first, then remote,
@@ -141,7 +154,7 @@ class _MapdlCommandExtended(_MapdlCore):
         return self._response  # returning last response
 
     @wraps(_MapdlCore.set)
-    def set(
+    def set(  # numpydoc ignore=RT01,PR01
         self,
         lstep="",
         sbstep="",
@@ -179,7 +192,9 @@ class _MapdlCommandExtended(_MapdlCore):
             return output
 
     @wraps(_MapdlCore.vsel)
-    def vsel(self, *args, **kwargs) -> str:
+    def vsel(
+        self, *args: P.args, **kwargs: P.kwargs
+    ) -> str:  # numpydoc ignore=RT01,PR01
         """Wraps superclassed VSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -196,7 +211,9 @@ class _MapdlCommandExtended(_MapdlCore):
         return wrapped(self, *args, **kwargs)
 
     @wraps(_MapdlCore.nsel)
-    def nsel(self, *args, **kwargs) -> str:
+    def nsel(
+        self, *args: P.args, **kwargs: P.kwargs
+    ) -> str:  # numpydoc ignore=RT01,PR01
         """Wraps previons NSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -213,7 +230,9 @@ class _MapdlCommandExtended(_MapdlCore):
         return wrapped(self, *args, **kwargs)
 
     @wraps(_MapdlCore.esel)
-    def esel(self, *args, **kwargs) -> str:
+    def esel(
+        self, *args: P.args, **kwargs: P.kwargs
+    ) -> str:  # numpydoc ignore=RT01,PR01
         """Wraps previons ESEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -230,7 +249,9 @@ class _MapdlCommandExtended(_MapdlCore):
         return wrapped(self, *args, **kwargs)
 
     @wraps(_MapdlCore.ksel)
-    def ksel(self, *args, **kwargs) -> str:
+    def ksel(
+        self, *args: P.args, **kwargs: P.kwargs
+    ) -> str:  # numpydoc ignore=RT01,PR01
         """Wraps superclassed KSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -247,7 +268,9 @@ class _MapdlCommandExtended(_MapdlCore):
         return wrapped(self, *args, **kwargs)
 
     @wraps(_MapdlCore.lsel)
-    def lsel(self, *args, **kwargs) -> str:
+    def lsel(
+        self, *args: P.args, **kwargs: P.kwargs
+    ) -> str:  # numpydoc ignore=RT01,PR01
         """Wraps superclassed LSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -264,7 +287,9 @@ class _MapdlCommandExtended(_MapdlCore):
         return wrapped(self, *args, **kwargs)
 
     @wraps(_MapdlCore.asel)
-    def asel(self, *args, **kwargs) -> str:
+    def asel(
+        self, *args: P.args, **kwargs: P.kwargs
+    ) -> str:  # numpydoc ignore=RT01,PR01
         """Wraps superclassed ASEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -281,7 +306,7 @@ class _MapdlCommandExtended(_MapdlCore):
         return wrapped(self, *args, **kwargs)
 
     @wraps(_MapdlCore.dim)
-    def dim(
+    def dim(  # numpydoc ignore=RT01,PR01
         self,
         par="",
         type_="",
@@ -305,7 +330,7 @@ class _MapdlCommandExtended(_MapdlCore):
         )
 
     @wraps(_MapdlCore.mpwrite)
-    def mpwrite(
+    def mpwrite(  # numpydoc ignore=RT01,PR01
         self,
         fname="",
         ext="",
@@ -330,7 +355,7 @@ class _MapdlCommandExtended(_MapdlCore):
         return output
 
     @wraps(_MapdlCore.mpread)
-    def mpread(self, fname="", ext="", lib="", **kwargs):
+    def mpread(self, fname="", ext="", lib="", **kwargs):  # numpydoc ignore=RT01,PR01
         if lib:
             raise NotImplementedError(
                 "The option 'lib' is not supported by the MAPDL gRPC server."
@@ -342,7 +367,7 @@ class _MapdlCommandExtended(_MapdlCore):
         return self.input(fname)
 
     @wraps(_MapdlCore.cwd)
-    def cwd(self, *args, **kwargs):
+    def cwd(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         """Wraps cwd."""
         try:
             output = super().cwd(*args, mute=False, **kwargs)
@@ -353,7 +378,7 @@ class _MapdlCommandExtended(_MapdlCore):
         return output
 
     @wraps(_MapdlCore.list)
-    def list(self, filename, ext=""):
+    def starlist(self, fname: str = "", ext: str = ""):  # numpydoc ignore=RT01,PR01
         """Displays the contents of an external, coded file.
 
         APDL Command: ``/LIST``
@@ -367,13 +392,12 @@ class _MapdlCommandExtended(_MapdlCore):
         ext : str, optional
             Filename extension
         """
-        if hasattr(self, "_local"):  # gRPC
-            if not self._local:
-                return self._download_as_raw(filename).decode()
+        if self.is_grpc and not self.is_local:
+            return self._download_as_raw(fname).decode()
 
-        path = pathlib.Path(filename)
+        path = pathlib.Path(fname)
         if path.parent != ".":
-            path = self.directory / filename
+            path = self.directory / fname
 
         path = str(path) + ext
         with open(path) as fid:
@@ -383,13 +407,13 @@ class _MapdlCommandExtended(_MapdlCore):
     @requires_graphics
     def kplot(
         self,
-        np1="",
-        np2="",
-        ninc="",
-        lab="",
+        np1: str = "",
+        np2: str = "",
+        ninc: str = "",
+        lab: str = "",
         *,
-        graphics_backend=None,
-        show_keypoint_numbering=True,
+        graphics_backend: GraphicsBackend | None = None,
+        show_keypoint_numbering: bool = True,
         **kwargs,
     ):
         """Display the selected keypoints.
@@ -421,7 +445,18 @@ class _MapdlCommandExtended(_MapdlCore):
         show_keypoint_numbering : bool, optional
             Display keypoint numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
+        **kwargs
+            See ``help(ansys.mapdl.core.plotting.visualizer.MapdlPlotter)`` for more
+            keyword arguments related to visualizing using ``graphics_backend``.
 
+        Returns
+        -------
+        MapdlPlotter
+            If ``return_plotter=True`` is set, the current plotter instance is returned.
+
+        np.ndarray
+            If ``return_cpos=True`` is set (which is the default), the current
+            camera position is returned.
 
         Notes
         -----
@@ -466,14 +501,14 @@ class _MapdlCommandExtended(_MapdlCore):
     @requires_graphics
     def lplot(
         self,
-        nl1="",
-        nl2="",
-        ninc="",
+        nl1: str = "",
+        nl2: str = "",
+        ninc: str = "",
         *,
-        graphics_backend=None,
-        show_line_numbering=True,
-        show_keypoint_numbering=False,
-        color_lines=False,
+        graphics_backend: GraphicsBackend | None = None,
+        show_line_numbering: bool = True,
+        show_keypoint_numbering: bool = False,
+        color_lines: bool = False,
         **kwargs,
     ):
         """Display the selected lines.
@@ -507,6 +542,15 @@ class _MapdlCommandExtended(_MapdlCore):
             See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
             ``graphics_backend=GraphicsBackend.PYVISTA``.
+
+        Returns
+        -------
+        MapdlPlotter
+            If ``return_plotter=True`` is set, the current plotter instance is returned.
+
+        np.ndarray
+            If ``return_cpos=True`` is set (which is the default), the current
+            camera position is returned.
 
         Notes
         -----
@@ -602,18 +646,18 @@ class _MapdlCommandExtended(_MapdlCore):
     @requires_graphics
     def aplot(
         self,
-        na1="",
-        na2="",
-        ninc="",
-        degen="",
-        scale="",
+        na1: str = "",
+        na2: str = "",
+        ninc: str = "",
+        degen: str = "",
+        scale: str = "",
         *,
-        graphics_backend=None,
-        quality=4,
-        show_area_numbering=False,
-        show_line_numbering=False,
-        color_areas=False,
-        show_lines=False,
+        graphics_backend: GraphicsBackend | None = None,
+        quality: int = 4,
+        show_area_numbering: bool = False,
+        show_line_numbering: bool = False,
+        color_areas: bool = False,
+        show_lines: bool = False,
         **kwargs,
     ):
         """Display the selected areas.
@@ -638,7 +682,7 @@ class _MapdlCommandExtended(_MapdlCore):
         ninc : int, optional
             Increment between minimum and maximum area.
 
-        degen, str, optional
+        degen : str, optional
             Degeneracy marker.  This option is ignored when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         scale : float, optional
@@ -679,6 +723,15 @@ class _MapdlCommandExtended(_MapdlCore):
             See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
             ``graphics_backend=GraphicsBackend.PYVISTA``.
+
+        Returns
+        -------
+        MapdlPlotter
+            If ``return_plotter=True`` is set, the current plotter instance is returned.
+
+        np.ndarray
+            If ``return_cpos=True`` is set (which is the default), the current
+            camera position is returned.
 
         Examples
         --------
@@ -836,20 +889,20 @@ class _MapdlCommandExtended(_MapdlCore):
     @requires_graphics
     def vplot(
         self,
-        nv1="",
-        nv2="",
-        ninc="",
-        degen="",
-        scale="",
+        nv1: str = "",
+        nv2: str = "",
+        ninc: str = "",
+        degen: str = "",
+        scale: str = "",
         *,
-        graphics_backend=None,
-        quality=4,
-        show_volume_numbering=False,
-        show_area_numbering=False,
-        show_line_numbering=False,
-        color_areas=False,
-        show_lines=True,
-        **kwargs,
+        graphics_backend: GraphicsBackend | None = None,
+        quality: int = 4,
+        show_volume_numbering: bool = False,
+        show_area_numbering: bool = False,
+        show_line_numbering: bool = False,
+        color_areas: bool = False,
+        show_lines: bool = True,
+        **kwargs: KwargDict,
     ):
         """Plot the selected volumes.
 
@@ -879,22 +932,43 @@ class _MapdlCommandExtended(_MapdlCore):
             is the size in window space (-1 to 1 in both directions) (defaults
             to .075).  Ignored when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
-        graphics_backend : GraphicsBackend, optional
+        graphics_backend
             Plot the currently selected volumes using ``ansys-tools-visualization_interface``.
             As this creates a temporary surface mesh, this may have a
             long execution time for large meshes.
 
-        quality : int, optional
+        quality
             quality of the mesh to display.  Varies between 1 (worst)
             to 10 (best).  Applicable when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
-        show_numbering : bool, optional
-            Display line and keypoint numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
+        show_volume_numbering
+            Display volume numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
+
+        show_area_numbering
+            Display area numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
+
+        show_line_numbering
+            Display line numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
+
+        color_areas
+            Color the areas when ``graphics_backend=GraphicsBackend.PYVISTA``.
+
+        show_lines
+            Show the lines when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         **kwargs
             See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
             ``graphics_backend=GraphicsBackend.PYVISTA``.
+
+        Returns
+        -------
+        MapdlPlotter
+            If ``return_plotter=True`` is set, the current plotter instance is returned.
+
+        np.ndarray
+            If ``return_cpos=True`` is set (which is the default), the current
+            camera position is returned.
 
         Examples
         --------
@@ -992,59 +1066,18 @@ class _MapdlCommandExtended(_MapdlCore):
             Defaults to current ``graphics_backend`` setting as set on the
             initialization of MAPDL.
 
-        plot_bc : bool, optional
-            Activate the plotting of the boundary conditions.
-            Defaults to ``False``.
+        **kwargs
+            See ``help(ansys.mapdl.core.plotting.visualizer.MapdlPlotter)`` for more
+            keyword arguments related to visualizing using ``graphics_backend``.
 
-            .. warning:: This is in alpha state.
+        Returns
+        -------
+        MapdlPlotter
+            If ``return_plotter=True`` is set, the current plotter instance is returned.
 
-        plot_bc_legend : bool, optional
-            Shows the boundary conditions legend.
-            Defaults to ``False``
-
-        plot_bc_labels : bool, optional
-            Shows the boundary conditions label per node.
-            Defaults to ``False``.
-
-        bc_labels : List[str], Tuple(str), optional
-            List or tuple of strings with the boundary conditions
-            to plot, i.e. ``["UX", "UZ"]``.
-            You can obtain the allowed boundary conditions by
-            evaluating ``ansys.mapdl.core.plotting.BCS``.
-            You can use also the following shortcuts:
-
-            * **'mechanical'**
-              To plot the following mechanical boundary conditions: ``'UX'``,
-              ``'UY'``, ``'UZ'``, ``'FX'``, ``'FY'``, and ``'FZ'``.  Rotational
-              or momentum boundary conditions are not allowed.
-
-            * ``'thermal'``
-              To plot the following boundary conditions: 'TEMP' and
-              'HEAT'.
-
-            * ``'electrical'``
-              To plot the following electrical boundary conditions:
-              ``'VOLT'``, ``'CHRGS'``, and ``'AMPS'``.
-
-            Defaults to all the allowed boundary conditions present
-            in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
-            and :func:`ansys.mapdl.core.Mapdl.flist()`.
-
-        bc_target : List[str], Tuple(str), optional
-            Specify the boundary conditions target
-            to plot, i.e. "Nodes", "Elements".
-            You can obtain the allowed boundary conditions target by
-            evaluating ``ansys.mapdl.core.plotting.ALLOWED_TARGETS``.
-            Defaults to only ``"Nodes"``.
-
-        bc_glyph_size : float, optional
-            Specify the size of the glyph used for the boundary
-            conditions plotting.
-            By default is ratio of the bounding box dimensions.
-
-        bc_labels_font_size : float, optional
-            Size of the text on the boundary conditions labels.
-            By default it is 16.
+        np.ndarray
+            If ``return_cpos=True`` is set (which is the default), the current
+            camera position is returned.
 
         Examples
         --------
@@ -1135,70 +1168,25 @@ class _MapdlCommandExtended(_MapdlCore):
 
         Parameters
         ----------
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
         graphics_backend : GraphicsBackend, optional
             Plot the currently selected elements using the picked backend.
             Defaults to current ``graphics_backend`` setting.
 
-        show_node_numbering : bool, optional
-            Plot the node numbers of surface nodes.
-
-        plot_bc : bool, optional
-            Activate the plotting of the boundary conditions.
-            Defaults to ``False``.
-
-            .. warning:: This is in alpha state.
-
-        plot_bc_legend : bool, optional
-            Shows the boundary conditions legend.
-            Defaults to ``False``
-
-        plot_bc_labels : bool, optional
-            Shows the boundary conditions label per node.
-            Defaults to ``False``.
-
-        bc_labels : List[str], Tuple(str), optional
-            List or tuple of strings with the boundary conditions
-            to plot, i.e. ``["UX", "UZ"]``.
-            You can obtain the allowed boundary conditions by
-            evaluating ``ansys.mapdl.core.plotting.BCS``.
-            You can use also the following shortcuts:
-
-            * **'mechanical'**
-              To plot the following mechanical boundary conditions: ``'UX'``,
-              ``'UY'``, ``'UZ'``, ``'FX'``, ``'FY'``, and ``'FZ'``.  Rotational
-              or momentum boundary conditions are not allowed.
-
-            * ``'thermal'``
-              To plot the following boundary conditions: 'TEMP' and
-              'HEAT'.
-
-            * ``'electrical'``
-              To plot the following electrical boundary conditions:
-              ``'VOLT'``, ``'CHRGS'``, and ``'AMPS'``.
-
-            Defaults to all the allowed boundary conditions present
-            in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
-            and :func:`ansys.mapdl.core.Mapdl.flist()`.
-
-        bc_target : List[str], Tuple(str), optional
-            Specify the boundary conditions target
-            to plot, i.e. "Nodes", "Elements".
-            You can obtain the allowed boundary conditions target by
-            evaluating ``ansys.mapdl.core.plotting.ALLOWED_TARGETS``.
-            Defaults to only ``"Nodes"``.
-
-        bc_glyph_size : float, optional
-            Specify the size of the glyph used for the boundary
-            conditions plotting.
-            By default is ratio of the bounding box dimensions.
-
-        bc_labels_font_size : float, optional
-            Size of the text on the boundary conditions labels.
-            By default it is 16.
-
         **kwargs
             See ``help(ansys.mapdl.core.plotting.visualizer.MapdlPlotter)`` for more
             keyword arguments related to visualizing using ``graphics_backend``.
+
+        Returns
+        -------
+        MapdlPlotter
+            If ``return_plotter=True`` is set, the current plotter instance is returned.
+
+        np.ndarray
+            If ``return_cpos=True`` is set (which is the default), the current
+            camera position is returned.
 
         Examples
         --------
@@ -1262,7 +1250,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 return self.run("EPLOT", **kwargs)
 
     @wraps(_MapdlCore.clear)
-    def clear(self, read: str = "NOSTART", **kwargs):
+    def clear(self, read: str = "NOSTART", **kwargs):  # numpydoc ignore=RT01,PR01
         """Wraps the MAPDL ``CLEAR`` command to use `NOSTART` with mute=True"""
         if self.is_grpc:
             self._create_session()
@@ -1270,7 +1258,9 @@ class _MapdlCommandExtended(_MapdlCore):
         super().clear(read=read, **kwargs)
 
     @wraps(_MapdlCore.cmplot)
-    def cmplot(self, label: str = "", entity: str = "", keyword: str = "", **kwargs):
+    def cmplot(
+        self, label: str = "", entity: str = "", keyword: str = "", **kwargs
+    ):  # numpydoc ignore=RT01,PR01
         """Wraps cmplot"""
 
         label = label.upper()
@@ -1334,7 +1324,9 @@ class _MapdlCommandExtended(_MapdlCore):
         return output
 
     @wraps(_MapdlCore.inquire)
-    def inquire(self, strarray="", func="", arg1="", arg2="", **kwargs):
+    def inquire(
+        self, strarray="", func="", arg1="", arg2="", **kwargs
+    ):  # numpydoc ignore=RT01,PR01
         """Wraps original INQUIRE function"""
         func_options = [
             "LOGIN",
@@ -1427,7 +1419,7 @@ class _MapdlCommandExtended(_MapdlCore):
             return response
 
     @wraps(_MapdlCore.parres)
-    def parres(self, lab="", fname="", ext="", **kwargs):
+    def parres(self, lab="", fname="", ext="", **kwargs):  # numpydoc ignore=RT01,PR01
         """Wraps the original /PARRES function"""
         if not fname:
             fname = self.jobname
@@ -1442,7 +1434,9 @@ class _MapdlCommandExtended(_MapdlCore):
         return self.input(filename)
 
     @wraps(_MapdlCore.lgwrite)
-    def lgwrite(self, fname="", ext="", kedit="", remove_grpc_extra=True, **kwargs):
+    def lgwrite(
+        self, fname="", ext="", kedit="", remove_grpc_extra=True, **kwargs
+    ):  # numpydoc ignore=RT01,PR01
         """Wraps original /LGWRITE"""
         if not fname:
             fname = self.jobname
@@ -1487,7 +1481,7 @@ class _MapdlCommandExtended(_MapdlCore):
         return output
 
     @wraps(_MapdlCore.vwrite)
-    def vwrite(
+    def vwrite(  # numpydoc ignore=RT01,PR01
         self,
         par1="",
         par2="",
@@ -1543,7 +1537,7 @@ class _MapdlCommandExtended(_MapdlCore):
         )
 
     @wraps(_MapdlCore.mwrite)
-    def mwrite(
+    def mwrite(  # numpydoc ignore=RT01,PR01
         self, parr="", fname="", ext="", label="", n1="", n2="", n3="", **kwargs
     ):
         """Wrapping *MWRITE"""
@@ -1567,7 +1561,9 @@ class _MapdlCommandExtended(_MapdlCore):
         )
 
     @wraps(_MapdlCore.nrm)
-    def nrm(self, name="", normtype="", parr="", normalize="", **kwargs):
+    def nrm(
+        self, name="", normtype="", parr="", normalize="", **kwargs
+    ):  # numpydoc ignore=RT01,PR01
         """Wraps *NRM"""
         if not parr:
             parr = "__temp_par__"
@@ -1577,7 +1573,7 @@ class _MapdlCommandExtended(_MapdlCore):
         return self.parameters[parr]
 
     @wraps(_MapdlCore.com)
-    def com(self, comment="", **kwargs):
+    def com(self, comment="", **kwargs):  # numpydoc ignore=RT01,PR01
         """Wraps /COM"""
         if self.print_com and not self.mute and not kwargs.get("mute", False):
             print("/COM,%s" % (str(comment)))
@@ -1585,14 +1581,16 @@ class _MapdlCommandExtended(_MapdlCore):
         return super().com(comment=comment, **kwargs)
 
     @wraps(_MapdlCore.lssolve)
-    def lssolve(self, lsmin="", lsmax="", lsinc="", **kwargs):
+    def lssolve(
+        self, lsmin="", lsmax="", lsinc="", **kwargs
+    ):  # numpydoc ignore=RT01,PR01
         """Wraps LSSOLVE"""
         with self.non_interactive:
             super().lssolve(lsmin=lsmin, lsmax=lsmax, lsinc=lsinc, **kwargs)
         return self.last_response
 
     @wraps(_MapdlCore.edasmp)
-    def edasmp(self, *args, **kwargs):
+    def edasmp(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edasmp()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1600,7 +1598,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edasmp(*args, **kwargs)
 
     @wraps(_MapdlCore.edbound)
-    def edbound(self, *args, **kwargs):
+    def edbound(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edbound()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1608,7 +1606,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edbound(*args, **kwargs)
 
     @wraps(_MapdlCore.edbx)
-    def edbx(self, *args, **kwargs):
+    def edbx(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edbx()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1616,7 +1614,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edbx(*args, **kwargs)
 
     @wraps(_MapdlCore.edcgen)
-    def edcgen(self, *args, **kwargs):
+    def edcgen(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edcgen()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1624,7 +1622,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edcgen(*args, **kwargs)
 
     @wraps(_MapdlCore.edclist)
-    def edclist(self, *args, **kwargs):
+    def edclist(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edclist()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1632,7 +1630,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edclist(*args, **kwargs)
 
     @wraps(_MapdlCore.edcmore)
-    def edcmore(self, *args, **kwargs):
+    def edcmore(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edcmore()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1640,7 +1638,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edcmore(*args, **kwargs)
 
     @wraps(_MapdlCore.edcnstr)
-    def edcnstr(self, *args, **kwargs):
+    def edcnstr(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edcnstr()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1648,7 +1646,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edcnstr(*args, **kwargs)
 
     @wraps(_MapdlCore.edcontact)
-    def edcontact(self, *args, **kwargs):
+    def edcontact(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edcontact()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1656,7 +1654,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edcontact(*args, **kwargs)
 
     @wraps(_MapdlCore.edcrb)
-    def edcrb(self, *args, **kwargs):
+    def edcrb(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edcrb()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1664,7 +1662,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edcrb(*args, **kwargs)
 
     @wraps(_MapdlCore.edcurve)
-    def edcurve(self, *args, **kwargs):
+    def edcurve(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edcurve()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1672,7 +1670,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edcurve(*args, **kwargs)
 
     @wraps(_MapdlCore.eddbl)
-    def eddbl(self, *args, **kwargs):
+    def eddbl(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.eddbl()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1680,7 +1678,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().eddbl(*args, **kwargs)
 
     @wraps(_MapdlCore.eddc)
-    def eddc(self, *args, **kwargs):
+    def eddc(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.eddc()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1688,7 +1686,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().eddc(*args, **kwargs)
 
     @wraps(_MapdlCore.edipart)
-    def edipart(self, *args, **kwargs):
+    def edipart(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edipart()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1696,7 +1694,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edipart(*args, **kwargs)
 
     @wraps(_MapdlCore.edlcs)
-    def edlcs(self, *args, **kwargs):
+    def edlcs(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edlcs()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1704,7 +1702,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edlcs(*args, **kwargs)
 
     @wraps(_MapdlCore.edmp)
-    def edmp(self, *args, **kwargs):
+    def edmp(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edmp()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1712,7 +1710,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edmp(*args, **kwargs)
 
     @wraps(_MapdlCore.ednb)
-    def ednb(self, *args, **kwargs):
+    def ednb(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.ednb()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1720,7 +1718,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().ednb(*args, **kwargs)
 
     @wraps(_MapdlCore.edndtsd)
-    def edndtsd(self, *args, **kwargs):
+    def edndtsd(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edndtsd()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1728,7 +1726,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edndtsd(*args, **kwargs)
 
     @wraps(_MapdlCore.ednrot)
-    def ednrot(self, *args, **kwargs):
+    def ednrot(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.ednrot()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1736,7 +1734,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().ednrot(*args, **kwargs)
 
     @wraps(_MapdlCore.edpart)
-    def edpart(self, *args, **kwargs):
+    def edpart(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edpart()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1744,7 +1742,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edpart(*args, **kwargs)
 
     @wraps(_MapdlCore.edpc)
-    def edpc(self, *args, **kwargs):
+    def edpc(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edpc()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1752,7 +1750,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edpc(*args, **kwargs)
 
     @wraps(_MapdlCore.edsp)
-    def edsp(self, *args, **kwargs):
+    def edsp(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edsp()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1760,7 +1758,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edsp(*args, **kwargs)
 
     @wraps(_MapdlCore.edweld)
-    def edweld(self, *args, **kwargs):
+    def edweld(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edweld()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1768,7 +1766,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edweld(*args, **kwargs)
 
     @wraps(_MapdlCore.edadapt)
-    def edadapt(self, *args, **kwargs):
+    def edadapt(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edadapt()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1776,7 +1774,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edadapt(*args, **kwargs)
 
     @wraps(_MapdlCore.edale)
-    def edale(self, *args, **kwargs):
+    def edale(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edale()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1784,7 +1782,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edale(*args, **kwargs)
 
     @wraps(_MapdlCore.edbvis)
-    def edbvis(self, *args, **kwargs):
+    def edbvis(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edbvis()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1792,7 +1790,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edbvis(*args, **kwargs)
 
     @wraps(_MapdlCore.edcadapt)
-    def edcadapt(self, *args, **kwargs):
+    def edcadapt(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edcadapt()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1800,7 +1798,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edcadapt(*args, **kwargs)
 
     @wraps(_MapdlCore.edcpu)
-    def edcpu(self, *args, **kwargs):
+    def edcpu(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edcpu()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1808,7 +1806,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edcpu(*args, **kwargs)
 
     @wraps(_MapdlCore.edcsc)
-    def edcsc(self, *args, **kwargs):
+    def edcsc(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edcsc()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1816,7 +1814,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edcsc(*args, **kwargs)
 
     @wraps(_MapdlCore.edcts)
-    def edcts(self, *args, **kwargs):
+    def edcts(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edcts()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1824,7 +1822,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edcts(*args, **kwargs)
 
     @wraps(_MapdlCore.eddamp)
-    def eddamp(self, *args, **kwargs):
+    def eddamp(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.eddamp()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1832,7 +1830,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().eddamp(*args, **kwargs)
 
     @wraps(_MapdlCore.eddrelax)
-    def eddrelax(self, *args, **kwargs):
+    def eddrelax(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.eddrelax()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1840,7 +1838,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().eddrelax(*args, **kwargs)
 
     @wraps(_MapdlCore.eddump)
-    def eddump(self, *args, **kwargs):
+    def eddump(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.eddump()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1848,7 +1846,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().eddump(*args, **kwargs)
 
     @wraps(_MapdlCore.edenergy)
-    def edenergy(self, *args, **kwargs):
+    def edenergy(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edenergy()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1856,7 +1854,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edenergy(*args, **kwargs)
 
     @wraps(_MapdlCore.edfplot)
-    def edfplot(self, *args, **kwargs):
+    def edfplot(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edfplot()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1864,7 +1862,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edfplot(*args, **kwargs)
 
     @wraps(_MapdlCore.edgcale)
-    def edgcale(self, *args, **kwargs):
+    def edgcale(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edgcale()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1872,7 +1870,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edgcale(*args, **kwargs)
 
     @wraps(_MapdlCore.edhgls)
-    def edhgls(self, *args, **kwargs):
+    def edhgls(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edhgls()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1880,7 +1878,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edhgls(*args, **kwargs)
 
     @wraps(_MapdlCore.edhist)
-    def edhist(self, *args, **kwargs):
+    def edhist(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edhist()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1888,7 +1886,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edhist(*args, **kwargs)
 
     @wraps(_MapdlCore.edhtime)
-    def edhtime(self, *args, **kwargs):
+    def edhtime(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edhtime()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1896,7 +1894,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edhtime(*args, **kwargs)
 
     @wraps(_MapdlCore.edint)
-    def edint(self, *args, **kwargs):
+    def edint(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edint()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1904,7 +1902,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edint(*args, **kwargs)
 
     @wraps(_MapdlCore.edis)
-    def edis(self, *args, **kwargs):
+    def edis(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edis()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1912,7 +1910,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edis(*args, **kwargs)
 
     @wraps(_MapdlCore.edload)
-    def edload(self, *args, **kwargs):
+    def edload(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edload()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1920,7 +1918,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edload(*args, **kwargs)
 
     @wraps(_MapdlCore.edopt)
-    def edopt(self, *args, **kwargs):
+    def edopt(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edopt()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1928,7 +1926,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edopt(*args, **kwargs)
 
     @wraps(_MapdlCore.edout)
-    def edout(self, *args, **kwargs):
+    def edout(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edout()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1936,7 +1934,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edout(*args, **kwargs)
 
     @wraps(_MapdlCore.edpl)
-    def edpl(self, *args, **kwargs):
+    def edpl(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edpl()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1944,7 +1942,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edpl(*args, **kwargs)
 
     @wraps(_MapdlCore.edpvel)
-    def edpvel(self, *args, **kwargs):
+    def edpvel(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edpvel()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1952,7 +1950,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edpvel(*args, **kwargs)
 
     @wraps(_MapdlCore.edrc)
-    def edrc(self, *args, **kwargs):
+    def edrc(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edrc()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1960,7 +1958,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edrc(*args, **kwargs)
 
     @wraps(_MapdlCore.edrd)
-    def edrd(self, *args, **kwargs):
+    def edrd(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edrd()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1968,7 +1966,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edrd(*args, **kwargs)
 
     @wraps(_MapdlCore.edri)
-    def edri(self, *args, **kwargs):
+    def edri(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edri()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1976,7 +1974,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edri(*args, **kwargs)
 
     @wraps(_MapdlCore.edrst)
-    def edrst(self, *args, **kwargs):
+    def edrst(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edrst()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1984,7 +1982,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edrst(*args, **kwargs)
 
     @wraps(_MapdlCore.edrun)
-    def edrun(self, *args, **kwargs):
+    def edrun(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edrun()' for explicit analysis was deprecated in Ansys 19.1"
@@ -1992,7 +1990,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edrun(*args, **kwargs)
 
     @wraps(_MapdlCore.edshell)
-    def edshell(self, *args, **kwargs):
+    def edshell(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edshell()' for explicit analysis was deprecated in Ansys 19.1"
@@ -2000,7 +1998,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edshell(*args, **kwargs)
 
     @wraps(_MapdlCore.edsolv)
-    def edsolv(self, *args, **kwargs):
+    def edsolv(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edsolv()' for explicit analysis was deprecated in Ansys 19.1"
@@ -2008,7 +2006,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edsolv(*args, **kwargs)
 
     @wraps(_MapdlCore.edstart)
-    def edstart(self, *args, **kwargs):
+    def edstart(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edstart()' for explicit analysis was deprecated in Ansys 19.1"
@@ -2016,7 +2014,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edstart(*args, **kwargs)
 
     @wraps(_MapdlCore.edterm)
-    def edterm(self, *args, **kwargs):
+    def edterm(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edterm()' for explicit analysis was deprecated in Ansys 19.1"
@@ -2024,7 +2022,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edterm(*args, **kwargs)
 
     @wraps(_MapdlCore.edtp)
-    def edtp(self, *args, **kwargs):
+    def edtp(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edtp()' for explicit analysis was deprecated in Ansys 19.1"
@@ -2032,7 +2030,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edtp(*args, **kwargs)
 
     @wraps(_MapdlCore.edvel)
-    def edvel(self, *args, **kwargs):
+    def edvel(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edvel()' for explicit analysis was deprecated in Ansys 19.1"
@@ -2040,7 +2038,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edvel(*args, **kwargs)
 
     @wraps(_MapdlCore.edwrite)
-    def edwrite(self, *args, **kwargs):
+    def edwrite(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edwrite()' for explicit analysis was deprecated in Ansys 19.1"
@@ -2048,7 +2046,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().edwrite(*args, **kwargs)
 
     @wraps(_MapdlCore.rexport)
-    def rexport(self, *args, **kwargs):
+    def rexport(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.rexport()' for explicit analysis was deprecated in Ansys 19.1"
@@ -2056,7 +2054,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().rexport(*args, **kwargs)
 
     @wraps(_MapdlCore.get)
-    def get(
+    def get(  # numpydoc ignore=RT01,PR01
         self,
         par: str = "__floatparameter__",
         entity: str = "",
@@ -2098,133 +2096,135 @@ class _MapdlCommandExtended(_MapdlCore):
             return value
 
     @wraps(_MapdlCore.cmlist)
-    def cmlist(self, *args, **kwargs):
+    def cmlist(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
         from ansys.mapdl.core.commands import ComponentListing
 
         return ComponentListing(super().cmlist(*args, **kwargs))
 
     @wraps(_MapdlCore.ndinqr)
-    def ndinqr(self, node, key, **kwargs):
+    def ndinqr(self, node, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``ndinqr`` method to take advantage of the gRPC methods."""
         super().ndinqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.elmiqr)
-    def elmiqr(self, ielem, key, **kwargs):
+    def elmiqr(self, ielem, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``elmiqr`` method to take advantage of the gRPC methods."""
         super().elmiqr(ielem, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.kpinqr)
-    def kpinqr(self, knmi, key, **kwargs):
+    def kpinqr(self, knmi, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``kpinqr`` method to take advantage of the gRPC methods."""
         super().kpinqr(knmi, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.lsinqr)
-    def lsinqr(self, line, key, **kwargs):
+    def lsinqr(self, line, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``lsinqr`` method to take advantage of the gRPC methods."""
         super().lsinqr(line, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.arinqr)
-    def arinqr(self, anmi, key, **kwargs):
+    def arinqr(self, anmi, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``arinqr`` method to take advantage of the gRPC methods."""
         super().arinqr(anmi, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.vlinqr)
-    def vlinqr(self, vnmi, key, **kwargs):
+    def vlinqr(self, vnmi, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``vlinqr`` method to take advantage of the gRPC methods."""
         super().vlinqr(vnmi, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.rlinqr)
-    def rlinqr(self, nreal, key, **kwargs):
+    def rlinqr(self, nreal, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``rlinqr`` method to take advantage of the gRPC methods."""
         super().rlinqr(nreal, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.gapiqr)
-    def gapiqr(self, ngap, key, **kwargs):
+    def gapiqr(self, ngap, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``gapiqr`` method to take advantage of the gRPC methods."""
         super().gapiqr(ngap, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.masiqr)
-    def masiqr(self, node, key, **kwargs):
+    def masiqr(self, node, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``masiqr`` method to take advantage of the gRPC methods."""
         super().masiqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.ceinqr)
-    def ceinqr(self, nce, key, **kwargs):
+    def ceinqr(self, nce, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``ceinqr`` method to take advantage of the gRPC methods."""
         super().ceinqr(nce, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.cpinqr)
-    def cpinqr(self, ncp, key, **kwargs):
+    def cpinqr(self, ncp, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``cpinqr`` method to take advantage of the gRPC methods."""
         super().cpinqr(ncp, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.csyiqr)
-    def csyiqr(self, ncsy, key, **kwargs):
+    def csyiqr(self, ncsy, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``csyiqr`` method to take advantage of the gRPC methods."""
         super().csyiqr(ncsy, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.etyiqr)
-    def etyiqr(self, itype, key, **kwargs):
+    def etyiqr(self, itype, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``etyiqr`` method to take advantage of the gRPC methods."""
         super().etyiqr(itype, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.foriqr)
-    def foriqr(self, node, key, **kwargs):
+    def foriqr(self, node, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``foriqr`` method to take advantage of the gRPC methods."""
         super().foriqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.sectinqr)
-    def sectinqr(self, nsect, key, **kwargs):
+    def sectinqr(self, nsect, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``sectinqr`` method to take advantage of the gRPC methods."""
         super().sectinqr(nsect, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.mpinqr)
-    def mpinqr(self, mat, iprop, key, **kwargs):
+    def mpinqr(self, mat, iprop, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``mpinqr`` method to take advantage of the gRPC methods."""
         super().mpinqr(mat, iprop, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.dget)
-    def dget(self, node, idf, kcmplx, **kwargs):
+    def dget(self, node, idf, kcmplx, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``dget`` method to take advantage of the gRPC methods."""
         super().dget(node, idf, kcmplx, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.fget)
-    def fget(self, node, idf, kcmplx, **kwargs):
+    def fget(self, node, idf, kcmplx, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``fget`` method to take advantage of the gRPC methods."""
         super().fget(node, idf, kcmplx, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.erinqr)
-    def erinqr(self, key, **kwargs):
+    def erinqr(self, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``erinqr`` method to take advantage of the gRPC methods."""
         super().erinqr(key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.wrinqr)
-    def wrinqr(self, key, **kwargs):
+    def wrinqr(self, key, **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
         super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.catiain)
-    def catiain(self, name="", extension="", path="", blank="", **kwargs):
+    def catiain(
+        self, name="", extension="", path="", blank="", **kwargs
+    ):  # numpydoc ignore=RT01,PR01
         """Wrap the ``catiain`` method to take advantage of the gRPC methods."""
         if self.platform == "windows":
             raise OSError(
@@ -2235,7 +2235,7 @@ class _MapdlCommandExtended(_MapdlCore):
         )
 
     @wraps(_MapdlCore.cat5in)
-    def cat5in(
+    def cat5in(  # numpydoc ignore=RT01,PR01
         self,
         name="",
         extension="",
@@ -2276,7 +2276,7 @@ class _MapdlCommandExtended(_MapdlCore):
         )
 
     @wraps(_MapdlCore.igesin)
-    def igesin(self, fname, ext="", **kwargs):
+    def igesin(self, fname, ext="", **kwargs):  # numpydoc ignore=RT01,PR01
         """Wrap the IGESIN command to handle the remote case."""
 
         fname = self._get_file_name(fname=fname, ext=ext)
@@ -2304,7 +2304,7 @@ class _MapdlCommandExtended(_MapdlCore):
         return out
 
     @wraps(_MapdlCore.satin)
-    def satin(
+    def satin(  # numpydoc ignore=RT01,PR01
         self,
         name,
         extension="",
@@ -2339,7 +2339,7 @@ class _MapdlCommandExtended(_MapdlCore):
         )
 
     @wraps(_MapdlCore.parain)
-    def parain(
+    def parain(  # numpydoc ignore=RT01,PR01
         self,
         name,
         extension="",
@@ -2376,11 +2376,24 @@ class _MapdlExtended(_MapdlCommandExtended):
     """Extend Mapdl class with new functions"""
 
     def set_graphics_backend(self, backend: GraphicsBackend):
-        """Set the graphics backend to use for plotting."""
+        """Set the graphics backend to use for plotting.
+
+        Parameters
+        ----------
+        backend
+            Selected backend for plotting.
+        """
         self._graphics_backend = backend
 
     def load_table(
-        self, name, array, var1="", var2="", var3="", csysid="", col_header=False
+        self,
+        name: str,
+        array: np.ndarray[float],
+        var1: str = "",
+        var2: str = "",
+        var3: str = "",
+        csysid: str = "",
+        col_header: bool = False,
     ):
         """Load a table from Python to into MAPDL.
 
@@ -2612,7 +2625,7 @@ class _MapdlExtended(_MapdlCommandExtended):
         kloop: MapdlFloat = "",
         **kwargs: KwargDict,
     ) -> NDArray[np.float64]:
-        """Uses the ``*VGET`` command to Return an array from ANSYS as a
+        """Uses the ``*VGET`` command to return an array from ANSYS as a
         Python array.
 
         See `VGET
@@ -2652,6 +2665,14 @@ class _MapdlExtended(_MapdlCommandExtended):
             - 4 : Loop on the IT1NUM field. Successive items are as shown with IT1NUM.
             - 5 : Loop on the Item2 field.
             - 6 : Loop on the IT2NUM field. Successive items are as shown with IT2NUM.
+
+        **kwargs
+            Additional keyword arguments to pass to the ``*VGET`` command, and :meth:`Mapdl.run`.
+
+        Returns
+        -------
+        np.ndarray[float64]
+            The retrieved array from ANSYS.
 
         Notes
         -----
@@ -2700,7 +2721,7 @@ class _MapdlExtended(_MapdlCommandExtended):
             ntry += 1
         return arr
 
-    def _get_array(
+    def _get_array(  # numpydoc ignore=RT01,PR01
         self,
         entity: str = "",
         entnum: str = "",
@@ -2713,7 +2734,7 @@ class _MapdlExtended(_MapdlCommandExtended):
         delete_after: bool = True,
         **kwargs,
     ) -> NDArray[np.float64]:
-        """Uses the VGET command to get an array from ANSYS"""
+        """Uses the VGET command to get an array from ANSYS."""
         parm_name = kwargs.pop("parm", None)
 
         if self._store_commands and not parm_name:
@@ -3063,6 +3084,10 @@ class _MapdlExtended(_MapdlCommandExtended):
             The number (or label) for the specified ``item4`` (if
             any). Some ``item4`` labels do not require an ``it4num``
             value.
+
+        **kwargs
+            Additional keyword arguments to pass to the underlying
+            :func:`Mapdl._get` and :func:`Mapdl.run` methods.
 
         Returns
         -------
