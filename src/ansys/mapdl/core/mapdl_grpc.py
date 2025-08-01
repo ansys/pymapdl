@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """A gRPC specific class and methods for the MAPDL gRPC client"""
 
 import fnmatch
@@ -324,7 +323,6 @@ class MapdlGrpc(MapdlBase):
     ...     ],
     ... )
     >>> mapdl = pymapdl.Mapdl(channel=channel)
-
     """
 
     # Required by `_name` method to be defined before __init__ be
@@ -594,7 +592,6 @@ class MapdlGrpc(MapdlBase):
             Number of connection attempts.
         timeout : float, optional
             Total timeout.
-
         """
         # This prevents a single failed connection from blocking other attempts
         connected = False
@@ -764,7 +761,6 @@ class MapdlGrpc(MapdlBase):
         """Return the target string.
 
         Generally of the form of "ip:port", like "127.0.0.1:50052".
-
         """
         channel = self._channel
         while channel is not None:
@@ -820,7 +816,6 @@ class MapdlGrpc(MapdlBase):
 
         >>> mapdl.k('', 1, 1, 1, mute=False)
         1
-
         """
         return self._mute
 
@@ -893,7 +888,6 @@ class MapdlGrpc(MapdlBase):
         2021R1 --> 0.3.0
         2021R2 --> 0.4.0
         2022R1 --> 0.X.X
-
         """
         sver = (0, 0, 0)
         verstr = self._ctrl("VERSION")
@@ -1013,7 +1007,6 @@ class MapdlGrpc(MapdlBase):
         Run a command and stream its output while it is being run.
 
         >>> mapdl.run('/PREP7', verbose=True)
-
         """
         if mute is None:
             mute = self._mute
@@ -1067,13 +1060,15 @@ class MapdlGrpc(MapdlBase):
     @property
     def jobid(self) -> int:
         """Returns the job id where the MAPDL is running in.
-        This is only applicable if MAPDL is running on an HPC cluster."""
+        This is only applicable if MAPDL is running on an HPC cluster.
+        """
         return self._jobid
 
     @property
     def mapdl_on_hpc(self) -> bool:
         """Returns :class:`True` if the MAPDL instance has been launched using
-        an scheduler."""
+        an scheduler.
+        """
         return self._mapdl_on_hpc
 
     @protect_grpc
@@ -1227,7 +1222,6 @@ class MapdlGrpc(MapdlBase):
 
         This only runs if the current working directory of MAPDL is within the
         user temporary directory.
-
         """
         if self.remove_temp_dir_on_exit and self._local:
             from pathlib import Path
@@ -1254,7 +1248,6 @@ class MapdlGrpc(MapdlBase):
         This only shuts down the mapdl server process and leaves the other
         processes orphaned. This is useful for killing a remote process but not
         a local process.
-
         """
         if self._exited:
             return
@@ -1321,7 +1314,6 @@ class MapdlGrpc(MapdlBase):
         This is effectively the only way to completely close down MAPDL locally on
         linux. Just killing the server with ``_exit_mapdl_server`` leaves orphaned
         processes making this method ineffective for a local instance of MAPDL.
-
         """
         self._log.debug("Closing processes")
         if self._local:
@@ -1343,7 +1335,6 @@ class MapdlGrpc(MapdlBase):
         These PIDs are stored in a "cleanup<GUID>.sh/bat" file and are the PIDs
         of the MAPDL process. Killing these kills all dependent MAPDL
         processes.
-
         """
         self._log.debug("Caching PIDs")
         self._pids = []
@@ -1436,7 +1427,6 @@ class MapdlGrpc(MapdlBase):
         Examples
         --------
         >>> mapdl.sys('ls')
-
         """
         # always redirect system output to a temporary file
         tmp_file = f"__tmp_sys_out_{random_string()}__"
@@ -1480,7 +1470,6 @@ class MapdlGrpc(MapdlBase):
 
         >>> import os
         >>> mapdl.download_result(os.getcwd())
-
         """
         if path is None:  # if not path seems to not work in same cases.
             path = os.getcwd()
@@ -1590,7 +1579,6 @@ class MapdlGrpc(MapdlBase):
 
         - ``mem-stats``
             To be added
-
         """
         self._log.debug(f'Issuing CtrlRequest "{cmd}" with option "{opt1}".')
         request = anskernel.CtrlRequest(ctrl=str(cmd), opt1=str(opt1))
@@ -1819,7 +1807,6 @@ class MapdlGrpc(MapdlBase):
 
         >>> from ansys.mapdl.core import mapdl_grpc
         >>> mapdl_grpc.DEFAULT_TIME_STEP_STREAM=100 # in milliseconds
-
         """
         # Checking compatibility
         # Checking the user is not reusing old api:
@@ -2278,7 +2265,6 @@ class MapdlGrpc(MapdlBase):
         :func:`Mapdl.download_project <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download_project>` (recommended):
 
         >>> mapdl.download_project()
-
         """
         if chunk_size is None:
             chunk_size = DEFAULT_CHUNKSIZE
@@ -2695,7 +2681,6 @@ class MapdlGrpc(MapdlBase):
         """Return a scalar parameter as a float.
 
         If parameter does not exist, returns ``None``.
-
         """
         request = pb_types.ParameterRequest(name=pname, array=False)
         presponse = self._stub.GetParameter(request)
@@ -2804,7 +2789,6 @@ class MapdlGrpc(MapdlBase):
         >>> sel, coord = nodes.coord(22)
         >>> coord
         (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
-
         """
         from ansys.mapdl.core.database import MapdlDb
 
@@ -3191,7 +3175,6 @@ class MapdlGrpc(MapdlBase):
 
         For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use the
         labels TBOT, TE2, TE3, . . ., TTOP instead of TEMP.
-
         """
         return self.nsol(
             VAR_IR,

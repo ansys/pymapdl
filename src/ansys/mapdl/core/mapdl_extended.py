@@ -788,7 +788,6 @@ class _MapdlCommandExtended(_MapdlCore):
         -------
         object
             Plot display object when using PyVista graphics backend, None otherwise.
-
         """
         if graphics_backend is None:
             graphics_backend = self._graphics_backend
@@ -995,7 +994,6 @@ class _MapdlCommandExtended(_MapdlCore):
         Plot while displaying area numbers.
 
         >>> mapdl.vplot(show_area_numbering=True)
-
         """
         if graphics_backend is None:
             graphics_backend = self._graphics_backend
@@ -1177,7 +1175,6 @@ class _MapdlCommandExtended(_MapdlCore):
         -------
         object
             Plot display object when using PyVista graphics backend, None otherwise.
-
         """
         if graphics_backend is None:
             graphics_backend = self._graphics_backend
@@ -1323,7 +1320,6 @@ class _MapdlCommandExtended(_MapdlCore):
         -------
         object
             Plot display object when using PyVista graphics backend, None otherwise.
-
         """
         if graphics_backend is None:
             graphics_backend = self._graphics_backend
@@ -2919,7 +2915,6 @@ class _MapdlExtended(_MapdlCommandExtended):
         array([ 0.01605306, -0.01605306,  0.00178402, -0.01605306,
                ...
                -0.00178402, -0.01234851,  0.01234851, -0.01234851])
-
         """
         if self._store_commands:
             raise MapdlRuntimeError(
@@ -3215,7 +3210,6 @@ class _MapdlExtended(_MapdlCommandExtended):
         Modal analysis using default parameters for the first 6 modes
 
         >>> mapdl.modal_analysis(nmode=6)
-
         """
         if nrmkey:
             if nrmkey.upper() != "OFF":

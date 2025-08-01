@@ -68,7 +68,6 @@ class Booleans:
         >>> a_comb = mapdl.aadd(a1, a2)
         >>> a_comb
         3
-
         """
         command = f"AADD,{na1},{na2},{na3},{na4},{na5},{na6},{na7},{na8},{na9}"
         return parse.parse_output_areas(self.run(command, **kwargs))
@@ -396,7 +395,6 @@ class Booleans:
         >>> aout = mapdl.asba(anum0, anum1)
         >>> aout
         3
-
         """
         command = f"ASBA,{na1},{na2},{sepo},{keep1},{keep2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
