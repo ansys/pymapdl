@@ -608,6 +608,8 @@ class Test_MAPDL_commands(TestClass):
         "lgwrite",
         "lplot",
         "lsread",
+        "mpread",
+        "mpwrite",
         "mwrite",
         "nplot",
         "sys",

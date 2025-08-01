@@ -1510,7 +1510,7 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     ## Checking reading
     # Uploading a local file
     with open(f"{fname}.{ext}", "r") as fid:
-        text = fid.read()
+        content = fid.read()
 
     os.remove(f"{fname}.{ext}")  # remove temp file
 
@@ -1518,12 +1518,11 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     mapdl.slashdelete(fname, ext)  # remove file if it exists
 
     fname_ = f"{fname}.{ext}"
-    new_nuxy = "MPDATA,NUXY,       1,   1, 0.4000000E+00,"
-    nuxy = float(new_nuxy.split(",")[4])
+    nuxy = float(0.40000)
     ex = 0.2100000e12
 
     with open(fname_, "w") as fid:
-        fid.write(text.replace("MPDATA,NUXY,       1,   1, 0.3000000E+00,", new_nuxy))
+        fid.write(content.replace("0.30000", str(nuxy)))
 
     # file might be left behind from a previous test
     if fname_ in mapdl.list_files():
@@ -1532,14 +1531,14 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
 
     mapdl.clear()
     mapdl.prep7()
-    captured = capsys.readouterr()  # To flush it
-    output = mapdl.mpread(fname, ext)
+    _ = capsys.readouterr()  # To flush it
+    output = mapdl.mpread(fname, ext, progress_bar=True)
     captured = capsys.readouterr()
 
-    assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
-    assert "TEMPERATURE TABLE ERASED." in output
-    assert "0.4000000" in output
-    # check if materials are read into the db
+    if has_dependency("tqdm"):
+        # Printing uploading requires tqdm
+        assert f"Uploading {fname}.{ext}:" in captured.err
+
     assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
 
@@ -1553,15 +1552,16 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     mapdl.clear()
     mapdl.prep7()
     output = mapdl.mpread(fname, ext)
-    assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
-    assert "TEMPERATURE TABLE ERASED." in output
-    assert "0.4000000" in output
     assert np.allclose(mapdl.get_value("NUXY", "1", "TEMP", 0), nuxy)
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
 
     # Test non-existing file
     with pytest.raises(FileNotFoundError):
         mapdl.mpread(fname="dummy", ext="dummy")
+
+    # Test not implemented error
+    with pytest.raises(NotImplementedError):
+        mapdl.mpread(fname="dummy", ext="dummy", lib="something")
 
     # Test suppliying a dir path when in remote
     if not ON_LOCAL:
@@ -1598,6 +1598,7 @@ def test_mpread_lib(mapdl):
     )
     mapdl.slashdelete("database", "mp")
     mapdl.mpwrite("database", "mp", mat=1)
+
     mapdl.clear()
     mapdl.prep7()
     mapdl.mpread("database", "mp")

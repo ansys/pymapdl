@@ -364,16 +364,73 @@ class _MapdlCommandExtended(_MapdlCore):
 
         return output
 
-    @wraps(_MapdlCore.mpread)
-    def mpread(self, fname="", ext="", lib="LIB", **kwargs):
-        if lib != "LIB":
-            raise MapdlRuntimeError("The 'lib' argument only supports the 'LIB' value.")
+    def mpread(self, fname="", ext="", lib="", **kwargs):
+        """APDL Command: MPREAD
+
+        Reads a file containing material properties.
+
+        Parameters
+        ----------
+        fname
+            File name and directory path (248 characters maximum,
+            including directory). If you do not specify the ``LIB``
+            option, the default directory is the current working
+            directory. If you specify the ``LIB`` option, the default is
+            the following search path: the current working directory,
+            the user's home directory, ``MPLIB_DIR`` (as specified by the
+            ``/MPLIB,READ,PATH`` command) and ``/ansys_dir/matlib`` (as
+            defined by installation). If you use the default for your
+            directory, you can use all 248 characters for the file
+            name.
+
+        ext
+            Filename extension (eight-character maximum).
+
+        lib
+            Reads material library files previously written with the
+            MPWRITE command.  (See the description of the ``LIB`` option
+            for the ``MPWRITE`` command.)  The only allowed value for ``LIB``
+            is ``LIB``.
+
+            .. note:: The argument "LIB" is not supported by the MAPDL gRPC server.
+
+        Notes
+        -----
+        Material properties written to a file without the ``LIB`` option
+        do not support nonlinear properties.  Also, properties written
+        to a file without the ``LIB`` option are restored in the same
+        material number as originally defined.  To avoid errors, use
+        ``MPREAD`` with the ``LIB`` option only when reading files written
+        using MPWRITE with the ``LIB`` option.
+
+        If you omit the ``LIB`` option for ``MPREAD``, this command supports
+        only linear properties.
+
+        Material numbers are hardcoded.  If you write a material file
+        without specifying the ``LIB`` option, then read that file in
+        using the ``MPREAD`` command with the ``LIB`` option, the ANSYS
+        program will not write the file to a new material number.
+        Instead, it will write the file to the "old" material number
+        (the number specified on the MPWRITE command that created the
+        file.)
+
+        This command is also valid in SOLUTION.
+        """
+        if lib:
+            raise NotImplementedError(
+                "The 'lib' argument is not supported by the MAPDL gRPC server. See #975"
+            )
 
         fname = self._get_file_name(fname, ext, "mp")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
         file_, ext_, path_ = self._decompose_fname(fname)
         self._log.info("Bypassing 'MPREAD' with 'INPUT'.")
-        return self.input(file_, ext_, **kwargs)
+        with self.non_interactive:
+            # Use INPUT instead of MPREAD to avoid issues with the gRPC server
+            # which does not support MPREAD.
+            super().mpread(fname=file_, ext=ext_, lib=lib, **kwargs)
+
+        return self.last_response
 
     @wraps(_MapdlCore.cwd)
     def cwd(self, *args, **kwargs):
