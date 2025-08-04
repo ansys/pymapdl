@@ -74,12 +74,18 @@ class DbElems:
         self._itelm = -1
 
     @property
-    def _db(self):
+    def _db(self):  # numpydoc ignore=RT01
         """Return the weakly referenced instance of the database."""
         return self._db_weakref()
 
     def __str__(self):
-        """Return the string representation of this class."""
+        """Return the string representation of this class.
+
+        Returns
+        -------
+        str
+            String representation of the class
+        """
         lines = ["MAPDL Database Elements"]
         lines.append(f"    Number of elements:          {self.num()}")
         lines.append(f"    Number of selected elements: {self.num(selected=True)}")
@@ -298,6 +304,11 @@ class DbElems:
     def max_num(self) -> int:
         """
         Maximum element number.
+
+        Returns
+        -------
+        int
+            The maximum element number.
 
         Examples
         --------
