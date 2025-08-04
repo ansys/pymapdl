@@ -1158,7 +1158,18 @@ def launch_mapdl(
     Parameters
     ----------
     exec_file : str, optional
-        The location of the MAPDL executable.
+        The location of the MAPDL executable. For instance, on Windows:
+
+        .. code:: console
+
+            C:\\Program Files\\ANSYS Inc\\v252\\ansys\\bin\\mapdl.exe
+
+        And on Linux:
+
+        .. code:: console
+
+            /usr/ansys_inc/v252/ansys/bin/mapdl
+
         By default (:class:`None`), it Will use the cached location unless
         the environment variable :envvar:`PYMAPDL_MAPDL_EXEC` is set.
 
@@ -1631,9 +1642,12 @@ def launch_mapdl(
 
         get_exec_file(args)
 
-        args["version"] = get_version(
-            args["version"], args.get("exec_file"), launch_on_hpc=args["launch_on_hpc"]
-        )
+        if args.get("exec_file"):
+            args["version"] = get_version(
+                args["version"],
+                args.get("exec_file"),
+                launch_on_hpc=args["launch_on_hpc"],
+            )
 
         args["additional_switches"] = set_license_switch(
             args["license_type"], args["additional_switches"]
