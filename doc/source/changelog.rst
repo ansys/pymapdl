@@ -28,6 +28,16 @@ This document contains the release notes for the project.
           - `#4042 <https://github.com/ansys/pymapdl/pull/4042>`_
 
 
+  .. tab-item:: Miscellaneous
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Fix: patch in testing
+          - `#4010 <https://github.com/ansys/pymapdl/pull/4010>`_
+
+
 .. _v0.70.1:
 
 `0.70.1 <https://github.com/ansys/pymapdl/releases/tag/v0.70.1>`_ - May 12, 2025
