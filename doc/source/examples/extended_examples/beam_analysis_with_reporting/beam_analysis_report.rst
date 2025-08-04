@@ -15,19 +15,19 @@ result extraction, and automated documentation generation.
 * Material property definition and assignment
 * Fully constrained beam at both ends
 * Distributed load applied using nodal forces
-* Comprehensive result extraction and post-processing
+* Comprehensive result extraction and postprocessing
 * Automated report generation in Markdown and Word formats
 * Analytical verification of finite element results
 
 Introduction
 ============
 
-Engineering analysis often requires not just obtaining results, but also documenting
+Engineering analysis often requires not only obtaining results but also documenting
 the analysis process, assumptions, and findings in a professional report format.
 This example shows how PyMAPDL can be used to create a complete analysis workflow
 that includes automated report generation.
 
-The analysis focuses on a fully constrained I-beam subjected to an uniformly distributed
+The analysis focuses on a fully constrained I-beam subjected to a uniformly distributed
 load, a fundamental structural engineering problem. The results are verified against
 analytical solutions and presented in professional report formats.
 
@@ -59,7 +59,7 @@ Analyze a I-beam with the following characteristics:
 - Verify safety against yielding
 - Generate comprehensive documentation
 
-Model Setup and Parametrisation
+Model Setup and Parametrization
 ===============================
 
 The example begins by defining all analysis parameters in dictionaries for easy
@@ -246,7 +246,7 @@ The Markdown report includes:
 Word Document Report
 --------------------
 
-The Word report provides:
+The Word document report provides:
 
 * Professional document formatting
 * Tables for organized data presentation
@@ -267,7 +267,7 @@ The Word report provides:
 Plot Generation
 ---------------
 
-The example includes capability to generate analysis plots:
+The example includes the capability to generate analysis plots:
 
 .. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
@@ -349,13 +349,13 @@ The framework can be extended for multiple load cases:
        # Generate separate reports
        results = create_ibeam_analysis_and_report(**case)
 
-This parameterized approach enables design optimization studies:
+This parameterized approach enables design optimization studies.
 
 
 Advanced Analysis Options
 =========================
 
-The example can be extended for more sophisticated analyses:
+The example can be extended for more sophisticated analyses.
 
 Nonlinear Analysis
 ------------------
@@ -384,7 +384,7 @@ Additional Report Features
 PDF Generation
 --------------
 
-If you install `pandoc <https://pandoc.org>`_, you can convert the markdown report to a PDF file as follows:
+If you install `pandoc <https://pandoc.org>`_, you can convert the Markdown report to a PDF file as follows:
 
 .. code-block:: python
 
