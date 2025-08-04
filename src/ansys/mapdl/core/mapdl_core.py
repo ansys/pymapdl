@@ -1065,6 +1065,8 @@ class _MapdlCore(Commands):
         Returns
         -------
         :class:`ansys.mapdl.core.solution.Solution`
+            The solution object contains methods to check the convergence of the
+            solution, the number of iterations, and the current time step.
 
         Examples
         --------
