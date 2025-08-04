@@ -10,6 +10,27 @@ This document contains the release notes for the project.
 .. towncrier release notes start
 
 
+.. _v0.70.3:
+
+`0.70.3 <https://github.com/ansys/pymapdl/releases/tag/v0.70.3>`_ - August 04, 2025
+==================================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Miscellaneous
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Fix: selection on non-interactive
+          - `#3998 <https://github.com/ansys/pymapdl/pull/3998>`_
+
+        * - Build: add support for ansys version 2026r1
+          - `#4050 <https://github.com/ansys/pymapdl/pull/4050>`_
+
+
 .. _v0.70.2:
 
 `0.70.2 <https://github.com/ansys/pymapdl/releases/tag/v0.70.2>`_ - June 26, 2025
