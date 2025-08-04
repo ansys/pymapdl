@@ -196,7 +196,7 @@ The maximum displacement is extracted using the `post_processing` module:
 Moment Results
 --------------
 
-The Moment at both nodes are extracted using ``ETABLE`` command, with ``SMISC`` items:
+The moment at both nodes are extracted using ``ETABLE`` command, with ``SMISC`` items:
 
 .. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
