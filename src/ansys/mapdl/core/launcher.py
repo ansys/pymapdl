@@ -1164,7 +1164,7 @@ def launch_mapdl(
 
             C:\\Program Files\\ANSYS Inc\\v252\\ansys\\bin\\mapdl.exe
 
-        And on linux:
+        And on Linux:
 
         .. code:: console
 
