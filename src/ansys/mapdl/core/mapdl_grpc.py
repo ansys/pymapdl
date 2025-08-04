@@ -2840,6 +2840,7 @@ class MapdlGrpc(MapdlBase):
          Returns
         -------
         :class:`MapdlMath <ansys.mapdl.core.math.MapdlMath>`
+            MAPDL Math interface.
 
         Examples
         --------
@@ -2890,6 +2891,7 @@ class MapdlGrpc(MapdlBase):
         Returns
         -------
         :class:`MapdlDb <ansys.mapdl.core.database.MapdlDb>`
+            MAPDL database interface.
 
         Examples
         --------

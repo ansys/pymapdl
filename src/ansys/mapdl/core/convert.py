@@ -566,8 +566,8 @@ class FileTranslator:
 
         Returns
         -------
-        str or None
-            The formatted text string, or None if no text provided.
+        str | None
+            The formatted text or None if not applicable.
         """
         if self.cleanup_output:
             try:
