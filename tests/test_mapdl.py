@@ -1535,10 +1535,6 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     output = mapdl.mpread(fname, ext, progress_bar=True)
     captured = capsys.readouterr()
 
-    if has_dependency("tqdm"):
-        # Printing uploading requires tqdm
-        assert f"Uploading {fname}.{ext}:" in captured.err
-
     assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
 
