@@ -22,14 +22,17 @@
 
 from functools import wraps
 import re
-from typing import Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, Optional
 import weakref
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlExitedError
 
+if TYPE_CHECKING:
+    from ansys.mapdl.core import Mapdl
 
-def update_information_first(update: bool = False) -> Callable:
+
+def update_information_first(update: bool = False) -> Callable[[Callable], Callable]:
     """
     Decorator to wrap :class:`Information <ansys.mapdl.core.misc.Information>`
     methods to force update the fields when accessed.
@@ -68,7 +71,12 @@ class Information:
     Parameters
     ----------
     mapdl : Mapdl
-        The MAPDL instance to get information from.
+        An instance of the MAPDL class.
+
+    Returns
+    -------
+    Mapdl
+        An MAPDL instance.
 
     Notes
     -----
@@ -97,18 +105,17 @@ class Information:
     """
 
     def __init__(self, mapdl: "Mapdl") -> None:
-        """
-        Initialize the Information class with a weakly referenced MAPDL instance.
-
-        This method validates that the provided `mapdl` object is an instance of
-        the `MapdlBase` class. It sets up a weak reference to the MAPDL instance,
-        initializes internal attributes for caching information, and defines
-        keys for representing the information in a structured format.
+        """Class Initializer
 
         Parameters
         ----------
         mapdl : Mapdl
-            The MAPDL instance to get information from.
+            An instance of the MAPDL class.
+
+        Returns
+        -------
+        Mapdl
+            An MAPDL instance.
 
         Raises
         ------
@@ -135,7 +142,7 @@ class Information:
         Returns
         -------
         Mapdl
-            The weakly referenced MAPDL instance associated with this object.
+            A reference to the MAPDL instance.
         """
         return self._mapdl_weakref()
 
@@ -152,8 +159,7 @@ class Information:
             self._stats = None
             raise MapdlExitedError("Information class: MAPDL exited")
 
-        stats = stats.replace("\n ", "\n")  # Bit of formatting
-        self._stats = stats
+        self._stats = stats.replace(r"\n ", r"\n")
         self._mapdl._log.debug("Information class: Updated")
 
     def __repr__(self) -> str:
@@ -178,7 +184,7 @@ class Information:
         Returns
         -------
         str
-            The product name.
+            The product name from the MAPDL instance.
         """
         return self._get_product()
 
@@ -190,7 +196,7 @@ class Information:
         Returns
         -------
         str
-            The MAPDL version string.
+            The MAPDL version from the MAPDL instance.
         """
         return self._get_mapdl_version()
 
@@ -202,7 +208,7 @@ class Information:
         Returns
         -------
         str
-            The MAPDL version release string.
+            The MAPDL version release.
         """
         st = self._get_mapdl_version()
         return self._get_between("RELEASE", "BUILD", st).strip()
@@ -215,7 +221,7 @@ class Information:
         Returns
         -------
         str
-            The MAPDL version build string.
+            The MAPDL version build.
         """
         st = self._get_mapdl_version()
         return self._get_between("BUILD", "UPDATE", st).strip()
@@ -228,7 +234,7 @@ class Information:
         Returns
         -------
         str
-            The MAPDL version update string.
+            The MAPDL version update.
         """
         st = self._get_mapdl_version()
         return self._get_between("UPDATE", "", st).strip()
@@ -241,7 +247,7 @@ class Information:
         Returns
         -------
         str
-            The PyMAPDL version string.
+            Returns the PyMAPDL version.
         """
         return self._get_pymapdl_version()
 
@@ -253,7 +259,7 @@ class Information:
         Returns
         -------
         str
-            The products string.
+            The products from the MAPDL instance.
         """
         return self._get_products()
 
@@ -265,7 +271,7 @@ class Information:
         Returns
         -------
         str
-            The preprocessing capabilities string.
+            The preprocessing capabilities from the MAPDL instance.
         """
         return self._get_preprocessing_capabilities()
 
@@ -277,7 +283,7 @@ class Information:
         Returns
         -------
         str
-            The aux capabilities string.
+            The aux capabilities from the MAPDL instance.
         """
         return self._get_aux_capabilities()
 
@@ -289,7 +295,7 @@ class Information:
         Returns
         -------
         str
-            The solution options string.
+            The solution options from the MAPDL instance.
         """
         return self._get_solution_options()
 
@@ -301,7 +307,7 @@ class Information:
         Returns
         -------
         str
-            The post capabilities string.
+            The post capabilities from the MAPDL instance.
         """
         return self._get_post_capabilities()
 
@@ -313,7 +319,7 @@ class Information:
         Returns
         -------
         str
-            The titles string.
+            The titles from the MAPDL instance.
         """
         return self._get_titles()
 
@@ -325,7 +331,7 @@ class Information:
         Returns
         -------
         str
-            The title string.
+            The title from the MAPDL instance.
         """
         return self._mapdl.inquire("", "title")
 
@@ -335,9 +341,23 @@ class Information:
 
     @property
     @update_information_first(True)
-    def stitles(self, i: int = None) -> str:
+    def stitles(self, i: int | None = None) -> str:
         """Retrieve or set the value for the MAPDL stitle (subtitles).
 
+        Parameters
+        ----------
+        i
+            The index of the stitle to retrieve or set. If not provided,
+            all stitles are returned. If provided, it should be between 0 and 3
+            (Python indexing).
+
+        Returns
+        -------
+        str
+            The stitle(s) from the MAPDL instance.
+
+        Notes
+        -----
         If 'stitle' includes newline characters (`\\n`), then each line
         is assigned to one STITLE.
 
@@ -346,16 +366,6 @@ class Information:
         If ``i`` is supplied, only set the stitle number i.
 
         Starting from 0 up to 3 (Python indexing).
-
-        Parameters
-        ----------
-        i : int, optional
-            The subtitle number to retrieve. If not provided, returns all subtitles.
-
-        Returns
-        -------
-        str
-            The subtitle(s) string.
         """
         if not i:
             return self._get_stitles()
@@ -363,7 +373,7 @@ class Information:
             return self._get_stitles()[i]
 
     @stitles.setter
-    def stitles(self, stitle: str, i: int = None) -> None:
+    def stitles(self, stitle: str | list[str] | None, i: int | None = None) -> None:
         if stitle is None:
             # Case to empty
             stitle = ["", "", "", ""]
@@ -386,7 +396,7 @@ class Information:
             for each_index, each_stitle in zip(range(1, 5), stitle):
                 self._mapdl.stitle(each_index, each_stitle)
         else:
-            self._mapdl.stitle(i, stitle)
+            self._mapdl.stitle(str(i), str(stitle))
 
     @property
     @update_information_first(True)
@@ -396,7 +406,7 @@ class Information:
         Returns
         -------
         str
-            The units string.
+            The units from the MAPDL instance.
         """
         return self._get_units()
 
@@ -408,7 +418,7 @@ class Information:
         Returns
         -------
         str
-            The scratch memory status string.
+            The scratch memory status from the MAPDL instance.
         """
         return self._get_scratch_memory_status()
 
@@ -420,7 +430,7 @@ class Information:
         Returns
         -------
         str
-            The database status string.
+            The database status from the MAPDL instance.
         """
         return self._get_database_status()
 
@@ -432,7 +442,7 @@ class Information:
         Returns
         -------
         str
-            The config values string.
+            The config values from the MAPDL instance.
         """
         return self._get_config_values()
 
@@ -444,7 +454,7 @@ class Information:
         Returns
         -------
         str
-            The global status string.
+            The global status from the MAPDL instance.
         """
         return self._get_global_status()
 
@@ -456,7 +466,7 @@ class Information:
         Returns
         -------
         str
-            The job information string.
+            The job information from the MAPDL instance.
         """
         return self._get_job_information()
 
@@ -468,7 +478,7 @@ class Information:
         Returns
         -------
         str
-            The model information string.
+            The model information from the MAPDL instance.
         """
         return self._get_model_information()
 
@@ -480,7 +490,7 @@ class Information:
         Returns
         -------
         str
-            The boundary condition information string.
+            The boundary condition information from the MAPDL instance.
         """
         return self._get_boundary_condition_information()
 
@@ -492,7 +502,7 @@ class Information:
         Returns
         -------
         str
-            The routine information string.
+            The routine information from the MAPDL instance.
         """
         return self._get_routine_information()
 
@@ -504,7 +514,7 @@ class Information:
         Returns
         -------
         str
-            The solution options configuration string.
+            The solution options configuration from the MAPDL instance.
         """
         return self._get_solution_options_configuration()
 
@@ -516,7 +526,7 @@ class Information:
         Returns
         -------
         str
-            The load step options string.
+            The load step options from the MAPDL instance.
         """
         return self._get_load_step_options()
 
@@ -528,15 +538,12 @@ class Information:
     ) -> str:
         if not string:
             self._update()
-            string = self._stats
+            string = self._stats or ""
 
-        st = string.find(init_string) + len(init_string)
+        st: int = string.find(init_string) + len(init_string)
+        en: int | None = string.find(end_string) if end_string else None
 
-        if not end_string:
-            en = None
-        else:
-            en = string.find(end_string)
-        return "\n".join(string[st:en].splitlines()).strip()
+        return "\n".join(str(string[st:en]).splitlines()).strip()
 
     def _get_product(self) -> str:
         return self._get_products().splitlines()[0]
@@ -553,19 +560,23 @@ class Information:
     def _get_title(self) -> str:
         match = re.match(r"TITLE=(.*)$", self._get_titles())
         if match:
-            return match.groups(1)[0].strip()
+            return str(match.groups(1)[0].strip())  # type: ignore
 
-    def _get_stitles(self) -> List[str]:
-        return [
-            (
-                re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
-                .groups(1)[0]
-                .strip()
-                if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
-                else ""
+    def _get_stitles(self) -> list[str]:
+        titles: str = self._get_titles()
+
+        stitles: list[str] = []
+        for i in range(1, 5):
+            match = re.search(f"SUBTITLE  {i}=(.*)", titles)
+            if not match or not match.groups(1):
+                # If the subtitle is not found, return an empty string
+                continue
+
+            stitles.append(
+                str(re.search(f"SUBTITLE  {i}=(.*)", titles).groups(1)[0]).strip()  # type: ignore
             )
-            for i in range(1, 5)
-        ]
+
+        return stitles
 
     def _get_products(self) -> str:
         init_ = "*** Products ***"
