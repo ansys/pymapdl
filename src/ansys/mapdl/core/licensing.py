@@ -29,6 +29,7 @@ import socket
 # the input is controlled by the library. Excluding bandit check.
 import subprocess  # nosec B404
 import time
+from typing import Iterator, Literal
 
 from ansys.mapdl.core import _HAS_ATP, LOG
 from ansys.mapdl.core.errors import LicenseServerConnectionError
@@ -51,6 +52,7 @@ LICENSES = {
     "preppost": "Mechanical Enterprise PrepPost",
 }
 ALLOWABLE_LICENSES = list(LICENSES)
+Allowable_licenses = Literal["ansys", "meba", "mech_2", "mech_1", "preppost"]
 
 ## Regarding license checking.
 # The available licenses we can check against are (in order of
@@ -78,7 +80,7 @@ class LicenseChecker:
         Timeout for the licensing log file check.
     """
 
-    def __init__(self, timeout=30, verbose=None):
+    def __init__(self, timeout: int = 30, verbose: bool | None = None):
         self._license_file_msg = []
         self._license_file_success = None
 
@@ -98,21 +100,21 @@ class LicenseChecker:
         self._is_connected = False
 
     @property
-    def stop(self):
+    def stop(self) -> bool:
         return self._stop
 
     @stop.setter
-    def stop(self, value):
+    def stop(self, value: bool):
         if bool(value):
             LOG.debug("Attempting to stop the license checker.")
         self._stop = bool(value)
 
     @property
-    def is_connected(self):
+    def is_connected(self) -> bool:
         return self._is_connected
 
     @is_connected.setter
-    def is_connected(self, value):
+    def is_connected(self, value: bool):
         if bool(value):
             LOG.debug("PyMAPDL has connected to a MAPDL session.")
         self._is_connected = bool(value)
@@ -128,7 +130,7 @@ class LicenseChecker:
             self._license_file_success = True
 
     @threaded_daemon
-    def checkout_license(self, host=None):
+    def checkout_license(self, host: str | None = None):
         try:
             self._check_mech_license_available(host)
         except Exception as error:
@@ -137,7 +139,7 @@ class LicenseChecker:
         else:
             self._license_checkout_success = True
 
-    def start(self, license_file=True, checkout_license=False):
+    def start(self, license_file: bool = True, checkout_license: bool = False):
         """Start monitoring the license file and attempt a license checkout.
 
         Parameters
@@ -160,7 +162,7 @@ class LicenseChecker:
         if self._checkout_thread is not None:
             self._checkout_thread.join()
 
-    def check(self):
+    def check(self) -> bool:
         """Report if the license checkout or license check was successful.
 
         It first checks the output from the license file and later the
@@ -192,9 +194,23 @@ class LicenseChecker:
 
         return False  # pragma: no cover
 
-    def _check_license_file(self, timeout=30, notify_at_second=5):  # pragma: no cover
+    def _check_license_file(
+        self, timeout: int = 30, notify_at_second: int = 5
+    ):  # pragma: no cover
         """Check the output of the license client log for connection error.
 
+        Parameters
+        ----------
+        timeout : int, optional
+            Time to keep checking the license log file for errors. Default to 10 (seconds).
+
+        Returns
+        -------
+        bool
+            ``True`` if the license file is valid, ``False`` otherwise.
+
+        Notes
+        -----
         Expect type of errors with 'DENIED' in the header such as:
         ```
         2021/09/06 22:39:38    DENIED              ansys                           21.2 (2021.0512)             1/0/0/0                 1/1/1/1   10268:FEAT_ANSYS:gayuso@AAPDDqVK5WqNLrt.win.ansys.com:winx64   7368:192.168.18.10
@@ -214,11 +230,6 @@ class LicenseChecker:
         ```
         for `FEAT_ANSYS`.
 
-        Parameters
-        ----------
-        timeout : int, optional
-            Time to keep checking the license log file for errors. Default to 10 (seconds).
-
         Raises
         ------
         LicenseServerConnectionError
@@ -237,9 +248,13 @@ class LicenseChecker:
         ):
             return True
 
-    def _check_license_file_iterator(
-        self, file_iterator, licdebug_file, timeout=30, notify_at_second=5
-    ):
+    def _check_license_file_iterator(  # numpydoc ignore=RT01
+        self,
+        file_iterator: Iterator[str],
+        licdebug_file: str,
+        timeout: int = 30,
+        notify_at_second: int = 5,
+    ) -> bool:
         """Loop over iterator"""
         max_time = time.time() + timeout
         notification_time = time.time() + notify_at_second
@@ -287,7 +302,9 @@ class LicenseChecker:
             f"Exceeded timeout of {timeout} seconds while examining:\n{licdebug_file}"
         )
 
-    def _checkout_license(self, lic, host=None, port=2325):
+    def _checkout_license(
+        self, lic: Allowable_licenses | str, host: str | None = None, port: int = 2325
+    ) -> str:
         """Check if a license is available using the Ansys license utility.
 
         It uses it own process.
@@ -306,6 +323,11 @@ class LicenseChecker:
             overrides any settings from the default license path.
         port : int, optional
             Port on the host to connect to.  Only used when ``host`` is set.
+
+        Returns
+        -------
+        str
+            The output from the license checkout command.
         """
         if lic.lower() not in ALLOWABLE_LICENSES:  # pragma: no cover
             raise ValueError(f"Invalid license '{lic}'")
@@ -342,8 +364,8 @@ class LicenseChecker:
         return output
 
     def _check_mech_license_available(
-        self, host=None, licenses=None
-    ):  # pragma: no cover
+        self, host: str | None = None, licenses: Allowable_licenses | None = None
+    ) -> bool:  # pragma: no cover
         """Check if there mechanical license available by running 'ansysli_util'.
 
         This uses the default configuration available to MAPDL.
@@ -393,7 +415,9 @@ class LicenseChecker:
         return True
 
 
-def get_ansys_license_debug_file_tail(licdebug_file, start_timeout=10, debug=False):
+def get_ansys_license_debug_file_tail(
+    licdebug_file: str, start_timeout: int = 10, debug: bool = False
+) -> Iterator[str]:
     """Get each of the licdebug file messages.
 
     This method keeps the ``licdebug`` file open checking for complete messages.
@@ -430,9 +454,14 @@ def get_ansys_license_debug_file_tail(licdebug_file, start_timeout=10, debug=Fal
             yield lines
 
 
-def get_ansys_license_directory():  # pragma: no cover
-    """Get the path to the Ansys license directory"""
+def get_ansys_license_directory() -> str:  # pragma: no cover
+    """Get the path to the Ansys license directory
 
+    Returns
+    -------
+    str
+        The path to the Ansys license directory.
+    """
     # it's possible the user has specified the license as an env var
     ansyslic_dir = None
     if LIC_FILE_ENVAR in os.environ:
@@ -464,7 +493,7 @@ def get_ansys_license_directory():  # pragma: no cover
     return ansyslic_dir
 
 
-def get_ansys_license_debug_file_name():  # pragma: no cover
+def get_ansys_license_debug_file_name() -> str:  # pragma: no cover
     """Get license client log file name.
 
     This file change the name according to the ANSYS version and the type of license requested (``$appname``).
@@ -500,7 +529,7 @@ def get_ansys_license_debug_file_name():  # pragma: no cover
     return ".".join([str(each_part) for each_part in parts])
 
 
-def get_ansys_license_debug_file_path():  # pragma: no cover
+def get_ansys_license_debug_file_path() -> str:  # pragma: no cover
     """Get license client log (``licdebug``) path.
 
     This path is obtained from the correspondent env variable (OS
@@ -521,8 +550,14 @@ def get_ansys_license_debug_file_path():  # pragma: no cover
     return os.path.join(folder, ".ansys")
 
 
-def get_ansys_license_utility_path():  # pragma: no cover
-    """Return the ansys licencing utilities path."""
+def get_ansys_license_utility_path() -> str:  # pragma: no cover
+    """Return the ansys licencing utilities path.
+
+    Returns
+    -------
+    str
+        The path to the ANSYS licensing utilities.
+    """
     ansyslic_dir = get_ansys_license_directory()
     if os.name == "nt":
         ansysli_util_path = os.path.join(ansyslic_dir, "winx64", "ansysli_util.exe")
