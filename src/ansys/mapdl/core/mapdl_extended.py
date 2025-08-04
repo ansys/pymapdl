@@ -98,8 +98,14 @@ class _MapdlCommandExtended(_MapdlCore):
             return super().file(fname=file_, ext=ext_, **kwargs)
 
     @wraps(_MapdlCore.lsread)
-    def lsread(self, *args: P.args, **kwargs: P.kwargs):  # numpydoc ignore=RT01,PR01
-        """Wraps the ``LSREAD`` which does not work in interactive mode."""
+    def lsread(self, *args, **kwargs):
+        """Wraps the ``LSREAD`` which does not work in interactive mode.
+
+        Returns
+        -------
+        str
+            Stripped response from MAPDL.
+        """
         self._log.debug("Forcing 'LSREAD' to run in non-interactive mode.")
         with self.non_interactive:
             super().lsread(*args, **kwargs)
