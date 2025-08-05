@@ -31,9 +31,6 @@ from typing import (
     Callable,
     Iterable,
     Literal,
-    ParamSpec,
-    TypeAlias,
-    Union,
 )
 import weakref
 
@@ -52,97 +49,26 @@ if _HAS_DPF:
 if TYPE_CHECKING and _HAS_PYVISTA:
     import pyvista as pv
 
-## Types
-Rnum: TypeAlias = Union[int, float, Iterable[int], Iterable[float], None]
-Ids: TypeAlias = Union[int, Iterable[int], None]
-Locations: TypeAlias = Literal["Nodal", "Elemental"]
-
-Entities: TypeAlias = str | int | Iterable[str | int] | None
-EntityType: TypeAlias = Literal["Nodal", "Elemental", "ElementalNodal"]
-
-ResultField: TypeAlias = str  # To be defined later.. Eg "displacement" etc...
-SolutionType: TypeAlias = str
-ComponentsDirections: TypeAlias = Literal["X", "Y", "Z", "XY", "YZ", "XZ"]
-
-Nodes: TypeAlias = str | int | Iterable[int | str] | None
-Elements: TypeAlias = str | int | Iterable[int | str] | None
-MAPDLComponents: TypeAlias = str | Iterable[int | str] | None
-
-ReturnData: TypeAlias = tuple[
-    np.ndarray[Any, np.dtype[np.floating[Any]]],
-    np.ndarray[Any, np.dtype[np.floating[Any]]],
-]
-Kwargs: TypeAlias = dict[Any, Any]
-P = ParamSpec("P")
-
-## Globals
-COMPONENTS: list[str] = ["X", "Y", "Z", "XY", "YZ", "XZ"]
-
-LOCATION_MAPPING: dict[str, str] = {
-    "NODE": "Nodal",
-    "ELEM": "Elemental",
-}
-
-MATERIAL_PROPERTIES: list[str] = [
-    "EX",
-    "EY",
-    "EZ",
-    "ALPX",
-    "ALPY",
-    "ALPZ",
-    "REFT",
-    "PRXY",
-    "PRYZ",
-    "PRX",
-    "NUXY",
-    "NUYZ",
-    "NUXZ",
-    "GXY",
-    "GYZ",
-    "GXZ",
-    "DAMP",
-    "MU",
-    "DENS",
-    "C",
-    "ENTH",
-    "KXX",
-    "KYY",
-    "KZZ",
-    "HF",
-    "EMIS",
-    "QRATE",
-    "VISC",
-    "SONC",
-    "RSVX",
-    "RSVY",
-    "RSVZ",
-    "PERX",
-    "PERY",
-    "PERZ",
-    "MURX",
-    "MURY",
-    "MURZ",
-    "MGXX",
-    "MGYY",
-    "MGZZ",
-    "XTEN",
-    "XCMP",
-    "YTEN",
-    "YCMP",
-    "ZTEN",
-    "ZCMP",
-    "XY",
-    "YZ",
-    "XZ",
-    "XYCP",
-    "YZCP",
-    "XZCP",
-    "XZIT",
-    "XZIC",
-    "YZIT",
-    "YZIC",
-]
-
+from ansys.mapdl.core.reader.constants import (
+    LOCATION_MAPPING,
+    MATERIAL_PROPERTIES,
+)
+from ansys.mapdl.core.reader.types import (
+    ComponentsDirections,
+    Elements,
+    Entities,
+    EntityType,
+    Ids,
+    Kwargs,
+    Locations,
+    MAPDLComponents,
+    Nodes,
+    P,
+    ResultField,
+    ReturnData,
+    Rnum,
+    SolutionType,
+)
 
 NOT_AVAILABLE_METHOD = """The method '{method}' has not been ported to the new DPF-based Results backend.
 If you still want to use it, you can switch to 'pymapdl-reader' backend."""
