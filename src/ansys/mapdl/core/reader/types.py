@@ -20,9 +20,31 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core.reader.data import DPFResultData
-from ansys.mapdl.core.reader.plotting import DPFResultPlotting
+"""Types for the MAPDL reader module."""
 
+from typing import Any, Iterable, Literal, ParamSpec, TypeAlias, Union
 
-class DPFResult(DPFResultData, DPFResultPlotting):
-    """Unified class for accessing DPF result data and plotting"""
+import numpy as np
+
+## Types
+Rnum: TypeAlias = Union[int, float, Iterable[int], Iterable[float], None]
+Ids: TypeAlias = Union[int, Iterable[int], None]
+Locations: TypeAlias = Literal["Nodal", "Elemental"]
+
+Entities: TypeAlias = str | int | Iterable[str | int] | None
+EntityType: TypeAlias = Literal["Nodal", "Elemental", "ElementalNodal"]
+
+ResultField: TypeAlias = str  # To be defined later.. Eg "displacement" etc...
+SolutionType: TypeAlias = str
+ComponentsDirections: TypeAlias = Literal["X", "Y", "Z", "XY", "YZ", "XZ"]
+
+Nodes: TypeAlias = str | int | Iterable[int | str] | None
+Elements: TypeAlias = str | int | Iterable[int | str] | None
+MAPDLComponents: TypeAlias = str | Iterable[int | str] | None
+
+ReturnData: TypeAlias = tuple[
+    np.ndarray[Any, np.dtype[np.floating[Any]]],
+    np.ndarray[Any, np.dtype[np.floating[Any]]],
+]
+Kwargs: TypeAlias = dict[Any, Any]
+P = ParamSpec("P")
