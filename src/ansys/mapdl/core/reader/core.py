@@ -50,6 +50,7 @@ if TYPE_CHECKING and _HAS_PYVISTA:
     import pyvista as pv
 
 from ansys.mapdl.core.reader.constants import (
+    COMPONENTS,
     LOCATION_MAPPING,
     MATERIAL_PROPERTIES,
     NOT_AVAILABLE_ARGUMENT,
@@ -983,6 +984,10 @@ class DPFResultCore:
         data = fc.data.copy()
         return ids, data
 
+    def _extract_field(self, op: "dpf.Operator") -> dpf.Field:
+        """Returns the first field from the operator's output."""
+        return op.outputs.fields_as_fields_container()[0]
+
     def _set_rescope(self, op: "dpf.Operator", scope_ids: list[int]) -> "dpf.Operator":
         fc: dpf.FieldsContainer = op.outputs.fields_container()
 
@@ -1069,9 +1074,11 @@ class DPFResultCore:
         self,
         rnum: Rnum,
         result_type: ResultField,
+        *,
         in_nodal_coord_sys: bool | None = False,
         nodes: Nodes = None,
         return_operator: bool = False,
+        return_field: bool = False,
     ):
         return self._get_result(
             rnum,
@@ -1080,15 +1087,18 @@ class DPFResultCore:
             scope_ids=nodes,
             result_in_entity_cs=in_nodal_coord_sys,
             return_operator=return_operator,
+            return_field=return_field,
         )
 
     def _get_elem_result(
         self,
         rnum: Rnum,
         result_type: ResultField,
+        *,
         in_element_coord_sys: bool = False,
         elements: Elements = None,
         return_operator: bool = False,
+        return_field: bool = False,
     ):
         return self._get_result(
             rnum,
@@ -1097,15 +1107,18 @@ class DPFResultCore:
             scope_ids=elements,
             result_in_entity_cs=in_element_coord_sys,
             return_operator=return_operator,
+            return_field=return_field,
         )
 
     def _get_elemnodal_result(
         self,
         rnum: Rnum,
         result_type: ResultField,
+        *,
         in_element_coord_sys: bool = False,
         elements: Elements = None,
         return_operator: bool = False,
+        return_field: bool = False,
     ):
         return self._get_result(
             rnum,
@@ -1114,17 +1127,20 @@ class DPFResultCore:
             scope_ids=elements,
             result_in_entity_cs=in_element_coord_sys,
             return_operator=return_operator,
+            return_field=return_field,
         )
 
     @update_result
     def _get_result(
         self,
+        *,
         rnum: Rnum,
         result_field: ResultField,
         requested_location: Locations = "Nodal",
         scope_ids: Ids = None,
         result_in_entity_cs: bool = False,
         return_operator: bool = False,
+        return_field: bool = False,
     ) -> "dpf.Operator | ReturnData":
         """
         Get elemental/nodal/elementalnodal results.
@@ -1174,6 +1190,8 @@ class DPFResultCore:
         NotImplementedError
             Component input selection is still not supported.
         """
+        if return_field and return_operator:
+            raise ValueError("Cannot return both field and operator.")
 
         # todo: accepts components in nodes.
         mesh: dpf.MeshedRegion = self.metadata.meshed_region  # type: ignore
@@ -1209,7 +1227,12 @@ class DPFResultCore:
 
         op = self._set_rescope(op, ids)
 
-        return op if return_operator else self._extract_data(op)
+        if return_operator:
+            return op
+        elif return_field:
+            return self._extract_field(op)
+        else:
+            return self._extract_data(op)
 
     @property
     def n_results(self) -> int:
@@ -1794,3 +1817,37 @@ class DPFResultCore:
                 16, 17, 18, 19, 20], dtype=int32)}
         """
         return self._get_comp_dict("ELEM")
+
+    def _component_selector(
+        self, fc: dpf.Field, component: str | int | None = None
+    ) -> "dpf.Field":
+        """Selects a component from a field.
+
+        Parameters
+        ----------
+        fc : dpf.Field
+            The field to select the component from.
+
+        component : str or int, optional
+            The component name or index to select. If None, it defaults to the first component (generally X)
+
+        Returns
+        -------
+        dpf.Field
+            The selected component field.
+        """
+        if component is None:
+            component = 0
+
+        if isinstance(component, str):
+            if component not in COMPONENTS:
+                raise ValueError(
+                    f"The component '{component}' is not a valid component. "
+                    f"Available components are: {COMPONENTS}"
+                )
+
+            component = COMPONENTS.index(component)
+
+        return dpf.operators.logic.component_selector(
+            field=fc, component_number=component
+        ).eval()
