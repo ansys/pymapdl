@@ -27,8 +27,11 @@ from pathlib import Path
 
 import numpy as np
 
-from ansys.mapdl.core.reader.constants import NOT_AVAILABLE_METHOD
-from ansys.mapdl.core.reader.core import DPFResultCore, ResultNotFound
+from ansys.mapdl.core.reader.core import (
+    DPFResultCore,
+    NotImplementedInDPFBackend,
+    ResultNotFound,
+)
 from ansys.mapdl.core.reader.types import (
     Elements,
     Kwargs,
@@ -85,9 +88,7 @@ class DPFResultData(DPFResultCore):
          array([30., 20., 40.]))
         """
         # To be done later
-        raise NotImplementedError(
-            NOT_AVAILABLE_METHOD.format(method="nodal_input_force")
-        )
+        raise NotImplementedInDPFBackend(method="nodal_input_force")
 
     def element_solution_data(
         self, rnum: Rnum, datatype: str, sort: bool = True, **kwargs: Kwargs
@@ -193,9 +194,7 @@ class DPFResultData(DPFResultCore):
         >>> ansys.read_float_parameter('SD_LOC1(1)')
         -4266.19
         """
-        raise NotImplementedError(
-            NOT_AVAILABLE_METHOD.format(method="element_solution_data")
-        )
+        raise NotImplementedInDPFBackend(method="element_solution_data")
 
     def result_dof(self, rnum: Rnum) -> None:
         """Return a list of degrees of freedom for a given result number.
@@ -222,7 +221,7 @@ class DPFResultData(DPFResultCore):
         ['UX', 'UY', 'UZ']
         """
         # To be done later
-        raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="result_dof"))
+        raise NotImplementedInDPFBackend(method="result_dof")
 
     def cs_4x4(self, cs_cord: int, as_vtk_matrix: bool = False) -> None:
         """Return a 4x4 transformation matrix for a given coordinate system.
@@ -271,7 +270,7 @@ class DPFResultData(DPFResultCore):
                [ 0.,  1.,  0.,  0.],
                [ 0.,  0.,  0.,  1.]])
         """
-        raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="cs_4x4"))
+        raise NotImplementedInDPFBackend(method="cs_4x4")
 
     def read_record(self, pointer: int, return_bufsize: bool = False) -> None:
         """Reads a record at a given position.
@@ -301,7 +300,7 @@ class DPFResultData(DPFResultCore):
             When ``return_bufsize`` is enabled, returns the number of
             words read.
         """
-        raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="read_record"))
+        raise NotImplementedInDPFBackend(method="read_record")
 
     def text_result_table(self, rnum: Rnum) -> None:
         """Returns a text result table for plotting.
@@ -316,9 +315,7 @@ class DPFResultData(DPFResultCore):
         rnum
             The result number to retrieve the table for.
         """
-        raise NotImplementedError(
-            NOT_AVAILABLE_METHOD.format(method="text_result_table")
-        )
+        raise NotImplementedInDPFBackend(method="text_result_table")
 
     def write_tables(self, filename: str | Path) -> None:
         """Write binary tables to ASCII.  Assumes int32.
@@ -337,7 +334,7 @@ class DPFResultData(DPFResultCore):
         --------
         >>> rst.write_tables('tables.txt')
         """
-        raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="write_tables"))
+        raise NotImplementedInDPFBackend(method="write_tables")
 
     def overwrite_element_solution_records(
         self, element_data: dict[int, np.ndarray], rnum: Rnum, solution_type: str
@@ -412,9 +409,7 @@ class DPFResultData(DPFResultCore):
                     2: np.random.random(56)}
         >>> rst.overwrite_element_solution_data(data, 0, 'EEL')
         """
-        raise NotImplementedError(
-            NOT_AVAILABLE_METHOD.format(method="overwrite_element_solution_records")
-        )
+        raise NotImplementedInDPFBackend(method="overwrite_element_solution_records")
 
     def nodal_time_history(
         self, solution_type: SolutionType = "NSL", in_nodal_coord_sys: bool = False

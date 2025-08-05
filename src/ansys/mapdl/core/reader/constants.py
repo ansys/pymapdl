@@ -92,5 +92,8 @@ MATERIAL_PROPERTIES: list[str] = [
 ]
 
 
-NOT_AVAILABLE_METHOD = """The method '{method}' has not been ported to the new DPF-based Results backend.
-If you still want to use it, you can switch to 'pymapdl-reader' backend."""
+NOT_AVAILABLE_METHOD: str = """The method '{method}' has not been ported to the new DPF-based Results backend.
+If you still want to use it, you can switch to 'pymapdl-reader' backend using `mapdl.use_reader_backend = True`."""
+
+NOT_AVAILABLE_ARGUMENT: str = """The argument '{argument}' in this function has not been ported to the new DPF-based Results backend.
+If you still want to use it, you can switch to 'pymapdl-reader' backend using `mapdl.use_reader_backend = True`."""

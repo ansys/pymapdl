@@ -52,6 +52,7 @@ if TYPE_CHECKING and _HAS_PYVISTA:
 from ansys.mapdl.core.reader.constants import (
     LOCATION_MAPPING,
     MATERIAL_PROPERTIES,
+    NOT_AVAILABLE_ARGUMENT,
     NOT_AVAILABLE_METHOD,
 )
 from ansys.mapdl.core.reader.types import (
@@ -85,6 +86,30 @@ class ResultNotFound(MapdlRuntimeError):
         msg
             Error message to display.
         """
+        MapdlRuntimeError.__init__(self, msg)
+
+
+class NotImplementedInDPFBackend(MapdlRuntimeError, NotImplementedError):
+    """Exception raised when a method is not implemented in the DPF backend.
+
+    Parameters
+    ----------
+    method : str
+        Name of the method that is not implemented.
+    """
+
+    def __init__(self, method: str = "", argument: str = ""):
+        """Initialize NotImplementedInDPFBackend exception.
+
+        Parameters
+        ----------
+        method : str
+            Name of the method that is not implemented.
+        """
+        if argument:
+            msg = NOT_AVAILABLE_ARGUMENT.format(argument=argument)
+        else:
+            msg = NOT_AVAILABLE_METHOD.format(method=method)
         MapdlRuntimeError.__init__(self, msg)
 
 
@@ -1681,7 +1706,7 @@ class DPFResultCore:
                     if pmeth=1: p-method convergence values
         - pCnvVal : P-method convergence values
         """
-        raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="solution_info"))
+        raise NotImplementedInDPFBackend(method="solution_info")
 
     @property
     def subtitle(self) -> str:
@@ -1697,7 +1722,7 @@ class DPFResultCore:
         str
             Subtitle of the model.
         """
-        raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="subtitle"))
+        raise NotImplementedInDPFBackend(method="subtitle")
 
     def _get_comp_dict(self, entity: str) -> dict[str, tuple[int]]:
         """Get a dictionary of components given an entity
