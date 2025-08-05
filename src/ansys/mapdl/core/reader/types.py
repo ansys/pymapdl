@@ -24,6 +24,7 @@
 
 from typing import Any, Iterable, Literal, ParamSpec, TypeAlias, Union
 
+import ansys.dpf.core as dpf
 import numpy as np
 
 ## Types
@@ -42,9 +43,13 @@ Nodes: TypeAlias = str | int | Iterable[int | str] | None
 Elements: TypeAlias = str | int | Iterable[int | str] | None
 MAPDLComponents: TypeAlias = str | Iterable[int | str] | None
 
-ReturnData: TypeAlias = tuple[
-    np.ndarray[Any, np.dtype[np.floating[Any]]],
-    np.ndarray[Any, np.dtype[np.floating[Any]]],
+ReturnData: TypeAlias = Union[
+    tuple[
+        np.ndarray[Any, np.dtype[np.floating[Any]]],
+        np.ndarray[Any, np.dtype[np.floating[Any]]],
+    ],
+    dpf.Field,
 ]
+
 Kwargs: TypeAlias = dict[Any, Any]
 P = ParamSpec("P")
