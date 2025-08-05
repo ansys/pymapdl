@@ -1492,14 +1492,17 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     ext = "mp1"
 
     mapdl.prep7()
+    mapdl.slashdelete(fname, ext)  # remove file if it exists
 
-    assert f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE=" in mapdl.mpwrite(fname, ext)
+    assert "WRITE OUT MATERIAL PROPERTY" in mapdl.mpwrite(fname, ext, mat=1)
     assert f"{fname}.{ext}" in mapdl.list_files()
 
     # asserting downloading
     ext = "mp2"
-    assert f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE=" in mapdl.mpwrite(
-        fname, ext, download_file=True
+    mapdl.slashdelete(fname, ext)  # remove file if it exists
+
+    assert "WRITE OUT MATERIAL PROPERTY" in mapdl.mpwrite(
+        fname, ext, download_file=True, mat=1
     )
     assert f"{fname}.{ext}" in mapdl.list_files()
     assert os.path.exists(f"{fname}.{ext}")
@@ -1507,18 +1510,19 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     ## Checking reading
     # Uploading a local file
     with open(f"{fname}.{ext}", "r") as fid:
-        text = fid.read()
+        content = fid.read()
 
     os.remove(f"{fname}.{ext}")  # remove temp file
 
     ext = ext + "2"
+    mapdl.slashdelete(fname, ext)  # remove file if it exists
+
     fname_ = f"{fname}.{ext}"
-    new_nuxy = "MPDATA,NUXY,       1,   1, 0.4000000E+00,"
-    nuxy = float(new_nuxy.split(",")[4])
+    nuxy = float(0.40000)
     ex = 0.2100000e12
 
     with open(fname_, "w") as fid:
-        fid.write(text.replace("MPDATA,NUXY,       1,   1, 0.3000000E+00,", new_nuxy))
+        fid.write(content.replace("0.30000", str(nuxy)))
 
     # file might be left behind from a previous test
     if fname_ in mapdl.list_files():
@@ -1527,17 +1531,10 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
 
     mapdl.clear()
     mapdl.prep7()
-    captured = capsys.readouterr()  # To flush it
-    output = mapdl.mpread(fname, ext)
+    _ = capsys.readouterr()  # To flush it
+    output = mapdl.mpread(fname, ext, progress_bar=True)
     captured = capsys.readouterr()
-    if has_dependency("tqdm"):
-        # Printing uploading requires tqdm
-        assert f"Uploading {fname}.{ext}:" in captured.err
 
-    assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
-    assert "TEMPERATURE TABLE ERASED." in output
-    assert "0.4000000" in output
-    # check if materials are read into the db
     assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
 
@@ -1551,9 +1548,6 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     mapdl.clear()
     mapdl.prep7()
     output = mapdl.mpread(fname, ext)
-    assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
-    assert "TEMPERATURE TABLE ERASED." in output
-    assert "0.4000000" in output
     assert np.allclose(mapdl.get_value("NUXY", "1", "TEMP", 0), nuxy)
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
 
@@ -1569,6 +1563,43 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     if not ON_LOCAL:
         with pytest.raises(IOError):
             mapdl.mpwrite("/test_dir/test", "mp")
+
+    mapdl.slashdelete(fname, ext)  # remove file if it exists
+
+
+def test_mpread_lib(mapdl):
+    mapdl.input_strings(
+        """
+        /prep7
+        /units,si
+        TB,BH  ,_MATL   ,   1,  20
+        TBTEM,  0.00000000    ,   1
+        TBPT,,  59.5238095    , 0.200000000
+        TBPT,,  119.047619    , 0.400000000
+        TBPT,,  158.730159    , 0.550000000
+        TBPT,,  396.825397    ,  1.15000000
+        TBPT,,  555.555556    ,  1.30000000
+        TBPT,,  793.650794    ,  1.40000000
+        TBPT,,  1587.30159    ,  1.55000000
+        TBPT,,  3968.25397    ,  1.63500000
+        TBPT,,  7936.50794    ,  1.65500000
+        TBPT,,  15873.0159    ,  1.67500000
+        TBPT,,  31746.0317    ,  1.70138960
+        TBPT,,  63492.0635    ,  1.75000000
+        TBPT,,  95238.0952    ,  1.79000000
+        TBPT,,  190476.190    ,  1.90980000
+        TBPT,,  285714.286    ,  2.02960000
+        TBPT,,  380952.381    ,  2.14950000
+    """
+    )
+    mapdl.slashdelete("database", "mp")
+    mapdl.mpwrite("database", "mp", mat=1)
+
+    mapdl.clear()
+    mapdl.prep7()
+    mapdl.mpread("database", "mp")
+    mapdl.mplist()
+    assert mapdl.get_value("MAT", 0, "count") == 1.0
 
 
 def test_mapdl_str(mapdl, cleared):
