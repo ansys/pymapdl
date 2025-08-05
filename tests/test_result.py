@@ -66,7 +66,7 @@ elif not TEST_DPF_BACKEND:
 else:
     from ansys.dpf import core as dpf_core
     from ansys.dpf.gate.errors import DPFServerException
-    from ansys.mapdl.core.reader.core import COMPONENTS
+    from ansys.mapdl.core.reader.constants import COMPONENTS
 
 from ansys.mapdl.reader import read_binary
 from ansys.mapdl.reader.rst import Result
@@ -490,9 +490,7 @@ class TestDPFResult:
             (True, Result),
             (
                 False,
-                __import__(
-                    "ansys.mapdl.core.reader.result", fromlist=["DPFResult"]
-                ).DPFResult,
+                __import__("ansys.mapdl.core.reader", fromlist=["DPFResult"]).DPFResult,
             ),
         ],
     )
