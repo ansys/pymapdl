@@ -74,10 +74,10 @@ jobs:
           EVENTNAME: ${{ github.event_name }}
           DISPATCH_PR_NUMBER: ${{ github.event.inputs.issue_number }}
           DISPATCH_USER: ${{ github.event.inputs.actor }}
-          DISPATCH_COMMENT_BODY:: ${{ github.event.inputs.comment_body }}
+          DISPATCH_COMMENT_BODY: ${{ github.event.inputs.comment_body }}
           DISPATCH_COMMENT_ID: ${{ github.event.inputs.comment_id }}
           #
-          COMMENT_PR_NUMBER ${{ github.event.issue.number }}
+          COMMENT_PR_NUMBER: ${{ github.event.issue.number }}
           COMMENT_USER: ${{ github.event.comment.user.login }}
           COMMENT_BODY: ${{ github.event.comment.body }}
           COMMENT_ID: ${{ github.event.comment.id }}
