@@ -21,31 +21,35 @@
 # SOFTWARE.
 
 """Class to provide with plotting capabilities for DPF results"""
+import ansys.dpf.core as dpf
 
-from ansys.mapdl.core.reader.core import DPFResultCore
+from ansys.mapdl.core.reader.core import NotImplementedInDPFBackend
+from ansys.mapdl.core.reader.data import DPFResultData
 from ansys.mapdl.core.reader.types import (
     ComponentsDirections,
     Kwargs,
     MAPDLComponents,
+    Nodes,
     Rnum,
 )
 
 
-class DPFResultPlotting(DPFResultCore):
+class DPFResultPlotting(DPFResultData):
     """Provides plotting capabilities for DPF results."""
 
     def plot_nodal_stress(
         self,
         rnum: Rnum,
-        comp: ComponentsDirections | None = None,
+        comp: ComponentsDirections | int | None = None,
         show_displacement: bool = False,
         displacement_factor: int = 1,
         node_components: MAPDLComponents | None = None,
         element_components: MAPDLComponents | None = None,
-        sel_type_all: bool = True,
-        treat_nan_as_zero: bool = True,
+        sel_type_all: bool | None = None,
+        treat_nan_as_zero: bool | None = None,
+        nodes: Nodes = None,
         **kwargs: Kwargs,
-    ):
+    ) -> list[float]:
         """Plots the stresses at each node in the solution.
 
         Parameters
@@ -88,6 +92,14 @@ class DPFResultPlotting(DPFResultCore):
             Treat NAN values (i.e. stresses at midside nodes) as zero
             when plotting.
 
+        nodes
+            Select a limited subset of nodes.  Can be a nodal
+            component or array of node numbers.  For example
+
+            * ``"MY_COMPONENT"``
+            * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+            * ``np.arange(1000, 2001)``
+
         **kwargs
             Additional keyword arguments.  See ``help(pyvista.plot)``
 
@@ -100,20 +112,27 @@ class DPFResultPlotting(DPFResultCore):
         --------
         Plot the X component nodal stress while showing displacement.
 
-        >>> rst.plot_nodal_stress(0, comp='x', show_displacement=True)
+        >>> mapdl.result.plot_nodal_stress(0, comp='x', show_displacement=True)
         """
-        # if not comp:
-        #     comp = "X"
+        if not comp:
+            comp = "X"
 
-        # ind = COMPONENTS.index(comp)
+        if element_components:
+            raise NotImplementedInDPFBackend(argument="element_components")
 
-        # op = self._get_nodes_result(
-        #     rnum,
-        #     "stress",
-        #     nodes=node_components,
-        #     in_nodal_coord_sys=False,
-        #     return_operator=True,
-        # )
-        # fc = op.outputs.fields_as_fields_container()[0]
+        if sel_type_all:
+            raise NotImplementedInDPFBackend(argument="sel_type_all")
 
-        raise NotImplementedError("WIP")
+        if treat_nan_as_zero:
+            raise NotImplementedInDPFBackend(argument="treat_nan_as_zero")
+
+        field = self.nodal_displacement(rnum, nodes=nodes, return_field=True)
+        field = self._component_selector(field, component_number=comp)
+
+        # If the user requested to show displacement, we will
+        # deform the mesh by the displacement field.
+        deform_by: dpf.Field | None = field if show_displacement else None
+
+        return self.mesh.plot(
+            field, scale_factor=displacement_factor, deform_by=deform_by, **kwargs
+        )

@@ -20,9 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core.reader.data import DPFResultData
 from ansys.mapdl.core.reader.plotting import DPFResultPlotting
 
 
-class DPFResult(DPFResultData, DPFResultPlotting):
+class DPFResult(DPFResultPlotting):
     """Unified class for accessing DPF result data and plotting"""
