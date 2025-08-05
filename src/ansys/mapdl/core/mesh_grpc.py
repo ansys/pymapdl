@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
 from functools import wraps
 import os
@@ -343,7 +342,6 @@ class MeshGrpc:
         - FIELD 8 : element number
         - FIELD 9 : base element number (applicable to reinforcing elements only)
         - FIELDS 10 - 30 : The nodes belonging to the element in ANSYS numbering.
-
         """
         if self._cached_elements is None:
             self._cached_elements = np.split(self._elem, self._elem_off[1:-1])
@@ -388,7 +386,6 @@ class MeshGrpc:
 
         Array containing element type numbers in the first column and
         the element types (like SURF154) in the second column.
-
         """
         return self._ekey
 
@@ -667,7 +664,6 @@ class MeshGrpc:
 
         offset : np.ndarray
             Array of indices indicating the start of each element.
-
         """
         if not chunk_size:
             chunk_size = self._chunk_size or DEFAULT_CHUNKSIZE
@@ -761,7 +757,6 @@ class MeshGrpc:
 
         >>> import pyvista
         >>> pyvista.read('grid.vtk')
-
         """
         return self._grid
 

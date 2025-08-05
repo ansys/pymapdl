@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """
 These PREP7 commands define the type of elements to be used in the model.
 """
@@ -269,7 +268,6 @@ class ElementType:
         >>> etype_num = mapdl.et(2, 'SOLID186')
         >>> etype_num
         2
-
         """
         command = (
             f"ET,{itype},{ename},{kop1},{kop2},{kop3},{kop4},{kop5},{kop6},{inopr}"
@@ -387,7 +385,6 @@ class ElementType:
         >>> print(output)
         ELEMENT TECHNOLOGY CONTROL PARAMETER FOR APPLICABLE ELEMENTS = SET.
          DEGENERATED ELEMENT SHAPE CONTROL PARAMETER FOR APPLICABLE ELEMENTS = ON.
-
         """
         return self.run(f"ETCONTROL,{eltech},{eldegene}", **kwargs)
 
@@ -417,7 +414,6 @@ class ElementType:
 
         >>> mapdl.et(1, 'SOLID186')
         >>> mapdl.etdele(1)
-
         """
         command = f"ETDELE,{ityp1},{ityp2},{inc}"
         return self.run(command, **kwargs)
