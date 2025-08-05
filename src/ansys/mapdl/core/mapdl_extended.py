@@ -23,6 +23,7 @@
 from functools import wraps
 import os
 import pathlib
+import re
 import tempfile
 from typing import Union
 import warnings
@@ -31,7 +32,7 @@ import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core.commands import CommandListingOutput
+from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
     ComponentDoesNotExits,
@@ -45,7 +46,6 @@ from ansys.mapdl.core.misc import (
     allow_iterables_vmin,
     allow_pickable_entities,
     check_deprecated_vtk_kwargs,
-    load_file,
     random_string,
     requires_graphics,
     supress_logging,
@@ -371,7 +371,7 @@ class _MapdlCommandExtended(_MapdlCore):
         self,
         fname="",
         ext="",
-        lib="",
+        lib="LIB",
         mat="",
         download_file=False,
         progress_bar=False,
@@ -385,23 +385,81 @@ class _MapdlCommandExtended(_MapdlCore):
                     f"The supplied path {fname_} is not allowed."
                 )
 
-        output = super().mpwrite(fname, ext, lib, mat, **kwargs)
+        output = super().mpwrite(fname, ext, lib=lib, mat=mat, **kwargs)
         if download_file:
             self.download(os.path.basename(fname_), progress_bar=progress_bar)
 
         return output
 
-    @wraps(_MapdlCore.mpread)
     def mpread(self, fname="", ext="", lib="", **kwargs):
+        """APDL Command: MPREAD
+
+        Reads a file containing material properties.
+
+        Parameters
+        ----------
+        fname
+            File name and directory path (248 characters maximum,
+            including directory). If you do not specify the ``LIB``
+            option, the default directory is the current working
+            directory. If you specify the ``LIB`` option, the default is
+            the following search path: the current working directory,
+            the user's home directory, ``MPLIB_DIR`` (as specified by the
+            ``/MPLIB,READ,PATH`` command) and ``/ansys_dir/matlib`` (as
+            defined by installation). If you use the default for your
+            directory, you can use all 248 characters for the file
+            name.
+
+        ext
+            Filename extension (eight-character maximum).
+
+        lib
+            Reads material library files previously written with the
+            MPWRITE command.  (See the description of the ``LIB`` option
+            for the ``MPWRITE`` command.)  The only allowed value for ``LIB``
+            is ``LIB``.
+
+            .. note:: The argument "LIB" is not supported by the MAPDL gRPC server.
+
+        Notes
+        -----
+        Material properties written to a file without the ``LIB`` option
+        do not support nonlinear properties.  Also, properties written
+        to a file without the ``LIB`` option are restored in the same
+        material number as originally defined.  To avoid errors, use
+        ``MPREAD`` with the ``LIB`` option only when reading files written
+        using MPWRITE with the ``LIB`` option.
+
+        If you omit the ``LIB`` option for ``MPREAD``, this command supports
+        only linear properties.
+
+        Material numbers are hardcoded.  If you write a material file
+        without specifying the ``LIB`` option, then read that file in
+        using the ``MPREAD`` command with the ``LIB`` option, the ANSYS
+        program will not write the file to a new material number.
+        Instead, it will write the file to the "old" material number
+        (the number specified on the MPWRITE command that created the
+        file.)
+
+        This command is also valid in SOLUTION.
+        """
         if lib:
             raise NotImplementedError(
-                "The option 'lib' is not supported by the MAPDL gRPC server."
+                "The 'lib' argument is not supported by the MAPDL gRPC server."
             )
 
-        fname_ = fname + "." + ext
-        fname = load_file(self, fname_)
-        self._log.info("Bypassing 'MPREAD' with 'INPUT'.")
-        return self.input(fname)
+        fname = self._get_file_name(fname, ext, "mp")
+        fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
+        file_, ext_, path_ = self._decompose_fname(fname)
+        with self.non_interactive:
+            # Use not interactive to avoid gRPC issues. See #975
+            if self._local:
+                # If local, we can use the full path
+                super().mpread(fname=path_ / file_, ext=ext_, lib=lib, **kwargs)
+            else:
+                super().mpread(fname=file_, ext=ext_, lib=lib, **kwargs)
+
+        return self.last_response
 
     @wraps(_MapdlCore.cwd)
     def cwd(self, *args, **kwargs):
@@ -422,24 +480,6 @@ class _MapdlCommandExtended(_MapdlCore):
 
     @wraps(_MapdlCore.list)
     def list(self, filename, ext=""):
-        """Displays the contents of an external, coded file.
-
-        APDL Command: ``/LIST``
-
-        Parameters
-        ----------
-        fname : str
-            File name and directory path. An unspecified directory
-            path defaults to the working directory.
-
-        ext : str, optional
-            Filename extension
-
-        Returns
-        -------
-        str
-            Contents of the file.
-        """
         if hasattr(self, "_local"):  # gRPC
             if not self._local:
                 return self._download_as_raw(filename).decode()
@@ -2605,6 +2645,26 @@ class _MapdlCommandExtended(_MapdlCore):
             scale=scale,
             **kwargs,
         )
+
+    @wraps(_MapdlCore.osresult)
+    def osresult(self, item="", comp="", freq="", cname="", **kwargs) -> CommandOutput:
+        result = super().osresult(item, comp, freq, cname, **kwargs)
+        if item.upper().strip() == "STATUS":
+            from ansys.mapdl.core.misc import expand_all_inner_lists
+
+            columns_names = ["ITEM", "FREQUENCY", "COMPONENT"]
+            result = CommandListingOutput(result)
+            table = re.search(
+                r"ITEM\s+FREQUENCY\s+COMPONENT(.*)", result, flags=re.DOTALL
+            ).group(1)
+            table = [each.split() for each in table.splitlines() if each.strip()]
+            table = expand_all_inner_lists(
+                table, target_length=len(columns_names), fill_value=""
+            )
+
+            result._columns_names = columns_names
+            result._cache = np.array(table)
+        return result
 
 
 class _MapdlExtended(_MapdlCommandExtended):

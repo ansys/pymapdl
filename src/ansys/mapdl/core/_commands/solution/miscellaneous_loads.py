@@ -1000,6 +1000,138 @@ class MiscellaneousLoads:
         command = f"OUTRES,{item},{freq},{cname},{nsvar},{dsubres}"
         return self.run(command, **kwargs)
 
+    def osresult(self, item="", comp="", freq="", cname="", **kwargs):
+        """Controls the selected result data written to the database.
+
+        APDL Command: OSRESULT
+
+        Parameters
+        ----------
+        item
+            Item to output to the database:
+
+            ERASE - Erases all selected result output specifications
+
+            STATUS - Lists the current set of selected result output specifications
+
+            SVAR - State variable number
+
+            FLD - User-defined field variables
+
+            S - Component and derived (principal, intensity, equivalent) stresses
+
+            EPEL - Component and derived (principal, intensity, equivalent) elastic strains
+
+            EPPL - Component and derived (principal, intensity, equivalent) plastic strains
+
+            EPCR - Component and derived (principal, intensity, equivalent) creep strains
+
+            EPTH - Component and derived (principal, intensity, equivalent) thermal strains
+
+            CDM - Mullins effect damage variable and maximum previous strain energy
+
+            PMSV - Pore mechanics state variables for coupled pore-pressure-thermal elements
+
+            FFLX - Fluid flow flux components in poromechanics
+
+            FGRA - Fluid pore pressure gradient components in poromechanics
+
+            BKS - Total nonlinear kinematic backstress components
+
+            GDMG - Generalized and ductile damage values
+
+        comp
+            Component of Item to output to the database:
+
+            For S, EPEL, EPPL, EPCR, EPTH: X, Y, Z, XY, YZ, XZ, 1, 2, 3, INT, EQV
+
+            For SVAR: 1, 2, 3, ..., N (state variable number)
+
+            For FLD: UF01, UF02, ..., UF09 (user-defined field variables)
+
+            For CDM: DMG, LM
+
+            For PMSV: VRAT, PPRE, DSAT, RPER
+
+            For FFLX, FGRA: X, Y, Z
+
+            For BKS: X, Y, Z, XY, YZ, XZ
+
+            For GDMG: ETA, ETAC, IDRA, DUCT (or blank for generalized damage)
+
+        freq
+            Frequency to output to the database:
+
+            n - Writes every nth and last substep of each load step
+
+            -n - Writes up to n equally spaced substeps of each load step
+
+            ALL - Writes every substep
+
+            LAST - Writes the last substep of each load step (default)
+
+        cname
+            The name of an element component (CM) defining the set of elements
+            for which this specification is active. If not specified, the set
+            is all elements.
+
+        Notes
+        -----
+        OSRESULT controls output to the results database for the selected result
+        defined by the item and component combination. The command activates output
+        of the selected result for the specified substeps and elements. Multiple
+        commands for the same result are cumulative. No selected results are written
+        to the database unless specified via OSRESULT.
+
+        The saved selected quantities are accessible via standard postprocessing
+        commands (ANSOL, ETABLE, ESOL, PLESOL, PLNSOL, PRESOL, and PRNSOL).
+
+        OSRESULT,ERASE deletes the existing output specifications.
+
+        OSRESULT,STATUS lists the current set of selected result specifications.
+
+        The output of selected results is valid for static (ANTYPE,STATIC) and
+        transient (ANTYPE,TRANS) analysis types.
+
+        To select other results to output to the database, see OUTRES. (Element
+        quantities specified via OUTRES can be redundant to those specified via
+        OSRESULT. Avoid specifying redundant quantities, as they are stored and
+        processed separately.)
+
+        All OSRESULT results are in the solution coordinate system.
+
+        This command is also valid in PREP7.
+
+        Examples
+        --------
+        Enter solution
+
+        >>> mapdl.slashsolu()
+
+        Suppress all solution results output first
+
+        >>> mapdl.outres("ALL", "NONE")
+
+        Use OSRESULT to specify selected results
+
+        >>> mapdl.osresult("S", "Y", "ALL")        # Stress Y component
+        >>> mapdl.osresult("S", "EQV", "ALL")      # Equivalent stress
+        >>> mapdl.osresult("EPPL", "INT", "ALL")   # Plastic strain intensity
+
+        Enter postprocessor
+
+        >>> mapdl.post1()
+
+        Retrieve selected results using PRESOL and PRNSOL
+
+        >>> mapdl.presol("SRES", "SY")      # Print selected stress Y
+        >>> mapdl.presol("SRES", "SEQV")    # Print selected equivalent stress
+        >>> mapdl.prnsol("SRES", "EPPLINT") # Print selected plastic strain intensity
+
+        """
+        command = f"OSRESULT,{item},{comp},{freq},{cname}"
+        return self.run(command, **kwargs)
+
     def rescontrol(
         self,
         action="",
