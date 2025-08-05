@@ -90,3 +90,7 @@ MATERIAL_PROPERTIES: list[str] = [
     "YZIT",
     "YZIC",
 ]
+
+
+NOT_AVAILABLE_METHOD = """The method '{method}' has not been ported to the new DPF-based Results backend.
+If you still want to use it, you can switch to 'pymapdl-reader' backend."""
