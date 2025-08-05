@@ -77,10 +77,10 @@ jobs:
           DISPATCH_COMMENT_BODY:: ${{ github.event.inputs.comment_body }}
           DISPATCH_COMMENT_ID: ${{ github.event.inputs.comment_id }}
           #
-          PRNUMBER_COM: ${{ github.event.issue.number }}
-          USERTRIGGERING_COM: ${{ github.event.comment.user.login }}
-          COMMENTBODY_COM: ${{ github.event.comment.body }}
-          COMMENTID_COM: ${{ github.event.comment.id }}
+          COMMENT_PR_NUMBER ${{ github.event.issue.number }}
+          COMMENT_USER: ${{ github.event.comment.user.login }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          COMMENT_ID: ${{ github.event.comment.id }}
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
@@ -92,18 +92,18 @@ jobs:
             if (eventName === "workflow_dispatch") {
               core.info('Running in "workflow_dispatch" mode');
 
-              prNumber = process.env.PRNUMBER_WD;
-              userTriggering = process.env.USERTRIGGERING_WD;
-              commentBody = process.env.COMMENTBODY_WD;
-              commentId = process.env.COMMENTID_WD;
+              prNumber = process.env.DISPATCH_PR_NUMBER;
+              userTriggering = process.env.DISPATCH_USER;
+              commentBody = process.env.DISPATCH_COMMENT_BODY;
+              commentId = process.env.DISPATCH_COMMENT_ID;
 
             } else {
               core.info('Running in "issue_comment" mode');
 
-              prNumber = process.env.PRNUMBER_COM;
-              userTriggering = process.env.USERTRIGGERING_COM;
-              commentBody = process.env.COMMENTBODY_COM;
-              commentId = process.env.COMMENTID_COM;
+              prNumber = process.env.COMMENT_PR_NUMBER;
+              userTriggering = process.env.COMMENT_USER;
+              commentBody = process.env.COMMENT_BODY;
+              commentId = process.env.COMMENT_ID;
             }
             core.debug(`PR Number: ${prNumber}`);
             core.debug(`User triggering: ${userTriggering}`);
