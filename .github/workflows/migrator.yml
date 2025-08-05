@@ -70,28 +70,40 @@ jobs:
       - name: Setup the configuration
         id: pr_number
         uses: actions/github-script@v7
+        env:
+          EVENTNAME: ${{ github.event_name }}
+          DISPATCH_PR_NUMBER: ${{ github.event.inputs.issue_number }}
+          DISPATCH_USER: ${{ github.event.inputs.actor }}
+          DISPATCH_COMMENT_BODY: ${{ github.event.inputs.comment_body }}
+          DISPATCH_COMMENT_ID: ${{ github.event.inputs.comment_id }}
+          #
+          COMMENT_PR_NUMBER: ${{ github.event.issue.number }}
+          COMMENT_USER: ${{ github.event.comment.user.login }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          COMMENT_ID: ${{ github.event.comment.id }}
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
-            const eventName = '${{ github.event_name }}';
+            const eventName = process.env.EVENTNAME
             core.debug(`Event name: ${eventName}`);
 
-            let prNumber, userTriggering, commentBody;
+            let prNumber, userTriggering, commentBody, commentId;
 
             if (eventName === "workflow_dispatch") {
               core.info('Running in "workflow_dispatch" mode');
 
-              prNumber = `${{ github.event.inputs.issue_number }}`;
-              userTriggering = `${{ github.event.inputs.actor }}`;
-              commentBody = `${{ github.event.inputs.comment_body }}`;
-              commentId = `${{ github.event.inputs.comment_id }}`;
+              prNumber = process.env.DISPATCH_PR_NUMBER;
+              userTriggering = process.env.DISPATCH_USER;
+              commentBody = process.env.DISPATCH_COMMENT_BODY;
+              commentId = process.env.DISPATCH_COMMENT_ID;
+
             } else {
               core.info('Running in "issue_comment" mode');
 
-              prNumber = `${{ github.event.issue.number }}`;
-              userTriggering = `${{ github.event.comment.user.login }}`;
-              commentBody = `${{ github.event.comment.body }}`;
-              commentId = `${{ github.event.comment.id }}`;
+              prNumber = process.env.COMMENT_PR_NUMBER;
+              userTriggering = process.env.COMMENT_USER;
+              commentBody = process.env.COMMENT_BODY;
+              commentId = process.env.COMMENT_ID;
             }
             core.debug(`PR Number: ${prNumber}`);
             core.debug(`User triggering: ${userTriggering}`);
@@ -134,7 +146,7 @@ jobs:
               const { data } = await github.rest.teams.getMembershipForUserInOrg({
                 org: 'ansys',
                 team_slug: 'pymapdl-maintainers',
-                username: '${{ env.USER_TRIGGERING }}',
+                username: process.env.USER_TRIGGERING,
               });
 
               if (core.isDebug()) {
@@ -161,7 +173,7 @@ jobs:
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
-            commentId = '${{ env.COMMENT_ID }}';
+            commentId = process.env.COMMENT_ID;
 
             // Remove previous reaction if it exists
             data = await github.rest.reactions.listForIssueComment({
@@ -201,7 +213,7 @@ jobs:
               github.rest.reactions.createForIssueComment({
                 owner: 'ansys',
                 repo: 'pymapdl',
-                comment_id: ${{ env.COMMENT_ID }},
+                comment_id: process.env.COMMENT_ID,
                 content: '+1',
               });
             } else {
@@ -211,14 +223,14 @@ jobs:
               github.rest.reactions.createForIssueComment({
                 owner: 'ansys',
                 repo: 'pymapdl',
-                comment_id: ${{ env.COMMENT_ID }},
+                comment_id: process.env.COMMENT_ID,
                 content: '-1',
               });
               // Create a comment to notify the user about insufficient permissions
               github.rest.issues.createComment({
                 owner: 'ansys',
                 repo: 'pymapdl',
-                issue_number: '${{ env.PR_NUMBER }}',
+                issue_number: process.env.PR_NUMBER,
                 body: `**:stop_sign: Not appropiated permissions! :stop_sign:**
 
             You are not a member of the PyMAPDL maintainers team. Please contact a team member to migrate this PR.`,
@@ -235,7 +247,7 @@ jobs:
             const { data } = await github.rest.pulls.get({
               owner: 'ansys',
               repo: 'pymapdl',
-              pull_number: ${{ env.PR_NUMBER }},
+              pull_number: process.env.PR_NUMBER,
             });
 
             if (!data || !data.head || !data.base) {
@@ -254,14 +266,14 @@ jobs:
               github.rest.reactions.createForIssueComment({
                 owner: 'ansys',
                 repo: 'pymapdl',
-                comment_id: ${{ env.COMMENT_ID }},
+                comment_id: process.env.COMMENT_ID,
                 content: 'confused',
               });
               // Create a comment to notify the user about insufficient permissions
               github.rest.issues.createComment({
                 owner: 'ansys',
                 repo: 'pymapdl',
-                issue_number: '${{ env.PR_NUMBER }}',
+                issue_number: process.env.PR_NUMBER,
                 body: `**:question: Wrong command? :confused:**
 
             You are trying to migrate a PR that is already in the main repository. No migration needed.`,
@@ -273,7 +285,7 @@ jobs:
             if (data && data.head && data.base) {
               core.exportVariable('PR_HEAD_BRANCH', data.head.ref);
               core.exportVariable('PR_HEAD_REPO', data.head.repo.full_name);
-              core.exportVariable('PR_BASE_BRANCH', `migration/pr-${{ env.PR_NUMBER }}`);
+              core.exportVariable('PR_BASE_BRANCH', `migration/pr-${process.env.PR_NUMBER}`);
               core.exportVariable('PR_BASE_REPO', data.base.repo.full_name);
 
             } else {
@@ -296,19 +308,19 @@ jobs:
           git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
           git config pull.rebase true
 
-          echo "\033[1;92m[INFO]Adding ${{ env.PR_HEAD_REPO }} as remote \033[0m"
-          git remote add head_repo https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ env.PR_HEAD_REPO }}.git
+          echo "\033[1;92m[INFO]Adding \"${PR_HEAD_REPO}\" as remote \033[0m"
+          git remote add head_repo https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${PR_HEAD_REPO}.git
 
-          echo "\033[1;92m[INFO]Fetching '${{ env.PR_HEAD_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}' \033[0m"
-          git fetch head_repo ${{ env.PR_HEAD_BRANCH }}
+          echo "\033[1;92m[INFO]Fetching \"${PR_HEAD_BRANCH}\" branch from \"${PR_HEAD_REPO}\" \033[0m"
+          git fetch head_repo ${PR_HEAD_BRANCH}
 
-          echo "\033[1;92m[INFO] Checking out '${{ env.PR_BASE_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}/${{ env.PR_HEAD_BRANCH }}' \033[0m"
-          git checkout -b ${{ env.PR_BASE_BRANCH }} head_repo/${{ env.PR_HEAD_BRANCH }}
+          echo "\033[1;92m[INFO] Checking out \"${PR_BASE_BRANCH}\" branch from \"${PR_HEAD_REPO}/${PR_HEAD_BRANCH}\" \033[0m"
+          git checkout -b ${PR_BASE_BRANCH} head_repo/${PR_HEAD_BRANCH}
 
-          echo  "\033[1;92m[INFO] Pulling '${{ env.PR_HEAD_BRANCH }}' from '${{ env.PR_BASE_REPO }}' \033[0m"
-          git pull head_repo ${{ env.PR_HEAD_BRANCH }}
+          echo  "\033[1;92m[INFO] Pulling \"${PR_HEAD_BRANCH}\" from \"${PR_BASE_REPO}\" \033[0m"
+          git pull head_repo ${PR_HEAD_BRANCH}
 
-          echo "\033[1;92m[INFO] Merging 'main' branch into '${{ env.PR_BASE_BRANCH }}' \033[0m"
+          echo "\033[1;92m[INFO] Merging 'main' branch into \"${PR_BASE_BRANCH}\" \033[0m"
           git merge origin/main
 
           # Check for merge conflicts
@@ -316,8 +328,8 @@ jobs:
           echo "Merge conflicts:"
           echo "${CONFLICTS}"
 
-          if [[ "$CONFLICTS" -gt 0 && -n "${{ env.MODE }}" ]]; then
-            echo "::warning:: Conflicts trying to solve using mode '${{ env.MODE }}'."
+          if [[ "$CONFLICTS" -gt 0 && -n "${MODE}" ]]; then
+            echo "::warning:: Conflicts trying to solve using mode ${MODE}."
 
             # Show conflicting files
             echo "Conflicting files:"
@@ -326,7 +338,7 @@ jobs:
 
             # Resolve conflicts by taking "theirs" changes (optional, depending on your strategy)
             echo "Resolving conflicts by taking 'theirs' changes"
-            git checkout ${{ env.MODE }} .
+            git checkout ${MODE} .
             git add .
 
             # Verify if conflicts are resolved
@@ -342,12 +354,12 @@ jobs:
             echo "No merge conflicts detected."
           fi
 
-          echo "Pushing changes to '${{ env.PR_BASE_REPO }}' repo"
-          git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || git fetch --all && git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || { echo "::error:: Push failed. Aborting."; exit 1; }
+          echo "Pushing changes to \"${PR_BASE_REPO}\" repo"
+          git push origin ${PR_BASE_BRANCH} --force-with-lease || git fetch --all && git push origin ${PR_BASE_BRANCH} --force-with-lease || { echo "::error:: Push failed. Aborting."; exit 1; }
 
-          if [[ "${{ env.MODE }}" == "--ours" ]]; then
-            echo "Sync mode is 'ours'. Pushing to head_repo/${{ env.PR_HEAD_BRANCH }} with 'ours' changes"
-            git push origin head_repo/${{ env.PR_HEAD_BRANCH }} --force-with-lease || { echo "::error:: Push to head_repo/${{ env.PR_HEAD_BRANCH }} failed. Aborting."; exit 1; }
+          if [[ "${MODE}" == "--ours" ]]; then
+            echo "Sync mode is 'ours'. Pushing to head_repo/${PR_HEAD_BRANCH} with 'ours' changes"
+            git push origin head_repo/${PR_HEAD_BRANCH} --force-with-lease || { echo "::error:: Push to head_repo/${PR_HEAD_BRANCH} failed. Aborting."; exit 1; }
           fi
 
       - name: Opening PR if needed.
