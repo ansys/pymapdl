@@ -1592,11 +1592,16 @@ class DPFResultCore:
                 f"Available element IDs: {list(mapping.keys())}"
             )
 
-        return mapping[element_id]
+        return int(mapping[element_id])
 
-    def solution_info(self, rnum: Rnum):
+    def solution_info(self, rnum: Rnum) -> dict[str, Any]:
         """Return an informative dictionary of solution data for a
         result.
+
+        .. warning:: This method has not been ported to the new DPF-based Results backend
+           and it is kept here for future references.
+           If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
+           `mapdl.use_reader_backend=True`.
 
         Parameters
         ----------
@@ -1679,7 +1684,19 @@ class DPFResultCore:
         raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="solution_info"))
 
     @property
-    def subtitle(self):
+    def subtitle(self) -> str:
+        """Subtitle of the model in the database.
+
+        .. warning:: This method has not been ported to the new DPF-based Results backend
+           and it is kept here for future references.
+           If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
+           `mapdl.use_reader_backend=True`.
+
+        Returns
+        -------
+        str
+            Subtitle of the model.
+        """
         raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="subtitle"))
 
     def _get_comp_dict(self, entity: str) -> dict[str, tuple[int]]:

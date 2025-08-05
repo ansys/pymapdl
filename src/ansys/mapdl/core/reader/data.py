@@ -45,7 +45,8 @@ class DPFResultData(DPFResultCore):
     def nodal_input_force(self, rnum: Rnum) -> None:
         """Nodal input force for a given result number.
 
-        .. warning:: This method has not been ported to the new DPF-based Results backend.
+        .. warning:: This method has not been ported to the new DPF-based Results backend
+           and it is kept here for future references.
            If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
            `mapdl.use_reader_backend=True`.
 
@@ -93,7 +94,8 @@ class DPFResultData(DPFResultCore):
     ) -> None:
         """Retrieves element solution data.  Similar to ETABLE.
 
-        .. warning:: This method has not been ported to the new DPF-based Results backend.
+        .. warning:: This method has not been ported to the new DPF-based Results backend
+           and it is kept here for future references.
            If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
            `mapdl.use_reader_backend=True`.
 
@@ -198,7 +200,8 @@ class DPFResultData(DPFResultCore):
     def result_dof(self, rnum: Rnum) -> None:
         """Return a list of degrees of freedom for a given result number.
 
-        .. warning:: This method has not been ported to the new DPF-based Results backend.
+        .. warning:: This method has not been ported to the new DPF-based Results backend
+           and it is kept here for future references.
            If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
            `mapdl.use_reader_backend=True`.
 
@@ -224,7 +227,8 @@ class DPFResultData(DPFResultCore):
     def cs_4x4(self, cs_cord: int, as_vtk_matrix: bool = False) -> None:
         """Return a 4x4 transformation matrix for a given coordinate system.
 
-        .. warning:: This method has not been ported to the new DPF-based Results backend.
+        .. warning:: This method has not been ported to the new DPF-based Results backend
+           and it is kept here for future references.
            If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
            `mapdl.use_reader_backend=True`.
 
@@ -272,7 +276,8 @@ class DPFResultData(DPFResultCore):
     def read_record(self, pointer: int, return_bufsize: bool = False) -> None:
         """Reads a record at a given position.
 
-        .. warning:: This method has not been ported to the new DPF-based Results backend.
+        .. warning:: This method has not been ported to the new DPF-based Results backend
+           and it is kept here for future references.
            If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
            `mapdl.use_reader_backend=True`.
 
@@ -301,7 +306,8 @@ class DPFResultData(DPFResultCore):
     def text_result_table(self, rnum: Rnum) -> None:
         """Returns a text result table for plotting.
 
-        .. warning:: This method has not been ported to the new DPF-based Results backend.
+        .. warning:: This method has not been ported to the new DPF-based Results backend
+           and it is kept here for future references.
            If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
            `mapdl.use_reader_backend=True`.
 
@@ -317,7 +323,8 @@ class DPFResultData(DPFResultCore):
     def write_tables(self, filename: str | Path) -> None:
         """Write binary tables to ASCII.  Assumes int32.
 
-        .. warning:: This method has not been ported to the new DPF-based Results backend.
+        .. warning:: This method has not been ported to the new DPF-based Results backend
+           and it is kept here for future references.
            If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
            `mapdl.use_reader_backend=True`.
 
@@ -337,7 +344,8 @@ class DPFResultData(DPFResultCore):
     ) -> None:
         """Overwrite element solution record.
 
-        .. warning:: This method has not been ported to the new DPF-based Results backend.
+        .. warning:: This method has not been ported to the new DPF-based Results backend
+           and it is kept here for future references.
            If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
            `mapdl.use_reader_backend=True`.
 
@@ -395,7 +403,7 @@ class DPFResultData(DPFResultCore):
 
         Examples
         --------
-        Overwrite the elastic strain record for elements 1 and 2 with
+        Overwrite the elastic strain record for elements 1 and 2
         for the first result with random data.
 
         >>> from ansys.mapdl import reader as pymapdl_reader
