@@ -42,8 +42,12 @@ from ansys.mapdl.core.reader.types import (
 class DPFResultData(DPFResultCore):
     """Provides methods for accessing and manipulating DPF result data."""
 
-    def nodal_input_force(self, rnum: Rnum):
+    def nodal_input_force(self, rnum: Rnum) -> None:
         """Nodal input force for a given result number.
+
+        .. warning:: This method has not been ported to the new DPF-based Results backend.
+           If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
+           `mapdl.use_reader_backend=True`.
 
         Nodal input force is generally set with the APDL command
         ``F``.  For example, ``F, 25, FX, 0.001``
@@ -86,8 +90,12 @@ class DPFResultData(DPFResultCore):
 
     def element_solution_data(
         self, rnum: Rnum, datatype: str, sort: bool = True, **kwargs: Kwargs
-    ):
+    ) -> None:
         """Retrieves element solution data.  Similar to ETABLE.
+
+        .. warning:: This method has not been ported to the new DPF-based Results backend.
+           If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
+           `mapdl.use_reader_backend=True`.
 
         Parameters
         ----------
@@ -187,8 +195,12 @@ class DPFResultData(DPFResultCore):
             NOT_AVAILABLE_METHOD.format(method="element_solution_data")
         )
 
-    def result_dof(self, rnum: Rnum):
+    def result_dof(self, rnum: Rnum) -> None:
         """Return a list of degrees of freedom for a given result number.
+
+        .. warning:: This method has not been ported to the new DPF-based Results backend.
+           If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
+           `mapdl.use_reader_backend=True`.
 
         Parameters
         ----------
@@ -209,8 +221,12 @@ class DPFResultData(DPFResultCore):
         # To be done later
         raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="result_dof"))
 
-    def cs_4x4(self, cs_cord: int, as_vtk_matrix: bool = False):
+    def cs_4x4(self, cs_cord: int, as_vtk_matrix: bool = False) -> None:
         """Return a 4x4 transformation matrix for a given coordinate system.
+
+        .. warning:: This method has not been ported to the new DPF-based Results backend.
+           If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
+           `mapdl.use_reader_backend=True`.
 
         Parameters
         ----------
@@ -253,11 +269,12 @@ class DPFResultData(DPFResultCore):
         """
         raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="cs_4x4"))
 
-    def read_record(self, pointer: int, return_bufsize: bool = False):
+    def read_record(self, pointer: int, return_bufsize: bool = False) -> None:
         """Reads a record at a given position.
 
-        Because ANSYS 19.0+ uses compression by default, you must use
-        this method rather than ``np.fromfile``.
+        .. warning:: This method has not been ported to the new DPF-based Results backend.
+           If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
+           `mapdl.use_reader_backend=True`.
 
         Parameters
         ----------
@@ -281,8 +298,12 @@ class DPFResultData(DPFResultCore):
         """
         raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="read_record"))
 
-    def text_result_table(self, rnum: Rnum):
+    def text_result_table(self, rnum: Rnum) -> None:
         """Returns a text result table for plotting.
+
+        .. warning:: This method has not been ported to the new DPF-based Results backend.
+           If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
+           `mapdl.use_reader_backend=True`.
 
         Parameters
         ----------
@@ -293,8 +314,12 @@ class DPFResultData(DPFResultCore):
             NOT_AVAILABLE_METHOD.format(method="text_result_table")
         )
 
-    def write_tables(self, filename: str | Path):
-        """Write binary tables to ASCII.  Assumes int32
+    def write_tables(self, filename: str | Path) -> None:
+        """Write binary tables to ASCII.  Assumes int32.
+
+        .. warning:: This method has not been ported to the new DPF-based Results backend.
+           If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
+           `mapdl.use_reader_backend=True`.
 
         Parameters
         ----------
@@ -309,8 +334,12 @@ class DPFResultData(DPFResultCore):
 
     def overwrite_element_solution_records(
         self, element_data: dict[int, np.ndarray], rnum: Rnum, solution_type: str
-    ):
+    ) -> None:
         """Overwrite element solution record.
+
+        .. warning:: This method has not been ported to the new DPF-based Results backend.
+           If you still want to use it, you can switch to 'pymapdl-reader' backend by setting
+           `mapdl.use_reader_backend=True`.
 
         This method replaces solution data for a set of elements at a
         result index for a given solution type.  The number of items
