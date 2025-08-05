@@ -375,7 +375,7 @@ class _MapdlCore(Commands):
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
 
-        self._post = PostProcessing(self)
+        self._post_object = None
 
         # Wrapping listing functions for "to_array" methods
         self._wrap_listing_functions()
@@ -391,6 +391,15 @@ class _MapdlCore(Commands):
 
     def _after_run(self, _command: str) -> None:
         pass
+
+    @property
+    def _post(self):
+        """
+        Initializes _post_object and allows _post to be None at __init__
+        """
+        if self._post_object is None:
+            self._post_object = PostProcessing(self)
+        return self._post_object
 
     @property
     def allow_ignore(self):
