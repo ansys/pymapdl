@@ -336,6 +336,72 @@ class DPFResultData(DPFResultCore):
         """
         raise NotImplementedInDPFBackend(method="write_tables")
 
+    def overwrite_element_solution_record(
+        self,
+        data: list[float] | np.ndarray,
+        rnum: Rnum,
+        solution_type: str,
+        element_id: int,
+    ):
+        """Overwrite element solution record.
+        This method replaces solution data for of an element at a
+        result index for a given solution type.  The number of items
+        in ``data`` must match the number of items in the record.
+        If you are not sure how many records are in a given record,
+        use ``element_solution_data`` to retrieve all the records for
+        a given ``solution_type`` and check the number of items in the
+        record.
+        Note: The record being replaced cannot be a compressed record.
+        If the result file uses compression (default sparse
+        compression as of 2019R1), you can disable this within MAPDL
+        with:
+        ``/FCOMP, RST, 0``
+        Parameters
+        ----------
+        data : list or np.ndarray
+            Data that will replace the existing records.
+        rnum : int
+            Zero based result number.
+        solution_type : str
+            Element data type to overwrite.
+            - EMS: misc. data
+            - ENF: nodal forces
+            - ENS: nodal stresses
+            - ENG: volume and energies
+            - EGR: nodal gradients
+            - EEL: elastic strains
+            - EPL: plastic strains
+            - ECR: creep strains
+            - ETH: thermal strains
+            - EUL: euler angles
+            - EFX: nodal fluxes
+            - ELF: local forces
+            - EMN: misc. non-sum values
+            - ECD: element current densities
+            - ENL: nodal nonlinear data
+            - EHC: calculated heat generations
+            - EPT: element temperatures
+            - ESF: element surface stresses
+            - EDI: diffusion strains
+            - ETB: ETABLE items
+            - ECT: contact data
+            - EXY: integration point locations
+            - EBA: back stresses
+            - ESV: state variables
+            - MNL: material nonlinear record
+        element_id : int
+            Ansys element number (e.g. ``1``)
+        Examples
+        --------
+        Overwrite the elastic strain record for element 1 for the
+        first result with random data.
+        >>> from ansys.mapdl import reader as pymapdl_reader
+        >>> rst = pymapdl_reader.read_binary('file.rst')
+        >>> data = np.random.random(56)
+        >>> rst.overwrite_element_solution_data(data, 0, 'EEL', 1)
+        """
+        raise NotImplementedInDPFBackend(method="overwrite_element_solution_record")
+
     def overwrite_element_solution_records(
         self, element_data: dict[int, np.ndarray], rnum: Rnum, solution_type: str
     ) -> None:
