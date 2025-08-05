@@ -114,9 +114,6 @@ class DPFResultPlotting(DPFResultData):
 
         >>> mapdl.result.plot_nodal_stress(0, comp='x', show_displacement=True)
         """
-        if not comp:
-            comp = "X"
-
         if element_components:
             raise NotImplementedInDPFBackend(argument="element_components")
 
@@ -126,8 +123,8 @@ class DPFResultPlotting(DPFResultData):
         if treat_nan_as_zero:
             raise NotImplementedInDPFBackend(argument="treat_nan_as_zero")
 
-        field = self.nodal_displacement(rnum, nodes=nodes, return_field=True)
-        field = self._component_selector(field, component_number=comp)
+        field: dpf.Field = self.nodal_stress(rnum, nodes=nodes, return_field=True)
+        field = self._component_selector(fc=field, component=comp)
 
         # If the user requested to show displacement, we will
         # deform the mesh by the displacement field.
