@@ -462,7 +462,11 @@ class DPFResultData(DPFResultCore):
         return nnum, data
 
     def nodal_displacement(
-        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+        self,
+        rnum: Rnum,
+        in_nodal_coord_sys: bool = False,
+        nodes: Nodes = None,
+        return_field: bool = False,
     ) -> ReturnData:
         """Returns the DOF solution for each node in the global
         cartesian coordinate system or nodal coordinate system.
@@ -484,6 +488,10 @@ class DPFResultData(DPFResultCore):
             * ``"MY_COMPONENT"``
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
+
+        return_field
+            When ``True``, returns the field associated with the results.
+            Default ``False``.
 
         Returns
         -------
@@ -520,7 +528,13 @@ class DPFResultData(DPFResultCore):
         These results are removed by and the node numbers of the
         solution results are reflected in ``nnum``.
         """
-        return self._get_nodes_result(rnum, "displacement", in_nodal_coord_sys, nodes)
+        return self._get_nodes_result(
+            rnum,
+            "displacement",
+            in_nodal_coord_sys=in_nodal_coord_sys,
+            nodes=nodes,
+            return_field=return_field,
+        )
 
     def nodal_solution(
         self,
@@ -528,6 +542,7 @@ class DPFResultData(DPFResultCore):
         in_nodal_coord_sys: bool = False,
         nodes: Nodes = None,
         return_temperature: bool = False,
+        return_field: bool = False,
     ) -> ReturnData:
         """Returns the DOF solution for each node in the global
         cartesian coordinate system or nodal coordinate system.
@@ -556,6 +571,10 @@ class DPFResultData(DPFResultCore):
         return_temperature
             When ``True``, returns the nodal temperature instead of
             the displacement.  Default ``False``.
+
+        return_field
+            When ``True``, returns the field associated with the results.
+            Default ``False``.
 
         Returns
         -------
@@ -594,15 +613,22 @@ class DPFResultData(DPFResultCore):
         """
 
         if hasattr(self.model.results, "displacement") and not return_temperature:
-            return self.nodal_displacement(rnum, in_nodal_coord_sys, nodes)
+            return self.nodal_displacement(
+                rnum,
+                in_nodal_coord_sys=in_nodal_coord_sys,
+                nodes=nodes,
+                return_field=return_field,
+            )
         elif hasattr(self.model.results, "temperature"):
-            return self.nodal_temperature(rnum, nodes)
+            return self.nodal_temperature(rnum, nodes=nodes, return_field=return_field)
         else:
             raise ResultNotFound(
                 "The current analysis does not have 'displacement' or 'temperature' results."
             )
 
-    def nodal_temperature(self, rnum: Rnum, nodes: Nodes = None) -> ReturnData:
+    def nodal_temperature(
+        self, rnum: Rnum, nodes: Nodes = None, return_field: bool = False
+    ) -> ReturnData:
         """Retrieves the temperature for each node in the
         solution.
 
@@ -624,6 +650,10 @@ class DPFResultData(DPFResultCore):
             * ``"MY_COMPONENT"``
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
+
+        return_field
+            When ``True``, returns the field associated with the results.
+            Default ``False``.
 
         Returns
         -------
@@ -648,10 +678,16 @@ class DPFResultData(DPFResultCore):
 
         >>> nnum, temp = rst.nodal_solution(0, nodes=range(20, 51))
         """
-        return self._get_nodes_result(rnum, "temperature", nodes=nodes)
+        return self._get_nodes_result(
+            rnum, "temperature", nodes=nodes, return_field=return_field
+        )
 
     def nodal_voltage(
-        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+        self,
+        rnum: Rnum,
+        in_nodal_coord_sys: bool = False,
+        nodes: Nodes = None,
+        return_field: bool = False,
     ) -> ReturnData:
         """Retrieves the voltage for each node in the
         solution.
@@ -679,6 +715,10 @@ class DPFResultData(DPFResultCore):
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
 
+        return_field
+            When ``True``, returns the field associated with the results.
+            Default ``False``.
+
         Returns
         -------
         numpy.ndarray
@@ -699,7 +739,11 @@ class DPFResultData(DPFResultCore):
         >>> nnum, temp = rst.nodal_stress(0, nodes='MY_COMPONENT')
         """
         return self._get_nodes_result(
-            rnum, "electric_potential", in_nodal_coord_sys, nodes
+            rnum,
+            "electric_potential",
+            in_nodal_coord_sys=in_nodal_coord_sys,
+            nodes=nodes,
+            return_field=return_field,
         )
 
     def element_stress(
@@ -708,6 +752,7 @@ class DPFResultData(DPFResultCore):
         principal: bool = False,
         in_element_coord_sys: bool = False,
         elements: Elements = None,
+        return_field: bool = False,
         **kwargs: Kwargs,
     ):
         """Retrieves the element component stresses.
@@ -740,6 +785,10 @@ class DPFResultData(DPFResultCore):
             * ``"MY_COMPONENT"``
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
+
+        return_field
+            When ``True``, returns the field associated with the results.
+            Default ``False``.
 
         **kwargs : optional keyword arguments
             Hidden options for distributed result files.
@@ -779,6 +828,12 @@ class DPFResultData(DPFResultCore):
                 "Hidden options for distributed result files are not implemented."
             )
 
+        if principal and return_field:
+            raise ValueError(
+                "Cannot return both principal stresses and field data. "
+                "Please set either 'principal' or 'return_field' to True, not both."
+            )
+
         if principal:
             op = self._get_elem_result(
                 rnum,
@@ -788,7 +843,14 @@ class DPFResultData(DPFResultCore):
                 return_operator=True,
             )
             return self._get_principal(op)
-        return self._get_elem_result(rnum, "stress", in_element_coord_sys, elements)
+
+        return self._get_elem_result(
+            rnum,
+            "stress",
+            in_element_coord_sys=in_element_coord_sys,
+            elements=elements,
+            return_field=return_field,
+        )
 
     def element_nodal_stress(
         self,
@@ -796,6 +858,7 @@ class DPFResultData(DPFResultCore):
         principal: bool = False,
         in_element_coord_sys: bool = False,
         elements: Elements = None,
+        return_field: bool = False,
         **kwargs: Kwargs,
     ):
         """Retrieves the nodal stresses for each element.
@@ -822,6 +885,10 @@ class DPFResultData(DPFResultCore):
             * ``"MY_COMPONENT"``
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
+
+        return_field
+            When ``True``, returns the field associated with the results.
+            Default ``False``.
 
         **kwargs
             Hidden options for distributed result files.
@@ -861,6 +928,12 @@ class DPFResultData(DPFResultCore):
                 "Hidden options for distributed result files are not implemented."
             )
 
+        if principal and return_field:
+            raise ValueError(
+                "Cannot return both principal stresses and field data. "
+                "Please set either 'principal' or 'return_field' to True, not both."
+            )
+
         if principal:
             op = self._get_elemnodal_result(
                 rnum,
@@ -870,12 +943,21 @@ class DPFResultData(DPFResultCore):
                 return_operator=True,
             )
             return self._get_principal(op)
+
         return self._get_elemnodal_result(
-            rnum, "stress", in_element_coord_sys, elements
+            rnum,
+            "stress",
+            in_element_coord_sys=in_element_coord_sys,
+            elements=elements,
+            return_field=return_field,
         )
 
     def nodal_elastic_strain(
-        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+        self,
+        rnum: Rnum,
+        in_nodal_coord_sys: bool = False,
+        nodes: Nodes = None,
+        return_field: bool = False,
     ) -> ReturnData:
         """Nodal component elastic strains.  This record contains
         strains in the order ``X, Y, Z, XY, YZ, XZ, EQV``.
@@ -903,6 +985,10 @@ class DPFResultData(DPFResultCore):
             * ``"MY_COMPONENT"``
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
+
+        return_field
+            When ``True``, returns the field associated with the results.
+            Default ``False``.
 
         Returns
         -------
@@ -942,11 +1028,19 @@ class DPFResultData(DPFResultCore):
         ..
         """
         return self._get_nodes_result(
-            rnum, "elastic_strain", in_nodal_coord_sys=in_nodal_coord_sys, nodes=nodes
+            rnum,
+            "elastic_strain",
+            in_nodal_coord_sys=in_nodal_coord_sys,
+            nodes=nodes,
+            return_field=return_field,
         )
 
     def nodal_plastic_strain(
-        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+        self,
+        rnum: Rnum,
+        in_nodal_coord_sys: bool = False,
+        nodes: Nodes = None,
+        return_field: bool = False,
     ) -> ReturnData:
         """Nodal component plastic strains.
 
@@ -973,6 +1067,10 @@ class DPFResultData(DPFResultCore):
             * ``"MY_COMPONENT"``
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
+
+        return_field
+            When ``True``, returns the field associated with the results.
+            Default ``False``.
 
         Returns
         -------
@@ -1001,10 +1099,20 @@ class DPFResultData(DPFResultCore):
 
         >>> nnum, plastic_strain = rst.nodal_plastic_strain(0, nodes=range(20, 51))
         """
-        return self._get_nodes_result(rnum, "plastic_strain", in_nodal_coord_sys, nodes)
+        return self._get_nodes_result(
+            rnum,
+            "plastic_strain",
+            in_nodal_coord_sys=in_nodal_coord_sys,
+            nodes=nodes,
+            return_field=return_field,
+        )
 
     def nodal_acceleration(
-        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+        self,
+        rnum: Rnum,
+        in_nodal_coord_sys: bool = False,
+        nodes: Nodes = None,
+        return_field: bool = False,
     ) -> ReturnData:
         """Nodal velocities for a given result set.
 
@@ -1025,6 +1133,10 @@ class DPFResultData(DPFResultCore):
             * ``"MY_COMPONENT"``
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
+
+        return_field
+            When ``True``, returns the field associated with the results.
+            Default ``False``.
 
         Returns
         -------
@@ -1048,10 +1160,20 @@ class DPFResultData(DPFResultCore):
         These results are removed by and the node numbers of the
         solution results are reflected in ``nnum``.
         """
-        return self._get_nodes_result(rnum, "acceleration", in_nodal_coord_sys, nodes)
+        return self._get_nodes_result(
+            rnum,
+            "acceleration",
+            in_nodal_coord_sys=in_nodal_coord_sys,
+            nodes=nodes,
+            return_field=return_field,
+        )
 
     def nodal_reaction_forces(
-        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+        self,
+        rnum: Rnum,
+        in_nodal_coord_sys: bool = False,
+        nodes: Nodes = None,
+        return_field: bool = False,
     ) -> ReturnData:
         """Nodal reaction forces.
 
@@ -1072,6 +1194,10 @@ class DPFResultData(DPFResultCore):
             * ``"MY_COMPONENT"``
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
+
+        return_field
+            When ``True``, returns the field associated with the results.
+            Default ``False``.
 
         Returns
         -------
@@ -1099,10 +1225,20 @@ class DPFResultData(DPFResultCore):
          array([1, 2, 3], dtype=int32),
          ['UX', 'UY', 'UZ'])
         """
-        return self._get_nodes_result(rnum, "reaction_force", in_nodal_coord_sys, nodes)
+        return self._get_nodes_result(
+            rnum,
+            "reaction_force",
+            in_nodal_coord_sys=in_nodal_coord_sys,
+            nodes=nodes,
+            return_field=return_field,
+        )
 
     def nodal_stress(
-        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+        self,
+        rnum: Rnum,
+        in_nodal_coord_sys: bool = False,
+        nodes: Nodes = None,
+        return_field: bool = False,
     ) -> ReturnData:
         """Retrieves the component stresses for each node in the
         solution.
@@ -1133,6 +1269,10 @@ class DPFResultData(DPFResultCore):
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
 
+        return_field
+            When ``True``, returns the field associated with the results.
+            Default ``False``.
+
         Returns
         -------
         nnum : numpy.ndarray
@@ -1162,10 +1302,20 @@ class DPFResultData(DPFResultCore):
         Nodes without a stress value will be NAN.
         Equivalent ANSYS command: PRNSOL, S
         """
-        return self._get_nodes_result(rnum, "stress", in_nodal_coord_sys, nodes)
+        return self._get_nodes_result(
+            rnum,
+            "stress",
+            in_nodal_coord_sys=in_nodal_coord_sys,
+            nodes=nodes,
+            return_field=return_field,
+        )
 
     def nodal_thermal_strain(
-        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+        self,
+        rnum: Rnum,
+        in_nodal_coord_sys: bool = False,
+        nodes: Nodes = None,
+        return_field: bool = False,
     ) -> ReturnData:
         """Nodal component thermal strain.
 
@@ -1194,6 +1344,10 @@ class DPFResultData(DPFResultCore):
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
 
+        return_field
+            When ``True``, returns the field associated with the results.
+            Default ``False``.
+
         Returns
         -------
         np.ndarray
@@ -1220,10 +1374,20 @@ class DPFResultData(DPFResultCore):
 
         >>> nnum, thermal_strain = rst.nodal_thermal_strain(0, nodes=range(20, 51))
         """
-        return self._get_nodes_result(rnum, "thermal_strain", in_nodal_coord_sys, nodes)
+        return self._get_nodes_result(
+            rnum,
+            "thermal_strain",
+            in_nodal_coord_sys=in_nodal_coord_sys,
+            nodes=nodes,
+            return_field=return_field,
+        )
 
     def nodal_velocity(
-        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+        self,
+        rnum: Rnum,
+        in_nodal_coord_sys: bool = False,
+        nodes: Nodes = None,
+        return_field: bool = False,
     ) -> ReturnData:
         """Nodal velocities for a given result set.
 
@@ -1244,6 +1408,10 @@ class DPFResultData(DPFResultCore):
             * ``"MY_COMPONENT"``
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
+
+        return_field
+            When ``True``, returns the field associated with the results.
+            Default ``False``.
 
         Returns
         -------
@@ -1267,10 +1435,20 @@ class DPFResultData(DPFResultCore):
         These results are removed by and the node numbers of the
         solution results are reflected in ``nnum``.
         """
-        return self._get_nodes_result(rnum, "velocity", in_nodal_coord_sys, nodes)
+        return self._get_nodes_result(
+            rnum,
+            "velocity",
+            in_nodal_coord_sys=in_nodal_coord_sys,
+            nodes=nodes,
+            return_field=return_field,
+        )
 
     def nodal_static_forces(
-        self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
+        self,
+        rnum: Rnum,
+        in_nodal_coord_sys: bool = False,
+        nodes: Nodes = None,
+        return_field: bool = False,
     ) -> ReturnData:
         """Return the nodal forces averaged at the nodes.
 
@@ -1295,6 +1473,10 @@ class DPFResultData(DPFResultCore):
             * ``"MY_COMPONENT"``
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
+
+        return_field
+            When ``True``, returns the field associated with the results.
+            Default ``False``.
 
         Returns
         -------
@@ -1330,7 +1512,13 @@ class DPFResultData(DPFResultCore):
         Nodes without a a nodal will be NAN.  These are generally
         midside (quadratic) nodes.
         """
-        return self._get_nodes_result(rnum, "nodal_force", in_nodal_coord_sys, nodes)
+        return self._get_nodes_result(
+            rnum,
+            "nodal_force",
+            in_nodal_coord_sys=in_nodal_coord_sys,
+            nodes=nodes,
+            return_field=return_field,
+        )
 
     def principal_nodal_stress(
         self, rnum: Rnum, in_nodal_coord_sys: bool = False, nodes: Nodes = None
