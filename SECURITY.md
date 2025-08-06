@@ -26,7 +26,7 @@ SOFTWARE.
 
 ## Supported Versions
 
-Up to three released minor versions are supported. The latest version can be check at [PyMAPDL Releases](https://github.com/ansys/pymapdl/releases).
+Up to three released minor versions are supported. The latest version can be checked at [PyMAPDL Releases](https://github.com/ansys/pymapdl/releases).
 
 For MAPDL compatibility table visit [Versions and interfaces](https://mapdl.docs.pyansys.com/version/stable/getting_started/versioning.html).
 
