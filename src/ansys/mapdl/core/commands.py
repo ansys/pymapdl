@@ -46,6 +46,7 @@ from ._commands import (
     misc,
     post1,
     post26,
+    prep7,
     preproc,
     session,
     solution,
@@ -325,17 +326,26 @@ def check_valid_output(func: Callable[..., Any]) -> Callable[..., Any]:
     return func_wrapper
 
 
+class Prep7Commands(
+    prep7._status.Status,
+    prep7.areas.Areas,
+    prep7.artificially_matched_layers.ArtificiallyMatchedLayers,
+    prep7.booleans.Booleans,
+    prep7.constraint_equations_.ConstraintEquations,
+    prep7.constraint_equations.ConstraintEquations,
+    prep7.coupled_dof.CoupledDof,
+    prep7.cross_sections.CrossSections,
+    prep7.data_tables.DataTables,
+):
+    pass
+
+
 class PreprocessorCommands(
     preproc.database.Database,
     preproc.explicit_dynamics.ExplicitDynamics,
     preproc.lines.Lines,
-    preproc.areas.Areas,
     preproc.nodes.Nodes,
     preproc.keypoints.KeyPoints,
-    preproc.artificially_matched_layers.ArtificiallyMatchedLayers,
-    preproc.booleans.Booleans,
-    preproc.constraint_equations.ConstraintEquations,
-    preproc.coupled_dof.CoupledDOF,
     preproc.real_constants.RealConstants,
     preproc.digitizing.Digitizing,
     preproc.element_type.ElementType,
