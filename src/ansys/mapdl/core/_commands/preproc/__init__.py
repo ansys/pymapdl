@@ -21,11 +21,6 @@
 # SOFTWARE.
 
 from . import (
-    areas,
-    artificially_matched_layers,
-    booleans,
-    constraint_equations,
-    coupled_dof,
     database,
     digitizing,
     element_type,
