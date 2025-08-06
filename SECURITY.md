@@ -26,22 +26,14 @@ SOFTWARE.
 
 ## Supported Versions
 
-The following versions are officially supported:
-
-| Version | Supported          |
-| ------- | ------------------ |
-| <= 0.67 | :x:                |
-| 0.68.x  | :white_check_mark: |
-| 0.69.x  | :white_check_mark: |
-| 0.70.0  | :white_check_mark: |
-| dev     | :white_check_mark: |
+Up to three released minor versions are supported. The latest version can be check at [PyMAPDL Releases](https://github.com/ansys/pymapdl/releases).
 
 For MAPDL compatibility table visit [Versions and interfaces](https://mapdl.docs.pyansys.com/version/stable/getting_started/versioning.html).
 
 ## Reporting a vulnerability
 
 > [!CAUTION]
-> **Do not use GitHub issues to report any security vulnerabilities.**
+> Do not use GitHub issues to report any security vulnerabilities.
 
 If you detect a vulnerability, contact the [PyAnsys Core team](mailto:pyansys.core@ansys.com),
 mentioning the repository and the details of your finding. The team will address it as soon as possible.
