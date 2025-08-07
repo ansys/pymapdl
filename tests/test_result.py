@@ -66,7 +66,7 @@ elif not TEST_DPF_BACKEND:
 else:
     from ansys.dpf import core as dpf_core
     from ansys.dpf.gate.errors import DPFServerException
-    from ansys.mapdl.core.reader.result import COMPONENTS
+    from ansys.mapdl.core.reader.constants import COMPONENTS
 
 from ansys.mapdl.reader import read_binary
 from ansys.mapdl.reader.rst import Result
@@ -312,7 +312,7 @@ class Example:
     def result(self, setup, tmp_path_factory, mapdl):
         # Since the DPF upload is broken, we copy the RST file to a temporary directory
         # in the MAPDL directory
-        from ansys.mapdl.core.reader.result import DPFResult
+        from ansys.mapdl.core.reader import DPFResult
 
         LOG.debug(
             f"Creating DPFResult with RST file: {self.rst_path}",
@@ -375,7 +375,7 @@ class Example:
 
 
 def test_error_initialization_none():
-    from ansys.mapdl.core.reader.result import DPFResult
+    from ansys.mapdl.core.reader import DPFResult
 
     with pytest.raises(
         ValueError, match="One of the following kwargs must be supplied"
@@ -384,14 +384,14 @@ def test_error_initialization_none():
 
 
 def test_error_initialization_both():
-    from ansys.mapdl.core.reader.result import DPFResult
+    from ansys.mapdl.core.reader import DPFResult
 
     with pytest.raises(ValueError, match="Only one the arguments must be supplied"):
         DPFResult(rst_file="", mapdl="")
 
 
 def test_error_initialization_rst_file_not_found():
-    from ansys.mapdl.core.reader.result import DPFResult
+    from ansys.mapdl.core.reader import DPFResult
 
     rst_file = "my_unexisting_rst_file.rst"
     with pytest.raises(
@@ -451,7 +451,7 @@ class TestDPFResult:
     @pytest.fixture(scope="class")
     def result(self, mapdl):
         """Fixture to ensure the model is solved before running tests."""
-        from ansys.mapdl.core.reader.result import DPFResult
+        from ansys.mapdl.core.reader import DPFResult
 
         clear(mapdl)
         solved_box_func(mapdl)
@@ -490,9 +490,7 @@ class TestDPFResult:
             (True, Result),
             (
                 False,
-                __import__(
-                    "ansys.mapdl.core.reader.result", fromlist=["DPFResult"]
-                ).DPFResult,
+                __import__("ansys.mapdl.core.reader", fromlist=["DPFResult"]).DPFResult,
             ),
         ],
     )
