@@ -355,10 +355,3 @@ class MapdlConsole(MapdlBase):
         if not self._name:
             self._name = f"Console_PID_{self._process.pid}"
         return self._name
-
-    def scalar_param(self, parm_name):
-        response = self.starstatus(parm_name)
-        response = response.splitlines()[-1]
-        if parm_name.upper() not in response:
-            raise ValueError(f"Parameter {parm_name} not found")
-        return float(response.split()[1].strip())
