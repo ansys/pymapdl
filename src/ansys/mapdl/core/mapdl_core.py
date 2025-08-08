@@ -375,6 +375,7 @@ class _MapdlCore(Commands):
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
 
+        # Empty object that will store the `PostProcessing` object
         self._post_object = None
 
         # Wrapping listing functions for "to_array" methods
@@ -391,15 +392,6 @@ class _MapdlCore(Commands):
 
     def _after_run(self, _command: str) -> None:
         pass
-
-    @property
-    def _post(self):
-        """
-        Initializes _post_object and allows _post to be None at __init__
-        """
-        if self._post_object is None:
-            self._post_object = PostProcessing(self)
-        return self._post_object
 
     @property
     def allow_ignore(self):
@@ -972,7 +964,11 @@ class _MapdlCore(Commands):
             raise MapdlRuntimeError(
                 "MAPDL exited.\n\nCan only postprocess a live " "MAPDL instance."
             )
-        return self._post
+
+        if self._post_object is None:
+            self._post_object = PostProcessing(self)
+
+        return self._post_object
 
     @property
     def print_com(self):
