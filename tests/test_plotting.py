@@ -1339,7 +1339,7 @@ def test_plot_path_screenshoot(mapdl, cleared, tmpdir):
     mapdl.graphics("FULL")
 
 
-def test_deprecated_params(mapdl):
+def test_deprecated_params(mapdl, make_block):
     with pytest.warns(DeprecationWarning, match="'vtk' and 'use_vtk' are deprecated"):
         mapdl.eplot(vtk=True)
     with pytest.warns(DeprecationWarning, match="'vtk' and 'use_vtk' are deprecated"):
