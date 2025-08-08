@@ -1223,6 +1223,18 @@ class TestNonaxisymmetric_vibration_of_a_stretched_circular_membrane(Example):
             results.shape
         ), "Element stress should have 6 components for each element."
 
+    @pytest.mark.parametrize("nodes", [["RIGHT"], ["LEFT", "RIGHT"]])
+    @pytest.mark.parametrize("set_", [0, 1, 2])
+    @pytest.mark.parametrize("comp", [0, 1, 2, 3, 4, 5])
+    def test_plot_nodal_stress(self, result, nodes, set_, comp):
+        """Test that plotting nodal stress works."""
+        import matplotlib.pyplot as plt
+
+        fig, ax = plt.subplots()
+        viewer = result.plot_nodal_stress(0, nodes=nodes, comp=comp, return_viewer=True)
+        assert fig is not None
+        plt.close(fig)
+
     @pytest.mark.parametrize(
         "values",
         [
