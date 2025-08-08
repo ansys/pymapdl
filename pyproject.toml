@@ -69,7 +69,7 @@ tests = [
   "matplotlib==3.10.5",
   "pandas==2.3.1",
   "pyansys-tools-report==0.8.2",
-  "pyfakefs==5.9.1",
+  "pyfakefs==5.9.2",
   "pyiges[full]==0.3.2",
   "pytest-cov==6.2.1",
   "pytest-profiling==1.8.1",
