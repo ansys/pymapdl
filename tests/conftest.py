@@ -218,7 +218,6 @@ if has_dependency("pyvista"):
 
     # Necessary for CI plotting
     pyvista.OFF_SCREEN = True
-    pyvista.global_theme.allow_empty_mesh = True
 
     from ansys.mapdl.core.plotting.theme import _apply_default_theme
 
