@@ -34,9 +34,6 @@ if not has_dependency("pyvista"):
         allow_module_level=True, reason="Skipping because 'pyvista' is not installed"
     )
 
-import pyvista
-
-pyvista.global_theme.allow_empty_mesh = True
 
 from ansys.mapdl.core.errors import ComponentDoesNotExits, MapdlRuntimeError
 from ansys.mapdl.core.plotting import GraphicsBackend
