@@ -1081,8 +1081,8 @@ class DPFResultCore:
         return_field: bool = False,
     ):
         return self._get_result(
-            rnum,
-            result_type,
+            rnum=rnum,
+            result_field=result_type,
             requested_location="Nodal",
             scope_ids=nodes,
             result_in_entity_cs=in_nodal_coord_sys,
@@ -1101,8 +1101,8 @@ class DPFResultCore:
         return_field: bool = False,
     ):
         return self._get_result(
-            rnum,
-            result_type,
+            rnum=rnum,
+            result_field=result_type,
             requested_location="Elemental",
             scope_ids=elements,
             result_in_entity_cs=in_element_coord_sys,
@@ -1121,8 +1121,8 @@ class DPFResultCore:
         return_field: bool = False,
     ):
         return self._get_result(
-            rnum,
-            result_type,
+            rnum=rnum,
+            result_field=result_type,
             requested_location="Elemental_Nodal",
             scope_ids=elements,
             result_in_entity_cs=in_element_coord_sys,
