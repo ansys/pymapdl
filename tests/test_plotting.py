@@ -34,9 +34,6 @@ if not has_dependency("pyvista"):
         allow_module_level=True, reason="Skipping because 'pyvista' is not installed"
     )
 
-import pyvista
-
-pyvista.global_theme.allow_empty_mesh = True
 
 from ansys.mapdl.core.errors import ComponentDoesNotExits, MapdlRuntimeError
 from ansys.mapdl.core.plotting import GraphicsBackend
@@ -1339,7 +1336,7 @@ def test_plot_path_screenshoot(mapdl, cleared, tmpdir):
     mapdl.graphics("FULL")
 
 
-def test_deprecated_params(mapdl):
+def test_deprecated_params(mapdl, make_block):
     with pytest.warns(DeprecationWarning, match="'vtk' and 'use_vtk' are deprecated"):
         mapdl.eplot(vtk=True)
     with pytest.warns(DeprecationWarning, match="'vtk' and 'use_vtk' are deprecated"):
