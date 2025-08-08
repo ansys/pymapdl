@@ -1,34 +1,37 @@
-.. _ref_areas_commands_api:
 
-*****
+.. _ref_areas:
+
+
 Areas
-*****
+=====
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to create, modify, list, etc., areas.
+.. currentmodule:: ansys.mapdl.core._commands.prep7.areas
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.areas.Areas
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.a
-   Mapdl.aatt
-   Mapdl.adele
-   Mapdl.adgl
-   Mapdl.adrag
-   Mapdl.afillt
-   Mapdl.agen
-   Mapdl.al
-   Mapdl.alist
-   Mapdl.anorm
-   Mapdl.aoffst
-   Mapdl.areverse
-   Mapdl.arotat
-   Mapdl.arscale
-   Mapdl.arsym
-   Mapdl.askin
-   Mapdl.asub
-   Mapdl.asum
-   Mapdl.atran
-   Mapdl.gsum
-   Mapdl.splot
+
+   Areas.a
+   Areas.adele
+   Areas.adgl
+   Areas.adrag
+   Areas.afillt
+   Areas.agen
+   Areas.al
+   Areas.alist
+   Areas.anorm
+   Areas.aoffst
+   Areas.aplot
+   Areas.areverse
+   Areas.arotat
+   Areas.arscale
+   Areas.arsym
+   Areas.askin
+   Areas.asub
+   Areas.asum
+   Areas.atran
+   Areas.splot
