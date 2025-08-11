@@ -1,0 +1,18 @@
+services:
+  mapdl:
+    shm_size: '8gb'
+    container_name: mapdl
+    mem_reservation: 8g
+    environment:
+      - ANSYSLMD_LICENSE_FILE=1055@${ANSYSLMD_LICENSE_FILE}
+      - ANSYS_LOCK=OFF
+    image: ${DOCKER_IMAGE}
+    platform: linux/amd64
+    entrypoint: "/bin/bash ansys -grpc"
+
+  test:
+    container_name: pymapdl-test
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
