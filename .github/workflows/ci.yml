@@ -53,6 +53,8 @@ jobs:
         if: |
           (
           github.event_name == 'pull_request' &&
+          github.actor != 'dependabot[bot]' &&
+          github.actor != 'pyansys-ci-bot' &&
           github.event.pull_request.state == 'opened' &&
           github.event.pull_request.assignees == '[]'
           )
