@@ -45,6 +45,21 @@ permissions:
 
 jobs:
 
+  add_labels:
+    name: Adding assignee if there is none.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions-ecosystem/action-add-assignees@v1
+        if: |
+          (
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.state == 'opened' &&
+          github.event.pull_request.assignees == '[]'
+          )
+        with:
+          github_token: ${{ secrets.github_token }}
+          assignees: ${{ github.actor }}
+
   update-changelog:
     name: "Update CHANGELOG (on release)"
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
