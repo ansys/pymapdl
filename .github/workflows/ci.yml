@@ -152,7 +152,6 @@ jobs:
     name: "Deploy PR documentation"
     runs-on: ubuntu-latest
     needs: docs-build
-    if: needs.docs-build.result == 'success'
     steps:
       - uses: ansys/actions/doc-deploy-pr@v10.0.14
         with:
