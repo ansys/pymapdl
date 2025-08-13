@@ -152,6 +152,7 @@ jobs:
     name: "Deploy PR documentation"
     runs-on: ubuntu-latest
     needs: docs-build
+    if: contains(github.event.pull_request.labels.*.name, 'deploy pr docs')
     steps:
       - uses: ansys/actions/doc-deploy-pr@v10.0.14
         with:
