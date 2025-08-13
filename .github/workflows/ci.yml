@@ -2,7 +2,6 @@ name: CI
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize, edited, closed]
   workflow_dispatch:
     inputs:
       run_all_builds:
