@@ -1,0 +1,29 @@
+# This action cleans up the deployed documentation for pull requests
+# after they have been merged or closed.
+# The docs deployment is implemented in the main CICD file (`ci.yml`)
+# since it is in that workflow where the docs are built.
+# 
+# For more information see:
+# https://actions.docs.ansys.com/version/stable/doc-actions/index.html#doc-deploy-pr-action
+
+name: PR-docs cleaner
+
+on:
+  pull_request:
+    types: [closed]
+
+env:
+  DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
+
+jobs:
+  clean-docs-pr:
+    name: "Deploy PR documentation"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ansys/actions/doc-deploy-pr@v10.0.14
+        with:
+          cname: ${{ env.DOCUMENTATION_CNAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
+          maximum-pr-doc-deployments: 3
