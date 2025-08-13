@@ -55,8 +55,7 @@ jobs:
           github.event_name == 'pull_request' &&
           github.actor != 'dependabot[bot]' &&
           github.actor != 'pyansys-ci-bot' &&
-          github.event.pull_request.state == 'opened' &&
-          github.event.pull_request.assignees == '[]'
+          toJson(github.event.pull_request.assignees) == '{}'
           )
         with:
           github_token: ${{ secrets.github_token }}
