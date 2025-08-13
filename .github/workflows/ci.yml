@@ -146,6 +146,22 @@ jobs:
       license-server: ${{ secrets.LICENSE_SERVER }}
       username: ${{ github.actor }}
       password: ${{ secrets.GITHUB_TOKEN }}
+  
+
+  doc-deploy-pr:
+    name: "Deploy PR documentation"
+    runs-on: ubuntu-latest
+    needs: docs-build
+    # Run when the PR is closed i.e. when doc-build job is skipped
+    if: always() && (needs.docs-build.result == 'success' || needs.docs-build.result == 'skipped')
+    steps:
+      - uses: ansys/actions/doc-deploy-pr@v10.0.14
+        with:
+          cname: ${{ env.DOCUMENTATION_CNAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
+          maximum-pr-doc-deployments: 3
 
 
   build-test-remote-matrix:
