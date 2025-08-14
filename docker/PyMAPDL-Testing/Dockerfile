@@ -1,6 +1,9 @@
 # PyMAPDL docker image that runs the tests.
 
-ARG DOCKER_IMAGE
+# Dummy default so there is no error if not set.
+# It needs to be set here because we are using it
+# later on the FROM.
+ARG DOCKER_IMAGE=mapdl:latest
 
 #######################################################
 FROM ubuntu:22.04 AS python-main

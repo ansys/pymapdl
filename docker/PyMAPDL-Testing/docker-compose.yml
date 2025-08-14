@@ -149,8 +149,6 @@ services:
       - '' # Default profile
     container_name: pymapdl-test
     platform: linux/amd64
-    depends_on:
-      - mapdl
     networks: 
       - pymapdl-net
     build:
@@ -167,11 +165,13 @@ services:
   pymapdl-clone:
     # This service clones the PyMAPDL repository and test against it.
     profiles:
-      - cloned-repository
+      - pymapdl-clone
+      - mapdl-remote-container-pymapdl-clone
+      - mapdl-remote-host-pymapdl-clone
+      - mapdl-local-container-pymapdl-clone
+      - mapdl-local-host-pymapdl-clone
     container_name: pymapdl-test
     platform: linux/amd64
-    depends_on:
-      - mapdl
     networks:
       - pymapdl-net
     build:
