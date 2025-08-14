@@ -62,6 +62,8 @@ class MapdlInProcess(MapdlBase):
         return self._in_process_backend.run_command(command, verbose, mute).strip()
 
     def wrinqr(self, key: int) -> int:
+        if self.version < 26.1:
+            return super().wrinqr(self, key)
         return self._in_process_backend.wrinqr(key)
 
     def input(
