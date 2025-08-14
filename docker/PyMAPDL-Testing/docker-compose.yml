@@ -24,11 +24,7 @@
 #
 # - MAPDL profiles:
 #   - mapdl-remote-container
-#   - mapdl-remote-container
 #   - mapdl-remote-host
-#   - mapdl-remote-host
-#   - mapdl-local-container
-#   - mapdl-local-host
 #   - mapdl-local-container
 #   - mapdl-local-host
 #
@@ -70,7 +66,7 @@
 # docker compose --profile local-repository --profile mapdl-container up
 #
 
-name: PyMAPDL Testing
+name: PyMAPDL-Testing
 
 services:
   mapdl-remote-container:
