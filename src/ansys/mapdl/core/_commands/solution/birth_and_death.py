@@ -116,7 +116,6 @@ class BirthAndDeath:
         >>> mapdl.prep7()
         >>> mapdl.estif(1E-8)
         'DEAD ELEMENT STIFFNESS MULTIPLIER= 0.10000E-07'
-
         """
         command = f"ESTIF,{kmult}"
         return self.run(command, **kwargs)

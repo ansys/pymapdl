@@ -59,7 +59,6 @@ class Elements:
 
         tline
             Component name for the target lines meshed with fluid elements.
-
         """
         command = f"AFSURF,{sarea},{tline}"
         return self.run(command, **kwargs)
@@ -138,7 +137,6 @@ class Elements:
         >>> mapdl.n(12, 0, 1, 1)
         >>> mapdl.e(5, 6, 7, 8, 9, 10, 11, 12)
         2
-
         """
         command = f"E,{i},{j},{k},{l},{m},{n},{o},{p}"
         return parse.parse_e(self.run(command, **kwargs))
@@ -210,7 +208,6 @@ class Elements:
 
         >>> mapdl.edele(10, 25)
         'DELETE SELECTED ELEMENTS FROM         10 TO         25 BY          1'
-
         """
         return self.run(f"EDELE,{iel1},{iel2},{inc}", **kwargs)
 
@@ -766,7 +763,6 @@ class Elements:
         >>> mapdl.vmesh('S', 'VOLU', '', 2)
         >>> mapdl.allsel('BELOW', 'VOLU')
         >>> mapdl.emodif('ALL', 'MAT', 2)
-
         """
         command = f"EMODIF,{iel},{stloc},{i1},{i2},{i3},{i4},{i5},{i6},{i7},{i8}"
         return self.run(command, **kwargs)
@@ -830,7 +826,6 @@ class Elements:
         'ELEMENT 1  1  2  3  4  5  6  7  8
                     9 10 11 12 13 14 15 16
                    17 18 19 20
-
         """
         command = f"EMORE,{q},{r},{s},{t},{u},{v},{w},{x}"
         return self.run(command, **kwargs)
@@ -1185,7 +1180,6 @@ class Elements:
         Examples
         --------
         >>> mapdl.enorm(1)
-
         """
         return self.run(f"ENORM,{enum}", **kwargs)
 
@@ -1278,7 +1272,6 @@ class Elements:
         PowerGraphics does not display midside nodes. ``/EFACET`` has no effect on EPLOT for non-midside
         node elements.
         This command is valid in any processor.
-
         """
         return self.run("EPLOT", **kwargs)
 
@@ -1634,7 +1627,6 @@ class Elements:
         Examples
         --------
         >>> mapdl.ewrite('etable.txt', format_='LONG')
-
         """
         return self.run(f"EWRITE,{fname},{ext},,{kappnd},{format_}", **kwargs)
 
@@ -1710,7 +1702,6 @@ class Elements:
             Real constant ID number for general contact interaction properties
             at the SECT1/SECT2 interface.  If zero or blank, the previous
             setting of REALID for SECT1/SECT2 (if any) is retained.
-
         """
         command = f"GCDEF,{option},{sect1},{sect2},{matid},{realid}"
         return self.run(command, **kwargs)
@@ -2104,7 +2095,6 @@ class Elements:
 
         For further details, see:
         https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_SHSD.html
-
         """
         return self.run(f"SHSD,{rid},{action}", **kwargs)
 

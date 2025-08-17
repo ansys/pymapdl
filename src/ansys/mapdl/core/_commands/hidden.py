@@ -22,7 +22,6 @@
 
 """These commands may be run by PyMAPDL, but are not supported from a
 user-context.
-
 """
 
 

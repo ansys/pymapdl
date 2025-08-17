@@ -219,7 +219,6 @@ class MapdlTheme(Theme):  # type: ignore
     Apply this theme to area plotting.
 
     >>> mapdl.aplot(theme=theme)
-
     """
 
     def __init__(self) -> None:  # type: ignore

@@ -67,3 +67,14 @@ def test_info_stitle(mapdl, cleared):
 
     info.stitles = None
     assert all([not each for each in info.stitles])
+
+
+def test_title(mapdl, cleared):
+    """Test the title property of the MapdlInfo class."""
+    title = "This is a test title"
+    mapdl.info.title = title
+    assert mapdl.info.title == title
+
+    stitles = ["Subtitle 1", "Subtitle 2", "Subtitle 3", "Subtitle 4"]
+    mapdl.info.stitles = stitles
+    assert mapdl.info.stitles == stitles
