@@ -60,10 +60,22 @@ class MapdlInProcess(MapdlBase):
         if len(command) > 639:
             raise ValueError("Maximum command length mut be less than 640 characters")
         return self._in_process_backend.run_command(command, verbose, mute).strip()
-
+    
+    @property
+    def version(self) -> float:
+        """
+        Overloading version property to force the call of MapdlBase.wrinqr to prevent
+        a recursion error
+        """
+        original_func = self.wrinqr
+        self.wrinqr = MapdlBase.wrinqr.__get__(self, MapdlInProcess)
+        version = super().version
+        self.wrinqr = original_func
+        return version
+    
     def wrinqr(self, key: int) -> int:
         if self.version < 26.1:
-            return super().wrinqr(self, key)
+            return super().wrinqr(key)
         return self._in_process_backend.wrinqr(key)
 
     def input(
