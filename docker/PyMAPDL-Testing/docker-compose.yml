@@ -98,7 +98,15 @@ services:
     platform: linux/amd64
     # You might want to customize it
     entrypoint: ${MAPDL_ENTRYPOINT:-"/bin/bash"}
-    command: ["${MAPDL_EXEC_PATH:-ansys}", "-grpc", "${MAPDL_EXTRA_ARGS:-}"]
+    command: [
+      "${MAPDL_EXEC_PATH:-ansys}",
+      "-grpc",
+      "${MAPDL_EXTRA_ARGS:-}"
+      ]
+    # Required for v261 onwards.
+    working_dir: /workspace
+    volumes:
+    - ./mylocal.ip:/workspace/mylocal.ip:ro
 
   mapdl-remote-host:
     # This service is used to run the local MAPDL instalation by mounting the volume
@@ -146,7 +154,6 @@ services:
       - mapdl-remote-host-pymapdl-host
       - mapdl-local-container-pymapdl-host
       - mapdl-local-host-pymapdl-host
-      - '' # Default profile
     container_name: pymapdl-test
     platform: linux/amd64
     networks: 
@@ -156,9 +163,10 @@ services:
       dockerfile: Dockerfile
       target: test-local-pymapdl
     environment:
-      - PYMAPDL_IP=mapdl-remote # Use the MAPDL service name 
+      - PYMAPDL_IP=mapdl # Use the MAPDL service name 
       # If empty, it will use the default 'main' branch
-      - PYMAPDL_BRANCH=${PYMAPDL_BRANCH}# if empty, it will use the default 'main' branch
+      - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-main}
+    working_dir: /workspace/pymapdl
     volumes:
       - ../../../:/workspace
 
@@ -170,19 +178,20 @@ services:
       - mapdl-remote-host-pymapdl-clone
       - mapdl-local-container-pymapdl-clone
       - mapdl-local-host-pymapdl-clone
-    container_name: pymapdl-test
+      - '' # Default profile
+    # container_name: pymapdl-test
     platform: linux/amd64
     networks:
       - pymapdl-net
     build:
       context: .
       dockerfile: Dockerfile
-      target: test-local-pymapdl
+      target: test-clone-pymapdl
     environment:
-      - PYMAPDL_IP=mapdl-remote # Use the MAPDL service name
+      - PYMAPDL_IP=mapdl # Use the MAPDL service name
       # If empty, it will use the default 'main' branch
-      - PYMAPDL_BRANCH=${PYMAPDL_BRANCH}# if empty, it will use the default 'main' branch
-   
+      - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-main}
+
   mapdl-local-container-pymapdl-clone:
     # This service clones PyMAPDL inside the MAPDL container and run the tests.
     # 
@@ -208,7 +217,7 @@ services:
         - DOCKER_IMAGE=${DOCKER_IMAGE}
     environment:
       # If empty, it will use the default 'main' branch
-      - PYMAPDL_BRANCH=${PYMAPDL_BRANCH}# if empty, it will use the default 'main' branch
+      - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-main}
 
   mapdl-local-container-pymapdl-host:
     # This service clones PyMAPDL inside the MAPDL container and run the tests.
@@ -235,7 +244,7 @@ services:
         - DOCKER_IMAGE=${DOCKER_IMAGE}
     environment:
       # If empty, it will use the default 'main' branch
-      - PYMAPDL_BRANCH=${PYMAPDL_BRANCH}# if empty, it will use the default 'main' branch
+      - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-main}
     volumes:
       - ../../../:/workspace
 

@@ -78,7 +78,7 @@ ENV ON_SAME_CONTAINER=False
 
 # Pytest settings
 # ---------------
-ENV PYTEST_ARGUMENTS='-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers'
+ENV PYTEST_ARGUMENTS="-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers"
 
 # Setting entrypoint
 # ------------------
@@ -87,22 +87,24 @@ RUN chmod +x /start.sh
 
 EXPOSE 50052
 
+RUN git config --global --add safe.directory /workspace/pymapdl
+
 CMD [ "/bin/bash", "/start.sh" ]
 
 #######################################################
 FROM python-main AS test-clone-pymapdl
 #######################################################
 
-ENV USE_LOCAL_REPO=True
+ENV USE_LOCAL_REPO=false
 
 #######################################################
 FROM python-main AS test-local-pymapdl
 #######################################################
 
-ENV USE_LOCAL_REPO=False
+ENV USE_LOCAL_REPO=true
 
 # Remove cloned repo so the local repo can be mounted.
-RUN rm -rf *
+RUN $(rm -rf *) >/dev/null 2>&1
 
 #######################################################
 FROM ubuntu:22.04 AS mapdl-local
@@ -130,7 +132,7 @@ RUN apt-get update && \
         && add-apt-repository -y ppa:zeehio/libxp \
         && apt-get update \
         && apt-get install -y libxp6 \
-        apt-get clean && rm -rf /var/lib/apt/lists/*
+        && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #######################################################
 FROM ${DOCKER_IMAGE} AS mapdl-local-container-pymapdl
