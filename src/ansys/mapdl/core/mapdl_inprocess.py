@@ -78,7 +78,6 @@ class MapdlInProcess(MapdlBase):
     def exit(self) -> None:
         self._in_process_backend.exit()
 
-
     @MapdlBase.name.getter
     def name(self) -> str:
         return "MapdlInProcess"
