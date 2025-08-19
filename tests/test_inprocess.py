@@ -29,6 +29,8 @@ import pytest
 if TYPE_CHECKING:
     from ansys.mapdl.core import Mapdl
 
+from conftest import ON_LOCAL
+
 
 class MapdlInProcessRunner:
     def __init__(self, wdir: str, exec_path: str | None = None) -> None:
@@ -97,7 +99,6 @@ class MapdlInProcessRunner:
 
 @pytest.fixture()
 def mapdl_inprocess(mapdl: "Mapdl", tmp_path) -> MapdlInProcessRunner:
-    from conftest import ON_LOCAL
 
     # check if MAPDL has *PYTHON
     if mapdl.version < 25.2:
