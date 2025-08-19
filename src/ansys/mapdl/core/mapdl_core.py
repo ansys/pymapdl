@@ -3096,8 +3096,7 @@ class _MapdlCore(Commands):
 
         def __enter__(self):
             self._parent()._log.debug("Entering force-output mode")
-
-            if self._parent().wrinqr(1) != 1:  # using wrinqr is more reliable than *get
+            if self._parent().wrinqr(1) == 0:  # using wrinqr is more reliable than *get
                 self._in_nopr = True
                 self._parent()._run("/gopr")  # Going to PR mode
             else:
