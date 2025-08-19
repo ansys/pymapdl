@@ -2036,8 +2036,11 @@ def test_force_output(mapdl, cleared):
 
 
 def test_get_not_muted(mapdl, cleared):
-    with mapdl.muted:
-        assert mapdl.get("line1", "LINE", 0, "NUM", "MAX") is not None
+    with patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.wrinqr") as mock_muted:
+        with mapdl.muted:
+            assert mapdl.get("line1", "LINE", 0, "NUM", "MAX") is not None
+
+    mock_muted.assert_called_once()
 
 
 def test_session_id(mapdl, cleared, running_test):
