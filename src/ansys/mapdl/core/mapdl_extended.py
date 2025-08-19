@@ -2128,7 +2128,7 @@ class _MapdlCommandExtended(_MapdlCore):
         response = self.run(command, **kwargs)
 
         if not response:
-            # If no response is received, check if the command was suppressed.
+            # If no response is received, re-run the command with force_output to ensure output is captured.
             with self.force_output:
                 response = self.run(command, **kwargs)
 
