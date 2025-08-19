@@ -85,11 +85,13 @@ class MapdlInProcessRunner:
                     "input.mac",
                     "-o",
                     "out.out",
+                    os.getenv("PYMAPDL_ADDITIONAL_SWITCHES", ""),
                     "-dir",
                     self.wdir,
                 ],
                 check=True,
                 capture_output=True,
+                shell=True,  # nosec B603
             )
 
         except subprocess.CalledProcessError as e:
