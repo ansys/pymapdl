@@ -76,19 +76,6 @@ class MapdlInProcessRunner:
         with open(os.path.join(self.wdir, "input.mac"), "w") as f:
             f.write(cmds)
 
-        self.completed_process = subprocess.run(
-            args=[
-                self.exec_path,
-                "-b",
-                "-i",
-                "input.mac",
-                "-o",
-                "out.out",
-                "-dir",
-                self.wdir,
-            ],
-            check=True,
-            capture_output=True,
         try:
             self.completed_process = subprocess.run(
                 args=[
@@ -104,6 +91,7 @@ class MapdlInProcessRunner:
                 check=True,
                 capture_output=True,
             )
+
         except subprocess.CalledProcessError as e:
             error_msg = (
                 f"MAPDL execution failed with return code {e.returncode}.\n"
