@@ -89,7 +89,29 @@ class MapdlInProcessRunner:
             ],
             check=True,
             capture_output=True,
-        )
+        try:
+            self.completed_process = subprocess.run(
+                args=[
+                    self.exec_path,
+                    "-b",
+                    "-i",
+                    "input.mac",
+                    "-o",
+                    "out.out",
+                    "-dir",
+                    self.wdir,
+                ],
+                check=True,
+                capture_output=True,
+            )
+        except subprocess.CalledProcessError as e:
+            error_msg = (
+                f"MAPDL execution failed with return code {e.returncode}.\n"
+                f"Command: {' '.join(e.cmd)}\n"
+                f"Stdout:\n{e.stdout.decode() if e.stdout else ''}\n"
+                f"Stderr:\n{e.stderr.decode() if e.stderr else ''}\n"
+            )
+            pytest.fail(error_msg)
 
         with open(os.path.join(self.wdir, "out.out"), "r") as f:
             self.output = f.read()
