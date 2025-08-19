@@ -2125,9 +2125,12 @@ class _MapdlCommandExtended(_MapdlCore):
         command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3},{it3num},{item4},{it4num}"
         kwargs["mute"] = False
 
-        # Checking printout is not suppressed by checking "wrinqr" flag.
-        with self.force_output:
-            response = self.run(command, **kwargs)
+        response = self.run(command, **kwargs)
+
+        if not response:
+            # If no response is received, check if the command was suppressed.
+            with self.force_output:
+                response = self.run(command, **kwargs)
 
         if self._store_commands:
             # Return early in non_interactive
