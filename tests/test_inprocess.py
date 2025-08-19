@@ -117,7 +117,7 @@ def mapdl_inprocess(mapdl: "Mapdl", tmp_path) -> MapdlInProcessRunner:
     if not ON_LOCAL:
         pytest.skip("InProcess interface can only be tested on local machines")
 
-    if not os.getenv("TEST_INPROCESS", "").lower() != "true":
+    if not (os.getenv("TEST_INPROCESS", "").lower() != "true"):
         pytest.skip(
             "Skipping InProcess tests, set TEST_INPROCESS environment variable to run them"
         )
