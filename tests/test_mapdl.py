@@ -2037,7 +2037,7 @@ def test_force_output(mapdl, cleared):
 
 def test_get_not_muted(mapdl, cleared):
     mapdl.gopr()
-    assert not mapdl.muted
+    assert not mapdl.mute
 
     with patch.object(mapdl, "wrinqr", wraps=mapdl.wrinqr) as mock_muted:
         with mapdl.muted:
