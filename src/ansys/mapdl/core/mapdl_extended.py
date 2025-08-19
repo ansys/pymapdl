@@ -2123,7 +2123,6 @@ class _MapdlCommandExtended(_MapdlCore):
         self._check_parameter_name(par)
 
         command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3},{it3num},{item4},{it4num}"
-        kwargs["mute"] = False
 
         response = self.run(command, **kwargs)
 
