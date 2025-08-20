@@ -238,3 +238,102 @@ class DPFResultPlotting(DPFResultData):
         return self.mesh.plot(
             field, scale_factor=displacement_factor, deform_by=deform_by, **kwargs
         )
+
+    def plot_nodal_temperature(
+        self,
+        rnum: Rnum,
+        comp: ComponentsDirections | int | None = None,
+        show_displacement: bool = False,
+        displacement_factor: int = 1,
+        node_components: MAPDLComponents | None = None,
+        element_components: MAPDLComponents | None = None,
+        sel_type_all: bool | None = None,
+        treat_nan_as_zero: bool | None = None,
+        nodes: Nodes = None,
+        **kwargs: Kwargs,
+    ) -> list[float]:
+        """Plots the temperature at each node in the solution.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        comp : str, optional
+            Temperature component to display. Note: Temperature is a scalar
+            field, so component selection may not apply.
+
+        show_displacement
+            If True, displays the displacement along with the temperature
+            plot. Default is False.
+
+        displacement_factor
+            Factor by which to scale the displacement plot. Default is 1.
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default ``True``.
+
+        treat_nan_as_zero : bool, optional
+            Treat NAN values (i.e. temperatures at midside nodes) as zero
+            when plotting.
+
+        nodes
+            Select a limited subset of nodes.  Can be a nodal
+            component or array of node numbers.  For example
+
+            * ``"MY_COMPONENT"``
+            * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+            * ``np.arange(1000, 2001)``
+
+        **kwargs
+            Additional keyword arguments.  See ``help(pyvista.plot)``
+
+        Returns
+        -------
+        cpos : list
+            3 x 3 vtk camera position.
+
+        Examples
+        --------
+        Plot the nodal temperature while showing displacement.
+
+        >>> mapdl.result.plot_nodal_temperature(0, show_displacement=True)
+        """
+        if element_components:
+            raise NotImplementedInDPFBackend(argument="element_components")
+
+        if node_components:
+            raise NotImplementedInDPFBackend(argument="node_components")
+
+        if sel_type_all:
+            raise NotImplementedInDPFBackend(argument="sel_type_all")
+
+        if treat_nan_as_zero:
+            raise NotImplementedInDPFBackend(argument="treat_nan_as_zero")
+
+        field: dpf.Field = self.nodal_temperature(rnum, nodes=nodes, return_field=True)  # type: ignore
+        field = self._component_selector(fc=field, component=comp)
+
+        # If the user requested to show displacement, we will
+        # deform the mesh by the displacement field.
+        deform_by: dpf.Field | None = None
+        if show_displacement:
+            # Get displacement field for deformation
+            displacement_field: dpf.Field = self.nodal_displacement(rnum, nodes=nodes, return_field=True)  # type: ignore
+            deform_by = displacement_field
+
+        return self.mesh.plot(
+            field, scale_factor=displacement_factor, deform_by=deform_by, **kwargs
+        )
