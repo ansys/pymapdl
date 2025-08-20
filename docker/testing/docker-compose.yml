@@ -103,9 +103,9 @@ services:
       "-grpc",
       "${MAPDL_EXTRA_ARGS:-}"
       ]
-    # Required for v261 onwards.
     working_dir: /workspace
     volumes:
+      # Required for v261 onwards.
     - ./mylocal.ip:/workspace/mylocal.ip:ro
 
   mapdl-remote-host:
