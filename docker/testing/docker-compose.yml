@@ -85,7 +85,7 @@ services:
       - mapdl-remote-container
       - mapdl-remote-container-pymapdl-clone
       - mapdl-remote-container-pymapdl-host
-- default
+      - default
     shm_size: '2gb'
     restart: unless-stopped
     hostname: mapdl
