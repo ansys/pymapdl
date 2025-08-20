@@ -85,7 +85,7 @@ services:
       - mapdl-remote-container
       - mapdl-remote-container-pymapdl-clone
       - mapdl-remote-container-pymapdl-host
-      - '' # Default profile
+- default
     shm_size: '2gb'
     restart: unless-stopped
     hostname: mapdl
@@ -144,7 +144,7 @@ services:
     entrypoint: ${MAPDL_ENTRYPOINT:-"/bin/bash"}
     command: ["${MAPDL_EXEC_PATH:-ansys}", "-grpc", "${MAPDL_EXTRA_ARGS:-}"]
     volumes:
-      - ${ANSYS_INC-/ansys_inc}:/ansys_inc:ro
+      - ${ANSYS_INC:-/ansys_inc}:/ansys_inc:ro
 
   pymapdl-host:
     # This service mount the local PyMAPDL repository and test it.
@@ -178,7 +178,7 @@ services:
       - mapdl-remote-host-pymapdl-clone
       - mapdl-local-container-pymapdl-clone
       - mapdl-local-host-pymapdl-clone
-      - '' # Default profile
+      - default # Default profile
     # container_name: pymapdl-test
     platform: linux/amd64
     networks:
