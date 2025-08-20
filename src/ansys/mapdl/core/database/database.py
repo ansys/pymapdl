@@ -321,7 +321,7 @@ class MapdlDb:
 
     def _status(self):
         """
-        Return the status of the MADPL DB Server.
+        Return the status of the MAPDL DB Server.
 
         Examples
         --------

@@ -803,7 +803,7 @@ Recommendations
 
 When connecting to an instance of MAPDL using gRPC (default), there are some cases
 where the MAPDL server might exit unexpectedly. There
-are several ways to improve MADPL performance and stability:
+are several ways to improve MAPDL performance and stability:
 
 Use ``mute`` to improve stability
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
