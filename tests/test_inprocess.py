@@ -70,28 +70,29 @@ class MapdlInProcessRunner:
             return self.completed_process.stderr.decode()
 
     def run(self, cmds: str) -> str:
-        """Simulate running commands in MAPDL."""
-        # This is a placeholder for the actual implementation
-
+        """Run commands in MAPDL on batch mode."""
         with open(os.path.join(self.wdir, "input.mac"), "w") as f:
             f.write(cmds)
 
         try:
+            args = [
+                self.exec_path,
+                "-b",
+                "-i",
+                "input.mac",
+                "-o",
+                "out.out",
+                os.getenv("PYMAPDL_ADDITIONAL_SWITCHES", ""),
+            ]
+
             self.completed_process = subprocess.run(
-                args=[
-                    self.exec_path,
-                    "-b",
-                    "-i",
-                    "input.mac",
-                    "-o",
-                    "out.out",
-                    os.getenv("PYMAPDL_ADDITIONAL_SWITCHES", ""),
-                    "-dir",
-                    self.wdir,
-                ],
+                args=args,
+                cwd=self.wdir,
                 check=True,
                 capture_output=True,
-                shell=True,  # nosec B603
+                # it does not support shell=True, because it does not
+                # generate the out.out file
+                shell=False,
             )
 
         except subprocess.CalledProcessError as e:
@@ -119,7 +120,7 @@ def mapdl_inprocess(mapdl: "Mapdl", tmp_path) -> MapdlInProcessRunner:
     if not ON_LOCAL:
         pytest.skip("InProcess interface can only be tested on local machines")
 
-    if not (os.getenv("TEST_INPROCESS", "").lower() != "true"):
+    if not (os.getenv("TEST_INPROCESS", "").lower() == "true"):
         pytest.skip(
             "Skipping InProcess tests, set TEST_INPROCESS environment variable to run them"
         )
@@ -132,26 +133,30 @@ def mapdl_inprocess(mapdl: "Mapdl", tmp_path) -> MapdlInProcessRunner:
 def test_start_python_from_pymapdl(mapdl, mapdl_inprocess):
     # calling mapdl_inprocess just to make sure we do not
     # run it in PyMAPDL versions below 25.2
-    mapdl.input_strings(
+    output = mapdl.input_strings(
         """
-    *PYTHON
-    print("Hello from MAPDL")
-    *ENDPY
-    """
+*PYTHON
+print("Hello from MAPDL")
+*ENDPY
+"""
     )
+
+    assert "START PYTHON COMMAND BLOCK" in output
+    assert "Hello from MAPDL" in output
+    assert "END PYTHON COMMAND BLOCK" in output
 
 
 def test_start_python(mapdl_inprocess):
     """Test that MAPDL starts Python correctly."""
     cmds = """
-    /com, Starting Python commands
-    *PYTHON
-    print('Hello from MAPDL!')
-    *ENDPY
-    /com, test ends
-    """
+/com, Starting Python commands
+*PYTHON
+print('Hello from MAPDL!')
+*ENDPY
+/com, test ends
+"""
     output_content = mapdl_inprocess.run(cmds)
 
-    assert (
-        "Hello from MAPDL!" in output_content
-    ), "MAPDL did not start Python correctly."
+    assert "Starting Python commands" in output_content
+    assert "Hello from MAPDL!" in output_content
+    assert "test ends" in output_content
