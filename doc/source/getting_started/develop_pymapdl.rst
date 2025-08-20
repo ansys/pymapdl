@@ -147,6 +147,9 @@ guidelines for developing code in a repository:
    continuous integration/continuous deployment (CI/CD) pipelines to catch issues early
    and ensure reliable deployments. For more information, see `Unit testing`_.
 
+   .. note:: No pull request is accepted if the amount of test coverage is not sufficient.
+      If you are adding new code, ensure that it is covered by existing or new unit tests.
+
 #. **Respect code style and standards**: Follow code style
    guidelines and adhere to coding standards specific to your language or
    framework.
@@ -228,38 +231,6 @@ along with integration tests. The difference between a unit test and an
 integration test is that the latter tests several units of the code to ensure
 that they all work together.
 
-To run all the unit tests use the following command:
-
-.. code:: console
-
-   (.venv) mapdl@machine:~/pymapdl$ pytest
-
-If you are running on a **Linux machine without display**, you must install ``xvfb`` OS
-library and run the preceding command with the ``xvfb-run`` command as prefix. 
-
-.. code:: console
-
-   (.venv) mapdl@machine:~/pymapdl$ xvfb-run pytest
-
-In case you want to run only a certain subset of tests, you can use the ``-k`` argument
-to filter the tests using booleans:
-
-.. code:: console
-
-   (.venv) mapdl@machine:~/pymapdl$ pytest -k "test_nlist_to_array or test_string_with_literal"
-   ==================================================== test session starts ====================================================
-   platform darwin -- Python 3.10.13, pytest-7.4.3, pluggy-1.3.0
-   rootdir: /Users/german.ayuso/pymapdl
-   configfile: pyproject.toml
-   testpaths: tests
-   plugins: timeout-2.2.0, cov-4.1.0, sphinx-0.5.0, rerunfailures-13.0, anyio-4.1.0, pytest_pyvista-0.1.9
-   collected 1468 items / 1466 deselected / 4 skipped / 2 selected
-
-   tests/test_commands.py ..                                                                                             [100%]
-
-   =============================================== PyMAPDL Pytest short summary ================================================
-   ======================================= 2 passed, 4 skipped, 1466 deselected in 2.27s =======================================
-
 
 Creation of a unit test
 -----------------------
@@ -297,34 +268,85 @@ It is executed upstream of each test and not within all tests.
 
 Passing the ``cleared`` fixture is also useful since it clears up the MAPDL database
 and configuration before performing the test.
-If you do not have MAPDL installed locally but still want to run the
-unit testing, you must set up the following environment variables.
 
-.. tab-set::
+Running PyMAPDL tests
+---------------------
 
-    .. tab-item:: Windows
-        :sync: key1
+To run all the unit tests use the following command:
 
-        .. code:: pwsh-session
+.. code:: console
 
-            SET PYMAPDL_START_INSTANCE=False
-            SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
-            SET PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
+   (.venv) mapdl@machine:~/pymapdl$ pytest
 
-    .. tab-item:: Linux
-        :sync: key1
-                
-        .. code:: console
+If you just want to run a specific test file, you can provide the path to the file:
 
-            export PYMAPDL_START_INSTANCE=False
-            export PYMAPDL_PORT=<MAPDL Port> (default 50052)
-            export PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
+.. code:: console
+
+   (.venv) mapdl@machine:~/pymapdl$ pytest tests/test_commands.py
+
+In case you want to run only a certain subset of tests, you can use the ``-k`` argument
+to filter the tests using booleans:
+
+.. code:: console
+
+   (.venv) mapdl@machine:~/pymapdl$ pytest -k "test_nlist_to_array or test_string_with_literal"
+   ======================================= test session starts ====================================================
+   platform darwin -- Python 3.10.13, pytest-7.4.3, pluggy-1.3.0
+   rootdir: /Users/german.ayuso/pymapdl
+   configfile: pyproject.toml
+   testpaths: tests
+   plugins: timeout-2.2.0, cov-4.1.0, sphinx-0.5.0, rerunfailures-13.0, anyio-4.1.0, pytest_pyvista-0.1.9
+   collected 1468 items / 1466 deselected / 4 skipped / 2 selected
+
+   tests/test_commands.py ..                                                                                             [100%]
+
+   ================================= PyMAPDL Pytest short summary ================================================
+   ========================= 2 passed, 4 skipped, 1466 deselected in 2.27s =======================================
+
+If you are running on a **Linux machine without display** (for example running from
+a container), you must install ``xvfb`` OS library and run the preceding command with the ``xvfb-run`` command as prefix.
+
+.. code:: console
+
+   (.venv) mapdl@machine:~/pymapdl$ xvfb-run pytest
 
 
-These environment variables tell PyMAPDL to attempt to connect to the existing
-MAPDL service by default when the ``launch_mapdl`` function is used.
+Configuring the test suite
+--------------------------
 
-Additionally, you can use the :envvar:`PYMAPDL_MAPDL_EXEC` and :envvar:`PYMAPDL_MAPDL_VERSION`
+PyMAPDL can operate in multiple situations, or configurations.
+To test these different configurations, you can use the `pytest` framework with specific environment variables.
+
+The list of environment variables that can be set includes:
+
++-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Environment variable              | Values           | Default         | Usage                                                                                                                                                                                                                                                         |
++===================================+==================+=================+===============================================================================================================================================================================================================================================================+
+| :envvar:`ON_CI`                   | `True`/`False`   | `False`         |  Tell Pytest it is running on GitHub Actions                                                                                                                                                                                                                  |
++-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :envvar:`ON_LOCAL`                | `True`/`False`   | Detected        |  Tell Pytest that PyMAPDL is running on local, and the test should match that.  The default is to detect whether MAPDL is installed or not. If the environment variable :envvar:`PYMAPDL_START_INSTANCE` is set, then :envvar:`ON_LOCAL` is `False`.          |
++-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :envvar:`ON_UBUNTU`               | `True`/`False`   | Detected        |  Tell Pytest that PyMAPDL is running on Ubuntu, and the test should match that.                                                                                                                                                                               |
++-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :envvar:`ON_STUDENT`              | `True`/`False`   | `False`         |  Tell Pytest that PyMAPDL is running on a student environment, and the test should match that.                                                                                                                                                                |
++-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :envvar:`TESTING_MINIMAL`         | `True`/`False`   | `False`         |  Tell Pytest that PyMAPDL is installed with the minimal requirements, hence it won't run tests that requires libraries like Pyvista, DPF, etc.                                                                                                                |
++-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :envvar:`PYMAPDL_DEBUG_TESTING`   | `True`/`False`   | `False`         |  Tell PyMAPDL to enable debug while testing. This means that the APDL commands are recorded to the file `pymapdl.apdl` and the debug calls are logged into the file `pymapdl.log`.                                                                            |
++-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :envvar:`HAS_GRPC`                | `True`/`False`   | Detected        |  Tell PyMAPDL that the gRPC interface is available for testing. If `TESTING_MINIMAL` is `True`, then this is `True` by default.                                                                                                                               |
++-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :envvar:`HAS_DPF`                 | `True`/`False`   | `False`         |  Tell Pytest that DPF should be tested.                                                                                                                                                                                                                       |
++-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :envvar:`DISTRIBUTED_MODE`        | `smp`/`dmp`      | `smp`           |  Tell Pytest that MAPDL is running a given distributed mode.                                                                                                                                                                                                  |
++-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :envvar:`SUPPORT_PLOTTING`        | `True`/`False`   | Detected        |  Tell Pytest that the machine supports plotting (i.e. it has a display).                                                                                                                                                                                      |
++-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :envvar:`TEST_DPF_BACKEND`        | `Yes`/`No`       | `NO`            |  Tell Pytest that the module `Result` with DPF backend should be tested.                                                                                                                                                                                      |
++-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+Additionally, you can use any `PyMAPDL environment variables <ref_environment_variables_>`_ 
+like the :envvar:`PYMAPDL_MAPDL_EXEC` and :envvar:`PYMAPDL_MAPDL_VERSION`
 environment variables to specify the MAPDL executable path and the version to launch (if
 multiple versions of MAPDL are installed).
 
