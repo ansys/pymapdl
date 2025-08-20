@@ -104,7 +104,7 @@ FROM python-main AS test-local-pymapdl
 ENV USE_LOCAL_REPO=true
 
 # Remove cloned repo so the local repo can be mounted.
-RUN $(rm -rf *) >/dev/null 2>&1
+RUN rm -rf /workspace/* >/dev/null 2>&1
 
 #######################################################
 FROM ubuntu:22.04 AS mapdl-local
@@ -172,7 +172,7 @@ RUN \
 # -------------
 # Variable for running as if it were on CICD while testing
 ENV ON_CI=True
-# Tu simulate running on local machine
+# To simulate running on local machine
 ENV ON_LOCAL=True
 # For tests that check if running on ubuntu.
 ENV ON_UBUNTU=False
