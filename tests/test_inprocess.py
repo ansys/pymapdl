@@ -22,6 +22,7 @@
 
 import os
 import subprocess
+import sys
 from typing import TYPE_CHECKING
 
 import pytest
@@ -37,6 +38,18 @@ class MapdlInProcessRunner:
         self.wdir = str(wdir)
         self.completed_process: subprocess.CompletedProcess[bytes] | None = None
         self._exec_path: str | None = exec_path
+        self._output: str | None = None
+
+        venv = os.getenv("MAPDL_PYTHON_ENV", None)
+        if not venv:
+            # Detecting the venv
+            if sys.prefix == sys.base_prefix:
+                pytest.warns(
+                    "Running from global python interpreter is not recommended."
+                )
+            venv = sys.prefix
+
+        self.venv = venv
 
     @property
     def exec_path(self) -> str:
@@ -61,22 +74,48 @@ class MapdlInProcessRunner:
 
     @property
     def stdout(self) -> str | None:
+        """Return the standard output of the completed process. If the process fail, this returns None."""
         if self.completed_process:
             return self.completed_process.stdout.decode()
 
     @property
     def stderr(self) -> str | None:
+        """Return the standard error output of the completed process. If the process fail, this returns None."""
         if self.completed_process:
             return self.completed_process.stderr.decode()
+
+    @property
+    def status_code(self) -> float | None:
+        """Return the status code of the completed process. If the process fail, this returns None."""
+        if self.completed_process:
+            return float(self.completed_process.returncode)
+
+    @property
+    def exist_output(self) -> bool:
+        """Return True if the output file exists, False otherwise."""
+        return os.path.exists(os.path.join(self.wdir, "out.out"))
+
+    def output(self) -> str | None:
+        if not self._output and self.exist_output:
+            with open(os.path.join(self.wdir, "out.out"), "r") as f:
+                self._output = f.read()
+        return self._output
 
     def run(self, cmds: str) -> str:
         """Run commands in MAPDL on batch mode."""
         with open(os.path.join(self.wdir, "input.mac"), "w") as f:
             f.write(cmds)
 
+        exec_path = self.exec_path
+        # Security: Validate the executable path
+        if not os.path.isabs(exec_path) or not os.path.isfile(exec_path):
+            raise ValueError(
+                "MAPDL executable path must be an absolute path to an existing file."
+            )
+
         try:
             args = [
-                self.exec_path,
+                exec_path,
                 "-b",
                 "-i",
                 "input.mac",
@@ -90,9 +129,11 @@ class MapdlInProcessRunner:
                 cwd=self.wdir,
                 check=True,
                 capture_output=True,
+                env={"MAPDL_PYTHON_ENV": self.venv},
                 # it does not support shell=True, because it does not
                 # generate the out.out file
-                shell=False,
+                # TODO: Why shell should be false in order to generate the output file?
+                shell=False,  # nosec B603
             )
 
         except subprocess.CalledProcessError as e:
@@ -104,17 +145,19 @@ class MapdlInProcessRunner:
             )
             pytest.fail(error_msg)
 
-        with open(os.path.join(self.wdir, "out.out"), "r") as f:
-            self.output = f.read()
-
         return self.output
 
 
 @pytest.fixture()
-def mapdl_inprocess(mapdl: "Mapdl", tmp_path) -> MapdlInProcessRunner:
+def mapdl_version(mapdl: "Mapdl"):
+    return mapdl.version
+
+
+@pytest.fixture()
+def mapdl_inprocess(mapdl_version: float, tmp_path: str) -> MapdlInProcessRunner:
 
     # check if MAPDL has *PYTHON
-    if mapdl.version < 25.2:
+    if mapdl_version < 25.2:
         pytest.skip("To test InProcess interface MAPDL 25.2 or higher is required")
 
     if not ON_LOCAL:
@@ -128,7 +171,9 @@ def mapdl_inprocess(mapdl: "Mapdl", tmp_path) -> MapdlInProcessRunner:
     return mapdl_inprocess
 
 
-def test_start_python_from_pymapdl(mapdl, mapdl_inprocess):
+def test_start_python_from_pymapdl(
+    mapdl: "Mapdl", mapdl_inprocess: MapdlInProcessRunner
+):
     # calling mapdl_inprocess just to make sure we do not
     # run it in PyMAPDL versions below 25.2
     output = mapdl.input_strings(
@@ -144,7 +189,7 @@ print("Hello from MAPDL")
     assert "END PYTHON COMMAND BLOCK" in output
 
 
-def test_start_python(mapdl_inprocess):
+def test_start_python_from_mapdl(mapdl_inprocess: MapdlInProcessRunner):
     """Test that MAPDL starts Python correctly."""
     cmds = """
 /com, Starting Python commands
@@ -154,6 +199,7 @@ print('Hello from MAPDL!')
 /com, test ends
 """
     output_content = mapdl_inprocess.run(cmds)
+    assert mapdl_inprocess.status_code == 0
 
     assert "Starting Python commands" in output_content
     assert "Hello from MAPDL!" in output_content
