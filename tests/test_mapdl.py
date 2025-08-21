@@ -2019,6 +2019,7 @@ def test_force_output(mapdl, cleared):
             assert mapdl.prep7()
         assert not mapdl.prep7()
 
+    with mapdl.muted:
         mapdl._run("nopr")
         with mapdl.force_output:
             assert mapdl.prep7()
@@ -2032,6 +2033,23 @@ def test_force_output(mapdl, cleared):
     with mapdl.force_output:
         assert mapdl.prep7()
     assert mapdl.prep7()
+
+
+def test_get_not_muted(mapdl, cleared):
+    mapdl.gopr()
+    assert not mapdl.mute
+
+    with patch.object(mapdl, "wrinqr", wraps=mapdl.wrinqr) as mock_muted:
+        with mapdl.muted:
+            assert mapdl.get("line1", "LINE", 0, "NUM", "MAX") is not None
+
+    mock_muted.assert_called_once()
+
+    assert mapdl.mute is False
+    with patch.object(mapdl, "wrinqr", wraps=mapdl.wrinqr) as mock_not_muted:
+        assert mapdl.get("line1", "LINE", 0, "NUM", "MAX") is not None
+
+    mock_not_muted.assert_not_called()
 
 
 def test_session_id(mapdl, cleared, running_test):
