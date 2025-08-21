@@ -20,17 +20,73 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import importlib.metadata
 import os
+import pathlib
 import subprocess
 import sys
 from typing import TYPE_CHECKING
 
+from packaging.requirements import Requirement
+from packaging.version import Version
 import pytest
 
 if TYPE_CHECKING:
     from ansys.mapdl.core import Mapdl
 
 from conftest import ON_LOCAL
+
+# This should be updated
+REQUIREMENTS_STAR_PYTHON = """
+ansys-api-mapdl==0.5.2
+ansys-mapdl-core==0.70.1
+ansys-tools-path==0.7.1
+pyansys-tools-versioning==0.6.0
+platformdirs==4.3.8 #already in CommonFiles on windows
+click==8.1.8
+"""
+
+
+def check_requirements(
+    req_file: str | None = None,
+) -> dict[str, tuple[bool, Version | None, Version | None]]:
+    if req_file is None:
+        req_text = REQUIREMENTS_STAR_PYTHON
+    else:
+        req_text = pathlib.Path(req_file).read_text()
+
+    reqs = req_text.splitlines()
+    results: dict[str, tuple[bool, Version | None, Version | None]] = {}
+
+    for req_line in reqs:
+        if not req_line.strip() or req_line.strip().startswith("#"):
+            # skip blanks/comments
+            continue
+
+        # Removing trailing comments
+        req_line = req_line.split("#", 1)[0].strip()
+
+        requirement = Requirement(req_line)
+        try:
+            installed_version = Version(importlib.metadata.version(requirement.name))
+        except importlib.metadata.PackageNotFoundError:
+            results[requirement.name] = (False, None, None)
+            continue
+
+        # Extract the *minimum required version* (if any)
+        min_required = None
+        for spec in requirement.specifier:
+            if spec.operator in (">=", "=="):
+                candidate = Version(spec.version)
+                if min_required is None or candidate > min_required:
+                    min_required = candidate
+
+        if min_required is None or installed_version >= min_required:
+            results[requirement.name] = (True, installed_version, min_required)
+        else:
+            results[requirement.name] = (False, installed_version, min_required)
+
+    return results
 
 
 class MapdlInProcessRunner:
@@ -204,3 +260,35 @@ print('Hello from MAPDL!')
     assert "Starting Python commands" in output_content
     assert "Hello from MAPDL!" in output_content
     assert "test ends" in output_content
+
+
+def test_python_path(mapdl_inprocess: MapdlInProcessRunner):
+    """This test makes sure we are using the correct Python venv"""
+    cmds = """
+/com, Testing Python path
+*PYTHON
+import sys
+print(sys.executable)
+*ENDPY
+/com, test ends
+"""
+    output_content = mapdl_inprocess.run(cmds)
+    assert mapdl_inprocess.status_code == 0
+
+    assert "Testing Python path" in output_content
+    assert sys.executable in output_content
+    assert "test ends" in output_content
+
+
+@pytest.mark.parametrize("pkg, data", list(check_requirements().items()))
+def test_venv_requirements(
+    mapdl_inprocess: MapdlInProcessRunner,
+    pkg: str,
+    data: tuple[bool, Version | None, Version | None],
+):
+    """Test that the virtual environment has the required packages."""
+    ok, installed, required = data
+    # Example usage
+    for pkg, (ok, installed, required) in check_requirements().items():
+        if not ok:
+            pytest.fail(f"{pkg} {installed} (needs >= {required})")
