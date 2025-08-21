@@ -24,8 +24,8 @@ Requirements
 
 * The following provided files:
   
-  * `Dockerfile <https://github.com/ansys/pymapdl/tree/main/docker/Dockerfile>`_
-  * `.dockerignore <https://github.com/ansys/pymapdl/tree/main/docker/.dockerignore>`_
+  * `Dockerfile <https://github.com/ansys/pymapdl/tree/main/docker/MAPDL/Dockerfile>`_
+  * `.dockerignore <https://github.com/ansys/pymapdl/tree/main/docker/MAPDL/.dockerignore>`_
 
 
 Procedure
@@ -100,10 +100,10 @@ Please notice that:
 * ``path_to_mapdl_installation`` is the path to where you have locally installed ANSYS MAPDL.
 
 Not all the installation files are copied, in fact, the files ignored during the copying
-are detailed in the file `.dockerignore <https://github.com/ansys/pymapdl/tree/main/docker/.dockerignore>`_.
+are detailed in the file `.dockerignore <https://github.com/ansys/pymapdl/tree/main/docker/MAPDL/.dockerignore>`_.
 
 The Docker container configuration needed to build the container is detailed in the
-`Dockerfile <https://github.com/ansys/pymapdl/tree/main/docker/Dockerfile>`_.
+`Dockerfile <https://github.com/ansys/pymapdl/tree/main/docker/MAPDL/Dockerfile>`_.
 
 
 Summary
