@@ -273,7 +273,7 @@ In such cases, if you try to start MAPDL from the command line you might see an 
             FlexNet Licensing error:-5,357
 
 
-If there are not enough licenses available, you might see an error similar to the above one. 
+This means that there are not enough licenses available to start MAPDL.
 In these cases you should contact your Ansys license administrator at your organization.
 
 If you are responsible for maintaining Ansys licensing or have a personal installation of Ansys, see the online
