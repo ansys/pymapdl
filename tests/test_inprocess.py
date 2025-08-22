@@ -32,6 +32,7 @@ if TYPE_CHECKING:
 
 from conftest import ON_LOCAL
 
+
 class MapdlInProcessRunner:
     def __init__(self, wdir: str, exec_path: str | None = None) -> None:
         self.wdir = str(wdir)
