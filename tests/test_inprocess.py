@@ -43,9 +43,7 @@ class MapdlInProcessRunner:
 
         # Detecting the venv
         if sys.prefix == sys.base_prefix:
-            pytest.warns(
-                "Running from global python interpreter is not recommended."
-            )
+            pytest.warns("Running from global python interpreter is not recommended.")
         os.environ["MAPDL_PYTHON_ENV"] = sys.prefix
 
     @property
