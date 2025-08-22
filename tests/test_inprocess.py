@@ -34,8 +34,9 @@ from conftest import ON_LOCAL
 
 
 class MapdlInProcessRunner:
-    def __init__(self, wdir: str, exec_path: str | None = None) -> None:
+    def __init__(self, wdir: str, version: float, exec_path: str | None = None) -> None:
         self.wdir = str(wdir)
+        self.version = version
         self.completed_process: subprocess.CompletedProcess[bytes] | None = None
         self._exec_path: str | None = exec_path
         self._output: str | None = None
@@ -90,7 +91,7 @@ class MapdlInProcessRunner:
                 self._output = f.read()
         return self._output
 
-    def run(self, cmds: str) -> str:
+    def run(self, cmds: str) -> str | None:
         """Run commands in MAPDL on batch mode."""
         with open(os.path.join(self.wdir, "input.mac"), "w") as f:
             f.write(cmds)
@@ -101,6 +102,11 @@ class MapdlInProcessRunner:
             raise ValueError(
                 "MAPDL executable path must be an absolute path to an existing file."
             )
+
+        if self.version == 25.2:
+            env = {"MAPDL_PYTHON_ENV": os.getenv("MAPDL_PYTHON_ENV", sys.prefix)}
+        else:
+            env = {}
 
         try:
             args = [
@@ -118,6 +124,7 @@ class MapdlInProcessRunner:
                 cwd=self.wdir,
                 check=True,
                 capture_output=True,
+                env=env,
                 # it does not support shell=True, because it does not
                 # generate the out.out file
                 # TODO: Why shell should be false in order to generate the output file?
@@ -154,7 +161,7 @@ def mapdl_inprocess(mapdl_version: float, tmp_path: str) -> MapdlInProcessRunner
     if not (os.getenv("TEST_INPROCESS", "").lower() == "true"):
         pytest.skip("Set TEST_INPROCESS environment variable to run them.")
 
-    mapdl_inprocess = MapdlInProcessRunner(tmp_path)
+    mapdl_inprocess = MapdlInProcessRunner(tmp_path, version=mapdl_version)
 
     return mapdl_inprocess
 
@@ -170,9 +177,9 @@ print(shutil.which("python"))
 /com, test ends
 """
     output_content = mapdl_inprocess.run(cmds)
-    print(output_content)
     assert mapdl_inprocess.status_code == 0
 
+    assert output_content is not None
     assert "Testing Python path" in output_content
     assert sys.executable in output_content
     assert "test ends" in output_content
@@ -189,6 +196,7 @@ print("Hello from MAPDL")
 """
     )
 
+    assert output is not None
     assert "START PYTHON COMMAND BLOCK" in output
     assert "Hello from MAPDL" in output
     assert "END PYTHON COMMAND BLOCK" in output
@@ -206,6 +214,7 @@ print('Hello from MAPDL!')
     output_content = mapdl_inprocess.run(cmds)
     assert mapdl_inprocess.status_code == 0
 
+    assert output_content is not None
     assert "Starting Python commands" in output_content
     assert "Hello from MAPDL!" in output_content
     assert "test ends" in output_content
