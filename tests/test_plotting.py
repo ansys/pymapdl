@@ -636,18 +636,12 @@ def test_pick_kp(mapdl, make_block, selection):
     mapdl.ksel("all")
 
     def improved_debug_orders(pl, point):
-        """A more reliable debug function that uses more robust coordinates."""
         pl = pl.scene
         pl.show(auto_close=False)
 
         # Use fixed window size to make tests more predictable
         window_size = 512  # Use a reasonable fixed size
         width, height = window_size, window_size
-
-        # Instead of using the original hardcoded coordinates which were resolution-dependent,
-        # use coordinates that are more likely to work across different setups
-        # The original coordinates (285/1024, 280/800) = (0.278, 0.35) in normalized coords
-        # We'll use similar but more centered coordinates
 
         if selection == "R":
             # For "R" selection, try coordinates that are more likely to hit remaining keypoints
@@ -869,18 +863,12 @@ def test_pick_areas(mapdl, make_block, selection):
     mapdl.asel("a", "area", "", 2)
 
     def improved_debug_orders(pl, point):
-        """A more reliable debug function that uses more robust coordinates."""
         pl = pl.scene
         pl.show(auto_close=False)
 
         # Use fixed window size to make tests more predictable
         window_size = 512  # Use a reasonable fixed size
         width, height = window_size, window_size
-
-        # Instead of using the original hardcoded coordinates which were resolution-dependent,
-        # use coordinates that are more likely to work across different setups
-        # The original coordinates (285/1024, 280/800) = (0.278, 0.35) in normalized coords
-        # For areas, we need coordinates that might hit different faces of the block
 
         if selection == "R":
             # For "R" selection, try coordinates that might hit a different area
