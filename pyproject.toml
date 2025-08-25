@@ -287,13 +287,13 @@ name = "Dependencies"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "miscellaneous"
-name = "Miscellaneous"
+directory = "documentation"
+name = "Documentation"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "documentation"
-name = "Documentation"
+directory = "miscellaneous"
+name = "Miscellaneous"
 showcontent = true
 
 [[tool.towncrier.type]]
