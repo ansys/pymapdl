@@ -24,7 +24,14 @@ import pyvista as pv
 from pyvista.core import _vtk_core as _vtk
 from pyvista.core.utilities import translate
 from pyvista.core.utilities.helpers import wrap
-from pyvista.core.utilities.misc import no_new_attr
+
+if pv.version_info >= (0, 46, 0):
+    # From v0.46.0, this decorator is not needed anymore.
+    def no_new_attr(cls):
+        return cls
+
+else:
+    from pyvista.core.utilities.misc import no_new_attr
 
 # I dont want to have to fix a very recent lower bound for pyvista.
 # Hence I'm copying what I need from there.

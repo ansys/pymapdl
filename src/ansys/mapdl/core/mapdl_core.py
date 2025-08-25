@@ -2700,7 +2700,12 @@ class _MapdlCore(Commands):
             pass
 
         # adding selection inversor
-        pl.scene._inver_mouse_click_selection = False
+        import pyvista
+
+        if pyvista.version_info >= (0, 46, 0):
+            pyvista.set_new_attribute(pl.scene, "_inver_mouse_click_selection", False)
+        else:
+            pl.scene._inver_mouse_click_selection = False
 
         selection_text = {
             "S": "New selection",
