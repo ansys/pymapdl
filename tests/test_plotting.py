@@ -679,7 +679,7 @@ def test_pick_kp(mapdl, make_block, selection):
     selected = mapdl.ksel(
         selection,
         "P",
-        _debug=lambda x: improved_debug_orders(x, point=None),
+        _debug=lambda x: improved_debug_orders(x),
         tolerance=0.2,
     )
 
