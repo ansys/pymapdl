@@ -132,3 +132,4 @@ jobs:
         bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
         bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
         token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+        use-conventional-commits: true  # To use the PR title instead of PR labels
