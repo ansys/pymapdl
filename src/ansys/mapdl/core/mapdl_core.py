@@ -2420,14 +2420,6 @@ class _MapdlCore(Commands):
         self._log.debug(f"Running (verbose: {verbose}, mute={mute}): '{command}'")
         text = self._run(command, verbose=verbose, mute=mute)
 
-        if (
-            "Display device has not yet been specified with the /SHOW command" in text
-            and short_cmd in PLOT_COMMANDS
-        ):
-            # Reissuing the command to make sure we get output.
-            self.show(self.default_file_type_for_plots)
-            text = self._run(command, verbose=verbose, mute=mute)
-
         self._after_run(command)
 
         if mute:
