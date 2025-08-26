@@ -2447,16 +2447,7 @@ class _MapdlCore(Commands):
         # special returns for certain geometry commands
         if short_cmd in PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
-            plot_path = self._get_plot_name(text)
-
-            if save_fig:
-                return self._download_plot(plot_path, save_fig)
-            elif self._has_matplotlib:
-                return self._display_plot(plot_path)
-            else:
-                self._log.debug(
-                    "Since matplolib is not installed, images are not shown."
-                )
+            self.screenshot(savefig=save_fig)
 
         return self._response
 
@@ -3325,36 +3316,35 @@ class _MapdlCore(Commands):
             return target_dir
 
         if savefig is None or savefig is False:
-            self._display_plot(file_name)
+            return self._display_plot(file_name)
 
-        else:
-            if savefig is True:
-                # Copying to working directory
-                target_dir = get_file_name(os.getcwd())
+        if savefig is True:
+            # Copying to working directory
+            target_dir = get_file_name(os.getcwd())
 
-            elif isinstance(savefig, str):
-                if not os.path.dirname(savefig):
-                    # File name given only
-                    target_dir = os.path.join(os.getcwd(), savefig)
+        elif isinstance(savefig, str):
+            if not os.path.dirname(savefig):
+                # File name given only
+                target_dir = os.path.join(os.getcwd(), savefig)
 
-                elif os.path.isdir(savefig):
-                    # Given directory path only, but not file name.
-                    target_dir = get_file_name(savefig)
+            elif os.path.isdir(savefig):
+                # Given directory path only, but not file name.
+                target_dir = get_file_name(savefig)
 
-                elif os.path.exists(os.path.dirname(savefig)):
-                    # Only directory is given. Checking if directory exists.
-                    target_dir = savefig
-
-                else:
-                    raise FileNotFoundError("The filename or path is not valid.")
+            elif os.path.exists(os.path.dirname(savefig)):
+                # Only directory is given. Checking if directory exists.
+                target_dir = savefig
 
             else:
-                raise ValueError(
-                    "Only strings or Booleans are valid inputs for the 'savefig' parameter."
-                )
+                raise FileNotFoundError("The filename or path is not valid.")
 
-            copy(file_name, target_dir)
-            return os.path.basename(target_dir)
+        else:
+            raise ValueError(
+                "Only strings or Booleans are valid inputs for the 'savefig' parameter."
+            )
+
+        copy(file_name, target_dir)
+        return os.path.basename(target_dir)
 
     def _create_session(self):
         """Generate a session ID."""
