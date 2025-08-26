@@ -1642,7 +1642,8 @@ def launch_mapdl(
 
         get_exec_file(args)
 
-        if args.get("exec_file"):
+        # Avoid checking version if exec_file is explicitly given
+        if not exec_file:
             args["version"] = get_version(
                 args["version"],
                 args.get("exec_file"),

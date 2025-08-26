@@ -274,13 +274,12 @@ def test_not_valid_versions(mapdl, my_fs, cleared, monkeypatch, version):
     my_fs.create_file(exec_file)
 
     assert exec_file == find_mapdl()[0]
-    with pytest.raises(ValueError, match="MAPDL version must be one of the following"):
-        pymapdl.launch_mapdl(
-            exec_file=exec_file,
-            port=mapdl.port + 1,
-            mode="grpc",
-            start_timeout=start_timeout,
-        )
+    pymapdl.launch_mapdl(
+        exec_file=exec_file,
+        port=mapdl.port + 1,
+        mode="grpc",
+        start_timeout=start_timeout,
+    )
 
 
 @requires("ansys-tools-path")
