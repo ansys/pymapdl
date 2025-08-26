@@ -188,7 +188,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v5
 
       - name: Build matrix for remote testing
         uses: ./.github/actions/build-matrix
@@ -224,7 +224,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v5
 
       - name: Build matrix for local, minimal and console testing
         uses: ./.github/actions/build-matrix
@@ -317,7 +317,7 @@ jobs:
       ON_LOCAL: TRUE
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v5
 
       - uses: ./.github/actions/test_windows
         with:
@@ -428,7 +428,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v5
 
       - name: "Run Julia testing"
         uses: ./.github/actions/test-julia
@@ -445,7 +445,7 @@ jobs:
     runs-on: ubuntu-latest          
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v5
 
       - name: "Run Pytest-summary action"
         uses: ./.github/actions/pytest-summary
