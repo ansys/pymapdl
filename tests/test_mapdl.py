@@ -2689,6 +2689,9 @@ def test_screenshot(mapdl, make_block, tmpdir):
     assert mapdl.screenshot(False) is None
     assert "TIFF" == mapdl.file_type_for_plots
 
+    if os.path.exists("mapdl_screenshot_0.png"):
+        os.remove("mapdl_screenshot_0.png")
+
     file_name = mapdl.screenshot(True)
     assert "mapdl_screenshot_0.png" == file_name
     assert "TIFF" == mapdl.file_type_for_plots
