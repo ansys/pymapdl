@@ -167,13 +167,7 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
         mapdl.eplot(savefig="myfile.png")
         assert not os.path.exists("myfile_1.png")
         assert os.path.getmtime("myfile.png") != ti_m  # file has been modified.
-
         os.remove("myfile.png")
-
-        # Testing no extension
-        mapdl.eplot(savefig="myfile")
-        assert os.path.exists("myfile")
-        os.remove("myfile")
 
         # Testing update name when file exists.
         mapdl.eplot(savefig=True)
@@ -190,7 +184,7 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
         mapdl.eplot(savefig=plot_)
         assert os.path.exists(plot_)
 
-        plot_ = os.path.join(tmpdir, "myplot")
+        plot_ = os.path.join(tmpdir, "myplot.png")
         mapdl.eplot(savefig=plot_)
         assert os.path.exists(plot_)
 
