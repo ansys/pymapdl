@@ -28,7 +28,7 @@ import logging
 import os
 import pathlib
 import re
-from shutil import copy, copyfile, rmtree
+from shutil import copyfile, rmtree
 
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
@@ -2324,7 +2324,7 @@ class _MapdlCore(Commands):
 
         # Check kwargs
         verbose = kwargs.pop("verbose", False)
-        save_fig = kwargs.pop("savefig", False)
+        savefig = kwargs.pop("savefig", False)
 
         # Check if you want to avoid the current non-interactive context.
         avoid_non_interactive = kwargs.pop("avoid_non_interactive", False)
@@ -2440,7 +2440,7 @@ class _MapdlCore(Commands):
         # special returns for certain geometry commands
         if short_cmd in PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
-            self.screenshot(savefig=save_fig)
+            return self.screenshot(savefig=savefig, default_name="plot")
 
         return self._response
 
@@ -2498,7 +2498,7 @@ class _MapdlCore(Commands):
             if os.path.isfile(filename):
                 return filename
             else:  # pragma: no cover
-                raise MapdlRuntimeError("Unable to find screenshot at %s", filename)
+                raise MapdlRuntimeError(f"Unable to find screenshot at {filename}")
         else:
             raise MapdlRuntimeError(
                 "Unable to find plotted file in MAPDL command output. "
@@ -2538,22 +2538,30 @@ class _MapdlCore(Commands):
 
             display(plt.gcf())
 
-    def _download_plot(self, filename: str, plot_name: str) -> None:
+    def _download_plot(
+        self, filename: str, plot_name: str, default_name: str = "plot"
+    ) -> None:
         """Copy the temporary download plot to the working directory."""
         if isinstance(plot_name, str):
             provided = True
             path_ = pathlib.Path(plot_name)
-            plot_name = path_.name
-            plot_stem = path_.stem
-            plot_ext = path_.suffix
-            plot_path = str(path_.parent)
-            if not plot_path or plot_path == ".":
-                plot_path = os.getcwd()
+            if path_.is_dir() or path_.suffix == "":
+                plot_name = f"{default_name}.png"
+                plot_stem = default_name
+                plot_ext = ".png"
+                plot_path = str(path_)
+            else:
+                plot_name = path_.name
+                plot_stem = path_.stem
+                plot_ext = path_.suffix
+                plot_path = str(path_.parent)
+                if not plot_path or plot_path == ".":
+                    plot_path = os.getcwd()
 
         elif isinstance(plot_name, bool):
             provided = False
-            plot_name = "plot.png"
-            plot_stem = "plot"
+            plot_name = f"{default_name}.png"
+            plot_stem = default_name
             plot_ext = ".png"
             plot_path = os.getcwd()
         else:  # pragma: no cover
@@ -2570,6 +2578,10 @@ class _MapdlCore(Commands):
         self._log.debug(
             f"Copy plot file from temp directory to working directory as: {plot_path}"
         )
+        if provided:
+            return plot_path_
+        else:
+            return os.path.basename(plot_path_)
 
     def _screenshot_path(self):
         """Return last filename based on the current jobname"""
@@ -3271,7 +3283,9 @@ class _MapdlCore(Commands):
             warn("No files listed")
         return files
 
-    def screenshot(self, savefig: Optional[str] = None):
+    def screenshot(
+        self, savefig: Optional[str] = None, default_name: str = "mapdl_screenshot"
+    ) -> str:
         """Take an MAPDL screenshot and show it in a popup window.
 
         Parameters
@@ -3298,46 +3312,12 @@ class _MapdlCore(Commands):
         self.show(previous_device)  # previous device
         file_name = self._get_plot_name(out_)
 
-        def get_file_name(path):
-            """Get a new filename so as not to overwrite an existing one."""
-            target_dir = os.path.join(path, "mapdl_screenshot_0.png")
-            i = 0
-            while os.path.exists(target_dir):
-                # Ensuring file is not overwritten.
-                i += 1
-                target_dir = os.path.join(path, f"mapdl_screenshot_{i}.png")
-            return target_dir
-
-        if savefig is None or savefig is False:
+        if savefig:
+            return self._download_plot(file_name, savefig, default_name=default_name)
+        elif self._has_matplotlib:
             return self._display_plot(file_name)
-
-        if savefig is True:
-            # Copying to working directory
-            target_dir = get_file_name(os.getcwd())
-
-        elif isinstance(savefig, str):
-            if not os.path.dirname(savefig):
-                # File name given only
-                target_dir = os.path.join(os.getcwd(), savefig)
-
-            elif os.path.isdir(savefig):
-                # Given directory path only, but not file name.
-                target_dir = get_file_name(savefig)
-
-            elif os.path.exists(os.path.dirname(savefig)):
-                # Only directory is given. Checking if directory exists.
-                target_dir = savefig
-
-            else:
-                raise FileNotFoundError("The filename or path is not valid.")
-
         else:
-            raise ValueError(
-                "Only strings or Booleans are valid inputs for the 'savefig' parameter."
-            )
-
-        copy(file_name, target_dir)
-        return os.path.basename(target_dir)
+            self._log.debug("Since matplolib is not installed, images are not shown.")
 
     def _create_session(self):
         """Generate a session ID."""
