@@ -364,7 +364,7 @@ html_context = {
     "github_version": BRANCH,
     "doc_path": str(DOC_PATH),
     "source_path": "src",
-    "pyansys_tags": ['Structures'],
+    "pyansys_tags": ["Structures"],
 }
 html_show_sourcelink = False
 
