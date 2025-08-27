@@ -221,9 +221,12 @@ def test_kplot(cleared, mapdl, tmpdir, backend):
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl.kplot(graphics_backend=backend, savefig=filename)
-    assert cpos is None
-    if backend:
-        assert os.path.isfile(filename)
+    if backend == GraphicsBackend.MAPDL:
+        assert isinstance(cpos, str)
+    else:
+        assert cpos is None
+
+    assert os.path.isfile(filename)
 
 
 @pytest.mark.parametrize(
@@ -1054,7 +1057,7 @@ def test_file_type_for_plots(mapdl, cleared):
         [each for each in mapdl.list_files() if each.endswith(".png")]
     )
 
-    assert n_files_ending_png_before + 1 == n_files_ending_png_after
+    assert n_files_ending_png_before + 2 == n_files_ending_png_after
 
 
 @pytest.mark.parametrize("entity", ["KP", "LINE", "AREA", "VOLU", "NODE", "ELEM"])

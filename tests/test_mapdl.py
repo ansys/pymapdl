@@ -2689,11 +2689,8 @@ def test_screenshot(mapdl, make_block, tmpdir):
     assert mapdl.screenshot(False) is None
     assert "TIFF" == mapdl.file_type_for_plots
 
-    if os.path.exists("mapdl_screenshot_0.png"):
-        os.remove("mapdl_screenshot_0.png")
-
     file_name = mapdl.screenshot(True)
-    assert "mapdl_screenshot_0.png" == file_name
+    assert "mapdl_screenshot.png" == file_name
     assert "TIFF" == mapdl.file_type_for_plots
     assert file_name in os.listdir(os.getcwd())
 
@@ -2702,12 +2699,12 @@ def test_screenshot(mapdl, make_block, tmpdir):
     assert "TIFF" == mapdl.file_type_for_plots
     assert file_name in os.listdir(os.getcwd())
 
-    os.remove("mapdl_screenshot_0.png")
+    os.remove("mapdl_screenshot.png")
     os.remove(file_name)
 
     file_name = mapdl.screenshot(str(tmpdir))
     assert "TIFF" == mapdl.file_type_for_plots
-    assert file_name in os.listdir(str(tmpdir))
+    assert os.path.basename(file_name) in os.listdir(str(tmpdir))
 
     dest = os.path.join(tmpdir, "myscreenshot.png")
     file_name = mapdl.screenshot(dest)
