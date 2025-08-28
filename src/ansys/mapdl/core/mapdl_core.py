@@ -192,7 +192,6 @@ PLOT_COMMANDS = [
     "NPLO",
     "PLES",
     "PLNS",
-    "PLVA",
     "PSDG",
     "SECP",
     "SPGR",
