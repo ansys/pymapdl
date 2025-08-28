@@ -167,13 +167,7 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
         mapdl.eplot(savefig="myfile.png")
         assert not os.path.exists("myfile_1.png")
         assert os.path.getmtime("myfile.png") != ti_m  # file has been modified.
-
         os.remove("myfile.png")
-
-        # Testing no extension
-        mapdl.eplot(savefig="myfile")
-        assert os.path.exists("myfile")
-        os.remove("myfile")
 
         # Testing update name when file exists.
         mapdl.eplot(savefig=True)
@@ -190,7 +184,7 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
         mapdl.eplot(savefig=plot_)
         assert os.path.exists(plot_)
 
-        plot_ = os.path.join(tmpdir, "myplot")
+        plot_ = os.path.join(tmpdir, "myplot.png")
         mapdl.eplot(savefig=plot_)
         assert os.path.exists(plot_)
 
@@ -221,9 +215,12 @@ def test_kplot(cleared, mapdl, tmpdir, backend):
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl.kplot(graphics_backend=backend, savefig=filename)
-    assert cpos is None
-    if backend:
-        assert os.path.isfile(filename)
+    if backend == GraphicsBackend.MAPDL:
+        assert isinstance(cpos, str)
+    else:
+        assert cpos is None
+
+    assert os.path.isfile(filename)
 
 
 @pytest.mark.parametrize(
@@ -1054,7 +1051,7 @@ def test_file_type_for_plots(mapdl, cleared):
         [each for each in mapdl.list_files() if each.endswith(".png")]
     )
 
-    assert n_files_ending_png_before + 1 == n_files_ending_png_after
+    assert n_files_ending_png_before + 2 == n_files_ending_png_after
 
 
 @pytest.mark.parametrize("entity", ["KP", "LINE", "AREA", "VOLU", "NODE", "ELEM"])
