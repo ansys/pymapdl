@@ -1340,7 +1340,7 @@ def test_deprecated_params(mapdl, make_block):
         mapdl.eplot(vtk=False)
 
 
-def test_plvar(mapdl, coupled_example, verify_image_cache):
+def test_plvar(mapdl, coupled_example):
     mapdl.post26()
     with patch("ansys.mapdl.core.Mapdl.screenshot") as mock_screenshot:
         mapdl.plvar(4, 5)
