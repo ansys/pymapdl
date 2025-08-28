@@ -190,7 +190,9 @@ print(shutil.which("python"))
     assert "test ends" in output_content
 
 
-def test_start_python_from_pymapdl(mapdl: "Mapdl"):
+def test_start_python_from_pymapdl(
+    mapdl: "Mapdl", mapdl_inprocess: MapdlInProcessRunner
+):
     # calling mapdl_inprocess just to make sure we do not
     # run it in PyMAPDL versions below 25.2
     output = mapdl.input_strings(
