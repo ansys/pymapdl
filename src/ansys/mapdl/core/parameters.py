@@ -834,7 +834,7 @@ def interp_star_status(status):
                 value = float(items[1])
             else:
                 value = items[1]
-            parameters[name] = {"type": items[2], "value": value}
+            parameters[name] = {"type": items[2], "value": valeu}
         elif len(items) == 4:
             # it is an array or string array
             if is_array_listing(status):
@@ -862,6 +862,11 @@ def interp_star_status(status):
                 parameters[name] = {
                     "type": items[1],
                     "workspace": int(items[4]),
+                }
+            elif items[1] in ["C_FullFile"]:
+                print("I GOT HERE!")
+                parameters[name] = {
+                    "type": items[1]
                 }
             else:
                 shape = (int(items[2]), int(items[3]), int(items[4]))
