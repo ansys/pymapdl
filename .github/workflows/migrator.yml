@@ -294,7 +294,7 @@ jobs:
 
       - name: Checkout repo
         if : ${{ env.CONTINUE == 'true'}}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
 

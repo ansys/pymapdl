@@ -65,7 +65,6 @@ class KeyPoints:
         >>> knum = mapdl.k(5, 10, 11, 12)
         >>> knum
         5
-
         """
         command = f"K,{npt},{x},{y},{z}"
         return parse.parse_k(self.run(command, **kwargs))
@@ -130,7 +129,6 @@ class KeyPoints:
         >>> k2 = mapdl.kbetw(k0, k1)
         >>> k2
         3
-
         """
         command = f"KBETW,{kp1},{kp2},{kpnew},{type_},{value}"
         return parse.parse_kpoint(self.run(command, **kwargs))
@@ -179,7 +177,6 @@ class KeyPoints:
         >>> k3 = mapdl.kcenter('KP', k0, k1, k2)
         >>> k3
         4
-
         """
         command = f"KCENTER,{type_},{val1},{val2},{val3},{val4},{kpnew}"
         return parse.parse_kpoint(self.run(command, **kwargs))
@@ -201,7 +198,6 @@ class KeyPoints:
             picking is enabled and all remaining command fields are ignored
             (valid only in the GUI).  A component name may also be substituted
             for NP1 (NP2 and NINC are ignored).
-
         """
         command = f"KDELE,{np1},{np2},{ninc}"
         return self.run(command, **kwargs)
@@ -244,7 +240,6 @@ class KeyPoints:
         >>> dist = mapdl.kdist(knum0, knum1)
         >>> dist
         [13.96424004376894, 1.0, -5.0, 13.0]
-
         """
         return parse.parse_kdist(self.run(f"KDIST,{kp1},{kp2}", **kwargs))
 
@@ -284,7 +279,6 @@ class KeyPoints:
             Spacing ratio.  Ratio of last division size to first division size.
             If > 1.0, divisions increase.  If < 1.0, divisions decrease.  Ratio
             defaults to 1.0 (uniform spacing).
-
         """
         command = f"KFILL,{np1},{np2},{nfill},{nstrt},{ninc},{space}"
         return self.run(command, **kwargs)
@@ -405,7 +399,6 @@ class KeyPoints:
         >>> lnum = mapdl.l(knum0, knum1)
         >>> lnum
         1
-
         """
         cmd = f"KL,{nl1},{ratio},{nk1}"
         return parse.parse_kl(self.run(cmd, **kwargs))
@@ -445,7 +438,6 @@ class KeyPoints:
                     than when displayed with all information).
 
             HPT - List only hard point information.
-
         """
         command = f"KLIST,{np1},{np2},{ninc},{lab}"
         return self.run(command, **kwargs)
@@ -579,7 +571,6 @@ class KeyPoints:
         >>> knum1 = mapdl.knode('', nnum)
         >>> knum1
         1
-
         """
         cmd = f"KNODE,{npt},{node}"
         return parse.parse_knode(self.run(cmd, **kwargs))
