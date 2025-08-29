@@ -317,7 +317,6 @@ class SetUp:
              - The ``n`` th state variable.
            * - FLDUF0 ``n``
              - The ``n`` th user-defined field variable.
-
         """
         command = (
             f"ANSOL,{nvar},{node},{item},{comp},{name},{mat},{real},{ename},{datakey}"
@@ -1004,7 +1003,6 @@ class SetUp:
              - The ``n`` th state variable.
            * - FLDUF0 ``n``
              - The ``n`` th user-defined field variable.
-
         """
         command = f"ESOL,{nvar},{elem},{node},{item},{comp},{name}"
         return self.run(command, **kwargs)
@@ -1136,7 +1134,6 @@ class SetUp:
            * - RM
              - X, Y, Z
              - Relative reaction moments in the local x, y, or z direction.
-
         """
         command = f"JSOL,{nvar},{elem},{item},{comp},{name}"
         return self.run(command, **kwargs)

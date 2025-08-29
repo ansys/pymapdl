@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """Contains the ansXpl class."""
 import json
 import pathlib
@@ -59,7 +58,6 @@ class ansXpl:
     >>> vec.asarray()
     array([ 4,  7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43,
             46, 49, 52, 55, 58,  1], dtype=int32)
-
     """
 
     def __init__(self, mapdl):
@@ -100,7 +98,6 @@ class ansXpl:
         ===============================================
 
         Opening the file.mode ANSYS File
-
         """
         self._filename = filename
         out = self._mapdl.run(f"*XPL,OPEN,{filename},,{option}")
@@ -166,7 +163,6 @@ class ansXpl:
          ::FULL::MASS::HEADER         Size =     50.801 KB
          ::FULL::DIAGM                Size =      1.910 KB
          ::FULL::NGPH                 Size =        336  B
-
         """
         response = self._mapdl.run(f"*XPL,LIST,{nlev}")
         self._check_ignored(response)
@@ -268,7 +264,6 @@ class ansXpl:
         DOFSBYNOD :
         Size : 3
                1         2         3
-
         """
         return self._mapdl.run(f"*XPL,PRINT,{recname}")
 
@@ -435,7 +430,6 @@ class ansXpl:
                  1.08619340e-02, -1.72211102e-02,  2.52199472e-03],
                [ 2.29726170e-02,  3.54392176e-03, -1.87020162e-03, ...,
                  1.20642736e-02,  2.58299321e-11,  9.14504940e-04]])
-
         """
         from ansys.math.core.math import AnsMath
 

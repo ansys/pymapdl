@@ -54,7 +54,6 @@ class SetUp:
         .. warning::
 
             This command is archived in the latest version of the software.
-
         """
         command = f"GAPF,{nvar},{num},{name}"
         return self.run(command, **kwargs)
