@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """Inquire undocumented functions"""
 
 
@@ -374,7 +373,6 @@ class inq_function:
 
             For key not equal to 1 returned data is based
             on setting of key.
-
         """
         return self.run(f"{pname} = lsinqr({line}, {key})", **kwargs)
 
@@ -580,7 +578,6 @@ class inq_function:
         -------
         int or str
             The returned value of ``rlinqr`` is based on setting of key.
-
         """
         return self.run(f"{pname} = rlinqr({nreal}, {key})", **kwargs)
 
@@ -762,7 +759,6 @@ class inq_function:
         -------
         int or str
             The returned value of ``cpinqr`` is based on setting of key.
-
         """
         return self.run(f"{pname} = cpinqr({ncp}, {key})", **kwargs)
 
@@ -1053,7 +1049,6 @@ class inq_function:
         +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
 
         see :meth:`TB <ansys.mapdl.core.Mapdl.tb>` command for more information.
-
         """
         return self.run(f"{pname} = mpinqr({mat}, {iprop}, {key})", **kwargs)
 
@@ -1350,7 +1345,6 @@ class inq_function:
         -------
         int or str
             Value corresponding to key.
-
         """
         return self.run(f"{pname} = erinqr({key})", **kwargs)
 
@@ -1423,6 +1417,5 @@ class inq_function:
         -------
         int or str
             The value corresponding to key.
-
         """
         return self.run(f"{pname} = wrinqr({key})", **kwargs)

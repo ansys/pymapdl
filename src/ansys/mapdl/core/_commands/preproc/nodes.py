@@ -244,7 +244,6 @@ class Nodes:
         >>> nnum = mapdl.n(10, 4, 5, 1)
         >>> nnum
         10
-
         """
         command = f"N,{node},{x},{y},{z},{thxy},{thyz},{thzx}"
         return parse.parse_n(self.run(command, **kwargs))
@@ -436,7 +435,6 @@ class Nodes:
         >>> node_dist = mapdl.ndist(node_num1, node_num2)
         >>> node_dist
         [16.673332000533065, 13.0, -3.0, 10.0]
-
         """
 
         return parse.parse_ndist(self.run(f"NDIST,{nd1},{nd2}", **kwargs))

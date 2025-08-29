@@ -957,6 +957,9 @@ Here are some examples:
 - The ``*IF`` command can be replaced with a Python ``if`` statement.
 - The ``*CREATE`` and ``*USE`` commands can be replaced with calls to another Python function or module.
 
+The User Programmable Features (UPF) are not compatible with MAPDL running through PyMAPDL, hence
+the related command such as ``/UPF`` are not supported.
+
 Other commands do not make sense in a non-GUI session. For example, the ``/ERASE``
 and ``ERASE`` commands that clear the graphics screen are not needed in a non-GUI session.
 
@@ -970,7 +973,6 @@ which returns the following warning:
     *** WARNING ***                         CP =       0.519   TIME= 12:04:16
     The /BATCH command must be the first line of input.  The /BATCH command
     is ignored.
-
 
 
 Table-1_ Comprehensive information on commands that are unavailable
@@ -1030,7 +1032,7 @@ Table-1_ Comprehensive information on commands that are unavailable
 
 
 .. note::
-    * **Interactive** means there is a method in MAPDL, such as the
+    * **Interactive** means there is a method, such as the
       :func:`Mapdl.prep7() <ansys.mapdl.core.Mapdl.prep7>` method.
     * **Non-interactive** means it is run inside a 
       :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>` context block,

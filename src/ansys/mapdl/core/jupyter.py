@@ -98,7 +98,6 @@ def launch_mapdl_on_cluster(
     Launch MAPDL and guarantee 16 GB minimum RAM and 8 CPUs.
 
     >>> mapdl = launch_mapdl(memory=16, nproc=8)
-
     """
     # attempt to connect to the remote scheduler
     check_manager()

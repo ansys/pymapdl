@@ -27,7 +27,6 @@ For example:
 
 # major, minor, patch
 version_info = 0, 58, 'dev0'
-
 """
 import importlib.metadata as importlib_metadata
 from typing import Dict

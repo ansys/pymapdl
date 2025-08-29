@@ -57,5 +57,6 @@
 * [sourcery-ai[bot]](https://github.com/apps/sourcery-ai)
 * [Sébastien Morais](https://github.com/SMoraisAnsys)
 * [Tetsuo Koyama](https://github.com/tkoyama010)
+* [valallansys](https://github.com/valallansys)
 * [Vikas Namdeo](https://github.com/vnamdeo)
 * [Yeguang Xue](https://github.com/yeguang-xue)

@@ -46,6 +46,7 @@ from ._commands import (
     misc,
     post1,
     post26,
+    prep7,
     preproc,
     session,
     solution,
@@ -169,7 +170,6 @@ str
     obtain a lower precision than using :class:`Mesh <ansys.mapdl.core.mesh_grpc.MeshGrpc>` methods.
     |bl|
     For more information visit :ref:`user_guide_postprocessing`.
-
 """
 
 XSEL_DOCSTRING_INJECTION: str = r"""
@@ -180,7 +180,6 @@ np.ndarray
     Numpy array with the ids of the selected entities.
 
     For more information visit :ref:`user_guide_postprocessing`.
-
 """
 
 
@@ -325,17 +324,26 @@ def check_valid_output(func: Callable[..., Any]) -> Callable[..., Any]:
     return func_wrapper
 
 
+class Prep7Commands(
+    prep7._status.Status,
+    prep7.areas.Areas,
+    prep7.artificially_matched_layers.ArtificiallyMatchedLayers,
+    prep7.booleans.Booleans,
+    prep7.constraint_equations_.ConstraintEquations,
+    prep7.constraint_equations.ConstraintEquations,
+    prep7.coupled_dof.CoupledDof,
+    prep7.cross_sections.CrossSections,
+    prep7.data_tables.DataTables,
+):
+    pass
+
+
 class PreprocessorCommands(
     preproc.database.Database,
     preproc.explicit_dynamics.ExplicitDynamics,
     preproc.lines.Lines,
-    preproc.areas.Areas,
     preproc.nodes.Nodes,
     preproc.keypoints.KeyPoints,
-    preproc.artificially_matched_layers.ArtificiallyMatchedLayers,
-    preproc.booleans.Booleans,
-    preproc.constraint_equations.ConstraintEquations,
-    preproc.coupled_dof.CoupledDOF,
     preproc.real_constants.RealConstants,
     preproc.digitizing.Digitizing,
     preproc.element_type.ElementType,
@@ -539,7 +547,6 @@ class CommandOutput(str):
 
     * :attr:`cmd() <ansys.mapdl.core.commands.CommandOutput.cmd>`
     * :attr:`command() <ansys.mapdl.core.commands.CommandOutput.command>`
-
     """
 
     ## References:
@@ -588,7 +595,6 @@ class CommandListingOutput(CommandOutput):
     * :func:`to_list() <ansys.mapdl.core.commands.CommandListingOutput.to_list>`
     * :func:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>`
     * :func:`to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput.to_dataframe>`
-
     """
 
     _magicwords: list[str] | None
@@ -727,7 +733,6 @@ class CommandListingOutput(CommandOutput):
         Returns
         -------
         List of strings
-
         """
         if self._columns_names:
             return self._columns_names
@@ -746,7 +751,6 @@ class CommandListingOutput(CommandOutput):
         -------
         numpy.ndarray
             Parsed tabular data from command output.
-
         """
         parsed_lines: list[list[str]] = []
         for line in self.splitlines():
@@ -842,7 +846,6 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
 
     * :func:`to_list() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput.to_list>`
     * :func:`to_dataframe() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput.to_dataframe>`
-
     """
 
     def bc_colnames(self) -> Optional[List[str]]:
@@ -903,7 +906,6 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
         Returns
         -------
         List of strings
-
         """
         if self._columns_names:
             return self._columns_names
@@ -973,7 +975,6 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
         * ``'LABEL'``: str
         * ``'REAL'``: float
         * ``'IMAG'``: float
-
         """
         df = super().to_dataframe(data=self.to_list())
 

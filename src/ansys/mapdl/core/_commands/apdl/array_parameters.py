@@ -1125,7 +1125,6 @@ class ArrayParameters:
            * - ETAB
              - Lab
              - Any user-defined element table label ( :ref:`etable` ).
-
         """
         command = (
             f"*VPUT,{parr},{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"

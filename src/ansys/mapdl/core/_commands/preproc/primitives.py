@@ -75,7 +75,6 @@ class Primitives:
         >>> vnum = mapdl.blc4(1, 1, 1, 2, 10)
         >>> vnum
         1
-
         """
         command = f"BLC4,{xcorner},{ycorner},{width},{height},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -134,7 +133,6 @@ class Primitives:
         >>> vnum = mapdl.blc5(width=1, height=4, depth=9)
         >>> vnum
         1
-
         """
         command = f"BLC5,{xcenter},{ycenter},{width},{height},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -177,7 +175,6 @@ class Primitives:
         >>> vnum = mapdl.block(0, 1, 0, 2, 1, 4)
         >>> vnum
         1
-
         """
         command = f"BLOCK,{x1},{x2},{y1},{y2},{z1},{z2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -229,7 +226,6 @@ class Primitives:
         >>> vnum = mapdl.con4(rad1=3, rad2=0, depth=10)
         >>> vnum
         1
-
         """
         command = f"CON4,{xcenter},{ycenter},{rad1},{rad2},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -289,7 +285,6 @@ class Primitives:
         >>> vnum = mapdl.cone(rbot=5, rtop=1, z1=0, z2=10, theta1=180, theta2=90)
         >>> vnum
         1
-
         """
         command = f"CONE,{rbot},{rtop},{z1},{z2},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -377,7 +372,6 @@ class Primitives:
 
         >>> vnum = mapdl.cyl4(0, 0, rad1=1.9, rad2=2.0, depth=10)
         2
-
         """
         command = f"CYL4,{xcenter},{ycenter},{rad1},{theta1},{rad2},{theta2},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -437,7 +431,6 @@ class Primitives:
         >>> vnum = mapdl.cyl5(xedge1=1, yedge1=1, xedge2=2, yedge2=2, depth=5)
         >>> vnum
         1
-
         """
         command = f"CYL5,{xedge1},{yedge1},{xedge2},{yedge2},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -497,7 +490,6 @@ class Primitives:
         >>> vnum = mapdl.cylind(0.9, 1, z1=0, z2=5)
         >>> vnum
         1
-
         """
         command = f"CYLIND,{rad1},{rad2},{z1},{z2},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -543,7 +535,6 @@ class Primitives:
         >>> anum = mapdl.pcirc(0.95, 1)
         >>> anum
         1
-
         """
         command = f"PCIRC,{rad1},{rad2},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -601,7 +592,6 @@ class Primitives:
         ----------
         z1, z2
             Working plane Z coordinates of the top and bottom of the prism.
-
         """
         command = f"PRISM,{z1},{z2}"
         return self.run(command, **kwargs)
@@ -624,7 +614,6 @@ class Primitives:
         ----------
         x1, y1, x2, y2, x3, y3, x4, y4
             X and Y coordinate pairs on the working plane.
-
         """
         command = f"PTXY,{x1},{y1},{x2},{y2},{x3},{y3},{x4},{y4}"
         return self.run(command, **kwargs)
@@ -645,7 +634,6 @@ class Primitives:
 
         y1, y2
             Working plane Y coordinates of the rectangle.
-
         """
         command = f"RECTNG,{x1},{x2},{y1},{y2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -677,7 +665,6 @@ class Primitives:
         minrad
             Radius of the minor (or inscribed) circle of the polygon.  Not used
             if LSIDE or MAJRAD is input.
-
         """
         command = f"RPOLY,{nsides},{lside},{majrad},{minrad}"
         return self.run(command, **kwargs)
@@ -725,7 +712,6 @@ class Primitives:
             the working plane Z direction) from the working plane representing
             the depth of the prism.  If DEPTH = 0 (default), a polygonal area
             is created on the working plane.
-
         """
         command = f"RPR4,{nsides},{xcenter},{ycenter},{radius},{theta},{depth}"
         return self.run(command, **kwargs)
@@ -766,7 +752,6 @@ class Primitives:
             Radius of the minor (or inscribed circle) of the polygon defining
             the top and bottom faces of the prism.  Not used if LSIDE or MAJRAD
             is input.
-
         """
         command = f"RPRISM,{z1},{z2},{nsides},{lside},{majrad},{minrad}"
         return self.run(command, **kwargs)
@@ -813,7 +798,6 @@ class Primitives:
         >>> vnum = mapdl.sph4(0, 0, rad1=0.9, rad2=1.0)
         >>> vnum
         1
-
         """
         command = f"SPH4,{xcenter},{ycenter},{rad1},{rad2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -854,7 +838,6 @@ class Primitives:
         >>> vnum = mapdl.sph5(xedge1=1, yedge1=1, xedge2=2, yedge2=2)
         >>> vnum
         1
-
         """
         command = f"SPH5,{xedge1},{yedge1},{xedge2},{yedge2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -905,7 +888,6 @@ class Primitives:
         >>> vnum = mapdl.sphere(rad1=0.95, rad2=1.0, theta1=90, theta2=270)
         >>> vnum
         1
-
         """
         command = f"SPHERE,{rad1},{rad2},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
@@ -962,7 +944,6 @@ class Primitives:
         >>> vnum = mapdl.torus(rad1=5, rad2=1, rad3=2, theta1=0, theta2=180)
         >>> vnum
         1
-
         """
         command = f"TORUS,{rad1},{rad2},{rad3},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))

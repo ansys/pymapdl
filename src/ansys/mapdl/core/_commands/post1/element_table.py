@@ -773,7 +773,6 @@ class ElementTable:
              - The ``n`` th state variable.
            * - FLDUF0 ``n``
              - The ``n`` th user-defined field variable.
-
         """
         command = f"ETABLE,{lab},{item},{comp},{option}"
         return self.run(command, **kwargs)

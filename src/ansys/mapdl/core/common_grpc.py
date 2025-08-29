@@ -90,10 +90,23 @@ VGET_NODE_ENTITY_TYPES: Dict[str, List[str]] = {
 
 
 class GrpcError(MapdlRuntimeError):
-    """Raised when gRPC fails"""
+    """Raised when gRPC fails.
+
+    Parameters
+    ----------
+    msg : str, optional
+        Error message, by default "".
+    """
 
     def __init__(self, msg: str = "") -> None:
-        super().__init__(self, msg)
+        """Initialize GrpcError.
+
+        Parameters
+        ----------
+        msg : str, optional
+            Error message, by default "".
+        """
+        super().__init__(self, msg=msg)
 
 
 def check_vget_input(entity: str, item: str, itnum: str) -> str:
@@ -174,7 +187,7 @@ def check_vget_input(entity: str, item: str, itnum: str) -> str:
 def parse_chunks(
     chunks: Iterable[anskernel.Chunk], dtype: Optional[np.typing.DTypeLike] = None
 ) -> np.ndarray:
-    """Deserialize gRPC chunks into a numpy array
+    """Deserialize gRPC chunks into a numpy array.
 
     Parameters
     ----------
@@ -188,7 +201,6 @@ def parse_chunks(
     -------
     np.ndarray
         Deserialized numpy array.
-
     """
     timeout = 3  # seconds
     time_step = 0.01
