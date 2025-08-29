@@ -1338,3 +1338,10 @@ def test_deprecated_params(mapdl, make_block):
         mapdl.eplot(vtk=True)
     with pytest.warns(DeprecationWarning, match="'vtk' and 'use_vtk' are deprecated"):
         mapdl.eplot(vtk=False)
+
+
+def test_plvar(mapdl, coupled_example):
+    mapdl.post26()
+    with patch("ansys.mapdl.core.Mapdl.screenshot") as mock_screenshot:
+        mapdl.plvar(4, 5)
+        mock_screenshot.assert_called_once()
