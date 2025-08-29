@@ -83,7 +83,6 @@ class Lines:
         >>> k1 = mapdl.k("", 0, 1, 0)
         >>> k2 = mapdl.k("", 1, 2, 0)
         >>> lnum = mapdl.bsplin(k0, k1, k2)
-
         """
         command = (
             f"BSPLIN,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}"
@@ -156,7 +155,6 @@ class Lines:
         >>> carc0 = mapdl.circle(k0, 1, k1)
         >>> carc0
         [1, 2, 3, 4]
-
         """
         command = f"CIRCLE,{pcent},{rad},{paxis},{pzero},{arc},{nseg}"
         return parse.parse_line_nos(self.run(command, **kwargs))
@@ -225,7 +223,6 @@ class Lines:
         >>> lnum = mapdl.l(k0, k1)
         >>> lnum
         1
-
         """
         command = f"L,{p1},{p2},{ndiv},{space},{xv1},{yv1},{zv1},{xv2},{yv2},{zv2}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -294,7 +291,6 @@ class Lines:
         >>> lnum = mapdl.l2ang(carc0[0], carc1[0], 90, 90)
         >>> lnum
         9
-
         """
         command = f"L2ANG,{nl1},{nl2},{ang1},{ang2},{phit1},{phit2}"
         msg = self.run(command, **kwargs)
@@ -342,7 +338,6 @@ class Lines:
         Plot these lines
 
         >>> mapdl.lplot(cpos='xy')
-
         """
         command = f"L2TAN,{nl1},{nl2}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -416,7 +411,6 @@ class Lines:
         >>> lnum = mapdl.lang(lnum, k2, 60)
         >>> lnum
         2
-
         """
         command = f"LANG,{nl1},{p3},{ang},{phit},{locat}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -472,7 +466,6 @@ class Lines:
         >>> k2 = mapdl.k("", 0, 1, 0)
         >>> lnum = mapdl.larc(k0, k1, k2, 2)
         1
-
         """
         command = f"LARC,{p1},{p2},{pc},{rad}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -517,7 +510,6 @@ class Lines:
         >>> lnum = mapdl.larea(k0, k2, a0)
         >>> lnum
         1
-
         """
         command = f"LAREA,{p1},{p2},{narea}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -572,7 +564,6 @@ class Lines:
         >>> lout = mapdl.lcomb(l0, l1)
         >>> lout
         1
-
         """
         command = f"LCOMB,{nl1},{nl2},{keep}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -678,7 +669,6 @@ class Lines:
         >>> k1 = mapdl.k("", 1, 0, 0)
         >>> l0 = mapdl.l(k0, k1)
         >>> mapdl.ldiv(l0, ndiv=5)
-
         """
         command = f"LDIV,{nl1},{ratio},{pdiv},{ndiv},{keep}"
         return self.run(command, **kwargs)
@@ -785,7 +775,6 @@ class Lines:
         >>> lnum = mapdl.lextnd(carcs[0], 3, 1)
         >>> lnum
         1
-
         """
         command = f"LEXTND,{nl1},{nk1},{dist},{keep}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -838,7 +827,6 @@ class Lines:
         >>> l1 = mapdl.l(k0, k2)
         >>> lnum = mapdl.lfillt(l0, l1, 0.25)
         3
-
         """
         command = f"LFILLT,{nl1},{nl2},{rad},{pcent}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -1210,7 +1198,6 @@ class Lines:
         >>> lnum = mapdl.lstr(k0, k1)
         >>> lnum
         1
-
         """
         command = f"LSTR,{p1},{p2}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -1343,7 +1330,6 @@ class Lines:
         >>> lnum = mapdl.ltan(carc[0], k2)
         >>> lnum
         2
-
         """
         command = f"LTAN,{nl1},{p3},{xv3},{yv3},{zv3}"
         return parse.parse_line_no(self.run(command, **kwargs))
@@ -1465,7 +1451,6 @@ class Lines:
         >>> lines = mapdl.spline(k0, k1, k2, k3, k4)
         >>> lines
         [1, 2, 3, 4]
-
         """
         command = (
             f"SPLINE,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}"

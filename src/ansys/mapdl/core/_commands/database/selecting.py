@@ -240,7 +240,6 @@ class Selecting:
            * - ACCA
              -
              - Concatenated areas (selects only areas that were created by area concatenation ( :ref:`accat` )).
-
         """
         command = f"ASEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kswp}"
         return self.run(command, **kwargs)
@@ -652,7 +651,6 @@ class Selecting:
            * - ETAB
              - ``Lab``
              - Any user-defined element table label ( :ref:`etable` ).
-
         """
         command = f"ESEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kabs}"
         return self.run(command, **kwargs)
@@ -935,7 +933,6 @@ class Selecting:
            * - ESYS
              -
              - Element coordinate system associated with the keypoint.
-
         """
         command = f"KSEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kabs}"
         return self.run(command, **kwargs)
@@ -1166,7 +1163,6 @@ class Selecting:
            * - LCCA
              -
              - Concatenated lines (selects only lines that were created by concatenation ( :ref:`lccat` )).
-
         """
         command = f"LSEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kswp}"
         return self.run(command, **kwargs)
@@ -2056,7 +2052,6 @@ class Selecting:
            * - ESYS
              -
              - Element coordinate system associated with the volume.
-
         """
         command = f"VSEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kswp}"
         return self.run(command, **kwargs)

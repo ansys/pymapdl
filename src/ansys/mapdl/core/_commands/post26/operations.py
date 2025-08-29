@@ -127,7 +127,6 @@ class Operations:
         Adds variables (up to three at once) according to the operation:
 
         ``IR`` = ( ``FACTA`` x ``IA`` ) + ( ``FACTB`` x ``IB`` ) + ( ``FACTC`` x ``IC`` )
-
         """
         command = f"ADD,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}"
         return self.run(command, **kwargs)
@@ -351,7 +350,6 @@ class Operations:
         Forms the exponential of a variable according to the operation:
 
         ``IR`` = ``FACTB`` \*EXP( ``FACTA`` x ``IA`` )
-
         """
         command = f"EXP,{ir},{ia},,,{name},,,{facta},{factb}"
         return self.run(command, **kwargs)
@@ -496,7 +494,6 @@ class Operations:
         Integrates variables according to the operation:
 
         ``IR`` = ∫ ( ``FACTA`` x ``IY`` ) d( ``FACTB`` x ``IX`` ) + ``CONST``
-
         """
         command = f"INT1,{ir},{iy},{ix},,{name},,,{facta},{factb},{const}"
         return self.run(command, **kwargs)
@@ -605,7 +602,6 @@ class Operations:
         Forms the natural log of a variable according to the operation:
 
         ``IR`` = ``FACTB`` \*LN( ``FACTA`` x ``IA`` )
-
         """
         command = f"NLOG,{ir},{ia},,,{name},,,{facta},{factb}"
         return self.run(command, **kwargs)
@@ -666,7 +662,6 @@ class Operations:
         Multiplies variables (up to three at once) according to the operation:
 
         ``IR`` = ( ``FACTA`` x ``IA`` ) x ( ``FACTB`` x ``IB`` ) x ( ``FACTC`` x ``IC`` )
-
         """
         command = f"PROD,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}"
         return self.run(command, **kwargs)
@@ -716,7 +711,6 @@ class Operations:
         Divides two variables according to the operation:
 
         ``IR`` = ( ``FACTA`` x ``IA`` )/( ``FACTB`` x ``IB`` )
-
         """
         command = f"QUOT,{ir},{ia},{ib},,{name},,,{facta},{factb}"
         return self.run(command, **kwargs)
@@ -819,7 +813,6 @@ class Operations:
         Finds the smallest of three variables according to the operation:
 
         ``IR`` = smallest of ( ``FACTA`` x ``IA``, ``FACTB`` x ``IB``, ``FACTC`` x ``IC`` )
-
         """
         command = f"SMALL,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}"
         return self.run(command, **kwargs)

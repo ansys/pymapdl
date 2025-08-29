@@ -562,7 +562,6 @@ class AnalysisOptions:
 
         For additional details on this command, see
         https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_CGROW.html
-
         """
         command = f"CGROW,{action},{par1},{par2}"
         return self.run(command, **kwargs)
@@ -884,7 +883,6 @@ class AnalysisOptions:
 
         For additional details, see the notes section at:
         https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_CNCHECK.html
-
         """
         command = f"CNCHECK,{option},{rid1},{rid2},{rinc},{intertype},{trlevel},{cgap},{cpen},{ioff}"
         return self.run(command, **kwargs)
@@ -2276,7 +2274,6 @@ class AnalysisOptions:
         By default the sturm sequence check is off for the Block Lanczos
         eigensolver when it is used in a modal analysis, and on when it is
         used in a buckling analysis.
-
         """
         return self.run(f"LANBOPTION,{strmck}", **kwargs)
 
