@@ -1,7 +1,6 @@
 """Validate the PNG images in the build/latex/ directory
 
-Removes invalid PNGs (probably GIF)
-
+Removes invalid PNGs (probably GIF).
 """
 
 from glob import glob

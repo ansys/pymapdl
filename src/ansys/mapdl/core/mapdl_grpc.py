@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """A gRPC specific class and methods for the MAPDL gRPC client"""
 
 import fnmatch
@@ -135,8 +134,8 @@ SERVICE_DEFAULT_CONFIG = {
 }
 
 
-def get_start_instance(*args, **kwargs) -> bool:
-    """Wraps get_start_instance to avoid circular imports"""
+def get_start_instance(*args, **kwargs) -> bool:  # numpydoc ignore=RT01
+    """Wraps get_start_instance to avoid circular imports."""
     from ansys.mapdl.core.launcher import get_start_instance
 
     return get_start_instance(*args, **kwargs)
@@ -324,7 +323,6 @@ class MapdlGrpc(MapdlBase):
     ...     ],
     ... )
     >>> mapdl = pymapdl.Mapdl(channel=channel)
-
     """
 
     # Required by `_name` method to be defined before __init__ be
@@ -547,8 +545,21 @@ class MapdlGrpc(MapdlBase):
         self._stderr_queue, self._stderr_thread = _create_queue_for_std(process.stderr)
 
     def _create_channel(self, ip: str, port: int) -> grpc.Channel:
-        """Create an insecured grpc channel."""
+        """Create an insecured grpc channel.
 
+        Parameters
+        ----------
+        ip : str
+            The IP address of the gRPC server.
+
+        port : int
+            The port number of the gRPC server.
+
+        Returns
+        -------
+        grpc.Channel
+            The created gRPC channel.
+        """
         # open the channel
         channel_str = f"{ip}:{port}"
         self._log.debug("Opening insecure channel at %s", channel_str)
@@ -575,6 +586,8 @@ class MapdlGrpc(MapdlBase):
     def channel_state(self) -> str:
         """Returns the gRPC channel state.
 
+        Notes
+        -----
         The possible values are:
 
         - 0 - 'IDLE'
@@ -582,6 +595,11 @@ class MapdlGrpc(MapdlBase):
         - 2 - 'READY'
         - 3 - 'TRANSIENT_FAILURE'
         - 4 - 'SHUTDOWN'
+
+        Returns
+        -------
+        str
+            The current state of the gRPC channel as a string.
         """
         return self._channel_state.name
 
@@ -594,7 +612,6 @@ class MapdlGrpc(MapdlBase):
             Number of connection attempts.
         timeout : float, optional
             Total timeout.
-
         """
         # This prevents a single failed connection from blocking other attempts
         connected = False
@@ -636,7 +653,7 @@ class MapdlGrpc(MapdlBase):
 
         self._exited = False
 
-    def _is_alive_subprocess(self):
+    def _is_alive_subprocess(self):  # numpydoc ignore=RT01
         """Returns:
         * True if the PID is alive.
         * False if it is not.
@@ -647,7 +664,13 @@ class MapdlGrpc(MapdlBase):
 
     @property
     def process_is_alive(self):
-        """Check if the MAPDL process is alive"""
+        """Check if the MAPDL process is alive.
+
+        Returns
+        -------
+        bool
+            True if the MAPDL process is alive, False otherwise.
+        """
         return self._is_alive_subprocess()
 
     def _post_mortem_checks(self, process=None):
@@ -760,11 +783,17 @@ class MapdlGrpc(MapdlBase):
             raise MapdlConnectionError(errs_message)
 
     @property
-    def _channel_str(self):
-        """Return the target string.
+    def _channel_str(self) -> str:
+        """Returns the target string.
 
+        Notes
+        -----
         Generally of the form of "ip:port", like "127.0.0.1:50052".
 
+        Returns
+        -------
+        str
+            The target string.
         """
         channel = self._channel
         while channel is not None:
@@ -820,7 +849,6 @@ class MapdlGrpc(MapdlBase):
 
         >>> mapdl.k('', 1, 1, 1, mute=False)
         1
-
         """
         return self._mute
 
@@ -833,13 +861,18 @@ class MapdlGrpc(MapdlBase):
         info = super().__repr__()
         return info
 
-    def _connect(self, timeout=5):
+    def _connect(self, timeout: int = 5) -> bool:
         """Establish a gRPC channel to a remote or local MAPDL instance.
 
         Parameters
         ----------
         timeout : float
-            Time in seconds to wait until the connection has been established
+            Time in seconds to wait until the connection has been established.
+
+        Returns
+        -------
+        bool
+            True if the connection was established successfully, False otherwise.
         """
         self._state = grpc.channel_ready_future(self._channel)
         self._stub = mapdl_grpc.MapdlServiceStub(self._channel)
@@ -869,8 +902,13 @@ class MapdlGrpc(MapdlBase):
         return True
 
     @property
-    def _server_version(self):
+    def _server_version(self) -> tuple[int, int, int]:
         """Return the server version.
+
+        Returns
+        -------
+        tuple
+            The server version as a tuple of (major, minor, patch).
 
         Examples
         --------
@@ -884,9 +922,11 @@ class MapdlGrpc(MapdlBase):
             self.__server_version = self._get_server_version()
         return self.__server_version
 
-    def _get_server_version(self):
+    def _get_server_version(self) -> tuple[int, int, int]:
         """Request version from gRPC server.
 
+        Notes
+        -----
         Generally tied to the release version unless on a development release.
 
         2020R2 --> 0.0.0 (or any unknown version)
@@ -894,6 +934,10 @@ class MapdlGrpc(MapdlBase):
         2021R2 --> 0.4.0
         2022R1 --> 0.X.X
 
+        Returns
+        -------
+        tuple
+            The server version as a tuple of (major, minor, patch).
         """
         sver = (0, 0, 0)
         verstr = self._ctrl("VERSION")
@@ -985,7 +1029,7 @@ class MapdlGrpc(MapdlBase):
         return self._mesh_rep
 
     def _run(self, cmd: str, verbose: bool = False, mute: Optional[bool] = None) -> str:
-        """Sens a command and return the response as a string.
+        """Send a command and return the response as a string.
 
         Parameters
         ----------
@@ -1000,6 +1044,11 @@ class MapdlGrpc(MapdlBase):
             is ``None``, in which case the global setting specified by
             ``mapdl.mute = <bool>`` is used, which is ``False`` by default.
 
+        Returns
+        -------
+        str
+            The response from the MAPDL server.
+
         Examples
         --------
         Run a basic command.
@@ -1013,7 +1062,6 @@ class MapdlGrpc(MapdlBase):
         Run a command and stream its output while it is being run.
 
         >>> mapdl.run('/PREP7', verbose=True)
-
         """
         if mute is None:
             mute = self._mute
@@ -1041,43 +1089,87 @@ class MapdlGrpc(MapdlBase):
 
     @property
     def busy(self) -> bool:
-        """True when MAPDL gRPC server is executing a command."""
+        """Check if the MAPDL gRPC server is busy executing a command.
+
+        Returns
+        -------
+        bool
+            Returns true if the MAPDL gRPC server is busy executing a command.
+        """
         return self._busy
 
     @property
     def exiting(self) -> bool:
-        """Returns true if the MAPDL instance is exiting."""
+        """Check if the MAPDL instance is exiting.
+
+        Returns
+        -------
+        bool
+            Returns true if the MAPDL instance is exiting."""
         return self._exiting
 
     @property
     def port(self) -> int:
-        """Returns the MAPDL gRPC instance port."""
+        """Returns the MAPDL gRPC instance port.
+
+        Returns
+        -------
+        int
+            Port number of the MAPDL gRPC instance.
+        """
         return self._port
 
     @property
     def ip(self) -> str:
-        """Return the MAPDL gRPC instance IP."""
+        """Return the MAPDL gRPC instance IP.
+
+        Returns
+        -------
+        str
+            IP address of the MAPDL gRPC instance.
+        """
         return self._ip
 
     @property
     def hostname(self) -> str:
-        """Return the hostname of the machine MAPDL is running in."""
+        """Return the hostname of the machine MAPDL is running in.
+
+        Returns
+        -------
+        str
+            Hostname of the machine MAPDL is running in
+        """
         return self._hostname
 
     @property
     def jobid(self) -> int:
         """Returns the job id where the MAPDL is running in.
-        This is only applicable if MAPDL is running on an HPC cluster."""
+
+        This is only applicable if MAPDL is running on an HPC cluster.
+
+        Returns
+        -------
+        int
+            Returns the job id where the MAPDL is running in.
+        """
         return self._jobid
 
     @property
     def mapdl_on_hpc(self) -> bool:
-        """Returns :class:`True` if the MAPDL instance has been launched using
-        an scheduler."""
+        """Check if MAPDL is running on an HPC cluster.
+
+        Returns
+        -------
+        bool
+            Returns :class:`True` if the MAPDL instance has been launched using
+            an scheduler.
+        """
         return self._mapdl_on_hpc
 
     @protect_grpc
-    def _send_command(self, cmd: str, mute: bool = False) -> Optional[str]:
+    def _send_command(
+        self, cmd: str, mute: bool = False
+    ) -> Optional[str]:  # numpydoc ignore=RT01
         """Send a MAPDL command and return the response as a string"""
         opt = ""
         if mute:
@@ -1093,7 +1185,7 @@ class MapdlGrpc(MapdlBase):
         return None
 
     @protect_grpc
-    def _send_command_stream(self, cmd, verbose=False) -> str:
+    def _send_command_stream(self, cmd, verbose=False) -> str:  # numpydoc ignore=RT01
         """Send a command and expect a streaming response"""
         request = pb_types.CmdRequest(command=cmd)
         time_step = self._get_time_step_stream()
@@ -1227,7 +1319,6 @@ class MapdlGrpc(MapdlBase):
 
         This only runs if the current working directory of MAPDL is within the
         user temporary directory.
-
         """
         if self.remove_temp_dir_on_exit and self._local:
             from pathlib import Path
@@ -1254,7 +1345,6 @@ class MapdlGrpc(MapdlBase):
         This only shuts down the mapdl server process and leaves the other
         processes orphaned. This is useful for killing a remote process but not
         a local process.
-
         """
         if self._exited:
             return
@@ -1321,7 +1411,6 @@ class MapdlGrpc(MapdlBase):
         This is effectively the only way to completely close down MAPDL locally on
         linux. Just killing the server with ``_exit_mapdl_server`` leaves orphaned
         processes making this method ineffective for a local instance of MAPDL.
-
         """
         self._log.debug("Closing processes")
         if self._local:
@@ -1343,7 +1432,6 @@ class MapdlGrpc(MapdlBase):
         These PIDs are stored in a "cleanup<GUID>.sh/bat" file and are the PIDs
         of the MAPDL process. Killing these kills all dependent MAPDL
         processes.
-
         """
         self._log.debug("Caching PIDs")
         self._pids = []
@@ -1436,7 +1524,6 @@ class MapdlGrpc(MapdlBase):
         Examples
         --------
         >>> mapdl.sys('ls')
-
         """
         # always redirect system output to a temporary file
         tmp_file = f"__tmp_sys_out_{random_string()}__"
@@ -1454,25 +1541,30 @@ class MapdlGrpc(MapdlBase):
 
     def download_result(
         self,
-        path: Optional[Union[str, pathlib.Path]] = None,
+        path: str | pathlib.Path | None = None,
         progress_bar: bool = False,
-        preference: Optional[Literal["rst", "rth"]] = None,
+        preference: Literal["rst", "rth"] | None = None,
     ) -> str:
         """Download remote result files to a local directory
 
         Parameters
         ----------
-        path : str, Path, optional
-          Path where the files are downloaded, by default the current
-          python path (``os.getcwd()``)
+        path
+            Path where the files are downloaded, by default the current
+            python path (``os.getcwd()``)
 
-        progress_bar : bool, optional
-          Show the progress bar or not, default to False.
+        progress_bar
+            Show the progress bar or not, default to False.
 
-        preference : str
-          Preferred type for the result file, which is either ``rst`` or ``rth``.
-          This parameter is only required when both files are present. The default is ```None``,
-          in which case ``"rst"`` is used.
+        preference
+            Preferred type for the result file, which is either ``rst`` or ``rth``.
+            This parameter is only required when both files are present. The default is ```None``,
+            in which case ``"rst"`` is used.
+
+        Returns
+        -------
+        list[str]
+            List of downloaded files.
 
         Examples
         --------
@@ -1480,7 +1572,6 @@ class MapdlGrpc(MapdlBase):
 
         >>> import os
         >>> mapdl.download_result(os.getcwd())
-
         """
         if path is None:  # if not path seems to not work in same cases.
             path = os.getcwd()
@@ -1561,7 +1652,7 @@ class MapdlGrpc(MapdlBase):
         return os.path.join(path, jobname + "0." + preference)
 
     @protect_grpc
-    def _ctrl(self, cmd: str, opt1: str = ""):
+    def _ctrl(self, cmd: str, opt1: str = ""):  # numpydoc ignore=RT01
         """Issue control command to the MAPDL server.
 
         Available commands:
@@ -1590,7 +1681,6 @@ class MapdlGrpc(MapdlBase):
 
         - ``mem-stats``
             To be added
-
         """
         self._log.debug(f'Issuing CtrlRequest "{cmd}" with option "{opt1}".')
         request = anskernel.CtrlRequest(ctrl=str(cmd), opt1=str(opt1))
@@ -1614,7 +1704,9 @@ class MapdlGrpc(MapdlBase):
             return resp.response
 
     @wraps(MapdlBase.cdread)
-    def cdread(self, option="", fname="", ext="", fnamei="", exti="", **kwargs):
+    def cdread(
+        self, option="", fname="", ext="", fnamei="", exti="", **kwargs
+    ):  # numpydoc ignore=RT01
         """Wraps CDREAD"""
         option = option.strip().upper()
 
@@ -1642,7 +1734,7 @@ class MapdlGrpc(MapdlBase):
         self.input(fname, **kwargs)
 
     @wraps(MapdlBase.tbft)
-    def tbft(
+    def tbft(  # numpydoc ignore=RT01
         self,
         oper="",
         id_="",
@@ -1819,7 +1911,6 @@ class MapdlGrpc(MapdlBase):
 
         >>> from ansys.mapdl.core import mapdl_grpc
         >>> mapdl_grpc.DEFAULT_TIME_STEP_STREAM=100 # in milliseconds
-
         """
         # Checking compatibility
         # Checking the user is not reusing old api:
@@ -1994,7 +2085,7 @@ class MapdlGrpc(MapdlBase):
 
         return output
 
-    def _get_time_step_stream(
+    def _get_time_step_stream(  # numpydoc ignore=RT01
         self, time_step: Optional[Union[int, float]] = None
     ) -> str:
         """Return the time step for checking if MAPDL is done writing the
@@ -2081,7 +2172,7 @@ class MapdlGrpc(MapdlBase):
             self._log.warning("Unable to remove temporary file %s", tmp_filename)
 
     @protect_grpc
-    def _get(
+    def _get(  # numpydoc ignore=RT01
         self,
         entity: str = "",
         entnum: str = "",
@@ -2209,20 +2300,20 @@ class MapdlGrpc(MapdlBase):
 
     def download(
         self,
-        files: Union[str, List[str], Tuple[str, ...]],
-        target_dir: Optional[str] = None,
-        extension: Optional[str] = None,
-        chunk_size: Optional[int] = None,
-        progress_bar: Optional[bool] = None,
+        files: str | list[str] | tuple[str, ...],
+        target_dir: str | None = None,
+        extension: str | None = None,
+        chunk_size: int | None = None,
+        progress_bar: bool | None = None,
         recursive: bool = False,
-    ) -> List[str]:
+    ) -> list[str]:
         """Download files from the gRPC instance working directory
 
         .. warning:: This feature is only available for MAPDL 2021R1 or newer.
 
         Parameters
         ----------
-        files : str or List[str] or tuple(str)
+        files
             Name of the file on the server. File must be in the same
             directory as the mapdl instance. A list of string names or
             tuples of string names can also be used.
@@ -2232,22 +2323,27 @@ class MapdlGrpc(MapdlBase):
             match file names. For example: `'file*'` to match every file whose
             name starts with `'file'`.
 
-        target_dir : str, optional
+        target_dir
             Path where the downloaded files will be located. The default is the current
             working directory.
 
-        extension : str, optional
+        extension
             Filename with this extension will be considered. The default is None.
 
-        chunk_size : int, optional
+        chunk_size
             Chunk size in bytes.  Must be less than 4MB. The default is 256 kB.
 
-        progress_bar : bool, optional
+        progress_bar
             Display a progress bar using ``tqdm`` when ``True``.
             Helpful for showing download progress.
 
-        recursive : bool, optional
+        recursive
             Whether to use recursion when using glob pattern. The default is ``False``.
+
+        Returns
+        -------
+        list[str]
+            List of downloaded files.
 
         Notes
         -----
@@ -2278,7 +2374,6 @@ class MapdlGrpc(MapdlBase):
         :func:`Mapdl.download_project <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download_project>` (recommended):
 
         >>> mapdl.download_project()
-
         """
         if chunk_size is None:
             chunk_size = DEFAULT_CHUNKSIZE
@@ -2315,7 +2410,7 @@ class MapdlGrpc(MapdlBase):
                 progress_bar=progress_bar,
             )
 
-    def _download_on_local(
+    def _download_on_local(  # numpydoc ignore=RT01
         self,
         files: Union[str, List[str], Tuple[str, ...]],
         target_dir: str,
@@ -2383,7 +2478,7 @@ class MapdlGrpc(MapdlBase):
 
         return return_list_files
 
-    def _download_from_remote(
+    def _download_from_remote(  # numpydoc ignore=RT01
         self,
         files: Union[str, List[str], Tuple[str, ...]],
         target_dir: str,
@@ -2592,7 +2687,7 @@ class MapdlGrpc(MapdlBase):
             self._vget_lock = False
         return values
 
-    def _screenshot_path(self):
+    def _screenshot_path(self):  # numpydoc ignore=RT01
         """Returns the local path of the MAPDL generated screenshot.
 
         If necessary, downloads the remotely rendered file.
@@ -2612,7 +2707,7 @@ class MapdlGrpc(MapdlBase):
         return save_name
 
     @protect_grpc
-    def _download_as_raw(self, target_name: str) -> str:
+    def _download_as_raw(self, target_name: str) -> str:  # numpydoc ignore=RT01
         """Download a file from the gRPC instance as a binary
         string without saving it to disk.
         """
@@ -2622,7 +2717,13 @@ class MapdlGrpc(MapdlBase):
 
     @property
     def is_alive(self) -> bool:
-        """True when there is an active connect to the gRPC server"""
+        """True when there is an active connect to the gRPC server.
+
+        Returns
+        -------
+        bool
+            True if the MAPDL instance is alive, False otherwise.
+        """
         if self.channel_state not in ["IDLE", "READY", None]:
             self._log.debug(
                 "MAPDL instance is not alive because the channel is not 'IDLE' o 'READY'."
@@ -2669,6 +2770,11 @@ class MapdlGrpc(MapdlBase):
 
         Iteratively navigate through MAPDL files.
 
+        Returns
+        -------
+        :class:`ansXpl <ansys.mapdl.core.xpl.ansXpl>`
+            An instance of :class:`ansXpl <ansys.mapdl.core.xpl.ansXpl>`.
+
         Examples
         --------
         Read the MASS record from the "file.full" file
@@ -2694,6 +2800,11 @@ class MapdlGrpc(MapdlBase):
 
         If parameter does not exist, returns ``None``.
 
+        Returns
+        -------
+        float or None
+            The value of the parameter as a float or ``None`` if the
+            parameter does not exist.
         """
         request = pb_types.ParameterRequest(name=pname, array=False)
         presponse = self._stub.GetParameter(request)
@@ -2727,6 +2838,7 @@ class MapdlGrpc(MapdlBase):
          Returns
         -------
         :class:`MapdlMath <ansys.mapdl.core.math.MapdlMath>`
+            MAPDL Math interface.
 
         Examples
         --------
@@ -2754,10 +2866,13 @@ class MapdlGrpc(MapdlBase):
     @property
     def krylov(self):
         """APDL krylov interface.
+
         For more information, see the :class:`KrylovSolver <ansys.mapdl.core.krylov.KrylovSolver>`
+
         Returns
         -------
         :class:`Krylov class <ansys.mapdl.core.krylov.KrylovSolver>`
+            An instance of :class:`Krylov class <ansys.mapdl.core.krylov.KrylovSolver>`
         """
         if self._krylov is None:
             from ansys.mapdl.core.krylov import KrylovSolver
@@ -2774,6 +2889,7 @@ class MapdlGrpc(MapdlBase):
         Returns
         -------
         :class:`MapdlDb <ansys.mapdl.core.database.MapdlDb>`
+            MAPDL database interface.
 
         Examples
         --------
@@ -2802,7 +2918,6 @@ class MapdlGrpc(MapdlBase):
         >>> sel, coord = nodes.coord(22)
         >>> coord
         (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
-
         """
         from ansys.mapdl.core.database import MapdlDb
 
@@ -2813,7 +2928,7 @@ class MapdlGrpc(MapdlBase):
         return self._db
 
     @protect_grpc
-    def _data_info(self, pname):
+    def _data_info(self, pname):  # numpydoc ignore=RT01
         """Returns the data type of a parameter
 
         APDLMATH vectors only.
@@ -2822,7 +2937,7 @@ class MapdlGrpc(MapdlBase):
         return self._stub.GetDataInfo(request)
 
     @protect_grpc
-    def _vec_data(self, pname):
+    def _vec_data(self, pname):  # numpydoc ignore=RT01
         """Downloads vector data from a MAPDL MATH parameter"""
         dtype = ANSYS_VALUE_TYPE[self._data_info(pname).stype]
         request = pb_types.ParameterRequest(name=pname)
@@ -2830,7 +2945,7 @@ class MapdlGrpc(MapdlBase):
         return parse_chunks(chunks, dtype)
 
     @protect_grpc
-    def _mat_data(self, pname, raw=False):
+    def _mat_data(self, pname, raw=False):  # numpydoc ignore=RT01
         """Downloads matrix data from a parameter and returns a scipy sparse array"""
         try:
             from scipy import sparse
@@ -2861,12 +2976,18 @@ class MapdlGrpc(MapdlBase):
         raise ValueError(f'Invalid matrix type "{mtype}"')
 
     @property
-    def locked(self):
-        """Instance is in use within a pool."""
+    def locked(self) -> bool:
+        """Instance is in use within a pool.
+
+        Returns
+        -------
+        bool
+            True if the instance is distributed, False otherwise.
+        """
         return self._locked
 
     @locked.setter
-    def locked(self, new_value):
+    def locked(self, new_value: bool):
         self._locked = new_value
 
     @supress_logging
@@ -2895,7 +3016,13 @@ class MapdlGrpc(MapdlBase):
     @supress_logging
     @run_as("PREP7")
     def _generate_iges(self):
-        """Save IGES geometry representation to disk"""
+        """Save IGES geometry representation to disk.
+
+        Returns
+        -------
+        str
+            The filename of the saved IGES representation.
+        """
         basename = "_tmp.iges"
         if self._local:
             filename = self.directory / basename
@@ -2907,7 +3034,7 @@ class MapdlGrpc(MapdlBase):
         return filename
 
     @property
-    def _distributed_result_file(self):
+    def _distributed_result_file(self):  # numpydoc ignore=RT01
         """Path of the distributed result file."""
         if not self._distributed:
             return
@@ -2943,14 +3070,26 @@ class MapdlGrpc(MapdlBase):
 
     @property
     def thermal_result(self):
-        """The thermal result object."""
+        """The thermal result object.
+
+        Returns
+        -------
+        :class:`MapdlResult <ansys.mapdl.core.result.MapdlResult>`
+            The thermal result object.
+        """
         self._prioritize_thermal = True
         result = self.result
         self._prioritize_thermal = False
         return result
 
-    def list_error_file(self):
-        """Listing of errors written in JOBNAME.err"""
+    def list_error_file(self) -> str | None:
+        """Listing of errors written in JOBNAME.err
+
+        Returns
+        -------
+        str
+            Contents of the error file or None if not found.
+        """
         files = self.list_files()
         jobname = self.jobname
         error_file = None
@@ -2972,7 +3111,7 @@ class MapdlGrpc(MapdlBase):
         return self._download_as_raw(error_file).decode("latin-1")
 
     @wraps(MapdlBase.cmatrix)
-    def cmatrix(
+    def cmatrix(  # numpydoc ignore=RT01
         self,
         symfac="",
         condname="",
@@ -2996,7 +3135,14 @@ class MapdlGrpc(MapdlBase):
 
     @MapdlBase.name.getter
     def name(self) -> str:
-        """Instance unique identifier."""
+        """Instance unique identifier.
+
+        Returns
+        -------
+        str
+            Unique identifier for the instance. If not set, it will be
+            generated based on the IP and port of the gRPC server.
+        """
         if not self._name:
             if self._ip or self._port:
                 self._name = f"GRPC_{self._ip}:{self._port}"
@@ -3005,14 +3151,14 @@ class MapdlGrpc(MapdlBase):
         return self._name
 
     @property
-    def _distributed(self) -> bool:
+    def _distributed(self) -> bool:  # numpydoc ignore=RT01
         """MAPDL is running in distributed mode."""
         if self.__distributed is None:
             self.__distributed = self.parameters.numcpu > 1
         return self.__distributed
 
     @wraps(MapdlBase.vget)
-    def vget(
+    def vget(  # numpydoc ignore=RT01
         self,
         par: str = "",
         ir: MapdlInt = "",
@@ -3062,7 +3208,7 @@ class MapdlGrpc(MapdlBase):
         return variable
 
     @wraps(MapdlBase.nsol)
-    def nsol(
+    def nsol(  # numpydoc ignore=RT01
         self,
         nvar: MapdlInt = VAR_IR,
         node: MapdlInt = "",
@@ -3085,7 +3231,7 @@ class MapdlGrpc(MapdlBase):
         return self.vget("_temp", nvar)
 
     @wraps(MapdlBase.esol)
-    def esol(
+    def esol(  # numpydoc ignore=RT01
         self,
         nvar: MapdlInt = VAR_IR,
         elem: MapdlInt = "",
@@ -3108,7 +3254,7 @@ class MapdlGrpc(MapdlBase):
         return self.vget("_temp", nvar)
 
     @wraps(MapdlBase.rpsd)
-    def rpsd(
+    def rpsd(  # numpydoc ignore=RT01
         self,
         ir: str = "",
         ia: str = "",
@@ -3189,7 +3335,6 @@ class MapdlGrpc(MapdlBase):
 
         For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use the
         labels TBOT, TE2, TE3, . . ., TTOP instead of TEMP.
-
         """
         return self.nsol(
             VAR_IR,

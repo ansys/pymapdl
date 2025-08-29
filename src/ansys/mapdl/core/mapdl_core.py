@@ -144,7 +144,6 @@ For example, in the *VWRITE case:
 with self.non_interactive:
     self.vwrite('%s(1)' % parm_name)
     self.run('(F20.12)')
-
 """
 
 ## Invalid commands in interactive mode.
@@ -418,7 +417,6 @@ class _MapdlCore(Commands):
         *** WARNING *** CP = 0.372 TIME= 21:39:58
         K is not a recognized POST1 command, abbreviation, or macro.
         This command will be ignored.
-
         """
         warn(
             "'allow_ignore' is being deprecated and will be removed in a future release. "
@@ -466,7 +464,6 @@ class _MapdlCore(Commands):
         >>> with mapdl.chain_commands:
             mapdl.prep7()
             mapdl.k(1, 1, 2, 3)
-
         """
         if self._distributed:
             raise MapdlRuntimeError(
@@ -515,14 +512,16 @@ class _MapdlCore(Commands):
     def default_file_type_for_plots(self):
         """Default file type for plots.
 
-        Use when device is not properly set, for instance when the device is closed."""
+        Use when device is not properly set, for instance when the device is closed.
+        """
         return self._default_file_type_for_plots
 
     @default_file_type_for_plots.setter
     def default_file_type_for_plots(self, value: VALID_FILE_TYPE_FOR_PLOT_LITERAL):
         """Set default file type for plots.
 
-        Used when device is not properly set, for instance when the device is closed."""
+        Used when device is not properly set, for instance when the device is closed.
+        """
         if not isinstance(value, str) or value.upper() not in VALID_FILE_TYPE_FOR_PLOT:
             raise ValueError(f"'{value}' is not allowed as file output for plots.")
         return self._default_file_type_for_plots
@@ -636,7 +635,6 @@ class _MapdlCore(Commands):
         and activating text output (``/GOPR``)
 
         You can still do changes to those inside this context.
-
         """
         return self._force_output(self)
 
@@ -678,7 +676,6 @@ class _MapdlCore(Commands):
         Reselect from the existing selection of lines.
 
         >>> mapdl.geometry.line_select([3, 4, 5], sel_type='R')
-
         """
         if self._geometry is None:
             self._geometry = self._create_geometry()
@@ -712,7 +709,6 @@ class _MapdlCore(Commands):
         *** WARNING *** CP = 0.372 TIME= 21:39:58
         K is not a recognized POST1 command, abbreviation, or macro.
         This command will be ignored.
-
         """
         return self._ignore_errors
 
@@ -845,7 +841,6 @@ class _MapdlCore(Commands):
         Access the geometry as a VTK object
 
         >>> mapdl.mesh.grid
-
         """
         return self._mesh
 
@@ -888,7 +883,6 @@ class _MapdlCore(Commands):
         ...    mapdl.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
         ...    mapdl.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
         >>> mapdl.last_response
-
         """
         return self._non_interactive(self)
 
@@ -903,7 +897,6 @@ class _MapdlCore(Commands):
         --------
         >>> with mapdl.muted:
         ...    mapdl.run("/SOLU") # This call is muted
-
         """
         return self._muted(self)
 
@@ -936,7 +929,6 @@ class _MapdlCore(Commands):
 
         >>> mapdl.parameters['ARR']
         array([1., 2., 3.])
-
         """
         return self._parameters
 
@@ -982,7 +974,8 @@ class _MapdlCore(Commands):
     @property
     def print_com(self):
         """Whether to print or not to the console the
-        :meth:`mapdl.com ("/COM") <ansys.mapdl.core.Mapdl.com>` calls."""
+        :meth:`mapdl.com ("/COM") <ansys.mapdl.core.Mapdl.com>` calls.
+        """
         return self._print_com
 
     @print_com.setter
@@ -1062,8 +1055,6 @@ class _MapdlCore(Commands):
         >>> q = mapdl.queries
         >>> q.nx(1), q.ny(1), q.nz(1)
         0.0 20.0 0.0
-
-
         """
         if self._query is None:
             self._query = Query(self)
@@ -1076,7 +1067,6 @@ class _MapdlCore(Commands):
         Save the current selection (nodes, elements, keypoints, lines, areas,
         volumes and components) before entering in the context manager, and
         when exit returns to that selection.
-
         """
         if self._save_selection_obj is None:
             self._save_selection_obj = self._save_selection(self)
@@ -1089,6 +1079,8 @@ class _MapdlCore(Commands):
         Returns
         -------
         :class:`ansys.mapdl.core.solution.Solution`
+            The solution object contains methods to check the convergence of the
+            solution, the number of iterations, and the current time step.
 
         Examples
         --------
@@ -1277,7 +1269,8 @@ class _MapdlCore(Commands):
     @supress_logging
     def _mesh(self) -> "Archive":
         """Write entire archive to ASCII and read it in as an
-        ``ansys.mapdl.core.Archive``"""
+        ``ansys.mapdl.core.Archive``
+        """
         from ansys.mapdl.reader import Archive
 
         if self._archive_cache is None:
@@ -1658,7 +1651,6 @@ class _MapdlCore(Commands):
         ...     mapdl.numvar(200)
         >>> mapdl.parameters.routine
         'PREP7'
-
         """
         return self._RetainRoutine(self, routine)
 
@@ -2041,7 +2033,6 @@ class _MapdlCore(Commands):
         Start writing the log to a new file named "mapdl.log"
 
         >>> mapdl.add_file_handler('mapdl.log')
-
         """
         if append:
             mode = "a"
@@ -2070,7 +2061,6 @@ class _MapdlCore(Commands):
         Used with ``non_interactive``.
 
         Overridden by gRPC.
-
         """
         if not self._stored_commands:
             self._log.debug("There is no commands to be flushed.")
@@ -2176,7 +2166,6 @@ class _MapdlCore(Commands):
          KEYOPT( 7-12)=        0      0      0        0      0      0
          KEYOPT(13-18)=        0      0      0        0      0      0
         output continues...
-
         """
 
         warn(
@@ -2230,7 +2219,6 @@ class _MapdlCore(Commands):
          KEYOPT( 1- 6)=        0      0      0        0      0      0
          KEYOPT( 7-12)=        0      0      0        0      0      0
          KEYOPT(13-18)=        0      0      0        0      0      0
-
         """
         if isinstance(commands, str):
             commands = commands.splitlines()
@@ -2306,7 +2294,6 @@ class _MapdlCore(Commands):
         Equivalent Pythonic method:
 
         >>> mapdl.prep7()
-
         """
         if self.exited:
             raise MapdlExitedError(

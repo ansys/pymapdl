@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from collections import UserList
 from logging import Logger, StreamHandler
 import os
 import re
@@ -167,7 +168,7 @@ def convert_script(
         ``True``.
 
     line_ending : str, optional
-        When None, automatically is ``\n.``
+        When None, automatically is ``\\n``.
 
     exec_file : str, optional
         Specify the location of the ANSYS executable and include
@@ -218,12 +219,16 @@ def convert_script(
         and exit commands are NOT included (``auto_exit=False``).
         Overrides ``header``, ``add_imports`` and ``auto_exit``.
 
-    graphics_backend : bool, optional
+    graphics_backend : GraphicsBackend, optional
         It sets the `mapdl.graphics_backend` argument equals True or False depending on
         this value.
 
     clear_at_start : bool, optional
         Add a `mapdl.clear()` after the Mapdl object initialization.
+
+    check_parameter_names : bool, optional
+        Check if parameter names are valid MAPDL parameter names.
+        Defaults to ``True``.
 
     Returns
     -------
@@ -253,7 +258,6 @@ def convert_script(
     >>> with open(out_file, 'r') as fid:
     ...     cmds = fid.read()
     >>> mapdl.input_strings(cmds.splitlines()[2:10])
-
     """
     with open(filename_in, "r") as fid:
         apdl_strings = fid.readlines()
@@ -312,7 +316,7 @@ def convert_apdl_block(
 
     Parameters
     ----------
-    apdl_string : str
+    apdl_strings : str
         APDL strings or list of strings to convert.
 
     loglevel : str, optional
@@ -324,6 +328,10 @@ def convert_apdl_block(
 
     line_ending : str, optional
         When None, automatically determined by OS being used.
+
+    exec_file : str, optional
+        Specify the location of the ANSYS executable and include
+        it in the converter output ``launch_mapdl`` call.
 
     macros_as_functions : bool, optional
         Attempt to convert MAPDL macros to python functions.
@@ -403,7 +411,6 @@ def convert_apdl_block(
     >>> cmds = cmds.replace('solve', '!solve')
     >>> mapdl = launch_mapdl()
     >>> mapdl.input_strings(cmds.splitlines()[2:10])
-
     """
 
     translator = _convert(
@@ -429,10 +436,6 @@ def convert_apdl_block(
     if isinstance(apdl_strings, str):
         return translator.line_ending.join(translator.lines)
     return translator.lines
-
-
-from collections import UserList
-from typing import Any
 
 
 class Lines(UserList[str]):
@@ -561,6 +564,10 @@ class FileTranslator:
         text : str, optional
             Text to format instead of `self.lines`. For development use.
 
+        Returns
+        -------
+        str | None
+            The formatted text or None if not applicable.
         """
         if self.cleanup_output:
             try:
@@ -581,7 +588,13 @@ class FileTranslator:
                 return autopep8.fix_code(text)
 
     def save(self, filename: str) -> None:
-        """Saves lines to file"""
+        """Saves lines to file.
+
+        Parameters
+        ----------
+        filename : str
+            The filename to save the lines to.
+        """
         if os.path.isfile(filename):
             os.remove(filename)
 
@@ -602,7 +615,15 @@ class FileTranslator:
             f.write(self.line_ending.join(self.lines))
 
     def initialize_mapdl_object(self, loglevel: str, exec_file: Optional[str]) -> None:
-        """Initializes ansys object as lines"""
+        """Initializes ansys object as lines
+
+        Parameters
+        ----------
+        loglevel : str
+            Logging level for the MAPDL object.
+        exec_file : str, optional
+            Path to the ANSYS executable file.
+        """
         core_module = "ansys.mapdl.core"  # shouldn't change
         self.lines.append(f"from {core_module} import launch_mapdl")
 
@@ -639,7 +660,18 @@ class FileTranslator:
         self._line_ending = line_ending
 
     def translate_line(self, line: str) -> Optional[str]:
-        """Converts a single line from an ANSYS APDL script"""
+        """Converts a single line from an ANSYS APDL script
+
+        Parameters
+        ----------
+        line : str
+            The APDL line to convert.
+
+        Returns
+        -------
+        str, optional
+            The converted Python line, or None if no conversion needed.
+        """
 
         if "$" in line:
             # these are chained commands.
@@ -993,6 +1025,13 @@ class FileTranslator:
     def store_run_command(self, command: str, run_underscored: bool = False) -> None:
         """Stores pyansys.ANSYS command that cannot be broken down
         into a function and parameters.
+
+        Parameters
+        ----------
+        command : str
+            The ANSYS command to store.
+        run_underscored : bool, optional
+            Whether to use underscored run method. Default is False.
         """
         if run_underscored:
             underscore = "_"
@@ -1068,7 +1107,15 @@ class FileTranslator:
         return ", ".join(parsed_parameters)
 
     def store_command(self, function: str, parameters: List[str]) -> None:
-        """Stores a valid pyansys function with parameters"""
+        """Stores a valid pyansys function with parameters
+
+        Parameters
+        ----------
+        function : str
+            The function name to store.
+        parameters : List[str]
+            List of parameters to pass to the function.
+        """
         parameter_str = self._parse_arguments(parameters)
         parameters_dict = {
             "indentation": self.indent,
@@ -1119,7 +1166,18 @@ class FileTranslator:
             self.chained_commands = False
 
     def output_to_file(self, line: str) -> bool:
-        """Return if an APDL line is redirecting to a file."""
+        """Return if an APDL line is redirecting to a file.
+
+        Parameters
+        ----------
+        line : str
+            The APDL line to check.
+
+        Returns
+        -------
+        bool
+            True if redirecting to a file, False otherwise.
+        """
         if line[:4].upper() == "/OUT":
             # We are redirecting the output to somewhere, probably a file.
             # Because of the problem with the ansys output, we need to execute
@@ -1159,7 +1217,18 @@ class FileTranslator:
         return False
 
     def _get_items(self, line_: str) -> List[str]:
-        """Parse the line items (comma separated elements) but ignoring the ones inside parenthesis, or brackets"""
+        """Parse the line items (comma separated elements) but ignoring the ones inside parenthesis, or brackets.
+
+        Parameters
+        ----------
+        line_ : str
+            The line to parse.
+
+        Returns
+        -------
+        List[str]
+            List of parsed items.
+        """
 
         parenthesis_count = 0
 

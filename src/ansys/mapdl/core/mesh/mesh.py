@@ -108,7 +108,6 @@ def _parse_vtk(
         Adds additional midside nodes when ``True``.  When
         ``False``, missing ANSYS cells will simply point to the
         first node.
-
     """
     if not mesh._has_nodes or not mesh._has_elements:
         # warnings.warn('Missing nodes or elements.  Unable to parse to vtk')
