@@ -452,7 +452,6 @@ class PathOperations:
         ``LabR`` = FACT2 x ``cos`` -1(FACT1 x Lab1) + CONST
 
         ``LabR`` = FACT2 x ``log(FACT1 x Lab1) + CONST``
-
         """
         command = f"PCALC,{oper},{labr},{lab1},{lab2},{fact1},{fact2},{const}"
         return self.run(command, **kwargs)
@@ -995,7 +994,6 @@ class PathOperations:
            * - "
              - INT, EQV
              - Stress intensity or equivalent stress.
-
         """
         command = f"PLSECT,{item},{comp},{rho},{kbr},{kbr3d}"
         return self.run(command, **kwargs)

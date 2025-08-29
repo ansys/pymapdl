@@ -128,7 +128,6 @@ Other loggers
 You can create your own loggers using python ``logging`` library as
 you would do in any other script.  There shall no be conflicts between
 these loggers.
-
 """
 from copy import copy
 from datetime import datetime
@@ -357,7 +356,6 @@ class Logger:
     >>> from ansys.mapdl.core import LOG
     >>> file_path = os.path.join(os.getcwd(), 'pymapdl.log')
     >>> LOG.log_to_file(file_path)
-
     """
 
     file_handler: Optional[logging.FileHandler] = None
@@ -438,7 +436,6 @@ class Logger:
         >>> import os
         >>> file_path = os.path.join(os.getcwd(), 'pymapdl.log')
         >>> LOG.log_to_file(file_path)
-
         """
 
         addfile_handler(self, filename=filename, level=level, write_headers=True)
@@ -587,7 +584,6 @@ class Logger:
         ------
         Exception
             You can only input strings as ``name`` to this method.
-
         """
         count_ = 0
         new_name = name

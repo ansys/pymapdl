@@ -19,12 +19,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """
 These PREP7 commands are used to read model data into the database,
 list out the database, and control the numbering of entities in the
 database.
-
 """
 
 
@@ -342,7 +340,6 @@ class Database:
          Number of Element Types:      1
          Number of Node Components:    0
          Number of Element Components: 0
-
         """
         command = f"CDWRITE,{option},'{fname}',{ext},,{fnamei},{exti},{fmat}"
         return self.run(command, **kwargs)

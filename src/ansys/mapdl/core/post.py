@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """Post-processing module using MAPDL interface"""
 import weakref
 
@@ -116,7 +115,6 @@ class PostProcessing:
 
     >>> mapdl.mesh.nnum_all
     array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
     """
 
     def __init__(self, mapdl):
@@ -339,7 +337,6 @@ class PostProcessing:
         -----
         Please reference your Ansys help manual ``*VGET`` command tables
         for all the available ``*VGET`` values.
-
         """
         # using _ndof_rst instead of get_array because it is wrapped to check the rst.
         values = self._ndof_rst(item=item, it1num=comp)
@@ -479,7 +476,6 @@ class PostProcessing:
         >>> arr = mapdl.post_processing.element_values("EPTH", "EQV", "min")
         >>> arr
         array([0., 0., 0., ..., 0., 0., 0.])
-
         """
         tmp_table = "__ETABLE__"
         self._mapdl.etable(tmp_table, item, comp, option, mute=True)
@@ -608,7 +604,6 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_element_values(
         ...     "CONT", "STAT", scalar_bar_args={"title": "Contact status"}
         ... )
-
         """
         kwargs.setdefault(
             "scalar_bar_args", {"title": f"item: {item}\nComponent: {comp}"}
@@ -778,7 +773,6 @@ class PostProcessing:
         -1 for unselected
         0 for undefined
         1 for selected
-
         """
         return self._ndof_rst("NSEL").astype(np.int8)
 
@@ -797,7 +791,6 @@ class PostProcessing:
 
         >>> mapdl.post_processing.selected_nodes.nonzero()[0] + 1
         array([1, 2, 3, 4, 5, 6, 7, 8, 9])
-
         """
         return self._nsel == 1
 
@@ -808,7 +801,6 @@ class PostProcessing:
         -1 for unselected
         0 for undefined
         1 for selected
-
         """
         return self._edof_rst("ESEL").astype(np.int8)
 
@@ -825,7 +817,6 @@ class PostProcessing:
 
         >>> mapdl.post_processing.selected_elements.nonzero()[0] + 1
         array([1, 2, 3, 4, 5, 6, 7, 8, 9])
-
         """
         return self._esel == 1
 
@@ -842,7 +833,6 @@ class PostProcessing:
           results.
         * ``ESOL`` - Use element-based results only.
         * ``NAR`` - Use nodal-averaged results only.
-
         """
         values = self._mapdl.get_array("NODE", item1=item, it1num=it1num, item2=item2)
         if values.size == 0:  # pragma: no cover
@@ -879,7 +869,6 @@ class PostProcessing:
         --------
         >>> mapdl.post_processing.temperature
         array([0., 0., 0., ..., 0., 0., 0.])
-
         """
         return self.nodal_values("TEMP")
 
@@ -983,7 +972,6 @@ class PostProcessing:
 
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
         """
         component = check_comp(component, DISP_TYPE)
 
@@ -1103,7 +1091,6 @@ class PostProcessing:
 
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
         """
         component = check_comp(component, ROT_TYPE)
 
@@ -1217,7 +1204,6 @@ class PostProcessing:
                [ 5.41204700e-06, -4.80335719e-05,  7.75819589e-11],
                [ 3.33649806e-06, -2.96109417e-05,  1.44947535e-10],
                [ 1.13836132e-06, -1.01038096e-05,  6.95566641e-11]])
-
         """
         check_elem_option(option)
         component = component.upper()
@@ -1297,7 +1283,6 @@ class PostProcessing:
         ...     "NORM",
         ...     option="AVG"
         ... )
-
         """
         if component.upper() == "ALL":
             raise ValueError(
@@ -1370,7 +1355,6 @@ class PostProcessing:
         >>> arr
         array([-0.29351357, -0.37027832, -0.37340827, ...,  0.        ,
                 0.        ,  0.        ])
-
         """
         if not isinstance(component, str):
             component = str(component)
@@ -1437,7 +1421,6 @@ class PostProcessing:
         Plot the average element component stress in the X direction.
 
         >>> mapdl.post_processing.plot_element_stress("X")
-
         """
         component = str(component).upper()
         stress = self.element_stress(component, option=option)
@@ -1494,7 +1477,6 @@ class PostProcessing:
         (2080, 3)
         >>> arr
         array([20., 20., 20., ..., 20., 20., 20.])
-
         """
         return self.element_values("TEMP", option=option)
 
@@ -1547,7 +1529,6 @@ class PostProcessing:
         Plot the average element temperature.
 
         >>> arr = mapdl.post_processing.plot_element_temperature()
-
         """
         scalars = self.element_temperature(option)
 
@@ -1575,7 +1556,6 @@ class PostProcessing:
         --------
         >>> mapdl.post_processing.pressure()
         array([0., 0., 0., ..., 0., 0., 0.])
-
         """
         return self.nodal_values("PRES")
 
@@ -1761,7 +1741,6 @@ class PostProcessing:
 
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
         """
         component = check_comp(component, COMPONENT_STRESS_TYPE)
         return self.nodal_values("S", component)
@@ -1851,7 +1830,6 @@ class PostProcessing:
 
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
         """
         if isinstance(component, int):
             component = str(component)
@@ -1935,7 +1913,6 @@ class PostProcessing:
         >>> mapdl.post_processing.nodal_stress_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
-
         """
         return self.nodal_values("S", "INT")
 
@@ -1989,7 +1966,6 @@ class PostProcessing:
 
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_stress_intensity(smooth_shading=True)
-
         """
         scalars = self.nodal_stress_intensity()
         kwargs.setdefault("scalar_bar_args", {"title": "Nodal Stress\nIntensity"})
@@ -2031,7 +2007,6 @@ class PostProcessing:
         >>> mapdl.post_processing.nodal_eqv_stress()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
-
         """
         return self.nodal_values("S", "EQV")
 
@@ -2085,7 +2060,6 @@ class PostProcessing:
 
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_eqv_stress(smooth_shading=True)
-
         """
         scalars = self.nodal_eqv_stress()
         kwargs.setdefault("scalar_bar_args", {"title": "Nodal Equivalent\nStress"})
@@ -2127,7 +2101,6 @@ class PostProcessing:
 
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
         """
         component = check_comp(component, COMPONENT_STRESS_TYPE)
         return self.nodal_values("EPTO", component)
@@ -2224,7 +2197,6 @@ class PostProcessing:
 
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
         """
         if isinstance(component, int):
             component = str(component)
@@ -2316,7 +2288,6 @@ class PostProcessing:
         >>> mapdl.post_processing.nodal_total_strain_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
-
         """
         return self.nodal_values("EPEL", "INT")
 
@@ -2372,7 +2343,6 @@ class PostProcessing:
 
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_total_strain_intensity()
-
         """
         scalars = self.nodal_total_strain_intensity()
         kwargs.setdefault("scalar_bar_args", {"title": "Total Nodal\nStrain Intensity"})
@@ -2412,7 +2382,6 @@ class PostProcessing:
         >>> mapdl.post_processing.nodal_total_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
-
         """
         return self.nodal_values("EPTO", "EQV")
 
@@ -2466,7 +2435,6 @@ class PostProcessing:
 
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_total_eqv_strain(smooth_shading=True)
-
         """
         scalars = self.nodal_total_eqv_strain()
         kwargs.setdefault(
@@ -2503,7 +2471,6 @@ class PostProcessing:
 
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
         """
         component = check_comp(component, COMPONENT_STRESS_TYPE)
         return self.nodal_values("EPEL", component)
@@ -2597,7 +2564,6 @@ class PostProcessing:
 
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
         """
         if isinstance(component, int):
             component = str(component)
@@ -2691,7 +2657,6 @@ class PostProcessing:
         >>> mapdl.post_processing.nodal_elastic_strain_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
-
         """
         return self.nodal_values("EPEL", "INT")
 
@@ -2745,7 +2710,6 @@ class PostProcessing:
 
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_elastic_strain_intensity()
-
         """
         scalars = self.nodal_elastic_strain_intensity()
         kwargs.setdefault(
@@ -2786,7 +2750,6 @@ class PostProcessing:
         >>> mapdl.post_processing.nodal_elastic_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
-
         """
         return self.nodal_values("EPEL", "EQV")
 
@@ -2840,7 +2803,6 @@ class PostProcessing:
 
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_elastic_eqv_strain(smooth_shading=True)
-
         """
         scalars = self.nodal_elastic_eqv_strain()
         kwargs.setdefault(
@@ -2882,7 +2844,6 @@ class PostProcessing:
 
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
         """
         component = check_comp(component, COMPONENT_STRESS_TYPE)
         return self.nodal_values("EPPL", component)
@@ -2970,7 +2931,6 @@ class PostProcessing:
 
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
         """
         if isinstance(component, int):
             component = str(component)
@@ -3065,7 +3025,6 @@ class PostProcessing:
         >>> mapdl.post_processing.nodal_plastic_strain_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
-
         """
         return self.nodal_values("EPPL", "INT")
 
@@ -3119,7 +3078,6 @@ class PostProcessing:
 
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_plastic_strain_intensity()
-
         """
         scalars = self.nodal_plastic_strain_intensity()
         kwargs.setdefault(
@@ -3167,7 +3125,6 @@ class PostProcessing:
         >>> mapdl.post_processing.nodal_plastic_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
-
         """
         return self.nodal_values("EPPL", "EQV")
 
@@ -3221,7 +3178,6 @@ class PostProcessing:
 
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True)
-
         """
         scalars = self.nodal_plastic_eqv_strain()
         kwargs.setdefault(
@@ -3264,7 +3220,6 @@ class PostProcessing:
 
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
         """
         component = check_comp(component, COMPONENT_STRESS_TYPE)
         return self.nodal_values("EPTH", component)
@@ -3358,7 +3313,6 @@ class PostProcessing:
 
         >>> mapdl.mesh.nnum_all
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
         """
         if isinstance(component, int):
             component = str(component)
@@ -3453,7 +3407,6 @@ class PostProcessing:
         >>> mapdl.post_processing.nodal_thermal_strain_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
-
         """
         return self.nodal_values("EPTH", "INT")
 
@@ -3507,7 +3460,6 @@ class PostProcessing:
 
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_thermal_strain_intensity()
-
         """
         scalars = self.nodal_thermal_strain_intensity()
         kwargs.setdefault(
@@ -3555,7 +3507,6 @@ class PostProcessing:
         >>> mapdl.post_processing.nodal_thermal_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
-
         """
         return self.nodal_values("EPTH", "EQV")
 
@@ -3609,7 +3560,6 @@ class PostProcessing:
 
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_thermal_eqv_strain(smooth_shading=True)
-
         """
         scalars = self.nodal_thermal_eqv_strain()
         kwargs.setdefault(
@@ -3647,7 +3597,6 @@ class PostProcessing:
         >>> mapdl.post_processing.nodal_contact_friction_stress()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
-
         """
         return self.nodal_values("CONT", "SFRIC")
 
@@ -3701,7 +3650,6 @@ class PostProcessing:
 
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_contact_friction_stress(smooth_shading=True)
-
         """
         kwargs.setdefault(
             "scalar_bar_args", {"title": "Nodal Contact\nFriction Stress"}

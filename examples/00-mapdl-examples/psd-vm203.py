@@ -256,17 +256,39 @@ Pmax = mapdl.get_value("VARI", 3, "EXTREM", "VMAX")
 Pmax = rpsduz.max()
 
 ###############################################################################
-# plot the response psd
+# You can plot the response psd using MAPDL methods:
+
+# Setting up the PSD plot with MAPDL
+mapdl.axlab("X", "Frequency (Hz)")
+mapdl.axlab("Y", "RPSD (M**2/Hz)")
+mapdl.yrange(ymin="0", ymax="0.004")
+mapdl.xrange(xmin="0", xmax="80")
+mapdl.gropt(lab="LOGY", key="ON")
+
+mapdl.xvar(0)  # Plot against time/frequency
+mapdl.plvar(3)  # Plot variable set 3 (RPSD)
+
+###############################################################################
+# or use matplotlib:
+
 freqs = mapdl.vget("FREQS", 1)
 
 # Remove the last two values as they are zero
-plt.plot(freqs[:-2], rpsduz[:-2], label="RPSD UZ")
+fig, ax = plt.subplots(figsize=(8, 4))
 
-plt.xlabel("Frequency Hz")
-plt.ylabel(r"RPSD $\left( \dfrac{M^2}{Hz}\right)$")
-plt.legend()
-plt.tight_layout()
-plt.show()
+ax.plot(freqs, rpsduz, label="RPSD UZ")
+
+ax.set_yscale("log")
+ax.set_xlabel("Frequency (Hz)")
+ax.set_ylabel(r"RPSD $\left( \dfrac{M^2}{Hz}\right)$")
+ax.set_xlim((0, 80))
+ax.set_ylim((0, 0.004))
+ax.grid()
+
+fig.legend()
+
+fig.tight_layout()
+fig.show()
 
 ###############################################################################
 # Compare and print results to manual values

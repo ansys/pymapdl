@@ -2019,6 +2019,7 @@ def test_force_output(mapdl, cleared):
             assert mapdl.prep7()
         assert not mapdl.prep7()
 
+    with mapdl.muted:
         mapdl._run("nopr")
         with mapdl.force_output:
             assert mapdl.prep7()
@@ -2032,6 +2033,23 @@ def test_force_output(mapdl, cleared):
     with mapdl.force_output:
         assert mapdl.prep7()
     assert mapdl.prep7()
+
+
+def test_get_not_muted(mapdl, cleared):
+    mapdl.gopr()
+    assert not mapdl.mute
+
+    with patch.object(mapdl, "wrinqr", wraps=mapdl.wrinqr) as mock_muted:
+        with mapdl.muted:
+            assert mapdl.get("line1", "LINE", 0, "NUM", "MAX") is not None
+
+    mock_muted.assert_called_once()
+
+    assert mapdl.mute is False
+    with patch.object(mapdl, "wrinqr", wraps=mapdl.wrinqr) as mock_not_muted:
+        assert mapdl.get("line1", "LINE", 0, "NUM", "MAX") is not None
+
+    mock_not_muted.assert_not_called()
 
 
 def test_session_id(mapdl, cleared, running_test):
@@ -2672,7 +2690,7 @@ def test_screenshot(mapdl, make_block, tmpdir):
     assert "TIFF" == mapdl.file_type_for_plots
 
     file_name = mapdl.screenshot(True)
-    assert "mapdl_screenshot_0.png" == file_name
+    assert "mapdl_screenshot.png" == file_name
     assert "TIFF" == mapdl.file_type_for_plots
     assert file_name in os.listdir(os.getcwd())
 
@@ -2681,12 +2699,12 @@ def test_screenshot(mapdl, make_block, tmpdir):
     assert "TIFF" == mapdl.file_type_for_plots
     assert file_name in os.listdir(os.getcwd())
 
-    os.remove("mapdl_screenshot_0.png")
+    os.remove("mapdl_screenshot.png")
     os.remove(file_name)
 
     file_name = mapdl.screenshot(str(tmpdir))
     assert "TIFF" == mapdl.file_type_for_plots
-    assert file_name in os.listdir(str(tmpdir))
+    assert os.path.basename(file_name) in os.listdir(str(tmpdir))
 
     dest = os.path.join(tmpdir, "myscreenshot.png")
     file_name = mapdl.screenshot(dest)

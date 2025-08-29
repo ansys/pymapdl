@@ -2944,7 +2944,6 @@ class ParameterDefinition:
            * - STAT
              - ``Element Number``
              - Status of the element: 0 = uncracked, 1 = cracked
-
         """
         command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}"
         return self.run(command, **kwargs)
@@ -4766,7 +4765,6 @@ class ParameterDefinition:
            * - EMF
              -
              - Electromotive force drop
-
         """
         command = (
             f"*VGET,{parr},{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"

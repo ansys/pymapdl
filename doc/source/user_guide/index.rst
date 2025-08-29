@@ -42,7 +42,6 @@ This section provides a general overview of PyMAPDL and how you use it.
    :caption: Advanced
 
    xpl
-   upf
    krylov
 
 .. toctree::

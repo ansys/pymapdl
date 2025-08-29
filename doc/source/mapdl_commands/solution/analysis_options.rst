@@ -1,64 +1,69 @@
-.. _ref_analysis_options_commands_api:
 
-****************
-Analysis options
-****************
+.. _ref_analysis_options:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to set general analysis options.
+AnalysisOptions
+===============
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.analysis_options
+
+.. autoclass:: ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.abextract
-   Mapdl.accoption
-   Mapdl.adams
-   Mapdl.antype
-   Mapdl.ascres
-   Mapdl.asol
-   Mapdl.bcsoption
-   Mapdl.cgrow
-   Mapdl.cmatrix
-   Mapdl.cmsopt
-   Mapdl.cncheck
-   Mapdl.cnkmod
-   Mapdl.cntr
-   Mapdl.cutcontrol
-   Mapdl.ddoption
-   Mapdl.dmpext
-   Mapdl.dmpoption
-   Mapdl.dspoption
-   Mapdl.exbopt
-   Mapdl.ematwrite
-   Mapdl.eqslv
-   Mapdl.eresx
-   Mapdl.escheck
-   Mapdl.essolv
-   Mapdl.expass
-   Mapdl.gauge
-   Mapdl.gmatrix
-   Mapdl.lanboption
-   Mapdl.lumpm
-   Mapdl.moddir
-   Mapdl.monitor
-   Mapdl.msave
-   Mapdl.msolve
-   Mapdl.opncontrol
-   Mapdl.outaero
-   Mapdl.ovcheck
-   Mapdl.pcgopt
-   Mapdl.perturb
-   Mapdl.prscontrol
-   Mapdl.pscontrol
-   Mapdl.rate
-   Mapdl.resvec
-   Mapdl.rstoff
-   Mapdl.scopt
-   Mapdl.seexp
-   Mapdl.seopt
-   Mapdl.snoption
-   Mapdl.solve
-   Mapdl.stabilize
-   Mapdl.thexpand
-   Mapdl.thopt
+
+   AnalysisOptions.abextract
+   AnalysisOptions.accoption
+   AnalysisOptions.adams
+   AnalysisOptions.antype
+   AnalysisOptions.ascres
+   AnalysisOptions.asol
+   AnalysisOptions.bcsoption
+   AnalysisOptions.cjump
+   AnalysisOptions.cload
+   AnalysisOptions.cmatrix
+   AnalysisOptions.cmsopt
+   AnalysisOptions.cnkmod
+   AnalysisOptions.cntr
+   AnalysisOptions.cutcontrol
+   AnalysisOptions.ddoption
+   AnalysisOptions.dmpext
+   AnalysisOptions.dmpoption
+   AnalysisOptions.dspoption
+   AnalysisOptions.ematwrite
+   AnalysisOptions.eqslv
+   AnalysisOptions.eresx
+   AnalysisOptions.exbopt
+   AnalysisOptions.expass
+   AnalysisOptions.gauge
+   AnalysisOptions.gmatrix
+   AnalysisOptions.invopt
+   AnalysisOptions.lanboption
+   AnalysisOptions.lumpm
+   AnalysisOptions.moddir
+   AnalysisOptions.monitor
+   AnalysisOptions.msave
+   AnalysisOptions.msolve
+   AnalysisOptions.opncontrol
+   AnalysisOptions.outaero
+   AnalysisOptions.pcgopt
+   AnalysisOptions.perturb
+   AnalysisOptions.pivcheck
+   AnalysisOptions.prscontrol
+   AnalysisOptions.pscontrol
+   AnalysisOptions.psolve
+   AnalysisOptions.rate
+   AnalysisOptions.resvec
+   AnalysisOptions.rstoff
+   AnalysisOptions.scopt
+   AnalysisOptions.seexp
+   AnalysisOptions.seopt
+   AnalysisOptions.snoption
+   AnalysisOptions.solve
+   AnalysisOptions.stabilize
+   AnalysisOptions.thexpand
+   AnalysisOptions.thopt
+   AnalysisOptions.toffst

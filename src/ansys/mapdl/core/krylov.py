@@ -77,7 +77,6 @@ class KrylovSolver:
     >>> Yz = mk.solve(10, 100,  freq_steps=1, ramped_load=True)
     >>> # Expand the reduced solution back to the FE space.
     >>> res = mk.expand(residual_computation=True, residual_algorithm="l2")
-
     """
 
     def __init__(self, mapdl: Mapdl):

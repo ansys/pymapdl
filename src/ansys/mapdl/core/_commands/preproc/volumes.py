@@ -266,7 +266,6 @@ class Volumes:
         >>> v2 = mapdl.v(k0, k1, k2, k2, k3, k3, k3, k3)
         >>> v2
         3
-
         """
         command = f"V,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8}"
         return parse.parse_v(self.run(command, **kwargs))
@@ -325,7 +324,6 @@ class Volumes:
         >>> vnum = mapdl.va(a0, a1, a2, a3)
         >>> vnum
         1
-
         """
         command = f"VA,{a1},{a2},{a3},{a4},{a5},{a6},{a7},{a8},{a9},{a10}"
         return parse.parse_v(self.run(command, **kwargs))
@@ -493,7 +491,6 @@ class Volumes:
           3,
         ALONG LINES
           9
-
         """
         command = f"VDRAG,{na1},{na2},{na3},{na4},{na5},{na6},{nlp1},{nlp2},{nlp3},{nlp4},{nlp5},{nlp6}"
         return self.run(command, **kwargs)
@@ -562,7 +559,6 @@ class Volumes:
 
         >>> mapdl.vdele('all')
         >>> mapdl.vext(a0, dz=4, rx=0.3, ry=0.3, rz=1)
-
         """
         command = f"VEXT,{na1},{na2},{ninc},{dx},{dy},{dz},{rx},{ry},{rz}"
         return self.run(command, **kwargs)
@@ -964,7 +960,6 @@ class Volumes:
         >>> k_axis0 = mapdl.k("", 0, 0, 0)
         >>> k_axis1 = mapdl.k("", 0, 0, 1)
         mapdl.vrotat(a0, pax1=k_axis0, pax2=k_axis1)
-
         """
         command = (
             f"VROTAT,{na1},{na2},{na3},{na4},{na5},{na6},{pax1},{pax2},{arc},{nseg}"
@@ -1092,7 +1087,6 @@ class Volumes:
         >>> print(output)
         SYMMETRY TRANSFORMATION OF VOLUMES       USING COMPONENT  Y
            SET IS ALL SELECTED VOLUMES
-
         """
         command = f"VSYMM,{ncomp},{nv1},{nv2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
