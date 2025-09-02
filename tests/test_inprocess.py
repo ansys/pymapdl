@@ -179,7 +179,7 @@ print(shutil.which("python"))
     assert mapdl_inprocess.status_code == 0
     assert output_content is not None
     assert "Testing Python path" in output_content
-    assert sys.executable.replace('\\\\', '\\').lower() in output_content.lower()
+    assert sys.executable.replace("\\\\", "\\").lower() in output_content.lower()
     assert "test ends" in output_content
 
 
