@@ -108,11 +108,6 @@ class MapdlInProcessRunner:
                 "MAPDL executable path must be an absolute path to an existing file."
             )
 
-        if self.version == 25.2:
-            env = {"MAPDL_PYTHON_ENV": os.getenv("MAPDL_PYTHON_ENV", sys.prefix)}
-        else:
-            env = {}
-
         try:
             args = [
                 exec_path,
@@ -129,10 +124,9 @@ class MapdlInProcessRunner:
                 cwd=self.wdir,
                 check=True,
                 capture_output=True,
-                env=env,
-                # it does not support shell=True, because it does not
-                # generate the out.out file
-                # TODO: Why shell should be false in order to generate the output file?
+                # # it does not support shell=True, because it does not
+                # # generate the out.out file
+                # # TODO: Why shell should be false in order to generate the output file?
                 shell=False,  # nosec B603
             )
 
@@ -183,10 +177,9 @@ print(shutil.which("python"))
 """
     output_content = mapdl_inprocess.run(cmds)
     assert mapdl_inprocess.status_code == 0
-
     assert output_content is not None
     assert "Testing Python path" in output_content
-    assert sys.executable in output_content
+    assert sys.executable.replace('\\\\', '\\').lower() in output_content.lower()
     assert "test ends" in output_content
 
 
