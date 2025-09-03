@@ -151,7 +151,6 @@ class Status:
           KEYOPT( 1- 6)=        0      0      0        0      0      0
           KEYOPT( 7-12)=        0      0      0        0      0      0
           KEYOPT(13-18)=        0      0      0        0      0      0
-
         """
         return self.run("ETYPE", **kwargs)
 

@@ -283,7 +283,6 @@ def _is_ubuntu() -> bool:
     It's a bit complicated because sometimes the distribution is
     Ubuntu, but the kernel has been recompiled and no longer has the
     word "ubuntu" in it.
-
     """
 
     # must be running linux for this to be True
@@ -327,7 +326,6 @@ def close_all_local_instances(port_range: range | None = None) -> None:
 
     >>> import ansys.mapdl.core as pymapdl
     >>> pymapdl.close_all_local_instances()
-
     """
     if port_range is None:
         port_range = range(50000, 50200)
@@ -472,7 +470,6 @@ def generate_mapdl_launch_command(
     -------
     list[str]
         Command
-
     """
     cpu_sw = "-np %d" % nproc
 
@@ -857,7 +854,6 @@ def get_start_instance(start_instance: bool | str | None = None) -> bool:
     -----
     If the environment variable ``PYMAPDL_START_INSTANCE`` is set,
     hence the argument ``start_instance`` is overwritten.
-
     """
 
     def valid_start_instance(start_instance: str) -> bool:
@@ -1035,7 +1031,6 @@ def set_MPI_additional_switches(
     -------
     str
         Validated additional switches.
-
     """
     # Converting additional_switches to lower case to avoid mismatches.
     add_sw_lower_case = add_sw.lower()
@@ -1104,7 +1099,6 @@ def force_smp_in_student(add_sw: str | None, exec_path: str) -> str:
     -------
     str
         Validated additional switches.
-
     """
     # Converting additional_switches to lower case to avoid mismatches.
     if add_sw is None:

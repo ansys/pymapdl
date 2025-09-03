@@ -97,7 +97,6 @@ class Parameters:
 
     >>> mapdl.parameters['ARR']
     array([1., 2., 3.])
-
     """
 
     def __init__(self, mapdl: MapdlBase):
@@ -142,7 +141,6 @@ class Parameters:
         --------
         >>> mapdl.parameters.numcpu
         2
-
         """
         return int(self._mapdl.get_value("ACTIVE", item1="NUMCPU"))
 
@@ -422,7 +420,6 @@ class Parameters:
         -------
         bool
             True if the key is in the dictionary, False otherwise.
-
         """
         return key.upper() in self._parm.keys()
 
@@ -434,7 +431,6 @@ class Parameters:
         -------
         iterator
             An iterator over the keys in the dictionary.
-
         """
         yield from self._parm.keys()
 
@@ -446,7 +442,6 @@ class Parameters:
         -------
         dict_keys
             A view object that contains the keys in the dictionary.
-
         """
         return self._parm.keys()
 
@@ -458,7 +453,6 @@ class Parameters:
         -------
         dict_values
             A view object that contains the values in the dictionary.
-
         """
         return self._parm.values()
 
@@ -470,7 +464,6 @@ class Parameters:
         -------
         dict
             A shallow copy of the dictionary.
-
         """
         return self._parm.copy()
 
@@ -482,7 +475,6 @@ class Parameters:
         -------
         dict_items
             A view object that contains the key-value pairs in the dictionary.
-
         """
         return self._parm.items()
 
@@ -498,7 +490,6 @@ class Parameters:
             :attr:`ansys.mapdl.core.mapdl_core.MAX_PARAM_CHARS`, beginning with
             a letter and containing only letters, numbers, and underscores.
             Examples: ``"ABC" "A3X" "TOP_END"``.
-
         """
         if not isinstance(value, (str, int, float, np.integer, np.floating)):
             raise TypeError("``Parameter`` must be either a float, int, or string")
@@ -612,7 +603,6 @@ class Parameters:
         >>> parm, mapdl_arrays = mapdl.load_parameters()
         >>> mapdl_arrays['MYARR']
         array([10., -1.,  8.,  4., 10.])
-
         """
         # type checks
         arr = np.array(arr)

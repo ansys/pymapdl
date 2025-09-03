@@ -85,7 +85,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v5
 
       - name: "Login in Github container registry"
         uses: docker/login-action@v3.5.0
