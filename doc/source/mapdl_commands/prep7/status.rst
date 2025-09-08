@@ -26,7 +26,6 @@ These PREP7 commands are for use with the STAT command.
    Mapdl.keypts
    Mapdl.line
    Mapdl.mater
-   Mapdl.meshing
    Mapdl.nodes
    Mapdl.prim
    Mapdl.rcon
