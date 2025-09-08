@@ -31,7 +31,6 @@ from . import (
     lines,
     material_data_tables,
     materials,
-    meshing,
     morphing,
     nodes,
     primitives,
