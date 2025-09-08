@@ -30,4 +30,5 @@ from . import (
     coupled_dof,
     cross_sections,
     data_tables,
+    meshing,
 )

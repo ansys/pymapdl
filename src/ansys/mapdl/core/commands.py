@@ -334,6 +334,7 @@ class Prep7Commands(
     prep7.coupled_dof.CoupledDof,
     prep7.cross_sections.CrossSections,
     prep7.data_tables.DataTables,
+    prep7.meshing.Meshing,
 ):
     pass
 
@@ -350,7 +351,6 @@ class PreprocessorCommands(
     preproc.elements.Elements,
     preproc.hard_points.HardPoints,
     preproc.material_data_tables.MaterialDataTables,
-    preproc.meshing.Meshing,
     preproc.morphing.Morphing,
     preproc.materials.Materials,
     preproc.primitives.Primitives,
