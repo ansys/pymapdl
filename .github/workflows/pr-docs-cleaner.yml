@@ -20,7 +20,7 @@ jobs:
     name: "Deploy PR documentation"
     runs-on: ubuntu-latest
     steps:
-      - uses: ansys/actions/doc-deploy-pr@v10.0.15
+      - uses: ansys/actions/doc-deploy-pr@v10.0.20
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
