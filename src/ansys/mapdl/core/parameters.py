@@ -853,6 +853,8 @@ def interp_star_status(status):
                     "type": items[1],
                     "workspace": int(items[4]),
                 }
+            elif items[1] in ["C_FullFile"]:
+                parameters[name] = {"type": items[1]}
             else:
                 shape = (int(items[2]), int(items[3]), int(items[4]))
                 parameters[name] = {"type": items[1], "shape": shape}
