@@ -171,7 +171,7 @@ omit = [
   # ignore non exposed interfaces
   "ansys/mapdl/core/mapdl_inprocess.py",
 ]
-source = ["ansys/pymapdl"]
+source = ["ansys.mapdl.core"]
 
 [tool.coverage.report]
 show_missing = true
