@@ -21,7 +21,7 @@ Set up your environment
 =======================
 
 To be able to write and build the documentation, you must follow the same
-steps described in :ref:`developing_pymapdl`, but in this case, you must install
+steps described in :ref:`develop_pymapdl`, but in this case, you must install
 documentation dependencies with this command:
 
 .. code:: console
@@ -211,7 +211,7 @@ There are three types of examples: dynamic, static, and semi-static.
 Dynamic examples
 ----------------
 
-Dynamic examples are based on Python files and must be able to run in under three minutes.
+Dynamic examples are based on Python files and must be able to run in under two minutes.
 In the PyMAPDL repository, they are in the `examples <pymapdl_examples_>`_ directory.
 
 
@@ -235,12 +235,12 @@ Static examples
 
 Static examples are based on reStructuredText files and do not have to
 be executed or run using Python.
-In the PyMAPDL repository, they are in the `doc\source <pymapdl_doc_source_>`_ directory.
+In the PyMAPDL repository, they are in the `doc\source\extended_examples <pymapdl_doc_extended_examples_>`_ directory.
 
-One static example is the `Harmonic analysis using the frequency-sweep Krylov method <pymapdl_doc_krylov_example_>`_ example. 
-This example shows how to do an harmonic analysis using the Krylov method.
-The source code can be found in the GitHub `krylov_example.rst <pymapdl_doc_krylov_example_rst_>`_, and it
-is rendered as HTML on the `Harmonic analysis using the frequency-sweep Krylov method <pymapdl_doc_krylov_example_>`_ page.
+One static example is the `Genetic algorithms and PyMAPDL <hpc_ml_ga_example_>`_ example. 
+This example shows how to run PyMAPDL together with a genetic algorithm library on a high performance platform (HPC).
+The source code can be found in the GitHub `krylov_example.rst <pymapdl_genetic_algorithm_example_rst_>`_, and it
+is rendered as HTML on the `Genetic algorithms and PyMAPDL <pymapdl_doc_genetic_algorithm_example_>`_ page.
 
 
 Semi-dynamic examples
@@ -254,7 +254,8 @@ Semi-dynamic examples are static RST files that execute Python code using this R
        :hide-code:
 
 
-These examples are also located in `doc\source <pymapdl_doc_source_>`_ directory.
+These examples are also located in `doc\source\extended_examples <pymapdl_doc_extended_examples_>`_ directory,
+however most of them have been moved to `PyMAPDL-Examples repo <pymapdl_ex_repo_>`_.
 These type of examples allow you to view and interact with the model.
 
 One semi-dynamic example is the

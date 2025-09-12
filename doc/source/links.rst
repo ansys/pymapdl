@@ -175,6 +175,7 @@
 .. _pymapdl_doc_krylov_example: https://mapdl.docs.pyansys.com/version/stable/examples/extended_examples/Krylov/krylov_example.html
 .. _pymapdl_doc_krylov_example_rst: https://github.com/ansys/pymapdl/blob/main/doc/source/examples/extended_examples/Krylov/krylov_example.rst
 .. _pymapdl_doc_source: https://github.com/ansys/pymapdl/tree/main/doc/source
+.. _pymapdl_doc_extended_examples: https://github.com/ansys/pymapdl/tree/main/doc/source/extended_examples
 .. _pymapdl_techdemo_28_rst: https://raw.githubusercontent.com/ansys/pymapdl-examples/main/doc/source/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.rst
 .. _pymapdl_techdemo_28: https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html
 .. _pymapdl_docker_dir: https://github.com/ansys/pymapdl/blob/main/docker
@@ -204,6 +205,8 @@
 .. _pymapdl_create_codespace_docs: https://codespaces.new/ansys/pymapdl?devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
 .. _pymapdl_examples_template: https://mapdl.docs.pyansys.com/version/stable/examples/gallery_examples/02-tips-n-tricks/00-example-template.html
 .. _pymapdl_bracket_static_example: https://mapdl.docs.pyansys.com/version/stable/examples/gallery_examples/00-mapdl-examples/bracket_static.html#sphx-glr-examples-gallery-examples-00-mapdl-examples-bracket-static-py
+.. _pymapdl_genetic_algorithm_example_rst: https://github.com/ansys/pymapdl/blob/main/doc/source/examples/extended_examples/hpc/hpc_ml_ga.rst
+.. _pymapdl_doc_genetic_algorithm_example: https://mapdl.docs.pyansys.com/version/stable/examples/extended_examples/hpc/hpc_ml_ga.html
 
 
 .. #Python

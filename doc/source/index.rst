@@ -103,9 +103,9 @@
         Check our :ref:`write_documentation` section.
 
     .. grid-item-card:: :fa:`keyboard` Develop PyMAPDL
-        :link: developing_pymapdl
+        :link: develop_pymapdl
         :link-type: ref
 
-        Check our :ref:`developing_pymapdl` section
+        Check our :ref:`develop_pymapdl` section
         to get guidance about setting
         the project for development.

@@ -1,24 +1,28 @@
 .. _ref_contributing:
 
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Contribute
+
+   write_documentation
+   developing_pymapdl
+   devcontainer
+
+
 ============
 Contributing
 ============
 
-
-.. toctree::
-   :hidden:
-   :maxdepth: 3
-
-   write_documentation
-   develop_pymapdl
-
+.. epigraph:: *“Alone we can do so little; together we can do so much.”* — Helen Keller
 
 There are several ways to contribute to PyMAPDL. 
 
 * `Answer discussions`_
 * `Post issues`_
 * :ref:`write_documentation`
-* :ref:`developing_pymapdl`
+* :ref:`develop_pymapdl`
 
 Overall guidance on contributing to a PyAnsys library appears in the
 `Contributing <dev_guide_contributing_>`_ topic

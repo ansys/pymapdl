@@ -28,16 +28,21 @@ Getting started
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Contribute
+   :caption: Advanced
 
-   contribution
-   devcontainer
    make_container
    docker
    macos
    wsl
    using_julia
 
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Contribute
+
+   ../contribution/contribution
 
 
 To use PyMAPDL you must follow the next three steps:
