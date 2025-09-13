@@ -1,0 +1,6 @@
+﻿starvplot
+=========
+
+.. currentmodule:: ansys.mapdl.core._commands.apdl.array_parameters
+
+.. automethod:: ArrayParameters.starvplot
