@@ -130,14 +130,14 @@ jobs:
               - 'pyproject.toml'
 
       - name: "Setup Python with cache"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         if:  steps.changes.outputs.workflows != 'true'
         with:
           cache: 'pip'
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Setup Python without cache"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}

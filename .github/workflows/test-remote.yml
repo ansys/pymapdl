@@ -188,14 +188,14 @@ jobs:
               - '.github/workflows/**'
 
       - name: "Setup Python with cache"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         if:  steps.changes.outputs.workflows != 'true'
         with:
           cache: 'pip'
           python-version: ${{ inputs.python-version }}
 
       - name: "Setup Python without cache"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ inputs.python-version }}
