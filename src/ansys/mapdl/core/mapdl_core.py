@@ -22,6 +22,7 @@
 
 """Module to control interaction with MAPDL through Python"""
 
+from enum import StrEnum
 from functools import wraps
 import glob
 import logging
@@ -231,6 +232,12 @@ _ALLOWED_START_PARM = [
     "timeout",
     "use_reader_backend",
 ]
+
+
+class STATUS(StrEnum):
+    EXITED = "exited"
+    EXITING = "exiting"
+    RUNNING = "running"
 
 
 def parse_to_short_cmd(command):
@@ -472,18 +479,18 @@ class _MapdlCore(Commands):
         return self._chain_commands(self)
 
     @property
-    def check_status(self):
+    def check_status(self) -> STATUS:
         """Return MAPDL status.
         * 'exited' if MAPDL is exited
         * 'exiting' if MAPDL is exiting
-        * Otherwise returns 'OK'.
+        * Otherwise returns 'running'.
         """
         if self.exited:
-            return "exited"
+            return STATUS.EXITED
         elif self.exiting:
-            return "exiting"
+            return STATUS.EXITING
         else:
-            return "OK"
+            return STATUS.RUNNING
 
     @property
     def components(self) -> "ComponentManager":
