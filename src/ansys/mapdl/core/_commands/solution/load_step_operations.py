@@ -165,8 +165,6 @@ class LoadStepOperations:
 
             NODE  LABEL     REAL           IMAG
                26  FZ     -10.0000000      0.00000000
-
-
         """
         command = f"LSREAD,{lsnum}"
         return self.run(command, **kwargs)
@@ -209,7 +207,6 @@ class LoadStepOperations:
 
         >>> mapdl.lswrite(2)
         >>> mapdl.lssolve(1, 2)
-
         """
         return self.run(f"LSSOLVE,{lsmin},{lsmax},{lsinc}", **kwargs)
 

@@ -29,5 +29,4 @@ class MapdlBase(_MapdlExtended):
     .. warning:: This class should NOT be imported by itself.
        You should always import a subclass of it like
        :class:`MapdlGrpc <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>`
-
     """

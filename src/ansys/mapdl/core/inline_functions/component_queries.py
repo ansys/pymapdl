@@ -600,7 +600,6 @@ class _DisplacementComponentQueries(_QueryExecution):
         >>> mapdl.finish()
         >>> mapdl.queries.ux(7)
         1.549155634e-07
-
         """
         return self._run_query(f"UX({n})", integer=False)
 
@@ -646,7 +645,6 @@ class _DisplacementComponentQueries(_QueryExecution):
         >>> mapdl.finish()
         >>> mapdl.queries.uy(7)
         5.803680779e-10
-
         """
         return self._run_query(f"UY({n})", integer=False)
 
@@ -692,6 +690,5 @@ class _DisplacementComponentQueries(_QueryExecution):
         >>> mapdl.finish()
         >>> mapdl.queries.uz(7)
         3.74530389e-08
-
         """
         return self._run_query(f"UZ({n})", integer=False)

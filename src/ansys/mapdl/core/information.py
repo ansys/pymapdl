@@ -22,14 +22,17 @@
 
 from functools import wraps
 import re
-from typing import Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, Optional
 import weakref
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlExitedError
 
+if TYPE_CHECKING:
+    from ansys.mapdl.core import Mapdl
 
-def update_information_first(update: bool = False) -> Callable:
+
+def update_information_first(update: bool = False) -> Callable[[Callable], Callable]:
     """
     Decorator to wrap :class:`Information <ansys.mapdl.core.misc.Information>`
     methods to force update the fields when accessed.
@@ -39,6 +42,11 @@ def update_information_first(update: bool = False) -> Callable:
     update : bool, optional
         If ``True``, the class information is updated by calling ``/STATUS``
         before accessing the methods. By default ``False``
+
+    Returns
+    -------
+    Callable
+        The decorator function.
     """
 
     def decorator(function):
@@ -59,6 +67,16 @@ class Information:
 
     It is also the object that is called when you issue ``print(mapdl)``,
     which means ``print`` calls ``mapdl.info.__str__()``.
+
+    Parameters
+    ----------
+    mapdl : Mapdl
+        An instance of the MAPDL class.
+
+    Returns
+    -------
+    Mapdl
+        An MAPDL instance.
 
     Notes
     -----
@@ -84,11 +102,26 @@ class Information:
     >>> info = mapdl.info
     >>> info.mapdl_version
     'RELEASE  2021 R2           BUILD 21.2      UPDATE 20210601'
-
     """
 
     def __init__(self, mapdl: "Mapdl") -> None:
-        """Class Initializer"""
+        """Class Initializer
+
+        Parameters
+        ----------
+        mapdl : Mapdl
+            An instance of the MAPDL class.
+
+        Returns
+        -------
+        Mapdl
+            An MAPDL instance.
+
+        Raises
+        ------
+        TypeError
+            If the provided `mapdl` object is not an instance of `MapdlBase`.
+        """
         from ansys.mapdl.core.mapdl import MapdlBase  # lazy import to avoid circular
 
         if not isinstance(mapdl, MapdlBase):  # pragma: no cover
@@ -104,12 +137,19 @@ class Information:
 
     @property
     def _mapdl(self) -> "Mapdl":
-        """Return the weakly referenced MAPDL instance."""
+        """Return the weakly referenced MAPDL instance.
+
+        Returns
+        -------
+        Mapdl
+            A reference to the MAPDL instance.
+        """
         return self._mapdl_weakref()
 
     def _update(self) -> None:
         """We might need to do more calls if we implement properties
-        that change over the MAPDL session."""
+        that change over the MAPDL session.
+        """
         try:
             if self._mapdl._exited:  # pragma: no cover
                 raise MapdlExitedError("Information class: MAPDL exited")
@@ -119,8 +159,7 @@ class Information:
             self._stats = None
             raise MapdlExitedError("Information class: MAPDL exited")
 
-        stats = stats.replace("\n ", "\n")  # Bit of formatting
-        self._stats = stats
+        self._stats = stats.replace(r"\n ", r"\n")
         self._mapdl._log.debug("Information class: Updated")
 
     def __repr__(self) -> str:
@@ -140,82 +179,160 @@ class Information:
     @property
     @update_information_first(False)
     def product(self) -> str:
-        """Retrieve the product from the MAPDL instance."""
+        """Retrieve the product from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The product name from the MAPDL instance.
+        """
         return self._get_product()
 
     @property
     @update_information_first(False)
     def mapdl_version(self) -> str:
-        """Retrieve the MAPDL version from the MAPDL instance."""
+        """Retrieve the MAPDL version from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The MAPDL version from the MAPDL instance.
+        """
         return self._get_mapdl_version()
 
     @property
     @update_information_first(False)
     def mapdl_version_release(self) -> str:
-        """Retrieve the MAPDL version release from the MAPDL instance."""
+        """Retrieve the MAPDL version release from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The MAPDL version release.
+        """
         st = self._get_mapdl_version()
         return self._get_between("RELEASE", "BUILD", st).strip()
 
     @property
     @update_information_first(False)
     def mapdl_version_build(self) -> str:
-        """Retrieve the MAPDL version build from the MAPDL instance."""
+        """Retrieve the MAPDL version build from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The MAPDL version build.
+        """
         st = self._get_mapdl_version()
         return self._get_between("BUILD", "UPDATE", st).strip()
 
     @property
     @update_information_first(False)
     def mapdl_version_update(self) -> str:
-        """Retrieve the MAPDL version update from the MAPDL instance."""
+        """Retrieve the MAPDL version update from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The MAPDL version update.
+        """
         st = self._get_mapdl_version()
         return self._get_between("UPDATE", "", st).strip()
 
     @property
     @update_information_first(False)
     def pymapdl_version(self) -> str:
-        """Retrieve the PyMAPDL version from the MAPDL instance."""
+        """Retrieve the PyMAPDL version from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            Returns the PyMAPDL version.
+        """
         return self._get_pymapdl_version()
 
     @property
     @update_information_first(False)
     def products(self) -> str:
-        """Retrieve the products from the MAPDL instance."""
+        """Retrieve the products from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The products from the MAPDL instance.
+        """
         return self._get_products()
 
     @property
     @update_information_first(False)
     def preprocessing_capabilities(self) -> str:
-        """Retrieve the preprocessing capabilities from the MAPDL instance."""
+        """Retrieve the preprocessing capabilities from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The preprocessing capabilities from the MAPDL instance.
+        """
         return self._get_preprocessing_capabilities()
 
     @property
     @update_information_first(False)
     def aux_capabilities(self) -> str:
-        """Retrieve the aux capabilities from the MAPDL instance."""
+        """Retrieve the aux capabilities from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The aux capabilities from the MAPDL instance.
+        """
         return self._get_aux_capabilities()
 
     @property
     @update_information_first(True)
     def solution_options(self) -> str:
-        """Retrieve the solution options from the MAPDL instance."""
+        """Retrieve the solution options from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The solution options from the MAPDL instance.
+        """
         return self._get_solution_options()
 
     @property
     @update_information_first(False)
     def post_capabilities(self) -> str:
-        """Retrieve the post capabilities from the MAPDL instance."""
+        """Retrieve the post capabilities from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The post capabilities from the MAPDL instance.
+        """
         return self._get_post_capabilities()
 
     @property
     @update_information_first(True)
     def titles(self) -> str:
-        """Retrieve the titles from the MAPDL instance."""
+        """Retrieve the titles from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The titles from the MAPDL instance.
+        """
         return self._get_titles()
 
     @property
     @update_information_first(True)
     def title(self) -> str:
-        """Retrieve and set the title from the MAPDL instance."""
+        """Retrieve and set the title from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The title from the MAPDL instance.
+        """
         return self._mapdl.inquire("", "title")
 
     @title.setter
@@ -224,9 +341,23 @@ class Information:
 
     @property
     @update_information_first(True)
-    def stitles(self, i: int = None) -> str:
+    def stitles(self, i: int | None = None) -> str:
         """Retrieve or set the value for the MAPDL stitle (subtitles).
 
+        Parameters
+        ----------
+        i
+            The index of the stitle to retrieve or set. If not provided,
+            all stitles are returned. If provided, it should be between 0 and 3
+            (Python indexing).
+
+        Returns
+        -------
+        str
+            The stitle(s) from the MAPDL instance.
+
+        Notes
+        -----
         If 'stitle' includes newline characters (`\\n`), then each line
         is assigned to one STITLE.
 
@@ -242,7 +373,7 @@ class Information:
             return self._get_stitles()[i]
 
     @stitles.setter
-    def stitles(self, stitle: str, i: int = None) -> None:
+    def stitles(self, stitle: str | list[str] | None, i: int | None = None) -> None:
         if stitle is None:
             # Case to empty
             stitle = ["", "", "", ""]
@@ -265,72 +396,138 @@ class Information:
             for each_index, each_stitle in zip(range(1, 5), stitle):
                 self._mapdl.stitle(each_index, each_stitle)
         else:
-            self._mapdl.stitle(i, stitle)
+            self._mapdl.stitle(str(i), str(stitle))
 
     @property
     @update_information_first(True)
     def units(self) -> str:
-        """Retrieve the units from the MAPDL instance."""
+        """Retrieve the units from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The units from the MAPDL instance.
+        """
         return self._get_units()
 
     @property
     @update_information_first(True)
     def scratch_memory_status(self) -> str:
-        """Retrieve the scratch memory status from the MAPDL instance."""
+        """Retrieve the scratch memory status from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The scratch memory status from the MAPDL instance.
+        """
         return self._get_scratch_memory_status()
 
     @property
     @update_information_first(True)
     def database_status(self) -> str:
-        """Retrieve the database status from the MAPDL instance."""
+        """Retrieve the database status from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The database status from the MAPDL instance.
+        """
         return self._get_database_status()
 
     @property
     @update_information_first(True)
     def config_values(self) -> str:
-        """Retrieve the config values from the MAPDL instance."""
+        """Retrieve the config values from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The config values from the MAPDL instance.
+        """
         return self._get_config_values()
 
     @property
     @update_information_first(True)
     def global_status(self) -> str:
-        """Retrieve the global status from the MAPDL instance."""
+        """Retrieve the global status from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The global status from the MAPDL instance.
+        """
         return self._get_global_status()
 
     @property
     @update_information_first(True)
     def job_information(self) -> str:
-        """Retrieve the job information from the MAPDL instance."""
+        """Retrieve the job information from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The job information from the MAPDL instance.
+        """
         return self._get_job_information()
 
     @property
     @update_information_first(True)
     def model_information(self) -> str:
-        """Retrieve the model information from the MAPDL instance."""
+        """Retrieve the model information from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The model information from the MAPDL instance.
+        """
         return self._get_model_information()
 
     @property
     @update_information_first(True)
     def boundary_condition_information(self) -> str:
-        """Retrieve the boundary condition information from the MAPDL instance."""
+        """Retrieve the boundary condition information from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The boundary condition information from the MAPDL instance.
+        """
         return self._get_boundary_condition_information()
 
     @property
     @update_information_first(True)
     def routine_information(self) -> str:
-        """Retrieve the routine information from the MAPDL instance."""
+        """Retrieve the routine information from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The routine information from the MAPDL instance.
+        """
         return self._get_routine_information()
 
     @property
     @update_information_first(True)
     def solution_options_configuration(self) -> str:
-        """Retrieve the solution options configuration from the MAPDL instance."""
+        """Retrieve the solution options configuration from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The solution options configuration from the MAPDL instance.
+        """
         return self._get_solution_options_configuration()
 
     @property
     @update_information_first(True)
     def load_step_options(self) -> str:
-        """Retrieve the load step options from the MAPDL instance."""
+        """Retrieve the load step options from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The load step options from the MAPDL instance.
+        """
         return self._get_load_step_options()
 
     def _get_between(
@@ -341,15 +538,12 @@ class Information:
     ) -> str:
         if not string:
             self._update()
-            string = self._stats
+            string = self._stats or ""
 
-        st = string.find(init_string) + len(init_string)
+        st: int = string.find(init_string) + len(init_string)
+        en: int | None = string.find(end_string) if end_string else None
 
-        if not end_string:
-            en = None
-        else:
-            en = string.find(end_string)
-        return "\n".join(string[st:en].splitlines()).strip()
+        return "\n".join(str(string[st:en]).splitlines()).strip()
 
     def _get_product(self) -> str:
         return self._get_products().splitlines()[0]
@@ -366,19 +560,23 @@ class Information:
     def _get_title(self) -> str:
         match = re.match(r"TITLE=(.*)$", self._get_titles())
         if match:
-            return match.groups(1)[0].strip()
+            return str(match.groups(1)[0].strip())  # type: ignore
 
-    def _get_stitles(self) -> List[str]:
-        return [
-            (
-                re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
-                .groups(1)[0]
-                .strip()
-                if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
-                else ""
+    def _get_stitles(self) -> list[str]:
+        titles: str = self._get_titles()
+
+        stitles: list[str] = []
+        for i in range(1, 5):
+            match = re.search(f"SUBTITLE  {i}=(.*)", titles)
+            if not match or not match.groups(1):
+                # If the subtitle is not found, return an empty string
+                continue
+
+            stitles.append(
+                str(re.search(f"SUBTITLE  {i}=(.*)", titles).groups(1)[0]).strip()  # type: ignore
             )
-            for i in range(1, 5)
-        ]
+
+        return stitles
 
     def _get_products(self) -> str:
         init_ = "*** Products ***"

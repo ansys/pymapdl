@@ -304,7 +304,6 @@ class Listing:
           consist of one material).
 
         * Anisotropic materials ( :ref:`tb`,ANEL) are not considered.
-
         """
         command = "PRERR"
         return self.run(command, **kwargs)

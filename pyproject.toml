@@ -66,19 +66,19 @@ tests = [
   "ansys-dpf-core[graphics]==0.13.6",
   "ansys-tools-visualization-interface==0.11.0",
   "autopep8==2.3.2",
-  "matplotlib==3.10.5",
-  "pandas==2.3.1",
-  "pyansys-tools-report==0.8.2",
-  "pyfakefs==5.9.2",
+  "matplotlib==3.10.6",
+  "pandas==2.3.2",
+  "pyansys-tools-report==0.8.3",
+  "pyfakefs==5.9.3",
   "pyiges[full]==0.3.2",
-  "pytest-cov==6.2.1",
+  "pytest-cov==7.0.0",
   "pytest-profiling==1.8.1",
   "pytest-pyvista==0.2.0",
   "pytest-random-order==1.2.0",
   "pytest-reportlog==0.4.0",
-  "pytest-rerunfailures==15.1",
+  "pytest-rerunfailures==16.0.1",
   "pytest-timeout==2.4.0",
-  "pytest==8.4.1",
+  "pytest==8.4.2",
   "scipy==1.15.3",
   "vtk==9.4.2",
 ]
@@ -86,7 +86,7 @@ tests = [
 doc = [
   "ansys-dpf-core[graphics]==0.13.6",
   "ansys-mapdl-reader==0.55.1",
-  "ansys-sphinx-theme==1.5.3",
+  "ansys-sphinx-theme==1.6.1",
   "ansys-tools-visualization-interface==0.11.0",
   "grpcio==1.74.0",
   "imageio-ffmpeg==0.6.0",
@@ -95,11 +95,11 @@ doc = [
   "jupyter_sphinx==0.5.3",
   "jupyterlab>=3.2.8",
   "linuxdoc==20240924",
-  "matplotlib==3.10.5",
+  "matplotlib==3.10.6",
   "nbformat==5.10.4",
   "numpydoc==1.9.0",
-  "pandas==2.3.1",
-  "plotly==6.2.0",
+  "pandas==2.3.2",
+  "plotly==6.3.0",
   "pyiges[full]==0.3.2",
   "pypandoc==1.15",
   "pytest-sphinx==0.6.3",
@@ -287,13 +287,13 @@ name = "Dependencies"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "miscellaneous"
-name = "Miscellaneous"
+directory = "documentation"
+name = "Documentation"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "documentation"
-name = "Documentation"
+directory = "miscellaneous"
+name = "Miscellaneous"
 showcontent = true
 
 [[tool.towncrier.type]]

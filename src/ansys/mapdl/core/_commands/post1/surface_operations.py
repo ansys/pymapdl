@@ -170,8 +170,6 @@ class SurfaceOperations:
         percent to check for inclusion. Excluding facets under such a small tolerance may yield unacceptable
         (aesthetically) results. Increasing the tolerance by a larger amount (0.1 or 10%) will sometimes
         yield smother edges along the surface you create.
-
-
         """
         command = f"SUCR,{surfname},{surftype},{nrefine},{radius},,,{tolout}"
         return self.run(command, **kwargs)
