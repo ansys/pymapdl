@@ -2286,7 +2286,7 @@ def test_exiting(mapdl, cleared):
 
 
 def test_check_status(mapdl, cleared):
-    assert mapdl.check_status == "OK"
+    assert mapdl.check_status == "running"
 
     mapdl._exited = True
     assert mapdl.exited
