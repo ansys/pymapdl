@@ -928,6 +928,22 @@ def test_load_array_negative_and_floats(mapdl, cleared):
     assert np.allclose(mapdl.parameters["MY_ARRAY"], my_array)
 
 
+def test_load_table_negative_and_floats(mapdl, cleared):
+    my_array = np.array(
+        [
+            [-100, 0.001],
+            [-20, 0.001],
+            [10, -0.005],
+            [700, 0.005],
+            [710, 0.200001],
+            [1000, -0.002],
+        ]
+    )
+
+    mapdl.load_table("MY_ARRAY", my_array)
+    assert np.allclose(mapdl.parameters["MY_ARRAY"].ravel(), my_array[:, 1].ravel())
+
+
 def test_load_table_error_ascending_row(mapdl, cleared):
     my_conv = np.ones((3, 3))
     my_conv[1, 0] = 4
