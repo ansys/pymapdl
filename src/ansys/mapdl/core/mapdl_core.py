@@ -22,7 +22,7 @@
 
 """Module to control interaction with MAPDL through Python"""
 
-from enum import StrEnum
+from enum import Enum
 from functools import wraps
 import glob
 import logging
@@ -234,7 +234,7 @@ _ALLOWED_START_PARM = [
 ]
 
 
-class STATUS(StrEnum):
+class STATUS(str, Enum):
     EXITED = "exited"
     EXITING = "exiting"
     RUNNING = "running"
