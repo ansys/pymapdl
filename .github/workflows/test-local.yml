@@ -282,12 +282,12 @@ jobs:
         run: |
           .ci/collect_mapdl_logs_locals.sh
 
-      - name: "Upload logs to GitHub"
-        if: always()
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: logs-${{ inputs.file-name }}.tgz
-          path: ./logs-${{ inputs.file-name }}.tgz
+      # - name: "Upload logs to GitHub"
+      #   if: always()
+      #   uses: actions/upload-artifact@v4.6.2
+      #   with:
+      #     name: logs-${{ inputs.file-name }}.tgz
+      #     path: ./logs-${{ inputs.file-name }}.tgz
 
       - name: "Display files structure"
         if: always()
