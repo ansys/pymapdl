@@ -278,12 +278,12 @@ jobs:
         run: |
           .ci/collect_mapdl_logs_remote.sh
 
-      - name: "Upload logs to GitHub"
-        if: always()
-        uses: actions/upload-artifact@master
-        with:
-          name: logs-build-docs.tgz
-          path: ./logs-build-docs.tgz
+      # - name: "Upload logs to GitHub"
+      #   if: always()
+      #   uses: actions/upload-artifact@master
+      #   with:
+      #     name: logs-build-docs.tgz
+      #     path: ./logs-build-docs.tgz
 
       - name: "Display files structure"
         if: always()
