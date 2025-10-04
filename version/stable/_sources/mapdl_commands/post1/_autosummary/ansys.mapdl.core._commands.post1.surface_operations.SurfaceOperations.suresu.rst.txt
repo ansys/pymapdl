@@ -1,0 +1,6 @@
+﻿suresu
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.surface_operations
+
+.. automethod:: SurfaceOperations.suresu
