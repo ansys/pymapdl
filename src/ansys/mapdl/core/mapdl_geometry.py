@@ -1295,7 +1295,7 @@ class Geometry:
                 self._mapdl.vsel("S", vmin=each_volu)
                 self._mapdl.aslv("S")
                 unstruct = surf.extract_cells(np.in1d(area_num, self.anum))
-                unstruct.entity_num = int(each_volu)
+                pv.set_new_attribute(unstruct, "entity_num", int(each_volu))
                 volumes_.append(unstruct)
 
         return volumes_
