@@ -28,6 +28,8 @@ from ansys.mapdl.core.mapdl import MapdlBase
 class _Backend(Protocol):
     def run_command(self, command: str, verbose: bool, mute: bool) -> str: ...
 
+    def wrinqr(self, key: int) -> int: ...
+
     def input_file(
         self,
         filename: str,
@@ -55,11 +57,12 @@ class MapdlInProcess(MapdlBase):
     def _run(self, command: str, verbose: bool = False, mute: bool = False) -> str:
         if not command.strip():
             raise ValueError("Empty commands not allowed")
-
         if len(command) > 639:
             raise ValueError("Maximum command length mut be less than 640 characters")
-
         return self._in_process_backend.run_command(command, verbose, mute).strip()
+
+    def wrinqr(self, key: int) -> int:
+        return self._in_process_backend.wrinqr(key)
 
     def input(
         self,

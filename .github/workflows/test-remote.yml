@@ -188,14 +188,14 @@ jobs:
               - '.github/workflows/**'
 
       - name: "Setup Python with cache"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         if:  steps.changes.outputs.workflows != 'true'
         with:
           cache: 'pip'
           python-version: ${{ inputs.python-version }}
 
       - name: "Setup Python without cache"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ inputs.python-version }}
@@ -307,12 +307,12 @@ jobs:
         run: |
           .ci/collect_mapdl_logs_remote.sh
 
-      - name: "Upload logs to GitHub"
-        if: always()
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: logs-${{ inputs.file-name }}.tgz
-          path: ./logs-${{ inputs.file-name }}.tgz
+      # - name: "Upload logs to GitHub"
+      #   if: always()
+      #   uses: actions/upload-artifact@v4.6.2
+      #   with:
+      #     name: logs-${{ inputs.file-name }}.tgz
+      #     path: ./logs-${{ inputs.file-name }}.tgz
 
       - name: "Display files structure"
         if: always()
