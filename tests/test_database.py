@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os
 import re
 
 from ansys.tools.versioning import server_meets_version
@@ -33,6 +34,8 @@ from ansys.mapdl.core.misc import random_string
 from conftest import ON_CI, TestClass
 
 SKIP_ON_VERSIONS = ["22.2", "23.1", "23.2", "24.1", "24.2", "25.1", "25.2"]
+
+TEST_DB = os.getenv("TEST_DB", "false").lower() == "true"
 
 
 @pytest.fixture(scope="session")
@@ -61,6 +64,9 @@ def db(mapdl):
         pytest.skip(
             f"This version of MAPDL gRPC API version ('ansys.api.mapdl' == {ver_}) is not compatible with 'database' module."
         )
+
+    if not TEST_DB:
+        pytest.skip("Database tests are skipped")
 
     mapdl.clear()
     if mapdl.db.active or mapdl.db._stub is None:
@@ -93,6 +99,9 @@ def test_database_start_stop(mapdl, cleared):
         pytest.skip(
             f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
         )
+
+    if not TEST_DB:
+        pytest.skip("Database tests are skipped")
 
     if MapdlDb(mapdl).active:
         MapdlDb(mapdl)._stop()
