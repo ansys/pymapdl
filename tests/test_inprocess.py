@@ -52,7 +52,7 @@ class MapdlInProcessRunner:
 
             self._exec_path = os.getenv("PYMAPDL_MAPDL_EXEC")
             if self._exec_path is None:
-                from ansys.tools.common.path import get_mapdl_path
+                from ansys.tools.path import get_mapdl_path
 
                 version: float | None = (
                     float(os.getenv("PYMAPDL_MAPDL_VERSION", 0)) or None
