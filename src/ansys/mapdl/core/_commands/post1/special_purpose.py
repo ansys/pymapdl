@@ -4029,7 +4029,6 @@ class SpecialPurpose:
         * :ref:`slashexpand` does not change the database as does the :ref:`expand` command.
 
         * You cannot print results displayed via :ref:`slashexpand`.
-
         """
         command = f"/EXPAND,{nrepeat1},{type1},{method1},{dx1},{dy1},{dz1},{nrepeat2},{type2},{method2},{dx2},{dy2},{dz2},{nrepeat3},{type3},{method3},{dx3},{dy3},{dz3}"
         return self.run(command, **kwargs)

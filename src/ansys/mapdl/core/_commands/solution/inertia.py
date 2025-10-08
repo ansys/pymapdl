@@ -589,7 +589,6 @@ class Inertia:
         Alternatively, ``coriolis`` supports bool parameters.
 
         >>> mapdl.coriolis(True, refframe=True)
-
         """
         # handle bool instead of strings
         if isinstance(option, bool):

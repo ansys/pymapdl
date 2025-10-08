@@ -107,7 +107,6 @@ class Geometry:
 
     Contains advanced methods to extend geometry building and
     selection within MAPDL.
-
     """
 
     def __init__(self, mapdl: Mapdl):
@@ -230,7 +229,6 @@ class Geometry:
                 print(each_point)
         [ 0.     ,  0.01778, -0.00318]
         ...
-
         """
         mb = Multiblock(self.get_keypoints(return_as_list=True))
         # Setting names
@@ -313,7 +311,6 @@ class Geometry:
                  0.00000000e+00],
                [ 6.00000000e+00,  1.58750000e-02, -7.62000000e-03,
         ...
-
         """
         if return_as_array or return_ids_in_array:
             if return_ids_in_array:
@@ -412,7 +409,6 @@ class Geometry:
           Z Bounds:   -3.180e-03, -3.180e-03
           N Arrays:   1
         ...
-
         """
         mb = Multiblock(self._lines)
         # Setting names
@@ -460,7 +456,6 @@ class Geometry:
         >>> lines = mapdl.geometry.get_lines(return_as_list=True)
         >>> lines
         [PolyData (0x1492ee7a...rrays:   1, PolyData (0x1491a404...rrays:   1, PolyData (0x1491068c...rrays:   1, PolyData (0x14910662...rrays:   1, PolyData (0x14910632...rrays:   1, PolyData (0x1492eeb0...rrays:   1, PolyData (0x1492eec8...rrays:   1, PolyData (0x1492eee0...rrays:   1, PolyData (0x1492eef8...rrays:   1, PolyData (0x1492ef10...rrays:   1, PolyData (0x1492ef28...rrays:   1, PolyData (0x1492ef40...rrays:   1, PolyData (0x1492ef58...rrays:   1, PolyData (0x1492ef70...rrays:   1, ...]
-
         """
         if return_as_list:
             return self._lines
@@ -529,7 +524,6 @@ class Geometry:
           Z Bounds:   -3.180e-03, -3.180e-03
           N Arrays:   3
         ...
-
         """
         mb = Multiblock(self.get_areas(return_as_list=True))
         # Setting names
@@ -592,7 +586,6 @@ class Geometry:
           Z Bounds:	5.500e-01, 5.500e-01
           N Arrays:	4,
         ...
-
         """
         if not isinstance(quality, int) or (quality > 10 or quality < 1):
             raise ValueError(
@@ -642,7 +635,6 @@ class Geometry:
 
         ninc : int, optional
             Steps to between amin and amax.
-
         """
         with self._mapdl.save_selection:
             orig_anum = self.anum
@@ -975,7 +967,6 @@ class Geometry:
         Select all keypoints
 
         >>> mapdl.geometry.keypoint_select('ALL')
-
         """
         if isinstance(items, str):
             items = items.upper()
@@ -1057,7 +1048,6 @@ class Geometry:
         Select all lines
 
         >>> mapdl.geometry.line_select('ALL')
-
         """
         if isinstance(items, str):
             items = items.upper()
@@ -1139,7 +1129,6 @@ class Geometry:
         Select all areas
 
         >>> mapdl.geometry.area_select('ALL')
-
         """
         if isinstance(items, str):
             items = items.upper()
@@ -1222,7 +1211,6 @@ class Geometry:
           Z Bounds:   -3.180e-03, 0.000e+00
           N Arrays:   3
         ...
-
         """
         mb = Multiblock(self.get_volumes(return_as_list=True))
         # Setting names
@@ -1288,7 +1276,6 @@ class Geometry:
           Z Bounds:	5.500e-01, 5.500e-01
           N Arrays:	4,
         ...
-
         """
         quality = int(quality)
         if quality > 10:
@@ -1308,7 +1295,7 @@ class Geometry:
                 self._mapdl.vsel("S", vmin=each_volu)
                 self._mapdl.aslv("S")
                 unstruct = surf.extract_cells(np.in1d(area_num, self.anum))
-                unstruct.entity_num = int(each_volu)
+                pv.set_new_attribute(unstruct, "entity_num", int(each_volu))
                 volumes_.append(unstruct)
 
         return volumes_
@@ -1374,7 +1361,6 @@ class Geometry:
         Select all volumes
 
         >>> mapdl.geometry.volume_select('ALL')
-
         """
         if isinstance(items, str):
             items = items.upper()
@@ -1427,7 +1413,6 @@ class Geometry:
             * ``'R'``: Reselect a set from the current set.
             * ``'A'``: Additionally select a set and extend the current set.
             * ``'U'``: Unselect a set from the current set.
-
         """
         if item_type not in FLST_LOOKUP:
             raise KeyError(f'Invalid ``item_type`` "{item_type}"')
@@ -1469,7 +1454,6 @@ class Geometry:
         np.ndarray
             An array with the area id for the first column, and the number of
             elements per each area on the second column.
-
         """
         anum = self.anum.ravel()
 

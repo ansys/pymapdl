@@ -69,7 +69,7 @@ jobs:
 
       - name: Setup the configuration
         id: pr_number
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           EVENTNAME: ${{ github.event_name }}
           DISPATCH_PR_NUMBER: ${{ github.event.inputs.issue_number }}
@@ -138,7 +138,7 @@ jobs:
             core.exportVariable('MODE', mode);
 
       - id: is_organization_member
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.TOKEN_TEAMS_USER_READ }}
           script: |
@@ -169,7 +169,7 @@ jobs:
              }
       
       - name: 'Delete previous reactions'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
@@ -202,7 +202,7 @@ jobs:
             }
 
       - name: 'Reply to comment'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
@@ -240,7 +240,7 @@ jobs:
 
       - name: Get pull request details
         if : ${{ env.CONTINUE == 'true' }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
@@ -294,7 +294,7 @@ jobs:
 
       - name: Checkout repo
         if : ${{ env.CONTINUE == 'true'}}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
 
@@ -364,7 +364,7 @@ jobs:
 
       - name: Opening PR if needed.
         if : ${{ env.CONTINUE == 'true' }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
@@ -475,7 +475,7 @@ jobs:
       - name: Create comment about failed migration
         # Not creating more failure comments if the workflow is retried
         if: ${{ failure() && github.run_attempt == 1 && github.event_name != 'workflow_dispatch' }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |

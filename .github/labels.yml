@@ -150,3 +150,7 @@
 - name: build failed
   description: "Schedule build fails"
   color: E67E22
+
+- name: 'deploy pr docs'
+  description: Deploy pull request documentation
+  color: 76D7C4

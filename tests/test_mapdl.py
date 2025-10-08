@@ -912,6 +912,38 @@ def test_load_table(mapdl, cleared, dim_rows, dim_cols, col_header):
         assert np.allclose(mapdl.parameters["my_conv"], my_conv[:, 1:], atol=1e-7)
 
 
+def test_load_array_negative_and_floats(mapdl, cleared):
+    my_array = np.array(
+        [
+            [0, 0.001],
+            [120, 0.001],
+            [130, 0.005],
+            [-700, 0.005],
+            [710, 0.002],
+            [1000, -0.002],
+        ]
+    )
+
+    mapdl.load_array("MY_ARRAY", my_array)
+    assert np.allclose(mapdl.parameters["MY_ARRAY"], my_array)
+
+
+def test_load_table_negative_and_floats(mapdl, cleared):
+    my_array = np.array(
+        [
+            [-100, 0.001],
+            [-20, 0.001],
+            [10, -0.005],
+            [700, 0.005],
+            [710, 0.200001],
+            [1000, -0.002],
+        ]
+    )
+
+    mapdl.load_table("MY_ARRAY", my_array)
+    assert np.allclose(mapdl.parameters["MY_ARRAY"].ravel(), my_array[:, 1].ravel())
+
+
 def test_load_table_error_ascending_row(mapdl, cleared):
     my_conv = np.ones((3, 3))
     my_conv[1, 0] = 4
@@ -2019,6 +2051,7 @@ def test_force_output(mapdl, cleared):
             assert mapdl.prep7()
         assert not mapdl.prep7()
 
+    with mapdl.muted:
         mapdl._run("nopr")
         with mapdl.force_output:
             assert mapdl.prep7()
@@ -2032,6 +2065,23 @@ def test_force_output(mapdl, cleared):
     with mapdl.force_output:
         assert mapdl.prep7()
     assert mapdl.prep7()
+
+
+def test_get_not_muted(mapdl, cleared):
+    mapdl.gopr()
+    assert not mapdl.mute
+
+    with patch.object(mapdl, "wrinqr", wraps=mapdl.wrinqr) as mock_muted:
+        with mapdl.muted:
+            assert mapdl.get("line1", "LINE", 0, "NUM", "MAX") is not None
+
+    mock_muted.assert_called_once()
+
+    assert mapdl.mute is False
+    with patch.object(mapdl, "wrinqr", wraps=mapdl.wrinqr) as mock_not_muted:
+        assert mapdl.get("line1", "LINE", 0, "NUM", "MAX") is not None
+
+    mock_not_muted.assert_not_called()
 
 
 def test_session_id(mapdl, cleared, running_test):
@@ -2236,7 +2286,7 @@ def test_exiting(mapdl, cleared):
 
 
 def test_check_status(mapdl, cleared):
-    assert mapdl.check_status == "OK"
+    assert mapdl.check_status == "running"
 
     mapdl._exited = True
     assert mapdl.exited
@@ -2672,7 +2722,7 @@ def test_screenshot(mapdl, make_block, tmpdir):
     assert "TIFF" == mapdl.file_type_for_plots
 
     file_name = mapdl.screenshot(True)
-    assert "mapdl_screenshot_0.png" == file_name
+    assert "mapdl_screenshot.png" == file_name
     assert "TIFF" == mapdl.file_type_for_plots
     assert file_name in os.listdir(os.getcwd())
 
@@ -2681,12 +2731,12 @@ def test_screenshot(mapdl, make_block, tmpdir):
     assert "TIFF" == mapdl.file_type_for_plots
     assert file_name in os.listdir(os.getcwd())
 
-    os.remove("mapdl_screenshot_0.png")
+    os.remove("mapdl_screenshot.png")
     os.remove(file_name)
 
     file_name = mapdl.screenshot(str(tmpdir))
     assert "TIFF" == mapdl.file_type_for_plots
-    assert file_name in os.listdir(str(tmpdir))
+    assert os.path.basename(file_name) in os.listdir(str(tmpdir))
 
     dest = os.path.join(tmpdir, "myscreenshot.png")
     file_name = mapdl.screenshot(dest)
