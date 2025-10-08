@@ -896,7 +896,7 @@ class MatrixOperations:
 
         .. _a-FREE_notes:
 
-        A ``/CLEAR`` command will automatically delete all the current APDL Math objects.
+        A :ref:`clear` command will automatically delete all the current APDL Math objects.
         """
         command = f"*FREE,{name},{val1}"
         return self.run(command, **kwargs)
@@ -1265,8 +1265,6 @@ class MatrixOperations:
         :ref:`lsrestore` command.
 
         A BCS Sparse Solver can be dumped only if uses the ``INCORE`` memory option (see :ref:`bcsoption` ).
-
-
         """
         command = f"*LSDUMP,{enginename},{filename}"
         return self.run(command, **kwargs)
@@ -1427,8 +1425,6 @@ class MatrixOperations:
 
         Restores a previously dumped Linear Solver (see the :ref:`lsdump` command). This Linear Solver can
         be used to solve a linear system using the :ref:`lsbac` command.
-
-
         """
         command = f"*LSRESTORE,{enginename},{filename}"
         return self.run(command, **kwargs)

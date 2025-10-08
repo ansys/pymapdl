@@ -238,7 +238,6 @@ class Report(base_report_class):
             Dictionary containing the Ansys libraries and versions to be reported.
             (e.g. {"MyLib" : "v1.2", ...}). Defaults to ``None``. Only used for
             the `pyansys-tools-report` package.
-
         """
         # Mandatory packages
         core = [

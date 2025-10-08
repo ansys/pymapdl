@@ -23,6 +23,53 @@
 
 class SetUp:
 
+    def clear(self, read: str = "", **kwargs):
+        r"""Clears the database.
+
+        Mechanical APDL Command: `/CLEAR <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CLEAR.html>`_
+
+        Parameters
+        ----------
+        read : str
+            File read option:
+
+            * ``START`` - Reread :file:`start.ans` file (default).
+
+            * ``NOSTART`` - Do not reread :file:`start.ans` file.
+
+        Notes
+        -----
+
+        .. _s-CLEAR_notes:
+
+        The :ref:`clear` command resets the database to the conditions present at the beginning of the
+        problem.
+
+        The command is typically used between multiple analyses in the same run, or between passes of a
+        multipass analysis (such as between substructure generation, use, and expansion passes).
+
+        The command sets the import and Boolean options back to the default, deletes all items from the
+        database, and sets memory values to zero for items derived from database information. (All files
+        remain intact.) The command also resets the jobname to match the currently open session :file:`.LOG`
+        and :file:`.ERR` files, returning the jobname to its original value or to the most recent value
+        specified via :ref:`filname` with ``KEY`` = 1.
+
+        After the database is cleared, the :file:`start.ans` file is reread (by default) unless ``Read`` =
+        NOSTART.
+
+        Additional commands cannot be stacked (via the $ separator) on the same line as the :ref:`clear`
+        command.
+
+        Use caution when placing the :ref:`clear` command within branching constructs (for example, those
+        using ``*DO`` or ``*IF`` commands), as the command deletes all parameters including the looping
+        parameter for do-loops. (To preserve your iteration parameter, issue a :ref:`parsav` command prior
+        to :ref:`clear`, then follow  :ref:`clear` with a :ref:`parres` command.)
+
+        This command is valid in any processor. Issuing this command at any point clears the database.
+        """
+        command = f"/CLEAR,{read}"
+        return self.run(command, **kwargs)
+
     def resume(
         self,
         fname: str = "",

@@ -143,7 +143,7 @@ jobs:
           df -h
 
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v5
         with:
           repository: ansys/pymapdl
 
@@ -186,7 +186,7 @@ jobs:
           apt-get update && apt install -y libgl1 libglx-mesa0 xvfb libgomp1 graphviz curl && apt-get clean
 
       - name: "Setup Python"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ inputs.python-version }}
 
@@ -282,12 +282,12 @@ jobs:
         run: |
           .ci/collect_mapdl_logs_locals.sh
 
-      - name: "Upload logs to GitHub"
-        if: always()
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: logs-${{ inputs.file-name }}.tgz
-          path: ./logs-${{ inputs.file-name }}.tgz
+      # - name: "Upload logs to GitHub"
+      #   if: always()
+      #   uses: actions/upload-artifact@v4.6.2
+      #   with:
+      #     name: logs-${{ inputs.file-name }}.tgz
+      #     path: ./logs-${{ inputs.file-name }}.tgz
 
       - name: "Display files structure"
         if: always()

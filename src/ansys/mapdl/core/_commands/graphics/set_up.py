@@ -1000,7 +1000,6 @@ class SetUp:
 
             * ``1,0`` - If ``Kywrd`` = TMOD, the values 1 and 0 determine whether bitmap (1) or stroke text (0)
               fonts will be used
-
         """
         command = f"JPEG,{kywrd},{opt}"
         return self.run(command, **kwargs)
@@ -1103,7 +1102,7 @@ class SetUp:
         of the graphics command macro, following the last graphics command within the macro, to enable the
         replot or zoom feature.
         """
-        command = f"/MREP,{name},{arg1},{arg2},{arg3},,{arg4},{arg5},{arg6},{arg7},{arg8},{arg9},{arg10},{arg11},{arg12},{arg13},{arg14},{arg15},{arg16},{arg17},{arg18}"
+        command = f"/MREP,{name},{arg1},{arg2},{arg3},{arg4},{arg5},{arg6},{arg7},{arg8},{arg9},{arg10},{arg11},{arg12},{arg13},{arg14},{arg15},{arg16},{arg17},{arg18}"
         return self.run(command, **kwargs)
 
     def noerase(self, **kwargs):
@@ -1192,7 +1191,6 @@ class SetUp:
 
             * ``1-9`` - Use this value to specify a specific compression level. 1 is the lowest compression
               level (fastest) and 9 is the highest compression level (slowest).
-
         """
         command = f"PNGR,{kywrd},{opt},{val}"
         return self.run(command, **kwargs)
@@ -1494,7 +1492,6 @@ class SetUp:
 
             * ``1, 0`` - If ``Kywrd`` = TMOD, the values 1 and 0 determine whether bitmap (1) or stroke text (0)
               fonts will be used
-
         """
         command = f"TIFF,{kywrd},{opt}"
         return self.run(command, **kwargs)

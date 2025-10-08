@@ -18,13 +18,13 @@
    changelog
 
 
-.. image:: ../source/_static/logo_dark.png
+.. image:: ../source/_static/pymapdl_dark_logo_large.png
     :class: only-dark
     :width: 800
     :alt: PyMAPDL Logo
     :align: center
 
-.. image:: ../source/_static/logo_light.png
+.. image:: ../source/_static/pymapdl_light_logo_large.png
     :class: only-light
     :width: 800
     :alt: PyMAPDL Logo

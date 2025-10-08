@@ -71,7 +71,7 @@ jobs:
       ON_DOCUMENTATION: TRUE
       PYANSYS_OFF_SCREEN: True
       BUILD_CHEATSHEET: '${{ inputs.build_cheatsheet }}'
-      MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.2-ubuntu-student
+      MAPDL_IMAGE_VERSION_DOCS_BUILD: v25.2-ubuntu-amd
       DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
       PYMAPDL_START_INSTANCE: FALSE
@@ -85,10 +85,10 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v5
 
       - name: "Login in Github container registry"
-        uses: docker/login-action@v3.4.0
+        uses: docker/login-action@v3.5.0
         with:
           registry: ghcr.io
           username: ${{ secrets.username }}
@@ -130,14 +130,14 @@ jobs:
               - 'pyproject.toml'
 
       - name: "Setup Python with cache"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         if:  steps.changes.outputs.workflows != 'true'
         with:
           cache: 'pip'
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Setup Python without cache"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
@@ -278,12 +278,12 @@ jobs:
         run: |
           .ci/collect_mapdl_logs_remote.sh
 
-      - name: "Upload logs to GitHub"
-        if: always()
-        uses: actions/upload-artifact@master
-        with:
-          name: logs-build-docs.tgz
-          path: ./logs-build-docs.tgz
+      # - name: "Upload logs to GitHub"
+      #   if: always()
+      #   uses: actions/upload-artifact@master
+      #   with:
+      #     name: logs-build-docs.tgz
+      #     path: ./logs-build-docs.tgz
 
       - name: "Display files structure"
         if: always()

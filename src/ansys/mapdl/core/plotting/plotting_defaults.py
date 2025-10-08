@@ -24,7 +24,7 @@ import pyvista as pv
 from pyvista.core import _vtk_core as _vtk
 from pyvista.core.utilities import translate
 from pyvista.core.utilities.helpers import wrap
-from pyvista.core.utilities.misc import no_new_attr
+from pyvista.core.utilities.misc import _NoNewAttrMixin
 
 # I dont want to have to fix a very recent lower bound for pyvista.
 # Hence I'm copying what I need from there.
@@ -32,8 +32,7 @@ from pyvista.core.utilities.misc import no_new_attr
 # https://github.com/pyvista/pyvista/blob/35396c2e7645a6b57ad30d25ac1893f2141aab95/pyvista/core/utilities/geometric_sources.py#L2254
 
 
-@no_new_attr
-class ArrowSource(_vtk.vtkArrowSource):
+class ArrowSource(_vtk.vtkArrowSource, _NoNewAttrMixin):
     def __init__(
         self,
         tip_length=0.25,

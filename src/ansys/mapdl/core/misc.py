@@ -33,6 +33,7 @@ import string
 import tempfile
 from threading import Thread
 from typing import (
+    Any,
     Callable,
     Dict,
     Iterable,
@@ -90,7 +91,6 @@ def check_valid_routine(routine: ROUTINES) -> bool:
     ------
     ValueError
         Raised when a routine is invalid.
-
     """
     if routine.lower().startswith("/"):
         routine = routine[1:]
@@ -375,7 +375,6 @@ def load_file(mapdl: "Mapdl", fname: str, priority_mapdl_file: bool = None) -> s
 
     Check if the file exists locally or in the working directory, if not, it will raise a ``FileNotFound`` exception.
     If the file is local, it will be uploaded.
-
     """
 
     base_fname = os.path.basename(fname)
@@ -717,3 +716,13 @@ def get_ip_hostname(ip: str) -> Tuple[str, str]:
                 hostname = ip
 
     return ip, hostname
+
+
+def expand_all_inner_lists(
+    lst: list[list[Any]], target_length: int, fill_value: str = ""
+) -> list[list[Any]]:
+    for inner in lst:
+        missing = target_length - len(inner)
+        if missing > 0:
+            inner.extend([fill_value] * missing)
+    return lst

@@ -69,7 +69,7 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.helpers import is_installed
 from ansys.mapdl.core.launcher import launch_mapdl
-from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
+from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string, stack
 from ansys.mapdl.core.plotting import GraphicsBackend
 
@@ -788,14 +788,20 @@ def test_set_get_parameters(mapdl, cleared, parm):
         assert np.allclose(mapdl.parameters[parm_name], parm)
 
 
-def test_set_parameters_arr_to_scalar(mapdl, cleared):
+def test_set_parameters_arr_to_scalar_overwrite(mapdl, cleared):
     mapdl.parameters["PARM"] = np.arange(10)
+    assert "PARM" in mapdl.parameters
+    assert np.allclose(mapdl.parameters["PARM"], np.arange(10).reshape((10, -1)))
+
     mapdl.parameters["PARM"] = 2
+    assert "PARM" in mapdl.parameters
+    assert mapdl.parameters["PARM"] == 2
 
 
 def test_set_parameters_string_spaces(mapdl, cleared):
-    with pytest.raises(ValueError):
-        mapdl.parameters["PARM"] = "string with spaces"
+    mapdl.parameters["PARM"] = "string with spaces"
+    assert "PARM" in mapdl.parameters
+    assert mapdl.parameters["PARM"] == "string with spaces"
 
 
 def test_set_parameters_too_long(mapdl, cleared):
@@ -904,6 +910,38 @@ def test_load_table(mapdl, cleared, dim_rows, dim_cols, col_header):
         assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], atol=1e-7)
     else:
         assert np.allclose(mapdl.parameters["my_conv"], my_conv[:, 1:], atol=1e-7)
+
+
+def test_load_array_negative_and_floats(mapdl, cleared):
+    my_array = np.array(
+        [
+            [0, 0.001],
+            [120, 0.001],
+            [130, 0.005],
+            [-700, 0.005],
+            [710, 0.002],
+            [1000, -0.002],
+        ]
+    )
+
+    mapdl.load_array("MY_ARRAY", my_array)
+    assert np.allclose(mapdl.parameters["MY_ARRAY"], my_array)
+
+
+def test_load_table_negative_and_floats(mapdl, cleared):
+    my_array = np.array(
+        [
+            [-100, 0.001],
+            [-20, 0.001],
+            [10, -0.005],
+            [700, 0.005],
+            [710, 0.200001],
+            [1000, -0.002],
+        ]
+    )
+
+    mapdl.load_table("MY_ARRAY", my_array)
+    assert np.allclose(mapdl.parameters["MY_ARRAY"].ravel(), my_array[:, 1].ravel())
 
 
 def test_load_table_error_ascending_row(mapdl, cleared):
@@ -1486,14 +1524,17 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     ext = "mp1"
 
     mapdl.prep7()
+    mapdl.slashdelete(fname, ext)  # remove file if it exists
 
-    assert f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE=" in mapdl.mpwrite(fname, ext)
+    assert "WRITE OUT MATERIAL PROPERTY" in mapdl.mpwrite(fname, ext, mat=1)
     assert f"{fname}.{ext}" in mapdl.list_files()
 
     # asserting downloading
     ext = "mp2"
-    assert f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE=" in mapdl.mpwrite(
-        fname, ext, download_file=True
+    mapdl.slashdelete(fname, ext)  # remove file if it exists
+
+    assert "WRITE OUT MATERIAL PROPERTY" in mapdl.mpwrite(
+        fname, ext, download_file=True, mat=1
     )
     assert f"{fname}.{ext}" in mapdl.list_files()
     assert os.path.exists(f"{fname}.{ext}")
@@ -1501,18 +1542,19 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     ## Checking reading
     # Uploading a local file
     with open(f"{fname}.{ext}", "r") as fid:
-        text = fid.read()
+        content = fid.read()
 
     os.remove(f"{fname}.{ext}")  # remove temp file
 
     ext = ext + "2"
+    mapdl.slashdelete(fname, ext)  # remove file if it exists
+
     fname_ = f"{fname}.{ext}"
-    new_nuxy = "MPDATA,NUXY,       1,   1, 0.4000000E+00,"
-    nuxy = float(new_nuxy.split(",")[4])
+    nuxy = float(0.40000)
     ex = 0.2100000e12
 
     with open(fname_, "w") as fid:
-        fid.write(text.replace("MPDATA,NUXY,       1,   1, 0.3000000E+00,", new_nuxy))
+        fid.write(content.replace("0.30000", str(nuxy)))
 
     # file might be left behind from a previous test
     if fname_ in mapdl.list_files():
@@ -1521,17 +1563,10 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
 
     mapdl.clear()
     mapdl.prep7()
-    captured = capsys.readouterr()  # To flush it
-    output = mapdl.mpread(fname, ext)
+    _ = capsys.readouterr()  # To flush it
+    output = mapdl.mpread(fname, ext, progress_bar=True)
     captured = capsys.readouterr()
-    if has_dependency("tqdm"):
-        # Printing uploading requires tqdm
-        assert f"Uploading {fname}.{ext}:" in captured.err
 
-    assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
-    assert "TEMPERATURE TABLE ERASED." in output
-    assert "0.4000000" in output
-    # check if materials are read into the db
     assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
 
@@ -1545,9 +1580,6 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     mapdl.clear()
     mapdl.prep7()
     output = mapdl.mpread(fname, ext)
-    assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
-    assert "TEMPERATURE TABLE ERASED." in output
-    assert "0.4000000" in output
     assert np.allclose(mapdl.get_value("NUXY", "1", "TEMP", 0), nuxy)
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
 
@@ -1563,6 +1595,43 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     if not ON_LOCAL:
         with pytest.raises(IOError):
             mapdl.mpwrite("/test_dir/test", "mp")
+
+    mapdl.slashdelete(fname, ext)  # remove file if it exists
+
+
+def test_mpread_lib(mapdl):
+    mapdl.input_strings(
+        """
+        /prep7
+        /units,si
+        TB,BH  ,_MATL   ,   1,  20
+        TBTEM,  0.00000000    ,   1
+        TBPT,,  59.5238095    , 0.200000000
+        TBPT,,  119.047619    , 0.400000000
+        TBPT,,  158.730159    , 0.550000000
+        TBPT,,  396.825397    ,  1.15000000
+        TBPT,,  555.555556    ,  1.30000000
+        TBPT,,  793.650794    ,  1.40000000
+        TBPT,,  1587.30159    ,  1.55000000
+        TBPT,,  3968.25397    ,  1.63500000
+        TBPT,,  7936.50794    ,  1.65500000
+        TBPT,,  15873.0159    ,  1.67500000
+        TBPT,,  31746.0317    ,  1.70138960
+        TBPT,,  63492.0635    ,  1.75000000
+        TBPT,,  95238.0952    ,  1.79000000
+        TBPT,,  190476.190    ,  1.90980000
+        TBPT,,  285714.286    ,  2.02960000
+        TBPT,,  380952.381    ,  2.14950000
+    """
+    )
+    mapdl.slashdelete("database", "mp")
+    mapdl.mpwrite("database", "mp", mat=1)
+
+    mapdl.clear()
+    mapdl.prep7()
+    mapdl.mpread("database", "mp")
+    mapdl.mplist()
+    assert mapdl.get_value("MAT", 0, "count") == 1.0
 
 
 def test_mapdl_str(mapdl, cleared):
@@ -1982,6 +2051,7 @@ def test_force_output(mapdl, cleared):
             assert mapdl.prep7()
         assert not mapdl.prep7()
 
+    with mapdl.muted:
         mapdl._run("nopr")
         with mapdl.force_output:
             assert mapdl.prep7()
@@ -1995,6 +2065,23 @@ def test_force_output(mapdl, cleared):
     with mapdl.force_output:
         assert mapdl.prep7()
     assert mapdl.prep7()
+
+
+def test_get_not_muted(mapdl, cleared):
+    mapdl.gopr()
+    assert not mapdl.mute
+
+    with patch.object(mapdl, "wrinqr", wraps=mapdl.wrinqr) as mock_muted:
+        with mapdl.muted:
+            assert mapdl.get("line1", "LINE", 0, "NUM", "MAX") is not None
+
+    mock_muted.assert_called_once()
+
+    assert mapdl.mute is False
+    with patch.object(mapdl, "wrinqr", wraps=mapdl.wrinqr) as mock_not_muted:
+        assert mapdl.get("line1", "LINE", 0, "NUM", "MAX") is not None
+
+    mock_not_muted.assert_not_called()
 
 
 def test_session_id(mapdl, cleared, running_test):
@@ -2199,7 +2286,7 @@ def test_exiting(mapdl, cleared):
 
 
 def test_check_status(mapdl, cleared):
-    assert mapdl.check_status == "OK"
+    assert mapdl.check_status == "running"
 
     mapdl._exited = True
     assert mapdl.exited
@@ -2635,7 +2722,7 @@ def test_screenshot(mapdl, make_block, tmpdir):
     assert "TIFF" == mapdl.file_type_for_plots
 
     file_name = mapdl.screenshot(True)
-    assert "mapdl_screenshot_0.png" == file_name
+    assert "mapdl_screenshot.png" == file_name
     assert "TIFF" == mapdl.file_type_for_plots
     assert file_name in os.listdir(os.getcwd())
 
@@ -2644,12 +2731,12 @@ def test_screenshot(mapdl, make_block, tmpdir):
     assert "TIFF" == mapdl.file_type_for_plots
     assert file_name in os.listdir(os.getcwd())
 
-    os.remove("mapdl_screenshot_0.png")
+    os.remove("mapdl_screenshot.png")
     os.remove(file_name)
 
     file_name = mapdl.screenshot(str(tmpdir))
     assert "TIFF" == mapdl.file_type_for_plots
-    assert file_name in os.listdir(str(tmpdir))
+    assert os.path.basename(file_name) in os.listdir(str(tmpdir))
 
     dest = os.path.join(tmpdir, "myscreenshot.png")
     file_name = mapdl.screenshot(dest)
@@ -3158,3 +3245,82 @@ class TestSelectionOnNonInteractive:
             assert np.allclose(checker(), [1, 3])
         elif sel_type == "A":
             assert np.allclose(checker(), [1, 2, 3, 5])
+
+
+def test_rpsd(mapdl, psd_analysis):
+    """Test the rpsd command."""
+    mapdl.post26()
+    output = mapdl.rpsd(3, 2, "", 1, 2)
+    assert isinstance(output, np.ndarray)
+    assert output.shape == (64, 1)
+
+
+def test_osresult(mapdl, solved_box):
+    mapdl.solution()
+
+    mapdl.outres("ALL", "NONE")
+    mapdl.osresult("S", "Y", "ALL")  # Stress Y component
+    mapdl.osresult("S", "EQV", "ALL")  # Equivalent stress
+    mapdl.osresult("EPPL", "INT", "ALL")  # Plastic strain intensity
+
+    assert "S" in mapdl.osresult("STATUS")
+    assert "Y" in mapdl.osresult("STATUS")
+    assert "EQV" in mapdl.osresult("STATUS")
+    assert "EPPL" in mapdl.osresult("STATUS")
+    assert "INT" in mapdl.osresult("STATUS")
+
+
+@requires("pandas")
+def test_osresult_to_list_and_dataframe(mapdl, solved_box):
+    import pandas as pd
+
+    mapdl.solution()
+
+    mapdl.outres("ALL", "NONE")
+    mapdl.osresult("S", "Y", "ALL")  # Stress Y component
+    mapdl.osresult("S", "EQV", "ALL")  # Equivalent stress
+    mapdl.osresult("EPPL", "INT", "ALL")  # Plastic strain intensity
+
+    expected_list = [["SY", "ALL", ""], ["SEQV", "ALL", ""], ["EPPLINT", "ALL", ""]]
+    assert (
+        mapdl.osresult("STATUS").to_list() == expected_list
+    ), "Status should contain the requested results"
+
+    expected_df = pd.DataFrame(
+        data=expected_list, columns=["ITEM", "FREQUENCY", "COMPONENT"]
+    )
+    assert (
+        mapdl.osresult("STATUS").to_dataframe().equals(expected_df)
+    ), "DataFrame should match the expected results"
+
+
+@pytest.mark.xfail(
+    reason="Bug in v25R2, osresult lists results as many times as issued",
+    strict=True,
+)
+def test_osresult_multiple(mapdl, solved_box):
+    mapdl.solution()
+
+    mapdl.outres("ALL", "NONE")
+    for i in range(3):
+        mapdl.osresult("EPPL", "INT", "ALL")
+
+    assert (
+        mapdl.osresult("STATUS").count("EPPLINT") == 1
+    ), "EPPLINT should only be listed once in the status"
+
+
+@pytest.mark.xfail(
+    reason="Bug? PRESOL cannot retrieve osresult data",
+    strict=True,
+)
+def test_osresult_presol(mapdl, solved_box):
+    mapdl.solution()
+
+    mapdl.outres("ALL", "NONE")
+    mapdl.osresult("S", "Y", "ALL")  # Stress Y component
+
+    mapdl.solve()
+    mapdl.post1()
+
+    assert mapdl.presol("SRES", "SY")

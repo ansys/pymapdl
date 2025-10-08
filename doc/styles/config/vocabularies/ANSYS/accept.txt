@@ -1,5 +1,6 @@
 [aA]nsys
 [Bb]ooleans
+[Cc]entroidal
 [Cc]odespace
 [Cc]odespaces
 [Cc]ommand [Pp]rompt
@@ -61,6 +62,7 @@ Dev
 devcontainer
 DevContainer
 Dimitris
+discretisation
 dof
 ect
 eigenfrequency
@@ -93,6 +95,7 @@ imagin
 importlib
 Ioannis
 ist
+Iyy
 Julia
 Kalogeris
 Krylov
@@ -110,10 +113,12 @@ MAPDL
 mater
 MATLAB
 matricies
+Mc
 mesher
 midside
 Mises
 mkdir
+MPa
 MSc
 multipoint
 nce
@@ -131,6 +136,7 @@ performant
 PMLs
 POIN
 Poisson
+post_processing
 postprocessor
 Prasanna
 preprocessor
@@ -150,6 +156,7 @@ Radiosity
 Rao
 righ
 RNNN
+Roark
 sbatch
 singl
 Slurm

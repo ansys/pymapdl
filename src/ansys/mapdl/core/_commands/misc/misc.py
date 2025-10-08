@@ -52,6 +52,5 @@ class Misc:
         >>> mapdl.finish()
         >>> mapdl.verify('VM1')
         '*** VERIFICATION RUN - CASE VM1                              ***  OPTION=  4'
-
         """
         return self.run(f"/VERIFY,{case},{level}", **kwargs)

@@ -388,7 +388,7 @@ mapdl_s_1_df.head()
 
 # mapdl_s_1_df.to_csv(path + '\prin-stresses.csv')
 # mapdl_s_1_df.to_json(path + '\prin-stresses.json')
-mapdl_s_1_df.to_html(path + "\prin-stresses.html")
+mapdl_s_1_df.to_html(path + "\\prin-stresses.html")
 
 ###############################################################################
 # Step 7: Advanced plotting

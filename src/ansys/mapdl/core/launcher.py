@@ -109,9 +109,12 @@ if not os.path.isdir(SETTINGS_DIR):
     try:
         os.makedirs(SETTINGS_DIR)
         LOG.debug(f"Created settings directory: {SETTINGS_DIR}")
-    except:
+    except FileExistsError:
+        # Directory already exists, no action needed
+        pass
+    except PermissionError:
         warnings.warn(
-            "Unable to create settings directory.\n"
+            "Permission denied: Unable to create settings directory.\n"
             "Will be unable to cache MAPDL executable location"
         )
 
@@ -287,7 +290,6 @@ def _is_ubuntu() -> bool:
     It's a bit complicated because sometimes the distribution is
     Ubuntu, but the kernel has been recompiled and no longer has the
     word "ubuntu" in it.
-
     """
 
     # must be running linux for this to be True
@@ -331,7 +333,6 @@ def close_all_local_instances(port_range: range | None = None) -> None:
 
     >>> import ansys.mapdl.core as pymapdl
     >>> pymapdl.close_all_local_instances()
-
     """
     if port_range is None:
         port_range = range(50000, 50200)
@@ -386,7 +387,7 @@ def port_in_use_using_socket(port: int, host: str) -> bool:
         try:
             sock.bind((host, port))
             return False
-        except:
+        except socket.error:
             return True
 
 
@@ -477,7 +478,6 @@ def generate_mapdl_launch_command(
     -------
     list[str]
         Command
-
     """
     cpu_sw = "-np %d" % nproc
 
@@ -864,7 +864,6 @@ def get_start_instance(start_instance: bool | str | None = None) -> bool:
     -----
     If the environment variable ``PYMAPDL_START_INSTANCE`` is set,
     hence the argument ``start_instance`` is overwritten.
-
     """
 
     def valid_start_instance(start_instance: str) -> bool:
@@ -1042,7 +1041,6 @@ def set_MPI_additional_switches(
     -------
     str
         Validated additional switches.
-
     """
     # Converting additional_switches to lower case to avoid mismatches.
     add_sw_lower_case = add_sw.lower()
@@ -1111,7 +1109,6 @@ def force_smp_in_student(add_sw: str | None, exec_path: str) -> str:
     -------
     str
         Validated additional switches.
-
     """
     # Converting additional_switches to lower case to avoid mismatches.
     if add_sw is None:
@@ -1165,7 +1162,18 @@ def launch_mapdl(
     Parameters
     ----------
     exec_file : str, optional
-        The location of the MAPDL executable.
+        The location of the MAPDL executable. For instance, on Windows:
+
+        .. code:: console
+
+            C:\\Program Files\\ANSYS Inc\\v252\\ansys\\bin\\mapdl.exe
+
+        And on Linux:
+
+        .. code:: console
+
+            /usr/ansys_inc/v252/ansys/bin/mapdl
+
         By default (:class:`None`), it Will use the cached location unless
         the environment variable :envvar:`PYMAPDL_MAPDL_EXEC` is set.
 
@@ -1638,9 +1646,12 @@ def launch_mapdl(
 
         get_exec_file(args)
 
-        args["version"] = get_version(
-            args["version"], args.get("exec_file"), launch_on_hpc=args["launch_on_hpc"]
-        )
+        if args.get("exec_file"):
+            args["version"] = get_version(
+                args["version"],
+                args.get("exec_file"),
+                launch_on_hpc=args["launch_on_hpc"],
+            )
 
         args["additional_switches"] = set_license_switch(
             args["license_type"], args["additional_switches"]

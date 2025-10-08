@@ -8,8 +8,8 @@
 
 * [1081](https://github.com/1081)
 * [Alex Fernandez](https://github.com/AlejandroFernandezLuces)
-* [Alex Kaszynski](https://github.com/ansys-akaszyns)
 * [Alex Kaszynski](https://github.com/akaszynski)
+* [Alex Kaszynski](https://github.com/ansys-akaszyns)
 * [beppo-dd](https://github.com/beppo-dd)
 * [Camille](https://github.com/clatapie)
 * [Daniel Correia](https://github.com/DanReia)
@@ -57,4 +57,6 @@
 * [sourcery-ai[bot]](https://github.com/apps/sourcery-ai)
 * [Sébastien Morais](https://github.com/SMoraisAnsys)
 * [Tetsuo Koyama](https://github.com/tkoyama010)
+* [valallansys](https://github.com/valallansys)
 * [Vikas Namdeo](https://github.com/vnamdeo)
+* [Yeguang Xue](https://github.com/yeguang-xue)

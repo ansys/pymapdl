@@ -23,6 +23,7 @@
 from functools import wraps
 import os
 import pathlib
+import re
 import tempfile
 from typing import Union
 import warnings
@@ -31,7 +32,7 @@ import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core.commands import CommandListingOutput
+from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
     ComponentDoesNotExits,
@@ -45,7 +46,6 @@ from ansys.mapdl.core.misc import (
     allow_iterables_vmin,
     allow_pickable_entities,
     check_deprecated_vtk_kwargs,
-    load_file,
     random_string,
     requires_graphics,
     supress_logging,
@@ -72,54 +72,34 @@ class _MapdlCommandExtended(_MapdlCore):
         super().__init__(*args, **kwargs)
         self._graphics_backend = GraphicsBackend.PYVISTA
 
+    @wraps(_MapdlCore.file)
     def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
-        """Specifies the data file where results are to be found.
-
-        APDL Command: FILE
-
-        Parameters
-        ----------
-        fname : str
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext : str, default: "rst"
-            Filename extension (eight-character maximum). If ``fname`` has an
-            extension this is ignored.
-
-        Notes
-        -----
-        Specifies the Ansys data file where the results are to be found for
-        postprocessing.
-
-        Examples
-        --------
-        Load a result file that is outside of the current working directory.
-
-        >>> from ansys.mapdl.core import launch_mapdl
-        >>> mapdl = launch_mapdl()
-        >>> mapdl.post1()
-        >>> mapdl.file('/tmp/file.rst')
-
-        """
-        fname = self._get_file_name(fname, ext, "rst")
+        """Wraps file to upload the file to the MAPDL working directory."""
+        fname = self._get_file_name(fname, ext, "cdb")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
-        file_, ext_, _ = self._decompose_fname(fname)
-        return self._file(file_, ext_, **kwargs)
+        file_, ext_, path_ = self._decompose_fname(fname)
 
-    def _file(self, filename: str = "", extension: str = "", **kwargs) -> str:
-        """Run the MAPDL ``file`` command with a proper filename."""
-        return self.run(f"FILE,{filename},{extension}", **kwargs)
-
-    def set_graphics_backend(self, backend: GraphicsBackend):
-        """Set the graphics backend to use for plotting."""
-        self._graphics_backend = backend
+        if self._local:
+            return super().file(fname=path_ / file_, ext=ext_, **kwargs)
+        else:
+            return super().file(fname=file_, ext=ext_, **kwargs)
 
     @wraps(_MapdlCore.lsread)
     def lsread(self, *args, **kwargs):
-        """Wraps the ``LSREAD`` which does not work in interactive mode."""
+        """Wraps the ``LSREAD`` which does not work in interactive mode.
+
+        Parameters
+        ----------
+        *args : tuple
+            Positional arguments to pass to the LSREAD command.
+        **kwargs : dict
+            Keyword arguments to pass to the LSREAD command.
+
+        Returns
+        -------
+        str
+            Command output from MAPDL.
+        """
         self._log.debug("Forcing 'LSREAD' to run in non-interactive mode.")
         with self.non_interactive:
             super().lsread(*args, **kwargs)
@@ -127,7 +107,20 @@ class _MapdlCommandExtended(_MapdlCore):
 
     @wraps(_MapdlCore.use)
     def use(self, *args, **kwargs):
-        """Wrap the use command."""
+        """Wrap the use command.
+
+        Parameters
+        ----------
+        *args : tuple
+            Positional arguments to pass to the USE command.
+        **kwargs : dict
+            Keyword arguments to pass to the USE command.
+
+        Returns
+        -------
+        str
+            Command output from MAPDL.
+        """
         # Because of `name` can be a macro file or a macro block on a macro library
         # file, we are going to test if the file exists locally first, then remote,
         # and if not, silently assume that it is a macro in a macro library.
@@ -186,7 +179,13 @@ class _MapdlCommandExtended(_MapdlCore):
         order="",
         **kwargs,
     ):
-        """Wraps SET to return a Command listing"""
+        """Wraps SET to return a Command listing
+
+        Returns
+        -------
+        CommandListingOutput or str
+            Command listing output when LIST is specified, otherwise MAPDL command output.
+        """
         output = super().set(
             lstep, sbstep, fact, kimg, time, angle, nset, order, **kwargs
         )
@@ -216,6 +215,11 @@ class _MapdlCommandExtended(_MapdlCore):
         """Wraps superclassed VSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
+
+        Returns
+        -------
+        str
+            Command output from MAPDL.
         """
         sel_func = (
             super().vsel
@@ -233,6 +237,11 @@ class _MapdlCommandExtended(_MapdlCore):
         """Wraps previons NSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
+
+        Returns
+        -------
+        str
+            Command output from MAPDL.
         """
         sel_func = (
             super().nsel
@@ -250,6 +259,11 @@ class _MapdlCommandExtended(_MapdlCore):
         """Wraps previons ESEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
+
+        Returns
+        -------
+        str
+            Command output from MAPDL.
         """
         sel_func = (
             super().esel
@@ -267,6 +281,11 @@ class _MapdlCommandExtended(_MapdlCore):
         """Wraps superclassed KSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
+
+        Returns
+        -------
+        str
+            Command output from MAPDL.
         """
         sel_func = (
             super().ksel
@@ -284,6 +303,11 @@ class _MapdlCommandExtended(_MapdlCore):
         """Wraps superclassed LSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
+
+        Returns
+        -------
+        str
+            Command output from MAPDL.
         """
         sel_func = (
             super().lsel
@@ -301,6 +325,11 @@ class _MapdlCommandExtended(_MapdlCore):
         """Wraps superclassed ASEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
+
+        Returns
+        -------
+        str
+            Command output from MAPDL.
         """
         sel_func = (
             super().asel
@@ -342,7 +371,7 @@ class _MapdlCommandExtended(_MapdlCore):
         self,
         fname="",
         ext="",
-        lib="",
+        lib="LIB",
         mat="",
         download_file=False,
         progress_bar=False,
@@ -356,27 +385,91 @@ class _MapdlCommandExtended(_MapdlCore):
                     f"The supplied path {fname_} is not allowed."
                 )
 
-        output = super().mpwrite(fname, ext, lib, mat, **kwargs)
+        output = super().mpwrite(fname, ext, lib=lib, mat=mat, **kwargs)
         if download_file:
             self.download(os.path.basename(fname_), progress_bar=progress_bar)
 
         return output
 
-    @wraps(_MapdlCore.mpread)
     def mpread(self, fname="", ext="", lib="", **kwargs):
+        """APDL Command: MPREAD
+
+        Reads a file containing material properties.
+
+        Parameters
+        ----------
+        fname
+            File name and directory path (248 characters maximum,
+            including directory). If you do not specify the ``LIB``
+            option, the default directory is the current working
+            directory. If you specify the ``LIB`` option, the default is
+            the following search path: the current working directory,
+            the user's home directory, ``MPLIB_DIR`` (as specified by the
+            ``/MPLIB,READ,PATH`` command) and ``/ansys_dir/matlib`` (as
+            defined by installation). If you use the default for your
+            directory, you can use all 248 characters for the file
+            name.
+
+        ext
+            Filename extension (eight-character maximum).
+
+        lib
+            Reads material library files previously written with the
+            MPWRITE command.  (See the description of the ``LIB`` option
+            for the ``MPWRITE`` command.)  The only allowed value for ``LIB``
+            is ``LIB``.
+
+            .. note:: The argument "LIB" is not supported by the MAPDL gRPC server.
+
+        Notes
+        -----
+        Material properties written to a file without the ``LIB`` option
+        do not support nonlinear properties.  Also, properties written
+        to a file without the ``LIB`` option are restored in the same
+        material number as originally defined.  To avoid errors, use
+        ``MPREAD`` with the ``LIB`` option only when reading files written
+        using MPWRITE with the ``LIB`` option.
+
+        If you omit the ``LIB`` option for ``MPREAD``, this command supports
+        only linear properties.
+
+        Material numbers are hardcoded.  If you write a material file
+        without specifying the ``LIB`` option, then read that file in
+        using the ``MPREAD`` command with the ``LIB`` option, the ANSYS
+        program will not write the file to a new material number.
+        Instead, it will write the file to the "old" material number
+        (the number specified on the MPWRITE command that created the
+        file.)
+
+        This command is also valid in SOLUTION.
+        """
         if lib:
             raise NotImplementedError(
-                "The option 'lib' is not supported by the MAPDL gRPC server."
+                "The 'lib' argument is not supported by the MAPDL gRPC server."
             )
 
-        fname_ = fname + "." + ext
-        fname = load_file(self, fname_)
-        self._log.info("Bypassing 'MPREAD' with 'INPUT'.")
-        return self.input(fname)
+        fname = self._get_file_name(fname, ext, "mp")
+        fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
+        file_, ext_, path_ = self._decompose_fname(fname)
+        with self.non_interactive:
+            # Use not interactive to avoid gRPC issues. See #975
+            if self._local:
+                # If local, we can use the full path
+                super().mpread(fname=path_ / file_, ext=ext_, lib=lib, **kwargs)
+            else:
+                super().mpread(fname=file_, ext=ext_, lib=lib, **kwargs)
+
+        return self.last_response
 
     @wraps(_MapdlCore.cwd)
     def cwd(self, *args, **kwargs):
-        """Wraps cwd."""
+        """Wraps cwd.
+
+        Returns
+        -------
+        str
+            Command output from MAPDL.
+        """
         try:
             output = super().cwd(*args, mute=False, **kwargs)
         except MapdlCommandIgnoredError as e:
@@ -387,19 +480,6 @@ class _MapdlCommandExtended(_MapdlCore):
 
     @wraps(_MapdlCore.list)
     def list(self, filename, ext=""):
-        """Displays the contents of an external, coded file.
-
-        APDL Command: ``/LIST``
-
-        Parameters
-        ----------
-        fname : str
-            File name and directory path. An unspecified directory
-            path defaults to the working directory.
-
-        ext : str, optional
-            Filename extension
-        """
         if hasattr(self, "_local"):  # gRPC
             if not self._local:
                 return self._download_as_raw(filename).decode()
@@ -455,6 +535,11 @@ class _MapdlCommandExtended(_MapdlCore):
             Display keypoint numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
 
+
+        Returns
+        -------
+        object
+            Plot display object when using PyVista graphics backend, None otherwise.
 
         Notes
         -----
@@ -548,6 +633,11 @@ class _MapdlCommandExtended(_MapdlCore):
         Otherwise, line divisions are controlled automatically.
 
         This command is valid in any processor.
+
+        Returns
+        -------
+        object
+            Plot display object when using PyVista graphics backend, None otherwise.
 
         Examples
         --------
@@ -734,6 +824,10 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> pl.add_text('my text')
         >>> pl.show()
 
+        Returns
+        -------
+        object
+            Plot display object when using PyVista graphics backend, None otherwise.
         """
         if graphics_backend is None:
             graphics_backend = self._graphics_backend
@@ -930,12 +1024,16 @@ class _MapdlCommandExtended(_MapdlCore):
             more keyword arguments applicable when visualizing with
             ``graphics_backend=GraphicsBackend.PYVISTA``.
 
+        Returns
+        -------
+        object
+            Plot display object when using PyVista graphics backend, None otherwise.
+
         Examples
         --------
         Plot while displaying area numbers.
 
         >>> mapdl.vplot(show_area_numbering=True)
-
         """
         if graphics_backend is None:
             graphics_backend = self._graphics_backend
@@ -1113,6 +1211,10 @@ class _MapdlCommandExtended(_MapdlCore):
         ...     bc_labels="mechanical",
         ... )
 
+        Returns
+        -------
+        object
+            Plot display object when using PyVista graphics backend, None otherwise.
         """
         if graphics_backend is None:
             graphics_backend = self._graphics_backend
@@ -1254,6 +1356,10 @@ class _MapdlCommandExtended(_MapdlCore):
                         window_size=[1920, 1080], savefig='screenshot.png',
                         off_screen=True)
 
+        Returns
+        -------
+        object
+            Plot display object when using PyVista graphics backend, None otherwise.
         """
         if graphics_backend is None:
             graphics_backend = self._graphics_backend
@@ -1298,37 +1404,13 @@ class _MapdlCommandExtended(_MapdlCore):
             with self._enable_interactive_plotting():
                 return self.run("EPLOT", **kwargs)
 
-    def clear(self, *args, **kwargs):
-        """Clear the database.
-
-        APDL Command: ``/CLEAR``
-
-        Resets the ANSYS database to the conditions at the beginning
-        of the problem.  Sets the import and Boolean options back to
-        the ANSYS default. All items are deleted from the database and
-        memory values are set to zero for items derived from database
-        information.  All files are left intact.  This command is
-        useful between multiple analyses in the same run, or between
-        passes of a multi-pass analysis (such as between the
-        substructure generation, use, and expansion passes).  Should
-        not be used in a do-loop since loop counters will be reset.
-        on the same line as the ``/CLEAR`` command.
-
-        ``/CLEAR`` resets the jobname to match the currently open
-        session .LOG and .ERR files. This will return the jobname to
-        its original value, or to the most recent value specified on
-        ``/FILNAME`` with KEY = 1.
-
-        This command is valid only at the Begin level.
-
-        Examples
-        --------
-        >>> mapdl.clear()
-
-        """
+    @wraps(_MapdlCore.clear)
+    def clear(self, read: str = "NOSTART", **kwargs):
+        """Wraps the MAPDL ``CLEAR`` command to use `NOSTART` with mute=True"""
         if self.is_grpc:
             self._create_session()
-        self.run("/CLE,NOSTART", mute=True)
+        kwargs.setdefault("mute", True)
+        super().clear(read=read, **kwargs)
 
     @wraps(_MapdlCore.cmplot)
     def cmplot(self, label: str = "", entity: str = "", keyword: str = "", **kwargs):
@@ -1396,7 +1478,13 @@ class _MapdlCommandExtended(_MapdlCore):
 
     @wraps(_MapdlCore.inquire)
     def inquire(self, strarray="", func="", arg1="", arg2="", **kwargs):
-        """Wraps original INQUIRE function"""
+        """Wraps original INQUIRE function
+
+        Returns
+        -------
+        float or bool or str
+            The inquired value. Type depends on the inquiry function used.
+        """
         func_options = [
             "LOGIN",
             "DOCU",
@@ -2135,11 +2223,13 @@ class _MapdlCommandExtended(_MapdlCore):
         self._check_parameter_name(par)
 
         command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3},{it3num},{item4},{it4num}"
-        kwargs["mute"] = False
 
-        # Checking printout is not suppressed by checking "wrinqr" flag.
-        with self.force_output:
-            response = self.run(command, **kwargs)
+        response = self.run(command, **kwargs)
+
+        if not response:
+            # If no response is received, re-run the command with force_output to ensure output is captured.
+            with self.force_output:
+                response = self.run(command, **kwargs)
 
         if self._store_commands:
             # Return early in non_interactive
@@ -2166,127 +2256,253 @@ class _MapdlCommandExtended(_MapdlCore):
 
     @wraps(_MapdlCore.ndinqr)
     def ndinqr(self, node, key, **kwargs):
-        """Wrap the ``ndinqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``ndinqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().ndinqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.elmiqr)
     def elmiqr(self, ielem, key, **kwargs):
-        """Wrap the ``elmiqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``elmiqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().elmiqr(ielem, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.kpinqr)
     def kpinqr(self, knmi, key, **kwargs):
-        """Wrap the ``kpinqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``kpinqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().kpinqr(knmi, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.lsinqr)
     def lsinqr(self, line, key, **kwargs):
-        """Wrap the ``lsinqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``lsinqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().lsinqr(line, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.arinqr)
     def arinqr(self, anmi, key, **kwargs):
-        """Wrap the ``arinqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``arinqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().arinqr(anmi, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.vlinqr)
     def vlinqr(self, vnmi, key, **kwargs):
-        """Wrap the ``vlinqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``vlinqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().vlinqr(vnmi, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.rlinqr)
     def rlinqr(self, nreal, key, **kwargs):
-        """Wrap the ``rlinqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``rlinqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().rlinqr(nreal, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.gapiqr)
     def gapiqr(self, ngap, key, **kwargs):
-        """Wrap the ``gapiqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``gapiqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().gapiqr(ngap, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.masiqr)
     def masiqr(self, node, key, **kwargs):
-        """Wrap the ``masiqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``masiqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().masiqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.ceinqr)
     def ceinqr(self, nce, key, **kwargs):
-        """Wrap the ``ceinqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``ceinqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().ceinqr(nce, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.cpinqr)
     def cpinqr(self, ncp, key, **kwargs):
-        """Wrap the ``cpinqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``cpinqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().cpinqr(ncp, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.csyiqr)
     def csyiqr(self, ncsy, key, **kwargs):
-        """Wrap the ``csyiqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``csyiqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().csyiqr(ncsy, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.etyiqr)
     def etyiqr(self, itype, key, **kwargs):
-        """Wrap the ``etyiqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``etyiqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().etyiqr(itype, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.foriqr)
     def foriqr(self, node, key, **kwargs):
-        """Wrap the ``foriqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``foriqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().foriqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.sectinqr)
     def sectinqr(self, nsect, key, **kwargs):
-        """Wrap the ``sectinqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``sectinqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().sectinqr(nsect, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.mpinqr)
     def mpinqr(self, mat, iprop, key, **kwargs):
-        """Wrap the ``mpinqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``mpinqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().mpinqr(mat, iprop, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.dget)
     def dget(self, node, idf, kcmplx, **kwargs):
-        """Wrap the ``dget`` method to take advantage of the gRPC methods."""
+        """Wrap the ``dget`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().dget(node, idf, kcmplx, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.fget)
     def fget(self, node, idf, kcmplx, **kwargs):
-        """Wrap the ``fget`` method to take advantage of the gRPC methods."""
+        """Wrap the ``fget`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().fget(node, idf, kcmplx, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.erinqr)
     def erinqr(self, key, **kwargs):
-        """Wrap the ``erinqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``erinqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().erinqr(key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.wrinqr)
     def wrinqr(self, key, **kwargs):
-        """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
+        """Wrap the ``wrinqr`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        float
+            Scalar parameter value.
+        """
         super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.catiain)
     def catiain(self, name="", extension="", path="", blank="", **kwargs):
-        """Wrap the ``catiain`` method to take advantage of the gRPC methods."""
+        """Wrap the ``catiain`` method to take advantage of the gRPC methods.
+
+        Returns
+        -------
+        str
+            Command output from MAPDL.
+        """
         if self.platform == "windows":
             raise OSError(
                 "The command 'catiain' is not supported on Windows. Use the 'mapdl.cat5in' method instead to import Catia v5 files."
@@ -2312,6 +2528,19 @@ class _MapdlCommandExtended(_MapdlCore):
             raise OSError(
                 "The command 'cat5in' is not supported on Linux. Use the 'mapdl.catiain' method instead to import Catia v4 files."
             )
+
+        fname = name
+        if path:
+            fname = os.path.join(path, name)
+        fname = self._get_file_name(fname, extension, "CATPart")
+        fname = self._get_file_path(fname, False)
+        name, extension, path = self._decompose_fname(fname)
+
+        path = "" if path == path.parent else str(path)
+
+        # wrapping path in single quotes because of #2286
+        path = f"'{path}'"
+        self.finish()
         return super().cat5in(
             name=name,
             extension=extension,
@@ -2323,9 +2552,129 @@ class _MapdlCommandExtended(_MapdlCore):
             **kwargs,
         )
 
+    @wraps(_MapdlCore.igesin)
+    def igesin(self, fname, ext="", **kwargs):
+        """Wrap the IGESIN command to handle the remote case."""
+
+        fname = self._get_file_name(fname=fname, ext=ext)
+        filename = self._get_file_path(fname, progress_bar=False)
+
+        # Entering aux15 preprocessor
+        self.aux15()
+
+        if " " not in fname:
+            return super().igesin(fname=filename, **kwargs)
+
+        # Bug in reading file paths with whitespaces.
+        # https://github.com/ansys/pymapdl/issues/1601
+
+        msg_ = f"Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
+        self.input_strings("\n".join([f"! {each}" for each in msg_.splitlines()]))
+        self._log.debug(msg_)
+
+        cmd = f"*dim,__iges_file__,string,248\n*set,__iges_file__(1), '{filename}'"
+        self.input_strings(cmd)
+
+        out = super().igesin(fname="__iges_file__(1)", **kwargs)
+        self.run("__iges_file__ =")  # cleaning array.
+        self.run("! Ending \\IGESIN whitespace patch.")
+        return out
+
+    @wraps(_MapdlCore.satin)
+    def satin(
+        self,
+        name,
+        extension="",
+        path="",
+        entity="",
+        fmt="",
+        nocl="",
+        noan="",
+        **kwargs,
+    ):
+        """Wraps ~SATIN command"""
+        fname = name
+        if path:
+            fname = os.path.join(path, name)
+        fname = self._get_file_name(fname, extension, "sat")
+        fname = self._get_file_path(fname, False)
+        name, extension, path = self._decompose_fname(fname)
+
+        path = "" if path == path.parent else str(path)
+
+        # wrapping path in single quotes because of #2286
+        path = f"'{path}'"
+        return super().satin(
+            name=name,
+            extension=extension,
+            path=path,
+            entity=entity,
+            fmt=fmt,
+            nocl=nocl,
+            noan=noan,
+            **kwargs,
+        )
+
+    @wraps(_MapdlCore.parain)
+    def parain(
+        self,
+        name,
+        extension="",
+        path="",
+        entity="",
+        fmt="",
+        scale="",
+        **kwargs,
+    ):
+        """Wraps ~parain command"""
+        fname = name
+        if path:
+            fname = os.path.join(path, name)
+        fname = self._get_file_name(fname, extension, "x_t")
+        fname = self._get_file_path(fname, False)
+        name, extension, path = self._decompose_fname(fname)
+
+        path = "" if path == path.parent else str(path)
+
+        # wrapping path in single quotes because of #2286
+        path = f"'{path}'"
+        return super().parain(
+            name=name,
+            extension=extension,
+            path=path,
+            entity=entity,
+            fmt=fmt,
+            scale=scale,
+            **kwargs,
+        )
+
+    @wraps(_MapdlCore.osresult)
+    def osresult(self, item="", comp="", freq="", cname="", **kwargs) -> CommandOutput:
+        result = super().osresult(item, comp, freq, cname, **kwargs)
+        if item.upper().strip() == "STATUS":
+            from ansys.mapdl.core.misc import expand_all_inner_lists
+
+            columns_names = ["ITEM", "FREQUENCY", "COMPONENT"]
+            result = CommandListingOutput(result)
+            table = re.search(
+                r"ITEM\s+FREQUENCY\s+COMPONENT(.*)", result, flags=re.DOTALL
+            ).group(1)
+            table = [each.split() for each in table.splitlines() if each.strip()]
+            table = expand_all_inner_lists(
+                table, target_length=len(columns_names), fill_value=""
+            )
+
+            result._columns_names = columns_names
+            result._cache = np.array(table)
+        return result
+
 
 class _MapdlExtended(_MapdlCommandExtended):
     """Extend Mapdl class with new functions"""
+
+    def set_graphics_backend(self, backend: GraphicsBackend):
+        """Set the graphics backend to use for plotting."""
+        self._graphics_backend = backend
 
     def load_table(
         self, name, array, var1="", var2="", var3="", csysid="", col_header=False
@@ -2523,10 +2872,10 @@ class _MapdlExtended(_MapdlCommandExtended):
         self._log.info(f"Generating file for table in {filename}")
         np.savetxt(
             filename,
-            array,
+            array.ravel(),
             delimiter="",
             header="File generated by PyMAPDL:load_array",
-            fmt="%24.18e",
+            fmt="%+24.18e",  # adding sign.
         )
 
         if not self._local:
@@ -2539,7 +2888,7 @@ class _MapdlExtended(_MapdlCommandExtended):
             n2 = imax
             n3 = kmax
             self.vread(name, filename, n1=n1, n2=n2, n3=n3, label=label, nskip=1)
-            fmt = f"({jmax}E24.18)"
+            fmt = f"(1E25.18)"  # Adding one extra space for the sign
             logger.info("Using *VREAD with format %s in %s", fmt, filename)
             self.run(fmt)
 
@@ -2606,6 +2955,11 @@ class _MapdlExtended(_MapdlCommandExtended):
         Please reference your Ansys help manual ``*VGET`` command tables
         for all the available ``*VGET`` values.
 
+        Returns
+        -------
+        numpy.ndarray
+            Array from MAPDL.
+
         Examples
         --------
         List the current selected node numbers
@@ -2623,7 +2977,6 @@ class _MapdlExtended(_MapdlCommandExtended):
         array([ 0.01605306, -0.01605306,  0.00178402, -0.01605306,
                ...
                -0.00178402, -0.01234851,  0.01234851, -0.01234851])
-
         """
         if self._store_commands:
             raise MapdlRuntimeError(
@@ -2919,7 +3272,6 @@ class _MapdlExtended(_MapdlCommandExtended):
         Modal analysis using default parameters for the first 6 modes
 
         >>> mapdl.modal_analysis(nmode=6)
-
         """
         if nrmkey:
             if nrmkey.upper() != "OFF":
