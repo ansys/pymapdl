@@ -51,7 +51,7 @@ version = "0.70.dev0"
 jupyter = ["ipywidgets", "jupyterlab>=3"]
 
 graphics = [
-  "ansys-tools-visualization-interface>=0.9.0,<0.12.0",
+  "ansys-tools-visualization-interface>=0.9.0,<0.13.0",
   "matplotlib>=3.0.0",                                  # for colormaps for pyvista
 ]
 
