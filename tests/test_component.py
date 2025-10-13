@@ -392,3 +392,19 @@ class Test_components(TestClass):
         mapdl.nsel("s", vmin=1)
         mapdl.cm("asdf", "node")
         assert len(mapdl.components) == 4
+
+
+def test_big_component(mapdl, cleared):
+    mapdl.prep7()
+
+    for i in range(1000):
+        mapdl.n(i, i, 0, 0)
+
+    mapdl.allsel()
+    mapdl.cm(f"many_nodes", "NODE")
+
+    print(mapdl.mesh)  # This will trigger COMP parsing
+
+    assert "MANY_NODES" in str(mapdl.components)
+    assert len(mapdl.components["many_nodes"]) == 999
+    assert all(isinstance(item, int) for item in mapdl.components["many_nodes"])
