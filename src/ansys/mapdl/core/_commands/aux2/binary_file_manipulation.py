@@ -280,10 +280,10 @@ class BinaryFileManipulation:
         .. _PSMAT_notes:
 
         This command is used to copy a matrix from the assembled global matrix file ( :file:`.FULL` file) as
-        specified on the ``FILE`` command and write it in a postscript format to a new file named ``Fname``.
-        ``Ext`` (defaults to :file:`Jobname.PS` ). The matrix is symbolized by a grid in which the black or
-        colored squares represent the nonzero coefficients of the matrix. The :file:`.FULL` file must be
-        available for this command to work properly.
+        specified on the :ref:`file` command and write it in a postscript format to a new file named
+        ``Fname``. ``Ext`` (defaults to :file:`Jobname.PS` ). The matrix is symbolized by a grid in which
+        the black or colored squares represent the nonzero coefficients of the matrix. The :file:`.FULL`
+        file must be available for this command to work properly.
 
         If the matrix is large, it may be difficult to display the postscript file. In this case, use
         ``Color`` = BLACK to reduce the postscript file size.

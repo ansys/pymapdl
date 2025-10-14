@@ -595,9 +595,11 @@ class Test_bc_cmdlist_model(TestClass):
 
 
 class Test_MAPDL_commands(TestClass):
-    SKIP = [
+    # The following commands are skipped because they are wrapped in a subclass
+    SKIP: list[str] = [
         "aplot",
         "cfopen",
+        "clear",
         "cmatrix",
         "create",
         "end",
@@ -608,6 +610,8 @@ class Test_MAPDL_commands(TestClass):
         "lgwrite",
         "lplot",
         "lsread",
+        "mpread",
+        "mpwrite",
         "mwrite",
         "nplot",
         "sys",
@@ -615,8 +619,8 @@ class Test_MAPDL_commands(TestClass):
         "vwrite",
     ]
 
-    RAISE_WARNINGS = ["eshape"]
-    RAISE_EXCEPTIONS = []
+    RAISE_WARNINGS: list[str] = ["eshape"]
+    RAISE_EXCEPTIONS: list[str] = []
 
     @staticmethod
     def fake_wrap(*args, **kwags):

@@ -1241,46 +1241,56 @@ class Test_contact_solve(TestClass):
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_incomplete_element_selection(mapdl, resume):
-        mapdl.esel("S", "ELEM", "", 1, mapdl.mesh.n_elem // 2)
+    @pytest.mark.parametrize(
+        "vmin,vmax,vinc",
+        [
+            [0, 1, 1],
+            [0.2, 0.3, 1],
+            [0, 1, 2],
+            [0.2, 0.5, 5],
+        ],
+    )
+    def test_plot_incomplete_element_selection(mapdl, resume, vmin, vmax, vinc):
+        n_elem = mapdl.mesh.n_elem
+        mapdl.esel(
+            "S",
+            "ELEM",
+            "",
+            vmin=int(n_elem * vmin) + 1,
+            vmax=int(n_elem * vmax),
+            vinc=vinc,
+        )
         assert mapdl.post_processing.plot_element_displacement() is None
 
-        mapdl.nsel("S", "NODE", "", 1, mapdl.mesh.n_elem // 2, 2)
-        assert mapdl.post_processing.plot_element_displacement() is None
-
-        mapdl.nsel("S", "NODE", "", 5, mapdl.mesh.n_elem // 2, 2)
-        assert mapdl.post_processing.plot_element_displacement() is None
-
-        mapdl.vsel("s", "", "", 1)
-        mapdl.eslv("s")
-        assert mapdl.post_processing.plot_element_displacement() is None
-
-        mapdl.vsel("s", "", "", 2)
+    @staticmethod
+    @requires("ansys-tools-visualization_interface")
+    @pytest.mark.parametrize("vol", [1, 2])
+    def test_plot_volume_selection(mapdl, resume, vol):
+        mapdl.vsel("s", "", "", vol)
         mapdl.eslv("s")
         assert mapdl.post_processing.plot_element_displacement() is None
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_incomplete_nodal_selection(mapdl, resume, verify_image_cache):
-        verify_image_cache.skip = True
-
-        mapdl.nsel("S", "NODE", "", 1, mapdl.mesh.n_node // 2)
-        assert mapdl.post_processing.plot_nodal_displacement() is None
-
-        mapdl.nsel("S", "NODE", "", 1, mapdl.mesh.n_node // 2, 2)
-        assert mapdl.post_processing.plot_nodal_displacement() is None
-
-        mapdl.nsel("S", "NODE", "", 5, mapdl.mesh.n_node // 2, 2)
-        assert mapdl.post_processing.plot_nodal_displacement() is None
-
-        mapdl.vsel("s", "", "", 1)
-        mapdl.eslv("S")
-        mapdl.nsle("S")
-        assert mapdl.post_processing.plot_nodal_displacement() is None
-
-        mapdl.vsel("s", "", "", 2)
-        mapdl.eslv("S")
-        mapdl.nsle("S")
+    @pytest.mark.parametrize(
+        "vmin,vmax,vinc",
+        [
+            [0, 1, 1],
+            [0.2, 0.3, 1],
+            [0, 1, 2],
+            [0.2, 0.5, 5],
+        ],
+    )
+    def test_plot_incomplete_node_selection(mapdl, resume, vmin, vmax, vinc):
+        n_node = mapdl.mesh.n_node
+        mapdl.nsel(
+            "S",
+            "NODE",
+            "",
+            vmin=int(n_node * vmin) + 1,
+            vmax=int(n_node * vmax),
+            vinc=vinc,
+        )
         assert mapdl.post_processing.plot_nodal_displacement() is None
 
     @staticmethod

@@ -172,7 +172,7 @@ class RunControls:
         .. _s-CWD_notes:
 
         After issuing the /CWD command, all new files opened with no default directory specified (via the
-        ``FILE``, :ref:`copy`, or :ref:`resume` commands, for example) default to the new ``DIRPATH``
+        :ref:`file`, :ref:`copy`, or :ref:`resume` commands, for example) default to the new ``DIRPATH``
         directory.
 
         Examples

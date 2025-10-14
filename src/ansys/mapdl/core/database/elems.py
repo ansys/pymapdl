@@ -19,12 +19,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """
 Contains the element implement of the MAPDL database service.
 
 This allows lower level the access to the elements in the MAPDL database.
-
 """
 import weakref
 
@@ -66,7 +64,6 @@ class DbElems:
 
     >>> elem_info.elmdat
     [1, 1, 1, 1, 0, 0, 14, 0, 0, 0]
-
     """
 
     def __init__(self, db):
@@ -77,12 +74,18 @@ class DbElems:
         self._itelm = -1
 
     @property
-    def _db(self):
+    def _db(self):  # numpydoc ignore=RT01
         """Return the weakly referenced instance of the database."""
         return self._db_weakref()
 
     def __str__(self):
-        """Return the string representation of this class."""
+        """Return the string representation of this class.
+
+        Returns
+        -------
+        str
+            String representation of the class
+        """
         lines = ["MAPDL Database Elements"]
         lines.append(f"    Number of elements:          {self.num()}")
         lines.append(f"    Number of selected elements: {self.num(selected=True)}")
@@ -121,7 +124,6 @@ class DbElems:
 
         >>> elems.first(ielm=10)
         11
-
         """
         self._itelm = ielm
         return self.next()
@@ -150,7 +152,6 @@ class DbElems:
 
         >>> elems.next()
         2
-
         """
         if self._itelm == -1:
             raise MapdlRuntimeError(
@@ -294,7 +295,6 @@ class DbElems:
         >>> elems = mapdl.db.elems
         >>> elems.num(selected=True)
         425
-
         """
         if selected:
             return self.info(0, DBDef.DB_NUMSELECTED)
@@ -305,6 +305,11 @@ class DbElems:
         """
         Maximum element number.
 
+        Returns
+        -------
+        int
+            The maximum element number.
+
         Examples
         --------
         Return the maximum element number.
@@ -312,7 +317,6 @@ class DbElems:
         >>> elems = mapdl.db.elems
         >>> elems.max_num
         64
-
         """
         return self.info(0, DBDef.DB_MAXDEFINED.value)
 
@@ -363,7 +367,6 @@ class DbElems:
 
         >>> elem_info.elmdat
         [1, 1, 1, 1, 0, 0, 14, 0, 0, 0]
-
         """
         request = mapdl_db_pb2.getelmRequest(ielem=ielm)
         return self._db._stub.getElm(request)
@@ -383,7 +386,6 @@ class DbElems:
         ...     [1, 1, 1, 1, 0, 0, 1, 0, 0, 0],
         ...     [1, 2, 3, 4, 5, 6, 7, 8],
         ... )
-
         """
         if len(elmdat) != 10:
             raise ValueError("`elmdat` must be length 10")

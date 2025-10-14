@@ -50,7 +50,6 @@ directory, or the lock file has not been deleted from an abnormally
 terminated ANSYS run.
 
 Disable this check by passing ``override=True``
-
 """
 
 
@@ -403,7 +402,6 @@ def protect_grpc(func: Callable) -> Callable:
 
     This works some of the time, but not all the time.  For some
     reason gRPC still captures SIGINT.
-
     """
 
     @wraps(func)

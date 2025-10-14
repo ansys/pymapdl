@@ -218,7 +218,6 @@ if has_dependency("pyvista"):
 
     # Necessary for CI plotting
     pyvista.OFF_SCREEN = True
-    pyvista.global_theme.allow_empty_mesh = True
 
     from ansys.mapdl.core.plotting.theme import _apply_default_theme
 
@@ -1329,3 +1328,10 @@ def query(mapdl, cleared):
 @pytest.fixture
 def common_functions_and_classes():
     return get_details_of_nodes, get_details_of_elements, Node, Element
+
+
+@pytest.fixture(scope="function")
+def psd_analysis(mapdl, cleared):
+    from ansys.mapdl.core.examples import vmfiles
+
+    mapdl.input(vmfiles["vm203"])
