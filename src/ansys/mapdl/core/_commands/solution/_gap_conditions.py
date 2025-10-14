@@ -119,8 +119,8 @@ class GapConditions:
 
         The order of specifying the gap nodes is important; that is, a gap condition connecting two nodes
         will act differently depending upon which node is specified first on the :ref:`gp` command. For
-        example, for Node 1 at  ``X`` = 0.0, Node 2 at _nolinebreak ? ``X`` =
-        0.1 /_nolinebreak ?, and the gap defined from Node 1 to 2, a displacement of Node 1 greater than
+        example, for Node 1 at  ``X`` = 0.0, Node 2 at  ``X`` =
+        0.1, and the gap defined from Node 1 to 2, a displacement of Node 1 greater than
         Node 2 will cause the gap to close. For the gap defined from Node 2 to 1, a displacement of Node 2
         greater than Node 1 will cause the gap to close (like a hook action). In general, the gap closes
         whenever the separation (defined as  U:sub:`J` - U:sub:`I` + ``GAP`` )
