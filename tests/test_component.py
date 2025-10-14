@@ -401,7 +401,7 @@ def test_big_component(mapdl, cleared):
         mapdl.n(i, i, 0, 0)
 
     mapdl.allsel()
-    mapdl.cm(f"many_nodes", "NODE")
+    mapdl.cm("many_nodes", "NODE")
 
     print(mapdl.mesh)  # This will trigger COMP parsing
 
