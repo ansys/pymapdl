@@ -83,8 +83,7 @@ if VALID_PORTS:
 else:
     PORT1 = 50090
 
-DEPRECATED_COMMANDS = [
-]
+DEPRECATED_COMMANDS = []
 
 CMD_BLOCK = """/prep7
 ! Mat
