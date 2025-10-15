@@ -84,7 +84,6 @@ else:
     PORT1 = 50090
 
 DEPRECATED_COMMANDS = [
-    "rexport",
 ]
 
 CMD_BLOCK = """/prep7
