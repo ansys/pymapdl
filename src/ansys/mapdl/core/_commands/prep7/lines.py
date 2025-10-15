@@ -25,9 +25,22 @@ from ansys.mapdl.core._commands import parse
 
 class Lines:
 
-
-
-    def bsplin(self, p1: str = "", p2: str = "", p3: str = "", p4: str = "", p5: str = "", p6: str = "", xv1: str = "", yv1: str = "", zv1: str = "", xv6: str = "", yv6: str = "", zv6: str = "", **kwargs):
+    def bsplin(
+        self,
+        p1: str = "",
+        p2: str = "",
+        p3: str = "",
+        p4: str = "",
+        p5: str = "",
+        p6: str = "",
+        xv1: str = "",
+        yv1: str = "",
+        zv1: str = "",
+        xv6: str = "",
+        yv6: str = "",
+        zv6: str = "",
+        **kwargs,
+    ):
         r"""Generates a single line from a spline fit to a series of keypoints.
 
         Mechanical APDL Command: `BSPLIN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BSPLIN.html>`_
@@ -144,12 +157,21 @@ class Lines:
         >>> k2 = mapdl.k("", 1, 2, 0)
         >>> lnum = mapdl.bsplin(k0, k1, k2)
         """
-        command = f'BSPLIN,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}'
+        command = (
+            f"BSPLIN,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}"
+        )
         return parse.parse_line_no(self.run(command, **kwargs))
 
-
-
-    def circle(self, pcent: str = "", rad: str = "", paxis: str = "", pzero: str = "", arc: str = "", nseg: str = "", **kwargs):
+    def circle(
+        self,
+        pcent: str = "",
+        rad: str = "",
+        paxis: str = "",
+        pzero: str = "",
+        arc: str = "",
+        nseg: str = "",
+        **kwargs,
+    ):
         r"""Generates circular arc lines.
 
         Mechanical APDL Command: `CIRCLE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CIRCLE.html>`_
@@ -213,12 +235,23 @@ class Lines:
         >>> carc0
         [1, 2, 3, 4]
         """
-        command = f'CIRCLE,{pcent},{rad},{paxis},{pzero},{arc},{nseg}'
+        command = f"CIRCLE,{pcent},{rad},{paxis},{pzero},{arc},{nseg}"
         return parse.parse_line_nos(self.run(command, **kwargs))
 
-
-
-    def l(self, p1: str = "", p2: str = "", ndiv: str = "", space: str = "", xv1: str = "", yv1: str = "", zv1: str = "", xv2: str = "", yv2: str = "", zv2: str = "", **kwargs):
+    def l(
+        self,
+        p1: str = "",
+        p2: str = "",
+        ndiv: str = "",
+        space: str = "",
+        xv1: str = "",
+        yv1: str = "",
+        zv1: str = "",
+        xv2: str = "",
+        yv2: str = "",
+        zv2: str = "",
+        **kwargs,
+    ):
         r"""Defines a line between two keypoints.
 
         Mechanical APDL Command: `L <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_L.html>`_
@@ -303,12 +336,19 @@ class Lines:
         >>> lnum
         1
         """
-        command = f'L,{p1},{p2},{ndiv},{space},{xv1},{yv1},{zv1},{xv2},{yv2},{zv2}'
+        command = f"L,{p1},{p2},{ndiv},{space},{xv1},{yv1},{zv1},{xv2},{yv2},{zv2}"
         return parse.parse_line_no(self.run(command, **kwargs))
 
-
-
-    def l2ang(self, nl1: str = "", nl2: str = "", ang1: str = "", ang2: str = "", phit1: str = "", phit2: str = "", **kwargs):
+    def l2ang(
+        self,
+        nl1: str = "",
+        nl2: str = "",
+        ang1: str = "",
+        ang2: str = "",
+        phit1: str = "",
+        phit2: str = "",
+        **kwargs,
+    ):
         r"""Generates a line at an angle with two existing lines.
 
         Mechanical APDL Command: `L2ANG <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_L2ANG.html>`_
@@ -370,12 +410,10 @@ class Lines:
         >>> lnum
         9
         """
-        command = f'L2ANG,{nl1},{nl2},{ang1},{ang2},{phit1},{phit2}'
+        command = f"L2ANG,{nl1},{nl2},{ang1},{ang2},{phit1},{phit2}"
         msg = self.run(command, **kwargs)
         if msg:
             return parse.parse_line_no(msg)
-
-
 
     def l2tan(self, nl1: str = "", nl2: str = "", **kwargs):
         r"""Generates a line tangent to two lines.
@@ -423,12 +461,18 @@ class Lines:
 
         >>> mapdl.lplot(cpos='xy')
         """
-        command = f'L2TAN,{nl1},{nl2}'
+        command = f"L2TAN,{nl1},{nl2}"
         return parse.parse_line_no(self.run(command, **kwargs))
 
-
-
-    def lang(self, nl1: str = "", p3: str = "", ang: str = "", phit: str = "", locat: str = "", **kwargs):
+    def lang(
+        self,
+        nl1: str = "",
+        p3: str = "",
+        ang: str = "",
+        phit: str = "",
+        locat: str = "",
+        **kwargs,
+    ):
         r"""Generates a straight line at an angle with a line.
 
         Mechanical APDL Command: `LANG <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LANG.html>`_
@@ -493,10 +537,8 @@ class Lines:
         >>> lnum
         2
         """
-        command = f'LANG,{nl1},{p3},{ang},{phit},{locat}'
+        command = f"LANG,{nl1},{p3},{ang},{phit},{locat}"
         return parse.parse_line_no(self.run(command, **kwargs))
-
-
 
     def larc(self, p1: str = "", p2: str = "", pc: str = "", rad: str = "", **kwargs):
         r"""Defines a circular arc.
@@ -550,10 +592,8 @@ class Lines:
         >>> lnum = mapdl.larc(k0, k1, k2, 2)
         1
         """
-        command = f'LARC,{p1},{p2},{pc},{rad}'
+        command = f"LARC,{p1},{p2},{pc},{rad}"
         return parse.parse_line_no(self.run(command, **kwargs))
-
-
 
     def larea(self, p1: str = "", p2: str = "", narea: str = "", **kwargs):
         r"""Generates the shortest line between two keypoints on an area.
@@ -600,10 +640,8 @@ class Lines:
         >>> lnum
         1
         """
-        command = f'LAREA,{p1},{p2},{narea}'
+        command = f"LAREA,{p1},{p2},{narea}"
         return parse.parse_line_no(self.run(command, **kwargs))
-
-
 
     def lcomb(self, nl1: str = "", nl2: str = "", keep: str = "", **kwargs):
         r"""Combines adjacent lines into one line.
@@ -659,10 +697,17 @@ class Lines:
         >>> lout
         1
         """
-        command = f'LCOMB,{nl1},{nl2},{keep}'
+        command = f"LCOMB,{nl1},{nl2},{keep}"
         return parse.parse_line_no(self.run(command, **kwargs))
 
-    def ldele(self, nl1: str = "", nl2: str = "", ninc: str = "", kswp: int | str = "", **kwargs):
+    def ldele(
+        self,
+        nl1: str = "",
+        nl2: str = "",
+        ninc: str = "",
+        kswp: int | str = "",
+        **kwargs,
+    ):
         r"""Deletes unmeshed lines.
 
         Mechanical APDL Command: `LDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LDELE.html>`_
@@ -707,9 +752,15 @@ class Lines:
         command = f"LDELE,{nl1},{nl2},{ninc},{kswp}"
         return self.run(command, **kwargs)
 
-
-
-    def ldiv(self, nl1: str = "", ratio: str = "", pdiv: str = "", ndiv: str = "", keep: int | str = "", **kwargs):
+    def ldiv(
+        self,
+        nl1: str = "",
+        ratio: str = "",
+        pdiv: str = "",
+        ndiv: str = "",
+        keep: int | str = "",
+        **kwargs,
+    ):
         r"""Divides a single line into two or more lines.
 
         Mechanical APDL Command: `LDIV <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LDIV.html>`_
@@ -757,9 +808,22 @@ class Lines:
         command = f"LDIV,{nl1},{ratio},{pdiv},{ndiv},{keep}"
         return self.run(command, **kwargs)
 
-
-
-    def ldrag(self, nk1: str = "", nk2: str = "", nk3: str = "", nk4: str = "", nk5: str = "", nk6: str = "", nl1: str = "", nl2: str = "", nl3: str = "", nl4: str = "", nl5: str = "", nl6: str = "", **kwargs):
+    def ldrag(
+        self,
+        nk1: str = "",
+        nk2: str = "",
+        nk3: str = "",
+        nk4: str = "",
+        nk5: str = "",
+        nk6: str = "",
+        nl1: str = "",
+        nl2: str = "",
+        nl3: str = "",
+        nl4: str = "",
+        nl5: str = "",
+        nl6: str = "",
+        **kwargs,
+    ):
         r"""Generates lines by sweeping a keypoint pattern along path.
 
         Mechanical APDL Command: `LDRAG <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LDRAG.html>`_
@@ -848,11 +912,9 @@ class Lines:
         command = f"LDRAG,{nk1},{nk2},{nk3},{nk4},{nk5},{nk6},{nl1},{nl2},{nl3},{nl4},{nl5},{nl6}"
         return self.run(command, **kwargs)
 
-
-
-
-
-    def lextnd(self, nl1: str = "", nk1: str = "", dist: str = "", keep: str = "", **kwargs):
+    def lextnd(
+        self, nl1: str = "", nk1: str = "", dist: str = "", keep: str = "", **kwargs
+    ):
         r"""Extends a line at one end by using its slope.
 
         Mechanical APDL Command: `LEXTND <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LEXTND.html>`_
@@ -901,12 +963,12 @@ class Lines:
         >>> lnum
         1
         """
-        command = f'LEXTND,{nl1},{nk1},{dist},{keep}'
+        command = f"LEXTND,{nl1},{nk1},{dist},{keep}"
         return parse.parse_line_no(self.run(command, **kwargs))
 
-
-
-    def lfillt(self, nl1: str = "", nl2: str = "", rad: str = "", pcent: str = "", **kwargs):
+    def lfillt(
+        self, nl1: str = "", nl2: str = "", rad: str = "", pcent: str = "", **kwargs
+    ):
         r"""Generates a fillet line between two intersecting lines.
 
         Mechanical APDL Command: `LFILLT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LFILLT.html>`_
@@ -959,10 +1021,23 @@ class Lines:
         >>> lnum = mapdl.lfillt(l0, l1, 0.25)
         3
         """
-        command = f'LFILLT,{nl1},{nl2},{rad},{pcent}'
+        command = f"LFILLT,{nl1},{nl2},{rad},{pcent}"
         return parse.parse_line_no(self.run(command, **kwargs))
 
-    def lgen(self, itime: str = "", nl1: str = "", nl2: str = "", ninc: str = "", dx: str = "", dy: str = "", dz: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def lgen(
+        self,
+        itime: str = "",
+        nl1: str = "",
+        nl2: str = "",
+        ninc: str = "",
+        dx: str = "",
+        dy: str = "",
+        dz: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Generates additional lines from a pattern of lines.
 
         Mechanical APDL Command: `LGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LGEN.html>`_
@@ -1043,12 +1118,14 @@ class Lines:
         recommended. New line numbers are automatically assigned (beginning with the lowest available values
         ( :ref:`numstr` )).
         """
-        command = f"LGEN,{itime},{nl1},{nl2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        command = (
+            f"LGEN,{itime},{nl1},{nl2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        )
         return self.run(command, **kwargs)
 
-
-
-    def llist(self, nl1: str = "", nl2: str = "", ninc: str = "", lab: str = "", **kwargs):
+    def llist(
+        self, nl1: str = "", nl2: str = "", ninc: str = "", lab: str = "", **kwargs
+    ):
         r"""Lists the defined lines.
 
         Mechanical APDL Command: `LLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LLIST.html>`_
@@ -1119,8 +1196,6 @@ class Lines:
         command = f"LLIST,{nl1},{nl2},{ninc},{lab}"
         return self.run(command, **kwargs)
 
-
-
     def lplot(self, nl1: str = "", nl2: str = "", ninc: str = "", **kwargs):
         r"""Displays the selected lines.
 
@@ -1154,8 +1229,6 @@ class Lines:
         """
         command = f"LPLOT,{nl1},{nl2},{ninc}"
         return self.run(command, **kwargs)
-
-
 
     def lreverse(self, lnum: str = "", noeflip: int | str = "", **kwargs):
         r"""Reverses the normal of a line, regardless of its connectivity or mesh status.
@@ -1198,9 +1271,20 @@ class Lines:
         command = f"LREVERSE,{lnum},{noeflip}"
         return self.run(command, **kwargs)
 
-
-
-    def lrotat(self, nk1: str = "", nk2: str = "", nk3: str = "", nk4: str = "", nk5: str = "", nk6: str = "", pax1: str = "", pax2: str = "", arc: str = "", nseg: str = "", **kwargs):
+    def lrotat(
+        self,
+        nk1: str = "",
+        nk2: str = "",
+        nk3: str = "",
+        nk4: str = "",
+        nk5: str = "",
+        nk6: str = "",
+        pax1: str = "",
+        pax2: str = "",
+        arc: str = "",
+        nseg: str = "",
+        **kwargs,
+    ):
         r"""Generates circular lines by rotating a keypoint pattern about an axis.
 
         Mechanical APDL Command: `LROTAT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LROTAT.html>`_
@@ -1267,12 +1351,24 @@ class Lines:
         90°). Line patterns are generated at the keypoint patterns. Keypoint and line numbers are
         automatically assigned (beginning with the lowest available values ( :ref:`numstr` )).
         """
-        command = f"LROTAT,{nk1},{nk2},{nk3},{nk4},{nk5},{nk6},{pax1},{pax2},{arc},{nseg}"
+        command = (
+            f"LROTAT,{nk1},{nk2},{nk3},{nk4},{nk5},{nk6},{pax1},{pax2},{arc},{nseg}"
+        )
         return self.run(command, **kwargs)
 
-
-
-    def lsscale(self, nl1: str = "", nl2: str = "", ninc: str = "", rx: str = "", ry: str = "", rz: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def lsscale(
+        self,
+        nl1: str = "",
+        nl2: str = "",
+        ninc: str = "",
+        rx: str = "",
+        ry: str = "",
+        rz: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Generates a scaled set of lines from a pattern of lines.
 
         Mechanical APDL Command: `LSSCALE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LSSCALE.html>`_
@@ -1362,10 +1458,6 @@ class Lines:
         command = f"LSSCALE,{nl1},{nl2},{ninc},{rx},{ry},{rz},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-
-
-
-
     def lstr(self, p1: str = "", p2: str = "", **kwargs):
         r"""Defines a straight line irrespective of the active coordinate system.
 
@@ -1406,7 +1498,7 @@ class Lines:
         >>> lnum
         1
         """
-        command = f'LSTR,{p1},{p2}'
+        command = f"LSTR,{p1},{p2}"
         return parse.parse_line_no(self.run(command, **kwargs))
 
     def lsum(self, **kwargs):
@@ -1428,9 +1520,17 @@ class Lines:
         command = "LSUM"
         return self.run(command, **kwargs)
 
-
-
-    def lsymm(self, ncomp: str = "", nl1: str = "", nl2: str = "", ninc: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def lsymm(
+        self,
+        ncomp: str = "",
+        nl1: str = "",
+        nl2: str = "",
+        ninc: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Generates lines from a line pattern by symmetry reflection.
 
         Mechanical APDL Command: `LSYMM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LSYMM.html>`_
@@ -1505,11 +1605,15 @@ class Lines:
         command = f"LSYMM,{ncomp},{nl1},{nl2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-
-
-
-
-    def ltan(self, nl1: str = "", p3: str = "", xv3: str = "", yv3: str = "", zv3: str = "", **kwargs):
+    def ltan(
+        self,
+        nl1: str = "",
+        p3: str = "",
+        xv3: str = "",
+        yv3: str = "",
+        zv3: str = "",
+        **kwargs,
+    ):
         r"""Generates a line at the end of, and tangent to, an existing line.
 
         Mechanical APDL Command: `LTAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LTAN.html>`_
@@ -1571,10 +1675,20 @@ class Lines:
         >>> lnum
         2
         """
-        command = f'LTAN,{nl1},{p3},{xv3},{yv3},{zv3}'
+        command = f"LTAN,{nl1},{p3},{xv3},{yv3},{zv3}"
         return parse.parse_line_no(self.run(command, **kwargs))
 
-    def ltran(self, kcnto: str = "", nl1: str = "", nl2: str = "", ninc: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def ltran(
+        self,
+        kcnto: str = "",
+        nl1: str = "",
+        nl2: str = "",
+        ninc: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Transfers a pattern of lines to another coordinate system.
 
         Mechanical APDL Command: `LTRAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LTRAN.html>`_
@@ -1643,11 +1757,22 @@ class Lines:
         command = f"LTRAN,{kcnto},{nl1},{nl2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-
-
-
-
-    def spline(self, p1: str = "", p2: str = "", p3: str = "", p4: str = "", p5: str = "", p6: str = "", xv1: str = "", yv1: str = "", zv1: str = "", xv6: str = "", yv6: str = "", zv6: str = "", **kwargs):
+    def spline(
+        self,
+        p1: str = "",
+        p2: str = "",
+        p3: str = "",
+        p4: str = "",
+        p5: str = "",
+        p6: str = "",
+        xv1: str = "",
+        yv1: str = "",
+        zv1: str = "",
+        xv6: str = "",
+        yv6: str = "",
+        zv6: str = "",
+        **kwargs,
+    ):
         r"""Generates a segmented spline through a series of keypoints.
 
         Mechanical APDL Command: `SPLINE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPLINE.html>`_
@@ -1744,7 +1869,9 @@ class Lines:
         >>> lines
         [1, 2, 3, 4]
         """
-        command = f'SPLINE,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}'
+        command = (
+            f"SPLINE,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}"
+        )
         return parse.parse_line_nos(self.run(command, **kwargs))
 
     def ssln(self, fact: str = "", size: str = "", **kwargs):
@@ -1776,5 +1903,3 @@ class Lines:
         """
         command = f"SSLN,{fact},{size}"
         return self.run(command, **kwargs)
-
-

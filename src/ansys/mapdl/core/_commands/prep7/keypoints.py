@@ -49,10 +49,6 @@ class Keypoints:
         command = "GSUM"
         return self.run(command, **kwargs)
 
-
-
-
-
     def k(self, npt: str = "", x: str = "", y: str = "", z: str = "", **kwargs):
         r"""Defines a keypoint.
 
@@ -109,12 +105,18 @@ class Keypoints:
         >>> knum
         5
         """
-        command = f'K,{npt},{x},{y},{z}'
+        command = f"K,{npt},{x},{y},{z}"
         return parse.parse_k(self.run(command, **kwargs))
 
-
-
-    def kbetw(self, kp1: str = "", kp2: str = "", kpnew: str = "", type_: str = "", value: str = "", **kwargs):
+    def kbetw(
+        self,
+        kp1: str = "",
+        kp2: str = "",
+        kpnew: str = "",
+        type_: str = "",
+        value: str = "",
+        **kwargs,
+    ):
         r"""Creates a keypoint between two existing keypoints.
 
         Mechanical APDL Command: `KBETW <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KBETW.html>`_
@@ -173,12 +175,19 @@ class Keypoints:
         >>> k2
         3
         """
-        command = f'KBETW,{kp1},{kp2},{kpnew},{type_},{value}'
+        command = f"KBETW,{kp1},{kp2},{kpnew},{type_},{value}"
         return parse.parse_kpoint(self.run(command, **kwargs))
 
-
-
-    def kcenter(self, type_: str = "", val1: str = "", val2: str = "", val3: str = "", val4: str = "", kpnew: str = "", **kwargs):
+    def kcenter(
+        self,
+        type_: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        kpnew: str = "",
+        **kwargs,
+    ):
         r"""Creates a keypoint at the center of a circular arc defined by three locations.
 
         Mechanical APDL Command: `KCENTER <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KCENTER.html>`_
@@ -242,7 +251,7 @@ class Keypoints:
         >>> k3
         4
         """
-        command = f'KCENTER,{type_},{val1},{val2},{val3},{val4},{kpnew}'
+        command = f"KCENTER,{type_},{val1},{val2},{val3},{val4},{kpnew}"
         return parse.parse_kpoint(self.run(command, **kwargs))
 
     def kdele(self, np1: str = "", np2: str = "", ninc: str = "", **kwargs):
@@ -283,10 +292,6 @@ class Keypoints:
         """
         command = f"KDELE,{np1},{np2},{ninc}"
         return self.run(command, **kwargs)
-
-
-
-
 
     def kdist(self, kp1: str = "", kp2: str = "", **kwargs):
         r"""Calculates and lists the distance between two keypoints.
@@ -337,9 +342,18 @@ class Keypoints:
         >>> dist
         [13.96424004376894, 1.0, -5.0, 13.0]
         """
-        return parse.parse_kdist(self.run(f'KDIST,{kp1},{kp2}', **kwargs))
+        return parse.parse_kdist(self.run(f"KDIST,{kp1},{kp2}", **kwargs))
 
-    def kfill(self, np1: str = "", np2: str = "", nfill: str = "", nstrt: str = "", ninc: str = "", space: str = "", **kwargs):
+    def kfill(
+        self,
+        np1: str = "",
+        np2: str = "",
+        nfill: str = "",
+        nstrt: str = "",
+        ninc: str = "",
+        space: str = "",
+        **kwargs,
+    ):
         r"""Generates keypoints between two keypoints.
 
         Mechanical APDL Command: `KFILL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KFILL.html>`_
@@ -384,9 +398,20 @@ class Keypoints:
         command = f"KFILL,{np1},{np2},{nfill},{nstrt},{ninc},{space}"
         return self.run(command, **kwargs)
 
-
-
-    def kgen(self, itime: str = "", np1: str = "", np2: str = "", ninc: str = "", dx: str = "", dy: str = "", dz: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def kgen(
+        self,
+        itime: str = "",
+        np1: str = "",
+        np2: str = "",
+        ninc: str = "",
+        dx: str = "",
+        dy: str = "",
+        dz: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Generates additional keypoints from a pattern of keypoints.
 
         Mechanical APDL Command: `KGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KGEN.html>`_
@@ -469,12 +494,10 @@ class Keypoints:
         defined in any coordinate system. However, solid modeling in a toroidal coordinate system is not
         recommended.
         """
-        command = f"KGEN,{itime},{np1},{np2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        command = (
+            f"KGEN,{itime},{np1},{np2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        )
         return self.run(command, **kwargs)
-
-
-
-
 
     def kl(self, nl1: str = "", ratio: str = "", nk1: str = "", **kwargs):
         r"""Generates a keypoint at a specified location on an existing line.
@@ -513,10 +536,12 @@ class Keypoints:
         >>> lnum
         1
         """
-        cmd = f'KL,{nl1},{ratio},{nk1}'
+        cmd = f"KL,{nl1},{ratio},{nk1}"
         return parse.parse_kl(self.run(cmd, **kwargs))
 
-    def klist(self, np1: str = "", np2: str = "", ninc: str = "", lab: str = "", **kwargs):
+    def klist(
+        self, np1: str = "", np2: str = "", ninc: str = "", lab: str = "", **kwargs
+    ):
         r"""Lists the defined keypoints or hard points.
 
         Mechanical APDL Command: `KLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KLIST.html>`_
@@ -570,8 +595,6 @@ class Keypoints:
         """
         command = f"KLIST,{np1},{np2},{ninc},{lab}"
         return self.run(command, **kwargs)
-
-
 
     def kmodif(self, npt: str = "", x: str = "", y: str = "", z: str = "", **kwargs):
         r"""Modifies an existing keypoint.
@@ -628,9 +651,19 @@ class Keypoints:
         command = f"KMODIF,{npt},{x},{y},{z}"
         return self.run(command, **kwargs)
 
-
-
-    def kmove(self, npt: str = "", kc1: str = "", x1: str = "", y1: str = "", z1: str = "", kc2: str = "", x2: str = "", y2: str = "", z2: str = "", **kwargs):
+    def kmove(
+        self,
+        npt: str = "",
+        kc1: str = "",
+        x1: str = "",
+        y1: str = "",
+        z1: str = "",
+        kc2: str = "",
+        x2: str = "",
+        y2: str = "",
+        z2: str = "",
+        **kwargs,
+    ):
         r"""Calculates and moves a keypoint to an intersection.
 
         Mechanical APDL Command: `KMOVE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KMOVE.html>`_
@@ -696,10 +729,6 @@ class Keypoints:
         command = f"KMOVE,{npt},{kc1},{x1},{y1},{z1},{kc2},{x2},{y2},{z2}"
         return self.run(command, **kwargs)
 
-
-
-
-
     def knode(self, npt: str = "", node: str = "", **kwargs):
         r"""Defines a keypoint at an existing node location.
 
@@ -730,10 +759,12 @@ class Keypoints:
         >>> knum1
         1
         """
-        cmd = f'KNODE,{npt},{node}'
+        cmd = f"KNODE,{npt},{node}"
         return parse.parse_knode(self.run(cmd, **kwargs))
 
-    def kplot(self, np1: str = "", np2: str = "", ninc: str = "", lab: str = "", **kwargs):
+    def kplot(
+        self, np1: str = "", np2: str = "", ninc: str = "", lab: str = "", **kwargs
+    ):
         r"""Displays the selected keypoints.
 
         Mechanical APDL Command: `KPLOT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KPLOT.html>`_
@@ -772,9 +803,19 @@ class Keypoints:
         command = f"KPLOT,{np1},{np2},{ninc},{lab}"
         return self.run(command, **kwargs)
 
-
-
-    def kpscale(self, np1: str = "", np2: str = "", ninc: str = "", rx: str = "", ry: str = "", rz: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def kpscale(
+        self,
+        np1: str = "",
+        np2: str = "",
+        ninc: str = "",
+        rx: str = "",
+        ry: str = "",
+        rz: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Generates a scaled set of (meshed) keypoints from a pattern of keypoints.
 
         Mechanical APDL Command: `KPSCALE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KPSCALE.html>`_
@@ -861,9 +902,17 @@ class Keypoints:
         command = f"KPSCALE,{np1},{np2},{ninc},{rx},{ry},{rz},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-
-
-    def kscale(self, kinc: str = "", np1: str = "", np2: str = "", ninc: str = "", rx: str = "", ry: str = "", rz: str = "", **kwargs):
+    def kscale(
+        self,
+        kinc: str = "",
+        np1: str = "",
+        np2: str = "",
+        ninc: str = "",
+        rx: str = "",
+        ry: str = "",
+        rz: str = "",
+        **kwargs,
+    ):
         r"""Generates a scaled pattern of keypoints from a given keypoint pattern.
 
         Mechanical APDL Command: `KSCALE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSCALE.html>`_
@@ -922,8 +971,6 @@ class Keypoints:
         command = f"KSCALE,{kinc},{np1},{np2},{ninc},{rx},{ry},{rz}"
         return self.run(command, **kwargs)
 
-
-
     def ksum(self, **kwargs):
         r"""Calculates and prints geometry statistics of the selected keypoints.
 
@@ -943,9 +990,17 @@ class Keypoints:
         command = "KSUM"
         return self.run(command, **kwargs)
 
-
-
-    def ksymm(self, ncomp: str = "", np1: str = "", np2: str = "", ninc: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def ksymm(
+        self,
+        ncomp: str = "",
+        np1: str = "",
+        np2: str = "",
+        ninc: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Generates a reflected set of keypoints.
 
         Mechanical APDL Command: `KSYMM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSYMM.html>`_
@@ -1017,9 +1072,17 @@ class Keypoints:
         command = f"KSYMM,{ncomp},{np1},{np2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-
-
-    def ktran(self, kcnto: str = "", np1: str = "", np2: str = "", ninc: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def ktran(
+        self,
+        kcnto: str = "",
+        np1: str = "",
+        np2: str = "",
+        ninc: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Transfers a pattern of keypoints to another coordinate system.
 
         Mechanical APDL Command: `KTRAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KTRAN.html>`_
@@ -1086,8 +1149,6 @@ class Keypoints:
         command = f"KTRAN,{kcnto},{np1},{np2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-
-
     def source(self, x: str = "", y: str = "", z: str = "", **kwargs):
         r"""Defines a default location for undefined nodes or keypoints.
 
@@ -1114,5 +1175,3 @@ class Keypoints:
         """
         command = f"SOURCE,{x},{y},{z}"
         return self.run(command, **kwargs)
-
-

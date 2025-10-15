@@ -25,7 +25,20 @@ from ansys.mapdl.core._commands import parse
 
 class ElementType:
 
-    def dof(self, lab1: str = "", lab2: str = "", lab3: str = "", lab4: str = "", lab5: str = "", lab6: str = "", lab7: str = "", lab8: str = "", lab9: str = "", lab10: str = "", **kwargs):
+    def dof(
+        self,
+        lab1: str = "",
+        lab2: str = "",
+        lab3: str = "",
+        lab4: str = "",
+        lab5: str = "",
+        lab6: str = "",
+        lab7: str = "",
+        lab8: str = "",
+        lab9: str = "",
+        lab10: str = "",
+        **kwargs,
+    ):
         r"""Adds degrees of freedom to the current DOF set.
 
         Mechanical APDL Command: `DOF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DOF.html>`_
@@ -119,11 +132,19 @@ class ElementType:
         command = f"DOF,{lab1},{lab2},{lab3},{lab4},{lab5},{lab6},{lab7},{lab8},{lab9},{lab10}"
         return self.run(command, **kwargs)
 
-
-
-
-
-    def et(self, itype: str = "", ename: str = "", kop1: str = "", kop2: str = "", kop3: str = "", kop4: str = "", kop5: str = "", kop6: str = "", inopr: str = "", **kwargs):
+    def et(
+        self,
+        itype: str = "",
+        ename: str = "",
+        kop1: str = "",
+        kop2: str = "",
+        kop3: str = "",
+        kop4: str = "",
+        kop5: str = "",
+        kop6: str = "",
+        inopr: str = "",
+        **kwargs,
+    ):
         r"""Defines a local element type from the element library.
 
         Mechanical APDL Command: `ET <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ET.html>`_
@@ -220,7 +241,9 @@ class ElementType:
         >>> etype_num
         2
         """
-        command = f'ET,{itype},{ename},{kop1},{kop2},{kop3},{kop4},{kop5},{kop6},{inopr}'
+        command = (
+            f"ET,{itype},{ename},{kop1},{kop2},{kop3},{kop4},{kop5},{kop6},{inopr}"
+        )
         return parse.parse_et(self.run(command, **kwargs))
 
     def etchg(self, cnv: str = "", **kwargs):
@@ -267,8 +290,6 @@ class ElementType:
         command = f"ETCHG,{cnv}"
         return self.run(command, **kwargs)
 
-
-
     def etcontrol(self, eltech: str = "", eldegene: str = "", **kwargs):
         r"""Control the element technologies used in element formulation (for applicable elements).
 
@@ -314,8 +335,6 @@ class ElementType:
         command = f"ETCONTROL,{eltech},{eldegene}"
         return self.run(command, **kwargs)
 
-
-
     def etdele(self, ityp1: str = "", ityp2: str = "", inc: str = "", **kwargs):
         r"""Deletes element types.
 
@@ -340,8 +359,6 @@ class ElementType:
         """
         command = f"ETDELE,{ityp1},{ityp2},{inc}"
         return self.run(command, **kwargs)
-
-
 
     def etlist(self, ityp1: str = "", ityp2: str = "", inc: str = "", **kwargs):
         r"""Lists currently defined element types.
@@ -374,8 +391,6 @@ class ElementType:
         """
         command = f"ETLIST,{ityp1},{ityp2},{inc}"
         return self.run(command, **kwargs)
-
-
 
     def keyopt(self, itype: str = "", knum: str = "", value: str = "", **kwargs):
         r"""Sets element key options.
@@ -440,8 +455,6 @@ class ElementType:
         command = f"KEYOPT,{itype},{knum},{value}"
         return self.run(command, **kwargs)
 
-
-
     def nsvr(self, itype: str = "", nstv: str = "", **kwargs):
         r"""Defines the number of variables for user-programmable element options.
 
@@ -466,5 +479,3 @@ class ElementType:
         """
         command = f"NSVR,{itype},{nstv}"
         return self.run(command, **kwargs)
-
-

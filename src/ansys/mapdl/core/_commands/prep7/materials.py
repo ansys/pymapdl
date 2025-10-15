@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Materials:
 
     def emunit(self, lab: str = "", value: str = "", **kwargs):
@@ -75,9 +76,19 @@ class Materials:
         command = f"EMUNIT,{lab},{value}"
         return self.run(command, **kwargs)
 
-
-
-    def fc(self, mat: str = "", lab1: str = "", lab2: str = "", data1: str = "", data2: str = "", data3: str = "", data4: str = "", data5: str = "", data6: str = "", **kwargs):
+    def fc(
+        self,
+        mat: str = "",
+        lab1: str = "",
+        lab2: str = "",
+        data1: str = "",
+        data2: str = "",
+        data3: str = "",
+        data4: str = "",
+        data5: str = "",
+        data6: str = "",
+        **kwargs,
+    ):
         r"""Provides failure criteria information and activates a data table to input temperature-dependent
         stress and strain limits.
 
@@ -231,10 +242,10 @@ class Materials:
         displays. This could result in minor changes to other data when Failure Criteria are applied. See
         the appropriate plot or print command documentation for more information.
         """
-        command = f"FC,{mat},{lab1},{lab2},{data1},{data2},{data3},{data4},{data5},{data6}"
+        command = (
+            f"FC,{mat},{lab1},{lab2},{data1},{data2},{data3},{data4},{data5},{data6}"
+        )
         return self.run(command, **kwargs)
-
-
 
     def fccheck(self, **kwargs):
         r"""Checks both the strain and stress input criteria for all materials.
@@ -250,8 +261,6 @@ class Materials:
         """
         command = "FCCHECK"
         return self.run(command, **kwargs)
-
-
 
     def fcdele(self, mat: str = "", **kwargs):
         r"""Deletes previously defined failure criterion data for the given material.
@@ -274,8 +283,6 @@ class Materials:
         """
         command = f"FCDELE,{mat}"
         return self.run(command, **kwargs)
-
-
 
     def fclist(self, mat: str = "", temp: str = "", **kwargs):
         r"""To list what the failure criteria is that you have input.
@@ -301,9 +308,17 @@ class Materials:
         command = f"FCLIST,{mat},,{temp}"
         return self.run(command, **kwargs)
 
-
-
-    def mp(self, lab: str = "", mat: str = "", c0: str = "", c1: str = "", c2: str = "", c3: str = "", c4: str = "", **kwargs):
+    def mp(
+        self,
+        lab: str = "",
+        mat: str = "",
+        c0: str = "",
+        c1: str = "",
+        c2: str = "",
+        c3: str = "",
+        c4: str = "",
+        **kwargs,
+    ):
         r"""Defines a linear material property as a constant or a function of temperature.
 
         Mechanical APDL Command: `MP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MP.html>`_
@@ -491,8 +506,6 @@ class Materials:
         command = f"MP,{lab},{mat},{c0},{c1},{c2},{c3},{c4}"
         return self.run(command, **kwargs)
 
-
-
     def mpamod(self, mat: str = "", deftemp: str = "", **kwargs):
         r"""Modifies temperature-dependent secant coefficients of thermal expansion.
 
@@ -526,8 +539,6 @@ class Materials:
         command = f"MPAMOD,{mat},{deftemp}"
         return self.run(command, **kwargs)
 
-
-
     def mpchg(self, mat: str = "", elem: str = "", **kwargs):
         r"""Changes the material number attribute of an element.
 
@@ -556,8 +567,6 @@ class Materials:
         """
         command = f"MPCHG,{mat},{elem}"
         return self.run(command, **kwargs)
-
-
 
     def mpcopy(self, matf: str = "", matt: str = "", **kwargs):
         r"""Copies linear material model data from one material reference number to another.
@@ -595,9 +604,19 @@ class Materials:
         command = f"MPCOPY,,{matf},{matt}"
         return self.run(command, **kwargs)
 
-
-
-    def mpdata(self, lab: str = "", mat: str = "", sloc: str = "", c1: str = "", c2: str = "", c3: str = "", c4: str = "", c5: str = "", c6: str = "", **kwargs):
+    def mpdata(
+        self,
+        lab: str = "",
+        mat: str = "",
+        sloc: str = "",
+        c1: str = "",
+        c2: str = "",
+        c3: str = "",
+        c4: str = "",
+        c5: str = "",
+        c6: str = "",
+        **kwargs,
+    ):
         r"""Defines property data to be associated with the temperature table.
 
         Mechanical APDL Command: `MPDATA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MPDATA.html>`_
@@ -739,9 +758,15 @@ class Materials:
         command = f"MPDATA,{lab},{mat},{sloc},{c1},{c2},{c3},{c4},{c5},{c6}"
         return self.run(command, **kwargs)
 
-
-
-    def mpdele(self, lab: str = "", mat1: str = "", mat2: str = "", inc: str = "", lchk: str = "", **kwargs):
+    def mpdele(
+        self,
+        lab: str = "",
+        mat1: str = "",
+        mat2: str = "",
+        inc: str = "",
+        lchk: str = "",
+        **kwargs,
+    ):
         r"""Deletes linear material properties.
 
         Mechanical APDL Command: `MPDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MPDELE.html>`_
@@ -790,9 +815,9 @@ class Materials:
         command = f"MPDELE,{lab},{mat1},{mat2},{inc},{lchk}"
         return self.run(command, **kwargs)
 
-
-
-    def mpdres(self, labf: str = "", matf: str = "", labt: str = "", matt: str = "", **kwargs):
+    def mpdres(
+        self, labf: str = "", matf: str = "", labt: str = "", matt: str = "", **kwargs
+    ):
         r"""Reassembles existing material data with the temperature table.
 
         Mechanical APDL Command: `MPDRES <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MPDRES.html>`_
@@ -824,8 +849,6 @@ class Materials:
         """
         command = f"MPDRES,{labf},{matf},{labt},{matt}"
         return self.run(command, **kwargs)
-
-
 
     def mplib(self, r_w_opt: str = "", path: str = "", **kwargs):
         r"""Sets the default material library read and write paths.
@@ -870,9 +893,15 @@ class Materials:
         command = f"/MPLIB,{r_w_opt},{path}"
         return self.run(command, **kwargs)
 
-
-
-    def mplist(self, mat1: str = "", mat2: str = "", inc: str = "", lab: str = "", tevl: str = "", **kwargs):
+    def mplist(
+        self,
+        mat1: str = "",
+        mat2: str = "",
+        inc: str = "",
+        lab: str = "",
+        tevl: str = "",
+        **kwargs,
+    ):
         r"""Lists linear material properties.
 
         Mechanical APDL Command: `MPLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MPLIST.html>`_
@@ -914,9 +943,16 @@ class Materials:
         command = f"MPLIST,{mat1},{mat2},{inc},{lab},{tevl}"
         return self.run(command, **kwargs)
 
-
-
-    def mpplot(self, lab: str = "", mat: str = "", tmin: str = "", tmax: str = "", pmin: str = "", pmax: str = "", **kwargs):
+    def mpplot(
+        self,
+        lab: str = "",
+        mat: str = "",
+        tmin: str = "",
+        tmax: str = "",
+        pmin: str = "",
+        pmax: str = "",
+        **kwargs,
+    ):
         r"""Plots linear material properties as a function of temperature.
 
         Mechanical APDL Command: `MPPLOT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MPPLOT.html>`_
@@ -953,8 +989,6 @@ class Materials:
         """
         command = f"MPPLOT,{lab},{mat},{tmin},{tmax},{pmin},{pmax}"
         return self.run(command, **kwargs)
-
-
 
     def mpread(self, fname: str = "", ext: str = "", lib: str = "", **kwargs):
         r"""Reads a file containing material properties.
@@ -1015,9 +1049,17 @@ class Materials:
         command = f"MPREAD,{fname},{ext},,{lib}"
         return self.run(command, **kwargs)
 
-
-
-    def mptemp(self, sloc: str = "", t1: str = "", t2: str = "", t3: str = "", t4: str = "", t5: str = "", t6: str = "", **kwargs):
+    def mptemp(
+        self,
+        sloc: str = "",
+        t1: str = "",
+        t2: str = "",
+        t3: str = "",
+        t4: str = "",
+        t5: str = "",
+        t6: str = "",
+        **kwargs,
+    ):
         r"""Defines a temperature table for material properties.
 
         Mechanical APDL Command: `MPTEMP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MPTEMP.html>`_
@@ -1090,9 +1132,9 @@ class Materials:
         command = f"MPTEMP,{sloc},{t1},{t2},{t3},{t4},{t5},{t6}"
         return self.run(command, **kwargs)
 
-
-
-    def mptgen(self, stloc: str = "", num: str = "", tstrt: str = "", tinc: str = "", **kwargs):
+    def mptgen(
+        self, stloc: str = "", num: str = "", tstrt: str = "", tinc: str = "", **kwargs
+    ):
         r"""Adds temperatures to the temperature table by generation.
 
         Mechanical APDL Command: `MPTGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MPTGEN.html>`_
@@ -1125,8 +1167,6 @@ class Materials:
         command = f"MPTGEN,{stloc},{num},{tstrt},{tinc}"
         return self.run(command, **kwargs)
 
-
-
     def mptres(self, lab: str = "", mat: str = "", **kwargs):
         r"""Restores a temperature table previously defined.
 
@@ -1154,9 +1194,9 @@ class Materials:
         command = f"MPTRES,{lab},{mat}"
         return self.run(command, **kwargs)
 
-
-
-    def mpwrite(self, fname: str = "", ext: str = "", lib: str = "", mat: str = "", **kwargs):
+    def mpwrite(
+        self, fname: str = "", ext: str = "", lib: str = "", mat: str = "", **kwargs
+    ):
         r"""Writes linear material properties in the database to a file (if the LIB option is not specified) or
         writes both linear and nonlinear material properties (if LIB is specified) from the database to a
         file.
@@ -1212,9 +1252,16 @@ class Materials:
         command = f"MPWRITE,{fname},{ext},,{lib},{mat}"
         return self.run(command, **kwargs)
 
-
-
-    def tbfplot(self, matid: str = "", curvefitname: str = "", expdatid: str = "", colx: str = "", coly1: str = "", coly2: str = "", **kwargs):
+    def tbfplot(
+        self,
+        matid: str = "",
+        curvefitname: str = "",
+        expdatid: str = "",
+        colx: str = "",
+        coly1: str = "",
+        coly2: str = "",
+        **kwargs,
+    ):
         r"""Plots `material curve-fitting
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/Hlp_AM_GMCF.html>`_ data.
 
@@ -1257,8 +1304,6 @@ class Materials:
         """
         command = f"TBFPLOT,{matid},{curvefitname},{expdatid},{colx},{coly1},{coly2}"
         return self.run(command, **kwargs)
-
-
 
     def tbft(self, **kwargs):
         r"""Performs `material curve-fitting
@@ -2018,9 +2063,17 @@ class Materials:
         command = "TBFT"
         return self.run(command, **kwargs)
 
-
-
-    def uimp(self, mat: str = "", lab1: str = "", lab2: str = "", lab3: str = "", val1: str = "", val2: str = "", val3: str = "", **kwargs):
+    def uimp(
+        self,
+        mat: str = "",
+        lab1: str = "",
+        lab2: str = "",
+        lab3: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        **kwargs,
+    ):
         r"""Defines constant material properties (GUI).
 
         Mechanical APDL Command: `UIMP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_UIMP.html>`_
@@ -2060,5 +2113,3 @@ class Materials:
         """
         command = f"UIMP,{mat},{lab1},{lab2},{lab3},{val1},{val2},{val3}"
         return self.run(command, **kwargs)
-
-

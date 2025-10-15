@@ -20,9 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Morphing:
 
-    def damorph(self, area: str = "", xline: str = "", rmshky: int | str = "", **kwargs):
+    def damorph(
+        self, area: str = "", xline: str = "", rmshky: int | str = "", **kwargs
+    ):
         r"""Move nodes in selected areas to conform to structural displacements.
 
         Mechanical APDL Command: `DAMORPH <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DAMORPH.html>`_
@@ -78,8 +81,6 @@ class Morphing:
         command = f"DAMORPH,{area},{xline},{rmshky}"
         return self.run(command, **kwargs)
 
-
-
     def demorph(self, elem: str = "", dimn: str = "", rmshky: int | str = "", **kwargs):
         r"""Move nodes in selected elements to conform to structural displacements.
 
@@ -133,9 +134,9 @@ class Morphing:
         command = f"DEMORPH,{elem},{dimn},{rmshky}"
         return self.run(command, **kwargs)
 
-
-
-    def dvmorph(self, volu: str = "", xarea: str = "", rmshky: int | str = "", **kwargs):
+    def dvmorph(
+        self, volu: str = "", xarea: str = "", rmshky: int | str = "", **kwargs
+    ):
         r"""Move nodes in selected volumes to conform to structural displacements.
 
         Mechanical APDL Command: `DVMORPH <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DVMORPH.html>`_
@@ -191,9 +192,19 @@ class Morphing:
         command = f"DVMORPH,{volu},{xarea},{rmshky}"
         return self.run(command, **kwargs)
 
-
-
-    def morph(self, option: str = "", remeshopt: str = "", elemset: str = "", armax: str = "", voch: str = "", arch: str = "", step: str = "", time: str = "", stropt: str = "", **kwargs):
+    def morph(
+        self,
+        option: str = "",
+        remeshopt: str = "",
+        elemset: str = "",
+        armax: str = "",
+        voch: str = "",
+        arch: str = "",
+        step: str = "",
+        time: str = "",
+        stropt: str = "",
+        **kwargs,
+    ):
         r"""Specifies morphing and remeshing controls.
 
         Mechanical APDL Command: `MORPH <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MORPH.html>`_
@@ -306,5 +317,3 @@ class Morphing:
         """
         command = f"MORPH,{option},,{remeshopt},{elemset},{armax},{voch},{arch},{step},{time},{stropt}"
         return self.run(command, **kwargs)
-
-

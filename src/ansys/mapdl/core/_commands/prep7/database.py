@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Database:
 
     def aflist(self, **kwargs):
@@ -37,8 +38,6 @@ class Database:
         """
         command = "AFLIST"
         return self.run(command, **kwargs)
-
-
 
     def cdopt(self, option: str = "", **kwargs):
         r"""Specifies format to be used for archiving geometry.
@@ -68,9 +67,15 @@ class Database:
         command = f"CDOPT,{option}"
         return self.run(command, **kwargs)
 
-
-
-    def cdread(self, option: str = "", fname: str = "", ext: str = "", fnamei: str = "", exti: str = "", **kwargs):
+    def cdread(
+        self,
+        option: str = "",
+        fname: str = "",
+        ext: str = "",
+        fnamei: str = "",
+        exti: str = "",
+        **kwargs,
+    ):
         r"""Reads a file of solid model and database information into the database.
 
         Mechanical APDL Command: `CDREAD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CDREAD.html>`_
@@ -159,9 +164,16 @@ class Database:
         command = f"CDREAD,{option},{fname},{ext},,{fnamei},{exti}"
         return self.run(command, **kwargs)
 
-
-
-    def cdwrite(self, option: str = "", fname: str = "", ext: str = "", fnamei: str = "", exti: str = "", fmat: str = "", **kwargs):
+    def cdwrite(
+        self,
+        option: str = "",
+        fname: str = "",
+        ext: str = "",
+        fnamei: str = "",
+        exti: str = "",
+        fmat: str = "",
+        **kwargs,
+    ):
         r"""Writes geometry and load database items to a file.
 
         Mechanical APDL Command: `CDWRITE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CDWRITE.html>`_
@@ -402,7 +414,6 @@ class Database:
         command = f"CDWRITE,{option},'{fname}',{ext},,{fnamei},{exti},{fmat}"
         return self.run(command, **kwargs)
 
-
     def cecheck(self, itemlab: str = "", tolerance: str = "", dof: str = "", **kwargs):
         r"""Check constraint equations and couplings for rigid body motions.
 
@@ -443,8 +454,6 @@ class Database:
         """
         command = f"CECHECK,{itemlab},{tolerance},{dof}"
         return self.run(command, **kwargs)
-
-
 
     def check(self, sele: str = "", levl: str = "", **kwargs):
         r"""Checks current database items for completeness.
@@ -488,9 +497,19 @@ class Database:
         command = f"CHECK,{sele},{levl}"
         return self.run(command, **kwargs)
 
-
-
-    def cncheck(self, option: str = "", rid1: str = "", rid2: str = "", rinc: str = "", intertype: str = "", trlevel: str = "", val1: str = "", val2: str = "", val3: str = "", **kwargs):
+    def cncheck(
+        self,
+        option: str = "",
+        rid1: str = "",
+        rid2: str = "",
+        rinc: str = "",
+        intertype: str = "",
+        trlevel: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        **kwargs,
+    ):
         r"""Provides and/or adjusts the initial status of contact pairs.
 
         Mechanical APDL Command: `CNCHECK <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CNCHECK.html>`_
@@ -905,8 +924,6 @@ class Database:
         command = f"CNCHECK,{option},{rid1},{rid2},{rinc},{intertype},{trlevel},{val1},{val2},{val3}"
         return self.run(command, **kwargs)
 
-
-
     def escheck(self, sele: str = "", levl: str = "", defkey: int | str = "", **kwargs):
         r"""Perform element shape checking for a selected element set.
 
@@ -947,8 +964,6 @@ class Database:
         """
         command = f"ESCHECK,{sele},{levl},{defkey}"
         return self.run(command, **kwargs)
-
-
 
     def igesout(self, fname: str = "", ext: str = "", att: int | str = "", **kwargs):
         r"""Writes solid model data to a file in IGES Version 5.1 format.
@@ -1018,8 +1033,6 @@ class Database:
         command = f"IGESOUT,{fname},{ext},,{att}"
         return self.run(command, **kwargs)
 
-
-
     def nooffset(self, label: str = "", **kwargs):
         r"""Prevents the :ref:`cdread` command from offsetting specified data items
 
@@ -1070,8 +1083,6 @@ class Database:
         """
         command = f"NOOFFSET,{label}"
         return self.run(command, **kwargs)
-
-
 
     def numcmp(self, label: str = "", **kwargs):
         r"""Compresses the numbering of defined items.
@@ -1137,9 +1148,15 @@ class Database:
         command = f"NUMCMP,{label}"
         return self.run(command, **kwargs)
 
-
-
-    def nummrg(self, label: str = "", toler: str = "", gtoler: str = "", action: str = "", switch: str = "", **kwargs):
+    def nummrg(
+        self,
+        label: str = "",
+        toler: str = "",
+        gtoler: str = "",
+        action: str = "",
+        switch: str = "",
+        **kwargs,
+    ):
         r"""Merges coincident or equivalently defined items.
 
         Mechanical APDL Command: `NUMMRG <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NUMMRG.html>`_
@@ -1341,8 +1358,6 @@ class Database:
         command = f"NUMMRG,{label},{toler},{gtoler},{action},{switch}"
         return self.run(command, **kwargs)
 
-
-
     def numoff(self, label: str = "", value: str = "", kref: str = "", **kwargs):
         r"""Adds a number offset to defined items.
 
@@ -1412,8 +1427,6 @@ class Database:
         command = f"NUMOFF,{label},{value},{kref}"
         return self.run(command, **kwargs)
 
-
-
     def numstr(self, label: str = "", value: str = "", **kwargs):
         r"""Establishes starting numbers for automatically numbered items.
 
@@ -1464,5 +1477,3 @@ class Database:
         """
         command = f"NUMSTR,{label},{value}"
         return self.run(command, **kwargs)
-
-

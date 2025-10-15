@@ -20,9 +20,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class HardPoints:
 
-    def hptcreate(self, type_: str = "", entity: str = "", nhp: str = "", label: str = "", val1: str = "", val2: str = "", val3: str = "", **kwargs):
+    def hptcreate(
+        self,
+        type_: str = "",
+        entity: str = "",
+        nhp: str = "",
+        label: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        **kwargs,
+    ):
         r"""Defines a hard point.
 
         Mechanical APDL Command: `HPTCREATE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_HPTCREATE.html>`_
@@ -85,8 +96,6 @@ class HardPoints:
         command = f"HPTCREATE,{type_},{entity},{nhp},{label},{val1},{val2},{val3}"
         return self.run(command, **kwargs)
 
-
-
     def hptdelete(self, np1: str = "", np2: str = "", ninc: str = "", **kwargs):
         r"""Deletes selected hardpoints.
 
@@ -123,5 +132,3 @@ class HardPoints:
         """
         command = f"HPTDELETE,{np1},{np2},{ninc}"
         return self.run(command, **kwargs)
-
-
