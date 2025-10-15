@@ -34,7 +34,6 @@ from numpy.typing import DTypeLike, NDArray
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput
 from ansys.mapdl.core.errors import (
-    CommandDeprecated,
     ComponentDoesNotExits,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
