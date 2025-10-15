@@ -1740,14 +1740,6 @@ class _MapdlCommandExtended(_MapdlCore):
             super().lssolve(lsmin=lsmin, lsmax=lsmax, lsinc=lsinc, **kwargs)
         return self.last_response
 
-    @wraps(_MapdlCore.edbound)
-    def edbound(self, *args, **kwargs):
-        if self.version >= 19.1:
-            raise CommandDeprecated(
-                "The command 'Mapdl.edbound()' for explicit analysis was deprecated in Ansys 19.1"
-            )
-        super().edbound(*args, **kwargs)
-
     @wraps(_MapdlCore.edbx)
     def edbx(self, *args, **kwargs):
         if self.version >= 19.1:

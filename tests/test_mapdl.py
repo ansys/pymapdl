@@ -86,7 +86,6 @@ else:
 DEPRECATED_COMMANDS = [
     "edadapt",
     "edale",
-    "edbound",
     "edbvis",
     "edbx",
     "edcadapt",
