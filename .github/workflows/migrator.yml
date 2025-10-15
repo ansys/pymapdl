@@ -59,6 +59,7 @@ permissions:
 
 jobs:
   migrate:
+    name: Migrate PR from fork to main repo
     if: |
        (
         github.event.issue.pull_request != null &&
@@ -297,19 +298,23 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
         with:
           ref: main
+          persist-credentials: false
 
       - name: Clone head repo and checkout branch. Resolve conflicts if needed.
         if : ${{ env.CONTINUE == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          PYANSYS_CI_BOT_USERNAME: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          PYANSYS_CI_BOT_EMAIL: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
+
         run: |
           echo "Setting up git configuration"
-          git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
-          git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
+          git config --global user.name "${PYANSYS_CI_BOT_USERNAME}"
+          git config --global user.email "${PYANSYS_CI_BOT_EMAIL}"
           git config pull.rebase true
 
           echo "\033[1;92m[INFO]Adding \"${PR_HEAD_REPO}\" as remote \033[0m"
-          git remote add head_repo https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${PR_HEAD_REPO}.git
+          git remote add head_repo https://x-access-token:${GITHUB_TOKEN}@github.com/${PR_HEAD_REPO}.git
 
           echo "\033[1;92m[INFO]Fetching \"${PR_HEAD_BRANCH}\" branch from \"${PR_HEAD_REPO}\" \033[0m"
           git fetch head_repo ${PR_HEAD_BRANCH}

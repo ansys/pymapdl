@@ -187,6 +187,8 @@ jobs:
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Build matrix for remote testing
         uses: ./.github/actions/build-matrix
@@ -223,6 +225,8 @@ jobs:
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Build matrix for local, minimal and console testing
         uses: ./.github/actions/build-matrix
@@ -303,23 +307,6 @@ jobs:
       file-name: "${{ matrix.mapdl-version }}-console"
       tags: "local,console"
       test_dpf: false
-
-
-  test-windows:
-    # Skipped
-    if: github.repository == ''
-    name: "Local: Build & test on Windows"
-    runs-on: [self-hosted, Windows, pymapdl]
-    timeout-minutes: 30
-    env:
-      ON_LOCAL: TRUE
-
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
-
-      - uses: ./.github/actions/test_windows
-        with:
-          codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
 
   package:
@@ -427,6 +414,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        with:
+          persist-credentials: false
 
       - name: "Run Julia testing"
         uses: ./.github/actions/test-julia
@@ -444,6 +433,8 @@ jobs:
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        with:
+          persist-credentials: false
 
       - name: "Run Pytest-summary action"
         uses: ./.github/actions/pytest-summary

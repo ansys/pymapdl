@@ -110,6 +110,7 @@ on:
 
 jobs:
   test-local:
+    name: Test MAPDL locally
     runs-on: ${{ inputs.runner }}
     env:
       ON_CI: True
@@ -146,17 +147,20 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
         with:
           repository: ansys/pymapdl
+          persist-credentials: false
 
       - name: "Get if running student version"
         id: student_check
         shell: bash
+        env:
+          MAPDL_VERSION: ${{ inputs.mapdl-version }}
         run: |
-          if [[ "${{ inputs.mapdl-version }}" == *"student"* ]]; 
+          if [[ "${MAPDL_VERSION}" == *"student"* ]]; 
             then export ON_STUDENT=true; export TAG_STUDENT="student";
             else export ON_STUDENT=false; export TAG_STUDENT="non-student";
           fi
 
-          if [[ "${{ inputs.mapdl-version }}" == *"cicd"* ]]; then
+          if [[ "${MAPDL_VERSION}" == *"cicd"* ]]; then
             echo "CICD MAPDL version detected, testing DPF backend for results module.";
             echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
           fi
@@ -232,6 +236,9 @@ jobs:
           ON_CONSOLE: ${{ inputs.on-console }}
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
           file_name: ${{ inputs.file-name }}
+          PYTEST_ARGUMENTS: "${{ env.PYTEST_ARGUMENTS }}"
+          MAPDL_VERSION: ${{ inputs.mapdl-version }}
+          PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
@@ -240,16 +247,16 @@ jobs:
           # Because there is no 'ansys-tools-path' we need to input the
           # executable path with the env var: PYMAPDL_MAPDL_EXEC.
 
-          if [[ "${{ inputs.mapdl-version }}" == *"latest-ubuntu"* ]] ; then
+          if [[ "${MAPDL_VERSION}" == *"latest-ubuntu"* ]] ; then
             version=${{ inputs.latest-version }}
           else
-            version=$(echo "${{ inputs.mapdl-version }}" | head -c 5 | tail -c 4 | tr -d '.')
+            version=$(echo "${MAPDL_VERSION}" | head -c 5 | tail -c 4 | tr -d '.')
           fi;
 
           echo "Version: $version"
 
           # If minimal is true, we need to set the executable path.
-          if [[ "${{ inputs.testing-minimal }}" == "true" ]]; then
+          if [[ "${ON_MINIMAL}" == "true" ]]; then
             echo "PYMAPDL_MAPDL_EXEC: $PYMAPDL_MAPDL_EXEC"
             export PYMAPDL_MAPDL_EXEC=/ansys_inc/v"$version"/ansys/bin/ansys"$version"
             export cmd="pytest"
@@ -260,8 +267,8 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           unset PYMAPDL_PORT
 
-          $cmd ${{ inputs.pytest-arguments }} \
-            ${{ env.PYTEST_ARGUMENTS }} \
+          $cmd ${PYTEST_INPUT_ARGUMENTS} \
+            ${PYTEST_ARGUMENTS} \
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml \
             --log-file=pytest.log \

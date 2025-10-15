@@ -37,22 +37,30 @@ jobs:
 
       - name: "Settings"
         id: settings
+        env:
+          event_name: ${{ github.event_name }}
+          inputs_user: ${{ inputs.user }}
+          inputs_html_url: ${{ inputs.html_url }}
+          inputs_pr: ${{ inputs.pr }}
+          inputs_commentid: ${{ inputs.commentid }}
+          github_login: ${{ github.event.comment.user.login }}
+          github_html_url: ${{ github.event.comment.html_url }}
+          github_number: ${{ github.event.issue.number }}
+          github_id: ${{ github.event.comment.id }}
         run: |
-          export event_name=${{ github.event_name }}
-
           if [[ $event_name == "workflow_dispatch" ]] ; then
             echo "On workflow dispatch"
-            echo "user=${{ inputs.user }}" >> $GITHUB_OUTPUT
-            echo "html_url=${{ inputs.html_url }}" >> $GITHUB_OUTPUT
-            echo "pull_request=${{ inputs.pr }}" >> $GITHUB_OUTPUT
-            echo "commentid=${{ inputs.commentid }}" >> $GITHUB_OUTPUT
+            echo "user=${inputs_user}" >> $GITHUB_OUTPUT
+            echo "html_url=${inputs_html_url}" >> $GITHUB_OUTPUT
+            echo "pull_request=${inputs_pr}" >> $GITHUB_OUTPUT
+            echo "commentid=${inputs_commentid}" >> $GITHUB_OUTPUT
 
           else
             echo "On $event_name"
-            echo "user=${{ github.event.comment.user.login }}" >> $GITHUB_OUTPUT
-            echo "html_url=${{ github.event.comment.html_url }}" >> $GITHUB_OUTPUT
-            echo "pull_request=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
-            echo "commentid=${{ github.event.comment.id }}" >> $GITHUB_OUTPUT
+            echo "user=${github_login}" >> $GITHUB_OUTPUT
+            echo "html_url=${github_html_url}" >> $GITHUB_OUTPUT
+            echo "pull_request=${github_number}" >> $GITHUB_OUTPUT
+            echo "commentid=${github_id}" >> $GITHUB_OUTPUT
 
           fi;
 

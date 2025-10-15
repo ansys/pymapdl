@@ -43,14 +43,16 @@ runs:
       id: get_user
       env:
         type_event: ${{ inputs.type_event }}
+        login: ${{ github.event.pull_request.user.login }}
+        user: ${{ github.actor }}
       shell: bash
       run: |
         if [[ $type_event ]]; then
           echo "Event type: $type_event"
           echo "event_type=$( echo "$type_event" )" >> $GITHUB_OUTPUT
-          export user=${{ github.event.pull_request.user.login }}
+          export user=${login}
         else
-          export user=${{ github.actor }}
+          export user=${user}
         fi
         echo "This PR has been opened by: $user"
         echo "user=$( echo "$user" )" >> $GITHUB_OUTPUT
