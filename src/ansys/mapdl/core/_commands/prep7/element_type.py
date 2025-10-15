@@ -22,6 +22,7 @@
 
 from ansys.mapdl.core._commands import parse
 
+
 class ElementType:
 
     def dof(self, lab1: str = "", lab2: str = "", lab3: str = "", lab4: str = "", lab5: str = "", lab6: str = "", lab7: str = "", lab8: str = "", lab9: str = "", lab10: str = "", **kwargs):

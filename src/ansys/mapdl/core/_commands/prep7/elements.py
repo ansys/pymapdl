@@ -22,6 +22,7 @@
 
 from ansys.mapdl.core._commands import parse
 
+
 class Elements:
 
     def afsurf(self, sarea: str = "", tline: str = "", **kwargs):

@@ -22,6 +22,7 @@
 
 from ansys.mapdl.core._commands import parse
 
+
 class Keypoints:
 
     def gsum(self, **kwargs):
