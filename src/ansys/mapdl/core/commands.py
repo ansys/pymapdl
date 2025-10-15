@@ -334,25 +334,22 @@ class Prep7Commands(
     prep7.coupled_dof.CoupledDof,
     prep7.cross_sections.CrossSections,
     prep7.data_tables.DataTables,
+    prep7.database.Database,
+    prep7.element_type.ElementType,
+    prep7.elements.Elements,
+    prep7.hard_points.HardPoints,
+    prep7.keypoints.KeyPoints,
+    prep7.lines.Lines,
+    prep7.materials.Materials,
     prep7.meshing.Meshing,
+    prep7.morphing.Morphing,
 ):
     pass
 
 
 class PreprocessorCommands(
-    preproc.database.Database,
-    preproc.explicit_dynamics.ExplicitDynamics,
-    preproc.lines.Lines,
     preproc.nodes.Nodes,
-    preproc.keypoints.KeyPoints,
     preproc.real_constants.RealConstants,
-    preproc.digitizing.Digitizing,
-    preproc.element_type.ElementType,
-    preproc.elements.Elements,
-    preproc.hard_points.HardPoints,
-    preproc.material_data_tables.MaterialDataTables,
-    preproc.morphing.Morphing,
-    preproc.materials.Materials,
     preproc.primitives.Primitives,
     preproc.sections.Sections,
     preproc.special_purpose.SpecialPurpose,

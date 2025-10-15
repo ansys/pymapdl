@@ -1,15 +1,19 @@
-.. _ref_hard_points_commands_api:
 
-***********
-Hard points
-***********
+.. _ref_hard_points:
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to create, modify, list, etc., hard points.
+HardPoints
+==========
+
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.hard_points
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.hard_points.HardPoints
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.hptcreate
-   Mapdl.hptdelete
+
+   HardPoints.hptcreate
+   HardPoints.hptdelete

@@ -40,11 +40,20 @@ Prep7
 
    areas
    booleans
+   meshing
+   database
+   elements
    cross_sections
+   lines
    data_tables
    constraint_equations
    constraint_equations_
    coupled_dof
+   morphing
+   element_type
+   materials
    _status
+   keypoints
+   hard_points
    artificially_matched_layers
-   meshing
+

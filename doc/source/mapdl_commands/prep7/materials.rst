@@ -1,31 +1,40 @@
-.. _ref_materials_commands_api:
 
-*********
+.. _ref_materials:
+
+
 Materials
-*********
+=========
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to define the linear material properties.
+.. currentmodule:: ansys.mapdl.core._commands.prep7.materials
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.materials.Materials
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.emunit
-   Mapdl.mp
-   Mapdl.mpamod
-   Mapdl.mpchg
-   Mapdl.mpcopy
-   Mapdl.mpdata
-   Mapdl.mpdele
-   Mapdl.mpdres
-   Mapdl.mplib
-   Mapdl.mplist
-   Mapdl.mpplot
-   Mapdl.mpread
-   Mapdl.mptemp
-   Mapdl.mptgen
-   Mapdl.mptres
-   Mapdl.mpwrite
-   Mapdl.tbft
-   Mapdl.uimp
+
+   Materials.emunit
+   Materials.fc
+   Materials.fccheck
+   Materials.fcdele
+   Materials.fclist
+   Materials.mp
+   Materials.mpamod
+   Materials.mpchg
+   Materials.mpcopy
+   Materials.mpdata
+   Materials.mpdele
+   Materials.mpdres
+   Materials.mplib
+   Materials.mplist
+   Materials.mpplot
+   Materials.mpread
+   Materials.mptemp
+   Materials.mptgen
+   Materials.mptres
+   Materials.mpwrite
+   Materials.tbfplot
+   Materials.tbft
+   Materials.uimp
