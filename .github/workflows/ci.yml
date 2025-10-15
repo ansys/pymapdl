@@ -25,9 +25,6 @@ env:
   PACKAGE_NAME: 'ansys-mapdl-core'
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
-  MEILISEARCH_API_KEY: ${{ secrets.MEILISEARCH_API_KEY }}
-  MEILISEARCH_PUBLIC_API_KEY: ${{ secrets.MEILISEARCH_PUBLIC_API_KEY }}
-
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
