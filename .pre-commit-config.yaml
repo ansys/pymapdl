@@ -33,7 +33,7 @@ repos:
     - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
-  rev: 6.1.0
+  rev: 7.0.0
   hooks:
   - id: isort
 
@@ -90,7 +90,7 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.34.0
+  rev: 0.34.1
   hooks:
     - id: check-github-workflows
 
