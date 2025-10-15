@@ -49,7 +49,7 @@ jobs:
     name: Adding assignee if there is none.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions-ecosystem/action-add-assignees@v1
+      - uses: actions-ecosystem/action-add-assignees@ce5019e63cc4f35aba27308dc88d19c8f3686747 #v1.0.0
         if: |
           (
           github.event_name == 'pull_request' &&
@@ -186,7 +186,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v5
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
 
       - name: Build matrix for remote testing
         uses: ./.github/actions/build-matrix
@@ -222,7 +222,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v5
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
 
       - name: Build matrix for local, minimal and console testing
         uses: ./.github/actions/build-matrix
@@ -315,7 +315,7 @@ jobs:
       ON_LOCAL: TRUE
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
 
       - uses: ./.github/actions/test_windows
         with:
@@ -408,7 +408,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Open issue"
-        uses: jayqi/failed-build-issue-action@v1
+        uses: jayqi/failed-build-issue-action@1a893bbf43ef1c2a8705e2b115cd4f0fe3c5649b #v1.2.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           title-template: "Failed scheduled build"
@@ -426,7 +426,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
 
       - name: "Run Julia testing"
         uses: ./.github/actions/test-julia
@@ -443,7 +443,7 @@ jobs:
     runs-on: ubuntu-latest          
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v5
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
 
       - name: "Run Pytest-summary action"
         uses: ./.github/actions/pytest-summary

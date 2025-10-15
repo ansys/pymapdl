@@ -55,7 +55,7 @@ runs:
         echo "This PR has been opened by: $user"
         echo "user=$( echo "$user" )" >> $GITHUB_OUTPUT
 
-    - uses: tspascoal/get-user-teams-membership@v3
+    - uses: tspascoal/get-user-teams-membership@57e9f42acd78f4d0f496b3be4368fc5f62696662 #v3.0.0
       id: is_organization_member
       if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'pre-commit-ci[bot]' }}
       with:
