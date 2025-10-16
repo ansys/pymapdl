@@ -300,8 +300,6 @@ jobs:
 
       - name: Clone head repo and checkout branch. Resolve conflicts if needed.
         if : ${{ env.CONTINUE == 'true' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
         run: |
           echo "Setting up git configuration"
           git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
