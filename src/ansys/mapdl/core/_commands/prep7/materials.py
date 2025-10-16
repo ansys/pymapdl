@@ -1305,11 +1305,150 @@ class Materials:
         command = f"TBFPLOT,{matid},{curvefitname},{expdatid},{colx},{coly1},{coly2}"
         return self.run(command, **kwargs)
 
-    def tbft(self, **kwargs):
+    def tbft(
+        self,
+        oper: str = "",
+        matid: str = "",
+        option1: str = "",
+        option2: str = "",
+        option3: str = "",
+        option4: str = "",
+        option5: str = "",
+        option6: str = "",
+        option7: str = "",
+        option10: str = "",
+        **kwargs,
+    ):
         r"""Performs `material curve-fitting
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/Hlp_AM_GMCF.html>`_ operations.
 
         Mechanical APDL Command: `TBFT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TBFT.html>`_
+
+        Parameters
+        ----------
+        oper : str
+            The operation to perform:
+
+            * ``Operation Set 1 (Curve-Fitting)`` - - - - - - - - - - - - - - - - - - - - -
+
+            * ``FADD`` - Define a constitutive model.
+
+            * ``FDEL`` - Delete a constitutive model.
+
+            * ``FSET`` - Write data related to a constitutive model to the database (same as :ref:`tb` command).
+
+            * ``SET`` - Initialize coefficients of a constitutive model for nonlinear curve-fitting procedure.
+
+            * ``CDEL`` - Deletes coefficients at current reference temperature. Applicable only for temperature-
+              dependent coefficients.
+
+            * ``AINI`` - Automatically initialize coefficients based on elastic properties and experimental
+              data.
+
+            * ``SOLVE`` - Solve for coefficients.
+
+            * ``PSOLVE`` - Custom multistep solve for coefficients.
+
+            * ``FIX`` - Fix (hold constant) the coefficient you specify in ``Option4``.
+
+            * ``Operation Set 2 (Experimental Data)`` - - - - - - - - - - - - - - - - - - - - -
+
+            * ``EADD`` - Add experimental data.
+
+            * ``EDEL`` - Delete experimental data.
+
+            * ``Other Operations`` - - - - - - - - - - - - - - - - - - - - -
+
+            * ``LIST`` - List all data associated with the material model represented by the material ID number
+              ( ``MATID`` ).
+
+        matid : str
+            Material reference identification number. (Same as :ref:`tb`, ``MATID``.) Valid value is any
+            number ``n``, where 0 < ``n`` < 100,000. Default = 1.
+
+        option1 : str
+            AML - For curve-fitting function operations ( ``Oper`` = Operation Set 1), this value specifies
+            the category.
+
+            UNIA - For adding or deleting your experiment (Operation Set 2), this value specifies the
+            experimental data type.
+
+        option2 : str
+            For curve-fitting function operations ( ``Oper`` = Operation Set 1), this value specifies the
+            constitutive model type. The only valid value is GENR (generic).
+
+            To obtain experimental data ( ``Oper`` = EADD in Operation Set 2) from a file, specify any valid
+            file name. (You can either specify the entire ``path`` \ ``filename`` . ``extension`` string
+            here and leave ``Option3`` and ``Option4`` blank, or specify ``filename`` here, ``extension`` in
+            ``Option3``, and ``path`` in ``Option4``.)
+
+        option3 : str
+            For curve-fitting function operations ( ``Oper`` = Operation Set 1), specify a unique name for
+            your curve-fitting model.
+
+            For obtaining experimental data ( Oper = EADD in Operation Set 2) from a file specified in
+            Option2, specify the file extension.
+
+        option4 : str
+            When fixing a specific coefficient to a desired value ( ``Oper`` = FIX), this value specifies
+            the index of that coefficient. Valid values vary from 1 to ``n``, where ``n`` is the total
+            number of coefficients. Default = 1.
+
+            For ``Oper`` = SET, see :ref:`tmftableoperset`.
+
+            You can also specify ``TREF`` to indicate the reference temperature, or ``COMP`` for a
+            partial/complete solution (only for bulk, only for shear, or all coefficients).
+
+            If ``Oper`` = SOLVE, this value specifies the curve-fitting procedure. Valid values are 0 for
+            non- normalized least squares curve-fitting procedure, and 1 for normalized least squares curve-
+            fitting procedure.
+
+            For obtaining experimental data ( Oper = EADD) from a file specified in Option2, specify the
+            path in which the file resides.
+
+        option5 : str
+            For ``Oper`` = SET, refer to the following table:
+
+            .. _tmftableoperset:
+
+            Set Operations
+            **************
+
+            .. flat-table::
+               :header-rows: 1
+
+               * - Purpose
+                 - Option4
+                 - Option5
+               * - Set the value of the coefficient
+                 - Index of coefficient
+                 - Value of coefficient
+               * - Set temperature dependency ON/OFF
+                 - TDEP
+                 - 1 -- ON   0 -- OFF
+               * - Set reference temperature
+                 - TREF
+                 - Temperature value
+
+            If ``Oper`` = SOLVE, use this value to specify the number of iterations to be used in the
+            calculation of the coefficients. Valid value is any positive integer. Default = 1000.
+
+            If you are specifying a coefficient to be held constant ( ``Oper`` = FIX):
+
+            * 1 - Fix the specified coefficient.
+            * 0 - Allow the specified coefficient to vary (disable fixing).
+
+        option6 : str
+            If ``Oper`` = SOLVE, specify the allowed tolerance in residual change to stop an iteration.
+            Valid value is 0.0 to 1.0. Default = 0.0.
+
+        option7 : str
+            If ``Oper`` = SOLVE, specify the allowed tolerance in coefficient change to stop an iteration.
+            Valid value is 0 to 1. Default = 0.
+
+        option10 : str
+            If ``Oper`` = SOLVE, enables parameter scaling when set to 1. Default = 0. Used for creep
+            material curve-fitting.
 
         Notes
         -----
@@ -2060,7 +2199,7 @@ class Materials:
         database file. You must therefore rerun the curve-fitting analysis and then replot ( :ref:`tbfplot`
         ).
         """
-        command = "TBFT"
+        command = f"TBFT,{oper},{matid},{option1},{option2},{option3},{option4},{option5},{option6},{option7},,,{option10}"
         return self.run(command, **kwargs)
 
     def uimp(
