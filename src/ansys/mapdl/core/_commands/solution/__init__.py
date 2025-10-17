@@ -21,7 +21,11 @@
 # SOFTWARE.
 
 from . import (
-    all_others,
+    _gap_conditions,
+    _nonlinear_options,
+    _status,
+    additive_manufacturing,
+    analysis_2d_to_3d,
     analysis_options,
     birth_and_death,
     dynamic_options,

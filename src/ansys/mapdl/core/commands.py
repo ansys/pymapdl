@@ -467,6 +467,11 @@ class SessionCommands(
 
 
 class SolutionCommands(
+    solution._gap_conditions.GapConditions,
+    solution._nonlinear_options.NonlinearOptions,
+    solution._status.Status,
+    solution.additive_manufacturing.AdditiveManufacturing,
+    solution.analysis_2d_to_3d.Analysis2DTo3D,
     solution.analysis_options.AnalysisOptions,
     solution.birth_and_death.BirthAndDeath,
     solution.dynamic_options.DynamicOptions,
