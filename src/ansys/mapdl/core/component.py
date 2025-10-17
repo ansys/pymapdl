@@ -43,6 +43,7 @@ from numpy.typing import NDArray
 
 from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import ComponentDoesNotExits, ComponentIsNotSelected
+from ansys.mapdl.core.misc import is_float
 
 if TYPE_CHECKING:  # pragma: no cover
     import logging
@@ -577,7 +578,7 @@ def _parse_cmlist_indiv(
 
     # Joining them together and giving them format.
     items = items.replace("\n", "  ").split()
-    items = [int(each) for each in items]
+    items = [int(each) for each in items if is_float(each)]
 
     return items
 
