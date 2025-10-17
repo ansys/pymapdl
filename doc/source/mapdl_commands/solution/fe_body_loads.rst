@@ -1,27 +1,30 @@
-.. _ref_fe_body_loads_commands_api:
 
-*************
-FE body loads
-*************
+.. _ref_fe_body_loads:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to define body loads on the finite element model.
+FeBodyLoads
+===========
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.fe_body_loads
+
+.. autoclass:: ansys.mapdl.core._commands.solution.fe_body_loads.FeBodyLoads
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.bf
-   Mapdl.bfcum
-   Mapdl.bfdele
-   Mapdl.bfe
-   Mapdl.bfecum
-   Mapdl.bfedele
-   Mapdl.bfelist
-   Mapdl.bfescal
-   Mapdl.bflist
-   Mapdl.bfscale
-   Mapdl.bfunif
-   Mapdl.ldread
-   Mapdl.rimport
-   Mapdl.tunif
+
+   FeBodyLoads.bf
+   FeBodyLoads.bfcum
+   FeBodyLoads.bfdele
+   FeBodyLoads.bfe
+   FeBodyLoads.bfecum
+   FeBodyLoads.bfedele
+   FeBodyLoads.bfelist
+   FeBodyLoads.bfescal
+   FeBodyLoads.bflist
+   FeBodyLoads.bfport
+   FeBodyLoads.bfscale
+   FeBodyLoads.bfunif
+   FeBodyLoads.tunif

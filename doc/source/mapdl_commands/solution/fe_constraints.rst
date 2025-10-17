@@ -1,26 +1,31 @@
-.. _ref_fe_constraints_commands_api:
 
-**************
-FE constraints
-**************
+.. _ref_fe_constraints:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to define constraints on the finite element model.
+FeConstraints
+=============
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.fe_constraints
+
+.. autoclass:: ansys.mapdl.core._commands.solution.fe_constraints.FeConstraints
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.d
-   Mapdl.dcum
-   Mapdl.ddele
-   Mapdl.dflx
-   Mapdl.dj
-   Mapdl.djdele
-   Mapdl.djlist
-   Mapdl.dlist
-   Mapdl.dscale
-   Mapdl.dsym
-   Mapdl.dval
-   Mapdl.gsbdata
-   Mapdl.gslist
+
+   FeConstraints.d
+   FeConstraints.dcum
+   FeConstraints.ddele
+   FeConstraints.dflx
+   FeConstraints.dj
+   FeConstraints.djdele
+   FeConstraints.djlist
+   FeConstraints.dlist
+   FeConstraints.dscale
+   FeConstraints.dsym
+   FeConstraints.dval
+   FeConstraints.gsbdata
+   FeConstraints.gslist
+   FeConstraints.ldread

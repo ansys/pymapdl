@@ -1,26 +1,31 @@
-.. _ref_inertia_commands_api:
 
-*******
+.. _ref_inertia:
+
+
 Inertia
-*******
+=======
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to define inertial loads on the model.
+.. currentmodule:: ansys.mapdl.core._commands.solution.inertia
+
+.. autoclass:: ansys.mapdl.core._commands.solution.inertia.Inertia
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.acel
-   Mapdl.cgloc
-   Mapdl.cgomga
-   Mapdl.cmacel
-   Mapdl.cmdomega
-   Mapdl.cmomega
-   Mapdl.cmrotate
-   Mapdl.coriolis
-   Mapdl.dcgomg
-   Mapdl.domega
-   Mapdl.irlf
-   Mapdl.omega
-   Mapdl.synchro
+
+   Inertia.acel
+   Inertia.airl
+   Inertia.cgloc
+   Inertia.cgomga
+   Inertia.cmacel
+   Inertia.cmdomega
+   Inertia.cmomega
+   Inertia.cmrotate
+   Inertia.coriolis
+   Inertia.dcgomg
+   Inertia.domega
+   Inertia.irlf
+   Inertia.omega
+   Inertia.synchro
