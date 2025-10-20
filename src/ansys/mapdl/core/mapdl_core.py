@@ -1723,7 +1723,12 @@ class _MapdlCore(Commands):
         self.igesout(filename, att=1, mute=True)
         return filename
 
-    def open_gui(self, include_result=None, inplace=None):  # pragma: no cover
+    def open_gui(
+        self,
+        include_result: bool | None = None,
+        inplace: bool | None = None,
+        exec_file: str | None = None,
+    ):  # pragma: no cover
         """Save the existing database and open it up in the MAPDL GUI.
 
         Parameters
@@ -1735,8 +1740,14 @@ class _MapdlCore(Commands):
         inplace : bool, optional
             Open the GUI on the current MAPDL working directory, instead of
             creating a new temporary directory and coping the results files
-            over there.  If ``True``, ignores ``include_result`` parameter.  By
+            over there.  If ``True``, ignores ``include_result`` parameter. By
             default, this ``False``.
+
+        exec_file: str, optional
+            Path to the MAPDL executable. If not provided, it will try to obtain
+            it using the `ansys.tools.path` package. If this package is not
+            available, it will use the same executable as the current MAPDL
+            instance.
 
         Examples
         --------
@@ -1767,7 +1778,7 @@ class _MapdlCore(Commands):
         >>> mapdl.eplot()
         """
         # lazy load here to avoid circular import
-        from ansys.mapdl.core.launcher import get_mapdl_path
+        from ansys.mapdl.core import _HAS_ATP
 
         if not self._local:
             raise MapdlRuntimeError(
@@ -1844,7 +1855,24 @@ class _MapdlCore(Commands):
         # issue system command to run ansys in GUI mode
         cwd = os.getcwd()
         os.chdir(run_dir)
-        exec_file = self._start_parm.get("exec_file", get_mapdl_path(allow_input=False))
+
+        if not exec_file:
+            if _HAS_ATP:
+                from ansys.mapdl.core.launcher import get_mapdl_path
+
+                exec_file_ = get_mapdl_path(allow_input=False)
+            else:
+                exec_file_ = None
+
+            exec_file = self._start_parm.get("exec_file", exec_file_)
+
+        if not exec_file:
+            raise MapdlRuntimeError(
+                "The path to the MAPDL executable was not found. "
+                "Please set it using the 'exec_file' parameter when "
+                "launching MAPDL."
+            )
+
         nproc = self._start_parm.get("nproc", 2)
         add_sw = self._start_parm.get("additional_switches", "")
 
