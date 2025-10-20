@@ -9,10 +9,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   linkcheck:
     name: "Check Links"
     uses: ./.github/workflows/doc-build.yml
+    permissions:
+      contents: read
+      packages: read
     with:
       builder: linkcheck
       build_pdf: false
@@ -30,9 +35,11 @@ jobs:
     needs: [linkcheck]
     if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: "Open issue"
-        uses: jayqi/failed-build-issue-action@v1.2
+        uses: jayqi/failed-build-issue-action@1a893bbf43ef1c2a8705e2b115cd4f0fe3c5649b #v1.2.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           title-template: "Failed scheduled linkcheck 🔗 build"
