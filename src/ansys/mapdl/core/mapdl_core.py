@@ -1858,7 +1858,7 @@ class _MapdlCore(Commands):
 
         if not exec_file:
             if _HAS_ATP:
-                from ansys.mapdl.core.launcher import get_mapdl_path
+                from ansys.mapdl.core import get_mapdl_path
 
                 exec_file_ = get_mapdl_path(allow_input=False)
             else:
