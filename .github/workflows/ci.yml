@@ -131,14 +131,14 @@ jobs:
 
       - name: "Importing library"
         env:
-          PYTHON_ACTIVATE: ${{ steps.build-wheelhouse.outputs.python-path }}
+          PYTHON_ACTIVATE: ${{ steps.build-wheelhouse.outputs.activate-venv }}
         run: |
           ${PYTHON_ACTIVATE}
           python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Checking plotting support"
         env:
-          PYTHON_ACTIVATE: ${{ steps.build-wheelhouse.outputs.python-path }}
+          PYTHON_ACTIVATE: ${{ steps.build-wheelhouse.outputs.activate-venv }}
         run: |
           ${PYTHON_ACTIVATE}
           python -c "from pyvista.plotting import system_supports_plotting; print('System support plotting ' + str(system_supports_plotting()))"
