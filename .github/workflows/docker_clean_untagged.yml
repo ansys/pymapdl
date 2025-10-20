@@ -8,14 +8,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: write
-  packages: write
+permissions: {}
 
 jobs:
   cleanup:
     name: Cleaning unnecessary packages
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     env:
       PACKAGE_DELETION_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
