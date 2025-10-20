@@ -22,6 +22,8 @@ on:
   issue_comment:                                     
     types: [created, edited]
 
+permissions: {}
+
 jobs:
   autoapprove:
     # This job only runs for pull request comments
@@ -37,28 +39,36 @@ jobs:
 
       - name: "Settings"
         id: settings
+        env:
+          event_name: ${{ github.event_name }}
+          inputs_user: ${{ inputs.user }}
+          inputs_html_url: ${{ inputs.html_url }}
+          inputs_pr: ${{ inputs.pr }}
+          inputs_commentid: ${{ inputs.commentid }}
+          github_login: ${{ github.event.comment.user.login }}
+          github_html_url: ${{ github.event.comment.html_url }}
+          github_number: ${{ github.event.issue.number }}
+          github_id: ${{ github.event.comment.id }}
         run: |
-          export event_name=${{ github.event_name }}
-
           if [[ $event_name == "workflow_dispatch" ]] ; then
             echo "On workflow dispatch"
-            echo "user=${{ inputs.user }}" >> $GITHUB_OUTPUT
-            echo "html_url=${{ inputs.html_url }}" >> $GITHUB_OUTPUT
-            echo "pull_request=${{ inputs.pr }}" >> $GITHUB_OUTPUT
-            echo "commentid=${{ inputs.commentid }}" >> $GITHUB_OUTPUT
+            echo "user=${inputs_user}" >> $GITHUB_OUTPUT
+            echo "html_url=${inputs_html_url}" >> $GITHUB_OUTPUT
+            echo "pull_request=${inputs_pr}" >> $GITHUB_OUTPUT
+            echo "commentid=${inputs_commentid}" >> $GITHUB_OUTPUT
 
           else
             echo "On $event_name"
-            echo "user=${{ github.event.comment.user.login }}" >> $GITHUB_OUTPUT
-            echo "html_url=${{ github.event.comment.html_url }}" >> $GITHUB_OUTPUT
-            echo "pull_request=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
-            echo "commentid=${{ github.event.comment.id }}" >> $GITHUB_OUTPUT
+            echo "user=${github_login}" >> $GITHUB_OUTPUT
+            echo "html_url=${github_html_url}" >> $GITHUB_OUTPUT
+            echo "pull_request=${github_number}" >> $GITHUB_OUTPUT
+            echo "commentid=${github_id}" >> $GITHUB_OUTPUT
 
           fi;
 
       - name: React to comment
       #https://github.com/ansys/pymapdl/pull/2654#issuecomment-1889009514
-        uses: dkershner6/reaction-action@v2 # You can also use a specific version, e.g. v2.0.0
+        uses: dkershner6/reaction-action@97ede302a1b145b3739dec3ca84a489a34ef48b5 #v2.2.1
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           commentId: ${{ steps.settings.outputs.commentid }} # Optional if the trigger is a comment. Use another action to find this otherwise.
@@ -71,7 +81,7 @@ jobs:
           export IMG_MSG=$(curl -s 'https://us-central1-lgtm-reloaded.cloudfunctions.net/lgtm' | jq -r '.markdown' | grep -v 'Powered By GIPHY')
           echo "IMG_MSG=$IMG_MSG" >> $GITHUB_OUTPUT
 
-      - uses: hmarr/auto-approve-action@v4
+      - uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 #v4.0.0
         with:
           review-message: |
             :white_check_mark: Approving this PR because [${{ steps.settings.outputs.user }}](https://github.com/${{ steps.settings.outputs.user }}) said so in [here](${{ steps.settings.outputs.html_url }}) :grimacing:
