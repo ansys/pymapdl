@@ -22,6 +22,8 @@ on:
   issue_comment:                                     
     types: [created, edited]
 
+permissions: {}
+
 jobs:
   autoapprove:
     # This job only runs for pull request comments

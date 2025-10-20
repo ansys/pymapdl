@@ -108,10 +108,15 @@ on:
           GitHub username for login into ghcr.io.
         required: true
 
+permissions: {}
+
 jobs:
   test-local:
     name: Test MAPDL locally
     runs-on: ${{ inputs.runner }}
+    permissions:
+      contents: read
+      packages: read
     env:
       ON_CI: True
       ON_LOCAL: true
@@ -127,7 +132,7 @@ jobs:
       DATAPROCESSING_DEBUG: /home/mapdl/dpf_logs
 
     container:
-      image: "${{ inputs.package-registry }}:${{ inputs.mapdl-version }}"
+      image: "${{ inputs.package-registry }}:${{ inputs.mapdl-version }}" # zizmor: ignore[unpinned-images]
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
         username: ${{ secrets.username }}
@@ -239,6 +244,7 @@ jobs:
           PYTEST_ARGUMENTS: "${{ env.PYTEST_ARGUMENTS }}"
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
           PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
+          LATEST_VERSION: "${{ inputs.latest-version }}"
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
@@ -248,7 +254,7 @@ jobs:
           # executable path with the env var: PYMAPDL_MAPDL_EXEC.
 
           if [[ "${MAPDL_VERSION}" == *"latest-ubuntu"* ]] ; then
-            version=${{ inputs.latest-version }}
+            version=${LATEST_VERSION}
           else
             version=$(echo "${MAPDL_VERSION}" | head -c 5 | tail -c 4 | tr -d '.')
           fi;

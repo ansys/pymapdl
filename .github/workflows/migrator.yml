@@ -52,10 +52,7 @@ on:
         required: true
         type: string
 
-
-permissions:
-  contents: write
-  pull-requests: read
+permissions: {}
 
 jobs:
   migrate:
@@ -66,6 +63,9 @@ jobs:
         (contains(github.event.comment.body, '@pyansys-ci-bot migrate') || contains(github.event.comment.body, '@pyansys-ci-bot sync') )
         ) || ( github.event_name == 'workflow_dispatch' )
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
 
       - name: Setup the configuration

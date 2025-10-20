@@ -5,10 +5,14 @@ on:
     types:
       - closed
 
+permissions: {}
+
 jobs:
   cleanup:
     name: Cleanup caches
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     steps:
       - name: Check out code
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0

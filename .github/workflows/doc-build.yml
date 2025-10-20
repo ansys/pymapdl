@@ -63,10 +63,15 @@ on:
           Password for the GitHub container registry.
         required: true
 
+permissions: {}
+
 jobs:
   doc-build:
     name: Build documentation
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     env:
       ON_CI: True
       ON_DOCUMENTATION: TRUE
@@ -230,9 +235,11 @@ jobs:
 
       - name: "Build documentation"
         shell: bash
+        env:
+          BUILDER: ${{ inputs.builder }}
         run: |
           export PYTHONFAULTHANDLER=1
-          xvfb-run make -C doc ${{ inputs.builder }} SPHINXOPTS="-j auto" | tee doc_build.log
+          xvfb-run make -C doc ${BUILDER} SPHINXOPTS="-j auto" | tee doc_build.log
 
       - name: "Substitute defective GIF"
         shell: bash

@@ -46,11 +46,15 @@ on:
           Token for Codecov.
         required: true
 
+permissions: {}
 
 jobs:
   test-remote:
     name: Test PyMAPDL with remote MAPDL instances
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     env:
       ON_CI: True
       ON_LOCAL: FALSE
