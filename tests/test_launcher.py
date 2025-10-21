@@ -2182,7 +2182,7 @@ def test_env_vars_with_slurm_bootstrap(monkeypatch):
                 exec_file="/fake/path/to/ansys242",
                 nproc=2,
             )
-        except Exception:
+        except Exception:  # nosec B703
             # We expect this to fail, we just want to capture env_vars
             pass
 
@@ -2210,7 +2210,6 @@ def test_mapdl_grpc_launch_uses_provided_start_parm():
         "port": 50052,
         "additional_switches": "",
         "mode": "grpc",
-        "run_location": "/tmp/original",
     }
     mapdl_grpc._env_vars = None
     mapdl_grpc._connect = MagicMock()
@@ -2225,7 +2224,6 @@ def test_mapdl_grpc_launch_uses_provided_start_parm():
         "port": 50053,
         "additional_switches": "-custom",
         "mode": "grpc",
-        "run_location": "/tmp/custom",
         "env_vars": {"CUSTOM_VAR": "custom_value"},
     }
 
@@ -2267,8 +2265,6 @@ def test_open_gui_with_mocked_call(mapdl, fake_local_mapdl):
         stack.enter_context(patch.object(mapdl, "_local", True))
 
         # Mock pathlib.Path to return a mock that has is_file() return True
-        from unittest.mock import MagicMock
-
         mock_path = MagicMock()
         mock_path.is_file.return_value = True
         stack.enter_context(
@@ -2291,7 +2287,7 @@ def test_open_gui_with_mocked_call(mapdl, fake_local_mapdl):
         try:
             # Call open_gui with custom exec_file
             mapdl.open_gui(exec_file=custom_exec_file, inplace=True)
-        except Exception:
+        except Exception:  # nosec B703
             # open_gui might fail for various reasons after the call
             # We're only interested in verifying the call arguments
             pass
@@ -2309,7 +2305,6 @@ def test_open_gui_with_mocked_call(mapdl, fake_local_mapdl):
 
 def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
     """Test complete open_gui flow: call, _launch, and reconnection methods are invoked."""
-    from unittest.mock import patch
 
     custom_exec_file = "/custom/test/path/ansys242"
 
@@ -2334,8 +2329,6 @@ def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
         # Mock _local to True so open_gui doesn't raise "can only be called from local"
         with patch.object(mapdl, "_local", True):
             # Mock pathlib.Path to return a mock that has is_file() return True
-            from unittest.mock import MagicMock
-
             mock_path = MagicMock()
             mock_path.is_file.return_value = True
             with patch(
@@ -2359,7 +2352,7 @@ def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
                         try:
                             # Call open_gui with custom exec_file
                             mapdl.open_gui(exec_file=custom_exec_file, inplace=True)
-                        except Exception:
+                        except Exception:  # nosec B703
                             # Some methods might fail, but we verify they were called
                             pass
 
