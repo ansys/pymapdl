@@ -2129,3 +2129,222 @@ def test_handle_launch_exceptions(msg, match, exception_type):
     exception = exception_type(msg)
     with pytest.raises(exception_type, match=match):
         raise handle_launch_exceptions(exception)
+
+
+def test_env_vars_propagation_in_launch_mapdl():
+    """Test that env_vars are propagated to start_parm in launch_mapdl."""
+    env_vars = {"MY_VAR": "test_value", "ANOTHER_VAR": "another_value"}
+
+    args = launch_mapdl(
+        env_vars=env_vars,
+        _debug_no_launch=True,
+    )
+
+    # Check that env_vars are in the returned args
+    assert "env_vars" in args
+    assert args["env_vars"]["MY_VAR"] == "test_value"
+    assert args["env_vars"]["ANOTHER_VAR"] == "another_value"
+
+
+def test_env_vars_with_slurm_bootstrap(monkeypatch):
+    """Test that SLURM env_vars are set correctly when launch_on_hpc is True."""
+    # This test verifies that when replace_env_vars is used with launch_on_hpc,
+    # SLURM-specific environment variables are added
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+
+    env_vars_input = {"CUSTOM_VAR": "custom_value"}
+
+    # Capture what env_vars are passed to launch_grpc
+    captured_env_vars = None
+
+    def mock_launch_grpc(cmd, run_location, env_vars=None, **kwargs):
+        nonlocal captured_env_vars
+        captured_env_vars = env_vars
+        # Mock process object
+        from tests.test_launcher import get_fake_process
+
+        return get_fake_process("Submitted batch job 1001")
+
+    with (
+        patch("ansys.mapdl.core.launcher.launch_grpc", mock_launch_grpc),
+        patch("ansys.mapdl.core.launcher.send_scontrol") as mock_scontrol,
+        patch("ansys.mapdl.core.launcher.kill_job"),
+    ):
+        # Mock scontrol to avoid timeout
+        mock_scontrol.return_value = get_fake_process(
+            "JobState=RUNNING\nBatchHost=testhost\n"
+        )
+
+        try:
+            args = launch_mapdl(
+                launch_on_hpc=True,
+                replace_env_vars=env_vars_input,  # Use replace_env_vars instead of env_vars
+                exec_file="/fake/path/to/ansys242",
+                nproc=2,
+            )
+        except Exception:
+            # We expect this to fail, we just want to capture env_vars
+            pass
+
+    # Verify the env_vars that were passed to launch_grpc
+    assert captured_env_vars is not None
+    assert "CUSTOM_VAR" in captured_env_vars
+    assert captured_env_vars["CUSTOM_VAR"] == "custom_value"
+    assert captured_env_vars["ANS_MULTIPLE_NODES"] == "1"
+    assert captured_env_vars["HYDRA_BOOTSTRAP"] == "slurm"
+
+
+def test_mapdl_grpc_launch_uses_provided_start_parm():
+    """Test that MapdlGrpc._launch uses provided start_parm over instance _start_parm."""
+    from unittest.mock import MagicMock, Mock, patch
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    # Create mock instance
+    mapdl_grpc = Mock(spec=MapdlGrpc)
+    mapdl_grpc._exited = True
+    mapdl_grpc._local = True  # Add _local attribute
+    mapdl_grpc._start_parm = {
+        "exec_file": "/original/path/to/ansys242",
+        "jobname": "original_job",
+        "nproc": 2,
+        "ram": 1024,
+        "port": 50052,
+        "additional_switches": "",
+        "mode": "grpc",
+        "run_location": "/tmp/original",
+    }
+    mapdl_grpc._env_vars = None
+    mapdl_grpc._connect = MagicMock()
+    mapdl_grpc._mapdl_process = None  # Add _mapdl_process attribute
+
+    # Custom start_parm that should be used
+    custom_start_parm = {
+        "exec_file": "/custom/path/to/ansys242",
+        "jobname": "custom_job",
+        "nproc": 4,
+        "ram": 2048,
+        "port": 50053,
+        "additional_switches": "-custom",
+        "mode": "grpc",
+        "run_location": "/tmp/custom",
+        "env_vars": {"CUSTOM_VAR": "custom_value"},
+    }
+
+    # Mock the launch_grpc function to capture what parameters are used
+    # Note: launch_grpc is in launcher module, not mapdl_grpc module
+    with patch("ansys.mapdl.core.launcher.launch_grpc") as mock_launch_grpc:
+        from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as RealMapdlGrpc
+
+        # Bind the real _launch method
+        mapdl_grpc._launch = RealMapdlGrpc._launch.__get__(mapdl_grpc, type(mapdl_grpc))
+
+        # Call _launch with custom start_parm
+        mapdl_grpc._launch(start_parm=custom_start_parm, timeout=10)
+
+        # Verify launch_grpc was called
+        mock_launch_grpc.assert_called_once()
+
+        # Get the cmd argument passed to launch_grpc
+        call_args = mock_launch_grpc.call_args
+        cmd_used = call_args[1]["cmd"]
+
+        # Verify the command uses custom_start_parm values
+        assert "/custom/path/to/ansys242" in " ".join(cmd_used)
+        assert "custom_job" in " ".join(cmd_used)
+
+
+@requires("local")
+def test_open_gui_with_mocked_call(mapdl, fake_local_mapdl):
+    """Test that open_gui uses the correct exec_file with mocked subprocess.call."""
+    from unittest.mock import patch
+
+    custom_exec_file = "/custom/test/path/ansys242"
+    captured_call_args = None
+
+    def mock_call(*args, **kwargs):
+        nonlocal captured_call_args
+        captured_call_args = args[0] if args else None
+        return 0
+
+    # Mock subprocess.call to capture what would be executed
+    with patch("subprocess.call", side_effect=mock_call) as mock_call:
+        try:
+            # Call open_gui with custom exec_file
+            mapdl.open_gui(exec_file=custom_exec_file, inplace=True)
+        except Exception as e:
+            # open_gui might fail for various reasons after the call
+            # We're only interested in verifying the call arguments
+            pass
+
+    # Verify that subprocess.call was called with the custom exec_file
+    mock_call.assert_called_once()
+    assert captured_call_args is not None, "subprocess.call was not called"
+    assert (
+        custom_exec_file in captured_call_args
+    ), f"Expected {custom_exec_file} in call args, but got {captured_call_args}"
+    assert "-g" in captured_call_args, "Expected -g flag for GUI mode"
+    assert mapdl.jobname in " ".join(
+        str(arg) for arg in captured_call_args
+    ), f"Expected jobname {mapdl.jobname} in call args"
+
+
+@requires("local")
+def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
+    """Test complete open_gui flow: call, _launch, and reconnection methods are invoked."""
+    from unittest.mock import patch
+
+    custom_exec_file = "/custom/test/path/ansys242"
+
+    # Track what methods were called
+    call_invoked = False
+    launch_invoked = False
+
+    def mock_call(*args, **kwargs):
+        nonlocal call_invoked
+        call_invoked = True
+        return 0
+
+    def mock_launch(start_parm, timeout=10):
+        nonlocal launch_invoked
+        launch_invoked = True
+        # Verify start_parm is passed
+        assert start_parm is not None
+        assert "exec_file" in start_parm
+
+    # Mock subprocess.call and _launch method
+    with patch("subprocess.call", side_effect=mock_call):
+        # Store original _launch to restore later
+        original_launch = mapdl._launch
+
+        try:
+            # Replace _launch with our mock
+            mapdl._launch = mock_launch
+
+            # Mock methods that open_gui calls before and after
+            with (
+                patch.object(mapdl, "finish") as mock_finish,
+                patch.object(mapdl, "save") as mock_save,
+                patch.object(mapdl, "exit") as mock_exit,
+                patch.object(mapdl, "resume") as mock_resume,
+                patch.object(mapdl, "_cache_routine") as mock_cache,
+            ):
+                try:
+                    # Call open_gui with custom exec_file
+                    mapdl.open_gui(exec_file=custom_exec_file, inplace=True)
+                except Exception as e:
+                    # Some methods might fail, but we verify they were called
+                    pass
+
+                # Verify the flow of method calls
+                assert mock_finish.called, "finish() should be called before GUI"
+                assert mock_save.called, "save() should be called before GUI"
+                assert mock_exit.called, "exit() should be called before GUI"
+                assert call_invoked, "subprocess.call should be invoked for GUI"
+                assert launch_invoked, "_launch() should be called to reconnect"
+                assert (
+                    mock_resume.called
+                ), "resume() should be called after reconnection"
+        finally:
+            # Restore original _launch
+            mapdl._launch = original_launch
