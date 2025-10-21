@@ -26,7 +26,7 @@ import os
 import subprocess
 import tempfile
 from time import sleep
-from unittest.mock import patch
+from unittest.mock import MagicMock, Mock, patch
 import warnings
 
 import psutil
@@ -2176,7 +2176,7 @@ def test_env_vars_with_slurm_bootstrap(monkeypatch):
         )
 
         try:
-            args = launch_mapdl(
+            launch_mapdl(
                 launch_on_hpc=True,
                 replace_env_vars=env_vars_input,  # Use replace_env_vars instead of env_vars
                 exec_file="/fake/path/to/ansys242",
@@ -2196,8 +2196,6 @@ def test_env_vars_with_slurm_bootstrap(monkeypatch):
 
 def test_mapdl_grpc_launch_uses_provided_start_parm():
     """Test that MapdlGrpc._launch uses provided start_parm over instance _start_parm."""
-    from unittest.mock import MagicMock, Mock, patch
-
     from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
     # Create mock instance
@@ -2234,10 +2232,8 @@ def test_mapdl_grpc_launch_uses_provided_start_parm():
     # Mock the launch_grpc function to capture what parameters are used
     # Note: launch_grpc is in launcher module, not mapdl_grpc module
     with patch("ansys.mapdl.core.launcher.launch_grpc") as mock_launch_grpc:
-        from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as RealMapdlGrpc
-
         # Bind the real _launch method
-        mapdl_grpc._launch = RealMapdlGrpc._launch.__get__(mapdl_grpc, type(mapdl_grpc))
+        mapdl_grpc._launch = MapdlGrpc._launch.__get__(mapdl_grpc, type(mapdl_grpc))
 
         # Call _launch with custom start_parm
         mapdl_grpc._launch(start_parm=custom_start_parm, timeout=10)
@@ -2257,8 +2253,6 @@ def test_mapdl_grpc_launch_uses_provided_start_parm():
 @requires("local")
 def test_open_gui_with_mocked_call(mapdl, fake_local_mapdl):
     """Test that open_gui uses the correct exec_file with mocked subprocess.call."""
-    from unittest.mock import patch
-
     custom_exec_file = "/custom/test/path/ansys242"
     captured_call_args = None
 
@@ -2272,7 +2266,7 @@ def test_open_gui_with_mocked_call(mapdl, fake_local_mapdl):
         try:
             # Call open_gui with custom exec_file
             mapdl.open_gui(exec_file=custom_exec_file, inplace=True)
-        except Exception as e:
+        except Exception:
             # open_gui might fail for various reasons after the call
             # We're only interested in verifying the call arguments
             pass
@@ -2332,7 +2326,7 @@ def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
                 try:
                     # Call open_gui with custom exec_file
                     mapdl.open_gui(exec_file=custom_exec_file, inplace=True)
-                except Exception as e:
+                except Exception:
                     # Some methods might fail, but we verify they were called
                     pass
 
@@ -2345,6 +2339,9 @@ def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
                 assert (
                     mock_resume.called
                 ), "resume() should be called after reconnection"
+                assert (
+                    mock_cache.called
+                ), "_cache_routine() should be called after reconnection"
         finally:
             # Restore original _launch
             mapdl._launch = original_launch
