@@ -2250,7 +2250,6 @@ def test_mapdl_grpc_launch_uses_provided_start_parm():
         assert "custom_job" in " ".join(cmd_used)
 
 
-@requires("local")
 def test_open_gui_with_mocked_call(mapdl, fake_local_mapdl):
     """Test that open_gui uses the correct exec_file with mocked subprocess.call."""
     from contextlib import ExitStack
@@ -2264,8 +2263,22 @@ def test_open_gui_with_mocked_call(mapdl, fake_local_mapdl):
         return 0
 
     with ExitStack() as stack:
-        # Mock subprocess.call to capture what would be executed
-        stack.enter_context(patch("subprocess.call", side_effect=mock_call))
+        # Mock _local to True so open_gui doesn't raise "can only be called from local"
+        stack.enter_context(patch.object(mapdl, "_local", True))
+
+        # Mock pathlib.Path to return a mock that has is_file() return True
+        from unittest.mock import MagicMock
+
+        mock_path = MagicMock()
+        mock_path.is_file.return_value = True
+        stack.enter_context(
+            patch("ansys.mapdl.core.mapdl_core.pathlib.Path", return_value=mock_path)
+        )
+
+        # Mock the call function imported in mapdl_core
+        stack.enter_context(
+            patch("ansys.mapdl.core.mapdl_core.call", side_effect=mock_call)
+        )
 
         # IMPORTANT: Mock exit, finish, save, _launch, resume to prevent killing the MAPDL instance
         stack.enter_context(patch.object(mapdl, "exit"))
@@ -2294,7 +2307,6 @@ def test_open_gui_with_mocked_call(mapdl, fake_local_mapdl):
     ), f"Expected jobname {mapdl.jobname} in call args"
 
 
-@requires("local")
 def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
     """Test complete open_gui flow: call, _launch, and reconnection methods are invoked."""
     from unittest.mock import patch
@@ -2317,42 +2329,54 @@ def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
         assert start_parm is not None
         assert "exec_file" in start_parm
 
-    # Mock subprocess.call and _launch method
-    with patch("subprocess.call", side_effect=mock_call):
-        # Store original _launch to restore later
-        original_launch = mapdl._launch
+    # Mock the call function imported in mapdl_core
+    with patch("ansys.mapdl.core.mapdl_core.call", side_effect=mock_call):
+        # Mock _local to True so open_gui doesn't raise "can only be called from local"
+        with patch.object(mapdl, "_local", True):
+            # Mock pathlib.Path to return a mock that has is_file() return True
+            from unittest.mock import MagicMock
 
-        try:
-            # Replace _launch with our mock
-            mapdl._launch = mock_launch
-
-            # Mock methods that open_gui calls before and after
-            with (
-                patch.object(mapdl, "finish") as mock_finish,
-                patch.object(mapdl, "save") as mock_save,
-                patch.object(mapdl, "exit") as mock_exit,
-                patch.object(mapdl, "resume") as mock_resume,
-                patch.object(mapdl, "_cache_routine") as mock_cache,
+            mock_path = MagicMock()
+            mock_path.is_file.return_value = True
+            with patch(
+                "ansys.mapdl.core.mapdl_core.pathlib.Path", return_value=mock_path
             ):
-                try:
-                    # Call open_gui with custom exec_file
-                    mapdl.open_gui(exec_file=custom_exec_file, inplace=True)
-                except Exception:
-                    # Some methods might fail, but we verify they were called
-                    pass
+                # Store original _launch to restore later
+                original_launch = mapdl._launch
 
-                # Verify the flow of method calls
-                assert mock_finish.called, "finish() should be called before GUI"
-                assert mock_save.called, "save() should be called before GUI"
-                assert mock_exit.called, "exit() should be called before GUI"
-                assert call_invoked, "subprocess.call should be invoked for GUI"
-                assert launch_invoked, "_launch() should be called to reconnect"
-                assert (
-                    mock_resume.called
-                ), "resume() should be called after reconnection"
-                assert (
-                    mock_cache.called
-                ), "_cache_routine() should be called after reconnection"
-        finally:
-            # Restore original _launch
-            mapdl._launch = original_launch
+                try:
+                    # Replace _launch with our mock
+                    mapdl._launch = mock_launch
+
+                    # Mock methods that open_gui calls before and after
+                    with (
+                        patch.object(mapdl, "finish") as mock_finish,
+                        patch.object(mapdl, "save") as mock_save,
+                        patch.object(mapdl, "exit") as mock_exit,
+                        patch.object(mapdl, "resume") as mock_resume,
+                        patch.object(mapdl, "_cache_routine") as mock_cache,
+                    ):
+                        try:
+                            # Call open_gui with custom exec_file
+                            mapdl.open_gui(exec_file=custom_exec_file, inplace=True)
+                        except Exception:
+                            # Some methods might fail, but we verify they were called
+                            pass
+
+                        # Verify the flow of method calls
+                        assert (
+                            mock_finish.called
+                        ), "finish() should be called before GUI"
+                        assert mock_save.called, "save() should be called before GUI"
+                        assert mock_exit.called, "exit() should be called before GUI"
+                        assert call_invoked, "subprocess.call should be invoked for GUI"
+                        assert launch_invoked, "_launch() should be called to reconnect"
+                        assert (
+                            mock_resume.called
+                        ), "resume() should be called after reconnection"
+                        assert (
+                            mock_cache.called
+                        ), "_cache_routine() should be called after reconnection"
+                finally:
+                    # Restore original _launch
+                    mapdl._launch = original_launch
