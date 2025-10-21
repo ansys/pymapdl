@@ -2210,6 +2210,7 @@ def test_mapdl_grpc_launch_uses_provided_start_parm():
         "port": 50052,
         "additional_switches": "",
         "mode": "grpc",
+        "run_location": "/default/run/location",
     }
     mapdl_grpc._env_vars = None
     mapdl_grpc._connect = MagicMock()
@@ -2225,6 +2226,7 @@ def test_mapdl_grpc_launch_uses_provided_start_parm():
         "additional_switches": "-custom",
         "mode": "grpc",
         "env_vars": {"CUSTOM_VAR": "custom_value"},
+        "run_location": "/custom/run/location",
     }
 
     # Mock the launch_grpc function to capture what parameters are used
