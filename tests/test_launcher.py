@@ -2253,6 +2253,8 @@ def test_mapdl_grpc_launch_uses_provided_start_parm():
 @requires("local")
 def test_open_gui_with_mocked_call(mapdl, fake_local_mapdl):
     """Test that open_gui uses the correct exec_file with mocked subprocess.call."""
+    from contextlib import ExitStack
+
     custom_exec_file = "/custom/test/path/ansys242"
     captured_call_args = None
 
@@ -2261,8 +2263,18 @@ def test_open_gui_with_mocked_call(mapdl, fake_local_mapdl):
         captured_call_args = args[0] if args else None
         return 0
 
-    # Mock subprocess.call to capture what would be executed
-    with patch("subprocess.call", side_effect=mock_call) as mock_call:
+    with ExitStack() as stack:
+        # Mock subprocess.call to capture what would be executed
+        stack.enter_context(patch("subprocess.call", side_effect=mock_call))
+
+        # IMPORTANT: Mock exit, finish, save, _launch, resume to prevent killing the MAPDL instance
+        stack.enter_context(patch.object(mapdl, "exit"))
+        stack.enter_context(patch.object(mapdl, "finish"))
+        stack.enter_context(patch.object(mapdl, "save"))
+        stack.enter_context(patch.object(mapdl, "_cache_routine"))
+        stack.enter_context(patch.object(mapdl, "_launch"))
+        stack.enter_context(patch.object(mapdl, "resume"))
+
         try:
             # Call open_gui with custom exec_file
             mapdl.open_gui(exec_file=custom_exec_file, inplace=True)
@@ -2272,7 +2284,6 @@ def test_open_gui_with_mocked_call(mapdl, fake_local_mapdl):
             pass
 
     # Verify that subprocess.call was called with the custom exec_file
-    mock_call.assert_called_once()
     assert captured_call_args is not None, "subprocess.call was not called"
     assert (
         custom_exec_file in captured_call_args
