@@ -2066,7 +2066,7 @@ def get_slurm_options(
         variable: str,
         kwargs: Dict[str, str],
         default: Optional[Union[str, int, float]] = 1,
-        astype: Optional[Callable[[Any], Any]] = int,
+        astype: Optional[Callable[[Any], Any]] = None,
     ) -> str | int | float:
         value_from_env_vars = os.environ.get(variable)
         value_from_kwargs = kwargs.pop(variable, None)
@@ -2077,8 +2077,13 @@ def get_slurm_options(
 
         if astype and value:
             return astype(value)
+        elif default is not None:
+            return type(default)(value)
         else:
-            return value
+            try:
+                return float(value)
+            except ValueError:
+                return str(value)
 
     ## Getting env vars
     SLURM_NNODES = get_value("SLURM_NNODES", kwargs)
@@ -2112,7 +2117,7 @@ def get_slurm_options(
     LOG.info(f"SLURM_MEM_PER_NODE: {SLURM_MEM_PER_NODE}")
 
     SLURM_NODELIST = str(
-        get_value("SLURM_NODELIST", kwargs, default="")  # type: ignore
+        get_value("SLURM_NODELIST", kwargs, default="", astype=str)  # type: ignore
     ).lower()  # type: ignore
     LOG.info(f"SLURM_NODELIST: {SLURM_NODELIST}")
 
