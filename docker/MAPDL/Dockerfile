@@ -62,7 +62,7 @@ RUN apt-get update && \
     && rm -rf .dockerignore \
       && rm -rf Dockerfile \
       && rm -rf *.log \
-      apt-get clean && rm -rf /var/lib/apt/lists/*
+      && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #################################
 # Installing MAPDL

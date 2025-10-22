@@ -45,7 +45,7 @@ RUN \
 # -------------
 # Variable for running as if it were on CICD while testing
 ENV ON_CI=True
-# Tu simulate running on local machine
+# To simulate running on local machine
 ENV ON_LOCAL=False
 # For tests that check if running on ubuntu.
 ENV ON_UBUNTU=False

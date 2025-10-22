@@ -13,7 +13,7 @@
 # Available profiles
 # ------------------
 #
-# This docker compose works using profiles. The are many profiles, depending on the following
+# This docker compose works using profiles. There are many profiles, depending on the following
 # configurations possible:
 #
 # - MAPDL acting as remote (`mapdl-remote`) or local (`mapdl-local`)
