@@ -2080,7 +2080,10 @@ def get_slurm_options(
         elif default is not None:
             return type(default)(value)
         else:
-            return int(value)
+            try:
+                return float(value)
+            except ValueError:
+                return str(value)
 
     ## Getting env vars
     SLURM_NNODES = get_value("SLURM_NNODES", kwargs)
