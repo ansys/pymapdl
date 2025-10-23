@@ -1690,6 +1690,7 @@ def launch_mapdl(
             env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
 
     start_parm = generate_start_parameters(args)
+    start_parm["env_vars"] = env_vars
 
     # Early exit for debugging.
     if args["_debug_no_launch"]:
