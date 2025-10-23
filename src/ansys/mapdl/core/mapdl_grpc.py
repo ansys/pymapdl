@@ -945,7 +945,9 @@ class MapdlGrpc(MapdlBase):
             sver = version_string_as_tuple(verstr)
         return sver
 
-    def _launch(self, start_parm, timeout=10):
+    def _launch(
+        self, start_parm: dict[str, Any] | None = None, timeout: int | None = 10
+    ):
         """Launch a local session of MAPDL in gRPC mode.
 
         This should only need to be used for legacy ``open_gui``
@@ -958,7 +960,7 @@ class MapdlGrpc(MapdlBase):
 
         self._exited = False  # reset exit state
 
-        args = self._start_parm
+        args = start_parm or self._start_parm
         cmd = generate_mapdl_launch_command(
             exec_file=args["exec_file"],
             jobname=args["jobname"],
@@ -972,7 +974,7 @@ class MapdlGrpc(MapdlBase):
             cmd=cmd, run_location=args["run_location"], env_vars=self._env_vars or None
         )
 
-        self._connect(args["port"])
+        self._connect()
 
         # may need to wait for viable connection in open_gui case
         tmax = time.time() + timeout
