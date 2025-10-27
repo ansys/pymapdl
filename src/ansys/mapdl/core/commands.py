@@ -492,9 +492,8 @@ class SolutionCommands(
     solution.solid_constraints.SolidConstraints,
     solution.solid_forces.SolidForces,
     solution.solid_surface_loads.SolidSurfaceLoads,
-    solution.solution_status.SolutionStatus,
     solution.spectrum_options.SpectrumOptions,
-    solution.twod_to_3d_analysis.TwoDTo3DAnalysis,
+    solution.status.Status,
 ):
     pass
 
