@@ -46,10 +46,15 @@ on:
           Token for Codecov.
         required: true
 
+permissions: {}
 
 jobs:
   test-remote:
+    name: Test PyMAPDL with remote MAPDL instances
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     env:
       ON_CI: True
       ON_LOCAL: FALSE
@@ -82,10 +87,12 @@ jobs:
           df -h
 
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v5
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        with:
+          persist-credentials: false
 
       - name: "Login in Github container registry"
-        uses: docker/login-action@v3.5.0
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef #v3.6.0
         with:
           registry: ghcr.io
           username: ${{ secrets.username }}
@@ -94,8 +101,9 @@ jobs:
       - name: "Getting SMP/DMP mode"
         id: distributed_mode
         shell: bash
+        env:
+          image: ${{ inputs.mapdl-version }}
         run: |
-          image=${{ inputs.mapdl-version }}
           export distributed_mode="smp"
           if [[ $image == *".1."* ]]; then
             export distributed_mode="dmp";
@@ -106,15 +114,17 @@ jobs:
       - name: "Get if running on Ubuntu"
         id: ubuntu_check
         shell: bash
+        env:
+          MAPDL_VERSION: ${{ inputs.mapdl-version }}
         run: |
           export ON_SAME_CONTAINER=false
 
-          if [[ "${{ inputs.mapdl-version }}" == *"ubuntu"* ]];
+          if [[ "${MAPDL_VERSION}" == *"ubuntu"* ]];
             then export ON_UBUNTU=true; export TAG_UBUNTU="ubuntu";
             else export ON_UBUNTU=false; export TAG_UBUNTU="centos";
           fi
 
-          if [[ "${{ inputs.mapdl-version }}" == *"cicd"* ]]; then
+          if [[ "${MAPDL_VERSION}" == *"cicd"* ]]; then
             echo "CICD MAPDL version detected, testing DPF backend for results module.";
             echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
 
@@ -133,8 +143,10 @@ jobs:
       - name: "Get if running student version"
         id: student_check
         shell: bash
+        env:
+          MAPDL_VERSION: ${{ inputs.mapdl-version }}
         run: |
-          if [[ "${{ inputs.mapdl-version }}" == *"student"* ]]; 
+          if [[ "${MAPDL_VERSION}" == *"student"* ]]; 
             then export ON_STUDENT=true; export TAG_STUDENT="student";
             else export ON_STUDENT=false; export TAG_STUDENT="non-student";
           fi
@@ -160,10 +172,10 @@ jobs:
 
           echo "Launching a second instance for MAPDL pool testing..."
           export RUN_DPF_SERVER=false
-          export PYMAPDL_PORT=${{ env.PYMAPDL_PORT2 }}
-          export PYMAPDL_DB_PORT=${{ env.PYMAPDL_DB_PORT2 }}
+          export PYMAPDL_PORT=${PYMAPDL_PORT2}
+          export PYMAPDL_DB_PORT=${PYMAPDL_DB_PORT2}
           export INSTANCE_NAME=MAPDL_1
-          export DPF_PORT=${{ env.DPF_PORT2 }}
+          export DPF_PORT=${DPF_PORT2}
           .ci/start_mapdl.sh &> mapdl_launch_1.log & export DOCKER_PID_1=$!
 
           echo "Launching MAPDL service 0 at PID: $DOCKER_PID_0"
@@ -177,10 +189,10 @@ jobs:
         env:
           ANSYS_DPF_ACCEPT_LA: Y
         run: |
-          docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y -p ${{ env.DPF_PORT }}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${{ env.DPF_PORT }}." > log_dpf.log &
+          docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y -p ${DPF_PORT}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${DPF_PORT}." > log_dpf.log &
 
       - name: "Getting files change filters"
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 #v3.0.2
         id: changes
         with:
           filters: |
@@ -188,14 +200,14 @@ jobs:
               - '.github/workflows/**'
 
       - name: "Setup Python with cache"
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c #v6.0.0
         if:  steps.changes.outputs.workflows != 'true'
         with:
           cache: 'pip'
           python-version: ${{ inputs.python-version }}
 
       - name: "Setup Python without cache"
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c #v6.0.0
         if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ inputs.python-version }}
@@ -245,12 +257,13 @@ jobs:
           ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
           file_name: "${{ inputs.file-name }}"
           MAPDL_VERSION: "${{ inputs.mapdl-version }}"
+          PYTEST_ARGUMENTS: "${{ env.PYTEST_ARGUMENTS }}"
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
           echo "ON_STUDENT: $ON_STUDENT"
           xvfb-run pytest \
-            ${{ env.PYTEST_ARGUMENTS }} \
+            ${PYTEST_ARGUMENTS} \
             --ignore_image_cache \
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml \
@@ -266,12 +279,12 @@ jobs:
           echo "Number of restarts in the MAPDL_1 container: $N_RESTART"
 
       - name: "Upload pytest reports to GitHub"
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
         with:
           name: "reports-${{ inputs.file-name }}"
           path: ./${{ inputs.file-name }}.jsonl
 
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 #v5.5.1
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.codecov-token }} # required
@@ -279,7 +292,7 @@ jobs:
           flags: remote-${{ steps.ubuntu_check.outputs.TAG_UBUNTU }}-${{ inputs.mapdl-version }}-${{ steps.distributed_mode.outputs.distributed_mode }}-${{ steps.student_check.outputs.TAG_STUDENT }}
 
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
         with:
           name: "${{ inputs.file-name }}.xml"
           path: "./${{ inputs.file-name }}.xml"
@@ -291,7 +304,7 @@ jobs:
           twine check dist/*
 
       - name: "Upload wheel and binaries"
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
         with:
           name: PyMAPDL-packages-${{ inputs.mapdl-version }}
           path: dist/
@@ -309,7 +322,7 @@ jobs:
 
       # - name: "Upload logs to GitHub"
       #   if: always()
-      #   uses: actions/upload-artifact@v4.6.2
+      #   uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
       #   with:
       #     name: logs-${{ inputs.file-name }}.tgz
       #     path: ./logs-${{ inputs.file-name }}.tgz

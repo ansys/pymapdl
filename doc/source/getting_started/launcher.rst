@@ -48,7 +48,7 @@ Connect PyMAPDL to a local MAPDL instance
 Connect to a local MAPDL instance requires two steps: launching a
 local MAPDL session and connect to it.
 
-.. _launch_grpc_madpl_session:
+.. _launch_grpc_mapdl_session:
 
 Launch a local gRPC MAPDL session
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -115,7 +115,7 @@ From version v0.68, you can use a command line interface to launch, stop, and li
 local MAPDL instances.
 For more information, see :ref:`ref_cli`.
 
-.. _connect_grpc_madpl_session:
+.. _connect_grpc_mapdl_session:
 
 Connect to the local MAPDL instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -143,7 +143,7 @@ Just make sure that you specify the mapped port instead of the internal MAPDL po
 For more information, see :ref:`pymapdl_docker`.
 
 
-.. _connect_grpc_remote_madpl_session:
+.. _connect_grpc_remote_mapdl_session:
 
 Connect PyMAPDL to a remote MAPDL instance
 ------------------------------------------
