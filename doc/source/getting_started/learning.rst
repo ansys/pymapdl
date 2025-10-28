@@ -43,6 +43,9 @@ Downloads
   - View and download :download:`PyMAPDL cheatsheet <https://github.com/ansys/pymapdl/blob/gh-pages/version/{{ version }}/_static/cheat_sheet.pdf>`  
     to help you to learn PyMAPDL.
 
+- Download the complete `PyMAPDL documentation as PDF <pymapdl_latest_pdf_doc_>`_ 
+  from the latest GitHub release for offline access.
+
 - Visit :ref:`ref_examples` to learn how PyMAPDL can be used to solve different real problems.
 
 
