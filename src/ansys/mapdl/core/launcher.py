@@ -386,11 +386,15 @@ def port_in_use_using_socket(port: int, host: str) -> bool:
 
 def is_ansys_process(proc: psutil.Process) -> bool:
     """Check if the given process is an Ansys MAPDL process"""
-    return (
-        bool(proc)
-        and proc.name().lower().startswith(("ansys", "mapdl"))
-        and "-grpc" in proc.cmdline()
-    )
+    try:
+        return (
+            bool(proc)
+            and proc.name().lower().startswith(("ansys", "mapdl"))
+            and "-grpc" in proc.cmdline()
+        )
+    except (psutil.AccessDenied, psutil.NoSuchProcess):
+        # Cannot access process information (likely owned by another user)
+        return False
 
 
 def get_process_at_port(port: int) -> Optional[psutil.Process]:
