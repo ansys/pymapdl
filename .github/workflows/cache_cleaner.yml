@@ -5,20 +5,30 @@ on:
     types:
       - closed
 
+permissions: {}
+
 jobs:
   cleanup:
+    name: Cleanup caches
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     steps:
       - name: Check out code
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Cleanup PR caches
         if: github.event_name != 'workflow_dispatch'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
           gh extension install actions/gh-actions-cache
-          
-          REPO=${{ github.repository }}
-          BRANCH="refs/pull/${{ github.event.pull_request.number }}/merge"
+
+          BRANCH="refs/pull/${PR_NUMBER}/merge"
 
           echo "Fetching list of cache key"
           cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH | cut -f 1 )
@@ -37,16 +47,16 @@ jobs:
             cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH | cut -f 1 )
           done
           echo "Done"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Cleanup by workflow dispatch
         if: github.event_name == 'workflow_dispatch'
+        env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            REPO: ${{ github.repository }}
         run: |
             gh extension install actions/gh-actions-cache
-            
-            REPO=${{ github.repository }}
-            echo $REPO
+
+            echo "The repository is: $REPO"
 
             echo "Fetching list of cache key"
             cacheKeysForPR=$(gh actions-cache list -R $REPO | cut -f 1 )
@@ -64,5 +74,3 @@ jobs:
               cacheKeysForPR=$(gh actions-cache list -R $REPO | cut -f 1 )
             done
             echo "Done"
-        env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

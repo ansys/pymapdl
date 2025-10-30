@@ -190,7 +190,6 @@
 .. _pymapdl_conf_file: https://github.com/ansys/pymapdl/blob/main/doc/source/conf.py
 .. _pymapdl_search_issues_pr: https://github.com/ansys/pymapdl/issues?q=
 .. _pymapdl_latest_github_release: https://github.com/ansys/pymapdl/releases/latest
-.. _pymapdl_latest_pdf_doc: https://github.com/ansys/pymapdl/releases/download/v%%PYMAPDLVERSION%%.0/pymapdl-Documentation-%%PYMAPDLVERSION%%.0.pdf
 .. _pymapdl_discussion_speed_pymapdl_mapdl: https://github.com/ansys/pymapdl/discussions/757
 .. _pymapdl_devcontainer_configuration: https://github.com/ansys/pymapdl/blob/main/.devcontainer/devcontainer-local/devcontainer.json
 .. _pymapdl_build_docker_compose: https://github.com/ansys/pymapdl/tree/main/.devcontainer/docker-compose.yml

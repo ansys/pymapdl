@@ -25,9 +25,6 @@ env:
   PACKAGE_NAME: 'ansys-mapdl-core'
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
-  MEILISEARCH_API_KEY: ${{ secrets.MEILISEARCH_API_KEY }}
-  MEILISEARCH_PUBLIC_API_KEY: ${{ secrets.MEILISEARCH_PUBLIC_API_KEY }}
-
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -37,19 +34,17 @@ defaults:
   run:
     shell: bash
 
-permissions:
-  contents: write
-  packages: read
-  pull-requests: write
-  issues: write
+permissions: {}
 
 jobs:
 
   add_labels:
     name: Adding assignee if there is none.
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
-      - uses: actions-ecosystem/action-add-assignees@v1
+      - uses: actions-ecosystem/action-add-assignees@a5b84af721c4a621eb9c7a4a95ec20a90d0b88e9 #v1.0.1
         if: |
           (
           github.event_name == 'pull_request' &&
@@ -69,7 +64,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: ansys/actions/doc-deploy-changelog@v10.0.14
+      - uses: ansys/actions/doc-deploy-changelog@c2fa7c93f6883114e0e643599431b33d29f0b13f #v10.1.4
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
@@ -80,9 +75,11 @@ jobs:
     if: github.event_name == 'pull_request'
     name: Check the name of the pull-request
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
     steps:
       - name: Check pull-request name
-        uses: ansys/actions/check-pr-title@v10.0.14
+        uses: ansys/actions/check-pr-title@c2fa7c93f6883114e0e643599431b33d29f0b13f #v10.1.4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -90,12 +87,14 @@ jobs:
   doc-style:
     name: "Documentation style ${{ matrix.folder }}"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       matrix:
         folder: ["doc", "examples"]
     steps:
       - name: "Ansys documentation style checks"
-        uses: ansys/actions/doc-style@v10.0.14
+        uses: ansys/actions/doc-style@c2fa7c93f6883114e0e643599431b33d29f0b13f #v10.1.4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ${{ matrix.folder }}
@@ -108,6 +107,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 20
+    permissions: {}
     strategy:
       fail-fast: false
       matrix:
@@ -122,7 +122,7 @@ jobs:
     steps:
       - name: "Build wheelhouse and perform smoke test"
         id: build-wheelhouse
-        uses: ansys/actions/build-wheelhouse@v10.0.14
+        uses: ansys/actions/build-wheelhouse@c2fa7c93f6883114e0e643599431b33d29f0b13f #v10.1.4
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
@@ -130,34 +130,51 @@ jobs:
           check-licenses: true
 
       - name: "Importing library"
+        env:
+          PYTHON_ACTIVATE: ${{ steps.build-wheelhouse.outputs.activate-venv }}
         run: |
-          ${{ steps.build-wheelhouse.outputs.activate-venv }}
+          ${PYTHON_ACTIVATE}
           python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Checking plotting support"
+        env:
+          PYTHON_ACTIVATE: ${{ steps.build-wheelhouse.outputs.activate-venv }}
         run: |
-          ${{ steps.build-wheelhouse.outputs.activate-venv }}
+          ${PYTHON_ACTIVATE}
           python -c "from pyvista.plotting import system_supports_plotting; print('System support plotting ' + str(system_supports_plotting()))"
 
 
   check-vulnerabilities:
     name: "Check library vulnerabilities"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: ansys/actions/check-vulnerabilities@v10.0.14
+      - uses: ansys/actions/check-vulnerabilities@c2fa7c93f6883114e0e643599431b33d29f0b13f #v10.1.4
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           python-package-name: ${{ env.PACKAGE_NAME }}
           dev-mode: ${{ github.ref != 'refs/heads/main' }}
-          upload-reports: True
-          hide-log: false
 
+  actions-security:
+    name: "Check actions security"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ansys/actions/check-actions-security@c2fa7c93f6883114e0e643599431b33d29f0b13f #v10.1.4
+        with:
+          generate-summary: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          auditing-level: 'high'
+          trust-ansys-actions: true
 
   docs-build:
     name: "Build documentation"
     needs: doc-style
     uses: ./.github/workflows/doc-build.yml
+    permissions:
+      contents: read
+      packages: read
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
       username: ${{ github.actor }}
@@ -169,8 +186,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: docs-build
     if: contains(github.event.pull_request.labels.*.name, 'deploy pr docs')
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-      - uses: ansys/actions/doc-deploy-pr@v10.0.14
+      - uses: ansys/actions/doc-deploy-pr@c2fa7c93f6883114e0e643599431b33d29f0b13f #v10.1.4
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -182,13 +202,17 @@ jobs:
   build-test-remote-matrix:
     name: "Build remote test matrix"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Build matrix for remote testing
         uses: ./.github/actions/build-matrix
@@ -205,6 +229,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-test-remote-matrix.outputs.matrix) }}
+    permissions:
+      contents: read
+      packages: read
     uses: ./.github/workflows/test-remote.yml
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
@@ -219,12 +246,16 @@ jobs:
   build-test-local-matrix:
     name: "Build test matrix for minimal and local"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Build matrix for local, minimal and console testing
         uses: ./.github/actions/build-matrix
@@ -240,6 +271,9 @@ jobs:
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [smoke-tests, build-test-local-matrix]
     uses: ./.github/workflows/test-local.yml
+    permissions:
+      contents: read
+      packages: read
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-test-local-matrix.outputs.matrix) }}
@@ -263,6 +297,9 @@ jobs:
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [build-test-ubuntu-local, build-test-remote]
     uses: ./.github/workflows/test-local.yml
+    permissions:
+      contents: read
+      packages: read
     strategy:
       fail-fast: false
       matrix:
@@ -286,6 +323,9 @@ jobs:
     name: "Local-min-console: ${{ matrix.mapdl-version }}"
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [build-test-ubuntu-local, build-test-remote]
+    permissions:
+      contents: read
+      packages: read
     uses: ./.github/workflows/test-local.yml
     strategy:
       fail-fast: false
@@ -307,30 +347,15 @@ jobs:
       test_dpf: false
 
 
-  test-windows:
-    # Skipped
-    if: github.repository == ''
-    name: "Local: Build & test on Windows"
-    runs-on: [self-hosted, Windows, pymapdl]
-    timeout-minutes: 30
-    env:
-      ON_LOCAL: TRUE
-
-    steps:
-      - uses: actions/checkout@v4.2.2
-
-      - uses: ./.github/actions/test_windows
-        with:
-          codecov_token: ${{ secrets.CODECOV_TOKEN }}
-
-
   package:
     name: "Package library"
     needs: [build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, docs-build]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: "Build library source and wheel artifacts"
-        uses: ansys/actions/build-library@v10.0.14
+        uses: ansys/actions/build-library@c2fa7c93f6883114e0e643599431b33d29f0b13f #v10.1.4
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
@@ -357,7 +382,7 @@ jobs:
         run: ls -Rla
 
       - name: "Release to PyPI using trusted publisher"
-        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
         with:
           repository-url: "https://upload.pypi.org/legacy/"
           print-hash: true
@@ -365,7 +390,7 @@ jobs:
           skip-existing: false
 
       - name: "Release to GitHub"
-        uses: ansys/actions/release-github@v10.0.14
+        uses: ansys/actions/release-github@c2fa7c93f6883114e0e643599431b33d29f0b13f #v10.1.4
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           additional-artifacts: "minimum_requirements.txt"
@@ -376,10 +401,12 @@ jobs:
     name: "Upload release documentation"
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs: [release]
     steps:
       - name: "Deploy the stable documentation"
-        uses: ansys/actions/doc-deploy-stable@v10.0.14
+        uses: ansys/actions/doc-deploy-stable@c2fa7c93f6883114e0e643599431b33d29f0b13f #v10.1.4
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -392,10 +419,12 @@ jobs:
     name: "Upload dev documentation"
     if: github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags')
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs: [docs-build]
     steps:
       - name: "Deploy the latest documentation"
-        uses: ansys/actions/doc-deploy-dev@v10.0.14
+        uses: ansys/actions/doc-deploy-dev@c2fa7c93f6883114e0e643599431b33d29f0b13f #v10.1.4
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -408,9 +437,11 @@ jobs:
     needs: [smoke-tests, docs-build, build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal]
     if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: "Open issue"
-        uses: jayqi/failed-build-issue-action@v1
+        uses: jayqi/failed-build-issue-action@1a893bbf43ef1c2a8705e2b115cd4f0fe3c5649b #v1.2.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           title-template: "Failed scheduled build"
@@ -420,6 +451,8 @@ jobs:
   test_julia:
     name: "Julia ${{ matrix.julia-version }} | ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
@@ -428,7 +461,9 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        with:
+          persist-credentials: false
 
       - name: "Run Julia testing"
         uses: ./.github/actions/test-julia
@@ -442,10 +477,15 @@ jobs:
       build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, build-test-ubuntu-console
       ]
     if: always()
-    runs-on: ubuntu-latest          
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        with:
+          persist-credentials: false
 
       - name: "Run Pytest-summary action"
         uses: ./.github/actions/pytest-summary

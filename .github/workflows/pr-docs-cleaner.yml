@@ -15,12 +15,16 @@ on:
 env:
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
 
+permissions: {}
+
 jobs:
   clean-docs-pr:
     name: "Deploy PR documentation"
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: ansys/actions/doc-deploy-pr@v10.0.14
+      - uses: ansys/actions/doc-deploy-pr@c2fa7c93f6883114e0e643599431b33d29f0b13f # v10.1.4
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}

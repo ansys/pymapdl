@@ -134,7 +134,6 @@ def download_bracket() -> str:
     >>> filename = examples.download_bracket()
     >>> filename
     '/home/user/.local/share/ansys_mapdl_core/examples/bracket.iges'
-
     """
     return _download_file("bracket.iges", "geometry")
 

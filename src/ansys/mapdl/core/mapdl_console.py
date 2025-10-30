@@ -291,7 +291,6 @@ class MapdlConsole(MapdlBase):
         Access the geometry as a VTK object
 
         >>> mapdl.mesh.grid
-
         """
         return self._mesh
 
@@ -301,7 +300,8 @@ class MapdlConsole(MapdlBase):
 
     def _exit(self):
         """Minimal exit command. No logging or cleanup so it does not raise
-        exceptions"""
+        exceptions.
+        """
         if self._process is not None:
             try:
                 self._process.sendline("FINISH")

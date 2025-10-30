@@ -43,6 +43,7 @@ from numpy.typing import NDArray
 
 from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import ComponentDoesNotExits, ComponentIsNotSelected
+from ansys.mapdl.core.misc import is_float
 
 if TYPE_CHECKING:  # pragma: no cover
     import logging
@@ -459,7 +460,6 @@ class ComponentManager:
         -------
         bool
             True if the component name exists *and it is selected*, False otherwise.
-
         """
         return key.upper() in self._comp.keys()
 
@@ -471,7 +471,6 @@ class ComponentManager:
         -------
         iterator
             Return an iterator over the component names.
-
         """
         yield from self._comp.keys()
 
@@ -494,7 +493,6 @@ class ComponentManager:
         -------
         tuple
             Return a tuple that contains the component names.
-
         """
         return tuple(self._comp.keys())
 
@@ -507,7 +505,6 @@ class ComponentManager:
         -------
         tuple
             Return a tuple that contains the types of the components.
-
         """
         return tuple(self._comp.values())
 
@@ -519,7 +516,6 @@ class ComponentManager:
         -------
         dict_items
             Return a view object that contains the name-type pairs for each component.
-
         """
         return self._comp.items()
 
@@ -536,7 +532,6 @@ class ComponentManager:
             Name(s) of the components
         mute : bool, optional
             Whether to mute the `/CMSEL` command output or not, by default False.
-
         """
         if isinstance(names, str):
             names = [names]
@@ -583,7 +578,7 @@ def _parse_cmlist_indiv(
 
     # Joining them together and giving them format.
     items = items.replace("\n", "  ").split()
-    items = [int(each) for each in items]
+    items = [int(each) for each in items if is_float(each)]
 
     return items
 

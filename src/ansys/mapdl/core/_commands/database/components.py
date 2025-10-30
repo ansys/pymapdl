@@ -511,7 +511,6 @@ class Components:
             * ``BLOCKED`` - Blocked format. This format allows faster reading of the file.
 
             * ``UNBLOCKED`` - Unblocked format.
-
         """
         command = f"CMWRITE,{fname},{ext},,,{fmat}"
         return self.run(command, **kwargs)

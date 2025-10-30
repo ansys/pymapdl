@@ -283,7 +283,6 @@ def _is_ubuntu() -> bool:
     It's a bit complicated because sometimes the distribution is
     Ubuntu, but the kernel has been recompiled and no longer has the
     word "ubuntu" in it.
-
     """
 
     # must be running linux for this to be True
@@ -327,7 +326,6 @@ def close_all_local_instances(port_range: range | None = None) -> None:
 
     >>> import ansys.mapdl.core as pymapdl
     >>> pymapdl.close_all_local_instances()
-
     """
     if port_range is None:
         port_range = range(50000, 50200)
@@ -388,11 +386,15 @@ def port_in_use_using_socket(port: int, host: str) -> bool:
 
 def is_ansys_process(proc: psutil.Process) -> bool:
     """Check if the given process is an Ansys MAPDL process"""
-    return (
-        bool(proc)
-        and proc.name().lower().startswith(("ansys", "mapdl"))
-        and "-grpc" in proc.cmdline()
-    )
+    try:
+        return (
+            bool(proc)
+            and proc.name().lower().startswith(("ansys", "mapdl"))
+            and "-grpc" in proc.cmdline()
+        )
+    except (psutil.AccessDenied, psutil.NoSuchProcess):
+        # Cannot access process information (likely owned by another user)
+        return False
 
 
 def get_process_at_port(port: int) -> Optional[psutil.Process]:
@@ -472,7 +474,6 @@ def generate_mapdl_launch_command(
     -------
     list[str]
         Command
-
     """
     cpu_sw = "-np %d" % nproc
 
@@ -857,7 +858,6 @@ def get_start_instance(start_instance: bool | str | None = None) -> bool:
     -----
     If the environment variable ``PYMAPDL_START_INSTANCE`` is set,
     hence the argument ``start_instance`` is overwritten.
-
     """
 
     def valid_start_instance(start_instance: str) -> bool:
@@ -1035,7 +1035,6 @@ def set_MPI_additional_switches(
     -------
     str
         Validated additional switches.
-
     """
     # Converting additional_switches to lower case to avoid mismatches.
     add_sw_lower_case = add_sw.lower()
@@ -1104,7 +1103,6 @@ def force_smp_in_student(add_sw: str | None, exec_path: str) -> str:
     -------
     str
         Validated additional switches.
-
     """
     # Converting additional_switches to lower case to avoid mismatches.
     if add_sw is None:
@@ -1696,6 +1694,7 @@ def launch_mapdl(
             env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
 
     start_parm = generate_start_parameters(args)
+    start_parm["env_vars"] = env_vars
 
     # Early exit for debugging.
     if args["_debug_no_launch"]:
@@ -2072,7 +2071,7 @@ def get_slurm_options(
         variable: str,
         kwargs: Dict[str, str],
         default: Optional[Union[str, int, float]] = 1,
-        astype: Optional[Callable[[Any], Any]] = int,
+        astype: Optional[Callable[[Any], Any]] = None,
     ) -> str | int | float:
         value_from_env_vars = os.environ.get(variable)
         value_from_kwargs = kwargs.pop(variable, None)
@@ -2083,8 +2082,13 @@ def get_slurm_options(
 
         if astype and value:
             return astype(value)
+        elif default is not None:
+            return type(default)(value)
         else:
-            return value
+            try:
+                return float(value)
+            except ValueError:
+                return str(value)
 
     ## Getting env vars
     SLURM_NNODES = get_value("SLURM_NNODES", kwargs)
@@ -2118,7 +2122,7 @@ def get_slurm_options(
     LOG.info(f"SLURM_MEM_PER_NODE: {SLURM_MEM_PER_NODE}")
 
     SLURM_NODELIST = str(
-        get_value("SLURM_NODELIST", kwargs, default="")  # type: ignore
+        get_value("SLURM_NODELIST", kwargs, default="", astype=str)  # type: ignore
     ).lower()  # type: ignore
     LOG.info(f"SLURM_NODELIST: {SLURM_NODELIST}")
 

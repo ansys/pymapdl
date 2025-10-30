@@ -8,21 +8,22 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: write
-  packages: write
+permissions: {}
 
 jobs:
   cleanup:
     name: Cleaning unnecessary packages
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     env:
       PACKAGE_DELETION_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
 
     - name: "Perform versions cleanup - except certain tags"
-      uses: ansys/actions/hk-package-clean-untagged@v10.0.14
+      uses: ansys/actions/hk-package-clean-untagged@c2fa7c93f6883114e0e643599431b33d29f0b13f #v10.1.4
       with:
         package-name: 'mapdl'
         token: ${{ secrets.GITHUB_TOKEN }}

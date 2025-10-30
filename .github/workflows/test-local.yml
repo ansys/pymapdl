@@ -108,9 +108,15 @@ on:
           GitHub username for login into ghcr.io.
         required: true
 
+permissions: {}
+
 jobs:
   test-local:
+    name: Test MAPDL locally
     runs-on: ${{ inputs.runner }}
+    permissions:
+      contents: read
+      packages: read
     env:
       ON_CI: True
       ON_LOCAL: true
@@ -126,7 +132,7 @@ jobs:
       DATAPROCESSING_DEBUG: /home/mapdl/dpf_logs
 
     container:
-      image: "${{ inputs.package-registry }}:${{ inputs.mapdl-version }}"
+      image: "${{ inputs.package-registry }}:${{ inputs.mapdl-version }}" # zizmor: ignore[unpinned-images]
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
         username: ${{ secrets.username }}
@@ -143,20 +149,23 @@ jobs:
           df -h
 
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
         with:
           repository: ansys/pymapdl
+          persist-credentials: false
 
       - name: "Get if running student version"
         id: student_check
         shell: bash
+        env:
+          MAPDL_VERSION: ${{ inputs.mapdl-version }}
         run: |
-          if [[ "${{ inputs.mapdl-version }}" == *"student"* ]]; 
+          if [[ "${MAPDL_VERSION}" == *"student"* ]]; 
             then export ON_STUDENT=true; export TAG_STUDENT="student";
             else export ON_STUDENT=false; export TAG_STUDENT="non-student";
           fi
 
-          if [[ "${{ inputs.mapdl-version }}" == *"cicd"* ]]; then
+          if [[ "${MAPDL_VERSION}" == *"cicd"* ]]; then
             echo "CICD MAPDL version detected, testing DPF backend for results module.";
             echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
           fi
@@ -186,7 +195,7 @@ jobs:
           apt-get update && apt install -y libgl1 libglx-mesa0 xvfb libgomp1 graphviz curl && apt-get clean
 
       - name: "Setup Python"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c #v6.0.0
         with:
           python-version: ${{ inputs.python-version }}
 
@@ -232,6 +241,10 @@ jobs:
           ON_CONSOLE: ${{ inputs.on-console }}
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
           file_name: ${{ inputs.file-name }}
+          PYTEST_ARGUMENTS: "${{ env.PYTEST_ARGUMENTS }}"
+          MAPDL_VERSION: ${{ inputs.mapdl-version }}
+          PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
+          LATEST_VERSION: "${{ inputs.latest-version }}"
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
@@ -240,16 +253,16 @@ jobs:
           # Because there is no 'ansys-tools-path' we need to input the
           # executable path with the env var: PYMAPDL_MAPDL_EXEC.
 
-          if [[ "${{ inputs.mapdl-version }}" == *"latest-ubuntu"* ]] ; then
-            version=${{ inputs.latest-version }}
+          if [[ "${MAPDL_VERSION}" == *"latest-ubuntu"* ]] ; then
+            version=${LATEST_VERSION}
           else
-            version=$(echo "${{ inputs.mapdl-version }}" | head -c 5 | tail -c 4 | tr -d '.')
+            version=$(echo "${MAPDL_VERSION}" | head -c 5 | tail -c 4 | tr -d '.')
           fi;
 
           echo "Version: $version"
 
           # If minimal is true, we need to set the executable path.
-          if [[ "${{ inputs.testing-minimal }}" == "true" ]]; then
+          if [[ "${ON_MINIMAL}" == "true" ]]; then
             echo "PYMAPDL_MAPDL_EXEC: $PYMAPDL_MAPDL_EXEC"
             export PYMAPDL_MAPDL_EXEC=/ansys_inc/v"$version"/ansys/bin/ansys"$version"
             export cmd="pytest"
@@ -260,8 +273,8 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           unset PYMAPDL_PORT
 
-          $cmd ${{ inputs.pytest-arguments }} \
-            ${{ env.PYTEST_ARGUMENTS }} \
+          $cmd ${PYTEST_INPUT_ARGUMENTS} \
+            ${PYTEST_ARGUMENTS} \
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml \
             --log-file=pytest.log \
@@ -269,7 +282,7 @@ jobs:
 
       - name: "Upload pytest reports to GitHub"
         if: always()
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
         with:
           name: "reports-${{ inputs.file-name }}"
           path: ./${{ inputs.file-name }}.jsonl
@@ -282,12 +295,12 @@ jobs:
         run: |
           .ci/collect_mapdl_logs_locals.sh
 
-      - name: "Upload logs to GitHub"
-        if: always()
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: logs-${{ inputs.file-name }}.tgz
-          path: ./logs-${{ inputs.file-name }}.tgz
+      # - name: "Upload logs to GitHub"
+      #   if: always()
+      #   uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
+      #   with:
+      #     name: logs-${{ inputs.file-name }}.tgz
+      #     path: ./logs-${{ inputs.file-name }}.tgz
 
       - name: "Display files structure"
         if: always()
@@ -297,7 +310,7 @@ jobs:
         run: |
           .ci/display_logs_locals.sh
 
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 #v5.5.1
         name: "Upload coverage to Codecov"
         if: inputs.codecov-report == true
         with:
@@ -307,7 +320,7 @@ jobs:
           flags: local-ubuntu-${{ inputs.mapdl-version }}-dmp-${{ steps.student_check.outputs.TAG_STUDENT }}-${{ inputs.tags }}
 
       - name: "Upload coverage artifacts"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
         if: inputs.codecov-report == true
         with:
           name: ${{ inputs.file-name }}.xml
