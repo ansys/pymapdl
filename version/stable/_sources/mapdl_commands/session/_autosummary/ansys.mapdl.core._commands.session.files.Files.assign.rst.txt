@@ -1,0 +1,6 @@
+﻿assign
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.session.files
+
+.. automethod:: Files.assign
