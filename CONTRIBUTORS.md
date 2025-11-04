@@ -12,6 +12,7 @@
 * [Alex Kaszynski](https://github.com/ansys-akaszyns)
 * [beppo-dd](https://github.com/beppo-dd)
 * [Camille](https://github.com/clatapie)
+* [Chai](https://github.com/ChaiF1)
 * [Daniel Correia](https://github.com/DanReia)
 * [Doug Addy](https://github.com/da1910)
 * [Dustin Sauriol](https://github.com/dts12263)

@@ -504,19 +504,30 @@ attribute or implemented Pythonically.
 
 Warnings and errors
 -------------------
-Errors are handled Pythonically. For example:
+
+PyMAPDL provides comprehensive error handling that converts MAPDL warnings and errors
+into Python exceptions. This approach enables Pythonic error handling and makes it easier
+to debug issues in your scripts.
+
+Error handling behavior
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Errors are handled Pythonically using try-except blocks:
 
 .. code:: python
 
     try:
         mapdl.solve()
-    except:
-        # do something else with MAPDL
-        pass
+    except MapdlRuntimeError as e:
+        # Handle MAPDL runtime errors
+        print(f"MAPDL error occurred: {e}")
+    except Exception as e:
+        # Handle other errors
+        print(f"Unexpected error: {e}")
 
-Commands that are ignored within MAPDL are flagged as errors. This is
+Commands that are ignored within MAPDL are flagged as errors by default. This is
 different than MAPDL's default behavior where commands that are
-ignored are treated as warnings. For example, in ``ansys-mapdl-core``
+ignored are treated as warnings. For example, in PyMAPDL
 running a command in the wrong session raises an error:
 
 .. code:: pycon
@@ -533,13 +544,60 @@ running a command in the wrong session raises an error:
 
 You can change this behavior so ignored commands can be logged as
 warnings and not raised as exceptions by using the
-:func:`Mapdl.ignore_errors() <ansys.mapdl.core.Mapdl.ignore_errors>` function. For
-example:
+:attr:`Mapdl.ignore_errors <ansys.mapdl.core.Mapdl.ignore_errors>` attribute:
 
 .. code:: pycon
 
    >>> mapdl.ignore_errors = True
    >>> mapdl.k()  # warning silently ignored
+
+Exception hierarchy
+~~~~~~~~~~~~~~~~~~~
+
+PyMAPDL defines a comprehensive hierarchy of exceptions to help you handle different 
+types of errors appropriately. All PyMAPDL exceptions inherit from :class:`MapdlException <ansys.mapdl.core.errors.MapdlException>`:
+
+**Main exception classes:**
+
+* :class:`MapdlRuntimeError <ansys.mapdl.core.errors.MapdlRuntimeError>` - General MAPDL runtime errors
+* :class:`MapdlValueError <ansys.mapdl.core.errors.MapdlValueError>` - Invalid values or parameters
+* :class:`MapdlFileNotFoundError <ansys.mapdl.core.errors.MapdlFileNotFoundError>` - File not found errors
+
+**Specific runtime errors:**
+
+* :class:`MapdlInvalidRoutineError <ansys.mapdl.core.errors.MapdlInvalidRoutineError>` - Command run in wrong routine
+* :class:`MapdlCommandIgnoredError <ansys.mapdl.core.errors.MapdlCommandIgnoredError>` - Commands ignored by MAPDL
+* :class:`MapdlExitedError <ansys.mapdl.core.errors.MapdlExitedError>` - MAPDL process has exited
+* :class:`MapdlConnectionError <ansys.mapdl.core.errors.MapdlConnectionError>` - Connection issues
+* :class:`LockFileException <ansys.mapdl.core.errors.LockFileException>` - Lock file conflicts
+
+**Startup and connection errors:**
+
+* :class:`MapdlDidNotStart <ansys.mapdl.core.errors.MapdlDidNotStart>` - MAPDL failed to start
+* :class:`PortAlreadyInUse <ansys.mapdl.core.errors.PortAlreadyInUse>` - Port conflicts
+* :class:`LicenseServerConnectionError <ansys.mapdl.core.errors.LicenseServerConnectionError>` - License server issues
+
+Example of specific exception handling:
+
+.. code:: python
+
+    from ansys.mapdl.core.errors import (
+        MapdlRuntimeError,
+        MapdlCommandIgnoredError,
+        MapdlExitedError,
+    )
+
+    try:
+        mapdl.k(1, 0, 0, 0)  # This might fail if in wrong routine
+    except MapdlCommandIgnoredError:
+        print("Command was ignored by MAPDL")
+        mapdl.prep7()  # Switch to correct routine
+        mapdl.k(1, 0, 0, 0)  # Retry the command
+    except MapdlExitedError:
+        print("MAPDL has exited unexpectedly")
+        # Handle cleanup or restart MAPDL
+    except MapdlRuntimeError as e:
+        print(f"General MAPDL error: {e}")
 
 
 Prompts
