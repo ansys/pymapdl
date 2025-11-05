@@ -2845,7 +2845,7 @@ class _MapdlExtended(_MapdlCommandExtended):
 
         This method uses :func:`Mapdl.get`.
 
-        See the full MADPL command documentation at `*GET
+        See the full MAPDL command documentation at `*GET
         <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_GET.html>`_
 
         .. note::

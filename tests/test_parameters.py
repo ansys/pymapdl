@@ -104,6 +104,13 @@ PARAMETER STATUS- MYARR  (      6 PARAMETERS DEFINED)
  PGFZJK_ROWDIM                     20.0000000                  SCALAR
  PORT                              50054.0000                  SCALAR
  STRARRAY                                   STRING ARRAY      96       1       1""",
+    "c_fullfile status": """APDLMATH PARAMETER STATUS-  (      3 PARAMETERS DEFINED)
+
+  Name                   Type            Mem. (MB)       Dims            Workspace
+
+   K                     SMAT            4.720           [19764:19764]           1
+   M                     SMAT            2.728           [19764:19764]           1
+   file.full             C_FullFile                      --              --              --""",
 }
 
 
@@ -355,6 +362,7 @@ def test_parameter_delete_raise(mapdl, cleared):
         ),
         ("string array status", ["aqzzzxcv zx zxcv   zxcv", "qwer wer qwer", "zxcv"]),
         ("general status", None),
+        ("c_fullfile status", None),
     ],
 )
 def test_interp_star_status(status_key, check):
@@ -364,8 +372,15 @@ def test_interp_star_status(status_key, check):
         name = list(output.keys())[0]
         if name == "MYARR" or name == "ASDF":
             assert np.all(output[name]["value"] == check)
+        elif name == "file.full":
+            assert output[name]["type"] == "C_FullFile"
+            assert "value" not in output[name]
         else:
             assert output[name]["value"] == check
+    elif status_key == "c_fullfile status":
+        assert "file.full" in output
+        assert output["file.full"]["type"] == "C_FullFile"
+        assert "value" not in output["file.full"]
     else:
         assert "MYARR" in output
         assert "PGFZJK_COLDIM" in output
@@ -532,6 +547,91 @@ def test_parameter_types(mapdl, cleared, parameter):
 
     else:
         assert isinstance(mapdl.parameters["temp_arr"], type(parameter))
+
+
+def test_c_fullfile_parameter_handling_mixed():
+    """Test handling of C_FullFile parameter type in interp_star_status function.
+
+    This test covers issue #4206 where imported matrix/vector files from .full files
+    are reported as C_FullFile parameters and need special handling.
+    """
+    # Test status output representing a mix of SMAT and C_FullFile parameters
+    status_mixed = """APDLMATH PARAMETER STATUS-  (      3 PARAMETERS DEFINED)
+
+  Name                   Type            Mem. (MB)       Dims            Workspace
+
+   K                     SMAT            4.720           [19764:19764]           1
+   M                     SMAT            2.728           [19764:19764]           1
+   file.full             C_FullFile                      --              --              --"""
+
+    # Test mixed status
+    output_mixed = interp_star_status(status_mixed)
+
+    # Should have all 3 parameters
+    assert len(output_mixed) == 3
+
+    # Check SMAT parameters
+    assert "K" in output_mixed
+    assert output_mixed["K"]["type"] == "SMAT"
+    assert output_mixed["K"]["MemoryMB"] == 4.720
+    assert output_mixed["K"]["workspace"] == 1
+
+    assert "M" in output_mixed
+    assert output_mixed["M"]["type"] == "SMAT"
+    assert output_mixed["M"]["MemoryMB"] == 2.728
+    assert output_mixed["M"]["workspace"] == 1
+
+    # Check C_FullFile parameter - should only have type, no other fields
+    assert "file.full" in output_mixed
+    assert output_mixed["file.full"]["type"] == "C_FullFile"
+    assert "MemoryMB" not in output_mixed["file.full"]
+    assert "workspace" not in output_mixed["file.full"]
+    assert "value" not in output_mixed["file.full"]
+    assert "shape" not in output_mixed["file.full"]
+
+
+def test_c_fullfile_parameter_handling_single():
+    # Test single C_FullFile status
+
+    # Test status output with only C_FullFile parameter
+    status_single = """APDLMATH PARAMETER STATUS-  (      1 PARAMETERS DEFINED)
+
+  Name                   Type            Mem. (MB)       Dims            Workspace
+
+   myfile.full           C_FullFile                      --              --              --"""
+
+    output_single = interp_star_status(status_single)
+
+    assert len(output_single) == 1
+    assert "myfile.full" in output_single
+    assert output_single["myfile.full"]["type"] == "C_FullFile"
+    assert len(output_single["myfile.full"]) == 1  # Only 'type' field should be present
+
+
+@pytest.mark.parametrize(
+    "param_name,param_type",
+    [
+        ("matrix.full", "C_FullFile"),
+        ("stiffness.full", "C_FullFile"),
+        ("mass.full", "C_FullFile"),
+        ("mydata.full", "C_FullFile"),
+    ],
+)
+def test_c_fullfile_parameter_types(param_name, param_type):
+    """Test various C_FullFile parameter names and ensure proper handling."""
+    status = f"""APDLMATH PARAMETER STATUS-  (      1 PARAMETERS DEFINED)
+
+  Name                   Type            Mem. (MB)       Dims            Workspace
+
+   {param_name:<20}  {param_type:<15}                --              --              --"""
+
+    output = interp_star_status(status)
+
+    assert len(output) == 1
+    assert param_name in output
+    assert output[param_name]["type"] == param_type
+    # Ensure no other fields are present for C_FullFile parameters
+    assert len(output[param_name]) == 1
 
 
 @pytest.mark.parametrize("use_load_table", [True, False])

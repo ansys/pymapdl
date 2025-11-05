@@ -722,27 +722,27 @@ def parameter_header(line):
     return "NAME" in line and "VALUE" in line and "TYPE" in line
 
 
-def math_header(line):
+def math_header(line: str) -> bool:
     return "Name" in line and "Type" in line and "Dims" in line and "Workspace" in line
 
 
-def array_header(line):
+def array_header(line: str) -> bool:
     return "LOCATION" in line and "VALUE" in line
 
 
-def is_parameter_listing(status):
+def is_parameter_listing(status: str) -> bool:
     return any([parameter_header(each) for each in status.splitlines()])
 
 
-def is_math_listing(status):
+def is_math_listing(status: str) -> bool:
     return any([math_header(each) for each in status.splitlines()])
 
 
-def is_array_listing(status):
+def is_array_listing(status: str) -> bool:
     return any([array_header(each) for each in status.splitlines()])
 
 
-def interp_star_status(status):
+def interp_star_status(status: str) -> dict[str, str]:
     """Interprets \\*STATUS command output from MAPDL
 
     Parameters
@@ -853,6 +853,8 @@ def interp_star_status(status):
                     "type": items[1],
                     "workspace": int(items[4]),
                 }
+            elif items[1] in ["C_FullFile"]:
+                parameters[name] = {"type": items[1]}
             else:
                 shape = (int(items[2]), int(items[3]), int(items[4]))
                 parameters[name] = {"type": items[1], "shape": shape}
