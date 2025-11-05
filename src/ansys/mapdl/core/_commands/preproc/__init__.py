@@ -21,17 +21,6 @@
 # SOFTWARE.
 
 from . import (
-    database,
-    digitizing,
-    element_type,
-    elements,
-    explicit_dynamics,
-    hard_points,
-    keypoints,
-    lines,
-    material_data_tables,
-    materials,
-    morphing,
     nodes,
     primitives,
     real_constants,
