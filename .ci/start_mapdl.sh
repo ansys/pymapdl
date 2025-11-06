@@ -98,6 +98,7 @@ run \
   --health-retries=4 \
   --health-timeout=0.5s \
   --health-start-period=10s \
+  -e ANSYS_MAPDL_GRPC_TRANSPORT=insecure \
   -e ANSYSLMD_LICENSE_FILE=1055@${LICENSE_SERVER} \
   -e ANSYS_LOCK="OFF" \
   ${DPF_ON} \
