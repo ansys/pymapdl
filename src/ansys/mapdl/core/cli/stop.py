@@ -194,8 +194,8 @@ def _can_access_process(proc):
         # Check if we can access basic process info and if it belongs to current user
         current_user = getpass.getuser()
         process_user = proc.username()
-        if os.name == 'nt' and '\\' in process_user:
-            return current_user == process_user.split('\\')[-1]
+        if os.name == "nt" and "\\" in process_user:
+            return current_user == process_user.split("\\")[-1]
         return process_user == current_user
     except (psutil.AccessDenied, psutil.NoSuchProcess):
         # Cannot access process or process doesn't exist
