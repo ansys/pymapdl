@@ -291,11 +291,13 @@ def test_pymapdl_stop_permission_handling(run_cli):
 
 
 @requires("click")
-@pytest.mark.skipif(platform.system() != "Windows", reason="Domain usernames are Windows-specific")
+@pytest.mark.skipif(
+    platform.system() != "Windows", reason="Domain usernames are Windows-specific"
+)
 def test_pymapdl_stop_with_username_containing_domain(run_cli):
     """Test that pymapdl stop processes when a process username contains DOMAIN information."""
     current_user = "someuser"
-    
+
     mock_process = MagicMock(spec=psutil.Process)
     mock_process.pid = 12
     mock_process.name.return_value = "ansys252"
@@ -322,7 +324,10 @@ def test_pymapdl_stop_with_username_containing_domain(run_cli):
 
         assert killed_processes == [12]
 
-        print("✅ Domain username handling test passed - processes with domain usernames handled correctly")
+        print(
+            "✅ Domain username handling test passed - processes with domain usernames handled correctly"
+        )
+
 
 @requires("click")
 @pytest.mark.parametrize(
