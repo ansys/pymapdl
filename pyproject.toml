@@ -50,6 +50,8 @@ version = "0.70.dev0"
 [project.optional-dependencies]
 jupyter = ["ipywidgets", "jupyterlab>=3"]
 
+hpc = ["paramiko==3.5.0"]
+
 graphics = [
   "ansys-tools-visualization-interface>=0.9.0,<0.13.0",
   "matplotlib>=3.0.0",                                  # for colormaps for pyvista
@@ -68,6 +70,7 @@ tests = [
   "autopep8==2.3.2",
   "matplotlib==3.10.7",
   "pandas==2.3.3",
+  "paramiko==3.5.0",
   "pyansys-tools-report==0.8.3",
   "pyfakefs==5.10.0",
   "pyiges[full]==0.3.2",
