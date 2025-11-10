@@ -57,7 +57,7 @@ repos:
     additional_dependencies: [black==25.9.0]
 
 - repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 25.9.0  # If version changes --> modify "blacken-docs" manually as well.
+  rev: 25.11.0  # If version changes --> modify "blacken-docs" manually as well.
   hooks:
   - id: black
     args:
