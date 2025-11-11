@@ -730,7 +730,7 @@ def _check_server_is_alive(stdout_queue: QueueWithStorage, timeout: int):
             continue
 
         if (
-            "START GRPC SERVER" in terminal_output
+            "GRPC SERVER" in terminal_output
             and "Server listening on" in terminal_output
         ):
             listening_on = terminal_output.splitlines()[-1]
