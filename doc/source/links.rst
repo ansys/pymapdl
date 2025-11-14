@@ -178,7 +178,7 @@
 .. _pymapdl_techdemo_28_rst: https://raw.githubusercontent.com/ansys/pymapdl-examples/main/doc/source/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.rst
 .. _pymapdl_techdemo_28: https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html
 .. _pymapdl_docker_dir: https://github.com/ansys/pymapdl/blob/main/docker
-.. _pymapdl_docker_compose_base: https://github.com/ansys/pymapdl/blob/main/docker/docker-compose.yml
+.. _pymapdl_docker_compose_base: https://github.com/ansys/pymapdl/blob/main/docker/run/docker-compose.yml
 .. _pymapdl_docker_compose_local: https://github.com/ansys/pymapdl/blob/main/docker/docker-compose.local.yml
 .. _pymapdl_docker_compose_license_server: https://github.com/ansys/pymapdl/blob/main/docker/docker-compose.license_server.yml
 .. _pymapdl_discussion_differences_mapdl_pymapdl: https://github.com/ansys/pymapdl-reader/issues/185
