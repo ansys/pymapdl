@@ -1,0 +1,6 @@
+﻿vfquery
+=======
+
+.. currentmodule:: ansys.mapdl.core._commands.aux12.radiosity_solver
+
+.. automethod:: RadiositySolver.vfquery
