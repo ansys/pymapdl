@@ -261,7 +261,7 @@ def test_check_license_file_exception(license_checker):
         license_checker._check_license_file(0.01)
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 def test_license_wait():
     license_checker = licensing.LicenseChecker()
     assert not license_checker._lic_file_thread
@@ -296,7 +296,7 @@ def test_license_check():
         license_checker.check()
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 def test_stop_license_checker():
     license_checker = licensing.LicenseChecker()
 
