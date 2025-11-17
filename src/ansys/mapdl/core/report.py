@@ -165,7 +165,7 @@ class Plain_Report:
         else:
             mapdl_install = None
             lines.append(
-                "Unable to locate any Ansys installations because 'ansys-tools-common is not installed."
+                "Unable to locate any Ansys installations because 'ansys-tools-common' is not installed."
             )
 
         install_info = "\n".join(lines)
