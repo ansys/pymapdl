@@ -250,7 +250,7 @@ jobs:
           echo "ON_UBUNTU: $ON_UBUNTU"
           echo "ON_STUDENT: $ON_STUDENT"
 
-          # Because there is no 'ansys-tools-path' we need to input the
+          # Because there is no 'ansys-tools-common' we need to input the
           # executable path with the env var: PYMAPDL_MAPDL_EXEC.
 
           if [[ "${MAPDL_VERSION}" == *"latest-ubuntu"* ]] ; then
