@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class GeneralRadiation:
+
+class GeneralRadiation(CommandsBase):
 
     def aux12(self, **kwargs):
         r"""Enters the radiation processor.

@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class RadiositySolver:
+
+class RadiositySolver(CommandsBase):
 
     def vfco(self, action: str = "", encl: str = "", level: int | str = "", **kwargs):
         r"""Controls the use and level of view factor condensation for symmetric radiation.

@@ -20,10 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
+
 """Miscellaneous methods not covered in the documentation."""
 
 
-class Misc:
+class Misc(CommandsBase):
     def verify(self, case="", level="", **kwargs):
         """Enter the verification run mode.
 

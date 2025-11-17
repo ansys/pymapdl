@@ -19,3 +19,46 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+from typing import Any, Optional
+
+
+class CommandsBase:
+    """Base class for MAPDL command mixin classes.
+
+    This class declares the interface that command mixin classes rely on.
+    The actual implementation of the run method is provided by the parent
+    MAPDL class when these command mixins are combined via multiple inheritance.
+    """
+
+    def run(
+        self,
+        command: str,
+        write_to_log: bool = True,
+        mute: Optional[bool] = None,
+        **kwargs: Any,
+    ) -> str:
+        """Run a single APDL command.
+
+        This method is implemented by the parent MAPDL class.
+        Command mixins can call this method to execute APDL commands.
+
+        Parameters
+        ----------
+        command : str
+            ANSYS APDL command.
+        write_to_log : bool, optional
+            Whether to write command to log. Default ``True``.
+        mute : bool, optional
+            Whether to mute command output.
+        **kwargs : Any
+            Additional keyword arguments.
+
+        Returns
+        -------
+        str
+            Command output from MAPDL.
+        """
+        raise NotImplementedError(
+            "The run method must be provided by the parent MAPDL class"
+        )
