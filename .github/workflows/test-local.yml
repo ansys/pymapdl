@@ -282,7 +282,7 @@ jobs:
 
       - name: "Upload pytest reports to GitHub"
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
         with:
           name: "reports-${{ inputs.file-name }}"
           path: ./${{ inputs.file-name }}.jsonl
@@ -297,7 +297,7 @@ jobs:
 
       # - name: "Upload logs to GitHub"
       #   if: always()
-      #   uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
+      #   uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
       #   with:
       #     name: logs-${{ inputs.file-name }}.tgz
       #     path: ./logs-${{ inputs.file-name }}.tgz
@@ -320,7 +320,7 @@ jobs:
           flags: local-ubuntu-${{ inputs.mapdl-version }}-dmp-${{ steps.student_check.outputs.TAG_STUDENT }}-${{ inputs.tags }}
 
       - name: "Upload coverage artifacts"
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
         if: inputs.codecov-report == true
         with:
           name: ${{ inputs.file-name }}.xml
