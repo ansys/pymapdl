@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import os
-from typing import List, Literal, Optional, Tuple, Union
+from typing import List, Literal, Optional, Tuple, TypeAlias, Union
 import weakref
 
 from ansys.math.core.math import AnsMath, AnsVec
@@ -30,6 +30,7 @@ import numpy as np
 from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
 
+# Residual algorithm options - single source of truth
 RESIDUAL_ALGORITHM: List[str] = [
     "l-inf",
     "linf",
@@ -39,7 +40,10 @@ RESIDUAL_ALGORITHM: List[str] = [
     "l2",
 ]
 
-RESIDUAL_ALGORITHM_LITERAL = Literal[tuple(RESIDUAL_ALGORITHM)]
+# Type alias derived from the list above
+RESIDUAL_ALGORITHM_LITERAL: TypeAlias = Literal[
+    "l-inf", "linf", "l-1", "l1", "l-2", "l2"
+]
 
 
 class KrylovSolver:

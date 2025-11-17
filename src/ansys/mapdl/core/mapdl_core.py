@@ -36,7 +36,17 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call  # nosec B404
 import tempfile
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    TypeAlias,
+    Union,
+)
 from uuid import uuid4
 from warnings import warn
 import weakref
@@ -100,12 +110,14 @@ SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
+# Graphics device options - single source of truth
 VALID_DEVICES = ["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
-VALID_DEVICES_LITERAL = Literal[tuple(["PNG", "TIFF", "VRML", "TERM", "CLOSE"])]
+VALID_DEVICES_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
 
+# Plot file types (devices minus CLOSE) - derived from VALID_DEVICES
 VALID_FILE_TYPE_FOR_PLOT = VALID_DEVICES.copy()
 VALID_FILE_TYPE_FOR_PLOT.remove("CLOSE")
-VALID_FILE_TYPE_FOR_PLOT_LITERAL = Literal[tuple(VALID_FILE_TYPE_FOR_PLOT)]
+VALID_FILE_TYPE_FOR_PLOT_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM"]
 
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",

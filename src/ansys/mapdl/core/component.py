@@ -32,6 +32,7 @@ from typing import (
     Literal,
     Optional,
     Tuple,
+    TypeAlias,
     Union,
     get_args,
 )
@@ -48,10 +49,12 @@ from ansys.mapdl.core.misc import is_float
 if TYPE_CHECKING:  # pragma: no cover
     import logging
 
-ENTITIES_TYP: List[str] = Literal[
+# Entity type options - single source of truth
+ENTITIES_TYP: TypeAlias = Literal[
     "NODE", "NODES", "ELEM", "ELEMS", "ELEMENTS", "VOLU", "AREA", "LINE", "KP"
 ]
 
+# Runtime list derived from the type alias above
 VALID_ENTITIES: List[str] = list(get_args(ENTITIES_TYP))
 
 SELECTOR_FUNCTION: List[str] = [
