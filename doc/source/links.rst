@@ -14,7 +14,7 @@
 .. _dpf_post_docs: https://post.docs.pyansys.com
 .. _legacy_reader_docs: https://reader.docs.pyansys.com/
 .. _example_data_repo: https://github.com/ansys/example-data
-.. _ansys_tools_path: http://path.tools.docs.pyansys.com/
+.. _ansys_tools_path: https://tools.docs.pyansys.com/version/stable/user_guide/ansys_tools_path.html
 .. _pyansys_math: https://math.docs.pyansys.com/version/stable/
 .. _pyansys_math_api: https://math.docs.pyansys.com/version/stable/api/index.html
 .. _pytwin_docs: https://twin.docs.pyansys.com
