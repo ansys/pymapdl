@@ -22,7 +22,7 @@
 
 """Module for helper functions"""
 
-from functools import namedtuple
+from collections import namedtuple
 import importlib.util
 import os
 import sys

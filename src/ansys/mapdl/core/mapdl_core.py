@@ -1309,12 +1309,13 @@ class _MapdlCore(Commands):
             self.cmsel("S", "__ELEM__", "ELEM", mute=True)
 
             self._archive_cache = Archive(arch_filename, parse_vtk=False, name="Mesh")
+            assert self._archive_cache is not None  # just created above
             grid = self._archive_cache._parse_vtk(additional_checking=True)
             self._archive_cache._grid = grid
 
             # rare bug
             if grid is not None:
-                if grid.n_points != self._archive_cache.n_node:
+                if grid.n_node != self._archive_cache.n_node:
                     self._archive_cache = Archive(
                         arch_filename, parse_vtk=True, name="Mesh"
                     )
@@ -1723,6 +1724,7 @@ class _MapdlCore(Commands):
             )
 
         self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
+        assert self._apdl_log is not None  # just opened above
         self._apdl_log.write(
             f"! APDL log script generated using PyMAPDL (ansys.mapdl.core {pymapdl.__version__})\n"
         )
@@ -2462,6 +2464,7 @@ class _MapdlCore(Commands):
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
             self._response = StringWithLiteralRepr(text.strip())
+            assert self._response is not None  # just assigned above
             response_ = "\n".join(self._response.splitlines()[:20])
             self._log.info(response_)
         else:
@@ -3096,12 +3099,14 @@ class _MapdlCore(Commands):
         self.slashdelete("__outputcmd__.txt")  # cleaning
         return sys_output == "true"
 
-    def _decompose_fname(self, fname: str) -> Tuple[str, str, str]:
+    def _decompose_fname(
+        self, fname: Union[str, pathlib.Path]
+    ) -> Tuple[str, str, pathlib.Path]:
         """Decompose a file name (with or without path) into filename and extension.
 
         Parameters
         ----------
-        fname : str
+        fname : str or pathlib.Path
             File name with or without path.
 
         Returns
@@ -3112,11 +3117,11 @@ class _MapdlCore(Commands):
         str
             File extension (without dot)
 
-        str
+        pathlib.Path
             File path
         """
-        fname = pathlib.Path(fname)
-        return (fname.stem, fname.suffix.replace(".", ""), fname.parent)
+        fname_path = pathlib.Path(fname)
+        return (fname_path.stem, fname_path.suffix.replace(".", ""), fname_path.parent)
 
     class _force_output:
         """Allows user to enter commands that need to run with forced text output."""

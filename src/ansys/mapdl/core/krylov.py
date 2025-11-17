@@ -645,10 +645,10 @@ class KrylovSolver:
                 "off",
             ]:
                 norm_rz, norm_fz = self.compute_residuals(iFreq, RzV, Xi, omega)
-                if not self.residuals:
+                if self.residuals is None:
                     self.residuals = []
 
-                self.residuals.append([iFreq, norm_rz, norm_fz])
+                self.residuals.append([iFreq, norm_rz, norm_fz])  # type: ignore[attr-defined]
 
         # Storing solution in class
         if compute_solution_vectors:

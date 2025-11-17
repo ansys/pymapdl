@@ -22,9 +22,8 @@
 
 """Common gRPC functions"""
 import time
-from typing import Dict, Iterable, List, Literal, Optional, get_args
+from typing import Dict, List, Literal, Optional, get_args
 
-from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 import grpc
 import numpy as np
 
@@ -185,13 +184,14 @@ def check_vget_input(entity: str, item: str, itnum: str) -> str:
 
 
 def parse_chunks(
-    chunks: Iterable[anskernel.Chunk], dtype: Optional[np.typing.DTypeLike] = None
+    chunks: grpc.CallIterator,  # type: ignore[name-defined]
+    dtype: Optional[np.typing.DTypeLike] = None,
 ) -> np.ndarray:
     """Deserialize gRPC chunks into a numpy array.
 
     Parameters
     ----------
-    chunks : generator
+    chunks : grpc.CallIterator
         generator from grpc.  Each chunk contains a bytes payload
 
     dtype : np.dtype

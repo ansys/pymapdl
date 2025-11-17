@@ -25,7 +25,6 @@ import re
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Dict,
     Iterator,
     List,
@@ -69,7 +68,7 @@ SELECTOR_FUNCTION: List[str] = [
     "KSEL",
 ]
 
-ENTITIES_MAPPING: Dict[str, Callable] = {
+ENTITIES_MAPPING: Dict[str, str] = {
     entity.upper(): func for entity, func in zip(VALID_ENTITIES, SELECTOR_FUNCTION)
 }
 
@@ -143,32 +142,29 @@ class Component(tuple):
         # https://stackoverflow.com/questions/47627298/how-is-tuple-init-different-from-super-init-in-a-subclass-of-tuple
         tuple.__init__(*args, **kwargs)
 
-    def __new__(
-        cls,
-        type_: ENTITIES_TYP,
-        items_: Tuple[str, Union[Tuple[int], List[int], NDArray[np.int_]]],
-    ):
+    def __new__(cls, items_: Tuple[int, ...], type_: ENTITIES_TYP) -> "Component":
+        """Create a new Component instance."""
         if not isinstance(type_, str) or type_.upper() not in VALID_ENTITIES:
             raise ValueError(
                 f"The value '{type_}' is not allowed for 'type' definition."
             )
         obj = super().__new__(cls, items_)
-        obj._type: ENTITIES_TYP = type_
+        obj._type: ENTITIES_TYP = type_  # type: ignore[attr-defined]
 
         return obj
 
     def __str__(self) -> str:
         tup_str = super().__str__()
-        return f"Component(type='{self._type}', items={tup_str})"
+        return f"Component(type='{self._type}', items={tup_str})"  # type: ignore[attr-defined]
 
     def __repr__(self) -> str:
         tup_str = super().__repr__()
-        return f"Component(type='{self._type}', items={tup_str})"
+        return f"Component(type='{self._type}', items={tup_str}')"  # type: ignore[attr-defined]
 
     @property
     def type(self) -> ENTITIES_TYP:
         """Return the type of the component. For instance "NODES", "KP", etc."""
-        return self._type
+        return self._type  # type: ignore[attr-defined]
 
     @property
     def items(self) -> Tuple[int]:

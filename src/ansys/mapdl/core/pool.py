@@ -905,9 +905,9 @@ class MapdlPool:
 
         # Waiting for the instance being fully initialized.
         # This is introduce to mitigate #2173
-        timeout = time.time() + timeout
+        timeout_end = time.time() + timeout
 
-        while timeout > time.time():
+        while timeout_end > time.time():
             if self.is_initialized(index):
                 break
             time.sleep(0.1)
@@ -919,7 +919,7 @@ class MapdlPool:
 
         # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
-            pbar.update(1)
+            pbar.update(1)  # type: ignore[attr-defined]
 
         self._spawning_i -= 1
 

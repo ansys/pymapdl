@@ -1383,7 +1383,7 @@ class Geometry:
 
     def _select_items(
         self,
-        items: Sequence[int],
+        items: Union[Sequence[int], np.ndarray],
         item_type: VALID_SELECTION_ENTITY_TP,
         sel_type: VALID_SELECTION_TYPE_TP,
     ) -> None:
@@ -1391,7 +1391,7 @@ class Geometry:
 
         Parameters
         ----------
-        items : sequence
+        items : sequence or np.ndarray
             Sequence of items.
 
         item_type : str

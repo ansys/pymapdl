@@ -72,7 +72,7 @@ P = ParamSpec("P")
 R = TypeVar("R")
 
 
-def check_valid_routine(routine: ROUTINES) -> bool:
+def check_valid_routine(routine: Union[str, ROUTINES]) -> bool:
     """Check if a routine is valid.
 
     Acceptable aliases for "Begin level" include "begin".
@@ -174,25 +174,25 @@ def supress_logging(func: Callable[P, R]) -> Callable[P, R]:
         mapdl = args[0]
         if not issubclass(type(mapdl), (MapdlBase)):
             # Assuming we are on a module object.
-            mapdl = mapdl._mapdl
+            mapdl = mapdl._mapdl  # type: ignore[attr-defined]
             if not issubclass(type(mapdl), (MapdlBase)):
                 raise Exception("This wrapper cannot access MAPDL object")
 
-        prior_log_level = mapdl._log.level
+        prior_log_level = mapdl._log.level  # type: ignore[attr-defined]
         if prior_log_level != "CRITICAL":
-            mapdl._set_log_level("CRITICAL")
+            mapdl._set_log_level("CRITICAL")  # type: ignore[attr-defined]
 
         out = func(*args, **kwargs)
 
         if prior_log_level != "CRITICAL":
-            mapdl._set_log_level(prior_log_level)
+            mapdl._set_log_level(prior_log_level)  # type: ignore[attr-defined]
 
         return out
 
     return wrapper
 
 
-def run_as(routine: ROUTINES):
+def run_as(routine: Union[str, ROUTINES]):
     """Run a MAPDL method at PREP7 and always revert to the prior processor"""
 
     def decorator(function):
