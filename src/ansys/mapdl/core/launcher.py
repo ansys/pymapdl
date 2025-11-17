@@ -52,7 +52,7 @@ import warnings
 import psutil
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import _HAS_ATP, _HAS_PIM, LOG  # type: ignore
+from ansys.mapdl.core import _HAS_ATC, _HAS_PIM, LOG  # type: ignore
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.errors import (
     LockFileException,
@@ -77,8 +77,8 @@ from ansys.mapdl.core.plotting import GraphicsBackend
 if _HAS_PIM:
     import ansys.platform.instancemanagement as pypim  # type: ignore
 
-if _HAS_ATP:
-    from ansys.tools.path import version_from_path as _version_from_path
+if _HAS_ATC:
+    from ansys.tools.common.path import version_from_path as _version_from_path
 
     @wraps(_version_from_path)
     def version_from_path(*args: Any, **kwargs: Any) -> int | None:
@@ -919,7 +919,7 @@ def get_default_ansys() -> Union[Tuple[str, float], Tuple[Literal[""], Literal["
     >>> get_default_ansys()
     (/usr/ansys_inc/v211/ansys/bin/ansys211, 21.1)
     """
-    from ansys.tools.path import find_mapdl
+    from ansys.tools.common.path import find_mapdl
 
     return find_mapdl(supported_versions=SUPPORTED_ANSYS_VERSIONS)
 
@@ -976,11 +976,11 @@ def get_default_ansys_version():
 
 def check_valid_ansys() -> bool:
     """Checks if a valid version of ANSYS is installed and preconfigured"""
-    if not _HAS_ATP:
+    if not _HAS_ATC:
         raise ModuleNotFoundError(
-            "The package 'ansys-tools-path' is required to use this function."
+            "The package 'ansys-tools-common' is required to use this function."
         )
-    from ansys.tools.path import get_mapdl_path
+    from ansys.tools.common.path import get_mapdl_path
 
     ansys_bin = get_mapdl_path(allow_input=False)  # type: ignore
     if ansys_bin is not None:
@@ -1041,11 +1041,11 @@ def set_MPI_additional_switches(
 
     # known issues with distributed memory parallel (DMP)
     if os.name == "nt" and "smp" not in add_sw_lower_case:  # pragma: no cover
-        if _HAS_ATP:
+        if _HAS_ATC:
             condition = not force_intel and version and (222 > version >= 210)
         else:
             warnings.warn(
-                "Because 'ansys-tools-path' is not installed, PyMAPDL cannot check\n"
+                "Because 'ansys-tools-common' is not installed, PyMAPDL cannot check\n"
                 "if this Ansys version requires the MPI fix, so if you are on Windows,\n"
                 "the fix is applied by default.\n"
                 "Use 'force_intel=True' to not apply the fix."
@@ -1388,7 +1388,7 @@ def launch_mapdl(
         Versions can be provided as integers (i.e. ``version=222``) or floats
         (i.e. ``version=22.2``).
         To retrieve the available installed versions, use the function
-        :func:`ansys.tools.path.get_available_ansys_installations`.
+        :func:`ansys.tools.common.path.get_available_ansys_installations`.
         You can also provide this value through the environment variable
         :envvar:`PYMAPDL_MAPDL_VERSION`. For instance:
 
@@ -2457,7 +2457,7 @@ def get_version(
 
     if not version:
         # verify version
-        if exec_file and _HAS_ATP:
+        if exec_file and _HAS_ATC:
             version = version_from_path("mapdl", exec_file, launch_on_hpc=launch_on_hpc)
             if version and version < 202:
                 raise VersionError(
@@ -2571,7 +2571,7 @@ def get_exec_file(args: Dict[str, Any]) -> None:
     Raises
     ------
     ModuleNotFoundError
-        'ansys-tools-path' library could not be found
+        'ansys-tools-common' library could not be found
     FileNotFoundError
         Invalid exec_file path or cannot load cached MAPDL path.
     FileNotFoundError
@@ -2585,13 +2585,13 @@ def get_exec_file(args: Dict[str, Any]) -> None:
         return
 
     if args["exec_file"] is None:
-        if not _HAS_ATP:
+        if not _HAS_ATC:
             raise ModuleNotFoundError(
-                "If you don't have 'ansys-tools-path' library installed, you need "
+                "If you don't have 'ansys-tools-common' library installed, you need "
                 "to input the executable path ('exec_file' argument) or use the "
                 "'PYMAPDL_MAPDL_EXEC' environment variable."
             )
-        from ansys.tools.path import get_mapdl_path
+        from ansys.tools.common.path import get_mapdl_path
 
         if args.get("_debug_no_launch", False):
             args["exec_file"] = ""

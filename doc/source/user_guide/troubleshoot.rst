@@ -725,7 +725,7 @@ If you want to see which Ansys installations PyMAPDL has detected, use:
 
 Student versions are provided as **negative** versions because the Python dictionary
 does not accept two equal keys. The result of the
-:func:`get_available_ansys_installations() <ansys.tools.path.get_available_ansys_installations>`
+:func:`get_available_ansys_installations() <ansys.tools.common.path.get_available_ansys_installations>`
 method lists higher versions first and student versions last.
 
 .. warning::
