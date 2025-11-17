@@ -51,7 +51,12 @@ from ansys.mapdl.core import _HAS_PYVISTA, _HAS_VISUALIZER, LOG
 from ansys.mapdl.core.plotting import GraphicsBackend
 
 # path of this module
-MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
+_frame = inspect.currentframe()
+MODULE_PATH = (
+    os.path.dirname(inspect.getfile(_frame))
+    if _frame is not None
+    else os.path.dirname(__file__)
+)
 
 
 class ROUTINES(Enum):

@@ -434,7 +434,7 @@ class MapdlGrpc(MapdlBase):
         self._subscribe_to_channel()
 
         # connect and validate to the channel
-        self._mapdl_process: subprocess.Popen = start_parm.pop("process", None)
+        self._mapdl_process: Optional[subprocess.Popen] = start_parm.pop("process", None)  # type: ignore[arg-type]
 
         # saving for later use (for example open_gui)
         self._start_parm: Dict[str, Any] = start_parm
@@ -2485,8 +2485,8 @@ class MapdlGrpc(MapdlBase):
         files: Union[str, List[str], Tuple[str, ...]],
         target_dir: str,
         extension: Optional[str] = None,
-        chunk_size: Optional[str] = None,
-        progress_bar: Optional[str] = None,
+        chunk_size: Optional[int] = None,
+        progress_bar: Optional[bool] = None,
     ) -> List[str]:
         """Download files when we are connected to a remote session."""
 
@@ -3222,7 +3222,7 @@ class MapdlGrpc(MapdlBase):
     ):
         """Wraps NSOL to return the variable as an array."""
         super().nsol(
-            nvar=nvar,
+            nvar=nvar,  # type: ignore[arg-type]
             node=node,
             item=item,
             comp=comp,
@@ -3230,7 +3230,7 @@ class MapdlGrpc(MapdlBase):
             sector=sector,
             **kwargs,
         )
-        return self.vget("_temp", nvar)
+        return self.vget("_temp", nvar)  # type: ignore[arg-type]
 
     @wraps(MapdlBase.esol)
     def esol(  # numpydoc ignore=RT01
@@ -3245,7 +3245,7 @@ class MapdlGrpc(MapdlBase):
     ) -> NDArray[np.float64]:
         """Wraps ESOL to return the variable as an array."""
         super().esol(
-            nvar=nvar,
+            nvar=nvar,  # type: ignore[arg-type]
             elem=elem,
             node=node,
             item=item,
@@ -3253,7 +3253,7 @@ class MapdlGrpc(MapdlBase):
             name=name,
             **kwargs,
         )
-        return self.vget("_temp", nvar)
+        return self.vget("_temp", nvar)  # type: ignore[arg-type]
 
     @wraps(MapdlBase.rpsd)
     def rpsd(  # numpydoc ignore=RT01
@@ -3278,7 +3278,7 @@ class MapdlGrpc(MapdlBase):
             signif=signif,
             **kwargs,
         )
-        return self.vget("_temp", ir)
+        return self.vget("_temp", ir)  # type: ignore[arg-type]
 
     def get_nsol(
         self,
@@ -3339,7 +3339,7 @@ class MapdlGrpc(MapdlBase):
         labels TBOT, TE2, TE3, . . ., TTOP instead of TEMP.
         """
         return self.nsol(
-            VAR_IR,
+            VAR_IR,  # type: ignore[arg-type]
             node=node,
             item=item,
             comp=comp,
@@ -3445,7 +3445,7 @@ class MapdlGrpc(MapdlBase):
         Technology Guide.
         """
         self.esol(
-            VAR_IR,
+            VAR_IR,  # type: ignore[arg-type]
             elem=elem,
             node=node,
             item=item,

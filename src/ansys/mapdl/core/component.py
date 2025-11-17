@@ -142,12 +142,32 @@ class Component(tuple):
         # https://stackoverflow.com/questions/47627298/how-is-tuple-init-different-from-super-init-in-a-subclass-of-tuple
         tuple.__init__(*args, **kwargs)
 
-    def __new__(cls, items_: Tuple[int, ...], type_: ENTITIES_TYP) -> "Component":
+    def __new__(
+        cls,
+        type_: ENTITIES_TYP,
+        items_: Union[Tuple[int, ...], List[int], "Component", NDArray, int, str, None],
+    ) -> "Component":
         """Create a new Component instance."""
         if not isinstance(type_, str) or type_.upper() not in VALID_ENTITIES:
             raise ValueError(
                 f"The value '{type_}' is not allowed for 'type' definition."
             )
+        # Convert to tuple if needed
+        if isinstance(items_, Component):
+            items_ = tuple(items_)
+        elif isinstance(items_, (list, np.ndarray)):
+            items_ = tuple(items_)
+        elif items_ is None:
+            items_ = tuple()
+        elif isinstance(items_, (int, str)):
+            # Handle single values
+            items_ = (int(items_),) if isinstance(items_, (int, str)) else tuple()
+        elif not isinstance(items_, tuple):
+            # Fallback for any iterable
+            try:
+                items_ = tuple(items_)  # type: ignore[arg-type]
+            except (TypeError, ValueError):
+                items_ = tuple()
         obj = super().__new__(cls, items_)
         obj._type: ENTITIES_TYP = type_  # type: ignore[attr-defined]
 
@@ -323,7 +343,9 @@ class ComponentManager:
             forced_to_select = True
 
         try:
-            cmtype = self._comp[key.upper()]
+            cmtype_raw = self._comp[key.upper()]
+            # cmtype can be a string (just type) or a list [selection, type]
+            cmtype: str = cmtype_raw[1] if isinstance(cmtype_raw, list) else cmtype_raw  # type: ignore[assignment]
         except KeyError:
             # testing if the CM exists or not
             # it seems you can use `*get` with components which are not selected.
@@ -338,12 +360,12 @@ class ComponentManager:
                     f"The component named '{key}' does not exist in the MAPDL instance."
                 )
 
-        output = self._mapdl._parse_cmlist_indiv(key, cmtype)
+        output: List[int] = self._mapdl._parse_cmlist_indiv(key, cmtype)
         if forced_to_select:
             # Unselect to keep the state of the things as before calling this method.
             self._mapdl.cmsel("U", key)
 
-        return Component(cmtype, output)
+        return Component(cmtype, output)  # type: ignore[arg-type]
 
     def __setitem__(self, key: str, value: ITEMS_VALUES) -> None:
         if not isinstance(key, str):
@@ -566,7 +588,7 @@ def _parse_cmlist_indiv(
     cmlist = "\n\n".join(
         re.findall(
             r"(?s)" + header + r"\s+(.*?)\s*(?=\n\s*\n|\Z)",
-            cmlist,
+            cmlist or "",  # Handle None case
             flags=re.DOTALL,
         )
     )
@@ -584,6 +606,8 @@ def _parse_cmlist_indiv(
 
 def _parse_cmlist(cmlist: Optional[str] = None) -> Dict[str, Any]:
     include_selection = False
+    if cmlist is None:
+        return {}
     if re.search(r"NAME\s+TYPE\s+SUBCOMPONENTS", cmlist):
         # header
         #  "NAME                            TYPE      SUBCOMPONENTS"

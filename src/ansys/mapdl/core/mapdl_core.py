@@ -545,7 +545,7 @@ class _MapdlCore(Commands):
             raise ValueError(f"'{value}' is not allowed as file output for plots.")
         return self._default_file_type_for_plots
 
-    def _wrap_directory(self, path: str) -> pathlib.PurePath:
+    def _wrap_directory(self, path: Union[str, pathlib.Path]) -> pathlib.PurePath:
         if self._platform is None:
             # MAPDL is not initialized yet so returning the path as is.
             return pathlib.PurePath(path)

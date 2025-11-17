@@ -547,6 +547,8 @@ def get_ansys_license_debug_file_path() -> str:  # pragma: no cover
     else:
         raise OSError(f"Unsupported OS {os.name}")
 
+    if folder is None:
+        raise OSError(f"Could not determine home directory for OS {os.name}")
     return os.path.join(folder, ".ansys")
 
 

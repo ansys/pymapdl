@@ -114,7 +114,7 @@ class KrylovSolver:
         """Return the weakly referenced instance of mapdl."""
         return self._mapdl_weakref()
 
-    def _check_full_file_exists(self, full_file: str = None) -> None:
+    def _check_full_file_exists(self, full_file: Optional[str] = None) -> None:
         """Check full file exists."""
         current_dir = self._mapdl.directory
         # Check if full file exists
@@ -173,7 +173,11 @@ class KrylovSolver:
             )
 
     def _check_input_solve(
-        self, freq_start: int, freq_end: int, freq_steps: int, ramped_load: bool
+        self,
+        freq_start: Union[int, str],
+        freq_end: Union[int, str],
+        freq_steps: Union[int, str],
+        ramped_load: bool,
     ):
         """Validate the inputs to the ``solve`` method."""
 
@@ -205,7 +209,7 @@ class KrylovSolver:
         self,
         return_solution: bool,
         residual_computation: bool,
-        residual_algorithm: RESIDUAL_ALGORITHM_LITERAL,
+        residual_algorithm: Optional[RESIDUAL_ALGORITHM_LITERAL],
     ):
         """Validate the inputs to the ``expand`` method."""
 
@@ -215,7 +219,7 @@ class KrylovSolver:
             )
         if not isinstance(residual_computation, bool):
             raise ValueError("The 'residual_computation' must be True or False.")
-        if (
+        if residual_algorithm is not None and (
             not isinstance(residual_algorithm, str)
             or residual_algorithm.lower() not in RESIDUAL_ALGORITHM
         ):

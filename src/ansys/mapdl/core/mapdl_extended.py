@@ -3053,8 +3053,8 @@ class _MapdlExtended(_MapdlCommandExtended):
             return np.empty(0)
 
         with self.non_interactive:
-            self.vwrite("%s(1)" % parm_name)
-            self.run("(F20.12)")
+            self.vwrite("%s(1)" % parm_name)  # type: ignore[arg-type]
+            self.run("(F20.12)")  # type: ignore[arg-type]
 
         array = np.fromstring(self.last_response, sep="\n")
 
