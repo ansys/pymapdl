@@ -33,6 +33,7 @@ from . import (
     database,
     element_type,
     elements,
+    explicit_dynamics,
     hard_points,
     keypoints,
     lines,

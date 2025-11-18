@@ -32,6 +32,7 @@ Prep7
    * - :ref:`ref_artificially_matched_layers`
    * - :ref:`ref_real_constants`
    * - :ref:`ref_superelements`
+   * - :ref:`ref_explicit_dynamics`
 
 
 .. toctree::
@@ -56,4 +57,4 @@ Prep7
    keypoints
    hard_points
    artificially_matched_layers
-
+   explicit_dynamics
