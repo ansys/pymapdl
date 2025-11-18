@@ -496,14 +496,14 @@ class KrylovSolver:
 
         # Loop over frequency range
         omega = self.freq_start * 2 * np.pi
-        self.intV = (self.freq_end - self.freq_start) / self.freq_steps
+        self.intV = (self.freq_end - self.freq_start) / self.freq_steps  # type: ignore[operator]
 
-        for iFreq in range(1, self.freq_steps + 1):
+        for iFreq in range(1, self.freq_steps + 1):  # type: ignore[operator]
             # form RHS at the i-th frequency point
             self.iRHS.zeros()
             if self.ramped_load == 0:
                 # apply ramped loading
-                ratio = 2 * iFreq / self.freq_steps
+                ratio = 2 * iFreq / self.freq_steps  # type: ignore[operator]
                 if self.freq_steps == 1:
                     ratio = 1.00
             else:
@@ -621,7 +621,7 @@ class KrylovSolver:
         omega = self.freq_start * 2 * np.pi  # circular frequency at starting point
         xii_usr_ordered = []
 
-        for iFreq in range(1, self.freq_steps + 1):
+        for iFreq in range(1, self.freq_steps + 1):  # type: ignore[operator]
             self._mapdl.vec(self.iY.id, "Z", "LINK", self.Yz.id, iFreq)
             # vector of solution in solver space
             self._mapdl.vec("Xi", "Z", "LINK", self.DzV.id, iFreq)
@@ -652,7 +652,7 @@ class KrylovSolver:
                     "off",
                 ]
             ):
-                norm_rz, norm_fz = self.compute_residuals(iFreq, RzV, Xi, omega)
+                norm_rz, norm_fz = self.compute_residuals(iFreq, RzV, Xi, omega)  # type: ignore[misc]
                 if self.residuals is None:
                     self.residuals = []  # type: ignore[assignment]
 
@@ -676,7 +676,7 @@ class KrylovSolver:
         self.iRHS.zeros()
         if self.ramped_load:
             # apply ramped loading
-            ratio = 2 * iFreq / self.freq_steps
+            ratio = 2 * iFreq / self.freq_steps  # type: ignore[operator]
             if self.freq_steps == 1:
                 ratio = 1.0
         else:
