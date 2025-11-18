@@ -617,39 +617,95 @@ class MapdlGrpc(MapdlBase):
         connected = False
         attempt_timeout = int(timeout / n_attempts)
 
-        max_time = time.time() + timeout
-        i = 1
-        while time.time() < max_time and i <= n_attempts:
-            self._log.debug("Connection attempt %d", i)
-            connected = self._connect(timeout=attempt_timeout)
-            i += 1
-            if connected:
-                self._log.debug("Connected")
-                break
-        else:
-            # Check if mapdl process is alive
-            msg = (
-                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}.\n"
-                f"Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s)."
+        # Start monitoring thread to check if MAPDL is alive
+        monitor_stop_event = threading.Event()
+        monitor_exception = {"error": None}
+        
+        def monitor_mapdl_alive():
+            """Monitor thread to check if MAPDL process is alive."""
+            from ansys.mapdl.core.launcher import (
+                _check_process_is_alive,
+                _check_file_error_created,
             )
+            
+            try:
+                while not monitor_stop_event.is_set():
+                    # Only monitor if we have a local process
+                    if self._local and self._mapdl_process and self._path:
+                        try:
+                            # Check if process is alive
+                            _check_process_is_alive(self._mapdl_process, self._path)
 
-            if self._mapdl_process is not None and psutil.pid_exists(
-                self._mapdl_process.pid
-            ):
-                # Process is alive
-                raise MapdlConnectionError(
-                    msg
-                    + f" The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
-                )
+                        except Exception as e:
+                            # Process died or something went wrong
+                            monitor_exception["error"] = e
+                            monitor_stop_event.set()
+                            break
+                    
+                    # Check every 0.5 seconds
+                    monitor_stop_event.wait(0.5)
+                    
+            except Exception as e:
+                self._log.debug(f"Monitor thread encountered error: {e}")
+                monitor_exception["error"] = e
+
+        # Start the monitoring thread
+        monitor_thread = None
+        if self._local and self._mapdl_process:
+            monitor_thread = threading.Thread(target=monitor_mapdl_alive, daemon=True)
+            monitor_thread.start()
+            self._log.debug("Started MAPDL monitoring thread")
+
+        try:
+            max_time = time.time() + timeout
+            i = 1
+            while time.time() < max_time and i <= n_attempts:
+                # Check if monitoring thread detected a problem
+                if monitor_exception["error"] is not None:
+                    self._log.debug("Monitor detected MAPDL process issue, stopping connection attempts")
+                    raise monitor_exception["error"]
+                
+                self._log.debug("Connection attempt %d", i)
+                connected = self._connect(timeout=attempt_timeout)
+                i += 1
+                if connected:
+                    self._log.debug("Connected")
+                    break
+                    
+                # Check again after connection attempt
+                if monitor_exception["error"] is not None:
+                    self._log.debug("Monitor detected MAPDL process issue after connection attempt")
+                    raise monitor_exception["error"]
             else:
-                pid_msg = (
-                    f" PID: {self._mapdl_process.pid}"
-                    if self._mapdl_process is not None
-                    else ""
+                # Check if mapdl process is alive
+                msg = (
+                    f"Unable to connect to MAPDL gRPC instance at {self._channel_str}.\n"
+                    f"Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s)."
                 )
-                raise MapdlConnectionError(
-                    msg + f" The MAPDL process has died{pid_msg}."
-                )
+
+                if self._mapdl_process is not None and psutil.pid_exists(
+                    self._mapdl_process.pid
+                ):
+                    # Process is alive
+                    raise MapdlConnectionError(
+                        msg
+                        + f" The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
+                    )
+                else:
+                    pid_msg = (
+                        f" PID: {self._mapdl_process.pid}"
+                        if self._mapdl_process is not None
+                        else ""
+                    )
+                    raise MapdlConnectionError(
+                        msg + f" The MAPDL process has died{pid_msg}."
+                    )
+        finally:
+            # Stop the monitoring thread
+            monitor_stop_event.set()
+            if monitor_thread is not None:
+                monitor_thread.join(timeout=1.0)
+                self._log.debug("Stopped MAPDL monitoring thread")
 
         self._exited = False
 
