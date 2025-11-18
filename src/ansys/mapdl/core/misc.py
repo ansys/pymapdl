@@ -33,6 +33,7 @@ import string
 import tempfile
 from threading import Thread
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -50,6 +51,9 @@ import numpy as np
 
 from ansys.mapdl.core import _HAS_PYVISTA, _HAS_VISUALIZER, LOG
 from ansys.mapdl.core.plotting import GraphicsBackend
+
+if TYPE_CHECKING:
+    from ansys.mapdl.core.mapdl import MapdlBase as Mapdl
 
 # path of this module
 _frame = inspect.currentframe()
@@ -98,6 +102,10 @@ def check_valid_routine(routine: Union[str, ROUTINES]) -> bool:
     ValueError
         Raised when a routine is invalid.
     """
+    # Convert ROUTINES enum to string if necessary
+    if isinstance(routine, ROUTINES):
+        return True
+
     if routine.lower().startswith("/"):
         routine = routine[1:]
 
@@ -544,7 +552,9 @@ def requires_package(package_name: str, softerror: bool = False) -> Callable:
     return decorator
 
 
-def _get_args_xsel(*args: Tuple[str], **kwargs: Dict[str, str]) -> Tuple[str]:
+def _get_args_xsel(
+    *args: str, **kwargs: str
+) -> Tuple[str, str, str, str, str, str, str, Dict[str, str]]:
     type_ = kwargs.pop("type_", str(args[0]) if len(args) else "").upper()
     item = kwargs.pop("item", str(args[1]) if len(args) > 1 else "").upper()
     comp = kwargs.pop("comp", str(args[2]) if len(args) > 2 else "").upper()

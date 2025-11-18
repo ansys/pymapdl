@@ -192,7 +192,7 @@ class Plain_Report:
 if _HAS_PYANSYS_REPORT:
     base_report_class: Type[pyansys_report.Report] = pyansys_report.Report
 else:  # pragma: no cover
-    base_report_class: Type[Plain_Report] = Plain_Report
+    base_report_class = Plain_Report
 
 
 class Report(base_report_class):  # type: ignore[misc]

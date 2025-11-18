@@ -221,7 +221,7 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
         kwargs["extra"] = {}
         # This are the extra parameters sent to log
         if self.extra is not None:
-            kwargs["extra"]["instance_name"] = self.extra.name  # type: ignore[union-attr]
+            kwargs["extra"]["instance_name"] = self.extra.name  # type: ignore[union-attr,attr-defined]
         return msg, kwargs
 
     def log_to_file(

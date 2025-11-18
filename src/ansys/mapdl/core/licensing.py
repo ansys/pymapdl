@@ -29,7 +29,7 @@ import socket
 # the input is controlled by the library. Excluding bandit check.
 import subprocess  # nosec B404
 import time
-from typing import Any, Iterator, Literal, Union
+from typing import Any, Iterator, Literal, Optional, Union
 
 from ansys.mapdl.core import _HAS_ATC, LOG
 from ansys.mapdl.core.errors import LicenseServerConnectionError
@@ -81,11 +81,11 @@ class LicenseChecker:
     """
 
     def __init__(self, timeout: int = 30, verbose: bool | None = None):
-        self._license_file_msg = []
-        self._license_file_success = None
+        self._license_file_msg: list[str] = []
+        self._license_file_success: Optional[bool] = None
 
-        self._license_checkout_msg = []
-        self._license_checkout_success = None
+        self._license_checkout_msg: list[str] = []
+        self._license_checkout_success: Optional[bool] = None
         self._timeout = timeout
 
         if verbose is not None:
@@ -131,7 +131,7 @@ class LicenseChecker:
 
     @threaded_daemon
     def checkout_license(self, host: str | None = None):
-        self._license_checkout_success: Optional[bool] = None
+        self._license_checkout_success = None
         try:
             self._check_mech_license_available(host)
         except Exception as error:
@@ -407,10 +407,10 @@ class LicenseChecker:
         if licenses is None:
             licenses = LIC_TO_CHECK
         elif isinstance(licenses, str):
-            licenses = [licenses]  # type: ignore[assignment]
+            licenses = [licenses]
 
         # At this point licenses is definitely a list
-        assert licenses is not None
+        assert isinstance(licenses, list)
 
         msg1 = "No such feature exists"
         msg2 = "The server is down or is not responsive."

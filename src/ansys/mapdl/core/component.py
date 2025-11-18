@@ -169,7 +169,7 @@ class Component(tuple):
             except (TypeError, ValueError):
                 items_ = tuple()
         obj = super().__new__(cls, items_)
-        obj._type: ENTITIES_TYP = type_  # type: ignore[attr-defined]
+        obj._type = type_  # type: ignore[misc,attr-defined]
 
         return obj
 
@@ -371,6 +371,10 @@ class ComponentManager:
         if not isinstance(key, str):
             raise ValueError("Only strings are allowed for component names.")
 
+        cmname: str
+        cmtype: ENTITIES_TYP
+        cmitems: Union[Component, List[int], Tuple[int, ...], NDArray[Any]]
+
         if isinstance(value, Component):
             # Allowing to use a component object to be set.
             cmname = key
@@ -392,7 +396,7 @@ class ComponentManager:
                     )
 
                 cmname = key
-                cmtype: ENTITIES_TYP = value[0].upper()  # type: ignore[assignment]
+                cmtype = value[0].upper()  # type: ignore[assignment]
                 cmitems = value[1]
 
             else:
@@ -419,7 +423,7 @@ class ComponentManager:
                 )
 
             cmname = key
-            cmtype: ENTITIES_TYP = value  # type: ignore[assignment]
+            cmtype = value  # type: ignore[assignment]
 
             self._mapdl.cm(cmname, cmtype)
 
@@ -439,7 +443,7 @@ class ComponentManager:
 
             cmname = key
             cmtype = self.default_entity
-            cmitems: Union[List[int], NDArray[Any]] = value  # type: ignore[assignment]
+            cmitems = value  # type: ignore[assignment]
 
         else:
             raise ValueError("Only strings or tuples are allowed for assignment.")
@@ -579,10 +583,10 @@ def _parse_cmlist_indiv(
     cmname: str, cmtype: str, cmlist: Optional[str] = None
 ) -> List[int]:
     # Capturing blocks
-    if "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
+    if cmlist and "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
         header = r"NAME\s+TYPE\s+SUBCOMPONENTS"
 
-    elif "LIST COMPONENT" in cmlist:
+    elif cmlist and "LIST COMPONENT" in cmlist:
         header = ""
 
     cmlist = "\n\n".join(

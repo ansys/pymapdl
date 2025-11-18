@@ -43,7 +43,6 @@ from typing import (
     List,
     Literal,
     Optional,
-    TextIO,
     Tuple,
     TypeAlias,
     Union,
@@ -312,7 +311,7 @@ class _MapdlCore(Commands):
         self._ignore_errors: bool = False
         self._apdl_log = None
         self._store_commands: bool = False
-        self._stored_commands = []
+        self._stored_commands: list[str] = []
         self._response = None
         self._mode = start_parm.get("mode", None)
         self._mapdl_process = None
@@ -1724,7 +1723,7 @@ class _MapdlCore(Commands):
                 " creation ('w', 'a', or 'x')."
             )
 
-        self._apdl_log: Optional[TextIO] = open(filename, mode=mode, buffering=1)  # type: ignore[assignment]  # line buffered
+        self._apdl_log = open(filename, mode=mode, buffering=1)  # type: ignore[misc,no-redef]  # line buffered
         assert self._apdl_log is not None  # just opened above
         self._apdl_log.write(
             f"! APDL log script generated using PyMAPDL (ansys.mapdl.core {pymapdl.__version__})\n"
