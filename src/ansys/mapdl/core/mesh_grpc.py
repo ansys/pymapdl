@@ -887,7 +887,7 @@ class MeshGrpc:
                 const_[set_] = values
 
             for i, jlimit in enumerate(range(limits[0] - 1, limits[1])):
-                const_[set_][jlimit] = values_[i]
+                const_[set_][jlimit] = int(values_[i])
 
         return const_
 
