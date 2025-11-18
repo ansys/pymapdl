@@ -23,12 +23,17 @@
 import os
 import re
 import tempfile
+from typing import Optional, Union
 import weakref
+
+import numpy as np
+from numpy.typing import NDArray
 
 try:
     from ansys.mapdl.reader._reader import write_array
 
     _HAS_READER = True
+
 except ModuleNotFoundError:  # pragma: no cover
     from ansys.mapdl.core.misc import write_array
 
@@ -799,21 +804,23 @@ def interp_star_status(status: str) -> dict[str, str]:
 
     if st == -1:
         return {}
-
     lines = status[st + incr :].splitlines()
     elements = []
     if is_array_listing(status):
-        myarray = np.array([each.split() for each in lines]).astype(float)
+        myarray_size: NDArray[np.float64] = np.array(
+            [each.split() for each in lines]
+        ).astype(float)
         idim = int(myarray[:, 0].max())
         jdim = int(myarray[:, 1].max())
         kdim = int(myarray[:, 2].max())
-        myarray = np.zeros((idim, jdim, kdim))
+        myarray: NDArray[np.float64] = np.zeros((idim, jdim, kdim))
 
     for line in lines:
         items = line.split()
         if not items:
             continue
 
+        value: Optional[Union[float, str]] = None
         # line will contain either a character, scalar, or array
         name = items[0]
         if len(items) == 2 or "CHARACTER" in items[-1].upper():

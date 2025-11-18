@@ -38,6 +38,7 @@ from typing import (
     Dict,
     Iterable,
     List,
+    Optional,
     ParamSpec,
     Tuple,
     TypeVar,
@@ -298,7 +299,7 @@ def last_created(filenames: List[str]) -> str:
     return filenames[idx]
 
 
-def create_temp_dir(tmpdir: str = None, name: str = None) -> str:
+def create_temp_dir(tmpdir: Optional[str] = None, name: Optional[str] = None) -> str:
     """Create a new unique directory at a given temporary directory"""
     if tmpdir is None:
         tmpdir = tempfile.gettempdir()
@@ -341,7 +342,9 @@ def get_bounding_box(nodes_xyz: np.ndarray) -> np.ndarray:
     return max_ - min_
 
 
-def load_file(mapdl: "Mapdl", fname: str, priority_mapdl_file: bool = None) -> str:
+def load_file(
+    mapdl: "Mapdl", fname: str, priority_mapdl_file: Optional[bool] = None
+) -> str:
     """
     Provide a file to the MAPDL instance.
 

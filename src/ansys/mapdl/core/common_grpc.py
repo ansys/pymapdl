@@ -47,7 +47,7 @@ ANSYS_VALUE_TYPE: Dict[int, Optional[np.typing.DTypeLike]] = {
 }
 
 
-VGET_ENTITY_TYPES_TYPING: List[str] = Literal[
+VGET_ENTITY_TYPES_TYPING = Literal[
     "NODE",
     "ELEM",
     "KP",

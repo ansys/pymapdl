@@ -195,7 +195,7 @@ class MapdlPool:
 
     def __init__(
         self,
-        n_instances: int = None,
+        n_instances: Optional[int] = None,
         wait: bool = True,
         run_location: Optional[str] = None,
         ip: Optional[Union[str, List[str]]] = None,
@@ -205,7 +205,7 @@ class MapdlPool:
         remove_temp_dir_on_exit: bool = True,
         names: Optional[str] = None,
         override=True,
-        start_instance: bool = None,
+        start_instance: Optional[bool] = None,
         exec_file: Optional[str] = None,
         timeout: int = 30,
         **kwargs,
@@ -876,8 +876,8 @@ class MapdlPool:
     def _spawn_mapdl(
         self,
         index: int,
-        ip: str = None,
-        port: int = None,
+        ip: Optional[str] = None,
+        port: Optional[int] = None,
         pbar: Optional[bool] = None,
         name: str = "",
         start_instance=True,

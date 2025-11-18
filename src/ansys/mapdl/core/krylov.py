@@ -596,7 +596,7 @@ class KrylovSolver:
             # To avoid having to set residual computation.
             residual_computation = True
         elif residual_algorithm is None:
-            residual_algorithm = "L-Inf"
+            residual_algorithm = "L-Inf"  # type: ignore[assignment]
 
         # Check inputs before executing the method
         self._check_input_expand(
@@ -654,7 +654,7 @@ class KrylovSolver:
             ):
                 norm_rz, norm_fz = self.compute_residuals(iFreq, RzV, Xi, omega)
                 if self.residuals is None:
-                    self.residuals = []
+                    self.residuals = []  # type: ignore[assignment]
 
                 self.residuals.append([iFreq, norm_rz, norm_fz])  # type: ignore[attr-defined]
 

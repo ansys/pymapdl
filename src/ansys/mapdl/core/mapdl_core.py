@@ -43,6 +43,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    TextIO,
     Tuple,
     TypeAlias,
     Union,
@@ -315,7 +316,7 @@ class _MapdlCore(Commands):
         self._response = None
         self._mode = start_parm.get("mode", None)
         self._mapdl_process = None
-        self._launched: bool = start_parm.get("launched", False)
+        self._launched: bool = start_parm.get("launched", False)  # type: ignore[assignment]
         self._stderr = None
         self._stdout = None
         self._file_type_for_plots = file_type_for_plots
@@ -323,7 +324,7 @@ class _MapdlCore(Commands):
         self._version = None  # cached version
         self._mute = False
         self._save_selection_obj = None
-        self._use_reader_backend: bool = start_parm.pop("use_reader_backend", True)
+        self._use_reader_backend: bool = start_parm.pop("use_reader_backend", True)  # type: ignore[assignment]
 
         if _HAS_VISUALIZER:
             if graphics_backend is not None:  # pragma: no cover
@@ -353,13 +354,13 @@ class _MapdlCore(Commands):
         # Start_parameters
         _sanitize_start_parm(start_parm)
         self._start_parm: Dict[str, Any] = start_parm
-        self._jobname: str = start_parm.get("jobname", "file")
+        self._jobname: str = start_parm.get("jobname", "file")  # type: ignore[assignment]
         self._path: str | pathlib.PurePath | None = (
             None  # start_parm.get("run_location", None)
         )
         self._check_parameter_names: bool = start_parm.get(
             "check_parameter_names", True
-        )
+        )  # type: ignore[assignment]
 
         # Setting up loggers
         self._log: logger = logger.add_instance_logger(
@@ -644,7 +645,7 @@ class _MapdlCore(Commands):
             self._run(
                 f"/show, {value.upper()}"
             )  # To avoid recursion we need to use _run.
-            self._file_type_for_plots = value.upper()
+            self._file_type_for_plots = value.upper()  # type: ignore[assignment]
         else:
             raise ValueError(f"'{value}' is not allowed as file output for plots.")
 
@@ -1723,7 +1724,7 @@ class _MapdlCore(Commands):
                 " creation ('w', 'a', or 'x')."
             )
 
-        self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
+        self._apdl_log: Optional[TextIO] = open(filename, mode=mode, buffering=1)  # type: ignore[assignment]  # line buffered
         assert self._apdl_log is not None  # just opened above
         self._apdl_log.write(
             f"! APDL log script generated using PyMAPDL (ansys.mapdl.core {pymapdl.__version__})\n"
@@ -2049,7 +2050,7 @@ class _MapdlCore(Commands):
         >>> mapdl.set_log_level('ERROR')
         """
         if isinstance(loglevel, str):
-            loglevel = loglevel.upper()
+            loglevel = loglevel.upper()  # type: ignore[assignment]
         setup_logger(loglevel=loglevel)
 
     def _list(self, command):
@@ -2414,7 +2415,7 @@ class _MapdlCore(Commands):
 
         # Tracking output device
         if command[:4].upper() == "/SHO" and "," in command:
-            self._file_type_for_plots = command.split(",")[1].upper()
+            self._file_type_for_plots = command.split(",")[1].upper()  # type: ignore[assignment]
 
         # Invalid commands silently ignored.
         cmd_ = command.split(",")[0].upper()

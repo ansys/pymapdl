@@ -362,7 +362,7 @@ class MapdlGrpc(MapdlBase):
                     "If `channel` is specified, neither `port` nor `ip` can be specified."
                 )
         if ip is None:
-            ip = start_parm.pop("ip", None) or "127.0.0.1"
+            ip = start_parm.pop("ip", None) or "127.0.0.1"  # type: ignore[assignment]
 
         # setting hostname and ip
         ip, hostname = get_ip_hostname(ip)
@@ -378,7 +378,7 @@ class MapdlGrpc(MapdlBase):
             port = MAPDL_DEFAULT_PORT
 
         self._port: int = int(port)
-        start_parm["port"] = self._port  # store for `open_gui`
+        start_parm["port"] = self._port  # type: ignore[assignment]  # store for `open_gui`
 
         super().__init__(
             loglevel=loglevel,
@@ -399,16 +399,16 @@ class MapdlGrpc(MapdlBase):
         self._stub: Optional[mapdl_grpc.MapdlServiceStub] = None
         self._cleanup: bool = cleanup_on_exit
         self.remove_temp_dir_on_exit: bool = remove_temp_dir_on_exit
-        self._jobname: str = start_parm.get("jobname", "file")
+        self._jobname: str = start_parm.get("jobname", "file")  # type: ignore[assignment]
         self._path: Optional[str] = (
             None  # self._wrap_directory(start_parm.get("run_location"))
         )
         self._start_instance: Optional[str] = (
-            start_parm.get("start_instance") or get_start_instance()
+            start_parm.get("start_instance") or get_start_instance()  # type: ignore[assignment]
         )
         self._busy: bool = False  # used to check if running a command on the server
-        self._local: bool = start_parm.get("local", True)
-        self._launched: bool = start_parm.get("launched", False)
+        self._local: bool = start_parm.get("local", True)  # type: ignore[assignment]
+        self._launched: bool = start_parm.get("launched", False)  # type: ignore[assignment]
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
         self._exited: Optional[bool] = None
@@ -434,15 +434,15 @@ class MapdlGrpc(MapdlBase):
         self._subscribe_to_channel()
 
         # connect and validate to the channel
-        self._mapdl_process: Optional[subprocess.Popen] = start_parm.pop("process", None)  # type: ignore[arg-type]
+        self._mapdl_process: Optional[subprocess.Popen] = start_parm.pop("process", None)  # type: ignore[assignment]
 
         # saving for later use (for example open_gui)
         self._start_parm: Dict[str, Any] = start_parm
 
         # Storing HPC related stuff
-        self._jobid: int = start_parm.get("jobid")
+        self._jobid: int = start_parm.get("jobid")  # type: ignore[assignment]
         self._mapdl_on_hpc: bool = bool(self._jobid)
-        self.finish_job_on_exit: bool = start_parm.get("finish_job_on_exit", True)
+        self.finish_job_on_exit: bool = start_parm.get("finish_job_on_exit", True)  # type: ignore[assignment]
 
         # Queueing the stds
         if not self._mapdl_on_hpc and self._mapdl_process:
@@ -515,7 +515,7 @@ class MapdlGrpc(MapdlBase):
         else:
             self._log.debug("Connection established")
 
-    def reconnect_to_mapdl(self, timeout: int = None):
+    def reconnect_to_mapdl(self, timeout: Optional[int] = None):
         """Reconnect to an already instantiated MAPDL instance.
 
         Re-establish an stopped or crashed gRPC connection with an already alive
@@ -919,7 +919,7 @@ class MapdlGrpc(MapdlBase):
         """
         # check cache
         if self.__server_version is None:
-            self.__server_version = self._get_server_version()
+            self.__server_version = self._get_server_version()  # type: ignore[assignment]
         return self.__server_version
 
     def _get_server_version(self) -> tuple[int, int, int]:
@@ -1302,7 +1302,7 @@ class MapdlGrpc(MapdlBase):
         if self._local and self._port in pymapdl._LOCAL_PORTS:
             pymapdl._LOCAL_PORTS.remove(self._port)
 
-    def _exit_mapdl(self, path: str = None) -> None:
+    def _exit_mapdl(self, path: Optional[str] = None) -> None:
         """Exit MAPDL and remove the lock file in `path`"""
         # This cannot/should not be faked
         if self._local:
@@ -1472,7 +1472,10 @@ class MapdlGrpc(MapdlBase):
         self._log.debug(f"Recaching PIDs: {self._pids}")
 
     def _remove_lock_file(
-        self, mapdl_path: str = None, jobname: str = None, use_cached: bool = False
+        self,
+        mapdl_path: Optional[str] = None,
+        jobname: Optional[str] = None,
+        use_cached: bool = False,
     ):
         """Removes the lock file.
 
@@ -2113,7 +2116,7 @@ class MapdlGrpc(MapdlBase):
                 raise ValueError("``time_step`` argument must be greater than 0``")
 
         self.logger.debug(f"The time_step argument is set to: {time_step}")
-        self._time_step_stream = time_step
+        self._time_step_stream = time_step  # type: ignore[assignment]
         return time_step
 
     def _flush_stored(self):

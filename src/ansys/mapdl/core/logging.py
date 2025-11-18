@@ -211,7 +211,7 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
     def __init__(self, logger: logging.Logger, extra: Optional["MapdlBase"] = None):
         self.logger = logger
         if extra is not None:
-            self.extra = weakref.proxy(extra)
+            self.extra = weakref.proxy(extra)  # type: ignore[assignment]
         else:
             self.extra = None
         self.file_handler = logger.file_handler  # type: ignore[attr-defined]

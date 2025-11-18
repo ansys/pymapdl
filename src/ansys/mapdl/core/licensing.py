@@ -29,7 +29,7 @@ import socket
 # the input is controlled by the library. Excluding bandit check.
 import subprocess  # nosec B404
 import time
-from typing import Iterator, Literal
+from typing import Any, Iterator, Literal, Union
 
 from ansys.mapdl.core import _HAS_ATP, LOG
 from ansys.mapdl.core.errors import LicenseServerConnectionError
@@ -131,6 +131,7 @@ class LicenseChecker:
 
     @threaded_daemon
     def checkout_license(self, host: str | None = None):
+        self._license_checkout_success: Optional[bool] = None
         try:
             self._check_mech_license_available(host)
         except Exception as error:
@@ -367,7 +368,7 @@ class LicenseChecker:
         return output
 
     def _check_mech_license_available(
-        self, host: str | None = None, licenses: Allowable_licenses | None = None
+        self, host: str | None = None, licenses: Allowable_licenses | str | None = None
     ) -> bool:  # pragma: no cover
         """Check if there mechanical license available by running 'ansysli_util'.
 
@@ -406,7 +407,7 @@ class LicenseChecker:
         if licenses is None:
             licenses = LIC_TO_CHECK
         elif isinstance(licenses, str):
-            licenses = [licenses]
+            licenses = [licenses]  # type: ignore[assignment]
 
         # At this point licenses is definitely a list
         assert licenses is not None
@@ -524,9 +525,10 @@ def get_ansys_license_debug_file_name() -> str:  # pragma: no cover
     hostname = socket.gethostname()
     appname = APP_NAME
     # This is the type of license my client requests (Windows 10, 2021R2)
-    version = version_from_path("mapdl", get_mapdl_path(allow_input=False))
+    version: int = version_from_path("mapdl", get_mapdl_path(allow_input=False))
     ending = "out"
 
+    parts: Union[tuple[str, str, Any, str], tuple[str, str, str, Any, str]]
     if version < 221:
         parts = (name, appname, version, ending)
     else:

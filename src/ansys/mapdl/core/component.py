@@ -294,7 +294,7 @@ class ComponentManager:
             raise ValueError(
                 f"Only the following entities are allowed:\n{', '.join(VALID_ENTITIES)}"
             )
-        self._default_entity = value.upper()
+        self._default_entity = value.upper()  # type: ignore[assignment]
 
     @property
     def default_entity_warning(self) -> bool:
@@ -392,7 +392,7 @@ class ComponentManager:
                     )
 
                 cmname = key
-                cmtype = value[0].upper()
+                cmtype: ENTITIES_TYP = value[0].upper()  # type: ignore[assignment]
                 cmitems = value[1]
 
             else:
@@ -408,8 +408,8 @@ class ComponentManager:
                     )
 
                 cmname = key
-                cmtype = self.default_entity
-                cmitems = value
+                cmtype = self.default_entity  # type: ignore[assignment]
+                cmitems = value  # type: ignore[assignment]
 
         elif isinstance(value, str):
             # create a component with the already selected elements
@@ -419,7 +419,7 @@ class ComponentManager:
                 )
 
             cmname = key
-            cmtype = value
+            cmtype: ENTITIES_TYP = value  # type: ignore[assignment]
 
             self._mapdl.cm(cmname, cmtype)
 
@@ -439,7 +439,7 @@ class ComponentManager:
 
             cmname = key
             cmtype = self.default_entity
-            cmitems = value
+            cmitems: Union[List[int], NDArray[Any]] = value  # type: ignore[assignment]
 
         else:
             raise ValueError("Only strings or tuples are allowed for assignment.")
@@ -598,10 +598,10 @@ def _parse_cmlist_indiv(
     items = "\n".join(re.findall(rg, cmlist, flags=re.DOTALL))
 
     # Joining them together and giving them format.
-    items = items.replace("\n", "  ").split()
-    items = [int(each) for each in items if is_float(each)]
+    items_raw: List[str] = items.replace("\n", "  ").split()
+    items_int: List[int] = [int(each) for each in items_raw if is_float(each)]
 
-    return items
+    return items_int
 
 
 def _parse_cmlist(cmlist: Optional[str] = None) -> Dict[str, Any]:

@@ -643,7 +643,7 @@ class Geometry:
             if amin or amax:
                 amax = amax or amin
                 amin = amin or 1
-                ninc = ninc or ""
+                ninc = ninc or ""  # type: ignore[assignment]
 
                 self._mapdl.asel("R", "AREA", vmin=amin, vmax=amax, vinc=ninc)
 
