@@ -404,17 +404,17 @@ class LicenseChecker:
             When errors messages found in the output of the license file.
         """
 
+        licenses_list: list[str]
         if licenses is None:
-            licenses = LIC_TO_CHECK
+            licenses_list = list(LIC_TO_CHECK)
         elif isinstance(licenses, str):
-            licenses = [licenses]
-
-        # At this point licenses is definitely a list
-        assert isinstance(licenses, list)
+            licenses_list = [licenses]
+        else:
+            licenses_list = [licenses]
 
         msg1 = "No such feature exists"
         msg2 = "The server is down or is not responsive."
-        for each_license in licenses:
+        for each_license in licenses_list:
             output = self._checkout_license(each_license, host)
             if isinstance(output, str) and (msg1 in output or msg2 in output):
                 raise LicenseServerConnectionError(output)
