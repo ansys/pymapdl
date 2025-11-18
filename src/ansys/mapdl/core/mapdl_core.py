@@ -43,6 +43,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    TextIO,
     Tuple,
     TypeAlias,
     Union,
@@ -309,7 +310,7 @@ class _MapdlCore(Commands):
         self._query = None
         self._exited: bool = False
         self._ignore_errors: bool = False
-        self._apdl_log = None
+        self._apdl_log: Optional[TextIO] = None
         self._store_commands: bool = False
         self._stored_commands: list[str] = []
         self._response = None
@@ -317,6 +318,8 @@ class _MapdlCore(Commands):
         self._mapdl_process = None
         self._launched: bool = start_parm.get("launched", False)  # type: ignore[assignment]
         self._stderr = None
+        self._archive_cache = None  # type: ignore[var-annotated]
+        self._remove_tmp: bool = False
         self._stdout = None
         self._file_type_for_plots = file_type_for_plots
         self._default_file_type_for_plots = file_type_for_plots
@@ -2008,6 +2011,7 @@ class _MapdlCore(Commands):
                 ]:
                     parent.show(parent.default_file_type_for_plots)
 
+        @requires_graphics
         def __exit__(self, *args) -> None:
             parent = self._parent()
             assert parent is not None, "Parent reference is None"
@@ -2020,7 +2024,8 @@ class _MapdlCore(Commands):
                     parent.show("PNG", mute=True)
                     parent.gfile(self._pixel_res, mute=True)
 
-                self._parent().file_type_for_plots = self.previous_device
+                assert parent is not None  # already checked above
+                parent.file_type_for_plots = self.previous_device
 
     def set_log_level(self, loglevel: DEBUG_LEVELS) -> None:
         """Sets log level
@@ -3358,11 +3363,14 @@ class _MapdlCore(Commands):
         file_name = self._get_plot_name(out_)
 
         if savefig:
-            return self._download_plot(file_name, savefig, default_name=default_name)
+            self._download_plot(file_name, savefig, default_name=default_name)
+            return None
         elif self._has_matplotlib:
-            return self._display_plot(file_name)
+            self._display_plot(file_name)
+            return None
         else:
             self._log.debug("Since matplolib is not installed, images are not shown.")
+            return None
 
     def _create_session(self):
         """Generate a session ID."""
