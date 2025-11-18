@@ -3106,12 +3106,12 @@ def test_muted(mapdl, prop):
     assert not mapdl.mute
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @patch(
-    "ansys.tools.path.path._get_application_path",
+    "ansys.tools.common.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",
 )
-@patch("ansys.tools.path.path._version_from_path", lambda *args, **kwargs: 242)
+@patch("ansys.tools.common.path.path._version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL)
 @pytest.mark.parametrize("set_no_abort", [True, False, None])
 @pytest.mark.parametrize("start_instance", [True, False])
