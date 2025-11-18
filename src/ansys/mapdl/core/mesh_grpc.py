@@ -872,10 +872,14 @@ class MeshGrpc:
         const_ = {}
         for each in constants_:
             values = [0 for i in range(18)]
-            set_ = int(re.match(r"REAL CONSTANT SET\s+(\d+)\s+", each).groups()[0])
+            set_match = re.match(r"REAL CONSTANT SET\s+(\d+)\s+", each)
+            set_ = int(set_match.groups()[0]) if set_match else 0
+
+            items_match = re.match(r".*ITEMS\s+(\d+)\s+", each)
+            to_match = re.match(r".*TO\s+(\d+)\s*", each)
             limits = (
-                int(re.match(r".*ITEMS\s+(\d+)\s+", each).groups()[0]),
-                int(re.match(r".*TO\s+(\d+)\s*", each).groups()[0]),
+                int(items_match.groups()[0]) if items_match else 0,
+                int(to_match.groups()[0]) if to_match else 0,
             )
             values_ = [float(i) for i in each.strip().splitlines()[1].split()]
 

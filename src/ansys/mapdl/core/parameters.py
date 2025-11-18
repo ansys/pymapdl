@@ -785,13 +785,15 @@ def interp_star_status(status: str) -> dict[str, str]:
         # listing of one array parameter
         header = "LOCATION                VALUE"
         incr = 30
-        name_ = re.search(r"STATUS-(.*)[^\(]\(", status).group(1).strip()
+        match = re.search(r"STATUS-(.*)[^\(]\(", status)
+        name_ = match.group(1).strip() if match else ""
     else:
         # listing of a string array
         is_string_array = True
         header = ""  # no header. Find will return 0.
         incr = sum([len(each) for each in status.splitlines()[0:2]]) + 1
-        name_ = re.search(r"STATUS-(.*)[^\(]\(", status).group(1).strip()
+        match = re.search(r"STATUS-(.*)[^\(]\(", status)
+        name_ = match.group(1).strip() if match else ""
 
     st = status.find(header)
 
@@ -835,9 +837,8 @@ def interp_star_status(status: str) -> dict[str, str]:
                 elements.append(items[-1])
 
         elif is_string_array:
-            last_element = (
-                re.search(r"\s*\d+\s+\d+\s+\d+\s+(.*)$", line).group(1).strip()
-            )
+            match = re.search(r"\s*\d+\s+\d+\s+\d+\s+(.*)$", line)
+            last_element = match.group(1).strip() if match else ""
             elements.append(last_element)
 
         elif len(items) == 5:

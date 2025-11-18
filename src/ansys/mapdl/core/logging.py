@@ -220,9 +220,8 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
     def process(self, msg: str, kwargs: MutableMapping[str, Dict[str, str]]):
         kwargs["extra"] = {}
         # This are the extra parameters sent to log
-        kwargs["extra"][
-            "instance_name"
-        ] = self.extra.name  # here self.extra is the argument pass to the log records.
+        if self.extra is not None:
+            kwargs["extra"]["instance_name"] = self.extra.name  # type: ignore[union-attr]
         return msg, kwargs
 
     def log_to_file(

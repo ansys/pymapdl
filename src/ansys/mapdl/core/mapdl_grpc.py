@@ -1184,7 +1184,7 @@ class MapdlGrpc(MapdlBase):
         resp = grpc_response.response
         if resp is not None:
             return resp.strip()
-        return None
+        return ""
 
     @protect_grpc
     def _send_command_stream(self, cmd, verbose=False) -> str:  # numpydoc ignore=RT01

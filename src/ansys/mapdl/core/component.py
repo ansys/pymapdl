@@ -330,7 +330,7 @@ class ComponentManager:
     def _comp(self, value) -> None:
         self.__comp = value
 
-    def __getitem__(self, key: str) -> ITEMS_VALUES:
+    def __getitem__(self, key: str) -> "Component":  # type: ignore[override]
         forced_to_select = False
 
         if key.upper() not in self._comp and self._autoselect_components:

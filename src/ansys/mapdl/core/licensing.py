@@ -355,7 +355,10 @@ class LicenseChecker:
             stderr=subprocess.STDOUT,
             env=env,
         )  # nosec B603
-        output = process.stdout.read().decode()
+        if process.stdout:
+            output = process.stdout.read().decode()
+        else:
+            output = ""
 
         t_elap = time.time() - tstart
         LOG.debug(f"License check complete in {t_elap:.2} seconds.\n")
@@ -405,11 +408,14 @@ class LicenseChecker:
         elif isinstance(licenses, str):
             licenses = [licenses]
 
+        # At this point licenses is definitely a list
+        assert licenses is not None
+
         msg1 = "No such feature exists"
         msg2 = "The server is down or is not responsive."
         for each_license in licenses:
             output = self._checkout_license(each_license, host)
-            if msg1 in output or msg2 in output:
+            if isinstance(output, str) and (msg1 in output or msg2 in output):
                 raise LicenseServerConnectionError(output)
 
         return True

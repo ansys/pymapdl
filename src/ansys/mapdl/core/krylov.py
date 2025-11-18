@@ -644,10 +644,14 @@ class KrylovSolver:
                 xii_usr_ordered.append(dof_each_freq)
 
             # Compute residual norm (if requested)
-            if residual_computation or residual_algorithm.lower() in [
-                "no",
-                "off",
-            ]:
+            if residual_computation or (
+                residual_algorithm
+                and residual_algorithm.lower()
+                in [
+                    "no",
+                    "off",
+                ]
+            ):
                 norm_rz, norm_fz = self.compute_residuals(iFreq, RzV, Xi, omega)
                 if self.residuals is None:
                     self.residuals = []
@@ -704,19 +708,28 @@ class KrylovSolver:
         # Output norms of residual vector
         norm_rz = 0.0
 
-        if self._residual_algorithm.lower() in ["l-inf", "linf"]:  # L-inf norm
+        if self._residual_algorithm and self._residual_algorithm.lower() in [
+            "l-inf",
+            "linf",
+        ]:  # L-inf norm
             norm_rz = Rzi.norm("NRMINF")
             norm_fz = self.iRHS.norm("NRMINF")
             if norm_fz != 0.0:
                 norm_rz = norm_rz / norm_fz
 
-        elif self._residual_algorithm.lower() in ["l-1", "l1"]:
+        elif self._residual_algorithm and self._residual_algorithm.lower() in [
+            "l-1",
+            "l1",
+        ]:
             norm_rz = Rzi.norm("NRM1")
             norm_fz = self.iRHS.norm("NRM1")
             if norm_fz != 0.0:
                 norm_rz = norm_rz / norm_fz
 
-        elif self._residual_algorithm.lower() in ["l-2", "l2"]:
+        elif self._residual_algorithm and self._residual_algorithm.lower() in [
+            "l-2",
+            "l2",
+        ]:
             norm_rz = Rzi.norm("NRM2")
             norm_fz = self.iRHS.norm("NRM2")
             if norm_fz != 0.0:

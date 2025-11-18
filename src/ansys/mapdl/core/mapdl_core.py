@@ -1988,31 +1988,37 @@ class _MapdlCore(Commands):
 
         @requires_graphics
         def __enter__(self) -> None:
-            self._parent()._log.debug("Entering in 'WithInterativePlotting' mode")
+            parent = self._parent()
+            assert parent is not None, "Parent reference is None"
 
-            if not self._parent()._store_commands:
-                if not self._parent()._png_mode:
-                    self._parent().show("PNG", mute=True)
-                    self._parent().gfile(self._pixel_res, mute=True)
+            parent._log.debug("Entering in 'WithInterativePlotting' mode")
 
-                self.previous_device = self._parent().file_type_for_plots
+            if not parent._store_commands:
+                if not parent._png_mode:
+                    parent.show("PNG", mute=True)
+                    parent.gfile(self._pixel_res, mute=True)
 
-                if self._parent().file_type_for_plots not in [
+                self.previous_device = parent.file_type_for_plots
+
+                if parent.file_type_for_plots not in [
                     "PNG",
                     "TIFF",
                     "PNG",
                     "VRML",
                 ]:
-                    self._parent().show(self._parent().default_file_type_for_plots)
+                    parent.show(parent.default_file_type_for_plots)
 
         def __exit__(self, *args) -> None:
-            self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
-            self._parent().show("close", mute=True)
+            parent = self._parent()
+            assert parent is not None, "Parent reference is None"
 
-            if not self._parent()._store_commands:
-                if not self._parent()._png_mode:
-                    self._parent().show("PNG", mute=True)
-                    self._parent().gfile(self._pixel_res, mute=True)
+            parent._log.debug("Exiting in 'WithInterativePlotting' mode")
+            parent.show("close", mute=True)
+
+            if not parent._store_commands:
+                if not parent._png_mode:
+                    parent.show("PNG", mute=True)
+                    parent.gfile(self._pixel_res, mute=True)
 
                 self._parent().file_type_for_plots = self.previous_device
 
