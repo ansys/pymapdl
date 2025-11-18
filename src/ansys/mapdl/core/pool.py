@@ -398,14 +398,15 @@ class MapdlPool:
 
     def wait_for_ready(self, timeout: Optional[int] = 180) -> bool:
         """Wait until pool is ready."""
-        timeout_ = time.time() + timeout
+        timeout_value = timeout if timeout is not None else 180
+        timeout_ = time.time() + timeout_value
         while time.time() < timeout_:
             if self.ready:
                 break
             time.sleep(0.1)
         else:
             raise TimeoutError(
-                f"MapdlPool is not ready after waiting {timeout} seconds."
+                f"MapdlPool is not ready after waiting {timeout_value} seconds."
             )
 
     def _verify_unique_ports(self) -> None:
