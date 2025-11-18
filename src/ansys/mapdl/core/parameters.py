@@ -810,9 +810,9 @@ def interp_star_status(status: str) -> dict[str, str]:
         myarray_size: NDArray[np.float64] = np.array(
             [each.split() for each in lines]
         ).astype(float)
-        idim = int(myarray[:, 0].max())
-        jdim = int(myarray[:, 1].max())
-        kdim = int(myarray[:, 2].max())
+        idim = int(myarray_size[:, 0].max())  # type: ignore[used-before-def]
+        jdim = int(myarray_size[:, 1].max())  # type: ignore[used-before-def]
+        kdim = int(myarray_size[:, 2].max())  # type: ignore[used-before-def]
         myarray: NDArray[np.float64] = np.zeros((idim, jdim, kdim))
 
     for line in lines:
@@ -833,7 +833,7 @@ def interp_star_status(status: str) -> dict[str, str]:
                 value = float(items[1])
             else:
                 value = items[1]
-            parameters[name] = {"type": items[2], "value": value}
+            parameters[name] = {"type": items[2], "value": value}  # type: ignore[dict-item]
         elif len(items) == 4:
             # it is an array or string array
             if is_array_listing(status):
@@ -852,32 +852,32 @@ def interp_star_status(status: str) -> dict[str, str]:
             if items[1] in ["DMAT", "VEC", "SMAT"]:
                 parameters[name] = {
                     "type": items[1],
-                    "MemoryMB": float(items[2]),
-                    "dimensions": get_apdl_math_dimensions(items[3]),
-                    "workspace": int(items[4]),
+                    "MemoryMB": float(items[2]),  # type: ignore[dict-item]
+                    "dimensions": get_apdl_math_dimensions(items[3]),  # type: ignore[dict-item]
+                    "workspace": int(items[4]),  # type: ignore[dict-item]
                 }
             elif items[1] in ["LSENGINE"]:
                 parameters[name] = {
                     "type": items[1],
-                    "workspace": int(items[4]),
+                    "workspace": int(items[4]),  # type: ignore[dict-item]
                 }
             elif items[1] in ["C_FullFile"]:
                 parameters[name] = {"type": items[1]}
             else:
                 shape = (int(items[2]), int(items[3]), int(items[4]))
-                parameters[name] = {"type": items[1], "shape": shape}
+                parameters[name] = {"type": items[1], "shape": shape}  # type: ignore[dict-item]
 
     if is_array_listing(status):
         dims = [ind for ind, each in enumerate([idim, jdim, kdim]) if each == 1]
         if dims:
             try:
-                return {name_: {"type": "ARRAY", "value": myarray.squeeze(tuple(dims))}}
+                return {name_: {"type": "ARRAY", "value": myarray.squeeze(tuple(dims))}}  # type: ignore[dict-item]
             except ValueError:
-                return {name_: {"type": "ARRAY", "value": myarray}}
+                return {name_: {"type": "ARRAY", "value": myarray}}  # type: ignore[dict-item]
         else:
-            return {name_: {"type": "ARRAY", "value": myarray}}
+            return {name_: {"type": "ARRAY", "value": myarray}}  # type: ignore[dict-item]
     elif is_string_array:
-        return {name_: {"type": "STRING_ARRAY", "value": elements}}
+        return {name_: {"type": "STRING_ARRAY", "value": elements}}  # type: ignore[dict-item]
     else:
         return parameters
 
