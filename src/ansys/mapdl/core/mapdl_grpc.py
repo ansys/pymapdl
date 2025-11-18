@@ -326,8 +326,8 @@ class MapdlGrpc(MapdlBase):
     """
 
     # Required by `_name` method to be defined before __init__ be
-    _ip = None
-    _port = None
+    _ip: Optional[str] = None
+    _port: Optional[int] = None
 
     def __init__(
         self,
@@ -369,7 +369,7 @@ class MapdlGrpc(MapdlBase):
         self._hostname: str = hostname
 
         check_valid_ip(ip)
-        self._ip: str = ip
+        self._ip = ip  # type: ignore[misc]
 
         # port and ip are needed to setup the log
         if port is None:
@@ -377,7 +377,7 @@ class MapdlGrpc(MapdlBase):
 
             port = MAPDL_DEFAULT_PORT
 
-        self._port: int = int(port)
+        self._port = int(port)  # type: ignore[misc]
         start_parm["port"] = self._port  # type: ignore[assignment]  # store for `open_gui`
 
         super().__init__(
@@ -408,6 +408,7 @@ class MapdlGrpc(MapdlBase):
         )
         self._busy: bool = False  # used to check if running a command on the server
         self._local: bool = start_parm.get("local", True)  # type: ignore[assignment]
+        self._xpl = None  # ansXpl instance, initialized on first access
         self._launched: bool = start_parm.get("launched", False)  # type: ignore[assignment]
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
@@ -425,10 +426,10 @@ class MapdlGrpc(MapdlBase):
 
         if channel is None:
             self._log.debug("Creating channel to %s:%s", ip, port)
-            self._channel: grpc.Channel = self._create_channel(ip, port)
+            self._channel = self._create_channel(ip, port)  # type: ignore[misc]
         else:
             self._log.debug("Using provided channel")
-            self._channel: grpc.Channel = channel
+            self._channel = channel  # type: ignore[misc]
 
         # Subscribe to channel for channel state updates
         self._subscribe_to_channel()
@@ -977,7 +978,8 @@ class MapdlGrpc(MapdlBase):
         self._connect()
 
         # may need to wait for viable connection in open_gui case
-        tmax = time.time() + timeout
+        timeout_value = timeout if timeout is not None else 10
+        tmax = time.time() + timeout_value
         success = False
         while time.time() < tmax:
             try:
@@ -1179,6 +1181,8 @@ class MapdlGrpc(MapdlBase):
 
         request = pb_types.CmdRequest(command=cmd, opt=opt)
         # TODO: Capture keyboard exception and place this in a thread
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
         grpc_response = self._stub.SendCommand(request)
 
         resp = grpc_response.response
@@ -1192,6 +1196,8 @@ class MapdlGrpc(MapdlBase):
         request = pb_types.CmdRequest(command=cmd)
         time_step = self._get_time_step_stream()
         metadata = [("time_step_stream", str(time_step))]
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
         stream = self._stub.SendCommandS(request, metadata=metadata)
         response = []
         for item in stream:
@@ -1689,6 +1695,9 @@ class MapdlGrpc(MapdlBase):
         """
         self._log.debug(f'Issuing CtrlRequest "{cmd}" with option "{opt1}".')
         request = anskernel.CtrlRequest(ctrl=str(cmd), opt1=str(opt1))
+
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
 
         # handle socket closing upon exit
         if cmd.lower() == "exit":
@@ -2223,6 +2232,8 @@ class MapdlGrpc(MapdlBase):
 
         self._get_lock = True
         try:
+            if self._stub is None:
+                raise MapdlRuntimeError("MAPDL stub not initialized")
             response = self._stub.Get(pb_types.GetRequest(getcmd=cmd))
         finally:
             self._get_lock = False
@@ -2451,7 +2462,7 @@ class MapdlGrpc(MapdlBase):
                 "Only strings, tuple of strings or list of strings are allowed."
             )
 
-        return_list_files = []
+        return_list_files: list[str] = []
         for file in list_files:
             # file is a complete path
             basename = os.path.basename(file)
@@ -2603,6 +2614,8 @@ class MapdlGrpc(MapdlBase):
             ("time_step_stream", "200"),
             ("chunk_size", str(chunk_size)),
         ]
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
         chunks = self._stub.DownloadFile(request, metadata=metadata)
         file_size = save_chunks_to_file(
             chunks,
@@ -2645,6 +2658,8 @@ class MapdlGrpc(MapdlBase):
         self._log.debug(f"Uploading file '{file_name}' to the MAPDL instance.")
 
         chunks_generator = get_file_chunks(file_name, progress_bar=progress_bar)
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
         response = self._stub.UploadFile(chunks_generator)
 
         if not response.length:
@@ -2717,6 +2732,8 @@ class MapdlGrpc(MapdlBase):
         string without saving it to disk.
         """
         request = pb_types.DownloadFileRequest(name=target_name)
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
         chunks = self._stub.DownloadFile(request)
         return b"".join([chunk.payload for chunk in chunks])
 
@@ -2812,6 +2829,8 @@ class MapdlGrpc(MapdlBase):
             parameter does not exist.
         """
         request = pb_types.ParameterRequest(name=pname, array=False)
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
         presponse = self._stub.GetParameter(request)
         if presponse.val:
             return float(presponse.val[0])
