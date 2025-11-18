@@ -72,7 +72,7 @@ VGET_NODE_ENTITY_TYPES: Dict[str, List[str]] = {
     "EPCR": STRESS_TYPES,
     "EPTH": STRESS_TYPES,
     "EPDI": STRESS_TYPES,
-    "EPSW": [None],
+    "EPSW": [""],
     "NL": ["SEPL", "SRAT", "HPRES", "EPEQ", "PSV", "PLWK"],
     "HS": ["X", "Y", "Z"],
     "BFE": ["TEMP"],
@@ -84,7 +84,7 @@ VGET_NODE_ENTITY_TYPES: Dict[str, List[str]] = {
     "H": COMP_TYPE,
     "B": COMP_TYPE,
     "FMAG": COMP_TYPE,
-    "NLIST": [None],
+    "NLIST": [""],
 }
 
 
