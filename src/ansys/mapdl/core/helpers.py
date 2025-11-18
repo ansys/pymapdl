@@ -22,7 +22,6 @@
 
 """Module for helper functions"""
 
-from collections import namedtuple
 import importlib.util
 import os
 import sys
@@ -45,7 +44,7 @@ def is_installed(package_name: str) -> bool:
     return True
 
 
-def get_python_version() -> namedtuple:
+def get_python_version():  # type: ignore[misc]
     return sys.version_info
 
 
