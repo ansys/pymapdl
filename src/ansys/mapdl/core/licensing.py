@@ -31,12 +31,12 @@ import subprocess  # nosec B404
 import time
 from typing import Any, Iterator, Literal, Union
 
-from ansys.mapdl.core import _HAS_ATP, LOG
+from ansys.mapdl.core import _HAS_ATC, LOG
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.misc import threaded_daemon
 
-if _HAS_ATP:
-    from ansys.tools.path import get_mapdl_path, version_from_path
+if _HAS_ATC:
+    from ansys.tools.common.path import get_mapdl_path, version_from_path
 
 LOCALHOST = "127.0.0.1"
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
@@ -151,7 +151,7 @@ class LicenseChecker:
             Start the checkout license thread.  By default this is
             disabled.
         """
-        if license_file and _HAS_ATP:
+        if license_file and _HAS_ATC:
             self._lic_file_thread = self.check_license_file()
         if checkout_license:
             self._checkout_thread = self.checkout_license()

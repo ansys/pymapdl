@@ -1760,7 +1760,7 @@ class _MapdlCore(Commands):
 
         exec_file: str, optional
             Path to the MAPDL executable. If not provided, it will try to obtain
-            it using the `ansys.tools.path` package. If this package is not
+            it using the `ansys.tools.common` package. If this package is not
             available, it will use the same executable as the current MAPDL
             instance.
 
@@ -1793,7 +1793,7 @@ class _MapdlCore(Commands):
         >>> mapdl.eplot()
         """
         # lazy load here to avoid circular import
-        from ansys.mapdl.core import _HAS_ATP
+        from ansys.mapdl.core import _HAS_ATC
 
         if not self._local:
             raise MapdlRuntimeError(
@@ -1872,7 +1872,7 @@ class _MapdlCore(Commands):
         os.chdir(run_dir)
 
         if not exec_file:
-            if _HAS_ATP:
+            if _HAS_ATC:
                 from ansys.mapdl.core import get_mapdl_path
 
                 exec_file_ = get_mapdl_path(allow_input=False)

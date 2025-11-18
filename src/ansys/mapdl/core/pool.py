@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional, Union
 import warnings
 import weakref
 
-from ansys.mapdl.core import _HAS_ATP, _HAS_TQDM, LOG, launch_mapdl
+from ansys.mapdl.core import _HAS_ATC, _HAS_TQDM, LOG, launch_mapdl
 from ansys.mapdl.core.errors import MapdlDidNotStart, MapdlRuntimeError, VersionError
 from ansys.mapdl.core.launcher import (
     LOCALHOST,
@@ -40,8 +40,8 @@ from ansys.mapdl.core.launcher import (
 )
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 
-if _HAS_ATP:
-    from ansys.tools.path import get_mapdl_path, version_from_path
+if _HAS_ATC:
+    from ansys.tools.common.path import get_mapdl_path, version_from_path
 
 if _HAS_TQDM:
     from tqdm import tqdm
@@ -276,12 +276,12 @@ class MapdlPool:
             exec_file = kwargs.get("exec_file", exec_file)
 
             if not exec_file:  # get default executable
-                if _HAS_ATP:
+                if _HAS_ATC:
                     exec_file = get_mapdl_path()
                 else:
                     raise ValueError(
                         "Please use 'exec_file' argument to specify the location of the ansys installation.\n"
-                        "Alternatively, PyMAPDL can detect your ansys installation if you install 'ansys-tools-path' library."
+                        "Alternatively, PyMAPDL can detect your ansys installation if you install 'ansys-tools-common' library."
                     )
 
                 if exec_file is None:
@@ -292,7 +292,7 @@ class MapdlPool:
                     )
 
             # Checking version
-            if _HAS_ATP:
+            if _HAS_ATC:
                 if version_from_path("mapdl", exec_file) < 211:
                     raise VersionError("MapdlPool requires MAPDL 2021R1 or later.")
 
