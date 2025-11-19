@@ -1114,7 +1114,7 @@ class CrossSections:
         External material ( ``M`` :sub:`ins` ) adds mass and increases hydraulic diameter, but does not add
         to stiffness.
 
-        .. figure::../../../images/_commands/gSECD_pipe.svg
+        .. figure:: ../../../images/_commands/gSECD_pipe.svg
 
         .. _SECDATA_pretension:
 
@@ -1202,15 +1202,15 @@ class CrossSections:
 
         When applied to 8-node or 20-node layered solid elements:
 
-        .. figure::../../../images/_commands/gSECD18.svg
+        .. figure:: ../../../images/_commands/gSECD18.svg
 
-        .. figure::../../../images/_commands/gSECD19.svg
+        .. figure:: ../../../images/_commands/gSECD19.svg
 
         When applied to 4-node or 8-node layered shell elements:
 
-        .. figure::../../../images/_commands/gSECD20.svg
+        .. figure:: ../../../images/_commands/gSECD20.svg
 
-        .. figure::../../../images/_commands/gSECD21.svg
+        .. figure:: ../../../images/_commands/gSECD21.svg
 
         **PATT: EDGO**
 
@@ -1235,11 +1235,11 @@ class CrossSections:
 
         When applied to 8-node or 20-node solid elements:
 
-        .. figure::../../../images/_commands/gSECD22.svg
+        .. figure:: ../../../images/_commands/gSECD22.svg
 
-        .. figure::../../../images/_commands/gSECD22b.svg
+        .. figure:: ../../../images/_commands/gSECD22b.svg
 
-        .. figure::../../../images/_commands/gSECD22c.svg
+        .. figure:: ../../../images/_commands/gSECD22c.svg
 
         When applied to tetrahedral elements:
 
@@ -1248,13 +1248,13 @@ class CrossSections:
 
         When applied to 3D shell elements:
 
-        .. figure::../../../images/_commands/gSECD28.svg
+        .. figure:: ../../../images/_commands/gSECD28.svg
 
-        .. figure::../../../images/_commands/gSECD29.svg
+        .. figure:: ../../../images/_commands/gSECD29.svg
 
         When applied to beam or link elements:
 
-        .. figure::../../../images/_commands/gSECD30.svg
+        .. figure:: ../../../images/_commands/gSECD30.svg
 
         **PATT: BEAM**
 
@@ -1271,7 +1271,7 @@ class CrossSections:
           ``Y1``, and the default value for ``Z2`` is ``Z1``. (Because ``V3`` and ``V4`` values apply only
           to tapered beams, the program ignores them if the base beam has a constant section.)
 
-        .. figure::../../../images/_commands/gSECD31.svg
+        .. figure:: ../../../images/_commands/gSECD31.svg
 
         - - - - - - - - - - - - - - - - - - - - -
 
@@ -1378,7 +1378,7 @@ class CrossSections:
 
         When applied to 3D shell elements:
 
-        .. figure::../../../images/_commands/gSECD16.svg
+        .. figure:: ../../../images/_commands/gSECD16.svg
 
         .. _SECDATA_shells:
 
@@ -2087,7 +2087,7 @@ class CrossSections:
           The following figure illustrates the offsets for a channel cross section, and shows the relative
           locations of SHRC and CENT.
 
-          .. figure::../../../images/_commands/gSECO1.svg
+          .. figure:: ../../../images/_commands/gSECO1.svg
 
              Offsets for a CHAN Section Subtype
 
@@ -2235,7 +2235,7 @@ class CrossSections:
 
         Following is a sample section plot for the beam section type:
 
-        .. figure::../../../images/_commands/gSECP1.jpg
+        .. figure:: ../../../images/_commands/gSECP1.jpg
 
         .. _SECPLOT_shells:
 
@@ -2250,7 +2250,7 @@ class CrossSections:
 
         Following is a sample section plot for the shell section type:
 
-        .. figure::../../../images/_commands/gsecplotshell.jpg
+        .. figure:: ../../../images/_commands/gsecplotshell.jpg
 
         .. _SECPLOT_reinf:
 
@@ -2273,7 +2273,7 @@ class CrossSections:
 
         Following is a sample section plot for the reinforcing section type:
 
-        .. figure::../../../images/_commands/gSECP.fig.3.jpg
+        .. figure:: ../../../images/_commands/gSECP.fig.3.jpg
 
         For more information about reinforcing, see the documentation for the :ref:`secdata` command, and
         the ``REINF264`` and ``REINF265`` elements.
@@ -2360,11 +2360,11 @@ class CrossSections:
         numbered consecutively, with the first node having a node number of 1, and the last node having a
         node number that is equal to the maximum number of nodes in the cell mesh.
 
-        .. figure::../../../images/_commands/gSECR2.svg
+        .. figure:: ../../../images/_commands/gSECR2.svg
 
            Two-hole Box Section
 
-        .. figure::../../../images/_commands/gSECR3.svg
+        .. figure:: ../../../images/_commands/gSECR3.svg
 
            Cell Mesh for the Two-hole Box Section
         """
@@ -2525,7 +2525,7 @@ class CrossSections:
 
             The following figure shows the shape of each cross section subtype:
 
-            .. figure::../../../images/_commands/gSECT1.svg
+            .. figure:: ../../../images/_commands/gSECT1.svg
 
             When ``Type`` = COMB, the only possible `composite-beam section
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_PREBEAMSECT_5.html#>`_

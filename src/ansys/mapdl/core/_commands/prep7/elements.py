@@ -3154,7 +3154,7 @@ class Elements:
         existing contact elements. The virtual shell elements are assigned the next available element type
         number and material number.
 
-        .. figure::../../../images/_commands/gSHSDcontact.eps
+        .. figure:: ../../../images/_commands/gSHSDcontact.eps
 
            Virtual Shell Elements Following the Contact Interface Edge
 
@@ -3166,7 +3166,7 @@ class Elements:
         virtual shell elements are created only for target elements that lie partially inside the influence
         distance region (see :ref:`shsdoverlap` ).
 
-        .. figure::../../../images/_commands/gSHSDoverlap.eps
+        .. figure:: ../../../images/_commands/gSHSDoverlap.eps
 
            Virtual Shell Elements Overlapping Target Elements
 
