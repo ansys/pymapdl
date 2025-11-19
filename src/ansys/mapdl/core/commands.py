@@ -337,6 +337,7 @@ class Prep7Commands(
     prep7.database.Database,
     prep7.element_type.ElementType,
     prep7.elements.Elements,
+    prep7.explicit_dynamics.ExplicitDynamics,
     prep7.hard_points.HardPoints,
     prep7.keypoints.Keypoints,
     prep7.lines.Lines,
