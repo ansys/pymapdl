@@ -624,8 +624,8 @@ class MapdlGrpc(MapdlBase):
         def monitor_mapdl_alive():
             """Monitor thread to check if MAPDL process is alive."""
             from ansys.mapdl.core.launcher import (
-                _check_process_is_alive,
                 _check_file_error_created,
+                _check_process_is_alive,
             )
             
             try:

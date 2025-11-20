@@ -2417,7 +2417,7 @@ def test_multi_connect_with_valid_process(mapdl, cleared):
 def test_multi_connect_early_exit_on_process_death(tmpdir):
     """Test that _multi_connect exits early when MAPDL process dies during connection."""
     from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-    
+
     # Get MAPDL executable
     exec_file = get_exec_file({"exec_file": None})
     
