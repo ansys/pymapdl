@@ -375,7 +375,11 @@ htmlhelp_basename = "pymapdldoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
-latex_elements: dict[Any, Any] = {}
+latex_elements: dict[Any, Any] = {
+    'preamble': r'''
+\usepackage{svg}
+    '''
+}
 
 latex_engine = "xelatex"
 
