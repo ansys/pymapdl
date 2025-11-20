@@ -651,7 +651,7 @@ class MapdlGrpc(MapdlBase):
 
         # Start the monitoring thread
         monitor_thread = None
-        if self._local and self._mapdl_process:
+        if self._local and self._mapdl_process and self._path:
             monitor_thread = threading.Thread(target=monitor_mapdl_alive, daemon=True)
             monitor_thread.start()
             self._log.debug("Started MAPDL monitoring thread")

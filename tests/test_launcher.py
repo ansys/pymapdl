@@ -2505,20 +2505,22 @@ def test_multi_connect_monitoring_conditions(mapdl, has_process, has_path, shoul
         mapdl._mapdl_process = Mock() if has_process else None
         mapdl._path = "/some/path" if has_path else None
         
-        # Mock _connect to succeed immediately
-        with patch.object(mapdl, '_connect', return_value=True):
-            # Track if thread was started by checking log calls
-            with patch.object(mapdl._log, 'debug') as mock_debug:
-                mapdl._multi_connect(n_attempts=1, timeout=1)
-                
-                # Check if monitoring thread debug message was logged
-                debug_calls = [str(call) for call in mock_debug.call_args_list]
-                thread_started = any("Started MAPDL monitoring thread" in str(call) for call in debug_calls)
-                
-                if should_monitor:
-                    assert thread_started, "Monitoring thread should have started"
-                else:
-                    assert not thread_started, "Monitoring thread should not have started"
+        # Mock _check_process_is_alive to not raise exceptions during monitoring
+        with patch('ansys.mapdl.core.launcher._check_process_is_alive'):
+            # Mock _connect to succeed immediately
+            with patch.object(mapdl, '_connect', return_value=True):
+                # Track if thread was started by checking log calls
+                with patch.object(mapdl._log, 'debug') as mock_debug:
+                    mapdl._multi_connect(n_attempts=1, timeout=1)
+                    
+                    # Check if monitoring thread debug message was logged
+                    debug_calls = [str(call) for call in mock_debug.call_args_list]
+                    thread_started = any("Started MAPDL monitoring thread" in str(call) for call in debug_calls)
+                    
+                    if should_monitor:
+                        assert thread_started, "Monitoring thread should have started"
+                    else:
+                        assert not thread_started, "Monitoring thread should not have started"
     
     finally:
         # Restore original state
@@ -2541,24 +2543,26 @@ def test_multi_connect_monitoring_thread_cleanup(mapdl):
         mapdl._mapdl_process = Mock(pid=12345)
         mapdl._path = "/some/path"
         
-        # Mock psutil to say process exists
-        with patch('psutil.pid_exists', return_value=True):
-            # Mock _connect to succeed quickly
-            with patch.object(mapdl, '_connect', return_value=True):
-                # Track active threads before
-                threads_before = threading.active_count()
-                
-                # Call _multi_connect
-                mapdl._multi_connect(n_attempts=1, timeout=2)
-                
-                # Give a moment for thread cleanup
-                sleep(0.2)
-                
-                # Thread count should be back to normal (or close)
-                threads_after = threading.active_count()
-                # Allow for some variance in thread count
-                assert abs(threads_after - threads_before) <= 1, \
-                    "Monitoring thread should be cleaned up"
+        # Mock _check_process_is_alive to not raise exceptions
+        with patch('ansys.mapdl.core.launcher._check_process_is_alive'):
+            # Mock psutil to say process exists
+            with patch('psutil.pid_exists', return_value=True):
+                # Mock _connect to succeed quickly
+                with patch.object(mapdl, '_connect', return_value=True):
+                    # Track active threads before
+                    threads_before = threading.active_count()
+                    
+                    # Call _multi_connect
+                    mapdl._multi_connect(n_attempts=1, timeout=2)
+                    
+                    # Give a moment for thread cleanup
+                    sleep(0.2)
+                    
+                    # Thread count should be back to normal (or close)
+                    threads_after = threading.active_count()
+                    # Allow for some variance in thread count
+                    assert abs(threads_after - threads_before) <= 1, \
+                        "Monitoring thread should be cleaned up"
     
     finally:
         mapdl._local = original_local
