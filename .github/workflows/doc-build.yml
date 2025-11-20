@@ -258,7 +258,7 @@ jobs:
         working-directory: doc
         shell: bash
         run: |
-          apt-get install -y inkscape
+          sudo apt-get install -y inkscape
           make pdf
 
       - name: "Show latex dir"
