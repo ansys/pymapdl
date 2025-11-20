@@ -14,10 +14,12 @@ import plotly.io as pio
 from plotly.io._sg_scraper import plotly_sg_scraper
 import pyvista
 from sphinx.application import Sphinx
+from sphinx.builders.latex import LaTeXBuilder
 from sphinx.util import logging
 from sphinx_gallery.sorting import FileNameSortKey
 
 pio.renderers.default = "sphinx_gallery"
+LaTeXBuilder.supported_image_types = ["image/png", "image/pdf", "image/svg+xml"]
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
