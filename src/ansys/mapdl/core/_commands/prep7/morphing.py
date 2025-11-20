@@ -90,7 +90,7 @@ class Morphing:
         ----------
         elem : str
             Non-structural elements to which mesh movement (morph) applies. If ALL, apply morphing to all
-            selected elements ( :ref:`esel`   ). If ELEM = P, graphical picking is enabled. A
+            selected elements ( :ref:`esel`  ). If ELEM = P, graphical picking is enabled. A
             component may be substituted for ELEM.
 
         dimn : str

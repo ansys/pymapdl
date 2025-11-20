@@ -1264,7 +1264,7 @@ class Lines:
         an element reversal.
 
         For more information, see `Revising Your Model
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD8_6.html>`_   in the
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD8_6.html>`_  in the
         `Modeling and Meshing Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_.
         """

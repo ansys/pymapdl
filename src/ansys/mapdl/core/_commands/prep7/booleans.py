@@ -490,7 +490,7 @@ class Booleans:
         Generates new areas which encompass the geometry of all the input areas. The new areas are defined
         by the regions of intersection of the input areas, and by the complementary (non-intersecting)
         regions. See `Solid Modeling
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD5_10.html>`_   in
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD5_10.html>`_  in
         the `Modeling and Meshing Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_ for an
         illustration. This operation is only valid when the region of intersection is an
@@ -656,7 +656,7 @@ class Booleans:
         resulting areas will be connected, sharing a common line where they touch. If ``SEPO`` is set to
         SEPO, ``NA1`` is divided into two unconnected areas with separate lines where they touch. See `Solid
         Modeling <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD5_10.html>`_
-         in the `Modeling and Meshing Guide
+        in the `Modeling and Meshing Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_ for an
         illustration. See the :ref:`boptn` command for an explanation of the
         options available to Boolean operations. Element attributes and solid model boundary conditions
@@ -722,7 +722,7 @@ class Booleans:
 
         Generates new areas by subtracting the regions common to both the areas and lines (the intersection)
         from the ``NA`` areas. The intersection will be a line(s). See `Solid Modeling
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD5_10.html>`_   in the
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD5_10.html>`_  in the
         `Modeling and Meshing Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_ for an
         illustration. See the :ref:`boptn` command for an explanation of the options
@@ -793,7 +793,7 @@ class Booleans:
         resulting areas will be connected, sharing a common line where they touch. If ``SEPO`` is set to
         SEPO, ``NA`` is divided into two unconnected areas with separate lines where they touch. See `Solid
         Modeling <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD5_10.html>`_
-         in the `Modeling and Meshing Guide
+        in the `Modeling and Meshing Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_ for an
         illustration. See the :ref:`boptn` command for an explanation of the
         options available to Boolean operations. Element attributes and solid model boundary conditions
@@ -842,7 +842,7 @@ class Booleans:
         be connected, sharing a common line where they touch. If ``SEPO`` is set to SEPO, ``NA`` is divided
         into two unconnected areas with separate lines. The SEPO option may cause unintended consequences if
         any keypoints exist along the cut plane. See `Solid Modeling
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD5_10.html>`_   in the
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD5_10.html>`_  in the
         `Modeling and Meshing Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_ for an
         illustration. See the :ref:`boptn` command for an explanation of the options

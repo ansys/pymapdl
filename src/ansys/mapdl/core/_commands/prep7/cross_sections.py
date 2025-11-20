@@ -391,7 +391,7 @@ class CrossSections:
 
         The :ref:`cbmd` command, one of several `composite beam section commands
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_PREBEAMSECT_5.html#>`_,
-        specifies the section mass  matrix (submatrix [ **C** ] data) for a composite beam section.
+        specifies the section mass matrix (submatrix [ **C** ] data) for a composite beam section.
         The section data defined is associated with the section most
         recently defined ( :ref:`sectype` ) at the specified temperature ( :ref:`cbtmp` ).
 
@@ -489,7 +489,7 @@ class CrossSections:
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_PREBEAMSECT_5.html#>`_,
         specifies a thermal expansion coefficient for a beam section. The value specified is associated with
         the section most recently defined ( :ref:`sectype` ) at the specified temperature ( :ref:`cbtmp`
-         ).
+        ).
 
         Unspecified values default to zero.
 
@@ -3077,7 +3077,7 @@ class CrossSections:
 
         The :ref:`ssbt` command, one of several `preintegrated shell section commands
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_PRESHELL_5.html#membraneoptionnote>`_,
-         specifies the bending thermal effects quantity (submatrix [ **B**  :sup:`T` ] data) for a
+        specifies the bending thermal effects quantity (submatrix [ **B**  :sup:`T` ] data) for a
         preintegrated shell section. The section data defined is associated with the section most recently
         defined (via the :ref:`sectype` command).
 
@@ -3205,7 +3205,7 @@ class CrossSections:
 
         The :ref:`sspa` command, one of several `preintegrated shell section commands
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_PRESHELL_5.html#membraneoptionnote>`_,
-         specifies the membrane stiffness quantity (submatrix [ **A** ]) for a preintegrated shell
+        specifies the membrane stiffness quantity (submatrix [ **A** ]) for a preintegrated shell
         section. The section data defined is associated with the section most
         recently defined (via the :ref:`sectype` command).
 

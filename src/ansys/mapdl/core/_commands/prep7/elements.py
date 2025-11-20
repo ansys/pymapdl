@@ -886,7 +886,7 @@ class Elements:
         knonrot : str
             When ``KNONROT`` = 0, the nodes coordinate system is not rotated. When ``KNONROT`` = 1, the
             nodes belonging to the elements created are rotated into coordinate system ``KCN`` (see
-            :ref:`nrotat`  command description).
+            :ref:`nrotat` command description).
 
         Notes
         -----
@@ -2982,7 +2982,7 @@ class Elements:
         Layers are cross-hatched and color-coded for clarity. The hatch lines indicate the layer angle (real
         constant THETA) and the color coding is for material identification (real constant MAT).
 
-        The actual orientation of a specific layer in three-  dimensional space can be seen using
+        The actual orientation of a specific layer in three- dimensional space can be seen using
         :ref:`psymb`,LAYR. To use :ref:`psymb`,LAYR with smeared reinforcing elements ( ``REINF265`` ),
         first set the vector-mode graphics option ( :ref:`device`,VECTOR,1).
 
@@ -3277,7 +3277,7 @@ class Elements:
         allowable surfaces (including the 2 surfaces used for the original set defined by :ref:`swgen` ) for
         each spot weld set is 11. See `Adding Surfaces to a Basic Set
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_spwdset.html#ctecreordersurf>`_
-         for more information.
+        for more information.
         """
         command = f"SWADD,{ecomp},{shrd},{ncm1},{ncm2},{ncm3},{ncm4},{ncm5},{ncm6},{ncm7},{ncm8},{ncm9}"
         return self.run(command, **kwargs)

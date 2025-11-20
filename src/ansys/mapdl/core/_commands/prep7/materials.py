@@ -595,7 +595,7 @@ class Materials:
 
         Also, if you copy a material model using the `Material Model Interface
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/BAS1matmodifjwf0413001150.html#BAS1mamoimisjwf0414000942>`_
-         ( Edit> Copy ), both the commands :ref:`mpcopy` and :ref:`tbcopy`, ALL are issued,
+        ( Edit> Copy ), both the commands :ref:`mpcopy` and :ref:`tbcopy`, ALL are issued,
         regardless of whether the model includes linear constants only, or if it includes a combination of
         linear and yield behavior constants.
 
@@ -935,7 +935,7 @@ class Materials:
 
         .. _MPLIST_notes:
 
-        For ``Lab``   = EVLT, when the property is from tables, the :ref:`mpplot` command will not be
+        For ``Lab``  = EVLT, when the property is from tables, the :ref:`mpplot` command will not be
         valid because the property could be a function of more than temperature.
 
         This command is valid in any processor.
@@ -983,7 +983,7 @@ class Materials:
         .. _MPPLOT_notes:
 
         When the property is from tables, the :ref:`mpplot` command will not be valid because the property
-        could be a f  unction of more than temperature.
+        could be a f unction of more than temperature.
 
         This command is valid in any processor.
         """

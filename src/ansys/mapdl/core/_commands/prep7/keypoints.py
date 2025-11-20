@@ -42,7 +42,7 @@ class Keypoints:
         is assumed unless the areas have a material (and real constant) association via the :ref:`aatt`
         command. For lines and keypoints, a unit density is assumed, irrespective of any material
         associations ( :ref:`latt`, :ref:`katt`, :ref:`mat` ). Items calculated by :ref:`gsum` and later
-        retrieved by a :ref:`get` or :ref:`starvget`  commands are valid only if the model is not
+        retrieved by a :ref:`get` or :ref:`starvget` commands are valid only if the model is not
         modified after the :ref:`gsum` command is issued. This command combines the functions of the
         :ref:`ksum`, :ref:`lsum`, :ref:`asum`, and :ref:`vsum` commands.
         """
