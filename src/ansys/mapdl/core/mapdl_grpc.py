@@ -620,14 +620,14 @@ class MapdlGrpc(MapdlBase):
         # Start monitoring thread to check if MAPDL is alive
         monitor_stop_event = threading.Event()
         monitor_exception = {"error": None}
-        
+
         def monitor_mapdl_alive():
             """Monitor thread to check if MAPDL process is alive."""
             from ansys.mapdl.core.launcher import (
                 _check_file_error_created,
                 _check_process_is_alive,
             )
-            
+
             try:
                 while not monitor_stop_event.is_set():
                     # Only monitor if we have a local process
@@ -641,10 +641,10 @@ class MapdlGrpc(MapdlBase):
                             monitor_exception["error"] = e
                             monitor_stop_event.set()
                             break
-                    
+
                     # Check every 0.5 seconds
                     monitor_stop_event.wait(0.5)
-                    
+
             except Exception as e:
                 self._log.debug(f"Monitor thread encountered error: {e}")
                 monitor_exception["error"] = e
@@ -662,19 +662,23 @@ class MapdlGrpc(MapdlBase):
             while time.time() < max_time and i <= n_attempts:
                 # Check if monitoring thread detected a problem
                 if monitor_exception["error"] is not None:
-                    self._log.debug("Monitor detected MAPDL process issue, stopping connection attempts")
+                    self._log.debug(
+                        "Monitor detected MAPDL process issue, stopping connection attempts"
+                    )
                     raise monitor_exception["error"]
-                
+
                 self._log.debug("Connection attempt %d", i)
                 connected = self._connect(timeout=attempt_timeout)
                 i += 1
                 if connected:
                     self._log.debug("Connected")
                     break
-                    
+
                 # Check again after connection attempt
                 if monitor_exception["error"] is not None:
-                    self._log.debug("Monitor detected MAPDL process issue after connection attempt")
+                    self._log.debug(
+                        "Monitor detected MAPDL process issue after connection attempt"
+                    )
                     raise monitor_exception["error"]
             else:
                 # Check if mapdl process is alive
