@@ -377,11 +377,18 @@ htmlhelp_basename = "pymapdldoc"
 # -- Options for LaTeX output ------------------------------------------------
 latex_elements: dict[Any, Any] = {
     "preamble": r"""
-\usepackage{svg}
-    """
+\usepackage[inkscapelatex=false]{svg}
+\usepackage{graphicx}
+    """,
+    # Enable shell escape for SVG conversion
+    "extraclassoptions": "openany",
 }
 
 latex_engine = "xelatex"
+
+# Enable shell escape for SVG package (requires inkscape or rsvg-convert installed)
+latex_use_xindy = False
+latex_additional_files = []
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
