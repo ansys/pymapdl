@@ -130,7 +130,6 @@ intersphinx_mapping = {
 }
 
 suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
-sd_fontawesome_latex = True
 
 # Graphviz diagrams configuration
 graphviz_output_format = "png"
