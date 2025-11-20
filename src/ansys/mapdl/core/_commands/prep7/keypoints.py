@@ -238,7 +238,10 @@ class Keypoints:
         three locations on a line. Note that for method c, if a circular line is specified by ``VAL1``,
         ``VAL2`` through ``VAL4`` are not needed.
 
-        .. figure:: ../../../images/_commands/gKCEN1.svg
+        .. only:: html
+
+            .. figure:: ../../../images/_commands/gKCEN1.svg
+
 
         Examples
         --------
