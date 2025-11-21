@@ -47,7 +47,6 @@ from ._commands import (
     post1,
     post26,
     prep7,
-    preproc,
     session,
     solution,
 )
@@ -344,19 +343,13 @@ class Prep7Commands(
     prep7.materials.Materials,
     prep7.meshing.Meshing,
     prep7.morphing.Morphing,
-):
-    pass
-
-
-class PreprocessorCommands(
-    preproc.nodes.Nodes,
-    preproc.real_constants.RealConstants,
-    preproc.primitives.Primitives,
-    preproc.sections.Sections,
-    preproc.special_purpose.SpecialPurpose,
-    preproc.status.Status,
-    preproc.superelements.Superelements,
-    preproc.volumes.Volumes,
+    prep7.nodes.Nodes,
+    prep7.piping.Piping,
+    prep7.real_constants.RealConstants,
+    prep7.special_purpose.SpecialPurpose,
+    prep7.status.Status,
+    prep7.superelements.Superelements,
+    prep7.volumes.Volumes,
 ):
     pass
 

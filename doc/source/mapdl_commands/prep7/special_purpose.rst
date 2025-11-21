@@ -1,28 +1,34 @@
-.. _ref_special_purpose_commands_api:
 
-***************
-Special purpose
-***************
+.. _ref_special_purpose:
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used for special-purpose operations.
+SpecialPurpose
+==============
+
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.special_purpose
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.aerocoeff
-   Mapdl.cint
-   Mapdl.cycexpand
-   Mapdl.cycfreq
-   Mapdl.cyclic
-   Mapdl.cycopt
-   Mapdl.emsym
-   Mapdl.mstole
-   Mapdl.perbc2d
-   Mapdl.physics
-   Mapdl.race
-   Mapdl.sstate
-   Mapdl.xfdata
-   Mapdl.xfenrich
-   Mapdl.xflist
+
+   SpecialPurpose.adpci
+   SpecialPurpose.aerocoeff
+   SpecialPurpose.cint
+   SpecialPurpose.cycexpand
+   SpecialPurpose.cycfreq
+   SpecialPurpose.cyclic
+   SpecialPurpose.cycopt
+   SpecialPurpose.emsym
+   SpecialPurpose.msopt
+   SpecialPurpose.mstole
+   SpecialPurpose.perbc2d
+   SpecialPurpose.race
+   SpecialPurpose.sstate
+   SpecialPurpose.xfcrkmesh
+   SpecialPurpose.xfdata
+   SpecialPurpose.xfenrich
+   SpecialPurpose.xflist
