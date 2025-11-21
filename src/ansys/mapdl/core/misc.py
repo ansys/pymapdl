@@ -283,14 +283,9 @@ def creation_time(path_to_file: str) -> float:
         return os.path.getctime(path_to_file)
     else:
         stat = os.stat(path_to_file)
-        try:
+        if hasattr(stat, "st_birthtime"):
             return float(stat.st_birthtime)
-        except AttributeError:
-            LOG.debug(
-                "We're probably on Linux. No easy way to get creation dates here, "
-                "so we'll settle for when its content was last modified."
-            )
-            return stat.st_mtime
+        return stat.st_mtime
 
 
 def last_created(filenames: List[str]) -> str:
