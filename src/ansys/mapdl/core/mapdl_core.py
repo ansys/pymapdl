@@ -2588,7 +2588,7 @@ class _MapdlCore(Commands):
 
     def _download_plot(
         self, filename: str, plot_name: str, default_name: str = "plot"
-    ) -> None:
+    ) -> str:
         """Copy the temporary download plot to the working directory."""
         if isinstance(plot_name, str):
             provided = True
@@ -3335,7 +3335,7 @@ class _MapdlCore(Commands):
 
     def screenshot(
         self, savefig: Optional[str] = None, default_name: str = "mapdl_screenshot"
-    ) -> str:
+    ) -> str | None:
         """Take an MAPDL screenshot and show it in a popup window.
 
         Parameters
@@ -3346,8 +3346,8 @@ class _MapdlCore(Commands):
 
         Returns
         -------
-        str
-            File name.
+        str | None
+            Returns the file name if ``savefig`` is provided. Otherwise, it returns None.
 
         Raises
         ------
@@ -3363,14 +3363,11 @@ class _MapdlCore(Commands):
         file_name = self._get_plot_name(out_)
 
         if savefig:
-            self._download_plot(file_name, savefig, default_name=default_name)
-            return None
+            return self._download_plot(file_name, savefig, default_name=default_name)
         elif self._has_matplotlib:
             self._display_plot(file_name)
-            return None
         else:
             self._log.debug("Since matplolib is not installed, images are not shown.")
-            return None
 
     def _create_session(self):
         """Generate a session ID."""
