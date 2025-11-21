@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Superelements:
 
     def se(self, file: str = "", toler: str = "", nstartvn: str = "", **kwargs):
@@ -64,8 +65,6 @@ class Superelements:
         command = f"SE,{file},,,{toler},{nstartvn}"
         return self.run(command, **kwargs)
 
-
-
     def sedlist(self, sename: str = "", kopt: int | str = "", **kwargs):
         r"""Lists the DOF solution of a superelement after the use pass.
 
@@ -96,8 +95,6 @@ class Superelements:
         """
         command = f"SEDLIST,{sename},{kopt}"
         return self.run(command, **kwargs)
-
-
 
     def selist(self, sename: str = "", kopt: int | str = "", kint: str = "", **kwargs):
         r"""Lists the contents of a superelement matrix file.
@@ -139,9 +136,15 @@ class Superelements:
         command = f"SELIST,{sename},{kopt},{kint}"
         return self.run(command, **kwargs)
 
-
-
-    def sesymm(self, sename: str = "", ncomp: str = "", inc: str = "", file: str = "", ext: str = "", **kwargs):
+    def sesymm(
+        self,
+        sename: str = "",
+        ncomp: str = "",
+        inc: str = "",
+        file: str = "",
+        ext: str = "",
+        **kwargs,
+    ):
         r"""Performs a symmetry operation on a superelement within the use pass.
 
         Mechanical APDL Command: `SESYMM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SESYMM.html>`_
@@ -194,9 +197,19 @@ class Superelements:
         command = f"SESYMM,{sename},{ncomp},{inc},{file},{ext}"
         return self.run(command, **kwargs)
 
-
-
-    def setran(self, sename: str = "", kcnto: str = "", inc: str = "", file: str = "", ext: str = "", dx: str = "", dy: str = "", dz: str = "", norot: int | str = "", **kwargs):
+    def setran(
+        self,
+        sename: str = "",
+        kcnto: str = "",
+        inc: str = "",
+        file: str = "",
+        ext: str = "",
+        dx: str = "",
+        dy: str = "",
+        dz: str = "",
+        norot: int | str = "",
+        **kwargs,
+    ):
         r"""Creates a superelement from an existing superelement.
 
         Mechanical APDL Command: `SETRAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SETRAN.html>`_
@@ -285,5 +298,3 @@ class Superelements:
         """
         command = f"SETRAN,{sename},{kcnto},{inc},{file},{ext},,{dx},{dy},{dz},{norot}"
         return self.run(command, **kwargs)
-
-

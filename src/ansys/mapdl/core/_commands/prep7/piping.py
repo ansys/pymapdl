@@ -20,9 +20,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Piping:
 
-    def bellow(self, nloc: str = "", leng: str = "", stiff: str = "", flex: str = "", elem: str = "", **kwargs):
+    def bellow(
+        self,
+        nloc: str = "",
+        leng: str = "",
+        stiff: str = "",
+        flex: str = "",
+        elem: str = "",
+        **kwargs,
+    ):
         r"""Defines a bellows in a piping run.
 
         Mechanical APDL Command: `BELLOW <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BELLOW.html>`_
@@ -61,9 +70,16 @@ class Piping:
         command = f"BELLOW,{nloc},{leng},{stiff},{flex},{elem}"
         return self.run(command, **kwargs)
 
-
-
-    def bend(self, nel1: str = "", nel2: str = "", rad: str = "", ndiv: str = "", estrt: str = "", einc: str = "", **kwargs):
+    def bend(
+        self,
+        nel1: str = "",
+        nel2: str = "",
+        rad: str = "",
+        ndiv: str = "",
+        estrt: str = "",
+        einc: str = "",
+        **kwargs,
+    ):
         r"""Defines a bend in a piping run.
 
         Mechanical APDL Command: `BEND <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BEND.html>`_
@@ -113,8 +129,6 @@ class Piping:
         command = f"BEND,{nel1},{nel2},{rad},{ndiv},{estrt},{einc}"
         return self.run(command, **kwargs)
 
-
-
     def branch(self, node: str = "", x: str = "", y: str = "", z: str = "", **kwargs):
         r"""Defines the starting point for a piping branch.
 
@@ -159,9 +173,17 @@ class Piping:
         command = f"BRANCH,{node},{x},{y},{z}"
         return self.run(command, **kwargs)
 
-
-
-    def flange(self, nloc: str = "", leng: str = "", mass: str = "", sif: str = "", flex: str = "", arins: str = "", elem: str = "", **kwargs):
+    def flange(
+        self,
+        nloc: str = "",
+        leng: str = "",
+        mass: str = "",
+        sif: str = "",
+        flex: str = "",
+        arins: str = "",
+        elem: str = "",
+        **kwargs,
+    ):
         r"""Defines a flange in a piping run.
 
         Mechanical APDL Command: `FLANGE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FLANGE.html>`_
@@ -226,9 +248,16 @@ class Piping:
         command = f"FLANGE,{nloc},{leng},{mass},{sif},{flex},{arins},{elem}"
         return self.run(command, **kwargs)
 
-
-
-    def miter(self, nel1: str = "", nel2: str = "", rad: str = "", ndiv: str = "", estrt: str = "", einc: str = "", **kwargs):
+    def miter(
+        self,
+        nel1: str = "",
+        nel2: str = "",
+        rad: str = "",
+        ndiv: str = "",
+        estrt: str = "",
+        einc: str = "",
+        **kwargs,
+    ):
         r"""Defines a mitered bend in a piping run.
 
         Mechanical APDL Command: `MITER <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MITER.html>`_
@@ -275,8 +304,6 @@ class Piping:
         command = f"MITER,{nel1},{nel2},{rad},{ndiv},{estrt},{einc}"
         return self.run(command, **kwargs)
 
-
-
     def pcorro(self, ctk: str = "", **kwargs):
         r"""Specifies the allowable exterior corrosion thickness for a piping run.
 
@@ -303,9 +330,19 @@ class Piping:
         command = f"PCORRO,{ctk}"
         return self.run(command, **kwargs)
 
-
-
-    def pdrag(self, px1: str = "", py1: str = "", pz1: str = "", h1: str = "", px2: str = "", py2: str = "", pz2: str = "", h2: str = "", kcord: str = "", **kwargs):
+    def pdrag(
+        self,
+        px1: str = "",
+        py1: str = "",
+        pz1: str = "",
+        h1: str = "",
+        px2: str = "",
+        py2: str = "",
+        pz2: str = "",
+        h2: str = "",
+        kcord: str = "",
+        **kwargs,
+    ):
         r"""Defines the external fluid drag loading for a piping run.
 
         Mechanical APDL Command: `PDRAG <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PDRAG.html>`_
@@ -363,8 +400,6 @@ class Piping:
         command = f"PDRAG,{px1},{py1},{pz1},{h1},{px2},{py2},{pz2},{h2},{kcord}"
         return self.run(command, **kwargs)
 
-
-
     def pfluid(self, dens: str = "", **kwargs):
         r"""Defines the contained fluid density for a piping run.
 
@@ -390,9 +425,17 @@ class Piping:
         command = f"PFLUID,{dens}"
         return self.run(command, **kwargs)
 
-
-
-    def pgap(self, nloc: str = "", k: str = "", dx: str = "", dy: str = "", dz: str = "", gap: str = "", elem: str = "", **kwargs):
+    def pgap(
+        self,
+        nloc: str = "",
+        k: str = "",
+        dx: str = "",
+        dy: str = "",
+        dz: str = "",
+        gap: str = "",
+        elem: str = "",
+        **kwargs,
+    ):
         r"""Defines a spring-gap constraint in a piping run.
 
         Mechanical APDL Command: `PGAP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PGAP.html>`_
@@ -440,8 +483,6 @@ class Piping:
         command = f"PGAP,{nloc},{k},{dx},{dy},{dz},{gap},{elem}"
         return self.run(command, **kwargs)
 
-
-
     def pinsul(self, dens: str = "", itk: str = "", **kwargs):
         r"""Defines the external insulation constants in a piping run.
 
@@ -476,8 +517,6 @@ class Piping:
         """
         command = f"PINSUL,{dens},{itk}"
         return self.run(command, **kwargs)
-
-
 
     def popt(self, lop1: str = "", **kwargs):
         r"""Selects the piping analysis standard for a piping run.
@@ -516,8 +555,6 @@ class Piping:
         command = f"POPT,{lop1}"
         return self.run(command, **kwargs)
 
-
-
     def ppres(self, press: str = "", **kwargs):
         r"""Defines the internal pressure for a piping run.
 
@@ -544,9 +581,15 @@ class Piping:
         command = f"PPRES,{press}"
         return self.run(command, **kwargs)
 
-
-
-    def pspec(self, mat: str = "", dnom: str = "", sched: str = "", od: str = "", tk: str = "", **kwargs):
+    def pspec(
+        self,
+        mat: str = "",
+        dnom: str = "",
+        sched: str = "",
+        od: str = "",
+        tk: str = "",
+        **kwargs,
+    ):
         r"""Defines pipe material and dimensions.
 
         Mechanical APDL Command: `PSPEC <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PSPEC.html>`_
@@ -600,9 +643,17 @@ class Piping:
         command = f"PSPEC,{mat},{dnom},{sched},{od},{tk}"
         return self.run(command, **kwargs)
 
-
-
-    def psprng(self, nloc: str = "", type_: str = "", k: str = "", dx: str = "", dy: str = "", dz: str = "", elem: str = "", **kwargs):
+    def psprng(
+        self,
+        nloc: str = "",
+        type_: str = "",
+        k: str = "",
+        dx: str = "",
+        dy: str = "",
+        dz: str = "",
+        elem: str = "",
+        **kwargs,
+    ):
         r"""Defines a spring constraint in a piping run.
 
         Mechanical APDL Command: `PSPRNG <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PSPRNG.html>`_
@@ -657,8 +708,6 @@ class Piping:
         command = f"PSPRNG,{nloc},{type_},{k},{dx},{dy},{dz},{elem}"
         return self.run(command, **kwargs)
 
-
-
     def ptemp(self, tout: str = "", tin: str = "", **kwargs):
         r"""Defines the pipe wall temperatures in a piping run.
 
@@ -694,8 +743,6 @@ class Piping:
         """
         command = f"PTEMP,{tout},{tin}"
         return self.run(command, **kwargs)
-
-
 
     def punit(self, kopt: int | str = "", **kwargs):
         r"""Selects the system of length units to be used in a piping run.
@@ -747,8 +794,6 @@ class Piping:
         command = f"PUNIT,{kopt}"
         return self.run(command, **kwargs)
 
-
-
     def reduce(self, nloc: str = "", leng: str = "", elem: str = "", **kwargs):
         r"""Defines a reducer in a piping run.
 
@@ -785,9 +830,17 @@ class Piping:
         command = f"REDUCE,{nloc},{leng},{elem}"
         return self.run(command, **kwargs)
 
-
-
-    def run(self, dx: str = "", dy: str = "", dz: str = "", ndiv: str = "", nend: str = "", estrt: str = "", einc: str = "", **kwargs):
+    def run(
+        self,
+        dx: str = "",
+        dy: str = "",
+        dz: str = "",
+        ndiv: str = "",
+        nend: str = "",
+        estrt: str = "",
+        einc: str = "",
+        **kwargs,
+    ):
         r"""Defines a pipe run.
 
         Mechanical APDL Command: `RUN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RUN.html>`_
@@ -850,9 +903,17 @@ class Piping:
         command = f"RUN,{dx},{dy},{dz},{ndiv},{nend},{estrt},{einc}"
         return self.run(command, **kwargs)
 
-
-
-    def tee(self, ncent: str = "", type_: str = "", elem: str = "", einc: str = "", l1: str = "", l2: str = "", l3: str = "", **kwargs):
+    def tee(
+        self,
+        ncent: str = "",
+        type_: str = "",
+        elem: str = "",
+        einc: str = "",
+        l1: str = "",
+        l2: str = "",
+        l3: str = "",
+        **kwargs,
+    ):
         r"""Defines a tee in a piping run.
 
         Mechanical APDL Command: `TEE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/None>`_
@@ -929,9 +990,17 @@ class Piping:
         command = f"TEE,{ncent},{type_},{elem},{einc},{l1},{l2},{l3}"
         return self.run(command, **kwargs)
 
-
-
-    def valve(self, nloc: str = "", leng: str = "", mass: str = "", sif: str = "", flex: str = "", arins: str = "", elem: str = "", **kwargs):
+    def valve(
+        self,
+        nloc: str = "",
+        leng: str = "",
+        mass: str = "",
+        sif: str = "",
+        flex: str = "",
+        arins: str = "",
+        elem: str = "",
+        **kwargs,
+    ):
         r"""Defines a valve in a piping run.
 
         Mechanical APDL Command: `VALVE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VALVE.html>`_
@@ -991,5 +1060,3 @@ class Piping:
         """
         command = f"VALVE,{nloc},{leng},{mass},{sif},{flex},{arins},{elem}"
         return self.run(command, **kwargs)
-
-

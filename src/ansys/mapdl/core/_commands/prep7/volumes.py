@@ -25,7 +25,15 @@ from ansys.mapdl.core._commands import parse
 
 class Volumes:
 
-    def extopt(self, lab: str = "", val1: str = "", val2: str = "", val3: str = "", val4: str = "", **kwargs):
+    def extopt(
+        self,
+        lab: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        **kwargs,
+    ):
         r"""Controls options relating to the generation of volume elements from area elements.
 
         Mechanical APDL Command: `EXTOPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EXTOPT.html>`_
@@ -148,11 +156,18 @@ class Volumes:
         command = f"EXTOPT,{lab},{val1},{val2},{val3},{val4}"
         return self.run(command, **kwargs)
 
-
-
-
-
-    def v(self, p1: str = "", p2: str = "", p3: str = "", p4: str = "", p5: str = "", p6: str = "", p7: str = "", p8: str = "", **kwargs):
+    def v(
+        self,
+        p1: str = "",
+        p2: str = "",
+        p3: str = "",
+        p4: str = "",
+        p5: str = "",
+        p6: str = "",
+        p7: str = "",
+        p8: str = "",
+        **kwargs,
+    ):
         r"""Defines a volume through keypoints.
 
         Mechanical APDL Command: `V <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_V.html>`_
@@ -250,12 +265,23 @@ class Volumes:
         >>> v2
         3
         """
-        command = f'V,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8}'
+        command = f"V,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8}"
         return parse.parse_v(self.run(command, **kwargs))
 
-
-
-    def va(self, a1: str = "", a2: str = "", a3: str = "", a4: str = "", a5: str = "", a6: str = "", a7: str = "", a8: str = "", a9: str = "", a10: str = "", **kwargs):
+    def va(
+        self,
+        a1: str = "",
+        a2: str = "",
+        a3: str = "",
+        a4: str = "",
+        a5: str = "",
+        a6: str = "",
+        a7: str = "",
+        a8: str = "",
+        a9: str = "",
+        a10: str = "",
+        **kwargs,
+    ):
         r"""Generates a volume bounded by existing areas.
 
         Mechanical APDL Command: `VA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VA.html>`_
@@ -352,10 +378,17 @@ class Volumes:
         >>> vnum
         1
         """
-        command = f'VA,{a1},{a2},{a3},{a4},{a5},{a6},{a7},{a8},{a9},{a10}'
+        command = f"VA,{a1},{a2},{a3},{a4},{a5},{a6},{a7},{a8},{a9},{a10}"
         return parse.parse_v(self.run(command, **kwargs))
 
-    def vdele(self, nv1: str = "", nv2: str = "", ninc: str = "", kswp: int | str = "", **kwargs):
+    def vdele(
+        self,
+        nv1: str = "",
+        nv2: str = "",
+        ninc: str = "",
+        kswp: int | str = "",
+        **kwargs,
+    ):
         r"""Deletes unmeshed volumes.
 
         Mechanical APDL Command: `VDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VDELE.html>`_
@@ -394,8 +427,6 @@ class Volumes:
         """
         command = f"VDELE,{nv1},{nv2},{ninc},{kswp}"
         return self.run(command, **kwargs)
-
-
 
     def vdgl(self, nv1: str = "", nv2: str = "", ninc: str = "", **kwargs):
         r"""Lists keypoints of a volume that lie on a parametric degeneracy.
@@ -442,9 +473,22 @@ class Volumes:
         command = f"VDGL,{nv1},{nv2},{ninc}"
         return self.run(command, **kwargs)
 
-
-
-    def vdrag(self, na1: str = "", na2: str = "", na3: str = "", na4: str = "", na5: str = "", na6: str = "", nlp1: str = "", nlp2: str = "", nlp3: str = "", nlp4: str = "", nlp5: str = "", nlp6: str = "", **kwargs):
+    def vdrag(
+        self,
+        na1: str = "",
+        na2: str = "",
+        na3: str = "",
+        na4: str = "",
+        na5: str = "",
+        na6: str = "",
+        nlp1: str = "",
+        nlp2: str = "",
+        nlp3: str = "",
+        nlp4: str = "",
+        nlp5: str = "",
+        nlp6: str = "",
+        **kwargs,
+    ):
         r"""Generates volumes by dragging an area pattern along a path.
 
         Mechanical APDL Command: `VDRAG <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VDRAG.html>`_
@@ -569,9 +613,19 @@ class Volumes:
         command = f"VDRAG,{na1},{na2},{na3},{na4},{na5},{na6},{nlp1},{nlp2},{nlp3},{nlp4},{nlp5},{nlp6}"
         return self.run(command, **kwargs)
 
-
-
-    def vext(self, na1: str = "", na2: str = "", ninc: str = "", dx: str = "", dy: str = "", dz: str = "", rx: str = "", ry: str = "", rz: str = "", **kwargs):
+    def vext(
+        self,
+        na1: str = "",
+        na2: str = "",
+        ninc: str = "",
+        dx: str = "",
+        dy: str = "",
+        dz: str = "",
+        rx: str = "",
+        ry: str = "",
+        rz: str = "",
+        **kwargs,
+    ):
         r"""Generates additional volumes by extruding areas.
 
         Mechanical APDL Command: `VEXT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VEXT.html>`_
@@ -668,9 +722,20 @@ class Volumes:
         command = f"VEXT,{na1},{na2},{ninc},{dx},{dy},{dz},{rx},{ry},{rz}"
         return self.run(command, **kwargs)
 
-
-
-    def vgen(self, itime: str = "", nv1: str = "", nv2: str = "", ninc: str = "", dx: str = "", dy: str = "", dz: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def vgen(
+        self,
+        itime: str = "",
+        nv1: str = "",
+        nv2: str = "",
+        ninc: str = "",
+        dx: str = "",
+        dy: str = "",
+        dz: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Generates additional volumes from a pattern of volumes.
 
         Mechanical APDL Command: `VGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VGEN.html>`_
@@ -750,10 +815,10 @@ class Volumes:
         coordinate system is not recommended. Volume, area, and line numbers are automatically assigned
         (beginning with the lowest available values ( :ref:`numstr` )).
         """
-        command = f"VGEN,{itime},{nv1},{nv2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        command = (
+            f"VGEN,{itime},{nv1},{nv2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        )
         return self.run(command, **kwargs)
-
-
 
     def vlist(self, nv1: str = "", nv2: str = "", ninc: str = "", **kwargs):
         r"""Lists the defined volumes.
@@ -803,9 +868,19 @@ class Volumes:
         command = f"VLIST,{nv1},{nv2},{ninc}"
         return self.run(command, **kwargs)
 
-
-
-    def vlscale(self, nv1: str = "", nv2: str = "", ninc: str = "", rx: str = "", ry: str = "", rz: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def vlscale(
+        self,
+        nv1: str = "",
+        nv2: str = "",
+        ninc: str = "",
+        rx: str = "",
+        ry: str = "",
+        rz: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Generates a scaled set of volumes from a pattern of volumes.
 
         Mechanical APDL Command: `VLSCALE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VLSCALE.html>`_
@@ -892,8 +967,6 @@ class Volumes:
         command = f"VLSCALE,{nv1},{nv2},{ninc},{rx},{ry},{rz},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-
-
     def voffst(self, narea: str = "", dist: str = "", kinc: str = "", **kwargs):
         r"""Generates a volume, offset from a given area.
 
@@ -935,9 +1008,15 @@ class Volumes:
         command = f"VOFFST,{narea},{dist},{kinc}"
         return self.run(command, **kwargs)
 
-
-
-    def vplot(self, nv1: str = "", nv2: str = "", ninc: str = "", degen: str = "", scale: str = "", **kwargs):
+    def vplot(
+        self,
+        nv1: str = "",
+        nv2: str = "",
+        ninc: str = "",
+        degen: str = "",
+        scale: str = "",
+        **kwargs,
+    ):
         r"""Displays the selected volumes.
 
         Mechanical APDL Command: `VPLOT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VPLOT.html>`_
@@ -984,9 +1063,20 @@ class Volumes:
         command = f"VPLOT,{nv1},{nv2},{ninc},{degen},{scale}"
         return self.run(command, **kwargs)
 
-
-
-    def vrotat(self, na1: str = "", na2: str = "", na3: str = "", na4: str = "", na5: str = "", na6: str = "", pax1: str = "", pax2: str = "", arc: str = "", nseg: str = "", **kwargs):
+    def vrotat(
+        self,
+        na1: str = "",
+        na2: str = "",
+        na3: str = "",
+        na4: str = "",
+        na5: str = "",
+        na6: str = "",
+        pax1: str = "",
+        pax2: str = "",
+        arc: str = "",
+        nseg: str = "",
+        **kwargs,
+    ):
         r"""Generates cylindrical volumes by rotating an area pattern about an axis.
 
         Mechanical APDL Command: `VROTAT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VROTAT.html>`_
@@ -1077,10 +1167,10 @@ class Volumes:
         information. Note that the ``NDIV`` argument on the
         :ref:`esize` command should be set before extruding the meshed areas.
         """
-        command = f"VROTAT,{na1},{na2},{na3},{na4},{na5},{na6},{pax1},{pax2},{arc},{nseg}"
+        command = (
+            f"VROTAT,{na1},{na2},{na3},{na4},{na5},{na6},{pax1},{pax2},{arc},{nseg}"
+        )
         return self.run(command, **kwargs)
-
-
 
     def vsum(self, lab: str = "", **kwargs):
         r"""Calculates and prints geometry statistics of the selected volumes.
@@ -1117,9 +1207,17 @@ class Volumes:
         command = f"VSUM,{lab}"
         return self.run(command, **kwargs)
 
-
-
-    def vsymm(self, ncomp: str = "", nv1: str = "", nv2: str = "", ninc: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def vsymm(
+        self,
+        ncomp: str = "",
+        nv1: str = "",
+        nv2: str = "",
+        ninc: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Generates volumes from a volume pattern by symmetry reflection.
 
         Mechanical APDL Command: `VSYMM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSYMM.html>`_
@@ -1194,9 +1292,17 @@ class Volumes:
         command = f"VSYMM,{ncomp},{nv1},{nv2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-
-
-    def vtran(self, kcnto: str = "", nv1: str = "", nv2: str = "", ninc: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def vtran(
+        self,
+        kcnto: str = "",
+        nv1: str = "",
+        nv2: str = "",
+        ninc: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Transfers a pattern of volumes to another coordinate system.
 
         Mechanical APDL Command: `VTRAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VTRAN.html>`_
@@ -1264,5 +1370,3 @@ class Volumes:
         """
         command = f"VTRAN,{kcnto},{nv1},{nv2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
-
-
