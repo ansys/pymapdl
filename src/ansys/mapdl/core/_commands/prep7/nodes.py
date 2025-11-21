@@ -22,6 +22,7 @@
 
 from ansys.mapdl.core._commands import parse
 
+
 class Nodes:
 
     def center(self, node: str = "", node1: str = "", node2: str = "", node3: str = "", radius: int | str = "", **kwargs):
