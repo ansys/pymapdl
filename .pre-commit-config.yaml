@@ -9,7 +9,6 @@ ci:
 
   # PR name when autoupdate
   autoupdate_commit_msg: 'ci: pre-commit autoupdate'
-  skip: [mypy]
 
 
 repos:
