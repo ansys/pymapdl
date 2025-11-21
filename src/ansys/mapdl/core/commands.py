@@ -518,7 +518,6 @@ class Commands(
     MiscCommands,
     Post1Commands,
     Post26Commands,
-    PreprocessorCommands,
     Prep7Commands,
     SessionCommands,
     SolutionCommands,
