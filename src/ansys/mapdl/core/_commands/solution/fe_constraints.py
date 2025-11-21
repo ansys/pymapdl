@@ -598,7 +598,7 @@ class FeConstraints:
 
         .. _DJDELE_notes:
 
-        This command is valid for ``MPC184`` joint elements.  See :ref:`dj` for information on
+        This command is valid for ``MPC184`` joint elements. See :ref:`dj` for information on
         specifying boundary conditions on the components of relative motion of a joint element.
         """
         command = f"DJDELE,{elem},{lab}"
@@ -621,7 +621,7 @@ class FeConstraints:
         .. _DJLIST_notes:
 
         This command is valid for ``MPC184`` joint elements. See :ref:`dj` for information on specifying
-        boundary  conditions on joint elements.
+        boundary conditions on joint elements.
         """
         command = f"DJLIST,{elem}"
         return self.run(command, **kwargs)
@@ -675,7 +675,7 @@ class FeConstraints:
         Parameters
         ----------
         rfact : str
-            Scale factor for the real component. Zero (or blank) defaults to 1.0. Use a sma  ll number
+            Scale factor for the real component. Zero (or blank) defaults to 1.0. Use a sma ll number
             for a zero scale factor.
 
         ifact : str
@@ -756,7 +756,7 @@ class FeConstraints:
         .. _DSYM_extranote1:
 
         Symmetry or antisymmetry constraint generations are based upon the valid degrees of freedom in the
-        model, that is, the de  grees of freedom associated with the elements attached to the nodes.
+        model, that is, the de grees of freedom associated with the elements attached to the nodes.
         The labels for degrees of freedom used in the generation depend on the ``Normal`` label.
 
         For displacement degrees of freedom, the constraints generated are:
@@ -943,7 +943,7 @@ class FeConstraints:
 
         All inputs and outputs are in the global Cartesian coordinate system. For more information about the
         generalized plane strain feature, see Generalized Plane Strain Option of Current-Technology Solid
-        Elements in the  `Element Reference
+        Elements in the `Element Reference
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_.
 
         This command is valid in any processor.
