@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class TwoDTo3DAnalysis:
+
+class TwoDTo3DAnalysis(CommandsBase):
     def map2dto3d(self, action="", ldstep="", sbstep="", option="", **kwargs):
         """Initiates a 2-D to 3-D analysis and maps variables.
 

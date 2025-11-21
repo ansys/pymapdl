@@ -566,7 +566,7 @@ class CommandOutput(str):
         return self._cmd
 
     @command.setter
-    def command(self):
+    def command(self, value):
         """Not allowed to change the value of ``command``."""
         pass
 

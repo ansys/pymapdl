@@ -22,9 +22,8 @@
 
 """Common gRPC functions"""
 import time
-from typing import Dict, Iterable, List, Literal, Optional, get_args
+from typing import Any, Dict, List, Literal, Optional, get_args
 
-from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 import grpc
 import numpy as np
 
@@ -48,7 +47,7 @@ ANSYS_VALUE_TYPE: Dict[int, Optional[np.typing.DTypeLike]] = {
 }
 
 
-VGET_ENTITY_TYPES_TYPING: List[str] = Literal[
+VGET_ENTITY_TYPES_TYPING = Literal[
     "NODE",
     "ELEM",
     "KP",
@@ -73,7 +72,7 @@ VGET_NODE_ENTITY_TYPES: Dict[str, List[str]] = {
     "EPCR": STRESS_TYPES,
     "EPTH": STRESS_TYPES,
     "EPDI": STRESS_TYPES,
-    "EPSW": [None],
+    "EPSW": [""],
     "NL": ["SEPL", "SRAT", "HPRES", "EPEQ", "PSV", "PLWK"],
     "HS": ["X", "Y", "Z"],
     "BFE": ["TEMP"],
@@ -85,7 +84,7 @@ VGET_NODE_ENTITY_TYPES: Dict[str, List[str]] = {
     "H": COMP_TYPE,
     "B": COMP_TYPE,
     "FMAG": COMP_TYPE,
-    "NLIST": [None],
+    "NLIST": [""],
 }
 
 
@@ -185,14 +184,15 @@ def check_vget_input(entity: str, item: str, itnum: str) -> str:
 
 
 def parse_chunks(
-    chunks: Iterable[anskernel.Chunk], dtype: Optional[np.typing.DTypeLike] = None
+    chunks: Any,  # type: ignore[misc]  # gRPC call iterator with custom methods
+    dtype: Optional[np.typing.DTypeLike] = None,
 ) -> np.ndarray:
     """Deserialize gRPC chunks into a numpy array.
 
     Parameters
     ----------
-    chunks : generator
-        generator from grpc.  Each chunk contains a bytes payload
+    chunks : Any
+        gRPC response iterator.  Each chunk contains a bytes payload
 
     dtype : np.dtype
         Numpy data type to interpret chunks as.

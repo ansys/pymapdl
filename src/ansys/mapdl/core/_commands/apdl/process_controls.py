@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class ProcessControls:
+
+class ProcessControls(CommandsBase):
 
     def starexit(self, **kwargs):
         r"""Exits a do-loop.

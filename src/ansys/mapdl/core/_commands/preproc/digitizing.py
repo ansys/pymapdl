@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Digitizing:
+
+class Digitizing(CommandsBase):
     def dig(self, node1="", node2="", ninc="", **kwargs):
         """Digitizes nodes to a surface.
 

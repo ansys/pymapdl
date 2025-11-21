@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Display:
+
+class Display(CommandsBase):
 
     def keep(self, key: str = "", **kwargs):
         r"""Stores POST26 definitions and data during active session.

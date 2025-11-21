@@ -72,7 +72,7 @@ class _SelectionStatusQueries(_QueryExecution):
         >>> q.nsel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        return SelectionStatus(self._run_query(f"NSEL({n})", integer=True))
+        return SelectionStatus(int(self._run_query(f"NSEL({n})", integer=True)))
 
     def ksel(self, k: int) -> SelectionStatus:
         """Returns selection status of a keypoint.
@@ -119,7 +119,7 @@ class _SelectionStatusQueries(_QueryExecution):
         >>> q.ksel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        return SelectionStatus(self._run_query(f"KSEL({k})", integer=True))
+        return SelectionStatus(int(self._run_query(f"KSEL({k})", integer=True)))
 
     def lsel(self, n: int) -> SelectionStatus:
         """Returns selection status of a line.
@@ -168,7 +168,7 @@ class _SelectionStatusQueries(_QueryExecution):
         >>> q.lsel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        return SelectionStatus(self._run_query(f"LSEL({n})", integer=True))
+        return SelectionStatus(int(self._run_query(f"LSEL({n})", integer=True)))
 
     def asel(self, a: int) -> SelectionStatus:
         """Returns selection status of an area.
@@ -218,7 +218,7 @@ class _SelectionStatusQueries(_QueryExecution):
         >>> q.asel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        return SelectionStatus(self._run_query(f"ASEL({a})", integer=True))
+        return SelectionStatus(int(self._run_query(f"ASEL({a})", integer=True)))
 
     def esel(self, e: int) -> SelectionStatus:
         """Returns selection status of an element.
@@ -269,7 +269,7 @@ class _SelectionStatusQueries(_QueryExecution):
         >>> q.esel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        return SelectionStatus(self._run_query(f"ESEL({e})", integer=True))
+        return SelectionStatus(int(self._run_query(f"ESEL({e})", integer=True)))
 
     def vsel(self, v: int) -> SelectionStatus:
         """Returns selection status of a volume.
@@ -322,7 +322,7 @@ class _SelectionStatusQueries(_QueryExecution):
         >>> q.vsel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        return SelectionStatus(self._run_query(f"VSEL({v})", integer=True))
+        return SelectionStatus(int(self._run_query(f"VSEL({v})", integer=True)))
 
 
 class _NextSelectedEntityQueries(_QueryExecution):

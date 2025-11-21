@@ -22,10 +22,11 @@
 
 from typing import Optional, Union
 
+from ansys.mapdl.core._commands import CommandsBase
 from ansys.mapdl.core.mapdl_types import MapdlFloat, MapdlInt
 
 
-class Meshing:
+class Meshing(CommandsBase):
     def accat(self, na1="", na2="", **kwargs):
         """Concatenates multiple areas in preparation for mapped meshing.
 

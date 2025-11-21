@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class LoadCaseCalculations:
+
+class LoadCaseCalculations(CommandsBase):
 
     def lcabs(self, lcno: str = "", kabs: int | str = "", **kwargs):
         r"""Specifies absolute values for load case operations.

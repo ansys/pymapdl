@@ -20,13 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
+
 """
 These PREP7 commands create and modify the material data tables (that
 is, to specify and define material models).
 """
 
 
-class MaterialDataTables:
+class MaterialDataTables(CommandsBase):
     def tb(
         self,
         lab="",

@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class SpectrumOptions:
+
+class SpectrumOptions(CommandsBase):
     def addam(self, af="", aa="", ab="", ac="", ad="", amin="", **kwargs):
         """Specifies the acceleration spectrum computation constants for the
 

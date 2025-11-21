@@ -24,11 +24,11 @@ These PREP7 commands define the type of elements to be used in the model.
 """
 from typing import Optional, Union
 
-from ansys.mapdl.core._commands import parse
+from ansys.mapdl.core._commands import CommandsBase, parse
 from ansys.mapdl.core.mapdl_types import MapdlInt
 
 
-class ElementType:
+class ElementType(CommandsBase):
     def dof(
         self,
         lab1="",

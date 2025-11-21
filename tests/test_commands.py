@@ -614,6 +614,7 @@ class Test_MAPDL_commands(TestClass):
         "mpwrite",
         "mwrite",
         "nplot",
+        "run",
         "sys",
         "vplot",
         "vwrite",

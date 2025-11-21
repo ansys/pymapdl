@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class SetUp:
+
+class SetUp(CommandsBase):
 
     def gapf(self, nvar: str = "", num: str = "", name: str = "", **kwargs):
         r"""Defines the gap force data to be stored in a variable.

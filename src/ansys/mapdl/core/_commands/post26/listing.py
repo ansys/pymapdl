@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Listing:
+
+class Listing(CommandsBase):
 
     def extrem(self, nvar1: str = "", nvar2: str = "", ninc: str = "", **kwargs):
         r"""Lists the extreme values for variables.

@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class MultiFieldSolverDefinitionCommands:
+
+class MultiFieldSolverDefinitionCommands(CommandsBase):
     def mfcmmand(self, fnumb="", fname="", ext="", **kwargs):
         """Captures field solution options in a command file.
 

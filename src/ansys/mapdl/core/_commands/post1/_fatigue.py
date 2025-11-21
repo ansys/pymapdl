@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Fatigue:
+
+class Fatigue(CommandsBase):
 
     def fe(
         self, nev: str = "", cycle: str = "", fact: str = "", title: str = "", **kwargs

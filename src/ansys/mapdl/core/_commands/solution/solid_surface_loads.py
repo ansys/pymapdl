@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class SolidSurfaceLoads:
+
+class SolidSurfaceLoads(CommandsBase):
     def sfa(self, area="", lkey="", lab="", value="", value2="", **kwargs):
         """Specifies surface loads on the selected areas.
 

@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class ProcessorEntry:
+
+class ProcessorEntry(CommandsBase):
 
     def finish(self, **kwargs):
         r"""Exits normally from a processor.

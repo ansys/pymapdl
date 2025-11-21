@@ -211,18 +211,17 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
     def __init__(self, logger: logging.Logger, extra: Optional["MapdlBase"] = None):
         self.logger = logger
         if extra is not None:
-            self.extra = weakref.proxy(extra)
+            self.extra = weakref.proxy(extra)  # type: ignore[assignment]
         else:
             self.extra = None
-        self.file_handler = logger.file_handler
-        self.std_out_handler = logger.std_out_handler
+        self.file_handler = logger.file_handler  # type: ignore[attr-defined]
+        self.std_out_handler = logger.std_out_handler  # type: ignore[attr-defined]
 
     def process(self, msg: str, kwargs: MutableMapping[str, Dict[str, str]]):
         kwargs["extra"] = {}
         # This are the extra parameters sent to log
-        kwargs["extra"][
-            "instance_name"
-        ] = self.extra.name  # here self.extra is the argument pass to the log records.
+        if self.extra is not None:
+            kwargs["extra"]["instance_name"] = self.extra.name  # type: ignore[union-attr,attr-defined]
         return msg, kwargs
 
     def log_to_file(
@@ -469,16 +468,16 @@ class Logger:
         logger and the new one.
         """
         logger = logging.getLogger(logger_name)
-        logger.std_out_handler = None
-        logger.file_handler = None
+        logger.std_out_handler = None  # type: ignore[attr-defined]
+        logger.file_handler = None  # type: ignore[attr-defined]
 
         if self.logger.hasHandlers():
             for each_handler in self.logger.handlers:
                 new_handler = copy(each_handler)
                 if each_handler == self.file_handler:
-                    logger.file_handler = new_handler
+                    logger.file_handler = new_handler  # type: ignore[attr-defined]
                 elif each_handler == self.std_out_handler:
-                    logger.std_out_handler = new_handler
+                    logger.std_out_handler = new_handler  # type: ignore[attr-defined]
 
                 if level:
                     # The logger handlers are copied and changed the loglevel is
@@ -655,7 +654,7 @@ def addfile_handler(
         logger.logger.addHandler(file_handler)
 
     elif isinstance(logger, logging.Logger):
-        logger.file_handler = file_handler
+        logger.file_handler = file_handler  # type: ignore[attr-defined]
         logger.addHandler(file_handler)
 
     if write_headers:

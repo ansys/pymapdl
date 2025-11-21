@@ -25,8 +25,10 @@ list out the database, and control the numbering of entities in the
 database.
 """
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Database:
+
+class Database(CommandsBase):
     def aflist(self, **kwargs):
         """Lists the current data in the database.
 

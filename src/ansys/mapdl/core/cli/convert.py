@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import sys
+from typing import TextIO
 
 import click
 
@@ -198,8 +199,8 @@ this value. Defaults to `None` which is Mapdl class default.""",
     help="""Set MAPDL object to avoid parameter name checks (do not raise leading underscored parameter exceptions). Defaults to `False`.""",
 )
 def convert(
-    file: str,
-    output: str,
+    file: TextIO,
+    output: TextIO,
     loglevel: str,
     auto_exit: bool,
     line_ending: str,

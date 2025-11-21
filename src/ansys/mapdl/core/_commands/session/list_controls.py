@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class ListControls:
+
+class ListControls(CommandsBase):
 
     def com(self, comment: str = "", **kwargs):
         r"""Places a comment in the output.

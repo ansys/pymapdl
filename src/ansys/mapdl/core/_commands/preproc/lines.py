@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import parse
+from ansys.mapdl.core._commands import CommandsBase, parse
 
 
-class Lines:
+class Lines(CommandsBase):
     def bsplin(
         self,
         p1="",

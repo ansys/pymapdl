@@ -25,7 +25,6 @@ import os
 import re
 import threading
 import time
-from typing import Dict
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
@@ -853,7 +852,7 @@ class MeshGrpc:
                 additional_checking,
             )
 
-    def _parse_rlist(self) -> Dict[int, float]:
+    def _parse_rlist(self) -> dict[int, list[int | float]]:
         # mapdl.rmore(*list)
         with self._mapdl.force_output:
             rlist = self._mapdl.rlist()
@@ -869,18 +868,23 @@ class MeshGrpc:
             r"REAL CONSTANT SET.*?\n\n", rlist + "\n\n", flags=re.DOTALL
         )
 
-        const_ = {}
+        const_: dict[int, list[int | float]] = {}
         for each in constants_:
             values = [0 for i in range(18)]
-            set_ = int(re.match(r"REAL CONSTANT SET\s+(\d+)\s+", each).groups()[0])
+            set_match = re.match(r"REAL CONSTANT SET\s+(\d+)\s+", each)
+            set_ = int(set_match.groups()[0]) if set_match else 0
+
+            items_match = re.match(r".*ITEMS\s+(\d+)\s+", each)
+            to_match = re.match(r".*TO\s+(\d+)\s*", each)
+
             limits = (
-                int(re.match(r".*ITEMS\s+(\d+)\s+", each).groups()[0]),
-                int(re.match(r".*TO\s+(\d+)\s*", each).groups()[0]),
+                int(items_match.groups()[0]) if items_match else 0,
+                int(to_match.groups()[0]) if to_match else 0,
             )
             values_ = [float(i) for i in each.strip().splitlines()[1].split()]
 
             if not set_ in const_:
-                const_[set_] = values
+                const_[set_] = values  # type: ignore
 
             for i, jlimit in enumerate(range(limits[0] - 1, limits[1])):
                 const_[set_][jlimit] = values_[i]

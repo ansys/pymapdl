@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import parse
+from ansys.mapdl.core._commands import CommandsBase, parse
 
 
-class Areas:
+class Areas(CommandsBase):
     def a(
         self,
         p1="",

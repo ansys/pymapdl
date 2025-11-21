@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Selecting:
+
+class Selecting(CommandsBase):
 
     def allsel(self, labt: str = "", entity: str = "", **kwargs):
         r"""Selects all entities with a single command.

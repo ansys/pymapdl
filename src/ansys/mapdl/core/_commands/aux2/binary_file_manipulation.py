@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class BinaryFileManipulation:
+
+class BinaryFileManipulation(CommandsBase):
 
     def combine(self, filetype: str = "", num: str = "", **kwargs):
         r"""Combines distributed memory parallel ( DMP ) files.

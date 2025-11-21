@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Labeling:
+
+class Labeling(CommandsBase):
 
     def cformat(self, nfirst: str = "", nlast: str = "", **kwargs):
         r"""Controls the graphical display of alphanumeric character strings for parameters, components,

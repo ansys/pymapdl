@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Controls:
+
+class Controls(CommandsBase):
 
     def avprin(self, key: int | str = "", effnu: str = "", **kwargs):
         r"""Specifies how principal and vector sums are to be calculated.

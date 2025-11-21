@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class MultiFieldConvergenceControls:
+
+class MultiFieldConvergenceControls(CommandsBase):
     def mfconv(self, lab="", toler="", minref="", **kwargs):
         """Sets convergence values for an ANSYS Multi-field solver analysis.
 

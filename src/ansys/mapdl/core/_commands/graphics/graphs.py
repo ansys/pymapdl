@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Graphs:
+
+class Graphs(CommandsBase):
 
     def axlab(self, axis: str = "", lab: str = "", **kwargs):
         r"""Labels the X and Y axes on graph displays.

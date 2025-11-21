@@ -21,8 +21,10 @@
 # SOFTWARE.
 """Inquire undocumented functions"""
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class inq_function:
+
+class inq_function(CommandsBase):
     def ndinqr(self, node, key, pname="__tmpvar__", **kwargs):
         """Get information about a node.
 

@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Rezoning:
+
+class Rezoning(CommandsBase):
     def rezone(self, option="", ldstep="", sbstep="", **kwargs):
         """Initiates the rezoning process, sets rezoning options, and rebuilds the
 
