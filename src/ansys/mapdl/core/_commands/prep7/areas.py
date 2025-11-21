@@ -741,7 +741,7 @@ class Areas:
         an element reversal.
 
         See `Revising Your Model
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD8_6.html>`_   of the
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD8_6.html>`_  of the
         `Modeling and Meshing Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_ for more
         information.
@@ -1246,7 +1246,7 @@ class Areas:
         To further control the geometry of the area (if ``NL1`` is negative), the beginning and end of any
         specified line (other than ``NL1`` ) can be temporarily interchanged (for the skinning operation
         only) by inputting that line number as negative. See `Solid Modeling
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD5_10.html>`_   in the
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD5_10.html>`_  in the
         `Modeling and Meshing Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_ for an
         illustration.

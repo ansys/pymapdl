@@ -131,7 +131,7 @@ class Meshing:
         You can use the :ref:`asel` command to select areas that were created by concatenation, and then
         follow it with an :ref:`adele`,ALL command to delete them. See `Meshing Your Solid Model
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD7_5.html#modmeshvaidck31400>`_
-         in the `Modeling and Meshing Guide
+        in the `Modeling and Meshing Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_ for a discussion
         on how to easily select and delete concatenated areas in
         one step.
@@ -263,7 +263,7 @@ class Meshing:
 
         Only one area at a time can be meshed with this command. The program internally concatenates all
         lines between the specified keypoints, then meshes the area with all quadrilateral elements. If line
-        divisions are set, the mesh will follow the rules for mapped meshing (see  `Meshing Your Solid
+        divisions are set, the mesh will follow the rules for mapped meshing (see `Meshing Your Solid
         Model
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD7_5.html#modmeshvaidck31400>`_
         in the `Modeling and Meshing Guide
@@ -314,7 +314,7 @@ class Meshing:
         Any undefined nodes required for the generated elements are created and assigned the lowest
         available numbers.
 
-        This command is also valid fo  r `rezoning
+        This command is also valid fo r `rezoning
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/Hlp_G_ADVRZSMP.html>`_.
         """
         command = f"AMESH,{na1},{na2},{ninc}"
@@ -393,7 +393,7 @@ class Meshing:
         .. _AREFINE_notes:
 
         :ref:`arefine` performs local mesh refinement around the specified areas. By default, the indi
-         cated elements are split to create new elements with 1/2 the edge length of the original
+        cated elements are split to create new elements with 1/2 the edge length of the original
         elements ( ``LEVEL`` = 1).
 
         :ref:`arefine` refines all area elements and tetrahedral volume elements that are adjacent to the
@@ -995,7 +995,7 @@ class Meshing:
         onto the shell or layer plane to determine the element coordinate system. See `Understanding the
         Element Coordinate System
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_3.html#elemESYSchange>`_
-         for more details. N refers to the coordinate system reference number ( ``KCN`` ) defined
+        for more details. N refers to the coordinate system reference number ( ``KCN`` ) defined
         using the :ref:`local` (or similar) command. Element coordinate system numbers may be displayed(
         :ref:`pnum` ).
         """
@@ -1091,7 +1091,7 @@ class Meshing:
         The ending point is automatically determined from the starting (reference) point and the geometry
         inputs. All inputs are in the global Cartesian coordinate system. For more information about the
         generalized plane strain feature, see Generalized Plane Strain Option of Current-Technology Solid
-        Elements in the  `Element Reference
+        Elements in the `Element Reference
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_.
         """
         command = f"GSGDATA,{lfiber},{xref},{yref},{rotx0},{roty0}"
@@ -1435,7 +1435,7 @@ class Meshing:
         of commands), or boundary conditions or loads applied directly to any of its nodes or elements. This
         applies to nodes and elements anywhere in the model, not just in the region where you want to
         request mesh refinement. See `Revising Your Model
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD8_6.html>`_   in the
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD8_6.html>`_  in the
         `Modeling and Meshing Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_ for additional
         restrictions on mesh refinement.
@@ -1645,7 +1645,7 @@ class Meshing:
 
         You can use the :ref:`lsel` command to select lines that were created by concatenation, and then
         follow it with an :ref:`ldele`,ALL command to delete them. Also see `Meshing Your Solid Model
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD7_8.html>`_   in the
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD7_8.html>`_  in the
         `Modeling and Meshing Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_ for a discussion
         on how to easily select and delete concatenated lines in one step.
@@ -2330,7 +2330,7 @@ class Meshing:
 
         Matching meshes are used for rotational (cyclic) symmetry, or for contact analysis using coupling or
         node-to-node gap elements. See `Using CPCYC and MSHCOPY Commands
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD7_8.html#>`_   in
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD7_8.html#>`_  in
         the `Modeling and Meshing Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_ for more
         information.
@@ -3481,7 +3481,7 @@ class Meshing:
         In some cases, the program can proceed with a volume meshing operation even when no logical element
         type has been assigned via :ref:`vatt`, ``TYPE`` or :ref:`type`. For more information, see the
         discussion on setting element attributes in `Meshing Your Solid Model
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD7_8.html>`_   of the
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD7_8.html>`_  of the
         `Modeling and Meshing Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_.
         """
@@ -3593,7 +3593,7 @@ class Meshing:
         elements in a mapped mesh. :ref:`veorient` has no effect on tetrahedron meshes, extruded meshes (
         :ref:`vrotat`, :ref:`vdrag`, :ref:`vext`, etc.), or swept meshes ( :ref:`vsweep` ).
 
-        Proper brick orientation is essential for certain element types such as  ``SOLID185`` Layered
+        Proper brick orientation is essential for certain element types such as ``SOLID185`` Layered
         Solid, ``SOLID186`` Layered Solid, and ``SOLSH190``. In such cases, use :ref:`veorient` or
         :ref:`eorient` to achieve the desired orientation. For other brick element types, you may need to
         specify element orientation to control orthotropic material property directions without concern for
@@ -3790,7 +3790,7 @@ class Meshing:
         sets volume sweeping options, it does not affect element spacing). Also see the detailed discussion
         of volume sweeping in `Meshing Your Solid Model
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD7_5.html#modmeshvaidck31400>`_
-         of the `Modeling and Meshing Guide
+        of the `Modeling and Meshing Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_.
         """
         command = f"VSWEEP,{vnum},{srca},{trga},{lsmo}"

@@ -41,7 +41,7 @@ class DataTables:
         (preintegrated cross-section stiffness), :ref:`cbmd` (preintegrated section mass), or :ref:`cbte`
         (thermal-expansion) commands.
 
-        The specified temperature remains active unt  il the next :ref:`cbtmp` command is issued.
+        The specified temperature remains active unt il the next :ref:`cbtmp` command is issued.
 
         An unspecified temperature value defaults to zero.
 

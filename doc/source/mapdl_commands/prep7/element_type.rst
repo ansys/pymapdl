@@ -1,22 +1,25 @@
-.. _ref_element_type_commands_api:
 
-************
-Element type
-************
+.. _ref_element_type:
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands define the type of elements to be used in the model.
+ElementType
+===========
+
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.element_type
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.element_type.ElementType
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.dof
-   Mapdl.elbow
-   Mapdl.et
-   Mapdl.etchg
-   Mapdl.etcontrol
-   Mapdl.etdele
-   Mapdl.etlist
-   Mapdl.keyopt
-   Mapdl.nsvr
+
+   ElementType.dof
+   ElementType.et
+   ElementType.etchg
+   ElementType.etcontrol
+   ElementType.etdele
+   ElementType.etlist
+   ElementType.keyopt
+   ElementType.nsvr

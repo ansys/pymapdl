@@ -257,7 +257,9 @@ jobs:
         if: ${{ inputs.build_pdf }}
         working-directory: doc
         shell: bash
-        run: make pdf
+        run: |
+          sudo apt-get install -y inkscape
+          make pdf
 
       - name: "Show latex dir"
         if: ${{ inputs.build_pdf }}
