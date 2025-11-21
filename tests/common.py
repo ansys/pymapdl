@@ -74,7 +74,7 @@ def is_on_local():
             os.environ.get("PYMAPDL_START_INSTANCE").lower() != "false"
         )  # default is false
 
-    from ansys.tools.path import find_mapdl
+    from ansys.tools.common.path import find_mapdl
 
     _, rver = find_mapdl()
 
@@ -109,7 +109,7 @@ def has_grpc():
         return True
 
     try:
-        from ansys.tools.path import find_mapdl
+        from ansys.tools.common.path import find_mapdl
     except ModuleNotFoundError:
         return True
 
