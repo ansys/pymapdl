@@ -284,7 +284,7 @@ def creation_time(path_to_file: str) -> float:
     else:
         stat = os.stat(path_to_file)
         if hasattr(stat, "st_birthtime"):
-            return float(stat.st_birthtime)
+            return float(stat.st_birthtime)  # type: ignore[attr-defined]
         return stat.st_mtime
 
 
