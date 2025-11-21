@@ -139,7 +139,7 @@ class SpectrumOptions:
 
         .. _COVAL_notes:
 
-        Defines PSD cospectral values to be associated with  the previously defined frequency points.
+        Defines PSD cospectral values to be associated with the previously defined frequency points.
         Two table references are required since values are off- diagonal terms. Unlike autospectra (
         :ref:`psdval` ), the cospectra can be positive or negative. The cospectral curve segment where there
         is a sign change is interpolated linearly (the rest of the curve segments use log-log
@@ -1458,7 +1458,7 @@ class SpectrumOptions:
 
         If the input spectrum curves are not associated with a damping value ( :ref:`spdamp` command),
         ``CURVNO`` and ``CURVNOBeg`` are not applicable and table ``TBLNO`` is displayed. Otherwise, specif
-         y ``CURVNO`` or ``CURVNOBeg`` :
+        y ``CURVNO`` or ``CURVNOBeg`` :
 
         * if ``CURVNO`` is used, one curve is displayed.
 
@@ -1836,7 +1836,7 @@ class SpectrumOptions:
         added to the ``DAMP`` curve after the last nonzero SV value.
 
         The interpolation method between response spectrum points and curves is specified using
-        ``KeyInterp`` in the :ref:`svtyp`   command. It is logarithmic by default.
+        ``KeyInterp`` in the :ref:`svtyp`  command. It is logarithmic by default.
 
         This command is also valid in PREP7.
         """

@@ -24,7 +24,22 @@
 class Ocean:
 
     def ocdata(
-        self, val1: str = "", val2: str = "", val3: str = "", val14: str = "", **kwargs
+        self,
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        val5: str = "",
+        val6: str = "",
+        val7: str = "",
+        val8: str = "",
+        val9: str = "",
+        val10: str = "",
+        val11: str = "",
+        val12: str = "",
+        val13: str = "",
+        val14: str = "",
+        **kwargs,
     ):
         r"""Defines an ocean load using non-table data.
 
@@ -39,6 +54,36 @@ class Ocean:
             Values describing the basic ocean load or a wave condition.
 
         val3 : str
+            Values describing the basic ocean load or a wave condition.
+
+        val4 : str
+            Values describing the basic ocean load or a wave condition.
+
+        val5 : str
+            Values describing the basic ocean load or a wave condition.
+
+        val6 : str
+            Values describing the basic ocean load or a wave condition.
+
+        val7 : str
+            Values describing the basic ocean load or a wave condition.
+
+        val8 : str
+            Values describing the basic ocean load or a wave condition.
+
+        val9 : str
+            Values describing the basic ocean load or a wave condition.
+
+        val10 : str
+            Values describing the basic ocean load or a wave condition.
+
+        val11 : str
+            Values describing the basic ocean load or a wave condition.
+
+        val12 : str
+            Values describing the basic ocean load or a wave condition.
+
+        val13 : str
             Values describing the basic ocean load or a wave condition.
 
         val14 : str
@@ -137,7 +182,7 @@ class Ocean:
           * Z (or 1) -- Values on the :ref:`octable` command depend on the Z levels (default).
           * RE (or 2) -- Values on the :ref:`octable` command depend on the Reynolds number.
 
-        .. figure::../../../images/_commands/gOCDATA1.png
+        .. figure:: ../../../images/_commands/gOCDATA1.png
 
            Basic Ocean Data Type Components
 
@@ -295,7 +340,7 @@ class Ocean:
 
         For a pipe-type ocean zone ( :ref:`oczone`,PIP), ``KFLOOD`` is the only valid option.
         """
-        command = f"OCDATA,{val1},{val2},{val3},{val14}"
+        command = f"OCDATA,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13},{val14}"
         return self.run(command, **kwargs)
 
     def ocdelete(self, datatype: str = "", zonename: str = "", **kwargs):
@@ -764,7 +809,7 @@ class Ocean:
 
         This command is also valid in PREP7.
 
-        .. figure::../../../images/_commands/gcmd_oczone_comp.png
+        .. figure:: ../../../images/_commands/gcmd_oczone_comp.png
 
            Ocean Zone Types (Specified via ZoneType)
 

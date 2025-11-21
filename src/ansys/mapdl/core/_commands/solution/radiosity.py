@@ -218,7 +218,7 @@ class Radiosity:
             * ``SUBS`` - Subset placement. An edge is collapsed by moving one node to another one. In the figure
               below, node I is moved to node J.
 
-              .. figure::../../../images/_commands/gRDEC.svg
+              .. figure:: ../../../images/_commands/gRDEC.svg
 
         Notes
         -----
@@ -482,7 +482,7 @@ class Radiosity:
         This command contains some tables and extra information which can be inspected in the original
         documentation pointed above.
 
-        .. figure::../../../images/_commands/gcmdrsymm3.png
+        .. figure:: ../../../images/_commands/gcmdrsymm3.png
 
            Usage Example: Extrusions with Axis= ZEXT and CEXT
 
@@ -520,7 +520,7 @@ class Radiosity:
         Simplified for Models with Symmetry
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_heat5.html#eqd7803bd4-5251-4d80-bd90-e01d7fdcb8bb>`_
 
-        .. figure::../../../images/_commands/gcmdrsymm1.png
+        .. figure:: ../../../images/_commands/gcmdrsymm1.png
 
            Usage Example: Option= COND
 

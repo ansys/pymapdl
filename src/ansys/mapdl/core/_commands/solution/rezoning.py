@@ -277,7 +277,7 @@ class Rezoning:
             employ:
 
             * ``MANUAL`` - Manual rezoning. You decide when to use rezoning, what region(s) to rezone, and what
-              remeshing method to use on the selected region(s). This method is currently  the default and
+              remeshing method to use on the selected region(s). This method is currently the default and
               only option.
 
         ldstep : str

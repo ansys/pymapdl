@@ -784,7 +784,7 @@ class LoadStepOptions:
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_the/Hlp_G_THE4.html>`_ for more
         information on applying boundary conditions via tabular input. See `Transient
         Thermal Analysis
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_the/Hlp_G_THE3_12.html>`_   of
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_the/Hlp_G_THE3_12.html>`_  of
         the `Thermal Analysis Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_the/Hlp_G_THE4.html>`_ for more
         information on defining the key time array.
