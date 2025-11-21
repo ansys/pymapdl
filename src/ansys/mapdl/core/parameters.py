@@ -778,6 +778,7 @@ def interp_star_status(status: str) -> dict[str, str]:
 
     parameters = {}
     is_string_array = False
+    name_ = ""
     if is_parameter_listing(status):
         # Works for one parameter or general listing
         header = "NAME                              VALUE"
