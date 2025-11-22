@@ -1,0 +1,6 @@
+﻿stef
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.aux12.general_radiation
+
+.. automethod:: GeneralRadiation.stef
