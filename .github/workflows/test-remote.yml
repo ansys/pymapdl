@@ -73,7 +73,7 @@ jobs:
       DPF_START_SERVER: False
       HAS_DPF: True
       TEST_DPF_BACKEND: false
-      PYTEST_ARGUMENTS: '-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers'
+      PYTEST_ARGUMENTS: '--ignore_image_cache'
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
 
     steps:
@@ -264,11 +264,8 @@ jobs:
           echo "ON_STUDENT: $ON_STUDENT"
           xvfb-run pytest \
             ${PYTEST_ARGUMENTS} \
-            --ignore_image_cache \
             --report-log=$file_name.jsonl \
-            --cov-report=xml:$file_name.xml \
-            --log-file=pytest.log \
-            --log-file-level="DEBUG"
+            --cov-report=xml:$file_name.xml
 
       - name: "Print amount of restarts"
         if: always()
