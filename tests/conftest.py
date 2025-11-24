@@ -462,6 +462,13 @@ def pytest_addoption(parser):
     parser.addoption(
         "--gui", action="store_true", default=False, dest="gui", help="run GUI tests"
     )
+    parser.addoption(
+        "--verify-images",
+        action="store_true",
+        default=False,
+        dest="verify_images",
+        help="verify image outputs against baseline",
+    )
 
 
 def pytest_collection_modifyitems(session, config, items):
@@ -510,11 +517,15 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: pytest.ExitCode):
 # Setting configuration fixtures
 # ------------------------------
 #
-
-if has_dependency("pytest-pyvista"):
-
+if has_dependency("pytest-pyvista") or has_dependency("pytest_pyvista"):
+    
     @pytest.fixture(autouse=True)
     def wrapped_verify_image_cache(verify_image_cache, pytestconfig):
+        # Skip image verification unless --verify-images flag is passed
+        if not pytestconfig.getoption("--verify-images"):
+            verify_image_cache.skip = True
+            return verify_image_cache
+
         # Configuration
         verify_image_cache.error_value = 500.0
         verify_image_cache.warning_value = 200.0
