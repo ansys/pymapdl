@@ -131,7 +131,17 @@ pymapdl = "ansys.mapdl.core.cli:main"
 pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_point"
 
 [tool.pytest.ini_options]
-addopts = "-ra -vvv --maxfail=10 --strict-markers --random-order-bucket=class --random-order --durations=10  --timeout=180"
+addopts = [
+  "-ra",
+  "-vvv",
+  "--maxfail=10",
+  "--strict-markers",
+  "--random-order-bucket=class",
+  "--random-order",
+  "--durations=10",
+  "--timeout=180"
+]
+
 filterwarnings = [
   "ignore::DeprecationWarning",
   "ignore::FutureWarning",
