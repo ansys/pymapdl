@@ -62,6 +62,7 @@ from ansys.mapdl.core.errors import (
     PortAlreadyInUseByAnMAPDLInstance,
     VersionError,
 )
+from ansys.mapdl.core.helpers import is_installed
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl_core import _ALLOWED_START_PARM  # type: ignore
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
@@ -93,8 +94,14 @@ if _HAS_ATC:
             return _version_from_path(*args, **kwargs)
 
 
+HAS_PARAMIKO = is_installed("paramiko")
+
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl_console import MapdlConsole
+
+    if HAS_PARAMIKO:
+        from paramiko import SSHClient
+
 
 # settings directory
 SETTINGS_DIR = pymapdl.USER_DATA_PATH
@@ -122,7 +129,7 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "cleanup_on_exit",
     "clear_on_connect",
     "exec_file",
-    "force_intel" "ip",
+    "force_intel",
     "ip",
     "jobname",
     "launch_on_hpc",
@@ -435,6 +442,7 @@ def generate_mapdl_launch_command(
     ram: Optional[int] = None,
     port: int = MAPDL_DEFAULT_PORT,
     additional_switches: str = "",
+    launch_on_hpc=False,
 ) -> list[str]:
     """Generate the command line to start MAPDL in gRPC mode.
 
@@ -488,7 +496,7 @@ def generate_mapdl_launch_command(
     grpc_sw = "-grpc"
 
     # Windows will spawn a new window, special treatment
-    if os.name == "nt":
+    if os.name == "nt" and not launch_on_hpc:
         exec_file = f"{exec_file}"
         # must start in batch mode on windows to hide APDL window
         tmp_inp = ".__tmp__.inp"
@@ -534,6 +542,7 @@ def launch_grpc(
     env_vars: Optional[Dict[str, str]] = None,
     launch_on_hpc: bool = False,
     mapdl_output: Optional[str] = None,
+    ssh_session: "SSHClient | None" = None,
 ) -> subprocess.Popen[bytes]:
     """Start MAPDL locally in gRPC mode.
 
@@ -613,6 +622,7 @@ def launch_grpc(
         stdout=stdout,
         stderr=stderr,
         env_vars=env_vars,
+        ssh_session=ssh_session,
     )  # nosec B604
 
 
@@ -1770,6 +1780,7 @@ def launch_mapdl(
             ram=args["ram"],
             port=args["port"],
             additional_switches=args["additional_switches"],
+            launch_on_hpc=args["launch_on_hpc"],
         )
 
         if args["launch_on_hpc"]:
@@ -2728,7 +2739,7 @@ def get_cpus(args: Dict[str, Any]):
     # Bypassing number of processors checks because VDI/VNC might have
     # different number of processors than the cluster compute nodes.
     # Also the CPUs are set in `get_slurm_options`
-    if args["running_on_hpc"]:
+    if args.get("running_on_hpc"):
         return
 
     # Setting number of processors
@@ -2840,7 +2851,11 @@ def launch_mapdl_on_cluster(
     )
 
 
-def get_hostname_host_cluster(job_id: int, timeout: int = 30) -> tuple[str, str]:
+def get_hostname_host_cluster(
+    job_id: int,
+    timeout: int = 30,
+    ssh_session: "SSHClient | None" = None,
+) -> tuple[str, str]:
     options = f"show jobid -dd {job_id}"
     LOG.debug(f"Executing the command 'scontrol {options}'")
 
@@ -2850,9 +2865,12 @@ def get_hostname_host_cluster(job_id: int, timeout: int = 30) -> tuple[str, str]
     stdout: str = ""
 
     while not ready:
-        proc = send_scontrol(options)
+        proc = send_scontrol(options, ssh_session=ssh_session)
 
-        stdout = proc.stdout.read().decode() if proc.stdout else ""
+        if isinstance(proc, tuple):
+            stdout = proc[0]
+        else:
+            stdout = proc.stdout.read().decode()
 
         if "JobState=RUNNING" not in stdout:
             counter += 1
@@ -2992,12 +3010,16 @@ def check_mapdl_launch_on_hpc(process: subprocess.Popen[bytes]) -> int | None:
     MapdlDidNotStart
         The job submission failed.
     """
-    if process.stdout is None:
-        return
+    if isinstance(process, tuple):
+        stdout, stderr = process
+    elif isinstance(process, str):
+        stdout = process
+        stderr = ""
+    else:
+        stdout = process.stdout.read().decode()
+        stderr = process.stderr.read().decode()
 
-    stdout: str = process.stdout.read().decode()
-    if "Submitted batch job" not in stdout and process.stderr is not None:
-        stderr: str = process.stderr.read().decode()
+    if "Submitted batch job" not in stdout:
         raise MapdlDidNotStart(
             "PyMAPDL failed to submit the sbatch job:\n"
             f"stdout:\n{stdout}\nstderr:\n{stderr}"
@@ -3009,7 +3031,10 @@ def check_mapdl_launch_on_hpc(process: subprocess.Popen[bytes]) -> int | None:
 
 
 def get_job_info(
-    start_parm: Dict[str, str | int], jobid: Optional[int] = None, timeout: int = 30
+    start_parm: Dict[str, str],
+    jobid: Optional[int] = None,
+    timeout: int = 30,
+    ssh_session: "SSHClient | None" = None,
 ):
     """Get job info like BatchHost IP and hostname
 
@@ -3031,21 +3056,23 @@ def get_job_info(
 
     jobid = jobid or int(start_parm["jobid"])
 
-    batch_host, batch_ip = get_hostname_host_cluster(jobid, timeout=timeout)
+    batch_host, batch_ip = get_hostname_host_cluster(
+        jobid, timeout=timeout, ssh_session=ssh_session
+    )
 
     start_parm["ip"] = batch_ip
     start_parm["hostname"] = batch_host
     start_parm["jobid"] = jobid
 
 
-def kill_job(jobid: int):
+def kill_job(jobid: int, ssh_session: "SSHClient | None" = None):
     """Kill SLURM job"""
-    submitter(["scancel", str(jobid)])
+    submitter(["scancel", str(jobid)], ssh_session=ssh_session)
 
 
-def send_scontrol(args: str):
+def send_scontrol(args: str, ssh_session: "SSHClient | None" = None):
     cmd = f"scontrol {args}".split(" ")
-    return submitter(cmd)
+    return submitter(cmd, ssh_session=ssh_session)
 
 
 def submitter(
@@ -3055,10 +3082,11 @@ def submitter(
     shell: bool = False,
     cwd: str | None = None,
     stdin: int | None = None,
-    stdout: int | IO[Any] | None = None,
-    stderr: int | IO[Any] | None = None,
+    stdout: int | None = None,
+    stderr: int | None = None,
     env_vars: dict[str, str] | None = None,
-) -> subprocess.Popen[bytes]:
+    ssh_session: "SSHClient | None" = None,
+):
 
     if executable:
         cmd = [executable] + cmd
@@ -3071,15 +3099,20 @@ def submitter(
 
     # cmd is controlled by the library with generate_mapdl_launch_command.
     # Excluding bandit check.
-    return subprocess.Popen(
-        args=cmd,
-        shell=shell,  # sbatch does not work without shell.
-        cwd=cwd,
-        stdin=stdin,
-        stdout=stdout,
-        stderr=stderr,
-        env=env_vars,
-    )
+    if ssh_session:
+        with ssh_session as ssh:
+            return ssh.submit(cmd, cwd, env_vars)
+
+    else:
+        return subprocess.Popen(
+            args=cmd,
+            shell=shell,  # sbatch does not work without shell.
+            cwd=cwd,
+            stdin=stdin,
+            stdout=stdout,
+            stderr=stderr,
+            env=env_vars,
+        )
 
 
 def check_console_start_parameters(start_parm: Dict[str, Any]) -> Dict[str, Any]:
