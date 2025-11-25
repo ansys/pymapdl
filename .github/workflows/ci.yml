@@ -239,6 +239,7 @@ jobs:
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
       token: ${{ secrets.GITHUB_TOKEN }}
       username: ${{ github.actor }}
+      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
       mapdl-version: "${{ matrix.mapdl-version }}"
       file-name: "remote-${{ matrix.mapdl-version }}"
@@ -283,6 +284,7 @@ jobs:
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
       token: ${{ secrets.GITHUB_TOKEN }}
       username: ${{ github.actor }}
+      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
       testing-minimal: false
       pytest-arguments: '--reset_only_failed  --add_missing_images'
@@ -311,6 +313,7 @@ jobs:
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
       token: ${{ secrets.GITHUB_TOKEN }}
       username: ${{ github.actor }}
+      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
       testing-minimal: true
       pytest-arguments: ''
@@ -339,6 +342,7 @@ jobs:
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
       token: ${{ secrets.GITHUB_TOKEN }}
       username: ${{ github.actor }}
+      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
       latest-version: "252"
       mapdl-version: ${{ matrix.mapdl-version }}
