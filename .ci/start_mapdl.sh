@@ -79,10 +79,15 @@ if [[ $MAPDL_VERSION == *"cicd"* ]] ; then
 
     echo "Overriding DISTRIBUTED_MODE to 'dmp' for CICD version"
     export DISTRIBUTED_MODE="dmp"
+
+    echo "Using OpenMPI for CICD version"
+    export MPI="-mpi openmpi"
+
 else
     export DPF_PORT_ARG=""
     export DB_INT_PORT=50055
     export DPF_ON=""
+    export MPI=""
 fi;
 
 echo "EXEC_PATH: $EXEC_PATH"
@@ -116,7 +121,7 @@ run \
   --memory=6656MB \
   --memory-swap=16896MB \
   --mount type=bind,src=${PWD}/.ci/entrypoint.sh,dst=/entrypoint.sh \
-  ${MAPDL_IMAGE} /entrypoint.sh
+  ${MAPDL_IMAGE} /entrypoint.sh ${MPI}
 _EOT_
 )
 
