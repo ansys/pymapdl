@@ -45,6 +45,13 @@ on:
         required: false
         type: boolean
         default: false
+      
+      skip-log-upload:
+        description: |
+          If true, logs will not be uploaded (for security). Set to false to enable encrypted log upload.
+        required: false
+        type: boolean
+        default: true
 
       file-name:
         description: |
@@ -97,6 +104,11 @@ on:
         description: |
           Token for Codecov.
         required: true
+
+      log-encryption-key:
+        description: |
+          Encryption key for sensitive log files.
+        required: false
       
       token:
         description: |
@@ -295,12 +307,37 @@ jobs:
         run: |
           .ci/collect_mapdl_logs_locals.sh
 
-      # - name: "Upload logs to GitHub"
-      #   if: always()
-      #   uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
-      #   with:
-      #     name: logs-${{ inputs.file-name }}.tgz
-      #     path: ./logs-${{ inputs.file-name }}.tgz
+      - name: "Encrypt and upload logs to GitHub"
+        if: always() && inputs.skip-log-upload == false
+        env:
+          ENCRYPTION_KEY: ${{ secrets.log-encryption-key }}
+          FILE_NAME: ${{ inputs.file-name }}
+        shell: bash
+        run: |
+          # Check if logs exist
+          if [ -f "./logs-${FILE_NAME}.tgz" ]; then
+            echo "Encrypting logs..."
+            
+            # Encrypt using OpenSSL (already available in container)
+            openssl enc -aes-256-cbc -salt -pbkdf2 \
+              -in ./logs-${FILE_NAME}.tgz \
+              -out ./logs-${FILE_NAME}.tgz.enc \
+              -pass env:ENCRYPTION_KEY
+            
+            echo "Logs encrypted successfully"
+            echo "To decrypt locally, use:"
+            echo "openssl enc -aes-256-cbc -d -pbkdf2 -in logs-${FILE_NAME}.tgz.enc -out logs-${FILE_NAME}.tgz -pass pass:YOUR_KEY"
+          else
+            echo "No log file found to encrypt"
+          fi
+
+      - name: "Upload encrypted logs to GitHub"
+        if: always() && inputs.skip-log-upload == false
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
+        with:
+          name: logs-${{ inputs.file-name }}-encrypted
+          path: ./logs-${{ inputs.file-name }}.tgz.enc
+          retention-days: 3
 
       - name: "Display files structure"
         if: always()
