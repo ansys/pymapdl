@@ -46,12 +46,12 @@ on:
         type: boolean
         default: false
 
-      skip-log-upload:
+      upload-logs:
         description: |
-          If true, logs will not be uploaded (for security). Set to false to enable encrypted log upload.
+          If true, logs will be uploaded encrypted. Set to false to disable log upload (for security).
         required: false
         type: boolean
-        default: true
+        default: false
 
       file-name:
         description: |
@@ -308,7 +308,7 @@ jobs:
           .ci/collect_mapdl_logs_locals.sh
 
       - name: "Encrypt and upload logs to GitHub"
-        if: always() && inputs.skip-log-upload == false
+        if: always() && inputs.upload-logs == true
         env:
           ENCRYPTION_KEY: ${{ secrets.log-encryption-key }}
           FILE_NAME: ${{ inputs.file-name }}
@@ -332,7 +332,7 @@ jobs:
           fi
 
       - name: "Upload encrypted logs to GitHub"
-        if: always() && inputs.skip-log-upload == false
+        if: always() && inputs.upload-logs == true
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
         with:
           name: logs-${{ inputs.file-name }}-encrypted
