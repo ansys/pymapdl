@@ -37,7 +37,7 @@ on:
         description: |
           Username for the GitHub container registry.
         required: true
-      
+
       token:
         description: |
           Token for GitHub.
@@ -47,7 +47,7 @@ on:
         description: |
           License server for ANSYS MAPDL
         required: true
-      
+
       codecov-token:
         description: |
           Token for Codecov.
@@ -166,7 +166,7 @@ jobs:
           echo "TAG_STUDENT: $TAG_STUDENT"
           echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
           echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
-          
+
       - name: "Pull, launch, and validate MAPDL service"
         id: start_mapdl
         env:
@@ -342,13 +342,13 @@ jobs:
           # Check if logs exist
           if [ -f "./logs-${FILE_NAME}.tgz" ]; then
             echo "Encrypting logs..."
-            
+
             # Encrypt using OpenSSL
             openssl enc -aes-256-cbc -salt -pbkdf2 \
               -in ./logs-${FILE_NAME}.tgz \
               -out ./logs-${FILE_NAME}.tgz.enc \
               -pass env:ENCRYPTION_KEY
-            
+
             echo "Logs encrypted successfully"
             echo "To decrypt locally, use:"
             echo "openssl enc -aes-256-cbc -d -pbkdf2 -in logs-${FILE_NAME}.tgz.enc -out logs-${FILE_NAME}.tgz -pass pass:YOUR_KEY"

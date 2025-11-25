@@ -31,21 +31,21 @@ on:
         required: false
         type: boolean
         default: false
-      
+
       test_dpf:
         description: |
           If true, the DPF tests will be run.
         required: false
         type: boolean
         default: true
-      
+
       on-console:
         description: |
           If true, the tests will be run on console.
         required: false
         type: boolean
         default: false
-      
+
       skip-log-upload:
         description: |
           If true, logs will not be uploaded (for security). Set to false to enable encrypted log upload.
@@ -79,7 +79,7 @@ on:
         required: false
         type: string
         default: ghcr.io/ansys/mapdl
-      
+
       runner:
         description: |
           Runner to use.
@@ -93,7 +93,7 @@ on:
         required: false
         type: string
         default: "3.12"
-        
+
     secrets:
       license-server:
         description: |
@@ -109,12 +109,12 @@ on:
         description: |
           Encryption key for sensitive log files.
         required: false
-      
+
       token:
         description: |
           Token for GitHub. Used also for login into ghcr.io.
         required: true
-      
+
       username:
         description: |
           GitHub username for login into ghcr.io.
@@ -186,13 +186,13 @@ jobs:
           echo "TAG_STUDENT: $TAG_STUDENT"
           echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
           echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
-        
+
       - name: "Install gcc"
         shell: bash
         if: ${{ contains(inputs.mapdl-version, 'cicd') }}
         run: |
           apt-get update && apt-get -y install gcc mono-mcs g++
-    
+
 
       - name: "Installing minimal OS packages"
         shell: bash
@@ -317,13 +317,13 @@ jobs:
           # Check if logs exist
           if [ -f "./logs-${FILE_NAME}.tgz" ]; then
             echo "Encrypting logs..."
-            
+
             # Encrypt using OpenSSL (already available in container)
             openssl enc -aes-256-cbc -salt -pbkdf2 \
               -in ./logs-${FILE_NAME}.tgz \
               -out ./logs-${FILE_NAME}.tgz.enc \
               -pass env:ENCRYPTION_KEY
-            
+
             echo "Logs encrypted successfully"
             echo "To decrypt locally, use:"
             echo "openssl enc -aes-256-cbc -d -pbkdf2 -in logs-${FILE_NAME}.tgz.enc -out logs-${FILE_NAME}.tgz -pass pass:YOUR_KEY"
