@@ -289,9 +289,7 @@ jobs:
           $cmd ${PYTEST_INPUT_ARGUMENTS} \
             ${PYTEST_ARGUMENTS} \
             --report-log=$file_name.jsonl \
-            --cov-report=xml:$file_name.xml \
-            --log-file=pytest.log \
-            --log-file-level="DEBUG"
+            --cov-report=xml:$file_name.xml
 
       - name: "Upload pytest reports to GitHub"
         if: always()

@@ -33,7 +33,7 @@ dependencies = [
   "psutil>=5.9.4",
   "pyansys-tools-versioning>=0.3.3",
   "pyiges[full]>=0.3.1",                       # Since v0.3.0, the 'full' flag is needed in order to install 'geomdl'
-  "pyvista<=0.46.3",
+  "pyvista<=0.46.4",
   "scipy>=1.3.0",                              # for sparse (consider optional?)
   "tabulate>=0.8.0",                           # for cli plotting
   "tqdm>=4.45.0",
@@ -131,7 +131,26 @@ pymapdl = "ansys.mapdl.core.cli:main"
 pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_point"
 
 [tool.pytest.ini_options]
-addopts = "-ra -vvv --maxfail=10 --strict-markers --random-order-bucket=class --random-order --durations=10  --timeout=180"
+addopts = [
+  "--cov-report=html",
+  "--cov=ansys.mapdl.core",
+  "--durations=30",
+  "--log-file-level=DEBUG",
+  "--log-file=pytest.log",
+  "--maxfail=10",
+  "--profile",
+  "--profile-svg",
+  "--random-order",
+  "--random-order-bucket=class",
+  "--report-log-exclude-logs-on-passed-tests",
+  "--reruns-delay=4",
+  "--reruns=3",
+  "--strict-markers",
+  "--timeout=180",
+  "-ra",
+  "-vvv",
+]
+
 filterwarnings = [
   "ignore::DeprecationWarning",
   "ignore::FutureWarning",
