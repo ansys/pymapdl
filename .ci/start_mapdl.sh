@@ -80,14 +80,10 @@ if [[ $MAPDL_VERSION == *"cicd"* ]] ; then
     echo "Overriding DISTRIBUTED_MODE to 'dmp' for CICD version"
     export DISTRIBUTED_MODE="dmp"
 
-    echo "Using OpenMPI for CICD version"
-    export MPI="-mpi openmpi"
-
 else
     export DPF_PORT_ARG=""
     export DB_INT_PORT=50055
     export DPF_ON=""
-    export MPI=""
 fi;
 
 echo "EXEC_PATH: $EXEC_PATH"
