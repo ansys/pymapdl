@@ -291,7 +291,7 @@ jobs:
       file-name: "local-${{ matrix.mapdl-version }}"
       tags: "local"
       latest-version: "252"
-      test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') }}
+      test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') && !contains(matrix.mapdl-version, '24') }}
       upload-logs: true
 
 
