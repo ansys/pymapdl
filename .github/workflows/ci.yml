@@ -306,7 +306,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu']
+        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu-cicd']
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
@@ -335,7 +335,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu']
+        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu-cicd']
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
