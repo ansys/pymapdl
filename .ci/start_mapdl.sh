@@ -79,6 +79,7 @@ if [[ $MAPDL_VERSION == *"cicd"* ]] ; then
 
     echo "Overriding DISTRIBUTED_MODE to 'dmp' for CICD version"
     export DISTRIBUTED_MODE="dmp"
+
 else
     export DPF_PORT_ARG=""
     export DB_INT_PORT=50055
@@ -108,6 +109,7 @@ run \
   -e DPF_PORT_INTERNAL=${DPF_PORT_INTERNAL} \
   -e EXEC_PATH=${EXEC_PATH} \
   -e DISTRIBUTED_MODE=${DISTRIBUTED_MODE} \
+  -e MAPDL_IMAGE=${MAPDL_IMAGE} \
   --shm-size=2gb \
   -e I_MPI_SHM_LMT=shm \
   -e P_SCHEMA=${P_SCHEMA} \

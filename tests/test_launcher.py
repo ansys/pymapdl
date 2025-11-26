@@ -43,7 +43,7 @@ from ansys.mapdl.core.errors import (
     VersionError,
 )
 from ansys.mapdl.core.launcher import (
-    _HAS_ATP,
+    _HAS_ATC,
     LOCALHOST,
     _is_ubuntu,
     check_mapdl_launch_on_hpc,
@@ -88,7 +88,7 @@ from conftest import (
 )
 
 try:
-    from ansys.tools.path import (
+    from ansys.tools.common.path import (
         find_mapdl,
         get_available_ansys_installations,
         version_from_path,
@@ -174,14 +174,14 @@ def test_validate_sw():
         assert "msmpi" in add_sw and "INTELMPI" not in add_sw
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @pytest.mark.parametrize("path_data", paths)
 def test_version_from_path(path_data):
     exec_file, version = path_data
     assert version_from_path("mapdl", exec_file) == version
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 def test_catch_version_from_path():
     with pytest.raises(RuntimeError):
         version_from_path("mapdl", "abc")
@@ -199,12 +199,12 @@ def test_catch_version_from_path():
         ["/ansysinc/v242/ansys/bin/mapdl", 24.2, ValueError],
     ],
 )
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 def test_find_mapdl_linux(my_fs, path, version, raises):
     my_fs.os = OSType.LINUX
     my_fs.create_file(path)
 
-    from ansys.tools.path import find_mapdl
+    from ansys.tools.common.path import find_mapdl
 
     bin_file, ver = find_mapdl()
 
@@ -218,7 +218,7 @@ def test_find_mapdl_linux(my_fs, path, version, raises):
         assert ver == version
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
 @patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
 @patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
@@ -235,7 +235,7 @@ def test_invalid_mode(mapdl, my_fs, cleared, monkeypatch):
         )
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @pytest.mark.parametrize("version", [120, 170, 190])
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
 @patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
@@ -260,7 +260,7 @@ def test_old_version_not_version(mapdl, my_fs, cleared, monkeypatch, version):
         )
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @pytest.mark.parametrize("version", [203, 213, 351])
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
 @patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
@@ -283,7 +283,7 @@ def test_not_valid_versions(mapdl, my_fs, cleared, monkeypatch, version):
         )
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @requires("local")
 @requires("linux")
 @requires("console")
@@ -294,7 +294,7 @@ def test_failed_console():
         pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @requires("local")
 @requires("console")
 @requires("linux")
@@ -307,7 +307,7 @@ def test_launch_console(version):
 
 @requires("local")
 @requires("nostudent")
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @pytest.mark.parametrize("license_name", LICENSES)
 def test_license_type_keyword_names(monkeypatch, license_name):
     exec_file = find_mapdl()[0]
@@ -327,7 +327,7 @@ def test_license_type_additional_switch(license_name):
 
 
 @stack(*PATCH_MAPDL_START)
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 def test_license_type_dummy(mapdl, cleared):
     dummy_license_type = "dummy"
     with pytest.warns(
@@ -518,7 +518,7 @@ def test__verify_version_latest():
     assert get_version("latest") is None
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @requires("local")
 def test_find_ansys(mapdl, cleared):
     assert find_mapdl() is not None
@@ -562,7 +562,7 @@ def test_is_ubuntu():
     assert _is_ubuntu()
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @requires("local")
 def test_get_default_ansys():
     assert get_default_ansys() is not None
@@ -886,7 +886,7 @@ def test_get_start_instance_envvar(monkeypatch, start_instance, context):
 
 
 @requires("local")
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @pytest.mark.parametrize("start_instance", [True, False])
 def test_launcher_start_instance(monkeypatch, start_instance):
     if "PYMAPDL_START_INSTANCE" in os.environ:
@@ -919,11 +919,11 @@ def test_ip_and_start_instance(
         monkeypatch.setenv("PYMAPDL_IP", str(ip_envvar))
 
     # Skip if PyMAPDL cannot detect where MAPDL is installed.
-    if not _HAS_ATP and not os.environ.get("PYMAPDL_MAPDL_EXEC"):
+    if not _HAS_ATC and not os.environ.get("PYMAPDL_MAPDL_EXEC"):
         # if start_instance and not ip:
         with pytest.raises(
             ModuleNotFoundError,
-            match="If you don't have 'ansys-tools-path' library installed, you need",
+            match="If you don't have 'ansys-tools-common' library installed, you need",
         ):
             options = launch_mapdl(
                 exec_file=None,
@@ -1118,7 +1118,7 @@ def test_generate_start_parameters_console():
     assert "timeout" not in new_args
 
 
-@patch("ansys.mapdl.core.launcher._HAS_ATP", False)
+@patch("ansys.mapdl.core.launcher._HAS_ATC", False)
 def test_get_exec_file(monkeypatch):
     monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", False)
 
@@ -1141,8 +1141,8 @@ def _get_application_path(*args, **kwargs):
     return None
 
 
-@requires("ansys-tools-path")
-@patch("ansys.tools.path.path._get_application_path", _get_application_path)
+@requires("ansys-tools-common")
+@patch("ansys.tools.common.path.path._get_application_path", _get_application_path)
 def test_get_exec_file_not_found_two(monkeypatch):
     monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", False)
     args = {"exec_file": None, "start_instance": True}
@@ -1424,12 +1424,12 @@ def test_exit_job(mock_popen, mapdl, cleared):
     mock_popen.assert_called_once_with(1001)
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @patch(
-    "ansys.tools.path.path._get_application_path",
+    "ansys.tools.common.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",
 )
-@patch("ansys.tools.path.path._version_from_path", lambda *args, **kwargs: 242)
+@patch("ansys.tools.common.path.path._version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL_START)
 @patch("ansys.mapdl.core.launcher.launch_grpc")
 @patch("ansys.mapdl.core.launcher.send_scontrol")
@@ -1767,11 +1767,12 @@ def test_get_hostname_host_cluster(
             assert batchhost_ip == "111.22.33.44"
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @patch(
-    "ansys.tools.path.path._version_from_path", side_effect=lambda *args, **kwargs: 201
+    "ansys.tools.common.path.path._version_from_path",
+    side_effect=lambda *args, **kwargs: 201,
 )
-@patch("ansys.mapdl.core._HAS_ATP", True)
+@patch("ansys.mapdl.core._HAS_ATC", True)
 def test_get_version_version_error(monkeypatch):
     monkeypatch.delenv("PYMAPDL_MAPDL_VERSION", False)
 
@@ -1981,12 +1982,12 @@ def test_submitter(cmd, executable, shell, cwd, stdin, stdout, stderr, envvars):
         assert kwargs["env"] == envvars
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @patch(
-    "ansys.tools.path.path._get_application_path",
+    "ansys.tools.common.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",
 )
-@patch("ansys.tools.path.path._version_from_path", lambda *args, **kwargs: 242)
+@patch("ansys.tools.common.path.path._version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL)
 @pytest.mark.parametrize(
     "arg,value,method",

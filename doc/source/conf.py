@@ -125,7 +125,7 @@ intersphinx_mapping = {
     "pypim": ("https://pypim.docs.pyansys.com/version/dev/", None),
     "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
     "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
-    "ansys-tools-path": ("https://path.tools.docs.pyansys.com/version/stable/", None),
+    "ansys-tools-common": ("https://tools.docs.pyansys.com/version/stable/", None),
     "pytwin": ("https://twin.docs.pyansys.com/version/stable/", None),
 }
 
