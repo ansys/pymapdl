@@ -25,7 +25,15 @@ if [ "$RUN_DPF_SERVER" == "true" ]; then
     echo "DPF server started."
 fi
 
+if [[ $MAPDL_VERSION == *"cicd"* ]] ; then
+    echo "Using OpenMPI for CICD version"
+    export MPI="-mpi openmpi"
+
+else
+    export MPI=""
+fi;
+
 echo "Starting MAPDL..."
 echo "Using executable path: ${EXEC_PATH}"
 
-$EXEC_PATH -grpc -dir /jobs -"${DISTRIBUTED_MODE}" -np 2 -db -6000 -m -6000 "$@" -
+$EXEC_PATH -grpc -dir /jobs -"${DISTRIBUTED_MODE}" -np 2 -db -6000 -m -6000 "${MPI}" -

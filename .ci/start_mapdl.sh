@@ -113,6 +113,7 @@ run \
   -e DPF_PORT_INTERNAL=${DPF_PORT_INTERNAL} \
   -e EXEC_PATH=${EXEC_PATH} \
   -e DISTRIBUTED_MODE=${DISTRIBUTED_MODE} \
+  -e MAPDL_IMAGE=${MAPDL_IMAGE} \
   --shm-size=2gb \
   -e I_MPI_SHM_LMT=shm \
   -e P_SCHEMA=${P_SCHEMA} \
