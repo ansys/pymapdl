@@ -132,24 +132,24 @@ pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_
 
 [tool.pytest.ini_options]
 addopts = [
-  "-ra",
-  "-vvv",
+  "--cov-report=html",
+  "--cov=ansys.mapdl.core",
   "--durations=30",
-  "--timeout=180",
-  "--reruns=3",
-  "--reruns-delay=4",
+  "--log-file-level=DEBUG",
+  "--log-file=pytest.log",
   "--maxfail=10",
-  "--strict-markers",
+  "--profile",
+  "--profile-svg",
   "--random-order",
   "--random-order-bucket=class",
-  "--cov=ansys.mapdl.core",
-  "--cov-report=html",
-  "--profile-svg",
-  "--profile",
   "--report-log-exclude-logs-on-passed-tests",
+  "--reruns-delay=4",
+  "--reruns=3",
   "--strict-markers",
-  "--log-file=pytest.log",
-  "--log-file-level=DEBUG"
+  "--strict-markers",
+  "--timeout=180",
+  "-ra",
+  "-vvv",
 ]
 
 filterwarnings = [
@@ -164,6 +164,7 @@ filterwarnings = [
 ]
 junit_family = "legacy"
 markers = [
+  "cad: run tests that verify the CAD import methods",
   "console: run console test based",
   "gui: run gui test",
   "requires_gui: run tests that require to launch the GUI interface",

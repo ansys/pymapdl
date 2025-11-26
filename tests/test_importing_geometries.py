@@ -75,6 +75,7 @@ def clear_wkdir_from_cads(mapdl):
 
 ## IGES
 #
+@pytest.mark.cad
 def test_readin_igs(mapdl, cleared):
     mapdl.igesin(fname=os.path.join(CADs_path, "CubeWithHole"), ext="igs")
     assert geometry_test_is_correct(mapdl, geometry="iges")
@@ -95,6 +96,7 @@ def test_readin_igs(mapdl, cleared):
 
 ## Connection commands
 #
+@pytest.mark.cad
 @pytest.mark.xfail(True, reason="Command seems broken. See #2377")
 def test_readin_sat(mapdl, cleared):
     if ON_CI and mapdl.version >= 23.2:
@@ -125,6 +127,7 @@ def test_readin_sat(mapdl, cleared):
     clear_wkdir_from_cads(mapdl)
 
 
+@pytest.mark.cad
 @pytest.mark.xfail(True, reason="Command seems broken. See #2377")
 def test_readin_x_t(mapdl, cleared):
     if ON_CI and mapdl.version >= 23.2:
@@ -158,6 +161,7 @@ def test_readin_x_t(mapdl, cleared):
     clear_wkdir_from_cads(mapdl)
 
 
+@pytest.mark.cad
 @pytest.mark.xfail(ON_CI, reason="MAPDL docker image do not have the CAD libraries")
 def test_readin_catiav4(mapdl, cleared):
     # Catia v4 is only supported on Linux
@@ -177,6 +181,7 @@ def test_readin_catiav4(mapdl, cleared):
     clear_wkdir_from_cads(mapdl)
 
 
+@pytest.mark.cad
 def test_readin_catiav5(mapdl, cleared):
     # Catia v5 is only supported on Windows
     if ON_CI and mapdl.version <= 22.2 and not ON_UBUNTU:

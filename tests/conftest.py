@@ -469,6 +469,13 @@ def pytest_addoption(parser):
         dest="verify_images",
         help="verify image outputs against baseline",
     )
+    parser.addoption(
+        "--verify-cad",
+        action="store_true",
+        default=False,
+        dest="verify_cad",
+        help="run CAD import tests",
+    )
 
 
 def pytest_collection_modifyitems(session, config, items):
@@ -484,6 +491,12 @@ def pytest_collection_modifyitems(session, config, items):
         for item in items:
             if "gui" in item.keywords:
                 item.add_marker(skip_gui)
+
+    if not config.getoption("--verify-cad"):
+        skip_cad = pytest.mark.skip(reason="need --verify-cad option to run")
+        for item in items:
+            if "cad" in item.keywords:
+                item.add_marker(skip_cad)
 
     if not HAS_GRPC:
         skip_grpc = pytest.mark.skip(
@@ -518,7 +531,7 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: pytest.ExitCode):
 # ------------------------------
 #
 if has_dependency("pytest-pyvista") or has_dependency("pytest_pyvista"):
-    
+
     @pytest.fixture(autouse=True)
     def wrapped_verify_image_cache(verify_image_cache, pytestconfig):
         # Skip image verification unless --verify-images flag is passed
