@@ -209,8 +209,8 @@ if DEBUG_TESTING:
 # ------------------
 #
 
-if has_dependency("ansys-tools-path"):
-    from ansys.tools.path import find_mapdl
+if has_dependency("ansys-tools-common"):
+    from ansys.tools.common.path import find_mapdl
 
 
 if has_dependency("pyvista"):
