@@ -180,7 +180,7 @@ jobs:
           if [[ "${MAPDL_VERSION}" == *"cicd"* ]]; then
             echo "CICD MAPDL version detected, testing DPF backend for results module.";
             echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
-            echo "PYMAPDL_ADDITIONAL_SWITCHES='-mpi openmpi'" >> $GITHUB_ENV;
+            echo "PYMAPDL_ADDITIONAL_SWITCHES=-mpi openmpi" >> $GITHUB_ENV;
           fi
 
           echo "ON_STUDENT: $ON_STUDENT"
