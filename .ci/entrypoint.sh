@@ -30,6 +30,7 @@ if [[ $MAPDL_VERSION == *"cicd"* ]] ; then
     export MPI="-mpi openmpi"
 
 else
+    echo "Using default MPI version"
     export MPI=""
 fi;
 
