@@ -10,6 +10,66 @@ This document contains the release notes for the project.
 .. towncrier release notes start
 
 
+.. _v0.71.2:
+
+`0.71.2 <https://github.com/ansys/pymapdl/releases/tag/v0.71.2>`_ - November 26, 2025
+====================================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Fixed
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Relax stdout check for gRPC server startup
+          - `#4299 <https://github.com/ansys/pymapdl/pull/4299>`_
+
+        * - Cicd mpi issue and adding conditional encrypted log uploads
+          - `#4319 <https://github.com/ansys/pymapdl/pull/4319>`_
+
+        * - Update pytest arguments for consistency and clarity in local and remote workflows
+          - `#4322 <https://github.com/ansys/pymapdl/pull/4322>`_
+
+
+  .. tab-item:: Dependencies
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Update pyvista requirement from <=0.46.3 to <=0.46.4
+          - `#4303 <https://github.com/ansys/pymapdl/pull/4303>`_
+
+        * - Bump the documentation group across 1 directory with 3 updates
+          - `#4315 <https://github.com/ansys/pymapdl/pull/4315>`_
+
+
+  .. tab-item:: Documentation
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Update \`\`CONTRIBUTORS.md\`\` with the latest contributors
+          - `#4289 <https://github.com/ansys/pymapdl/pull/4289>`_
+
+
+  .. tab-item:: Maintenance
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Update CHANGELOG for v0.71.1
+          - `#4286 <https://github.com/ansys/pymapdl/pull/4286>`_
+
+        * - Migrate ansys-tools-path -> ansys-tools-common
+          - `#4307 <https://github.com/ansys/pymapdl/pull/4307>`_
+
+
 .. _v0.71.1:
 
 `0.71.1 <https://github.com/ansys/pymapdl/releases/tag/v0.71.1>`_ - October 30, 2025
