@@ -31,17 +31,24 @@ on:
         required: false
         type: boolean
         default: false
-      
+
       test_dpf:
         description: |
           If true, the DPF tests will be run.
         required: false
         type: boolean
         default: true
-      
+
       on-console:
         description: |
           If true, the tests will be run on console.
+        required: false
+        type: boolean
+        default: false
+
+      upload-logs:
+        description: |
+          If true, logs will be uploaded encrypted. Set to false to disable log upload (for security).
         required: false
         type: boolean
         default: false
@@ -72,7 +79,7 @@ on:
         required: false
         type: string
         default: ghcr.io/ansys/mapdl
-      
+
       runner:
         description: |
           Runner to use.
@@ -86,7 +93,7 @@ on:
         required: false
         type: string
         default: "3.12"
-        
+
     secrets:
       license-server:
         description: |
@@ -97,12 +104,17 @@ on:
         description: |
           Token for Codecov.
         required: true
-      
+
+      log-encryption-key:
+        description: |
+          Encryption key for sensitive log files.
+        required: false
+
       token:
         description: |
           Token for GitHub. Used also for login into ghcr.io.
         required: true
-      
+
       username:
         description: |
           GitHub username for login into ghcr.io.
@@ -126,7 +138,7 @@ jobs:
       TESTING_MINIMAL: ${{ inputs.testing-minimal }}
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
       PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
-      PYTEST_ARGUMENTS: '-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers'
+      PYTEST_ARGUMENTS: '-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=2 --reruns 2 --reruns-delay 2 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers'
       OMPI_ALLOW_RUN_AS_ROOT: 1
       OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
       DATAPROCESSING_DEBUG: /home/mapdl/dpf_logs
@@ -168,19 +180,20 @@ jobs:
           if [[ "${MAPDL_VERSION}" == *"cicd"* ]]; then
             echo "CICD MAPDL version detected, testing DPF backend for results module.";
             echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
+            echo "PYMAPDL_ADDITIONAL_SWITCHES=-mpi openmpi" >> $GITHUB_ENV;
           fi
 
           echo "ON_STUDENT: $ON_STUDENT"
           echo "TAG_STUDENT: $TAG_STUDENT"
           echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
           echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
-        
+
       - name: "Install gcc"
         shell: bash
         if: ${{ contains(inputs.mapdl-version, 'cicd') }}
         run: |
           apt-get update && apt-get -y install gcc mono-mcs g++
-    
+
 
       - name: "Installing minimal OS packages"
         shell: bash
@@ -295,12 +308,37 @@ jobs:
         run: |
           .ci/collect_mapdl_logs_locals.sh
 
-      # - name: "Upload logs to GitHub"
-      #   if: always()
-      #   uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
-      #   with:
-      #     name: logs-${{ inputs.file-name }}.tgz
-      #     path: ./logs-${{ inputs.file-name }}.tgz
+      - name: "Encrypt and upload logs to GitHub"
+        if: always() && inputs.upload-logs == true
+        env:
+          ENCRYPTION_KEY: ${{ secrets.log-encryption-key }}
+          FILE_NAME: ${{ inputs.file-name }}
+        shell: bash
+        run: |
+          # Check if logs exist
+          if [ -f "./logs-${FILE_NAME}.tgz" ]; then
+            echo "Encrypting logs..."
+
+            # Encrypt using OpenSSL (already available in container)
+            openssl enc -aes-256-cbc -salt -pbkdf2 \
+              -in ./logs-${FILE_NAME}.tgz \
+              -out ./logs-${FILE_NAME}.tgz.enc \
+              -pass env:ENCRYPTION_KEY
+
+            echo "Logs encrypted successfully"
+            echo "To decrypt locally, use:"
+            echo "openssl enc -aes-256-cbc -d -pbkdf2 -in logs-${FILE_NAME}.tgz.enc -out logs-${FILE_NAME}.tgz -pass pass:YOUR_KEY"
+          else
+            echo "No log file found to encrypt"
+          fi
+
+      - name: "Upload encrypted logs to GitHub"
+        if: always() && inputs.upload-logs == true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
+        with:
+          name: logs-${{ inputs.file-name }}-encrypted
+          path: ./logs-${{ inputs.file-name }}.tgz.enc
+          retention-days: 3
 
       - name: "Display files structure"
         if: always()

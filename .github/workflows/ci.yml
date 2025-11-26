@@ -238,10 +238,11 @@ jobs:
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
       token: ${{ secrets.GITHUB_TOKEN }}
       username: ${{ github.actor }}
+      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
       mapdl-version: "${{ matrix.mapdl-version }}"
       file-name: "remote-${{ matrix.mapdl-version }}"
-
+      upload-logs: false
 
   build-test-local-matrix:
     name: "Build test matrix for minimal and local"
@@ -282,6 +283,7 @@ jobs:
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
       token: ${{ secrets.GITHUB_TOKEN }}
       username: ${{ github.actor }}
+      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
       testing-minimal: false
       pytest-arguments: '--reset_only_failed  --add_missing_images'
@@ -289,7 +291,8 @@ jobs:
       file-name: "local-${{ matrix.mapdl-version }}"
       tags: "local"
       latest-version: "252"
-      test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') }}
+      test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') && !contains(matrix.mapdl-version, '24') }}
+      upload-logs: false
 
 
   build-test-ubuntu-minimal:
@@ -303,12 +306,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu']
+        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu-cicd']
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
       token: ${{ secrets.GITHUB_TOKEN }}
       username: ${{ github.actor }}
+      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
       testing-minimal: true
       pytest-arguments: ''
@@ -317,6 +321,7 @@ jobs:
       tags: "local,minimal"
       latest-version: "252"
       test_dpf: false
+      upload-logs: false
 
 
   build-test-ubuntu-console:
@@ -330,12 +335,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu']
+        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu-cicd']
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
       token: ${{ secrets.GITHUB_TOKEN }}
       username: ${{ github.actor }}
+      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
       latest-version: "252"
       mapdl-version: ${{ matrix.mapdl-version }}
@@ -345,7 +351,7 @@ jobs:
       file-name: "${{ matrix.mapdl-version }}-console"
       tags: "local,console"
       test_dpf: false
-
+      upload-logs: false
 
   package:
     name: "Package library"
