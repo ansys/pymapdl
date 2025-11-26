@@ -187,6 +187,7 @@ def test_catch_version_from_path():
         version_from_path("mapdl", "abc")
 
 
+@pytest.mark.skipif(os.name == "nt", reason="Not valid on Windows")
 @pytest.mark.parametrize(
     "path,version,raises",
     [
@@ -240,6 +241,7 @@ def test_invalid_mode(mapdl, my_fs, cleared, monkeypatch):
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
 @patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
 @patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
+@pytest.mark.skipif(os.name == "nt", reason="Not valid on Windows")
 def test_old_version_not_version(mapdl, my_fs, cleared, monkeypatch, version):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
     monkeypatch.delenv("PYMAPDL_IP", False)
@@ -260,6 +262,7 @@ def test_old_version_not_version(mapdl, my_fs, cleared, monkeypatch, version):
         )
 
 
+@pytest.mark.skipif(os.name == "nt", reason="Not valid on Windows")
 @requires("ansys-tools-common")
 @pytest.mark.parametrize("version", [203, 213, 351])
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
@@ -2052,6 +2055,7 @@ def test_mapdl_output_pass_arg(tmpdir):
     assert isinstance(args, list)
 
 
+@pytest.mark.skipif(os.name == "nt", reason="Not valid on Windows")
 @requires("local")
 @requires("nostudent")
 def test_mapdl_output(tmpdir):
