@@ -146,7 +146,6 @@ addopts = [
   "--reruns-delay=4",
   "--reruns=3",
   "--strict-markers",
-  "--strict-markers",
   "--timeout=180",
   "-ra",
   "-vvv",
