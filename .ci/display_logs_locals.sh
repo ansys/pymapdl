@@ -17,19 +17,19 @@
 
 #####
 # Displaying files
-FILE_PAT="$LOG_NAMES"/pymapdl.log
+FILE_PAT=${LOG_NAMES}/pymapdl.log
 FILE_DESCRIPTION="PyMAPDL log"
 
 (echo "::group:: $FILE_DESCRIPTION: $FILE_PAT" && cat "$FILE_PAT" && echo "::endgroup::") || echo "Failed to show $FILE_DESCRIPTION file"
 
 #####
-FILE_PAT="$LOG_NAMES"/pymapdl.apdl
+FILE_PAT=${LOG_NAMES}/pymapdl.apdl
 FILE_DESCRIPTION="PyMAPDL APDL log"
 
 (echo "::group:: $FILE_DESCRIPTION: $FILE_PAT" && cat "$FILE_PAT" && echo "::endgroup::") || echo "Failed to show $FILE_DESCRIPTION file"
 
 #####
-FILE_PAT="$LOG_NAMES"/apdl.out
+FILE_PAT=${LOG_NAMES}/apdl.out
 FILE_DESCRIPTION="MAPDL Output"
 
 (echo "::group:: $FILE_DESCRIPTION: $FILE_PAT" && cat "$FILE_PAT" && echo "::endgroup::") || echo "Failed to show $FILE_DESCRIPTION file"
