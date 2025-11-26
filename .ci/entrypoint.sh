@@ -1,4 +1,5 @@
 #!/bin/bash
+
 export OMPI_ALLOW_RUN_AS_ROOT=1
 export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
@@ -15,6 +16,7 @@ if [ -n "${ANSYS_DPF_ACCEPT_LA}" ]; then
     fi
 fi
 
+
 echo "RUN_DPF_SERVER: $RUN_DPF_SERVER"
 
 if [ "$RUN_DPF_SERVER" == "true" ]; then
@@ -23,7 +25,16 @@ if [ "$RUN_DPF_SERVER" == "true" ]; then
     echo "DPF server started."
 fi
 
+if [[ $MAPDL_VERSION == *"cicd"* ]] ; then
+    echo "Using OpenMPI for CICD version"
+    export MPI="-mpi openmpi"
+
+else
+    echo "Using default MPI version"
+    export MPI=""
+fi;
+
 echo "Starting MAPDL..."
 echo "Using executable path: ${EXEC_PATH}"
 
-$EXEC_PATH -grpc -dir /jobs -"${DISTRIBUTED_MODE}" -np 2 -db -6000 -m -6000 -
+$EXEC_PATH -grpc -dir /jobs -"${DISTRIBUTED_MODE}" -np 2 -db -6000 -m -6000 "${MPI}" -
