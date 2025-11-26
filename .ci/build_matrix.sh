@@ -14,7 +14,6 @@ versions=(
     'v25.1-ubuntu-cicd'
     'v25.1-ubuntu-student'
     'v24.2.0'
-    'v24.2-ubuntu-cicd'
     'v24.1.0'
     'v24.1-ubuntu'
     'v23.2.0'
