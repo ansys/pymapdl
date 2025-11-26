@@ -122,7 +122,7 @@ run \
   --memory=6656MB \
   --memory-swap=16896MB \
   --mount type=bind,src=${PWD}/.ci/entrypoint.sh,dst=/entrypoint.sh \
-  ${MAPDL_IMAGE} /entrypoint.sh ${MPI}
+  ${MAPDL_IMAGE} /entrypoint.sh
 _EOT_
 )
 
