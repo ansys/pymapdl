@@ -351,14 +351,21 @@ class TestPlottingBoundaryConditionsCoupled:
 class TestPlottingMeshing:
 
     @pytest.fixture(scope="class")
-    def make_block(self):
-        pass
+    def make_class_block(self, mapdl):
+        from conftest import clear
+
+        clear(mapdl)
+
+        mapdl.block(0, 1, 0, 1, 0, 1)
+        mapdl.et(1, 186)
+        mapdl.esize(0.25)
+        mapdl.vmesh("ALL")
 
     @staticmethod
     @pytest.mark.parametrize(
         "backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL, None]
     )
-    def test_eplot(mapdl, make_block, backend):
+    def test_eplot(mapdl, make_class_block, backend):
         init_elem = mapdl.mesh.n_elem
         mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
         mapdl.eplot(show_node_numbering=True, background="w", color="b")
@@ -372,7 +379,7 @@ class TestPlottingMeshing:
         assert mapdl.mesh.n_elem == init_elem
 
     @staticmethod
-    def test_eplot_savefig(mapdl, make_block, tmpdir):
+    def test_eplot_savefig(mapdl, make_class_block, tmpdir):
         filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
         mapdl.eplot(
             background="w",
@@ -388,7 +395,7 @@ class TestPlottingMeshing:
         "selection",
         ["S", "R", "A", "U"],
     )
-    def test_pick_nodes(mapdl, make_block, selection, verify_image_cache):
+    def test_pick_nodes(mapdl, make_class_block, selection, verify_image_cache):
         # Cleaning the model a bit
         mapdl.modmsh("detach")  # detaching geom and fem
         mapdl.edele("all")
@@ -459,7 +466,7 @@ class TestPlottingMeshing:
         "selection",
         ["S", "R", "A", "U"],
     )
-    def test_pick_kp(mapdl, make_block, selection):
+    def test_pick_kp(mapdl, make_class_block, selection):
         # Cleaning the model a bit
         mapdl.modmsh("detach")  # detaching geom and fem
         mapdl.vdele("all")
@@ -525,7 +532,7 @@ class TestPlottingMeshing:
             assert 1 in selected
 
     @staticmethod
-    def test_pick_node_failure(mapdl, make_block):
+    def test_pick_node_failure(mapdl, make_class_block):
         # it should work for the KP too.
         # Cleaning the model a bit
         mapdl.modmsh("detach")  # detaching geom and fem
@@ -545,7 +552,7 @@ class TestPlottingMeshing:
             mapdl.nsel("S", "node", "", [1, 2, 3], "", 1)
 
     @staticmethod
-    def test_nsel_ksel_iterable_input(mapdl, make_block):
+    def test_nsel_ksel_iterable_input(mapdl, make_class_block):
         # Testing using iterable (list/tuple/array) as vmin
         assert np.allclose(
             mapdl.nsel("S", "node", "", [1, 2, 3], "", ""), np.array([1, 2, 3])
@@ -581,7 +588,7 @@ class TestPlottingMeshing:
         assert len(mapdl._get_selected_("node")) == 0
 
     @staticmethod
-    def test_pick_node_special_cases(mapdl, make_block):
+    def test_pick_node_special_cases(mapdl, make_class_block):
         # Cleaning the model a bit
         mapdl.modmsh("detach")  # detaching geom and fem
         mapdl.edele("all")
@@ -635,7 +642,7 @@ class TestPlottingMeshing:
         assert selected is not None
 
     @staticmethod
-    def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
+    def test_pick_node_select_unselect_with_mouse(mapdl, make_class_block):
         # Cleaning the model a bit
         mapdl.modmsh("detach")  # detaching geom and fem
         mapdl.edele("all")
@@ -681,7 +688,7 @@ class TestPlottingMeshing:
         "selection",
         ["S", "R", "A", "U"],
     )
-    def test_pick_areas(mapdl, make_block, selection):
+    def test_pick_areas(mapdl, make_class_block, selection):
         # Cleaning the model a bit
         mapdl.modmsh("detach")  # detaching geom and fem
         mapdl.edele("all")
@@ -745,7 +752,7 @@ class TestPlottingMeshing:
 
     @staticmethod
     @requires("pyvista")
-    def test_plotter_input(mapdl, make_block):
+    def test_plotter_input(mapdl, make_class_block):
         import pyvista as pv
 
         pl = MapdlPlotter()
@@ -763,7 +770,7 @@ class TestPlottingMeshing:
         pl3.show()
 
     @staticmethod
-    def test_cpos_input(mapdl, make_block):
+    def test_cpos_input(mapdl, make_class_block):
         cpos = [
             (0.3914, 0.4542, 0.7670),
             (0.0243, 0.0336, -0.0222),
@@ -776,7 +783,7 @@ class TestPlottingMeshing:
         )
 
     @staticmethod
-    def test_show_bounds(mapdl, make_block):
+    def test_show_bounds(mapdl, make_class_block):
         default_bounds = [-1.0, 1.0, -1.0, 1.0, -1.0, 1.0]
         pl = mapdl.eplot(show_bounds=True, return_plotter=True)
 
@@ -786,7 +793,7 @@ class TestPlottingMeshing:
         pl.show()  # plotting for catching
 
     @staticmethod
-    def test_background(mapdl, make_block):
+    def test_background(mapdl, make_class_block):
         default_color = "#4c4c4cff"
         pl = mapdl.eplot(background="red", return_plotter=True)
         assert pl.scene.background_color != default_color
@@ -794,25 +801,25 @@ class TestPlottingMeshing:
         pl.show()  # plotting for catching
 
     @staticmethod
-    def test_plot_nodal_values(mapdl, make_block):
+    def test_plot_nodal_values(mapdl, make_class_block):
         assert mapdl.post_processing.plot_nodal_values("U", "X") is None
         assert mapdl.post_processing.plot_nodal_values("U", "Y") is None
         assert mapdl.post_processing.plot_nodal_values("U", "Z") is None
 
     @staticmethod
-    def test_lsel_iterable(mapdl, make_block):
+    def test_lsel_iterable(mapdl, make_class_block):
         assert np.allclose(
             mapdl.lsel("S", "line", "", [1, 2, 3], "", ""), np.array([1, 2, 3])
         )
 
     @staticmethod
-    def test_asel_iterable(mapdl, make_block):
+    def test_asel_iterable(mapdl, make_class_block):
         assert np.allclose(
             mapdl.asel("S", "area", "", [1, 2, 3], "", ""), np.array([1, 2, 3])
         )
 
     @staticmethod
-    def test_vsel_iterable_and_kswp(mapdl, make_block):
+    def test_vsel_iterable_and_kswp(mapdl, make_class_block):
         mapdl.run("VGEN, 5, 1, , , 100, , , , , ")
         assert np.allclose(
             mapdl.vsel("S", "volu", "", [1, 2, 4], "", ""), np.array([1, 2, 4])
@@ -823,7 +830,7 @@ class TestPlottingMeshing:
         )
 
     @staticmethod
-    def test_color_areas(mapdl, make_block):
+    def test_color_areas(mapdl, make_class_block):
         mapdl.aplot(color_areas=True)
 
     @staticmethod
@@ -845,18 +852,18 @@ class TestPlottingMeshing:
             ),
         ],
     )
-    def test_color_areas_individual(mapdl, make_block, color_areas):
+    def test_color_areas_individual(mapdl, make_class_block, color_areas):
         # we do rely on the `pytest-pyvista` extension to deal with the differences
         mapdl.aplot(color_areas=color_areas)
 
     @staticmethod
-    def test_color_areas_error(mapdl, make_block):
+    def test_color_areas_error(mapdl, make_class_block):
         color_areas = ["red", "green", "blue"]
         with pytest.raises(ValueError):
             mapdl.aplot(color_areas=color_areas)
 
     @staticmethod
-    def test_WithInterativePlotting(mapdl, make_block):
+    def test_WithInterativePlotting(mapdl, make_class_block):
         mapdl.eplot(graphics_backend=GraphicsBackend.MAPDL)
         jobname = mapdl.jobname.upper()
 
@@ -883,37 +890,37 @@ class TestPlottingMeshing:
 
     @staticmethod
     @pytest.mark.parametrize("entity", ["KP", "LINE", "AREA", "VOLU", "NODE", "ELEM"])
-    def test_cmplot_individual(mapdl, make_block, entity):
+    def test_cmplot_individual(mapdl, make_class_block, entity):
         mapdl.allsel()
         mapdl.cm("tmp_cm", entity=entity)
         mapdl.cmplot("tmp_cm")
 
     @staticmethod
     @pytest.mark.parametrize("label", ["N", "P"])
-    def test_cmplot_label_error(mapdl, make_block, label):
+    def test_cmplot_label_error(mapdl, make_class_block, label):
         with pytest.raises(ValueError):
             mapdl.cmplot(label)
 
     @staticmethod
-    def test_cmplot_entity_error(mapdl, make_block):
+    def test_cmplot_entity_error(mapdl, make_class_block):
         with pytest.raises(ValueError):
             mapdl.cmplot("all", "non_valid_entity")
 
     @staticmethod
-    def test_cmplot_incorrect_entity(mapdl, make_block):
+    def test_cmplot_incorrect_entity(mapdl, make_class_block):
         mapdl.allsel()
         mapdl.cm("tmp_cm", entity="NODE")
         with pytest.raises(ValueError):
             mapdl.cmplot("tmp_cm", "KP")
 
     @staticmethod
-    def test_cmplot_component_not_exist(mapdl, make_block):
+    def test_cmplot_component_not_exist(mapdl, make_class_block):
         with pytest.raises(ComponentDoesNotExits):
             mapdl.cmplot("not_exist")
 
     @staticmethod
     @pytest.mark.parametrize("entity", ["KP", "NODE"])
-    def test_cmplot_all(mapdl, make_block, entity):
+    def test_cmplot_all(mapdl, make_class_block, entity):
         mapdl.allsel()
         ids = np.array([1, 2, 3, 4])
         if entity == "KP":
@@ -936,24 +943,24 @@ class TestPlottingMeshing:
 
     @staticmethod
     @pytest.mark.parametrize("background", ["white", "black", "green", "red"])
-    def test_labels_colors_background(mapdl, make_block, background):
+    def test_labels_colors_background(mapdl, make_class_block, background):
         # Test if the labels change color according background
         mapdl.nplot(background=background, nnum=True)
 
     @staticmethod
-    def test_vplot_show_volume_numbering(mapdl, make_block):
+    def test_vplot_show_volume_numbering(mapdl, make_class_block):
         mapdl.vplot(show_volume_numbering=True)
 
     @staticmethod
-    def test_vplot_area_numbering(mapdl, make_block):
+    def test_vplot_area_numbering(mapdl, make_class_block):
         mapdl.vplot(show_area_numbering=True)
 
     @staticmethod
-    def test_vplot_line_numbering(mapdl, make_block):
+    def test_vplot_line_numbering(mapdl, make_class_block):
         mapdl.vplot(show_line_numbering=True)
 
     @staticmethod
-    def test_vplot_multi_numbering(mapdl, make_block):
+    def test_vplot_multi_numbering(mapdl, make_class_block):
         mapdl.vplot(
             show_area_numbering=True,
             show_line_numbering=True,
@@ -961,15 +968,15 @@ class TestPlottingMeshing:
         )
 
     @staticmethod
-    def test_vplot_color(mapdl, make_block):
+    def test_vplot_color(mapdl, make_class_block):
         mapdl.vplot(color="gray")
 
     @staticmethod
-    def test_vplot_cpos(mapdl, make_block):
+    def test_vplot_cpos(mapdl, make_class_block):
         mapdl.vplot(cpos="xy")
 
     @staticmethod
-    def test_vplot_multiargs(mapdl, make_block):
+    def test_vplot_multiargs(mapdl, make_class_block):
         mapdl.vplot(
             color="gray",
             cpos="xy",
@@ -980,7 +987,7 @@ class TestPlottingMeshing:
 
     @staticmethod
     @pytest.mark.parametrize("quality", [101, -2, 0, "as"])
-    def test_aplot_quality_fail(mapdl, make_block, quality):
+    def test_aplot_quality_fail(mapdl, make_class_block, quality):
         with pytest.raises(
             ValueError,
             match="The argument 'quality' can only be an integer between 1 and 10",
@@ -988,7 +995,7 @@ class TestPlottingMeshing:
             mapdl.aplot(quality=quality)
 
     @staticmethod
-    def test_deprecated_params(mapdl, make_block):
+    def test_deprecated_params(mapdl, make_class_block):
         with pytest.warns(
             DeprecationWarning, match="'vtk' and 'use_vtk' are deprecated"
         ):
