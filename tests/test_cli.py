@@ -321,12 +321,7 @@ def test_pymapdl_stop_with_username_containing_domain(run_cli):
         output = run_cli("stop --all")
 
         assert "success" in output.lower()
-
         assert killed_processes == [12]
-
-        print(
-            "✅ Domain username handling test passed - processes with domain usernames handled correctly"
-        )
 
 
 @requires("click")
