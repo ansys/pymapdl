@@ -462,6 +462,13 @@ def pytest_addoption(parser):
     parser.addoption(
         "--gui", action="store_true", default=False, dest="gui", help="run GUI tests"
     )
+    parser.addoption(
+        "--cleanup-instance",
+        action="store_true",
+        default=True,
+        dest="cleanup_instance",
+        help="Clean up leftover MAPDL instances in teardown. It makes the tests slower.",
+    )
 
 
 def pytest_collection_modifyitems(session, config, items):
@@ -599,7 +606,8 @@ def run_before_and_after_tests(
     mapdl.graphics("full")
 
     # Handling extra instances
-    make_sure_not_instances_are_left_open(VALID_PORTS)
+    if request.config.getoption("cleanup_instance"):
+        make_sure_not_instances_are_left_open(VALID_PORTS)
 
     # Teardown
     if mapdl.is_local and mapdl._exited:

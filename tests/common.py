@@ -23,8 +23,6 @@
 """Shared testing module"""
 from collections import namedtuple
 import os
-import subprocess
-import time
 from typing import Dict, List
 
 import psutil
@@ -334,7 +332,9 @@ def make_sure_not_instances_are_left_open(valid_ports: List) -> None:
                     port = int(cmdline[cmdline.index("-port") + 1])
 
                     if port not in valid_ports:
-                        subprocess.run(["pymapdl", "stop", "--port", f"{port}"])
-                        time.sleep(1)
+                        from ansys.mapdl.core.cli.stop import stop_mapdl
+
+                        stop_mapdl(port=port)
+
             except psutil.NoSuchProcess:
                 continue
