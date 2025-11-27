@@ -428,6 +428,7 @@ class TestPlottingMeshing:
         elif isinstance(output, list):
             assert len(output) == 0
         assert len(mapdl._get_selected_("node")) == 0
+        mapdl.allsel()
 
     @staticmethod
     @requires("pyvista")
