@@ -152,6 +152,11 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "on_pool",
     "graphics_backend",
     "use_reader_backend",
+    # Transport-related args
+    "transport_mode",
+    "uds_dir",
+    "uds_id",
+    "certs_dir",
 ]
 
 ON_WSL = os.name == "posix" and (
@@ -1149,6 +1154,11 @@ def launch_mapdl(
     start_instance: Optional[bool] = None,
     start_timeout: Optional[int] = None,
     version: Optional[Union[int, str]] = None,
+    # Transport-related parameters
+    transport_mode: Optional[str] = None,
+    uds_dir: Optional[str] = None,
+    uds_id: Optional[str] = None,
+    certs_dir: Optional[str] = None,
     **kwargs: Dict[str, Any],
 ) -> "MapdlGrpc | MapdlConsole | list[Any]":
     """Start MAPDL locally.
@@ -1399,6 +1409,24 @@ def launch_mapdl(
         However the argument (if specified) has precedence over the environment
         variable. If this environment variable is empty, it is as it is not set.
         Defaults to latest available version (:class:`None`).
+
+    transport_mode : str, optional
+        Transport mode for gRPC channel creation. Supported modes are:
+        ``'insecure'``, ``'uds'``, ``'wnau'``, ``'mtls'``.
+        Defaults to :class:`None`, which selects the appropriate mode based on
+        platform and environment variables.
+
+    uds_dir : str, optional
+        Directory for Unix Domain Socket (UDS) files when using ``'uds'`` transport.
+        Defaults to :class:`None`, which uses ``~/.conn``.
+
+    uds_id : str, optional
+        Identifier for UDS socket file when using ``'uds'`` transport.
+        Defaults to :class:`None`, which uses ``mapdl-{port}``.
+
+    certs_dir : str, optional
+        Directory containing certificates for ``'mtls'`` transport.
+        Defaults to :class:`None`.
 
     kwargs : dict, Optional
         These keyword arguments are interface-specific or for

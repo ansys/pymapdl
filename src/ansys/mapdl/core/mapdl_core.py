@@ -231,6 +231,11 @@ _ALLOWED_START_PARM = [
     "start_timeout",
     "timeout",
     "use_reader_backend",
+    # Transport-related parameters
+    "transport_mode",
+    "uds_dir",
+    "uds_id",
+    "certs_dir",
 ]
 
 
