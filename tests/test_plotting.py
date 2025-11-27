@@ -33,7 +33,10 @@ if not has_dependency("pyvista"):
     pytest.skip(
         allow_module_level=True, reason="Skipping because 'pyvista' is not installed"
     )
+else:
+    import pyvista as pv
 
+    pv.global_theme.allow_empty_mesh = True
 
 from ansys.mapdl.core.errors import ComponentDoesNotExits, MapdlRuntimeError
 from ansys.mapdl.core.plotting import GraphicsBackend
@@ -470,7 +473,6 @@ class TestPlottingMeshing:
 
     @staticmethod
     def test_background(mapdl, make_class_block):
-        default_color = "#4c4c4cff"
         pl = mapdl.eplot(background="red", return_plotter=True)
         assert pl.scene.background_color == "red"
         pl.show()  # plotting for catching
@@ -491,17 +493,6 @@ class TestPlottingMeshing:
     def test_asel_iterable(mapdl, make_class_block):
         assert np.allclose(
             mapdl.asel("S", "area", "", [1, 2, 3], "", ""), np.array([1, 2, 3])
-        )
-
-    @staticmethod
-    def test_vsel_iterable_and_kswp(mapdl, make_class_block):
-        mapdl.run("VGEN, 5, 1, , , 100, , , , , ")
-        assert np.allclose(
-            mapdl.vsel("S", "volu", "", [1, 2, 4], "", ""), np.array([1, 2, 4])
-        )
-        mapdl.vsel("S", "volu", "", [1], "", "", kswp=1)
-        assert np.allclose(mapdl.geometry.vnum, [1]) and np.allclose(
-            mapdl.geometry.anum, [1, 2, 3, 4, 5, 6]
         )
 
     @staticmethod
@@ -1389,3 +1380,15 @@ def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
         "S", "P", _debug=lambda x: debug_orders_1(x, point=point), tolerance=0.1
     )  # Selects node 2
     assert selected == []
+
+
+def test_vsel_iterable_and_kswp(mapdl, make_block):
+    mapdl.run("VGEN, 5, 1, , , 100, , , , , ")
+    assert np.allclose(
+        mapdl.vsel("S", "volu", "", [1, 2, 4], "", ""), np.array([1, 2, 4])
+    )
+    mapdl.vsel("S", "volu", "", [1], "", "", kswp=1)
+    assert np.allclose(mapdl.geometry.vnum, [1]) and np.allclose(
+        mapdl.geometry.anum, [1, 2, 3, 4, 5, 6]
+    )
+    mapdl.allsel()
