@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import os
+import platform
 import re
 import subprocess
 from typing import Callable
@@ -287,6 +288,40 @@ def test_pymapdl_stop_permission_handling(run_cli):
 
         # Verify no exceptions were raised (test would fail if AccessDenied was unhandled)
         print("✅ Permission handling test passed - no crashes occurred")
+
+
+@requires("click")
+@pytest.mark.skipif(
+    platform.system() != "Windows", reason="Domain usernames are Windows-specific"
+)
+def test_pymapdl_stop_with_username_containing_domain(run_cli):
+    """Test that pymapdl stop processes when a process username contains DOMAIN information."""
+    current_user = "someuser"
+
+    mock_process = MagicMock(spec=psutil.Process)
+    mock_process.pid = 12
+    mock_process.name.return_value = "ansys252"
+    mock_process.status.return_value = psutil.STATUS_RUNNING
+    mock_process.cmdline.return_value = ["ansys251", "-grpc", "-port", "50052"]
+    mock_process.username.return_value = f"DOMAIN\\{current_user}"
+
+    killed_processes: list[int] = []
+
+    def mock_kill_process(proc: psutil.Process):
+        """Track which processes would be killed."""
+        killed_processes.append(proc.pid)
+
+    with (
+        patch("getpass.getuser", return_value=current_user),
+        patch("psutil.process_iter", return_value=[mock_process]),
+        patch("psutil.pid_exists", return_value=True),
+        patch("ansys.mapdl.core.cli.stop._kill_process", side_effect=mock_kill_process),
+    ):
+        killed_processes.clear()
+        output = run_cli("stop --all")
+
+        assert "success" in output.lower()
+        assert killed_processes == [12]
 
 
 @requires("click")
