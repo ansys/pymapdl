@@ -79,6 +79,7 @@ from ansys.mapdl.core.licensing import LICENSES
 from ansys.mapdl.core.misc import check_has_mapdl, parse_ip_route, stack
 from conftest import (
     ON_LOCAL,
+    ON_WINDOWS,
     PATCH_MAPDL,
     PATCH_MAPDL_START,
     QUICK_LAUNCH_SWITCHES,
@@ -137,6 +138,11 @@ def get_fake_process(message_stdout, message_stderr="", time_sleep=0):
 
 @pytest.fixture
 def my_fs(fs):
+    if ON_WINDOWS:
+        pytest.skip("Test only for Linux")
+    else:
+        fs.os = OSType.LINUX
+
     # fs.add_real_directory("/proc", lazy_read=False)
     yield fs
 
@@ -201,7 +207,6 @@ def test_catch_version_from_path():
 )
 @requires("ansys-tools-common")
 def test_find_mapdl_linux(my_fs, path, version, raises):
-    my_fs.os = OSType.LINUX
     my_fs.create_file(path)
 
     from ansys.tools.common.path import find_mapdl
@@ -260,6 +265,7 @@ def test_old_version_not_version(mapdl, my_fs, cleared, monkeypatch, version):
         )
 
 
+@pytest.mark.skipif(ON_WINDOWS, reason="Test only for Linux")
 @requires("ansys-tools-common")
 @pytest.mark.parametrize("version", [203, 213, 351])
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
@@ -2054,8 +2060,10 @@ def test_mapdl_output_pass_arg(tmpdir):
 
 @requires("local")
 @requires("nostudent")
+@pytest.mark.skipif(ON_WINDOWS, reason="Test only for Linux")
 def test_mapdl_output(tmpdir):
     mapdl_output = os.path.join(tmpdir, "apdl.txt")
+    breakpoint()
     mapdl = launch_mapdl(mapdl_output=mapdl_output, port=50058)
 
     assert os.path.exists(mapdl_output)
@@ -2314,6 +2322,7 @@ def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
     # Track what methods were called
     call_invoked = False
     launch_invoked = False
+    breakpoint()
 
     def mock_call(*args, **kwargs):
         nonlocal call_invoked
@@ -2352,12 +2361,7 @@ def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
                         patch.object(mapdl, "resume") as mock_resume,
                         patch.object(mapdl, "_cache_routine") as mock_cache,
                     ):
-                        try:
-                            # Call open_gui with custom exec_file
-                            mapdl.open_gui(exec_file=custom_exec_file, inplace=True)
-                        except Exception:  # nosec B703
-                            # Some methods might fail, but we verify they were called
-                            pass
+                        mapdl.open_gui(exec_file=custom_exec_file, inplace=True)
 
                         # Verify the flow of method calls
                         assert (
