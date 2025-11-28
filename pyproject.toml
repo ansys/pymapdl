@@ -139,7 +139,6 @@ addopts = [
   "--log-file=pytest.log",
   "--maxfail=10",
   "--profile",
-  "--profile-svg",
   "--random-order",
   "--random-order-bucket=class",
   "--report-log-exclude-logs-on-passed-tests",
@@ -274,6 +273,8 @@ disable_error_code = [
   "return",
   "return-value",
 ]
+files = ["src", "tests"]
+namespace_packages = true
 
 [tool.towncrier]
 directory = "doc/changelog.d"
