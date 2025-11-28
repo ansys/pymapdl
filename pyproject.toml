@@ -139,7 +139,6 @@ addopts = [
   "--log-file=pytest.log",
   "--maxfail=10",
   "--profile",
-  "--profile-svg",
   "--random-order",
   "--random-order-bucket=class",
   "--report-log-exclude-logs-on-passed-tests",
