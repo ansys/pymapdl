@@ -1312,6 +1312,8 @@ class _MapdlCore(Commands):
             self.cmsel("S", "__ELEM__", "ELEM", mute=True)
 
             self._archive_cache = Archive(arch_filename, parse_vtk=False, name="Mesh")
+            if self._archive_cache is None:
+                raise MapdlRuntimeError("Failed to create the mesh archive.")
             grid = self._archive_cache._parse_vtk(additional_checking=True)
             self._archive_cache._grid = grid
 
@@ -1726,6 +1728,8 @@ class _MapdlCore(Commands):
             )
 
         self._apdl_log = open(filename, mode=mode, buffering=1)  # type: ignore[misc,no-redef]  # line buffered
+        if self._apdl_log is None:
+            raise MapdlRuntimeError("Failed to open APDL log file.")
         self._apdl_log.write(
             f"! APDL log script generated using PyMAPDL (ansys.mapdl.core {pymapdl.__version__})\n"
         )
@@ -1990,6 +1994,8 @@ class _MapdlCore(Commands):
         @requires_graphics
         def __enter__(self) -> None:
             parent = self._parent()
+            if parent is None:
+                raise MapdlRuntimeError("Parent reference is None")
 
             parent._log.debug("Entering in 'WithInterativePlotting' mode")
 
@@ -2011,6 +2017,8 @@ class _MapdlCore(Commands):
         @requires_graphics
         def __exit__(self, *args) -> None:
             parent = self._parent()
+            if parent is None:
+                raise MapdlRuntimeError("Parent reference is None")
 
             parent._log.debug("Exiting in 'WithInterativePlotting' mode")
             parent.show("close", mute=True)
@@ -2470,6 +2478,8 @@ class _MapdlCore(Commands):
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
             self._response = StringWithLiteralRepr(text.strip())
+            if self._response is None:
+                raise MapdlRuntimeError("MAPDL did not return any response.")
             response_ = "\n".join(self._response.splitlines()[:20])
             self._log.info(response_)
         else:
