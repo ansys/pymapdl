@@ -69,56 +69,13 @@ def list_instances(instances, long, cmd, location) -> None:
     return _list_instances(instances, long, cmd, location)
 
 
-def is_grpc_based(proc):
-    cmdline = proc.cmdline()
-    return "-grpc" in cmdline
-
-
-def get_port(proc):
-    cmdline = proc.cmdline()
-    ind_grpc = cmdline.index("-port")
-    return cmdline[ind_grpc + 1]
-
-
-def is_valid_ansys_process(proc):
-    return ("ansys" in proc.name().lower()) or ("mapdl" in proc.name().lower())
-
-
-def is_alive(proc):
-    import psutil
-
-    return proc.status() in [
-        psutil.STATUS_RUNNING,
-        psutil.STATUS_IDLE,
-        psutil.STATUS_SLEEPING,
-    ]
-
-
-def is_valid_process(proc):
-    return is_alive(proc) and is_valid_ansys_process(proc) and is_grpc_based(proc)
-
-
 def _list_instances(instances, long, cmd, location):
-    import psutil
     from tabulate import tabulate
 
+    from ansys.mapdl.core.cli.core import get_mapdl_instances
+
     # Assuming all ansys processes have -grpc flag
-    mapdl_instances = []
-
-    for proc in psutil.process_iter():
-        # Check if the process is running and not suspended
-        try:
-            if is_valid_process(proc):
-                # Checking the number of children we infer if the process is the main process,
-                # or one of the main process thread.
-                if len(proc.children(recursive=True)) < 2:
-                    proc.ansys_instance = False
-                else:
-                    proc.ansys_instance = True
-                mapdl_instances.append(proc)
-
-        except (psutil.NoSuchProcess, psutil.ZombieProcess) as e:
-            continue
+    mapdl_instances = get_mapdl_instances()
 
     # printing
     if long:
@@ -137,23 +94,23 @@ def _list_instances(instances, long, cmd, location):
 
     table = []
     for each_p in mapdl_instances:
-        if instances and not each_p.ansys_instance:
+        if instances and not each_p.get("is_instance", False):
             # Skip child processes if only printing instances
             continue
 
         proc_line = []
-        proc_line.append(each_p.name())
+        proc_line.append(each_p["name"])
 
         if not instances:
-            proc_line.append(each_p.ansys_instance)
+            proc_line.append(each_p.get("is_instance", False))
 
-        proc_line.extend([each_p.status(), get_port(each_p), each_p.pid])
+        proc_line.extend([each_p["status"], each_p["port"], each_p["pid"]])
 
         if cmd:
-            proc_line.append(" ".join(each_p.cmdline()))
+            proc_line.append(" ".join(each_p["cmdline"]))
 
         if location:
-            proc_line.append(each_p.cwd())
+            proc_line.append(each_p["cwd"])
 
         table.append(proc_line)
 
@@ -161,13 +118,35 @@ def _list_instances(instances, long, cmd, location):
 
 
 def get_ansys_process_from_port(port: int):
+    import socket
+
     import psutil
 
-    for proc in psutil.process_iter():
-        # Check if the process is running and not suspended
-        try:
-            if is_valid_process(proc) and get_port(proc) == str(port):
-                return proc
+    from ansys.mapdl.core.cli.core import is_alive_status, is_valid_ansys_process_name
 
+    # Filter by name first
+    potential_procs = []
+    for proc in psutil.process_iter(attrs=["name"]):
+        name = proc.info["name"]
+        if is_valid_ansys_process_name(name):
+            potential_procs.append(proc)
+
+    for proc in potential_procs:
+        try:
+            status = proc.status()
+            if not is_alive_status(status):
+                continue
+            cmdline = proc.cmdline()
+            if "-grpc" not in cmdline:
+                continue
+            # Check if listening on the port
+            connections = proc.connections()
+            for conn in connections:
+                if (
+                    conn.status == "LISTEN"
+                    and conn.family == socket.AF_INET
+                    and conn.laddr[1] == port
+                ):
+                    return proc
         except (psutil.NoSuchProcess, psutil.ZombieProcess) as e:
             continue
