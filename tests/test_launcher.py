@@ -2411,17 +2411,18 @@ def test_multi_connect_with_valid_process(mapdl, cleared):
 @requires("nostudent")
 def test_multi_connect_early_exit_on_process_death(tmpdir):
     """Test that _multi_connect exits early when MAPDL process dies during connection."""
-    from ansys.mapdl.core.cli.list_instances import get_ansys_process_from_port
+    from ansys.mapdl.core.cli.core import get_ansys_process_from_port
     from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
     run_location = str(tmpdir)
 
     # Start process
-    _, port, _ = launch_mapdl(
+    mapdl_0 = launch_mapdl(
         run_location=run_location,
-        just_launch=True,
         additional_switches=QUICK_LAUNCH_SWITCHES,
     )
+    original_process = mapdl_0._mapdl_process
+    port = mapdl_0.port
 
     # Give it a moment to start
     sleep(1)
@@ -2433,7 +2434,7 @@ def test_multi_connect_early_exit_on_process_death(tmpdir):
     try:
         # Create MapdlGrpc instance with the process
         start_parm = {
-            "process": process,
+            "process": original_process,
             "local": True,
             "launched": True,
             "run_location": run_location,
@@ -2450,7 +2451,6 @@ def test_multi_connect_early_exit_on_process_death(tmpdir):
 
         with pytest.raises((MapdlConnectionError, MapdlDidNotStart)):
             mapdl = MapdlGrpc(
-                ip="127.0.0.1",
                 port=port,
                 timeout=30,  # Long timeout - but should exit early
                 **start_parm,
@@ -2466,12 +2466,9 @@ def test_multi_connect_early_exit_on_process_death(tmpdir):
 
     finally:
         # Cleanup
-        if process.poll() is None:
+        if process.is_running():
             process.kill()
-        try:
-            process.wait(timeout=2)
-        except:
-            pass
+        mapdl_0.exit(force=True)
 
 
 @pytest.mark.parametrize(
