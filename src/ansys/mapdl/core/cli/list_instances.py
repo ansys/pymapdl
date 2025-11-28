@@ -66,31 +66,44 @@ from ansys.mapdl.core.cli import main
     help="Print running location info.",
 )
 def list_instances(instances, long, cmd, location) -> None:
+    return _list_instances(instances, long, cmd, location)
+
+
+def is_grpc_based(proc):
+    cmdline = proc.cmdline()
+    return "-grpc" in cmdline
+
+
+def get_port(proc):
+    cmdline = proc.cmdline()
+    ind_grpc = cmdline.index("-port")
+    return cmdline[ind_grpc + 1]
+
+
+def is_valid_ansys_process(proc):
+    return ("ansys" in proc.name().lower()) or ("mapdl" in proc.name().lower())
+
+
+def is_alive(proc):
+    import psutil
+
+    return proc.status() in [
+        psutil.STATUS_RUNNING,
+        psutil.STATUS_IDLE,
+        psutil.STATUS_SLEEPING,
+    ]
+
+
+def is_valid_process(proc):
+    return is_alive(proc) and is_valid_ansys_process(proc) and is_grpc_based(proc)
+
+
+def _list_instances(instances, long, cmd, location):
     import psutil
     from tabulate import tabulate
 
     # Assuming all ansys processes have -grpc flag
     mapdl_instances = []
-
-    def is_grpc_based(proc):
-        cmdline = proc.cmdline()
-        return "-grpc" in cmdline
-
-    def get_port(proc):
-        cmdline = proc.cmdline()
-        ind_grpc = cmdline.index("-port")
-        return cmdline[ind_grpc + 1]
-
-    def is_valid_process(proc):
-        valid_status = proc.status() in [
-            psutil.STATUS_RUNNING,
-            psutil.STATUS_IDLE,
-            psutil.STATUS_SLEEPING,
-        ]
-        valid_ansys_process = ("ansys" in proc.name().lower()) or (
-            "mapdl" in proc.name().lower()
-        )
-        return valid_status and valid_ansys_process and is_grpc_based(proc)
 
     for proc in psutil.process_iter():
         # Check if the process is running and not suspended
@@ -145,3 +158,16 @@ def list_instances(instances, long, cmd, location) -> None:
         table.append(proc_line)
 
     print(tabulate(table, headers))
+
+
+def get_ansys_process_from_port(port: int):
+    import psutil
+
+    for proc in psutil.process_iter():
+        # Check if the process is running and not suspended
+        try:
+            if is_valid_process(proc) and get_port(proc) == str(port):
+                return proc
+
+        except (psutil.NoSuchProcess, psutil.ZombieProcess) as e:
+            continue
