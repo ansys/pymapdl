@@ -20,10 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 from ansys.mapdl.core.errors import MapdlRuntimeError
 
 
-class RunControls:
+class RunControls(CommandsBase):
 
     def config(self, lab: str = "", val: str = "", **kwargs):
         r"""Assigns values to Mechanical APDL configuration parameters.

@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Animation:
+
+class Animation(CommandsBase):
 
     def ancntr(self, nfram: str = "", delay: str = "", ncycl: str = "", **kwargs):
         r"""Produces an animated sequence of a contoured deformed shape.

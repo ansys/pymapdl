@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Status:
+
+class Status(CommandsBase):
 
     def calc(self, **kwargs):
         r"""Specifies "Calculation settings" as the subsequent status topic.

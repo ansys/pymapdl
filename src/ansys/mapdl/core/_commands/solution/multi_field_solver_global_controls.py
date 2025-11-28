@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class MultiFieldSolverGlobalControls:
+
+class MultiFieldSolverGlobalControls(CommandsBase):
     def mfanalysis(self, key="", **kwargs):
         """Activates or deactivates an ANSYS Multi-field solver analysis.
 

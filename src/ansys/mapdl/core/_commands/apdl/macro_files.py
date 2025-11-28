@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class MacroFiles:
+
+class MacroFiles(CommandsBase):
 
     def cfclos(self, **kwargs):
         r"""Closes the "command" file.

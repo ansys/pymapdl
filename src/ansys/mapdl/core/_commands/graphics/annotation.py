@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Annotation:
+
+class Annotation(CommandsBase):
 
     def an3d(self, **kwargs):
         r"""Specifies 3D annotation functions
