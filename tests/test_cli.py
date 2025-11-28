@@ -46,6 +46,7 @@ def make_fake_process(pid, name, port=PORT1, ansys_process=False, n_children=0):
     mock_process = MagicMock(spec=psutil.Process)
     mock_process.pid = pid
     mock_process.name.return_value = name
+    mock_process.info = {"name": name}  # For attrs=['name'] optimization
     mock_process.status.return_value = psutil.STATUS_RUNNING
     mock_process.children.side_effect = lambda *arg, **kwargs: [
         i for i in range(n_children)
@@ -210,6 +211,7 @@ def test_pymapdl_stop_permission_handling(run_cli):
         mock_process = MagicMock(spec=psutil.Process)
         mock_process.pid = pid
         mock_process.name.return_value = name
+        mock_process.info = {"name": name}  # For attrs=['name'] optimization
         mock_process.status.return_value = psutil.STATUS_RUNNING
 
         if ansys_process:
@@ -226,6 +228,7 @@ def test_pymapdl_stop_permission_handling(run_cli):
         mock_process = MagicMock(spec=psutil.Process)
         mock_process.pid = pid
         mock_process.name.return_value = name
+        mock_process.info = {"name": name}  # For attrs=['name'] optimization
 
         # Simulate the original issue: AccessDenied when accessing process info
         mock_process.cmdline.side_effect = psutil.AccessDenied(pid, name)
@@ -301,6 +304,7 @@ def test_pymapdl_stop_with_username_containing_domain(run_cli):
     mock_process = MagicMock(spec=psutil.Process)
     mock_process.pid = 12
     mock_process.name.return_value = "ansys252"
+    mock_process.info = {"name": "ansys252"}  # For attrs=['name'] optimization
     mock_process.status.return_value = psutil.STATUS_RUNNING
     mock_process.cmdline.return_value = ["ansys251", "-grpc", "-port", "50052"]
     mock_process.username.return_value = f"DOMAIN\\{current_user}"
