@@ -115,38 +115,3 @@ def _list_instances(instances, long, cmd, location):
         table.append(proc_line)
 
     print(tabulate(table, headers))
-
-
-def get_ansys_process_from_port(port: int):
-    import socket
-
-    import psutil
-
-    from ansys.mapdl.core.cli.core import is_alive_status, is_valid_ansys_process_name
-
-    # Filter by name first
-    potential_procs = []
-    for proc in psutil.process_iter(attrs=["name"]):
-        name = proc.info["name"]
-        if is_valid_ansys_process_name(name):
-            potential_procs.append(proc)
-
-    for proc in potential_procs:
-        try:
-            status = proc.status()
-            if not is_alive_status(status):
-                continue
-            cmdline = proc.cmdline()
-            if "-grpc" not in cmdline:
-                continue
-            # Check if listening on the port
-            connections = proc.connections()
-            for conn in connections:
-                if (
-                    conn.status == "LISTEN"
-                    and conn.family == socket.AF_INET
-                    and conn.laddr[1] == port
-                ):
-                    return proc
-        except (psutil.NoSuchProcess, psutil.ZombieProcess, psutil.AccessDenied):
-            continue
