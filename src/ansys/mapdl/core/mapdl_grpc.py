@@ -624,7 +624,6 @@ class MapdlGrpc(MapdlBase):
         def monitor_mapdl_alive():
             """Monitor thread to check if MAPDL process is alive."""
             from ansys.mapdl.core.launcher import (
-                _check_file_error_created,
                 _check_process_is_alive,
             )
 
@@ -674,12 +673,6 @@ class MapdlGrpc(MapdlBase):
                     self._log.debug("Connected")
                     break
 
-                # Check again after connection attempt
-                if monitor_exception["error"] is not None:
-                    self._log.debug(
-                        "Monitor detected MAPDL process issue after connection attempt"
-                    )
-                    raise monitor_exception["error"]
             else:
                 # Check if mapdl process is alive
                 msg = (
