@@ -36,6 +36,7 @@ import pytest
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import (
     IncorrectMPIConfigurationError,
+    MapdlConnectionError,
     MapdlDidNotStart,
     NotAvailableLicenses,
     NotEnoughResources,
@@ -2162,7 +2163,6 @@ def test_env_vars_with_slurm_bootstrap(monkeypatch):
         nonlocal captured_env_vars
         captured_env_vars = env_vars
         # Mock process object
-        from tests.test_launcher import get_fake_process
 
         return get_fake_process("Submitted batch job 1001")
 
@@ -2378,11 +2378,6 @@ def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
                     mapdl._launch = original_launch
 
 
-###############################################################################
-# Test _multi_connect method with monitoring thread functionality
-###############################################################################
-
-
 @requires("local")
 @requires("nostudent")
 def test_multi_connect_with_valid_process(mapdl, cleared):
@@ -2416,34 +2411,24 @@ def test_multi_connect_with_valid_process(mapdl, cleared):
 @requires("nostudent")
 def test_multi_connect_early_exit_on_process_death(tmpdir):
     """Test that _multi_connect exits early when MAPDL process dies during connection."""
+    from ansys.mapdl.core.cli.list_instances import get_ansys_process_from_port
     from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-
-    # Get MAPDL executable
-    exec_file = get_exec_file({"exec_file": None})
-
-    # Create a process that will die immediately (invalid command to make it fail)
-    # We'll use a valid MAPDL command but kill it immediately
-    cmd = generate_mapdl_launch_command(
-        exec_file=exec_file,
-        jobname="test_early_exit",
-        nproc=1,
-        port=50061,
-        additional_switches="-b -m 10",
-    )
 
     run_location = str(tmpdir)
 
     # Start process
-    process = subprocess.Popen(
-        cmd,
-        shell=False,
-        cwd=run_location,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+    _, port, _ = launch_mapdl(
+        run_location=run_location,
+        just_launch=True,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
     )
 
     # Give it a moment to start
-    sleep(0.5)
+    sleep(1)
+
+    # On Windows the launcher starts a terminal process that in turn starts MAPDL.
+    # We need to get the actual MAPDL process to kill it.
+    process = get_ansys_process_from_port(port)
 
     try:
         # Create MapdlGrpc instance with the process
@@ -2466,7 +2451,7 @@ def test_multi_connect_early_exit_on_process_death(tmpdir):
         with pytest.raises((MapdlConnectionError, MapdlDidNotStart)):
             mapdl = MapdlGrpc(
                 ip="127.0.0.1",
-                port=50061,
+                port=port,
                 timeout=30,  # Long timeout - but should exit early
                 **start_parm,
             )

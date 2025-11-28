@@ -273,6 +273,8 @@ disable_error_code = [
   "return",
   "return-value",
 ]
+files = ["src", "tests"]
+namespace_packages = true
 
 [tool.towncrier]
 directory = "doc/changelog.d"
