@@ -148,5 +148,5 @@ def get_ansys_process_from_port(port: int):
                     and conn.laddr[1] == port
                 ):
                     return proc
-        except (psutil.NoSuchProcess, psutil.ZombieProcess) as e:
+        except (psutil.NoSuchProcess, psutil.ZombieProcess, psutil.AccessDenied):
             continue
