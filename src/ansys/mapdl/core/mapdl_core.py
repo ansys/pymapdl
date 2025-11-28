@@ -1312,7 +1312,6 @@ class _MapdlCore(Commands):
             self.cmsel("S", "__ELEM__", "ELEM", mute=True)
 
             self._archive_cache = Archive(arch_filename, parse_vtk=False, name="Mesh")
-            assert self._archive_cache is not None  # just created above
             grid = self._archive_cache._parse_vtk(additional_checking=True)
             self._archive_cache._grid = grid
 
@@ -1727,7 +1726,6 @@ class _MapdlCore(Commands):
             )
 
         self._apdl_log = open(filename, mode=mode, buffering=1)  # type: ignore[misc,no-redef]  # line buffered
-        assert self._apdl_log is not None  # just opened above
         self._apdl_log.write(
             f"! APDL log script generated using PyMAPDL (ansys.mapdl.core {pymapdl.__version__})\n"
         )
@@ -1992,7 +1990,6 @@ class _MapdlCore(Commands):
         @requires_graphics
         def __enter__(self) -> None:
             parent = self._parent()
-            assert parent is not None, "Parent reference is None"
 
             parent._log.debug("Entering in 'WithInterativePlotting' mode")
 
@@ -2014,7 +2011,6 @@ class _MapdlCore(Commands):
         @requires_graphics
         def __exit__(self, *args) -> None:
             parent = self._parent()
-            assert parent is not None, "Parent reference is None"
 
             parent._log.debug("Exiting in 'WithInterativePlotting' mode")
             parent.show("close", mute=True)
@@ -2024,7 +2020,6 @@ class _MapdlCore(Commands):
                     parent.show("PNG", mute=True)
                     parent.gfile(self._pixel_res, mute=True)
 
-                assert parent is not None  # already checked above
                 parent.file_type_for_plots = self.previous_device
 
     def set_log_level(self, loglevel: DEBUG_LEVELS) -> None:
@@ -2475,7 +2470,6 @@ class _MapdlCore(Commands):
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
             self._response = StringWithLiteralRepr(text.strip())
-            assert self._response is not None  # just assigned above
             response_ = "\n".join(self._response.splitlines()[:20])
             self._log.info(response_)
         else:
