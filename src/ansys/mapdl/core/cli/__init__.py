@@ -24,7 +24,7 @@ try:
     import click  # noqa: F401
 
     _HAS_CLICK = True
-except ImportError:
+except ImportError:  # pragma: no cover
     _HAS_CLICK = False
 
 if _HAS_CLICK:
