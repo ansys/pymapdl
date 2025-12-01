@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class SolidConstraints:
+
+class SolidConstraints(CommandsBase):
     def da(self, area="", lab="", value1="", value2="", **kwargs):
         """Defines degree-of-freedom constraints on areas.
 

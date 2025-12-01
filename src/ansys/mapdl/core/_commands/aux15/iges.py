@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Iges:
+
+class Iges(CommandsBase):
 
     def aux15(self, **kwargs):
         r"""Enters the IGES file transfer processor.

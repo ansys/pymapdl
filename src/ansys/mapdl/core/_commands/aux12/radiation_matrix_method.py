@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class RadiationMatrixMethod:
+
+class RadiationMatrixMethod(CommandsBase):
 
     def emis(self, mat: str = "", evalu: str = "", **kwargs):
         r"""Specifies emissivity as a material property for the Radiation Matrix method.

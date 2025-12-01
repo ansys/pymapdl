@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Operations:
+
+class Operations(CommandsBase):
 
     def abs(
         self, ir: str = "", ia: str = "", name: str = "", facta: str = "", **kwargs

@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Results:
+
+class Results(CommandsBase):
 
     def lcsum(self, lab: str = "", **kwargs):
         r"""Specifies whether to process non-summable items in load case operations.

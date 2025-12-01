@@ -9,7 +9,6 @@ ci:
 
   # PR name when autoupdate
   autoupdate_commit_msg: 'ci: pre-commit autoupdate'
-  skip: [mypy]
 
 
 repos:
@@ -24,6 +23,7 @@ repos:
   hooks:
     - id: mypy
       args: [ --follow-imports=silent, --config-file=pyproject.toml]
+      exclude: ^(doc/|examples/)
 
 - repo: https://github.com/ansys/pre-commit-hooks
   rev: v0.5.2

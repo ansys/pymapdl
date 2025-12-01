@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class FeForces:
+
+class FeForces(CommandsBase):
     def f(self, node="", lab="", value="", value2="", nend="", ninc="", **kwargs):
         """Specifies force loads at nodes.
 

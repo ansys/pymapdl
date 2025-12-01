@@ -22,8 +22,10 @@
 
 import warnings
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Style:
+
+class Style(CommandsBase):
 
     def cplane(self, key: int | str = "", **kwargs):
         r"""Specifies the cutting plane for section and capped displays.

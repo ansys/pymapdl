@@ -273,8 +273,19 @@ disable_error_code = [
   "return",
   "return-value",
 ]
+exclude = [
+  "^\\.ci/",
+  "^build/",
+  "^dist/",
+  "^doc/",
+  "^examples/",
+  "^htmlcov/",
+  "^tests/",
+]
+explicit_package_bases = true
 files = ["src", "tests"]
 namespace_packages = true
+
 
 [tool.towncrier]
 directory = "doc/changelog.d"

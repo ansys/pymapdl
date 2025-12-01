@@ -22,6 +22,11 @@
 
 """Contains methods used only when running on ANSYS's jupyterhub cluster"""
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ansys.mapdl.core.mapdl import MapdlBase as Mapdl
+
 try:
     from ansys.jupyterhub import manager
 except ImportError:
