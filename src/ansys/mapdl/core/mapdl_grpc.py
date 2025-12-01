@@ -409,7 +409,7 @@ class MapdlGrpc(MapdlBase):
 
             port = MAPDL_DEFAULT_PORT
 
-        self._port = int(port)  # type: ignore[misc]
+        self._port: int = int(port)
         start_parm["port"] = self._port  # type: ignore[assignment]  # store for `open_gui`
 
         super().__init__(
@@ -524,7 +524,7 @@ class MapdlGrpc(MapdlBase):
         )
 
     def _configure_transport(
-        self, *, ip: Optional[str], port: Optional[int], uds_id: Optional[str]
+        self, *, ip: str, port: int, uds_id: Optional[str]
     ) -> None:
         """Configure transport-related defaults, validate mode, and resolve UDS conflicts.
 
@@ -628,6 +628,24 @@ class MapdlGrpc(MapdlBase):
                 f"Transport mode '{self.transport_mode}' does not support remote connections. "
                 "For remote connections, use 'mtls' or 'insecure' (discouraged)."
             )
+
+        if self.transport_mode == "wnua":
+            if os.name != "nt":
+                raise ValueError("WNUA transport mode is only supported on Windows.")
+        elif self.transport_mode == "uds":
+            if os.name == "nt":
+                raise ValueError("UDS transport mode is not supported on Windows.")
+
+        if self.transport_mode == "wnua":
+            msg = f"Using WNUA transport on {ip}:{self._port}"
+        elif self.transport_mode == "uds":
+            msg = f"Using UDS transport with socket ID '{self.uds_id}' in directory '{self.uds_dir}'"
+        elif self.transport_mode == "mtls":
+            msg = f"Using mTLS transport with certificates in '{self.certs_dir}'"
+        else:
+            msg = f"Using insecure transport on {ip}:{self._port}"
+        if hasattr(self, "_log"):
+            self._log.info(msg)
 
     def _after_run(self, command: str) -> None:
         if command[:4].upper() == "/CLE":
