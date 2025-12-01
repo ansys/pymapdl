@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class FailureCriteria:
+
+class FailureCriteria(CommandsBase):
 
     def fctyp(self, oper: str = "", lab: str = "", **kwargs):
         r"""Activates or removes failure-criteria types for postprocessing.

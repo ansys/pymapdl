@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class BinaryFileDump:
+
+class BinaryFileDump(CommandsBase):
 
     def aux2(self, **kwargs):
         r"""Enters the binary file dumping processor.

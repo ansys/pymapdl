@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Abbreviations:
+
+class Abbreviations(CommandsBase):
 
     def abbr(self, abbr: str = "", string: str = "", **kwargs):
         r"""Defines an abbreviation.

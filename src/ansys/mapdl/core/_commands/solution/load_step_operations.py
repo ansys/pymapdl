@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class LoadStepOperations:
+
+class LoadStepOperations(CommandsBase):
     def lsclear(self, lab="", **kwargs):
         """Clears loads and load step options from the database.
 

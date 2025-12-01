@@ -40,8 +40,8 @@ class GraphicsBackend(Enum):
     This enum is used to set the graphics backend for PyMAPDL.
     """
 
-    PYVISTA: str = "pyvista"
-    MAPDL: str = "mapdl"
+    PYVISTA = "pyvista"
+    MAPDL = "mapdl"
 
 
 if _HAS_VISUALIZER:
