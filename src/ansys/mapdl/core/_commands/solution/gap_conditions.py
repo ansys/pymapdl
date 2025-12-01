@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class GapConditions:
+
+class GapConditions(CommandsBase):
     def gp(self, node1="", node2="", lab="", stif="", gap="", damp="", **kwargs):
         """Defines a gap condition for transient analyses.
 

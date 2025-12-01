@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class MultiFieldSolverInterfaceMapping:
+
+class MultiFieldSolverInterfaceMapping(CommandsBase):
     def mfbucket(self, key="", value="", **kwargs):
         """Turns a bucket search on or off.
 

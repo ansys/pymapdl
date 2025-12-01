@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Scaling:
+
+class Scaling(CommandsBase):
 
     def iclwid(self, factor: str = "", **kwargs):
         r"""Scales the line width of circuit builder icons.

@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class ResultsFiles:
+
+class ResultsFiles(CommandsBase):
 
     def aux3(self, **kwargs):
         r"""Enters the results file editing processor.

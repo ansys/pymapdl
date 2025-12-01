@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class PressureMapping:
+
+class PressureMapping(CommandsBase):
 
     def ftype(self, filetype: str = "", prestype: int | str = "", **kwargs):
         r"""Specifies the file type and pressure type for the subsequent import of source points and pressures.
