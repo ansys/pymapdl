@@ -12,7 +12,7 @@ click==8.1.7
 cloudpickle==3.0.0
 contourpy==1.2.0
 cycler==0.12.1
-fonttools==4.49.0
+fonttools==4.61.0
 geomdl==5.3.1
 grpcio==1.62.0
 idna==3.7.0
