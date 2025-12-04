@@ -846,6 +846,187 @@ class MapdlPool:
                     count += 1
         return count
 
+    def add_instance(
+        self,
+        ip: Optional[str] = None,
+        port: Optional[int] = None,
+        name: Optional[str] = None,
+        exec_file: Optional[str] = None,
+        **kwargs,
+    ):
+        """Add a new MAPDL instance to the pool.
+
+        Parameters
+        ----------
+        ip : str, optional
+            IP address to connect to or create the MAPDL instance on.
+            Defaults to ``LOCALHOST``.
+
+        port : int, optional
+            Port to connect to or use for the new MAPDL instance.
+            If not provided, an available port will be selected automatically
+            when ``start_instance=True``.
+
+        name : str, optional
+            Name for the new instance. If not provided, a name will be
+            generated automatically based on the current number of instances.
+
+        exec_file : str, optional
+            Path to the MAPDL executable. If not provided, uses the
+            pool's default executable.
+
+        **kwargs : dict, optional
+            Additional keyword arguments to pass to ``launch_mapdl``.
+
+        Returns
+        -------
+        int
+            Index of the newly added instance in the pool.
+
+        Examples
+        --------
+        Add a new instance to an existing pool
+
+        >>> pool = MapdlPool(2)
+        >>> index = pool.add_instance()
+        >>> print(f"Added instance at index {index}")
+
+        Add an instance with a specific port
+
+        >>> index = pool.add_instance(port=50053)
+        """
+        # Determine IP
+        if ip is None:
+            ip = LOCALHOST
+        else:
+            ip = socket.gethostbyname(ip)
+            check_valid_ip(ip)
+
+        # Determine port
+        if port is None:
+            if self._start_instance:
+                port = available_ports(1, MAPDL_DEFAULT_PORT)[0]
+            else:
+                port = MAPDL_DEFAULT_PORT
+
+        # Determine name
+        if name is None:
+            name = self._names(len(self._instances))
+
+        # Determine exec_file
+        if exec_file is None:
+            exec_file = self._exec_file
+
+        # Create run location
+        run_location = create_temp_dir(self._root_dir, name=name)
+
+        # Add placeholder to instances list
+        index = len(self._instances)
+        self._instances.append(None)
+
+        # Update instance count
+        self._n_instances = len(self._instances)
+
+        # Spawn the new instance
+        try:
+            self._spawn_mapdl(
+                index,
+                ip=ip,
+                port=port,
+                pbar=None,
+                name=name,
+                thread_name=name,
+                start_instance=self._start_instance,
+                exec_file=exec_file,
+                run_location=run_location,
+            ).join()
+
+            # Verify the instance was created successfully
+            if self._instances[index] is None:
+                self._instances.pop(index)
+                self._n_instances = len(self._instances)
+                raise MapdlRuntimeError(f"Failed to create MAPDL instance at index {index}")
+
+            LOG.info(f"Added MAPDL instance at index {index} (name: {name}, port: {port})")
+            return index
+
+        except Exception as e:
+            # Clean up on failure
+            self._instances.pop(index)
+            self._n_instances = len(self._instances)
+            raise MapdlRuntimeError(f"Failed to add MAPDL instance: {e}") from e
+
+    def remove_instance(self, index: int, force: bool = False):
+        """Remove a MAPDL instance from the pool.
+
+        Parameters
+        ----------
+        index : int
+            Index of the instance to remove from the pool.
+
+        force : bool, optional
+            If ``True``, remove the instance even if it is locked or busy.
+            Default is ``False``.
+
+        Raises
+        ------
+        IndexError
+            If the index is out of range.
+
+        MapdlRuntimeError
+            If the instance is locked or busy and ``force=False``.
+
+        Examples
+        --------
+        Remove an instance from the pool
+
+        >>> pool = MapdlPool(3)
+        >>> pool.remove_instance(2)
+        >>> print(len(pool))
+        2
+
+        Force remove a busy instance
+
+        >>> pool.remove_instance(1, force=True)
+        """
+        if index < 0 or index >= len(self._instances):
+            raise IndexError(f"Index {index} is out of range for pool with {len(self._instances)} instances")
+
+        instance = self._instances[index]
+
+        if instance is None:
+            LOG.warning(f"Instance at index {index} is already None or not initialized")
+            self._instances.pop(index)
+            self._n_instances = len(self._instances)
+            return
+
+        # Check if instance is locked or busy
+        if not force:
+            if hasattr(instance, 'locked') and instance.locked:
+                raise MapdlRuntimeError(
+                    f"Instance at index {index} is locked. Use force=True to remove it anyway."
+                )
+            if hasattr(instance, 'busy') and instance.busy:
+                raise MapdlRuntimeError(
+                    f"Instance at index {index} is busy. Use force=True to remove it anyway."
+                )
+
+        # Exit the instance
+        try:
+            if not instance._exited:
+                self._exiting_i += 1
+                instance.exit()
+                self._exiting_i -= 1
+        except Exception as e:
+            LOG.warning(f"Error while exiting instance at index {index}: {e}")
+            self._exiting_i -= 1
+
+        # Remove from the list
+        self._instances.pop(index)
+        self._n_instances = len(self._instances)
+
+        LOG.info(f"Removed MAPDL instance at index {index}")
+
     def __getitem__(self, key: int):
         """Return an instance by an index"""
 

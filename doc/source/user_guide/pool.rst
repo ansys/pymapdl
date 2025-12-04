@@ -218,6 +218,52 @@ you must manage the lock with the :meth:`Mapdl.locked <ansys.mapdl.core.mapdl._M
     mapdl.locked = False  # Important for the instance to be seen as available.
 
 
+Dynamically add or remove instances
+------------------------------------
+
+You can dynamically add or remove instances from a pool after its creation 
+using the :meth:`MapdlPool.add_instance() <ansys.mapdl.core.MapdlPool.add_instance>` 
+and :meth:`MapdlPool.remove_instance() <ansys.mapdl.core.MapdlPool.remove_instance>` methods.
+
+Adding instances
+~~~~~~~~~~~~~~~~
+
+Add new instances to the pool when you need more computational resources:
+
+.. code:: pycon
+
+    >>> pool = MapdlPool(2)
+    >>> print(len(pool))
+    2
+    >>> new_index = pool.add_instance()
+    >>> print(len(pool))
+    3
+
+You can also specify port and other parameters for the new instance:
+
+.. code:: pycon
+
+    >>> index = pool.add_instance(port=50055, name="CustomInstance")
+
+
+Removing instances  
+~~~~~~~~~~~~~~~~~~
+
+Remove instances from the pool when you want to free up resources:
+
+.. code:: pycon
+
+    >>> pool.remove_instance(2)
+    >>> print(len(pool))
+    2
+
+If an instance is locked or busy, you must use the ``force`` parameter to remove it:
+
+.. code:: pycon
+
+    >>> pool.remove_instance(1, force=True)
+
+
 Close the PyMAPDL pool
 ----------------------
 

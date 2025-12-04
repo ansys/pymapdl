@@ -39,7 +39,7 @@ else:
     EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
 
 from ansys.mapdl.core import Mapdl, MapdlPool, examples
-from ansys.mapdl.core.errors import VersionError
+from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
 from ansys.mapdl.core.launcher import LOCALHOST, MAPDL_DEFAULT_PORT
 from conftest import QUICK_LAUNCH_SWITCHES, VALID_PORTS, NullContext, requires
 
@@ -844,3 +844,60 @@ class TestMapdlPool:
             assert exec_files == [
                 "/ansys_inc/v222/ansys/bin/ansys222" for i in range(exp_n_instances)
             ]
+
+    @skip_if_ignore_pool
+    @requires("local")
+    def test_add_remove_instance(self, pool):
+        """Test adding and removing instances from the pool."""
+        initial_size = len(pool)
+        initial_n_instances = pool._n_instances
+        
+        # Test add_instance
+        new_index = pool.add_instance()
+        assert len(pool._instances) == initial_n_instances + 1
+        assert pool._n_instances == initial_n_instances + 1
+        assert pool[new_index] is not None
+        assert not pool[new_index]._exited
+        
+        # Verify the new instance works
+        result = pool[new_index].prep7()
+        assert "PREP" in result.upper()
+        
+        # Test remove_instance
+        pool.remove_instance(new_index)
+        assert len(pool._instances) == initial_n_instances
+        assert pool._n_instances == initial_n_instances
+        
+        # Test adding multiple instances
+        idx1 = pool.add_instance()
+        idx2 = pool.add_instance()
+        assert len(pool._instances) == initial_n_instances + 2
+        assert pool._n_instances == initial_n_instances + 2
+        
+        # Clean up added instances
+        pool.remove_instance(idx2)
+        pool.remove_instance(idx1)
+        assert len(pool._instances) == initial_n_instances
+        assert pool._n_instances == initial_n_instances
+        
+    @skip_if_ignore_pool
+    @requires("local")
+    def test_remove_instance_locked(self, pool):
+        """Test that removing a locked instance raises error without force."""
+        if len(pool) < 1:
+            pytest.skip("Need at least one instance in pool")
+            
+        instance = pool[0]
+        instance.locked = True
+        
+        # Should raise error when trying to remove locked instance
+        with pytest.raises(MapdlRuntimeError, match="locked"):
+            pool.remove_instance(0, force=False)
+        
+        # Should succeed with force=True
+        initial_size = len(pool._instances)
+        pool.remove_instance(0, force=True)
+        assert len(pool._instances) == initial_size - 1
+        
+        # Add it back for other tests
+        pool.add_instance()
