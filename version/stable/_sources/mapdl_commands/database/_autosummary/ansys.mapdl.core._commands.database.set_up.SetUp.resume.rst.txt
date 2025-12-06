@@ -1,0 +1,6 @@
+﻿resume
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.database.set_up
+
+.. automethod:: SetUp.resume
