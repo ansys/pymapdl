@@ -16,7 +16,7 @@ charset-normalizer==3.4.0
 click==8.1.7
 contourpy==1.3.1
 cycler==0.12.1
-fonttools==4.55.0
+fonttools==4.61.0
 frozenlist==1.5.0
 geomdl==5.3.1
 grpcio==1.68.0
@@ -58,7 +58,7 @@ trame-server==3.2.3
 trame-vtk==2.8.12
 trame-vuetify==2.7.2
 typing_extensions==4.12.2
-urllib3==2.5.0
+urllib3==2.6.0
 vtk==9.4.2
 websockets==13.1
 wslink==2.2.1
