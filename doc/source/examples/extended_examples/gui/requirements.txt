@@ -58,7 +58,7 @@ trame-server==3.2.3
 trame-vtk==2.8.12
 trame-vuetify==2.7.2
 typing_extensions==4.12.2
-urllib3==2.5.0
+urllib3==2.6.0
 vtk==9.4.2
 websockets==13.1
 wslink==2.2.1
