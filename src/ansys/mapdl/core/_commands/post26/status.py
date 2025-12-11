@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Status:
+
+class Status(CommandsBase):
 
     def operate(self, **kwargs):
         r"""Specifies "Operation data" as the subsequent status topic.

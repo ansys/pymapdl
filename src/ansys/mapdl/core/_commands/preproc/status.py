@@ -22,8 +22,10 @@
 
 from typing import Optional
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Status:
+
+class Status(CommandsBase):
     def areas(self, **kwargs):
         """Specifies "Areas" as the subsequent status topic.
 

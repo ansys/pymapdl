@@ -22,10 +22,11 @@
 
 from typing import Optional
 
+from ansys.mapdl.core._commands import CommandsBase
 from ansys.mapdl.core.mapdl_types import MapdlInt
 
 
-class AnalysisOptions:
+class AnalysisOptions(CommandsBase):
     def abextract(self, mode1="", mode2="", **kwargs):
         """Extracts the alpha-beta damping multipliers for Rayleigh damping.
 

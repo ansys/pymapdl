@@ -195,7 +195,7 @@ class MapdlPool:
 
     def __init__(
         self,
-        n_instances: int = None,
+        n_instances: Optional[int] = None,
         wait: bool = True,
         run_location: Optional[str] = None,
         ip: Optional[Union[str, List[str]]] = None,
@@ -205,7 +205,7 @@ class MapdlPool:
         remove_temp_dir_on_exit: bool = True,
         names: Optional[str] = None,
         override=True,
-        start_instance: bool = None,
+        start_instance: Optional[bool] = None,
         exec_file: Optional[str] = None,
         timeout: int = 30,
         **kwargs,
@@ -398,14 +398,15 @@ class MapdlPool:
 
     def wait_for_ready(self, timeout: Optional[int] = 180) -> bool:
         """Wait until pool is ready."""
-        timeout_ = time.time() + timeout
+        timeout_value = timeout if timeout is not None else 180
+        timeout_ = time.time() + timeout_value
         while time.time() < timeout_:
             if self.ready:
                 break
             time.sleep(0.1)
         else:
             raise TimeoutError(
-                f"MapdlPool is not ready after waiting {timeout} seconds."
+                f"MapdlPool is not ready after waiting {timeout_value} seconds."
             )
 
     def _verify_unique_ports(self) -> None:
@@ -876,8 +877,8 @@ class MapdlPool:
     def _spawn_mapdl(
         self,
         index: int,
-        ip: str = None,
-        port: int = None,
+        ip: Optional[str] = None,
+        port: Optional[int] = None,
         pbar: Optional[bool] = None,
         name: str = "",
         start_instance=True,
@@ -905,9 +906,9 @@ class MapdlPool:
 
         # Waiting for the instance being fully initialized.
         # This is introduce to mitigate #2173
-        timeout = time.time() + timeout
+        timeout_end = time.time() + timeout
 
-        while timeout > time.time():
+        while timeout_end > time.time():
             if self.is_initialized(index):
                 break
             time.sleep(0.1)
@@ -919,7 +920,7 @@ class MapdlPool:
 
         # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
-            pbar.update(1)
+            pbar.update(1)  # type: ignore[attr-defined]
 
         self._spawning_i -= 1
 

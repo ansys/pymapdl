@@ -26,7 +26,10 @@ import inspect
 import os
 from typing import Dict
 
-module_path: str = os.path.dirname(inspect.getfile(inspect.currentframe()))
+current_frame = inspect.currentframe()
+if current_frame is None:
+    raise RuntimeError("Cannot get current frame")
+module_path: str = os.path.dirname(inspect.getfile(current_frame))
 
 
 def load_vmfiles() -> Dict[str, str]:

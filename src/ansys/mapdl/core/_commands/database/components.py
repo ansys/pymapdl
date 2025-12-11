@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Components:
+
+class Components(CommandsBase):
 
     def cm(self, cname: str = "", entity: str = "", kopt: str = "", **kwargs):
         r"""Groups geometry items into a component.

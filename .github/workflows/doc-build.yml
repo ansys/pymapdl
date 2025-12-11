@@ -91,7 +91,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 #v6.0.0
         with:
           persist-credentials: false
 
@@ -247,7 +247,7 @@ jobs:
           .ci/substitute_defective_gif.sh
 
       - name: "Upload HTML Documentation"
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
         with:
           name: documentation-html
           path: doc/_build/html
@@ -267,7 +267,7 @@ jobs:
 
       - name: "Upload PDF documentation"
         if: ${{ inputs.build_pdf }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
         with:
           name: documentation-pdf
           path: doc/_build/latex/pymapdl*.pdf
@@ -275,7 +275,7 @@ jobs:
 
       - name: "Upload minimal requirements file"
         # To include it in the release
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
         with:
           name: minimum_requirements.txt
           path: ./minimum_requirements.txt

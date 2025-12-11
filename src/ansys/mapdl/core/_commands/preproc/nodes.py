@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import parse
+from ansys.mapdl.core._commands import CommandsBase, parse
 
 
-class Nodes:
+class Nodes(CommandsBase):
     def center(self, node="", node1="", node2="", node3="", radius="", **kwargs):
         """Defines a node at the center of curvature of 2 or 3 nodes.
 

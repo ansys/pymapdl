@@ -161,7 +161,7 @@ jobs:
           df -h
 
       - name: "Install Git and checkout project"
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 #v6.0.0
         with:
           repository: ansys/pymapdl
           persist-credentials: false
@@ -293,7 +293,7 @@ jobs:
 
       - name: "Upload pytest reports to GitHub"
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
         with:
           name: "reports-${{ inputs.file-name }}"
           path: ./${{ inputs.file-name }}.jsonl
@@ -332,7 +332,7 @@ jobs:
 
       - name: "Upload encrypted logs to GitHub"
         if: always() && inputs.upload-logs == true
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
         with:
           name: logs-${{ inputs.file-name }}-encrypted
           path: ./logs-${{ inputs.file-name }}.tgz.enc
@@ -356,7 +356,7 @@ jobs:
           flags: local-ubuntu-${{ inputs.mapdl-version }}-dmp-${{ steps.student_check.outputs.TAG_STUDENT }}-${{ inputs.tags }}
 
       - name: "Upload coverage artifacts"
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
         if: inputs.codecov-report == true
         with:
           name: ${{ inputs.file-name }}.xml
