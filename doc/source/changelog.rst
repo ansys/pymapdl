@@ -10,6 +10,81 @@ This document contains the release notes for the project.
 .. towncrier release notes start
 
 
+.. _v0.71.3:
+
+`0.71.3 <https://github.com/ansys/pymapdl/releases/tag/v0.71.3>`_ - December 11, 2025
+====================================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Fixed
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Check access process on windows
+          - `#4293 <https://github.com/ansys/pymapdl/pull/4293>`_
+
+        * - Mypy type checking issues across core modules
+          - `#4309 <https://github.com/ansys/pymapdl/pull/4309>`_
+
+
+  .. tab-item:: Dependencies
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Bump grpcio from 1.75.1 to 1.76.0 in the grpc-deps group
+          - `#4294 <https://github.com/ansys/pymapdl/pull/4294>`_
+
+        * - Bump pyfakefs from 5.10.0 to 5.10.2
+          - `#4304 <https://github.com/ansys/pymapdl/pull/4304>`_
+
+        * - Bump plotly from 6.4.0 to 6.5.0 in the documentation group
+          - `#4327 <https://github.com/ansys/pymapdl/pull/4327>`_
+
+        * - Bump the testing group with 3 updates
+          - `#4328 <https://github.com/ansys/pymapdl/pull/4328>`_
+
+
+  .. tab-item:: Miscellaneous
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - List_instances
+          - `#4329 <https://github.com/ansys/pymapdl/pull/4329>`_
+
+
+  .. tab-item:: Maintenance
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Pre-commit autoupdate
+          - `#4295 <https://github.com/ansys/pymapdl/pull/4295>`_, `#4333 <https://github.com/ansys/pymapdl/pull/4333>`_
+
+        * - Bump the actions group across 1 directory with 3 updates
+          - `#4308 <https://github.com/ansys/pymapdl/pull/4308>`_
+
+        * - Update CHANGELOG for v0.71.2
+          - `#4325 <https://github.com/ansys/pymapdl/pull/4325>`_
+
+        * - Update missing or outdated files
+          - `#4330 <https://github.com/ansys/pymapdl/pull/4330>`_
+
+        * - Bump actions/checkout from 5.0.0 to 6.0.0 in the actions group
+          - `#4334 <https://github.com/ansys/pymapdl/pull/4334>`_
+
+        * - Update vtk version to 9.5.2 in requirements and pyproject.toml
+          - `#4340 <https://github.com/ansys/pymapdl/pull/4340>`_
+
+
 .. _v0.71.2:
 
 `0.71.2 <https://github.com/ansys/pymapdl/releases/tag/v0.71.2>`_ - November 26, 2025
