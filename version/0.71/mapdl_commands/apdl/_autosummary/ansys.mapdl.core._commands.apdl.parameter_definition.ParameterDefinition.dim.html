@@ -1,0 +1,1048 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>dim &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=9e79609d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=9e79609d" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=aadf6d2c"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/apdl/_autosummary/ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.dim';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.71';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="get" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.get.html" />
+    <link rel="prev" title="afun" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.afun.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.71.3" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/apdl/_autosummary/ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.dim.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    <div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(
+      (text) => (document.getElementById("announcement_msg").innerHTML = text),
+    )
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Session</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../session/index.html">Session</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Database</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../database/index.html">Database</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Graphics</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../graphics/index.html">Graphics</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">APDL</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../abbreviations.html">Abbreviations</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../parameter_definition.html">ParameterDefinition</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.afun.html">afun</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.get.html">get</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.inquire.html">inquire</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.parres.html">parres</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.parsav.html">parsav</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.starset.html">starset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.starstatus.html">starstatus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.starvget.html">starvget</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.taxis.html">taxis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.tread.html">tread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.vfill.html">vfill</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.vread.html">vread</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../matrix_operations.html">MatrixOperations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../macro_files.html">MacroFiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../encryption_decryption.html">EncryptionDecryption</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../array_parameters.html">ArrayParameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../process_controls.html">ProcessControls</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Preprocessing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/element_type.html">Element type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/real_constants.html">Real constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/materials.html">Materials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/material_data_tables.html">Material data tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/primitives.html">Primitives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/keypoints.html">Keypoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/hard_points.html">Hard points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/lines.html">Lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/areas.html">Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/volumes.html">Volumes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/booleans.html">Booleans</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/meshing.html">Meshing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/nodes.html">Nodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/elements.html">Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/superelements.html">Superelements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/digitizing.html">Digitizing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/coupled_dof.html">Coupled degrees of freedom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/constraint_equations.html">Constraint equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/status.html">Status</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/explicit_dynamics.html">Explicit dynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/sections.html">Sections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/morphing.html">Morphing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/artificially_matched_layers.html">Artificially matched layers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/special_purpose.html">Special purpose</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Solution</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../solution/analysis_options.html">Analysis options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/nonlinear_options.html">Nonlinear options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/dynamic_options.html">Dynamic options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/spectrum_options.html">Spectrum options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/load_step_options.html">Load step options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_constraints.html">Solid constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_forces.html">Solid forces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_surface_loads.html">Solid surface loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_body_loads.html">Solid body loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/inertia.html">Inertia</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/miscellaneous_loads.html">Miscellaneous loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/load_step_operations.html">Load step operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/master_dof.html">Master degrees of freedom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/gap_conditions.html">Gap conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/rezoning.html">Rezoning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/2d_to_3d_analysis.html">2D to 3D analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/birth_and_death.html">Birth and death</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_constraints.html">FE constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_forces.html">FE forces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_surface_loads.html">FE surface loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_body_loads.html">FE body loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/ocean.html">Ocean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solution_status.html">Solution status</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/radiosity.html">Radiosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_definition_commands.html">Multi-Field solver definition commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_global_controls.html">Multi-Field solver global controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_time_controls.html">Multi-Field solver time controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_load_transfer.html">Multi-Field solver load transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_convergence_controls.html">Multi-Field solver convergence controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_interface_mapping.html">Multi-Field solver interface mapping</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post1/index.html">Post1</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST26</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post26/index.html">Post26</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux2/index.html">Aux2</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux3/index.html">Aux3</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX12</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux12/index.html">Aux12</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX15</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux15/index.html">Aux15</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">MAP</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../map/index.html">Map</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Connection</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../conn.html">Connection commands</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../misc.html">Miscellaneous</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Undocumented</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../inqfun.html">Undocumented inquire commands</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item"> 
+<div class="tocsection editthispage">
+  <a href="None">
+    <i class="fa-solid fa-pencil"></i>
+       Edit
+    on GitHub  
+  </a>
+</div>
+
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">MAPDL commands</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../index.html" class="nav-link">&lt;no title&gt;</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../parameter_definition.html" class="nav-link">ParameterDefinition</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">dim</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="dim">
+<h1>dim<a class="headerlink" href="#dim" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.dim">
+<span class="sig-prename descclassname"><span class="pre">ParameterDefinition.</span></span><span class="sig-name descname"><span class="pre">dim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csysid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.dim" title="Link to this definition">#</a></dt>
+<dd><p>Defines an array parameter and its dimensions.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DIM.html">*DIM</a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>par</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Name of parameter to be dimensioned. See <span class="xref std std-ref">starset</span> for name restrictions.</p>
+</dd>
+<dt><strong>type_</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Array type:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ARRAY</span></code> - Arrays are similar to standard FORTRAN arrays (indices are integers) (default). Index
+numbers for the rows, columns, and planes are sequential values beginning with one. Used for 1-, 2-,
+or 3D arrays.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ARR4</span></code> - Same as ARRAY, but used to specify 4-D arrays.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ARR5</span></code> - Same as ARRAY, but used to specify 5-D arrays.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CHAR</span></code> - Array entries are character strings (up to 8 characters each). Index numbers for rows,
+columns, and planes are sequential values beginning with one.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TABLE</span></code> - Array indices are real (non-integer) numbers which must be defined when filling the
+table. Index numbers for the rows and columns are stored in the zero column and row “array elements”
+and are initially assigned a near-zero value. Index numbers must be in ascending order and are used
+only for retrieving an array element. When retrieving an array element with a real index that does
+not match a specified index, linear interpolation is done among the nearest indices and the
+corresponding array element values ( <span class="xref std std-ref">starset</span> ). Used for 1-, 2-, or 3D tables.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TAB4</span></code> - Same as TABLE, but used to specify 4-D tables.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TAB5</span></code> - Same as TABLE, but used to specify 5-D tables.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">STRING</span></code> - Array entries are character strings (up to IMAX each). Index numbers for columns and
+planes are sequential values beginning with 1. Row index is character position in string.</p></li>
+</ul>
+</dd>
+<dt><strong>imax</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Extent of first dimension (row). (For <code class="docutils literal notranslate"><span class="pre">Type</span></code> = STRING, <code class="docutils literal notranslate"><span class="pre">IMAX</span></code> is rounded up to the next
+multiple of eight and has a limit of 248). Default = 1.</p>
+</dd>
+<dt><strong>jmax</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Extent of second dimension (column). Default = 1.</p>
+</dd>
+<dt><strong>kmax</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Extent of third dimension (plane). Default = 1.</p>
+</dd>
+<dt><strong>var1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Variable name corresponding to the first dimension (row) for <code class="docutils literal notranslate"><span class="pre">Type</span></code> = TABLE, TAB4, or TAB5.
+Default = Row.</p>
+</dd>
+<dt><strong>var2</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Variable name corresponding to the second dimension (column) for <code class="docutils literal notranslate"><span class="pre">Type</span></code> = TABLE, TAB4, or
+TAB5. Default = Column.</p>
+</dd>
+<dt><strong>var3</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Variable name corresponding to the third dimension (plane) for <code class="docutils literal notranslate"><span class="pre">Type</span></code> = TABLE, TAB4, TAB5.
+Default = Plane.</p>
+</dd>
+<dt><strong>csysid</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>An integer corresponding to the coordinate system ID number. Default = 0 (global Cartesian).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This function contains specificities regarding the argument definitions.
+Please refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DIM.html">command documentation</a>
+for further explanations.</p>
+</div>
+<p><strong>Argument Descriptions</strong></p>
+<ul class="simple" id="a-dim-argdescript">
+<li><p><code class="docutils literal notranslate"><span class="pre">par</span> <span class="pre">:</span> <span class="pre">str</span></code> - Name of parameter to be dimensioned. See <span class="xref std std-ref">starset</span> for name restrictions.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">type_</span> <span class="pre">:</span> <span class="pre">str</span></code> - Array type:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">ARRAY</span></code> - Arrays are similar to standard FORTRAN arrays (indices are integers) (default). Index
+numbers for the rows, columns, and planes are sequential values beginning with one. Used for 1-, 2-,
+or 3D arrays.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ARR4</span></code> - Same as ARRAY, but used to specify 4-D arrays.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ARR5</span></code> - Same as ARRAY, but used to specify 5-D arrays.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CHAR</span></code> - Array entries are character strings (up to 8 characters each). Index numbers for rows,
+columns, and planes are sequential values beginning with one.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TABLE</span></code> - Array indices are real (non-integer) numbers which must be defined when filling the
+table. Index numbers for the rows and columns are stored in the zero column and row “array elements”
+and are initially assigned a near-zero value. Index numbers must be in ascending order and are used
+only for retrieving an array element. When retrieving an array element with a real index that does
+not match a specified index, linear interpolation is done among the nearest indices and the
+corresponding array element values ( <span class="xref std std-ref">starset</span> ). Used for 1-, 2-, or 3D tables.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TAB4</span></code> - Same as TABLE, but used to specify 4-D tables.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TAB5</span></code> - Same as TABLE, but used to specify 5-D tables.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">STRING</span></code> - Array entries are character strings (up to IMAX each). Index numbers for columns and
+planes are sequential values beginning with 1. Row index is character position in string.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">imax</span> <span class="pre">:</span> <span class="pre">str</span></code> - Extent of first dimension (row). (For <code class="docutils literal notranslate"><span class="pre">Type</span></code> = STRING, <code class="docutils literal notranslate"><span class="pre">IMAX</span></code> is rounded up
+to the next multiple of eight and has a limit of 248). Default = 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">jmax</span> <span class="pre">:</span> <span class="pre">str</span></code> - Extent of second dimension (column). Default = 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kmax</span> <span class="pre">:</span> <span class="pre">str</span></code> - Extent of third dimension (plane). Default = 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">var1</span> <span class="pre">:</span> <span class="pre">str</span></code> - Variable name corresponding to the first dimension (row) for <code class="docutils literal notranslate"><span class="pre">Type</span></code> = TABLE,
+TAB4, or TAB5. Default = Row.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">var2</span> <span class="pre">:</span> <span class="pre">str</span></code> - Variable name corresponding to the second dimension (column) for <code class="docutils literal notranslate"><span class="pre">Type</span></code> =
+TABLE, TAB4, or TAB5. Default = Column.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">var3</span> <span class="pre">:</span> <span class="pre">str</span></code> - Variable name corresponding to the third dimension (plane) for <code class="docutils literal notranslate"><span class="pre">Type</span></code> = TABLE,
+TAB4, TAB5. Default = Plane.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">csysid</span> <span class="pre">:</span> <span class="pre">str</span></code> - An integer corresponding to the coordinate system ID number. Default = 0
+(global Cartesian).</p></li>
+</ul>
+<p id="a-dim-notes">Up to three dimensions (row, column, and plane) may be defined using ARRAY and TABLE. Use ARR4,
+ARR5, TAB4, and TAB5 to define up to five dimensions (row, column, plane, book, and shelf). An index
+number is associated with each row, column, and plane. For array and table type parameters, element
+values are initialized to zero. For character and string parameters, element values are initialized
+to (blank). A defined parameter must be deleted ( <span class="xref std std-ref">starset</span> ) before its dimensions can be
+changed. Scalar (single valued) parameters should not be dimensioned. <span class="xref std std-ref">dim</span>,A,,3 defines a
+vector array with elements A(1), A(2), and A(3). <span class="xref std std-ref">dim</span>,B,,2,3 defines a 2x3 array with elements
+B(1,1), B(2,1), B(1,2), B(2,2), B(1,3), and B(2,3). Use <span class="xref std std-ref">starstatus</span>, <code class="docutils literal notranslate"><span class="pre">Par</span></code> to display
+elements of array <code class="docutils literal notranslate"><span class="pre">Par</span></code>. You can write formatted data files (tabular formatting) from data held in
+arrays through the <span class="xref std std-ref">vwrite</span> command.</p>
+<p>If you use table parameters to define boundary conditions, then <code class="docutils literal notranslate"><span class="pre">Var1</span></code>, <code class="docutils literal notranslate"><span class="pre">Var2</span></code>, and/or <code class="docutils literal notranslate"><span class="pre">Var3</span></code>
+can either specify a primary variable (listed in <a class="reference internal" href="#a-dim-tab-1"><span class="std std-ref">*DIM - Primary Variables</span></a> ) or can be an independent
+parameter. If specifying an independent parameter, then you must define an additional table for the
+independent parameter. The additional table must have the same name as the independent parameter and
+may be a function of one or more primary variables or another independent parameter. All independent
+parameters must relate to a primary variable.</p>
+<p>Tabular load arrays can be defined in both global Cartesian (default), cylindrical, spherical, or
+local (see below) coordinate systems by specifying <code class="docutils literal notranslate"><span class="pre">CSYSID</span></code>, as defined in <span class="xref std std-ref">local</span>.
+Coordinate system <code class="docutils literal notranslate"><span class="pre">CSYSID</span></code> must exist prior to issuing the <span class="xref std std-ref">dim</span> command.</p>
+<p><strong>The following constraints apply when specifying a local coordinate system for your tabular
+loads:</strong></p>
+<ul class="simple">
+<li><p>Only Cartesian, cylindrical and spherical coordinate systems are supported</p></li>
+<li><p>Angle values for Y in cylindrical or spherical coordinate systems must be input in degrees and
+must be positive values between 0 and 360 degrees (0 <span class="math notranslate nohighlight">\(equation not available\)</span>  Y
+<span class="math notranslate nohighlight">\(equation not available\)</span>  360)</p></li>
+<li><p>Angle values for Z in spherical coordinate system must be input in degrees and must be positive
+values between -90 and +90 ( -90 <span class="math notranslate nohighlight">\(equation not available\)</span>  Z  <span class="math notranslate nohighlight">\(equation not available\)</span>
+90)</p></li>
+</ul>
+<p>If specifying a 4- or 5-D array or table, four additional fields ( <code class="docutils literal notranslate"><span class="pre">LMAX</span></code>, <code class="docutils literal notranslate"><span class="pre">MMAX</span></code>, <code class="docutils literal notranslate"><span class="pre">Var4</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">Var5</span></code> ) are available. Thus, for a 4-D table, the command syntax would be:</p>
+<div class="highlight-apdl notranslate"><div class="highlight"><pre><span></span><span class="k">*DIM</span><span class="p">,</span><span class="nv">Par</span><span class="p">,</span><span class="nv">Type</span><span class="p">,</span><span class="nv">IMAX</span><span class="p">,</span><span class="nv">JMAX</span><span class="p">,</span><span class="nv">KMAX</span><span class="p">,</span><span class="nv">LMAX</span><span class="p">,</span><span class="nv">Var1</span><span class="p">,</span><span class="nv">Var2</span><span class="p">,</span><span class="nv">Var3</span><span class="p">,</span><span class="nv">Var4</span><span class="p">,</span><span class="nv">CSYSID</span>
+</pre></div>
+</div>
+<p>For a 5-D table, the command syntax is:</p>
+<div class="highlight-apdl notranslate"><div class="highlight"><pre><span></span><span class="k">*DIM</span><span class="p">,</span><span class="nv">Par</span><span class="p">,</span><span class="nv">Type</span><span class="p">,</span><span class="nv">IMAX</span><span class="p">,</span><span class="nv">JMAX</span><span class="p">,</span><span class="nv">KMAX</span><span class="p">,</span><span class="nv">LMAX</span><span class="p">,</span><span class="nv">MMAX</span><span class="p">,</span><span class="nv">Var1</span><span class="p">,</span><span class="nv">Var2</span><span class="p">,</span><span class="nv">Var3</span><span class="p">,</span><span class="nv">Var4</span><span class="p">,</span><span class="nv">Var5</span><span class="p">,</span><span class="nv">CSYSID</span>
+</pre></div>
+</div>
+<p>You cannot create or edit 4- or 5-D arrays or tables via the GUI.</p>
+<p>For more information, see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/Hlp_P_APDL3_11.html#ansys.guide.apdl.ch3.s11.9">Array Parameters</a></p>
+<section id="dim-primary-variables">
+<span id="a-dim-tab-1"></span><h2>*DIM - Primary Variables<a class="headerlink" href="#dim-primary-variables" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Primary Variable</p></th>
+<th class="head"><p>Label for <code class="docutils literal notranslate"><span class="pre">Var1,</span> <span class="pre">Var2,</span> <span class="pre">Var3,</span> <span class="pre">Var4,</span> <span class="pre">Var5</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Time</p></td>
+<td><p>TIME</p></td>
+</tr>
+<tr class="row-odd"><td><p>Frequency</p></td>
+<td><p>FREQ</p></td>
+</tr>
+<tr class="row-even"><td><p>X-coordinate location</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-odd"><td><p>Y-coordinate location</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-even"><td><p>Z-coordinate location</p></td>
+<td><p>Z</p></td>
+</tr>
+<tr class="row-odd"><td><p>Temperature</p></td>
+<td><p>TEMP</p></td>
+</tr>
+<tr class="row-even"><td><p>Velocity</p></td>
+<td><p>VELOCITY</p></td>
+</tr>
+<tr class="row-odd"><td><p>Pressure</p></td>
+<td><p>PRESSURE [ <span class="xref std std-ref">cmddimvarnote1</span> ]</p></td>
+</tr>
+<tr class="row-even"><td><p>Geometric gap/penetration</p></td>
+<td><p>GAP</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cyclic sector number</p></td>
+<td><p>SECTOR</p></td>
+</tr>
+<tr class="row-even"><td><p>Amplitude of the rotational velocity vector</p></td>
+<td><p>OMEGS</p></td>
+</tr>
+<tr class="row-odd"><td><p>Eccentricity</p></td>
+<td><p>ECCENT</p></td>
+</tr>
+<tr class="row-even"><td><p>Phase shift</p></td>
+<td><p>THETA</p></td>
+</tr>
+<tr class="row-odd"><td><p>Element number</p></td>
+<td><p>ELEM</p></td>
+</tr>
+<tr class="row-even"><td><p>Node number</p></td>
+<td><p>NODE</p></td>
+</tr>
+<tr class="row-odd"><td><p>Concentration</p></td>
+<td><p>CONC</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p id="cmddimvarnote1">Specify PRESSURE as the independent variable (not PRES).</p>
+<p>The X, Y, and Z coordinate locations listed above are valid in global Cartesian, or local
+(Cartesian, cylindrical and spherical) coordinate systems. The VELOCITY label is applicable only to
+the calculated fluid velocity in element <code class="docutils literal notranslate"><span class="pre">FLUID116</span></code>.</p>
+<p>When using PRESSURE as a primary variable, the underlying element must have the pressure DOF
+associated with it, or it must be a supported contact element.</p>
+<p>The gap/penetration label (GAP) is only used for defining certain contact element real constants.</p>
+<p>The frequency label (FREQ) is valid for harmonic analyses only.</p>
+<p>The node and element labels (NODE and ELEM) allow you to use node and element numbers as primary
+variables, and their axis values should be integers.</p>
+<p>The OMEGS, ECCENT, and THETA primary variables only apply to the <code class="docutils literal notranslate"><span class="pre">COMBI214</span></code> element. The amplitude
+of the rotational velocity (OMEGS) is an absolute value, so only positive values of OMEGS are valid.
+The eccentricity (ECCENT) and phase shift (THETA) labels are only valid for nonlinear analyses.</p>
+<p>If you use table parameters to define boundary conditions, the table names ( <code class="docutils literal notranslate"><span class="pre">Par</span></code> ) must not
+exceed 32 characters.</p>
+<p>In thermal analyses, if you apply tabular loads as a function of temperature but the rest of the
+model is linear (for example, includes no temperature-dependent material properties or radiation ),
+you should turn on Newton-Raphson iterations ( <span class="xref std std-ref">nropt</span>,FULL) to evaluate the temperature-
+dependent tabular boundary conditions correctly.</p>
+<p>This command is valid in any processor.</p>
+</section>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.71.3 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.6.3. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>
