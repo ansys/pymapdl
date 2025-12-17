@@ -15,8 +15,8 @@ jobs:
     name: Cleaning unnecessary packages
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: write
+      contents: read  # Needed to read repository contents
+      packages: write  # Needed to delete untagged Docker images
     env:
       PACKAGE_DELETION_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

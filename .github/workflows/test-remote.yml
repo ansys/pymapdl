@@ -60,13 +60,17 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-remote:
     name: Test PyMAPDL with remote MAPDL instances
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: read
+      contents: read  # Needed to read repository contents for tests
+      packages: read  # Needed to pull Docker images from GitHub packages
     env:
       ON_CI: True
       ON_LOCAL: FALSE

@@ -122,13 +122,17 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-local:
     name: Test MAPDL locally
     runs-on: ${{ inputs.runner }}
     permissions:
-      contents: read
-      packages: read
+      contents: read  # Needed to read repository contents for tests
+      packages: read  # Needed to pull Docker images from GitHub packages
     env:
       ON_CI: True
       ON_LOCAL: true
