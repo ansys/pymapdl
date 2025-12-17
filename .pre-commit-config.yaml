@@ -19,7 +19,7 @@ repos:
       args: [ "-x"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: c2738302f5cf2bfb559c1f210950badb133613ea # v1.19.0
+  rev: a66e98df7b4aeeb3724184b332785976d062b92e # v1.19.1
   hooks:
     - id: mypy
       args: [ --follow-imports=silent, --config-file=pyproject.toml]
@@ -90,7 +90,7 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: b32b2911704f67f5319d0a7630394cb6b07df851 # 0.35.0
+  rev: 0fe8648804a32455c690e0519c217f8cee6a48c6 # 0.36.0
   hooks:
     - id: check-github-workflows
 
