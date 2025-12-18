@@ -26,7 +26,7 @@ repos:
       exclude: ^(doc/|examples/)
 
 - repo: https://github.com/ansys/pre-commit-hooks
-  rev: fd1d6b0b4baeb08e32d4de0909999576695c0433 #v0.5.2
+  rev: fd1d6b0b4baeb08e32d4de0909999576695c0433 # v0.5.2
   hooks:
   - id: add-license-headers
     args:
