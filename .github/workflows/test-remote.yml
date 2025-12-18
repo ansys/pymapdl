@@ -60,10 +60,6 @@ on:
 
 permissions: {}
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   test-remote:
     name: Test PyMAPDL with remote MAPDL instances
