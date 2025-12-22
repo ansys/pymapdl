@@ -91,7 +91,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 #v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
         with:
           persist-credentials: false
 
@@ -140,14 +140,14 @@ jobs:
               - 'pyproject.toml'
 
       - name: "Setup Python with cache"
-        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c #v6.0.0
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 #v6.1.0
         if:  steps.changes.outputs.workflows != 'true'
         with:
           cache: 'pip'
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Setup Python without cache"
-        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c #v6.0.0
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 #v6.1.0
         if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
@@ -177,7 +177,7 @@ jobs:
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
 
       - name: "Cache examples"
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 #v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb #v5.0.1
         if: ${{ inputs.use_cache_examples && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/source/examples
@@ -186,7 +186,7 @@ jobs:
             Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Cache docs build directory"
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 #v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb #v5.0.1
         if: ${{ inputs.use_cache_doc_build && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/_build
@@ -195,7 +195,7 @@ jobs:
             doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Cache autosummary"
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 #v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb #v5.0.1
         if: ${{ inputs.use_cache_autosummary && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/source/**/_autosummary/*.rst
@@ -215,7 +215,7 @@ jobs:
       
       - name: Install Quarto
         if: ${{ inputs.build_cheatsheet }}
-        uses: quarto-dev/quarto-actions/setup@9e48da27e184aa238fcb49f5db75469626d43adb #v2.1.9
+        uses: quarto-dev/quarto-actions/setup@8a96df13519ee81fd526f2dfca5962811136661b #v2.2.0
         with:
           tinytex: true
           version: 1.7.32
@@ -247,7 +247,7 @@ jobs:
           .ci/substitute_defective_gif.sh
 
       - name: "Upload HTML Documentation"
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
         with:
           name: documentation-html
           path: doc/_build/html
@@ -267,7 +267,7 @@ jobs:
 
       - name: "Upload PDF documentation"
         if: ${{ inputs.build_pdf }}
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
         with:
           name: documentation-pdf
           path: doc/_build/latex/pymapdl*.pdf
@@ -275,7 +275,7 @@ jobs:
 
       - name: "Upload minimal requirements file"
         # To include it in the release
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
         with:
           name: minimum_requirements.txt
           path: ./minimum_requirements.txt
