@@ -63,11 +63,10 @@ on:
           Password for the GitHub container registry.
         required: true
 
-permissions: {}
+# zizmor: ignore[concurrency-limits]
+# Concurrency is controlled by the parent workflow (ci.yml)
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+permissions: {}
 
 jobs:
   doc-build:
