@@ -1412,7 +1412,7 @@ def launch_mapdl(
 
     transport_mode : str, optional
         Transport mode for gRPC channel creation. Supported modes are:
-        ``'insecure'``, ``'uds'``, ``'wnau'``, ``'mtls'``.
+        ``'insecure'``, ``'uds'``, ``'wnua'``, ``'mtls'``.
         Defaults to :class:`None`, which selects the appropriate mode based on
         platform and environment variables.
 
