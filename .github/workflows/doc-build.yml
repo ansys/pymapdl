@@ -63,6 +63,9 @@ on:
           Password for the GitHub container registry.
         required: true
 
+# zizmor: ignore[concurrency-limits]
+# Concurrency is controlled by the parent workflow (ci.yml)
+
 permissions: {}
 
 jobs:
@@ -70,8 +73,8 @@ jobs:
     name: Build documentation
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: read
+      contents: read  # Needed to read repository contents for documentation build
+      packages: read  # Needed to pull Docker images from GitHub packages
     env:
       ON_CI: True
       ON_DOCUMENTATION: TRUE

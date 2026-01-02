@@ -17,12 +17,16 @@ env:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   clean-docs-pr:
     name: "Deploy PR documentation"
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write  # Needed to remove documentation from gh-pages branch
     steps:
       - uses: ansys/actions/doc-deploy-pr@21c9de9bee9692173780696d4a39964f20b9cfa3 # v10.1.5
         with:

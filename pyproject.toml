@@ -286,6 +286,8 @@ exclude = [
 explicit_package_bases = true
 namespace_packages = true
 
+[tool.bandit]
+exclude_dirs = ["examples", "tests"]
 
 [tool.towncrier]
 directory = "doc/changelog.d"
