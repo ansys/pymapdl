@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -549,6 +549,72 @@ class MapdlGrpc(MapdlBase):
                     warn("Unknown platform, defaulting to 'insecure' transport mode.")
                     self.transport_mode = "insecure"
 
+        # Configure transport-specific settings
+        if self.transport_mode == "uds":
+            if os.name == "nt":
+                raise ValueError("UDS transport mode is not supported on Windows.")
+            self.configure_uds(port=port, uds_id=uds_id)
+
+        elif self.transport_mode == "wnua":
+            if os.name != "nt":
+                raise ValueError("WNUA transport mode is only supported on Windows.")
+            self.configure_wnua()
+
+        elif self.transport_mode == "insecure":
+            self.configure_insecure()
+
+        elif self.transport_mode == "mtls":
+            self.configure_mtls()
+
+        # Validate transport mode compatibility using external helper
+        try:
+            from ansys.tools.common.cyberchannel import verify_transport_mode
+
+            verify_transport_mode(self.transport_mode)
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "ansys.tools.common is required for transport verification. "
+                "Install ansys-tools-common or set transport_mode to 'insecure'."
+            )
+
+        # Transport compatibility checks for remote IPs. Allow loopback/local
+        # addresses (e.g., 127.0.0.1) to use local-only transports.
+        self._check_remote(ip)
+
+        if self.transport_mode == "wnua":
+            msg = f"Using WNUA transport on {ip}:{self._port}"
+        elif self.transport_mode == "uds":
+            msg = f"Using UDS transport with socket ID '{self.uds_id}' in directory '{self.uds_dir}'"
+        elif self.transport_mode == "mtls":
+            msg = f"Using mTLS transport with certificates in '{self.certs_dir}'"
+        else:
+            msg = f"Using insecure transport on {ip}:{self._port}"
+
+        if hasattr(self, "_log"):
+            self._log.info(msg)
+
+    def _check_remote(self, ip: Optional[str]) -> None:
+        """Check if the connection is remote and validate transport mode compatibility."""
+        is_remote = True
+        if ip is None:
+            is_remote = False
+        else:
+            try:
+                import ipaddress
+
+                is_remote = not ipaddress.ip_address(str(ip)).is_loopback
+            except Exception:
+                # If ip cannot be parsed, conservatively treat as not remote
+                is_remote = False
+
+        if is_remote and self.transport_mode in ["wnua", "uds"]:
+            raise ValueError(
+                f"Transport mode '{self.transport_mode}' does not support remote connections. "
+                "For remote connections, use 'mtls' or 'insecure' (discouraged)."
+            )
+
+    def configure_uds(self, port: int, uds_id: Optional[str] = None) -> None:
+        """Configure UDS transport-specific settings."""
         # Set defaults for UDS
         if self.uds_dir is None:
             self.uds_dir = os.path.join(os.path.expanduser("~"), ".conn")
@@ -569,83 +635,45 @@ class MapdlGrpc(MapdlBase):
             pid_port = getattr(self, "_port", port)
             self.uds_id = f"mapdl-{pid_port}.sock"
 
+        socket_path = os.path.join(self.uds_dir, self.uds_id)
+        if os.path.exists(socket_path):
+            # Todo: to check logic here
+            if port is not None or uds_id is not None:  # explicitly specified
+                raise ValueError(
+                    f"UDS socket file {socket_path} already exists. Please specify a different port or uds_id."
+                )
+            else:
+                # Increment port and uds_id until an available socket file is found
+                original_port = getattr(self, "_port", port)
+                while os.path.exists(socket_path):
+                    # ensure _port exists
+                    if not hasattr(self, "_port"):
+                        self._port = int(port)
+                    self._port += 1
+                    self.uds_id = f"mapdl-{self._port}.sock"
+                    socket_path = os.path.join(self.uds_dir, self.uds_id)
+                if hasattr(self, "_log"):
+                    self._log.info(
+                        f"UDS socket file for port {original_port} exists, using port {self._port} instead."
+                    )
+
+    def configure_insecure(self) -> None:
+        """Configure insecure transport-specific settings."""
+        # No specific configuration needed for insecure transport
+        pass
+
+    def configure_wnua(self) -> None:
+        """Configure WNUA transport-specific settings."""
+        # No specific configuration needed for WNUA transport
+        pass
+
+    def configure_mtls(self) -> None:
+        """Configure mTLS transport-specific settings."""
         # Set defaults for certificates
         if self.certs_dir is None:
             self.certs_dir = os.environ.get(
                 "ANSYS_GRPC_CERTIFICATES", os.path.join(os.getcwd(), "certs")
             )
-
-        # Validate transport mode compatibility using external helper
-        try:
-            from ansys.tools.common.cyberchannel import verify_transport_mode
-
-            verify_transport_mode(self.transport_mode)
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                "ansys.tools.common is required for transport verification. "
-                "Install ansys-tools-common or set transport_mode to 'insecure'."
-            )
-
-        # Handle UDS socket file conflicts
-        if self.transport_mode == "uds":
-            socket_path = os.path.join(self.uds_dir, self.uds_id)
-            if os.path.exists(socket_path):
-                if port is not None or uds_id is not None:  # explicitly specified
-                    raise ValueError(
-                        f"UDS socket file {socket_path} already exists. Please specify a different port or uds_id."
-                    )
-                else:
-                    # Increment port and uds_id until an available socket file is found
-                    original_port = getattr(self, "_port", port)
-                    while os.path.exists(socket_path):
-                        # ensure _port exists
-                        if not hasattr(self, "_port"):
-                            self._port = int(port)
-                        self._port += 1
-                        self.uds_id = f"mapdl-{self._port}.sock"
-                        socket_path = os.path.join(self.uds_dir, self.uds_id)
-                    if hasattr(self, "_log"):
-                        self._log.info(
-                            f"UDS socket file for port {original_port} exists, using port {self._port} instead."
-                        )
-
-        # Transport compatibility checks for remote IPs. Allow loopback/local
-        # addresses (e.g., 127.0.0.1) to use local-only transports.
-        is_remote = True
-        if ip is None:
-            is_remote = False
-        else:
-            try:
-                import ipaddress
-
-                is_remote = not ipaddress.ip_address(str(ip)).is_loopback
-            except Exception:
-                # If ip cannot be parsed, conservatively treat as remote
-                is_remote = True
-
-        if is_remote and self.transport_mode in ["wnua", "uds"]:
-            raise ValueError(
-                f"Transport mode '{self.transport_mode}' does not support remote connections. "
-                "For remote connections, use 'mtls' or 'insecure' (discouraged)."
-            )
-
-        if self.transport_mode == "wnua":
-            if os.name != "nt":
-                raise ValueError("WNUA transport mode is only supported on Windows.")
-        elif self.transport_mode == "uds":
-            if os.name == "nt":
-                raise ValueError("UDS transport mode is not supported on Windows.")
-
-        if self.transport_mode == "wnua":
-            msg = f"Using WNUA transport on {ip}:{self._port}"
-        elif self.transport_mode == "uds":
-            msg = f"Using UDS transport with socket ID '{self.uds_id}' in directory '{self.uds_dir}'"
-        elif self.transport_mode == "mtls":
-            msg = f"Using mTLS transport with certificates in '{self.certs_dir}'"
-        else:
-            msg = f"Using insecure transport on {ip}:{self._port}"
-        if hasattr(self, "_log"):
-            self._log.info(msg)
 
     def _after_run(self, command: str) -> None:
         if command[:4].upper() == "/CLE":
@@ -669,7 +697,6 @@ class MapdlGrpc(MapdlBase):
                 "The error wasn't caught by the post-mortem checks.\nThe stdout is printed now:"
             )
             self._log.debug(self._stdout)
-
             raise err  # Raise original error if we couldn't catch it in post-mortem analysis
         else:
             self._log.debug("Connection established")
