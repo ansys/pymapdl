@@ -58,6 +58,9 @@ on:
           Encryption key for sensitive log files.
         required: false
 
+# zizmor: ignore[concurrency-limits]
+# Concurrency is controlled by the parent workflow (ci.yml)
+
 permissions: {}
 
 jobs:

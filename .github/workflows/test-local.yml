@@ -120,6 +120,9 @@ on:
           GitHub username for login into ghcr.io.
         required: true
 
+# zizmor: ignore[concurrency-limits]
+# Concurrency is controlled by the parent workflow (ci.yml)
+
 permissions: {}
 
 jobs:
