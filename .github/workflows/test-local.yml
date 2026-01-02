@@ -142,6 +142,8 @@ jobs:
       OMPI_ALLOW_RUN_AS_ROOT: 1
       OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
       DATAPROCESSING_DEBUG: /home/mapdl/dpf_logs
+      PYMAPDL_GRPC_TRANSPORT: 'insecure'
+      ANSYS_MAPDL_GRPC_TRANSPORT: 'insecure'
 
     container:
       image: "${{ inputs.package-registry }}:${{ inputs.mapdl-version }}" # zizmor: ignore[unpinned-images]
