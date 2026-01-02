@@ -37,7 +37,7 @@ dependencies = [
   "scipy>=1.3.0",                              # for sparse (consider optional?)
   "tabulate>=0.8.0",                           # for cli plotting
   "tqdm>=4.45.0",
-  "vtk>=9.0.0,<9.5.0",
+  "vtk>=9.0.0,<9.5.3",
 ]
 description = "A Python client library for Ansys MAPDL."
 license = { file = "LICENSE" }
@@ -80,7 +80,7 @@ tests = [
   "pytest-timeout==2.4.0",
   "pytest==9.0.1",
   "scipy==1.15.3",
-  "vtk==9.4.2",
+  "vtk==9.5.2",
 ]
 
 doc = [
@@ -114,7 +114,7 @@ doc = [
   "sphinx==8.2.3",
   "sphinxcontrib-websupport==2.0.0",
   "sphinxemoji==0.3.1",
-  "vtk==9.4.2",
+  "vtk==9.5.2",
 ]
 
 [tool.flit.module]
