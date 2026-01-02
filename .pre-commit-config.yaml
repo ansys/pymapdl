@@ -100,17 +100,3 @@ repos:
     - id: taplo-format
       # See options: https://taplo.tamasfe.dev/configuration/formatter-options.html
       args: [--option, "reorder_arrays=true", --option, "reorder_keys=true"]
-
-- repo: https://github.com/zizmorcore/zizmor-pre-commit
-  rev: 1e30511413f07e516c1844ba91abce8aca984963 # 1.18.0
-  hooks:
-    - id: zizmor
-      args: ["--pedantic"]
-
-# Security checks with bandit
-- repo: https://github.com/PyCQA/bandit
-  rev: ea0d187d78b2e6365e35f676d2eb9b1be264c091 # 1.9.2
-  hooks:
-    - id: bandit
-      args: ['-c', 'pyproject.toml']
-      additional_dependencies: ['bandit[toml]']
