@@ -1,0 +1,6 @@
+﻿slashsolu
+=========
+
+.. currentmodule:: ansys.mapdl.core._commands.session.processor_entry
+
+.. automethod:: ProcessorEntry.slashsolu
