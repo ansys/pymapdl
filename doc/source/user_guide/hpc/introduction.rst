@@ -33,11 +33,11 @@ Descriptions follow of basic terms.
 - **Login node**: A type of node used only for login and job submission.
   No computation should be performed on it. It is sometimes referred to as
   *virtual desktop infrastructure* (VDI).
-- **Partition**: A logical grouping of nodes with similar characteristics (for 
-  example, CPU architecture and memory size). 
-- **Job**: A task submitted to SLURM for execution. 
-- **Queue**: A waiting area where jobs are held until resources become available. 
-- **Scheduler**: The component responsible for deciding which job gets 
+- **Partition**: A logical grouping of nodes with similar characteristics (for
+  example, CPU architecture and memory size).
+- **Job**: A task submitted to SLURM for execution.
+- **Queue**: A waiting area where jobs are held until resources become available.
+- **Scheduler**: The component responsible for deciding which job gets
   executed and when and where it gets executed.
 
 
@@ -69,7 +69,7 @@ job parameters and commands to execute. Here's a basic example:
 **my_script.sh**
 
 .. code-block:: bash
-    
+
     #!/bin/bash
     #SBATCH --job-name=myjob
     #SBATCH --nodes=1
@@ -93,13 +93,13 @@ To submit a job, use the ``srun`` command followed by the name of
 the batch script:
 
 .. code-block:: console
-    
+
     user@machine:~$ srun my_script.sh
 
 If you prefer to submit a batch job, you can use the ``sbatch`` command:
 
 .. code-block:: console
-    
+
     user@machine:~$ sbatch my_script.sh
 
 You can specify each job setting using the command line. For example:
@@ -110,7 +110,7 @@ You can specify each job setting using the command line. For example:
 
 .. warning:: **Command line arguments versus in-file arguments**:
     Command line arguments do **NOT** overwrite the equivalent arguments
-    written in the bash file. Hence, you must ensure that the argument that you 
+    written in the bash file. Hence, you must ensure that the argument that you
     want to pass using the command line is not already present in the bash file.
 
 
@@ -241,7 +241,7 @@ Best practices
 - Optimize resource usage to minimize job wait times and maximize cluster efficiency.
 - Regularly monitor job queues and system resources to identify potential bottlenecks.
 - Follow naming conventions for batch scripts and job names to maintain organization.
-- Keep batch scripts and job submissions concise and well-documented 
+- Keep batch scripts and job submissions concise and well-documented
   for reproducibility and troubleshooting.
 
 
@@ -293,4 +293,3 @@ Resource Limits
 ~~~~~~~~~~~~~~~
 Set resource limits for individual jobs using directives such as
 ``--cpus-per-task``, ``--mem``, and ``--time``.
-

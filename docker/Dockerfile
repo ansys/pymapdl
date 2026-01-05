@@ -30,7 +30,7 @@ RUN wget http://your.server.com/path/to/MAPDL_${VERSION} -O /MAPDL
 #################################
 # Install MAPDL dependencies
 # --------------------------
-# 
+#
 RUN apt-get update && \
     apt-get install -y \
       curl  \
@@ -170,7 +170,7 @@ RUN apt install -y software-properties-common \
 # Installing locale
 # -----------------
 # Adding locales to avoid locale warnings.
-# Depending on your environment, you might not need it 
+# Depending on your environment, you might not need it
 # or need to change the locale to your preferred one.
 RUN apt-get install -y locales && \
     locale-gen 'en_US.UTF-8' && \
@@ -221,4 +221,3 @@ RUN echo 'alias ansys="/ansys_inc/v$ANSYS_VERSION/ansys/bin/mapdl"' >> ~/.bashrc
 #
 EXPOSE 50052
 ENTRYPOINT [ "bash", "-c", "/ansys_inc/v${ANSYS_VERSION}/ansys/bin/mapdl -grpc -dir ${WORKING_DIRECTORY}"]
-

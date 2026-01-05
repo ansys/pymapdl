@@ -10,7 +10,7 @@ methods and attributes of :class:`string`.
 
 .. currentmodule:: ansys.mapdl.core.commands
 
-.. We should add the line ':toctree: _autosummary' to the following classes autosummary 
+.. We should add the line ':toctree: _autosummary' to the following classes autosummary
    to remove the warning during building, however, it shows only the methods links in the
    sidebar (toctree), not the classes, and since both classes have the same method name, it
    is confusing.

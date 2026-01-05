@@ -6,7 +6,7 @@ description: |
   This action runs PyMAPDL tests on Windows
 
 inputs:
-  
+
   # Required inputs
 
   codecov_token:

@@ -137,7 +137,7 @@ These commands are used to load and solve the model.
    solution/multi_field_solver_load_transfer
    solution/multi_field_solver_convergence_controls
    solution/multi_field_solver_interface_mapping
-   
+
 *****
 POST1
 *****
@@ -270,5 +270,3 @@ Undocumented inquire commands.
    :caption: Undocumented
 
    inqfun
-
-

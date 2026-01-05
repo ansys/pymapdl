@@ -2,7 +2,7 @@
 # after they have been merged or closed.
 # The docs deployment is implemented in the main CICD file (`ci.yml`)
 # since it is in that workflow where the docs are built.
-# 
+#
 # For more information see:
 # https://actions.docs.ansys.com/version/stable/doc-actions/index.html#doc-deploy-pr-action
 

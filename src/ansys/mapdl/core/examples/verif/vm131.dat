@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ C***    VECTOR MECHANICS FOR ENGINEERS, BEER & JOHNSTON, P 616, PROB. 15.13
 ANTYPE,STATIC
 ET,1,MASS21,,,2      ! GENERALIZED MASS WITHOUT ROTARY INERTIA
 R,1,1                ! UNIT MASS
-N,1,34.64,20      
+N,1,34.64,20
 E,1
 OMEGA,,,.5           ! ANGULAR VELOCITY OF RISING BOOM WRT GLOBAL
 CGOMGA,,.3           ! ANGULAR VELOCITY OF CAB WRT REFERENCE SYSTEM
@@ -38,7 +38,7 @@ OUTPR,RSOL,1
 OUTPR,NLOAD,1
 FINISH
 /out,scratch
-/SOLU    
+/SOLU
 SOLVE
 NSEL,S,NODE,,1,1
 FINI
@@ -68,4 +68,3 @@ LABEL(1,2) = 'ft/s/s','ft/s/s','ft/s/s'
 /OUT
 FINISH
 *LIST,vm131,vrt
-

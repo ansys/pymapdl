@@ -4,7 +4,7 @@
 Genetic algorithms and PyMAPDL
 ==============================
 
-This example shows how to use PyMAPDL in an HPC cluster to 
+This example shows how to use PyMAPDL in an HPC cluster to
 take advantage of multiple MAPDL instances to calculate each of the
 genetic algorithm population solutions.
 To manage multiple MAPDL instances, you should use the
@@ -65,7 +65,7 @@ To manage multiple MAPDL instances, the best approach is to use the :class:`~ans
 Deflection target
 =================
 
-Because this is a demonstration example, the target displacement is calculated 
+Because this is a demonstration example, the target displacement is calculated
 using the beam function itself with a force of 22840 :math:`N/cm^2`.
 
 .. literalinclude:: ml_ga_beam.py
@@ -280,11 +280,10 @@ this script.
 5. Run the bash script using the `sbatch <slurm_sbatch_>`_ command:
 
    .. code-block:: console
-    
+
       sbatch --nodes=1 --ntasks-per-node=10 job.sh
 
    The preceding command allocates 10 cores for the job.
    For optimal performance, this value should be higher than the number
    of MAPDL instances that the
    :class:`~ansys.mapdl.core.pool.MapdlPool` instance is creating.
-
