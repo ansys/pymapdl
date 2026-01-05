@@ -106,8 +106,8 @@ The Docker container configuration needed to build the container is detailed in 
 `Dockerfile <https://github.com/ansys/pymapdl/tree/main/docker/Dockerfile>`_.
 
 
-Summary
-=======
+Procedure summary
+=================
 
 
 * **Step 1:** Download latest Ansys MAPDL version from the customer portal
