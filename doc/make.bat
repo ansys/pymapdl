@@ -16,6 +16,7 @@ if "%1" == "clean" goto clean
 if "%1" == "clean-examples" goto clean-examples
 if "%1" == "clean-except-examples" goto clean-except-examples
 if "%1" == "linkcheck" goto linkcheck
+if "%1" == "html-noexamples" goto html-noexamples
 
 
 %SPHINXBUILD% >NUL 2>NUL
@@ -32,6 +33,11 @@ if errorlevel 9009 (
 )
 
 %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
+goto end
+
+:html-noexamples
+echo Running without examples
+%SPHINXBUILD% -D plot_gallery=0 -b html %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 goto end
 
 :clean-except-examples
