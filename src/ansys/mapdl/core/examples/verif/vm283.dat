@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -21,13 +21,13 @@
 ! SOFTWARE.
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
-/VERIFY,VM283 
+/VERIFY,VM283
 /TITLE,VM283,Low Reduced Frequency Model for Visco-thermal Fluid with Thin Structure
 /COM,
 /COM, REFERENCE:
-/COM, W. M. BELTMAN, "Viscothermal Wave Propagation Including Acousto-elastic Interaction", 
+/COM, W. M. BELTMAN, "Viscothermal Wave Propagation Including Acousto-elastic Interaction",
 /COM, THESIS, SECTION6.3, PP128-136, ISBN 90-3651217-4, 1998.
-/COM, 
+/COM,
 JPGPRF,500,100,1
 
 /PREP7
@@ -42,7 +42,7 @@ rho = 1.2                       ! DENSITY
 c0 = 340                        ! SOUND SPEED
 visc = 18.2e-6                  ! DYNAMIC VISCOSITY
 kxx = 25.6e-3                   ! THERMAL CONDUCTIVITY
-Cp = 1004                       ! SPECIFIC HEAT       
+Cp = 1004                       ! SPECIFIC HEAT
 Cv = 1004/1.4
 
 z0 = rho*c0
@@ -59,7 +59,7 @@ ZA = 0.5                        ! HEIGHT OF ROOM A
 ZB = 2.0                        ! HEIGHT OF ROOM B
 
 TB,AFDM,1,,,MAT                 ! ACOUSTIC FREQUENCY-DEPENDENT MATERIAL PROPERTIES
-TBDATA,1,rho,c0,visc,kxx,Cp,Cv  
+TBDATA,1,rho,c0,visc,kxx,Cp,Cv
 TB,AFDM,1,,,THIN                ! ACOUSTIC FREQUENCY-DEPENDENT THIN LAYER
 TBDATA,1,2*h0
 
@@ -248,4 +248,3 @@ R9 = 26.7/29.0
 *list,vm283,vrt
 FINISH
 /EXIT,NOSAVE
-

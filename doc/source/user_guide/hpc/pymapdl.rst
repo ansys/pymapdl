@@ -118,7 +118,7 @@ Using a submission script
 -------------------------
 
 If you need to customize your PyMAPDL job further, you can create a SLURM
-submission script for submitting it. 
+submission script for submitting it.
 In this case, you must create two files:
 
 - Python script with the PyMAPDL code
@@ -147,7 +147,7 @@ In this case, you must create two files:
    #!/bin/bash
    # Set SLURM options
    #SBATCH --job-name=ansys_job            # Job name
-   #SBATCH --partition=qsmall              # Specify the queue/partition name                  
+   #SBATCH --partition=qsmall              # Specify the queue/partition name
    #SBATCH --nodes=5                       # Number of nodes
    #SBATCH --ntasks-per-node=2             # Number of tasks (cores) per node
    #SBATCH --time=04:00:00                 # Set a time limit for the job (optional but recommended)
@@ -211,5 +211,5 @@ to the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function.
 
 Alternatively, you can override these settings by either specifying
 custom settings in the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
-function's arguments or using specific environment variables. 
+function's arguments or using specific environment variables.
 For more information, see :ref:`ref_environment_variables`.

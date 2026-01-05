@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,7 @@ NSEL,ALL
 BFE,ALL,HGEN,,111311.7         ! ELEMENT HEAT GENERATION
 OUTPR,BASIC,1
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 /POST1
@@ -85,7 +85,7 @@ SF,ALL,CONV,5,70
 NSEL,ALL
 BFE,ALL,HGEN,1,111311.7         ! ELEMENT HEAT GENERATION
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 /POST1
@@ -125,4 +125,3 @@ RESUME,TABLE2
 /OUT
 FINISH
 *LIST,vm118,vrt
-

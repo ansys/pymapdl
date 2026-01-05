@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /OUT,SCRATCH
-/PREP7 
+/PREP7
 SMRT,OFF
 ET,1,95                                  ! ELEMENT TYPE SOLID95
 ET,2,95                                  ! ELEMENT TYPE SOLID95
@@ -40,12 +40,12 @@ W = 31.071                               ! WIDTH
 H = 33.917                               ! HEIGHT
 L = 37.264                               ! LENGTH
 I = 1/12*(W)*(H**3)                      ! MOMENT OF INERTIA
-SURF = P/(W*H)                           ! SURFACE FORCE 
+SURF = P/(W*H)                           ! SURFACE FORCE
 BLOCK,-W/2, 0  , 0  , H/2, 0  ,  L
 BLOCK, 0  , W/2, 0  , H/2, 0  ,  L       ! CREATE BLOCKS
 BLOCK, 0  , W/2,-H/2, 0  , 0  ,  L       ! FORMING MIDPLANES
 BLOCK,-W/2, 0  ,-H/2, 0  , 0  ,  L
-WPOFF,,,L/2                              ! OFFSET WORKPLANE 
+WPOFF,,,L/2                              ! OFFSET WORKPLANE
 WPLANE,-1,0,0,18.632,.87653,.402592,18.896,-.437455,.894952,18.72
 WPLANE,-1,0,0,18.632,.890222,.338091,18.937,-.405661,.893273,18.826
 VSBW,ALL,,
@@ -74,7 +74,7 @@ TYPE,2
 VSEL,S,VOLU,,3,4,1
 VSEL,A,VOLU,,6,8,2
 VMESH,ALL                                ! VMESH ELEMENT TYPE 2
-VSEL,ALL 
+VSEL,ALL
 CSYS,4                                   ! USE WP AS LOCAL COOR. SYS
 NSEL,S,LOC,Z,0                           ! SELECT ALL NODES ON WP
 CSYS,0                                   ! REVERT COOR. SYS TO CART.
@@ -90,18 +90,18 @@ EPLO                                     ! ADJUST VIEW AND CAPTURE INTERFACE
 MSHGEN3D                                 ! READ MACRO TO GENERATE MESH
 
 *CREATE,SOLV3D,MAC                       ! CREATE MACRO TO PERFORM SOLUTION
-! THIS IS THE SECTION CONTAINING THE LOADING.  THE MOMENT 
-! USED IN THE VERIFICATION EQUATION IS THE SUM OF ALL 
+! THIS IS THE SECTION CONTAINING THE LOADING.  THE MOMENT
+! USED IN THE VERIFICATION EQUATION IS THE SUM OF ALL
 ! OF THE MOMENTS ON THE AREA LOCATED AT Z=0 OR Z=L.  NOTE
 ! THAT THE LOADS ON EITHER AREA FORM A COUPLE.
-SFGRAD,PRES,,Y,H/2,2*SURF/H                ! APPLY GRADIENT SURFACE LOADS  
+SFGRAD,PRES,,Y,H/2,2*SURF/H                ! APPLY GRADIENT SURFACE LOADS
 ASEL,S,LOC,Z,0
 ASEL,A,LOC,Z,L
 SFA,ALL,1,PRES,SURF,
 ALLS
 SFTRAN                                     ! LOADS END
 NSEL,S,LOC,X,W/2                           ! DEFINE DOF CONSTRAINTS
-NSEL,R,LOC,Y,0                             ! SIMILAR TO PATCH TEST 
+NSEL,R,LOC,Y,0                             ! SIMILAR TO PATCH TEST
 NSEL,R,LOC,Z,0                             ! CONSTRAINTS
 D,ALL, UX ,
 D,ALL, UY ,
@@ -133,8 +133,8 @@ PRRSOL                                     ! PRINT REACTION SOLUTIONS
 /VIEW,1,1,0,0
 /GLINE,1,0
 /DEV,VECT,ON
-PLNSOL,S,Z                                 ! Z-STRESS CONTOUR 
-/NUM,0 
+PLNSOL,S,Z                                 ! Z-STRESS CONTOUR
+/NUM,0
 
 MST1=0                                     ! INIT PARAMETERS
 NDE1=0
@@ -143,7 +143,7 @@ NDE2=0
 MST3=0
 NDE3=0
 *DIM,RESULTS,ARRAY,3                       ! DEFINE ARRAY PARAMETER RESULTS
-                                           ! CALCULATION : TOP AVERAGE OF STRESS 
+                                           ! CALCULATION : TOP AVERAGE OF STRESS
 NSEL,S,LOC,Y,H/2                           ! SELECT NODES IN TOP AREA
 *GET,NUMNOD1,NODE,,COUNT                   ! OBTAIN NUMBER OF TOP SURFACE NODES
 
@@ -161,9 +161,9 @@ COUNT=0
    *DO,K,1,NUMELM,1                       ! LOOP ON ELEMS CONNECTED TO NDE1
       ELNUM=ELNEXT(ELNUM)
       *DO,L,1,8,1                         ! VOLUME : SOLID95 CORNER NODES
-         POS=NELEM(ELNUM,L)               ! CHECK POS 1-8 ON SOLID95 FOR 
+         POS=NELEM(ELNUM,L)               ! CHECK POS 1-8 ON SOLID95 FOR
                                           ! NODE NUMBER
-         *IF,POS,EQ,NDE1,THEN            
+         *IF,POS,EQ,NDE1,THEN
             TRIP=1                        ! SET TRIP IF OUR CURRENTLY SELECTED
                                           ! NODE IS CORNER OF ELEMENT ELNUM
          *ENDIF
@@ -179,10 +179,10 @@ COUNT=0
    *ENDIF
 
    ALLSEL
-   *GET,ZSTR1,NODE,NDE1,S,Z               ! IF ENTRY GAINED TO THIS POINT OF 
+   *GET,ZSTR1,NODE,NDE1,S,Z               ! IF ENTRY GAINED TO THIS POINT OF
    TOTAL=TOTAL+ZSTR1                      ! THE LOOP, THEN GRAB Z-STRESS AT
    COUNT=COUNT+1                          ! NODE NDE1 AND ADD IT TO TOTAL.
-   NSEL,S,LOC,Y,H/2                       ! RESET SELECTED SETS TO WHAT IS 
+   NSEL,S,LOC,Y,H/2                       ! RESET SELECTED SETS TO WHAT IS
    ESEL,ALL                               ! NEEDED.
 *ENDDO
 
@@ -193,7 +193,7 @@ NSEL,S,LOC,Y,0                            ! SELECT NODES ALONG Z AXIS
 NSEL,R,LOC,X,0                            ! ( THE NURTRAL AXIS )
 *GET,NUMNOD2,NODE,,COUNT                  ! OBTAIN NUMBER OF TOP SURFACE NODES
 
-ZSTR2=0 
+ZSTR2=0
 COUNT=0
 TOTAL=0
 
@@ -224,9 +224,9 @@ TOTAL=0
    *ENDIF
 
    ALLSEL
-   
+
    *GET,ZSTR2,NODE,NDE2,S,Z
-   TOTAL=TOTAL+ZSTR2 
+   TOTAL=TOTAL+ZSTR2
    COUNT=COUNT+1
    NSEL,S,LOC,Y,0
    NSEL,R,LOC,X,0
@@ -236,7 +236,7 @@ TOTAL=0
 MST2=TOTAL/COUNT                         ! AVERAGE STRESS OF NEURTRAL AXIS
 RESULTS(2)=MST2
 
-NSEL,S,LOC,Y,-H/2                        ! SELECT NODES IN BOTTOM AREA 
+NSEL,S,LOC,Y,-H/2                        ! SELECT NODES IN BOTTOM AREA
 *GET,NUMNOD3,NODE,,COUNT
 
 ZSTR3=0
@@ -276,7 +276,7 @@ TOTAL=0
    ESEL,ALL
 *ENDDO
 
-MST3=TOTAL/COUNT                         ! AVERAGE STRESS ON BOTTOM NODES                 
+MST3=TOTAL/COUNT                         ! AVERAGE STRESS ON BOTTOM NODES
 RESULTS(3)=MST3
                                          ! CALCULATE THE RATIOS
 RAT1=MST1/(-SURF)
@@ -314,7 +314,7 @@ SAVE,TABLE_1
 /CLEAR, NOSTART ! CLEAR DATABASE FOR 2ND SOLUTION
 /PREP7
 SMRT,OFF
-/TITLE, VM210, BENDING OF HEX-TO-TET INTERFACE, FORMATION OF PYRAMIDS 
+/TITLE, VM210, BENDING OF HEX-TO-TET INTERFACE, FORMATION OF PYRAMIDS
 /COM,   ****** USING 3-D SOLID186 ******
 ET,1,186                                 ! ELEMENT TYPE SOLID186
 ET,2,186                                 ! ELEMENT TYPE SOLID186

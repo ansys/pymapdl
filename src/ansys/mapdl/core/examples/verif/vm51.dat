@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,9 @@
 /VERIFY,VM51
 JPGPRF,500,100,1                ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
-_GEOMGEN_1=0                    ! SET THIS TO 1 TO UPDATE CDB FILE 
+_GEOMGEN_1=0                    ! SET THIS TO 1 TO UPDATE CDB FILE
 _EXIT1=0                       ! SET THIS TO 1 TO EXIT WITHOUT SOLVING
-*IF,_GEOMGEN_1,EQ,1,THEN 
+*IF,_GEOMGEN_1,EQ,1,THEN
 /TITLE,VM51, FORCE BETWEEN CHARGED SPHERES
 C*** USING SOLID122
 !         THE ELECTROMAGNETIC FIELD,  SHADOWITZ, PAGE 61
@@ -226,9 +226,9 @@ FINISH
 /CLEAR,NOSTART
 
 /OUT,SCRATCH
-_GEOMGEN_2=0                    ! SET THIS TO 1 TO UPDATE CDB FILE 
+_GEOMGEN_2=0                    ! SET THIS TO 1 TO UPDATE CDB FILE
 _EXIT2=0                       ! SET THIS TO 1 TO EXIT WITHOUT SOLVING
-*IF,_GEOMGEN_2,EQ,1,THEN 
+*IF,_GEOMGEN_2,EQ,1,THEN
 
 /TITLE,VM51, FORCE BETWEEN CHARGED SPHERES
 C*** USING SOLID123
@@ -255,7 +255,7 @@ NUMCMP,AREA
 ET,1,SOLID123                   ! 3-D 10-NODE TETERAHEDRAL ELECTROSTATIC SOLID
 ET,2,MESH200,5                  ! NEW MESH200 2-D 6-NODE ELEMENT TYPE
 ET,3,INFIN111,2,1               ! 3-D INFINITE SOLID ELEMENT
-MP,PERX,1,1         
+MP,PERX,1,1
 MP,PERX,2,1
 K,200                           ! CREATE KEYPOINTS FOR ROTATION
 K,201,,R3                       ! 3 DIVISIONS IN ROTATE DIRECTION
@@ -274,11 +274,11 @@ ESIZE,.1
 MAT,1
 VMESH,ALL
 VSEL,S,VOLU,,1,2		! CHANGE SPHERE TO MATERIAL 2
-ESLV,S,1                   	
+ESLV,S,1
 EMODIF,ALL,MAT,2
 ALLSEL,ALL
 
-LOCAL,11,2,,R2/2 
+LOCAL,11,2,,R2/2
 CSYS,2                          ! SPHERICAL COORDINATE SYSTEM
 KSEL,S,LOC,X,R3                 ! KEYPOINT SELECT AT RADIUS R3
 LSLK,S,1                        ! LINE SELECT FROM KEYPOINTS
@@ -424,4 +424,3 @@ FINISH
 *LIST,vm51,vrt
 /DELETE,INF1
 /DELETE,INF2
-

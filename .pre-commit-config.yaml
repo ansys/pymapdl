@@ -87,6 +87,13 @@ repos:
   hooks:
   - id: check-merge-conflict
   - id: debug-statements
+  - id: end-of-file-fixer
+  - id: detect-private-key
+  - id: trailing-whitespace
+  - id: check-toml
+  - id: mixed-line-ending
+    args: ['--fix=lf']
+    description: Forces to replace line ending by the UNIX 'lf' character.
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ NSEL,ALL
 FK,5,FY,.25               ! APPLY LOAD
 *REPEAT,4,1
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 *CREATE,MAC               ! CREATE A MACRO TO DO POSTPROCESSING
@@ -57,7 +57,7 @@ FINISH
 CSYS,0
 NSEL,S,LOC,X,0,.001,,1    ! SELECT NODES AT FREE END OF BEAM
 PRNSOL,U,COMP
-LCDEF,1,1          
+LCDEF,1,1
 LCFACT,1,(1/.08854)
 LCASE,1
 PRNSOL,U,COMP
@@ -73,7 +73,7 @@ LABEL(1,2) = 'in '
 *VFILL,VALUE(1,3),DATA,ABS(U1/.08854)
 SAVE,TABLE_1
 *USE,MAC                  ! EXECUTE POSTPROCESSING MACRO
-/CLEAR, NOSTART 
+/CLEAR, NOSTART
 /PREP7
 smrt,off
 /TITLE, VM187, BENDING OF A CURVED BEAM
@@ -99,7 +99,7 @@ F,ALL,FY,1                ! APPLY LOAD
 NSEL,ALL
 SAVE
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 *USE,MAC                  ! EXECUTE POSTPROCESSING MACRO
@@ -120,7 +120,7 @@ smrt,off
 RESUME
 ET,1,SOLID98,2            ! ANALYZE AGAIN USING SOLID98 TETRAHEDRONS
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 *USE,MAC                  ! EXECUTE POSTPROCESSING MACRO
@@ -141,7 +141,7 @@ smrt,off
 RESUME
 ET,1,SOLID187             ! ANALYZE AGAIN USING SOLID187 TETRAHEDRONS
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 *USE,MAC                  ! EXECUTE POSTPROCESSING MACRO
