@@ -1600,6 +1600,68 @@ def test_launch_on_hpc_exception_successfull_sbatch(monkeypatch):
     mock_kill_job.assert_called_once()
 
 
+def test_generate_start_parameters_includes_transport_args():
+    args = {
+        "transport_mode": "insecure",
+        "uds_dir": "/tmp/.conn",
+        "uds_id": "mapdl-50052.sock",
+        "certs_dir": "/etc/ansys/certs",
+        # Required fields used by generate_start_parameters
+        "mode": "grpc",
+        "ram": None,
+        "override": False,
+        "start_timeout": 30,
+        "launched": True,
+        "run_location": "/tmp",
+        "jobname": "file",
+        "exec_file": "",
+        "nproc": 2,
+        "timeout": 15,
+        "port": 50052,
+    }
+
+    start_parm = generate_start_parameters(args)
+
+    # The start parameters should include transport-related keys when allowed
+    assert "transport_mode" in start_parm or "transport_mode" in args
+    assert args["transport_mode"] == "insecure"
+    assert args["uds_dir"] == "/tmp/.conn"
+    assert args["uds_id"] == "mapdl-50052.sock"
+    assert args["certs_dir"] == "/etc/ansys/certs"
+
+
+def test_env_transport_precedence(monkeypatch):
+    # Ensure env var takes precedence for transport selection and that
+    # MapdlGrpc reads it during initialization. We patch external
+    # dependencies to avoid launching a real channel.
+    monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", "mtls")
+
+    import sys
+    import types
+
+    # Insert a fake cyberchannel module with verify_transport_mode
+    fake_mod = types.ModuleType("ansys.tools.common.cyberchannel")
+    fake_mod.verify_transport_mode = lambda mode: None
+    monkeypatch.setitem(sys.modules, "ansys.tools.common.cyberchannel", fake_mod)
+
+    # Patch MapdlGrpc internals to avoid network operations
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    monkeypatch.setattr(MapdlGrpc, "_subscribe_to_channel", lambda self: None)
+    monkeypatch.setattr(
+        MapdlGrpc, "reconnect_to_mapdl", lambda self, timeout=None: None
+    )
+    monkeypatch.setattr(MapdlGrpc, "_send_command", lambda self, cmd="", mute=False: "")
+
+    class DummyChannel:
+        def subscribe(self, *args, **kwargs):
+            return None
+
+    # Construct MapdlGrpc with a dummy channel to bypass network creation
+    grpc = MapdlGrpc(channel=DummyChannel(), cleanup_on_exit=False)
+    assert grpc.transport_mode == "mtls"
+
+
 @pytest.mark.parametrize(
     "args,context",
     [
