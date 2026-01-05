@@ -1630,14 +1630,25 @@ def test_generate_start_parameters_includes_transport_args():
     assert args["certs_dir"] == "/etc/ansys/certs"
 
 
-def test_env_transport_precedence(monkeypatch):
+@pytest.mark.parametrize("transport_mode", ["insecure", "mtls", "uds", "wnua"])
+def test_env_transport_precedence(monkeypatch, transport_mode):
     # Ensure env var takes precedence for transport selection and that
     # MapdlGrpc reads it during initialization. We patch external
     # dependencies to avoid launching a real channel.
-    monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", "mtls")
+    monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", transport_mode)
 
+    import os
+    import platform
     import sys
     import types
+
+    if transport_mode == "wnua" and os.name != "nt":
+        monkeypatch.setattr(os, "name", "nt")
+        monkeypatch.setattr(platform, "system", lambda: "Windows")
+
+    if transport_mode == "uds" and os.name == "nt":
+        monkeypatch.setattr(os, "name", "posix")
+        monkeypatch.setattr(platform, "system", lambda: "Linux")
 
     # Insert a fake cyberchannel module with verify_transport_mode
     fake_mod = types.ModuleType("ansys.tools.common.cyberchannel")
@@ -1652,14 +1663,18 @@ def test_env_transport_precedence(monkeypatch):
         MapdlGrpc, "reconnect_to_mapdl", lambda self, timeout=None: None
     )
     monkeypatch.setattr(MapdlGrpc, "_send_command", lambda self, cmd="", mute=False: "")
+    monkeypatch.setattr(MapdlGrpc, "_verify_local", lambda self: None)
+    monkeypatch.setattr(MapdlGrpc, "platform", lambda self: "Windows")
 
     class DummyChannel:
         def subscribe(self, *args, **kwargs):
             return None
 
     # Construct MapdlGrpc with a dummy channel to bypass network creation
-    grpc = MapdlGrpc(channel=DummyChannel(), cleanup_on_exit=False)
-    assert grpc.transport_mode == "mtls"
+    grpc = MapdlGrpc(
+        channel=DummyChannel(), cleanup_on_exit=False, disable_run_at_connect=True
+    )
+    assert grpc.transport_mode == transport_mode
 
 
 @pytest.mark.parametrize(
