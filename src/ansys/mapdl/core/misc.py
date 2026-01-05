@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -33,11 +33,13 @@ import string
 import tempfile
 from threading import Thread
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
     Iterable,
     List,
+    Optional,
     ParamSpec,
     Tuple,
     TypeVar,
@@ -50,8 +52,16 @@ import numpy as np
 from ansys.mapdl.core import _HAS_PYVISTA, _HAS_VISUALIZER, LOG
 from ansys.mapdl.core.plotting import GraphicsBackend
 
+if TYPE_CHECKING:
+    from ansys.mapdl.core.mapdl import MapdlBase as Mapdl
+
 # path of this module
-MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
+_frame = inspect.currentframe()
+MODULE_PATH = (
+    os.path.dirname(inspect.getfile(_frame))
+    if _frame is not None
+    else os.path.dirname(__file__)
+)
 
 
 class ROUTINES(Enum):
@@ -72,7 +82,7 @@ P = ParamSpec("P")
 R = TypeVar("R")
 
 
-def check_valid_routine(routine: ROUTINES) -> bool:
+def check_valid_routine(routine: Union[str, ROUTINES]) -> bool:
     """Check if a routine is valid.
 
     Acceptable aliases for "Begin level" include "begin".
@@ -92,6 +102,10 @@ def check_valid_routine(routine: ROUTINES) -> bool:
     ValueError
         Raised when a routine is invalid.
     """
+    # Convert ROUTINES enum to string if necessary
+    if isinstance(routine, ROUTINES):
+        return True
+
     if routine.lower().startswith("/"):
         routine = routine[1:]
 
@@ -174,25 +188,25 @@ def supress_logging(func: Callable[P, R]) -> Callable[P, R]:
         mapdl = args[0]
         if not issubclass(type(mapdl), (MapdlBase)):
             # Assuming we are on a module object.
-            mapdl = mapdl._mapdl
+            mapdl = mapdl._mapdl  # type: ignore[attr-defined]
             if not issubclass(type(mapdl), (MapdlBase)):
                 raise Exception("This wrapper cannot access MAPDL object")
 
-        prior_log_level = mapdl._log.level
+        prior_log_level = mapdl._log.level  # type: ignore[attr-defined]
         if prior_log_level != "CRITICAL":
-            mapdl._set_log_level("CRITICAL")
+            mapdl._set_log_level("CRITICAL")  # type: ignore[attr-defined]
 
         out = func(*args, **kwargs)
 
         if prior_log_level != "CRITICAL":
-            mapdl._set_log_level(prior_log_level)
+            mapdl._set_log_level(prior_log_level)  # type: ignore[attr-defined]
 
         return out
 
     return wrapper
 
 
-def run_as(routine: ROUTINES):
+def run_as(routine: Union[str, ROUTINES]):
     """Run a MAPDL method at PREP7 and always revert to the prior processor"""
 
     def decorator(function):
@@ -269,14 +283,9 @@ def creation_time(path_to_file: str) -> float:
         return os.path.getctime(path_to_file)
     else:
         stat = os.stat(path_to_file)
-        try:
-            return float(stat.st_birthtime)
-        except AttributeError:
-            LOG.debug(
-                "We're probably on Linux. No easy way to get creation dates here, "
-                "so we'll settle for when its content was last modified."
-            )
-            return stat.st_mtime
+        if hasattr(stat, "st_birthtime"):
+            return float(stat.st_birthtime)  # type: ignore[attr-defined]
+        return stat.st_mtime
 
 
 def last_created(filenames: List[str]) -> str:
@@ -293,7 +302,7 @@ def last_created(filenames: List[str]) -> str:
     return filenames[idx]
 
 
-def create_temp_dir(tmpdir: str = None, name: str = None) -> str:
+def create_temp_dir(tmpdir: Optional[str] = None, name: Optional[str] = None) -> str:
     """Create a new unique directory at a given temporary directory"""
     if tmpdir is None:
         tmpdir = tempfile.gettempdir()
@@ -336,7 +345,9 @@ def get_bounding_box(nodes_xyz: np.ndarray) -> np.ndarray:
     return max_ - min_
 
 
-def load_file(mapdl: "Mapdl", fname: str, priority_mapdl_file: bool = None) -> str:
+def load_file(
+    mapdl: "Mapdl", fname: str, priority_mapdl_file: Optional[bool] = None
+) -> str:
     """
     Provide a file to the MAPDL instance.
 
@@ -536,7 +547,9 @@ def requires_package(package_name: str, softerror: bool = False) -> Callable:
     return decorator
 
 
-def _get_args_xsel(*args: Tuple[str], **kwargs: Dict[str, str]) -> Tuple[str]:
+def _get_args_xsel(
+    *args: str, **kwargs: str
+) -> Tuple[str, str, str, str, str, str, str, Dict[str, str]]:
     type_ = kwargs.pop("type_", str(args[0]) if len(args) else "").upper()
     item = kwargs.pop("item", str(args[1]) if len(args) > 1 else "").upper()
     comp = kwargs.pop("comp", str(args[2]) if len(args) > 2 else "").upper()

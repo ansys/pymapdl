@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -25,13 +25,13 @@ import re
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Dict,
     Iterator,
     List,
     Literal,
     Optional,
     Tuple,
+    TypeAlias,
     Union,
     get_args,
 )
@@ -48,10 +48,12 @@ from ansys.mapdl.core.misc import is_float
 if TYPE_CHECKING:  # pragma: no cover
     import logging
 
-ENTITIES_TYP: List[str] = Literal[
+# Entity type options - single source of truth
+ENTITIES_TYP: TypeAlias = Literal[
     "NODE", "NODES", "ELEM", "ELEMS", "ELEMENTS", "VOLU", "AREA", "LINE", "KP"
 ]
 
+# Runtime list derived from the type alias above
 VALID_ENTITIES: List[str] = list(get_args(ENTITIES_TYP))
 
 SELECTOR_FUNCTION: List[str] = [
@@ -66,7 +68,7 @@ SELECTOR_FUNCTION: List[str] = [
     "KSEL",
 ]
 
-ENTITIES_MAPPING: Dict[str, Callable] = {
+ENTITIES_MAPPING: Dict[str, str] = {
     entity.upper(): func for entity, func in zip(VALID_ENTITIES, SELECTOR_FUNCTION)
 }
 
@@ -143,29 +145,46 @@ class Component(tuple):
     def __new__(
         cls,
         type_: ENTITIES_TYP,
-        items_: Tuple[str, Union[Tuple[int], List[int], NDArray[np.int_]]],
-    ):
+        items_: Union[Tuple[int, ...], List[int], "Component", NDArray, int, str, None],
+    ) -> "Component":
+        """Create a new Component instance."""
         if not isinstance(type_, str) or type_.upper() not in VALID_ENTITIES:
             raise ValueError(
                 f"The value '{type_}' is not allowed for 'type' definition."
             )
+        # Convert to tuple if needed
+        if isinstance(items_, Component):
+            items_ = tuple(items_)
+        elif isinstance(items_, (list, np.ndarray)):
+            items_ = tuple(items_)
+        elif items_ is None:
+            items_ = tuple()
+        elif isinstance(items_, (int, str)):
+            # Handle single values
+            items_ = (int(items_),) if isinstance(items_, (int, str)) else tuple()
+        elif not isinstance(items_, tuple):
+            # Fallback for any iterable
+            try:
+                items_ = tuple(items_)  # type: ignore[arg-type]
+            except (TypeError, ValueError):
+                items_ = tuple()
         obj = super().__new__(cls, items_)
-        obj._type: ENTITIES_TYP = type_
+        obj._type = type_  # type: ignore[misc,attr-defined]
 
         return obj
 
     def __str__(self) -> str:
         tup_str = super().__str__()
-        return f"Component(type='{self._type}', items={tup_str})"
+        return f"Component(type='{self._type}', items={tup_str})"  # type: ignore[attr-defined]
 
     def __repr__(self) -> str:
         tup_str = super().__repr__()
-        return f"Component(type='{self._type}', items={tup_str})"
+        return f"Component(type='{self._type}', items={tup_str}')"  # type: ignore[attr-defined]
 
     @property
     def type(self) -> ENTITIES_TYP:
         """Return the type of the component. For instance "NODES", "KP", etc."""
-        return self._type
+        return self._type  # type: ignore[attr-defined]
 
     @property
     def items(self) -> Tuple[int]:
@@ -275,7 +294,7 @@ class ComponentManager:
             raise ValueError(
                 f"Only the following entities are allowed:\n{', '.join(VALID_ENTITIES)}"
             )
-        self._default_entity = value.upper()
+        self._default_entity = value.upper()  # type: ignore[assignment]
 
     @property
     def default_entity_warning(self) -> bool:
@@ -311,7 +330,7 @@ class ComponentManager:
     def _comp(self, value) -> None:
         self.__comp = value
 
-    def __getitem__(self, key: str) -> ITEMS_VALUES:
+    def __getitem__(self, key: str) -> "Component":  # type: ignore[override]
         forced_to_select = False
 
         if key.upper() not in self._comp and self._autoselect_components:
@@ -324,7 +343,9 @@ class ComponentManager:
             forced_to_select = True
 
         try:
-            cmtype = self._comp[key.upper()]
+            cmtype_raw = self._comp[key.upper()]
+            # cmtype can be a string (just type) or a list [selection, type]
+            cmtype: str = cmtype_raw[1] if isinstance(cmtype_raw, list) else cmtype_raw  # type: ignore[assignment]
         except KeyError:
             # testing if the CM exists or not
             # it seems you can use `*get` with components which are not selected.
@@ -339,16 +360,20 @@ class ComponentManager:
                     f"The component named '{key}' does not exist in the MAPDL instance."
                 )
 
-        output = self._mapdl._parse_cmlist_indiv(key, cmtype)
+        output: List[int] = self._mapdl._parse_cmlist_indiv(key, cmtype)
         if forced_to_select:
             # Unselect to keep the state of the things as before calling this method.
             self._mapdl.cmsel("U", key)
 
-        return Component(cmtype, output)
+        return Component(cmtype, output)  # type: ignore[arg-type]
 
     def __setitem__(self, key: str, value: ITEMS_VALUES) -> None:
         if not isinstance(key, str):
             raise ValueError("Only strings are allowed for component names.")
+
+        cmname: str
+        cmtype: ENTITIES_TYP
+        cmitems: Union[Component, List[int], Tuple[int, ...], NDArray[Any]]
 
         if isinstance(value, Component):
             # Allowing to use a component object to be set.
@@ -371,7 +396,7 @@ class ComponentManager:
                     )
 
                 cmname = key
-                cmtype = value[0].upper()
+                cmtype = value[0].upper()  # type: ignore[assignment]
                 cmitems = value[1]
 
             else:
@@ -387,8 +412,8 @@ class ComponentManager:
                     )
 
                 cmname = key
-                cmtype = self.default_entity
-                cmitems = value
+                cmtype = self.default_entity  # type: ignore[assignment]
+                cmitems = value  # type: ignore[assignment]
 
         elif isinstance(value, str):
             # create a component with the already selected elements
@@ -398,7 +423,7 @@ class ComponentManager:
                 )
 
             cmname = key
-            cmtype = value
+            cmtype = value  # type: ignore[assignment]
 
             self._mapdl.cm(cmname, cmtype)
 
@@ -418,7 +443,7 @@ class ComponentManager:
 
             cmname = key
             cmtype = self.default_entity
-            cmitems = value
+            cmitems = value  # type: ignore[assignment]
 
         else:
             raise ValueError("Only strings or tuples are allowed for assignment.")
@@ -558,16 +583,16 @@ def _parse_cmlist_indiv(
     cmname: str, cmtype: str, cmlist: Optional[str] = None
 ) -> List[int]:
     # Capturing blocks
-    if "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
+    if cmlist and "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
         header = r"NAME\s+TYPE\s+SUBCOMPONENTS"
 
-    elif "LIST COMPONENT" in cmlist:
+    elif cmlist and "LIST COMPONENT" in cmlist:
         header = ""
 
     cmlist = "\n\n".join(
         re.findall(
             r"(?s)" + header + r"\s+(.*?)\s*(?=\n\s*\n|\Z)",
-            cmlist,
+            cmlist or "",  # Handle None case
             flags=re.DOTALL,
         )
     )
@@ -577,14 +602,16 @@ def _parse_cmlist_indiv(
     items = "\n".join(re.findall(rg, cmlist, flags=re.DOTALL))
 
     # Joining them together and giving them format.
-    items = items.replace("\n", "  ").split()
-    items = [int(each) for each in items if is_float(each)]
+    items_raw: List[str] = items.replace("\n", "  ").split()
+    items_int: List[int] = [int(each) for each in items_raw if is_float(each)]
 
-    return items
+    return items_int
 
 
 def _parse_cmlist(cmlist: Optional[str] = None) -> Dict[str, Any]:
     include_selection = False
+    if cmlist is None:
+        return {}
     if re.search(r"NAME\s+TYPE\s+SUBCOMPONENTS", cmlist):
         # header
         #  "NAME                            TYPE      SUBCOMPONENTS"

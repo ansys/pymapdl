@@ -42,7 +42,7 @@ jobs:
     name: Adding assignee if there is none.
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
+      pull-requests: write  # Needed to add assignees to pull requests
     steps:
       - uses: actions-ecosystem/action-add-assignees@a5b84af721c4a621eb9c7a4a95ec20a90d0b88e9 #v1.0.1
         if: |
@@ -61,8 +61,8 @@ jobs:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write  # Needed to update changelog files
+      pull-requests: write  # Needed to create pull requests with changelog updates
     steps:
       - uses: ansys/actions/doc-deploy-changelog@21c9de9bee9692173780696d4a39964f20b9cfa3 #v10.1.5
         with:
@@ -76,7 +76,7 @@ jobs:
     name: Check the name of the pull-request
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: read
+      pull-requests: read  # Needed to read pull request details
     steps:
       - name: Check pull-request name
         uses: ansys/actions/check-pr-title@21c9de9bee9692173780696d4a39964f20b9cfa3 #v10.1.5
@@ -173,8 +173,8 @@ jobs:
     needs: doc-style
     uses: ./.github/workflows/doc-build.yml
     permissions:
-      contents: read
-      packages: read
+      contents: read  # Needed to read repository contents for documentation build
+      packages: read  # Needed to pull Docker images from GitHub packages
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
       username: ${{ github.actor }}
@@ -187,8 +187,8 @@ jobs:
     needs: docs-build
     if: contains(github.event.pull_request.labels.*.name, 'deploy pr docs')
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write  # Needed to push documentation to gh-pages branch
+      pull-requests: write  # Needed to comment on pull requests with documentation link
     steps:
       - uses: ansys/actions/doc-deploy-pr@21c9de9bee9692173780696d4a39964f20b9cfa3 #v10.1.5
         with:
@@ -203,14 +203,14 @@ jobs:
     name: "Build remote test matrix"
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: read  # Needed to read repository contents for matrix build
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 #v6.0.0
         with:
           persist-credentials: false
 
@@ -230,8 +230,8 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-test-remote-matrix.outputs.matrix) }}
     permissions:
-      contents: read
-      packages: read
+      contents: read  # Needed to read repository contents for tests
+      packages: read  # Needed to pull Docker images from GitHub packages
     uses: ./.github/workflows/test-remote.yml
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
@@ -248,13 +248,13 @@ jobs:
     name: "Build test matrix for minimal and local"
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: read  # Needed to read repository contents for matrix build
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 #v6.0.0
         with:
           persist-credentials: false
 
@@ -273,8 +273,8 @@ jobs:
     needs: [smoke-tests, build-test-local-matrix]
     uses: ./.github/workflows/test-local.yml
     permissions:
-      contents: read
-      packages: read
+      contents: read  # Needed to read repository contents for tests
+      packages: read  # Needed to pull Docker images from GitHub packages
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-test-local-matrix.outputs.matrix) }}
@@ -301,8 +301,8 @@ jobs:
     needs: [build-test-ubuntu-local, build-test-remote]
     uses: ./.github/workflows/test-local.yml
     permissions:
-      contents: read
-      packages: read
+      contents: read  # Needed to read repository contents for tests
+      packages: read  # Needed to pull Docker images from GitHub packages
     strategy:
       fail-fast: false
       matrix:
@@ -329,8 +329,8 @@ jobs:
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [build-test-ubuntu-local, build-test-remote]
     permissions:
-      contents: read
-      packages: read
+      contents: read  # Needed to read repository contents for tests
+      packages: read  # Needed to pull Docker images from GitHub packages
     uses: ./.github/workflows/test-local.yml
     strategy:
       fail-fast: false
@@ -358,7 +358,7 @@ jobs:
     needs: [build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, docs-build]
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: read  # Needed to read repository contents for packaging
     steps:
       - name: "Build library source and wheel artifacts"
         uses: ansys/actions/build-library@21c9de9bee9692173780696d4a39964f20b9cfa3 #v10.1.5
@@ -375,8 +375,8 @@ jobs:
     # Specifying a GitHub environment is optional, but strongly encouraged
     environment: release
     permissions:
-      id-token: write
-      contents: write
+      id-token: write  # Required for trusted publishing to PyPI
+      contents: write  # Needed to create GitHub releases
     steps:
       - name: "Download the library artifacts from build-library step"
         uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
@@ -408,7 +408,7 @@ jobs:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write  # Needed to push documentation to gh-pages branch
     needs: [release]
     steps:
       - name: "Deploy the stable documentation"
@@ -426,7 +426,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags')
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write  # Needed to push documentation to gh-pages branch
     needs: [docs-build]
     steps:
       - name: "Deploy the latest documentation"
@@ -444,7 +444,7 @@ jobs:
     if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     permissions:
-      issues: write
+      issues: write  # Needed to create issues on build failures
     steps:
       - name: "Open issue"
         uses: jayqi/failed-build-issue-action@1a893bbf43ef1c2a8705e2b115cd4f0fe3c5649b #v1.2.0
@@ -467,7 +467,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 #v6.0.0
         with:
           persist-credentials: false
 
@@ -485,11 +485,11 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      actions: write
+      contents: read  # Needed to read repository contents
+      actions: write  # Needed to generate workflow summaries
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 #v6.0.0
         with:
           persist-credentials: false
 

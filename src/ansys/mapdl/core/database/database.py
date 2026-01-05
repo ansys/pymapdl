@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -247,11 +247,13 @@ class MapdlDb:
 
         # permit overriding db_port via env var for CI
         if not port:
+            env_port = os.environ.get("PYMAPDL_DB_PORT")
             if (
                 "PYMAPDL_DB_PORT" in os.environ
-                and os.environ.get("PYMAPDL_DB_PORT").isdigit()
+                and env_port is not None
+                and env_port.isdigit()
             ):
-                db_port_str = int(os.environ.get("PYMAPDL_DB_PORT"))
+                db_port_str = int(env_port)
                 self._mapdl._log.debug(
                     f"Setting DB port from 'PYMAPDL_DB_PORT' env var: {db_port_str}"
                 )

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,10 +22,11 @@
 
 from typing import Optional
 
+from ansys.mapdl.core._commands import CommandsBase
 from ansys.mapdl.core.mapdl_types import MapdlInt
 
 
-class AnalysisOptions:
+class AnalysisOptions(CommandsBase):
     def abextract(self, mode1="", mode2="", **kwargs):
         """Extracts the alpha-beta damping multipliers for Rayleigh damping.
 
