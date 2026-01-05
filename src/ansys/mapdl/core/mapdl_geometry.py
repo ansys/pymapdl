@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -1294,7 +1294,7 @@ class Geometry:
             for each_volu in self.vnum:
                 self._mapdl.vsel("S", vmin=each_volu)
                 self._mapdl.aslv("S")
-                unstruct = surf.extract_cells(np.in1d(area_num, self.anum))
+                unstruct = surf.extract_cells(np.isin(area_num, self.anum))
                 pv.set_new_attribute(unstruct, "entity_num", int(each_volu))
                 volumes_.append(unstruct)
 
