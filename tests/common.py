@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -74,7 +74,7 @@ def is_on_local():
             os.environ.get("PYMAPDL_START_INSTANCE").lower() != "false"
         )  # default is false
 
-    from ansys.tools.path import find_mapdl
+    from ansys.tools.common.path import find_mapdl
 
     _, rver = find_mapdl()
 
@@ -109,7 +109,7 @@ def has_grpc():
         return True
 
     try:
-        from ansys.tools.path import find_mapdl
+        from ansys.tools.common.path import find_mapdl
     except ModuleNotFoundError:
         return True
 

@@ -261,7 +261,7 @@ you can use the following command to launch MAPDL:
 Connect to the MAPDL container from Python
 ==========================================
 
-You can connect to an MAPDL instance as indicated in :ref:`connect_grpc_madpl_session`.
+You can connect to an MAPDL instance as indicated in :ref:`connect_grpc_mapdl_session`.
 You do not need to specify an IP address because Docker maps the ports to the local host.
 
 

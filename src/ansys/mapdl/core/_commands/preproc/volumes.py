@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,11 +22,11 @@
 
 from typing import Optional, Union
 
-from ansys.mapdl.core._commands import parse
+from ansys.mapdl.core._commands import CommandsBase, parse
 from ansys.mapdl.core.mapdl_types import MapdlInt
 
 
-class Volumes:
+class Volumes(CommandsBase):
     def extopt(
         self,
         lab: str = "",

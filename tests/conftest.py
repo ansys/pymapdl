@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -209,8 +209,8 @@ if DEBUG_TESTING:
 # ------------------
 #
 
-if has_dependency("ansys-tools-path"):
-    from ansys.tools.path import find_mapdl
+if has_dependency("ansys-tools-common"):
+    from ansys.tools.common.path import find_mapdl
 
 
 if has_dependency("pyvista"):

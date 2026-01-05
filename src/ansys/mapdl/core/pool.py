@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional, Union
 import warnings
 import weakref
 
-from ansys.mapdl.core import _HAS_ATP, _HAS_TQDM, LOG, launch_mapdl
+from ansys.mapdl.core import _HAS_ATC, _HAS_TQDM, LOG, launch_mapdl
 from ansys.mapdl.core.errors import MapdlDidNotStart, MapdlRuntimeError, VersionError
 from ansys.mapdl.core.launcher import (
     LOCALHOST,
@@ -40,8 +40,8 @@ from ansys.mapdl.core.launcher import (
 )
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 
-if _HAS_ATP:
-    from ansys.tools.path import get_mapdl_path, version_from_path
+if _HAS_ATC:
+    from ansys.tools.common.path import get_mapdl_path, version_from_path
 
 if _HAS_TQDM:
     from tqdm import tqdm
@@ -195,7 +195,7 @@ class MapdlPool:
 
     def __init__(
         self,
-        n_instances: int = None,
+        n_instances: Optional[int] = None,
         wait: bool = True,
         run_location: Optional[str] = None,
         ip: Optional[Union[str, List[str]]] = None,
@@ -205,7 +205,7 @@ class MapdlPool:
         remove_temp_dir_on_exit: bool = True,
         names: Optional[str] = None,
         override=True,
-        start_instance: bool = None,
+        start_instance: Optional[bool] = None,
         exec_file: Optional[str] = None,
         timeout: int = 30,
         **kwargs,
@@ -276,12 +276,12 @@ class MapdlPool:
             exec_file = kwargs.get("exec_file", exec_file)
 
             if not exec_file:  # get default executable
-                if _HAS_ATP:
+                if _HAS_ATC:
                     exec_file = get_mapdl_path()
                 else:
                     raise ValueError(
                         "Please use 'exec_file' argument to specify the location of the ansys installation.\n"
-                        "Alternatively, PyMAPDL can detect your ansys installation if you install 'ansys-tools-path' library."
+                        "Alternatively, PyMAPDL can detect your ansys installation if you install 'ansys-tools-common' library."
                     )
 
                 if exec_file is None:
@@ -292,7 +292,7 @@ class MapdlPool:
                     )
 
             # Checking version
-            if _HAS_ATP:
+            if _HAS_ATC:
                 if version_from_path("mapdl", exec_file) < 211:
                     raise VersionError("MapdlPool requires MAPDL 2021R1 or later.")
 
@@ -398,14 +398,15 @@ class MapdlPool:
 
     def wait_for_ready(self, timeout: Optional[int] = 180) -> bool:
         """Wait until pool is ready."""
-        timeout_ = time.time() + timeout
+        timeout_value = timeout if timeout is not None else 180
+        timeout_ = time.time() + timeout_value
         while time.time() < timeout_:
             if self.ready:
                 break
             time.sleep(0.1)
         else:
             raise TimeoutError(
-                f"MapdlPool is not ready after waiting {timeout} seconds."
+                f"MapdlPool is not ready after waiting {timeout_value} seconds."
             )
 
     def _verify_unique_ports(self) -> None:
@@ -876,8 +877,8 @@ class MapdlPool:
     def _spawn_mapdl(
         self,
         index: int,
-        ip: str = None,
-        port: int = None,
+        ip: Optional[str] = None,
+        port: Optional[int] = None,
         pbar: Optional[bool] = None,
         name: str = "",
         start_instance=True,
@@ -905,9 +906,9 @@ class MapdlPool:
 
         # Waiting for the instance being fully initialized.
         # This is introduce to mitigate #2173
-        timeout = time.time() + timeout
+        timeout_end = time.time() + timeout
 
-        while timeout > time.time():
+        while timeout_end > time.time():
             if self.is_initialized(index):
                 break
             time.sleep(0.1)
@@ -919,7 +920,7 @@ class MapdlPool:
 
         # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
-            pbar.update(1)
+            pbar.update(1)  # type: ignore[attr-defined]
 
         self._spawning_i -= 1
 

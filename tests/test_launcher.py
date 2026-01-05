@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -26,7 +26,7 @@ import os
 import subprocess
 import tempfile
 from time import sleep
-from unittest.mock import patch
+from unittest.mock import MagicMock, Mock, patch
 import warnings
 
 import psutil
@@ -43,7 +43,7 @@ from ansys.mapdl.core.errors import (
     VersionError,
 )
 from ansys.mapdl.core.launcher import (
-    _HAS_ATP,
+    _HAS_ATC,
     LOCALHOST,
     _is_ubuntu,
     check_mapdl_launch_on_hpc,
@@ -88,7 +88,7 @@ from conftest import (
 )
 
 try:
-    from ansys.tools.path import (
+    from ansys.tools.common.path import (
         find_mapdl,
         get_available_ansys_installations,
         version_from_path,
@@ -174,14 +174,14 @@ def test_validate_sw():
         assert "msmpi" in add_sw and "INTELMPI" not in add_sw
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @pytest.mark.parametrize("path_data", paths)
 def test_version_from_path(path_data):
     exec_file, version = path_data
     assert version_from_path("mapdl", exec_file) == version
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 def test_catch_version_from_path():
     with pytest.raises(RuntimeError):
         version_from_path("mapdl", "abc")
@@ -199,12 +199,12 @@ def test_catch_version_from_path():
         ["/ansysinc/v242/ansys/bin/mapdl", 24.2, ValueError],
     ],
 )
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 def test_find_mapdl_linux(my_fs, path, version, raises):
     my_fs.os = OSType.LINUX
     my_fs.create_file(path)
 
-    from ansys.tools.path import find_mapdl
+    from ansys.tools.common.path import find_mapdl
 
     bin_file, ver = find_mapdl()
 
@@ -218,7 +218,7 @@ def test_find_mapdl_linux(my_fs, path, version, raises):
         assert ver == version
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
 @patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
 @patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
@@ -235,7 +235,7 @@ def test_invalid_mode(mapdl, my_fs, cleared, monkeypatch):
         )
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @pytest.mark.parametrize("version", [120, 170, 190])
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
 @patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
@@ -260,7 +260,7 @@ def test_old_version_not_version(mapdl, my_fs, cleared, monkeypatch, version):
         )
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @pytest.mark.parametrize("version", [203, 213, 351])
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
 @patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
@@ -283,7 +283,7 @@ def test_not_valid_versions(mapdl, my_fs, cleared, monkeypatch, version):
         )
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @requires("local")
 @requires("linux")
 @requires("console")
@@ -294,7 +294,7 @@ def test_failed_console():
         pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @requires("local")
 @requires("console")
 @requires("linux")
@@ -307,7 +307,7 @@ def test_launch_console(version):
 
 @requires("local")
 @requires("nostudent")
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @pytest.mark.parametrize("license_name", LICENSES)
 def test_license_type_keyword_names(monkeypatch, license_name):
     exec_file = find_mapdl()[0]
@@ -327,7 +327,7 @@ def test_license_type_additional_switch(license_name):
 
 
 @stack(*PATCH_MAPDL_START)
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 def test_license_type_dummy(mapdl, cleared):
     dummy_license_type = "dummy"
     with pytest.warns(
@@ -518,7 +518,7 @@ def test__verify_version_latest():
     assert get_version("latest") is None
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @requires("local")
 def test_find_ansys(mapdl, cleared):
     assert find_mapdl() is not None
@@ -562,7 +562,7 @@ def test_is_ubuntu():
     assert _is_ubuntu()
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @requires("local")
 def test_get_default_ansys():
     assert get_default_ansys() is not None
@@ -886,7 +886,7 @@ def test_get_start_instance_envvar(monkeypatch, start_instance, context):
 
 
 @requires("local")
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @pytest.mark.parametrize("start_instance", [True, False])
 def test_launcher_start_instance(monkeypatch, start_instance):
     if "PYMAPDL_START_INSTANCE" in os.environ:
@@ -919,11 +919,11 @@ def test_ip_and_start_instance(
         monkeypatch.setenv("PYMAPDL_IP", str(ip_envvar))
 
     # Skip if PyMAPDL cannot detect where MAPDL is installed.
-    if not _HAS_ATP and not os.environ.get("PYMAPDL_MAPDL_EXEC"):
+    if not _HAS_ATC and not os.environ.get("PYMAPDL_MAPDL_EXEC"):
         # if start_instance and not ip:
         with pytest.raises(
             ModuleNotFoundError,
-            match="If you don't have 'ansys-tools-path' library installed, you need",
+            match="If you don't have 'ansys-tools-common' library installed, you need",
         ):
             options = launch_mapdl(
                 exec_file=None,
@@ -1118,7 +1118,7 @@ def test_generate_start_parameters_console():
     assert "timeout" not in new_args
 
 
-@patch("ansys.mapdl.core.launcher._HAS_ATP", False)
+@patch("ansys.mapdl.core.launcher._HAS_ATC", False)
 def test_get_exec_file(monkeypatch):
     monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", False)
 
@@ -1141,8 +1141,8 @@ def _get_application_path(*args, **kwargs):
     return None
 
 
-@requires("ansys-tools-path")
-@patch("ansys.tools.path.path._get_application_path", _get_application_path)
+@requires("ansys-tools-common")
+@patch("ansys.tools.common.path.path._get_application_path", _get_application_path)
 def test_get_exec_file_not_found_two(monkeypatch):
     monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", False)
     args = {"exec_file": None, "start_instance": True}
@@ -1424,12 +1424,12 @@ def test_exit_job(mock_popen, mapdl, cleared):
     mock_popen.assert_called_once_with(1001)
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @patch(
-    "ansys.tools.path.path._get_application_path",
+    "ansys.tools.common.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",
 )
-@patch("ansys.tools.path.path._version_from_path", lambda *args, **kwargs: 242)
+@patch("ansys.tools.common.path.path._version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL_START)
 @patch("ansys.mapdl.core.launcher.launch_grpc")
 @patch("ansys.mapdl.core.launcher.send_scontrol")
@@ -1767,11 +1767,12 @@ def test_get_hostname_host_cluster(
             assert batchhost_ip == "111.22.33.44"
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @patch(
-    "ansys.tools.path.path._version_from_path", side_effect=lambda *args, **kwargs: 201
+    "ansys.tools.common.path.path._version_from_path",
+    side_effect=lambda *args, **kwargs: 201,
 )
-@patch("ansys.mapdl.core._HAS_ATP", True)
+@patch("ansys.mapdl.core._HAS_ATC", True)
 def test_get_version_version_error(monkeypatch):
     monkeypatch.delenv("PYMAPDL_MAPDL_VERSION", False)
 
@@ -1981,12 +1982,12 @@ def test_submitter(cmd, executable, shell, cwd, stdin, stdout, stderr, envvars):
         assert kwargs["env"] == envvars
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 @patch(
-    "ansys.tools.path.path._get_application_path",
+    "ansys.tools.common.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",
 )
-@patch("ansys.tools.path.path._version_from_path", lambda *args, **kwargs: 242)
+@patch("ansys.tools.common.path.path._version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL)
 @pytest.mark.parametrize(
     "arg,value,method",
@@ -2129,3 +2130,249 @@ def test_handle_launch_exceptions(msg, match, exception_type):
     exception = exception_type(msg)
     with pytest.raises(exception_type, match=match):
         raise handle_launch_exceptions(exception)
+
+
+def test_env_vars_propagation_in_launch_mapdl():
+    """Test that env_vars are propagated to start_parm in launch_mapdl."""
+    env_vars = {"MY_VAR": "test_value", "ANOTHER_VAR": "another_value"}
+
+    args = launch_mapdl(
+        env_vars=env_vars,
+        _debug_no_launch=True,
+    )
+
+    # Check that env_vars are in the returned args
+    assert "env_vars" in args
+    assert args["env_vars"]["MY_VAR"] == "test_value"
+    assert args["env_vars"]["ANOTHER_VAR"] == "another_value"
+
+
+def test_env_vars_with_slurm_bootstrap(monkeypatch):
+    """Test that SLURM env_vars are set correctly when launch_on_hpc is True."""
+    # This test verifies that when replace_env_vars is used with launch_on_hpc,
+    # SLURM-specific environment variables are added
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+
+    env_vars_input = {"CUSTOM_VAR": "custom_value"}
+
+    # Capture what env_vars are passed to launch_grpc
+    captured_env_vars = None
+
+    def mock_launch_grpc(cmd, run_location, env_vars=None, **kwargs):
+        nonlocal captured_env_vars
+        captured_env_vars = env_vars
+        # Mock process object
+        from tests.test_launcher import get_fake_process
+
+        return get_fake_process("Submitted batch job 1001")
+
+    with (
+        patch("ansys.mapdl.core.launcher.launch_grpc", mock_launch_grpc),
+        patch("ansys.mapdl.core.launcher.send_scontrol") as mock_scontrol,
+        patch("ansys.mapdl.core.launcher.kill_job"),
+    ):
+        # Mock scontrol to avoid timeout
+        mock_scontrol.return_value = get_fake_process(
+            "JobState=RUNNING\nBatchHost=testhost\n"
+        )
+
+        try:
+            launch_mapdl(
+                launch_on_hpc=True,
+                replace_env_vars=env_vars_input,  # Use replace_env_vars instead of env_vars
+                exec_file="/fake/path/to/ansys242",
+                nproc=2,
+            )
+        except Exception:  # nosec B703
+            # We expect this to fail, we just want to capture env_vars
+            pass
+
+    # Verify the env_vars that were passed to launch_grpc
+    assert captured_env_vars is not None
+    assert "CUSTOM_VAR" in captured_env_vars
+    assert captured_env_vars["CUSTOM_VAR"] == "custom_value"
+    assert captured_env_vars["ANS_MULTIPLE_NODES"] == "1"
+    assert captured_env_vars["HYDRA_BOOTSTRAP"] == "slurm"
+
+
+def test_mapdl_grpc_launch_uses_provided_start_parm():
+    """Test that MapdlGrpc._launch uses provided start_parm over instance _start_parm."""
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    # Create mock instance
+    mapdl_grpc = Mock(spec=MapdlGrpc)
+    mapdl_grpc._exited = True
+    mapdl_grpc._local = True  # Add _local attribute
+    mapdl_grpc._start_parm = {
+        "exec_file": "/original/path/to/ansys242",
+        "jobname": "original_job",
+        "nproc": 2,
+        "ram": 1024,
+        "port": 50052,
+        "additional_switches": "",
+        "mode": "grpc",
+        "run_location": "/default/run/location",
+    }
+    mapdl_grpc._env_vars = None
+    mapdl_grpc._connect = MagicMock()
+    mapdl_grpc._mapdl_process = None  # Add _mapdl_process attribute
+
+    # Custom start_parm that should be used
+    custom_start_parm = {
+        "exec_file": "/custom/path/to/ansys242",
+        "jobname": "custom_job",
+        "nproc": 4,
+        "ram": 2048,
+        "port": 50053,
+        "additional_switches": "-custom",
+        "mode": "grpc",
+        "env_vars": {"CUSTOM_VAR": "custom_value"},
+        "run_location": "/custom/run/location",
+    }
+
+    # Mock the launch_grpc function to capture what parameters are used
+    # Note: launch_grpc is in launcher module, not mapdl_grpc module
+    with patch("ansys.mapdl.core.launcher.launch_grpc") as mock_launch_grpc:
+        # Bind the real _launch method
+        mapdl_grpc._launch = MapdlGrpc._launch.__get__(mapdl_grpc, type(mapdl_grpc))
+
+        # Call _launch with custom start_parm
+        mapdl_grpc._launch(start_parm=custom_start_parm, timeout=10)
+
+        # Verify launch_grpc was called
+        mock_launch_grpc.assert_called_once()
+
+        # Get the cmd argument passed to launch_grpc
+        call_args = mock_launch_grpc.call_args
+        cmd_used = call_args[1]["cmd"]
+
+        # Verify the command uses custom_start_parm values
+        assert "/custom/path/to/ansys242" in " ".join(cmd_used)
+        assert "custom_job" in " ".join(cmd_used)
+
+
+def test_open_gui_with_mocked_call(mapdl, fake_local_mapdl):
+    """Test that open_gui uses the correct exec_file with mocked subprocess.call."""
+    from contextlib import ExitStack
+
+    custom_exec_file = "/custom/test/path/ansys242"
+    captured_call_args = None
+
+    def mock_call(*args, **kwargs):
+        nonlocal captured_call_args
+        captured_call_args = args[0] if args else None
+        return 0
+
+    with ExitStack() as stack:
+        # Mock _local to True so open_gui doesn't raise "can only be called from local"
+        stack.enter_context(patch.object(mapdl, "_local", True))
+
+        # Mock pathlib.Path to return a mock that has is_file() return True
+        mock_path = MagicMock()
+        mock_path.is_file.return_value = True
+        stack.enter_context(
+            patch("ansys.mapdl.core.mapdl_core.pathlib.Path", return_value=mock_path)
+        )
+
+        # Mock the call function imported in mapdl_core
+        stack.enter_context(
+            patch("ansys.mapdl.core.mapdl_core.call", side_effect=mock_call)
+        )
+
+        # IMPORTANT: Mock exit, finish, save, _launch, resume to prevent killing the MAPDL instance
+        stack.enter_context(patch.object(mapdl, "exit"))
+        stack.enter_context(patch.object(mapdl, "finish"))
+        stack.enter_context(patch.object(mapdl, "save"))
+        stack.enter_context(patch.object(mapdl, "_cache_routine"))
+        stack.enter_context(patch.object(mapdl, "_launch"))
+        stack.enter_context(patch.object(mapdl, "resume"))
+
+        try:
+            # Call open_gui with custom exec_file
+            mapdl.open_gui(exec_file=custom_exec_file, inplace=True)
+        except Exception:  # nosec B703
+            # open_gui might fail for various reasons after the call
+            # We're only interested in verifying the call arguments
+            pass
+
+    # Verify that subprocess.call was called with the custom exec_file
+    assert captured_call_args is not None, "subprocess.call was not called"
+    assert (
+        custom_exec_file in captured_call_args
+    ), f"Expected {custom_exec_file} in call args, but got {captured_call_args}"
+    assert "-g" in captured_call_args, "Expected -g flag for GUI mode"
+    assert mapdl.jobname in " ".join(
+        str(arg) for arg in captured_call_args
+    ), f"Expected jobname {mapdl.jobname} in call args"
+
+
+def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
+    """Test complete open_gui flow: call, _launch, and reconnection methods are invoked."""
+
+    custom_exec_file = "/custom/test/path/ansys242"
+
+    # Track what methods were called
+    call_invoked = False
+    launch_invoked = False
+
+    def mock_call(*args, **kwargs):
+        nonlocal call_invoked
+        call_invoked = True
+        return 0
+
+    def mock_launch(start_parm, timeout=10):
+        nonlocal launch_invoked
+        launch_invoked = True
+        # Verify start_parm is passed
+        assert start_parm is not None
+        assert "exec_file" in start_parm
+
+    # Mock the call function imported in mapdl_core
+    with patch("ansys.mapdl.core.mapdl_core.call", side_effect=mock_call):
+        # Mock _local to True so open_gui doesn't raise "can only be called from local"
+        with patch.object(mapdl, "_local", True):
+            # Mock pathlib.Path to return a mock that has is_file() return True
+            mock_path = MagicMock()
+            mock_path.is_file.return_value = True
+            with patch(
+                "ansys.mapdl.core.mapdl_core.pathlib.Path", return_value=mock_path
+            ):
+                # Store original _launch to restore later
+                original_launch = mapdl._launch
+
+                try:
+                    # Replace _launch with our mock
+                    mapdl._launch = mock_launch
+
+                    # Mock methods that open_gui calls before and after
+                    with (
+                        patch.object(mapdl, "finish") as mock_finish,
+                        patch.object(mapdl, "save") as mock_save,
+                        patch.object(mapdl, "exit") as mock_exit,
+                        patch.object(mapdl, "resume") as mock_resume,
+                        patch.object(mapdl, "_cache_routine") as mock_cache,
+                    ):
+                        try:
+                            # Call open_gui with custom exec_file
+                            mapdl.open_gui(exec_file=custom_exec_file, inplace=True)
+                        except Exception:  # nosec B703
+                            # Some methods might fail, but we verify they were called
+                            pass
+
+                        # Verify the flow of method calls
+                        assert (
+                            mock_finish.called
+                        ), "finish() should be called before GUI"
+                        assert mock_save.called, "save() should be called before GUI"
+                        assert mock_exit.called, "exit() should be called before GUI"
+                        assert call_invoked, "subprocess.call should be invoked for GUI"
+                        assert launch_invoked, "_launch() should be called to reconnect"
+                        assert (
+                            mock_resume.called
+                        ), "resume() should be called after reconnection"
+                        assert (
+                            mock_cache.called
+                        ), "_cache_routine() should be called after reconnection"
+                finally:
+                    # Restore original _launch
+                    mapdl._launch = original_launch

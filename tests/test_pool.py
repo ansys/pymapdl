@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -30,8 +30,8 @@ import pytest
 
 from conftest import ON_LOCAL, ON_STUDENT, has_dependency
 
-if has_dependency("ansys-tools-path"):
-    from ansys.tools.path import find_mapdl
+if has_dependency("ansys-tools-common"):
+    from ansys.tools.common.path import find_mapdl
 
     EXEC_FILE = find_mapdl()[0]
 

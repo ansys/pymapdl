@@ -14,7 +14,7 @@
 .. _dpf_post_docs: https://post.docs.pyansys.com
 .. _legacy_reader_docs: https://reader.docs.pyansys.com/
 .. _example_data_repo: https://github.com/ansys/example-data
-.. _ansys_tools_path: http://path.tools.docs.pyansys.com/
+.. _ansys_tools_path: https://tools.docs.pyansys.com/version/stable/user_guide/ansys_tools_path.html
 .. _pyansys_math: https://math.docs.pyansys.com/version/stable/
 .. _pyansys_math_api: https://math.docs.pyansys.com/version/stable/api/index.html
 .. _pytwin_docs: https://twin.docs.pyansys.com
@@ -178,7 +178,7 @@
 .. _pymapdl_techdemo_28_rst: https://raw.githubusercontent.com/ansys/pymapdl-examples/main/doc/source/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.rst
 .. _pymapdl_techdemo_28: https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html
 .. _pymapdl_docker_dir: https://github.com/ansys/pymapdl/blob/main/docker
-.. _pymapdl_docker_compose_base: https://github.com/ansys/pymapdl/blob/main/docker/docker-compose.yml
+.. _pymapdl_docker_compose_base: https://github.com/ansys/pymapdl/blob/main/docker/run/docker-compose.yml
 .. _pymapdl_docker_compose_local: https://github.com/ansys/pymapdl/blob/main/docker/docker-compose.local.yml
 .. _pymapdl_docker_compose_license_server: https://github.com/ansys/pymapdl/blob/main/docker/docker-compose.license_server.yml
 .. _pymapdl_discussion_differences_mapdl_pymapdl: https://github.com/ansys/pymapdl-reader/issues/185
@@ -190,7 +190,6 @@
 .. _pymapdl_conf_file: https://github.com/ansys/pymapdl/blob/main/doc/source/conf.py
 .. _pymapdl_search_issues_pr: https://github.com/ansys/pymapdl/issues?q=
 .. _pymapdl_latest_github_release: https://github.com/ansys/pymapdl/releases/latest
-.. _pymapdl_latest_pdf_doc: https://github.com/ansys/pymapdl/releases/download/v%%PYMAPDLVERSION%%.0/pymapdl-Documentation-%%PYMAPDLVERSION%%.0.pdf
 .. _pymapdl_discussion_speed_pymapdl_mapdl: https://github.com/ansys/pymapdl/discussions/757
 .. _pymapdl_devcontainer_configuration: https://github.com/ansys/pymapdl/blob/main/.devcontainer/devcontainer-local/devcontainer.json
 .. _pymapdl_build_docker_compose: https://github.com/ansys/pymapdl/tree/main/.devcontainer/docker-compose.yml

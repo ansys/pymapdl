@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -643,7 +643,7 @@ class Geometry:
             if amin or amax:
                 amax = amax or amin
                 amin = amin or 1
-                ninc = ninc or ""
+                ninc = ninc or ""  # type: ignore[assignment]
 
                 self._mapdl.asel("R", "AREA", vmin=amin, vmax=amax, vinc=ninc)
 
@@ -1294,7 +1294,7 @@ class Geometry:
             for each_volu in self.vnum:
                 self._mapdl.vsel("S", vmin=each_volu)
                 self._mapdl.aslv("S")
-                unstruct = surf.extract_cells(np.in1d(area_num, self.anum))
+                unstruct = surf.extract_cells(np.isin(area_num, self.anum))
                 pv.set_new_attribute(unstruct, "entity_num", int(each_volu))
                 volumes_.append(unstruct)
 
@@ -1383,7 +1383,7 @@ class Geometry:
 
     def _select_items(
         self,
-        items: Sequence[int],
+        items: Union[Sequence[int], np.ndarray],
         item_type: VALID_SELECTION_ENTITY_TP,
         sel_type: VALID_SELECTION_TYPE_TP,
     ) -> None:
@@ -1391,7 +1391,7 @@ class Geometry:
 
         Parameters
         ----------
-        items : sequence
+        items : sequence or np.ndarray
             Sequence of items.
 
         item_type : str

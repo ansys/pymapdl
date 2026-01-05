@@ -273,7 +273,7 @@ In such cases, if you try to start MAPDL from the command line you might see an 
             FlexNet Licensing error:-5,357
 
 
-If there are not enough licenses available, you might see an error similar to the above one. 
+This means that there are not enough licenses available to start MAPDL.
 In these cases you should contact your Ansys license administrator at your organization.
 
 If you are responsible for maintaining Ansys licensing or have a personal installation of Ansys, see the online
@@ -725,7 +725,7 @@ If you want to see which Ansys installations PyMAPDL has detected, use:
 
 Student versions are provided as **negative** versions because the Python dictionary
 does not accept two equal keys. The result of the
-:func:`get_available_ansys_installations() <ansys.tools.path.get_available_ansys_installations>`
+:func:`get_available_ansys_installations() <ansys.tools.common.path.get_available_ansys_installations>`
 method lists higher versions first and student versions last.
 
 .. warning::
@@ -803,7 +803,7 @@ Recommendations
 
 When connecting to an instance of MAPDL using gRPC (default), there are some cases
 where the MAPDL server might exit unexpectedly. There
-are several ways to improve MADPL performance and stability:
+are several ways to improve MAPDL performance and stability:
 
 Use ``mute`` to improve stability
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

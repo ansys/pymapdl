@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,14 +22,15 @@
 
 """Module for report features"""
 import os
+from typing import Type
 
-from ansys.mapdl.core import _HAS_ATP, _HAS_PYANSYS_REPORT, _HAS_PYVISTA
+from ansys.mapdl.core import _HAS_ATC, _HAS_PYANSYS_REPORT, _HAS_PYVISTA
 
 if _HAS_PYANSYS_REPORT:
     import ansys.tools.report as pyansys_report
 
-if _HAS_ATP:
-    from ansys.tools.path import get_available_ansys_installations
+if _HAS_ATC:
+    from ansys.tools.common.path import get_available_ansys_installations
 
 ANSYS_ENV_VARS = [
     "PYMAPDL_START_INSTANCE",
@@ -152,7 +153,7 @@ class Plain_Report:
         # List installed Ansys
         lines = ["", "Ansys Environment Report", "-" * 79]
         lines = ["\n", "Ansys Installation", "******************"]
-        if _HAS_ATP:
+        if _HAS_ATC:
             mapdl_install = get_available_ansys_installations()
 
             if not mapdl_install:
@@ -165,7 +166,7 @@ class Plain_Report:
         else:
             mapdl_install = None
             lines.append(
-                "Unable to locate any Ansys installations because 'ansys-tools-path is not installed."
+                "Unable to locate any Ansys installations because 'ansys-tools-common' is not installed."
             )
 
         install_info = "\n".join(lines)
@@ -189,12 +190,12 @@ class Plain_Report:
 # Determine which type of report will be used (depending on the
 # available packages)
 if _HAS_PYANSYS_REPORT:
-    base_report_class = pyansys_report.Report
+    base_report_class: Type[pyansys_report.Report] = pyansys_report.Report
 else:  # pragma: no cover
     base_report_class = Plain_Report
 
 
-class Report(base_report_class):
+class Report(base_report_class):  # type: ignore[misc]
     """A class for custom scooby.Report."""
 
     def __init__(

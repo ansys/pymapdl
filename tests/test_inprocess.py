@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -52,7 +52,7 @@ class MapdlInProcessRunner:
 
             self._exec_path = os.getenv("PYMAPDL_MAPDL_EXEC")
             if self._exec_path is None:
-                from ansys.tools.path import get_mapdl_path
+                from ansys.tools.common.path import get_mapdl_path
 
                 version: float | None = (
                     float(os.getenv("PYMAPDL_MAPDL_VERSION", 0)) or None

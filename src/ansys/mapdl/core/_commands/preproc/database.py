@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -25,8 +25,10 @@ list out the database, and control the numbering of entities in the
 database.
 """
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Database:
+
+class Database(CommandsBase):
     def aflist(self, **kwargs):
         """Lists the current data in the database.
 

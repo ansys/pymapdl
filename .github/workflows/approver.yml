@@ -24,6 +24,10 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   autoapprove:
     # This job only runs for pull request comments
@@ -33,7 +37,7 @@ jobs:
           github.event.comment.user.login == 'germa89'
         )) || ( github.event_name == 'workflow_dispatch' )
     permissions:
-      pull-requests: write
+      pull-requests: write  # Needed to approve pull requests
     runs-on: ubuntu-latest
     steps:
 

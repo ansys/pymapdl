@@ -16,8 +16,8 @@ jobs:
     name: "Check Links"
     uses: ./.github/workflows/doc-build.yml
     permissions:
-      contents: read
-      packages: read
+      contents: read  # Needed to read repository contents for link checking
+      packages: read  # Needed to pull Docker images from GitHub packages
     with:
       builder: linkcheck
       build_pdf: false
@@ -36,7 +36,7 @@ jobs:
     if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     permissions:
-      issues: write
+      issues: write  # Needed to create issues on linkcheck failures
     steps:
       - name: "Open issue"
         uses: jayqi/failed-build-issue-action@1a893bbf43ef1c2a8705e2b115cd4f0fe3c5649b #v1.2.0

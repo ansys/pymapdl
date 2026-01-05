@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -614,6 +614,7 @@ class Test_MAPDL_commands(TestClass):
         "mpwrite",
         "mwrite",
         "nplot",
+        "run",
         "sys",
         "vplot",
         "vwrite",

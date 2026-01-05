@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -66,46 +66,16 @@ from ansys.mapdl.core.cli import main
     help="Print running location info.",
 )
 def list_instances(instances, long, cmd, location) -> None:
-    import psutil
+    return _list_instances(instances, long, cmd, location)
+
+
+def _list_instances(instances, long, cmd, location):
     from tabulate import tabulate
 
+    from ansys.mapdl.core.cli.core import get_mapdl_instances
+
     # Assuming all ansys processes have -grpc flag
-    mapdl_instances = []
-
-    def is_grpc_based(proc):
-        cmdline = proc.cmdline()
-        return "-grpc" in cmdline
-
-    def get_port(proc):
-        cmdline = proc.cmdline()
-        ind_grpc = cmdline.index("-port")
-        return cmdline[ind_grpc + 1]
-
-    def is_valid_process(proc):
-        valid_status = proc.status() in [
-            psutil.STATUS_RUNNING,
-            psutil.STATUS_IDLE,
-            psutil.STATUS_SLEEPING,
-        ]
-        valid_ansys_process = ("ansys" in proc.name().lower()) or (
-            "mapdl" in proc.name().lower()
-        )
-        return valid_status and valid_ansys_process and is_grpc_based(proc)
-
-    for proc in psutil.process_iter():
-        # Check if the process is running and not suspended
-        try:
-            if is_valid_process(proc):
-                # Checking the number of children we infer if the process is the main process,
-                # or one of the main process thread.
-                if len(proc.children(recursive=True)) < 2:
-                    proc.ansys_instance = False
-                else:
-                    proc.ansys_instance = True
-                mapdl_instances.append(proc)
-
-        except (psutil.NoSuchProcess, psutil.ZombieProcess) as e:
-            continue
+    mapdl_instances = get_mapdl_instances()
 
     # printing
     if long:
@@ -124,23 +94,23 @@ def list_instances(instances, long, cmd, location) -> None:
 
     table = []
     for each_p in mapdl_instances:
-        if instances and not each_p.ansys_instance:
+        if instances and not each_p.get("is_instance", False):
             # Skip child processes if only printing instances
             continue
 
         proc_line = []
-        proc_line.append(each_p.name())
+        proc_line.append(each_p["name"])
 
         if not instances:
-            proc_line.append(each_p.ansys_instance)
+            proc_line.append(each_p.get("is_instance", False))
 
-        proc_line.extend([each_p.status(), get_port(each_p), each_p.pid])
+        proc_line.extend([each_p["status"], each_p["port"], each_p["pid"]])
 
         if cmd:
-            proc_line.append(" ".join(each_p.cmdline()))
+            proc_line.append(" ".join(each_p["cmdline"]))
 
         if location:
-            proc_line.append(each_p.cwd())
+            proc_line.append(each_p["cwd"])
 
         table.append(proc_line)
 

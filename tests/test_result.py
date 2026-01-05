@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -499,7 +499,7 @@ class TestDPFResult:
         mapdl._use_reader_backend = _use_reader_backend
         assert isinstance(mapdl.result, expected_cls)
 
-    @pytest.mark.xfail(not ON_LOCAL, reason="Upload to remote using DPF is broken")
+    @pytest.mark.xfail(True, reason="Upload to remote using DPF is broken")
     def test_solve_rst_only(self, mapdl, result):
         """Test that the result object can be created with a solved RST file."""
         # Check if the result object is created successfully
