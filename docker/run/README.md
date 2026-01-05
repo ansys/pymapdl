@@ -5,7 +5,6 @@ This directory contains Docker Compose files for running MAPDL, DPF, and license
 ## Contents
 
 - **`docker-compose.yml`**: Main Docker Compose configuration for running MAPDL and DPF services
-- **`license.docker-compose.yml`**: Docker Compose configuration for running a license server alongside MAPDL
 
 ## Usage
 
@@ -18,21 +17,13 @@ export DOCKER_IMAGE=myregistry.com/myimage:mytag
 export DPF_DOCKER_IMAGE=myregistry.com/mydpfimage:mydpftag  # optional
 
 # Start MAPDL service
-docker-compose up -d mapdl
+docker compose up -d mapdl
 
 # Start MAPDL with DPF
-docker-compose up -d mapdl dpf
+docker compose up -d mapdl dpf
 
 # Or use profiles
-docker-compose --profile mapdl-dpf up -d
-```
-
-### Running with Local License Server
-
-Use `license.docker-compose.yml` to run a containerized license server:
-
-```bash
-docker-compose -f license.docker-compose.yml up -d
+docker compose --profile mapdl-dpf up -d
 ```
 
 ## Available Services
