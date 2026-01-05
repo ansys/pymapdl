@@ -54,6 +54,10 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   migrate:
     name: Migrate PR from fork to main repo
@@ -64,8 +68,8 @@ jobs:
         ) || ( github.event_name == 'workflow_dispatch' )
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write  # Needed to create and push migration branches
+      pull-requests: write  # Needed to create pull requests and add comments
     steps:
 
       - name: Setup the configuration
@@ -295,7 +299,7 @@ jobs:
 
       - name: Checkout repo
         if : ${{ env.CONTINUE == 'true'}}
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
         with:
           ref: main
           persist-credentials: true # zizmor: ignore[artipacked]
