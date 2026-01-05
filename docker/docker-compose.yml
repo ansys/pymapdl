@@ -20,24 +20,24 @@
 # For example:
 #
 #    .. code:: bash
-# 
+#
 #       export ANSYSLMD_LICENSE_FILE=1055@mylicenseserver
 #       export DOCKER_IMAGE=myregistry.com/myimage:mytag
 #       export DPF_DOCKER_IMAGE=myregistry.com/mydpfimage:mydpftag # optional
 #
 #    Additionally you can also configure the following environment variables:
-# 
+#
 #    - ``AWP_ROOT``: Set the environment variable ``AWP_ROOTXXX`` where XXX is the MAPDL version.
 #      For instance, MAPDL 2025R1 is 251.
 #    - ``AWP_ROOT_VALUE``: Set the value of the ``AWP_ROOTXXX`` environment variable, which normally points
 #      to the MAPDL installation directory.
 #    - ``DOCKER_USER``: It should match the username inside the container. You can obtain this value by executing
 #      ``echo $USER`` in a terminal inside the container.
-# 
+#
 # 2. Run the following command from the ``docker`` directory.
-# 
+#
 #    .. code:: bash
-# 
+#
 #       cd docker
 #       docker-compose up -d %service_name%
 #
@@ -47,22 +47,22 @@
 #   specified port to allow incoming connections to it.
 # - ``dpf``: DPF service which can be used for data processing.
 # - ``mapdl-local``: Use this service to start an ubuntu docker image with MAPDL installed in it.
-#   It is said to be running as 'local' because it will mount the parent directory (``../``) in '/home/mapdl/pymapdl' 
+#   It is said to be running as 'local' because it will mount the parent directory (``../``) in '/home/mapdl/pymapdl'
 #   This service allow VS Code to attach to it and do development inside the container.
 #   and it will override the entrypoint to run the 'bash' command.
 #
 # You can also specify multiple services:
 #
 #    .. code:: bash
-# 
+#
 #       docker-compose up -d mapdl dpf
 #
 # Or use profiles:
 #
-# 
+#
 #    .. code:: bash
-# 
-#       docker-compose --profile dpf up -d 
+#
+#       docker-compose --profile dpf up -d
 #
 # The following profiles are are available:
 #

@@ -623,7 +623,7 @@ This document contains the release notes for the project.
 
         * - Build: update pyvista requirement from <=0.45.2 to <=0.45.3
           - `#4166 <https://github.com/ansys/pymapdl/pull/4166>`_
-        
+
         * - build: bump numpy from 2.2.5 to 2.2.6 in the minimal group
           - `#3944 <https://github.com/ansys/pymapdl/pull/3944>`_
 

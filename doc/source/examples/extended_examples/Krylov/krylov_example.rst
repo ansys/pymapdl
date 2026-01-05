@@ -7,7 +7,7 @@ Harmonic analysis using the frequency-sweep Krylov method
 
 This example shows how to use the frequency-sweep Krylov method
 implemented in PyMAPDL. For more information, including the
-theory behind this method, see `Frequency-Sweep Harmonic Analysis via the Krylov Method 
+theory behind this method, see `Frequency-Sweep Harmonic Analysis via the Krylov Method
 <ansys_krylov_sweep_harmonic_analysis_>`_
 in the **Structural Analysis** guide for Mechanical APDL.
 
@@ -51,7 +51,7 @@ Perform required imports and launch MAPDL.
     # Importing and connecting PyAnsys Math with PyMAPDL
     mm = AnsMath(mapdl)
 
-  
+
 Define parameters
 -----------------
 
@@ -71,14 +71,14 @@ and can have ten elements per wavelength.
     c0 = 340                         # speed of Sound
     frq = 1000                       # excitation freq   Hz
     visco = 0.9                      # viscosity
-    
+
     TP = 1/frq
     WL = c0 * TP
     no_wl = 3                        # no of wavelengths in space
 
     cyl_L = no_wl * WL               # length of duct
     cyl_r = 0.025 * cyl_L            # cross section of duct
-    
+
     nelem_wl = 10                    # no of elements per wavelength
     tol_elem = nelem_wl * no_wl      # total number of elements across length
 
@@ -91,7 +91,7 @@ with no FSI interface in the element.
 .. code:: ipython3
 
     mapdl.prep7()
-    
+
     mapdl.et(1,'FLUID220', kop2=1)   # uncoupled acoustic element without FSIs
     mapdl.mp("DENS", 1, rho)
     mapdl.mp("SONC", 1, c0)
@@ -108,17 +108,17 @@ four segments for uniform generation of the mesh in each segment.
 
     # Set back to default
     mapdl.csys(0)
-    
+
     # Rotate working plane for the cylinder generation
     mapdl.wpcsys(-1)
     mapdl.wprota(thzx=90)
 
-    # Generate a circular area with a specified radius 
+    # Generate a circular area with a specified radius
     mapdl.cyl4(0, 0, cyl_r)
 
     mapdl.wpcsys(-1)
 
-    # Extrude the circular area to generate a cylinder of specified length 
+    # Extrude the circular area to generate a cylinder of specified length
     mapdl.vext("ALL", dx=cyl_L)
 
     # Split the cylinder into four segments to create a more uniform mesh
@@ -127,7 +127,7 @@ four segments for uniform generation of the mesh in each segment.
     mapdl.vsbw("ALL", keep='DELETE')
 
     mapdl.wpcsys(-1)
-    
+
     # Create a component with the created volume
     mapdl.cm('cm1', 'volu')
 
@@ -144,7 +144,7 @@ Create the mesh and plot the FE model.
     mapdl.mat(1)
     mapdl.type(1)
 
-    # Select volume to mesh    
+    # Select volume to mesh
     mapdl.cmsel("S", "cm1")
 
 
@@ -168,7 +168,7 @@ a length element size constraint to the longitudinal lines.
     # Mesh
     mapdl.vsweep('ALL')
     mapdl.allsel()
-    
+
     # Plot the FE model
     mapdl.eplot()
 
@@ -189,10 +189,10 @@ Apply pressure load on one end and output impedance on other end of the acoustic
     mapdl.asel('R',"EXT")  # select external areas
     mapdl.asel('R',"LOC","x",0)
     mapdl.nsla('S',1)
-    
+
     # Apply pressure
     mapdl.d('ALL','PRES', 1)
-    
+
     # Select nodes on the areas where impedance is to be applied
     mapdl.cmsel("S", "cm1")
     mapdl.aslv()
@@ -251,7 +251,7 @@ The first ten modes are:
 |     10      |    1584.36     |
 +-------------+----------------+
 
-    
+
 
 Run harmonic analysis using Krylov method
 -----------------------------------------
@@ -363,15 +363,15 @@ Plot the calculated data.
 .. code:: ipython3
 
     plt.plot(sorted_x_data, sorted_y_data, linewidth= 3.0, color='b', label='Krylov method')
-    
+
     # Name the graph and the x-axis and y-axis
     plt.title("Pressure distribution as a function of length")
     plt.xlabel("Length coordinate")
     plt.ylabel("Pressure")
-    
+
     # Add legend
     plt.legend()
-    
+
     # Load the display window
     plt.show()
 
@@ -389,7 +389,7 @@ This code plots the frequency response function for a node along 0.2 in the X di
 
     # Pick node closest to 0.2 in X direction, Y&Z = 0
     node_number = mapdl.queries.node(0.2, 0, 0)
-    
+
 
 Get the response of the system for the selected node
 over a range of frequencies, such as 0 to 1000 Hz.
@@ -417,7 +417,7 @@ Sort the results.
     frf_List = sorted(frf_List)
     frf_x, frf_y = zip(*frf_List)
 
-Plot the frequency response function for the selected node. 
+Plot the frequency response function for the selected node.
 
 .. code:: python
 

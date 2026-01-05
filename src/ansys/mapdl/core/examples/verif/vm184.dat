@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ NSEL,ALL
 FK,2,FX,0.25           ! APPLY AXIAL FORCES
 *REPEAT,4,2
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FKDELE,ALL,FX          ! DELETE AXIAL FORCES
 FK,2,FY,0.25           ! APPLY IN-PLANE LOADS
@@ -94,7 +94,7 @@ LABEL(1,2) = 'in','in','in'
 *VFILL,VALUE(1,3),DATA,ABS(UX1/(3E-5)),ABS(UY1/.108),ABS(UZ1/.432)
 SAVE,TABLE_1
 FINISH
-/CLEAR, NOSTART 
+/CLEAR, NOSTART
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /PREP7
 smrt,off
@@ -146,7 +146,7 @@ F,TOPP,FX,(1/6)
 F,BOTT,FX,(1/6)
 F,MIDD,FX,(1/3)
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FDELE,ALL              ! REMOVE ALL FORCES
 F,RGHT,FY,(1/6)
@@ -187,7 +187,7 @@ LABEL(1,2) = 'in','in','in'
 *VFILL,VALUE(1,3),DATA,ABS(UX2/(3E-5)),ABS(UY2/.108),ABS(UZ2/.432)
 SAVE,TABLE_2
 FINISH
-/CLEAR, NOSTART 
+/CLEAR, NOSTART
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /PREP7
 smrt,off
@@ -225,7 +225,7 @@ F,TOPP,FX,(1/6)
 F,BOTT,FX,(1/6)
 F,MIDD,FX,(1/3)
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FDELE,ALL              ! REMOVE ALL FORCES
 F,RGHT,FY,(1/6)
@@ -318,7 +318,7 @@ F,TOPP,FX,(1/6)
 F,BOTT,FX,(1/6)
 F,MIDD,FX,(1/3)
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FDELE,ALL              ! REMOVE ALL FORCES
 F,RGHT,FY,(1/6)

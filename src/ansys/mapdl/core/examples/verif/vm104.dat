@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
 ! SOFTWARE.
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
-/VERIFY,VM104  
+/VERIFY,VM104
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /PREP7
@@ -32,8 +32,8 @@ ANTYPE,TRANS
 ET,1,PLANE55
 MP,DENS,1,1000
 MP,KXX,1,0.6
-MPTEMP,1,-10,-1,0,10                  
-MPDATA,ENTH,1,1,0,37.8E6,79.8E6,121.8E6  ! ENTHALPY 
+MPTEMP,1,-10,-1,0,10
+MPDATA,ENTH,1,1,0,37.8E6,79.8E6,121.8E6  ! ENTHALPY
 K,1
 K,2,0.01
 K,3,0.01,0.001
@@ -45,8 +45,8 @@ A,1,2,3,4
 ESIZE,,15
 AMESH,1
 FINISH
-/SOLU    
-OUTRES,,ALL  
+/SOLU
+OUTRES,,ALL
 BFUNIF,TEMP                              ! INITIAL TEMPERATURE
 NSEL,S,LOC,X
 D,ALL,TEMP,-5.0                          ! SURFACE TEMPERATURE
@@ -103,4 +103,4 @@ LABEL(1,2) = '.002 m) ','004 m)  '
 /OUT
 FINISH
 *LIST,vm104,vrt
- 
+

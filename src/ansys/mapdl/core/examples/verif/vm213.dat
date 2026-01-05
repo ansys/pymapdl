@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -83,7 +83,7 @@ NUI=50                  ! ABSOLUTE RELUCTIVITY OF IRON
 N1=10                   ! NUMBER OF TURNS IN COIL1
 N2=20                   ! NUMBER OF TURNS IN COIL2
 
-!      EXCITATION DATA 
+!      EXCITATION DATA
 
 SYMFAC=2                ! SYMMETRIC FACTOR FOR INDUCTANCE COMPUTATION
 NC=2                    ! NUMBER OF COILS
@@ -262,7 +262,7 @@ SSUM
 
 FINISH
 
-! COMPUTE INCREMENTAL INDUCTANCE 
+! COMPUTE INCREMENTAL INDUCTANCE
 INDI(1,1)=2*IENE(1,1)/CUR(1)**2*SYMFAC
 INDI(2,2)=2*IENE(2,2)/CUR(2)**2*SYMFAC
 INDI(1,2)=(IENE(1,2)-IENE(1,1)-IENE(2,2))/(CUR(1)*CUR(2))*SYMFAC
@@ -303,7 +303,7 @@ LABEL1(1)= 'COIL1','COIL2'
 /COM,------------------- VM213  RESULTS COMPARISON ---------------------
 /COM
 /COM,   ENERGY (J)   |   TARGET   |  Mechanical APDL  |   RATIO
-/COM 
+/COM
 *VWRITE,LABENG(1),VALENG(1,1),RESENG(1,1),VALENG(1,2)
 (1X,A10,'     ',F10.4,'    ',F10.4,'     ',1F13.3)
 /COM

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ pi=3.141593
 a=10			    !crack length
 
 et,1,plane183       ! Plane183 element
-keyopt,1,3,2        ! Plane strain element 			
+keyopt,1,3,2        ! Plane strain element
 mp,ex,1,e
 mp,nuxy,1,nu
 
@@ -74,7 +74,7 @@ nsel,r,loc,x,10
 d,all,ux,0
 nsel,all
 lsel,s,line,,4
-sfl,all,press,-sig		
+sfl,all,press,-sig
 lsel,all
 
 nsel,s,loc,y,0
@@ -86,7 +86,7 @@ cint,type,sifs        ! calculate stress intensity factors
 cint,ctnc,crack1      ! crack ID
 cint,ncon,3           ! number of countours
 cint,symm,on          ! symmetry on
-cint,norm,0,2         
+cint,norm,0,2
 cint,list
 allsel,all
 solve
@@ -110,7 +110,7 @@ norm_sif=k1/k0
 LABEL(1,1) = 'KI'
 *VFILL,VALUE(1,1),DATA,3
 *VFILL,VALUE(1,2),DATA,norm_sif
-*VFILL,VALUE(1,3),DATA,ABS(norm_sif/3 ) 
+*VFILL,VALUE(1,3),DATA,ABS(norm_sif/3 )
 SAVE,TABLE_1
 FINI
 /CLEAR,NOSTART
@@ -127,7 +127,7 @@ pi=3.141593
 a=10			    !crack length
 
 et,1,plane183       ! Plane183 element
-keyopt,1,3,2        ! Plane strain element 			
+keyopt,1,3,2        ! Plane strain element
 mp,ex,1,e
 mp,nuxy,1,nu
 
@@ -164,7 +164,7 @@ nsel,all
 lsel,s,line,,4
 sfl,all,press,-sig
 lsel,all
-		
+
 nsel,s,loc,y,0
 nsel,r,loc,x,0
 cm,crack1,node        ! define the crack tip node component
@@ -173,7 +173,7 @@ cint,new,1
 cint,ctnc,crack1      ! crack ID
 cint,ncon,3           ! number of countours
 cint,symm,on          ! symmetry on
-cint,norm,0,2         
+cint,norm,0,2
 cint,list
 allsel,all
 solve
@@ -184,8 +184,8 @@ fini
 prcint,1                     ! Get the J1,J2,J3 values
 *get,j1,cint,1,ctip,node(0,0,0),,1,,
 *get,j2,cint,1,ctip,node(0,0,0),,2,,
-*get,j3,cint,1,ctip,node(0,0,0),,3,, 
-jc1 =(abs(j1)+abs(j2)+abs(j3))/3 
+*get,j3,cint,1,ctip,node(0,0,0),,3,,
+jc1 =(abs(j1)+abs(j2)+abs(j3))/3
 *stat,jc1
 con1 = ((pi*a)**0.5)
 con2 = E/(1-(nu*nu))
@@ -193,14 +193,14 @@ K1 = ((con2*jc1)**0.5)
 k0=(sig*con1)
 norm_sif = K1/k0
 /out,
-*status,norm_sif 
+*status,norm_sif
 
 *DIM,LABEL,CHAR,1,5
 *DIM,VALUE,,1,3
 LABEL(1,1) = 'KI'
 *VFILL,VALUE(1,1),DATA,3
 *VFILL,VALUE(1,2),DATA,norm_sif
-*VFILL,VALUE(1,3),DATA,ABS(norm_sif/3 ) 
+*VFILL,VALUE(1,3),DATA,ABS(norm_sif/3 )
 SAVE,TABLE_2
 
 /NOPR
@@ -211,7 +211,7 @@ SAVE,TABLE_2
 /COM,              |   TARGET   |   MECHANICAL APDL   |   RATIO
 /COM,
 RESUME,TABLE_1
-/COM,USING STRESS INTENSITY FACTOR CALCULATION 
+/COM,USING STRESS INTENSITY FACTOR CALCULATION
 *VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
 (1X,A8,'   ',F10.3,'  ',F12.3,'   ',1F16.3)
 /COM,
@@ -229,5 +229,5 @@ RESUME,TABLE_2
 
 /OUT
 FINISH
-*list,vmr020-t2a-183,vrt 
-        
+*list,vmr020-t2a-183,vrt
+

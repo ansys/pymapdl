@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM73
-/PREP7                       
+/PREP7
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /TITLE, VM73, FREE VIBRATION WITH COULOMB DAMPING
@@ -33,7 +33,7 @@ N,1
 N,2
 E,1,2
 FINISH
-/SOLU    
+/SOLU
 ANTYPE,TRANS                 ! NONLINEAR TRANSIENT DYNAMIC ANALYSIS
 TRNOPT, , , , , ,HHT
 D,1,UX
@@ -49,7 +49,7 @@ TINTP,,,,0.5,0.5,0.2
 SOLVE
 FINISH
 /POST26
-NSOL,2,2,U,X,UX              ! STORE UX DISPLACEMENT OF NODE 2 
+NSOL,2,2,U,X,UX              ! STORE UX DISPLACEMENT OF NODE 2
 ESOL,3,1,,SMISC,1,F1         ! STORE FORCE F1 OF ELEMENT 1 AS VARIABLE 3
 PRVAR,2,3                    ! PRINT VARIABLES 2 AND 3
 /GRID,1                      ! TURN GRID ON

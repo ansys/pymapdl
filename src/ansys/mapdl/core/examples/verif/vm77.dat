@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -66,17 +66,17 @@ SOLVE
 
 TIME,.075               ! TIME AT END OF LOAD STEP
 F,2,FY,20               ! FORCE IS RAMPED (KBC,0 IS DEFAULT) TO 20
-SOLVE  
+SOLVE
 
 TIME,.1                 ! CONSTANT FORCE UNTIL TIME = 0.1
 SOLVE
 FINISH
 
-/SOLU    
+/SOLU
 C***    EXPANSION PASS USING BEAM188 AND MASS21 ELEMENTS
 EXPASS,ON               ! EXPANSION PASS ON
 EXPSOL,,,0.092          ! TIME OF MAXIMUM RESPONSE
-SOLVE            
+SOLVE
 FINISH
 
 /OUT,
@@ -96,7 +96,7 @@ STORE
 *DIM,VALUE_1,,2,3
 LABEL_1(1,1) = 'T_MAX, s','Y_MAX, i'
 LABEL_1(1,2) = 'ec      ','n       '
-*VFILL,VALUE_1(1,1),DATA,.092,.331 
+*VFILL,VALUE_1(1,1),DATA,.092,.331
 *VFILL,VALUE_1(1,2),DATA,TMAX,YMAX
 *VFILL,VALUE_1(1,3),DATA,ABS(TMAX/.092),ABS(YMAX/.331)
 *DIM,LABEL_2,CHAR,1,2
@@ -105,7 +105,7 @@ LABEL_2(1,1) = 'SIG_BEND'
 LABEL_2(1,2) = ', KSI   '
 *VFILL,VALUE_2(1,1),DATA,-18.6
 *VFILL,VALUE_2(1,2),DATA,STRSS
-*VFILL,VALUE_2(1,3),DATA,ABS(STRSS/18.6) 
+*VFILL,VALUE_2(1,3),DATA,ABS(STRSS/18.6)
 /COM
 /OUT,vm77,vrt
 /COM,------------------- VM77 RESULTS COMPARISON --------------
