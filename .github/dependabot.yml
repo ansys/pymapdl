@@ -22,7 +22,6 @@ updates:
 
   - directory: "/" # Location of package manifests
     package-ecosystem: "pip" # See documentation for possible values
-    insecure-external-code-execution: allow
     schedule:
       interval: "weekly"
       day: "friday"
