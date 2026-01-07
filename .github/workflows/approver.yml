@@ -19,7 +19,7 @@ on:
         type: number
         required: true
 
-  issue_comment:                                     
+  issue_comment:
     types: [created, edited]
 
 permissions: {}

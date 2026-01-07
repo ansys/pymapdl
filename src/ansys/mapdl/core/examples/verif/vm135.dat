@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 /TITLE, VM135, BENDING OF A BEAM ON AN ELASTIC FOUNDATION
 C***    STR. OF MATL., TIMOSHENKO, PART 2, 3RD ED., PAGE 12
 /PREP7
-ET,1,BEAM189             ! BEAM     
+ET,1,BEAM189             ! BEAM
 SECTYPE,1,BEAM,RECT
 SECDATA,5,4.224
 MP,EX  ,1,30E6
@@ -52,7 +52,7 @@ D,1,UX
 DSYM,SYMM,Z
 OUTPR,,1
 FINISH
-/SOLU    
+/SOLU
 /OUT,SCRATCH
 SOLVE
 /OUT,
@@ -78,4 +78,3 @@ LABEL(1,2) = ' in '
 /NOPR
 FINISH
 *LIST,vm135,vrt
-

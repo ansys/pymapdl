@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -152,7 +152,7 @@ RESUME,temp,db
 ET,5,SOLID185                  ! 3-D 8-NODE STRUCTURAL SOLID
 KEYOPT,5,6,1                   ! Mixed U-P FORMULATION
 ET,2,TARGE170
-ET,3,CONTA174                  ! 3-D 8 NODE CONTACT ELEMENT WITH DROPPED MIDSIDE NODES 
+ET,3,CONTA174                  ! 3-D 8 NODE CONTACT ELEMENT WITH DROPPED MIDSIDE NODES
 KEYOPT,3,10,0
 KEYOPT,3,5,4
 ET,4,200,6                     ! 2-D 4 NODED MESH200

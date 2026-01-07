@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -51,10 +51,10 @@ NSEL,S,LOC,X,12
 CP,1,ROTY,ALL           ! COUPLE ROTATIONS AT FREE END
 TORQ=7.854              ! DEFINE HALF TOTAL LOAD
 F,2,MY,TORQ
-NSEL,ALL                ! RESELECT ALL NODES 
+NSEL,ALL                ! RESELECT ALL NODES
 FINISH
 /SOLU
-DMPOPT,RNNN,YES    
+DMPOPT,RNNN,YES
 AUTOTS,ON               ! USE AUTOMATIC LOAD STEPPING
 NSUBST,10,100,10        ! START WITH MAX OF 10 SUBSTEPS FOR EACH LOAD STEP
 CNVTOL,F,1,1.0E-2		! FORCE CONVERGENCE
@@ -66,7 +66,7 @@ SOLVE
 FINISH
 
 /CLEAR,NOSTART          ! CLEAR THE DATA BASE
-/SOLU      
+/SOLU
 ANTYPE,,REST            ! RESTART ANALYSIS
 F,2,MY,TORQ*2           ! APPLY FULL LOAD
 SOLVE
@@ -126,7 +126,7 @@ TORQ=7.854              ! DEFINE HALF TOTAL LOAD
 F,2,MY,TORQ
 NSEL,ALL                ! RESELECT ALL NODES
 FINISH
-/SOLU    
+/SOLU
 AUTOTS,ON               ! USE AUTOMATIC LOAD STEPPING
 NSUBST,10,100,10        ! START WITH MAX OF 10 SUBSTEPS FOR EACH LOAD STEP
 CNVTOL,F,1,1.0E-2		! FORCE CONVERGENCE

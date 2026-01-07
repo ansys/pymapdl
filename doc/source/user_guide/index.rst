@@ -104,7 +104,7 @@ example, if you input an invalid command:
 
    >>> mapdl.run("AL, 1, 2, 3")
 
-   MapdlRuntimeError: 
+   MapdlRuntimeError:
    AL, 1, 2, 3
 
    DEFINE AREA BY LIST OF LINES
@@ -112,8 +112,8 @@ example, if you input an invalid command:
    TRAVERSED IN SAME DIRECTION AS LINE     1)
 
    *** ERROR ***                           CP =       0.338   TIME= 09:45:36
-   Keypoint 1 is referenced by only one line.  Improperly connected line   
-   set for AL command.                                                     
+   Keypoint 1 is referenced by only one line.  Improperly connected line
+   set for AL command.
 
 This ``MapdlRuntimeError`` was caught immediately. This means that
 you can write your MAPDL scripts in Python, run them interactively, and
@@ -157,7 +157,7 @@ Additionally, exceptions are caught and handled within Python.
 
    >>> mapdl.run("AL, 1, 2, 3")
 
-   Exception: 
+   Exception:
    AL, 1, 2, 3
 
    DEFINE AREA BY LIST OF LINES
@@ -165,8 +165,8 @@ Additionally, exceptions are caught and handled within Python.
    (TRAVERSED IN SAME DIRECTION AS LINE     1)
 
    *** ERROR ***                           CP =       0.338   TIME= 09:45:36
-   Keypoint 1 is referenced by only one line.  Improperly connected line   
-   set for AL command.                                                     
+   Keypoint 1 is referenced by only one line.  Improperly connected line
+   set for AL command.
 
 
 For longer scripts, instead of sending commands to MAPDL as in the

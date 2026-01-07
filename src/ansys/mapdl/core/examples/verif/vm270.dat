@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -51,7 +51,7 @@ I = 0.050                   ! COIL CURRENT / A
 AC = (R_2-R_1)*L_1          ! COIL AREA / M^2
 JS = N*I/AC                 ! CURRENT DENSITY
 SD = SE + DEL
-                  
+
 ! PERMANENT MAGNET
 ! SAMARIUM-COBALT
 
@@ -90,7 +90,7 @@ NUMCMP,AREA
 
 ET,1,PLANE233,0,0,1     	! 2-D MAGNETIC (AZ) AXISYMMETRIC SOLID
 KEYOP,1,7,1             	! CONDENCE FMAG FORCES TO ELEMENT CORNER NODES
-ET,2,110,,1,1           	! INFIN BOUNDARY 
+ET,2,110,,1,1           	! INFIN BOUNDARY
 
 ! MATERIALS
 
@@ -228,7 +228,7 @@ FINISH
 RESUME,TABLE_1
 /COM,
 /OUT,vm270,vrt
-/COM,-----------------------VM270 RESULTS COMPARISON ----------------------- 
+/COM,-----------------------VM270 RESULTS COMPARISON -----------------------
 /COM,
 /COM,				|  TARGET   |   Mechanical APDL  |   RATIO
 /COM,

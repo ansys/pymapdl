@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,vmr049-cr4-182
-/TITLE,vmr049-cr4-182,PRESSURISED CYLINDER CREEP BENCHMARK 
+/TITLE,vmr049-cr4-182,PRESSURISED CYLINDER CREEP BENCHMARK
 /COM,NAFEMS REPORT R0049, TEST:  CR-4
 /SHOW,JPEG
 JPGPRF,500,100,1

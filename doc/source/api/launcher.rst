@@ -16,7 +16,7 @@ library `ansys-tools-common.path <ansys_tools_common_>`_.
    get_default_ansys_version
    launch_mapdl
    close_all_local_instances
-   
+
 
 ``ansys-tools-common.path`` functions
 --------------------------------------
@@ -25,7 +25,7 @@ library `ansys-tools-common.path <ansys_tools_common_>`_.
 
 .. autosummary::
    :toctree: _autosummary
-   
+
    change_default_ansys_path
    find_mapdl
    save_ansys_path

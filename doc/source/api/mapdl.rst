@@ -110,4 +110,3 @@ Constants
    mapdl_grpc.MapdlGrpc.mute
    mapdl_grpc.MapdlGrpc.port
    mapdl_grpc.MapdlGrpc.upload
-

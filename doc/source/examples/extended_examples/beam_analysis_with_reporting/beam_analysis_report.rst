@@ -112,7 +112,7 @@ The ``SECDATA`` command defines the I-beam geometry where:
 
 * First two parameters: top and bottom flange widths
 * Third parameter: total beam height
-* Fourth and fifth parameters: flange thicknesses  
+* Fourth and fifth parameters: flange thicknesses
 * Sixth parameter: web thickness
 
 Node and Element Generation
@@ -547,7 +547,7 @@ It provides a foundation for developing robust engineering analysis tools and
 workflows using PyMAPDL by combining:
 
 * Parameterized modeling
-* Comprehensive result extraction  
+* Comprehensive result extraction
 * Analytical verification
 * Automated report generation
 

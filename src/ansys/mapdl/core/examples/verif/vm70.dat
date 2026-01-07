@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -32,20 +32,20 @@ SECT,1,BEAM,ASEC
 SECD,273.9726,(1000/3),,(1000/3),,1E-6  ! A = 273.9726, I = (1000/3), H = 14
 MP,EX,1,30E6
 MP,DENS,1,73E-5
-K,1 
-K,2,240 
+K,1
+K,2,240
 L,1,2
-ESIZE,,8 
+ESIZE,,8
 LMESH,1
-NSEL,S,LOC,X,0 
+NSEL,S,LOC,X,0
 D,ALL,UY
-NSEL,S,LOC,X,240 
+NSEL,S,LOC,X,240
 D,ALL,UX,,,,,UY
 NSEL,ALL
 D,ALL,ROTY,,,,,ROTX,UZ
 FINISH
 /out,scratch
-/SOLU    
+/SOLU
 ANTYPE,MODAL                 ! MODE-FREQUENCY ANALYSIS
 MODOPT,LANB,3
 MXPAND,3,,,YES               ! EXPAND FIRST MODE SHAPE, CALCULATE ELEMENT STRESSES
@@ -55,7 +55,7 @@ SOLVE
 *GET,FREQ,MODE,1,FREQ
 FINISH
 /out,scratch
-/SOLU    
+/SOLU
 ANTYPE,SPECTR                ! SPECTRUM ANALYSIS
 SPOPT,SPRS                   ! SINGLE POINT SPECTRUM
 SED,,1                       ! GLOBAL Y-AXIS AS SPECTRUM DIRECTION
@@ -76,7 +76,7 @@ STRSS=(-1*MZ*(HEIGHT/2))/(1000/3)
 *GET,DEF,NODE,10,U,Y
 *DIM,LABEL,CHAR,3,2
 *DIM,VALUE,,3,3
-LABEL(1,1) = 'f,      ','DEF.    ','SIG MAX,' 
+LABEL(1,1) = 'f,      ','DEF.    ','SIG MAX,'
 LABEL(1,2) = '      Hz','      in','     psi'
 *VFILL,VALUE(1,1),DATA,6.0979,.56,20158
 *VFILL,VALUE(1,2),DATA,FREQ,DEF,ABS(STRSS)

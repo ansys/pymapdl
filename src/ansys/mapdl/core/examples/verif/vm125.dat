@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -55,7 +55,7 @@ ET,2,MATRIX50,1,,,,,1  ! SUPERELEMENT (RADIATION MATRIX)
 TYPE,2
 SE,VM125
 TOFFST,460.0           ! TEMPERATURE OFFSET FOR ABSOLUTE SCALE
-LSEL,S,LINE,,1,18 
+LSEL,S,LINE,,1,18
 NSLL,S,1               ! SELECT INNER CYLINDER NODES
 D,ALL,TEMP,540         ! T1 = 540 + 460 = 1000 DEG. R.
 LSEL,S,LINE,,19,36
@@ -64,7 +64,7 @@ D,ALL,TEMP,0.0         ! T2 = 460 DEG. R.
 NSEL,ALL
 LSEL,ALL
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 /POST1
@@ -97,4 +97,3 @@ LABEL(1,2) = '-in)'
 FINISH
 /DELETE,VM125,sub
 *LIST,vm125,vrt
-

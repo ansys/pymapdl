@@ -2,7 +2,7 @@
 name: "Documentation Build"
 
 on:
-  workflow_call:  
+  workflow_call:
     inputs:
       builder:
         description: |
@@ -215,7 +215,7 @@ jobs:
         shell: bash
         run: |
           .ci/waiting_services.sh
-      
+
       - name: Install Quarto
         if: ${{ inputs.build_cheatsheet }}
         uses: quarto-dev/quarto-actions/setup@8a96df13519ee81fd526f2dfca5962811136661b #v2.2.0
@@ -228,7 +228,7 @@ jobs:
         shell: bash
         run: |
           quarto --version
-      
+
       - name: "Install Poppler for PDF to PNG conversion"
         if: ${{ inputs.build_cheatsheet }}
         shell: bash

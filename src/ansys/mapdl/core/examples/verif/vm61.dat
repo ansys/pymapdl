@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ SECD,1,1,,1,,1
 MODOPT,LANB,3                    ! SELECT THE BLOCK LANCZOS EIGENSOLVER
 MP,EX,1,3E7
 MP,DENS,1,73E-5
-K,1 
+K,1
 K,2,800
 L,1,2
 ESIZE,,11
@@ -42,7 +42,7 @@ OUTPR,BASIC,1
 D,ALL,UY,,,,,ROTZ,UZ,ROTY,ROTX   ! ALLOW UX DOF'S ONLY
 FINISH
 /out,scratch
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 /out

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -48,10 +48,10 @@ E,3,4
 KBC,1                    ! STEP BOUNDARY CONDITIONS
 D,4,VOLT,100             ! NODAL VOLTAGE
 D,1,VOLT,0               ! GROUND NODE
-OUTPR,ALL,1 
+OUTPR,ALL,1
 OUTPR,VENG,NONE
 FINISH
-/SOLU    
+/SOLU
 /OUT,SCRATCH
 SOLVE
 FINISH
@@ -111,10 +111,10 @@ REAL,6
 E,4,1,5
 KBC,1                    ! STEP BOUNDARY CONDITIONS
 D,1,VOLT,0               ! GROUND NODE
-OUTPR,ALL,1 
+OUTPR,ALL,1
 OUTPR,VENG,NONE
 FINISH
-/SOLU    
+/SOLU
 /OUT,SCRATCH
 SOLVE
 FINISH
@@ -169,4 +169,3 @@ FINISH
 /DELETE,TABLE_2
 FINISH
 *LIST,vm117,vrt
-

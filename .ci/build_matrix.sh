@@ -7,7 +7,7 @@
 # List of versions
 versions=(
     # if added more "latest", change "$LATEST"
-    'v25.2-ubuntu-cicd' 
+    'v25.2-ubuntu-cicd'
     'latest-ubuntu-student'
     'v25.2.0'
     'v25.1.0'
@@ -37,7 +37,7 @@ ON_REMOTE="${ON_REMOTE:-false}"
 
 # Do not process more than the $AUTH_USER_LIMIT_VERSIONS versions in above list
 AUTH_USER_LIMIT_VERSIONS="${AUTH_USER_LIMIT_VERSIONS:-2}"
-AUTH_USER_LIMIT=$((LATEST+AUTH_USER_LIMIT_VERSIONS*3)) 
+AUTH_USER_LIMIT=$((LATEST+AUTH_USER_LIMIT_VERSIONS*3))
 
 # Students licenses only last a year, hence $NON_AUTH_USER_LIMIT_VERSIONS cannot be more than 2.
 NON_AUTH_USER_LIMIT_VERSIONS="${NON_AUTH_USER_LIMIT_VERSIONS:-2}"
@@ -48,7 +48,7 @@ LIMIT_VERSIONS="${LIMIT_VERSIONS:-0}"
 HARD_LIMIT_VERSION=$((LATEST+LIMIT_VERSIONS*3))
 
 # Checking if extended testing must be done
-# 
+#
 
 if [[ $ON_SCHEDULE || ( $ON_WORKFLOW_DISPATCH && $RUN_ALL_TEST ) || ( $ON_PUSH && $HAS_TAG ) ]]; then
     extended_testing=true
@@ -62,7 +62,7 @@ counter=0
 
 # Loop through each version
 for version in "${versions[@]}"; do
-    
+
     # 1 based counter
     ((counter++))
 
@@ -75,13 +75,13 @@ for version in "${versions[@]}"; do
     # checking version config
     if [[ "$version" == *"ubuntu"* ]]; then
         ON_UBUNTU=true;
-    else 
+    else
         ON_UBUNTU=false;
     fi
 
     if [[ "$version" == *"student"* ]]; then
         ON_STUDENT=true;
-    else 
+    else
         ON_STUDENT=false;
     fi
 
@@ -121,7 +121,7 @@ for version in "${versions[@]}"; do
     # main logic
     if [[ "$AUTH_USER" == "true" ]]; then
         if [[ "$extended_testing" == "true" ]]; then
-            # runs everything 
+            # runs everything
             add_line="true";
         else
             # Runs only "latest" and last two versions.

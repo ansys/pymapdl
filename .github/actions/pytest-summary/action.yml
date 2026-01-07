@@ -7,7 +7,7 @@ description: |
 
 inputs:
   python-version:
-    description: | 
+    description: |
       Python version to use.
     required: true
     type: string

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ MUC                    = 10.0     !MPA
 Q                      = 0.23
 THETA0                 = 300      !K
 
-K = 6000               
+K = 6000
 MU = 250
 
 YOUNG = 9.d0*K*MU/(3.d0*K+MU)
@@ -75,8 +75,8 @@ TBDATA,1,MUC         ! TBDATA, 14
 TBDATA,2,Q           ! TBDATA, 15
 
 TB,TNM,1, , ,FLOW
-TBDATA,1,A           ! TBDATA, 6     
-TBDATA,2,N           ! TBDATA, 8        
+TBDATA,1,A           ! TBDATA, 6
+TBDATA,2,N           ! TBDATA, 8
 
 TB,TNM,1, , ,TDEP
 TBDATA,1,THETAHAT    ! TBDATA, 2

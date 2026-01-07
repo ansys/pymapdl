@@ -23,7 +23,7 @@ _old/
 # Pip generated folders #
 #########################
 *.egg-info/
-build/
+./build/
 dist/
 
 # MISC

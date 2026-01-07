@@ -80,7 +80,7 @@ pointing to a valid license server. This environment variable can be already
 included in the Docker image. However, this is not recommended because it could
 expose the license server if the Docker image is leaked.
 The recommended approach is to set that environment variable when running the
-container. 
+container.
 
 To instantiate an MAPDL Docker container from an image hosted at ``ghcr.io/myuser/myrepo/mymapdldockerimage``,
 use code like in the following examples.
@@ -126,7 +126,7 @@ To rerun it, you should restart the container with this command:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ docker start mapdl
@@ -145,7 +145,7 @@ Or you can delete the container and run it again using these commands:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ docker rm -f mapdl
@@ -173,7 +173,7 @@ you want to run multiple simulations at the same time.
 
 The :ref:`ref_pymapdl_pool` module does not
 work when you are connecting to a remote MAPDL Docker image.
-It also does not work when connected to Docker containers. 
+It also does not work when connected to Docker containers.
 If you decide to launch multiple MAPDL instances, you must manage these
 instances yourself.
 
@@ -197,7 +197,7 @@ number available on the host machine) with the ``-np`` switch:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always -d --name mapdl -p $LOCAL_MAPDL_PORT:50052 $MAPDL_DOCKER_REGISTRY_URL -smp -np 8 > log.txt
@@ -224,8 +224,8 @@ in your console (or the output file):
     Server listening on : 0.0.0.0:50052
 
 
-.. note:: 
-  
+.. note::
+
    Notice that the port specified in the console is the internal Docker container port.
    This port has been mapped to the value specified for the :envvar:`LOCAL_MAPDL_PORT`
    environment variable.
@@ -241,7 +241,7 @@ a ``docker-compose`` file.
 This is useful if you want to load an already configured environment, or
 if you want to launch multiple instances of MAPDL or services.
 
-For your convenience, the `docker <pymapdl_docker_dir_>`_ directory 
+For your convenience, the `docker <pymapdl_docker_dir_>`_ directory
 contains configured ``docker-compose`` files that you can
 use.
 
@@ -276,7 +276,7 @@ and it deletes this file if it exits normally. The file is used to avoid overwri
 such as database (DB) files or result (RST) files when starting MAPDL after an
 abnormal termination.
 
-Because of this behavior, when using the Docker ``--restart`` flag in the `docker run <docker_run_>`_ 
+Because of this behavior, when using the Docker ``--restart`` flag in the `docker run <docker_run_>`_
 command, you might enter into an infinite loop after crashing if you specify the Docker image to
 reboot after an abnormal termination.
 When there is an abnormal termination (MAPDL crashes), the :file:`LOCK` file is kept on the
@@ -285,13 +285,13 @@ working directory. Since MAPDL has exited, the container also exits.
 This triggers the Docker ``restart`` policy, which attempts to restart MAPDL container and
 the MAPDL process with it.
 But because of the presence of the ``LOCK`` file, MAPDL exits in an attempt to not overwrite
-the files from the previous crash. 
+the files from the previous crash.
 This is the start of an infinite loop, where Docker keeps restarting the MAPDL container and
 MAPDL keeps exiting to avoid overwrite the previous files.
 
 In such cases, you should not use the ``--restart`` option. If you really need to use
 this option, you can avoid MAPDL checks and create the ``LOCK`` file by starting
-the process with the ``ANSYS_LOCK`` environment variable set to ``"OFF"``. 
+the process with the ``ANSYS_LOCK`` environment variable set to ``"OFF"``.
 
 This code shows how to do this in your `docker run <docker_run_>`_ command:
 
@@ -312,7 +312,7 @@ This code shows how to do this in your `docker run <docker_run_>`_ command:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ docker run \
@@ -346,7 +346,7 @@ First, get the Docker container name:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ docker ps -a
@@ -367,7 +367,7 @@ Then use the ``name`` in this command:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ docker exec -it mapdl /bin/bash
@@ -387,7 +387,7 @@ This command executes the command shell (``/bin/bash``) of the container and att
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ docker exec -it mapdl /bin/bash
@@ -411,7 +411,7 @@ Now you can enter commands inside the Docker container and navigate inside it.
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ docker exec -it mapdl /bin/bash
@@ -434,16 +434,16 @@ Exit the container terminal using the ``exit`` command:
 
             [root@c14560bff70f /]# exit
             exit
-            (.venv) PS C:\Users\user\pymapdl> 
+            (.venv) PS C:\Users\user\pymapdl>
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             [root@c14560bff70f /]# exit
             exit
-            (.venv) user@machine:~$ 
+            (.venv) user@machine:~$
 
 You can then copy the noted files using the `docker cp <docker_cp_>`_ command:
 
@@ -458,7 +458,7 @@ You can then copy the noted files using the `docker cp <docker_cp_>`_ command:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ docker cp mapdl:/file0.err .
@@ -481,7 +481,7 @@ If you want to retrieve multiple files, the most efficient approach is to get ba
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ docker exec -it mapdl /bin/bash
@@ -497,7 +497,7 @@ Create a folder where you are going to copy all the desired files:
 
         .. code:: pwsh-session
 
-            (.venv) PS C:\Users\user\pymapdl> 
+            (.venv) PS C:\Users\user\pymapdl>
             [root@c14560bff70f /]# mkdir -p /mapdl_logs
             [root@c14560bff70f /]# cp -f /file*.out /mapdl_logs
             [root@c14560bff70f /]# cp -f /file*.err /mapdl_logs
@@ -506,10 +506,10 @@ Create a folder where you are going to copy all the desired files:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
-            (.venv) user@machine:~$ 
+            (.venv) user@machine:~$
             [root@c14560bff70f /]# mkdir -p /mapdl_logs
             [root@c14560bff70f /]# cp -f /file*.out /mapdl_logs
             [root@c14560bff70f /]# cp -f /file*.err /mapdl_logs
@@ -530,7 +530,7 @@ Then copy the entire folder content at once:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ docker cp mapdl:/mapdl_logs/. .

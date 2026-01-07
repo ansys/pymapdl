@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -43,108 +43,108 @@
      *ELSEIF,I,EQ,2,THEN,
 		 ETYP = 55
 		 ARG1 = 0.1
-		 ARG2 = 0            
-         ARG3 = 1            
+		 ARG2 = 0
+         ARG3 = 1
 		 !QUADRILATERAL MESH (N1 = 0.1)
      *ELSEIF,I,EQ,3,THEN,
 		 ETYP = 77
 		 ARG1 = 0.2
-		 ARG2 = 0            
-         ARG3 = 1            
+		 ARG2 = 0
+         ARG3 = 1
 		 !QUADRILATERAL MESH (N1 = 0.2)
 	 *ELSEIF,I,EQ,4,THEN,
 		 ETYP = 77
 		 ARG1 = 0.1
-		 ARG2 = 0            
-         ARG3 = 1            
-		 !QUADRILATERAL MESH (N1 = 0.1) 
+		 ARG2 = 0
+         ARG3 = 1
+		 !QUADRILATERAL MESH (N1 = 0.1)
 	 *ELSEIF,I,EQ,5,THEN,
 		 ETYP = 35
 		 ARG1 = 0.2
-		 ARG2 = 1               !MSHAPE = TRI            
+		 ARG2 = 1               !MSHAPE = TRI
          ARG3 = 0               !MSHKEY = UNMAPPED
-		 !TRIANGLE MESH (N1 = 0.2) 
+		 !TRIANGLE MESH (N1 = 0.2)
 	 *ELSEIF,I,EQ,6,THEN,
 		 ETYP = 35
 		 ARG1 = 0.1
-		 ARG2 = 1                           
-         ARG3 = 0               
-		 !TRIANGLE MESH (N1 = 0.1) 
+		 ARG2 = 1
+         ARG3 = 0
+		 !TRIANGLE MESH (N1 = 0.1)
 	 *ELSEIF,I,EQ,7,THEN,
 		 ETYP = 55
 		 ARG1 = 0.2
-		 ARG2 = 1                           
-         ARG3 = 0               
-		 !TRIANGLE MESH (N1 = 0.2) 
+		 ARG2 = 1
+         ARG3 = 0
+		 !TRIANGLE MESH (N1 = 0.2)
 	 *ELSEIF,I,EQ,8,THEN,
 		 ETYP = 55
 		 ARG1 = 0.1
-		 ARG2 = 1                           
-         ARG3 = 0              
+		 ARG2 = 1
+         ARG3 = 0
 		 !TRIANGLE MESH (N1 = 0.1)
 	 *ELSEIF,I,EQ,9,THEN,
 		 ETYP = 77
 		 ARG1 = 0.2
-		 ARG2 = 1                           
-         ARG3 = 0               
+		 ARG2 = 1
+         ARG3 = 0
 		 !TRIANGLE MESH (N1 = 0.2)
 	 *ELSEIF,I,EQ,10,THEN,
 		 ETYP = 77
 		 ARG1 = 0.1
-		 ARG2 = 1                           
-         ARG3 = 0               
-		 !TRIANGLE MESH (N1 = 0.1) 
+		 ARG2 = 1
+         ARG3 = 0
+		 !TRIANGLE MESH (N1 = 0.1)
 	 *ELSEIF,I,EQ,11,THEN,
 		 ETYP = 35
 		 ARG1 = 0.2
-		 ARG2 = 1               !MSHAPE = TRI            
+		 ARG2 = 1               !MSHAPE = TRI
          ARG3 = 1               !MSHKEY = MAPPED
-		 !TRIANGLE MESH (N1 = 0.2) 
+		 !TRIANGLE MESH (N1 = 0.2)
 	 *ELSEIF,I,EQ,12,THEN,
 		 ETYP = 35
 		 ARG1 = 0.1
-		 ARG2 = 1                           
-         ARG3 = 1               
-		 !TRIANGLE MESH (N1 = 0.1) 
+		 ARG2 = 1
+         ARG3 = 1
+		 !TRIANGLE MESH (N1 = 0.1)
 	 *ELSEIF,I,EQ,13,THEN,
 		 ETYP = 55
 		 ARG1 = 0.2
-		 ARG2 = 1                           
-         ARG3 = 1               
-		 !TRIANGLE MESH (N1 = 0.2) 
+		 ARG2 = 1
+         ARG3 = 1
+		 !TRIANGLE MESH (N1 = 0.2)
 	 *ELSEIF,I,EQ,14,THEN,
 		 ETYP = 55
 		 ARG1 = 0.1
-		 ARG2 = 1                           
-         ARG3 = 1               
+		 ARG2 = 1
+         ARG3 = 1
 		 !TRIANGLE MESH (N1 = 0.1)
 	 *ELSEIF,I,EQ,15,THEN,
 		 ETYP = 77
 		 ARG1 = 0.2
-		 ARG2 = 1                           
-         ARG3 = 1               
+		 ARG2 = 1
+         ARG3 = 1
 		 !TRIANGLE MESH (N1 = 0.2)
 	 *ELSEIF,I,EQ,16,THEN,
 		 ETYP = 77
 		 ARG1 = 0.1
-		 ARG2 = 1                           
-         ARG3 = 1               
+		 ARG2 = 1
+         ARG3 = 1
 		 !TRIANGLE MESH (N1 = 0.1)
 	 *ENDIF
-	 
-	
+
+
      PARSAV,ALL
       /clear, nostart
       PARRES,CHANGE
      /PREP7
      SMRT,OFF
-	 
-	 
-	 
+
+
+
 	 !TO SUPPLY TITLES TO THE IMAGES
-  
+
 	 *IF,I,LE,4,THEN
-		 /TITLE,VMC6 - QUADRILATERAL MESH: (N1 = %ARG1%)	
+		 /TITLE,VMC6 - QUADRILATERAL MESH: (N1 = %ARG1%)
 	 *ELSEIF,I,GT,4,AND,I,LE,10,THEN
 		 /TITLE,VMC6 - TRIANGLE MESH: (N1 = %ARG1%)
 	 *ELSEIF,I,GT,11,THEN
@@ -158,7 +158,7 @@
      ET,1,ETYP                     ! DEFINE ELEMENT TYPE PARAMETRICALLY
      NARAY(I,1)= ETYP              ! STORE ETYPE
      MP,KXX,1,52.0                 ! DEFINE CONDUCTIVITY
-     
+
          K,1                       ! DEFINE KEYPOINTS
          K,2,.6
          K,3,.6,1.0
@@ -170,7 +170,7 @@
          NARAY(I,2)=ARG1           ! STORE N1 (ELEMENT EDGE LENGTH)
          NARAY(I,3)=ARG2           ! STORE N2 (ELEMENT SHAPE)
          AMESH,1                   ! MESH AREA
-      
+
      *GET,MAXE,ELEM,,NUM,MAX
      *GET,MAXN,NODE,,NUM,MAX
      NARAY(I,4)=MAXN*1                ! CALCULATE NO. DEGREES OF FREEDOM
@@ -186,7 +186,7 @@
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!  SETUP AND PLOT ELEMENTS FOR DOCUMENTATION !!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     *IF,ETYP,EQ,55,THEN 
+     *IF,ETYP,EQ,55,THEN
 	     /AUTO,1
          /VIEW,1,,,1
          /ANG,1
@@ -197,9 +197,9 @@
 		 /SHOW,PNG,REV
          EPLOT
          /SHOW,CLOSE
-		 
+
 	 *ENDIF
-  
+
 
 
       FINISH
@@ -210,8 +210,8 @@
        NARAY(I,6)=NTEM/18.3         ! CALCULATE TEMPERATURE RATIO
        PARSAV,,PARAM
       FINISH
-  
-  
+
+
 
 *ENDDO
 

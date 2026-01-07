@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,7 @@ D,2,ROTZ
 F,2,FY,5654866.8       ! CAP FORCE
 SFE,1,1,PRES,,500      ! INTERNAL PRESSURE
 FINISH
-/SOLU    
+/SOLU
 OUTPR,ALL,1
 SOLVE
 FINISH

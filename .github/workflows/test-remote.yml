@@ -161,7 +161,7 @@ jobs:
         env:
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
         run: |
-          if [[ "${MAPDL_VERSION}" == *"student"* ]]; 
+          if [[ "${MAPDL_VERSION}" == *"student"* ]];
             then export ON_STUDENT=true; export TAG_STUDENT="student";
             else export ON_STUDENT=false; export TAG_STUDENT="non-student";
           fi
