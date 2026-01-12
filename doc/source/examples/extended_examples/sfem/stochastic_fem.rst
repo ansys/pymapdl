@@ -59,7 +59,7 @@ Recall that a random variable is defined as a rule that assigns a number :math:`
 of an experiment. However, in some applications, the experiment evolves with respect to a deterministic parameter :math:`t`,
 which belongs to an interval :math:`I`. For example, this occurs in an engineering system subjected to random dynamic loads
 over a time interval :math:`I \subseteq \mathbb{R}^+`. In such cases, the system's response at a specific material point is
-described not by a single random variable but by a collection of random variables :math:`\{X(t)\}` indexed by :math:`t \in I`. 
+described not by a single random variable but by a collection of random variables :math:`\{X(t)\}` indexed by :math:`t \in I`.
 
 This `infinite` collection of random variables over the interval :math:`I` is called a stochastic process and is denoted as
 :math:`\{X(t), t \in I\}` or simply :math:`X`. In this way, a stochastic process generalizes the concept of a random variable
@@ -128,7 +128,7 @@ the K-L series expansion is given by this equation:
 
 The terms in the first summation are given by
 
-.. math:: 
+.. math::
    :label: cosine terms
 
    \lambda_{c,n} = \frac{2b}{1+\omega_{c,n}^2\cdot b^2},\quad \varphi_{c,n}(t) = k_{c,n}\cos(\omega_{c,n}\cdot t)
@@ -142,11 +142,11 @@ In the preceding terms, :math:`\omega_{c,n}` is obtained as the solution of
 
 The terms in the second summation are given by
 
-.. math:: 
+.. math::
    :label: sine terms
 
    \lambda_{s,n} = \frac{2b}{1+\omega_{s,n}^2\cdot b^2},\quad \varphi_{s,n}(t) = k_{s,n}\sin(\omega_{s,n}\cdot t)
- 
+
    k_{s,n} = \frac{1}{\sqrt{a-\frac{\sin(2\omega_{s,n}\cdot a)}{2\omega_{s,n}}}}
 
 In the preceding terms, :math:`\omega_{s,n}` is obtained as the solution of
@@ -224,9 +224,9 @@ random field given by this expression:
 
 Here :math:`f(x)` is a zero mean stationary Gaussian field with unit variance. The covariance function for :math:`f` is :math:`C_f(x_r,x_s)=e^{-\frac{\lvert x_r-x_s \rvert}{3}}`.
 
-1. Using the K-L series expansion, generate 5000 realizations for :math:`E(x)` and perform Monte 
-   Carlo simulation to determine the PDF of the response :math:`u`, at the bottom right corner 
-   of the cantilever. 
+1. Using the K-L series expansion, generate 5000 realizations for :math:`E(x)` and perform Monte
+   Carlo simulation to determine the PDF of the response :math:`u`, at the bottom right corner
+   of the cantilever.
 
 2. If some design code stipulates that the displacement :math:`u` must not exceed :math:`0.2 \: m`, how confident can
    you be that the structure meets this requirement?
@@ -238,7 +238,7 @@ Here :math:`f(x)` is a zero mean stationary Gaussian field with unit variance. T
 
 Evaluating the Young's modulus
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Code that allows representation of the zero-mean Gaussian field :math:`f` is implemented. This simply means solving 
+Code that allows representation of the zero-mean Gaussian field :math:`f` is implemented. This simply means solving
 the :math:numref:`cosine equation` and :math:numref:`sine equation` and then substituting calculated values into
 :math:numref:`cosine terms` and :math:numref:`sine terms` to obtain the constant terms in those equations. The
 number of retained terms :math:`P` and :math:`Q` in :math:numref:`approximation` can be automatically determined
@@ -270,7 +270,7 @@ You can now generate sample realizations of the Young's modulus to see what they
   :lines: 298-348
 
 .. figure:: young_modulus_realizations.png
-   
+
    10 realizations of the Young's modulus depict randomness from one realization to another.
 
 Verification of the implementation
@@ -322,7 +322,7 @@ You can generate a plot of the mean versus the number of realizations:
   :lines: 387-397
 
 .. figure:: mean.png
-   
+
    The mean converges to the true value as the number of realizations is increased.
 
 You can also generate a plot of the variance versus the number of realizations:
@@ -348,7 +348,7 @@ you must write a workflow that performs these actions:
 
 #. For each simulation, generate one realization of :math:`E` and one sample of :math:`P`.
 
-#. For each simulation, loop through the elements and for each element, use the generated 
+#. For each simulation, loop through the elements and for each element, use the generated
    realization to assign the value of the Young's modulus. Also assign the load for each simulation.
 
 #. Solve the model and store :math:`u` for each simulation.
@@ -420,15 +420,14 @@ To run simulations over 10 MAPDL instances, call the preceding function with app
 The simulations are completed much faster.
 
 .. tip::
-   In a local test, using the ``MapdlPool`` approach (with 10 MAPDL instances) takes about 38 minutes to run, while a single instance runs 
+   In a local test, using the ``MapdlPool`` approach (with 10 MAPDL instances) takes about 38 minutes to run, while a single instance runs
    for about 3 hours. The simulation speed depends on a multitude of factors, but this comparison provides an idea of the speed
    gain to expect when using multiple instances.
 
 .. warning::
-   Ensure there are enough licenses available to run multiple MAPDL instances concurrently. 
+   Ensure there are enough licenses available to run multiple MAPDL instances concurrently.
 
 References
 ----------
-.. [1] Ioannis Kalogeris, "Advanced surrogate modeling and machine learning methods in computational stochastic mechanics," PhD Dissertation 
+.. [1] Ioannis Kalogeris, "Advanced surrogate modeling and machine learning methods in computational stochastic mechanics," PhD Dissertation
 .. [2] Dimitris G. Giovanis and Vissarion Papadopoulos, "Stochastic Finite Element Methods : An Introduction"
-

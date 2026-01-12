@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
 /COM,  REF: ANY ELECTROSTATICS TEXTBOOK
 /COM,
 
-PI=ACOS(-1)  
+PI=ACOS(-1)
 
 K=3           ! SPRING CONSTANT PER UNIT AREA, KG/(UM^2 S^2)
 M=1E-6        ! PLATE MASS PER UNIT AREA, KG/UM^2
@@ -53,7 +53,7 @@ A=L**2        ! PLATE AREA, UM^2
 
 /PREP7
 ET,1,226,1001
-KEYOP,1,4,1      
+KEYOP,1,4,1
 BLOCK,,D,,L,,L
 ESIZE,,1
 VMESH,1
@@ -96,7 +96,7 @@ _J=0
 	N2=N1+NMAX
 	N,N2,NX(N1)+1,NY(N1),NZ(N1)
 	D,N2,UX,0
-	
+
 	TYPE,2
 	REAL,2
 	E,N2,N1
@@ -107,13 +107,13 @@ _J=0
 *ENDDO
 ALLSE
 FINISH
-/COM, 
+/COM,
 /COM, ******************************************
 /COM, ***              NONLINEAR             ***
 /COM, ***           STATIC ANALYSIS          ***
 /COM, ******************************************
 /COM,
-/SOLU 
+/SOLU
 D,NLOAD,VOLT,500
 
 ALLSE
@@ -129,7 +129,7 @@ SOLVE
 FINISH
 
 /POST26
-NSOL,3,NLOAD,VOLT,,VOLT    
+NSOL,3,NLOAD,VOLT,,VOLT
 NSOL,4,NLOAD,U,X,'UX VS VOLT'
 FILLDATA,5,,,,-D/3,0
 VARNAM,5,'PULL-IN UX'
@@ -159,7 +159,7 @@ RATIO=0
 RATIO=RATIO/NS
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, ******************************************
 /COM, ***         LINEAR PERTURBATION        ***
 /COM, ***           STATIC ANALYSIS          ***
@@ -188,7 +188,7 @@ SET,LAST
 ULP=-UX(NLOAD)
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, ******************************************
 /COM, ***         LINEAR PERTURBATION        ***
 /COM, ***            MODAL ANALYSIS          ***
@@ -200,8 +200,8 @@ ANTYP,STATIC,RESTART,1,NS2,PERTURB
 PERTURB,MODAL
 SOLVE,ELFORM
 D,NLOAD,VOLT,0
-MODOPT,LANB,1  
-MXPAND           
+MODOPT,LANB,1
+MXPAND
 SOLVE
 FINISH
 
@@ -211,7 +211,7 @@ SET,LAST
 *GET,FRQ1,MODE,1,FREQ
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, ******************************************
 /COM, ***         LINEAR PERTURBATION        ***
 /COM, ***            MODAL ANALYSIS          ***
@@ -223,8 +223,8 @@ ANTYP,STATIC,RESTART,1,NS2,PERTURB
 PERTURB,MODAL
 SOLVE,ELFORM
 DDELE,NLOAD,VOLT
-MODOPT,LANB,1   
-MXPAND         
+MODOPT,LANB,1
+MXPAND
 SOLVE
 FINISH
 
@@ -234,7 +234,7 @@ SET,LAST
 *GET,FRQ2,MODE,1,FREQ
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, ******************************************
 /COM, ***         LINEAR PERTURBATION        ***
 /COM, ***          HARMONIC ANALYSIS         ***
@@ -260,7 +260,7 @@ SET,LAST
 UHR=-UX(NLOAD)
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, ******************************************
 /COM, ***         LINEAR PERTURBATION        ***
 /COM, ***          HARMONIC ANALYSIS         ***

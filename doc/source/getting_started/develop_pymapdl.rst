@@ -143,7 +143,7 @@ guidelines for developing code in a repository:
    Follow the `numpydoc <numpydoc_>`_ convention for documenting code.
 
 #. **Test your changes**: Thoroughly test your changes to ensure that they work
-   as expected. If applicable, create or update the unit tests that run on the 
+   as expected. If applicable, create or update the unit tests that run on the
    continuous integration/continuous deployment (CI/CD) pipelines to catch issues early
    and ensure reliable deployments. For more information, see `Unit testing`_.
 
@@ -240,16 +240,16 @@ is either the function, method, or class that you are testing or some other expl
 name. In the command line, you can use the ``-k`` argument to filter the tests to run.
 For more information, see `pytest usage <pytest_usage_>`_.
 
-Here are some guidelines for creating good unit tests: 
+Here are some guidelines for creating good unit tests:
 
 - Assign long and descriptive names to tests.
 - Use the `Codecov <codecov_>`_ tool to ensure that all implemented code is tested.
-- Check that tests return the same results each time. 
+- Check that tests return the same results each time.
 - Verify that tests are independent.
 - Write tests that verify only one part of the code at a time.
 - Make tests as short and fast as possible.
 
-`What makes a good unit test? <article_good_unit_test_>`_ 
+`What makes a good unit test? <article_good_unit_test_>`_
 is an exhaustive list of tips for creating good unit tests.
 
 Most PyMAPDL tests require a connection to a running instance of
@@ -345,7 +345,7 @@ The list of environment variables that can be set includes:
 | :envvar:`TEST_DPF_BACKEND`        | `Yes`/`No`       | `NO`            |  Tell Pytest that the module `Result` with DPF backend should be tested.                                                                                                                                                                                      |
 +-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Additionally, you can use any :ref:`ref_environment_variables` 
+Additionally, you can use any :ref:`ref_environment_variables`
 like the :envvar:`PYMAPDL_MAPDL_EXEC` and :envvar:`PYMAPDL_MAPDL_VERSION`
 environment variables to specify the MAPDL executable path and the version to launch (if
 multiple versions of MAPDL are installed).
@@ -353,7 +353,7 @@ multiple versions of MAPDL are installed).
 Continuous integration and continuous deployment
 ------------------------------------------------
 
-Unit tests and integration tests are part of continuous integration (CI). 
+Unit tests and integration tests are part of continuous integration (CI).
 The automation of testing, monitoring, and deployment of newly added
 code allows continuous deployment (CD) throughout the app lifecycle,
 providing a comprehensive CI/CD approach.
@@ -414,7 +414,7 @@ Code coverage
 To verify that all code is properly tested, you must ensure that every piece of
 code is used (covered) in at least one unit test. In this repository, the
 `Codecov <codecov_>`_ tool generates a coverage report of the committed code.
-It indicates how merging a pull request would impact coverage. 
+It indicates how merging a pull request would impact coverage.
 The generation of this report is one of the checks that must run successfully
 to merge code changes.
 
@@ -557,7 +557,7 @@ This way, it's not possible for you to push code that fails the style checks. Fo
    [INFO] Restored changes from /home/mapdl/.cache/pre-commit/patch1704703895-16914.
    [ci/mybranch cXXXXXXX] my commit
    1 file changed, 25 insertions(+)
-   (.venv) mapdl@machine:~/pymapdl$ 
+   (.venv) mapdl@machine:~/pymapdl$
 
 
 First time you run ``pre-commit`` (using ``git commit`` or ``pre-commit``), the command

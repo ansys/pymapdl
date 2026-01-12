@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 /PREP7
 MP,PRXY,,0.3
 /TITLE, VM195, TOGGLE MECHANISM
-C*** KINEMATICS AND DYNAMICS OF MACHINES, MARTIN, 2ND ED., P 56, FIG 3-22 
+C*** KINEMATICS AND DYNAMICS OF MACHINES, MARTIN, 2ND ED., P 56, FIG 3-22
 ET,1,MPC184,6,,,1
 ET,2,BEAM188,,,3
 ET,3,COMBIN14

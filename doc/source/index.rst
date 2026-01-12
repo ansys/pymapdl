@@ -33,7 +33,7 @@
 
 .. vale off
 
-.. title is given using the 
+.. title is given using the
 
 **What do you want to do? I want to...**
 
@@ -80,7 +80,7 @@
 
         Check our :ref:`ref_user_guide` chapter.
         Don't miss the right side bar with the table content.
- 
+
     .. grid-item-card:: :fa:`question` Help with PyMAPDL
         :link: ref_troubleshooting
         :link-type: ref

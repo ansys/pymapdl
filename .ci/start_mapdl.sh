@@ -1,6 +1,6 @@
 #!/bin/bash
 # This script is used to start a MAPDL instance in a Docker container.
-# 
+#
 # Usage:
 # ------
 # This script is intended to be run in a CI/CD environment where the necessary environment variables are set.
@@ -29,7 +29,7 @@
 #   export PYMAPDL_DB_PORT=50056
 #   export PYMAPDL_PORT=50052
 #   ./start_mapdl.sh
-#   
+#
 
 export MAJOR MINOR MAPDL_IMAGE VERSION
 

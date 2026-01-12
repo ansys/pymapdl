@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ SMRT,OFF
 ET,1,PLANE82,,,1        ! AXISYMMETRIC ELEMENTS
 ET,2,PLANE183,,,1
 ET,3,CONTA178,,4        ! NODAL CONTACT
-R,1  
+R,1
 RMOD,1,7,1              !CONTACT NORMAL ALONG UY
 MP,EX,1,1E3
 MP,NUXY,1,.3
@@ -42,8 +42,8 @@ K,5
 K,6,8,-82.65            ! PLACE KEYPOINT AND NODE AT EXPECTED CONTACT RADIUS
 K,7,7.5,-82.65
 L,1,3                   ! DEFINE LINES
-L,2,4  
-L,6,7  
+L,2,4
+L,6,7
 LESIZE,ALL,,,1          ! DEFINE ELEMENT DIVISIONS ON ALL EXISTING LINES
 A,1,6,7,3               ! DEFINE AREAS
 A,6,2,4,7
@@ -85,12 +85,12 @@ EMODIF,7,7,0
 *REPEAT,6,1
 MODMSH,CHECK
 FINISH
-/SOLU    
+/SOLU
 NSEL,S,LOC,X,-.01,.01   ! BOUNDARY CONDITIONS AND LOADING
 D,ALL,UX,0
 NSEL,R,LOC,Y,0
 D,ALL,UY,0
-NSEL,ALL             
+NSEL,ALL
 LOAD=0
 *CREATE,LOADSTEP        ! MACRO TO INCREMENTALLY APPLY LOAD
 FK,8,FY,ARG1
@@ -137,7 +137,7 @@ RATA=(AACT/ATAR)        ! RATIO
 *DIM,VALUE,,1,3
 LABEL(1,1) = '      A,'
 LABEL(1,2) = ' mm     '
-*VFILL,VALUE(1,1),DATA,1.010 
+*VFILL,VALUE(1,1),DATA,1.010
 *VFILL,VALUE(1,2),DATA,AACT
 *VFILL,VALUE(1,3),DATA,ABS(AACT/1.010)
 /COM

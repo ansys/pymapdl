@@ -36,4 +36,3 @@ runs:
       shell: bash
       run: |
         julia -e 'using Pkg; Pkg.add("PyCall");using PyCall;pymapdl = pyimport("ansys.mapdl.core");print(pymapdl.__version__)'
-        

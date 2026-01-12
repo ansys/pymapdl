@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -73,14 +73,14 @@ AATT,1,3,3
 ASEL,ALL
 CSYS,1
 LSEL,S,LOC,X,9*S
-LESIZE,ALL,,,1  
+LESIZE,ALL,,,1
 ESIZE,,8
-AMESH,4   
+AMESH,4
 
 
 ASEL,S,AREA,,1
-LSLA,S  
-LESIZE,ALL,,,5  
+LSLA,S
+LESIZE,ALL,,,5
 LSEL,ALL
 ASEL,ALL
 CSYS,0
@@ -134,19 +134,19 @@ FINISH
 
 /POST1
 SET,1
-*GET,CURREAL,NODE,N1,RF,AMPS 
+*GET,CURREAL,NODE,N1,RF,AMPS
 SET,1,1,,1
-*GET,CURIMAG,NODE,N1,RF,AMPS   
+*GET,CURIMAG,NODE,N1,RF,AMPS
 
 *DIM,LABEL,CHAR,4,2
 *DIM,VALUE,,3,3
 LABEL(1,1) = 'COIL CUR','REAL SOL','IMAG SOL'
-LABEL(1,2) = 'RENT    ','UTION   ','UTION   '   
+LABEL(1,2) = 'RENT    ','UTION   ','UTION   '
 *VFILL,VALUE(1,1),DATA,3.395,1.192,-1.621
 *VFILL,VALUE(1,2),DATA,ICOIL,CURREAL,CURIMAG
 V1 = ABS(ICOIL/3.395)
-V2 = ABS(CURREAL/1.192) 
-V3 = ABS(CURIMAG/1.621) 
+V2 = ABS(CURREAL/1.192)
+V3 = ABS(CURIMAG/1.621)
 *VFILL,VALUE(1,3),DATA,V1,V2,V3
 /COM
 /OUT,vm206,vrt,,
@@ -157,4 +157,3 @@ V3 = ABS(CURIMAG/1.621)
 /OUT
 FINISH
 *LIST,vm206,vrt
-

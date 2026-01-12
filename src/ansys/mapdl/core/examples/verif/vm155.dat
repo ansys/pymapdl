@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -39,20 +39,20 @@ TBDATA,1,1.53e8,62511e6,1.1/311e6*62511e6
 TB,RATE,1,,6,EVH                ! DEFINE RATE DEPENDENT MATERIAL DATA
 TBDATA,1,1.53e8,0,-1.53e8,317,1/7.7,1150e6
 
-N, 1, 0.0, 0.0, 0.0    
-N, 2, 0.0, 1.0, 0.0     
-N, 3, 1.0, 0.0, 0.0   
+N, 1, 0.0, 0.0, 0.0
+N, 2, 0.0, 1.0, 0.0
+N, 3, 1.0, 0.0, 0.0
 N, 4, 1.0, 1.0, 0.0
 E,1,3,4,2
 
 NSEL,S,LOC,X,0                    ! BOUNDARY CONDITIONS
 D,ALL,UX,0
 NSEL,S,LOC,Y,0
-D,ALL,UY,0 
+D,ALL,UY,0
 ALLSEL
 FINISH
 
-/SOLU  
+/SOLU
 OUTRES,ALL,NONE
 NSUB,30,300,10
 TIME,910/89
@@ -146,4 +146,3 @@ VALUE(1,3)=ABS(VALUE(1,1)/VALUE(1,2))
 /OUT
 *LIST,vm155,vrt
 FINISH
-

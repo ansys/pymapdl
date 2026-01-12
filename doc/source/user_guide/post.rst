@@ -4,7 +4,7 @@ Postprocessing
 ==============
 In an active MAPDL session, you can postprocess using the
 :class:`Mapdl.post_processing <ansys.mapdl.core.post.PostProcessing>` class,
-an attribute of an instance of :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`. 
+an attribute of an instance of :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`.
 One advantage of this approach is that it integrates well with existing MAPDL
 scripting or automation. This approach can also be used on result files generated
 from other programs, including ANSYS Mechanical.
@@ -31,17 +31,17 @@ You would typically request nodal results from MAPDL using the
 
      POST1:
      PRNSOL, U, X
-    
+
      PRINT U    NODAL SOLUTION PER NODE
-    
-      ***** POST1 NODAL DEGREE OF FREEDOM LISTING *****                            
-     
-      LOAD STEP=     1  SUBSTEP=     1                                             
-       TIME=    1.0000      LOAD CASE=   0                                         
-     
-      THE FOLLOWING DEGREE OF FREEDOM RESULTS ARE IN THE GLOBAL COORDINATE SYSTEM  
-     
-        NODE       UX    
+
+      ***** POST1 NODAL DEGREE OF FREEDOM LISTING *****
+
+      LOAD STEP=     1  SUBSTEP=     1
+       TIME=    1.0000      LOAD CASE=   0
+
+      THE FOLLOWING DEGREE OF FREEDOM RESULTS ARE IN THE GLOBAL COORDINATE SYSTEM
+
+        NODE       UX
            1  0.10751E-003
            2  0.85914E-004
            3  0.57069E-004
@@ -83,7 +83,7 @@ Selecting entities
 The MAPDL database processes some results independently if nodes or
 elements are selected. If you have subselected a certain component
 and want to also limit the result of a certain output
-(:func:`nodal_displacement() <ansys.mapdl.core.post.PostProcessing.nodal_displacement>`), 
+(:func:`nodal_displacement() <ansys.mapdl.core.post.PostProcessing.nodal_displacement>`),
 use the :attr:`selected_nodes <ansys.mapdl.core.post.PostProcessing.selected_nodes>` attribute to get
 a mask of the currently selected nodes:
 
@@ -143,7 +143,7 @@ These commands are listed in Table-1_.
 |                |                                                                                                   | * :func:`Mapdl.set("LIST") <ansys.mapdl.core.Mapdl.set>`                 |
 |                |                                                                                                   | * :func:`Mapdl.nlist() <ansys.mapdl.core.Mapdl.nlist>`                   |
 |                |                                                                                                   |                                                                          |
-+----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+  
++----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+
 | **Boundary**   | * :func:`cmd.to_list() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput>`               | * :func:`Mapdl.dlist() <ansys.mapdl.core.Mapdl.dlist>`                   |
 | **Conditions** | * :func:`cmd.to_dataframe() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput>`          | * :func:`Mapdl.flist() <ansys.mapdl.core.Mapdl.flist>`                   |
 | **Listing**    |                                                                                                   |                                                                          |
@@ -156,7 +156,7 @@ Here's a simple example that demonstrates usage:
 
 .. code:: pycon
 
-    
+
     >>> from ansys.mapdl.core import launch_mapdl
     >>> from ansys.mapdl.core import examples
 

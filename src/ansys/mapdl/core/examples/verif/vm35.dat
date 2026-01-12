@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ C*** USING SHELL281
 ANTYPE,STATIC
 ET,1,SHELL281
 SECTYPE,1,SHELL
-SECDATA,0.05,1,0       ! LAYER 1: 0.05 THICK, MAT'L 1, THETA 0 
+SECDATA,0.05,1,0       ! LAYER 1: 0.05 THICK, MAT'L 1, THETA 0
 SECDATA,0.05,2,0       ! LAYER 2: 0.05 THICK, MAT'L 2, THETA 0,
 MP,EX,1,3E7            ! MATERIAL PROPERTIES
 MP,EX,2,3E7
@@ -43,7 +43,7 @@ N,22,10,1
 N,11,10
 FILL,1,11,9,2,1
 FILL,12,22,9,13,1
-FILL,1,12,1,23  
+FILL,1,12,1,23
 FILL,3,14,1,24
 FILL,5,16,1,25
 FILL,7,18,1,26
@@ -63,7 +63,7 @@ NSEL,ALL
 TREF,70
 BFUNIF,TEMP,170        ! DEFINE UNIFORM TEMPERATURE
 FINISH
-/SOLU    
+/SOLU
 OUTPR,NSOL,1
 OUTPR,RSOL,1
 /OUT,SCRATCH

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ JPGPRF,500,100,1
 /PREP7
 R = 2.5E-5
 ET,1,183,,,
-KEYOPT,1,3,2   	
+KEYOPT,1,3,2
 N,1,,,,
 N,2,0.0,0.5,,
 N,3,0.0,1.0,,
@@ -47,9 +47,9 @@ ET=50E3
 EP=EX*ET/(EX-ET)
 TB,PLAS,1,,,BISO
 TBDATA,1,5,EP
-TB,HILL,1	
+TB,HILL,1
 TBDATA,1,1.0,1.0,1.0,1.0,1.0,1.0
-NSEL,S,LOC,X	
+NSEL,S,LOC,X
 D,ALL,UX
 NSEL,S,LOC,Y
 D,ALL,UY
@@ -182,31 +182,31 @@ TARGETZ(1)='2.500','6.379','8.879','12.867','10.777','8.495','5.995','4.615'
 *VFILL,RATIOY,DATA,R9,R10,R11,R12,R13,R14,R15,R16
 *VFILL,RATIOZ,DATA,R17,R18,R19,R20,R21,R22,R23,R24
 /COM,
-/COM, ----------- vmr049-pl1b-183 RESULTS COMPARISON -------------- 
-/COM, 
-/COM, vmr049-pl1b-183.jpeg RESULTS SHOULD MATCH R0049 NAFEMS MANUAL 
-/COM, GRAPH RESULTS.  THE RESULTS DISPLAYED ARE INCREMENTED 
+/COM, ----------- vmr049-pl1b-183 RESULTS COMPARISON --------------
+/COM,
+/COM, vmr049-pl1b-183.jpeg RESULTS SHOULD MATCH R0049 NAFEMS MANUAL
+/COM, GRAPH RESULTS.  THE RESULTS DISPLAYED ARE INCREMENTED
 /COM, FOR THIS PURPOSE.
 /COM,
 /COM,
-/COM, ------ vmr049-pl1b-183 STRESS RESULTS IN X DIRECTION ------- 
-/COM, 
-/COM, |  STEP  |  TARGET  |  Mechanical APDL  |  RATIO 
+/COM, ------ vmr049-pl1b-183 STRESS RESULTS IN X DIRECTION -------
+/COM,
+/COM, |  STEP  |  TARGET  |  Mechanical APDL  |  RATIO
 /COM,
 *VWRITE,TIME(1),TARGETX(1),VALUEX(1,1),RATIOX(1,1)
 (1X,A8,'   ',1x,A8,'   ',F14.3,'   ',F12.3,'   ')
 /COM,
-/COM, ------ vmr049-pl1b-183 STRESS RESULTS IN Y DIRECTION ------- 
-/COM, 
-/COM, |  STEP  |  TARGET  |  Mechanical APDL  |  RATIO 
+/COM, ------ vmr049-pl1b-183 STRESS RESULTS IN Y DIRECTION -------
+/COM,
+/COM, |  STEP  |  TARGET  |  Mechanical APDL  |  RATIO
 /COM,
 *VWRITE,TIME(1),TARGETY(1),VALUEY(1,1),RATIOY(1,1)
 (1X,A8,'   ',1x,A8,'   ',F14.3,'   ',F12.3,'   ')
 /COM,
 /COM,
-/COM, ------ vmr049-pl1b-183 STRESS RESULTS IN Z DIRECTION ------- 
-/COM, 
-/COM, |  STEP  |  TARGET  |  Mechanical APDL  |  RATIO 
+/COM, ------ vmr049-pl1b-183 STRESS RESULTS IN Z DIRECTION -------
+/COM,
+/COM, |  STEP  |  TARGET  |  Mechanical APDL  |  RATIO
 /COM,
 *VWRITE,TIME(1),TARGETZ(1),VALUEZ(1,1),RATIOZ(1,1)
 (1X,A8,'   ',1x,A8,'   ',F14.3,'   ',F12.3,'   ')
@@ -224,7 +224,7 @@ LABEL2(1) = 'vmr049-','pl1b-183'
 
 /OUT,vmr049-pl1b-183,vrt
 /COM
-/COM,------------------- vmr049-pl1b RESULTS COMPARISON --------------------- 
+/COM,------------------- vmr049-pl1b RESULTS COMPARISON ---------------------
 /COM,
 /COM,            |   Mechanical APDL   |   RATIO  |         INPUT         |
 /COM,

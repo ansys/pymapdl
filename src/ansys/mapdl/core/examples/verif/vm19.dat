@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -65,7 +65,7 @@ PSDFRQ,1,1,0.1,70.
 PSDVAL,1,1,1                       ! IN N**2/HZ
 PFACT,1,NODE
 PSDRES,DISP,REL
-PSDCOM 
+PSDCOM
 SOLVE
 FINISH
 
@@ -81,7 +81,7 @@ FINISH
 
 /POST26
 STORE,PSD,10
-ESOL,3,5,6,SMISC,37  
+ESOL,3,5,6,SMISC,37
 RPSD,9,3,3,0,2,,,1.0e-3
 PRTIME,42.630,42.631
 PRVAR,9
@@ -112,4 +112,3 @@ FINISH
 /COM,-----------------------------------------------------------------
 /OUT
 *LIST,vm19,vrt
-
