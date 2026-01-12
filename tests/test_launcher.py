@@ -2131,6 +2131,7 @@ def test_mapdl_output_pass_arg(tmpdir):
 
 @requires("local")
 @requires("nostudent")
+@requires("grpc")
 def test_mapdl_output(tmpdir):
     mapdl_output = os.path.join(tmpdir, "apdl.txt")
     mapdl = launch_mapdl(mapdl_output=mapdl_output, port=50058)
@@ -2144,8 +2145,14 @@ def test_mapdl_output(tmpdir):
         content = fid.read()
 
     assert "Beta activation of the GRPC server." in content
-    assert "### START GRPC SERVER      ###" in content
     assert "Server listening on" in content
+    try:
+        # before gRPC transport updates
+        assert "### START GRPC SERVER      ###" in content
+    except AssertionError:
+        assert "GRPC SERVER STARTED" in content
+        assert mapdl.transport_mode.upper() in content
+        assert "Transport Mode" in content
 
 
 def test_check_server_is_alive_no_queue():
