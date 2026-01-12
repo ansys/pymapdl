@@ -64,6 +64,7 @@ all = [
 
 tests = [
   "ansys-dpf-core[graphics]==0.13.6",
+  "ansys-mapdl-reader==0.55.2",
   "ansys-tools-visualization-interface==0.12.1",
   "autopep8==2.3.2",
   "matplotlib==3.10.8",
