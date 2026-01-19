@@ -747,8 +747,11 @@ def test_fail_channel_ip():
     ),
     indirect=["set_env_var_context"],
 )
-def test_get_slurm_options(set_env_var_context, validation):
+def test_get_slurm_options(set_env_var_context, validation, monkeypatch):
     """test slurm env vars"""
+    if "PYMAPDL_NPROC" in os.environ:
+        monkeypatch.delenv("PYMAPDL_NPROC")
+
     for each_key, each_value in set_env_var_context.items():
         if each_value:
             assert os.environ.get(each_key) == str(each_value)
