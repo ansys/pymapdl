@@ -170,7 +170,7 @@ jobs:
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
         run: |
-          ansysgrpc
+          /ansys_inc/v252/ansys/bin/ansys252 -grpc -mpi openmpi
 
       - name: "Install Git and checkout project"
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
