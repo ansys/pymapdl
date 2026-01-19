@@ -217,7 +217,7 @@ jobs:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
         run: |
           echo "/prep7" > input.dat
-          /ansys_inc/v252/ansys/bin/ansys252 -grpc -smp -b -i input.dat -o output.out
+          /ansys_inc/v252/ansys/bin/ansys252 -grpc -mpi openmpi -np 2 -b -i input.dat -o output.out
 
       - name: "Show output file"
         shell: bash
