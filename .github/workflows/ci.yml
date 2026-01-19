@@ -242,7 +242,7 @@ jobs:
     with:
       mapdl-version: "${{ matrix.mapdl-version }}"
       file-name: "remote-${{ matrix.mapdl-version }}"
-      upload-logs: false
+      upload-logs: true
 
   build-test-local-matrix:
     name: "Build test matrix for minimal and local"
