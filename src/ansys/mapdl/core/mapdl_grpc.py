@@ -620,15 +620,7 @@ class MapdlGrpc(MapdlBase):
             self.uds_dir = os.path.join(os.path.expanduser("~"), ".conn")
 
         # Ensure uds_dir exists if possible
-        try:
-            os.makedirs(self.uds_dir, exist_ok=True)
-        except Exception:
-            # If logging is available, raise a runtime error; otherwise allow
-            # constructor to proceed and raise later when needed.
-            if hasattr(self, "_log"):
-                raise MapdlRuntimeError(
-                    f"Could not create UDS directory: {self.uds_dir}"
-                )
+        os.makedirs(self.uds_dir, exist_ok=True)
 
         if self.uds_id is None:
             # Prefer resolved port if available
@@ -1522,7 +1514,7 @@ class MapdlGrpc(MapdlBase):
                 try:
                     os.remove(socket_path)
                     self._log.debug(f"Removed UDS socket file {socket_path}")
-                except OSError:
+                except OSError:  # pragma: no cover
                     self._log.warning(f"Failed to remove UDS socket file {socket_path}")
 
         self._exit_mapdl(path=mapdl_path)
