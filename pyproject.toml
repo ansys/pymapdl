@@ -138,7 +138,7 @@ addopts = [
   "--durations=30",
   "--log-file-level=DEBUG",
   "--log-file=pytest.log",
-  "--maxfail=10",
+  "--maxfail=2",
   "--profile",
   "--profile-svg",
   "--random-order",
