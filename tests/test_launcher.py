@@ -1307,7 +1307,10 @@ def test_get_cpus(monkeypatch, arg, env):
 
 
 @patch("psutil.cpu_count", lambda *args, **kwags: 1)
-def test_get_cpus_min():
+def test_get_cpus_min(monkeypatch):
+    if "PYMAPDL_NPROC" in os.environ:
+        monkeypatch.delenv("PYMAPDL_NPROC")
+
     args = {"nproc": None, "running_on_hpc": False}
     get_cpus(args)
     assert args["nproc"] == 1
