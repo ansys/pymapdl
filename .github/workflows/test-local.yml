@@ -165,20 +165,6 @@ jobs:
           echo "Disk space:"
           df -h
 
-      - name: "Test MAPDL"
-        shell: bash
-        env:
-          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
-        run: |
-          echo "/prep7" > input.dat
-          /ansys_inc/v252/ansys/bin/ansys252 -grpc -mpi openmpi -b -i input.dat -o output.out
-
-      - name: "Show output file"
-        shell: bash
-        if: always()
-        run: |
-          cat output.out
-
       - name: "Install Git and checkout project"
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
         with:
@@ -224,6 +210,20 @@ jobs:
         if: inputs.testing-minimal == false
         run: |
           apt-get update && apt install -y libgl1 libglx-mesa0 xvfb libgomp1 graphviz curl git && apt-get clean
+
+      - name: "Test MAPDL"
+        shell: bash
+        env:
+          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
+        run: |
+          echo "/prep7" > input.dat
+          /ansys_inc/v252/ansys/bin/ansys252 -grpc -mpi openmpi -b -i input.dat -o output.out
+
+      - name: "Show output file"
+        shell: bash
+        if: always()
+        run: |
+          cat output.out
 
       - name: "Setup Python"
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 #v6.1.0
