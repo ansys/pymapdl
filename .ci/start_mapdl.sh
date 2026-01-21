@@ -106,7 +106,6 @@ run \
   -e EXEC_PATH=${EXEC_PATH} \
   -e DISTRIBUTED_MODE=${DISTRIBUTED_MODE} \
   -e MAPDL_IMAGE=${MAPDL_IMAGE} \
-  -e ANSYS_MAPDL_GRPC_TRANSPORT='insecure' \
   --shm-size=2gb \
   -e I_MPI_SHM_LMT=shm \
   -e P_SCHEMA=${P_SCHEMA} \
