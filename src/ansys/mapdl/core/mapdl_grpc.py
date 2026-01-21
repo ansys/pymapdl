@@ -3729,7 +3729,7 @@ class MapdlGrpc(MapdlBase):
         if self._exited:
             return
 
-        if not self._start_instance:
+        if hasattr(self, "_start_instance") and not self._start_instance:
             # Early skip if start_instance is False
             return
 
