@@ -1,7 +1,9 @@
-# Copyright (C) 2016 - 2026 ANSYS, Inc.
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 
+
+import logging
 import os
+import platform
 import sys
 import types
 from unittest.mock import MagicMock
@@ -41,12 +43,6 @@ def test_wait_until_healthy_succeeds(monkeypatch):
     fake_mod = types.ModuleType("ansys.tools.common.cyberchannel")
     fake_mod.verify_transport_mode = lambda mode: None
     monkeypatch.setitem(sys.modules, "ansys.tools.common.cyberchannel", fake_mod)
-
-    import logging
-
-    import grpc
-
-    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
     # Create fake channel and future that will succeed within timeout
     channel, future = _make_fake_channel_ready(delay=0.1)
@@ -204,7 +200,7 @@ def test_exit_removes_uds_socket(tmp_path, monkeypatch):
 def test_generate_start_parameters_includes_transport_args():
     args = {
         "transport_mode": "insecure",
-        "uds_dir": "/tmp/.conn",
+        "uds_dir": "/home/user/tmp/.conn",
         "uds_id": "mapdl-50052.sock",
         "certs_dir": "/etc/ansys/certs",
         # Required fields used by generate_start_parameters
@@ -213,7 +209,7 @@ def test_generate_start_parameters_includes_transport_args():
         "override": False,
         "start_timeout": 30,
         "launched": True,
-        "run_location": "/tmp",
+        "run_location": "/home/user/tmp",
         "jobname": "file",
         "exec_file": "",
         "nproc": 2,
@@ -226,7 +222,7 @@ def test_generate_start_parameters_includes_transport_args():
     # The start parameters should include transport-related keys when allowed
     assert "transport_mode" in start_parm or "transport_mode" in args
     assert args["transport_mode"] == "insecure"
-    assert args["uds_dir"] == "/tmp/.conn"
+    assert args["uds_dir"] == "/home/user/tmp/.conn"
     assert args["uds_id"] == "mapdl-50052.sock"
     assert args["certs_dir"] == "/etc/ansys/certs"
 
@@ -237,11 +233,6 @@ def test_env_transport_precedence(monkeypatch, transport_mode):
     # MapdlGrpc reads it during initialization. We patch external
     # dependencies to avoid launching a real channel.
     monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", transport_mode)
-
-    import os
-    import platform
-    import sys
-    import types
 
     if transport_mode == "wnua" and os.name != "nt":
         monkeypatch.setattr(os, "name", "nt")
@@ -297,7 +288,7 @@ def test_configure_transport_calls_verify(tmp_path, monkeypatch):
     uds_dir = tmp_path / "conn"
     # Do not create uds dir beforehand — constructor should create it
     with pytest.raises(MapdlRuntimeError):
-        mapdl = MapdlGrpc(channel=MagicMock(spec=grpc.Channel), uds_dir=str(uds_dir))
+        MapdlGrpc(channel=MagicMock(spec=grpc.Channel), uds_dir=str(uds_dir))
 
     fake_verify.assert_called_once()
 
@@ -306,12 +297,12 @@ def test_missing_ansys_tools_common_raises(monkeypatch):
     # Force import of verifier to raise ModuleNotFoundError
     real_import = __import__
 
-    def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+    def fake_import(name, globals_=None, locals=None, fromlist=(), level=0):
         if name.startswith("ansys.tools.common.cyberchannel") or (
             name == "ansys.tools.common" and "cyberchannel" in fromlist
         ):
             raise ModuleNotFoundError
-        return real_import(name, globals, locals, fromlist, level)
+        return real_import(name, globals_, locals, fromlist, level)
 
     monkeypatch.setattr("builtins.__import__", fake_import)
     with pytest.raises(ModuleNotFoundError):
