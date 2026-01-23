@@ -747,8 +747,11 @@ def test_fail_channel_ip():
     ),
     indirect=["set_env_var_context"],
 )
-def test_get_slurm_options(set_env_var_context, validation):
+def test_get_slurm_options(set_env_var_context, validation, monkeypatch):
     """test slurm env vars"""
+    if "PYMAPDL_NPROC" in os.environ:
+        monkeypatch.delenv("PYMAPDL_NPROC")
+
     for each_key, each_value in set_env_var_context.items():
         if each_value:
             assert os.environ.get(each_key) == str(each_value)
@@ -1304,7 +1307,10 @@ def test_get_cpus(monkeypatch, arg, env):
 
 
 @patch("psutil.cpu_count", lambda *args, **kwags: 1)
-def test_get_cpus_min():
+def test_get_cpus_min(monkeypatch):
+    if "PYMAPDL_NPROC" in os.environ:
+        monkeypatch.delenv("PYMAPDL_NPROC")
+
     args = {"nproc": None, "running_on_hpc": False}
     get_cpus(args)
     assert args["nproc"] == 1
@@ -2054,6 +2060,7 @@ def test_mapdl_output_pass_arg(tmpdir):
 
 @requires("local")
 @requires("nostudent")
+@requires("grpc")
 def test_mapdl_output(tmpdir):
     mapdl_output = os.path.join(tmpdir, "apdl.txt")
     mapdl = launch_mapdl(mapdl_output=mapdl_output, port=50058)
@@ -2067,8 +2074,14 @@ def test_mapdl_output(tmpdir):
         content = fid.read()
 
     assert "Beta activation of the GRPC server." in content
-    assert "### START GRPC SERVER      ###" in content
     assert "Server listening on" in content
+    try:
+        # before gRPC transport updates
+        assert "### START GRPC SERVER      ###" in content
+    except AssertionError:
+        assert "GRPC SERVER STARTED" in content
+        assert mapdl.transport_mode.upper() in content
+        assert "Transport Mode" in content
 
 
 def test_check_server_is_alive_no_queue():

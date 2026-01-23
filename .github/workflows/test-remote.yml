@@ -90,6 +90,8 @@ jobs:
       TEST_DPF_BACKEND: false
       PYTEST_ARGUMENTS: '--ignore_image_cache'
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
+      PYMAPDL_GRPC_TRANSPORT: 'insecure'
+      DPF_DEFAULT_GRPC_MODE: 'insecure'
 
     steps:
       - name: "Freeing some space and show space consumption (pre-test)"

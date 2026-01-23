@@ -133,6 +133,11 @@ SERVICE_DEFAULT_CONFIG = {
     ]
 }
 
+DEFAULT_GRPC_OPTIONS = [
+    ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+    ("grpc.service_config", json.dumps(SERVICE_DEFAULT_CONFIG)),
+]
+
 
 def get_start_instance(*args, **kwargs) -> bool:  # numpydoc ignore=RT01
     """Wraps get_start_instance to avoid circular imports."""
@@ -290,9 +295,24 @@ class MapdlGrpc(MapdlBase):
         PyPIM. This instance will be deleted when calling
         :func:`Mapdl.exit <ansys.mapdl.core.Mapdl.exit>`.
 
-    file_type_for_plots: ["PNG", "TIFF", "PNG", "VRML", "TERM"], Optional
-        Change the default file type for plots using ``/SHOW``, by
-        default it is ``PNG``.
+    transport_mode : str | None
+        Transport mode selected, by default `None` and thus it will be selected
+        for you based on the connection criteria. Options are: "insecure", "uds", "wnua", "mtls"
+
+    uds_dir : Path | str | None
+        Directory to use for Unix Domain Sockets (UDS) transport mode.
+        By default `None` and thus it will use the "~/.conn" folder.
+
+    uds_id : str | None
+        Optional ID to use for the UDS socket filename.
+        By default `None` and thus it will use "aposdas_socket.sock".
+        Otherwise, the socket filename will be "aposdas_socket-<uds_id>.sock".
+
+    certs_dir : Path | str | None
+        Directory to use for TLS certificates.
+        By default `None` and thus search for the "ANSYS_GRPC_CERTIFICATES" environment variable.
+        If not found, it will use the "certs" folder assuming it is in the current working
+        directory.
 
 
     Examples
@@ -333,6 +353,7 @@ class MapdlGrpc(MapdlBase):
         self,
         ip: Optional[str] = None,
         port: Optional[MapdlInt] = None,
+        *,
         timeout: int = 15,
         loglevel: str = "WARNING",
         log_file: bool = False,
@@ -344,6 +365,10 @@ class MapdlGrpc(MapdlBase):
         disable_run_at_connect: bool = False,
         channel: Optional[grpc.Channel] = None,
         remote_instance: Optional["PIM_Instance"] = None,
+        transport_mode: Optional[str] = None,
+        uds_dir: Optional[Union[str, pathlib.Path]] = None,
+        uds_id: Optional[str] = None,
+        certs_dir: Optional[Union[str, pathlib.Path]] = None,
         **start_parm: dict[str, Any],
     ):
         """Initialize connection to the mapdl server"""
@@ -355,6 +380,13 @@ class MapdlGrpc(MapdlBase):
         self._strict_session_id_check: bool = (
             False  # bool to force to check the session id matches in client and server
         )
+
+        self.transport_mode = transport_mode
+        self.uds_dir = uds_dir
+        self.uds_id = uds_id
+        self.certs_dir = certs_dir
+        self.grpc_options = start_parm.pop("grpc_options", DEFAULT_GRPC_OPTIONS)
+        # Transport configuration will be finalized after base init
 
         if channel is not None:
             if ip is not None or port is not None:
@@ -377,7 +409,7 @@ class MapdlGrpc(MapdlBase):
 
             port = MAPDL_DEFAULT_PORT
 
-        self._port = int(port)  # type: ignore[misc]
+        self._port: int = int(port)
         start_parm["port"] = self._port  # type: ignore[assignment]  # store for `open_gui`
 
         super().__init__(
@@ -388,6 +420,8 @@ class MapdlGrpc(MapdlBase):
             mode="grpc",
             **start_parm,
         )
+        # Finalize transport specifics now that logging and port are set
+        self._configure_transport(ip=ip, port=port, uds_id=uds_id)
         self._mode: Literal["grpc"] = "grpc"
 
         # gRPC request specific locks as these gRPC request are not thread safe
@@ -489,6 +523,150 @@ class MapdlGrpc(MapdlBase):
             f"Connected to MAPDL server running at {self._hostname} on {self.ip}:{self.port} on {self.platform} OS"
         )
 
+    def _configure_transport(
+        self, *, ip: str, port: int, uds_id: Optional[str]
+    ) -> None:
+        """Configure transport-related defaults, validate mode, and resolve UDS conflicts.
+
+        This centralizes duplicated logic from the constructor and can be
+        safely called before or after `super().__init__()`; it expects that
+        when called after `super().__init__()` the attributes `self._port`
+        and `self._log` are available.
+        """
+        # Determine transport mode if not provided
+        if self.transport_mode is None:
+            self.transport_mode = os.environ.get(
+                "PYMAPDL_GRPC_TRANSPORT"
+            ) or os.environ.get("ANSYS_MAPDL_GRPC_TRANSPORT")
+            if self.transport_mode is None:
+                import platform
+
+                if platform.system() == "Linux":
+                    self.transport_mode = "uds"
+                elif platform.system() == "Windows":
+                    self.transport_mode = "wnua"
+                else:
+                    warn("Unknown platform, defaulting to 'insecure' transport mode.")
+                    self.transport_mode = "insecure"
+
+        # Configure transport-specific settings
+        if self.transport_mode == "uds":
+            if os.name == "nt":
+                raise ValueError("UDS transport mode is not supported on Windows.")
+            self.configure_uds(port=port, uds_id=uds_id)
+
+        elif self.transport_mode == "wnua":
+            if os.name != "nt":
+                raise ValueError("WNUA transport mode is only supported on Windows.")
+            self.configure_wnua()
+
+        elif self.transport_mode == "insecure":
+            self.configure_insecure()
+
+        elif self.transport_mode == "mtls":
+            self.configure_mtls()
+
+        # Validate transport mode compatibility using external helper
+        try:
+            from ansys.tools.common.cyberchannel import verify_transport_mode
+
+            verify_transport_mode(self.transport_mode)
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "ansys.tools.common is required for transport verification. "
+                "Install ansys-tools-common or set transport_mode to 'insecure'."
+            )
+
+        # Transport compatibility checks for remote IPs. Allow loopback/local
+        # addresses (e.g., 127.0.0.1) to use local-only transports.
+        self._check_remote(ip)
+
+        if self.transport_mode == "wnua":
+            msg = f"Using WNUA transport on {ip}:{self._port}"
+        elif self.transport_mode == "uds":
+            msg = f"Using UDS transport with socket ID '{self.uds_id}' in directory '{self.uds_dir}'"
+        elif self.transport_mode == "mtls":
+            msg = f"Using mTLS transport with certificates in '{self.certs_dir}'"
+        else:
+            msg = f"Using insecure transport on {ip}:{self._port}"
+
+        if hasattr(self, "_log"):
+            self._log.info(msg)
+
+    def _check_remote(self, ip: Optional[str]) -> None:
+        """Check if the connection is remote and validate transport mode compatibility."""
+        is_remote = True
+        if ip is None:
+            is_remote = False
+        else:
+            try:
+                import ipaddress
+
+                is_remote = not ipaddress.ip_address(str(ip)).is_loopback
+            except Exception:
+                # If ip cannot be parsed, conservatively treat as not remote
+                is_remote = False
+
+        if is_remote and self.transport_mode in ["wnua", "uds"]:
+            raise ValueError(
+                f"Transport mode '{self.transport_mode}' does not support remote connections. "
+                "For remote connections, use 'mtls' or 'insecure' (discouraged)."
+            )
+
+    def configure_uds(self, port: int, uds_id: Optional[str] = None) -> None:
+        """Configure UDS transport-specific settings."""
+        # Set defaults for UDS
+        if self.uds_dir is None:
+            self.uds_dir = os.path.join(os.path.expanduser("~"), ".conn")
+
+        # Ensure uds_dir exists if possible
+        os.makedirs(self.uds_dir, exist_ok=True)
+
+        if self.uds_id is None:
+            # Prefer resolved port if available
+            pid_port = getattr(self, "_port", port)
+            self.uds_id = f"mapdl-{pid_port}.sock"
+
+        socket_path = os.path.join(self.uds_dir, self.uds_id)
+        if os.path.exists(socket_path):
+            # Todo: to check logic here
+            if port is not None or uds_id is not None:  # explicitly specified
+                raise ValueError(
+                    f"UDS socket file {socket_path} already exists. Please specify a different port or uds_id."
+                )
+            else:
+                # Increment port and uds_id until an available socket file is found
+                original_port = getattr(self, "_port", port)
+                while os.path.exists(socket_path):
+                    # ensure _port exists
+                    if not hasattr(self, "_port"):
+                        self._port = int(port)
+                    self._port += 1
+                    self.uds_id = f"mapdl-{self._port}.sock"
+                    socket_path = os.path.join(self.uds_dir, self.uds_id)
+                if hasattr(self, "_log"):
+                    self._log.info(
+                        f"UDS socket file for port {original_port} exists, using port {self._port} instead."
+                    )
+
+    def configure_insecure(self) -> None:
+        """Configure insecure transport-specific settings."""
+        # No specific configuration needed for insecure transport
+        pass
+
+    def configure_wnua(self) -> None:
+        """Configure WNUA transport-specific settings."""
+        # No specific configuration needed for WNUA transport
+        pass
+
+    def configure_mtls(self) -> None:
+        """Configure mTLS transport-specific settings."""
+        # Set defaults for certificates
+        if self.certs_dir is None:
+            self.certs_dir = os.environ.get(
+                "ANSYS_GRPC_CERTIFICATES", os.path.join(os.getcwd(), "certs")
+            )
+
     def _after_run(self, command: str) -> None:
         if command[:4].upper() == "/CLE":
             # We have reset the database, so we need to create a new session id
@@ -511,7 +689,6 @@ class MapdlGrpc(MapdlBase):
                 "The error wasn't caught by the post-mortem checks.\nThe stdout is printed now:"
             )
             self._log.debug(self._stdout)
-
             raise err  # Raise original error if we couldn't catch it in post-mortem analysis
         else:
             self._log.debug("Connection established")
@@ -546,7 +723,7 @@ class MapdlGrpc(MapdlBase):
         self._stderr_queue, self._stderr_thread = _create_queue_for_std(process.stderr)
 
     def _create_channel(self, ip: str, port: int) -> grpc.Channel:
-        """Create an insecured grpc channel.
+        """Create a gRPC channel using the specified transport mode.
 
         Parameters
         ----------
@@ -561,15 +738,19 @@ class MapdlGrpc(MapdlBase):
         grpc.Channel
             The created gRPC channel.
         """
+        from ansys.tools.common.cyberchannel import create_channel
+
         # open the channel
         channel_str = f"{ip}:{port}"
-        self._log.debug("Opening insecure channel at %s", channel_str)
-        return grpc.insecure_channel(
-            channel_str,
-            options=[
-                ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
-                ("grpc.service_config", json.dumps(SERVICE_DEFAULT_CONFIG)),
-            ],
+        self._log.debug(f"Opening channel at {channel_str}")
+        return create_channel(
+            transport_mode=self.transport_mode,
+            host=ip,
+            port=port,
+            uds_dir=self.uds_dir,
+            uds_id=self.uds_id,
+            certs_dir=self.certs_dir,
+            grpc_options=self.grpc_options,
         )
 
     def _subscribe_to_channel(self):
@@ -603,6 +784,43 @@ class MapdlGrpc(MapdlBase):
             The current state of the gRPC channel as a string.
         """
         return self._channel_state.name
+
+    def wait_until_healthy(self, timeout: float = 30.0) -> None:
+        """Wait for the gRPC channel to become healthy.
+
+        This method waits for the channel to reach the 'READY' state,
+        indicating that the connection is healthy and ready for use.
+        It supports configurable timeout and handles different transport modes.
+
+        Parameters
+        ----------
+        timeout : float, optional
+            Maximum time in seconds to wait for the channel to become healthy.
+            Default is 30.0 seconds.
+
+        Raises
+        ------
+        MapdlConnectionError
+            If the channel does not become healthy within the specified timeout.
+
+        Examples
+        --------
+        >>> mapdl.wait_until_healthy(timeout=10.0)
+        """
+        import concurrent.futures
+
+        # Use the public API to wait for channel readiness.
+        state_future = grpc.channel_ready_future(self._channel)
+        try:
+            state_future.result(timeout=timeout)
+        except concurrent.futures.TimeoutError:
+            current_state = self.channel_state
+            raise MapdlConnectionError(
+                f"Channel did not become healthy within {timeout} seconds. "
+                f"Current state: {current_state}"
+            )
+
+        self._log.debug("Channel is healthy and ready for use.")
 
     def _multi_connect(self, n_attempts=5, timeout=15):
         """Try to connect over a series of attempts to the channel.
@@ -1288,6 +1506,17 @@ class MapdlGrpc(MapdlBase):
 
         # Exiting MAPDL instance if we launched.
         self._exiting = True
+
+        # Remove UDS socket file if using UDS transport
+        if self.transport_mode == "uds":
+            socket_path = os.path.join(self.uds_dir, self.uds_id)
+            if os.path.exists(socket_path):
+                try:
+                    os.remove(socket_path)
+                    self._log.debug(f"Removed UDS socket file {socket_path}")
+                except OSError:  # pragma: no cover
+                    self._log.warning(f"Failed to remove UDS socket file {socket_path}")
+
         self._exit_mapdl(path=mapdl_path)
         self._exited = True
 
@@ -3500,7 +3729,7 @@ class MapdlGrpc(MapdlBase):
         if self._exited:
             return
 
-        if not self._start_instance:
+        if hasattr(self, "_start_instance") and not self._start_instance:
             # Early skip if start_instance is False
             return
 

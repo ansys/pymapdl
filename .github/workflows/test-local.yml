@@ -145,6 +145,8 @@ jobs:
       OMPI_ALLOW_RUN_AS_ROOT: 1
       OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
       DATAPROCESSING_DEBUG: /home/mapdl/dpf_logs
+      PYMAPDL_GRPC_TRANSPORT: 'insecure'
+      ANSYS_MAPDL_GRPC_TRANSPORT: 'insecure'
 
     container:
       image: "${{ inputs.package-registry }}:${{ inputs.mapdl-version }}" # zizmor: ignore[unpinned-images]
@@ -196,7 +198,6 @@ jobs:
         if: ${{ contains(inputs.mapdl-version, 'cicd') }}
         run: |
           apt-get update && apt-get -y install gcc mono-mcs g++
-
 
       - name: "Installing minimal OS packages"
         shell: bash
@@ -261,6 +262,7 @@ jobs:
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
           PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
           LATEST_VERSION: "${{ inputs.latest-version }}"
+          PYMAPDL_NPROC: 2
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
