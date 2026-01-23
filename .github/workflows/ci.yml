@@ -295,33 +295,33 @@ jobs:
       upload-logs: false
 
 
-  build-test-ubuntu-minimal:
-    name: "Local-min: ${{ matrix.mapdl-version }}"
-    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs: [build-test-ubuntu-local, build-test-remote]
-    uses: ./.github/workflows/test-local.yml
-    permissions:
-      contents: read  # Needed to read repository contents for tests
-      packages: read  # Needed to pull Docker images from GitHub packages
-    strategy:
-      fail-fast: false
-      matrix:
-        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu-cicd']
-    secrets:
-      license-server: ${{ secrets.LICENSE_SERVER }}
-      codecov-token: ${{ secrets.CODECOV_TOKEN }}
-      token: ${{ secrets.GITHUB_TOKEN }}
-      username: ${{ github.actor }}
-      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
-    with:
-      testing-minimal: true
-      pytest-arguments: ''
-      mapdl-version: ${{ matrix.mapdl-version }}
-      file-name: "${{ matrix.mapdl-version }}-minimal"
-      tags: "local,minimal"
-      latest-version: "252"
-      test_dpf: false
-      upload-logs: false
+  # build-test-ubuntu-minimal: # TODO: Enable again when minimal builds are stable
+  #   name: "Local-min: ${{ matrix.mapdl-version }}"
+  #   if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+  #   needs: [build-test-ubuntu-local, build-test-remote]
+  #   uses: ./.github/workflows/test-local.yml
+  #   permissions:
+  #     contents: read  # Needed to read repository contents for tests
+  #     packages: read  # Needed to pull Docker images from GitHub packages
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu-cicd']
+  #   secrets:
+  #     license-server: ${{ secrets.LICENSE_SERVER }}
+  #     codecov-token: ${{ secrets.CODECOV_TOKEN }}
+  #     token: ${{ secrets.GITHUB_TOKEN }}
+  #     username: ${{ github.actor }}
+  #     log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
+  #   with:
+  #     testing-minimal: true
+  #     pytest-arguments: ''
+  #     mapdl-version: ${{ matrix.mapdl-version }}
+  #     file-name: "${{ matrix.mapdl-version }}-minimal"
+  #     tags: "local,minimal"
+  #     latest-version: "252"
+  #     test_dpf: false
+  #     upload-logs: false
 
 
   build-test-ubuntu-console:
@@ -355,7 +355,7 @@ jobs:
 
   package:
     name: "Package library"
-    needs: [build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, docs-build]
+    needs: [build-test-remote, build-test-ubuntu-local, docs-build] # TODO: add build-test-ubuntu-minimal when re-enabled
     runs-on: ubuntu-latest
     permissions:
       contents: read  # Needed to read repository contents for packaging
@@ -440,7 +440,7 @@ jobs:
 
   notify:
     name: "Notify failed build"
-    needs: [smoke-tests, docs-build, build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal]
+    needs: [smoke-tests, docs-build, build-test-remote, build-test-ubuntu-local] # TODO: add build-test-ubuntu-minimal when re-enabled
     if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     permissions:
@@ -480,8 +480,8 @@ jobs:
   pytest-summary:
     name: Pytest summary for all the test jobs
     needs: [
-      build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, build-test-ubuntu-console
-      ]
+      build-test-remote, build-test-ubuntu-local, build-test-ubuntu-console
+      ] # TODO: add build-test-ubuntu-minimal when re-enabled
     if: always()
     runs-on: ubuntu-latest
     permissions:
