@@ -355,7 +355,7 @@ jobs:
 
   package:
     name: "Package library"
-    needs: [build-test-remote, build-test-ubuntu-local, docs-build] # TODO: add build-test-ubuntu-minimal when re-enabled
+    needs: [build-test-remote, build-test-ubuntu-local, docs-build, build-test-ubuntu-minimal]
     runs-on: ubuntu-latest
     permissions:
       contents: read  # Needed to read repository contents for packaging
@@ -440,7 +440,7 @@ jobs:
 
   notify:
     name: "Notify failed build"
-    needs: [smoke-tests, docs-build, build-test-remote, build-test-ubuntu-local] # TODO: add build-test-ubuntu-minimal when re-enabled
+    needs: [smoke-tests, docs-build, build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal]
     if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     permissions:
@@ -480,8 +480,8 @@ jobs:
   pytest-summary:
     name: Pytest summary for all the test jobs
     needs: [
-      build-test-remote, build-test-ubuntu-local, build-test-ubuntu-console
-      ] # TODO: add build-test-ubuntu-minimal when re-enabled
+      build-test-remote, build-test-ubuntu-local, build-test-ubuntu-console, build-test-ubuntu-minimal
+      ]
     if: always()
     runs-on: ubuntu-latest
     permissions:
