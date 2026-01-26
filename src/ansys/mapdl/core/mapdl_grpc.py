@@ -41,7 +41,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Uni
 from warnings import warn
 import weakref
 
-from ansys.tools.versioning.utils import version_string_as_tuple
+from ansys.tools.common.versioning import version_string_as_tuple
 import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np

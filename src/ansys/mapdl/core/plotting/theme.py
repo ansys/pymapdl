@@ -52,7 +52,7 @@ if _HAS_MATPLOTLIB:
     PyMAPDL_cmap: ListedColormap = ListedColormap(MAPDL_colorbar, name="PyMAPDL")
 
 if _HAS_PYVISTA:
-    from ansys.tools.versioning.utils import version_string_as_tuple  # type: ignore
+    from ansys.tools.common.versioning import version_string_as_tuple  # type: ignore
     from cycler import Cycler
     from pyvista import __version__ as pyvista_version
     from pyvista.plotting.colors import get_cycler  # type: ignore
