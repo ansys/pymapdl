@@ -240,6 +240,8 @@ jobs:
         shell: bash
         env:
           BUILDER: ${{ inputs.builder }}
+          PYMAPDL_GRPC_TRANSPORT: 'insecure'
+          DPF_DEFAULT_GRPC_MODE: 'insecure'
         run: |
           export PYTHONFAULTHANDLER=1
           xvfb-run make -C doc ${BUILDER} SPHINXOPTS="-j auto" | tee doc_build.log
