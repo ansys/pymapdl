@@ -35,6 +35,7 @@ Also shown here:
 - Notes regarding FULL vs. POWER graphics when using PRNSOL.
 
 """
+
 import numpy as np
 
 from ansys.mapdl.core import launch_mapdl

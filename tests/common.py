@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Shared testing module"""
+
 from collections import namedtuple
 import os
 import subprocess

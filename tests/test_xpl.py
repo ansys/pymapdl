@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Test xpl functionality"""
+
 import re
 
 from ansys.tools.versioning.utils import SemanticVersion

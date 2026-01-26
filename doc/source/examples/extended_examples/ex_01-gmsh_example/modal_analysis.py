@@ -22,7 +22,6 @@
 
 """Import the CDB database, setup modal analysis and run it."""
 
-
 from ansys.mapdl.core import launch_mapdl
 
 mapdl = launch_mapdl(override=True, additional_switches="-smp")

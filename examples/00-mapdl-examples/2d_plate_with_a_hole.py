@@ -32,6 +32,7 @@ elements and then verify this using 3D elements.
 
 First, start MAPDL as a service.
 """
+
 # sphinx_gallery_thumbnail_number = 3
 
 import numpy as np

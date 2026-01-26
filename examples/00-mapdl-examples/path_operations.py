@@ -32,6 +32,7 @@ along a path for stress.  This shows some advanced features of the
 
 First, start MAPDL as a service and disable all but error messages.
 """
+
 # sphinx_gallery_thumbnail_number = 3
 
 import matplotlib.pyplot as plt

@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """gRPC service specific tests"""
+
 import os
 import re
 import shutil

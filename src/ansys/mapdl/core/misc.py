@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Module for miscellaneous functions and methods"""
+
 from enum import Enum
 from functools import cache, wraps
 import importlib

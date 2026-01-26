@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """loads a list of verification files"""
+
 import glob
 import inspect
 import os
