@@ -1460,7 +1460,7 @@ def test_launch_on_hpc_found_ansys(mck_ssctrl, mck_launch_grpc, monkeypatch):
 
     assert "sbatch" in cmd
     assert "--wrap" in cmd
-    assert "path/to/mapdl/executable" in cmd[-1]
+    assert os.path.exists(cmd[-1])
     assert "-grpc" in cmd[-1]
 
     assert env_vars.get("ANS_MULTIPLE_NODES") == "1"
@@ -2023,10 +2023,7 @@ def test_args_pass(monkeypatch, arg, value, method):
 
 
 def test_check_has_mapdl():
-    if TESTING_MINIMAL:
-        assert check_has_mapdl() is False
-    else:
-        assert check_has_mapdl() == ON_LOCAL
+    assert check_has_mapdl() == ON_LOCAL
 
 
 def raising():
