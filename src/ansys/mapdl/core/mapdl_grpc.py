@@ -861,18 +861,10 @@ class MapdlGrpc(MapdlBase):
                                     _check_process_is_alive,
                                 )
 
-                                try:
-                                    _check_process_is_alive(
-                                        self._mapdl_process, self._path
-                                    )
-                                except MapdlDidNotStart as e:
-                                    raise
+                                _check_process_is_alive(self._mapdl_process, self._path)
                             except MapdlDidNotStart:
                                 # Propagate to outer except to set monitor_exception
                                 raise
-                            except Exception:
-                                # Ignore import errors or other issues and continue
-                                pass
 
                             # If _mapdl_process is a psutil.Process-like object
                             # Prefer direct checks, but if the provided terminal
@@ -897,10 +889,7 @@ class MapdlGrpc(MapdlBase):
                                 # Do NOT overwrite the original subprocess.Popen
                                 # object (it may be the terminal). Only cache the
                                 # discovered PIDs for future checks.
-                                try:
-                                    self._pids = [int(p.pid) for p in procs]
-                                except Exception:
-                                    pass
+                                self._pids = [int(p.pid) for p in procs]
 
                         except Exception as e:
                             # Process died or something went wrong
@@ -944,16 +933,11 @@ class MapdlGrpc(MapdlBase):
                     try:
                         from ansys.mapdl.core.launcher import _check_process_is_alive
 
-                        try:
-                            _check_process_is_alive(self._mapdl_process, self._path)
-                        except MapdlDidNotStart as e:
-                            monitor_exception["error"] = e
-                            monitor_stop_event.set()
-                            break
-                    except Exception:
-                        # Ignore import or other issues and continue with
-                        # our heuristics.
-                        pass
+                        _check_process_is_alive(self._mapdl_process, self._path)
+                    except MapdlDidNotStart as e:
+                        monitor_exception["error"] = e
+                        monitor_stop_event.set()
+                        break
 
                     try:
                         if hasattr(self._mapdl_process, "is_running"):
@@ -980,27 +964,21 @@ class MapdlGrpc(MapdlBase):
                     # that port. This detects the Windows case where the
                     # terminal remains but the MAPDL server died.
                     if process_alive and getattr(self, "_port", None):
+
+                        from ansys.mapdl.core.launcher import get_process_at_port
+
+                        proc_at_port = None
                         try:
-                            from ansys.mapdl.core.launcher import get_process_at_port
-
-                            proc_at_port = None
-                            try:
-                                proc_at_port = get_process_at_port(self._port)
-                            except Exception:
-                                proc_at_port = None
-
-                            if (
-                                not proc_at_port
-                                or not getattr(
-                                    proc_at_port, "is_running", lambda: False
-                                )()
-                            ):
-                                # The server that should be listening on the port is gone
-                                process_alive = False
+                            proc_at_port = get_process_at_port(self._port)
                         except Exception:
-                            # If anything goes wrong with the port check, continue
-                            # with the existing heuristics.
-                            pass
+                            proc_at_port = None
+
+                        if (
+                            not proc_at_port
+                            or not getattr(proc_at_port, "is_running", lambda: False)()
+                        ):
+                            # The server that should be listening on the port is gone
+                            process_alive = False
 
                     if not process_alive:
                         # Attempt to discover the actual MAPDL processes that
@@ -1010,10 +988,7 @@ class MapdlGrpc(MapdlBase):
                             raise MapdlDidNotStart("MAPDL process has died.")
                         # Do not overwrite the original process object; cache
                         # discovered PIDs instead so later checks can use them.
-                        try:
-                            self._pids = [int(p.pid) for p in procs]
-                        except Exception:
-                            pass
+                        self._pids = [int(p.pid) for p in procs]
 
                 self._log.debug("Connection attempt %d", i)
                 connected = self._connect(timeout=attempt_timeout)
@@ -1042,13 +1017,11 @@ class MapdlGrpc(MapdlBase):
                 alive_cached = False
                 try:
                     for pid in self._pids or []:
-                        try:
-                            if psutil.pid_exists(int(pid)):
-                                alive_cached = True
-                                cached_pid = pid
-                                break
-                        except Exception:
-                            continue
+                        if psutil.pid_exists(int(pid)):
+                            alive_cached = True
+                            cached_pid = pid
+                            break
+
                 except Exception:
                     alive_cached = False
 
@@ -1100,11 +1073,7 @@ class MapdlGrpc(MapdlBase):
 
             # subprocess.Popen-like object: prefer poll() if available
             if hasattr(self._mapdl_process, "poll"):
-                try:
-                    return self._mapdl_process.poll() is None
-                except Exception:
-                    # Fall through to pid-based checks
-                    pass
+                return self._mapdl_process.poll() is None
 
             pid = getattr(self._mapdl_process, "pid", None)
             if pid is None:
@@ -1148,19 +1117,12 @@ class MapdlGrpc(MapdlBase):
         found: list[psutil.Process] = []
 
         # 0) If we have a port, try to find process directly listening on it
-        try:
-            from ansys.mapdl.core.launcher import get_process_at_port
+        from ansys.mapdl.core.launcher import get_process_at_port
 
-            if getattr(self, "_port", None):
-                try:
-                    proc_at_port = get_process_at_port(self._port)
-                    if proc_at_port and proc_at_port.is_running():
-                        return [proc_at_port]
-                except Exception:
-                    pass
-        except Exception:
-            # if import fails, continue with other heuristics
-            pass
+        if getattr(self, "_port", None):
+            proc_at_port = get_process_at_port(self._port)
+            if proc_at_port and proc_at_port.is_running():
+                return [proc_at_port]
 
         # 1) If we already have a live process object
         try:
@@ -1173,16 +1135,13 @@ class MapdlGrpc(MapdlBase):
                         pass
                 else:
                     # subprocess.Popen-like
-                    try:
-                        if self._mapdl_process.poll() is None:
-                            pid = getattr(self._mapdl_process, "pid", None)
-                            if pid is not None:
-                                try:
-                                    return [psutil.Process(pid)]
-                                except psutil.NoSuchProcess:
-                                    pass
-                    except Exception:
-                        pass
+                    if self._mapdl_process.poll() is None:
+                        pid = getattr(self._mapdl_process, "pid", None)
+                        if pid is not None:
+                            try:
+                                return [psutil.Process(pid)]
+                            except psutil.NoSuchProcess:
+                                pass
 
             # 2) Check cached pids
             pids = [p for p in (self._pids or []) if p]
@@ -1207,15 +1166,12 @@ class MapdlGrpc(MapdlBase):
                         info = p.info
                         # Match by cwd
                         if cwd_to_match and info.get("cwd"):
-                            try:
-                                if os.path.abspath(str(info.get("cwd"))).startswith(
-                                    os.path.abspath(cwd_to_match)
-                                ):
-                                    if p.is_running():
-                                        found.append(p)
-                                        continue
-                            except Exception:
-                                pass
+                            if os.path.abspath(str(info.get("cwd"))).startswith(
+                                os.path.abspath(cwd_to_match)
+                            ):
+                                if p.is_running():
+                                    found.append(p)
+                                    continue
 
                         # Match by jobname in cmdline
                         cmdline = info.get("cmdline") or []
