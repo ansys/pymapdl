@@ -94,11 +94,7 @@ CMD=$(cat <<-_EOT_
 run \
   --entrypoint /bin/bash \
   --name ${INSTANCE_NAME} \
-  --restart always \
-  --health-interval=0.5s \
-  --health-retries=4 \
-  --health-timeout=0.5s \
-  --health-start-period=10s \
+  --restart unless-stopped \
   -e ANSYSLMD_LICENSE_FILE=1055@${LICENSE_SERVER} \
   -e ANSYS_LOCK="OFF" \
   ${DPF_ON} \

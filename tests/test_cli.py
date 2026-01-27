@@ -331,6 +331,7 @@ def test_pymapdl_stop_with_username_containing_domain(run_cli):
 
 
 @requires("click")
+@requires("tabulate")
 @pytest.mark.parametrize(
     "arg,check",
     (
