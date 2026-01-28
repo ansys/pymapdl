@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """ "Testing of log module"""
+
 import logging as deflogging  # Default logging
 import os
 import re

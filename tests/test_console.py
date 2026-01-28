@@ -25,6 +25,7 @@
 This has been copied from test_mapdl.py
 
 """
+
 import os
 import time
 from unittest.mock import patch

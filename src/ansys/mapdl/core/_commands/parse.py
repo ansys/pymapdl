@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """These commands are used to parse responses from MAPDL"""
+
 import re
 from typing import Optional
 

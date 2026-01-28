@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Module for report features"""
+
 import os
 from typing import Type
 

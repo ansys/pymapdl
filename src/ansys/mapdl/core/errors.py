@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """PyMAPDL specific errors"""
+
 from enum import Enum
 from functools import cache, wraps
 import signal

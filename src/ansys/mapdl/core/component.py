@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Component related module"""
+
 import re
 from typing import (
     TYPE_CHECKING,
