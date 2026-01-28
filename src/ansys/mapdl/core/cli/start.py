@@ -286,7 +286,8 @@ def start(
     )
 
     if len(out) == 3:
-        header = f"Launched an MAPDL instance (PID={out[2]}) at "
+        pid = out[2].pid
+        header = f"Launched an MAPDL instance (PID={pid}) at "
     else:
         header = "Launched an MAPDL instance at "
 
