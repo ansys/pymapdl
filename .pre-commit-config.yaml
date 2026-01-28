@@ -57,7 +57,7 @@ repos:
     additional_dependencies: [black==25.12.0]
 
 - repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 831207fd435b47aeffdf6af853097e64322b4d44  # frozen: 25.12.0
+  rev: ea488cebbfd88a5f50b8bd95d5c829d0bb76feb8  # frozen: 26.1.0
   hooks:
   - id: black
     args:
@@ -97,7 +97,7 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: b035497fb64e3f9faa91e833331688cc185891e6  # frozen: 0.36.0
+  rev: ccf21790019848af3eb4464be2a9d5efed6358f3  # frozen: 0.36.1
   hooks:
     - id: check-github-workflows
 
@@ -109,14 +109,14 @@ repos:
       args: [--option, "reorder_arrays=true", --option, "reorder_keys=true"]
 
 - repo: https://github.com/zizmorcore/zizmor-pre-commit
-  rev: 7fc963270df722f37707d47ff41265fe8f460822  # frozen: v1.20.0
+  rev: b546b77c44c466a54a42af5499dcc0dcc1a3193f  # frozen: v1.22.0
   hooks:
     - id: zizmor
       args: ["--pedantic"]
 
 # Security checks with bandit
 - repo: https://github.com/PyCQA/bandit
-  rev: ea0d187d78b2e6365e35f676d2eb9b1be264c091  # frozen: 1.9.2
+  rev: 765f00d3f202f83f61d03f882f80a2d5142d81f8  # frozen: 1.9.3
   hooks:
     - id: bandit
       args: ['-c', 'pyproject.toml']
