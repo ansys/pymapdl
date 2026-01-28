@@ -24,7 +24,7 @@
 
 import os
 
-from ansys.tools.versioning.utils import server_meets_version
+from ansys.tools.common.versioning import server_meets_version
 import numpy as np
 import pytest
 

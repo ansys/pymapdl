@@ -24,7 +24,7 @@
 
 import re
 
-from ansys.tools.versioning.utils import SemanticVersion
+from ansys.tools.common.versioning import SemanticVersion
 import numpy as np
 import pytest
 
