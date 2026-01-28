@@ -467,11 +467,9 @@ def test_convert(run_cli, tmpdir):
     output_file = str(tmpdir.join("output.pymapdl"))
 
     with open(input_file, "w") as fid:
-        fid.write(
-            """/prep7
+        fid.write("""/prep7
 BLOCK,0,1,0,1,0,1
-"""
-        )
+""")
 
     run_cli(f"convert -f {input_file} -o {output_file}")
 
@@ -482,12 +480,9 @@ BLOCK,0,1,0,1,0,1
     assert str(__version__) in converted
     assert "from ansys.mapdl.core import launch_mapdl" in converted
 
-    assert (
-        """
+    assert """
 mapdl.prep7()
-mapdl.block(0, 1, 0, 1, 0, 1)"""
-        in converted
-    )
+mapdl.block(0, 1, 0, 1, 0, 1)""" in converted
 
 
 @requires("click")

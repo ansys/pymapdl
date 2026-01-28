@@ -249,9 +249,7 @@ def test_convert_block_commands(tmpdir, cmd):
 def test_logger(capsys):
     apdl_ = """FINISH
     /PREP7
-    """.split(
-        "\n"
-    )
+    """.split("\n")
 
     translator = FileTranslator(line_ending="\n", show_log=True)
     for line in apdl_:
