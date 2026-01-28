@@ -51,6 +51,7 @@ The model is solved using SHELL281 elements and generic materials.
 Import modules
 ==============
 """
+
 import matplotlib.pyplot as plt
 from tabulate import tabulate
 

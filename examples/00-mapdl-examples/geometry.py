@@ -36,6 +36,7 @@ This example also demonstrates some of the more advanced features of
 PyMAPDL including direct mesh access through VTK.
 
 """
+
 # sphinx_gallery_thumbnail_number = 3
 
 import numpy as np

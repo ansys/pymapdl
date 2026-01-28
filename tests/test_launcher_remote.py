@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Test the PyPIM integration."""
+
 import pytest
 
 from conftest import has_dependency

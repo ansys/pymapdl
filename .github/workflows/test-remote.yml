@@ -90,6 +90,8 @@ jobs:
       TEST_DPF_BACKEND: false
       PYTEST_ARGUMENTS: '--ignore_image_cache'
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
+      PYMAPDL_GRPC_TRANSPORT: 'insecure'
+      DPF_DEFAULT_GRPC_MODE: 'insecure'
 
     steps:
       - name: "Freeing some space and show space consumption (pre-test)"
@@ -102,7 +104,7 @@ jobs:
           df -h
 
       - name: "Install Git and checkout project"
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
         with:
           persist-credentials: false
 

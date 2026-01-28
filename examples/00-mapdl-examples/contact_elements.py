@@ -32,6 +32,7 @@ contact.
 Begin by launching MAPDL.
 
 """
+
 from ansys.mapdl import core as pymapdl
 
 mapdl = pymapdl.launch_mapdl()

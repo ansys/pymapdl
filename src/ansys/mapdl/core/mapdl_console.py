@@ -24,6 +24,7 @@
 
 Used when launching Mapdl via pexpect on Linux when <= 17.0
 """
+
 import os
 import re
 import time

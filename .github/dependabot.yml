@@ -45,7 +45,6 @@ updates:
             - "numpy"
             - "platformdirs"
             - "psutil"
-            - "pyansys-tools-versioning"
 
        grpc-deps:
           patterns:
@@ -70,7 +69,6 @@ updates:
             - "ansys-api-mapdl"
             - "ansys-dpf-core"
             - "pyansys-tools-report"
-            - "pyansys-tools-versioning"
 
        documentation:
           patterns:

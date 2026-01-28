@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 """Contains the MapdlDb classes, allowing the access to MAPDL DB from Python."""
+
 from enum import Enum
 from functools import wraps
 import os
@@ -29,7 +30,7 @@ from warnings import warn
 import weakref
 
 from ansys.api.mapdl.v0 import mapdl_db_pb2_grpc
-from ansys.tools.versioning import server_meets_version
+from ansys.tools.common.versioning import server_meets_version
 import grpc
 
 from ansys.mapdl.core.errors import MapdlConnectionError

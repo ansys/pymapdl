@@ -21,7 +21,8 @@ echo "RUN_DPF_SERVER: $RUN_DPF_SERVER"
 
 if [ "$RUN_DPF_SERVER" == "true" ]; then
     echo "Starting DPF server..."
-    "/ansys_inc/v${VERSION}/aisol/bin/linx64/Ans.Dpf.Grpc.sh" --port "${DPF_PORT_INTERNAL}" > log_dpf.log &
+    export DPF_DEFAULT_GRPC_MODE="insecure"
+    "/ansys_inc/v${VERSION}/aisol/bin/linx64/Ans.Dpf.Grpc.sh" --port "${DPF_PORT_INTERNAL}" --address '0.0.0.0' > log_dpf.log &
     echo "DPF server started."
 fi
 
@@ -37,4 +38,4 @@ fi;
 echo "Starting MAPDL..."
 echo "Using executable path: ${EXEC_PATH}"
 
-$EXEC_PATH -grpc -dir /jobs -"${DISTRIBUTED_MODE}" -np 2 -db -6000 -m -6000 "${MPI}" -
+$EXEC_PATH -grpc -dir /jobs -"${DISTRIBUTED_MODE}" -transport insecure -allowremote true -np 2 -db -6000 -m -6000 "${MPI}" -

@@ -7,6 +7,7 @@
 # List of versions
 versions=(
     # if added more "latest", change "$LATEST"
+    'v25.2-pre1-ubuntu-cicd'
     'v25.2-ubuntu-cicd'
     'latest-ubuntu-student'
     'v25.2.0'
