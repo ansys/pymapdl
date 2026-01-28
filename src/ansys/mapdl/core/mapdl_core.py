@@ -98,6 +98,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl import MapdlBase
     from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
     from ansys.mapdl.core.parameters import Parameters
+    from ansys.mapdl.core.plugin import ansPlugin
     from ansys.mapdl.core.solution import Solution
     from ansys.mapdl.core.xpl import ansXpl
 
@@ -391,6 +392,8 @@ class _MapdlCore(Commands):
         self._solution: Solution = Solution(self)
 
         self._xpl: Optional[ansXpl] = None  # Initialized in mapdl_grpc
+
+        self._plugin: Optional[ansPlugin] = None  # Initialized in mapdl_grpc
 
         from ansys.mapdl.core.component import ComponentManager
 
@@ -1128,6 +1131,26 @@ class _MapdlCore(Commands):
     def graphics_backend(self, value: GraphicsBackend):
         """Set the graphics backend to be used."""
         self._graphics_backend = value
+
+    @property
+    def plugins(self) -> "ansPlugin":
+        """MAPDL plugin handler
+
+        Plugin Manager for MAPDL
+
+        Examples
+        --------
+
+        >>> from ansys import Mapdl
+        >>> mapdl = Mapdl()
+        >>> plugin = mapdl.plugin
+        >>> plugin.load('PluginDPF')
+        """
+        if self._plugin is None:
+            from ansys.mapdl.core.plugin import ansPlugin
+
+            self._plugin = ansPlugin(self)
+        return self._plugin
 
     @property
     @requires_package("ansys.mapdl.reader", softerror=True)
