@@ -501,7 +501,6 @@ def generate_mapdl_launch_command(
 
         tmp_out = mapdl_output if mapdl_output else ".__tmp__.out"
 
-
         # must start in batch mode on windows to hide APDL window
         tmp_inp = ".__tmp__.inp"
         command_parm = [
