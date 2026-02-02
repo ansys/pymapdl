@@ -476,7 +476,8 @@ def generate_mapdl_launch_command(
         the notes section for additional details.
 
     mapdl_output : str, optional
-        Whether redirect MAPDL console output (stdout) to a file.
+        File path to redirect MAPDL console output (stdout). If not specified,
+        a default temporary output file is used on Windows.
 
     Returns
     -------
@@ -498,8 +499,8 @@ def generate_mapdl_launch_command(
     # Windows will spawn a new window, special treatment
     if os.name == "nt":
 
-        tmp_out = f"{mapdl_output}" if mapdl_output else ".__tmp__.out"
-        exec_file = f"{exec_file}"
+        tmp_out = mapdl_output if mapdl_output else ".__tmp__.out"
+
 
         # must start in batch mode on windows to hide APDL window
         tmp_inp = ".__tmp__.inp"
