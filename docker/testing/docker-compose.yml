@@ -87,13 +87,14 @@ services:
       - mapdl-remote-container-pymapdl-host
       - default
     shm_size: '2gb'
-    restart: unless-stopped
     hostname: mapdl
     networks: 
       - pymapdl-net
     environment:
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
       - ANSYS_LOCK=OFF
+      - OMPI_ALLOW_RUN_AS_ROOT=1
+      - OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
     image: ${DOCKER_IMAGE}
     platform: linux/amd64
     # You might want to customize it
@@ -104,6 +105,7 @@ services:
       "${MAPDL_EXTRA_ARGS:-}"
       ]
     working_dir: /workspace
+    user: root
     volumes:
       # Required for v261 onwards.
     - ./mylocal.ip:/workspace/mylocal.ip:ro
@@ -129,13 +131,14 @@ services:
       - mapdl-remote-host-pymapdl-clone
       - mapdl-remote-host-pymapdl-host
     shm_size: '2gb'
-    restart: unless-stopped
     hostname: mapdl
     networks: 
       - pymapdl-net
     environment:
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
       - ANSYS_LOCK=OFF
+      - OMPI_ALLOW_RUN_AS_ROOT=1
+      - OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
     platform: linux/amd64
     build:
       context: .
@@ -218,6 +221,8 @@ services:
     environment:
       # If empty, it will use the default 'main' branch
       - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-main}
+      - OMPI_ALLOW_RUN_AS_ROOT=1
+      - OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
   mapdl-local-container-pymapdl-host:
     # This service clones PyMAPDL inside the MAPDL container and run the tests.
@@ -245,6 +250,8 @@ services:
     environment:
       # If empty, it will use the default 'main' branch
       - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-main}
+      - OMPI_ALLOW_RUN_AS_ROOT=1
+      - OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
     volumes:
       - ../../../:/workspace
 

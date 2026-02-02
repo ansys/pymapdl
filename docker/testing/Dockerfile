@@ -141,6 +141,8 @@ FROM ${DOCKER_IMAGE} AS mapdl-local-container-pymapdl
 # WARNING: This container is designed to work using an Ubuntu base image.
 #
 ARG PYTHON_VERSION=3.11
+ENV OMPI_ALLOW_RUN_AS_ROOT=1
+ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
 # OS configuration
 # ----------------
