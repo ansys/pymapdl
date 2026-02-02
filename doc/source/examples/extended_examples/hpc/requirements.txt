@@ -23,7 +23,7 @@ packaging==23.2
 pillow==10.3.0
 platformdirs==4.2.0
 pooch==1.8.1
-protobuf==4.25.8
+protobuf==6.33.5
 psutil==5.9.8
 pyansys-tools-versioning==0.5.0
 pygad==3.3.1
