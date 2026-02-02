@@ -167,8 +167,7 @@ def test_download_tech_demo_data(running_test):
 
 @requires("requests")
 def test_detach_examples_submodule():
-    cmd = (
-        """
+    cmd = """
 import sys
 
 assert 'ansys.mapdl.core' not in sys.modules, 'PyMAPDL is loaded!'
@@ -186,10 +185,7 @@ assert 'ansys.mapdl.core.examples' in sys.modules, 'examples is not loaded!'
 assert 'requests' in sys.modules, 'requests is not loaded!'
 
 print('Everything went well')
-""".strip()
-        .replace("\n", ";")
-        .replace(";;", ";")
-    )
+""".strip().replace("\n", ";").replace(";;", ";")
 
     cmd_line = f"""python -c "{cmd}" """
 

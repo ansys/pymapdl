@@ -34,6 +34,7 @@ notches in a finite width thin plate.
 
 First, start MAPDL as a service and disable all but error messages.
 """
+
 from matplotlib import pyplot as plt
 
 # sphinx_gallery_thumbnail_number = 3

@@ -29,6 +29,7 @@ PyVista Mesh Integration
 Run a modal analysis on a mesh generated from pyvista within MAPDL.
 
 """
+
 # sphinx_gallery_thumbnail_number = 2
 
 import os

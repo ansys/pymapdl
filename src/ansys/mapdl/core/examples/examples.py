@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """pymapdl examples"""
+
 import os
 
 # get location of this folder and the example files

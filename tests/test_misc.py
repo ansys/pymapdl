@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Small or misc tests that don't fit in other test modules"""
+
 import os
 import pathlib
 

@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 """Contains the MapdlDb classes, allowing the access to MAPDL DB from Python."""
+
 from enum import Enum
 from functools import wraps
 import os

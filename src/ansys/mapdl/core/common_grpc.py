@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Common gRPC functions"""
+
 import time
 from typing import Any, Dict, List, Literal, Optional, get_args
 

@@ -31,6 +31,7 @@ system at 1000 RPM.
 
 
 """
+
 from ansys.mapdl.reader import examples
 
 from ansys.mapdl.core import launch_mapdl

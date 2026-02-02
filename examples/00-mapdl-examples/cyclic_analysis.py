@@ -38,6 +38,7 @@ Our first task is to create a simple cyclic model with 7 sectors.
 First, start MAPDL as a service.
 
 """
+
 # sphinx_gallery_thumbnail_number = 3
 
 import numpy as np
