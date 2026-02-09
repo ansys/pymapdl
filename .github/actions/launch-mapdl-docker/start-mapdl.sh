@@ -153,7 +153,7 @@ docker run \
   --entrypoint /bin/bash \
   --name "${INSTANCE_NAME}" \
   --restart unless-stopped \
-  -e ANSYSLMD_LICENSE_FILE="${LICENSE_SERVER}" \
+  -e ANSYSLMD_LICENSE_FILE="1055@${LICENSE_SERVER}" \
   -e ANSYS_LOCK="OFF" \
   -p "${PYMAPDL_PORT}:50052" \
   -p "${PYMAPDL_DB_PORT}:${DB_INT_PORT}" \
