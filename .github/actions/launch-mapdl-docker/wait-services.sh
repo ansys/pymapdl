@@ -48,7 +48,7 @@ while ! nc -z localhost "${PYMAPDL_PORT}"; do
         echo "❌ Timeout waiting for PyMAPDL port ${PYMAPDL_PORT}"
         exit 1
     fi
-    sleep 0.5
+    sleep 1
     ELAPSED=$((ELAPSED + 1))
 done
 
