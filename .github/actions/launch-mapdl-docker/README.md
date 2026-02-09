@@ -42,8 +42,7 @@ That's it! Cleanup is automatic.
 
 ### Common Configurations
 
-<details>
-<summary><b>With DPF Server</b></summary>
+#### With DPF Server
 
 ```yaml
 - name: Launch MAPDL with DPF
@@ -53,10 +52,8 @@ That's it! Cleanup is automatic.
     license-server: ${{ secrets.LICENSE_SERVER }}
     enable-dpf-server: 'true'
 ```
-</details>
 
-<details>
-<summary><b>High Performance (DMP, 4 CPUs)</b></summary>
+#### High Performance (DMP, 4 CPUs)
 
 ```yaml
 - name: Launch MAPDL
@@ -69,10 +66,8 @@ That's it! Cleanup is automatic.
     memory-mb: '8192'
     mpi-type: 'openmpi'
 ```
-</details>
 
-<details>
-<summary><b>Multiple Instances</b></summary>
+#### Multiple Instances
 
 ```yaml
 - name: Instance 0
@@ -91,10 +86,8 @@ That's it! Cleanup is automatic.
     license-server: ${{ secrets.LICENSE_SERVER }}
     pymapdl-port: '21001'
 ```
-</details>
 
-<details>
-<summary><b>Using Outputs</b></summary>
+#### Using Outputs
 
 ```yaml
 - id: mapdl
@@ -109,70 +102,71 @@ That's it! Cleanup is automatic.
     echo "Port: ${{ steps.mapdl.outputs.pymapdl-port }}"
     docker logs ${{ steps.mapdl.outputs.container-name }}
 ```
-</details>
 
 
 ## API Reference
 
 ### Required Inputs
 
-| Input | Description | Example |
-|-------|-------------|---------|
-| `mapdl-version` | MAPDL Docker image version tag | `v25.2-ubuntu-cicd` |
-| `license-server` | License server address (port@host) | `1055@license.example.com` |
+| Input           | Description                            | Example                    |
+|-----------------|----------------------------------------|----------------------------|
+| `mapdl-version` | MAPDL Docker image version tag         | `v25.2-ubuntu-cicd`        |
+| `license-server` | License server address (port@host)    | `1055@license.example.com` |
 
 ### Optional Inputs
 
-| Input | Default | Description |
-|-------|---------|-------------|
-| `mapdl-image` | `ghcr.io/ansys/mapdl` | Docker image repository |
-| `instance-name` | `MAPDL_0` | Container name |
-| `pymapdl-port` | `50052` | PyMAPDL gRPC port |
-| `pymapdl-db-port` | `50055` | PyMAPDL database port |
-| `dpf-port` | `50056` | DPF service port |
-| `enable-dpf-server` | `false` | Start DPF server (`true`/`false`) |
-| `distributed-mode` | `smp` | Execution mode (`smp` or `dmp`) |
-| `num-processors` | `2` | Number of processors |
-| `mpi-type` | `auto` | MPI type (`auto`, `openmpi`, `intelmpi`) |
-| `memory-mb` | `6656` | Container memory limit (MB) |
-| `memory-swap-mb` | `16896` | Container swap limit (MB) |
-| `memory-db-mb` | `6000` | MAPDL database memory (MB) |
-| `memory-workspace-mb` | `6000` | MAPDL workspace memory (MB) |
-| `transport` | `insecure` | gRPC transport mode |
-| `student-version` | `auto` | Student version flag (`auto`, `true`, `false`) |
-| `timeout` | `60` | Startup timeout (seconds) |
+| Input                  | Default             | Description                                |
+|------------------------|---------------------|--------------------------------------------|
+| `mapdl-image`          | `ghcr.io/ansys/mapdl` | Docker image repository                  |
+| `instance-name`        | `MAPDL_0`           | Container name                             |
+| `pymapdl-port`         | `50052`             | PyMAPDL gRPC port                          |
+| `pymapdl-db-port`      | `50055`             | PyMAPDL database port                      |
+| `dpf-port`             | `50056`             | DPF service port                           |
+| `enable-dpf-server`    | `false`             | Start DPF server (`true`/`false`)          |
+| `distributed-mode`     | `smp`               | Execution mode (`smp` or `dmp`)            |
+| `num-processors`       | `2`                 | Number of processors                       |
+| `mpi-type`             | `auto`              | MPI type (`auto`, `openmpi`, `intelmpi`)   |
+| `memory-mb`            | `6656`              | Container memory limit (MB)                |
+| `memory-swap-mb`       | `16896`             | Container swap limit (MB)                  |
+| `memory-db-mb`         | `6000`              | MAPDL database memory (MB)                 |
+| `memory-workspace-mb`  | `6000`              | MAPDL workspace memory (MB)                |
+| `transport`            | `insecure`          | gRPC transport mode                        |
+| `student-version`      | `auto`              | Student version flag (`auto`, `true`, `false`) |
+| `timeout`              | `60`                | Startup timeout (seconds)                  |
 
 ### Outputs
 
-| Output | Description | Example |
-|--------|-------------|---------|
-| `container-id` | Docker container ID | `a1b2c3d4e5f6` |
-| `container-name` | Container name | `MAPDL_0` |
-| `pymapdl-port` | PyMAPDL port used | `50052` |
-| `dpf-port` | DPF port used | `50056` |
-| `pymapdl-db-port` | Database port used | `50055` |
-| `mapdl-version-number` | Numeric version | `252` |
-| `log-file` | Launch log file path | `/tmp/mapdl_launch.log` |
+| Output                 | Description              | Example        |
+|------------------------|--------------------------|----------------|
+| `container-id`         | Docker container ID      | `a1b2c3d4e5f6` |
+| `container-name`       | Container name           | `MAPDL_0`      |
+| `pymapdl-port`         | PyMAPDL port used        | `50052`        |
+| `dpf-port`             | DPF port used            | `50056`        |
+| `pymapdl-db-port`      | Database port used       | `50055`        |
+| `mapdl-version-number` | Numeric version          | `252`          |
+| `log-file`             | Launch log file path     | `/tmp/mapdl_launch.log` |
 
 ## Automatic Detection
 
 The action intelligently configures itself based on the `mapdl-version` string:
 
-| Version Pattern | Detection | Configuration |
-|----------------|-----------|---------------|
-| Contains `ubuntu` | Ubuntu image | Uses `/ansys_inc/v{VERSION}/ansys/bin/mapdl` |
-| Contains `latest-ubuntu` | Latest Ubuntu | Uses simplified `ansys` command |
-| Contains `cicd` | CI/CD image | Forces DMP, enables DPF port binding |
-| Contains `student` | Student version | Auto-detects student mode |
-| Other | CentOS/Rocky | Uses `/ansys_inc/ansys/bin/mapdl` |
+| Version Pattern    | Detection       | Configuration                                   |
+|--------------------|-----------------|------------------------------------------------|
+| Contains `ubuntu`  | Ubuntu image    | Uses `/ansys_inc/v{VERSION}/ansys/bin/mapdl`   |
+| Contains `latest-ubuntu` | Latest Ubuntu | Uses simplified `ansys` command            |
+| Contains `cicd`    | CI/CD image     | Forces DMP, enables DPF port binding           |
+| Contains `student` | Student version | Auto-detects student mode                      |
+| Other              | CentOS/Rocky    | Uses `/ansys_inc/ansys/bin/mapdl`              |
 
 **MPI Auto-Selection:**
+
 - CICD versions → OpenMPI
 - Other versions → Based on `mpi-type` input
 
 ## Usage from Other Repositories
 
 ### By Branch
+
 ```yaml
 - uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
   with:
@@ -181,6 +175,7 @@ The action intelligently configures itself based on the `mapdl-version` string:
 ```
 
 ### By Tag/Version
+
 ```yaml
 - uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@v0.69.0
   with:
@@ -189,11 +184,13 @@ The action intelligently configures itself based on the `mapdl-version` string:
 ```
 
 ### Copy to Your Repository
+
 Simply copy the entire `.github/actions/launch-mapdl-docker/` directory to your repository.
 
 ## Migration from Shell Scripts
 
 **Old approach** (using `.ci/start_mapdl.sh`):
+
 ```yaml
 - name: Launch MAPDL
   env:
@@ -211,6 +208,7 @@ Simply copy the entire `.github/actions/launch-mapdl-docker/` directory to your 
 ```
 
 **New approach** (using this action):
+
 ```yaml
 - name: Launch MAPDL
   uses: ./.github/actions/launch-mapdl-docker
@@ -223,6 +221,7 @@ Simply copy the entire `.github/actions/launch-mapdl-docker/` directory to your 
 ```
 
 **Benefits:**
+
 - ✅ Service waiting is built-in
 - ✅ Type-safe inputs with validation
 - ✅ Structured outputs for downstream steps
@@ -232,17 +231,17 @@ Simply copy the entire `.github/actions/launch-mapdl-docker/` directory to your 
 
 ### Environment Variable Mapping
 
-| Old Variable | New Input |
-|-------------|-----------|
-| `MAPDL_VERSION` | `mapdl-version` |
-| `MAPDL_PACKAGE` | `mapdl-image` |
-| `INSTANCE_NAME` | `instance-name` |
-| `LICENSE_SERVER` | `license-server` |
-| `PYMAPDL_PORT` | `pymapdl-port` |
-| `PYMAPDL_DB_PORT` | `pymapdl-db-port` |
-| `DPF_PORT` | `dpf-port` |
-| `RUN_DPF_SERVER` | `enable-dpf-server` |
-| `DISTRIBUTED_MODE` | `distributed-mode` |
+| Old Variable       | New Input             |
+|--------------------|-----------------------|
+| `MAPDL_VERSION`    | `mapdl-version`       |
+| `MAPDL_PACKAGE`    | `mapdl-image`         |
+| `INSTANCE_NAME`    | `instance-name`       |
+| `LICENSE_SERVER`   | `license-server`      |
+| `PYMAPDL_PORT`     | `pymapdl-port`        |
+| `PYMAPDL_DB_PORT`  | `pymapdl-db-port`     |
+| `DPF_PORT`         | `dpf-port`            |
+| `RUN_DPF_SERVER`   | `enable-dpf-server`   |
+| `DISTRIBUTED_MODE` | `distributed-mode`    |
 
 ## Requirements
 

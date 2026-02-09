@@ -92,25 +92,24 @@ fi
 
 # Configure DPF server settings
 DPF_PORT_INTERNAL="50055"
+DPF_ENV_ARGS=()
+DPF_PORT_ARGS=()
+
 if [[ $MAPDL_VERSION == *"cicd"* ]]; then
     echo "Detected: CICD version"
 
     if [[ "${ENABLE_DPF_SERVER}" == "true" ]]; then
         echo "  Enabling DPF server"
-        DPF_ENV_VAR="-e ANSYS_DPF_ACCEPT_LA=Y"
-    else
-        DPF_ENV_VAR=""
+        DPF_ENV_ARGS=("-e" "ANSYS_DPF_ACCEPT_LA=Y")
     fi
 
-    DPF_PORT_ARG="-p ${DPF_PORT}:${DPF_PORT_INTERNAL}"
+    DPF_PORT_ARGS=("-p" "${DPF_PORT}:${DPF_PORT_INTERNAL}")
     DB_INT_PORT="50056"
 
     # CICD versions force DMP mode
     echo "  Overriding distributed mode to 'dmp' for CICD version"
     DISTRIBUTED_MODE="dmp"
 else
-    DPF_ENV_VAR=""
-    DPF_PORT_ARG=""
     DB_INT_PORT="50055"
 fi
 
@@ -133,7 +132,7 @@ echo ""
 echo "Container Configuration:"
 echo "  Executable Path: ${EXEC_PATH}"
 echo "  Schema Path: ${P_SCHEMA}"
-echo "  DPF Port Mapping: ${DPF_PORT_ARG}"
+echo "  DPF Port Mapping: ${DPF_PORT_ARGS[*]}"
 echo "  DB Internal Port: ${DB_INT_PORT}"
 echo "  MPI Arguments: ${MPI_ARG}"
 echo "  Distributed Mode: ${DISTRIBUTED_MODE}"
@@ -158,8 +157,8 @@ docker run \
   -e ANSYS_LOCK="OFF" \
   -p "${PYMAPDL_PORT}:50052" \
   -p "${PYMAPDL_DB_PORT}:${DB_INT_PORT}" \
-  "${DPF_PORT_ARG}" \
-  "${DPF_ENV_VAR}" \
+  "${DPF_PORT_ARGS[@]}" \
+  "${DPF_ENV_ARGS[@]}" \
   -e VERSION="${VERSION}" \
   -e MAPDL_VERSION="${MAPDL_VERSION}" \
   -e DPF_PORT_INTERNAL="${DPF_PORT_INTERNAL}" \

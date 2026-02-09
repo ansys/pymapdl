@@ -36,10 +36,15 @@ echo "Waiting for PyMAPDL gRPC service on port ${PYMAPDL_PORT}..."
 nc -v -z localhost "${PYMAPDL_PORT}" 2>&1 || true
 
 # Wait up to 60 seconds for the port to be open
-TIMEOUT=60
+TIMEOUT=${TIMEOUT:-60}
+if ! [[ "$TIMEOUT" =~ ^[0-9]+$ ]] || [ "$TIMEOUT" -lt 1 ]; then
+    echo "⚠️  Invalid timeout value, using default 60 seconds"
+    TIMEOUT=60
+fi
+
 ELAPSED=0
 while ! nc -z localhost "${PYMAPDL_PORT}"; do
-    if [ $ELAPSED -ge $TIMEOUT ]; then
+    if [ $ELAPSED -ge "$TIMEOUT" ]; then
         echo "❌ Timeout waiting for PyMAPDL port ${PYMAPDL_PORT}"
         exit 1
     fi
@@ -56,7 +61,7 @@ if [[ "${ENABLE_DPF_SERVER}" == "true" ]]; then
 
     ELAPSED=0
     while ! nc -z localhost "${DPF_PORT}"; do
-        if [ $ELAPSED -ge $TIMEOUT ]; then
+        if [ $ELAPSED -ge "$TIMEOUT" ]; then
             echo "⚠️  Timeout waiting for DPF port ${DPF_PORT}"
             echo "DPF server may not have started correctly"
             break
