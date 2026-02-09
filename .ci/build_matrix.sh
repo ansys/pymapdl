@@ -7,22 +7,12 @@
 # List of versions
 versions=(
     # if added more "latest", change "$LATEST"
-    'v25.2-pre1-ubuntu-cicd'
     'v25.2-ubuntu-cicd'
-    'latest-ubuntu-student'
     'v25.2.0'
-    'v25.1.0'
     'v25.1-ubuntu-cicd'
-    'v25.1-ubuntu-student'
+    'v25.1.0'
+    'v24.2-ubuntu-cicd'
     'v24.2.0'
-    'v24.1.0'
-    'v24.1-ubuntu'
-    'v23.2.0'
-    'v23.2-ubuntu'
-    'v23.1.0'
-    'v23.1-ubuntu'
-    'v22.2.1'
-    'v22.2-ubuntu'
 )
 
 LATEST=3 # for 'latest-ubuntu' and 'latest-ubuntu-student'
