@@ -27628,9 +27628,9 @@ async function run() {
     process.env.STUDENT_VERSION = studentVersion;
     process.env.TIMEOUT = timeout.toString();
 
-    // Run the launch script
-    const scriptPath = __nccwpck_require__.ab + "start-mapdl.sh";
-    await exec.exec('bash', [__nccwpck_require__.ab + "start-mapdl.sh"]);
+    // Run the launch script (from parent directory when compiled to dist/)
+    const scriptPath = path.join(__dirname, '..', 'start-mapdl.sh');
+    await exec.exec('bash', [scriptPath]);
 
     // Get container ID
     let containerId = '';
@@ -27665,8 +27665,8 @@ async function run() {
     // Wait for services if requested
     if (wait === 'true') {
       core.startGroup('Waiting for MAPDL services to be ready');
-      const waitScriptPath = __nccwpck_require__.ab + "wait-services.sh";
-      await exec.exec('bash', [__nccwpck_require__.ab + "wait-services.sh"]);
+      const waitScriptPath = path.join(__dirname, '..', 'wait-services.sh');
+      await exec.exec('bash', [waitScriptPath]);
       core.endGroup();
       console.log('✅ MAPDL instance is ready!');
     } else {
