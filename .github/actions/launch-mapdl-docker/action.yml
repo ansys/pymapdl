@@ -82,7 +82,7 @@ inputs:
     default: '6000'
 
   transport:
-    description: 'gRPC transport mode (only insecure is supported)'
+    description: 'gRPC transport mode (value is passed through to MAPDL; default is insecure)'
     required: false
     default: 'insecure'
 
