@@ -83,9 +83,6 @@ if [ -n "${MPI_ARG}" ]; then
     MAPDL_CMD="${MAPDL_CMD} ${MPI_ARG}"
 fi
 
-# Add trailing dash to read from stdin (keeps container running)
-MAPDL_CMD="${MAPDL_CMD} -"
-
 echo ""
 echo "Executing command:"
 echo "  ${MAPDL_CMD}"
