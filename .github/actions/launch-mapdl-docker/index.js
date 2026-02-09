@@ -76,14 +76,18 @@ async function run() {
     await exec.exec('bash', [scriptPath]);
 
     // Get container ID
-    let containerId = '';
-    await exec.exec('docker', ['ps', '-aqf', `name=${instanceName}`], {
+    let psOutput = '';
+    await exec.exec('docker', ['ps', '-aqf', `name=^/${instanceName}$`], {
       listeners: {
         stdout: (data) => {
-          containerId = data.toString().trim();
+          psOutput += data.toString();
         }
       }
     });
+    const containerId = psOutput
+      .split('\n')
+      .map(line => line.trim())
+      .find(line => line.length > 0) || '';
 
     // Extract version number
     const major = mapdlVersion.substring(1, 3);

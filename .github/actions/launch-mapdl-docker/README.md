@@ -7,7 +7,7 @@ A comprehensive, production-ready action that consolidates MAPDL Docker launch s
 ## Features
 
 - ✅ **Automatic cleanup** - Containers stopped/removed when workflow completes
-- ✅ **18 configurable inputs** with smart defaults
+- ✅ **Configurable inputs** with smart defaults
 - ✅ **7 structured outputs** for downstream steps
 - ✅ **Automatic image detection** (Ubuntu/CentOS/CICD/Student)
 - ✅ **Built-in service checks** - waits for MAPDL and DPF to be ready
