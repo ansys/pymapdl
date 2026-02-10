@@ -516,6 +516,7 @@ jobs:
 
       - name: "Run test container"
         run: |
+          docker pull ghcr.io/ansys/mapdl:v24.2-ubuntu-cicd
           docker run \
             --entrypoint /bin/bash \
             --name MAPDL_0 \
