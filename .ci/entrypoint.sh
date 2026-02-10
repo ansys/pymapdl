@@ -26,7 +26,7 @@ if [ "$RUN_DPF_SERVER" == "true" ]; then
     echo "DPF server started."
 fi
 
-if [[ $MAPDL_VERSION == *"cicd"* ]] ; then
+if [[ $MAPDL_IMAGE == *"cicd"* ]] ; then
     echo "Using OpenMPI for CICD version"
     export MPI="-mpi openmpi"
 
