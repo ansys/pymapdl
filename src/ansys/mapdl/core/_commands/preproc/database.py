@@ -40,14 +40,13 @@ class Database(CommandsBase):
         lists all appropriate data.  If interactive, lists only summaries.
         """
         command = "AFLIST,"
-        result = self.run(command, **kwargs)
-        # Clean up the temporary file to avoid file locking issues on subsequent calls.
-        # This is best-effort: ignore failures in the delete command so that a
-        # successful AFLIST does not raise due to cleanup issues.
         try:
+            result = self.run(command, **kwargs)
+            # Clean up the temporary file to avoid file locking issues on subsequent calls.
+            # This is best-effort: ignore failures in the delete command so that a
+            # successful AFLIST does not raise due to cleanup issues.
+        finally:
             self.run("/delete,aflist,tmp", mute=True)
-        except Exception:
-            pass
         return result
 
     def cdread(self, option="", fname="", ext="", fnamei="", exti="", **kwargs):
