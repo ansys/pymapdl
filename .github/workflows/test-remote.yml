@@ -307,7 +307,7 @@ jobs:
           path: dist/
           retention-days: 7
 
-      - name: "Collect logs on failure"
+      - name: "Collect logs"
         if: always()
         env:
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
@@ -316,6 +316,15 @@ jobs:
         shell: bash
         run: |
           .ci/collect_mapdl_logs_remote.sh
+
+      - name: "Display logs"
+        if: always()
+        env:
+          MAPDL_INSTANCE: MAPDL_0
+          LOG_NAMES: logs-${{ inputs.file-name }}
+        shell: bash
+        run: |
+          .ci/display_logs_remote.sh
 
       - name: "Encrypt and upload logs to GitHub"
         if: always() && inputs.upload-logs == true
@@ -348,15 +357,6 @@ jobs:
           name: logs-${{ inputs.file-name }}-encrypted
           path: ./logs-${{ inputs.file-name }}.tgz.enc
           retention-days: 3
-
-      - name: "Display files structure"
-        if: always()
-        env:
-          MAPDL_INSTANCE: MAPDL_0
-          LOG_NAMES: logs-${{ inputs.file-name }}
-        shell: bash
-        run: |
-          .ci/display_logs_remote.sh
 
       - name: "Show space consumption (post-test)"
         if: always()

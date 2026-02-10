@@ -10,10 +10,13 @@ echo "::group:: Display docker run log" && cat log.txt && echo "::endgroup::"
 
 # Displaying MAPDL files
 FILE_PAT="./$LOG_NAMES/*.err"
+echo "Displaying files with pattern '*.err': $FILE_PAT"
 if compgen -G "$FILE_PAT" > /dev/null ;then for f in $FILE_PAT; do echo "::group:: Error file $f" && cat "$f" && echo "::endgroup::" ; done; fi || echo "Failed to display the 'err' files."
 
 FILE_PAT="./$LOG_NAMES/*.log"
+echo "Displaying files with pattern '*.log': $FILE_PAT"
 if compgen -G "$FILE_PAT" > /dev/null ;then for f in $FILE_PAT; do echo "::group:: Log file $f" && cat "$f" && echo "::endgroup::" ; done; fi || echo "Failed to display the 'log' files."
 
 FILE_PAT="./$LOG_NAMES/*.out"
+echo "Displaying files with pattern '*.out': $FILE_PAT"
 if compgen -G "$FILE_PAT" > /dev/null ;then for f in $FILE_PAT; do echo "::group:: Output file $f" && cat "$f" && echo "::endgroup::" ; done; fi || echo "Failed to display the 'output' files."

@@ -290,13 +290,21 @@ jobs:
           name: "reports-${{ inputs.file-name }}"
           path: ./${{ inputs.file-name }}.jsonl
 
-      - name: "Collect logs on failure"
+      - name: "Collect logs"
         if: always()
         env:
           LOG_NAMES: logs-${{ inputs.file-name }}
         shell: bash
         run: |
           .ci/collect_mapdl_logs_locals.sh
+
+      - name: "Display logs"
+        if: always()
+        env:
+          LOG_NAMES: logs-${{ inputs.file-name }}
+        shell: bash
+        run: |
+          .ci/display_logs_locals.sh
 
       - name: "Encrypt and upload logs to GitHub"
         if: always() && inputs.upload-logs == true
@@ -329,14 +337,6 @@ jobs:
           name: logs-${{ inputs.file-name }}-encrypted
           path: ./logs-${{ inputs.file-name }}.tgz.enc
           retention-days: 3
-
-      - name: "Display files structure"
-        if: always()
-        env:
-          LOG_NAMES: logs-${{ inputs.file-name }}
-        shell: bash
-        run: |
-          .ci/display_logs_locals.sh
 
       - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
         name: "Upload coverage to Codecov"
