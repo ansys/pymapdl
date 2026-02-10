@@ -497,3 +497,46 @@ jobs:
         uses: ./.github/actions/pytest-summary
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+  test:
+    name: "test job"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: "Login in Github container registry"
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef #v3.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Run test container"
+        run: |
+          docker run \
+            --entrypoint /bin/bash \
+            --name MAPDL_0 \
+            --restart unless-stopped \
+            -e ANSYSLMD_LICENSE_FILE="1055@${{ secrets.LICENSE_SERVER }}" \
+            -e ANSYS_LOCK="OFF" \
+            -e ANSYS_DPF_ACCEPT_LA=Y \
+            -p 21000:50052 \
+            -p 21002:50056 \
+            -p 21014:50055 \
+            -e VERSION=242 \
+            -e DPF_PORT_INTERNAL=50055 \
+            -e EXEC_PATH=/ansys_inc/v242/ansys/bin/mapdl \
+            -e DISTRIBUTED_MODE=dmp \
+            -e MAPDL_IMAGE=ghcr.io/ansys/mapdl:v24.2-ubuntu-cicd \
+            --shm-size=2gb \
+            -e I_MPI_SHM_LMT=shm \
+            -e P_SCHEMA=/ansys_inc/v242/ansys/ac4/schema \
+            -w /jobs \
+            -u=0:0 \
+            --memory=6656MB \
+            --memory-swap=16896MB \
+            --mount type=bind,src=/home/runner/work/pymapdl/pymapdl/.ci/entrypoint.sh,dst=/entrypoint.sh \
+            ghcr.io/ansys/mapdl:v24.2-ubuntu-cicd /entrypoint.sh
