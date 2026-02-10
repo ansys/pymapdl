@@ -733,12 +733,12 @@ class Test_output_listing(TestClass):
 
 def test_aflist_multiple_calls(mapdl, cleared):
     """Test that aflist can be called multiple times without error.
-    
+
     This test verifies the fix for the issue where aflist.tmp file
     remained locked after the first call, causing subsequent calls to fail.
     """
     mapdl.prep7()
-    
+
     # Call aflist multiple times - should not raise an error
     for i in range(3):
         result = mapdl.aflist()
