@@ -740,6 +740,5 @@ def test_aflist_multiple_calls(mapdl, cleared):
     mapdl.prep7()
 
     # Call aflist multiple times - should not raise an error
-    for i in range(3):
-        result = mapdl.aflist()
-        assert result is not None  # The key is that it doesn't raise an error
+    for _ in range(3):
+        mapdl.aflist()
