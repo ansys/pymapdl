@@ -106,7 +106,8 @@ class UnitsDict(dict):
             # Match lines like "LENGTH        (l)  = METER (M)"
             # or "TOFFSET            = 273.0"
             # Pattern explanation: 
-            # - [A-Z](?:[A-Z\s]*)? matches one uppercase letter followed by optional uppercase letters/spaces
+            # - [A-Z](?:[A-Z\s]*)? matches one uppercase letter, optionally followed by 
+            #   zero or more uppercase letters or spaces
             # - (?:\(([a-zA-Z])\))? optionally matches the short name in parentheses
             # - \s*=\s* matches equals sign with optional whitespace
             # - (.+) matches the value
