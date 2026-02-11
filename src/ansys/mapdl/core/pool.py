@@ -839,6 +839,184 @@ class MapdlPool:
         if block:
             [thread.join() for thread in threads]
 
+    def increase(self, n: int = 1) -> None:
+        """Add instances to the pool.
+
+        Parameters
+        ----------
+        n : int, optional
+            Number of instances to add. Default is 1.
+
+        Examples
+        --------
+        >>> pool = MapdlPool(2)
+        >>> pool.increase()  # add 1 instance
+        >>> pool.increase(2)  # add 2 more instances
+        """
+        if not isinstance(n, int):
+            raise TypeError(f"Argument 'n' must be an integer, got {type(n).__name__}")
+        if n < 1:
+            raise ValueError(f"Must add at least 1 instance. Got n={n}")
+
+        LOG.debug(f"Increasing pool size by {n} instances")
+
+        # Determine starting index for new instances
+        current_count = self._n_instances
+        
+        # Extend the instances list with None placeholders
+        self._instances.extend([None for _ in range(n)])
+        
+        # Update the total count
+        self._n_instances += n
+
+        # Get available ports for new instances
+        if self._start_instance:
+            # Find the highest current port and start from there
+            current_ports = [inst._port for inst in self if inst is not None]
+            if current_ports:
+                starting_port = max(current_ports) + 1
+            else:
+                starting_port = MAPDL_DEFAULT_PORT
+            
+            new_ports = available_ports(n, starting_port)
+        else:
+            # If not starting instances, use incremental ports
+            if self._ports:
+                starting_port = max(self._ports) + 1
+            else:
+                starting_port = MAPDL_DEFAULT_PORT
+            new_ports = [starting_port + i for i in range(n)]
+
+        # Spawn new instances
+        threads = []
+        for i in range(n):
+            index = current_count + i
+            port = new_ports[i]
+            ip = LOCALHOST if self._start_instance else self._ips[0] if self._ips else LOCALHOST
+            
+            thread = self._spawn_mapdl(
+                index,
+                ip=ip,
+                port=port,
+                name=self._names(index),
+                thread_name=self._names(index),
+                start_instance=self._start_instance,
+                exec_file=self._exec_file,
+            )
+            threads.append(thread)
+
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
+
+        LOG.debug(f"Successfully increased pool size to {self._n_instances} instances")
+
+    def reduce(self, n: int = 1) -> None:
+        """Remove instances from the pool.
+
+        Parameters
+        ----------
+        n : int, optional
+            Number of instances to remove. Default is 1.
+
+        Raises
+        ------
+        ValueError
+            If trying to reduce to 0 or negative instances.
+
+        Examples
+        --------
+        >>> pool = MapdlPool(3)
+        >>> pool.reduce()  # remove 1 instance
+        >>> pool.reduce(1)  # remove 1 more instance
+        """
+        if not isinstance(n, int):
+            raise TypeError(f"Argument 'n' must be an integer, got {type(n).__name__}")
+        if n < 1:
+            raise ValueError(f"Must remove at least 1 instance. Got n={n}")
+        if self._n_instances - n < 1:
+            raise ValueError(
+                f"Cannot reduce pool to less than 1 instance. "
+                f"Current instances: {self._n_instances}, trying to remove: {n}"
+            )
+
+        LOG.debug(f"Reducing pool size by {n} instances")
+
+        # Exit the last n instances
+        instances_to_exit = []
+        for i in range(self._n_instances - 1, self._n_instances - n - 1, -1):
+            instance = self._instances[i]
+            if instance is not None:
+                instances_to_exit.append((i, instance))
+
+        # Exit instances in threads
+        @threaded
+        def threaded_exit(index, instance):
+            self._exiting_i += 1
+            try:
+                instance.exit()
+            except MapdlRuntimeError as e:
+                LOG.warning(
+                    f"Unable to exit instance {index} because of the following reason:\n{str(e)}"
+                )
+            self._instances[index] = None
+            LOG.debug(f"Exited instance: {instance}")
+            self._exiting_i -= 1
+
+        threads = []
+        for index, instance in instances_to_exit:
+            threads.append(threaded_exit(index, instance))
+
+        # Wait for all exits to complete
+        for thread in threads:
+            thread.join()
+
+        # Remove the last n entries from instances list
+        self._instances = self._instances[:-n]
+        
+        # Update the total count
+        self._n_instances -= n
+
+        LOG.debug(f"Successfully reduced pool size to {self._n_instances} instances")
+
+    def add(self, mapdl) -> None:
+        """Add an existing MAPDL instance to the pool.
+
+        Parameters
+        ----------
+        mapdl : ansys.mapdl.core.Mapdl
+            An existing MAPDL instance to add to the pool.
+
+        Examples
+        --------
+        >>> from ansys.mapdl.core import launch_mapdl, MapdlPool
+        >>> mapdl = launch_mapdl()
+        >>> pool = MapdlPool(1)
+        >>> pool.add(mapdl)
+        """
+        from ansys.mapdl.core.mapdl import MapdlBase
+        
+        if not isinstance(mapdl, MapdlBase):
+            raise TypeError(
+                f"Argument 'mapdl' must be a MAPDL instance, got {type(mapdl).__name__}"
+            )
+
+        if mapdl._exited:
+            raise ValueError("Cannot add an exited MAPDL instance to the pool")
+
+        LOG.debug(f"Adding existing MAPDL instance to pool")
+
+        # Add to instances list
+        self._instances.append(mapdl)
+        
+        # Update the total count
+        self._n_instances += 1
+        
+        # Mark instance as part of pool
+        mapdl.on_pool = True
+
+        LOG.debug(f"Successfully added instance. Pool size now: {self._n_instances}")
+
     def __len__(self):
         count = 0
         for instance in self._instances:
