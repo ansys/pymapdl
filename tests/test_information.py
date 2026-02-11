@@ -93,6 +93,25 @@ def test_units_dict_parsing():
     assert units.get('nonexistent', 'default') == 'default'
 
 
+def test_units_dict_short_name_collision():
+    """Test that when short names collide, the first occurrence is kept."""
+    # Test case where 'L' appears as short name for both LENGTH and INDUCTANCE
+    # Only the first (LENGTH) should be kept as 'l'
+    units_string = """TEST UNITS
+  LENGTH        (l)  = METER (M)
+  INDUCTANCE    (L)  = HENRY"""
+    
+    units = UnitsDict(units_string)
+    
+    # 'l' should map to the first occurrence (meter), not the second (henry)
+    assert units['l'] == 'meter'
+    assert units['L'] == 'meter'
+    
+    # But the full names should still work correctly
+    assert units['length'] == 'meter'
+    assert units['inductance'] == 'henry'
+
+
 def test_mapdl_info(mapdl, cleared, capfd):
     info = mapdl.info
     for attr, value in inspect.getmembers(info):

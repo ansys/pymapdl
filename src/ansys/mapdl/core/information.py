@@ -105,7 +105,12 @@ class UnitsDict(dict):
             
             # Match lines like "LENGTH        (l)  = METER (M)"
             # or "TOFFSET            = 273.0"
-            match = re.match(r'^([A-Z][A-Z\s]+?)\s*(?:\(([a-zA-Z])\))?\s*=\s*(.+)$', line)
+            # Pattern explanation: 
+            # - [A-Z][A-Z\s]* matches one or more uppercase letters/spaces for the unit name
+            # - (?:\(([a-zA-Z])\))? optionally matches the short name in parentheses
+            # - \s*=\s* matches equals sign with optional whitespace
+            # - (.+) matches the value
+            match = re.match(r'^([A-Z][A-Z\s]*?)\s*(?:\(([a-zA-Z])\))?\s*=\s*(.+)$', line)
             
             if match:
                 full_name = match.group(1).strip()
@@ -114,6 +119,7 @@ class UnitsDict(dict):
                 
                 # Extract the first word before parentheses as the base unit value
                 # For "METER (M)", extract "METER"
+                # For numeric values like "273.0", keep them as-is
                 unit_match = re.match(r'^([A-Z]+)', value)
                 if unit_match:
                     base_value = unit_match.group(1).lower()
@@ -126,9 +132,10 @@ class UnitsDict(dict):
                 self[full_name_key] = base_value
                 
                 # Store with short name if available (only if not already set)
+                # Use super().__contains__() to check the actual dict without case conversion
                 if short_name:
                     short_name_key = short_name.lower()
-                    if short_name_key not in self:
+                    if not super().__contains__(short_name_key):
                         self[short_name_key] = base_value
     
     def __getitem__(self, key):
