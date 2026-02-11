@@ -932,6 +932,26 @@ class TestMapdlPool:
             pool.increase(-1)
 
     @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    def test_increase_remote_pool_error(self, monkeypatch):
+        """Test that increase raises error for remote pools"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        
+        pool = MapdlPool(
+            1,
+            ip="123.0.0.1",
+            port=[50052],
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+        
+        with pytest.raises(ValueError, match="Cannot automatically increase pool when 'start_instance' is False"):
+            pool.increase()
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
     @patch("ansys.mapdl.core.pool.MapdlPool.exit")
     def test_reduce_default(self, mock_exit, monkeypatch):
         """Test reducing pool by default (1 instance)"""

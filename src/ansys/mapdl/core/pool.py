@@ -847,6 +847,11 @@ class MapdlPool:
         n : int, optional
             Number of instances to add. Default is 1.
 
+        Raises
+        ------
+        ValueError
+            If trying to increase pool when start_instance is False.
+
         Examples
         --------
         >>> pool = MapdlPool(2)
@@ -857,6 +862,12 @@ class MapdlPool:
             raise TypeError(f"Argument 'n' must be an integer, got {type(n).__name__}")
         if n < 1:
             raise ValueError(f"Must add at least 1 instance. Got n={n}")
+        
+        if not self._start_instance:
+            raise ValueError(
+                "Cannot automatically increase pool when 'start_instance' is False. "
+                "Use the 'add()' method to add existing MAPDL instances instead."
+            )
 
         LOG.debug(f"Increasing pool size by {n} instances")
 
@@ -870,29 +881,21 @@ class MapdlPool:
         self._n_instances += n
 
         # Get available ports for new instances
-        if self._start_instance:
-            # Find the highest current port and start from there
-            current_ports = [inst._port for inst in self if inst is not None]
-            if current_ports:
-                starting_port = max(current_ports) + 1
-            else:
-                starting_port = MAPDL_DEFAULT_PORT
-            
-            new_ports = available_ports(n, starting_port)
+        # Find the highest current port and start from there
+        current_ports = [inst._port for inst in self if inst is not None]
+        if current_ports:
+            starting_port = max(current_ports) + 1
         else:
-            # If not starting instances, use incremental ports
-            if self._ports:
-                starting_port = max(self._ports) + 1
-            else:
-                starting_port = MAPDL_DEFAULT_PORT
-            new_ports = [starting_port + i for i in range(n)]
+            starting_port = MAPDL_DEFAULT_PORT
+        
+        new_ports = available_ports(n, starting_port)
 
         # Spawn new instances
         threads = []
         for i in range(n):
             index = current_count + i
             port = new_ports[i]
-            ip = LOCALHOST if self._start_instance else self._ips[0] if self._ips else LOCALHOST
+            ip = LOCALHOST
             
             thread = self._spawn_mapdl(
                 index,
