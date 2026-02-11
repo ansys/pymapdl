@@ -68,7 +68,7 @@ async function run() {
     instanceNames.push(instanceName);
     core.saveState('instance-names', JSON.stringify(instanceNames));
 
-    core.startGroup('Launch MAPDL Docker Container');
+    core.startGroup('MAPDL Docker Container Configuration');
     console.log('Configuration:');
     console.log(`  MAPDL Version: ${versionNumber}`);
     console.log(`  MAPDL Image: ${fullImageRef}`);
@@ -101,6 +101,7 @@ async function run() {
     process.env.TIMEOUT = timeout.toString();
 
     // Run the launch script (from parent directory when compiled to dist/)
+    core.startGroup('Launch MAPDL Docker Container');
     const scriptPath = path.join(__dirname, '..', 'start-mapdl.sh');
     await exec.exec('bash', [scriptPath]);
 
@@ -117,6 +118,8 @@ async function run() {
       .split('\n')
       .map(line => line.trim())
       .find(line => line.length > 0) || '';
+
+    core.endGroup();
 
     // Set outputs
     core.setOutput('container-id', containerId);
