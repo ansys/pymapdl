@@ -28,7 +28,7 @@ async function run() {
       // Extract version number from image tag (e.g., v25.2 -> 252)
       const tagMatch = mapdlImage.match(/v?(\d+)\.(\d+)/);
       if (tagMatch) {
-        versionNumber = `${tagMatch[1]}${tagMatch[2]}`;
+        versionNumber = `${tagMatch[1]}.${tagMatch[2]}`;
       } else {
         versionNumber = 'unknown';
       }
@@ -36,7 +36,7 @@ async function run() {
       // User provided version number (e.g., 25.2)
       // Default to ubuntu-cicd variant
       fullImageRef = `ghcr.io/ansys/mapdl:v${mapdlVersion}-ubuntu-cicd`;
-      versionNumber = mapdlVersion.replace('.', '');
+      versionNumber = mapdlVersion;
     }
     const pymapdlPort = core.getInput('pymapdl-port') || '50052';
     const pymapdlDbPort = core.getInput('pymapdl-db-port') || '50055';
@@ -79,6 +79,7 @@ async function run() {
     core.endGroup();
 
     // Set environment variables for the bash script
+    process.env.MAPDL_VERSION = versionNumber;
     process.env.MAPDL_IMAGE = fullImageRef;
     process.env.INSTANCE_NAME = instanceName;
     process.env.LICENSE_SERVER = licenseServer;
@@ -122,6 +123,7 @@ async function run() {
     core.setOutput('pymapdl-port', pymapdlPort);
     core.setOutput('dpf-port', dpfPort);
     core.setOutput('pymapdl-db-port', pymapdlDbPort);
+    versionNumber = versionNumber.replace('.', '');
     core.setOutput('mapdl-version-number', versionNumber);
     core.setOutput('log-file', `${instanceName}.log`);
 
