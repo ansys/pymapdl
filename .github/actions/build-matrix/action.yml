@@ -59,7 +59,7 @@ runs:
 
     - uses: tspascoal/get-user-teams-membership@57e9f42acd78f4d0f496b3be4368fc5f62696662 #v3.0.0
       id: is_organization_member
-      if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'pre-commit-ci[bot]' }}
+      if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'pre-commit-ci[bot]' && github.actor != 'Copilot' }}
       with:
         username: ${{ steps.get_user.outputs.user }}
         organization: ansys
@@ -68,7 +68,7 @@ runs:
 
     - id: set-matrix
       env:
-        AUTH_USER: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' || github.actor == 'dependabot[bot]' || github.actor == 'pre-commit-ci[bot]' }}
+        AUTH_USER: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' || github.actor == 'dependabot[bot]' || github.actor == 'pre-commit-ci[bot]' || github.actor == 'Copilot' }}
         ON_REMOTE: ${{ inputs.local == 'false' }}
         ONLY_UBUNTU: ${{ inputs.local == 'true' }}
         ON_SCHEDULE: ${{ github.event_name == 'schedule' }}
