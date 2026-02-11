@@ -264,10 +264,13 @@ jobs:
 
       - name: "Print amount of restarts"
         if: always()
+        env:
+          MAPDL_0: ${{ steps.mapdl_0.outputs.container_name }}
+          MAPDL_1: ${{ steps.mapdl_1.outputs.container_name }}
         run: |
-          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  MAPDL_0)
+          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  "${MAPDL_0}")
           echo "Number of restarts in the MAPDL_0 container: $N_RESTART"
-          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  MAPDL_1)
+          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  "${MAPDL_1}")
           echo "Number of restarts in the MAPDL_1 container: $N_RESTART"
 
       - name: "Upload pytest reports to GitHub"
