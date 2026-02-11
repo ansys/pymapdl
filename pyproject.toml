@@ -102,7 +102,7 @@ doc = [
   "plotly==6.5.2",
   "pyiges[full]==0.3.2",
   "pypandoc==1.16.2",
-  "pytest-sphinx==0.6.3",
+  "pytest-sphinx==0.7.1",
   "pythreejs==2.4.2",
   "sphinx-autobuild==2024.10.3",
   "sphinx-autodoc-typehints==3.1.0",
