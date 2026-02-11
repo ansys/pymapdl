@@ -51,46 +51,46 @@ def test_units_dict_parsing():
   MAGNETIC FLUX      = WEBER
   RESISTANCE    (R)  = OHM
   ELECTRIC POTENTIAL = VOLT"""
-    
+
     units = UnitsDict(units_string)
-    
+
     # Test access by full name (case-insensitive)
-    assert units['CHARGE'] == 'coulomb'
-    assert units['charge'] == 'coulomb'
-    assert units['Charge'] == 'coulomb'
-    
+    assert units["CHARGE"] == "coulomb"
+    assert units["charge"] == "coulomb"
+    assert units["Charge"] == "coulomb"
+
     # Test access by short name
-    assert units['Q'] == 'coulomb'
-    assert units['q'] == 'coulomb'
-    
+    assert units["Q"] == "coulomb"
+    assert units["q"] == "coulomb"
+
     # Test length access
-    assert units['LENGTH'] == 'meter'
-    assert units['length'] == 'meter'
-    assert units['l'] == 'meter'  # short name
-    
+    assert units["LENGTH"] == "meter"
+    assert units["length"] == "meter"
+    assert units["l"] == "meter"  # short name
+
     # Test mass access
-    assert units['MASS'] == 'kilogram'
-    assert units['mass'] == 'kilogram'
-    assert units['M'] == 'kilogram'  # short name
-    assert units['m'] == 'kilogram'
-    
+    assert units["MASS"] == "kilogram"
+    assert units["mass"] == "kilogram"
+    assert units["M"] == "kilogram"  # short name
+    assert units["m"] == "kilogram"
+
     # Test numeric value
-    assert units['TOFFSET'] == '273.0'
-    assert units['toffset'] == '273.0'
-    
+    assert units["TOFFSET"] == "273.0"
+    assert units["toffset"] == "273.0"
+
     # Test __str__ and __repr__ return original string
     assert str(units) == units_string
     assert repr(units) == units_string
-    
+
     # Test __contains__
-    assert 'charge' in units
-    assert 'CHARGE' in units
-    assert 'q' in units
-    assert 'nonexistent' not in units
-    
+    assert "charge" in units
+    assert "CHARGE" in units
+    assert "q" in units
+    assert "nonexistent" not in units
+
     # Test get method with default
-    assert units.get('charge') == 'coulomb'
-    assert units.get('nonexistent', 'default') == 'default'
+    assert units.get("charge") == "coulomb"
+    assert units.get("nonexistent", "default") == "default"
 
 
 def test_units_dict_short_name_collision():
@@ -100,16 +100,16 @@ def test_units_dict_short_name_collision():
     units_string = """TEST UNITS
   LENGTH        (l)  = METER (M)
   INDUCTANCE    (L)  = HENRY"""
-    
+
     units = UnitsDict(units_string)
-    
+
     # 'l' should map to the first occurrence (meter), not the second (henry)
-    assert units['l'] == 'meter'
-    assert units['L'] == 'meter'
-    
+    assert units["l"] == "meter"
+    assert units["L"] == "meter"
+
     # But the full names should still work correctly
-    assert units['length'] == 'meter'
-    assert units['inductance'] == 'henry'
+    assert units["length"] == "meter"
+    assert units["inductance"] == "henry"
 
 
 def test_mapdl_info(mapdl, cleared, capfd):
@@ -168,27 +168,27 @@ def test_title(mapdl, cleared):
 def test_units(mapdl, cleared):
     """Test the units property returns a UnitsDict with proper functionality."""
     from ansys.mapdl.core.information import UnitsDict
-    
+
     units = mapdl.info.units
-    
+
     # Check that it's a UnitsDict instance
     assert isinstance(units, UnitsDict)
-    
+
     # Check that it's also a dict
     assert isinstance(units, dict)
-    
+
     # Check __str__ and __repr__ return the original formatted string
     units_str = str(units)
     units_repr = repr(units)
-    
+
     assert "UNITS SPECIFIED" in units_str
     assert "UNITS SPECIFIED" in units_repr
-    
+
     # Check that we can access units by their full name (case-insensitive)
     # These assertions might vary depending on what units are set, so we test
     # if the dict is not empty and has expected structure
     assert len(units) > 0
-    
+
     # Try to access some common unit keys (if they exist)
     # The actual keys present depend on the MAPDL unit system
     # So we just verify the case-insensitive access works
@@ -197,8 +197,7 @@ def test_units(mapdl, cleared):
         value = units[key]
         assert value == units[key.upper()]
         assert value == units[key.lower()]
-        
+
     # Test that invalid keys raise KeyError
     with pytest.raises(KeyError):
         _ = units["NONEXISTENT_UNIT_KEY_12345"]
-
