@@ -67,7 +67,10 @@ NPROC = 1
 
 def patch_spawn_mapdl(*args, **kwargs):
     kwargs["index"] = args[0]
-    return kwargs
+    # Return a mock thread object that has a join method
+    mock_thread = MagicMock()
+    mock_thread.join = MagicMock()
+    return mock_thread
 
 
 class TestMapdlPool:
@@ -853,6 +856,7 @@ class TestMapdlPool:
     def test_increase_default(self, monkeypatch):
         """Test increasing pool by default (1 instance)"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
 
         pool = MapdlPool(
             2,
@@ -879,6 +883,7 @@ class TestMapdlPool:
     def test_increase_multiple(self, monkeypatch):
         """Test increasing pool by multiple instances"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
 
         pool = MapdlPool(
             1,
@@ -901,6 +906,7 @@ class TestMapdlPool:
     def test_increase_invalid_type(self, monkeypatch):
         """Test that increase raises TypeError for non-integer input"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
 
         pool = MapdlPool(
             1,
@@ -921,6 +927,7 @@ class TestMapdlPool:
     def test_increase_invalid_value(self, monkeypatch):
         """Test that increase raises ValueError for values < 1"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
 
         pool = MapdlPool(
             1,
