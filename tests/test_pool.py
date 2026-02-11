@@ -66,10 +66,15 @@ NPROC = 1
 
 
 def patch_spawn_mapdl(*args, **kwargs):
-    kwargs["index"] = args[0]
-    # Return a mock thread object that has a join method
-    mock_thread = MagicMock()
-    mock_thread.join = MagicMock()
+    class MockedDict(dict):
+        def join(self, *args, **kwargs):
+            return self
+
+    mock_thread = MockedDict()
+    mock_thread["index"] = args[0]
+
+    for key, val in kwargs.items():
+        mock_thread[key] = val
     return mock_thread
 
 
