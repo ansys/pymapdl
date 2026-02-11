@@ -61,11 +61,11 @@ VERSION="${MAJOR}${MINOR}"
 echo "Extracted MAPDL version number: ${VERSION}"
 
 # Determine executable path based on image type
-if [[ $MAPDL_VERSION == *"latest-ubuntu"* ]]; then
+if [[ $MAPDL_IMAGE == *"latest-ubuntu"* ]]; then
     echo "Detected: latest-ubuntu image"
     EXEC_PATH="ansys"
     P_SCHEMA=""
-elif [[ $MAPDL_VERSION == *"ubuntu"* ]]; then
+elif [[ $MAPDL_IMAGE == *"ubuntu"* ]]; then
     echo "Detected: Ubuntu-based image"
     EXEC_PATH="/ansys_inc/v${VERSION}/ansys/bin/mapdl"
     P_SCHEMA="/ansys_inc/v${VERSION}/ansys/ac4/schema"
@@ -100,7 +100,7 @@ fi
 
 # Determine MPI type
 if [[ "${MPI_TYPE}" == "auto" ]]; then
-    if [[ $MAPDL_VERSION == *"cicd"* ]]; then
+    if [[ $MAPDL_IMAGE == *"cicd"* ]]; then
         MPI_ARG="-mpi openmpi"
     else
         MPI_ARG=""
