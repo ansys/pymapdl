@@ -230,7 +230,6 @@ When using custom registries (not from `ghcr.io/ansys/mapdl` or `ansys/mapdl`):
 | `memory-db-mb`         | `6000`              | MAPDL database memory (MB)                 |
 | `memory-workspace-mb`  | `6000`              | MAPDL workspace memory (MB)                |
 | `transport`            | `insecure`          | gRPC transport mode                        |
-| `student-version`      | `auto`              | Student version flag (`auto`, `true`, `false`) |
 | `timeout`              | `60`                | Startup timeout (seconds)                  |
 
 ### Outputs

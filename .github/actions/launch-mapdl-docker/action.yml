@@ -86,11 +86,6 @@ inputs:
     required: false
     default: 'insecure'
 
-  student-version:
-    description: 'Whether this is a student version (will be auto-detected if not specified)'
-    required: false
-    default: 'auto'
-
   timeout:
     description: 'Timeout in seconds to wait for MAPDL to start'
     required: false

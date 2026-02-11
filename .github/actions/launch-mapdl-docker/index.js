@@ -61,6 +61,12 @@ async function run() {
       fullImageRef = `ghcr.io/ansys/mapdl:v${mapdlVersion}-ubuntu-cicd`;
       versionNumber = mapdlVersion;
     }
+
+    // Ensure versionNumber is set
+    if (!versionNumber) {
+      throw new Error('Failed to determine MAPDL version number');
+    }
+
     const pymapdlPort = core.getInput('pymapdl-port') || '50052';
     const pymapdlDbPort = core.getInput('pymapdl-db-port') || '50055';
     const dpfPort = core.getInput('dpf-port') || '50056';
@@ -74,7 +80,6 @@ async function run() {
     const memoryDbMb = core.getInput('memory-db-mb') || '6000';
     const memoryWorkspaceMb = core.getInput('memory-workspace-mb') || '6000';
     const transport = core.getInput('transport') || 'insecure';
-    const studentVersion = core.getInput('student-version') || 'auto';
     const timeout = parseInt(core.getInput('timeout') || '60');
     const wait = core.getInput('wait') || 'true';
 
