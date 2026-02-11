@@ -42,7 +42,7 @@ echo "Starting MAPDL..."
 echo "Using executable path: ${EXEC_PATH}"
 
 CMD=$(cat <<-_EOT_
-${EXEC_PATH} -grpc -dir /jobs -${DISTRIBUTED_MODE} ${MPI} -transport insecure -allowremote true -np 2 -db -6000 -m -6000
+${EXEC_PATH} -grpc -dir /jobs -${DISTRIBUTED_MODE} ${MPI} -transport insecure -allowremote true -np 2 -db -3000 -m -6000
 _EOT_
 )
 
