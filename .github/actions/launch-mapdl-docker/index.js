@@ -70,6 +70,7 @@ async function run() {
 
     core.startGroup('Launch MAPDL Docker Container');
     console.log('Configuration:');
+    console.log(`  MAPDL Version: ${versionNumber}`);
     console.log(`  MAPDL Image: ${fullImageRef}`);
     console.log(`  Instance Name: ${instanceName}`);
     console.log(`  PyMAPDL Port: ${pymapdlPort}`);
