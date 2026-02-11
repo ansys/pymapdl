@@ -878,7 +878,7 @@ class MapdlPool:
                 "Use the 'add()' method to add existing MAPDL instances instead."
             )
 
-        LOG.debug(f"Increasing pool size by {n} instances")
+        LOG.debug("Increasing pool size by {n} instances")
 
         # Determine starting index for new instances
         current_count = self._n_instances
