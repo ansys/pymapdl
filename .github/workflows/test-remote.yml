@@ -86,6 +86,7 @@ jobs:
       DPF_PORT_INTERNAL: 50055 # Internal port for DPF server
       DPF_PORT2: 21015
       DPF_START_SERVER: False
+      DPF_IP: '0.0.0.0'
       HAS_DPF: True
       TEST_DPF_BACKEND: false
       PYTEST_ARGUMENTS: '--ignore_image_cache'
