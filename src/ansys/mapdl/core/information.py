@@ -106,11 +106,11 @@ class UnitsDict(dict):
             # Match lines like "LENGTH        (l)  = METER (M)"
             # or "TOFFSET            = 273.0"
             # Pattern explanation: 
-            # - [A-Z][A-Z\s]* matches one or more uppercase letters/spaces for the unit name
+            # - [A-Z](?:[A-Z\s]*)? matches one uppercase letter followed by optional uppercase letters/spaces
             # - (?:\(([a-zA-Z])\))? optionally matches the short name in parentheses
             # - \s*=\s* matches equals sign with optional whitespace
             # - (.+) matches the value
-            match = re.match(r'^([A-Z][A-Z\s]*?)\s*(?:\(([a-zA-Z])\))?\s*=\s*(.+)$', line)
+            match = re.match(r'^([A-Z](?:[A-Z\s]*)?)\s*(?:\(([a-zA-Z])\))?\s*=\s*(.+)$', line)
             
             if match:
                 full_name = match.group(1).strip()
@@ -140,14 +140,20 @@ class UnitsDict(dict):
     
     def __getitem__(self, key):
         """Get item with case-insensitive key."""
+        if not isinstance(key, str):
+            raise TypeError(f"Key must be a string, not {type(key).__name__}")
         return super().__getitem__(key.lower())
     
     def __contains__(self, key):
         """Check if key exists (case-insensitive)."""
+        if not isinstance(key, str):
+            return False
         return super().__contains__(key.lower())
     
     def get(self, key, default=None):
         """Get item with case-insensitive key and default value."""
+        if not isinstance(key, str):
+            return default
         return super().get(key.lower(), default)
     
     def __repr__(self):
