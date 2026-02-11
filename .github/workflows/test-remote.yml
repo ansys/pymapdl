@@ -86,6 +86,7 @@ jobs:
       DPF_PORT_INTERNAL: 50055 # Internal port for DPF server
       DPF_PORT2: 21015
       DPF_START_SERVER: False
+      DPF_IP: '0.0.0.0'
       HAS_DPF: True
       TEST_DPF_BACKEND: false
       PYTEST_ARGUMENTS: '--ignore_image_cache'
@@ -147,6 +148,13 @@ jobs:
 
             echo "It should be run on the same container as MAPDL";
             export ON_SAME_CONTAINER=true;
+          else
+            echo "TEST_DPF_BACKEND=false" >> $GITHUB_ENV;
+          fi
+
+          if [[ "${MAPDL_VERSION}" == *"24.2"* ]]; then
+            echo "MAPDL 24.2 detected, skipping DPF backend tests for results module.";
+            echo "TEST_DPF_BACKEND=false" >> $GITHUB_ENV;
           fi
 
           echo "ON_UBUNTU: $ON_UBUNTU"
@@ -156,21 +164,6 @@ jobs:
           echo "ON_UBUNTU=$(echo $ON_UBUNTU)" >> $GITHUB_OUTPUT
           echo "TAG_UBUNTU=$(echo $TAG_UBUNTU)" >> $GITHUB_OUTPUT
           echo "ON_SAME_CONTAINER=$(echo $ON_SAME_CONTAINER)" >> $GITHUB_OUTPUT
-
-      - name: "Get if running student version"
-        id: student_check
-        shell: bash
-        env:
-          MAPDL_VERSION: ${{ inputs.mapdl-version }}
-        run: |
-          if [[ "${MAPDL_VERSION}" == *"student"* ]];
-            then export ON_STUDENT=true; export TAG_STUDENT="student";
-            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
-          fi
-          echo "ON_STUDENT: $ON_STUDENT"
-          echo "TAG_STUDENT: $TAG_STUDENT"
-          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
-          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
 
       - name: "Launch first MAPDL instance using action"
         id: mapdl_0
@@ -259,14 +252,12 @@ jobs:
         env:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
           ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
-          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
           file_name: "${{ inputs.file-name }}"
           MAPDL_VERSION: "${{ inputs.mapdl-version }}"
           PYTEST_ARGUMENTS: "${{ env.PYTEST_ARGUMENTS }}"
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
-          echo "ON_STUDENT: $ON_STUDENT"
           xvfb-run pytest \
             ${PYTEST_ARGUMENTS} \
             --report-log=$file_name.jsonl \
@@ -291,7 +282,7 @@ jobs:
         with:
           token: ${{ secrets.codecov-token }} # required
           name: "${{ inputs.file-name }}.xml"
-          flags: remote-${{ steps.ubuntu_check.outputs.TAG_UBUNTU }}-${{ inputs.mapdl-version }}-${{ steps.distributed_mode.outputs.distributed_mode }}-${{ steps.student_check.outputs.TAG_STUDENT }}
+          flags: remote-${{ steps.ubuntu_check.outputs.TAG_UBUNTU }}-${{ inputs.mapdl-version }}-${{ steps.distributed_mode.outputs.distributed_mode }}
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
@@ -312,7 +303,7 @@ jobs:
           path: dist/
           retention-days: 7
 
-      - name: "Collect logs on failure"
+      - name: "Collect logs"
         if: always()
         env:
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
@@ -353,15 +344,6 @@ jobs:
           name: logs-${{ inputs.file-name }}-encrypted
           path: ./logs-${{ inputs.file-name }}.tgz.enc
           retention-days: 3
-
-      - name: "Display files structure"
-        if: always()
-        env:
-          MAPDL_INSTANCE: MAPDL_0
-          LOG_NAMES: logs-${{ inputs.file-name }}
-        shell: bash
-        run: |
-          .ci/display_logs_remote.sh
 
       - name: "Show space consumption (post-test)"
         if: always()
