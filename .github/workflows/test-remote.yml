@@ -148,6 +148,8 @@ jobs:
 
             echo "It should be run on the same container as MAPDL";
             export ON_SAME_CONTAINER=true;
+          else
+            echo "TEST_DPF_BACKEND=false" >> $GITHUB_ENV;
           fi
 
           echo "ON_UBUNTU: $ON_UBUNTU"
