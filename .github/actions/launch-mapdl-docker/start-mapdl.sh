@@ -33,7 +33,6 @@ MEMORY_SWAP_MB="${MEMORY_SWAP_MB:-16896}"
 MEMORY_DB_MB="${MEMORY_DB_MB:-6000}"
 MEMORY_WORKSPACE_MB="${MEMORY_WORKSPACE_MB:-6000}"
 TRANSPORT="${TRANSPORT:-insecure}"
-STUDENT_VERSION="${STUDENT_VERSION:-auto}"
 TIMEOUT="${TIMEOUT:-60}"
 
 echo "Configuration:"
@@ -60,17 +59,6 @@ MAJOR=$(echo "$MAPDL_VERSION" | head -c 3 | tail -c 2)
 MINOR=$(echo "$MAPDL_VERSION" | head -c 5 | tail -c 1)
 VERSION="${MAJOR}${MINOR}"
 echo "Extracted MAPDL version number: ${VERSION}"
-
-# Determine if student version
-IS_STUDENT="false"
-if [[ "${STUDENT_VERSION}" == "auto" ]]; then
-    if [[ "${MAPDL_VERSION}" == *"student"* ]]; then
-        IS_STUDENT="true"
-    fi
-else
-    IS_STUDENT="${STUDENT_VERSION}"
-fi
-echo "Student version: ${IS_STUDENT}"
 
 # Determine executable path based on image type
 if [[ $MAPDL_VERSION == *"latest-ubuntu"* ]]; then

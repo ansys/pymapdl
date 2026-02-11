@@ -102,9 +102,18 @@ async function run() {
     console.log(`  MAPDL Image: ${fullImageRef}`);
     console.log(`  Instance Name: ${instanceName}`);
     console.log(`  PyMAPDL Port: ${pymapdlPort}`);
+    console.log(`  Transport: ${transport}`);
+    console.log(`  --`);
+    console.log(`  Enable DPF Server: ${enableDpfServer}`);
     console.log(`  DPF Port: ${dpfPort}`);
+    console.log(`  --`);
     console.log(`  Distributed Mode: ${distributedMode}`);
     console.log(`  Number of Processors: ${numProcessors}`);
+    console.log(`  MPI Type: ${mpiType}`);
+    console.log(`  Working Directory: ${workingDirectory}`);
+    console.log(`  Memory (MB): ${memoryMb}`);
+    console.log(`  Memory DB (MB): ${memoryDbMb}`);
+    console.log(`  Memory Workspace (MB): ${memoryWorkspaceMb}`);
     core.endGroup();
 
     // Set environment variables for the bash script
@@ -125,7 +134,6 @@ async function run() {
     process.env.MEMORY_DB_MB = memoryDbMb;
     process.env.MEMORY_WORKSPACE_MB = memoryWorkspaceMb;
     process.env.TRANSPORT = transport;
-    process.env.STUDENT_VERSION = studentVersion;
     process.env.TIMEOUT = timeout.toString();
 
     // Run the launch script (from parent directory when compiled to dist/)
