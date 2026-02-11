@@ -1570,6 +1570,25 @@ class _MapdlCommandExtended(_MapdlCore):
                     f"Unexpected output from 'mapdl.inquire' function:\n{response}"
                 )
 
+        if func.upper() in [
+            "LOGIN",
+            "DOCU",
+            "APDL",
+            "PROG",
+            "AUTH",
+            "USER",
+            "DIRECTORY",
+            "JOBNAME",
+            "RSTDIR",
+            "RSTFILE",
+            "RSTEXT",
+            "OUTPUT",
+            "ENV",
+            "TITLE",
+            "DATE",
+        ]:
+            return response
+
         try:
             return float(response)
         except ValueError:
