@@ -38,6 +38,8 @@ updates:
         - "*"  # Include all dependencies in cooldown
       exclude:
         - "ansys-tools-visualization-interface"
+    exclude-paths:
+      - "doc/source/examples"
     groups:
        minimal:
           patterns:
