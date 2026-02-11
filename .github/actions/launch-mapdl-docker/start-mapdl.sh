@@ -8,8 +8,8 @@ echo "MAPDL Docker Container Launch"
 echo "==================================="
 
 # Validate required environment variables
-if [ -z "${MAPDL_VERSION}" ]; then
-    echo "❌ Error: MAPDL_VERSION is required"
+if [ -z "${MAPDL_IMAGE}" ]; then
+    echo "❌ Error: MAPDL_IMAGE is required"
     exit 1
 fi
 
@@ -19,7 +19,6 @@ if [ -z "${LICENSE_SERVER}" ]; then
 fi
 
 # Set defaults
-MAPDL_IMAGE="${MAPDL_IMAGE:-ghcr.io/ansys/mapdl}"
 INSTANCE_NAME="${INSTANCE_NAME:-MAPDL_0}"
 PYMAPDL_PORT="${PYMAPDL_PORT:-50052}"
 PYMAPDL_DB_PORT="${PYMAPDL_DB_PORT:-50055}"
@@ -52,11 +51,9 @@ echo "  MPI Type: ${MPI_TYPE}"
 echo "  Memory: ${MEMORY_MB} MB"
 echo "  Transport: ${TRANSPORT}"
 
-# Build full image name
-FULL_IMAGE="${MAPDL_IMAGE}:${MAPDL_VERSION}"
 echo ""
-echo "Pulling Docker image: ${FULL_IMAGE}"
-docker pull "${FULL_IMAGE}"
+echo "Pulling Docker image: ${MAPDL_IMAGE}"
+docker pull "${MAPDL_IMAGE}"
 
 # Extract version number
 MAJOR=$(echo "$MAPDL_VERSION" | head -c 3 | tail -c 2)
@@ -178,7 +175,7 @@ docker run \
   --memory="${MEMORY_MB}MB" \
   --memory-swap="${MEMORY_SWAP_MB}MB" \
   --mount type=bind,src="${ENTRYPOINT_PATH}",dst=/entrypoint.sh \
-  "${FULL_IMAGE}" \
+  "${MAPDL_IMAGE}" \
   /entrypoint.sh
 
 echo ""
