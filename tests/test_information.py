@@ -32,7 +32,7 @@ from ansys.mapdl.core.information import UnitsDict
 def test_units_dict_parsing():
     """Test UnitsDict parsing and access without requiring MAPDL."""
     # Sample units string similar to what MAPDL returns
-    units_string = """MKS UNITS SPECIFIED FOR INTERNAL    
+    units_string = """MKS UNITS SPECIFIED FOR INTERNAL
   LENGTH        (l)  = METER (M)
   MASS          (M)  = KILOGRAM (KG)
   TIME          (t)  = SECOND (SEC)
