@@ -1027,7 +1027,7 @@ class MapdlPool:
         if self._n_instances is None:
             raise RuntimeError("Pool must be initialized before calling add()")
 
-        LOG.debug(f"Adding existing MAPDL instance to pool")
+        LOG.debug("Adding existing MAPDL instance to pool")
 
         # Add to instances list
         self._instances.append(mapdl)
