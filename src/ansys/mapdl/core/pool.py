@@ -859,7 +859,7 @@ class MapdlPool:
         >>> pool.increase(2)  # add 2 more instances
         """
         if not isinstance(n, int):
-            raise TypeError(f"Argument 'n' must be an integer, got {type(n).__name__}")
+            raise TypeError(f"Argument 'n' must be an integer, got {type(n).__name__} instead")
         if n < 1:
             raise ValueError(f"Must add at least 1 instance. Got n={n}")
         
@@ -934,7 +934,7 @@ class MapdlPool:
         >>> pool.reduce(1)  # remove 1 more instance
         """
         if not isinstance(n, int):
-            raise TypeError(f"Argument 'n' must be an integer, got {type(n).__name__}")
+            raise TypeError(f"Argument 'n' must be an integer, got {type(n).__name__} instead")
         if n < 1:
             raise ValueError(f"Must remove at least 1 instance. Got n={n}")
         if self._n_instances - n < 1:
@@ -1001,7 +1001,7 @@ class MapdlPool:
         
         if not isinstance(mapdl, MapdlBase):
             raise TypeError(
-                f"Argument 'mapdl' must be a MAPDL instance, got {type(mapdl).__name__}"
+                f"Argument 'mapdl' must be a MAPDL instance, got {type(mapdl).__name__} instead"
             )
 
         if mapdl._exited:
