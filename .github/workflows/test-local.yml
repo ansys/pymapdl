@@ -171,27 +171,16 @@ jobs:
           repository: ansys/pymapdl
           persist-credentials: false
 
-      - name: "Get if running student version"
-        id: student_check
+      - name: "Handle CICD version detection"
         shell: bash
         env:
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
         run: |
-          if [[ "${MAPDL_VERSION}" == *"student"* ]];
-            then export ON_STUDENT=true; export TAG_STUDENT="student";
-            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
-          fi
-
           if [[ "${MAPDL_VERSION}" == *"cicd"* ]]; then
             echo "CICD MAPDL version detected, testing DPF backend for results module.";
             echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
             echo "PYMAPDL_ADDITIONAL_SWITCHES=-mpi openmpi" >> $GITHUB_ENV;
           fi
-
-          echo "ON_STUDENT: $ON_STUDENT"
-          echo "TAG_STUDENT: $TAG_STUDENT"
-          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
-          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
 
       - name: "Install gcc"
         shell: bash
@@ -253,7 +242,6 @@ jobs:
 
       - name: "Unit testing"
         env:
-          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
           ON_MINIMAL: ${{ inputs.testing-minimal }}
           ON_CONSOLE: ${{ inputs.on-console }}
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
@@ -266,7 +254,6 @@ jobs:
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
-          echo "ON_STUDENT: $ON_STUDENT"
 
           # Because there is no 'ansys-tools-common' we need to input the
           # executable path with the env var: PYMAPDL_MAPDL_EXEC.
@@ -303,13 +290,21 @@ jobs:
           name: "reports-${{ inputs.file-name }}"
           path: ./${{ inputs.file-name }}.jsonl
 
-      - name: "Collect logs on failure"
+      - name: "Collect logs"
         if: always()
         env:
           LOG_NAMES: logs-${{ inputs.file-name }}
         shell: bash
         run: |
           .ci/collect_mapdl_logs_locals.sh
+
+      - name: "Display logs"
+        if: always()
+        env:
+          LOG_NAMES: logs-${{ inputs.file-name }}
+        shell: bash
+        run: |
+          .ci/display_logs_locals.sh
 
       - name: "Encrypt and upload logs to GitHub"
         if: always() && inputs.upload-logs == true
@@ -343,14 +338,6 @@ jobs:
           path: ./logs-${{ inputs.file-name }}.tgz.enc
           retention-days: 3
 
-      - name: "Display files structure"
-        if: always()
-        env:
-          LOG_NAMES: logs-${{ inputs.file-name }}
-        shell: bash
-        run: |
-          .ci/display_logs_locals.sh
-
       - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
         name: "Upload coverage to Codecov"
         if: inputs.codecov-report == true
@@ -358,7 +345,7 @@ jobs:
           token: ${{ secrets.codecov-token }} # required
           root_dir: ${{ github.workspace }}
           name: ${{ inputs.file-name }}.xml
-          flags: local-ubuntu-${{ inputs.mapdl-version }}-dmp-${{ steps.student_check.outputs.TAG_STUDENT }}-${{ inputs.tags }}
+          flags: local-ubuntu-${{ inputs.mapdl-version }}-dmp-${{ inputs.tags }}
 
       - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0

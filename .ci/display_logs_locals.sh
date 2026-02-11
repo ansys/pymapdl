@@ -9,7 +9,6 @@
 #     ./display_logs_locals.sh
 #
 # Typical log directories or files displayed include:
-#     - logs-local-latest-ubuntu-student/apdl.out
 #     - Any other relevant log files in the workspace
 #
 # Modify this script as needed to include additional log files or directories.
