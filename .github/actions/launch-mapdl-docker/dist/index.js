@@ -27562,10 +27562,39 @@ const path = __nccwpck_require__(6928);
 async function run() {
   try {
     // Get inputs
-    const mapdlVersion = core.getInput('mapdl-version', { required: true });
+    const mapdlVersion = core.getInput('mapdl-version');
+    const mapdlImage = core.getInput('mapdl-image');
     const licenseServer = core.getInput('license-server', { required: true });
-    const mapdlImage = core.getInput('mapdl-image') || 'ghcr.io/ansys/mapdl';
     const instanceName = core.getInput('instance-name') || 'MAPDL_0';
+
+    // Validate that exactly one of mapdl-version or mapdl-image is provided
+    if (!mapdlVersion && !mapdlImage) {
+      throw new Error('Either mapdl-version or mapdl-image must be provided (but not both)');
+    }
+    if (mapdlVersion && mapdlImage) {
+      throw new Error('Only one of mapdl-version or mapdl-image should be provided, not both');
+    }
+
+    // Determine the full image reference and version number
+    let fullImageRef;
+    let versionNumber;
+
+    if (mapdlImage) {
+      // User provided full image reference
+      fullImageRef = mapdlImage;
+      // Extract version number from image tag (e.g., v25.2 -> 252)
+      const tagMatch = mapdlImage.match(/v?(\d+)\.(\d+)/);
+      if (tagMatch) {
+        versionNumber = `${tagMatch[1]}${tagMatch[2]}`;
+      } else {
+        versionNumber = 'unknown';
+      }
+    } else {
+      // User provided version number (e.g., 25.2)
+      // Default to ubuntu-cicd variant
+      fullImageRef = `ghcr.io/ansys/mapdl:v${mapdlVersion}-ubuntu-cicd`;
+      versionNumber = mapdlVersion.replace('.', '');
+    }
     const pymapdlPort = core.getInput('pymapdl-port') || '50052';
     const pymapdlDbPort = core.getInput('pymapdl-db-port') || '50055';
     const dpfPort = core.getInput('dpf-port') || '50056';
@@ -27598,8 +27627,7 @@ async function run() {
 
     core.startGroup('Launch MAPDL Docker Container');
     console.log('Configuration:');
-    console.log(`  MAPDL Version: ${mapdlVersion}`);
-    console.log(`  MAPDL Image: ${mapdlImage}`);
+    console.log(`  MAPDL Image: ${fullImageRef}`);
     console.log(`  Instance Name: ${instanceName}`);
     console.log(`  PyMAPDL Port: ${pymapdlPort}`);
     console.log(`  DPF Port: ${dpfPort}`);
@@ -27608,8 +27636,7 @@ async function run() {
     core.endGroup();
 
     // Set environment variables for the bash script
-    process.env.MAPDL_VERSION = mapdlVersion;
-    process.env.MAPDL_IMAGE = mapdlImage;
+    process.env.MAPDL_IMAGE = fullImageRef;
     process.env.INSTANCE_NAME = instanceName;
     process.env.LICENSE_SERVER = licenseServer;
     process.env.PYMAPDL_PORT = pymapdlPort;
@@ -27633,19 +27660,18 @@ async function run() {
     await exec.exec('bash', [scriptPath]);
 
     // Get container ID
-    let containerId = '';
-    await exec.exec('docker', ['ps', '-aqf', `name=${instanceName}`], {
+    let psOutput = '';
+    await exec.exec('docker', ['ps', '-aqf', `name=^/${instanceName}$`], {
       listeners: {
         stdout: (data) => {
-          containerId = data.toString().trim();
+          psOutput += data.toString();
         }
       }
     });
-
-    // Extract version number
-    const major = mapdlVersion.substring(1, 3);
-    const minor = mapdlVersion.substring(4, 5);
-    const version = `${major}${minor}`;
+    const containerId = psOutput
+      .split('\n')
+      .map(line => line.trim())
+      .find(line => line.length > 0) || '';
 
     // Set outputs
     core.setOutput('container-id', containerId);
@@ -27653,7 +27679,7 @@ async function run() {
     core.setOutput('pymapdl-port', pymapdlPort);
     core.setOutput('dpf-port', dpfPort);
     core.setOutput('pymapdl-db-port', pymapdlDbPort);
-    core.setOutput('mapdl-version-number', version);
+    core.setOutput('mapdl-version-number', versionNumber);
     core.setOutput('log-file', `${instanceName}.log`);
 
     core.startGroup('Container Information');

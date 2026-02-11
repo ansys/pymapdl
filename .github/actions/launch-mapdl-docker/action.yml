@@ -4,13 +4,13 @@ author: 'Ansys'
 
 inputs:
   mapdl-version:
-    description: 'MAPDL version tag (e.g., v25.2-ubuntu-cicd, v24.1-centos)'
-    required: true
+    description: 'MAPDL version number (e.g., 25.2, 25.1, 24.2). By default it uses `vXX.Y-ubuntu-cicd` image. Mutually exclusive with mapdl-image.'
+    required: false
+    type: string
 
   mapdl-image:
-    description: 'MAPDL Docker image repository (e.g., ghcr.io/ansys/mapdl)'
+    description: 'Full MAPDL Docker image reference with tag (e.g., ghcr.io/ansys/mapdl:v25.2-ubuntu-cicd). Mutually exclusive with mapdl-version.'
     required: false
-    default: 'ghcr.io/ansys/mapdl'
 
   instance-name:
     description: 'Name for the Docker container instance'

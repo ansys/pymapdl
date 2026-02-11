@@ -18,7 +18,9 @@ A comprehensive, production-ready action that consolidates MAPDL Docker launch s
 
 ## Quick Start
 
-### Minimal Example
+### Minimal Examples
+
+**Option 1: Using version number (simpler, defaults to ubuntu-cicd)**
 
 ```yaml
 steps:
@@ -34,21 +36,41 @@ steps:
   - name: Launch MAPDL
     uses: ./.github/actions/launch-mapdl-docker
     with:
-      mapdl-version: 'v25.2-ubuntu-cicd'
+      mapdl-version: '25.2'  # Automatically uses v25.2-ubuntu-cicd
       license-server: ${{ secrets.LICENSE_SERVER }}
 ```
 
-That's it! Cleanup is automatic.
+**Option 2: Using full image reference (for custom variants)**
+
+```yaml
+steps:
+  - uses: actions/checkout@v4
+
+  - name: Login to registry
+    uses: docker/login-action@v3
+    with:
+      registry: ghcr.io
+      username: ${{ github.actor }}
+      password: ${{ secrets.GITHUB_TOKEN }}
+
+  - name: Launch MAPDL
+    uses: ./.github/actions/launch-mapdl-docker
+    with:
+      mapdl-image: 'ghcr.io/ansys/mapdl:v25.2-ubuntu'  # Full image reference
+      license-server: ${{ secrets.LICENSE_SERVER }}
+```
+
+**Note:** Use either `mapdl-version` OR `mapdl-image`, not both. Cleanup is automatic.
 
 ### Common Configurations
 
-#### With DPF Server
+#### With DPF Server (using version number)
 
 ```yaml
 - name: Launch MAPDL with DPF
   uses: ./.github/actions/launch-mapdl-docker
   with:
-    mapdl-version: 'v25.2-ubuntu-cicd'
+    mapdl-version: '25.2'  # Automatically uses v25.2-ubuntu-cicd
     license-server: ${{ secrets.LICENSE_SERVER }}
     enable-dpf-server: 'true'
 ```
@@ -59,12 +81,22 @@ That's it! Cleanup is automatic.
 - name: Launch MAPDL
   uses: ./.github/actions/launch-mapdl-docker
   with:
-    mapdl-version: 'v25.2-ubuntu-cicd'
+    mapdl-version: '25.2'
     license-server: ${{ secrets.LICENSE_SERVER }}
     distributed-mode: 'dmp'
     num-processors: '4'
     memory-mb: '8192'
     mpi-type: 'openmpi'
+```
+
+#### Using Full Image Reference
+
+```yaml
+- name: Launch MAPDL with custom image
+  uses: ./.github/actions/launch-mapdl-docker
+  with:
+    mapdl-image: 'ghcr.io/ansys/mapdl:v25.1-centos'
+    license-server: ${{ secrets.LICENSE_SERVER }}
 ```
 
 #### Multiple Instances
@@ -74,7 +106,7 @@ That's it! Cleanup is automatic.
   uses: ./.github/actions/launch-mapdl-docker
   with:
     instance-name: 'MAPDL_0'
-    mapdl-version: 'v25.2-ubuntu-cicd'
+    mapdl-version: '25.2'
     license-server: ${{ secrets.LICENSE_SERVER }}
     pymapdl-port: '21000'
 
@@ -82,7 +114,7 @@ That's it! Cleanup is automatic.
   uses: ./.github/actions/launch-mapdl-docker
   with:
     instance-name: 'MAPDL_1'
-    mapdl-version: 'v25.2-ubuntu-cicd'
+    mapdl-version: '25.2'
     license-server: ${{ secrets.LICENSE_SERVER }}
     pymapdl-port: '21001'
 ```
@@ -93,7 +125,7 @@ That's it! Cleanup is automatic.
 - id: mapdl
   uses: ./.github/actions/launch-mapdl-docker
   with:
-    mapdl-version: 'v25.2-ubuntu-cicd'
+    mapdl-version: '25.2'
     license-server: ${{ secrets.LICENSE_SERVER }}
 
 - name: Use outputs
@@ -108,16 +140,38 @@ That's it! Cleanup is automatic.
 
 ### Required Inputs
 
-| Input           | Description                            | Example                    |
-|-----------------|----------------------------------------|----------------------------|
-| `mapdl-version` | MAPDL Docker image version tag         | `v25.2-ubuntu-cicd`        |
-| `license-server` | License server address (port@host)    | `1055@license.example.com` |
+| Input           | Description                                        | Example                      |
+|-----------------|------------------------------------------------|---------------------------:|
+| `license-server` | License server address (port@host)              | `1055@license.example.com` |
+
+### Input Options (Choose One)
+
+Provide **exactly one** of the following:
+
+| Input           | Description                                    | Example                      |
+|-----------------|------------------------------------------------|---------------------------:|
+| `mapdl-version` | MAPDL version number (simpler, recommended)    | `25.2`, `25.1`, `24.2`     |
+| `mapdl-image`   | Full Docker image reference (for custom tags)  | `ghcr.io/ansys/mapdl:v25.2-ubuntu` |
+
+**Important:** Providing both or neither will cause an error. The action will fail with a clear message if this requirement isn't met.
+
+#### `mapdl-version` Details
+
+- Format: `25.2`, `25.1`, `24.2` (version number only, no prefix or tag)
+- Automatically expands to: `ghcr.io/ansys/mapdl:v{version}-ubuntu-cicd`
+- Use this for most cases—it's simpler and defaults to the recommended ubuntu-cicd variant
+- Cannot be used together with `mapdl-image`
+
+#### `mapdl-image` Details
+
+- Format: `ghcr.io/ansys/mapdl:v25.2-ubuntu-cicd` (full image reference with tag)
+- Use this only when you need a non-default variant (e.g., CentOS, specific tag, different registry)
+- Cannot be used together with `mapdl-version`
 
 ### Optional Inputs
 
 | Input                  | Default             | Description                                |
 |------------------------|---------------------|--------------------------------------------|
-| `mapdl-image`          | `ghcr.io/ansys/mapdl` | Docker image repository                  |
 | `instance-name`        | `MAPDL_0`           | Container name                             |
 | `pymapdl-port`         | `50052`             | PyMAPDL gRPC port                          |
 | `pymapdl-db-port`      | `50055`             | PyMAPDL database port                      |
@@ -170,7 +224,7 @@ The action intelligently configures itself based on the `mapdl-version` string:
 ```yaml
 - uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
   with:
-    mapdl-version: 'v25.2-ubuntu-cicd'
+    mapdl-version: '25.2'
     license-server: ${{ secrets.LICENSE_SERVER }}
 ```
 
@@ -179,7 +233,7 @@ The action intelligently configures itself based on the `mapdl-version` string:
 ```yaml
 - uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@v0.69.0
   with:
-    mapdl-version: 'v25.2-ubuntu-cicd'
+    mapdl-version: '25.2'
     license-server: ${{ secrets.LICENSE_SERVER }}
 ```
 
@@ -213,7 +267,7 @@ Simply copy the entire `.github/actions/launch-mapdl-docker/` directory to your 
 - name: Launch MAPDL
   uses: ./.github/actions/launch-mapdl-docker
   with:
-    mapdl-version: 'v25.2-ubuntu-cicd'
+    mapdl-version: '25.2'
     instance-name: 'MAPDL_0'
     license-server: ${{ secrets.license-server }}
     distributed-mode: 'dmp'
@@ -271,7 +325,7 @@ Check logs:
   id: mapdl
   uses: ./.github/actions/launch-mapdl-docker
   with:
-    mapdl-version: 'v25.2-ubuntu-cicd'
+    mapdl-version: '25.2'
     license-server: ${{ secrets.LICENSE_SERVER }}
 
 - name: Debug on failure
@@ -358,7 +412,7 @@ jobs:
         id: mapdl
         uses: ./.github/actions/launch-mapdl-docker
         with:
-          mapdl-version: 'v25.2-ubuntu-cicd'
+          mapdl-version: '25.2'
           license-server: ${{ secrets.LICENSE_SERVER }}
           enable-dpf-server: 'true'
           distributed-mode: 'dmp'
@@ -387,6 +441,68 @@ jobs:
           docker logs ${{ steps.mapdl.outputs.container-name }}
           cat ${{ steps.mapdl.outputs.log-file }}
 ```
+
+## Development
+
+### Building the Action
+
+This GitHub Action uses bundled JavaScript files to reduce dependencies and improve execution speed. The action requires building after any changes to the main source files.
+
+#### Prerequisites
+
+- Node.js 20 or later
+- npm (comes with Node.js)
+
+#### Source Files
+
+- **`index.js`** - Main entry point for the action (runs during workflow step)
+- **`post.js`** - Post-action entry point for cleanup (runs after workflow completes)
+- **`package.json`** - Dependencies and build configuration
+- **`action.yml`** - Action metadata and input/output definitions
+
+#### Build Process
+
+The action uses `@vercel/ncc` (Node.js Compiler Collection) to bundle all JavaScript code, dependencies, and assets into single executable files.
+
+**To build:**
+
+```bash
+cd .github/actions/launch-mapdl-docker
+npm install          # Install dependencies (only needed once)
+npm run build        # Compile source files into dist/ directories
+```
+
+**Output:**
+
+- `dist/index.js` - Bundled main action code
+- `dist-post/index.js` - Bundled post-action cleanup code
+- `.gitignore` - Should include `dist/`, `dist-post/`, and `node_modules/`
+
+#### After Making Changes
+
+Any modifications to source files require rebuilding:
+
+```bash
+npm run build
+```
+
+Then commit the new `dist/` and `dist-post/` directories along with your source changes:
+
+```bash
+git add index.js post.js package.json action.yml
+git add dist/ dist-post/
+git commit -m "feat: update action logic"
+```
+
+#### CI/CD Integration
+
+The `prepare` script in `package.json` runs automatically when installing npm packages:
+
+```bash
+npm install  # This automatically runs 'npm run build'
+```
+
+This ensures the distribution files are always up-to-date when dependencies change.
 
 ## Related Documentation
 
