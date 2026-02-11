@@ -952,7 +952,6 @@ class TestMapdlPool:
             pool.increase()
 
     @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
-    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
     @patch("ansys.mapdl.core.pool.MapdlPool.exit")
     def test_reduce_default(self, mock_exit, monkeypatch):
         """Test reducing pool by default (1 instance)"""
