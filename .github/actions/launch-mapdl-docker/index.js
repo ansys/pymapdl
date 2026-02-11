@@ -25,8 +25,8 @@ async function run() {
     if (mapdlImage) {
       // User provided full image reference
       fullImageRef = mapdlImage;
-      // Extract version number from image tag (e.g., v25.2 -> 252)
-      const tagMatch = mapdlImage.match(/v?(\d+)\.(\d+)/);
+      // Extract version number from image tag (e.g., 25.1.0 -> 25.1)
+      const tagMatch = mapdlImage.match(/v?(\d+)\.(\d+)(?:\.\d+)?/);
       if (tagMatch) {
         versionNumber = `${tagMatch[1]}.${tagMatch[2]}`;
       } else {
