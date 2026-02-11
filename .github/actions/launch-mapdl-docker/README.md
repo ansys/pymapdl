@@ -40,7 +40,7 @@ steps:
       license-server: ${{ secrets.LICENSE_SERVER }}
 ```
 
-**Option 2: Using full image reference (for custom variants)**
+**Option 2: Using official Ansys registry image (auto-mapped)**
 
 ```yaml
 steps:
@@ -56,11 +56,32 @@ steps:
   - name: Launch MAPDL
     uses: ./.github/actions/launch-mapdl-docker
     with:
-      mapdl-image: 'ghcr.io/ansys/mapdl:v25.2-ubuntu'  # Full image reference
+      mapdl-image: 'ghcr.io/ansys/mapdl:v25.1.0'  # Auto-extracts version 25.1
       license-server: ${{ secrets.LICENSE_SERVER }}
 ```
 
-**Note:** Use either `mapdl-version` OR `mapdl-image`, not both. Cleanup is automatic.
+**Option 3: Using custom registry image (requires version)**
+
+```yaml
+steps:
+  - uses: actions/checkout@v4
+
+  - name: Login to custom registry
+    uses: docker/login-action@v3
+    with:
+      registry: my-registry.com
+      username: ${{ secrets.REGISTRY_USER }}
+      password: ${{ secrets.REGISTRY_PASSWORD }}
+
+  - name: Launch MAPDL
+    uses: ./.github/actions/launch-mapdl-docker
+    with:
+      mapdl-image: 'my-registry.com/custom/mapdl:mytag'
+      mapdl-version: '25.1'  # Required for custom registries
+      license-server: ${{ secrets.LICENSE_SERVER }}
+```
+
+**Note:** Use `mapdl-version` for simplicity, or `mapdl-image` with/without version depending on the registry.
 
 ### Common Configurations
 
@@ -89,13 +110,24 @@ steps:
     mpi-type: 'openmpi'
 ```
 
-#### Using Full Image Reference
+#### Using Official Ansys Registry Image
+
+```yaml
+- name: Launch MAPDL with official image
+  uses: ./.github/actions/launch-mapdl-docker
+  with:
+    mapdl-image: 'ghcr.io/ansys/mapdl:v25.1.0'  # Version auto-extracted to 25.1
+    license-server: ${{ secrets.LICENSE_SERVER }}
+```
+
+#### Using Custom Registry Image
 
 ```yaml
 - name: Launch MAPDL with custom image
   uses: ./.github/actions/launch-mapdl-docker
   with:
-    mapdl-image: 'ghcr.io/ansys/mapdl:v25.1-centos'
+    mapdl-image: 'my-registry.com/custom/mapdl:mytag'
+    mapdl-version: '25.1'  # Required for custom registries
     license-server: ${{ secrets.LICENSE_SERVER }}
 ```
 
@@ -144,29 +176,42 @@ steps:
 |-----------------|------------------------------------------------|---------------------------:|
 | `license-server` | License server address (port@host)              | `1055@license.example.com` |
 
-### Input Options (Choose One)
+### Input Options
 
-Provide **exactly one** of the following:
+Provide **at least one** of the following:
 
-| Input           | Description                                    | Example                      |
-|-----------------|------------------------------------------------|---------------------------:|
-| `mapdl-version` | MAPDL version number (simpler, recommended)    | `25.2`, `25.1`, `24.2`     |
-| `mapdl-image`   | Full Docker image reference (for custom tags)  | `ghcr.io/ansys/mapdl:v25.2-ubuntu` |
+| Input           | Description                                    | Example                      | When Required |
+|-----------------|------------------------------------------------|---------------------------:|---|
+| `mapdl-version` | MAPDL version number (simpler, recommended)    | `25.2`, `25.1`, `24.2`     | Always supported |
+| `mapdl-image`   | Full Docker image reference (for custom tags)  | `ghcr.io/ansys/mapdl:v25.2-ubuntu` | **Required** for custom registries |
 
-**Important:** Providing both or neither will cause an error. The action will fail with a clear message if this requirement isn't met.
+**Important:** At least one input must be provided, or the action will fail.
 
 #### `mapdl-version` Details
 
 - Format: `25.2`, `25.1`, `24.2` (version number only, no prefix or tag)
 - Automatically expands to: `ghcr.io/ansys/mapdl:v{version}-ubuntu-cicd`
 - Use this for most cases—it's simpler and defaults to the recommended ubuntu-cicd variant
-- Cannot be used together with `mapdl-image`
+- Can be omitted if using an official Ansys registry image with `mapdl-image`
 
-#### `mapdl-image` Details
+#### `mapdl-image` Details - Official Ansys Registries
 
-- Format: `ghcr.io/ansys/mapdl:v25.2-ubuntu-cicd` (full image reference with tag)
-- Use this only when you need a non-default variant (e.g., CentOS, specific tag, different registry)
-- Cannot be used together with `mapdl-version`
+When using official Ansys registries (`ghcr.io/ansys/mapdl` or `ansys/mapdl`):
+
+- Format: `ghcr.io/ansys/mapdl:v25.1.0` or `ansys/mapdl:v25.2-ubuntu-cicd`
+- Version is extracted from the image tag (e.g., `v25.1.0` → `25.1`)
+- Automatically mapped to: `ghcr.io/ansys/mapdl:v{version}-ubuntu-cicd`
+- `mapdl-version` input is **optional** when using official registries
+- Supports semantic versioning (v25.1.0, v25.2, etc.)
+
+#### `mapdl-image` Details - Custom Registries
+
+When using custom registries (not from `ghcr.io/ansys/mapdl` or `ansys/mapdl`):
+
+- Format: Full image reference with tag (e.g., `my-registry.com/custom/mapdl:mytag`)
+- `mapdl-version` input is **required** to specify the version number (format: `XX.Y`)
+- Image is used as-is without modification
+- Useful for private registries or custom image variants
 
 ### Optional Inputs
 

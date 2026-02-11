@@ -10,30 +10,53 @@ async function run() {
     const licenseServer = core.getInput('license-server', { required: true });
     const instanceName = core.getInput('instance-name') || 'MAPDL_0';
 
-    // Validate that exactly one of mapdl-version or mapdl-image is provided
+    // Validate inputs
     if (!mapdlVersion && !mapdlImage) {
-      throw new Error('Either mapdl-version or mapdl-image must be provided (but not both)');
+      throw new Error('Either mapdl-version or mapdl-image must be provided');
     }
-    if (mapdlVersion && mapdlImage) {
-      throw new Error('Only one of mapdl-version or mapdl-image should be provided, not both');
+
+    // Check if using official Ansys registry
+    const isOfficialRegistry = mapdlImage &&
+      (mapdlImage.startsWith('ghcr.io/ansys/mapdl') || mapdlImage.startsWith('ansys/mapdl'));
+
+    // If custom image (not official registry), mapdl-version must be provided
+    if (mapdlImage && !isOfficialRegistry && !mapdlVersion) {
+      throw new Error('mapdl-version must be provided when using a custom image (not from ghcr.io/ansys/mapdl or ansys/mapdl)');
     }
 
     // Determine the full image reference and version number
     let fullImageRef;
     let versionNumber;
 
-    if (mapdlImage) {
-      // User provided full image reference
-      fullImageRef = mapdlImage;
-      // Extract version number from image tag (e.g., 25.1.0 -> 25.1)
+    if (mapdlImage && isOfficialRegistry) {
+      // Extract version number from official registry image tag (e.g., v25.1.0 -> 25.1)
       const tagMatch = mapdlImage.match(/v?(\d+)\.(\d+)(?:\.\d+)?/);
+
       if (tagMatch) {
         versionNumber = `${tagMatch[1]}.${tagMatch[2]}`;
+        // Validate version format (XX.Y)
+        if (!/^\d{2}\.\d$/.test(versionNumber) && !/^\d{2,}\.\d{1,}$/.test(versionNumber)) {
+          throw new Error(`Invalid version format extracted from image: ${versionNumber}. Expected format: XX.Y`);
+        }
+        // Map to standard image reference
+        fullImageRef = `ghcr.io/ansys/mapdl:v${versionNumber}-ubuntu-cicd`;
       } else {
-        versionNumber = 'unknown';
+        throw new Error('Could not extract version from official Ansys MAPDL image tag');
       }
+    } else if (mapdlImage && !isOfficialRegistry) {
+      // Custom image with mapdl-version provided
+      fullImageRef = mapdlImage;
+      // Validate version format (XX.Y)
+      if (!/^\d{2}\.\d$/.test(mapdlVersion) && !/^\d{2,}\.\d{1,}$/.test(mapdlVersion)) {
+        throw new Error(`Invalid mapdl-version format: ${mapdlVersion}. Expected format: XX.Y`);
+      }
+      versionNumber = mapdlVersion;
     } else {
       // User provided version number (e.g., 25.2)
+      // Validate version format (XX.Y)
+      if (!/^\d{2}\.\d$/.test(mapdlVersion) && !/^\d{2,}\.\d{1,}$/.test(mapdlVersion)) {
+        throw new Error(`Invalid mapdl-version format: ${mapdlVersion}. Expected format: XX.Y`);
+      }
       // Default to ubuntu-cicd variant
       fullImageRef = `ghcr.io/ansys/mapdl:v${mapdlVersion}-ubuntu-cicd`;
       versionNumber = mapdlVersion;
@@ -134,7 +157,7 @@ async function run() {
     core.startGroup('Container Information');
     console.log(`Container ID: ${containerId}`);
     console.log(`Container Name: ${instanceName}`);
-    console.log(`MAPDL Version Number: ${version}`);
+    console.log(`MAPDL Version Number: ${versionNumber}`);
     core.endGroup();
 
     // Wait for services if requested
