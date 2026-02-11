@@ -181,8 +181,8 @@ def test_units(mapdl, cleared):
     units_str = str(units)
     units_repr = repr(units)
 
-    assert "UNITS SPECIFIED" in units_str
-    assert "UNITS SPECIFIED" in units_repr
+    assert "USER UNIT SET SPECIFIED FOR INTERNAL" in units_str
+    assert "USER UNIT SET SPECIFIED FOR INTERNAL" in units_repr
 
     # Check that we can access units by their full name (case-insensitive)
     # These assertions might vary depending on what units are set, so we test
