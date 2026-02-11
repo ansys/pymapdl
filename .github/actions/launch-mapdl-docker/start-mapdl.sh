@@ -55,8 +55,8 @@ echo "Pulling Docker image: ${MAPDL_IMAGE}"
 docker pull "${MAPDL_IMAGE}"
 
 # Extract version number
-MAJOR=$(echo "$MAPDL_VERSION" | head -c 3 | tail -c 2)
-MINOR=$(echo "$MAPDL_VERSION" | head -c 5 | tail -c 1)
+MAJOR=$(echo "$MAPDL_VERSION" | head -c 2 | tail -c 2)
+MINOR=$(echo "$MAPDL_VERSION" | head -c 4 | tail -c 1)
 VERSION="${MAJOR}${MINOR}"
 echo "Extracted MAPDL version number: ${VERSION}"
 
