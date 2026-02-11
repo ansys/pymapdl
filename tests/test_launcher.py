@@ -306,7 +306,6 @@ def test_launch_console(version):
 
 
 @requires("local")
-@requires("nostudent")
 @requires("ansys-tools-common")
 @pytest.mark.parametrize("license_name", LICENSES)
 def test_license_type_keyword_names(monkeypatch, license_name):
@@ -344,7 +343,6 @@ def test_license_type_dummy(mapdl, cleared):
 
 
 @requires("local")
-@requires("nostudent")
 def test_remove_temp_dir_on_exit(mapdl, cleared):
     """Ensure the working directory is removed when run_location is not set."""
     mapdl_ = launch_mapdl(
@@ -367,7 +365,6 @@ def test_remove_temp_dir_on_exit(mapdl, cleared):
 
 
 @requires("local")
-@requires("nostudent")
 def test_remove_temp_dir_on_exit_fail(mapdl, cleared, tmpdir):
     """Ensure the working directory is not removed when the cwd is changed."""
     mapdl_ = launch_mapdl(
@@ -2057,7 +2054,6 @@ def test_mapdl_output_pass_arg(tmpdir):
 
 
 @requires("local")
-@requires("nostudent")
 @requires("grpc")
 def test_mapdl_output(tmpdir):
     mapdl_output = os.path.join(tmpdir, "apdl.txt")

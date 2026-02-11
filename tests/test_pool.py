@@ -28,7 +28,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from conftest import ON_LOCAL, ON_STUDENT, has_dependency
+from conftest import ON_LOCAL, has_dependency
 
 if has_dependency("ansys-tools-common"):
     from ansys.tools.common.path import find_mapdl
@@ -49,10 +49,10 @@ pytestmark = requires("grpc")
 # Check env var
 IGNORE_POOL = os.environ.get("IGNORE_POOL", "").upper() == "TRUE"
 
-# skipping if ON_STUDENT because we cannot spawn that many instances.
+
 skip_if_ignore_pool = pytest.mark.skipif(
-    IGNORE_POOL or ON_STUDENT,
-    reason=f"Ignoring Pool tests because {'of the IGNORE_POOL env var' if IGNORE_POOL else 'running on student'}.",
+    IGNORE_POOL,
+    reason="Ignoring Pool tests because of the IGNORE_POOL env var.",
 )
 
 
