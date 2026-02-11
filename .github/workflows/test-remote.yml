@@ -142,7 +142,7 @@ jobs:
             else export ON_UBUNTU=false; export TAG_UBUNTU="centos";
           fi
 
-          if [[ "${MAPDL_VERSION}" == *"cicd"* ]]; then
+          if [[ "${MAPDL_VERSION}" == *"cicd"* && "${MAPDL_VERSION}" != *"24.2"* ]]; then
             echo "CICD MAPDL version detected, testing DPF backend for results module.";
             echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
 
