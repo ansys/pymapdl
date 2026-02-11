@@ -169,8 +169,7 @@ jobs:
         id: mapdl_0
         uses: ./.github/actions/launch-mapdl-docker
         with:
-          mapdl-version: ${{ inputs.mapdl-version }}
-          mapdl-image: ${{ env.MAPDL_PACKAGE }}
+          mapdl-image: ${{ env.MAPDL_PACKAGE }}:${{ inputs.mapdl-version }}
           instance-name: 'MAPDL_0'
           license-server: ${{ secrets.license-server }}
           pymapdl-port: ${{ env.PYMAPDL_PORT }}
@@ -184,8 +183,7 @@ jobs:
         id: mapdl_1
         uses: ./.github/actions/launch-mapdl-docker
         with:
-          mapdl-version: ${{ inputs.mapdl-version }}
-          mapdl-image: ${{ env.MAPDL_PACKAGE }}
+          mapdl-image: ${{ env.MAPDL_PACKAGE }}:${{ inputs.mapdl-version }}
           instance-name: 'MAPDL_1'
           license-server: ${{ secrets.license-server }}
           pymapdl-port: ${{ env.PYMAPDL_PORT2 }}
