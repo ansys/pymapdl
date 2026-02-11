@@ -952,17 +952,20 @@ class TestMapdlPool:
             pool.increase()
 
     @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
     @patch("ansys.mapdl.core.pool.MapdlPool.exit")
     def test_reduce_default(self, mock_exit, monkeypatch):
         """Test reducing pool by default (1 instance)"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
         
         # Create mock instances
+        from ansys.mapdl.core.mapdl import MapdlBase
         mock_instances = []
         for i in range(3):
-            mock_inst = patch("ansys.mapdl.core.Mapdl")
+            mock_inst = MagicMock(spec=MapdlBase)
             mock_inst._exited = False
             mock_inst._port = 50052 + i
+            mock_inst.exit = MagicMock()
             mock_instances.append(mock_inst)
         
         pool = MapdlPool(
@@ -991,11 +994,13 @@ class TestMapdlPool:
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
         
         # Create mock instances
+        from ansys.mapdl.core.mapdl import MapdlBase
         mock_instances = []
         for i in range(5):
-            mock_inst = patch("ansys.mapdl.core.Mapdl")
+            mock_inst = MagicMock(spec=MapdlBase)
             mock_inst._exited = False
             mock_inst._port = 50052 + i
+            mock_inst.exit = MagicMock()
             mock_instances.append(mock_inst)
         
         pool = MapdlPool(
