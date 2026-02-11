@@ -52,7 +52,7 @@ IGNORE_POOL = os.environ.get("IGNORE_POOL", "").upper() == "TRUE"
 
 skip_if_ignore_pool = pytest.mark.skipif(
     IGNORE_POOL,
-    reason=f"Ignoring Pool tests because {'of the IGNORE_POOL env var' if IGNORE_POOL else 'running on student'}.",
+    reason="Ignoring Pool tests because of the IGNORE_POOL env var.",
 )
 
 
