@@ -2639,7 +2639,6 @@ def test_remove_temp_dir_on_exit(mapdl, cleared, tmpdir):
 
 
 @requires("local")
-@requires("nostudent")
 def test_remove_temp_dir_on_exit_with_launch_mapdl(mapdl, cleared):
 
     mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=PORT1)
