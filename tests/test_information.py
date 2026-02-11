@@ -26,11 +26,77 @@ import inspect
 
 import pytest
 
+from ansys.mapdl.core.information import UnitsDict
+
+
+def test_units_dict_parsing():
+    """Test UnitsDict parsing and access without requiring MAPDL."""
+    # Sample units string similar to what MAPDL returns
+    units_string = """MKS UNITS SPECIFIED FOR INTERNAL    
+  LENGTH        (l)  = METER (M)
+  MASS          (M)  = KILOGRAM (KG)
+  TIME          (t)  = SECOND (SEC)
+  TEMPERATURE   (T)  = CELSIUS (C)
+  TOFFSET            = 273.0
+  CHARGE        (Q)  = COULOMB
+  FORCE         (f)  = NEWTON (N) (KG-M/SEC2)
+  HEAT               = JOULE (N-M)
+
+  PRESSURE           = PASCAL (NEWTON/M**2)
+  ENERGY        (W)  = JOULE (N-M)
+  POWER         (P)  = WATT (N-M/SEC)
+  CURRENT       (i)  = AMPERE (COULOMBS/SEC)
+  CAPACITANCE   (C)  = FARAD
+  INDUCTANCE    (L)  = HENRY
+  MAGNETIC FLUX      = WEBER
+  RESISTANCE    (R)  = OHM
+  ELECTRIC POTENTIAL = VOLT"""
+    
+    units = UnitsDict(units_string)
+    
+    # Test access by full name (case-insensitive)
+    assert units['CHARGE'] == 'coulomb'
+    assert units['charge'] == 'coulomb'
+    assert units['Charge'] == 'coulomb'
+    
+    # Test access by short name
+    assert units['Q'] == 'coulomb'
+    assert units['q'] == 'coulomb'
+    
+    # Test length access
+    assert units['LENGTH'] == 'meter'
+    assert units['length'] == 'meter'
+    assert units['l'] == 'meter'  # short name
+    
+    # Test mass access
+    assert units['MASS'] == 'kilogram'
+    assert units['mass'] == 'kilogram'
+    assert units['M'] == 'kilogram'  # short name
+    assert units['m'] == 'kilogram'
+    
+    # Test numeric value
+    assert units['TOFFSET'] == '273.0'
+    assert units['toffset'] == '273.0'
+    
+    # Test __str__ and __repr__ return original string
+    assert str(units) == units_string
+    assert repr(units) == units_string
+    
+    # Test __contains__
+    assert 'charge' in units
+    assert 'CHARGE' in units
+    assert 'q' in units
+    assert 'nonexistent' not in units
+    
+    # Test get method with default
+    assert units.get('charge') == 'coulomb'
+    assert units.get('nonexistent', 'default') == 'default'
+
 
 def test_mapdl_info(mapdl, cleared, capfd):
     info = mapdl.info
     for attr, value in inspect.getmembers(info):
-        if not attr.startswith("_") and attr not in ["title", "stitles"]:
+        if not attr.startswith("_") and attr not in ["title", "stitles", "units"]:
             assert isinstance(value, str)
 
             with pytest.raises(AttributeError):
@@ -78,3 +144,42 @@ def test_title(mapdl, cleared):
     stitles = ["Subtitle 1", "Subtitle 2", "Subtitle 3", "Subtitle 4"]
     mapdl.info.stitles = stitles
     assert mapdl.info.stitles == stitles
+
+
+def test_units(mapdl, cleared):
+    """Test the units property returns a UnitsDict with proper functionality."""
+    from ansys.mapdl.core.information import UnitsDict
+    
+    units = mapdl.info.units
+    
+    # Check that it's a UnitsDict instance
+    assert isinstance(units, UnitsDict)
+    
+    # Check that it's also a dict
+    assert isinstance(units, dict)
+    
+    # Check __str__ and __repr__ return the original formatted string
+    units_str = str(units)
+    units_repr = repr(units)
+    
+    assert "UNITS SPECIFIED" in units_str
+    assert "UNITS SPECIFIED" in units_repr
+    
+    # Check that we can access units by their full name (case-insensitive)
+    # These assertions might vary depending on what units are set, so we test
+    # if the dict is not empty and has expected structure
+    assert len(units) > 0
+    
+    # Try to access some common unit keys (if they exist)
+    # The actual keys present depend on the MAPDL unit system
+    # So we just verify the case-insensitive access works
+    for key in list(units.keys())[:1]:  # Test with the first key
+        # Test case insensitive access
+        value = units[key]
+        assert value == units[key.upper()]
+        assert value == units[key.lower()]
+        
+    # Test that invalid keys raise KeyError
+    with pytest.raises(KeyError):
+        _ = units["NONEXISTENT_UNIT_KEY_12345"]
+
