@@ -63,11 +63,11 @@ def _get_process_user(proc: psutil.Process) -> Optional[str]:
     try:
         current_user = getpass.getuser()
         process_user = proc.username()
-        
+
         # On Windows, username may include domain (e.g., "DOMAIN\\username")
         if platform.system() == "Windows" and "\\" in process_user:
             process_user = process_user.split("\\")[-1]
-        
+
         return process_user
     except (psutil.AccessDenied, psutil.NoSuchProcess):
         return None
@@ -91,10 +91,10 @@ def _is_current_user_process(proc: psutil.Process) -> bool:
     try:
         current_user = getpass.getuser()
         process_user = _get_process_user(proc)
-        
+
         if process_user is None:
             return False
-        
+
         return current_user == process_user
     except Exception:
         return False
@@ -102,7 +102,7 @@ def _is_current_user_process(proc: psutil.Process) -> bool:
 
 def get_mapdl_instances() -> List[Dict[str, Any]]:
     """Get list of MAPDL instances with minimal data.
-    
+
     This function safely handles permission errors when accessing process information.
     If a process belongs to another user and cannot be accessed, it is skipped.
     If a process belongs to the current user but cmdline/cwd cannot be accessed,
@@ -135,7 +135,7 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
             # If we got cmdline, check for -grpc flag
             if cmdline and "-grpc" not in cmdline:
                 continue
-            
+
             # If cmdline is empty (permission error on our own process),
             # we can't determine if it's gRPC, so skip it
             if not cmdline:

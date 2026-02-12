@@ -451,12 +451,12 @@ def test_pymapdl_list_permission_handling(run_cli):
         mock_process.name.return_value = name
         mock_process.info = {"name": name}
         mock_process.status.return_value = psutil.STATUS_RUNNING
-        
+
         # cmdline raises AccessDenied
         mock_process.cmdline.side_effect = psutil.AccessDenied(pid, name)
         # But username works and returns current user
         mock_process.username.return_value = getpass.getuser()
-        
+
         return mock_process
 
     # Create a mix of processes:
