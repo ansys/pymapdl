@@ -80,7 +80,7 @@ DPF_PORT_INTERNAL="50055"
 DPF_ENV_ARGS=()
 DPF_PORT_ARGS=()
 
-if [[ $MAPDL_VERSION == *"cicd"* ]]; then
+if [[ $MAPDL_IMAGE == *"cicd"* ]]; then
     echo "Detected: CICD version"
 
     if [[ "${ENABLE_DPF_SERVER}" == "true" ]]; then
