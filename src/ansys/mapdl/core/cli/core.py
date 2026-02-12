@@ -159,12 +159,12 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
                 pass
 
             # Try to get cwd - may fail due to permissions
-            cwd = None
+            cwd = ""
             try:
                 cwd = proc.cwd()
             except (psutil.AccessDenied, PermissionError):
                 # If we can't get cwd, use empty string
-                cwd = ""
+                pass
 
             instances.append(
                 {
