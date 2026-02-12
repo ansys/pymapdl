@@ -72,7 +72,7 @@ def list_instances(instances, long, cmd, location) -> None:
 def _list_instances(instances, long, cmd, location):
     from tabulate import tabulate
 
-    from ansys.mapdl.core.cli.core import get_mapdl_instances
+    from ansys.mapdl.core.cli.helpers import get_mapdl_instances
 
     # Assuming all ansys processes have -grpc flag
     mapdl_instances = get_mapdl_instances()

@@ -25,8 +25,6 @@ Minimal core functionality for CLI operations.
 This module avoids importing heavy dependencies like pandas, numpy, etc.
 """
 
-import getpass
-import platform
 from typing import Any, Dict, List
 
 import psutil
@@ -49,6 +47,9 @@ def can_access_process(proc):
     bool
         True if we can safely access the process
     """
+    import getpass
+    import platform
+
     try:
         # Check if we can access basic process info and if it belongs to current user
         current_user = getpass.getuser()
@@ -145,10 +146,6 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
 
 def get_ansys_process_from_port(port: int):
     import socket
-
-    import psutil
-
-    from ansys.mapdl.core.cli.core import is_alive_status, is_valid_ansys_process_name
 
     # Filter by name first
     potential_procs = []

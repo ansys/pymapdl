@@ -31,8 +31,8 @@ import numpy as np
 import psutil
 import pytest
 
-import ansys.mapdl.core.cli.core as core_module
-from ansys.mapdl.core.cli.core import get_ansys_process_from_port
+import ansys.mapdl.core.cli.helpers as core_module
+from ansys.mapdl.core.cli.helpers import get_ansys_process_from_port
 from ansys.mapdl.core.plotting import GraphicsBackend
 from conftest import VALID_PORTS, requires
 
