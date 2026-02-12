@@ -97,14 +97,21 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
                 continue
 
             # Try to get cmdline
-            cmdline = proc.cmdline()
+            try:
+                cmdline = proc.cmdline()
+            except (psutil.AccessDenied, PermissionError):
+                # Can't access cmdline - check if it's our process
+                if not can_access_process(proc):
+                    # Not our process, skip it
+                    continue
+                # Our process but can't get cmdline - skip (can't verify if gRPC)
+                continue
 
             # Check if it's a gRPC process
             if "-grpc" not in cmdline:
                 continue
 
             # Get port from cmdline
-            port = None
             try:
                 port_index = cmdline.index("-port")
                 port = int(cmdline[port_index + 1])
@@ -118,8 +125,11 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
             except (psutil.AccessDenied, PermissionError):
                 is_instance = False
 
-            # Get working directory
-            cwd = proc.cwd()
+            # Get working directory (with fallback to empty string on permission issues)
+            try:
+                cwd = proc.cwd()
+            except (psutil.AccessDenied, PermissionError):
+                cwd = ""
 
             instances.append(
                 {
