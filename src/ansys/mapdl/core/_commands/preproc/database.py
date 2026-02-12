@@ -46,7 +46,10 @@ class Database(CommandsBase):
             # This is best-effort: ignore failures in the delete command so that a
             # successful AFLIST does not raise due to cleanup issues.
         finally:
-            self.slashdelete("aflist", "tmp", mute=True)
+            try:
+                self.slashdelete("aflist", "tmp", mute=True)
+            except Exception:
+                pass
         return result
 
     def cdread(self, option="", fname="", ext="", fnamei="", exti="", **kwargs):
