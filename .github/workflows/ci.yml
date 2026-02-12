@@ -242,7 +242,7 @@ jobs:
     with:
       mapdl-version: "${{ matrix.mapdl-version }}"
       file-name: "remote-${{ matrix.mapdl-version }}"
-      upload-logs: false
+      upload-logs: true
 
   build-test-local-matrix:
     name: "Build test matrix for minimal and local"
@@ -292,7 +292,7 @@ jobs:
       tags: "local"
       latest-version: "252"
       test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') && !contains(matrix.mapdl-version, '24') }}
-      upload-logs: false
+      upload-logs: true
 
 
   build-test-ubuntu-minimal:
@@ -321,7 +321,7 @@ jobs:
       tags: "local,minimal"
       latest-version: "252"
       test_dpf: false
-      upload-logs: false
+      upload-logs: true
 
 
   build-test-ubuntu-console:
@@ -351,7 +351,7 @@ jobs:
       file-name: "${{ matrix.mapdl-version }}-console"
       tags: "local,console"
       test_dpf: false
-      upload-logs: false
+      upload-logs: true
 
   package:
     name: "Package library"

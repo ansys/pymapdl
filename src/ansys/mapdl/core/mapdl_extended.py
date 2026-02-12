@@ -2689,6 +2689,13 @@ class _MapdlCommandExtended(_MapdlCore):
                 result._cache = np.array(table)
         return result
 
+    @wraps(_MapdlCore.aflist)
+    def aflist(self, **kwargs):
+        # Running in non-interactive to avoid the `aflist.tmp` command being locked
+        # because of `/INPUT` issue on MAPDL side. See #4390 for more details.
+        with self.non_interactive:
+            return super().aflist(**kwargs)
+
 
 class _MapdlExtended(_MapdlCommandExtended):
     """Extend Mapdl class with new functions"""
