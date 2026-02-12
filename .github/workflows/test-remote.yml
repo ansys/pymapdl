@@ -265,8 +265,8 @@ jobs:
       - name: "Print amount of restarts"
         if: always()
         env:
-          MAPDL_0: ${{ steps.mapdl_0.outputs.container_name }}
-          MAPDL_1: ${{ steps.mapdl_1.outputs.container_name }}
+          MAPDL_0: ${{ steps.mapdl_0.outputs.container-name }}
+          MAPDL_1: ${{ steps.mapdl_1.outputs.container-name }}
         run: |
           N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  "${MAPDL_0}")
           echo "Number of restarts in the MAPDL_0 container: $N_RESTART"
