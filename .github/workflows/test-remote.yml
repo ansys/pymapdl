@@ -165,33 +165,32 @@ jobs:
           echo "TAG_UBUNTU=$(echo $TAG_UBUNTU)" >> $GITHUB_OUTPUT
           echo "ON_SAME_CONTAINER=$(echo $ON_SAME_CONTAINER)" >> $GITHUB_OUTPUT
 
-      - name: "Pull, launch, and validate MAPDL service"
-        id: start_mapdl
-        env:
-          LICENSE_SERVER: ${{ secrets.license-server }}
-          MAPDL_VERSION: ${{ inputs.mapdl-version }}
-          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
-          MAPDL_PACKAGE: ${{ env.MAPDL_PACKAGE }}
-          DPF_PORT_INTERNAL: ${{ env.DPF_PORT_INTERNAL }}
-        shell: bash
-        run: |
-          echo "Launching first MAPDL instance..."
-          export INSTANCE_NAME=MAPDL_0
-          export RUN_DPF_SERVER=true
-          .ci/start_mapdl.sh &> mapdl_launch_0.log & export DOCKER_PID_0=$!
+      - name: "Launch first MAPDL instance using action"
+        id: mapdl_0
+        uses: ./.github/actions/launch-mapdl-docker
+        with:
+          mapdl-image: ${{ env.MAPDL_PACKAGE }}:${{ inputs.mapdl-version }}
+          instance-name: 'MAPDL_0'
+          license-server: ${{ secrets.license-server }}
+          pymapdl-port: ${{ env.PYMAPDL_PORT }}
+          pymapdl-db-port: ${{ env.PYMAPDL_DB_PORT }}
+          dpf-port: ${{ env.DPF_PORT }}
+          enable-dpf-server: 'true'
+          distributed-mode: ${{ steps.distributed_mode.outputs.distributed_mode }}
+          wait: 'false'
 
-          echo "Launching a second instance for MAPDL pool testing..."
-          export RUN_DPF_SERVER=false
-          export PYMAPDL_PORT=${PYMAPDL_PORT2}
-          export PYMAPDL_DB_PORT=${PYMAPDL_DB_PORT2}
-          export INSTANCE_NAME=MAPDL_1
-          export DPF_PORT=${DPF_PORT2}
-          .ci/start_mapdl.sh &> mapdl_launch_1.log & export DOCKER_PID_1=$!
-
-          echo "Launching MAPDL service 0 at PID: $DOCKER_PID_0"
-          echo "Launching MAPDL service 1 at PID: $DOCKER_PID_1"
-          echo "DOCKER_PID_0=$(echo $DOCKER_PID_0)" >> $GITHUB_OUTPUT
-          echo "DOCKER_PID_1=$(echo $DOCKER_PID_1)" >> $GITHUB_OUTPUT
+      - name: "Launch second MAPDL instance for pool testing using action"
+        id: mapdl_1
+        uses: ./.github/actions/launch-mapdl-docker
+        with:
+          mapdl-image: ${{ env.MAPDL_PACKAGE }}:${{ inputs.mapdl-version }}
+          instance-name: 'MAPDL_1'
+          license-server: ${{ secrets.license-server }}
+          pymapdl-port: ${{ env.PYMAPDL_PORT2 }}
+          pymapdl-db-port: ${{ env.PYMAPDL_DB_PORT2 }}
+          dpf-port: ${{ env.DPF_PORT2 }}
+          enable-dpf-server: 'false'
+          distributed-mode: ${{ steps.distributed_mode.outputs.distributed_mode }}
 
       - name: "Start DPF server on a separate container"
         shell: bash
@@ -248,18 +247,6 @@ jobs:
         run: |
           python -m pip install .[tests]
 
-      - name: "Waiting for the services to be up"
-        shell: bash
-        env:
-          PYMAPDL_PORT: ${{ env.PYMAPDL_PORT }}
-          PYMAPDL_PORT2: ${{ env.PYMAPDL_PORT2 }}
-          MAPDL_INSTANCE: MAPDL_0
-        run: |
-          docker ps > docker_ps_start.log || echo "Failed to get the docker images from the docker container"
-          (docker exec "${MAPDL_INSTANCE}" /bin/bash -c "ps aux > docker_processes_start.log") || echo "Failed to get the processes from the docker container"
-
-          .ci/waiting_services.sh
-
       - name: "Unit testing"
         env:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
@@ -277,10 +264,13 @@ jobs:
 
       - name: "Print amount of restarts"
         if: always()
+        env:
+          MAPDL_0: ${{ steps.mapdl_0.outputs.container-name }}
+          MAPDL_1: ${{ steps.mapdl_1.outputs.container-name }}
         run: |
-          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  MAPDL_0)
+          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  "${MAPDL_0}")
           echo "Number of restarts in the MAPDL_0 container: $N_RESTART"
-          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  MAPDL_1)
+          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  "${MAPDL_1}")
           echo "Number of restarts in the MAPDL_1 container: $N_RESTART"
 
       - name: "Upload pytest reports to GitHub"
