@@ -40,17 +40,7 @@ class Database(CommandsBase):
         lists all appropriate data.  If interactive, lists only summaries.
         """
         command = "AFLIST,"
-        try:
-            result = self.run(command, **kwargs)
-            # Clean up the temporary file to avoid file locking issues on subsequent calls.
-            # This is best-effort: ignore failures in the delete command so that a
-            # successful AFLIST does not raise due to cleanup issues.
-        finally:
-            try:
-                self.slashdelete("aflist", "tmp", mute=True)
-            except Exception:
-                pass
-        return result
+        return self.run(command, **kwargs)
 
     def cdread(self, option="", fname="", ext="", fnamei="", exti="", **kwargs):
         """Reads a file of solid model and database information into the database.
