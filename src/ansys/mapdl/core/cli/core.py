@@ -25,11 +25,40 @@ Minimal core functionality for CLI operations.
 This module avoids importing heavy dependencies like pandas, numpy, etc.
 """
 
+import getpass
+import platform
 from typing import Any, Dict, List
 
 import psutil
 
-from ansys.mapdl.core.cli.helpers import can_access_process
+
+def can_access_process(proc):
+    """Check if we have permission to access and interact with a process.
+
+    Returns True if:
+    1. We can access the process information (no AccessDenied)
+    2. The process belongs to the current user
+
+    Parameters
+    ----------
+    proc : psutil.Process
+        The process to check
+
+    Returns
+    -------
+    bool
+        True if we can safely access the process
+    """
+    try:
+        # Check if we can access basic process info and if it belongs to current user
+        current_user = getpass.getuser()
+        process_user = proc.username()
+        if platform.system() == "Windows" and "\\" in process_user:
+            return current_user == process_user.split("\\")[-1]
+        return process_user == current_user
+    except (psutil.AccessDenied, psutil.NoSuchProcess):
+        # Cannot access process or process doesn't exist
+        return False
 
 
 def is_valid_ansys_process_name(name: str) -> bool:
@@ -67,21 +96,14 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
                 continue
 
             # Try to get cmdline
-            try:
-                cmdline = proc.cmdline()
-            except (psutil.AccessDenied, PermissionError):
-                # Can't access cmdline - check if it's our process
-                if not can_access_process(proc):
-                    # Not our process, skip it
-                    continue
-                # Our process but can't get cmdline - skip (can't verify if gRPC)
-                continue
+            cmdline = proc.cmdline()
 
             # Check if it's a gRPC process
             if "-grpc" not in cmdline:
                 continue
 
             # Get port from cmdline
+            port = None
             try:
                 port_index = cmdline.index("-port")
                 port = int(cmdline[port_index + 1])
@@ -96,10 +118,7 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
                 is_instance = False
 
             # Get working directory
-            try:
-                cwd = proc.cwd()
-            except (psutil.AccessDenied, PermissionError):
-                cwd = ""
+            cwd = proc.cwd()
 
             instances.append(
                 {
@@ -116,12 +135,9 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
         except (psutil.NoSuchProcess, psutil.ZombieProcess):
             # Process disappeared or is zombie, skip it
             continue
-        except psutil.AccessDenied:
-            # Can't access process at all - check if it's our process
-            if not can_access_process(proc):
-                # Not our process, skip it
-                continue
-            # Our process but can't access it fully - skip it
+
+        except (psutil.AccessDenied, PermissionError):
+            # We don't have permission to access this process, skip it
             continue
 
     return instances
