@@ -149,10 +149,6 @@ def support_plotting():
         return False
 
 
-def is_running_on_student():
-    return os.environ.get("ON_STUDENT", "NO").upper().strip() in ["YES", "TRUE"]
-
-
 def testing_minimal():
     return os.environ.get("TESTING_MINIMAL", "NO").upper().strip() in ["YES", "TRUE"]
 

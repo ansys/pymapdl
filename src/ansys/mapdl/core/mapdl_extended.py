@@ -1570,6 +1570,25 @@ class _MapdlCommandExtended(_MapdlCore):
                     f"Unexpected output from 'mapdl.inquire' function:\n{response}"
                 )
 
+        if func.upper() in [
+            "LOGIN",
+            "DOCU",
+            "APDL",
+            "PROG",
+            "AUTH",
+            "USER",
+            "DIRECTORY",
+            "JOBNAME",
+            "RSTDIR",
+            "RSTFILE",
+            "RSTEXT",
+            "OUTPUT",
+            "ENV",
+            "TITLE",
+            "DATE",
+        ]:
+            return response
+
         try:
             return float(response)
         except ValueError:
@@ -2669,6 +2688,13 @@ class _MapdlCommandExtended(_MapdlCore):
                 result._columns_names = columns_names
                 result._cache = np.array(table)
         return result
+
+    @wraps(_MapdlCore.aflist)
+    def aflist(self, **kwargs):
+        # Running in non-interactive to avoid the `aflist.tmp` command being locked
+        # because of `/INPUT` issue on MAPDL side. See #4390 for more details.
+        with self.non_interactive:
+            return super().aflist(**kwargs)
 
 
 class _MapdlExtended(_MapdlCommandExtended):

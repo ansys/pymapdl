@@ -31,8 +31,10 @@ import numpy as np
 import psutil
 import pytest
 
-import ansys.mapdl.core.cli.core as core_module
-from ansys.mapdl.core.cli.core import get_ansys_process_from_port
+import ansys.mapdl.core.cli.helpers as helpers_module
+
+core_module = helpers_module
+from ansys.mapdl.core.cli.helpers import get_ansys_process_from_port
 from ansys.mapdl.core.plotting import GraphicsBackend
 from conftest import VALID_PORTS, requires
 
@@ -410,6 +412,93 @@ def test_launch_mapdl_cli_list(run_cli, arg, check):
                 assert proc_options["name"] in output
                 assert str(proc_options["pid"]) in output
                 assert proc_options["port"] in output
+
+
+@requires("click")
+@requires("tabulate")
+def test_pymapdl_list_permission_handling(run_cli):
+    """Test that pymapdl list handles processes with permission errors gracefully.
+
+    This test verifies that:
+    1. Processes owned by other users are skipped silently
+    2. Processes with AccessDenied on cmdline don't crash the command
+    3. Only accessible processes are listed
+    """
+
+    def make_other_user_process(pid, name, ansys_process=True):
+        """Create a mock process owned by another user."""
+        mock_process = MagicMock(spec=psutil.Process)
+        mock_process.pid = pid
+        mock_process.name.return_value = name
+        mock_process.info = {"name": name}
+        mock_process.status.return_value = psutil.STATUS_RUNNING
+
+        if ansys_process:
+            # This simulates a process where cmdline() raises AccessDenied
+            mock_process.cmdline.side_effect = psutil.AccessDenied(pid, name)
+            # username also raises AccessDenied
+            mock_process.username.side_effect = psutil.AccessDenied(pid, name)
+        else:
+            mock_process.cmdline.return_value = ["other_process"]
+            mock_process.username.return_value = "other_user"
+
+        return mock_process
+
+    def make_cmdline_denied_current_user_process(pid, name):
+        """Create a mock process where cmdline is denied but it's current user's process."""
+        import getpass
+
+        mock_process = MagicMock(spec=psutil.Process)
+        mock_process.pid = pid
+        mock_process.name.return_value = name
+        mock_process.info = {"name": name}
+        mock_process.status.return_value = psutil.STATUS_RUNNING
+
+        # cmdline raises AccessDenied
+        mock_process.cmdline.side_effect = psutil.AccessDenied(pid, name)
+        # But username works and returns current user
+        mock_process.username.return_value = getpass.getuser()
+
+        return mock_process
+
+    # Create a mix of processes:
+    # 1. Current user's accessible ANSYS process (should be listed)
+    # 2. Other user's ANSYS process with permission errors (should be skipped)
+    # 3. Current user's ANSYS process with cmdline permission error (should be skipped - can't verify if gRPC)
+    # 4. Non-ANSYS process (should be skipped)
+    test_processes = [
+        make_fake_process(
+            pid=2001, name="ansys251", ansys_process=True, port=50053, n_children=4
+        ),  # Accessible - should list
+        make_other_user_process(
+            pid=2002, name="ansys261", ansys_process=True
+        ),  # Other user - skip
+        make_cmdline_denied_current_user_process(
+            pid=2003, name="ansys.exe"
+        ),  # Current user but cmdline denied - skip
+        make_fake_process(
+            pid=2004, name="python", ansys_process=False
+        ),  # Not ANSYS - skip
+    ]
+
+    with patch("psutil.process_iter", return_value=test_processes):
+        # Test list command should not crash and only list accessible processes
+        output = run_cli("list")
+
+        # Should succeed without errors
+        assert "running" in output.lower() or "sleeping" in output.lower()
+
+        # Should list the accessible process (PID 2001)
+        assert "2001" in output
+        assert "50053" in output
+
+        # Should NOT list the inaccessible processes
+        assert "2002" not in output
+        assert "2003" not in output
+        assert "2004" not in output
+
+        # Verify no exceptions were raised
+        print("✅ List permission handling test passed - no crashes occurred")
 
 
 @requires("click")

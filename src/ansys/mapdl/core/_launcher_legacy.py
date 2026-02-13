@@ -440,6 +440,7 @@ def generate_mapdl_launch_command(
     ram: Optional[int] = None,
     port: int = MAPDL_DEFAULT_PORT,
     additional_switches: str = "",
+    mapdl_output: Optional[str] = None,
 ) -> list[str]:
     """Generate the command line to start MAPDL in gRPC mode.
 
@@ -474,6 +475,9 @@ def generate_mapdl_launch_command(
         these are already included to start up the MAPDL server.  See
         the notes section for additional details.
 
+    mapdl_output : str, optional
+        File path to redirect MAPDL console output (stdout). If not specified,
+        a default temporary output file is used on Windows.
 
     Returns
     -------
@@ -494,7 +498,9 @@ def generate_mapdl_launch_command(
 
     # Windows will spawn a new window, special treatment
     if os.name == "nt":
-        exec_file = f"{exec_file}"
+
+        tmp_out = mapdl_output if mapdl_output else ".__tmp__.out"
+
         # must start in batch mode on windows to hide APDL window
         tmp_inp = ".__tmp__.inp"
         command_parm = [
@@ -505,7 +511,7 @@ def generate_mapdl_launch_command(
             "-i",
             tmp_inp,
             "-o",
-            ".__tmp__.out",
+            tmp_out,
             additional_switches,
             port_sw,
             grpc_sw,
@@ -591,7 +597,7 @@ def launch_grpc(
     )
 
     if mapdl_output:
-        stdout = open(str(mapdl_output), "wb", 0)
+        stdout = open(str(mapdl_output), "ab", 0)
         stderr = subprocess.STDOUT
     else:
         stdout = subprocess.PIPE  # type: ignore
@@ -1798,6 +1804,7 @@ def launch_mapdl(
             ram=args["ram"],
             port=args["port"],
             additional_switches=args["additional_switches"],
+            mapdl_output=args["mapdl_output"],
         )
 
         if args["launch_on_hpc"]:
