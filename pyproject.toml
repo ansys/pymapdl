@@ -19,7 +19,7 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 dependencies = [
-  "ansys-api-mapdl==0.5.2",                    # supports at least 2020R2 - 2022R1
+  "ansys-api-mapdl==0.6.0",                    # supports at least 2020R2 - 2022R1
   "ansys-mapdl-reader>=0.51.7",
   "ansys-math-core>=0.1.2",
   "ansys-platform-instancemanagement~=1.0",
