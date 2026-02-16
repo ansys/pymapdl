@@ -392,7 +392,9 @@ def launch_mapdl(
             error_header = "Configuration validation failed with the following errors:"
             formatted_errors = [f"- {err}" for err in validation_result.errors]
             error_body = "\n".join(formatted_errors)
-            full_message = f"{error_header}\n{error_body}" if formatted_errors else error_header
+            full_message = (
+                f"{error_header}\n{error_body}" if formatted_errors else error_header
+            )
             LOG.error(full_message)
             raise LaunchError(full_message)
 
