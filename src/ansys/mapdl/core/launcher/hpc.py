@@ -189,7 +189,7 @@ def _generate_sbatch_command(
     # Add scheduler options
     if options:
         for key, value in options.items():
-            if key == "wrap":
+            if key.lower() == "wrap":
                 raise ValueError(
                     "The 'wrap' option is reserved by PyMAPDL. Please remove it."
                 )

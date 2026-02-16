@@ -191,8 +191,23 @@ def _validate_file_permissions(config: LaunchConfig, result: ValidationResult) -
     if config.exec_file:
         if not os.path.isfile(config.exec_file):
             result.add_error(f"MAPDL executable not found: {config.exec_file}")
-        elif not os.access(config.exec_file, os.X_OK) and os.name == "posix":
-            result.add_error(f"MAPDL executable is not executable: {config.exec_file}")
+        else:
+            if os.name == "posix":
+                # On POSIX, require executable permission bit
+                if not os.access(config.exec_file, os.X_OK):
+                    result.add_error(
+                        f"MAPDL executable is not executable: {config.exec_file}"
+                    )
+            elif os.name == "nt":
+                # On Windows, executability is typically determined by extension
+                executable_exts = (".exe", ".bat", ".cmd", ".com")
+                _, ext = os.path.splitext(config.exec_file)
+                if ext.lower() not in executable_exts:
+                    result.add_error(
+                        f"MAPDL executable does not have a supported Windows "
+                        f"executable extension ({', '.join(executable_exts)}): "
+                        f"{config.exec_file}"
+                    )
 
     # Check run_location is writable
     if config.run_location:

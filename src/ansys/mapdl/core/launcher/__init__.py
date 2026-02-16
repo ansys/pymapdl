@@ -125,7 +125,7 @@ try:
         launch_grpc,
     )
     from ansys.mapdl.core._launcher_legacy import (
-        launch_mapdl as _legacy_launch_mapdl,  # The main legacy launch function (used as fallback); Queue functions used by MapdlGrpc; Exception handling; Constants; Also re-export functions that launcher.py imported from misc; Helper functions; Launch functions; HPC functions; Argument processing; Other utilities
+        launch_mapdl as _legacy_launch_mapdl,  # Legacy launch_mapdl implementation used as a fallback by the new launcher API.
     )
     from ansys.mapdl.core._launcher_legacy import (
         launch_mapdl_on_cluster,
@@ -389,9 +389,12 @@ def launch_mapdl(
     try:
         validation_result = validate_config(config)
         if not validation_result.valid:
-            error_msg = "\n".join(validation_result.errors)
-            LOG.error(f"Validation failed:\n{error_msg}")
-            raise LaunchError(f"Configuration validation failed:\n{error_msg}")
+            error_header = "Configuration validation failed with the following errors:"
+            formatted_errors = [f"- {err}" for err in validation_result.errors]
+            error_body = "\n".join(formatted_errors)
+            full_message = f"{error_header}\n{error_body}" if formatted_errors else error_header
+            LOG.error(full_message)
+            raise LaunchError(full_message)
 
         # Log warnings
         for warning in validation_result.warnings:
