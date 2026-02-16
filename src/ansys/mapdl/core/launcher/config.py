@@ -622,6 +622,10 @@ def resolve_start_instance(start_instance: Optional[bool], ip: Optional[str]) ->
     """
     # Priority 1: Explicit argument
     if start_instance is not None:
+        if ip is not None:
+            LOG.warning(
+                "Both start_instance and ip are specified. start_instance will take precedence."
+            )
         return start_instance
 
     # Priority 2: Environment variable

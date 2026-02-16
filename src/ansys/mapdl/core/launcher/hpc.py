@@ -27,6 +27,7 @@ Currently supports SLURM only.
 """
 
 import os
+import shlex
 import socket
 import subprocess  # nosec B404
 import time
@@ -177,6 +178,10 @@ def _generate_sbatch_command(
 ) -> List[str]:
     """Generate sbatch submission command.
 
+    Uses shlex.quote() to safely escape each command component,
+    protecting against shell injection from single quotes or special
+    characters in jobname, exec_file, or additional_switches.
+
     Parameters:
         mapdl_cmd: MAPDL command to wrap
         options: Scheduler options
@@ -203,9 +208,12 @@ def _generate_sbatch_command(
 
             cmd.append(f"{key}={value}")
 
-    # Add wrapped command
-    mapdl_cmd_str = " ".join(mapdl_cmd)
-    cmd.extend(["--wrap", f"'{mapdl_cmd_str}'"])
+    # Add wrapped command with proper escaping
+    # Use shlex.quote() on each component to safely handle special characters
+    # (e.g., single quotes in jobname or exec_file)
+    quoted_mapdl_cmd = [shlex.quote(component) for component in mapdl_cmd]
+    mapdl_cmd_str = " ".join(quoted_mapdl_cmd)
+    cmd.extend(["--wrap", mapdl_cmd_str])
 
     LOG.debug(f"Generated sbatch command: {' '.join(cmd)}")
     return cmd
@@ -215,7 +223,7 @@ def _submit_job(cmd: List[str]) -> int:
     """Submit job and extract job ID.
 
     Parameters:
-        cmd: sbatch command
+        cmd: sbatch command as list of strings
 
     Returns:
         Job ID
@@ -223,11 +231,13 @@ def _submit_job(cmd: List[str]) -> int:
     Raises:
         MapdlDidNotStart: If submission fails
     """
-    LOG.info(f"Submitting HPC job: {' '.join(cmd)}")
+    # Join command for shell execution
+    cmd_str = " ".join(cmd)
+    LOG.info(f"Submitting HPC job: {cmd_str}")
 
     try:
         result = subprocess.run(
-            cmd,
+            cmd_str,
             capture_output=True,
             text=True,
             shell=True,  # nosec B602 - sbatch requires shell
@@ -246,9 +256,7 @@ def _submit_job(cmd: List[str]) -> int:
 
     except subprocess.CalledProcessError as e:
         raise MapdlDidNotStart(
-            f"Failed to submit HPC job:\n"
-            f"Command: {' '.join(cmd)}\n"
-            f"Error: {e.stderr}"
+            f"Failed to submit HPC job:\n" f"Command: {cmd_str}\n" f"Error: {e.stderr}"
         )
     except ValueError as e:
         raise MapdlDidNotStart(f"Could not parse job ID from sbatch output: {e}")

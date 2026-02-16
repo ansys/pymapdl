@@ -31,7 +31,7 @@ from queue import Empty, Queue
 import subprocess  # nosec B404
 import threading
 import time
-from typing import Any, Dict, List, Optional, Union
+from typing import IO, Dict, List, Optional, Union
 
 from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import MapdlDidNotStart
@@ -124,6 +124,9 @@ def wait_for_process_ready(
     if process.poll() is not None:
         raise MapdlDidNotStart("MAPDL process died immediately after launch")
 
+    # Wait for the directory to be ready (handles potential delays in file system availability)
+    _wait_directory_ready(run_location, timeout)
+
     # Check error file created
     _wait_for_error_file(run_location, timeout)
 
@@ -185,9 +188,12 @@ def _start_subprocess(
         Subprocess handle
     """
     # Set up output redirection
+    stdout_arg: Union[int, IO[bytes]]
+    stderr_arg: int
+
     if output_file:
-        stdout_arg: Union[int, Any] = open(output_file, "wb", 0)
-        stderr_arg: Union[int, int] = subprocess.STDOUT
+        stdout_arg = open(output_file, "wb", 0)  # todo: handle file closing
+        stderr_arg = subprocess.STDOUT
     else:
         stdout_arg = subprocess.PIPE
         stderr_arg = subprocess.PIPE
@@ -255,6 +261,33 @@ def _monitor_stdout(stdout: Optional[object]) -> Optional[Queue]:
     thread.start()
 
     return queue
+
+
+def _wait_directory_ready(run_location: str, timeout: int) -> None:
+    """Wait for the run_location directory to be ready.
+
+    This handles potential delays in file system availability, especially on network drives.
+
+    Parameters:
+        run_location: Directory to check
+        timeout: Maximum wait time in seconds
+
+    Raises:
+        MapdlDidNotStart: If directory is not ready in time
+    """
+    sleep_time = 0.1
+    iterations = int(timeout / sleep_time)
+
+    for i in range(iterations):
+        if os.path.isdir(run_location):
+            LOG.debug(f"Run location directory is ready: {run_location}")
+            return
+        time.sleep(sleep_time)
+
+    raise MapdlDidNotStart(
+        f"MAPDL failed to start within {timeout} seconds. "
+        f"Run location directory not ready: {run_location}"
+    )
 
 
 def _wait_for_error_file(run_location: str, timeout: int) -> None:
