@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,12 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
+
 """
 These PREP7 commands define the model real constants.
 """
 
 
-class RealConstants:
+class RealConstants(CommandsBase):
     def r(self, nset="", r1="", r2="", r3="", r4="", r5="", r6="", **kwargs):
         """APDL Command: R
 

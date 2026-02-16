@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,9 @@
 /VERIFY,VM215
 /PREP7
 /TITLE,VM215, CONDUCTING SPHERE
-ET,1,157              
+ET,1,157
 R,1,0.2               ! THICKNESS = 0.2
-MP,RSVX,,7            ! DEFINE ELECTRICAL RESISTIVITIES PROPERTY 
+MP,RSVX,,7            ! DEFINE ELECTRICAL RESISTIVITIES PROPERTY
 MP,KXX,,3             ! DEFINE THERMAL CONDUCTIVITIES PROPERTY
 CSYS,2                ! SPHERICAL COORDINATE SYSTEM
 N,1,10                ! 10 UNIT RADIUS SPHERE

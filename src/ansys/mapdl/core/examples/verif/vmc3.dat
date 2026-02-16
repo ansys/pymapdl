@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -63,7 +63,7 @@
 		ARG2 = 1
 		ARG3 = 0
 		ETYP = 281
-        !VMC3 - TRIANGLE MESH (N = 8)	
+        !VMC3 - TRIANGLE MESH (N = 8)
 	*ELSEIF,I,EQ,7,THEN
 		ARG1 = 4
 		ARG2 = 1
@@ -76,23 +76,23 @@
 		ARG3 = 0
 		ETYP = 181
         !VMC3 - TRIANGLE MESH (N = 8)
-	*ENDIF	
-	
-	
+	*ENDIF
+
+
   PARSAV,ALL
   /CLEAR, NOSTART
   PARRES,CHANGE
   /PREP7
   SMRT,OFF
-  
-  
+
+
   *IF,I,LE,4,THEN
 	 /TITLE, VMC3 - QUADRILATERAL MESH (N = %ARG1%)
 	*ELSEIF,I,GT,THEN
 	 /TITLE, VMC3 - TRIANGLE MESH (N = %ARG1%)
-	*ENDIF 
-  
-  
+	*ENDIF
+
+
  /OUT,SCRATCH
   ANTYPE,STATIC
   ET,1,ETYP                        ! DEFINE ELEMENT TYPE PARAMETRICALLY
@@ -140,7 +140,7 @@
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!  SETUP AND PLOT ELEMENTS FOR DOCUMENTATION !!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  
+
   *IF,ETYP,EQ,181,THEN
      /AUTO,1
      /VIEW,1,0.5,0.5,0.5
@@ -149,7 +149,7 @@
      /DEVICE,DITHER,1
      /TYPE,ALL,4
      /COLOR,NUM,BLUE,1
-  
+
      /SHOW,PNG,REV
      EPLOT
      /SHOW,CLOSE
@@ -175,14 +175,14 @@
   FINISH
 
 *ENDDO
-  
+
   *DO,COL,1,2                      ! INITIALIZE COLUMN 1 WITH ELEMENT TYPES
      NARAY(COL,1)=281
      NARAY(COL+2,1)=181
 	 NARAY(COL+4,1)=281
 	 NARAY(COL+6,1)=181
   *ENDDO
-  
+
 
 SAVE,
 FINISH

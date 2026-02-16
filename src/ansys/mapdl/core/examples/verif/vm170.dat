@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -40,11 +40,11 @@ EGEN,4,1,-1
 D,5,VOLT,0                ! GROUND VOLTAGE IN WIRE
 F,1,AMPS,7.5              ! APPLY CURRENT AT "CUT"
 FINISH
-/SOLU    
-OUTPR,ESOL,LAST           ! BASIC ELEMENT PRINTOUT                 
+/SOLU
+OUTPR,ESOL,LAST           ! BASIC ELEMENT PRINTOUT
 SOLVE                     ! SOLVE ELECTRIC CURRENT CONDUCTION
 BIOT,NEW                  ! CALCULATE HS FIELD VIA BIOT-SAVART INTEG.
-*GET,HX,NODE,6,HS,X       ! GET HS(X) AS A PARAMETER 
+*GET,HX,NODE,6,HS,X       ! GET HS(X) AS A PARAMETER
 *GET,HY,NODE,6,HS,Y       ! GET HS(Y)
 *GET,HZ,NODE,6,HS,Z       ! GET HS(Z)
 MUZRO=12.5664E-7          ! DEFINE FREE=SPACE PERMEABILITY

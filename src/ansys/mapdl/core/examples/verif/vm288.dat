@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 /PREP7
 /TITLE,VM288,ELECTRICAL INPUT ADMITTANCE ON A PIEZOELECTRIC TRANDUCER
 /COM,        USING ENFORCED MOTION APPROACH
-/COM,   
+/COM,
 /COM,   REFERENCE:
 /COM    KAGAWA AND YAMABUCHI, FINITE ELEMENT SIMULATION OF A COMPOSITE
 /COM    PIEZOELECTRIC ULTRASONIC TRANSDUCER, IEEE TRANS. SONICS AND
@@ -91,8 +91,8 @@ V,15,7,8,16,13,5,6,14            ! CREATE ALUMINUM VOLUME
 VSEL,S,VOLU,,3
 VATT,2,,1                        ! ASSIGN MATERIAL ATTRIBUTES
 VSEL,ALL
-MSHK,1                           ! MAPPED VOLUME MESH 
-MSHA,0,3D                        ! USING HEX  
+MSHK,1                           ! MAPPED VOLUME MESH
+MSHA,0,3D                        ! USING HEX
 ESIZE,,RDIV
 SHPP,OFF                         ! TURN OFF SHAPE CHECKING TO ALLOW
 !                                  FOR WEDGE SHAPE MESH OF SOLIDS
@@ -138,7 +138,7 @@ HROPT,MSUP                       ! USE MODE-SUPERPOSITION METHOD
 OUTRES,ALL,ALL                   ! STORE EVERY SUBSTEP
 HARFRQ,5000,35000                ! SOLVE FOR FREQ=5KHZ AND 35KHZ
 NSUBST,20                        ! SPECIFY NUMBER OF SUBSTEPS
-KBC,1                            ! STEP BOUNDARY CONDITIONS  
+KBC,1                            ! STEP BOUNDARY CONDITIONS
 DVAL,1,U,-0.5                    ! APPLY ENFORCED MOTION TO TOP ELECTRODE
 SOLVE
 HARFRQ,39000,45000               ! SOLVE FOR FREQ=39KHZ AND 45KHZ
@@ -190,4 +190,3 @@ LABEL(1,2) = '@20 kHz','@35 kHz','@40 kHz','@45 kHz','@50 kHz','@54 kHz'
 /out,scratch
 FINISH
 /EXIT,NOSAVE
-

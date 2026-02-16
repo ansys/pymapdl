@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -188,13 +188,11 @@ def test_start_python_from_pymapdl(
 ):
     # calling mapdl_inprocess just to make sure we do not
     # run it in PyMAPDL versions below 25.2
-    output = mapdl.input_strings(
-        """
+    output = mapdl.input_strings("""
 *PYTHON
 print("Hello from MAPDL")
 *ENDPY
-"""
-    )
+""")
 
     assert output is not None
     assert "START PYTHON COMMAND BLOCK" in output

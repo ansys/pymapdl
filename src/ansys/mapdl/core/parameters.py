@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -23,12 +23,17 @@
 import os
 import re
 import tempfile
+from typing import Optional, Union
 import weakref
+
+import numpy as np
+from numpy.typing import NDArray
 
 try:
     from ansys.mapdl.reader._reader import write_array
 
     _HAS_READER = True
+
 except ModuleNotFoundError:  # pragma: no cover
     from ansys.mapdl.core.misc import write_array
 
@@ -773,6 +778,7 @@ def interp_star_status(status: str) -> dict[str, str]:
 
     parameters = {}
     is_string_array = False
+    name_ = ""
     if is_parameter_listing(status):
         # Works for one parameter or general listing
         header = "NAME                              VALUE"
@@ -785,33 +791,37 @@ def interp_star_status(status: str) -> dict[str, str]:
         # listing of one array parameter
         header = "LOCATION                VALUE"
         incr = 30
-        name_ = re.search(r"STATUS-(.*)[^\(]\(", status).group(1).strip()
+        match = re.search(r"STATUS-(.*)[^\(]\(", status)
+        name_ = match.group(1).strip() if match else ""
     else:
         # listing of a string array
         is_string_array = True
         header = ""  # no header. Find will return 0.
         incr = sum([len(each) for each in status.splitlines()[0:2]]) + 1
-        name_ = re.search(r"STATUS-(.*)[^\(]\(", status).group(1).strip()
+        match = re.search(r"STATUS-(.*)[^\(]\(", status)
+        name_ = match.group(1).strip() if match else ""
 
     st = status.find(header)
 
     if st == -1:
         return {}
-
     lines = status[st + incr :].splitlines()
     elements = []
     if is_array_listing(status):
-        myarray = np.array([each.split() for each in lines]).astype(float)
-        idim = int(myarray[:, 0].max())
-        jdim = int(myarray[:, 1].max())
-        kdim = int(myarray[:, 2].max())
-        myarray = np.zeros((idim, jdim, kdim))
+        myarray_size: NDArray[np.float64] = np.array(
+            [each.split() for each in lines]
+        ).astype(float)
+        idim = int(myarray_size[:, 0].max())  # type: ignore[used-before-def]
+        jdim = int(myarray_size[:, 1].max())  # type: ignore[used-before-def]
+        kdim = int(myarray_size[:, 2].max())  # type: ignore[used-before-def]
+        myarray: NDArray[np.float64] = np.zeros((idim, jdim, kdim))
 
     for line in lines:
         items = line.split()
         if not items:
             continue
 
+        value: Optional[Union[float, str]] = None
         # line will contain either a character, scalar, or array
         name = items[0]
         if len(items) == 2 or "CHARACTER" in items[-1].upper():
@@ -824,7 +834,7 @@ def interp_star_status(status: str) -> dict[str, str]:
                 value = float(items[1])
             else:
                 value = items[1]
-            parameters[name] = {"type": items[2], "value": value}
+            parameters[name] = {"type": items[2], "value": value}  # type: ignore[dict-item]
         elif len(items) == 4:
             # it is an array or string array
             if is_array_listing(status):
@@ -835,41 +845,40 @@ def interp_star_status(status: str) -> dict[str, str]:
                 elements.append(items[-1])
 
         elif is_string_array:
-            last_element = (
-                re.search(r"\s*\d+\s+\d+\s+\d+\s+(.*)$", line).group(1).strip()
-            )
+            match = re.search(r"\s*\d+\s+\d+\s+\d+\s+(.*)$", line)
+            last_element = match.group(1).strip() if match else ""
             elements.append(last_element)
 
         elif len(items) == 5:
             if items[1] in ["DMAT", "VEC", "SMAT"]:
                 parameters[name] = {
                     "type": items[1],
-                    "MemoryMB": float(items[2]),
-                    "dimensions": get_apdl_math_dimensions(items[3]),
-                    "workspace": int(items[4]),
+                    "MemoryMB": float(items[2]),  # type: ignore[dict-item]
+                    "dimensions": get_apdl_math_dimensions(items[3]),  # type: ignore[dict-item]
+                    "workspace": int(items[4]),  # type: ignore[dict-item]
                 }
             elif items[1] in ["LSENGINE"]:
                 parameters[name] = {
                     "type": items[1],
-                    "workspace": int(items[4]),
+                    "workspace": int(items[4]),  # type: ignore[dict-item]
                 }
             elif items[1] in ["C_FullFile"]:
                 parameters[name] = {"type": items[1]}
             else:
                 shape = (int(items[2]), int(items[3]), int(items[4]))
-                parameters[name] = {"type": items[1], "shape": shape}
+                parameters[name] = {"type": items[1], "shape": shape}  # type: ignore[dict-item]
 
     if is_array_listing(status):
         dims = [ind for ind, each in enumerate([idim, jdim, kdim]) if each == 1]
         if dims:
             try:
-                return {name_: {"type": "ARRAY", "value": myarray.squeeze(tuple(dims))}}
+                return {name_: {"type": "ARRAY", "value": myarray.squeeze(tuple(dims))}}  # type: ignore[dict-item]
             except ValueError:
-                return {name_: {"type": "ARRAY", "value": myarray}}
+                return {name_: {"type": "ARRAY", "value": myarray}}  # type: ignore[dict-item]
         else:
-            return {name_: {"type": "ARRAY", "value": myarray}}
+            return {name_: {"type": "ARRAY", "value": myarray}}  # type: ignore[dict-item]
     elif is_string_array:
-        return {name_: {"type": "STRING_ARRAY", "value": elements}}
+        return {name_: {"type": "STRING_ARRAY", "value": elements}}  # type: ignore[dict-item]
     else:
         return parameters
 

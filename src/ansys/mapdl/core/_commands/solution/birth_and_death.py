@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,11 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from typing import Optional, Union
 
-class BirthAndDeath:
+from ansys.mapdl.core._commands import CommandsBase
+from ansys.mapdl.core.mapdl_types import MapdlFloat
 
-    def ealive(self, elem: str = "", **kwargs):
-        r"""Reactivates an element (for the birth and death capability).
+
+class BirthAndDeath(CommandsBase):
+    def ealive(self, elem: str = "", **kwargs) -> Optional[str]:
+        """Reactivates an element (for the birth and death capability).
 
         Mechanical APDL Command: `EALIVE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EALIVE.html>`_
 

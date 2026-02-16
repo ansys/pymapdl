@@ -33,6 +33,6 @@ runs:
         "$PYTHON_PATH" -m pip install -e .
 
     - name: "Starting Julia"
-      shell: julia {0}
+      shell: bash
       run: |
-        using Pkg; Pkg.add("PyCall");using PyCall;pymapdl = pyimport("ansys.mapdl.core");print(pymapdl.__version__)
+        julia -e 'using Pkg; Pkg.add("PyCall");using PyCall;pymapdl = pyimport("ansys.mapdl.core");print(pymapdl.__version__)'

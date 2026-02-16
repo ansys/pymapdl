@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ JPGPRF,500,100,1
 /PREP7
 R = 2.5E-5
 ET,1,182,,,
-KEYOPT,1,3,1     
+KEYOPT,1,3,1
 N,1,100,0,,
 N,2,100,50,,
 N,3,100,100,,
@@ -54,35 +54,35 @@ E, 7,10,11,8
 E, 8,11,12,9
 E, 10,13,14,11
 E, 11,14,15,12
-MP,EX,1,21E3,		
+MP,EX,1,21E3,
 MP,NUXY,1,0.3,
 TB,PLAS,1,,,BISO
-TBDATA,1,24.0,0.0		
-NSEL,U,LOC,Y,50		
+TBDATA,1,24.0,0.0
+NSEL,U,LOC,Y,50
 D,ALL,UY,0.0
 NSEL,ALL,
 FINISH
 
 /SOLU
 NLGEOM,ON
-NSEL,S,LOC,X,100	
+NSEL,S,LOC,X,100
 SF,ALL,PRES,10.0
 NSEL,ALL,
 NSUBST,10,,,
 OUTRES,ALL,ALL
 /OUT,SCRATCH
 SOLVE
-NSEL,S,LOC,X,100	
+NSEL,S,LOC,X,100
 SF,ALL,PRES,14.0
 NSEL,ALL,
 NSUBST,10,,,
 SOLVE
-NSEL,S,LOC,X,100	
+NSEL,S,LOC,X,100
 SF,ALL,PRES,16.6
 NSEL, ALL,
 NSUBST,10,,,
 SOLVE
-NSEL,S,LOC,X,100	
+NSEL,S,LOC,X,100
 SF,ALL,PRES,19.1
 NSEL,ALL,
 NSUBST,10,,,

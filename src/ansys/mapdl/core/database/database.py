@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 """Contains the MapdlDb classes, allowing the access to MAPDL DB from Python."""
+
 from enum import Enum
 from functools import wraps
 import os
@@ -29,7 +30,7 @@ from warnings import warn
 import weakref
 
 from ansys.api.mapdl.v0 import mapdl_db_pb2_grpc
-from ansys.tools.versioning import server_meets_version
+from ansys.tools.common.versioning import server_meets_version
 import grpc
 
 from ansys.mapdl.core.errors import MapdlConnectionError
@@ -247,11 +248,13 @@ class MapdlDb:
 
         # permit overriding db_port via env var for CI
         if not port:
+            env_port = os.environ.get("PYMAPDL_DB_PORT")
             if (
                 "PYMAPDL_DB_PORT" in os.environ
-                and os.environ.get("PYMAPDL_DB_PORT").isdigit()
+                and env_port is not None
+                and env_port.isdigit()
             ):
-                db_port_str = int(os.environ.get("PYMAPDL_DB_PORT"))
+                db_port_str = int(env_port)
                 self._mapdl._log.debug(
                     f"Setting DB port from 'PYMAPDL_DB_PORT' env var: {db_port_str}"
                 )

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,11 +22,11 @@
 
 from typing import Optional, Union
 
-from ansys.mapdl.core._commands import parse
+from ansys.mapdl.core._commands import CommandsBase, parse
 from ansys.mapdl.core.mapdl_types import MapdlFloat, MapdlInt
 
 
-class Elements:
+class Elements(CommandsBase):
     def afsurf(self, sarea="", tline="", **kwargs):
         """Generates surface elements overlaid on the surface of existing solid elements.
 

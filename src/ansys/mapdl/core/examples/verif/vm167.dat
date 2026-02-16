@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ ET,1,PLANE13                         ! 2-D COUPLED-FIELD SOLID, AZ DOF
 EMUNIT,MKS                           ! MKS UNITS
 MP,MURX,1,1                          ! RELATIVE PERMEABILITY - AIR
 MP,MURX,2,1                          ! RELATIVE PERMEABILITY - ALUMINUM
-MP,RSVX,2,4E-7                       ! RESISTIVITY - ALUMINUM 
+MP,RSVX,2,4E-7                       ! RESISTIVITY - ALUMINUM
 N,1
 N,41,20
 FILL,1,41,,,,,,20
@@ -41,7 +41,7 @@ MAT,2
 E,1,2,52,51
 EGEN,40,1,-1
 FINISH
-/SOLU    
+/SOLU
 ANTYPE,TRANS                         ! TRANSIENT ANALYSIS
 NSEL,S,LOC,X,0
 D,ALL,AZ,2                           ! APPLY STEP POTENTIAL
@@ -145,7 +145,7 @@ ET,1,PLANE233,1,2                    ! 2-D LF EMAG SOLID (AZ,VOLT DOF)
 MP,MURX,1,1                          ! RELATIVE PERMEABILITY - AIR
 MP,MURX,2,1                          ! RELATIVE PERMEABILITY - ALUMINUM
 MP,RSVX,2,4E-7                       ! RESISTIVITY - ALUMINUM
-MP,RSVX,1,1.E9                       ! RESISTIVITY - AIR 
+MP,RSVX,1,1.E9                       ! RESISTIVITY - AIR
 N,1
 N,41,20
 FILL,1,41,,,,,,20
@@ -154,7 +154,7 @@ MAT,2
 E,1,2,52,51
 EGEN,40,1,-1
 FINISH
-/SOLU    
+/SOLU
 D,ALL,VOLT,0
 ANTYPE,TRANS                         ! TRANSIENT ANALYSIS
 NSEL,S,LOC,X,0

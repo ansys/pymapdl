@@ -189,7 +189,7 @@ User case on a SLURM cluster
 Assume a user wants to start a remote MAPDL instance in an HPC cluster
 to interact with it.
 The user would like to request 10 nodes, and 1 task per node (to avoid clashes
-between MAPDL instances). 
+between MAPDL instances).
 The user would like to also request 64 GB of RAM.
 Because of administration logistics, the user must use the machines in
 the ``supercluster01`` partition.

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM71
-/PREP7                    
+/PREP7
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /TITLE, VM71, TRANSIENT RESPONSE OF A SPRING, MASS, DAMPING SYSTEM
@@ -40,7 +40,7 @@ EGEN,4,2,1,1,1,,,1        ! GENERATE ELEMENTS WITH INCREMENTING REAL CONSTANT SE
 D,2,UY,,,8,2
 FINISH
 
-/SOLU       
+/SOLU
 ANTYPE,MODAL              ! PERFORM MODAL SOLVE
 MODOPT,QRDAMP,4           ! USE QRDAMP EIGENSOLVER
 MXPAND,4,,,YES
@@ -51,7 +51,7 @@ FINISH
 
 /SOLU
 ANTYPE,TRANSIENT
-TRNOPT,MSUP,4,,,          ! PERFORM MSUP TRANSIENT SOLVE    
+TRNOPT,MSUP,4,,,          ! PERFORM MSUP TRANSIENT SOLVE
 DELTIM,1E-3
 OUTRES,NSOL,1
 OUTPR,NSOL,1

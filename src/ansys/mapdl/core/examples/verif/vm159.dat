@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -54,7 +54,7 @@ TYPE,2
 REAL,4
 E,2,3                      ! CONVECTION LINK
 FINISH
-/SOLU    
+/SOLU
 TIME,.2
 IC,1,TEMP,70               ! UNIFORM STARTING TEMPERATURE
 IC,2,TEMP,70

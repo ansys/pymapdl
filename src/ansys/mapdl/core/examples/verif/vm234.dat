@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -32,12 +32,12 @@ JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /COM
 /OUT,SCRATCH
 /PREP7
-MP,EX,1,422500.0              		 
+MP,EX,1,422500.0
 TB,HYPER,1, ,3,OGDEN,					! HYPER ODGEN MATERIAL MODEL
 TBDATA,1,6.3E+05*3.0,1.3,1200*3.0,5,-10000*3.0,-2
 TB,PRONY,1, ,2,SHEAR
 TBDATA,,1.0/3.0,0.40,1.0/3.0,0.20,
-N,1, 0.0, 0.0, 0.0            
+N,1, 0.0, 0.0, 0.0
 N,2, 0.1, 0.0, 0.0
 N,3, 0.1, 0.1, 0.0
 N,4, 0.0, 0.1, 0.0
@@ -52,7 +52,7 @@ FINISH
 
 /SOLUTION
 /OUT,SCRATCH
-NSEL,S,LOC,X                 				
+NSEL,S,LOC,X
 D,ALL,UX
 NSEL,S,LOC,Y
 D,ALL,UY

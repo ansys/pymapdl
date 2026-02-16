@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@
 /TITLE, VM47, TORSIONAL FREQUENCY OF A SUSPENDED DISK
 C*** VIBRATION THEORY AND APPLICATIONS, THOMSON, 2ND PRINTING, PAGE 10, EX 1.3-2
 ANTYPE,MODAL
-MODOPT,LANB,1,,,     
+MODOPT,LANB,1,,,
 ET,1,COMBIN14,,,1    ! THREE-DIMENSIONAL TORSIONAL SPRING
 ET,2,MASS21,,,3      ! TWO-DIMENSIONAL MASS WITH ROTARY INERTIA
 R,1,4.8              ! REAL CONSTANT SET #1 SPRING CONSTANT
@@ -41,16 +41,16 @@ OUTPR,BASIC,1
 D,1,ALL              ! CONSTRAIN END OF WIRE IN ALL DOF
 D,2,UX,,, ,,UY,UX    ! PREVENT TRANSLATION OF THE MASS
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 *GET,FREQ,MODE,1,FREQ
 *DIM,LABEL,CHAR,1,2
 *DIM,VALUE,,1,3
 LABEL(1,1) = '      F,'
 LABEL(1,2) = ' (Hz)   '
-*VFILL,VALUE(1,1),DATA,.63333 
-*VFILL,VALUE(1,2),DATA,FREQ 
-*VFILL,VALUE(1,3),DATA,ABS(FREQ/.63333 ) 
+*VFILL,VALUE(1,1),DATA,.63333
+*VFILL,VALUE(1,2),DATA,FREQ
+*VFILL,VALUE(1,3),DATA,ABS(FREQ/.63333 )
 /COM
 /OUT,vm47,vrt
 /COM,------------------- VM47 RESULTS COMPARISON ---------------
@@ -64,4 +64,3 @@ LABEL(1,2) = ' (Hz)   '
 
 FINISH
 *LIST,vm47,vrt
-

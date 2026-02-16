@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -40,8 +40,8 @@ class GraphicsBackend(Enum):
     This enum is used to set the graphics backend for PyMAPDL.
     """
 
-    PYVISTA: str = "pyvista"
-    MAPDL: str = "mapdl"
+    PYVISTA = "pyvista"
+    MAPDL = "mapdl"
 
 
 if _HAS_VISUALIZER:

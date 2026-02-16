@@ -6,7 +6,7 @@ Develop on containers
 
 This guide describes how to develop PyMAPDL features or fix bugs using
 a `remote container <vscode_devcontainers_containers_>`_.
-The files for setting up the container can be found in the 
+The files for setting up the container can be found in the
 `.devcontainer directory <pymapdl_devcontainer_directory_>`_.
 
 
@@ -31,7 +31,7 @@ This environment variable sets the port and IP address of the license server.
 If you do not have set this environment variable before launching the
 container, you are prompt to enter your license server port and address.
 
-You can set the :envvar:`ANSYSLMD_LICENSE_FILE` environment variable 
+You can set the :envvar:`ANSYSLMD_LICENSE_FILE` environment variable
 from the terminal before launching VS Code.
 For example, if you have a license server at the address ``123.45.67.89``,
 you can set the license using:
@@ -48,7 +48,7 @@ you can set the license using:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ export ANSYSLMD_LICENSE_FILE =1055@123.45.65.89
@@ -64,8 +64,8 @@ Develop on a remote container
 =============================
 
 .. note:: This approach requires you have a Docker image with MAPDL installed.
-   The Docker image listed in the 
-   `repository development container configuration files <pymapdl_devcontainer_configuration_>`_ 
+   The Docker image listed in the
+   `repository development container configuration files <pymapdl_devcontainer_configuration_>`_
    is not for public use due to licensing issues.
    However, you can `create your own Docker image <ref_make_container_>`
    and use this file as a template for setting your own local development container.
@@ -122,4 +122,3 @@ However, this mounting process might have a significant impact on
 the container performance, especially noticeable if you are using MacOS.
 You can avoid this by cloning the repository inside the container.
 For more information, see `Quick start: Open a Git repository or GitHub PR in an isolated container volume <vscode_open_a_repository_in_container_>`_.
-

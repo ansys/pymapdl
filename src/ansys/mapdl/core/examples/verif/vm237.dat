@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -22,11 +22,11 @@
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM237
-/TITLE,VM237, PIEZOELECTRIC-CIRCUIT ANALYSIS 
+/TITLE,VM237, PIEZOELECTRIC-CIRCUIT ANALYSIS
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /COM,  ---------------------------------------------------------------
-/COM,     FINITE ELEMENT MODEL OF A PIEZOELECTRIC CIRCULAR PLATE 
+/COM,     FINITE ELEMENT MODEL OF A PIEZOELECTRIC CIRCULAR PLATE
 /COM,  ---------------------------------------------------------------
 A=1E-3                        ! RADIUS, M
 T=0.1E-3                      ! THICKNESS, M
@@ -40,10 +40,10 @@ T=0.1E-3                      ! THICKNESS, M
 /COM,   [s12 s13 s11  0  0  0 ]        [ 0 d31  0 ]      [  0   0   ep11]
 /COM,   [ 0   0   0  s44 0  0 ]        [ 0  0  d15]
 /COM,   [ 0   0   0   0 s66 0 ]        [ 0  0   0 ]
-/COM,   [ 0   0   0   0  0 s44]        [d15 0   0 ] 
+/COM,   [ 0   0   0   0  0 s44]        [d15 0   0 ]
 /COM,
 /COM,   - COMPLIANCE COEFFICIENTS, M2/N
-S11=16.4E-12          
+S11=16.4E-12
 S12=-5.74E-12
 S13=-7.22E-12
 S33=18.8E-12
@@ -77,7 +77,7 @@ TBDA,7,S33,S13
 TBDA,12,S11
 TBDA,16,S44
 
-TB,PIEZ,1,,,1                 ! PIEZOELECTRIC STRAIN MATRIX       
+TB,PIEZ,1,,,1                 ! PIEZOELECTRIC STRAIN MATRIX
 TBDA,2,D31
 TBDA,5,D33
 TBDA,8,D31
@@ -93,7 +93,7 @@ MP,DENS,1,RHO                 ! DENSITY
 ET,1,PLANE223,1001,,1         ! PIEZOELECTRIC AXISYMMETRIC ELEMENT TYPE
 RECT,,A,,T
 ESIZE,T                       ! MESH SOLID MODEL
-NUMSTR,NODE,10                
+NUMSTR,NODE,10
 AMESH,1
                               ! APPLY STRUCTURAL BC, SIMPLY SUPPORTED PLATE
 NSEL,S,LOC,X
@@ -116,7 +116,7 @@ D,NTOP,VOLT,1                 ! APPLY 1V LOAD ON TOP ELECTRODE
 FINI
 /SOLU
 ANTYPE,STATIC                 ! STATIC ANALYSIS
-SOLVE              
+SOLVE
 FINI
 
 /POST1
@@ -124,7 +124,7 @@ FINI
 CP=ABS(QT)                    ! CAPACITANCE CP=Q/V, WHERE V=1V
 EPZ0=8.854E-12                ! FREE SPACE PERMITTIVITY
 PI=3.1415                     ! PI CONSTANT
-C=EP33*EPZ0*PI*A**2/T         ! ANALYTICAL CAPACITANCE 
+C=EP33*EPZ0*PI*A**2/T         ! ANALYTICAL CAPACITANCE
 /COM,    2-D CAPACITANCE (ANALYTICAL) =%C%, F
 /COM,    2-D CAPACITANCE (Mechanical APDL) = %CP%, F
 FINI
@@ -136,7 +136,7 @@ FINI
 DDELE,NTOP,VOLT               ! DELETE VOLTAGE LOAD ON TOP ELECTRODE
 ET,2,CIRCU94,0                ! DEFINE A RESISTOR
 R=3000                        ! RESISTANCE, OHM
-R,1,R                        
+R,1,R
 N,1
 TYPE,2
 REAL,1
@@ -193,7 +193,7 @@ VPUT,WORK2(1),6               ! COS(B*T)
 VPUT,WORK2(1),7               ! SIN(B*T)
 ADD,8,6,7,,,,,,D/B            ! COS(B*T) + D/B*SIN(B*T)
 PROD,9,4,8                    ! -EXP(-D*T)*[COS(B*T) + D/B*SIN(B*T)]
-ADD,10,3,9,,V_C_EXACT         ! 1-EXP(-D*T)*[COS(B*T) + D/B*SIN(B*T)]       
+ADD,10,3,9,,V_C_EXACT         ! 1-EXP(-D*T)*[COS(B*T) + D/B*SIN(B*T)]
 
 
 ! PRINT AND PLOT Mechanical APDL AND EXACT VOLTAGE ACROSS THE PZT CAPACITOR
@@ -221,11 +221,11 @@ PLVAR,2,10
 LABEL(1) = '1.8E-2s','4.0E-2s','8.8E-2s','1.3E-1s','1.86E-1s'
 *VFILL,VALUE(1,1),DATA,VCE(1),VCE(2),VCE(3),VCE(4),VCE(5)
 *VFILL,VALUE(1,2),DATA,VCA(1),VCA(2),VCA(3),VCA(4),VCA(5)
-V1 = VCA(1)/VCE(1) 
-V2 = VCA(2)/VCE(2) 
-V3 = VCA(3)/VCE(3) 
-V4 = VCA(4)/VCE(4) 
-V5 = VCA(5)/VCE(5) 
+V1 = VCA(1)/VCE(1)
+V2 = VCA(2)/VCE(2)
+V3 = VCA(3)/VCE(3)
+V4 = VCA(4)/VCE(4)
+V5 = VCA(5)/VCE(5)
 *VFILL,VALUE(1,3),DATA,ABS(V1),ABS(V2),ABS(V3),ABS(V4),ABS(V5)
 /OUT,vm237,vrt
 /COM

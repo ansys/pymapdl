@@ -25,23 +25,30 @@ on:
         type: string
         default: ""
 
-      testing-minimal: 
+      testing-minimal:
         description: |
           If true, the minimal requirements will be installed.
         required: false
         type: boolean
         default: false
-      
+
       test_dpf:
         description: |
           If true, the DPF tests will be run.
         required: false
         type: boolean
         default: true
-      
+
       on-console:
         description: |
           If true, the tests will be run on console.
+        required: false
+        type: boolean
+        default: false
+
+      upload-logs:
+        description: |
+          If true, logs will be uploaded encrypted. Set to false to disable log upload (for security).
         required: false
         type: boolean
         default: false
@@ -72,7 +79,7 @@ on:
         required: false
         type: string
         default: ghcr.io/ansys/mapdl
-      
+
       runner:
         description: |
           Runner to use.
@@ -86,7 +93,7 @@ on:
         required: false
         type: string
         default: "3.12"
-        
+
     secrets:
       license-server:
         description: |
@@ -97,16 +104,24 @@ on:
         description: |
           Token for Codecov.
         required: true
-      
+
+      log-encryption-key:
+        description: |
+          Encryption key for sensitive log files.
+        required: false
+
       token:
         description: |
           Token for GitHub. Used also for login into ghcr.io.
         required: true
-      
+
       username:
         description: |
           GitHub username for login into ghcr.io.
         required: true
+
+# zizmor: ignore[concurrency-limits]
+# Concurrency is controlled by the parent workflow (ci.yml)
 
 permissions: {}
 
@@ -115,8 +130,8 @@ jobs:
     name: Test MAPDL locally
     runs-on: ${{ inputs.runner }}
     permissions:
-      contents: read
-      packages: read
+      contents: read  # Needed to read repository contents for tests
+      packages: read  # Needed to pull Docker images from GitHub packages
     env:
       ON_CI: True
       ON_LOCAL: true
@@ -126,10 +141,12 @@ jobs:
       TESTING_MINIMAL: ${{ inputs.testing-minimal }}
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
       PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
-      PYTEST_ARGUMENTS: '-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers'
+      PYTEST_ARGUMENTS: '-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=2 --reruns 2 --reruns-delay 2 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers'
       OMPI_ALLOW_RUN_AS_ROOT: 1
       OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
       DATAPROCESSING_DEBUG: /home/mapdl/dpf_logs
+      PYMAPDL_GRPC_TRANSPORT: 'insecure'
+      ANSYS_MAPDL_GRPC_TRANSPORT: 'insecure'
 
     container:
       image: "${{ inputs.package-registry }}:${{ inputs.mapdl-version }}" # zizmor: ignore[unpinned-images]
@@ -149,38 +166,27 @@ jobs:
           df -h
 
       - name: "Install Git and checkout project"
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
         with:
           repository: ansys/pymapdl
           persist-credentials: false
 
-      - name: "Get if running student version"
-        id: student_check
+      - name: "Handle CICD version detection"
         shell: bash
         env:
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
         run: |
-          if [[ "${MAPDL_VERSION}" == *"student"* ]]; 
-            then export ON_STUDENT=true; export TAG_STUDENT="student";
-            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
-          fi
-
           if [[ "${MAPDL_VERSION}" == *"cicd"* ]]; then
             echo "CICD MAPDL version detected, testing DPF backend for results module.";
             echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
+            echo "PYMAPDL_ADDITIONAL_SWITCHES=-mpi openmpi" >> $GITHUB_ENV;
           fi
 
-          echo "ON_STUDENT: $ON_STUDENT"
-          echo "TAG_STUDENT: $TAG_STUDENT"
-          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
-          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
-        
       - name: "Install gcc"
         shell: bash
         if: ${{ contains(inputs.mapdl-version, 'cicd') }}
         run: |
           apt-get update && apt-get -y install gcc mono-mcs g++
-    
 
       - name: "Installing minimal OS packages"
         shell: bash
@@ -195,7 +201,7 @@ jobs:
           apt-get update && apt install -y libgl1 libglx-mesa0 xvfb libgomp1 graphviz curl git && apt-get clean
 
       - name: "Setup Python"
-        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c #v6.0.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 #v6.2.0
         with:
           python-version: ${{ inputs.python-version }}
 
@@ -236,7 +242,6 @@ jobs:
 
       - name: "Unit testing"
         env:
-          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
           ON_MINIMAL: ${{ inputs.testing-minimal }}
           ON_CONSOLE: ${{ inputs.on-console }}
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
@@ -245,10 +250,10 @@ jobs:
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
           PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
           LATEST_VERSION: "${{ inputs.latest-version }}"
+          PYMAPDL_NPROC: 2
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
-          echo "ON_STUDENT: $ON_STUDENT"
 
           # Because there is no 'ansys-tools-common' we need to input the
           # executable path with the env var: PYMAPDL_MAPDL_EXEC.
@@ -276,18 +281,16 @@ jobs:
           $cmd ${PYTEST_INPUT_ARGUMENTS} \
             ${PYTEST_ARGUMENTS} \
             --report-log=$file_name.jsonl \
-            --cov-report=xml:$file_name.xml \
-            --log-file=pytest.log \
-            --log-file-level="DEBUG"
+            --cov-report=xml:$file_name.xml
 
       - name: "Upload pytest reports to GitHub"
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
         with:
           name: "reports-${{ inputs.file-name }}"
           path: ./${{ inputs.file-name }}.jsonl
 
-      - name: "Collect logs on failure"
+      - name: "Collect logs"
         if: always()
         env:
           LOG_NAMES: logs-${{ inputs.file-name }}
@@ -295,14 +298,7 @@ jobs:
         run: |
           .ci/collect_mapdl_logs_locals.sh
 
-      # - name: "Upload logs to GitHub"
-      #   if: always()
-      #   uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
-      #   with:
-      #     name: logs-${{ inputs.file-name }}.tgz
-      #     path: ./logs-${{ inputs.file-name }}.tgz
-
-      - name: "Display files structure"
+      - name: "Display logs"
         if: always()
         env:
           LOG_NAMES: logs-${{ inputs.file-name }}
@@ -310,17 +306,49 @@ jobs:
         run: |
           .ci/display_logs_locals.sh
 
-      - uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 #v5.5.1
+      - name: "Encrypt and upload logs to GitHub"
+        if: always() && inputs.upload-logs == true
+        env:
+          ENCRYPTION_KEY: ${{ secrets.log-encryption-key }}
+          FILE_NAME: ${{ inputs.file-name }}
+        shell: bash
+        run: |
+          # Check if logs exist
+          if [ -f "./logs-${FILE_NAME}.tgz" ]; then
+            echo "Encrypting logs..."
+
+            # Encrypt using OpenSSL (already available in container)
+            openssl enc -aes-256-cbc -salt -pbkdf2 \
+              -in ./logs-${FILE_NAME}.tgz \
+              -out ./logs-${FILE_NAME}.tgz.enc \
+              -pass env:ENCRYPTION_KEY
+
+            echo "Logs encrypted successfully"
+            echo "To decrypt locally, use:"
+            echo "openssl enc -aes-256-cbc -d -pbkdf2 -in logs-${FILE_NAME}.tgz.enc -out logs-${FILE_NAME}.tgz -pass pass:YOUR_KEY"
+          else
+            echo "No log file found to encrypt"
+          fi
+
+      - name: "Upload encrypted logs to GitHub"
+        if: always() && inputs.upload-logs == true
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
+        with:
+          name: logs-${{ inputs.file-name }}-encrypted
+          path: ./logs-${{ inputs.file-name }}.tgz.enc
+          retention-days: 3
+
+      - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
         name: "Upload coverage to Codecov"
         if: inputs.codecov-report == true
         with:
           token: ${{ secrets.codecov-token }} # required
           root_dir: ${{ github.workspace }}
           name: ${{ inputs.file-name }}.xml
-          flags: local-ubuntu-${{ inputs.mapdl-version }}-dmp-${{ steps.student_check.outputs.TAG_STUDENT }}-${{ inputs.tags }}
+          flags: local-ubuntu-${{ inputs.mapdl-version }}-dmp-${{ inputs.tags }}
 
       - name: "Upload coverage artifacts"
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
         if: inputs.codecov-report == true
         with:
           name: ${{ inputs.file-name }}.xml

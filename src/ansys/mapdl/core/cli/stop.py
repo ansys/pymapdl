@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -23,6 +23,8 @@
 from typing import Optional
 
 import click
+
+from ansys.mapdl.core.cli.helpers import can_access_process
 
 
 @click.command(
@@ -95,10 +97,6 @@ def stop(port: int, pid: Optional[int], all: bool) -> None:
         killed_ = False
         for proc in psutil.process_iter():
             try:
-                # First check if we can access the process
-                if not _can_access_process(proc):
-                    continue
-
                 if _is_valid_ansys_process(PROCESS_OK_STATUS, proc):
                     # Killing "all"
                     if all:

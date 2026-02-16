@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
+<<<<<<< HEAD
 class LoadStepOptions:
+=======
+
+class LoadStepOptions(CommandsBase):
+    def autots(self, key="", **kwargs):
+        """Specifies whether to use automatic time stepping or load stepping.
+>>>>>>> main
 
     def autots(self, key: str = "", **kwargs):
         r"""Specifies whether to use automatic time stepping or load stepping.

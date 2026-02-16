@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -74,13 +74,13 @@ AATT,1,3,3
 ASEL,ALL
 CSYS,1
 LSEL,S,LOC,X,9*S
-LESIZE,ALL,,,1  
+LESIZE,ALL,,,1
 ESIZE,,8
-AMESH,4   
+AMESH,4
 
 ASEL,S,AREA,,1
-LSLA,S  
-LESIZE,ALL,,,5  
+LSLA,S
+LESIZE,ALL,,,5
 LSEL,ALL
 ASEL,ALL
 CSYS,0
@@ -158,7 +158,7 @@ LABEL(1,2) = 'CE,HENRY',' AMPS   '
 *VFILL,VALUE(1,2),DATA,LCOIL,IC
 *VFILL,VALUE(1,3),DATA,ABS(LCOIL/.01274),ABS(IC/1.9849)
 /COM
-/OUT,vm207,vrt,            
+/OUT,vm207,vrt,
 /COM,PLANE233
 *VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)
 (1X,A8,A8,'   ',F10.5,'  ',F14.5,'   ',1F15.3)

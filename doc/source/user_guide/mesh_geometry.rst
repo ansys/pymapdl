@@ -32,8 +32,8 @@ The :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class allows you to access
 the mesh and geometry without writing to an intermediate file or
 interpreting the text output from various MAPDL commands. For
 example, to access the nodes and elements of a model, normally you
-would list the nodes within MAPDL using the 
-:func:`Mapdl.nlist() <ansys.mapdl.core.Mapdl.nlist>` method. 
+would list the nodes within MAPDL using the
+:func:`Mapdl.nlist() <ansys.mapdl.core.Mapdl.nlist>` method.
 However, this generates a string.
 Array access requires either cumbersome MAPDL GET commands or that the
 nodes be written to an archive file and then read in with other
@@ -52,7 +52,7 @@ software:
 
 
 However, with the :attr:`Mapdl.mesh <ansys.mapdl.core.mesh_grpc.MeshGrpc>` class,
-you can interface with a current instance of the 
+you can interface with a current instance of the
 :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class and access the current nodes coordinates
 with this code:
 
@@ -121,7 +121,7 @@ as a |pv-multiblock|  object.
 As you can see, you do not need to call the entities in the new API.
 
 For more differences between the new Geometry API and the old one, see
-:ref:`migration_geometry_api_066`. 
+:ref:`migration_geometry_api_066`.
 
 
 The selection now is easier.

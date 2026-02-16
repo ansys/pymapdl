@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 
 /COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
 /VERIFY,VME1
-/TITLE,VME1, Spring-Mass System Response to Step Input 
+/TITLE,VME1, Spring-Mass System Response to Step Input
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 

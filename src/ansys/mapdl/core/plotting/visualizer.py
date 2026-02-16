@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Module for the MapdlPlotter class."""
+
 from collections import OrderedDict
 from typing import Any, Callable, Dict, Iterable, Optional, Union
 
@@ -84,11 +85,19 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
         )
 
     def plot_iter(
-        self, plottable_object: Any, name_filter: str = None, **plotting_options
+        self,
+        plottable_object: Any,
+        name_filter: Optional[str] = None,
+        **plotting_options,
     ):
         pass
 
-    def plot(self, plottable_object: Any, name_filter: str = None, **plotting_options):
+    def plot(
+        self,
+        plottable_object: Any,
+        name_filter: Optional[str] = None,
+        **plotting_options,
+    ):
         pass
 
     @property
@@ -131,8 +140,8 @@ class MapdlPlotter(Plotter):
         self._theme = theme
         if theme is None:
             self._theme = MapdlTheme()
-        self._off_screen = None
-        self._notebook = None
+        self._off_screen: Optional[bool] = None
+        self._notebook: Optional[bool] = None
         self._savefig = None
         self._title = None
         self._bc_settings = None
@@ -285,7 +294,7 @@ class MapdlPlotter(Plotter):
     def plot_iter(
         self,
         plotting_list: Iterable[Any],
-        name_filter: str = None,
+        name_filter: Optional[str] = None,
         **plotting_options,
     ) -> None:
         """Add a list of objects to the plotter.
@@ -413,6 +422,7 @@ class MapdlPlotter(Plotter):
 
                 if (
                     "scalars" in mesh
+                    and scalars is not None
                     and scalars.ndim == 2
                     and (scalars.shape[1] == 3 or scalars.shape[1] == 4)
                 ):

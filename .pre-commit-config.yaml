@@ -9,36 +9,36 @@ ci:
 
   # PR name when autoupdate
   autoupdate_commit_msg: 'ci: pre-commit autoupdate'
-  skip: [mypy]
 
 
 repos:
--   repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.11.0.1
-    hooks:
-    -   id: shellcheck
-        args: [ "-x"]
+- repo: https://github.com/shellcheck-py/shellcheck-py
+  rev: 745eface02aef23e168a8afb6b5737818efbea95  # frozen: v0.11.0.1
+  hooks:
+    - id: shellcheck
+      args: [ "-x"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.18.2
+  rev: a66e98df7b4aeeb3724184b332785976d062b92e  # frozen: v1.19.1
   hooks:
     - id: mypy
       args: [ --follow-imports=silent, --config-file=pyproject.toml]
+      exclude: ^(doc/|examples/)
 
 - repo: https://github.com/ansys/pre-commit-hooks
-  rev: v0.5.2
+  rev: fd1d6b0b4baeb08e32d4de0909999576695c0433  # frozen: v0.5.2
   hooks:
   - id: add-license-headers
     args:
     - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
-  rev: 7.0.0
+  rev: 0a09c783808cfe77bb3269250f663ff733d23302  # frozen: 7.0.0
   hooks:
   - id: isort
 
 - repo: https://github.com/numpy/numpydoc
-  rev: v1.9.0
+  rev: 16a20aad58d5532fb12c2a87af0eb4ea290bacb4  # frozen: v1.10.0
   hooks:
     - id: numpydoc-validation
       exclude: |
@@ -51,25 +51,25 @@ repos:
           )
 
 - repo: https://github.com/adamchainz/blacken-docs
-  rev: 1.20.0
+  rev: dda8db18cfc68df532abf33b185ecd12d5b7b326  # frozen: 1.20.0
   hooks:
   - id: blacken-docs
-    additional_dependencies: [black==25.9.0]
+    additional_dependencies: [black==25.12.0]
 
 - repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 25.9.0  # If version changes --> modify "blacken-docs" manually as well.
+  rev: ea488cebbfd88a5f50b8bd95d5c829d0bb76feb8  # frozen: 26.1.0
   hooks:
   - id: black
     args:
       - --line-length=88
 
 - repo: https://github.com/PyCQA/flake8
-  rev: 7.3.0
+  rev: d93590f5be797aabb60e3b09f2f52dddb02f349f  # frozen: 7.3.0
   hooks:
   - id: flake8
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.4.1
+  rev: 63c8f8312b7559622c0d82815639671ae42132ac  # frozen: v2.4.1
   hooks:
   - id: codespell
     args: ["--toml", "pyproject.toml"]
@@ -83,20 +83,41 @@ repos:
 #     exclude: "tests/"
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v6.0.0
+  rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
   hooks:
   - id: check-merge-conflict
   - id: debug-statements
+  - id: end-of-file-fixer
+  - id: detect-private-key
+  - id: trailing-whitespace
+  - id: check-toml
+  - id: mixed-line-ending
+    args: ['--fix=lf']
+    description: Forces to replace line ending by the UNIX 'lf' character.
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.34.1
+  rev: ccf21790019848af3eb4464be2a9d5efed6358f3  # frozen: 0.36.1
   hooks:
     - id: check-github-workflows
 
 - repo: https://github.com/ComPWA/taplo-pre-commit
-  rev: v0.9.3
+  rev: 23eab0f0eedcbedebff420f5fdfb284744adc7b3  # frozen: v0.9.3
   hooks:
     - id: taplo-format
       # See options: https://taplo.tamasfe.dev/configuration/formatter-options.html
       args: [--option, "reorder_arrays=true", --option, "reorder_keys=true"]
+
+- repo: https://github.com/zizmorcore/zizmor-pre-commit
+  rev: b546b77c44c466a54a42af5499dcc0dcc1a3193f  # frozen: v1.22.0
+  hooks:
+    - id: zizmor
+      args: ["--pedantic"]
+
+# Security checks with bandit
+- repo: https://github.com/PyCQA/bandit
+  rev: 765f00d3f202f83f61d03f882f80a2d5142d81f8  # frozen: 1.9.3
+  hooks:
+    - id: bandit
+      args: ['-c', 'pyproject.toml']
+      additional_dependencies: ['bandit[toml]']

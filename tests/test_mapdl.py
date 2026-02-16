@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Test MAPDL interface"""
+
 from datetime import datetime
 from importlib import reload
 import logging
@@ -1401,13 +1402,11 @@ def test_tbft(mapdl, cleared, tmpdir, option2, option3, option4):
     fpath = dirpath.join(fname)
 
     with open(fpath, "w") as fid:
-        fid.write(
-            """0.819139E-01 0.82788577E+00
+        fid.write("""0.819139E-01 0.82788577E+00
         0.166709E+00 0.15437247E+01
         0.253960E+00 0.21686152E+01
         0.343267E+00 0.27201819E+01
-        0.434257E+00 0.32129833E+0"""
-        )
+        0.434257E+00 0.32129833E+0""")
 
     if option4 == "DIR":
         option4 = dirpath
@@ -1600,8 +1599,7 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
 
 
 def test_mpread_lib(mapdl):
-    mapdl.input_strings(
-        """
+    mapdl.input_strings("""
         /prep7
         /units,si
         TB,BH  ,_MATL   ,   1,  20
@@ -1622,8 +1620,7 @@ def test_mpread_lib(mapdl):
         TBPT,,  190476.190    ,  1.90980000
         TBPT,,  285714.286    ,  2.02960000
         TBPT,,  380952.381    ,  2.14950000
-    """
-    )
+    """)
     mapdl.slashdelete("database", "mp")
     mapdl.mpwrite("database", "mp", mat=1)
 
@@ -2642,7 +2639,6 @@ def test_remove_temp_dir_on_exit(mapdl, cleared, tmpdir):
 
 
 @requires("local")
-@requires("nostudent")
 def test_remove_temp_dir_on_exit_with_launch_mapdl(mapdl, cleared):
 
     mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=PORT1)

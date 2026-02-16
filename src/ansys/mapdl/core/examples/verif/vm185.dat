@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -52,15 +52,15 @@ AGLUE,1,2                           ! GLUE AREAS TOGETHER
 
 ASEL,S,AREA,,3
 AATT,1,,1                           ! SET ATTRIBUTES FOR AIR
-ASEL,S,AREA,,1   
+ASEL,S,AREA,,1
 AATT,2,,2                           ! SET ATTRIBUTES FOR CONDUCTOR
 ASEL,ALL
 ESIZE,D/15                          ! SET ELEMENT EDGE LENGTH
 MSHK,0                              ! FREE AREA MESH
-MSHA,1,2D                           ! USING TRIS 
+MSHA,1,2D                           ! USING TRIS
 AMESH,ALL                           ! MESH AREAS
 ESEL,S,MAT,,2                       ! SELECT ALL NODES IN CONDUCTOR
-NSLE,S  
+NSLE,S
 CP,1,VOLT,ALL                       ! COUPLE ALL NODES IN VOLT
 I=1.0                               ! DEFINE TOTAL CURRENT
 ASUM                                ! CALCULATE AREA ATTRIBUTES
@@ -72,7 +72,7 @@ NSEL,S,LOC,Y,.02345                 ! SELECT NODES AT TOP PLANE
 D,ALL,AZ,0                          ! SET FLUX PARALLEL B.C.
 NSEL,ALL
 FINISH
-/SOLU    
+/SOLU
 ANTYPE,HARMIC                       ! HARMONIC ANALYSIS
 HARFRQ,45                           ! SET OPERATING FREQUENCY
 SOLVE
@@ -157,15 +157,15 @@ AGLUE,1,2                           ! GLUE AREAS TOGETHER
 
 ASEL,S,AREA,,3
 AATT,1,,1                           ! SET ATTRIBUTES FOR AIR
-ASEL,S,AREA,,1   
+ASEL,S,AREA,,1
 AATT,2,,2                           ! SET ATTRIBUTES FOR CONDUCTOR
 ASEL,ALL
 ESIZE,D/15                          ! SET ELEMENT EDGE LENGTH
 MSHK,0                              ! FREE AREA MESH
-MSHA,1,2D                           ! USING TRIS 
+MSHA,1,2D                           ! USING TRIS
 AMESH,ALL                           ! MESH AREAS
 ESEL,S,MAT,,2                       ! SELECT ALL NODES IN CONDUCTOR
-NSLE,S  
+NSLE,S
 CP,1,VOLT,ALL                       ! COUPLE ALL NODES IN VOLT
 I=1.0                               ! DEFINE TOTAL CURRENT
 ASUM                                ! CALCULATE AREA ATTRIBUTES
@@ -178,7 +178,7 @@ D,ALL,AZ,0                          ! SET FLUX PARALLEL B.C.
 NSEL,ALL
 FINISH
 
-/SOLU    
+/SOLU
 ANTYPE,HARMIC                       ! HARMONIC ANALYSIS
 HARFRQ,45                           ! SET OPERATING FREQUENCY
 SOLVE

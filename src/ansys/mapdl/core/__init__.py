@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -29,6 +29,9 @@ import os
 from typing import Dict, List, Tuple
 
 from platformdirs import user_data_dir
+
+# Apply NumPy compatibility patches for dependencies
+from ansys.mapdl.core import _numpy_compat  # noqa: F401
 
 ###############################################################################
 # Logging

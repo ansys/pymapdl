@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
+<<<<<<< HEAD
 class Inertia:
+=======
+
+class Inertia(CommandsBase):
+    def acel(self, acel_x="", acel_y="", acel_z="", **kwargs):
+        """Specifies the linear acceleration of the global Cartesian reference
+>>>>>>> main
 
     def acel(self, acel_x: str = "", acel_y: str = "", acel_z: str = "", **kwargs):
         r"""Specifies the linear acceleration of the global Cartesian reference frame for the analysis.

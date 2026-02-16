@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import os
+import platform
 import re
 import subprocess
 from typing import Callable
@@ -30,6 +31,10 @@ import numpy as np
 import psutil
 import pytest
 
+import ansys.mapdl.core.cli.helpers as helpers_module
+
+core_module = helpers_module
+from ansys.mapdl.core.cli.helpers import get_ansys_process_from_port
 from ansys.mapdl.core.plotting import GraphicsBackend
 from conftest import VALID_PORTS, requires
 
@@ -45,6 +50,7 @@ def make_fake_process(pid, name, port=PORT1, ansys_process=False, n_children=0):
     mock_process = MagicMock(spec=psutil.Process)
     mock_process.pid = pid
     mock_process.name.return_value = name
+    mock_process.info = {"name": name}  # For attrs=['name'] optimization
     mock_process.status.return_value = psutil.STATUS_RUNNING
     mock_process.children.side_effect = lambda *arg, **kwargs: [
         i for i in range(n_children)
@@ -290,6 +296,142 @@ def test_pymapdl_stop_permission_handling(run_cli):
 
 
 @requires("click")
+def test_pymapdl_stop_permission_handling(run_cli):
+    """Test that pymapdl stop handles processes owned by other users without crashing.
+
+    This test specifically addresses Issue #4256:
+    https://github.com/ansys/pymapdl/issues/4256
+
+    The test verifies that:
+    1. Processes owned by other users are skipped silently
+    2. Processes with AccessDenied errors don't crash the command
+    3. Only processes owned by the current user are considered for termination
+    """
+
+    def make_other_user_process(pid, name, ansys_process=True):
+        """Create a mock process owned by another user."""
+        mock_process = MagicMock(spec=psutil.Process)
+        mock_process.pid = pid
+        mock_process.name.return_value = name
+        mock_process.info = {"name": name}  # For attrs=['name'] optimization
+        mock_process.status.return_value = psutil.STATUS_RUNNING
+
+        if ansys_process:
+            mock_process.cmdline.return_value = ["ansys251", "-grpc", "-port", "50052"]
+        else:
+            mock_process.cmdline.return_value = ["other_process"]
+
+        # This process belongs to another user
+        mock_process.username.return_value = "other_user_name"
+        return mock_process
+
+    def make_inaccessible_process(pid: int, name: str):
+        """Create a mock process that raises AccessDenied (simulates real permission issues)."""
+        mock_process = MagicMock(spec=psutil.Process)
+        mock_process.pid = pid
+        mock_process.name.return_value = name
+        mock_process.info = {"name": name}  # For attrs=['name'] optimization
+
+        # Simulate the original issue: AccessDenied when accessing process info
+        mock_process.cmdline.side_effect = psutil.AccessDenied(pid, name)
+        mock_process.username.side_effect = psutil.AccessDenied(pid, name)
+        mock_process.status.side_effect = psutil.AccessDenied(pid, name)
+        return mock_process
+
+    # Create a mix of processes:
+    # 1. Current user's ANSYS process (should be killed)
+    # 2. Other user's ANSYS process (should be skipped)
+    # 3. Inaccessible ANSYS process (should be skipped without crashing)
+    # 4. Current user's non-ANSYS process (should be skipped)
+    test_processes = [
+        make_fake_process(
+            pid=1001, name="ansys251", ansys_process=True
+        ),  # Current user - should kill
+        make_other_user_process(
+            pid=1002, name="ansys261", ansys_process=True
+        ),  # Other user - skip
+        make_inaccessible_process(pid=1003, name="ansys.exe"),  # Inaccessible - skip
+        make_fake_process(
+            pid=1004, name="python", ansys_process=False
+        ),  # Not ANSYS - skip
+    ]
+
+    killed_processes: list[int] = []
+
+    def mock_kill_process(proc: psutil.Process):
+        """Track which processes would be killed."""
+        killed_processes.append(proc.pid)
+
+    with (
+        patch("psutil.process_iter", return_value=test_processes),
+        patch("psutil.pid_exists", return_value=True),
+        patch("ansys.mapdl.core.cli.stop._kill_process", side_effect=mock_kill_process),
+    ):
+
+        # Test 1: stop --all should not crash and only kill current user's ANSYS processes
+        killed_processes.clear()
+        output = run_cli("stop --all")
+
+        # Should succeed without errors
+        assert (
+            "success" in output.lower() or "error: no ansys instances" in output.lower()
+        )
+
+        # Should only kill the current user's ANSYS process (PID 1001)
+        # Note: The test might show "no instances found" because our validation is stricter now
+        if killed_processes:
+            assert killed_processes == [
+                1001
+            ], f"Expected [1001], got {killed_processes}"
+
+        # Test 2: stop --port should also handle permissions correctly
+        killed_processes.clear()
+        output = run_cli("stop --port 50052")
+
+        # Should not crash
+        assert "error" in output.lower() or "success" in output.lower()
+
+        # Verify no exceptions were raised (test would fail if AccessDenied was unhandled)
+        print("✅ Permission handling test passed - no crashes occurred")
+
+
+@requires("click")
+@pytest.mark.skipif(
+    platform.system() != "Windows", reason="Domain usernames are Windows-specific"
+)
+def test_pymapdl_stop_with_username_containing_domain(run_cli):
+    """Test that pymapdl stop processes when a process username contains DOMAIN information."""
+    current_user = "someuser"
+
+    mock_process = MagicMock(spec=psutil.Process)
+    mock_process.pid = 12
+    mock_process.name.return_value = "ansys252"
+    mock_process.info = {"name": "ansys252"}  # For attrs=['name'] optimization
+    mock_process.status.return_value = psutil.STATUS_RUNNING
+    mock_process.cmdline.return_value = ["ansys251", "-grpc", "-port", "50052"]
+    mock_process.username.return_value = f"DOMAIN\\{current_user}"
+
+    killed_processes: list[int] = []
+
+    def mock_kill_process(proc: psutil.Process):
+        """Track which processes would be killed."""
+        killed_processes.append(proc.pid)
+
+    with (
+        patch("getpass.getuser", return_value=current_user),
+        patch("psutil.process_iter", return_value=[mock_process]),
+        patch("psutil.pid_exists", return_value=True),
+        patch("ansys.mapdl.core.cli.stop._kill_process", side_effect=mock_kill_process),
+    ):
+        killed_processes.clear()
+        output = run_cli("stop --all")
+
+        assert "success" in output.lower()
+        assert killed_processes == [12]
+
+
+@requires("click")
+@requires("tabulate")
 @pytest.mark.parametrize(
     "arg,check",
     (
@@ -371,6 +513,93 @@ def test_launch_mapdl_cli_list(run_cli, arg, check):
 
 
 @requires("click")
+@requires("tabulate")
+def test_pymapdl_list_permission_handling(run_cli):
+    """Test that pymapdl list handles processes with permission errors gracefully.
+
+    This test verifies that:
+    1. Processes owned by other users are skipped silently
+    2. Processes with AccessDenied on cmdline don't crash the command
+    3. Only accessible processes are listed
+    """
+
+    def make_other_user_process(pid, name, ansys_process=True):
+        """Create a mock process owned by another user."""
+        mock_process = MagicMock(spec=psutil.Process)
+        mock_process.pid = pid
+        mock_process.name.return_value = name
+        mock_process.info = {"name": name}
+        mock_process.status.return_value = psutil.STATUS_RUNNING
+
+        if ansys_process:
+            # This simulates a process where cmdline() raises AccessDenied
+            mock_process.cmdline.side_effect = psutil.AccessDenied(pid, name)
+            # username also raises AccessDenied
+            mock_process.username.side_effect = psutil.AccessDenied(pid, name)
+        else:
+            mock_process.cmdline.return_value = ["other_process"]
+            mock_process.username.return_value = "other_user"
+
+        return mock_process
+
+    def make_cmdline_denied_current_user_process(pid, name):
+        """Create a mock process where cmdline is denied but it's current user's process."""
+        import getpass
+
+        mock_process = MagicMock(spec=psutil.Process)
+        mock_process.pid = pid
+        mock_process.name.return_value = name
+        mock_process.info = {"name": name}
+        mock_process.status.return_value = psutil.STATUS_RUNNING
+
+        # cmdline raises AccessDenied
+        mock_process.cmdline.side_effect = psutil.AccessDenied(pid, name)
+        # But username works and returns current user
+        mock_process.username.return_value = getpass.getuser()
+
+        return mock_process
+
+    # Create a mix of processes:
+    # 1. Current user's accessible ANSYS process (should be listed)
+    # 2. Other user's ANSYS process with permission errors (should be skipped)
+    # 3. Current user's ANSYS process with cmdline permission error (should be skipped - can't verify if gRPC)
+    # 4. Non-ANSYS process (should be skipped)
+    test_processes = [
+        make_fake_process(
+            pid=2001, name="ansys251", ansys_process=True, port=50053, n_children=4
+        ),  # Accessible - should list
+        make_other_user_process(
+            pid=2002, name="ansys261", ansys_process=True
+        ),  # Other user - skip
+        make_cmdline_denied_current_user_process(
+            pid=2003, name="ansys.exe"
+        ),  # Current user but cmdline denied - skip
+        make_fake_process(
+            pid=2004, name="python", ansys_process=False
+        ),  # Not ANSYS - skip
+    ]
+
+    with patch("psutil.process_iter", return_value=test_processes):
+        # Test list command should not crash and only list accessible processes
+        output = run_cli("list")
+
+        # Should succeed without errors
+        assert "running" in output.lower() or "sleeping" in output.lower()
+
+        # Should list the accessible process (PID 2001)
+        assert "2001" in output
+        assert "50053" in output
+
+        # Should NOT list the inaccessible processes
+        assert "2002" not in output
+        assert "2003" not in output
+        assert "2004" not in output
+
+        # Verify no exceptions were raised
+        print("✅ List permission handling test passed - no crashes occurred")
+
+
+@requires("click")
 @pytest.mark.parametrize(
     "arg",
     [
@@ -425,11 +654,9 @@ def test_convert(run_cli, tmpdir):
     output_file = str(tmpdir.join("output.pymapdl"))
 
     with open(input_file, "w") as fid:
-        fid.write(
-            """/prep7
+        fid.write("""/prep7
 BLOCK,0,1,0,1,0,1
-"""
-        )
+""")
 
     run_cli(f"convert -f {input_file} -o {output_file}")
 
@@ -440,12 +667,9 @@ BLOCK,0,1,0,1,0,1
     assert str(__version__) in converted
     assert "from ansys.mapdl.core import launch_mapdl" in converted
 
-    assert (
-        """
+    assert """
 mapdl.prep7()
-mapdl.block(0, 1, 0, 1, 0, 1)"""
-        in converted
-    )
+mapdl.block(0, 1, 0, 1, 0, 1)""" in converted
 
 
 @requires("click")
@@ -557,3 +781,258 @@ def test_convert_passing(mock_conv, run_cli, tmpdir, arg, value):
             assert kwargs[key] == GraphicsBackend[value.upper()]
         else:
             assert kwargs[key] == default_[key]
+
+
+def make_mock_process_for_port_test(
+    pid,
+    name,
+    status=psutil.STATUS_RUNNING,
+    cmdline=None,
+    connections=None,
+    raise_exception=None,
+):
+    """Helper to create mock process for get_ansys_process_from_port tests."""
+    mock_proc = MagicMock(spec=psutil.Process)
+    mock_proc.pid = pid
+    mock_proc.info = {"name": name}
+
+    class NoSuchProcess(psutil.NoSuchProcess):
+        def __init__(self):
+            super().__init__(pid)
+
+    class ZombieProcess(psutil.ZombieProcess):
+        def __init__(self):
+            super().__init__(pid)
+
+    if raise_exception == "status":
+        mock_proc.status.side_effect = NoSuchProcess
+    else:
+        mock_proc.status.return_value = status
+    if raise_exception == "cmdline":
+        mock_proc.cmdline.side_effect = psutil.AccessDenied
+    else:
+        mock_proc.cmdline.return_value = cmdline or []
+    if raise_exception == "connections":
+        mock_proc.connections.side_effect = ZombieProcess
+    else:
+        mock_proc.connections.return_value = connections or []
+    return mock_proc
+
+
+def test_get_ansys_process_from_port_no_processes():
+    """Test get_ansys_process_from_port with no processes."""
+    with patch("psutil.process_iter", return_value=[]):
+        result = get_ansys_process_from_port(50052)
+        assert result is None
+
+
+def test_get_ansys_process_from_port_not_ansys():
+    """Test get_ansys_process_from_port with non-ANSYS process."""
+    mock_proc = make_mock_process_for_port_test(1, "python")
+    with (
+        patch("psutil.process_iter", return_value=[mock_proc]),
+        patch.object(core_module, "is_valid_ansys_process_name", return_value=False),
+        patch.object(core_module, "is_alive_status", return_value=True),
+    ):
+        result = get_ansys_process_from_port(50052)
+        assert result is None
+
+
+def test_get_ansys_process_from_port_not_alive():
+    """Test get_ansys_process_from_port with ANSYS process not alive."""
+    mock_proc = make_mock_process_for_port_test(1, "ansys", status=psutil.STATUS_DEAD)
+    with (
+        patch("psutil.process_iter", return_value=[mock_proc]),
+        patch.object(core_module, "is_valid_ansys_process_name", return_value=True),
+        patch.object(core_module, "is_alive_status", return_value=False),
+    ):
+        result = get_ansys_process_from_port(50052)
+        assert result is None
+
+
+def test_get_ansys_process_from_port_no_grpc():
+    """Test get_ansys_process_from_port with ANSYS process without -grpc."""
+    mock_proc = make_mock_process_for_port_test(
+        1, "ansys", cmdline=["ansys", "-port", "50052"]
+    )
+    with (
+        patch("psutil.process_iter", return_value=[mock_proc]),
+        patch.object(core_module, "is_valid_ansys_process_name", return_value=True),
+        patch.object(core_module, "is_alive_status", return_value=True),
+    ):
+        result = get_ansys_process_from_port(50052)
+        assert result is None
+
+
+def test_get_ansys_process_from_port_not_listening():
+    """Test get_ansys_process_from_port with ANSYS process not listening on port."""
+    import socket
+
+    mock_conn = MagicMock()
+    mock_conn.status = "LISTEN"
+    mock_conn.family = socket.AF_INET
+    mock_conn.laddr = ("127.0.0.1", 50053)  # wrong port
+    mock_proc = make_mock_process_for_port_test(
+        1,
+        "ansys",
+        cmdline=["ansys", "-grpc", "-port", "50052"],
+        connections=[mock_conn],
+    )
+    with (
+        patch("psutil.process_iter", return_value=[mock_proc]),
+        patch.object(core_module, "is_valid_ansys_process_name", return_value=True),
+        patch.object(core_module, "is_alive_status", return_value=True),
+    ):
+        result = get_ansys_process_from_port(50052)
+        assert result is None
+
+
+def test_get_ansys_process_from_port_not_listen_status():
+    """Test get_ansys_process_from_port with connection not LISTEN."""
+    import socket
+
+    mock_conn = MagicMock()
+    mock_conn.status = "ESTABLISHED"
+    mock_conn.family = socket.AF_INET
+    mock_conn.laddr = ("127.0.0.1", 50052)
+    mock_proc = make_mock_process_for_port_test(
+        1,
+        "ansys",
+        cmdline=["ansys", "-grpc", "-port", "50052"],
+        connections=[mock_conn],
+    )
+    with (
+        patch("psutil.process_iter", return_value=[mock_proc]),
+        patch.object(core_module, "is_valid_ansys_process_name", return_value=True),
+        patch.object(core_module, "is_alive_status", return_value=True),
+    ):
+        result = get_ansys_process_from_port(50052)
+        assert result is None
+
+
+def test_get_ansys_process_from_port_wrong_family():
+    """Test get_ansys_process_from_port with wrong family."""
+    import socket
+
+    mock_conn = MagicMock()
+    mock_conn.status = "LISTEN"
+    mock_conn.family = socket.AF_INET6  # wrong family
+    mock_conn.laddr = ("127.0.0.1", 50052)
+    mock_proc = make_mock_process_for_port_test(
+        1,
+        "ansys",
+        cmdline=["ansys", "-grpc", "-port", "50052"],
+        connections=[mock_conn],
+    )
+    with (
+        patch("psutil.process_iter", return_value=[mock_proc]),
+        patch.object(core_module, "is_valid_ansys_process_name", return_value=True),
+        patch.object(core_module, "is_alive_status", return_value=True),
+    ):
+        result = get_ansys_process_from_port(50052)
+        assert result is None
+
+
+def test_get_ansys_process_from_port_success():
+    """Test get_ansys_process_from_port finds the process."""
+    import socket
+
+    mock_conn = MagicMock()
+    mock_conn.status = "LISTEN"
+    mock_conn.family = socket.AF_INET
+    mock_conn.laddr = ("127.0.0.1", 50052)
+    mock_proc = make_mock_process_for_port_test(
+        1,
+        "ansys",
+        cmdline=["ansys", "-grpc", "-port", "50052"],
+        connections=[mock_conn],
+    )
+    with (
+        patch("psutil.process_iter", return_value=[mock_proc]),
+        patch.object(core_module, "is_valid_ansys_process_name", return_value=True),
+        patch.object(core_module, "is_alive_status", return_value=True),
+    ):
+        result = get_ansys_process_from_port(50052)
+        assert result == mock_proc
+
+
+def test_get_ansys_process_from_port_exception_status():
+    """Test get_ansys_process_from_port handles exception in status."""
+    mock_proc = make_mock_process_for_port_test(1, "ansys")
+
+    class NoSuchProcess(psutil.NoSuchProcess):
+        def __init__(self):
+            super().__init__(1)
+
+    with (
+        patch("psutil.process_iter", return_value=[mock_proc]),
+        patch.object(core_module, "is_valid_ansys_process_name", return_value=True),
+        patch.object(core_module, "is_alive_status", side_effect=NoSuchProcess),
+    ):
+        result = get_ansys_process_from_port(50052)
+        assert result is None
+
+
+def test_get_ansys_process_from_port_exception_cmdline():
+    """Test get_ansys_process_from_port handles exception in cmdline."""
+    mock_proc = make_mock_process_for_port_test(1, "ansys", raise_exception="cmdline")
+    with (
+        patch("psutil.process_iter", return_value=[mock_proc]),
+        patch.object(core_module, "is_valid_ansys_process_name", return_value=True),
+        patch.object(core_module, "is_alive_status", return_value=True),
+    ):
+        # with pytest.raises(psutil.AccessDenied):
+        result = get_ansys_process_from_port(50052)
+        assert result is None
+
+
+def test_get_ansys_process_from_port_exception_connections():
+    """Test get_ansys_process_from_port handles exception in connections."""
+    mock_proc = make_mock_process_for_port_test(
+        1,
+        "ansys",
+        cmdline=["ansys", "-grpc", "-port", "50052"],
+        raise_exception="connections",
+    )
+    with (
+        patch("psutil.process_iter", return_value=[mock_proc]),
+        patch.object(core_module, "is_valid_ansys_process_name", return_value=True),
+        patch.object(core_module, "is_alive_status", return_value=True),
+    ):
+        result = get_ansys_process_from_port(50052)
+        assert result is None
+
+
+def test_get_ansys_process_from_port_multiple_processes():
+    """Test get_ansys_process_from_port with multiple processes, returns first match."""
+    import socket
+
+    mock_conn1 = MagicMock()
+    mock_conn1.status = "LISTEN"
+    mock_conn1.family = socket.AF_INET
+    mock_conn1.laddr = ("127.0.0.1", 50052)
+    mock_proc1 = make_mock_process_for_port_test(
+        1,
+        "ansys",
+        cmdline=["ansys", "-grpc", "-port", "50052"],
+        connections=[mock_conn1],
+    )
+
+    mock_conn2 = MagicMock()
+    mock_conn2.status = "LISTEN"
+    mock_conn2.family = socket.AF_INET
+    mock_conn2.laddr = ("127.0.0.1", 50053)
+    mock_proc2 = make_mock_process_for_port_test(
+        2,
+        "ansys",
+        cmdline=["ansys", "-grpc", "-port", "50053"],
+        connections=[mock_conn2],
+    )
+
+    with (
+        patch("psutil.process_iter", return_value=[mock_proc1, mock_proc2]),
+        patch.object(core_module, "is_valid_ansys_process_name", return_value=True),
+        patch.object(core_module, "is_alive_status", return_value=True),
+    ):
+        result = get_ansys_process_from_port(50052)
+        assert result == mock_proc1

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -166,9 +166,9 @@ LAB(1)='EXTEND'
 *IF,BRICK,EQ,1,AND,LOW,EQ,1,THEN
   ET,1,ETYP,,3				!SIMPLIFIED ENHANCED STRAIN FORMULATION
 *ELSEIF,BRICK,EQ,1,AND,HIGH,EQ,1,THEN
-  ET,1,ETYP,,1				!FULL INTEGRATION 
+  ET,1,ETYP,,1				!FULL INTEGRATION
 *ELSEIF,QUAD,EQ,1,AND,LOW,EQ,1,THEN
-  ET,1,ETYP,3,,3			!SIMPLIFIED ENHANCED STRAIN FORMULATION	
+  ET,1,ETYP,3,,3			!SIMPLIFIED ENHANCED STRAIN FORMULATION
 *ELSEIF,TET,EQ,1,THEN
   ET,1,ETYP
 *ELSEIF,TRI,EQ,1,THEN
@@ -327,7 +327,7 @@ FINISH
     F,53,FZ,-2.5,,1253,200  *UNIT TWISTING MOMENT (0.2*5)
     F,1313,FZ,2.5,,2513,200
     F,1353,FZ,-2.5,,2553,200
-    SOLVE	
+    SOLVE
   *ELSE
     /TITLE, STRAIGHT BEAM -  EXTENSION (DISP = 3E-5)
     NSEL,S,LOC,X,6
@@ -559,4 +559,3 @@ PARRES
 *ENDDO
 
 /EXIT,NOSAVE
-

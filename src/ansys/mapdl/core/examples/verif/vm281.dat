@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@
 JPGPRF,500,100,1
 
 /PREP7
-lg = 152.4e-3       ! LENGTH IN METERS 
+lg = 152.4e-3       ! LENGTH IN METERS
 wd = 50.8e-3        ! WIDTH IN METERS
 tk = 2.54e-3        ! THICKNESS IN METERS
 
@@ -46,9 +46,9 @@ A,1,2,3,4
 
 /COM, MATERIAL PROPERTIES OF STRUCTURAL STEEL PLATE
 
-MP,EX,1,2.0e+11    
-MP,DENS,1,7850      
-MP,NUXY,1,0.3      
+MP,EX,1,2.0e+11
+MP,DENS,1,7850
+MP,NUXY,1,0.3
 
 ET,1,SHELL181       ! 4-NODE STRUCTURAL SHELL ELEMENT
 SECTYPE,1,SHELL
@@ -75,7 +75,7 @@ FINISH
 /OUT,SCRATCH
 /SOLUTION
 ANTYPE,MODAL
-MODOPT,LANB,4       ! EXTRACT 4 MODES USING BLOCK-LANCZOS 
+MODOPT,LANB,4       ! EXTRACT 4 MODES USING BLOCK-LANCZOS
 MXPAND,4
 SOLVE
 /OUT,
@@ -258,7 +258,7 @@ FINISH
 
 /PREP7
 
-lg = 152.4e-3       ! LENGTH IN METERS 
+lg = 152.4e-3       ! LENGTH IN METERS
 wd = 50.8e-3        ! WIDTH IN METERS
 tk = 2.54e-3        ! THICKNESS IN METERS
 
@@ -277,9 +277,9 @@ V,1,2,3,4,5,6,7,8
 
 /COM, MATERIAL PROPERTIES OF STRUCTURAL STEEL PLATE
 
-MP,EX,1,2.0e+11    
-MP,DENS,1,7850      
-MP,NUXY,1,0.3      
+MP,EX,1,2.0e+11
+MP,DENS,1,7850
+MP,NUXY,1,0.3
 
 
 ET,1,SOLID185       ! 3-D 8 NODE STRUCTURAL SOLID ELEMENT
@@ -305,7 +305,7 @@ FINISH
 /OUT,SCRATCH
 /SOLUTION
 ANTYPE,MODAL
-MODOPT,LANB,4       ! EXTRACT 4 MODES USING BLOCK-LANCZOS 
+MODOPT,LANB,4       ! EXTRACT 4 MODES USING BLOCK-LANCZOS
 MXPAND,4
 SOLVE
 /OUT,
@@ -508,8 +508,3 @@ RESUME,TABLE_2
 *LIST,vm281,vrt
 FINISH
 /EXIT,NOSAVE
-
-
-
-
-

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -1570,6 +1570,25 @@ class _MapdlCommandExtended(_MapdlCore):
                     f"Unexpected output from 'mapdl.inquire' function:\n{response}"
                 )
 
+        if func.upper() in [
+            "LOGIN",
+            "DOCU",
+            "APDL",
+            "PROG",
+            "AUTH",
+            "USER",
+            "DIRECTORY",
+            "JOBNAME",
+            "RSTDIR",
+            "RSTFILE",
+            "RSTEXT",
+            "OUTPUT",
+            "ENV",
+            "TITLE",
+            "DATE",
+        ]:
+            return response
+
         try:
             return float(response)
         except ValueError:
@@ -2656,17 +2675,26 @@ class _MapdlCommandExtended(_MapdlCore):
 
             columns_names = ["ITEM", "FREQUENCY", "COMPONENT"]
             result = CommandListingOutput(result)
-            table = re.search(
+            table_match = re.search(
                 r"ITEM\s+FREQUENCY\s+COMPONENT(.*)", result, flags=re.DOTALL
-            ).group(1)
-            table = [each.split() for each in table.splitlines() if each.strip()]
-            table = expand_all_inner_lists(
-                table, target_length=len(columns_names), fill_value=""
             )
+            if table_match:
+                table = table_match.group(1)
+                table = [each.split() for each in table.splitlines() if each.strip()]
+                table = expand_all_inner_lists(
+                    table, target_length=len(columns_names), fill_value=""
+                )
 
-            result._columns_names = columns_names
-            result._cache = np.array(table)
+                result._columns_names = columns_names
+                result._cache = np.array(table)
         return result
+
+    @wraps(_MapdlCore.aflist)
+    def aflist(self, **kwargs):
+        # Running in non-interactive to avoid the `aflist.tmp` command being locked
+        # because of `/INPUT` issue on MAPDL side. See #4390 for more details.
+        with self.non_interactive:
+            return super().aflist(**kwargs)
 
 
 class _MapdlExtended(_MapdlCommandExtended):
@@ -3053,8 +3081,8 @@ class _MapdlExtended(_MapdlCommandExtended):
             return np.empty(0)
 
         with self.non_interactive:
-            self.vwrite("%s(1)" % parm_name)
-            self.run("(F20.12)")
+            self.vwrite("%s(1)" % parm_name)  # type: ignore[arg-type]
+            self.run("(F20.12)")  # type: ignore[arg-type]
 
         array = np.fromstring(self.last_response, sep="\n")
 
