@@ -344,6 +344,7 @@ def _check_grpc_server_ready(stdout_queue: Queue, timeout: int) -> None:
             elif isinstance(line, str):
                 output += line
         except Empty:
+            # No new stdout available within the short timeout; this is expected during polling.
             pass
 
         # Check for server ready message
