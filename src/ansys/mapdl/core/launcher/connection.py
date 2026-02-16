@@ -77,7 +77,14 @@ def create_grpc_client(
         log_apdl=config.log_apdl,
         print_com=config.print_com,
         set_no_abort=config.set_no_abort,
+        timeout=config.timeout,
         remove_temp_dir_on_exit=config.remove_temp_dir_on_exit,
+        process=process_info.process if process_info else None,
+        # channel=config.grpc_channel,
+        # transport_mode=config.transport_mode,
+        # uds_dir=config.uds_dir,
+        # uds_id=config.uds_id,
+        # certs_dir=config.certs_dir,
     )
 
     # Clear database if requested

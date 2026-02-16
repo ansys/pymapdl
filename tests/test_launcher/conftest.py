@@ -9,28 +9,22 @@ Launcher tests don't need a running MAPDL instance, so we disable
 the global autouse fixture that launches MAPDL.
 """
 
+from pathlib import Path
+import sys
+
 import pytest
 
-from ansys.mapdl.core.helpers import is_installed as has_dependency
+# Add parent tests directory to path to enable imports from parent conftest
+_parent_dir = Path(__file__).parent.parent
+if str(_parent_dir) not in sys.path:
+    sys.path.insert(0, str(_parent_dir))
+
+# Re-export symbols from parent conftest for "from conftest import" statements
+# This is necessary because Python's import system will find this conftest first
+from conftest import VALID_PORTS, requires  # noqa: F401
 
 
-@pytest.fixture(autouse=False)
+@pytest.fixture(autouse=True, scope="function")
 def run_before_and_after_tests(request: pytest.FixtureRequest):
     """Override the global autouse fixture to disable MAPDL launching for launcher tests."""
     yield
-
-
-def requires_dependency(dependency: str):
-    """Skip a test if a dependency is not installed."""
-    if not has_dependency(dependency):
-        return pytest.mark.skip(reason=f"{dependency} not installed")
-    return lambda x: x
-
-
-def requires(requirement: str):
-    """Check requirements and return appropriate skip marker or function wrapper."""
-    requirement = requirement.lower()
-    if "ansys-tools-common" == requirement:
-        return requires_dependency("ansys-tools-common")
-    else:
-        return requires_dependency(requirement)
