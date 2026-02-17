@@ -55,6 +55,7 @@ def _create_test_config(**overrides):
         "uds_dir": None,
         "uds_id": None,
         "certs_dir": None,
+        "env_vars": None,
     }
     defaults.update(overrides)
     return LaunchConfig(**defaults)
@@ -97,6 +98,20 @@ class TestEnvironmentDetection:
                 )
                 result = is_ubuntu()
                 assert isinstance(result, bool)
+
+    def test_is_ubuntu_via_platform_string(self):
+        """Test Ubuntu detection via platform string."""
+        with patch("os.name", "posix"):
+            with patch("platform.platform", return_value="Linux-5.4.0-ubuntu"):
+                result = is_ubuntu()
+                assert result is True
+
+    def test_is_ubuntu_not_ubuntu_platform_string(self):
+        """Test non-Ubuntu platform string detection."""
+        with patch("os.name", "posix"):
+            with patch("platform.platform", return_value="Linux-5.4.0-fedora"):
+                result = is_ubuntu()
+                assert result is False
 
     def test_is_ubuntu_false_on_other_distro(self):
         """Test Ubuntu detection returns False on other distributions."""
@@ -153,6 +168,28 @@ class TestEnvironmentWSLHelpers:
             result = get_windows_host_ip()
             assert result is None
 
+    def test_get_windows_host_ip_timeout(self):
+        """Test getting Windows host IP when command times out."""
+        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=True):
+            with patch("subprocess.run") as mock_subprocess:
+                mock_subprocess.side_effect = subprocess.TimeoutExpired("ip", 5)
+                result = get_windows_host_ip()
+                assert result is None
+
+    def test_get_windows_host_ip_unexpected_error(self):
+        """Test getting Windows host IP on unexpected error."""
+        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=True):
+            with patch("subprocess.run") as mock_subprocess:
+                mock_subprocess.side_effect = RuntimeError("Unexpected error")
+                result = get_windows_host_ip()
+                assert result is None
+
+    def test_get_windows_host_ip_not_on_wsl(self):
+        """Test getting Windows host IP when not on WSL."""
+        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=False):
+            result = get_windows_host_ip()
+            assert result is None
+
 
 # ============================================================================
 # Environment Preparation Tests
@@ -170,6 +207,16 @@ class TestEnvironmentPrepare:
             result = prepare_environment(config)
             assert isinstance(result, EnvironmentConfig)
             assert result.variables is not None
+
+    def test_prepare_environment_with_user_env_vars(self):
+        """Test environment preparation with user-provided environment variables."""
+        custom_env = {"CUSTOM_VAR": "custom_value", "ANOTHER_VAR": "another_value"}
+        config = _create_test_config(env_vars=custom_env)
+
+        result = prepare_environment(config)
+        assert isinstance(result, EnvironmentConfig)
+        assert result.replace_all is True
+        assert result.variables == custom_env
 
     def test_prepare_environment_wsl(self):
         """Test environment preparation on WSL."""
@@ -204,6 +251,30 @@ class TestEnvironmentPrepare:
         with patch("platform.system", return_value="Linux"):
             result = prepare_environment(config)
             assert isinstance(result, EnvironmentConfig)
+
+    def test_prepare_environment_ubuntu(self):
+        """Test environment preparation on Ubuntu includes MPI settings."""
+        config = _create_test_config()
+
+        with patch(
+            "ansys.mapdl.core.launcher.environment.is_ubuntu", return_value=True
+        ):
+            result = prepare_environment(config)
+            assert isinstance(result, EnvironmentConfig)
+            # Ubuntu-specific settings should be applied
+            assert "I_MPI_SHM_LMT" in result.variables
+            assert result.variables["I_MPI_SHM_LMT"] == "shm"
+
+    def test_prepare_environment_sets_cmd_nodiag(self):
+        """Test that prepare_environment always sets ANS_CMD_NODIAG."""
+        config = _create_test_config()
+
+        with patch(
+            "ansys.mapdl.core.launcher.environment.is_ubuntu", return_value=False
+        ):
+            result = prepare_environment(config)
+            assert isinstance(result, EnvironmentConfig)
+            assert result.variables["ANS_CMD_NODIAG"] == "TRUE"
 
 
 class TestEnvironmentVariables:
@@ -256,3 +327,46 @@ class TestEnvironmentEdgeCases:
             with patch("builtins.open", side_effect=IOError("Cannot read file")):
                 result = is_ubuntu()
                 assert result is False
+
+    def test_is_wsl_on_windows_os(self):
+        """Test WSL detection returns False on Windows."""
+        with patch("os.name", "nt"):
+            result = is_wsl()
+            assert result is False
+
+    def test_is_ubuntu_on_windows_os(self):
+        """Test Ubuntu detection returns False on Windows."""
+        with patch("os.name", "nt"):
+            result = is_ubuntu()
+            assert result is False
+
+    def test_is_wsl_with_wsl_distro_name(self):
+        """Test WSL detection with WSL_DISTRO_NAME environment variable."""
+        with patch("os.name", "posix"):
+            with patch.dict(os.environ, {"WSL_DISTRO_NAME": "Ubuntu"}):
+                result = is_wsl()
+                assert result is True
+
+    def test_is_wsl_with_wsl_interop(self):
+        """Test WSL detection with WSL_INTEROP environment variable."""
+        with patch("os.name", "posix"):
+            with patch.dict(os.environ, {"WSL_INTEROP": "1"}, clear=True):
+                result = is_wsl()
+                assert result is True
+
+    def test_parse_ip_route_multiple_routes(self):
+        """Test parsing ip route output with multiple routes."""
+        output = """default via 172.18.0.1 dev eth0
+172.18.0.0/16 dev eth0 proto kernel scope link src 172.18.0.2"""
+        result = _parse_ip_route(output)
+        assert result == "172.18.0.1"
+
+    def test_prepare_environment_replace_all_false(self):
+        """Test that prepare_environment sets replace_all=False by default."""
+        config = _create_test_config()
+
+        with patch(
+            "ansys.mapdl.core.launcher.environment.is_ubuntu", return_value=False
+        ):
+            result = prepare_environment(config)
+            assert result.replace_all is False
