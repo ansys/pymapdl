@@ -32,6 +32,13 @@ on:
         type: string
         default: "3.12"
 
+      pytest-arguments:
+        description: |
+          Arguments to pass to pytest, additionally to the ones in the pyproject.toml file.
+        required: false
+        type: string
+        default: ""
+
     secrets:
       username:
         description: |
@@ -71,28 +78,28 @@ jobs:
       contents: read  # Needed to read repository contents for tests
       packages: read  # Needed to pull Docker images from GitHub packages
     env:
+      DPF_DEFAULT_GRPC_MODE: 'insecure'
+      DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
+      DPF_IP: '0.0.0.0'
+      DPF_PORT_INTERNAL: 50055 # Internal port for DPF server
+      DPF_PORT: 21014
+      DPF_PORT2: 21015
+      DPF_START_SERVER: False
+      HAS_DPF: True
+      MAPDL_PACKAGE: ghcr.io/ansys/mapdl
       ON_CI: True
       ON_LOCAL: FALSE
       ON_UBUNTU: FALSE
       PYANSYS_OFF_SCREEN: True
-      PYMAPDL_DEBUG_TESTING: True
-      PYMAPDL_START_INSTANCE: FALSE
-      PYMAPDL_PORT: 21000  # default won't work on GitHub runners
-      PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21002  # default won't work on GitHub runners
       PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
-      DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
-      DPF_PORT: 21014
-      DPF_PORT_INTERNAL: 50055 # Internal port for DPF server
-      DPF_PORT2: 21015
-      DPF_START_SERVER: False
-      DPF_IP: '0.0.0.0'
-      HAS_DPF: True
-      TEST_DPF_BACKEND: false
-      PYTEST_ARGUMENTS: '--ignore_image_cache'
-      MAPDL_PACKAGE: ghcr.io/ansys/mapdl
+      PYMAPDL_DEBUG_TESTING: True
       PYMAPDL_GRPC_TRANSPORT: 'insecure'
-      DPF_DEFAULT_GRPC_MODE: 'insecure'
+      PYMAPDL_PORT: 21000  # default won't work on GitHub runners
+      PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
+      PYMAPDL_START_INSTANCE: FALSE
+      PYTEST_ARGUMENTS: '--ignore_image_cache'
+      TEST_DPF_BACKEND: false
 
     steps:
       - name: "Freeing some space and show space consumption (pre-test)"
@@ -253,11 +260,12 @@ jobs:
           ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
           file_name: "${{ inputs.file-name }}"
           MAPDL_VERSION: "${{ inputs.mapdl-version }}"
-          PYTEST_ARGUMENTS: "${{ env.PYTEST_ARGUMENTS }}"
+          PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
           xvfb-run pytest \
+            ${PYTEST_INPUT_ARGUMENTS} \
             ${PYTEST_ARGUMENTS} \
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml
