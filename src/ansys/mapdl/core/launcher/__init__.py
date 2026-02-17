@@ -257,6 +257,7 @@ def launch_mapdl(
     license_server_check: bool = False,
     force_intel: bool = False,
     graphics_backend: Optional[str] = None,
+    start_timeout: Optional[int] = None,
     **kwargs: Any,
 ) -> Union["MapdlGrpc", "MapdlConsole"]:
     """Launch MAPDL or connect to existing instance.
@@ -300,6 +301,7 @@ def launch_mapdl(
         license_server_check: Check license server
         force_intel: Force Intel MPI
         graphics_backend: Graphics backend
+        start_timeout: Deprecated. Use ``timeout`` instead.
         **kwargs: Additional arguments
 
     Returns:
@@ -380,6 +382,7 @@ def launch_mapdl(
             license_server_check=license_server_check,
             force_intel=force_intel,
             graphics_backend=graphics_backend,
+            start_timeout=start_timeout,
         )
     except ConfigurationError as e:
         LOG.error(f"Configuration error: {e}")

@@ -292,7 +292,7 @@ def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
                 run_location=mapdl._path,
                 cleanup_on_exit=mapdl._cleanup,
                 license_server_check=False,
-                start_timeout=10,
+                timeout=10,
             )
             LOG.info("MAPDL died during testing, relaunched.")
 

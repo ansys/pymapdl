@@ -713,7 +713,7 @@ def mapdl(request, tmpdir_factory):
         run_location=run_path,
         cleanup_on_exit=cleanup,
         license_server_check=False,
-        start_timeout=50,
+        timeout=50,
         loglevel="DEBUG",  # Because Pytest captures all output
         # If the following file names are changed, update `ci.yml`.
         log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,

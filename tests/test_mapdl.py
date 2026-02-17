@@ -580,7 +580,7 @@ def test_apdl_logging_start(tmpdir, mapdl, cleared):
 
     launch_options = launch_mapdl(
         port=mapdl.port - 1,  # It normally goes up, so 50051 should be free
-        start_timeout=30,
+        timeout=30,
         log_apdl=filename,
         additional_switches=QUICK_LAUNCH_SWITCHES,
         _debug_no_launch=True,

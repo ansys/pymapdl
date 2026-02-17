@@ -80,6 +80,7 @@ def resolve_launch_config(
     license_server_check: bool = False,
     force_intel: bool = False,
     graphics_backend: Optional[str] = None,
+    start_timeout: Optional[int] = None,
     **kwargs: Any,
 ) -> LaunchConfig:
     """Resolve complete launch configuration.
@@ -123,6 +124,7 @@ def resolve_launch_config(
         license_server_check: Check license server
         force_intel: Force Intel MPI
         graphics_backend: Graphics backend
+        start_timeout: Deprecated. Use ``timeout`` instead.
         **kwargs: Additional arguments
 
     Returns:
@@ -138,6 +140,20 @@ def resolve_launch_config(
         >>> config.version
         222
     """
+    import warnings
+
+    # Handle deprecated start_timeout parameter
+    if start_timeout is not None:
+        warnings.warn(
+            "The 'start_timeout' parameter is deprecated and will be removed in a future version. "
+            "Use 'timeout' instead.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        # Use start_timeout if timeout is not explicitly provided
+        if timeout is None:
+            timeout = start_timeout
+
     # Resolve start_instance first (affects other resolution)
     resolved_start_instance = resolve_start_instance(start_instance, ip)
 

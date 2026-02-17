@@ -92,7 +92,7 @@ class TestMapdlPool:
                 license_server_check=False,
                 run_location=run_path,
                 port=port,
-                start_timeout=30,
+                timeout=30,
                 exec_file=EXEC_FILE,
                 additional_switches=QUICK_LAUNCH_SWITCHES,
                 nproc=NPROC,
