@@ -133,6 +133,22 @@ class TestCalculateSlurmNproc:
             result = _calculate_slurm_nproc()
             assert result is None
 
+    def test_calculate_nproc_from_cpus_per_task(self):
+        """Test nproc calculation from SLURM_CPUS_PER_TASK only."""
+        with patch.dict(os.environ, {"SLURM_CPUS_PER_TASK": "8"}, clear=True):
+            result = _calculate_slurm_nproc()
+            assert result == 8
+
+    def test_calculate_nproc_from_ntasks_and_cpus_per_task(self):
+        """Test nproc calculation from both SLURM_NTASKS and SLURM_CPUS_PER_TASK."""
+        with patch.dict(
+            os.environ,
+            {"SLURM_NTASKS": "4", "SLURM_CPUS_PER_TASK": "8"},
+            clear=True,
+        ):
+            result = _calculate_slurm_nproc()
+            assert result == 32  # 4 * 8
+
 
 class TestCalculateSlurmRam:
     """Tests for _calculate_slurm_ram function."""
@@ -148,6 +164,48 @@ class TestCalculateSlurmRam:
         with patch.dict(os.environ, {}, clear=True):
             result = _calculate_slurm_ram()
             assert result is None
+
+    def test_calculate_ram_with_gigabyte_unit(self):
+        """Test RAM calculation with gigabyte unit."""
+        with patch.dict(os.environ, {"SLURM_MEM_PER_NODE": "16G"}):
+            result = _calculate_slurm_ram()
+            assert result == 16 * 1024  # 16 GB in MB
+
+    def test_calculate_ram_with_terabyte_unit(self):
+        """Test RAM calculation with terabyte unit."""
+        with patch.dict(os.environ, {"SLURM_MEM_PER_NODE": "2T"}):
+            result = _calculate_slurm_ram()
+            assert result == 2 * 1024 * 1024  # 2 TB in MB
+
+    def test_calculate_ram_with_kilobyte_unit(self):
+        """Test RAM calculation with kilobyte unit."""
+        with patch.dict(os.environ, {"SLURM_MEM_PER_NODE": "2048K"}):
+            result = _calculate_slurm_ram()
+            assert result == 2048 // 1024  # 2048 KB in MB
+
+    def test_calculate_ram_with_megabyte_unit(self):
+        """Test RAM calculation with megabyte unit."""
+        with patch.dict(os.environ, {"SLURM_MEM_PER_NODE": "8192M"}):
+            result = _calculate_slurm_ram()
+            assert result == 8192
+
+    def test_calculate_ram_with_invalid_format(self):
+        """Test RAM calculation with invalid format."""
+        with patch.dict(os.environ, {"SLURM_MEM_PER_NODE": "invalid"}):
+            result = _calculate_slurm_ram()
+            assert result is None
+
+    def test_calculate_ram_with_invalid_unit(self):
+        """Test RAM calculation with unsupported unit."""
+        with patch.dict(os.environ, {"SLURM_MEM_PER_NODE": "16X"}):
+            result = _calculate_slurm_ram()
+            assert result is None
+
+    def test_calculate_ram_with_lowercase_unit(self):
+        """Test RAM calculation with lowercase unit."""
+        with patch.dict(os.environ, {"SLURM_MEM_PER_NODE": "8g"}):
+            result = _calculate_slurm_ram()
+            assert result == 8 * 1024  # 8 GB in MB
 
 
 class TestResolveSlurmResources:
@@ -181,6 +239,41 @@ class TestResolveSlurmResources:
         with patch.dict(os.environ, {"SLURM_MEM_PER_NODE": "16384"}):
             result = resolve_slurm_resources(config)
             assert result.ram is not None
+
+    def test_resolve_slurm_resources_nproc_and_ram(self):
+        """Test SLURM resource resolution with both nproc and ram."""
+        config = _create_test_hpc_config(nproc=4, ram=4096)
+        with patch.dict(
+            os.environ,
+            {"SLURM_NTASKS": "16", "SLURM_MEM_PER_NODE": "32768"},
+            clear=True,
+        ):
+            result = resolve_slurm_resources(config)
+            assert result.nproc == 16
+            assert result.ram == 32768
+
+    def test_resolve_slurm_resources_only_nproc(self):
+        """Test SLURM resource resolution with only nproc."""
+        config = _create_test_hpc_config(nproc=4, ram=4096)
+        with patch.dict(os.environ, {"SLURM_NTASKS": "16"}, clear=True):
+            result = resolve_slurm_resources(config)
+            assert result.nproc == 16
+            assert result.ram == 4096  # Unchanged
+
+    def test_resolve_slurm_resources_only_ram(self):
+        """Test SLURM resource resolution with only ram."""
+        config = _create_test_hpc_config(nproc=4, ram=4096)
+        with patch.dict(os.environ, {"SLURM_MEM_PER_NODE": "32768"}, clear=True):
+            result = resolve_slurm_resources(config)
+            assert result.nproc == 4  # Unchanged
+            assert result.ram == 32768
+
+    def test_resolve_slurm_resources_returns_original_when_no_env(self):
+        """Test that original config is returned when no SLURM env vars."""
+        config = _create_test_hpc_config(nproc=4, ram=4096)
+        with patch.dict(os.environ, {}, clear=True):
+            result = resolve_slurm_resources(config)
+            assert result is config  # Should return the same object
 
 
 # ============================================================================
@@ -226,6 +319,56 @@ class TestGenerateMapdlCommand:
         assert "-smp" in cmd
         assert "-dis" in cmd
 
+    def test_command_with_switches_without_dis(self):
+        """Test MAPDL command adds -dis if not present."""
+        config = _create_test_hpc_config(additional_switches="-smp")
+        cmd = _generate_mapdl_command(config)
+
+        assert "-smp" in cmd
+        assert "-dis" in cmd
+
+    def test_command_with_switches_ending_with_dis(self):
+        """Test MAPDL command doesn't duplicate -dis at end."""
+        config = _create_test_hpc_config(additional_switches="-smp -dis")
+        cmd = _generate_mapdl_command(config)
+
+        # Count -dis occurrences
+        dis_count = cmd.count("-dis")
+        assert dis_count == 1
+
+    def test_command_with_no_ram(self):
+        """Test MAPDL command without RAM specification."""
+        config = _create_test_hpc_config(ram=None)
+        cmd = _generate_mapdl_command(config)
+
+        assert "-m" not in cmd
+
+    def test_command_with_no_additional_switches(self):
+        """Test MAPDL command without additional switches."""
+        config = _create_test_hpc_config(additional_switches="")
+        cmd = _generate_mapdl_command(config)
+
+        # When additional_switches is empty, -dis is not added (logic only adds it when switches are present)
+        assert "-dis" not in cmd
+
+    def test_command_order(self):
+        """Test that MAPDL command has correct argument order."""
+        config = _create_test_hpc_config(
+            exec_file="/usr/bin/mapdl",
+            jobname="test_job",
+            nproc=4,
+            port=50052,
+            ram=8192,
+            additional_switches="-smp",
+        )
+        cmd = _generate_mapdl_command(config)
+
+        # Check that exec_file is first
+        assert cmd[0] == "/usr/bin/mapdl"
+
+        # Check that -grpc is present
+        assert "-grpc" in cmd
+
 
 class TestGenerateSbatchCommand:
     """Tests for _generate_sbatch_command function."""
@@ -256,6 +399,191 @@ class TestGenerateSbatchCommand:
 
         cmd_str = " ".join(cmd)
         assert "--wrap" in cmd_str
+
+    def test_sbatch_with_single_dash_option(self):
+        """Test sbatch command with single-dash scheduler option."""
+        mapdl_cmd = ["/usr/bin/mapdl", "-j", "test", "-np", "4"]
+        options = {"p": "gpu"}  # Single character option
+        cmd = _generate_sbatch_command(mapdl_cmd, options)
+
+        cmd_str = " ".join(cmd)
+        assert "-p=gpu" in cmd_str
+
+    def test_sbatch_with_reserved_wrap_option_raises_error(self):
+        """Test that using reserved 'wrap' option raises ValueError."""
+        mapdl_cmd = ["/usr/bin/mapdl", "-j", "test", "-np", "4"]
+        options = {"wrap": "some_command"}
+
+        with pytest.raises(ValueError, match="wrap.*reserved"):
+            _generate_sbatch_command(mapdl_cmd, options)
+
+    def test_sbatch_with_quotes_in_jobname(self):
+        """Test sbatch command with quotes in jobname."""
+        mapdl_cmd = ["/usr/bin/mapdl", "-j", "test'job", "-np", "4"]
+        cmd = _generate_sbatch_command(mapdl_cmd, None)
+
+        cmd_str = " ".join(cmd)
+        assert "--wrap" in cmd_str
+
+
+# ============================================================================
+# Job Ready Waiting Tests
+# ============================================================================
+
+
+class TestWaitForJobReady:
+    """Tests for _wait_for_job_ready function."""
+
+    def test_wait_for_job_ready_running(self):
+        """Test successful job ready detection."""
+        from ansys.mapdl.core.launcher.hpc import _wait_for_job_ready
+
+        scontrol_output = """JobID=12345 JobName=test_job
+            JobState=RUNNING
+            BatchHost=node01.cluster"""
+
+        with (
+            patch("subprocess.run") as mock_run,
+            patch("socket.gethostbyname") as mock_gethostbyname,
+        ):
+            mock_result = Mock()
+            mock_result.stdout = scontrol_output
+            mock_run.return_value = mock_result
+            mock_gethostbyname.return_value = "192.168.1.10"
+
+            job_info = _wait_for_job_ready(12345, timeout=10)
+            assert job_info.jobid == 12345
+            assert job_info.state == "RUNNING"
+            assert job_info.hostname == "node01.cluster"
+            assert job_info.ip == "192.168.1.10"
+
+    def test_wait_for_job_ready_failed_state(self):
+        """Test job failed state handling."""
+        from ansys.mapdl.core.launcher.hpc import _wait_for_job_ready
+
+        scontrol_output = """JobID=12345 JobName=test_job
+            JobState=FAILED
+            ExitCode=1:0"""
+
+        with patch("subprocess.run") as mock_run:
+            mock_result = Mock()
+            mock_result.stdout = scontrol_output
+            mock_run.return_value = mock_result
+
+            with pytest.raises(MapdlDidNotStart, match="FAILED"):
+                _wait_for_job_ready(12345, timeout=10)
+
+    def test_wait_for_job_ready_cancelled_state(self):
+        """Test job cancelled state handling."""
+        from ansys.mapdl.core.launcher.hpc import _wait_for_job_ready
+
+        scontrol_output = """JobID=12345 JobName=test_job
+            JobState=CANCELLED"""
+
+        with patch("subprocess.run") as mock_run:
+            mock_result = Mock()
+            mock_result.stdout = scontrol_output
+            mock_run.return_value = mock_result
+
+            with pytest.raises(MapdlDidNotStart, match="CANCELLED"):
+                _wait_for_job_ready(12345, timeout=10)
+
+    def test_wait_for_job_ready_timeout_state(self):
+        """Test job timeout state handling."""
+        from ansys.mapdl.core.launcher.hpc import _wait_for_job_ready
+
+        scontrol_output = """JobID=12345 JobName=test_job
+            JobState=TIMEOUT"""
+
+        with patch("subprocess.run") as mock_run:
+            mock_result = Mock()
+            mock_result.stdout = scontrol_output
+            mock_run.return_value = mock_result
+
+            with pytest.raises(MapdlDidNotStart, match="TIMEOUT"):
+                _wait_for_job_ready(12345, timeout=10)
+
+    def test_wait_for_job_ready_node_fail_state(self):
+        """Test job node failure state handling."""
+        from ansys.mapdl.core.launcher.hpc import _wait_for_job_ready
+
+        scontrol_output = """JobID=12345 JobName=test_job
+            JobState=NODE_FAIL"""
+
+        with patch("subprocess.run") as mock_run:
+            mock_result = Mock()
+            mock_result.stdout = scontrol_output
+            mock_run.return_value = mock_result
+
+            with pytest.raises(MapdlDidNotStart, match="NODE_FAIL"):
+                _wait_for_job_ready(12345, timeout=10)
+
+    def test_wait_for_job_ready_scontrol_timeout_expired(self):
+        """Test scontrol command timeout handling."""
+        from ansys.mapdl.core.launcher.hpc import _wait_for_job_ready
+
+        with patch("subprocess.run") as mock_run:
+            mock_run.side_effect = subprocess.TimeoutExpired("scontrol", 10)
+
+            with pytest.raises(MapdlDidNotStart, match="did not start within"):
+                _wait_for_job_ready(12345, timeout=2)
+
+    def test_wait_for_job_ready_scontrol_error(self):
+        """Test scontrol command error handling."""
+        from ansys.mapdl.core.launcher.hpc import _wait_for_job_ready
+
+        with patch("subprocess.run") as mock_run:
+            mock_run.side_effect = subprocess.CalledProcessError(
+                1, "scontrol", stderr="error"
+            )
+
+            with pytest.raises(MapdlDidNotStart, match="did not start within"):
+                _wait_for_job_ready(12345, timeout=2)
+
+    def test_wait_for_job_ready_pending_then_running(self):
+        """Test job state transition from PENDING to RUNNING."""
+        from ansys.mapdl.core.launcher.hpc import _wait_for_job_ready
+
+        pending_output = """JobID=12345 JobName=test_job
+            JobState=PENDING"""
+
+        running_output = """JobID=12345 JobName=test_job
+            JobState=RUNNING
+            BatchHost=node01.cluster"""
+
+        with (
+            patch("subprocess.run") as mock_run,
+            patch("socket.gethostbyname") as mock_gethostbyname,
+            patch("time.time") as mock_time,
+        ):
+            # Mock time progression
+            mock_time.side_effect = [0, 1, 2, 3]  # Enough time to pass both calls
+
+            # First call returns PENDING, second returns RUNNING
+            mock_run.side_effect = [
+                Mock(stdout=pending_output),
+                Mock(stdout=running_output),
+            ]
+            mock_gethostbyname.return_value = "192.168.1.10"
+
+            job_info = _wait_for_job_ready(12345, timeout=10)
+            assert job_info.state == "RUNNING"
+
+    def test_wait_for_job_ready_main_timeout(self):
+        """Test main timeout when job never reaches RUNNING."""
+        from ansys.mapdl.core.launcher.hpc import _wait_for_job_ready
+
+        pending_output = """JobID=12345 JobName=test_job
+            JobState=PENDING"""
+
+        with patch("subprocess.run") as mock_run, patch("time.time") as mock_time:
+            mock_run.return_value = Mock(stdout=pending_output)
+
+            # Simulate timeout: return times that exceed the timeout
+            mock_time.side_effect = [0, 1, 2, 3, 10]  # Final return simulates timeout
+
+            with pytest.raises(MapdlDidNotStart, match="did not start within"):
+                _wait_for_job_ready(12345, timeout=2)
 
 
 # ============================================================================
@@ -358,6 +686,12 @@ class TestParseBatchHost:
         with pytest.raises(ValueError, match="BatchHost not found"):
             _parse_batch_host(output)
 
+    def test_parse_batch_host_with_multiple_spaces(self):
+        """Test parsing batch host with multiple spaces."""
+        output = "BatchHost=node02.cluster   Reason=None"
+        hostname = _parse_batch_host(output)
+        assert hostname == "node02.cluster"
+
 
 # ============================================================================
 # HPC Launch Tests
@@ -367,22 +701,45 @@ class TestParseBatchHost:
 class TestLaunchOnHpc:
     """Tests for launch_on_hpc function."""
 
-    @pytest.mark.skip(reason="Complex integration test - requires full HPC mock")
-    def test_launch_on_hpc_basic(self):
-        """Test basic HPC launch."""
+    def test_launch_on_hpc_successful(self):
+        """Test successful HPC launch."""
         config = _create_test_hpc_config(scheduler_options={"nodes": "2"})
 
-        with patch("subprocess.run") as mock_run:
-            mock_result = Mock()
-            mock_result.stdout = "Submitted batch job 98765\n"
-            mock_run.return_value = mock_result
+        scontrol_output = """JobID=98765 JobName=test_job
+            JobState=RUNNING
+            BatchHost=node01.cluster"""
 
-            try:
-                result = launch_on_hpc(config, env={})
-            except Exception:
-                pass
+        with (
+            patch(
+                "ansys.mapdl.core.launcher.hpc._generate_mapdl_command"
+            ) as mock_mapdl_cmd,
+            patch(
+                "ansys.mapdl.core.launcher.hpc._generate_sbatch_command"
+            ) as mock_sbatch_cmd,
+            patch("ansys.mapdl.core.launcher.hpc._submit_job") as mock_submit,
+            patch("ansys.mapdl.core.launcher.hpc._wait_for_job_ready") as mock_wait,
+        ):
 
-    @pytest.mark.skip(reason="Complex integration test - requires full HPC mock")
+            mock_mapdl_cmd.return_value = ["/usr/bin/mapdl", "-j", "test_job"]
+            mock_sbatch_cmd.return_value = ["sbatch", "--nodes=2", "--wrap", "mapdl"]
+            mock_submit.return_value = 98765
+
+            from ansys.mapdl.core.launcher.hpc import HPCJobInfo
+
+            mock_wait.return_value = HPCJobInfo(
+                jobid=98765,
+                state="RUNNING",
+                hostname="node01.cluster",
+                ip="192.168.1.10",
+            )
+
+            result = launch_on_hpc(config, env_vars={})
+
+            assert result.jobid == 98765
+            assert result.ip == "192.168.1.10"
+            assert result.port == config.port
+            assert result.hostname == "node01.cluster"
+
     def test_launch_on_hpc_with_custom_scheduler_options(self):
         """Test HPC launch with various scheduler options."""
         options = {
@@ -393,15 +750,54 @@ class TestLaunchOnHpc:
         }
         config = _create_test_hpc_config(scheduler_options=options)
 
-        with patch("subprocess.run") as mock_run:
-            mock_result = Mock()
-            mock_result.stdout = "Submitted batch job 55555\n"
-            mock_run.return_value = mock_result
+        with (
+            patch(
+                "ansys.mapdl.core.launcher.hpc._generate_mapdl_command"
+            ) as mock_mapdl_cmd,
+            patch(
+                "ansys.mapdl.core.launcher.hpc._generate_sbatch_command"
+            ) as mock_sbatch_cmd,
+            patch("ansys.mapdl.core.launcher.hpc._submit_job") as mock_submit,
+            patch("ansys.mapdl.core.launcher.hpc._wait_for_job_ready") as mock_wait,
+        ):
 
-            try:
-                result = launch_on_hpc(config, env={})
-            except Exception:
-                pass
+            mock_mapdl_cmd.return_value = ["/usr/bin/mapdl", "-j", "test_job"]
+            mock_sbatch_cmd.return_value = ["sbatch", "--nodes=4", "--wrap", "mapdl"]
+            mock_submit.return_value = 55555
+
+            from ansys.mapdl.core.launcher.hpc import HPCJobInfo
+
+            mock_wait.return_value = HPCJobInfo(
+                jobid=55555,
+                state="RUNNING",
+                hostname="compute-node.cluster",
+                ip="192.168.1.20",
+            )
+
+            result = launch_on_hpc(config, env_vars={})
+            assert result.jobid == 55555
+            assert mock_sbatch_cmd.called
+
+    def test_launch_on_hpc_job_submission_fails(self):
+        """Test HPC launch when job submission fails."""
+        config = _create_test_hpc_config()
+
+        with (
+            patch(
+                "ansys.mapdl.core.launcher.hpc._generate_mapdl_command"
+            ) as mock_mapdl_cmd,
+            patch(
+                "ansys.mapdl.core.launcher.hpc._generate_sbatch_command"
+            ) as mock_sbatch_cmd,
+            patch("ansys.mapdl.core.launcher.hpc._submit_job") as mock_submit,
+        ):
+
+            mock_mapdl_cmd.return_value = ["/usr/bin/mapdl", "-j", "test_job"]
+            mock_sbatch_cmd.return_value = ["sbatch", "--wrap", "mapdl"]
+            mock_submit.side_effect = MapdlDidNotStart("Job submission failed")
+
+            with pytest.raises(MapdlDidNotStart, match="Job submission failed"):
+                launch_on_hpc(config, env_vars={})
 
 
 # ============================================================================
