@@ -32,6 +32,13 @@ on:
         type: string
         default: "3.12"
 
+      pytest-arguments:
+        description: |
+          Arguments to pass to pytest, additionally to the ones in the pyproject.toml file.
+        required: false
+        type: string
+        default: ""
+
     secrets:
       username:
         description: |
@@ -253,12 +260,12 @@ jobs:
           ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
           file_name: "${{ inputs.file-name }}"
           MAPDL_VERSION: "${{ inputs.mapdl-version }}"
-          PYTEST_ARGUMENTS: "${{ env.PYTEST_ARGUMENTS }}"
+          PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
           xvfb-run pytest \
-            ${PYTEST_ARGUMENTS} \
+            ${PYTEST_INPUT_ARGUMENTS} \
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml
 
