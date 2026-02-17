@@ -97,7 +97,7 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: ccf21790019848af3eb4464be2a9d5efed6358f3  # frozen: 0.36.1
+  rev: ec368acd16deee9c560c105ab6d27db4ee19a5ec  # frozen: 0.36.2
   hooks:
     - id: check-github-workflows
 

@@ -1,4 +1,4 @@
-ansys-api-mapdl==0.5.2
+ansys-api-mapdl==0.6.0
 ansys-api-platform-instancemanagement==1.0.0
 ansys-mapdl-core==0.68.1
 ansys-mapdl-reader==0.55.0
