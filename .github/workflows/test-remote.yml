@@ -266,6 +266,7 @@ jobs:
           echo "ON_UBUNTU: $ON_UBUNTU"
           xvfb-run pytest \
             ${PYTEST_INPUT_ARGUMENTS} \
+            ${PYTEST_ARGUMENTS} \
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml
 
