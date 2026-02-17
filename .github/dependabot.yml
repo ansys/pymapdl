@@ -39,7 +39,7 @@ updates:
       exclude:
         - "ansys-tools-visualization-interface"
     exclude-paths:
-      - "doc/source/examples/**/*"
+      - "/doc/source/examples/extended_examples/**"
     groups:
        minimal:
           patterns:
