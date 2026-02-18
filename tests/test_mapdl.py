@@ -2813,6 +2813,7 @@ def test_ip_hostname_in_start_parm(ip):
         "local": False,
         "set_no_abort": False,
         "jobid": 1001,
+        "transport_mode": "insecure",
     }
 
     with patch("socket.gethostbyaddr") as mck_sock:
@@ -3181,7 +3182,11 @@ def test_set_no_abort(monkeypatch, set_no_abort, start_instance):
             "ansys.mapdl.core.mapdl_grpc.MapdlGrpc.__del__", return_value=None
         ) as mock_del,
     ):
-        mapdl = launch_mapdl(set_no_abort=set_no_abort, start_instance=start_instance)
+        mapdl = launch_mapdl(
+            set_no_abort=set_no_abort,
+            start_instance=start_instance,
+            transport_mode="insecure",
+        )
 
         mapdl._exit_mapdl = lambda *args, **kwargs: None  # Avoiding exit
         mapdl.__del__ = lambda x: None  # Avoiding exit
