@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 #
 #
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -100,14 +101,16 @@ def test_launch_mapdl_cli(monkeypatch, run_cli, start_instance):
         monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
 
     with (
-        patch("ansys.mapdl.core.launcher.launch_mapdl") as mock_launch,
+        patch(
+            "ansys.mapdl.core.launcher.launch_mapdl_process"
+        ) as mock_launch_process_only,
         patch("ansys.mapdl.core.launcher.submitter") as mock_submitter,
     ):  # test we are not calling Popen
 
-        mock_launch.side_effect = lambda *args, **kwargs: (
+        mock_launch_process_only.side_effect = lambda *args, **kwargs: (
             "123.45.67.89",
-            str(PORT1),
-            "123245",
+            int(PORT1),
+            123245,
         )
 
         # Setting a port so it does not collide with the already running instance for testing
@@ -938,3 +941,316 @@ def test_get_ansys_process_from_port_multiple_processes():
     ):
         result = get_ansys_process_from_port(50052)
         assert result == mock_proc1
+
+
+@requires("click")
+class TestCliStartCommand:
+    """Tests for the CLI start command."""
+
+    @pytest.fixture
+    def cli_runner(self):
+        """Provide a CLI runner."""
+        from ansys.mapdl.core.cli import main
+
+        runner = CliRunner()
+
+        def run_cli(args_str):
+            """Run CLI with given arguments."""
+            args = args_str.split() if args_str else []
+            result = runner.invoke(main, args)
+            return result
+
+        return run_cli
+
+    def test_start_command_basic(self, cli_runner):
+        """Test basic start command without just_launch parameter."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            mock_launch.return_value = ("127.0.0.1", PORT_TEST_START, 12345)
+
+            result = cli_runner(f"start --port {PORT_TEST_START}")
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+            assert "Success" in result.output
+            assert "127.0.0.1" in result.output
+            assert str(PORT_TEST_START) in result.output
+            assert "PID=12345" in result.output
+
+    def test_start_command_without_pid(self, cli_runner):
+        """Test start command when PID is None (e.g., HPC case)."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            mock_launch.return_value = ("192.168.1.100", PORT_TEST_START + 1, None)
+
+            result = cli_runner(f"start --port {PORT_TEST_START + 1}")
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+            assert "Success" in result.output
+            assert "192.168.1.100" in result.output
+            assert str(PORT_TEST_START + 1) in result.output
+            # Should not have PID in output when None
+            assert "PID=" not in result.output
+
+    def test_start_command_with_nproc(self, cli_runner):
+        """Test start command with nproc parameter."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            mock_launch.return_value = ("127.0.0.1", PORT_TEST_START + 2, 12346)
+
+            result = cli_runner(f"start --port {PORT_TEST_START + 2} --nproc 8")
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+
+            # Verify nproc was passed correctly
+            call_kwargs = mock_launch.call_args[1]
+            assert call_kwargs["nproc"] == 8
+
+    def test_start_command_with_ram(self, cli_runner):
+        """Test start command with ram parameter."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            mock_launch.return_value = ("127.0.0.1", PORT_TEST_START + 3, 12347)
+
+            result = cli_runner(f"start --port {PORT_TEST_START + 3} --ram 8192")
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+
+            # Verify ram was passed correctly
+            call_kwargs = mock_launch.call_args[1]
+            assert call_kwargs["ram"] == 8192
+
+    def test_start_command_with_additional_switches(self, cli_runner):
+        """Test start command with additional_switches parameter."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            mock_launch.return_value = ("127.0.0.1", PORT_TEST_START + 4, 12348)
+
+            result = cli_runner(
+                f"start --port {PORT_TEST_START + 4} --additional_switches aa_r"
+            )
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+
+            # Verify additional_switches was passed correctly
+            call_kwargs = mock_launch.call_args[1]
+            assert call_kwargs["additional_switches"] == "aa_r"
+
+    def test_start_command_with_license_type(self, cli_runner):
+        """Test start command with license_type parameter."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            mock_launch.return_value = ("127.0.0.1", PORT_TEST_START + 5, 12349)
+
+            result = cli_runner(
+                f"start --port {PORT_TEST_START + 5} --license_type ansys"
+            )
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+
+            # Verify license_type was passed correctly
+            call_kwargs = mock_launch.call_args[1]
+            assert call_kwargs["license_type"] == "ansys"
+
+    def test_start_command_warns_ignored_parameters(self, cli_runner):
+        """Test that CLI warns about ignored parameters."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            mock_launch.return_value = ("127.0.0.1", PORT_TEST_START + 6, 12350)
+
+            result = cli_runner(
+                f"start --port {PORT_TEST_START + 6} --mode grpc --loglevel INFO"
+            )
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+
+            # Verify warnings were displayed
+            assert "Warn:" in result.output
+            assert "mode" in result.output.lower()
+            assert "loglevel" in result.output.lower()
+
+    def test_start_command_warns_cleanup_on_exit(self, cli_runner):
+        """Test CLI warns about cleanup_on_exit parameter."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            mock_launch.return_value = ("127.0.0.1", PORT_TEST_START + 7, 12351)
+
+            result = cli_runner(
+                f"start --port {PORT_TEST_START + 7} --cleanup_on_exit True"
+            )
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+
+            # Verify warning was displayed
+            assert "Warn:" in result.output
+            assert "cleanup_on_exit" in result.output.lower()
+
+    def test_start_command_warns_start_instance(self, cli_runner):
+        """Test CLI warns about start_instance parameter."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            mock_launch.return_value = ("127.0.0.1", PORT_TEST_START + 8, 12352)
+
+            result = cli_runner(
+                f"start --port {PORT_TEST_START + 8} --start_instance False"
+            )
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+
+            # Verify warning was displayed
+            assert "Warn:" in result.output
+            assert "start_instance" in result.output.lower()
+
+    def test_start_command_warns_ip(self, cli_runner):
+        """Test CLI warns about ip parameter."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            mock_launch.return_value = ("127.0.0.1", PORT_TEST_START + 9, 12353)
+
+            result = cli_runner(f"start --port {PORT_TEST_START + 9} --ip 192.168.1.1")
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+
+            # Verify warning was displayed
+            assert "Warn:" in result.output
+            assert "ip" in result.output.lower()
+
+    def test_start_command_warns_print_com(self, cli_runner):
+        """Test CLI warns about print_com parameter."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            mock_launch.return_value = ("127.0.0.1", PORT_TEST_START + 10, 12354)
+
+            result = cli_runner(f"start --port {PORT_TEST_START + 10} --print_com True")
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+
+            # Verify warning was displayed
+            assert "Warn:" in result.output
+            assert "print_com" in result.output.lower()
+
+    def test_start_command_with_version(self, cli_runner):
+        """Test start command with version parameter."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            mock_launch.return_value = ("127.0.0.1", PORT_TEST_START + 11, 12355)
+
+            result = cli_runner(f"start --port {PORT_TEST_START + 11} --version 231")
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+
+            # Verify version was passed correctly
+            call_kwargs = mock_launch.call_args[1]
+            assert call_kwargs["version"] == 231
+
+    def test_start_command_passes_all_parameters(self, cli_runner):
+        """Test that all relevant parameters are passed to launch_mapdl_process."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            mock_launch.return_value = ("127.0.0.1", PORT_TEST_START + 12, 12356)
+
+            result = cli_runner(
+                f"start --port {PORT_TEST_START + 12} "
+                "--exec_file /path/to/mapdl "
+                "--run_location /tmp/test "
+                "--jobname myjob "
+                "--nproc 4 "
+                "--ram 4096 "
+                "--override True "
+                "--additional_switches aa_r "
+                "--start_timeout 60 "
+                "--license_type ansys "
+                "--version 231"
+            )
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+
+            # Verify all parameters were passed
+            call_kwargs = mock_launch.call_args[1]
+            assert call_kwargs["exec_file"] == "/path/to/mapdl"
+            assert call_kwargs["run_location"] == "/tmp/test"
+            assert call_kwargs["jobname"] == "myjob"
+            assert call_kwargs["nproc"] == 4
+            assert call_kwargs["ram"] == 4096
+            assert call_kwargs["override"] is True
+            assert call_kwargs["additional_switches"] == "aa_r"
+            assert call_kwargs["start_timeout"] == 60
+            assert call_kwargs["license_type"] == "ansys"
+            assert call_kwargs["version"] == 231
+
+    def test_start_command_error_propagation(self, cli_runner):
+        """Test that errors from launch_mapdl_process are properly propagated."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            from ansys.mapdl.core.launcher import LaunchError
+
+            mock_launch.side_effect = LaunchError("Failed to launch MAPDL")
+
+            result = cli_runner(f"start --port {PORT_TEST_START + 13}")
+
+            # Verify the command failed
+            assert result.exit_code != 0
+            # The error should be propagated
+            assert "Failed to launch MAPDL" in result.output or "Error" in result.output
+
+    def test_start_command_removes_pymapdl_start_instance_env_var(
+        self, cli_runner, monkeypatch
+    ):
+        """Test that PYMAPDL_START_INSTANCE env var is removed when using CLI."""
+        monkeypatch.setenv("PYMAPDL_START_INSTANCE", "True")
+
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            mock_launch.return_value = ("127.0.0.1", PORT_TEST_START + 14, 12357)
+
+            result = cli_runner(f"start --port {PORT_TEST_START + 14}")
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+
+            # The env var should be removed (this is verified in the CLI code)
+            # but we can't easily verify this in the test, so we just ensure it runs
+            assert "Success" in result.output
+
+    def test_start_command_output_format(self, cli_runner):
+        """Test that start command output format is correct."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            ip = "192.168.1.50"
+            port = PORT_TEST_START + 15
+            pid = 54321
+
+            mock_launch.return_value = (ip, port, pid)
+
+            result = cli_runner(f"start --port {port}")
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+
+            # Verify output format
+            output = result.output
+            assert "Success:" in output
+            assert f"{ip}:{port}" in output
+            assert f"PID={pid}" in output
+            # Should match pattern like: "Launched an MAPDL instance (PID=54321) at 192.168.1.50:50105"
+            pattern = rf"Launched an MAPDL instance \(PID={pid}\) at {ip}:{port}"
+            assert re.search(pattern, output)
+
+    def test_start_command_output_format_no_pid(self, cli_runner):
+        """Test start command output format when pid is None."""
+        with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
+            ip = "localhost"
+            port = PORT_TEST_START + 16
+
+            mock_launch.return_value = (ip, port, None)
+
+            result = cli_runner(f"start --port {port}")
+
+            # Verify the command succeeded
+            assert result.exit_code == 0
+
+            # Verify output format
+            output = result.output
+            assert "Success:" in output
+            assert f"{ip}:{port}" in output
+            # Should not have PID when None
+            assert "(PID=" not in output
+            # Should match pattern like: "Launched an MAPDL instance at localhost:50106"
+            pattern = rf"Launched an MAPDL instance at {ip}:{port}"
+            assert re.search(pattern, output)

@@ -192,7 +192,7 @@ def start(
     replace_env_vars: Dict[str, str],  # ignored
     version: Union[int, str],
 ) -> None:
-    from ansys.mapdl.core.launcher import launch_mapdl
+    from ansys.mapdl.core.launcher import launch_mapdl_process
 
     if mode:
         click.echo(
@@ -270,9 +270,8 @@ def start(
     if "PYMAPDL_START_INSTANCE" in os.environ:
         os.environ.pop("PYMAPDL_START_INSTANCE")
 
-    out = launch_mapdl(
+    ip_addr, port_num, pid = launch_mapdl_process(
         exec_file=exec_file,
-        just_launch=True,
         run_location=run_location,
         jobname=jobname,
         nproc=nproc,
@@ -285,9 +284,9 @@ def start(
         version=version,
     )
 
-    if len(out) == 3:
-        header = f"Launched an MAPDL instance (PID={out[2]}) at "
+    if pid is not None:
+        header = f"Launched an MAPDL instance (PID={pid}) at "
     else:
         header = "Launched an MAPDL instance at "
 
-    click.echo(click.style("Success: ", fg="green") + header + f"{out[0]}:{out[1]}")
+    click.echo(click.style("Success: ", fg="green") + header + f"{ip_addr}:{port_num}")

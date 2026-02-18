@@ -57,7 +57,7 @@ from .hpc import (
 )
 from .hpc import launch_on_hpc as _launch_on_hpc_fn
 from .models import LaunchConfig, LaunchMode
-from .process import launch_mapdl_process
+from .process import launch_mapdl_process as _launch_mapdl_process
 from .validation import validate_config
 
 if TYPE_CHECKING:
@@ -66,6 +66,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "launch_mapdl",
+    "launch_mapdl_process",
     "LaunchConfig",
     "ConfigurationError",
     "LaunchError",
@@ -221,6 +222,157 @@ except ImportError as e:
     )
 
 
+def _launch_mapdl_common(
+    exec_file: Optional[str],
+    run_location: Optional[str],
+    jobname: str,
+    nproc: Optional[int],
+    port: Optional[int],
+    ip: Optional[str],
+    mode: Optional[str],
+    version: Optional[int],
+    start_instance: Optional[bool],
+    ram: Optional[int],
+    timeout: Optional[int],
+    cleanup_on_exit: bool,
+    clear_on_connect: bool,
+    override: bool,
+    remove_temp_dir_on_exit: bool,
+    set_no_abort: bool,
+    additional_switches: str,
+    license_type: Optional[str],
+    launch_on_hpc: bool,
+    running_on_hpc: bool,
+    scheduler_options: Optional[Dict[str, Any]],
+    loglevel: str,
+    log_apdl: Optional[str],
+    print_com: bool,
+    mapdl_output: Optional[str],
+    transport_mode: Optional[str],
+    uds_dir: Optional[str],
+    uds_id: Optional[str],
+    certs_dir: Optional[str],
+    add_env_vars: Optional[Dict[str, str]],
+    replace_env_vars: Optional[Dict[str, str]],
+    license_server_check: bool,
+    force_intel: bool,
+    graphics_backend: Optional[str],
+    start_timeout: Optional[int],
+):
+    """Common logic for launch_mapdl and launch_mapdl_process.
+
+    Returns:
+        Tuple of (config, process_info) where process_info is None if not launching a new instance
+    """
+    # Merge environment variable dictionaries
+    env_vars_merged = None
+    if add_env_vars or replace_env_vars:
+        env_vars_merged = {}
+        if add_env_vars:
+            env_vars_merged.update(add_env_vars)
+        if replace_env_vars:
+            env_vars_merged.update(replace_env_vars)
+
+    # Step 1: Resolve configuration from arguments, env vars, and defaults
+    try:
+        config = resolve_launch_config(
+            exec_file=exec_file,
+            run_location=run_location,
+            jobname=jobname,
+            nproc=nproc,
+            port=port,
+            ip=ip,
+            mode=mode,
+            version=version,
+            start_instance=start_instance,
+            ram=ram,
+            timeout=timeout,
+            cleanup_on_exit=cleanup_on_exit,
+            clear_on_connect=clear_on_connect,
+            override=override,
+            remove_temp_dir_on_exit=remove_temp_dir_on_exit,
+            set_no_abort=set_no_abort,
+            additional_switches=additional_switches,
+            license_type=license_type,
+            launch_on_hpc=launch_on_hpc,
+            running_on_hpc=running_on_hpc,
+            scheduler_options=scheduler_options,
+            loglevel=loglevel,
+            log_apdl=log_apdl,
+            print_com=print_com,
+            mapdl_output=mapdl_output,
+            transport_mode=transport_mode,
+            uds_dir=uds_dir,
+            uds_id=uds_id,
+            certs_dir=certs_dir,
+            env_vars=env_vars_merged,
+            license_server_check=license_server_check,
+            force_intel=force_intel,
+            graphics_backend=graphics_backend,
+            start_timeout=start_timeout,
+        )
+    except ConfigurationError as e:
+        LOG.error(f"Configuration error: {e}")
+        raise LaunchError(f"Invalid launch configuration: {e}") from e
+
+    # Step 2: Validate configuration
+    try:
+        validation_result = validate_config(config)
+        if not validation_result.valid:
+            error_header = "Configuration validation failed with the following errors:"
+            formatted_errors = [f"- {err}" for err in validation_result.errors]
+            error_body = "\n".join(formatted_errors)
+            full_message = (
+                f"{error_header}\n{error_body}" if formatted_errors else error_header
+            )
+            LOG.error(full_message)
+            raise LaunchError(full_message)
+
+        # Log warnings
+        for warning in validation_result.warnings:
+            LOG.warning(warning)
+
+    except LaunchError:
+        raise
+    except Exception as e:
+        LOG.error(f"Validation error: {e}")
+        raise LaunchError(f"Configuration validation error: {e}") from e
+
+    # Step 3: Handle connection to existing instance (if applicable)
+    if not config.start_instance:
+        return config, None
+
+    # Step 4: Prepare environment
+    try:
+        env_config = prepare_environment(config)
+        process_env = env_config.variables
+    except Exception as e:
+        LOG.error(f"Environment preparation failed: {e}")
+        raise LaunchError(f"Failed to prepare environment: {e}") from e
+
+    # Step 5: Launch MAPDL process (local or HPC)
+    process_info = None
+    try:
+        if config.launch_on_hpc:
+            # Resolve SLURM resources if available
+            if detect_slurm_environment():
+                config = resolve_slurm_resources(config)
+
+            # Launch on HPC
+            LOG.info("Launching MAPDL on HPC cluster...")
+            process_info = _launch_on_hpc_fn(config, process_env)
+        else:
+            # Launch locally
+            LOG.info("Launching MAPDL locally...")
+            process_info = _launch_mapdl_process(config, process_env)
+
+    except Exception as e:
+        LOG.error(f"Process launch failed: {e}")
+        raise LaunchError(f"Failed to launch MAPDL: {e}") from e
+
+    return config, process_info
+
+
 def launch_mapdl(
     exec_file: Optional[str] = None,
     run_location: Optional[str] = None,
@@ -337,82 +489,47 @@ def launch_mapdl(
         - Client connection: connection.create_grpc_client() or
           connection.create_console_client()
     """
-    # Merge environment variable dictionaries
-    env_vars_merged = None
-    if add_env_vars or replace_env_vars:
-        env_vars_merged = {}
-        if add_env_vars:
-            env_vars_merged.update(add_env_vars)
-        if replace_env_vars:
-            env_vars_merged.update(replace_env_vars)
+    # Use common launch logic
+    config, process_info = _launch_mapdl_common(
+        exec_file=exec_file,
+        run_location=run_location,
+        jobname=jobname,
+        nproc=nproc,
+        port=port,
+        ip=ip,
+        mode=mode,
+        version=version,
+        start_instance=start_instance,
+        ram=ram,
+        timeout=timeout,
+        cleanup_on_exit=cleanup_on_exit,
+        clear_on_connect=clear_on_connect,
+        override=override,
+        remove_temp_dir_on_exit=remove_temp_dir_on_exit,
+        set_no_abort=set_no_abort,
+        additional_switches=additional_switches,
+        license_type=license_type,
+        launch_on_hpc=launch_on_hpc,
+        running_on_hpc=running_on_hpc,
+        scheduler_options=scheduler_options,
+        loglevel=loglevel,
+        log_apdl=log_apdl,
+        print_com=print_com,
+        mapdl_output=mapdl_output,
+        transport_mode=transport_mode,
+        uds_dir=uds_dir,
+        uds_id=uds_id,
+        certs_dir=certs_dir,
+        add_env_vars=add_env_vars,
+        replace_env_vars=replace_env_vars,
+        license_server_check=license_server_check,
+        force_intel=force_intel,
+        graphics_backend=graphics_backend,
+        start_timeout=start_timeout,
+    )
 
-    # Step 1: Resolve configuration from arguments, env vars, and defaults
-    try:
-        config = resolve_launch_config(
-            exec_file=exec_file,
-            run_location=run_location,
-            jobname=jobname,
-            nproc=nproc,
-            port=port,
-            ip=ip,
-            mode=mode,
-            version=version,
-            start_instance=start_instance,
-            ram=ram,
-            timeout=timeout,
-            cleanup_on_exit=cleanup_on_exit,
-            clear_on_connect=clear_on_connect,
-            override=override,
-            remove_temp_dir_on_exit=remove_temp_dir_on_exit,
-            set_no_abort=set_no_abort,
-            additional_switches=additional_switches,
-            license_type=license_type,
-            launch_on_hpc=launch_on_hpc,
-            running_on_hpc=running_on_hpc,
-            scheduler_options=scheduler_options,
-            loglevel=loglevel,
-            log_apdl=log_apdl,
-            print_com=print_com,
-            mapdl_output=mapdl_output,
-            transport_mode=transport_mode,
-            uds_dir=uds_dir,
-            uds_id=uds_id,
-            certs_dir=certs_dir,
-            env_vars=env_vars_merged,
-            license_server_check=license_server_check,
-            force_intel=force_intel,
-            graphics_backend=graphics_backend,
-            start_timeout=start_timeout,
-        )
-    except ConfigurationError as e:
-        LOG.error(f"Configuration error: {e}")
-        raise LaunchError(f"Invalid launch configuration: {e}") from e
-
-    # Step 2: Validate configuration
-    try:
-        validation_result = validate_config(config)
-        if not validation_result.valid:
-            error_header = "Configuration validation failed with the following errors:"
-            formatted_errors = [f"- {err}" for err in validation_result.errors]
-            error_body = "\n".join(formatted_errors)
-            full_message = (
-                f"{error_header}\n{error_body}" if formatted_errors else error_header
-            )
-            LOG.error(full_message)
-            raise LaunchError(full_message)
-
-        # Log warnings
-        for warning in validation_result.warnings:
-            LOG.warning(warning)
-
-    except LaunchError:
-        raise
-    except Exception as e:
-        LOG.error(f"Validation error: {e}")
-        raise LaunchError(f"Configuration validation error: {e}") from e
-
-    # Step 3: Handle connection to existing instance
-    if not config.start_instance:
+    # Handle connection to existing instance
+    if process_info is None:
         LOG.info(f"Connecting to existing MAPDL instance at {config.ip}:{config.port}")
         try:
             return connect_to_existing(config)
@@ -420,35 +537,7 @@ def launch_mapdl(
             LOG.error(f"Failed to connect to existing instance: {e}")
             raise
 
-    # Step 4: Prepare environment
-    try:
-        env_config = prepare_environment(config)
-        process_env = env_config.variables
-    except Exception as e:
-        LOG.error(f"Environment preparation failed: {e}")
-        raise LaunchError(f"Failed to prepare environment: {e}") from e
-
-    # Step 5: Launch MAPDL process (local or HPC)
-    process_info = None
-    try:
-        if config.launch_on_hpc:
-            # Resolve SLURM resources if available
-            if detect_slurm_environment():
-                config = resolve_slurm_resources(config)
-
-            # Launch on HPC
-            LOG.info("Launching MAPDL on HPC cluster...")
-            process_info = _launch_on_hpc_fn(config, process_env)
-        else:
-            # Launch locally
-            LOG.info("Launching MAPDL locally...")
-            process_info = launch_mapdl_process(config, process_env)
-
-    except Exception as e:
-        LOG.error(f"Process launch failed: {e}")
-        raise LaunchError(f"Failed to launch MAPDL: {e}") from e
-
-    # Step 6: Create and return client
+    # Create and return client
     try:
         if config.mode == LaunchMode.CONSOLE:
             LOG.debug("Creating MapdlConsole client")
@@ -459,3 +548,156 @@ def launch_mapdl(
     except Exception as e:
         LOG.error(f"Client creation failed: {e}")
         raise LaunchError(f"Failed to create MAPDL client: {e}") from e
+
+
+def launch_mapdl_process(
+    exec_file: Optional[str] = None,
+    run_location: Optional[str] = None,
+    jobname: str = "file",
+    *,
+    nproc: Optional[int] = None,
+    port: Optional[int] = None,
+    ip: Optional[str] = None,
+    mode: Optional[str] = None,
+    version: Optional[int] = None,
+    start_instance: Optional[bool] = None,
+    ram: Optional[int] = None,
+    timeout: Optional[int] = None,
+    cleanup_on_exit: bool = True,
+    clear_on_connect: bool = True,
+    override: bool = False,
+    remove_temp_dir_on_exit: bool = False,
+    set_no_abort: bool = True,
+    additional_switches: str = "",
+    license_type: Optional[str] = None,
+    launch_on_hpc: bool = False,
+    running_on_hpc: bool = True,
+    scheduler_options: Optional[Dict[str, Any]] = None,
+    loglevel: str = "ERROR",
+    log_apdl: Optional[str] = None,
+    print_com: bool = False,
+    mapdl_output: Optional[str] = None,
+    transport_mode: Optional[str] = None,
+    uds_dir: Optional[str] = None,
+    uds_id: Optional[str] = None,
+    certs_dir: Optional[str] = None,
+    add_env_vars: Optional[Dict[str, str]] = None,
+    replace_env_vars: Optional[Dict[str, str]] = None,
+    license_server_check: bool = False,
+    force_intel: bool = False,
+    graphics_backend: Optional[str] = None,
+    start_timeout: Optional[int] = None,
+    **kwargs: Any,
+) -> tuple[str, int, Optional[int]]:
+    """Launch MAPDL process and return connection info without creating a client.
+
+    This is the specialized entry point for CLI and programmatic use cases that
+    need the process to be launched without immediately creating a client connection.
+    Unlike ``launch_mapdl()``, this function:
+    - Does NOT connect to an existing instance
+    - Returns connection info tuple (ip, port, pid) instead of a client
+    - Does NOT create a client object
+
+    Parameters:
+        exec_file: Path to MAPDL executable
+        run_location: Working directory for MAPDL
+        jobname: MAPDL job name
+        nproc: Number of processors
+        port: gRPC server port
+        ip: IP address to bind
+        mode: Launch mode (ignored, gRPC only)
+        version: MAPDL version
+        start_instance: Whether to start new instance (must be True)
+        ram: RAM allocation in MB
+        timeout: Launch timeout in seconds
+        cleanup_on_exit: Clean up on exit
+        clear_on_connect: Clear database on connection
+        override: Override existing lock file
+        remove_temp_dir_on_exit: Remove temp directory on exit
+        set_no_abort: Set NO_ABORT flag
+        additional_switches: Additional command line switches
+        license_type: License type
+        launch_on_hpc: Launch on HPC cluster
+        running_on_hpc: Running on HPC
+        scheduler_options: HPC scheduler options
+        loglevel: Logging level
+        log_apdl: APDL log file path
+        print_com: Print commands
+        mapdl_output: Redirect MAPDL output
+        transport_mode: gRPC transport mode
+        uds_dir: Unix domain socket directory
+        uds_id: Unix domain socket ID
+        certs_dir: Certificates directory
+        add_env_vars: Environment variables to add
+        replace_env_vars: Environment variables to replace
+        license_server_check: Check license server
+        force_intel: Force Intel MPI
+        graphics_backend: Graphics backend
+        start_timeout: Deprecated. Use ``timeout`` instead.
+        **kwargs: Additional arguments (ignored)
+
+    Returns:
+        Tuple of (ip, port, pid) for the launched MAPDL instance
+
+    Raises:
+        ConfigurationError: Invalid configuration
+        LaunchError: Launch failed
+
+    Examples:
+        >>> from ansys.mapdl.core.launcher import launch_mapdl_process
+        >>> ip, port, pid = launch_mapdl_process(nproc=4)
+        >>> print(f"MAPDL listening at {ip}:{port} (PID: {pid})")
+
+    Notes:
+        This function is primarily used by the CLI to launch MAPDL without
+        creating a client connection. The caller is responsible for managing
+        the launched process lifecycle.
+    """
+    # Use common launch logic
+    config, process_info = _launch_mapdl_common(
+        exec_file=exec_file,
+        run_location=run_location,
+        jobname=jobname,
+        nproc=nproc,
+        port=port,
+        ip=ip,
+        mode=mode,
+        version=version,
+        start_instance=start_instance,
+        ram=ram,
+        timeout=timeout,
+        cleanup_on_exit=cleanup_on_exit,
+        clear_on_connect=clear_on_connect,
+        override=override,
+        remove_temp_dir_on_exit=remove_temp_dir_on_exit,
+        set_no_abort=set_no_abort,
+        additional_switches=additional_switches,
+        license_type=license_type,
+        launch_on_hpc=launch_on_hpc,
+        running_on_hpc=running_on_hpc,
+        scheduler_options=scheduler_options,
+        loglevel=loglevel,
+        log_apdl=log_apdl,
+        print_com=print_com,
+        mapdl_output=mapdl_output,
+        transport_mode=transport_mode,
+        uds_dir=uds_dir,
+        uds_id=uds_id,
+        certs_dir=certs_dir,
+        add_env_vars=add_env_vars,
+        replace_env_vars=replace_env_vars,
+        license_server_check=license_server_check,
+        force_intel=force_intel,
+        graphics_backend=graphics_backend,
+        start_timeout=start_timeout,
+    )
+
+    # For process-only launching, ensure we're starting a new instance
+    if process_info is None:
+        raise LaunchError(
+            "launch_mapdl_process() requires start_instance=True. "
+            "Use launch_mapdl() to connect to existing instances."
+        )
+
+    # Return connection info tuple (ip, port, pid)
+    return (process_info.ip, process_info.port, process_info.pid)
