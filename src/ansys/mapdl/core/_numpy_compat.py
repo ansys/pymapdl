@@ -27,7 +27,7 @@ This module provides compatibility shims for NumPy functions that have been
 removed or deprecated in newer versions.
 
 NumPy 2.0+ Compatibility
-=========================
+========================
 
 NumPy removed in1d in version 2.0 (replaced by numpy.isin), but some of our
 dependencies may still reference it, causing AttributeError on import.

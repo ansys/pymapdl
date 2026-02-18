@@ -37,27 +37,56 @@ from .models import LaunchConfig, LaunchMode, ValidationResult
 
 
 def validate_config(config: LaunchConfig) -> ValidationResult:
-    """Validate complete launch configuration.
+    """Validate complete launch configuration comprehensively.
 
-    Checks:
-    - Version compatibility with mode
-    - Resource availability (CPU, RAM)
-    - Port availability
-    - File permissions
-    - Conflicting options
-    - Platform compatibility
+    Performs all validation checks to ensure the configuration is valid
+    for launching MAPDL. Collects all issues (errors and warnings) in a
+    single ValidationResult without raising exceptions.
 
-    Parameters:
-        config: Complete launch configuration
+    Validation checks performed:
+    - Version compatibility with launch mode
+    - Resource availability (CPU count, RAM)
+    - Port availability on target machine
+    - File system permissions (exec file, run directory)
+    - Conflicting options (e.g., start_instance + custom IP)
+    - Platform-specific compatibility (Windows vs Linux, WSL)
 
-    Returns:
-        ValidationResult with errors and warnings
+    Parameters
+    ----------
+    config : LaunchConfig
+        Complete launch configuration to validate
 
-    Examples:
-        >>> config = LaunchConfig(...)
-        >>> result = validate_config(config)
-        >>> if not result.valid:
-        ...     raise ConfigurationError(result.errors)
+    Returns
+    -------
+    ValidationResult
+        Result containing valid flag, errors list, and warnings list
+
+    Raises
+    ------
+    None
+        All issues are collected in result; no exceptions raised
+
+    Examples
+    --------
+    Validate configuration before launch:
+
+    >>> from ansys.mapdl.core.launcher.models import LaunchConfig
+    >>> from ansys.mapdl.core.launcher.validation import validate_config
+    >>> config = LaunchConfig(...)
+    >>> result = validate_config(config)
+    >>> if not result.valid:
+    ...     for error in result.errors:
+    ...         print(f"ERROR: {error}")
+    ...     raise ConfigurationError(result.errors)
+    >>> for warning in result.warnings:
+    ...     print(f"WARNING: {warning}")
+
+    Notes
+    -----
+    - Should always be called before launch_mapdl_process()
+    - Errors prevent launch, warnings allow launch to proceed
+    - Some checks (like port availability) may be affected by system state
+    - File access checks use current user permissions
     """
     result = ValidationResult(valid=True)
 
@@ -75,11 +104,42 @@ def validate_config(config: LaunchConfig) -> ValidationResult:
 def _validate_version_mode_compatibility(
     config: LaunchConfig, result: ValidationResult
 ) -> None:
-    """Validate version-mode compatibility.
+    """Validate MAPDL version compatibility with launch mode.
 
-    Parameters:
-        config: Launch configuration
-        result: ValidationResult to update
+    Checks that selected launch mode is compatible with MAPDL version.
+    gRPC mode requires MAPDL 2021R1 (version 211) or newer.
+
+    Parameters
+    ----------
+    config : LaunchConfig
+        Launch configuration with version and mode
+    result : ValidationResult
+        Result object to update with errors/warnings
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    None
+        Adds error to result if incompatible
+
+    Examples
+    --------
+    Validation is internal, called by validate_config():
+
+    >>> from ansys.mapdl.core.launcher.validation import validate_config
+    >>> config = LaunchConfig(version=195, mode=LaunchMode.GRPC, ...)
+    >>> result = validate_config(config)
+    >>> result.errors[0]
+    'gRPC mode requires MAPDL version 211...'
+
+    Notes
+    -----
+    - Internal utility function
+    - Only checked if version and mode are set
+    - gRPC requires version >= 211 (MAPDL 2021R1)
     """
     if config.mode == LaunchMode.GRPC and config.version:
         if config.version < 211:
@@ -93,11 +153,45 @@ def _validate_version_mode_compatibility(
 def _validate_resource_availability(
     config: LaunchConfig, result: ValidationResult
 ) -> None:
-    """Validate CPU and RAM availability.
+    """Validate CPU and RAM resource availability on local machine.
 
-    Parameters:
-        config: Launch configuration
-        result: ValidationResult to update
+    Checks that requested CPU and RAM resources are available on the system.
+    Uses psutil to query system capabilities. Generates errors for impossible
+    requests and warnings for likely over-subscription.
+
+    Parameters
+    ----------
+    config : LaunchConfig
+        Launch configuration with nproc and ram settings
+    result : ValidationResult
+        Result object to update with errors/warnings
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    None
+        Errors/warnings added to result
+
+    Examples
+    --------
+    Validation is internal, called by validate_config():
+
+    >>> from ansys.mapdl.core.launcher.validation import validate_config
+    >>> config = LaunchConfig(nproc=1000, ...)
+    >>> result = validate_config(config)
+    >>> result.errors[0]
+    'Requested 1000 processors but only...'
+
+    Notes
+    -----
+    - Internal utility function
+    - Skipped if start_instance is False
+    - Warnings generated if nproc > available CPUs
+    - Errors generated if nproc > available CPUs * 2 (likely to fail)
+    - Soft limits apply to RAM
     """
     if not config.start_instance:
         # No need to check resources if not starting instance
@@ -141,11 +235,42 @@ def _validate_resource_availability(
 
 
 def _validate_port_availability(config: LaunchConfig, result: ValidationResult) -> None:
-    """Validate port is available if starting new instance.
+    """Validate that gRPC port is available if starting new instance.
 
-    Parameters:
-        config: Launch configuration
-        result: ValidationResult to update
+    Checks port availability using socket binding and process inspection.
+    Distinguishes between ports used by MAPDL (which may be handled) and
+    ports used by other processes (which prevent launch).
+
+    Parameters
+    ----------
+    config : LaunchConfig
+        Launch configuration with port and ip settings
+    result : ValidationResult
+        Result object to update with errors/warnings
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    None
+        Errors/warnings added to result
+
+    Examples
+    --------
+    Validation is internal, called by validate_config():
+
+    >>> from ansys.mapdl.core.launcher.validation import validate_config
+    >>> config = LaunchConfig(port=50052, ...)
+    >>> result = validate_config(config)
+
+    Notes
+    -----
+    - Internal utility function
+    - Skipped if start_instance is False
+    - Specific error message for MAPDL vs other processes
+    - Exceptions from network module handled gracefully
     """
     if not config.start_instance:
         # If not starting instance, port validation is less critical
@@ -178,11 +303,45 @@ def _validate_port_availability(config: LaunchConfig, result: ValidationResult) 
 
 
 def _validate_file_permissions(config: LaunchConfig, result: ValidationResult) -> None:
-    """Validate file system permissions.
+    """Validate file system permissions for MAPDL executable and directories.
 
-    Parameters:
-        config: Launch configuration
-        result: ValidationResult to update
+    Checks that MAPDL executable exists and is executable, and that the
+    run directory is writable. Platform-specific checks for executability
+    (permission bit on POSIX, file extension on Windows).
+
+    Parameters
+    ----------
+    config : LaunchConfig
+        Launch configuration with exec_file and run_location
+    result : ValidationResult
+        Result object to update with errors/warnings
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    None
+        Errors added to result
+
+    Examples
+    --------
+    Validation is internal, called by validate_config():
+
+    >>> from ansys.mapdl.core.launcher.validation import validate_config
+    >>> config = LaunchConfig(exec_file="/nonexistent/mapdl", ...)
+    >>> result = validate_config(config)
+    >>> result.errors[0]
+    'MAPDL executable not found: /nonexistent/mapdl'
+
+    Notes
+    -----
+    - Internal utility function
+    - Skipped if start_instance is False
+    - POSIX: Requires executable permission bit
+    - Windows: Checks for .exe, .bat, .cmd, .com extensions
+    - Checks parent directory if run_location doesn't exist yet
     """
     if not config.start_instance:
         return
@@ -225,11 +384,50 @@ def _validate_file_permissions(config: LaunchConfig, result: ValidationResult) -
 def _validate_conflicting_options(
     config: LaunchConfig, result: ValidationResult
 ) -> None:
-    """Validate no conflicting options are set.
+    """Validate no conflicting or invalid option combinations exist.
 
-    Parameters:
-        config: Launch configuration
-        result: ValidationResult to update
+    Checks for option combinations that are incompatible or likely to fail:
+    - start_instance + custom IP (except on WSL)
+    - HPC launch + custom IP
+    - HPC launch on Windows
+    - Other incompatible combinations
+
+    Parameters
+    ----------
+    config : LaunchConfig
+        Launch configuration
+    result : ValidationResult
+        Result object to update with errors
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    None
+        Errors added to result
+
+    Examples
+    --------
+    Validation is internal, called by validate_config():
+
+    >>> from ansys.mapdl.core.launcher.validation import validate_config
+    >>> config = LaunchConfig(
+    ...     start_instance=True,
+    ...     ip="192.168.1.100",  # Conflicting!
+    ...     launch_on_hpc=False,
+    ...     ...
+    ... )
+    >>> result = validate_config(config)
+    >>> result.errors[0]
+    "Cannot specify 'ip' when 'start_instance' is True..."
+
+    Notes
+    -----
+    - Internal utility function
+    - Offers suggestions for resolution in error messages
+    - Checks IP conflicts separately for WSL, HPC, and local modes
     """
     # start_instance + ip conflict (except on WSL or localhost)
     if config.start_instance and config.ip not in ("127.0.0.1", "localhost"):
@@ -258,11 +456,50 @@ def _validate_conflicting_options(
 def _validate_platform_compatibility(
     config: LaunchConfig, result: ValidationResult
 ) -> None:
-    """Validate platform compatibility.
+    """Validate platform-specific compatibility constraints.
 
-    Parameters:
-        config: Launch configuration
-        result: ValidationResult to update
+    Checks that launch mode, transport mode, and configuration options
+    are compatible with the current platform (Windows, Linux, WSL).
+
+    Platform constraints:
+    - Console mode only on Linux
+    - UDS transport only on Linux
+    - mTLS transport requires certificates directory
+
+    Parameters
+    ----------
+    config : LaunchConfig
+        Launch configuration with mode and transport settings
+    result : ValidationResult
+        Result object to update with errors
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    None
+        Errors added to result
+
+    Examples
+    --------
+    Validation is internal, called by validate_config():
+
+    >>> from ansys.mapdl.core.launcher.models import LaunchMode, TransportMode
+    >>> from ansys.mapdl.core.launcher.validation import validate_config
+    >>> import os
+    >>> if os.name == "nt":  # Windows
+    ...     config = LaunchConfig(mode=LaunchMode.CONSOLE, ...)  # Invalid!
+    ...     result = validate_config(config)
+    ...     result.errors[0]
+    ...     'Console mode is only supported on Linux.'
+
+    Notes
+    -----
+    - Internal utility function
+    - Platform checks performed via os.name (nt=Windows, posix=Linux)
+    - Specific error messages for each platform incompatibility
     """
     # Console mode only on Linux
     if config.mode == LaunchMode.CONSOLE and os.name == "nt":

@@ -40,26 +40,51 @@ from .models import HPCJobInfo, LaunchConfig, ProcessInfo
 
 
 def launch_on_hpc(config: LaunchConfig, env_vars: Dict[str, str]) -> ProcessInfo:
-    """Launch MAPDL on HPC cluster via SLURM.
+    """Launch MAPDL on HPC cluster via SLURM scheduler.
 
-    Submits job to scheduler, waits for allocation, and returns
-    connection info.
+    Submits a job to the SLURM scheduler, waits for the job to enter the
+    RUNNING state, retrieves the compute node information, and returns
+    connection details for accessing the MAPDL instance.
 
-    Parameters:
-        config: Launch configuration
-        env_vars: Environment variables
+    Parameters
+    ----------
+    config : LaunchConfig
+        Launch configuration with HPC-specific settings including
+        scheduler_options, timeout, and port
+    env_vars : Dict[str, str]
+        Environment variables to pass to the SLURM job
 
-    Returns:
-        ProcessInfo with HPC job details
+    Returns
+    -------
+    ProcessInfo
+        Process information containing job ID, hostname, IP address,
+        and port for connecting to MAPDL on HPC
 
-    Raises:
-        MapdlDidNotStart: If job submission or allocation fails
+    Raises
+    ------
+    MapdlDidNotStart
+        If job submission fails, job allocation times out, or job reaches
+        a failed state (FAILED, CANCELLED, TIMEOUT, NODE_FAIL)
 
-    Examples:
-        >>> config = LaunchConfig(launch_on_hpc=True, ...)
-        >>> process_info = launch_on_hpc(config, env_vars)
-        >>> process_info.jobid
-        12345
+    Examples
+    --------
+    Launch MAPDL on HPC cluster:
+
+    >>> from ansys.mapdl.core.launcher.models import LaunchConfig
+    >>> from ansys.mapdl.core.launcher.hpc import launch_on_hpc
+    >>> config = LaunchConfig(launch_on_hpc=True, ...)
+    >>> env_vars = {"ANS_CMD_NODIAG": "TRUE"}
+    >>> process_info = launch_on_hpc(config, env_vars)
+    >>> print(f"Job ID: {process_info.jobid}")
+    >>> print(f"Host: {process_info.hostname}")
+
+    Notes
+    -----
+    - SLURM scheduler must be available on the system
+    - Scheduler options are passed directly to sbatch command
+    - Job ID can be used to monitor and cancel job with scontrol/scancel
+    - The returned ProcessInfo has process=None since it's remote
+    - Timeout applies to waiting for job to reach RUNNING state
     """
     # Generate base MAPDL command
     mapdl_cmd = _generate_mapdl_command(config)
@@ -89,36 +114,73 @@ def launch_on_hpc(config: LaunchConfig, env_vars: Dict[str, str]) -> ProcessInfo
 
 
 def detect_slurm_environment() -> bool:
-    """Detect if running in SLURM environment.
+    """Detect if running in a SLURM environment.
 
-    Checks for SLURM environment variables.
+    Checks for the presence of SLURM environment variables that are
+    set when running inside a SLURM job.
 
-    Returns:
-        True if SLURM environment detected
+    Returns
+    -------
+    bool
+        True if SLURM environment variables are detected, False otherwise
 
-    Examples:
-        >>> detect_slurm_environment()
-        False
+    Examples
+    --------
+    Check if running under SLURM:
+
+    >>> from ansys.mapdl.core.launcher.hpc import detect_slurm_environment
+    >>> if detect_slurm_environment():
+    ...     print("Running on SLURM cluster")
+    ... else:
+    ...     print("Not in SLURM environment")
+
+    Notes
+    -----
+    - Checks for presence of SLURM_JOB_NAME and SLURM_JOB_ID
+    - Returns False on systems without SLURM
+    - Returns False when not currently in a SLURM job allocation
     """
     return bool(os.environ.get("SLURM_JOB_NAME") and os.environ.get("SLURM_JOB_ID"))
 
 
 def resolve_slurm_resources(config: LaunchConfig) -> LaunchConfig:
-    """Resolve resources from SLURM environment.
+    """Resolve resource allocation from SLURM environment.
 
-    Overrides nproc, ram based on SLURM allocation.
+    Overrides nproc and RAM settings in the configuration based on
+    current SLURM job allocation. Useful when launching MAPDL within
+    an existing SLURM allocation to prevent over-subscription.
 
-    Parameters:
-        config: Initial configuration
+    Parameters
+    ----------
+    config : LaunchConfig
+        Initial launch configuration
 
-    Returns:
-        Updated configuration with SLURM resources
+    Returns
+    -------
+    LaunchConfig
+        Updated configuration with SLURM resources applied
 
-    Examples:
-        >>> config = LaunchConfig(...)
-        >>> updated = resolve_slurm_resources(config)
-        >>> updated.nproc  # From SLURM allocation
-        16
+    Raises
+    ------
+    None
+
+    Examples
+    --------
+    Resolve SLURM resources:
+
+    >>> from ansys.mapdl.core.launcher.models import LaunchConfig
+    >>> from ansys.mapdl.core.launcher.hpc import resolve_slurm_resources
+    >>> config = LaunchConfig(nproc=4, ram=8192)
+    >>> updated = resolve_slurm_resources(config)
+    >>> # If running under SLURM allocation with 16 CPUs:
+    >>> # updated.nproc == 16 (from SLURM_NTASKS or similar)
+
+    Notes
+    -----
+    - Respects SLURM_NTASKS, SLURM_CPUS_PER_TASK environment variables
+    - Converts SLURM_MEM_PER_NODE from various units (K, M, G, T) to MB
+    - Only updates fields where SLURM provides values
+    - Returns original config unchanged if not in SLURM environment
     """
     # Get SLURM resources
     slurm_nproc = _calculate_slurm_nproc()
@@ -142,13 +204,42 @@ def resolve_slurm_resources(config: LaunchConfig) -> LaunchConfig:
 
 
 def _generate_mapdl_command(config: LaunchConfig) -> List[str]:
-    """Generate MAPDL command for HPC.
+    """Generate MAPDL launch command for HPC submission.
 
-    Parameters:
-        config: Launch configuration
+    Constructs the complete MAPDL command line based on configuration,
+    including executable path, job name, processor count, port, and
+    additional switches.
 
-    Returns:
-        Command as list of strings
+    Parameters
+    ----------
+    config : LaunchConfig
+        Launch configuration
+
+    Returns
+    -------
+    List[str]
+        Command components as list of strings (ready for subprocess)
+
+    Raises
+    ------
+    None
+
+    Examples
+    --------
+    Generate command for HPC:
+
+    >>> from ansys.mapdl.core.launcher.models import LaunchConfig
+    >>> config = LaunchConfig(exec_file="/usr/ansys/bin/mapdl", ...)
+    >>> cmd = _generate_mapdl_command(config)
+    >>> ' '.join(cmd)
+    '/usr/ansys/bin/mapdl -j job1 -np 16 -port 50052 -grpc'
+
+    Notes
+    -----
+    - Internal function for HPC submission
+    - Always includes -grpc flag for consistency
+    - Adds -dis flag to additional_switches if not present
+    - Returns command as list for safe subprocess execution
     """
     cmd = [config.exec_file]
 
@@ -176,18 +267,47 @@ def _generate_mapdl_command(config: LaunchConfig) -> List[str]:
 def _generate_sbatch_command(
     mapdl_cmd: List[str], options: Optional[Dict[str, Any]]
 ) -> List[str]:
-    """Generate sbatch submission command.
+    """Generate sbatch submission command with proper shell escaping.
 
-    Uses shlex.quote() to safely escape each command component,
-    protecting against shell injection from single quotes or special
-    characters in jobname, exec_file, or additional_switches.
+    Constructs a sbatch command that wraps the MAPDL command, applying
+    scheduler options. Uses shlex.quote() to safely escape each command
+    component, protecting against shell injection from special characters
+    in jobname, exec_file, or additional_switches.
 
-    Parameters:
-        mapdl_cmd: MAPDL command to wrap
-        options: Scheduler options
+    Parameters
+    ----------
+    mapdl_cmd : List[str]
+        MAPDL command components as list of strings
+    options : Optional[Dict[str, Any]]
+        SLURM scheduler options (e.g., {'nodes': '1', 'cpus-per-task': '4'})
 
-    Returns:
-        sbatch command as list
+    Returns
+    -------
+    List[str]
+        sbatch command as list of strings
+
+    Raises
+    ------
+    ValueError
+        If 'wrap' option is found in options (reserved by PyMAPDL)
+
+    Examples
+    --------
+    Generate sbatch command:
+
+    >>> from ansys.mapdl.core.launcher.hpc import _generate_sbatch_command
+    >>> mapdl_cmd = ['/usr/ansys/bin/mapdl', '-j', 'job1', '-np', '16']
+    >>> options = {'nodes': '1', 'cpus-per-task': '4'}
+    >>> sbatch = _generate_sbatch_command(mapdl_cmd, options)
+    >>> ' '.join(sbatch)
+    "sbatch --nodes=1 --cpus-per-task=4 --wrap='/usr/ansys/bin/mapdl -j job1 -np 16'"
+
+    Notes
+    -----
+    - Each scheduler option key is automatically prefixed with - or --
+    - Single character keys get single dash, multi-character get double dash
+    - Uses shlex.quote() for proper shell escaping
+    - The 'wrap' option is reserved and cannot be used
     """
     cmd = ["sbatch"]
 
@@ -220,16 +340,40 @@ def _generate_sbatch_command(
 
 
 def _submit_job(cmd: List[str]) -> int:
-    """Submit job and extract job ID.
+    """Submit job to SLURM scheduler and extract job ID.
 
-    Parameters:
-        cmd: sbatch command as list of strings
+    Runs sbatch command and parses the response to extract the job ID.
+    The SLURM scheduler returns "Submitted batch job <ID>" on success.
 
-    Returns:
-        Job ID
+    Parameters
+    ----------
+    cmd : List[str]
+        sbatch command as list of strings
 
-    Raises:
-        MapdlDidNotStart: If submission fails
+    Returns
+    -------
+    int
+        Job ID assigned by SLURM scheduler
+
+    Raises
+    ------
+    MapdlDidNotStart
+        If sbatch command fails or output cannot be parsed
+
+    Examples
+    --------
+    Submit job to SLURM:
+
+    >>> from ansys.mapdl.core.launcher.hpc import _submit_job
+    >>> sbatch_cmd = ['sbatch', '--nodes=1', '--wrap=/path/to/mapdl']
+    >>> job_id = _submit_job(sbatch_cmd)
+    >>> print(f"Submitted job: {job_id}")
+
+    Notes
+    -----
+    - Internal function used by launch_on_hpc()
+    - Joins command into string and executes with shell
+    - Parses "Submitted batch job XXXXX" format from sbatch
     """
     # Join command for shell execution
     cmd_str = " ".join(cmd)
@@ -263,19 +407,44 @@ def _submit_job(cmd: List[str]) -> int:
 
 
 def _wait_for_job_ready(jobid: int, timeout: int) -> HPCJobInfo:
-    """Wait for job to reach RUNNING state.
+    """Wait for SLURM job to reach RUNNING state.
 
-    Polls scontrol until job is running or timeout.
+    Polls the job status using scontrol until the job reaches RUNNING state
+    or timeout is exceeded. Extracts batch host and resolves its IP address.
 
-    Parameters:
-        jobid: SLURM job ID
-        timeout: Maximum wait time
+    Parameters
+    ----------
+    jobid : int
+        SLURM job ID to monitor
 
-    Returns:
-        HPCJobInfo with batch host details
+    timeout : int
+        Maximum time in seconds to wait for job to start
 
-    Raises:
-        MapdlDidNotStart: If job doesn't start in time
+    Returns
+    -------
+    HPCJobInfo
+        Job information including job ID, state, hostname, and IP address
+
+    Raises
+    ------
+    MapdlDidNotStart
+        If job doesn't reach RUNNING state within timeout or enters failed state
+
+    Examples
+    --------
+    Wait for job to start:
+
+    >>> from ansys.mapdl.core.launcher.hpc import _wait_for_job_ready
+    >>> job_info = _wait_for_job_ready(12345, timeout=600)
+    >>> print(f"Job running on {job_info.hostname} ({job_info.ip})")
+
+    Notes
+    -----
+    - Internal function used by launch_on_hpc()
+    - Polls every 1 second
+    - Recognizes failed states: FAILED, CANCELLED, TIMEOUT, NODE_FAIL
+    - Uses scontrol show jobid command for job status
+    - Resolves hostname to IP using socket.gethostbyname()
     """
     LOG.info(f"Waiting for HPC job {jobid} to start (timeout: {timeout}s)")
 
@@ -332,16 +501,41 @@ def _wait_for_job_ready(jobid: int, timeout: int) -> HPCJobInfo:
 
 
 def _parse_batch_host(scontrol_output: str) -> str:
-    """Extract BatchHost from scontrol output.
+    """Extract BatchHost from scontrol command output.
 
-    Parameters:
-        scontrol_output: Output from scontrol command
+    Parses the output of 'scontrol show jobid' to find the BatchHost
+    field which specifies the compute node where the job is running.
 
-    Returns:
-        Batch host name
+    Parameters
+    ----------
+    scontrol_output : str
+        Raw output from scontrol command
 
-    Raises:
-        ValueError: If BatchHost not found
+    Returns
+    -------
+    str
+        Batch host name (e.g., 'compute-node-05')
+
+    Raises
+    ------
+    ValueError
+        If BatchHost field not found in output
+
+    Examples
+    --------
+    Parse batch host:
+
+    >>> from ansys.mapdl.core.launcher.hpc import _parse_batch_host
+    >>> output = '''JobID=12345 ArrayJobID=N/A
+    ... BatchHost=compute-node-05
+    ... JobState=RUNNING'''
+    >>> _parse_batch_host(output)
+    'compute-node-05'
+
+    Notes
+    -----
+    - Searches for line containing "BatchHost=" prefix
+    - Internal utility function
     """
     for line in scontrol_output.split("\n"):
         if "BatchHost=" in line:
@@ -352,16 +546,42 @@ def _parse_batch_host(scontrol_output: str) -> str:
 
 
 def _parse_job_state(scontrol_output: str) -> str:
-    """Extract JobState from scontrol output.
+    """Extract JobState from scontrol command output.
 
-    Parameters:
-        scontrol_output: Output from scontrol command
+    Parses the output of 'scontrol show jobid' to find the JobState
+    field which indicates the current state of the job.
 
-    Returns:
-        Job state string
+    Parameters
+    ----------
+    scontrol_output : str
+        Raw output from scontrol command
 
-    Raises:
-        ValueError: If JobState not found
+    Returns
+    -------
+    str
+        Job state string (e.g., 'PENDING', 'RUNNING', 'FAILED')
+
+    Raises
+    ------
+    ValueError
+        If JobState field not found in output
+
+    Examples
+    --------
+    Parse job state:
+
+    >>> from ansys.mapdl.core.launcher.hpc import _parse_job_state
+    >>> output = '''JobID=12345 ArrayJobID=N/A
+    ... JobState=RUNNING
+    ... BatchHost=compute-node-05'''
+    >>> _parse_job_state(output)
+    'RUNNING'
+
+    Notes
+    -----
+    - Searches for line containing "JobState=" prefix
+    - Internal utility function
+    - Common states: PENDING, RUNNING, COMPLETED, FAILED, CANCELLED, TIMEOUT
     """
     for line in scontrol_output.split("\n"):
         if "JobState=" in line:
@@ -372,10 +592,35 @@ def _parse_job_state(scontrol_output: str) -> str:
 
 
 def _calculate_slurm_nproc() -> Optional[int]:
-    """Calculate nproc from SLURM environment.
+    """Calculate processor count from SLURM environment variables.
 
-    Returns:
-        Number of processors or None
+    Determines the number of processors from SLURM_NTASKS and
+    SLURM_CPUS_PER_TASK environment variables, with fallback to
+    individual values if only one is available.
+
+    Returns
+    -------
+    Optional[int]
+        Number of processors, or None if SLURM variables not set
+
+    Raises
+    ------
+    None
+
+    Examples
+    --------
+    Calculate SLURM processors:
+
+    >>> from ansys.mapdl.core.launcher.hpc import _calculate_slurm_nproc
+    >>> # If SLURM_NTASKS=4, SLURM_CPUS_PER_TASK=4
+    >>> _calculate_slurm_nproc()
+    16
+
+    Notes
+    -----
+    - Internal utility function
+    - Used by resolve_slurm_resources()
+    - Priority: ntasks * cpus_per_task > ntasks > cpus_per_task
     """
     ntasks = os.environ.get("SLURM_NTASKS")
     cpus_per_task = os.environ.get("SLURM_CPUS_PER_TASK")
@@ -391,10 +636,36 @@ def _calculate_slurm_nproc() -> Optional[int]:
 
 
 def _calculate_slurm_ram() -> Optional[int]:
-    """Calculate RAM from SLURM environment.
+    """Calculate RAM allocation from SLURM environment variables.
 
-    Returns:
-        RAM in MB or None
+    Parses SLURM_MEM_PER_NODE environment variable and converts to MB.
+    Supports various memory units (K, M, G, T).
+
+    Returns
+    -------
+    Optional[int]
+        RAM allocation in MB, or None if not set or cannot be parsed
+
+    Examples
+    --------
+    Calculate SLURM RAM:
+
+    >>> from ansys.mapdl.core.launcher.hpc import _calculate_slurm_ram
+    >>> # If SLURM_MEM_PER_NODE="8G"
+    >>> _calculate_slurm_ram()
+    8192
+
+    >>> # If SLURM_MEM_PER_NODE="2048M"
+    >>> _calculate_slurm_ram()
+    2048
+
+    Notes
+    -----
+    - Internal utility function
+    - Used by resolve_slurm_resources()
+    - Supports: K (kilobytes), M (megabytes), G (gigabytes), T (terabytes)
+    - Defaults to MB if no unit specified
+    - Returns None and logs warning on parse errors
     """
     mem = os.environ.get("SLURM_MEM_PER_NODE")
     if not mem:

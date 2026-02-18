@@ -39,24 +39,53 @@ if TYPE_CHECKING:
 def create_grpc_client(
     config: LaunchConfig, process_info: Optional[ProcessInfo] = None
 ) -> MapdlGrpc:
-    """Create MapdlGrpc client instance.
+    """Create and connect to a MapdlGrpc client instance.
 
-    Parameters:
-        config: Launch configuration
-        process_info: Process info (if started locally)
+    Establishes a connection to the MAPDL gRPC server using the provided
+    configuration. If process_info is provided, uses its IP and port;
+    otherwise uses the configuration's IP and port. The database is cleared
+    upon connection if configured.
 
-    Returns:
-        Connected MapdlGrpc instance
+    Parameters
+    ----------
+    config : LaunchConfig
+        Launch configuration containing connection parameters and behavior flags
+    process_info : Optional[ProcessInfo], default: None
+        Process information from a locally started instance. If provided,
+        the IP and port from this will override config's IP and port
 
-    Raises:
-        ConnectionError: If cannot connect to MAPDL
+    Returns
+    -------
+    MapdlGrpc
+        Connected and initialized MapdlGrpc client instance
 
-    Examples:
-        >>> config = LaunchConfig(...)
-        >>> process_info = ProcessInfo(...)
-        >>> mapdl = create_grpc_client(config, process_info)
-        >>> mapdl.version
-        '22.2'
+    Raises
+    ------
+    ConnectionError
+        If unable to establish connection to the MAPDL gRPC server
+    socket.error
+        If network connection fails
+
+    Examples
+    --------
+    Connect using process information from local launch:
+
+    >>> from ansys.mapdl.core.launcher.models import LaunchConfig, ProcessInfo
+    >>> config = LaunchConfig(ip='127.0.0.1', port=50052)
+    >>> process_info = ProcessInfo(port=50052, ip='127.0.0.1', process=None)
+    >>> mapdl = create_grpc_client(config, process_info)
+
+    Connect to existing instance:
+
+    >>> config = LaunchConfig(ip='192.168.1.100', port=50052)
+    >>> mapdl = create_grpc_client(config)
+
+    Notes
+    -----
+    - If `clear_on_connect` is True in config, the MAPDL database will be
+      cleared immediately after connection
+    - The timeout from config applies to the connection attempt
+    - Additional gRPC channel parameters can be configured via the config object
     """
     # Determine IP and port
     if process_info:
@@ -97,17 +126,44 @@ def create_grpc_client(
 
 
 def create_console_client(config: LaunchConfig) -> "MapdlConsole":
-    """Create MapdlConsole client instance (legacy).
+    """Create MapdlConsole client instance for legacy console mode.
 
-    Parameters:
-        config: Launch configuration
+    Creates a console-based MAPDL client for use with older MAPDL versions
+    or environments where gRPC is not available. This is a legacy interface
+    maintained for backward compatibility.
 
-    Returns:
-        Connected MapdlConsole instance
+    Parameters
+    ----------
+    config : LaunchConfig
+        Launch configuration with console-specific parameters including
+        exec_file, run_location, jobname, and other settings
 
-    Examples:
-        >>> config = LaunchConfig(mode=LaunchMode.CONSOLE, ...)
-        >>> mapdl = create_console_client(config)
+    Returns
+    -------
+    MapdlConsole
+        Created and initialized MapdlConsole instance
+
+    Raises
+    ------
+    FileNotFoundError
+        If exec_file does not exist
+    OSError
+        If working directory cannot be created or accessed
+
+    Examples
+    --------
+    Create and use console client:
+
+    >>> from ansys.mapdl.core.launcher.models import LaunchConfig, LaunchMode
+    >>> config = LaunchConfig(mode=LaunchMode.CONSOLE, ...)
+    >>> mapdl = create_console_client(config)
+
+    Notes
+    -----
+    - This mode is deprecated in favor of gRPC mode for new code
+    - Console mode may have limited functionality compared to gRPC
+    - Available only on Linux systems
+    - Useful for MAPDL versions before 2021R1
     """
     from ansys.mapdl.core.mapdl_console import MapdlConsole
 
@@ -130,20 +186,57 @@ def create_console_client(config: LaunchConfig) -> "MapdlConsole":
 
 
 def connect_to_existing(config: LaunchConfig) -> MapdlGrpc:
-    """Connect to existing MAPDL instance.
+    """Connect to an existing MAPDL instance without starting a new one.
 
-    Parameters:
-        config: Configuration with ip and port
+    Establishes a connection to an already running MAPDL instance specified
+    by IP address and port. This is useful for connecting to MAPDL instances
+    running on remote machines or HPC clusters.
 
-    Returns:
-        Connected MapdlGrpc instance
+    Parameters
+    ----------
+    config : LaunchConfig
+        Configuration object with IP address and port of existing instance.
+        Must have start_instance=False
 
-    Raises:
-        ConnectionError: If cannot connect
+    Returns
+    -------
+    MapdlGrpc
+        Connected MapdlGrpc client to existing instance
 
-    Examples:
-        >>> config = LaunchConfig(start_instance=False, ip="192.168.1.100", ...)
-        >>> mapdl = connect_to_existing(config)
+    Raises
+    ------
+    ConnectionError
+        If unable to establish connection to the specified instance
+    socket.error
+        If network connection fails
+
+    Examples
+    --------
+    Connect to remote MAPDL instance:
+
+    >>> from ansys.mapdl.core.launcher.models import LaunchConfig
+    >>> config = LaunchConfig(
+    ...     start_instance=False,
+    ...     ip="192.168.1.100",
+    ...     port=50052
+    ... )
+    >>> mapdl = connect_to_existing(config)
+
+    Connect to MAPDL on localhost:
+
+    >>> config = LaunchConfig(
+    ...     start_instance=False,
+    ...     ip="127.0.0.1",
+    ...     port=50052
+    ... )
+    >>> mapdl = connect_to_existing(config)
+
+    Notes
+    -----
+    - The target MAPDL instance must be running and listening on the
+      specified IP and port
+    - Ensure network connectivity and firewall rules allow connection
+    - Default timeout from config will be used for connection attempts
     """
     LOG.info(f"Connecting to existing MAPDL instance at {config.ip}:{config.port}")
     return create_grpc_client(config, process_info=None)
