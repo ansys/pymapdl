@@ -218,7 +218,6 @@ import ansys.mapdl.core as pymapdl
 
 pymapdl.RUNNING_TESTS = True
 
-from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
@@ -545,9 +544,17 @@ def running_test():
 
 @pytest.fixture(autouse=True, scope="function")
 def run_before_and_after_tests(
-    request: pytest.FixtureRequest, mapdl: Mapdl
-) -> Generator[Mapdl]:
+    request: pytest.FixtureRequest,
+) -> Generator[None]:
     """Fixture to execute asserts before and after a test is run"""
+
+    # Skip for CLI tests which don't use MAPDL
+    if "test_cli" in request.node.fspath.strpath:
+        yield
+        return
+
+    # Get mapdl fixture for other tests
+    mapdl = request.getfixturevalue("mapdl")
 
     test_name = os.environ.get(
         "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
