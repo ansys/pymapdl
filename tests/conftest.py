@@ -588,8 +588,9 @@ def run_before_and_after_tests(
     # Returning to default
     mapdl.graphics("full")
 
-    # Handling extra instances
-    make_sure_not_instances_are_left_open(VALID_PORTS)
+    if DEBUG_TESTING:
+        # Handling extra instances
+        make_sure_not_instances_are_left_open(VALID_PORTS)
 
     # Teardown
     if mapdl.is_local and mapdl._exited:
