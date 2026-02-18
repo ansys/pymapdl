@@ -1,30 +1,37 @@
-.. _ref_nonlinear_options_commands_api:
 
-*****************
-Nonlinear options
-*****************
+.. _ref_nonlinear_options:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to define options for nonlinear analyses.
+NonlinearOptions
+================
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.nonlinear_options
+
+.. autoclass:: ansys.mapdl.core._commands.solution.nonlinear_options.NonlinearOptions
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.arclen
-   Mapdl.arctrm
-   Mapdl.bucopt
-   Mapdl.cnvtol
-   Mapdl.crplim
-   Mapdl.gst
-   Mapdl.lnsrch
-   Mapdl.ncnv
-   Mapdl.neqit
-   Mapdl.nladaptive
-   Mapdl.nldiag
-   Mapdl.nlgeom
-   Mapdl.nlhist
-   Mapdl.nlmesh
-   Mapdl.nropt
-   Mapdl.pred
-   Mapdl.pstres
+
+   NonlinearOptions.arclen
+   NonlinearOptions.arctrm
+   NonlinearOptions.bucopt
+   NonlinearOptions.cnvtol
+   NonlinearOptions.gst
+   NonlinearOptions.lnsrch
+   NonlinearOptions.ncnv
+   NonlinearOptions.neqit
+   NonlinearOptions.nladaptive
+   NonlinearOptions.nldiag
+   NonlinearOptions.nlgeom
+   NonlinearOptions.nlhist
+   NonlinearOptions.nlmesh
+   NonlinearOptions.nropt
+   NonlinearOptions.pred
+   NonlinearOptions.pstres
+   NonlinearOptions.semiimplicit
+   NonlinearOptions.soloption
+   NonlinearOptions.ssopt
+   NonlinearOptions.sstif
