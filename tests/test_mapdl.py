@@ -2641,6 +2641,7 @@ def test_remove_temp_dir_on_exit(mapdl, cleared, tmpdir):
     assert os.path.exists(path) is False
 
 
+@pytest.mark.skipif(True, reason="See #4430")
 @requires("local")
 def test_remove_temp_dir_on_exit_with_launch_mapdl(mapdl, cleared):
 
