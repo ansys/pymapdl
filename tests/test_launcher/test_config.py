@@ -407,7 +407,7 @@ class TestStartTimeoutDeprecation:
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            resolve_launch_config(start_timeout=120)
+            resolve_launch_config(start_timeout=120, start_instance=False)
             assert len(w) >= 1
             assert issubclass(w[-1].category, DeprecationWarning)
             assert "start_timeout" in str(w[-1].message)
@@ -415,13 +415,15 @@ class TestStartTimeoutDeprecation:
     def test_start_timeout_used_when_timeout_not_provided(self):
         """Test that start_timeout is used when timeout is None."""
         with patch("warnings.warn"):
-            config = resolve_launch_config(start_timeout=200)
+            config = resolve_launch_config(start_timeout=200, start_instance=False)
             assert config.timeout == 200
 
     def test_timeout_takes_precedence_over_start_timeout(self):
         """Test that timeout takes precedence over start_timeout."""
         with patch("warnings.warn"):
-            config = resolve_launch_config(start_timeout=200, timeout=150)
+            config = resolve_launch_config(
+                start_timeout=200, timeout=150, start_instance=False
+            )
             assert config.timeout == 150
 
 

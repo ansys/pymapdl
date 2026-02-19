@@ -93,7 +93,7 @@ class TestLaunchMapdlProcessOnly:
             patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
             patch("ansys.mapdl.core.launcher.prepare_environment") as mock_prep_env,
             patch(
-                "ansys.mapdl.core.launcher.launch_mapdl_process"
+                "ansys.mapdl.core.launcher._launch_mapdl_process"
             ) as mock_launch_process,
         ):
             # Setup mocks
@@ -125,7 +125,7 @@ class TestLaunchMapdlProcessOnly:
             patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
             patch("ansys.mapdl.core.launcher.prepare_environment") as mock_prep_env,
             patch(
-                "ansys.mapdl.core.launcher.launch_mapdl_process"
+                "ansys.mapdl.core.launcher._launch_mapdl_process"
             ) as mock_launch_process,
         ):
             # Setup mocks - no PID for HPC
@@ -244,7 +244,7 @@ class TestLaunchMapdlProcessOnly:
             patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
             patch("ansys.mapdl.core.launcher.prepare_environment") as mock_prep_env,
             patch(
-                "ansys.mapdl.core.launcher.launch_mapdl_process"
+                "ansys.mapdl.core.launcher._launch_mapdl_process"
             ) as mock_launch_process,
         ):
             # Setup mocks - process launch failure
@@ -272,7 +272,7 @@ class TestLaunchMapdlProcessOnly:
             patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
             patch("ansys.mapdl.core.launcher.prepare_environment") as mock_prep_env,
             patch(
-                "ansys.mapdl.core.launcher.launch_mapdl_process"
+                "ansys.mapdl.core.launcher._launch_mapdl_process"
             ) as mock_launch_process,
         ):
             # Setup mocks
@@ -308,7 +308,7 @@ class TestLaunchMapdlProcessOnly:
             patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
             patch("ansys.mapdl.core.launcher.prepare_environment") as mock_prep_env,
             patch(
-                "ansys.mapdl.core.launcher.launch_mapdl_process"
+                "ansys.mapdl.core.launcher._launch_mapdl_process"
             ) as mock_launch_process,
         ):
             # Setup mocks with custom port
@@ -339,7 +339,7 @@ class TestLaunchMapdlProcessOnly:
             patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
             patch("ansys.mapdl.core.launcher.prepare_environment") as mock_prep_env,
             patch(
-                "ansys.mapdl.core.launcher.launch_mapdl_process"
+                "ansys.mapdl.core.launcher._launch_mapdl_process"
             ) as mock_launch_process,
         ):
             # Setup mocks
@@ -376,7 +376,7 @@ class TestLaunchMapdlProcessOnly:
             patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
             patch("ansys.mapdl.core.launcher.prepare_environment") as mock_prep_env,
             patch(
-                "ansys.mapdl.core.launcher.launch_mapdl_process"
+                "ansys.mapdl.core.launcher._launch_mapdl_process"
             ) as mock_launch_process,
         ):
             # Setup mocks
@@ -411,7 +411,7 @@ class TestLaunchMapdlProcessOnly:
             patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
             patch("ansys.mapdl.core.launcher.prepare_environment") as mock_prep_env,
             patch(
-                "ansys.mapdl.core.launcher.launch_mapdl_process"
+                "ansys.mapdl.core.launcher._launch_mapdl_process"
             ) as mock_launch_process,
         ):
             # Setup mocks
@@ -441,7 +441,7 @@ class TestLaunchMapdlProcessOnly:
             patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
             patch("ansys.mapdl.core.launcher.prepare_environment") as mock_prep_env,
             patch(
-                "ansys.mapdl.core.launcher.launch_mapdl_process"
+                "ansys.mapdl.core.launcher._launch_mapdl_process"
             ) as mock_launch_process,
         ):
             # Setup mocks
