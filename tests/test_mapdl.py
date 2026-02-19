@@ -272,14 +272,14 @@ def warns_in_cdread_error_log(mapdl, tmpdir):
 
 
 @pytest.mark.parametrize("command", DEPRECATED_COMMANDS)
-def test_deprecated_commands(mapdl, cleared, command):
+def test_deprecated_commands(mapdl, command):
     with pytest.raises(CommandDeprecated):
         method = getattr(mapdl, command)
         method()
 
 
 @requires("grpc")
-def test_internal_name_grpc(mapdl, cleared):
+def test_internal_name_grpc(mapdl):
     assert str(mapdl._ip) in mapdl.name
     assert str(mapdl._port) in mapdl.name
     assert "GRPC" in mapdl.name
@@ -304,7 +304,7 @@ def test_jobname(mapdl, cleared):
 
 
 @requires("grpc")
-def test_server_version(mapdl, cleared):
+def test_server_version(mapdl):
     if mapdl.version == 20.2:
         assert mapdl._server_version == (0, 0, 0)
     elif mapdl.version == 21.1:
@@ -319,7 +319,7 @@ def test_server_version(mapdl, cleared):
 
 
 @requires("grpc")
-def test_global_mute(mapdl, cleared):
+def test_global_mute(mapdl):
     mapdl.mute = True
     assert mapdl.mute is True
     assert mapdl.prep7() is None
@@ -381,12 +381,12 @@ def test_no_results(mapdl, cleared, tmpdir):
         mapdl.download_result(pth)
 
 
-def test_empty(mapdl, cleared):
+def test_empty(mapdl):
     with pytest.raises(ValueError):
         mapdl.run("")
 
 
-def test_multiline_fail_value_error(mapdl, cleared):
+def test_multiline_fail_value_error(mapdl):
     with pytest.raises(ValueError, match="Use ``input_strings``"):
         mapdl.run(CMD_BLOCK)
 
@@ -400,25 +400,25 @@ def test_multiline_fail_deprecation_warning(mapdl, cleared):
         ), "not capturing the end of the block"
 
 
-def test_input_strings_fail(mapdl, cleared):
+def test_input_strings_fail(mapdl, clear_at_end):
     resp = mapdl.input_strings(CMD_BLOCK)
     assert "IS SOLID186" in resp, "not capturing the beginning of the block"
     assert "GENERATE NODES AND ELEMENTS" in resp, "not capturing the end of the block"
 
 
-def test_input_strings(mapdl, cleared):
+def test_input_strings(mapdl, clear_at_end):
     assert isinstance(mapdl.input_strings(CMD_BLOCK), str)
     assert isinstance(mapdl.input_strings(CMD_BLOCK.splitlines()), str)
 
 
-def test_str(mapdl, cleared):
+def test_str(mapdl):
     mapdl_str = str(mapdl)
     assert "Product:" in mapdl_str
     assert "MAPDL Version" in mapdl_str
     assert str(mapdl.version) in mapdl_str
 
 
-def test_version(mapdl, cleared):
+def test_version(mapdl):
     assert isinstance(mapdl.version, float)  # Checking MAPDL version
     expected_version = float(
         datetime.now().year - 2000 + 1 + 1
@@ -438,18 +438,18 @@ def test_pymapdl_version():
     assert version_[2].isnumeric() or "dev" in version_[2]
 
 
-def test_comment(cleared, mapdl):
+def test_comment(mapdl):
     comment = "Testing..."
     resp = mapdl.com(comment)
     assert comment in resp
 
 
-def test_basic_command(cleared, mapdl):
+def test_basic_command(mapdl):
     resp = mapdl.finish()
     assert "ROUTINE COMPLETED" in resp
 
 
-def test_allow_ignore(mapdl, cleared):
+def test_allow_ignore(mapdl, clear_at_end):
     with pytest.warns(DeprecationWarning):
         mapdl.allow_ignore = True
 
@@ -478,7 +478,7 @@ def test_allow_ignore(mapdl, cleared):
         mapdl.allow_ignore = False
 
 
-def test_chaining(mapdl, cleared):
+def test_chaining(mapdl, clear_at_end):
     # test chaining with distributed only
     if mapdl._distributed:
         with pytest.raises(MapdlRuntimeError):
@@ -493,12 +493,12 @@ def test_chaining(mapdl, cleared):
         assert mapdl.geometry.n_keypoint == 1000
 
 
-def test_error(mapdl, cleared):
+def test_error(mapdl, clear_at_end):
     with pytest.raises(MapdlRuntimeError):
         mapdl.a(0, 0, 0, 0)
 
 
-def test_ignore_errors(mapdl, cleared):
+def test_ignore_errors(mapdl):
     mapdl.ignore_errors = False
     assert not mapdl.ignore_errors
     mapdl.ignore_errors = True
@@ -513,7 +513,7 @@ def test_ignore_errors(mapdl, cleared):
 
 
 @requires("grpc")
-def test_list(mapdl, cleared, tmpdir):
+def test_list(mapdl, tmpdir):
     """Added for backwards compatibility"""
     fname = "tmp.txt"
     filename = str(tmpdir.mkdir("tmpdir").join(fname))
@@ -527,12 +527,12 @@ def test_list(mapdl, cleared, tmpdir):
 
 
 @requires("grpc")
-def test_invalid_input(mapdl, cleared):
+def test_invalid_input(mapdl):
     with pytest.raises(FileNotFoundError):
         mapdl.input("thisisnotafile")
 
 
-def test_keypoints(cleared, mapdl):
+def test_keypoints(mapdl, cleared, clear_at_end):
     assert mapdl.geometry.n_keypoint == 0
     kps = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
 
@@ -551,7 +551,7 @@ def test_keypoints(cleared, mapdl):
 
 
 @requires("pyvista")
-def test_lines(mapdl, cleared):
+def test_lines(mapdl, clear_at_start_and_end):
     assert mapdl.geometry.n_line == 0
 
     k0 = mapdl.k("", 0, 0, 0)
@@ -572,7 +572,7 @@ def test_lines(mapdl, cleared):
 
 
 @requires("local")
-def test_apdl_logging_start(tmpdir, mapdl, cleared):
+def test_apdl_logging_start(tmpdir, mapdl, clear_at_start_and_end):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
     launch_options = launch_mapdl(
@@ -611,7 +611,7 @@ def test_apdl_logging_start(tmpdir, mapdl, cleared):
     mapdl._close_apdl_log()
 
 
-def test_apdl_logging(mapdl, cleared, tmpdir):
+def test_apdl_logging(mapdl, clear_at_start_and_end, tmpdir):
     tmp_dir = tmpdir.mkdir("tmpdir")
     file_name = "tmp_logger.log"
     file_path = str(tmp_dir.join(file_name))

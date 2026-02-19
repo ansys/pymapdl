@@ -639,21 +639,35 @@ def path_tests(tmpdir):
 
 
 def clear(mapdl):
-    mapdl.finish()
-    # *MUST* be NOSTART.  With START fails after 20 calls...
-    # this has been fixed in later pymapdl and MAPDL releases
-    mapdl.clear("NOSTART")
-    mapdl.header("DEFA")
-    mapdl.format("DEFA")
-    mapdl.page("DEFA")
+    with mapdl.non_interactive:
+        mapdl.finish()
+        # *MUST* be NOSTART.  With START fails after 20 calls...
+        # this has been fixed in later pymapdl and MAPDL releases
+        mapdl.clear("NOSTART")
+        mapdl.header("DEFA")
+        mapdl.format("DEFA")
+        mapdl.page("DEFA")
 
-    mapdl.prep7()
+        mapdl.prep7()
 
 
 @pytest.fixture(scope="function")
 def cleared(mapdl):
     clear(mapdl)
     yield
+
+
+@pytest.fixture(scope="function")
+def clear_at_end(mapdl):
+    yield
+    clear(mapdl)
+
+
+@pytest.fixture(scope="function")
+def clear_at_start_and_end(mapdl):
+    clear(mapdl)
+    yield
+    clear(mapdl)
 
 
 ################################################################
