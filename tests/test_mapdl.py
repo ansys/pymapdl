@@ -900,7 +900,7 @@ def test_cyclic_solve(mapdl, clear_at_start_and_end):
     ),
 )
 @pytest.mark.parametrize("col_header", [False, True])
-def test_load_table(mapdl, cleared, dim_rows, dim_cols, col_header):
+def test_load_table(mapdl, clear_at_end, dim_rows, dim_cols, col_header):
     my_conv = np.random.rand(dim_rows, dim_cols)
     my_conv[:, 0] = np.arange(dim_rows)  # "time" values
 
@@ -913,7 +913,7 @@ def test_load_table(mapdl, cleared, dim_rows, dim_cols, col_header):
         assert np.allclose(mapdl.parameters["my_conv"], my_conv[:, 1:], atol=1e-7)
 
 
-def test_load_array_negative_and_floats(mapdl, cleared):
+def test_load_array_negative_and_floats(mapdl, clear_at_end):
     my_array = np.array(
         [
             [0, 0.001],
@@ -929,7 +929,7 @@ def test_load_array_negative_and_floats(mapdl, cleared):
     assert np.allclose(mapdl.parameters["MY_ARRAY"], my_array)
 
 
-def test_load_table_negative_and_floats(mapdl, cleared):
+def test_load_table_negative_and_floats(mapdl, clear_at_end):
     my_array = np.array(
         [
             [-100, 0.001],
@@ -945,7 +945,7 @@ def test_load_table_negative_and_floats(mapdl, cleared):
     assert np.allclose(mapdl.parameters["MY_ARRAY"].ravel(), my_array[:, 1].ravel())
 
 
-def test_load_table_error_ascending_row(mapdl, cleared):
+def test_load_table_error_ascending_row(mapdl):
     my_conv = np.ones((3, 3))
     my_conv[1, 0] = 4
     with pytest.raises(ValueError, match="requires that the first column is in"):
@@ -972,7 +972,7 @@ def test_load_array(mapdl, cleared, dimx, dimy):
         np.zeros((3, 3)),
     ],
 )
-def test_load_array_types(mapdl, cleared, array):
+def test_load_array_types(mapdl, clear_at_end, array):
     mapdl.load_array("myarr", array)
     assert np.allclose(mapdl.parameters["myarr"], array, rtol=1e-7)
 
@@ -1035,7 +1035,7 @@ def test_lssolve(mapdl, cleared):
     assert f"Load step file number {lsnum}.  Begin solution ..." in out
 
 
-def test_coriolis(mapdl, cleared):
+def test_coriolis(mapdl):
     """Simply test that we're formatting the input parm for coriolis"""
     # must be v190 or newer
     resp = mapdl.coriolis(True, True, True, True)
@@ -1045,13 +1045,13 @@ def test_coriolis(mapdl, cleared):
     assert "PRINT ROTOR MASS SUMMARY ACTIVATED" in resp
 
 
-def test_title(mapdl, cleared):
+def test_title(mapdl, clear_at_end):
     title = "title1"  # the title cannot be longer than 7 chars. Check *get,parm,active,0,title for more info.
     mapdl.title(title)
     assert title == mapdl.get("par", "active", "0", "title")
 
 
-def test_cdread(mapdl, cleared):
+def test_cdread(mapdl, clear_at_end):
     random_letters = random_string(4)
 
     mapdl.run(f"PARMTEST='{random_letters}'")
@@ -1084,7 +1084,7 @@ def test_cdread(mapdl, cleared):
 
 
 @requires("local")
-def test_cdread_different_location(mapdl, cleared, tmpdir):
+def test_cdread_different_location(mapdl, clear_at_end, tmpdir):
     random_letters = random_string(4)
     dirname = "tt" + random_letters
 
