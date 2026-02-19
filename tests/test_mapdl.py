@@ -1264,8 +1264,8 @@ def test_cwd(mapdl, cleared, tmpdir):
         mapdl.sys(f"mkdir tmp")
 
     try:
-        mapdl.directory = str(tempdir_)
-        assert str(mapdl.directory) == str(tempdir_).replace("\\", "/")
+        mapdl.directory = tempdir_
+        assert pathlib.Path(mapdl.directory) == pathlib.Path(tempdir_)
 
         wrong_path = "wrong_path"
         with pytest.raises(IncorrectWorkingDirectory, match="working directory"):
@@ -1346,8 +1346,6 @@ def test_inquire_exist(mapdl, cleared, tmpdir):
 
     finally:
         # Clean up the temporary file
-        if os.path.exists(existing_file):
-            os.remove(existing_file)
         mapdl.slashdelete(basename)
 
 
