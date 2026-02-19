@@ -133,19 +133,20 @@ jobs:
       contents: read  # Needed to read repository contents for tests
       packages: read  # Needed to pull Docker images from GitHub packages
     env:
+      ANSYS_MAPDL_GRPC_TRANSPORT: 'insecure'
+      DATAPROCESSING_DEBUG: /home/mapdl/dpf_logs
+      HAS_DPF: ${{ inputs.test_dpf }}
+      OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
+      OMPI_ALLOW_RUN_AS_ROOT: 1
       ON_CI: True
       ON_LOCAL: true
       ON_UBUNTU: true
-      HAS_DPF: ${{ inputs.test_dpf }}
-      PYMAPDL_DEBUG_TESTING: True
-      TESTING_MINIMAL: ${{ inputs.testing-minimal }}
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
-      PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
-      OMPI_ALLOW_RUN_AS_ROOT: 1
-      OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
-      DATAPROCESSING_DEBUG: /home/mapdl/dpf_logs
+      PYMAPDL_DEBUG_TESTING: True
       PYMAPDL_GRPC_TRANSPORT: 'insecure'
-      ANSYS_MAPDL_GRPC_TRANSPORT: 'insecure'
+      PYTEST_ARGUMENTS: ""
+      PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
+      TESTING_MINIMAL: ${{ inputs.testing-minimal }}
 
     container:
       image: "${{ inputs.package-registry }}:${{ inputs.mapdl-version }}" # zizmor: ignore[unpinned-images]
@@ -241,15 +242,15 @@ jobs:
 
       - name: "Unit testing"
         env:
-          ON_MINIMAL: ${{ inputs.testing-minimal }}
-          ON_CONSOLE: ${{ inputs.on-console }}
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
           file_name: ${{ inputs.file-name }}
-          PYTEST_ARGUMENTS: "${{ env.PYTEST_ARGUMENTS }}"
-          MAPDL_VERSION: ${{ inputs.mapdl-version }}
-          PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
           LATEST_VERSION: "${{ inputs.latest-version }}"
+          MAPDL_VERSION: ${{ inputs.mapdl-version }}
+          ON_CONSOLE: ${{ inputs.on-console }}
+          ON_MINIMAL: ${{ inputs.testing-minimal }}
           PYMAPDL_NPROC: 2
+          PYTEST_ARGUMENTS: "${{ env.PYTEST_ARGUMENTS }}"
+          PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
