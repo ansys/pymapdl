@@ -687,7 +687,7 @@ def test_apdl_logging(mapdl, clear_at_start_and_end, tmpdir):
     assert file_name in os.listdir(tmp_dir)
 
 
-def test_nodes(tmpdir, cleared, mapdl):
+def test_nodes(tmpdir, clear_at_end, mapdl):
     mapdl.n(1, 1, 1, 1)
     mapdl.n(11, 10, 1, 1)
     mapdl.fill(1, 11, 9)
@@ -717,7 +717,7 @@ def test_enum(mapdl, make_block):
     assert np.allclose(mapdl.mesh.enum, range(1, mapdl.mesh.n_elem + 1))
 
 
-def test_elements(cleared, mapdl):
+def test_elements(clear_at_start_and_end, mapdl):
     mapdl.et(1, 185)
 
     # two basic cells
@@ -773,7 +773,7 @@ def test_elements(cleared, mapdl):
         np.random.random((10, 3, 3)),
     ),
 )
-def test_set_get_parameters(mapdl, cleared, parm):
+def test_set_get_parameters(mapdl, parm):
     parm_name = pymapdl.misc.random_string(20)
     mapdl.parameters[parm_name] = parm
 
@@ -789,7 +789,7 @@ def test_set_get_parameters(mapdl, cleared, parm):
         assert np.allclose(mapdl.parameters[parm_name], parm)
 
 
-def test_set_parameters_arr_to_scalar_overwrite(mapdl, cleared):
+def test_set_parameters_arr_to_scalar_overwrite(mapdl, clear_at_end):
     mapdl.parameters["PARM"] = np.arange(10)
     assert "PARM" in mapdl.parameters
     assert np.allclose(mapdl.parameters["PARM"], np.arange(10).reshape((10, -1)))
@@ -799,13 +799,13 @@ def test_set_parameters_arr_to_scalar_overwrite(mapdl, cleared):
     assert mapdl.parameters["PARM"] == 2
 
 
-def test_set_parameters_string_spaces(mapdl, cleared):
+def test_set_parameters_string_spaces(mapdl, clear_at_end):
     mapdl.parameters["PARM"] = "string with spaces"
     assert "PARM" in mapdl.parameters
     assert mapdl.parameters["PARM"] == "string with spaces"
 
 
-def test_set_parameters_too_long(mapdl, cleared):
+def test_set_parameters_too_long(mapdl):
     from ansys.mapdl.core.mapdl_core import MAX_PARAM_CHARS
 
     parm_name = "a" * (MAX_PARAM_CHARS + 1)
@@ -822,7 +822,7 @@ def test_set_parameters_too_long(mapdl, cleared):
         mapdl.parameters["asdf"] = "a" * (MAX_PARAM_CHARS + 1)
 
 
-def test_builtin_parameters(mapdl, cleared):
+def test_builtin_parameters(mapdl, clear_at_end):
     assert mapdl.parameters.routine == "PREP7"
 
     mapdl.units("SI")
@@ -848,7 +848,7 @@ def test_builtin_parameters(mapdl, cleared):
     assert mapdl.parameters.real == 1
 
 
-def test_partial_mesh_nnum(mapdl, make_block):
+def test_partial_mesh_nnum(mapdl, make_block, clear_at_end):
     allsel_nnum_old = mapdl.mesh.nnum
     mapdl.nsel("S", "NODE", vmin=100, vmax=200)
     allsel_nnum_now = mapdl.mesh.nnum_all
@@ -865,7 +865,7 @@ def test_partial_mesh_nnum2(mapdl, make_block):
     assert mapdl.mesh._grid.n_cells == 11
 
 
-def test_cyclic_solve(mapdl, cleared):
+def test_cyclic_solve(mapdl, clear_at_start_and_end):
     # build the cyclic model
     mapdl.shpp("off")
     mapdl.cdread("db", os.path.join(TEST_FILES, "sector.cdb"))
