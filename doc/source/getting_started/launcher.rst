@@ -42,6 +42,43 @@ For more information on controlling how MAPDL launches locally, see the
 description of the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function.
 
 
+Launch MAPDL process without creating a client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sometimes you may want to launch a MAPDL process without immediately creating a
+client connection. This is useful for:
+
+* Starting MAPDL from the command-line interface (CLI)
+* Managing multiple MAPDL instances programmatically
+* Launching MAPDL in a separate process for later connection
+
+For these scenarios, you can use the :func:`launch_mapdl_process() <ansys.mapdl.core.launcher.launch_mapdl_process>`
+function, which starts MAPDL and returns connection information without creating a client:
+
+.. code:: pycon
+
+    >>> from ansys.mapdl.core.launcher import launch_mapdl_process
+    >>> ip, port, pid = launch_mapdl_process(nproc=4, port=50052)
+    >>> print(f"MAPDL is running at {ip}:{port} (PID: {pid})")
+    MAPDL is running at 127.0.0.1:50052 (PID: 12345)
+
+You can later connect to this instance using the :class:`Mapdl <ansys.mapdl.core.Mapdl>` class:
+
+.. code:: pycon
+
+    >>> from ansys.mapdl.core import Mapdl
+    >>> mapdl = Mapdl(ip=ip, port=port)
+
+This approach gives you more control over the MAPDL process lifecycle and allows
+you to manage the process independently from the client connection.
+
+.. note::
+   The :func:`launch_mapdl_process() <ansys.mapdl.core.launcher.launch_mapdl_process>`
+   function always starts a new MAPDL instance. It cannot be used to connect to
+   an existing instance. Use :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
+   with ``start_instance=False`` for that purpose.
+
+
 Connect PyMAPDL to a local MAPDL instance
 -----------------------------------------
 

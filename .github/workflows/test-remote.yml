@@ -93,7 +93,7 @@ jobs:
       PYANSYS_OFF_SCREEN: True
       PYMAPDL_DB_PORT: 21002  # default won't work on GitHub runners
       PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
-      PYMAPDL_DEBUG_TESTING: True
+      PYMAPDL_DEBUG_TESTING: False
       PYMAPDL_GRPC_TRANSPORT: 'insecure'
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
