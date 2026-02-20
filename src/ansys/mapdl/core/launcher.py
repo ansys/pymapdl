@@ -1854,10 +1854,8 @@ def launch_mapdl(
             raise handle_launch_exceptions(exception)
 
         if args["just_launch"]:
-            out: list[Any] = [args["ip"], args["port"]]
-            if hasattr(process, "pid"):
-                out += [process.pid]
-            return out
+            pid = process.pid if hasattr(process, "pid") else "Unknown"
+            return (args["ip"], args["port"], pid)
 
         ########################################
         # Connect to MAPDL using gRPC

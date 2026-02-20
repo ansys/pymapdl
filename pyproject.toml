@@ -142,7 +142,6 @@ addopts = [
   "--log-file=pytest.log",
   "--maxfail=2",
   "--profile",
-  "--profile-svg",
   "--random-order",
   "--random-order-bucket=class",
   "--report-log-exclude-logs-on-passed-tests",
@@ -287,6 +286,7 @@ exclude = [
   "^tests/",
 ]
 explicit_package_bases = true
+files = ["src", "tests"]
 namespace_packages = true
 
 [tool.bandit]
