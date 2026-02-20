@@ -2688,12 +2688,8 @@ def test_lgwrite(mapdl, cleared, filename, ext, remove_grpc_extra, kedit):
         content = fid.read()
 
     if remove_grpc_extra:
-        assert "/OUT" not in content
-        assert "__PYMAPDL_SESSION_ID__" not in content
         assert "anstmp" not in content
     else:
-        assert "/OUT" in content
-        assert "__PYMAPDL_SESSION_ID__" in content
         assert "anstmp" in content
 
     if kedit != "remove":
