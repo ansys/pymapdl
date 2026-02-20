@@ -554,20 +554,20 @@ class _MapdlCore(Commands):
         return self._default_file_type_for_plots
 
     def _wrap_directory(self, path: Union[str, pathlib.Path]) -> pathlib.PurePath:
-        if self._platform is None:
+        if self.platform is None:
             # MAPDL is not initialized yet so returning the path as is.
             return pathlib.PurePath(path)
 
-        if self._platform == "windows":
+        if self.platform == "windows":
             # Windows path
             return pathlib.PureWindowsPath(path)
-        elif self._platform == "linux":
+        elif self.platform == "linux":
             # Linux path
             return pathlib.PurePosixPath(path)
         else:
             # Other OS path
             warn(
-                f"MAPDL is running on an unknown OS '{self._platform}'. "
+                f"MAPDL is running on an unknown OS '{self.platform}'. "
                 "Using PurePosixPath as default.",
                 UserWarning,
             )
