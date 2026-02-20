@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@
       NARAY(I,J)=0.             ! INITIALIZE NARAY
     *ENDDO
   *ENDDO
-  
+
 *CREATE,base,
   PARSAV,ALL
   /clear, nostart
@@ -71,7 +71,7 @@ smrt,off
   NARAY(ARG5,2)=ARG2            ! STORE N1
   NARAY(ARG5,3)=ARG3            ! STORE N2
   VMESH,1 			            ! MESH VOLUME
-                          
+
   NSEL,S,LOC,Y,0                ! SELECT NODES FOR CONSTRAINING
   NSEL,A,LOC,Y,10
   NSEL,A,LOC,X,0
@@ -159,7 +159,7 @@ smrt,off
   /TITLE,VMC5 - RIGID BODY - MODE 3
   PLDISP,1
   *ENDIF
-  /VIEW,1,-0.677530527371,-0.68876415506,0.257985122023 
+  /VIEW,1,-0.677530527371,-0.68876415506,0.257985122023
   /ANG,1,76.7942822618
   *IF,I,EQ,2,THEN
   SET,1,4
@@ -224,7 +224,7 @@ smrt,off
   /COM,
   /COM,---------------------- VMC5 RESULTS CONT.... -----------------------
   /COM,
-  /COM,| RAT6 |  RAT7 |  RAT8 |  RAT9 |  RAT10 
+  /COM,| RAT6 |  RAT7 |  RAT8 |  RAT9 |  RAT10
   /COM,
   *VWRITE,NARAY(1,6),NARAY(1,7),NARAY(1,8),NARAY(1,9),NARAY(1,10)
   ('  ',F5.3,'   ',F5.3,'   ',F5.3,'   ',F5.3,'   ',F5.3,'   ')

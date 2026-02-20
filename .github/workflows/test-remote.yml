@@ -32,6 +32,13 @@ on:
         type: string
         default: "3.12"
 
+      pytest-arguments:
+        description: |
+          Arguments to pass to pytest, additionally to the ones in the pyproject.toml file.
+        required: false
+        type: string
+        default: ""
+
     secrets:
       username:
         description: |
@@ -71,25 +78,28 @@ jobs:
       contents: read  # Needed to read repository contents for tests
       packages: read  # Needed to pull Docker images from GitHub packages
     env:
+      DPF_DEFAULT_GRPC_MODE: 'insecure'
+      DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
+      DPF_IP: '0.0.0.0'
+      DPF_PORT_INTERNAL: 50055 # Internal port for DPF server
+      DPF_PORT: 21014
+      DPF_PORT2: 21015
+      DPF_START_SERVER: False
+      HAS_DPF: True
+      MAPDL_PACKAGE: ghcr.io/ansys/mapdl
       ON_CI: True
       ON_LOCAL: FALSE
       ON_UBUNTU: FALSE
       PYANSYS_OFF_SCREEN: True
-      PYMAPDL_DEBUG_TESTING: True
-      PYMAPDL_START_INSTANCE: FALSE
-      PYMAPDL_PORT: 21000  # default won't work on GitHub runners
-      PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21002  # default won't work on GitHub runners
       PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
-      DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
-      DPF_PORT: 21014
-      DPF_PORT_INTERNAL: 50055 # Internal port for DPF server
-      DPF_PORT2: 21015
-      DPF_START_SERVER: False
-      HAS_DPF: True
-      TEST_DPF_BACKEND: false
+      PYMAPDL_DEBUG_TESTING: True
+      PYMAPDL_GRPC_TRANSPORT: 'insecure'
+      PYMAPDL_PORT: 21000  # default won't work on GitHub runners
+      PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
+      PYMAPDL_START_INSTANCE: FALSE
       PYTEST_ARGUMENTS: '--ignore_image_cache'
-      MAPDL_PACKAGE: ghcr.io/ansys/mapdl
+      TEST_DPF_BACKEND: false
 
     steps:
       - name: "Freeing some space and show space consumption (pre-test)"
@@ -102,12 +112,12 @@ jobs:
           df -h
 
       - name: "Install Git and checkout project"
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
         with:
           persist-credentials: false
 
       - name: "Login in Github container registry"
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef #v3.6.0
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 #v3.7.0
         with:
           registry: ghcr.io
           username: ${{ secrets.username }}
@@ -145,6 +155,13 @@ jobs:
 
             echo "It should be run on the same container as MAPDL";
             export ON_SAME_CONTAINER=true;
+          else
+            echo "TEST_DPF_BACKEND=false" >> $GITHUB_ENV;
+          fi
+
+          if [[ "${MAPDL_VERSION}" == *"24.2"* ]]; then
+            echo "MAPDL 24.2 detected, skipping DPF backend tests for results module.";
+            echo "TEST_DPF_BACKEND=false" >> $GITHUB_ENV;
           fi
 
           echo "ON_UBUNTU: $ON_UBUNTU"
@@ -155,48 +172,32 @@ jobs:
           echo "TAG_UBUNTU=$(echo $TAG_UBUNTU)" >> $GITHUB_OUTPUT
           echo "ON_SAME_CONTAINER=$(echo $ON_SAME_CONTAINER)" >> $GITHUB_OUTPUT
 
-      - name: "Get if running student version"
-        id: student_check
-        shell: bash
-        env:
-          MAPDL_VERSION: ${{ inputs.mapdl-version }}
-        run: |
-          if [[ "${MAPDL_VERSION}" == *"student"* ]]; 
-            then export ON_STUDENT=true; export TAG_STUDENT="student";
-            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
-          fi
-          echo "ON_STUDENT: $ON_STUDENT"
-          echo "TAG_STUDENT: $TAG_STUDENT"
-          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
-          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
+      - name: "Launch first MAPDL instance using action"
+        id: mapdl_0
+        uses: ./.github/actions/launch-mapdl-docker
+        with:
+          mapdl-image: ${{ env.MAPDL_PACKAGE }}:${{ inputs.mapdl-version }}
+          instance-name: 'MAPDL_0'
+          license-server: ${{ secrets.license-server }}
+          pymapdl-port: ${{ env.PYMAPDL_PORT }}
+          pymapdl-db-port: ${{ env.PYMAPDL_DB_PORT }}
+          dpf-port: ${{ env.DPF_PORT }}
+          enable-dpf-server: 'true'
+          distributed-mode: ${{ steps.distributed_mode.outputs.distributed_mode }}
+          wait: 'false'
 
-      - name: "Pull, launch, and validate MAPDL service"
-        id: start_mapdl
-        env:
-          LICENSE_SERVER: ${{ secrets.license-server }}
-          MAPDL_VERSION: ${{ inputs.mapdl-version }}
-          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
-          MAPDL_PACKAGE: ${{ env.MAPDL_PACKAGE }}
-          DPF_PORT_INTERNAL: ${{ env.DPF_PORT_INTERNAL }}
-        shell: bash
-        run: |
-          echo "Launching first MAPDL instance..."
-          export INSTANCE_NAME=MAPDL_0
-          export RUN_DPF_SERVER=true
-          .ci/start_mapdl.sh &> mapdl_launch_0.log & export DOCKER_PID_0=$!
-
-          echo "Launching a second instance for MAPDL pool testing..."
-          export RUN_DPF_SERVER=false
-          export PYMAPDL_PORT=${PYMAPDL_PORT2}
-          export PYMAPDL_DB_PORT=${PYMAPDL_DB_PORT2}
-          export INSTANCE_NAME=MAPDL_1
-          export DPF_PORT=${DPF_PORT2}
-          .ci/start_mapdl.sh &> mapdl_launch_1.log & export DOCKER_PID_1=$!
-
-          echo "Launching MAPDL service 0 at PID: $DOCKER_PID_0"
-          echo "Launching MAPDL service 1 at PID: $DOCKER_PID_1"
-          echo "DOCKER_PID_0=$(echo $DOCKER_PID_0)" >> $GITHUB_OUTPUT
-          echo "DOCKER_PID_1=$(echo $DOCKER_PID_1)" >> $GITHUB_OUTPUT
+      - name: "Launch second MAPDL instance for pool testing using action"
+        id: mapdl_1
+        uses: ./.github/actions/launch-mapdl-docker
+        with:
+          mapdl-image: ${{ env.MAPDL_PACKAGE }}:${{ inputs.mapdl-version }}
+          instance-name: 'MAPDL_1'
+          license-server: ${{ secrets.license-server }}
+          pymapdl-port: ${{ env.PYMAPDL_PORT2 }}
+          pymapdl-db-port: ${{ env.PYMAPDL_DB_PORT2 }}
+          dpf-port: ${{ env.DPF_PORT2 }}
+          enable-dpf-server: 'false'
+          distributed-mode: ${{ steps.distributed_mode.outputs.distributed_mode }}
 
       - name: "Start DPF server on a separate container"
         shell: bash
@@ -215,14 +216,14 @@ jobs:
               - '.github/workflows/**'
 
       - name: "Setup Python with cache"
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 #v6.1.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 #v6.2.0
         if:  steps.changes.outputs.workflows != 'true'
         with:
           cache: 'pip'
           python-version: ${{ inputs.python-version }}
 
       - name: "Setup Python without cache"
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 #v6.1.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 #v6.2.0
         if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ inputs.python-version }}
@@ -253,41 +254,31 @@ jobs:
         run: |
           python -m pip install .[tests]
 
-      - name: "Waiting for the services to be up"
-        shell: bash
-        env:
-          PYMAPDL_PORT: ${{ env.PYMAPDL_PORT }}
-          PYMAPDL_PORT2: ${{ env.PYMAPDL_PORT2 }}
-          MAPDL_INSTANCE: MAPDL_0
-        run: |
-          docker ps > docker_ps_start.log || echo "Failed to get the docker images from the docker container"
-          (docker exec "${MAPDL_INSTANCE}" /bin/bash -c "ps aux > docker_processes_start.log") || echo "Failed to get the processes from the docker container"
-
-          .ci/waiting_services.sh
-
       - name: "Unit testing"
         env:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
           ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
-          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
           file_name: "${{ inputs.file-name }}"
           MAPDL_VERSION: "${{ inputs.mapdl-version }}"
-          PYTEST_ARGUMENTS: "${{ env.PYTEST_ARGUMENTS }}"
+          PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
-          echo "ON_STUDENT: $ON_STUDENT"
           xvfb-run pytest \
+            ${PYTEST_INPUT_ARGUMENTS} \
             ${PYTEST_ARGUMENTS} \
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml
 
       - name: "Print amount of restarts"
         if: always()
+        env:
+          MAPDL_0: ${{ steps.mapdl_0.outputs.container-name }}
+          MAPDL_1: ${{ steps.mapdl_1.outputs.container-name }}
         run: |
-          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  MAPDL_0)
+          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  "${MAPDL_0}")
           echo "Number of restarts in the MAPDL_0 container: $N_RESTART"
-          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  MAPDL_1)
+          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  "${MAPDL_1}")
           echo "Number of restarts in the MAPDL_1 container: $N_RESTART"
 
       - name: "Upload pytest reports to GitHub"
@@ -301,7 +292,7 @@ jobs:
         with:
           token: ${{ secrets.codecov-token }} # required
           name: "${{ inputs.file-name }}.xml"
-          flags: remote-${{ steps.ubuntu_check.outputs.TAG_UBUNTU }}-${{ inputs.mapdl-version }}-${{ steps.distributed_mode.outputs.distributed_mode }}-${{ steps.student_check.outputs.TAG_STUDENT }}
+          flags: remote-${{ steps.ubuntu_check.outputs.TAG_UBUNTU }}-${{ inputs.mapdl-version }}-${{ steps.distributed_mode.outputs.distributed_mode }}
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
@@ -322,7 +313,7 @@ jobs:
           path: dist/
           retention-days: 7
 
-      - name: "Collect logs on failure"
+      - name: "Collect logs"
         if: always()
         env:
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
@@ -363,15 +354,6 @@ jobs:
           name: logs-${{ inputs.file-name }}-encrypted
           path: ./logs-${{ inputs.file-name }}.tgz.enc
           retention-days: 3
-
-      - name: "Display files structure"
-        if: always()
-        env:
-          MAPDL_INSTANCE: MAPDL_0
-          LOG_NAMES: logs-${{ inputs.file-name }}
-        shell: bash
-        run: |
-          .ci/display_logs_remote.sh
 
       - name: "Show space consumption (post-test)"
         if: always()

@@ -1,6 +1,6 @@
 # CHANGELOG
 
-This project uses [towncrier](https://towncrier.readthedocs.io/) to generate changelogs. 
+This project uses [towncrier](https://towncrier.readthedocs.io/) to generate changelogs.
 
 For more information, see the [raw release notes](doc/source/changelog.rst).
 

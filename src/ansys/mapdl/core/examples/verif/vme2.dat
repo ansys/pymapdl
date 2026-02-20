@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /title,VME2, Drop Analysis Of A Block Onto A Spring Scale
 /stitle,1,Reason COMPARE differences are acceptable:
 /stitle,2,  Leading zero before decimals, Accuracy
-! Beer and Johnson, Vector Mechanics for Engineers, pg 635 
+! Beer and Johnson, Vector Mechanics for Engineers, pg 635
 /PREP7
 ET,1,164
 R,1

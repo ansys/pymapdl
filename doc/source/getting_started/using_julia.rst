@@ -46,7 +46,7 @@ Next install the PyCall package by typing:
 
 
 To use PyCall, press the backspace key to go to the Julia command line.
-The command line is then preceded by the name ``Julia``. 
+The command line is then preceded by the name ``Julia``.
 
 .. code:: jlcon
 
@@ -59,7 +59,7 @@ Next use the PyCall package with:
     julia> using PyCall
 
 
-This should be enough to use packages included in a basic Python distribution. 
+This should be enough to use packages included in a basic Python distribution.
 
 
 For example:
@@ -87,7 +87,7 @@ To install PyMAPDL, first locate the Python executable with:
 In Linux, the preceding code prints the following, where ``python3`` is the default Python3 installation for the operating system.
 
 .. code:: jlcon
-    
+
     julia> PyCall.python
     "python3"
 
@@ -96,7 +96,7 @@ In Linux, the preceding code prints the following, where ``python3`` is the defa
 
     In Linux, there are no specific installation steps. You only need to add the Julia executable to the path.
     Hence, Julia's Python installation path can differ from user to user.
-    For example, if you uncompress the source files in ``/home/USER/Julia``, Julia's path is 
+    For example, if you uncompress the source files in ``/home/USER/Julia``, Julia's path is
     ``/home/USER/Julia/julia-1.7.2/bin``.
 
 You would use this Python executable to install PyMAPDL:
@@ -115,7 +115,7 @@ In Linux:, you would install with:
 Finally, after restarting Julia, you can import PyMAPDL using the same procedure as described earlier:
 
 .. code:: jlcon
-    
+
     julia> using PyCall
     julia> pymapdl = pyimport("ansys.mapdl.core")
     PyObject <module 'ansys.mapdl.core' from 'C:\\Users\\USER\\.julia\\conda\\3\\lib\\site-packages\\ansys\\mapdl\\core\\__init__.py'>
@@ -124,12 +124,12 @@ Finally, after restarting Julia, you can import PyMAPDL using the same procedure
     Product:             Ansys Mechanical Enterprise
     MAPDL Version:       24.1
     ansys.mapdl Version: 0.68.0
-    
+
 .. note::
     If you experience errors when using PyCall, you can try to rebuild the package by pressing ``"]"`` to go to the package manager and typing:
-    
+
     .. code:: jlcon
-        
+
         pkg> build PyCall
 
 

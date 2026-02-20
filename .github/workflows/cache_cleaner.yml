@@ -19,7 +19,7 @@ jobs:
       actions: write  # Needed to delete cache entries
     steps:
       - name: Check out code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
         with:
           persist-credentials: false
 
@@ -37,21 +37,21 @@ jobs:
           echo "Fetching list of cache key"
           cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH | cut -f 1 )
 
-          ## Setting this to not fail the workflow while deleting cache keys. 
+          ## Setting this to not fail the workflow while deleting cache keys.
           set +e
           echo "Deleting caches..."
-          
+
           while [ ! -z "$cacheKeysForPR" ];
           do
             for cacheKey in $cacheKeysForPR
             do
                 gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm && echo "Deleting cache with key: $cacheKey"
             done
-          
+
             cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH | cut -f 1 )
           done
           echo "Done"
-        
+
       - name: Cleanup by workflow dispatch
         if: github.event_name == 'workflow_dispatch'
         env:
@@ -65,7 +65,7 @@ jobs:
             echo "Fetching list of cache key"
             cacheKeysForPR=$(gh actions-cache list -R $REPO | cut -f 1 )
 
-            ## Setting this to not fail the workflow while deleting cache keys. 
+            ## Setting this to not fail the workflow while deleting cache keys.
             set +e
             echo "Deleting caches..."
             while [ ! -z "$cacheKeysForPR" ];

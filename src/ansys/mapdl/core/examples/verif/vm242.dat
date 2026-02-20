@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@
 jpgprf,500,100,1
 /show,jpeg
 
-FREQUENCY  = 4000 
+FREQUENCY  = 4000
 DIM_WIDTH  = 30e-3
 MAT_SPEED  = 343
 MAT_DENSITY= 1.2
@@ -100,7 +100,7 @@ finish
 
 /solu
 antype,harmic
-harfrq,0,FREQUENCY		
+harfrq,0,FREQUENCY
 nsubst,NUM_STEPS
 outres,all,all
 kbc,1
@@ -160,19 +160,18 @@ resume,table_1
 /com,
 /com,                               | TARGET |  Mechanical APDL | RATIO
 /com,
-/com,  
-/com, 
+/com,
+/com,
 /com,
 *VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)
 (1X,A8,A8,'      ','     ',F10.3,'    ',F10.3,'    ',F10.3)
 /com,
-/com, 
+/com,
 /NOPR,
 /com,
-/com, 
+/com,
 /com, --------------------------------------------------------------------------------
 /out,
 *list,vm242,vrt
 finish
 /exit,nosave
-    

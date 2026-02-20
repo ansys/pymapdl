@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Test post-processing module for ansys.mapdl.core"""
+
 import inspect
 import re
 

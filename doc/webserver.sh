@@ -14,7 +14,7 @@
 #
 # If "stop" is passed as the first argument, it will stop any running web server.
 #
-#    ./webserver.sh stop      
+#    ./webserver.sh stop
 #
 
 RED="\033[91m"

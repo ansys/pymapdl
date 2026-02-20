@@ -36,6 +36,7 @@ reduce this effect using a simple geometry.
 
 First, start MAPDL as a service.
 """
+
 # sphinx_gallery_thumbnail_number = 3
 
 from ansys.mapdl.core import launch_mapdl

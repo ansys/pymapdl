@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +36,7 @@ EGEN,4,2,1
 D,9,TEMP,80,,29,10         ! PEAK TEMPERATURE AT THETA=0
 MODE,2,1                   ! SYMMETRIC MODE WITH 2 WAVES AROUND PERIPHERY
 FINISH
-/SOLU    
+/SOLU
 OUTPR,ALL,LAST             ! PRINTOUT ELEMENT SOLUTION
 /OUT,SCRATCH
 SOLVE

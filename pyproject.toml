@@ -19,11 +19,11 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 dependencies = [
-  "ansys-api-mapdl==0.5.2",                    # supports at least 2020R2 - 2022R1
+  "ansys-api-mapdl==0.6.0",                    # supports at least 2020R2 - 2022R1
   "ansys-mapdl-reader>=0.51.7",
   "ansys-math-core>=0.1.2",
   "ansys-platform-instancemanagement~=1.0",
-  "ansys-tools-common>=0.2.1",
+  "ansys-tools-common>=0.3.0",
   "click>=8.1.3",                              # for CLI interface
   "grpcio>=1.30.0",                            # tested up to grpcio==1.35
   "numpy>=1.14.0,<3.0.0",
@@ -31,9 +31,8 @@ dependencies = [
   "platformdirs>=3.6.0",
   "protobuf>=3.12.2",                          # minimum required based on latest ansys-grpc-mapdl
   "psutil>=5.9.4",
-  "pyansys-tools-versioning>=0.3.3",
   "pyiges[full]>=0.3.1",                       # Since v0.3.0, the 'full' flag is needed in order to install 'geomdl'
-  "pyvista<=0.46.4",
+  "pyvista<=0.47.0",
   "scipy>=1.3.0",                              # for sparse (consider optional?)
   "tabulate>=0.8.0",                           # for cli plotting
   "tqdm>=4.45.0",
@@ -45,7 +44,7 @@ maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 name = "ansys-mapdl-core"
 readme = "README.md"
 requires-python = ">=3.10,<3.14" # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
-version = "0.70.dev0"
+version = "0.72.dev0"
 
 [project.optional-dependencies]
 jupyter = ["ipywidgets", "jupyterlab>=3"]
@@ -56,7 +55,7 @@ graphics = [
 ]
 
 all = [
-  "ansys-tools-visualization-interface>=0.9.0,<0.12.0",
+  "ansys-tools-visualization-interface>=0.9.0,<0.13.0",
   "ipywidgets",
   "jupyterlab>=3",
   "matplotlib>=3.0.0",                                  # for colormaps for pyvista
@@ -64,12 +63,13 @@ all = [
 
 tests = [
   "ansys-dpf-core[graphics]==0.13.6",
+  "ansys-mapdl-reader==0.55.2",
   "ansys-tools-visualization-interface==0.12.1",
   "autopep8==2.3.2",
   "matplotlib==3.10.8",
   "pandas==2.3.3",
   "pyansys-tools-report==0.9.0",
-  "pyfakefs==6.0.0",
+  "pyfakefs==6.1.1",
   "pyiges[full]==0.3.2",
   "pytest-cov==7.0.0",
   "pytest-profiling==1.8.1",
@@ -85,10 +85,10 @@ tests = [
 
 doc = [
   "ansys-dpf-core[graphics]==0.13.6",
-  "ansys-mapdl-reader==0.55.1",
-  "ansys-sphinx-theme==1.6.4",
+  "ansys-mapdl-reader==0.55.2",
+  "ansys-sphinx-theme==1.7.0",
   "ansys-tools-visualization-interface==0.12.1",
-  "grpcio==1.76.0",
+  "grpcio==1.78.0",
   "imageio-ffmpeg==0.6.0",
   "imageio==2.37.2",
   "jupyter==1.1.1",
@@ -99,19 +99,21 @@ doc = [
   "nbformat==5.10.4",
   "numpydoc==1.10.0",
   "pandas==2.3.3",
-  "plotly==6.5.0",
+  "plotly==6.5.2",
   "pyiges[full]==0.3.2",
   "pypandoc==1.16.2",
-  "pytest-sphinx==0.6.3",
+  "pytest-sphinx==0.7.1",
   "pythreejs==2.4.2",
   "sphinx-autobuild==2024.10.3",
-  "sphinx-autodoc-typehints==3.1.0",
+  "sphinx-autodoc-typehints==3.0.1; python_version < '3.11'",
+  "sphinx-autodoc-typehints==3.1.0; python_version >= '3.11'",
   "sphinx-copybutton==0.5.2",
   "sphinx-design==0.6.1",
   "sphinx-gallery==0.20.0",
   "sphinx-jinja==2.0.2",
   "sphinx-notfound-page==1.1.0",
-  "sphinx==8.2.3",
+  "sphinx==8.1.3; python_version < '3.11'",
+  "sphinx==8.2.3; python_version >= '3.11'",
   "sphinxcontrib-websupport==2.0.0",
   "sphinxemoji==0.3.2",
   "vtk==9.5.2",
@@ -132,19 +134,20 @@ pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_
 
 [tool.pytest.ini_options]
 addopts = [
+  "--color=yes",
   "--cov-report=html",
   "--cov=ansys.mapdl.core",
   "--durations=30",
   "--log-file-level=DEBUG",
   "--log-file=pytest.log",
-  "--maxfail=10",
+  "--maxfail=2",
   "--profile",
   "--profile-svg",
   "--random-order",
   "--random-order-bucket=class",
   "--report-log-exclude-logs-on-passed-tests",
   "--reruns-delay=4",
-  "--reruns=3",
+  "--reruns=2",
   "--strict-markers",
   "--timeout=180",
   "-ra",

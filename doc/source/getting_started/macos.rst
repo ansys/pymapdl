@@ -65,5 +65,3 @@ Connect to an MAPDL container
 =============================
 
 You can connect to an MAPDL instance as indicated in :ref:`connect_grpc_mapdl_session`.
-
-

@@ -42,17 +42,17 @@ goto end
 
 :clean-except-examples
 echo Cleaning everything except examples
-rmdir /s /q %BUILDDIR% > /NUL 2>&1 
-rmdir /s /q images/auto-generated > /NUL 2>&1 
+rmdir /s /q %BUILDDIR% > /NUL 2>&1
+rmdir /s /q images/auto-generated > /NUL 2>&1
 for /d /r %SOURCEDIR% %%d in (_autosummary) do @if exist "%%d" rmdir /s /q "%%d"
 goto end
 
 :clean
 echo Cleaning everything
-rmdir /s /q %BUILDDIR% > /NUL 2>&1 
-rmdir /s /q source\examples\gallery_examples > /NUL 2>&1 
+rmdir /s /q %BUILDDIR% > /NUL 2>&1
+rmdir /s /q source\examples\gallery_examples > /NUL 2>&1
 for /d /r %SOURCEDIR% %%d in (_autosummary) do @if exist "%%d" rmdir /s /q "%%d"
-rmdir /s /q images/auto-generated > /NUL 2>&1 
+rmdir /s /q images/auto-generated > /NUL 2>&1
 goto end
 
 :clean-examples

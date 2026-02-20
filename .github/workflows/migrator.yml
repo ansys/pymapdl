@@ -41,12 +41,12 @@ on:
         required: false
         default: '@pyansys-ci-bot migrate'
         type: string
-      
+
       comment_id:
         description: 'Comment ID'
         required: true
         type: number
-      
+
       actor:
         description: 'Actor triggering the workflow'
         required: true
@@ -114,7 +114,7 @@ jobs:
             core.debug(`User triggering: ${userTriggering}`);
             core.debug(`Comment body: ${commentBody}`);
             core.debug(`Comment ID: ${commentId}`);
-            
+
             // Export variables for later steps
             core.exportVariable('PR_NUMBER', prNumber);
             core.exportVariable('USER_TRIGGERING', userTriggering);
@@ -172,7 +172,7 @@ jobs:
               core.exportVariable('CONTINUE', 'false');
               return;
              }
-      
+
       - name: 'Delete previous reactions'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd #v8.0.0
         with:
@@ -299,7 +299,7 @@ jobs:
 
       - name: Checkout repo
         if : ${{ env.CONTINUE == 'true'}}
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
         with:
           ref: main
           persist-credentials: true # zizmor: ignore[artipacked]
@@ -429,7 +429,7 @@ jobs:
             });
 
             core.info(`New PR created: ${newPrData.data.number}`);
-            
+
             core.info(`Assinging PR to: ${userTriggering} and ${originalPR.user.login}`);
             await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/assignees', {
               owner: 'ansys',
@@ -464,7 +464,7 @@ jobs:
             Thank you @${originalPR.user.login} for your contribution! Please review the new PR and make any necessary changes.
 
             This PR will be closed by the admins soon.
-            
+
             You can now start to work in the new pull request by cloning this pull request branch in a new repository by doing:
 
             ~~~terminal
@@ -507,4 +507,3 @@ jobs:
 
             An error occurred while migrating or syncing the PR. Pinging @pymapdl-maintainers for assistance.`,
               });
-

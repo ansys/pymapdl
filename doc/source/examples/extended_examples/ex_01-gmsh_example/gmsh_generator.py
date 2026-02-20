@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Using ``gmsh``, read the STEP file, mesh it, and save it as a MSH file."""
+
 import gmsh
 
 gmsh.initialize()

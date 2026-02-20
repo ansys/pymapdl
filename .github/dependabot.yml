@@ -20,6 +20,22 @@ updates:
           patterns:
             - "*"
 
+  - directory: ".github/actions/launch-mapdl-docker"
+    package-ecosystem: "npm"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "00:00"
+    labels:
+      - "maintenance"
+      - "dependencies"
+    commit-message:
+      prefix: "build"
+    cooldown:
+      default-days: 7
+      include:
+        - "*"  # Include all dependencies in cooldown
+
   - directory: "/" # Location of package manifests
     package-ecosystem: "pip" # See documentation for possible values
     schedule:
@@ -38,6 +54,8 @@ updates:
         - "*"  # Include all dependencies in cooldown
       exclude:
         - "ansys-tools-visualization-interface"
+    exclude-paths:
+      - "/doc/source/examples/extended_examples/**"
     groups:
        minimal:
           patterns:
@@ -45,7 +63,6 @@ updates:
             - "numpy"
             - "platformdirs"
             - "psutil"
-            - "pyansys-tools-versioning"
 
        grpc-deps:
           patterns:
@@ -70,7 +87,6 @@ updates:
             - "ansys-api-mapdl"
             - "ansys-dpf-core"
             - "pyansys-tools-report"
-            - "pyansys-tools-versioning"
 
        documentation:
           patterns:

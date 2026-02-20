@@ -64,7 +64,7 @@ jobs:
       contents: write  # Needed to update changelog files
       pull-requests: write  # Needed to create pull requests with changelog updates
     steps:
-      - uses: ansys/actions/doc-deploy-changelog@41f86da4c9ead510db9135e428e33df9cc6f92e1 #v10.2.3
+      - uses: ansys/actions/doc-deploy-changelog@3931ac9351b13ae11b1203c2ef6b51e5c75502ea #v10.2.5
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
@@ -79,7 +79,7 @@ jobs:
       pull-requests: read  # Needed to read pull request details
     steps:
       - name: Check pull-request name
-        uses: ansys/actions/check-pr-title@41f86da4c9ead510db9135e428e33df9cc6f92e1 #v10.2.3
+        uses: ansys/actions/check-pr-title@3931ac9351b13ae11b1203c2ef6b51e5c75502ea #v10.2.5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -94,7 +94,7 @@ jobs:
         folder: ["doc", "examples"]
     steps:
       - name: "Ansys documentation style checks"
-        uses: ansys/actions/doc-style@41f86da4c9ead510db9135e428e33df9cc6f92e1 #v10.2.3
+        uses: ansys/actions/doc-style@3931ac9351b13ae11b1203c2ef6b51e5c75502ea #v10.2.5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ${{ matrix.folder }}
@@ -114,7 +114,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.10', '3.11', '3.12']
         # Only perform wheelhouse builds for macOS when releasing
-        should-release: 
+        should-release:
           - ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
         exclude:
           - should-release: false
@@ -122,7 +122,7 @@ jobs:
     steps:
       - name: "Build wheelhouse and perform smoke test"
         id: build-wheelhouse
-        uses: ansys/actions/build-wheelhouse@41f86da4c9ead510db9135e428e33df9cc6f92e1 #v10.2.3
+        uses: ansys/actions/build-wheelhouse@3931ac9351b13ae11b1203c2ef6b51e5c75502ea #v10.2.5
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
@@ -150,7 +150,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: ansys/actions/check-vulnerabilities@41f86da4c9ead510db9135e428e33df9cc6f92e1 #v10.2.3
+      - uses: ansys/actions/check-vulnerabilities@3931ac9351b13ae11b1203c2ef6b51e5c75502ea #v10.2.5
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
@@ -161,7 +161,7 @@ jobs:
     name: "Check actions security"
     runs-on: ubuntu-latest
     steps:
-      - uses: ansys/actions/check-actions-security@41f86da4c9ead510db9135e428e33df9cc6f92e1 #v10.2.3
+      - uses: ansys/actions/check-actions-security@3931ac9351b13ae11b1203c2ef6b51e5c75502ea #v10.2.5
         with:
           generate-summary: true
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -179,7 +179,7 @@ jobs:
       license-server: ${{ secrets.LICENSE_SERVER }}
       username: ${{ github.actor }}
       password: ${{ secrets.GITHUB_TOKEN }}
-  
+
 
   doc-deploy-pr:
     name: "Deploy PR documentation"
@@ -190,7 +190,7 @@ jobs:
       contents: write  # Needed to push documentation to gh-pages branch
       pull-requests: write  # Needed to comment on pull requests with documentation link
     steps:
-      - uses: ansys/actions/doc-deploy-pr@41f86da4c9ead510db9135e428e33df9cc6f92e1 #v10.2.3
+      - uses: ansys/actions/doc-deploy-pr@3931ac9351b13ae11b1203c2ef6b51e5c75502ea #v10.2.5
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -210,7 +210,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
         with:
           persist-credentials: false
 
@@ -242,7 +242,7 @@ jobs:
     with:
       mapdl-version: "${{ matrix.mapdl-version }}"
       file-name: "remote-${{ matrix.mapdl-version }}"
-      upload-logs: false
+      upload-logs: true
 
   build-test-local-matrix:
     name: "Build test matrix for minimal and local"
@@ -254,7 +254,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
         with:
           persist-credentials: false
 
@@ -292,10 +292,10 @@ jobs:
       tags: "local"
       latest-version: "252"
       test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') && !contains(matrix.mapdl-version, '24') }}
-      upload-logs: false
+      upload-logs: true
 
 
-  build-test-ubuntu-minimal:
+  build-test-ubuntu-minimal: # TODO: Enable again when minimal builds are stable
     name: "Local-min: ${{ matrix.mapdl-version }}"
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [build-test-ubuntu-local, build-test-remote]
@@ -321,7 +321,7 @@ jobs:
       tags: "local,minimal"
       latest-version: "252"
       test_dpf: false
-      upload-logs: false
+      upload-logs: true
 
 
   build-test-ubuntu-console:
@@ -351,17 +351,17 @@ jobs:
       file-name: "${{ matrix.mapdl-version }}-console"
       tags: "local,console"
       test_dpf: false
-      upload-logs: false
+      upload-logs: true
 
   package:
     name: "Package library"
-    needs: [build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, docs-build]
+    needs: [build-test-remote, build-test-ubuntu-local, docs-build, build-test-ubuntu-minimal]
     runs-on: ubuntu-latest
     permissions:
       contents: read  # Needed to read repository contents for packaging
     steps:
       - name: "Build library source and wheel artifacts"
-        uses: ansys/actions/build-library@41f86da4c9ead510db9135e428e33df9cc6f92e1 #v10.2.3
+        uses: ansys/actions/build-library@3931ac9351b13ae11b1203c2ef6b51e5c75502ea #v10.2.5
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
@@ -396,7 +396,7 @@ jobs:
           skip-existing: false
 
       - name: "Release to GitHub"
-        uses: ansys/actions/release-github@41f86da4c9ead510db9135e428e33df9cc6f92e1 #v10.2.3
+        uses: ansys/actions/release-github@3931ac9351b13ae11b1203c2ef6b51e5c75502ea #v10.2.5
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           additional-artifacts: "minimum_requirements.txt"
@@ -412,7 +412,7 @@ jobs:
     needs: [release]
     steps:
       - name: "Deploy the stable documentation"
-        uses: ansys/actions/doc-deploy-stable@41f86da4c9ead510db9135e428e33df9cc6f92e1 #v10.2.3
+        uses: ansys/actions/doc-deploy-stable@3931ac9351b13ae11b1203c2ef6b51e5c75502ea #v10.2.5
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -430,7 +430,7 @@ jobs:
     needs: [docs-build]
     steps:
       - name: "Deploy the latest documentation"
-        uses: ansys/actions/doc-deploy-dev@41f86da4c9ead510db9135e428e33df9cc6f92e1 #v10.2.3
+        uses: ansys/actions/doc-deploy-dev@3931ac9351b13ae11b1203c2ef6b51e5c75502ea #v10.2.5
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -467,7 +467,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
         with:
           persist-credentials: false
 
@@ -480,7 +480,7 @@ jobs:
   pytest-summary:
     name: Pytest summary for all the test jobs
     needs: [
-      build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, build-test-ubuntu-console
+      build-test-remote, build-test-ubuntu-local, build-test-ubuntu-console, build-test-ubuntu-minimal
       ]
     if: always()
     runs-on: ubuntu-latest
@@ -489,7 +489,7 @@ jobs:
       actions: write  # Needed to generate workflow summaries
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
         with:
           persist-credentials: false
 

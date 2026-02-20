@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -42,13 +42,13 @@ N,5,150
 E,1,2                         ! DEFINE BEAM ELEMENTS
 E,3,4
 TYPE,2                        ! DEFINE BREAKAWAY HINGE ELEMENTS
-REAL,2  
-E,2,3  
+REAL,2
+E,2,3
 E,4,5
-REAL,3  
-E,2,3  
+REAL,3
+E,2,3
 E,4,5                         ! EXTRA ELEMENTS FOR SOLUTION STABILITY
-OUTPR,ALL,ALL                 
+OUTPR,ALL,ALL
 CNVTOL,M,27778,.001
 CP,1,UX,2,3                   ! COUPLE TRANSLATIONS ACROSS PLASTIC HINGE
 CPLGEN,1,UZ                   ! GENERATE 2ND SET IN DIRECTION UZ W/ SAME NODES
@@ -59,7 +59,7 @@ D,4,UZ,,,,,UX                 ! CONSTRAIN RIGID END AGAINST TWO DIRECTIONAL DISP
 D,5,ROTY                      ! CONSTRAIN RIGID END AGAINST ROTATIONAL MOVEMENT
 F,2,FZ,-1000                  ! APPLY ELASTIC FORCE AT HINGE B
 FINISH
-/SOLU    
+/SOLU
 /OUT,SCRATCH
 SOLVE                         ! WRITE LOAD STEP
 FINISH
@@ -69,8 +69,8 @@ FINISH
 RFORCE,2,1,F,Z
 RFORCE,3,5,M,Y
 STORE
-*GET,RA,VARI,2,EXTREM,VMAX 
-*GET,MC,VARI,3,EXTREM,VMAX 
+*GET,RA,VARI,2,EXTREM,VMAX
+*GET,MC,VARI,3,EXTREM,VMAX
 *GET,UB,NODE,2,U,Z
 *DIM,LABEL1,CHAR,3,2
 *DIM,VALUE1,,3,3

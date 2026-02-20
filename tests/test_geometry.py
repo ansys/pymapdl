@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Test geometry commands"""
+
 import numpy as np
 import pytest
 

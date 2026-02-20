@@ -23,6 +23,7 @@
 """
 Classes and functions for returning/manipulating result data
 """
+
 from pathlib import Path
 
 import numpy as np

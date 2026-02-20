@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Unit tests regarding plotting."""
+
 import os
 from unittest.mock import patch
 

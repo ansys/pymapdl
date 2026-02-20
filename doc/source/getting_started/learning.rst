@@ -21,7 +21,7 @@ To learn how to use this library, you have many resources available:
 * Become familiar with the Python programming language. There are many online courses and
   websites for learning Python. Additionally, Ansys provides a :ref:`ref_python_course` course.
 * Understand finite element methods (FEMs). Because physical models are solved using FEMs, you
-  need to know how these methods work to get accurate and adequate solutions. The 
+  need to know how these methods work to get accurate and adequate solutions. The
   `Introduction to Finite Element Methods <course_fem_track_>`_ course on the Ansys
   Learning Resources website offers tracks to help you to get familiar with these methods.
 * Take the Ansys :ref:`ref_mapdl_course` course. Because PyMAPDL interface with MAPDL
@@ -35,15 +35,15 @@ Downloads
 
 - You can try the Student Version of Ansys products. For more information, see
   `Ansys Student Versions <ansys_student_version_>`_.
-  These are versions valid during a year and with limited capabilities 
+  These are versions valid during a year and with limited capabilities
   regarding number of nodes, elements, etc.
 
 .. jinja:: cheat_sheet
-  
-  - View and download :download:`PyMAPDL cheatsheet <https://github.com/ansys/pymapdl/blob/gh-pages/version/{{ version }}/_static/cheat_sheet.pdf>`  
+
+  - View and download :download:`PyMAPDL cheatsheet <https://github.com/ansys/pymapdl/blob/gh-pages/version/{{ version }}/_static/cheat_sheet.pdf>`
     to help you to learn PyMAPDL.
 
-- Download the complete `PyMAPDL documentation as PDF <pymapdl_latest_pdf_doc_>`_ 
+- Download the complete `PyMAPDL documentation as PDF <pymapdl_latest_pdf_doc_>`_
   from the latest GitHub release for offline access.
 
 - Visit :ref:`ref_examples` to learn how PyMAPDL can be used to solve different real problems.
@@ -88,7 +88,7 @@ Getting started with PyMAPDL
 ----------------------------
 
 The `Getting started with PyMAPDL <course_getting_started_pymapdl_>`_ course teaches
-you about PyMAPDL, the Pythonic way to access Ansys MAPDL. 
+you about PyMAPDL, the Pythonic way to access Ansys MAPDL.
 
 Course content
 ~~~~~~~~~~~~~~
@@ -128,12 +128,12 @@ Ansys Innovation Space
 
 .. vale on
 
-You can find more courses for different Ansys product organized in 
+You can find more courses for different Ansys product organized in
 different categories such as
 `structures <ansys_innovation_space_structures_>`_,
 `fluids <ansys_innovation_space_fluids_>`_,
 `materials <ansys_innovation_space_materials_>`_ or
-`3D design <ansys_innovation_space_geometry_>`_. 
+`3D design <ansys_innovation_space_geometry_>`_.
 
 You can find all the categories in `https://courses.ansys.com <ansys_innovation_space_>`_.
 
@@ -159,17 +159,17 @@ You can find documentation such as the
 `Verification manual guide <ansys_verification_manual_>`_ or
 `Technology showcase guide <ansys_techdemo_guide_>`_.
 
-The `Technology showcase guide <ansys_techdemo_guide_>`_ is a comprehensive guide with 
+The `Technology showcase guide <ansys_techdemo_guide_>`_ is a comprehensive guide with
 real-world example problems which present the broad simulation
 capabilities of Ansys Mechanical APDL.
-The problems demonstrate how to use Mechanical APDL to effectively 
+The problems demonstrate how to use Mechanical APDL to effectively
 and accurately solve interdisciplinary problems from a variety of
 industries and engineering fields.
 The problems are more substantive and complex than examples found
 in the standard documentation set. The documentation thoroughly
 examines the physics involved with each problem and the considerations
 necessary for translating problems into numerical models.
-You can find some of the technology showcase examples in PyMAPDL documentation 
+You can find some of the technology showcase examples in PyMAPDL documentation
 `Technology Showcases <pymapdl_ex_ts_>`. For a more comprehensive list of
 showcases, visit `Technology showcase guide <ansys_techdemo_guide_>`_.
 
@@ -194,7 +194,7 @@ Recommended articles
 * Access the Power of Ansys from the Python World.
   `Link to article in Ansys blog <ansys_python_power_article_>`_
 * Using Ansys Scripting with pyMAPDL, pyDPF-Post, and More - Part 1
-  *Running and Post-Processing an Ansys Model Outside Ansys*. 
+  *Running and Post-Processing an Ansys Model Outside Ansys*.
   `Link to article in PADT Inc Blog <padt_post_>`_.
 * ANSYS in a Python Web App, Part 1: Post Processing with PyDPF:
   *Integrating PyAnsys with Plotly's Dash and the Dash-VTK component to build an

@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Module for the MapdlPlotter class."""
+
 from collections import OrderedDict
 from typing import Any, Callable, Dict, Iterable, Optional, Union
 

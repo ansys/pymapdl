@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ MPTEMP,1,0
 MPDATA,EX,1,,E1
 MPDATA,PRXY,1,,.27
 MPDATA,DENS,1,,1
-RECTNG,0,L,0,THICK      
+RECTNG,0,L,0,THICK
 RECTNG,0,L,10,10+THICK
 AMESH,ALL
 *DEL,_FNCNAME
@@ -85,11 +85,11 @@ NSLL,S,1
 PRNSOL,U,SUM
 LSEL,S,LINE,,5
 NSLL,S,1
-PRNSOL,U,SUM				
+PRNSOL,U,SUM
 ALLSEL
 
 I1=(THICK*THICK*THICK*THICK)/12  	! MOMENT OF INERTIA FOR SQUARE BEAM
-TARGET_DISP=(11/120)*(L*L*L*L*MAXLOAD)/(E1*I1)  
+TARGET_DISP=(11/120)*(L*L*L*L*MAXLOAD)/(E1*I1)
 *GET,TBDISP,NODE,2,U,SUM   		! DISPLACEMENT AT CORNER FOR TABULAR LOADED BEAM
 *GET,LDDISP,NODE,127,U,SUM 		! DISPLACEMENT AT CORNER FOR LINEAR LOADED BEAM
 *DIM,LABEL,CHAR,2,2

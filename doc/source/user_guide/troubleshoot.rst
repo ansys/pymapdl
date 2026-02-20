@@ -14,8 +14,8 @@ Debug in PyMAPDL
 ----------------
 
 If you are having trouble with PyMAPDL, you can record some internal
-logs into a file using a logger. 
-This file can be examined to help to identify any issue. 
+logs into a file using a logger.
+This file can be examined to help to identify any issue.
 
 You can set the logger output file to be ``mylog.log`` by
 running the following commands in a Python terminal or at the beginning of your
@@ -103,12 +103,12 @@ In some cases, it may be necessary to run the launch command manually from the c
         .. code:: pwsh-session
 
             (.venv) PS C:\Users\user\pymapdl> "C:\Program Files\ANSYS Inc\v241\ansys\bin\winx64\ANSYS241.exe"
-        
+
         .. note:: PowerShell users can run the preceding command without quotes.
 
     .. tab-item:: Linux
         :sync: oskey
-        
+
         Run the version-dependent command:
 
         .. code:: console
@@ -143,7 +143,7 @@ You can specify a directory by launching MAPDL from the temporary directory:
 
     .. tab-item:: Linux
         :sync: oskey
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ mkdir temporary_directory
@@ -178,7 +178,7 @@ If this command doesn't launch MAPDL, look at the command output:
 
     .. tab-item:: Linux
         :sync: oskey
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ /usr/ansys_inc/v241/ansys/bin/ansys241
@@ -255,7 +255,7 @@ In such cases, if you try to start MAPDL from the command line you might see an 
 
     .. tab-item:: Linux
         :sync: oskey
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ /usr/ansys_inc/v241/ansys/bin/ansys241
@@ -281,8 +281,8 @@ If you are responsible for maintaining Ansys licensing or have a personal instal
 In case you are not able to find the information you need, you can open a customer request ticket.
 
 For more comprehensive information, download the :download:`ANSYS Licensing Guide <lic_guide.pdf>`.
-PADT has a great blog regarding ANSYS issues, and licensing is always a common issue. For 
-example, see `Changes to Licensing at ANSYS 2020R1 <padt_licensing_>`_. 
+PADT has a great blog regarding ANSYS issues, and licensing is always a common issue. For
+example, see `Changes to Licensing at ANSYS 2020R1 <padt_licensing_>`_.
 
 
 Incorrect licensing environment variables
@@ -305,7 +305,7 @@ either Windows or Linux.
 
     .. tab-item:: Linux
         :sync: oskey
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ printenv | grep ANSYSLMD_LICENSE_FILE
@@ -467,7 +467,7 @@ is fine.
 
 If you experience issues, you should edit these environment variables to remove any
 reference to the student version: ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``, and
-``CADOE_LIBDIRXXX``. 
+``CADOE_LIBDIRXXX``.
 Visit `Incorrect environment variables`_ for information on how to set these environment variables
 to the correct location.
 
@@ -480,7 +480,7 @@ Incorrect environment variables
 
 If you are using a non-standard install, you might need to manually set the
 environment variables ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``, and
-``CADOE_LIBDIRXXX`` to the correct location. 
+``CADOE_LIBDIRXXX`` to the correct location.
 The three-digit MAPDL version appears where ``XXX`` is
 shown. For Ansys MAPDL 2024 R2, ``242`` appears where ``XXX`` is shown.
 
@@ -647,7 +647,7 @@ method.
 
     .. tab-item:: Linux
         :sync: oskey
-                
+
         .. code:: pycon
 
             >>> from ansys.mapdl.core import launch_mapdl
@@ -677,11 +677,11 @@ Ansys installations are normally under:
 
     .. tab-item:: Linux
         :sync: oskey
-                
+
         .. code:: text
 
             /usr/ansys_inc/vXXX
-            
+
         Or under:
 
         .. code:: text
@@ -836,7 +836,7 @@ More help needed?
 
 .. epigraph::
 
-   *"What do I do if an issue is not listed here?"*  
+   *"What do I do if an issue is not listed here?"*
 
 .. vale on
 
@@ -850,4 +850,3 @@ To see if your issue is already posted, search the `PyMAPDL Issues <pymapdl_issu
   create an issue on the `PyMAPDL Issues <pymapdl_issues_>`_ page.
 
 For more complex issues or queries, contact the `PyAnsys Core team <pyansys_core_>`_.
-

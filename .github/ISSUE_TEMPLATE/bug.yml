@@ -138,7 +138,7 @@ body:
       description: |
         Attach the logger output file. For more information on how to set the logger and
         attach its output file, see the [Troubleshooting section](https://mapdl.docs.pyansys.com/version/stable/user_guide/troubleshoot.html).
-        
+
       value: |
         <details><summary>Show the logger output file.</summary>
 

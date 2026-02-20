@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Module to support MAPDL CAD geometry"""
+
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Sequence, Tuple, Union
 

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ et,2,mass21,,,4             ! 2D Mass without rotary inertia
 et,3,mass21,,,4             ! 2D Mass without rotary inertia
 
 r,1,10000                   ! Stiffness for spring element
-r,2,1                       ! Mass 
+r,2,1                       ! Mass
 r,3,0.5                     ! Mass
 
 n,1
@@ -87,7 +87,7 @@ finish
 /solution
 antype,modal
 modopt,lanb,4               ! Extracting all modes
-mxpand,all,,,yes    
+mxpand,all,,,yes
 f,4,fx,1                    ! Generate load vector for harmonic analysis
 solve
 fini
@@ -97,7 +97,7 @@ antype,harmic,new
 hropt,msup,4,,              ! Mode superposition harmonic analysis
 outres,all,all
 fdele,all
-lvscale,1                   ! Scaling the load vector 
+lvscale,1                   ! Scaling the load vector
 harfrq,3,70                 ! Frequency range
 dmprat,0.02                 ! Damping
 nsubst,500
@@ -124,18 +124,18 @@ numvar,20
 nsol,2,4,u,x,4ux
 realvar,4,2,,,UXR           ! Real value of UX
 imagin,5,2,,,UXI            ! Imaginary value of UX
-prod,6,4,4,,UXR_2     
-prod,7,5,5,,UXI_2     
-add,8,6,7,,UXR_2+UXI_2    
+prod,6,4,4,,UXR_2
+prod,7,5,5,,UXI_2
+add,8,6,7,,UXR_2+UXI_2
 sqrt,9,8,,,ampl_disp,,,1    ! Amplitude
 
 
 esol,10,4,4,smisc,1
-realvar,11,10,,,ForceR       ! Real value of Spring force 
+realvar,11,10,,,ForceR       ! Real value of Spring force
 imagin,12,10,,,ForceI        ! Imaginary value of Spring force
-prod,13,11,11,,ForceR_2     
-prod,14,12,12,,ForceI_2     
-add,15,13,14,,ForceR_2+ForceI_2    
+prod,13,11,11,,ForceR_2
+prod,14,12,12,,ForceI_2
+add,15,13,14,,ForceR_2+ForceI_2
 sqrt,16,15,,,ampl_force,,,1     ! Amplitude
 
 /out,scratch
@@ -159,11 +159,11 @@ timerange,11,70             ! Listing values between 11hz to 70Hz
 store,new                   ! Store new set of data
 
 esol,10,4,4,smisc,1
-realvar,11,10,,,ForceR       ! Real value of Spring force 
+realvar,11,10,,,ForceR       ! Real value of Spring force
 imagin,12,10,,,ForceI        ! Imaginary value of Spring force
-prod,13,11,11,,ForceR_2     
-prod,14,12,12,,ForceI_2     
-add,15,13,14,,ForceR_2+ForceI_2    
+prod,13,11,11,,ForceR_2
+prod,14,12,12,,ForceI_2
+add,15,13,14,,ForceR_2+ForceI_2
 sqrt,16,15,,,ampl_force,,,1     ! Amplitude
 
 /out,scratch
@@ -226,7 +226,7 @@ et,2,mass21,,,4             ! 2D Mass without rotary inertia
 et,3,mass21,,,4             ! 2D Mass without rotary inertia
 
 r,1,10000                   ! Stiffness for spring element
-r,2,1                       ! Mass 
+r,2,1                       ! Mass
 r,3,0.5                     ! Mass
 
 n,1
@@ -306,18 +306,18 @@ numvar,20
 nsol,2,4,u,x,4ux
 realvar,4,2,,,UXR           ! Real value of UX
 imagin,5,2,,,UXI            ! Imaginary value of UX
-prod,6,4,4,,UXR_2     
-prod,7,5,5,,UXI_2     
-add,8,6,7,,UXR_2+UXI_2    
+prod,6,4,4,,UXR_2
+prod,7,5,5,,UXI_2
+add,8,6,7,,UXR_2+UXI_2
 sqrt,9,8,,,ampl_disp,,,1
 
 
 esol,10,4,4,smisc,1
-realvar,11,10,,,ForceR     ! Real value of Spring force 
+realvar,11,10,,,ForceR     ! Real value of Spring force
 imagin,12,10,,,ForceI      ! Imaginary value of Spring force
-prod,13,11,11,,ForceR_2     
-prod,14,12,12,,ForceI_2     
-add,15,13,14,,ForceR_2+ForceI_2    
+prod,13,11,11,,ForceR_2
+prod,14,12,12,,ForceI_2
+add,15,13,14,,ForceR_2+ForceI_2
 sqrt,16,15,,,ampl_force,,,1
 
 /out,scratch
@@ -342,11 +342,11 @@ timerange,11,70
 store,new
 
 esol,10,4,4,smisc,1
-realvar,11,10,,,ForceR       ! Real value of Spring force 
+realvar,11,10,,,ForceR       ! Real value of Spring force
 imagin,12,10,,,ForceI        ! Imaginary value of Spring force
-prod,13,11,11,,ForceR_2     
-prod,14,12,12,,ForceI_2     
-add,15,13,14,,ForceR_2+ForceI_2    
+prod,13,11,11,,ForceR_2
+prod,14,12,12,,ForceI_2
+add,15,13,14,,ForceR_2+ForceI_2
 sqrt,16,15,,,ampl_force,,,1     ! Amplitude
 
 /out,scratch
@@ -406,7 +406,7 @@ resume,table_1
 /com,
 /com,                       | TARGET |  Mechanical APDL | RATIO
 /com,
-/com,  
+/com,
 /com, Extracting all modes
 /com, --------------------
 /com,
@@ -430,12 +430,9 @@ resume,table_2
 /com,
 /NOPR,
 /com,
-/com, 
+/com,
 /com, --------------------------------------------------------------------------------
 /out,
 *list,vm149,vrt
 finish
 /exit,nosave
-    
-
-

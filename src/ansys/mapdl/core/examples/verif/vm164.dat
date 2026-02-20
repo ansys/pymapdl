@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ EGEN,10,1,1
 TUNIF,30                ! INITIAL MOISTURE CONCENTRATION (THAT OF WOOD)
 D,11,TEMP,5             ! FINAL MOISTURE CONCENTRATION (AMBIENT)
 FINISH
-/SOLU    
+/SOLU
 AUTOTS,ON
 OUTPR,,LAST
 DELTIM,0.434

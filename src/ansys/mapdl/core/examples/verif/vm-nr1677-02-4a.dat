@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -28,8 +28,8 @@
 /com, Reference: Piping benchmark problems,Dynamic analysis independant support
 /com,            motion response spectrum method, P. Bezler, M. Subudhi and
 /com,            M.Hartzman, NUREG/CR--1677-Vol.2, August 1985.
-/com, 
-/com, 
+/com,
+/com,
 /com, Elements used: PIPE289, ELBOW290, MASS21 and COMBIN14
 /com,
 /com, Results :
@@ -200,7 +200,7 @@ keyopt,46,3,2
 
 et,47,mass21
 keyopt,47,3,2
-	    
+
 et,48,combin14,,1						! Spring Elements Types and Real constants
 keyopt,48,2,1						! X Degree of Freedom
 
@@ -316,8 +316,8 @@ keyopt,83,2,3						! Z Degree of Freedom
 /com,****************
 
 sectype,1,pipe
-secdata,OD_1,WTick_1,	
-					
+secdata,OD_1,WTick_1,
+
 sectype,2,pipe
 secdata,OD_2,WTick_2,
 
@@ -442,14 +442,14 @@ r,79, 0.5000e+6
 r,80, 0.5000e+6
 r,81, 0.1000e+9
 r,82, 0.1000e+9
-r,83, 0.1000e+9 
+r,83, 0.1000e+9
 
 /com,------------------------------------------------------------------------------------
 
 /com, Material Properties
 /com,*********************
 
-MP,EX,  1, YoungModulus					
+MP,EX,  1, YoungModulus
 MP,NUXY,1, Nu
 MP,GXY ,1, ShearModulus
 MP,ALPX,1, K
@@ -1154,7 +1154,7 @@ mat,1
 type,14
 secnum,3
 larc,7,302,301,           ! 128
-larc,302,304,303,         
+larc,302,304,303,
 larc,304,8,305,
 larc,9,312,311,
 larc,312,314,313,
@@ -1720,8 +1720,8 @@ nrotat,69
 nrotat,44000
 csys,0
 
-real,54  
-type,54  
+real,54
+type,54
 e,69,44000
 
 wplane,,nx(80),ny(80),nz(80),nx(52000),ny(52000),nz(52000),nx(78),ny(78),nz(78)
@@ -1730,8 +1730,8 @@ nrotat,80
 nrotat,52000
 csys,0
 
-real,56  
-type,56  
+real,56
+type,56
 e,80,52000
 
 wplane,,nx(87),ny(87),nz(87),nx(57000),ny(57000),nz(57000),nx(86),ny(86),nz(86)
@@ -1740,8 +1740,8 @@ nrotat,87
 nrotat,57000
 csys,0
 
-real,57  
-type,57  
+real,57
+type,57
 e,87,57000
 
 wplane,,nx(103),ny(103),nz(103),nx(68000),ny(68000),nz(68000),nx(101),ny(101),nz(101)
@@ -1750,8 +1750,8 @@ nrotat,103
 nrotat,68000
 csys,0
 
-real,59 
-type,59  
+real,59
+type,59
 e,103,68000
 
 wplane,,nx(112),ny(112),nz(112),nx(75000),ny(75000),nz(75000),nx(110),ny(110),nz(110)
@@ -1760,8 +1760,8 @@ nrotat,112
 nrotat,75000
 csys,0
 
-real,61  
-type,61  
+real,61
+type,61
 e,112,75000
 
 wplane,,nx(172),ny(172),nz(172),nx(118000),ny(118000),nz(118000),nx(171),ny(171),nz(171)
@@ -1770,8 +1770,8 @@ nrotat,172
 nrotat,118000
 csys,0
 
-real,69  
-type,69  
+real,69
+type,69
 e,172,118000
 
 wplane,,nx(186),ny(186),nz(186),nx(128000),ny(128000),nz(128000),nx(185),ny(185),nz(185)
@@ -1780,8 +1780,8 @@ nrotat,186
 nrotat,128000
 csys,0
 
-real,71  
-type,71  
+real,71
+type,71
 e,186,128000
 
 wplane,,nx(197),ny(197),nz(197),nx(136000),ny(136000),nz(136000),nx(195),ny(195),nz(195)
@@ -1790,8 +1790,8 @@ nrotat,197
 nrotat,136000
 csys,0
 
-real,73  
-type,73  
+real,73
+type,73
 e,197,136000
 
 wplane,,nx(206),ny(206),nz(206),nx(142000),ny(142000),nz(142000),nx(205),ny(205),nz(205)
@@ -1800,8 +1800,8 @@ nrotat,206
 nrotat,142000
 csys,0
 
-real,74  
-type,74  
+real,74
+type,74
 e,206,142000
 
 wplane,,nx(243),ny(243),nz(243),nx(166000),ny(166000),nz(166000),nx(234),ny(234),nz(234)
@@ -1810,8 +1810,8 @@ nrotat,243
 nrotat,166000
 csys,0
 
-real,78  
-type,78  
+real,78
+type,78
 e,243,166000
 
 /com,------------------------------------------------------------------------------------
@@ -1895,7 +1895,7 @@ finish
 
 /solution
 antype,modal					! Perform Modal Analysis
-modopt,lanb,maxm					
+modopt,lanb,maxm
 lumpm,on						! Use Lumped Mass Matrix Approximation
 mxpand,maxm,,,yes					! Expand solutions with Element Calculations turned ON
 solve
@@ -1930,7 +1930,7 @@ SRSS,0.0							! Combine modes using SRSS mode combination
 
 svtyp, 2, 386.20
 
-freq,0.2,0.5,0.5263,0.578,0.7752,1.7241,2.0,2.1978,2.2472,                                  
+freq,0.2,0.5,0.5263,0.578,0.7752,1.7241,2.0,2.1978,2.2472,
 SV,,0.16,0.16,0.16,0.23,0.339,0.55,0.555,0.555,0.65,
 
 freq,2.9851,3.125,4.1667,5.0,5.7143,7.6923,9.0909,9.5238,10.4167
@@ -1943,7 +1943,7 @@ sed,1,0,0
 solve
 
 /com,
-/com, spectrum 2 (Y - Direction) 
+/com, spectrum 2 (Y - Direction)
 /com,****************************
 
 svtyp, 2, 386.20
@@ -1952,7 +1952,7 @@ freq,,
 FREQ,0.2,0.6061,0.667,1.9231,2.439,3.7037,4.0,5.3476,5.5866,
 SV,,0.085,0.115,0.125,0.36,0.40,0.525,0.54,0.54,0.506,
 
-FREQ,8.333,10.989,12.5,14.7059,20.0,21.2766,22.2222,27.7778,28.5714,   
+FREQ,8.333,10.989,12.5,14.7059,20.0,21.2766,22.2222,27.7778,28.5714,
 SV,,2.6,2.6,0.9,0.875,0.875,0.76,0.85,0.85,0.522,
 
 FREQ,30.303,33.3333,50.0,100.0
@@ -1962,16 +1962,16 @@ sed,0,1,0
 solve
 
 /com,
-/com, spectrum 3 (Z - Direction) 
+/com, spectrum 3 (Z - Direction)
 /com,***************************
 
 svtyp, 2, 386.20
 freq,,,
 
-FREQ,0.2,0.5,0.5814,1.7544,2.1739,2.8571,3.0303,4.1667,5.0,    
+FREQ,0.2,0.5,0.5814,1.7544,2.1739,2.8571,3.0303,4.1667,5.0,
 SV,,0.16,0.16,0.23,0.56,0.56,0.80,1.5,1.5,1.15,
 
-FREQ,5.2632,5.7143,5.8824,6.2893,6.5789,7.4074,9.6154,10.4167,14.0845,            
+FREQ,5.2632,5.7143,5.8824,6.2893,6.5789,7.4074,9.6154,10.4167,14.0845,
 SV,,0.64,0.64,0.7,0.7,0.875,1.05,1.05,1.31,1.31,
 
 FREQ,15.873,17.2414,25.0,27.027,32.2581,50.0,100.0
@@ -2050,7 +2050,7 @@ pretab,pxi_1,vyi_1,vzi_1,txi_1,myi_1,mzi_1
 /com,  Node J
 /com,==========
 
-/com, Element #1 (Pipe289 element)  
+/com, Element #1 (Pipe289 element)
 /com,************************
 
 esel,s,elem,,1
@@ -2138,4 +2138,3 @@ prrsol
 
 finish
 /exit,nosave
-

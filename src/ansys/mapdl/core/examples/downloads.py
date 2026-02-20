@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Functions to download sample datasets from the pyansys data repository."""
+
 from functools import wraps
 import os
 import shutil

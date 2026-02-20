@@ -1,0 +1,128 @@
+name: 'Launch MAPDL Docker Instance'
+description: 'Launch a MAPDL instance in a Docker container with configurable parameters. Automatic cleanup on job completion.'
+author: 'Ansys'
+
+inputs:
+  mapdl-version:
+    description: 'MAPDL version number (e.g., 25.2, 25.1, 24.2). By default it uses `vXX.Y-ubuntu-cicd` image. Mutually exclusive with mapdl-image.'
+    required: false
+    type: string
+
+  mapdl-image:
+    description: 'Full MAPDL Docker image reference with tag (e.g., ghcr.io/ansys/mapdl:v25.2-ubuntu-cicd). Mutually exclusive with mapdl-version.'
+    required: false
+
+  instance-name:
+    description: 'Name for the Docker container instance'
+    required: false
+    default: 'MAPDL_0'
+
+  license-server:
+    description: 'License server address (e.g., 1055@123.123.123.123)'
+    required: true
+
+  pymapdl-port:
+    description: 'External port for PyMAPDL gRPC service'
+    required: false
+    default: '50052'
+
+  pymapdl-db-port:
+    description: 'External port for PyMAPDL database service'
+    required: false
+    default: '50055'
+
+  dpf-port:
+    description: 'External port for DPF service'
+    required: false
+    default: '50056'
+
+  enable-dpf-server:
+    description: 'Enable DPF server inside the MAPDL container'
+    required: false
+    default: 'false'
+
+  distributed-mode:
+    description: 'MAPDL distributed mode: smp or dmp'
+    required: false
+    default: 'smp'
+
+  num-processors:
+    description: 'Number of processors for MAPDL'
+    required: false
+    default: '2'
+
+  mpi-type:
+    description: 'MPI type to use (openmpi, intelmpi, or auto)'
+    required: false
+    default: 'auto'
+
+  working-directory:
+    description: 'Working directory inside the container'
+    required: false
+    default: '/jobs'
+
+  memory-mb:
+    description: 'Memory limit in MB'
+    required: false
+    default: '6656'
+
+  memory-swap-mb:
+    description: 'Memory swap limit in MB'
+    required: false
+    default: '16896'
+
+  memory-db-mb:
+    description: 'MAPDL database memory limit in MB (-db flag)'
+    required: false
+    default: '6000'
+
+  memory-workspace-mb:
+    description: 'MAPDL workspace memory limit in MB (-m flag)'
+    required: false
+    default: '6000'
+
+  transport:
+    description: 'gRPC transport mode (value is passed through to MAPDL; default is insecure)'
+    required: false
+    default: 'insecure'
+
+  timeout:
+    description: 'Timeout in seconds to wait for MAPDL to start'
+    required: false
+    default: '60'
+
+  wait:
+    description: 'Wait for MAPDL services to be ready before completing the action'
+    required: false
+    default: 'true'
+
+outputs:
+  container-id:
+    description: 'Docker container ID'
+
+  container-name:
+    description: 'Docker container name'
+
+  pymapdl-port:
+    description: 'PyMAPDL gRPC port'
+
+  dpf-port:
+    description: 'DPF service port'
+
+  pymapdl-db-port:
+    description: 'PyMAPDL database port'
+
+  mapdl-version-number:
+    description: 'Extracted MAPDL version number (e.g., 252)'
+
+  log-file:
+    description: 'Path to MAPDL launch log file'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+  post: 'dist-post/index.js'
+
+branding:
+  icon: 'play-circle'
+  color: 'blue'

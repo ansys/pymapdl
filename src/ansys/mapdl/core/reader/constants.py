@@ -22,7 +22,6 @@
 
 """Defines constants for the MAPDL reader."""
 
-
 ## Globals
 COMPONENTS: list[str] = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 

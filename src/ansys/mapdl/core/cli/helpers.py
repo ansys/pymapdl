@@ -30,6 +30,38 @@ from typing import Any, Dict, List
 import psutil
 
 
+def can_access_process(proc):
+    """Check if we have permission to access and interact with a process.
+
+    Returns True if:
+    1. We can access the process information (no AccessDenied)
+    2. The process belongs to the current user
+
+    Parameters
+    ----------
+    proc : psutil.Process
+        The process to check
+
+    Returns
+    -------
+    bool
+        True if we can safely access the process
+    """
+    import getpass
+    import platform
+
+    try:
+        # Check if we can access basic process info and if it belongs to current user
+        current_user = getpass.getuser()
+        process_user = proc.username()
+        if platform.system() == "Windows" and "\\" in process_user:
+            return current_user == process_user.split("\\")[-1]
+        return process_user == current_user
+    except (psutil.AccessDenied, psutil.NoSuchProcess):
+        # Cannot access process or process doesn't exist
+        return False
+
+
 def is_valid_ansys_process_name(name: str) -> bool:
     """Check if process name indicates ANSYS/MAPDL"""
     return ("ansys" in name.lower()) or ("mapdl" in name.lower())
@@ -45,7 +77,12 @@ def is_alive_status(status) -> bool:
 
 
 def get_mapdl_instances() -> List[Dict[str, Any]]:
-    """Get list of MAPDL instances with minimal data"""
+    """Get list of MAPDL instances with minimal data.
+
+    This function safely handles permission errors when accessing process information.
+    Processes owned by other users are skipped. For current user's processes,
+    we attempt to gather information but skip if critical data is inaccessible.
+    """
     instances = []
 
     for proc in psutil.process_iter(attrs=["name"]):
@@ -54,26 +91,46 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
             continue
 
         try:
+            # Check if alive
             status = proc.status()
             if not is_alive_status(status):
                 continue
 
-            cmdline = proc.cmdline()
+            # Try to get cmdline
+            try:
+                cmdline = proc.cmdline()
+            except (psutil.AccessDenied, PermissionError):
+                # Can't access cmdline - check if it's our process
+                if not can_access_process(proc):
+                    # Not our process, skip it
+                    continue
+                # Our process but can't get cmdline - skip (can't verify if gRPC)
+                continue
+
+            # Check if it's a gRPC process
             if "-grpc" not in cmdline:
                 continue
 
             # Get port from cmdline
-            port = None
             try:
-                ind_grpc = cmdline.index("-port")
-                port = int(cmdline[ind_grpc + 1])
+                port_index = cmdline.index("-port")
+                port = int(cmdline[port_index + 1])
             except (ValueError, IndexError):
                 continue
 
-            children = proc.children(recursive=True)
-            is_instance = len(children) >= 2
+            # Get number of children (for is_instance flag)
+            try:
+                children = proc.children(recursive=True)
+                is_instance = len(children) >= 2
+            except (psutil.AccessDenied, PermissionError):
+                is_instance = False
 
-            cwd = proc.cwd()
+            # Get working directory (with fallback to empty string on permission issues)
+            try:
+                cwd = proc.cwd()
+            except (psutil.AccessDenied, PermissionError):
+                cwd = ""
+
             instances.append(
                 {
                     "name": name,
@@ -86,7 +143,12 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
                 }
             )
 
-        except (psutil.NoSuchProcess, psutil.ZombieProcess, psutil.AccessDenied):
+        except (psutil.NoSuchProcess, psutil.ZombieProcess):
+            # Process disappeared or is zombie, skip it
+            continue
+
+        except (psutil.AccessDenied, PermissionError):
+            # We don't have permission to access this process, skip it
             continue
 
     return instances
@@ -94,10 +156,6 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
 
 def get_ansys_process_from_port(port: int):
     import socket
-
-    import psutil
-
-    from ansys.mapdl.core.cli.core import is_alive_status, is_valid_ansys_process_name
 
     # Filter by name first
     potential_procs = []

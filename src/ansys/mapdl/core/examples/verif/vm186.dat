@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM186
-/PREP7  
+/PREP7
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /TITLE, VM186, TRANSIENT ANALYSIS OF A SLOT EMBEDDED CONDUCTOR
@@ -59,7 +59,7 @@ NSEL,S,LOC,Y,7
 D,ALL,AZ,0                    ! FLUX-PARALLEL B.C.
 NSEL,ALL
 FINISH
-/SOLU    
+/SOLU
 EQSLV,JCG,1E-9                ! USE THE JACOBI CONJUGATE GRADIENT SOLVER
 T=1E-8                        ! INITIALIZE TIME PARAMETER
 C=0                           ! INITIALIZE COUNTER PARAMETER
@@ -162,7 +162,7 @@ FINISH
 
 /CLEAR,NOSTART
 /NOPR
-/PREP7  
+/PREP7
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /TITLE, VM186, TRANSIENT ANALYSIS OF A SLOT EMBEDDED CONDUCTOR
@@ -195,7 +195,7 @@ NSEL,S,LOC,Y,7
 D,ALL,AZ,0                    ! FLUX-PARALLEL B.C.
 NSEL,ALL
 FINISH
-/SOLU    
+/SOLU
 EQSLV,JCG,1E-9                ! USE THE JACOBI CONJUGATE GRADIENT SOLVER
 T=1E-8                        ! INITIALIZE TIME PARAMETER
 C=0                           ! INITIALIZE COUNTER PARAMETER

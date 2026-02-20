@@ -27,7 +27,7 @@ Install WSL
 There are two versions of WSL: WSL1 and WSL2. Because WSL2 provides many improvements
 over WSL1, you should upgrade to and use WSL2.
 
-Install WSL by following Microsoft's directions at 
+Install WSL by following Microsoft's directions at
 `Microsoft: Install WSL <install_wsl_microsoft_>`_.
 
 Install the CentOS7 WSL distribution
@@ -60,7 +60,7 @@ If you are using CentOS 7, before installing MAPDL, you must install some
 required libraries:
 
 .. code:: console
-   
+
    sudo yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
 
 
@@ -76,14 +76,14 @@ To install Ansys products in WSL Linux, perform these steps:
 
 1. Download the **Ansys Structures** image from the customer portal (`Current
    Release <ansys_current_release_>`_).
-   
+
    If you are downloading the image on a Windows machine, you should later copy the image from
    your downloads folder to WSL.
 
 2. Extract the compressed source code file (``tar.gz``) with this command:
 
    .. code:: console
-   
+
        tar xvzf STRUCTURES_2021R2_LINX64.tgz
 
 
@@ -91,10 +91,10 @@ To install Ansys products in WSL Linux, perform these steps:
    run this command:
 
    .. code:: console
-   
+
       sudo ./INSTALL -silent -install_dir /usr/ansys_inc/ -mechapdl
 
-   where: 
+   where:
 
    - ``-silent`` : Initiates a silent installation, which means no GUI is shown.
    - ``-install_dir /path/`` : Specifies the directory to install the product or
@@ -256,7 +256,7 @@ address is not correct, you can specify the IP address to connect to like this:
 
 You might need to turn off the Microsoft Firewall completely or at least
 for the WSL network connection.
-To do so, follow 
+To do so, follow
 :ref:`Disable firewall on WSL ethernet <disable_firewall_on_wsl_ethernet_section>`.
 
 
@@ -401,7 +401,7 @@ This method does not show a notification:
     powershell.exe -Command "Set-NetFirewallProfile -DisabledInterfaceAliases \"vEthernet (WSL)\""
 
 
-**Reference:** 
+**Reference:**
 The information has been obtained from `WSL Windows Toolbar Launcher repository <WSL_Windows_Toolbar_Launcher_>`_.
 More specifically from the *Troubleshooting* section `Firewall rules <disabling_firewall_on_wsl_>`_
 
@@ -498,4 +498,3 @@ Notes
   flag ``-mpi msmpi`` when calling MAPDL. This WSL guidance has not been written for or tested
   on VPN. If you are experiencing issues connecting to the Windows host machine,
   your license server, or an MAPDL instance, disconnect the VPN and try again.
-
