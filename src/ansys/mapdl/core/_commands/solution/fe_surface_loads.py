@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class FeSurfaceLoads:
 
     def sf(
@@ -1008,11 +1009,12 @@ class FeSurfaceLoads:
 
         .. warning::
 
-            You cannot use SFE with the INFIN110or INFIN111elements without prior knowledge of element-face
-            orientation (that is, you must know which face is the exterior in order to flag it). Also, for
-            surface-effect elements SURF153and SURF154, use LKEYto enable tangential and other loads. For
-            supported structural solid and shell elements, issue SFCONTROL to define tangential and other
-            loads.
+            You cannot use :ref:`sfe` with the ``INFIN110`` or ``INFIN111`` elements without prior knowledge
+            of element-face orientation (that is, you must know which face is the exterior in order to flag
+            it). Also, for surface-effect elements ``SURF153`` and ``SURF154``, use ``LKEY`` to enable
+            tangential and other loads. For `supported structural solid and shell elements
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SFCONTROL.html#>`_, issue
+            :ref:`sfcontrol` to define tangential and other loads.
 
         :ref:`sfe` can apply tapered loads over the faces of most elements.
 

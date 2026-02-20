@@ -1,23 +1,27 @@
-.. _ref_solid_constraints_commands_api:
 
-*****************
-Solid constraints
-*****************
+.. _ref_solid_constraints:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to define constraints on the solid model.
+SolidConstraints
+================
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.solid_constraints
+
+.. autoclass:: ansys.mapdl.core._commands.solution.solid_constraints.SolidConstraints
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.da
-   Mapdl.dadele
-   Mapdl.dalist
-   Mapdl.dk
-   Mapdl.dkdele
-   Mapdl.dklist
-   Mapdl.dl
-   Mapdl.dldele
-   Mapdl.dllist
-   Mapdl.dtran
+
+   SolidConstraints.da
+   SolidConstraints.dadele
+   SolidConstraints.dalist
+   SolidConstraints.dk
+   SolidConstraints.dkdele
+   SolidConstraints.dklist
+   SolidConstraints.dl
+   SolidConstraints.dldele
+   SolidConstraints.dllist
+   SolidConstraints.dtran
