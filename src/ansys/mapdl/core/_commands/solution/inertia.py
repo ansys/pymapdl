@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Inertia:
 
     def acel(self, acel_x: str = "", acel_y: str = "", acel_z: str = "", **kwargs):

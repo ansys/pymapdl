@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -90,7 +90,7 @@ class GapConditions:
         Gap conditions can only be defined between two master degree of freedom (DOF) nodes or between
         master DOF nodes and ground, as shown in the following figure.
 
-        .. figure::../../../images/_commands/GSTR5-2.svg
+        .. figure:: ../../../images/_commands/GSTR5-2.svg
 
         Master degrees of freedom are the unconstrained and active degrees of freedom. Gap nodes not defined
         as active degrees of freedom or attached to an element are assumed to be grounded. Grounded gap

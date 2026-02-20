@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class FeForces:
 
     def f(
@@ -377,8 +378,8 @@ class FeForces:
 
         .. warning::
 
-            A list containing a node number that is larger than the maximum defined node ( NODE2), could
-            deplete the system memory and produce unpredictable results.
+            A list containing a node number that is larger than the maximum defined node ( ``NODE2`` ),
+            could deplete the system memory and produce unpredictable results.
 
         This command is valid in any processor.
         """
