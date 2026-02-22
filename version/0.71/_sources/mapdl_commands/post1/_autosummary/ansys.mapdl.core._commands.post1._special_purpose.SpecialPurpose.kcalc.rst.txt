@@ -1,0 +1,6 @@
+﻿kcalc
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.post1._special_purpose
+
+.. automethod:: SpecialPurpose.kcalc

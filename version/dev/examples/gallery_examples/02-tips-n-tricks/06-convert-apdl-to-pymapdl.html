@@ -1,0 +1,1093 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Converting APDL scripts to PyMAPDL &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=affbdea0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/gallery_examples/02-tips-n-tricks/06-convert-apdl-to-pymapdl';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Academic finite element examples" href="../03-general-fea/index.html" />
+    <link rel="prev" title="Binary MAPDL File Explorer" href="05-explore_mapdl_files.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.72.dev0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/examples/gallery_examples/02-tips-n-tricks/06-convert-apdl-to-pymapdl.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../mapdl_commands/index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="../../index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../mapdl_commands/index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../00-mapdl-examples/index.html">Full examples using PyMAPDL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../01-geometry/index.html">Geometry examples</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Miscellaneous examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="00-example-template.html">Adding a new gallery example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="01-smoothing-element-size-transitions.html">MAPDL Element Size Transition Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03-using_inline_functions_and_Query.html">Using Inline Functions (Query)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04-rotational-displacement.html">Generating and Extracting Rotational Displacement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05-explore_mapdl_files.html">Binary MAPDL File Explorer</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Converting APDL scripts to PyMAPDL</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../03-general-fea/index.html">Academic finite element examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../extended_examples/index.html">Extended examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devportal.html">PyMAPDL Developer Portal articles</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://examples.mapdl.docs.pyansys.com/verif-manual/index.html">Verification Manual</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html">Technology Showcases</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="https://github.com/ansys/pymapdl/edit/main/doc/source/examples/gallery_examples/02-tips-n-tricks/06-convert-apdl-to-pymapdl.rst" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">Examples</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="index.html" class="nav-link">Miscellaneous examples</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Converting APDL scripts to PyMAPDL</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-examples-gallery-examples-02-tips-n-tricks-06-convert-apdl-to-pymapdl-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="converting-apdl-scripts-to-pymapdl">
+<span id="ref-converting-apdl-to-pymapdl-example"></span><span id="sphx-glr-examples-gallery-examples-02-tips-n-tricks-06-convert-apdl-to-pymapdl-py"></span><h1>Converting APDL scripts to PyMAPDL<a class="headerlink" href="#converting-apdl-scripts-to-pymapdl" title="Link to this heading">#</a></h1>
+<p>PyMAPDL offers two functions for converting APDL scripts to PyMAPDL scripts,</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">convert_apdl_block()</span></code>, which works with strings</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">convert_script()</span></code>, which works with files</p></li>
+</ul>
+<p>This example converts a modified version of the APDL verification example 45.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_apdl_block</span><span class="p">,</span> <span class="n">convert_script</span>
+
+<a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">apdl_script</span></a> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2</span>
+<span class="s2">/VERIFY,VM45</span>
+<span class="s2">/PREP7</span>
+<span class="s2">/TITLE, VM45, NATURAL FREQUENCY OF A SPRING-MASS SYSTEM</span>
+<span class="s2">C*** VIBRATION THEORY AND APPLICATIONS, THOMSON, 2ND PRINTING, PAGE 6, EX. 1.2-2</span>
+<span class="s2">ANTYPE,MODAL</span>
+<span class="s2">MODOPT,LANB,1</span>
+<span class="s2">ET,1,COMBIN14,,,2     ! TWO-DIMENSIONAL LONGITUDINAL SPRING</span>
+<span class="s2">ET,2,MASS21,,,4       ! TWO-DIMENSIONAL MASS</span>
+<span class="s2">R,1,48</span>
+<span class="s2">R,2,.006477</span>
+<span class="s2">N,1</span>
+<span class="s2">N,2,,1</span>
+<span class="s2">E,1,2</span>
+<span class="s2">TYPE,2</span>
+<span class="s2">REAL,2</span>
+<span class="s2">E,2</span>
+<span class="s2">OUTPR,ALL,1</span>
+<span class="s2">OUTRES,ALL,0</span>
+<span class="s2">D,1,ALL</span>
+<span class="s2">D,2,UX</span>
+<span class="s2">FINISH</span>
+<span class="s2">/SOLU</span>
+<span class="s2">SOLVE</span>
+<span class="s2">*GET,FREQ,MODE,1,FREQ</span>
+<span class="s2">*DIM,LABEL,CHAR,1,2</span>
+<span class="s2">*DIM,VALUE,,1,3</span>
+<span class="s2">LABEL(1,1) = &#39;      F,&#39;</span>
+<span class="s2">LABEL(1,2) = &#39; (Hz)   &#39;</span>
+<span class="s2">*VFILL,VALUE(1,1),DATA,13.701</span>
+<span class="s2">*VFILL,VALUE(1,2),DATA,FREQ</span>
+<span class="s2">*VFILL,VALUE(1,3),DATA,ABS(FREQ/13.701)</span>
+<span class="s2">/COM</span>
+<span class="s2">/OUT,vm45,vrt</span>
+<span class="s2">/COM,------------------- VM45 RESULTS COMPARISON ---------------</span>
+<span class="s2">/COM,</span>
+<span class="s2">/COM,                 |   TARGET   |   Mechanical APDL   |   RATIO</span>
+<span class="s2">/COM,</span>
+<span class="s2">*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)</span>
+<span class="s2">(1X,A8,A8,&#39;   &#39;,F10.3,&#39;  &#39;,F14.3,&#39;   &#39;,1F15.3)</span>
+<span class="s2">/COM,-----------------------------------------------------------</span>
+
+<span class="s2">/OUT</span>
+<span class="s2">FINISH</span>
+<span class="s2">*LIST,vm45,vrt</span>
+<span class="s2">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<section id="convert-a-string-inline">
+<h2>Convert a string inline<a class="headerlink" href="#convert-a-string-inline" title="Link to this heading">#</a></h2>
+<p>Calling the <code class="docutils literal notranslate"><span class="pre">convert_apdl_block()</span></code> function converts the supplied string to a list of translated
+lines of code.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">convert_apdl_block</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">apdl_script</span></a><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;&quot;&quot;Script generated by ansys-mapdl-core version 0.72.dev0&quot;&quot;&quot;
+
+from ansys.mapdl.core import launch_mapdl
+mapdl = launch_mapdl(loglevel=&quot;WARNING&quot;, print_com=True, check_parameter_names=False)
+
+mapdl.com(&quot;ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2&quot;)
+mapdl.run(&quot;FINISH&quot;)
+mapdl.run(&quot;/VERIFY,VM45&quot;)
+mapdl.prep7()
+mapdl.title(&quot;VM45, NATURAL FREQUENCY OF A SPRING-MASS SYSTEM&quot;)
+mapdl.com(&quot;VIBRATION THEORY AND APPLICATIONS, THOMSON, 2ND PRINTING, PAGE 6, EX. 1.2-2&quot;)
+mapdl.antype(&quot;MODAL&quot;)
+mapdl.modopt(&quot;LANB&quot;, 1)
+mapdl.et(1, &quot;COMBIN14&quot;, &quot;&quot;, &quot;&quot;, 2)  # TWO-DIMENSIONAL LONGITUDINAL SPRING
+mapdl.et(2, &quot;MASS21&quot;, &quot;&quot;, &quot;&quot;, 4)  # TWO-DIMENSIONAL MASS
+mapdl.r(1, 48)
+mapdl.r(2, .006477)
+mapdl.n(1)
+mapdl.n(2, &quot;&quot;, 1)
+mapdl.e(1, 2)
+mapdl.type(2)
+mapdl.real(2)
+mapdl.e(2)
+mapdl.outpr(&quot;ALL&quot;, 1)
+mapdl.outres(&quot;ALL&quot;, 0)
+mapdl.d(1, &quot;ALL&quot;)
+mapdl.d(2, &quot;UX&quot;)
+mapdl.finish()
+mapdl.slashsolu()
+mapdl.solve()
+mapdl.get(&quot;FREQ&quot;, &quot;MODE&quot;, 1, &quot;FREQ&quot;)
+mapdl.dim(&quot;LABEL&quot;, &quot;CHAR&quot;, 1, 2)
+mapdl.dim(&quot;VALUE&quot;, &quot;&quot;, 1, 3)
+mapdl.run(&quot;LABEL(1,1) = &#39;      F,&#39;&quot;)
+mapdl.run(&quot;LABEL(1,2) = &#39; (Hz)   &#39;&quot;)
+mapdl.vfill(&quot;VALUE(1,1)&quot;, &quot;DATA&quot;, 13.701)
+mapdl.vfill(&quot;VALUE(1,2)&quot;, &quot;DATA&quot;, &quot;FREQ&quot;)
+mapdl.vfill(&quot;VALUE(1,3)&quot;, &quot;DATA&quot;, &quot;ABS(FREQ/13.701)&quot;)
+mapdl.com(&quot;&quot;)
+with mapdl.non_interactive:
+    mapdl.run(&quot;/OUT,vm45,vrt&quot;)
+    mapdl.com(&quot;------------------- VM45 RESULTS COMPARISON ---------------&quot;)
+    mapdl.com(&quot;&quot;)
+    mapdl.com(&quot;|   TARGET   |   Mechanical APDL   |   RATIO&quot;)
+    mapdl.com(&quot;&quot;)
+    mapdl.run(&quot;*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)&quot;)
+    mapdl.run(&quot;(1X,A8,A8,&#39;   &#39;,F10.3,&#39;  &#39;,F14.3,&#39;   &#39;,1F15.3)&quot;)
+    mapdl.com(&quot;-----------------------------------------------------------&quot;)
+
+    mapdl.run(&quot;/OUT&quot;)
+    mapdl.run(&quot;/GOPR&quot;)
+    mapdl.finish()
+    mapdl.starlist(&quot;vm45&quot;, &quot;vrt&quot;)
+
+
+mapdl.exit()
+</pre></div>
+</div>
+</section>
+<section id="quality-of-life-kwargs">
+<h2>Quality of Life kwargs<a class="headerlink" href="#quality-of-life-kwargs" title="Link to this heading">#</a></h2>
+<p>This function also includes several kwargs that cover common use cases when converting
+from APDL to PyMAPDL, such as adding the necessary Python imports when <code class="docutils literal notranslate"><span class="pre">add_imports</span></code>
+is set to <code class="docutils literal notranslate"><span class="pre">True</span></code> or adding the <code class="docutils literal notranslate"><span class="pre">mapdl.exit()</span></code> command to the end when <code class="docutils literal notranslate"><span class="pre">auto_exit</span></code>
+is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<p>Some of the most useful kwargs follow.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">only_commands</span></code>: Convert the commands without adding any boilerplate such as <code class="docutils literal notranslate"><span class="pre">mapdl=launch...</span></code> or <code class="docutils literal notranslate"><span class="pre">mapdl.exit</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">print_com</span></code>: Change <code class="docutils literal notranslate"><span class="pre">/COM</span></code> commands to <code class="docutils literal notranslate"><span class="pre">print()</span></code> commands.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">clear_at_start</span></code>: Call the <code class="docutils literal notranslate"><span class="pre">mapdl.clear()</span></code> method after the <cite>launch_mapdl`</cite> function.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">add_imports</span></code> Add Python import lines at the start of the script.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">auto_exit</span></code>:  If <code class="docutils literal notranslate"><span class="pre">True</span></code>, append the <code class="docutils literal notranslate"><span class="pre">mapdl.exit()</span></code> method to the end of the file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cleanup_output</span></code>: If <code class="docutils literal notranslate"><span class="pre">True</span></code>, format output using <code class="docutils literal notranslate"><span class="pre">autopep8</span></code> (if you have this Python package installed).</p></li>
+</ul>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">convert_apdl_block</span><span class="p">(</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">apdl_script</span></a><span class="p">,</span> <span class="n">print_com</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">clear_at_start</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">add_imports</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_exit</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;&quot;&quot;Script generated by ansys-mapdl-core version 0.72.dev0&quot;&quot;&quot;
+
+from ansys.mapdl.core import launch_mapdl
+mapdl = launch_mapdl(loglevel=&quot;WARNING&quot;, print_com=True, check_parameter_names=False)
+mapdl.clear() # Clearing session
+
+mapdl.com(&quot;ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2&quot;)
+mapdl.run(&quot;FINISH&quot;)
+mapdl.run(&quot;/VERIFY,VM45&quot;)
+mapdl.prep7()
+mapdl.title(&quot;VM45, NATURAL FREQUENCY OF A SPRING-MASS SYSTEM&quot;)
+mapdl.com(&quot;VIBRATION THEORY AND APPLICATIONS, THOMSON, 2ND PRINTING, PAGE 6, EX. 1.2-2&quot;)
+mapdl.antype(&quot;MODAL&quot;)
+mapdl.modopt(&quot;LANB&quot;, 1)
+mapdl.et(1, &quot;COMBIN14&quot;, &quot;&quot;, &quot;&quot;, 2)  # TWO-DIMENSIONAL LONGITUDINAL SPRING
+mapdl.et(2, &quot;MASS21&quot;, &quot;&quot;, &quot;&quot;, 4)  # TWO-DIMENSIONAL MASS
+mapdl.r(1, 48)
+mapdl.r(2, .006477)
+mapdl.n(1)
+mapdl.n(2, &quot;&quot;, 1)
+mapdl.e(1, 2)
+mapdl.type(2)
+mapdl.real(2)
+mapdl.e(2)
+mapdl.outpr(&quot;ALL&quot;, 1)
+mapdl.outres(&quot;ALL&quot;, 0)
+mapdl.d(1, &quot;ALL&quot;)
+mapdl.d(2, &quot;UX&quot;)
+mapdl.finish()
+mapdl.slashsolu()
+mapdl.solve()
+mapdl.get(&quot;FREQ&quot;, &quot;MODE&quot;, 1, &quot;FREQ&quot;)
+mapdl.dim(&quot;LABEL&quot;, &quot;CHAR&quot;, 1, 2)
+mapdl.dim(&quot;VALUE&quot;, &quot;&quot;, 1, 3)
+mapdl.run(&quot;LABEL(1,1) = &#39;      F,&#39;&quot;)
+mapdl.run(&quot;LABEL(1,2) = &#39; (Hz)   &#39;&quot;)
+mapdl.vfill(&quot;VALUE(1,1)&quot;, &quot;DATA&quot;, 13.701)
+mapdl.vfill(&quot;VALUE(1,2)&quot;, &quot;DATA&quot;, &quot;FREQ&quot;)
+mapdl.vfill(&quot;VALUE(1,3)&quot;, &quot;DATA&quot;, &quot;ABS(FREQ/13.701)&quot;)
+mapdl.com(&quot;&quot;)
+with mapdl.non_interactive:
+    mapdl.run(&quot;/OUT,vm45,vrt&quot;)
+    mapdl.com(&quot;------------------- VM45 RESULTS COMPARISON ---------------&quot;)
+    mapdl.com(&quot;&quot;)
+    mapdl.com(&quot;|   TARGET   |   Mechanical APDL   |   RATIO&quot;)
+    mapdl.com(&quot;&quot;)
+    mapdl.run(&quot;*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)&quot;)
+    mapdl.run(&quot;(1X,A8,A8,&#39;   &#39;,F10.3,&#39;  &#39;,F14.3,&#39;   &#39;,1F15.3)&quot;)
+    mapdl.com(&quot;-----------------------------------------------------------&quot;)
+
+    mapdl.run(&quot;/OUT&quot;)
+    mapdl.run(&quot;/GOPR&quot;)
+    mapdl.finish()
+    mapdl.starlist(&quot;vm45&quot;, &quot;vrt&quot;)
+
+
+mapdl.exit()
+</pre></div>
+</div>
+</section>
+<section id="convert-from-a-file">
+<h2>Convert from a file<a class="headerlink" href="#convert-from-a-file" title="Link to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">convert_script</span></code> function provides all the same functionality
+but converts from a file to a list of translated strings. Additionally,
+it provides an option for saving the result to a file automatically, which
+the <code class="docutils literal notranslate"><span class="pre">convert_apdl_block()</span></code> function does not provide.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">new_file</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">filename</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/tempfile.html#tempfile.mkstemp" title="tempfile.mkstemp" class="sphx-glr-backref-module-tempfile sphx-glr-backref-type-py-function"><span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span></a><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.inp&quot;</span><span class="p">)</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">filename</span></a><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">apdl_script</span></a><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">convert_script</span><span class="p">(</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">filename</span></a><span class="p">,</span> <span class="n">print_com</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">clear_at_start</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">add_imports</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_exit</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Converted: &#39;&quot;&quot;&quot;Script generated by ansys-mapdl-core version 0.72.dev0&quot;&quot;&quot;\n&#39;
+Converted: &#39;from ansys.mapdl.core import launch_mapdl&#39;
+Converted: &#39;mapdl = launch_mapdl(loglevel=&quot;WARNING&quot;, print_com=True)&#39;
+Converted: &#39;mapdl.clear() # Clearing session&#39;
+Converted: &#39;mapdl.com(&quot;ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2&quot;)&#39;
+Converted: &#39;mapdl.run(&quot;FINISH&quot;)&#39;
+Converted: &#39;mapdl.run(&quot;/VERIFY,VM45&quot;)&#39;
+Converted: &#39;mapdl.prep7()&#39;
+Converted: &#39;mapdl.title(&quot;VM45, NATURAL FREQUENCY OF A SPRING-MASS SYSTEM&quot;)&#39;
+Converted: &#39;mapdl.com(&quot;VIBRATION THEORY AND APPLICATIONS, THOMSON, 2ND PRINTING, PAGE 6, EX. 1.2-2&quot;)&#39;
+Converted: &#39;mapdl.antype(&quot;MODAL&quot;)&#39;
+Converted: &#39;mapdl.modopt(&quot;LANB&quot;, 1)&#39;
+Converted: &#39;mapdl.et(1, &quot;COMBIN14&quot;, &quot;&quot;, &quot;&quot;, 2)  # TWO-DIMENSIONAL LONGITUDINAL SPRING&#39;
+Converted: &#39;mapdl.et(2, &quot;MASS21&quot;, &quot;&quot;, &quot;&quot;, 4)  # TWO-DIMENSIONAL MASS&#39;
+Converted: &#39;mapdl.r(1, 48)&#39;
+Converted: &#39;mapdl.r(2, .006477)&#39;
+Converted: &#39;mapdl.n(1)&#39;
+Converted: &#39;mapdl.n(2, &quot;&quot;, 1)&#39;
+Converted: &#39;mapdl.e(1, 2)&#39;
+Converted: &#39;mapdl.type(2)&#39;
+Converted: &#39;mapdl.real(2)&#39;
+Converted: &#39;mapdl.e(2)&#39;
+Converted: &#39;mapdl.outpr(&quot;ALL&quot;, 1)&#39;
+Converted: &#39;mapdl.outres(&quot;ALL&quot;, 0)&#39;
+Converted: &#39;mapdl.d(1, &quot;ALL&quot;)&#39;
+Converted: &#39;mapdl.d(2, &quot;UX&quot;)&#39;
+Converted: &#39;mapdl.finish()&#39;
+Converted: &#39;mapdl.slashsolu()&#39;
+Converted: &#39;mapdl.solve()&#39;
+Converted: &#39;mapdl.get(&quot;FREQ&quot;, &quot;MODE&quot;, 1, &quot;FREQ&quot;)&#39;
+Converted: &#39;mapdl.dim(&quot;LABEL&quot;, &quot;CHAR&quot;, 1, 2)&#39;
+Converted: &#39;mapdl.dim(&quot;VALUE&quot;, &quot;&quot;, 1, 3)&#39;
+Converted: &#39;mapdl.run(&quot;LABEL(1,1) = &#39;      F,&#39;&quot;)&#39;
+Converted: &#39;mapdl.run(&quot;LABEL(1,2) = &#39; (Hz)   &#39;&quot;)&#39;
+Converted: &#39;mapdl.vfill(&quot;VALUE(1,1)&quot;, &quot;DATA&quot;, 13.701)&#39;
+Converted: &#39;mapdl.vfill(&quot;VALUE(1,2)&quot;, &quot;DATA&quot;, &quot;FREQ&quot;)&#39;
+Converted: &#39;mapdl.vfill(&quot;VALUE(1,3)&quot;, &quot;DATA&quot;, &quot;ABS(FREQ/13.701)&quot;)&#39;
+Converted: &#39;mapdl.com(&quot;&quot;)&#39;
+Converted: &#39;with mapdl.non_interactive:&#39;
+Converted: &#39;    mapdl.run(&quot;/OUT,vm45,vrt&quot;)&#39;
+Converted: &#39;    mapdl.com(&quot;------------------- VM45 RESULTS COMPARISON ---------------&quot;)&#39;
+Converted: &#39;    mapdl.com(&quot;&quot;)&#39;
+Converted: &#39;    mapdl.com(&quot;|   TARGET   |   Mechanical APDL   |   RATIO&quot;)&#39;
+Converted: &#39;    mapdl.com(&quot;&quot;)&#39;
+Converted: &#39;    mapdl.run(&quot;*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)&quot;)&#39;
+Converted: &#39;    mapdl.run(&quot;(1X,A8,A8,&#39;   &#39;,F10.3,&#39;  &#39;,F14.3,&#39;   &#39;,1F15.3)&quot;)&#39;
+Converted: &#39;    mapdl.com(&quot;-----------------------------------------------------------&quot;)&#39;
+Converted: &#39;    mapdl.run(&quot;/OUT&quot;)&#39;
+Converted: &#39;    mapdl.run(&quot;/GOPR&quot;)&#39;
+Converted: &#39;    mapdl.finish()&#39;
+Converted: &#39;    mapdl.starlist(&quot;vm45&quot;, &quot;vrt&quot;)&#39;
+Converted: &#39;\nmapdl.exit()&#39;
+&quot;&quot;&quot;Script generated by ansys-mapdl-core version 0.72.dev0&quot;&quot;&quot;
+
+from ansys.mapdl.core import launch_mapdl
+mapdl = launch_mapdl(loglevel=&quot;WARNING&quot;, print_com=True)
+mapdl.clear() # Clearing session
+
+mapdl.com(&quot;ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2&quot;)
+mapdl.run(&quot;FINISH&quot;)
+mapdl.run(&quot;/VERIFY,VM45&quot;)
+mapdl.prep7()
+mapdl.title(&quot;VM45, NATURAL FREQUENCY OF A SPRING-MASS SYSTEM&quot;)
+mapdl.com(&quot;VIBRATION THEORY AND APPLICATIONS, THOMSON, 2ND PRINTING, PAGE 6, EX. 1.2-2&quot;)
+mapdl.antype(&quot;MODAL&quot;)
+mapdl.modopt(&quot;LANB&quot;, 1)
+mapdl.et(1, &quot;COMBIN14&quot;, &quot;&quot;, &quot;&quot;, 2)  # TWO-DIMENSIONAL LONGITUDINAL SPRING
+mapdl.et(2, &quot;MASS21&quot;, &quot;&quot;, &quot;&quot;, 4)  # TWO-DIMENSIONAL MASS
+mapdl.r(1, 48)
+mapdl.r(2, .006477)
+mapdl.n(1)
+mapdl.n(2, &quot;&quot;, 1)
+mapdl.e(1, 2)
+mapdl.type(2)
+mapdl.real(2)
+mapdl.e(2)
+mapdl.outpr(&quot;ALL&quot;, 1)
+mapdl.outres(&quot;ALL&quot;, 0)
+mapdl.d(1, &quot;ALL&quot;)
+mapdl.d(2, &quot;UX&quot;)
+mapdl.finish()
+mapdl.slashsolu()
+mapdl.solve()
+mapdl.get(&quot;FREQ&quot;, &quot;MODE&quot;, 1, &quot;FREQ&quot;)
+mapdl.dim(&quot;LABEL&quot;, &quot;CHAR&quot;, 1, 2)
+mapdl.dim(&quot;VALUE&quot;, &quot;&quot;, 1, 3)
+mapdl.run(&quot;LABEL(1,1) = &#39;      F,&#39;&quot;)
+mapdl.run(&quot;LABEL(1,2) = &#39; (Hz)   &#39;&quot;)
+mapdl.vfill(&quot;VALUE(1,1)&quot;, &quot;DATA&quot;, 13.701)
+mapdl.vfill(&quot;VALUE(1,2)&quot;, &quot;DATA&quot;, &quot;FREQ&quot;)
+mapdl.vfill(&quot;VALUE(1,3)&quot;, &quot;DATA&quot;, &quot;ABS(FREQ/13.701)&quot;)
+mapdl.com(&quot;&quot;)
+with mapdl.non_interactive:
+    mapdl.run(&quot;/OUT,vm45,vrt&quot;)
+    mapdl.com(&quot;------------------- VM45 RESULTS COMPARISON ---------------&quot;)
+    mapdl.com(&quot;&quot;)
+    mapdl.com(&quot;|   TARGET   |   Mechanical APDL   |   RATIO&quot;)
+    mapdl.com(&quot;&quot;)
+    mapdl.run(&quot;*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)&quot;)
+    mapdl.run(&quot;(1X,A8,A8,&#39;   &#39;,F10.3,&#39;  &#39;,F14.3,&#39;   &#39;,1F15.3)&quot;)
+    mapdl.com(&quot;-----------------------------------------------------------&quot;)
+
+    mapdl.run(&quot;/OUT&quot;)
+    mapdl.run(&quot;/GOPR&quot;)
+    mapdl.finish()
+    mapdl.starlist(&quot;vm45&quot;, &quot;vrt&quot;)
+
+mapdl.exit()
+</pre></div>
+</div>
+</section>
+<section id="command-line-interface">
+<h2>Command-line interface<a class="headerlink" href="#command-line-interface" title="Link to this heading">#</a></h2>
+<p>You can access the <code class="docutils literal notranslate"><span class="pre">convert_script</span></code> function in the terminal using a CLI
+(command-line interface). Assuming a virtual environment is activated,
+you can use the following command to convert a file named <code class="docutils literal notranslate"><span class="pre">mapdl.in</span></code>
+to a <code class="docutils literal notranslate"><span class="pre">mapdl.out</span></code> file.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pymapdl<span class="w"> </span>convert<span class="w"> </span>-f<span class="w"> </span>mapdl.dat<span class="w"> </span>--print_com<span class="w"> </span>--clear_at_start<span class="w"> </span>--add_imports<span class="w"> </span>--auto_exit<span class="w"> </span>--output<span class="w"> </span>mapdl.out
+</pre></div>
+</div>
+<p>You can even build the input on the fly using the <code class="docutils literal notranslate"><span class="pre">echo</span></code> command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">echo</span><span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;/prep7\nblock,0,1,0,1,0,1&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>pymapdl<span class="w"> </span>convert<span class="w"> </span>-oc
+<span class="go">mapdl.prep7()</span>
+<span class="go">mapdl.block(0, 1, 0, 1, 0, 1)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.076 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-gallery-examples-02-tips-n-tricks-06-convert-apdl-to-pymapdl-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../../_downloads/99c9a6a59f7ec4640edd949da57093f1/06-convert-apdl-to-pymapdl.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">06-convert-apdl-to-pymapdl.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../../_downloads/44e50b41b9175db34cd444df01226d65/06-convert-apdl-to-pymapdl.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">06-convert-apdl-to-pymapdl.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../../_downloads/3c711b13b7f86a2a615ecf236e686581/06-convert-apdl-to-pymapdl.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">06-convert-apdl-to-pymapdl.zip</span></code></a></p>
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.72.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.7.0. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>
