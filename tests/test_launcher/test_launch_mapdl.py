@@ -86,16 +86,13 @@ class TestLaunchMapdlOrchestration:
             )
             mock_connect.return_value = Mock()
 
-            try:
-                client = launch_mapdl(
-                    exec_file="/path/to/mapdl",
-                    start_instance=False,
-                    ip="127.0.0.1",
-                    port=50052,
-                )
-                assert client is not None
-            except Exception:
-                pass
+            client = launch_mapdl(
+                exec_file="/path/to/mapdl",
+                start_instance=False,
+                ip="127.0.0.1",
+                port=50052,
+            )
+            assert client is not None
 
     def test_launch_mapdl_grpc_mode(self):
         """Test launch_mapdl with gRPC mode."""
@@ -120,15 +117,12 @@ class TestLaunchMapdlOrchestration:
             )
             mock_connect.return_value = Mock()
 
-            try:
-                client = launch_mapdl(
-                    exec_file="/path/to/mapdl",
-                    mode="grpc",
-                    start_instance=False,
-                )
-                assert client is not None
-            except Exception:
-                pass
+            client = launch_mapdl(
+                exec_file="/path/to/mapdl",
+                mode="grpc",
+                start_instance=False,
+            )
+            assert client is not None
 
     def test_launch_mapdl_console_mode(self):
         """Test launch_mapdl with console mode."""
@@ -173,13 +167,10 @@ class TestLaunchMapdlOrchestration:
                     message="Started",
                 )
 
-                try:
-                    client = launch_mapdl(
-                        exec_file="/path/to/mapdl",
-                        mode="console",
-                    )
-                except Exception:
-                    pass
+                launch_mapdl(
+                    exec_file="/path/to/mapdl",
+                    mode="console",
+                )
 
     def test_launch_mapdl_hpc_mode(self):
         """Test launch_mapdl with HPC mode."""
@@ -220,13 +211,10 @@ class TestLaunchMapdlOrchestration:
             )
             mock_grpc.return_value = Mock()
 
-            try:
-                client = launch_mapdl(
-                    exec_file="/path/to/mapdl",
-                    launch_on_hpc=True,
-                )
-            except Exception:
-                pass
+            launch_mapdl(
+                exec_file="/path/to/mapdl",
+                launch_on_hpc=True,
+            )
 
     def test_launch_mapdl_config_error(self):
         """Test launch_mapdl handles configuration errors."""

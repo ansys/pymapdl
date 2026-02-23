@@ -77,11 +77,7 @@ class TestConnectionCreation:
 
         with patch("ansys.mapdl.core.launcher.connection.MapdlGrpc") as mock_grpc:
             mock_grpc.return_value = Mock()
-            try:
-                result = create_grpc_client(config, process_info)
-                # May succeed or fail depending on mock setup
-            except Exception:
-                pass  # Expected without full mocking
+            create_grpc_client(config, process_info)
 
     def test_create_grpc_client_with_custom_port(self):
         """Test gRPC client creation with custom port."""
@@ -96,12 +92,10 @@ class TestConnectionCreation:
         with patch("ansys.mapdl.core.launcher.connection.MapdlGrpc") as mock_grpc:
             mock_instance = Mock()
             mock_grpc.return_value = mock_instance
-            try:
-                result = create_grpc_client(config, process_info)
-                # Check that MapdlGrpc was called
-                mock_grpc.assert_called()
-            except Exception:
-                pass
+
+            create_grpc_client(config, process_info)
+            # Check that MapdlGrpc was called
+            mock_grpc.assert_called()
 
     def test_create_grpc_client_with_custom_ip(self):
         """Test gRPC client creation with custom IP."""
@@ -116,15 +110,8 @@ class TestConnectionCreation:
         with patch("ansys.mapdl.core.launcher.connection.MapdlGrpc") as mock_grpc:
             mock_instance = Mock()
             mock_grpc.return_value = mock_instance
-            try:
-                result = create_grpc_client(config, process_info)
-            except Exception:
-                pass
 
-    @pytest.mark.skip(reason="MapdlConsole API no longer available")
-    def test_create_console_client(self):
-        """Test console client creation."""
-        pass
+            create_grpc_client(config, process_info)
 
 
 # ============================================================================
@@ -142,11 +129,8 @@ class TestConnectToExisting:
         with patch("ansys.mapdl.core.launcher.connection.MapdlGrpc") as mock_grpc:
             mock_instance = Mock()
             mock_grpc.return_value = mock_instance
-            try:
-                result = connect_to_existing(config)
-                # May succeed or fail depending on mock setup
-            except Exception:
-                pass
+
+            connect_to_existing(config)
 
     def test_connect_to_existing_with_timeout(self):
         """Test connecting with custom timeout."""
@@ -155,10 +139,8 @@ class TestConnectToExisting:
         with patch("ansys.mapdl.core.launcher.connection.MapdlGrpc") as mock_grpc:
             mock_instance = Mock()
             mock_grpc.return_value = mock_instance
-            try:
-                result = connect_to_existing(config)
-            except Exception:
-                pass
+
+            connect_to_existing(config)
 
     def test_connect_to_existing_failure(self):
         """Test handling connection failure."""
@@ -191,10 +173,7 @@ class TestConnectionConfiguration:
         with patch("ansys.mapdl.core.launcher.connection.MapdlGrpc") as mock_grpc:
             mock_instance = Mock()
             mock_grpc.return_value = mock_instance
-            try:
-                result = create_grpc_client(config, process_info)
-            except Exception:
-                pass
+            create_grpc_client(config, process_info)
 
     def test_create_client_with_clear_on_connect(self):
         """Test client creation with clear on connect."""
@@ -209,10 +188,7 @@ class TestConnectionConfiguration:
         with patch("ansys.mapdl.core.launcher.connection.MapdlGrpc") as mock_grpc:
             mock_instance = Mock()
             mock_grpc.return_value = mock_instance
-            try:
-                result = create_grpc_client(config, process_info)
-            except Exception:
-                pass
+            create_grpc_client(config, process_info)
 
     def test_create_client_with_logging_settings(self):
         """Test client creation with logging settings."""
@@ -231,10 +207,7 @@ class TestConnectionConfiguration:
         with patch("ansys.mapdl.core.launcher.connection.MapdlGrpc") as mock_grpc:
             mock_instance = Mock()
             mock_grpc.return_value = mock_instance
-            try:
-                result = create_grpc_client(config, process_info)
-            except Exception:
-                pass
+            create_grpc_client(config, process_info)
 
 
 # ============================================================================
@@ -308,11 +281,7 @@ class TestConnectionIntegration:
             mock_instance._check_parameter_names = Mock()
             mock_grpc.return_value = mock_instance
 
-            try:
-                result = create_grpc_client(config, process_info)
-                # Basic workflow should complete without errors
-            except Exception:
-                pass  # Some exceptions expected without full setup
+            create_grpc_client(config, process_info)
 
     def test_connection_with_process_info(self):
         """Test connection includes process information."""
@@ -328,8 +297,4 @@ class TestConnectionIntegration:
             mock_instance = Mock()
             mock_grpc.return_value = mock_instance
 
-            try:
-                result = create_grpc_client(config, process_info)
-                # Process info should be available
-            except Exception:
-                pass
+            create_grpc_client(config, process_info)

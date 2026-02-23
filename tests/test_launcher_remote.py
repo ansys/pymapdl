@@ -409,10 +409,7 @@ class TestPyPIMToMapdlConnection:
             mock_instance = Mock()
             mock_grpc.return_value = mock_instance
 
-            try:
-                result = create_grpc_client(config, process_info=None)
-            except Exception:
-                pass
+            create_grpc_client(config, process_info=None)
 
     def test_grpc_channel_carries_pypim_metadata(self, monkeypatch):
         """Test that gRPC channel includes PyPIM metadata."""

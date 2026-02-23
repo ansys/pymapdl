@@ -314,12 +314,9 @@ class TestEnvironmentEdgeCases:
     def test_is_wsl_with_exception(self):
         """Test WSL detection handles exceptions gracefully."""
         with patch("platform.system", side_effect=Exception("Test error")):
-            try:
-                result = is_wsl()
-                # Should return False on error or raise exception
-                assert isinstance(result, bool)
-            except Exception:
-                pass  # Expected if function doesn't catch exceptions
+            result = is_wsl()
+            # Should return False on error or raise exception
+            assert isinstance(result, bool)
 
     def test_is_ubuntu_with_read_error(self):
         """Test Ubuntu detection handles read errors gracefully."""
