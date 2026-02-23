@@ -555,9 +555,10 @@ class TestWaitForJobReady:
             patch("subprocess.run") as mock_run,
             patch("socket.gethostbyname") as mock_gethostbyname,
             patch("time.time") as mock_time,
+            patch("time.sleep"),
         ):
-            # Mock time progression
-            mock_time.side_effect = [0, 1, 2, 3]  # Enough time to pass both calls
+            # Mock time progression: start_time (0), first loop (1), second loop (2)
+            mock_time.side_effect = [0, 1, 2]
 
             # First call returns PENDING, second returns RUNNING
             mock_run.side_effect = [
@@ -576,11 +577,15 @@ class TestWaitForJobReady:
         pending_output = """JobID=12345 JobName=test_job
             JobState=PENDING"""
 
-        with patch("subprocess.run") as mock_run, patch("time.time") as mock_time:
+        with (
+            patch("subprocess.run") as mock_run,
+            patch("time.time") as mock_time,
+            patch("time.sleep"),
+        ):
             mock_run.return_value = Mock(stdout=pending_output)
 
             # Simulate timeout: return times that exceed the timeout
-            mock_time.side_effect = [0, 1, 2, 3, 10]  # Final return simulates timeout
+            mock_time.side_effect = [0, 1, 2, 3]  # Final return simulates timeout
 
             with pytest.raises(MapdlDidNotStart, match="did not start within"):
                 _wait_for_job_ready(12345, timeout=2)
