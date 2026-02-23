@@ -24,4 +24,4 @@ fi
 echo "Using pytest arguments: ${PYTEST_ARGUMENTS}"
 
 # shellcheck disable=SC2086
-xvfb-run pytest ${PYTEST_ARGUMENTS}
+xvfb-run -a uv run --no-cache --extra tests pytest tests ${PYTEST_ARGUMENTS}

@@ -19,27 +19,27 @@
 # - MAPDL acting as remote (`mapdl-remote`) or local (`mapdl-local`)
 # - MAPDL from a container (`mapdl-xxx-container`) or from the host (`mapdl-xxx-host`)
 # - PyMAPDL cloned from Github (`pymapdl-clone`) or from the host (`pymapdl-host`)
-# 
+#
 # Because of this configuration there are two main groups of profiles, based on MAPDL or PyMAPDL.
 #
 # - MAPDL profiles:
 #   - mapdl-remote-container
-#   - mapdl-remote-host
+#   - mapdl-remote-host [NOT IMPLEMENTED YET]
 #   - mapdl-local-container
-#   - mapdl-local-host
+#   - mapdl-local-host [NOT IMPLEMENTED YET]
 #
 # - PyMAPDL profiles
-#   - pymapdl-clone
+#   - pymapdl-clone  [NOT IMPLEMENTED YET]
 #   - pymapdl-host
 #
 # You can specify each one with `--profile <profile_name>`. For instance:
-# 
+#
 # ```
 # docker compose --profile mapdl-remote-container --profile pymapdl-clone
 # ```
 #
 # which is equivalent to:
-# 
+#
 # ```
 # docker compose --profile mapdl-remote-container-pymapdl-clone
 # ```
@@ -50,14 +50,14 @@
 # - [x] mapdl-remote-container-pymapdl-host
 # - [x] mapdl-remote-host-pymapdl-clone
 # - [x] mapdl-remote-host-pymapdl-host
-# 
+#
 # - [ ] mapdl-local-container-pymapdl-host
 # - [ ] mapdl-local-host-pymapdl-host
 # - [w] mapdl-local-container-pymapdl-clone
 # - [w] mapdl-local-host-pymapdl-clone
 #
 # The list of profiles not implemented yet are:
-# 
+#
 #
 #
 # Example usage
@@ -88,7 +88,7 @@ services:
       - default
     shm_size: '2gb'
     hostname: mapdl
-    networks: 
+    networks:
       - pymapdl-net
     environment:
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
@@ -104,50 +104,7 @@ services:
       "-grpc",
       "${MAPDL_EXTRA_ARGS:-}"
       ]
-    working_dir: /workspace
     user: root
-    volumes:
-      # Required for v261 onwards.
-    - ./mylocal.ip:/workspace/mylocal.ip:ro
-
-  mapdl-remote-host:
-    # This service is used to run the local MAPDL instalation by mounting the volume
-    # inside the container.
-    # This is using an ubuntu container with the required dependencies to mount the directory
-    # where MAPDL is installed, and then run MAPDL.
-    # 
-    # Environment variables
-    # ---------------------
-    #
-    # - `ANSYSLMD_LICENSE_FILE` (mandatory) for the license server.
-    # - `ANSYS_INC` (mandatory) the installation directory `ansys_inc` of MAPDL.
-    # - `MAPDL_EXEC_PATH` (mandatory) the path to the MAPDL executable. The default is `ansys`.
-    # - `MAPDL_ENTRYPOINT` (optional) the entrypoint to the MAPDL container. The default is `"/bin/bash"`.
-    # - `MAPDL_EXTRA_ARGS` (optional) any additional arguments for the MAPDL command.
-    #
-    container_name: mapdl
-    profiles:
-      - mapdl-remote-host
-      - mapdl-remote-host-pymapdl-clone
-      - mapdl-remote-host-pymapdl-host
-    shm_size: '2gb'
-    hostname: mapdl
-    networks: 
-      - pymapdl-net
-    environment:
-      - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
-      - ANSYS_LOCK=OFF
-      - OMPI_ALLOW_RUN_AS_ROOT=1
-      - OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
-    platform: linux/amd64
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: mapdl-local
-    entrypoint: ${MAPDL_ENTRYPOINT:-"/bin/bash"}
-    command: ["${MAPDL_EXEC_PATH:-ansys}", "-grpc", "${MAPDL_EXTRA_ARGS:-}"]
-    volumes:
-      - ${ANSYS_INC:-/ansys_inc}:/ansys_inc:ro
 
   pymapdl-host:
     # This service mount the local PyMAPDL repository and test it.
@@ -155,34 +112,7 @@ services:
       - pymapdl-host
       - mapdl-remote-container-pymapdl-host
       - mapdl-remote-host-pymapdl-host
-      - mapdl-local-container-pymapdl-host
-      - mapdl-local-host-pymapdl-host
     container_name: pymapdl-test
-    platform: linux/amd64
-    networks: 
-      - pymapdl-net
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: test-local-pymapdl
-    environment:
-      - PYMAPDL_IP=mapdl # Use the MAPDL service name 
-      # If empty, it will use the default 'main' branch
-      - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-main}
-    working_dir: /workspace/pymapdl
-    volumes:
-      - ../../../:/workspace
-
-  pymapdl-clone:
-    # This service clones the PyMAPDL repository and test against it.
-    profiles:
-      - pymapdl-clone
-      - mapdl-remote-container-pymapdl-clone
-      - mapdl-remote-host-pymapdl-clone
-      - mapdl-local-container-pymapdl-clone
-      - mapdl-local-host-pymapdl-clone
-      - default # Default profile
-    # container_name: pymapdl-test
     platform: linux/amd64
     networks:
       - pymapdl-net
@@ -194,39 +124,13 @@ services:
       - PYMAPDL_IP=mapdl # Use the MAPDL service name
       # If empty, it will use the default 'main' branch
       - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-main}
-
-  mapdl-local-container-pymapdl-clone:
-    # This service clones PyMAPDL inside the MAPDL container and run the tests.
-    # 
-    # WARNING: It is very likely you will have to update your dockerfile according the specific
-    # ${DOCKER_IMAGE} you are using.
-    #
-    # Environment variables
-    # ---------------------
-    #
-    # - `ANSYSLMD_LICENSE_FILE` (mandatory) for the license server.
-    #
-    profiles:
-      - mapdl-local-container-pymapdl-clone
-    container_name: pymapdl-test
-    platform: linux/amd64
-    networks:
-      - pymapdl-net
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: mapdl-local-container-pymapdl
-      args:
-        - DOCKER_IMAGE=${DOCKER_IMAGE}
-    environment:
-      # If empty, it will use the default 'main' branch
-      - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-main}
-      - OMPI_ALLOW_RUN_AS_ROOT=1
-      - OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+    working_dir: /workspace/pymapdl
+    volumes:
+      - ../../../:/workspace
 
   mapdl-local-container-pymapdl-host:
     # This service clones PyMAPDL inside the MAPDL container and run the tests.
-    # 
+    #
     # WARNING: It is very likely you will have to update your dockerfile according the specific
     # ${DOCKER_IMAGE} you are using.
     #
@@ -237,7 +141,7 @@ services:
     #
     profiles:
       - mapdl-local-container-pymapdl-host
-    container_name: pymapdl-test
+    container_name: pymapdl-test-local
     platform: linux/amd64
     networks:
       - pymapdl-net
@@ -252,8 +156,10 @@ services:
       - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-main}
       - OMPI_ALLOW_RUN_AS_ROOT=1
       - OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+      - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
+      - PYMAPDL_GRPC_TRANSPORT=insecure
     volumes:
-      - ../../../:/workspace
+      - ../../:/workspace
 
 networks:
   pymapdl-net:

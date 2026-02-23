@@ -3,7 +3,7 @@
 # Dummy default so there is no error if not set.
 # It needs to be set here because we are using it
 # later on the FROM.
-ARG DOCKER_IMAGE=mapdl:latest
+ARG DOCKER_IMAGE="mapdl:latest"
 
 #######################################################
 FROM ubuntu:22.04 AS python-main
@@ -13,6 +13,7 @@ ARG USE_LOCAL_REPO=yes
 ARG PYTHON_VERSION=3.11
 
 ENV USE_LOCAL_REPO=${USE_LOCAL_REPO}
+ENV UV_PYTHON=${PYTHON_VERSION}
 
 # Set workdir
 WORKDIR /workspace
@@ -25,21 +26,19 @@ RUN apt-get update && \
     libgomp1 \
     graphviz \
     git \
-    openssh-client
-
-# Clone to install the libraries needed
-RUN git clone https://github.com/ansys/pymapdl.git .
-
-RUN apt-get update && apt install -y \
-    python${PYTHON_VERSION}-venv \
-    python3-pip \
+    openssh-client \
+    curl
+    # Installing uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip and install test dependencies
-RUN \
-    python${PYTHON_VERSION} -m pip install --upgrade pip && \
-    pip install .[tests]
+RUN git clone https://github.com/ansys/pymapdl.git . \
+    && git config --global --add safe.directory /workspace
+
+# Set PATH to include uv
+ENV PATH="/root/.local/bin:$PATH"
+RUN uv --version
 
 # Configuration
 # -------------
@@ -62,6 +61,8 @@ ENV PYMAPDL_DEBUG_TESTING=True
 ENV PYMAPDL_START_INSTANCE=False
 # Set MAPDL port to connect to
 ENV PYMAPDL_PORT=50052
+# Use insecure gRPC transport for testing. This is needed to connect to the remote MAPDL instance, which is what we want to do in this container.
+ENV PYMAPDL_GRPC_TRANSPORT=insecure
 
 # DPF testing
 # -----------
@@ -78,18 +79,15 @@ ENV ON_SAME_CONTAINER=False
 
 # Pytest settings
 # ---------------
-ENV PYTEST_ARGUMENTS="-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers"
+ENV PYTEST_ARGUMENTS='--ignore_image_cache'
 
 # Setting entrypoint
 # ------------------
 COPY start.sh /
 RUN chmod +x /start.sh
 
-EXPOSE 50052
-
-RUN git config --global --add safe.directory /workspace/pymapdl
-
-CMD [ "/bin/bash", "/start.sh" ]
+ENTRYPOINT [ "/bin/bash", "/start.sh" ]
+SHELL [ "/bin/bash" ]
 
 #######################################################
 FROM python-main AS test-clone-pymapdl
@@ -107,46 +105,22 @@ ENV USE_LOCAL_REPO=true
 RUN rm -rf /workspace/* >/dev/null 2>&1
 
 #######################################################
-FROM ubuntu:22.04 AS mapdl-local
-#######################################################
-
-ARG USERNAME=mapdl
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-
-ENV DEBIAN_FRONTEND=noninteractive
-ENV USERNAME=$USERNAME
-
-# OS configuration
-# ----------------
-# Installing dependencies
-RUN apt-get update && \
-        apt-get install -y \
-          libgomp1 \
-          libgl1 \
-          libglu1 \
-          libxm4 \
-          libxi6 \
-          openssh-client \
-        && apt install -y software-properties-common \
-        && add-apt-repository -y ppa:zeehio/libxp \
-        && apt-get update \
-        && apt-get install -y libxp6 \
-        && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-#######################################################
 FROM ${DOCKER_IMAGE} AS mapdl-local-container-pymapdl
 #######################################################
 #
 # WARNING: This container is designed to work using an Ubuntu base image.
 #
 ARG PYTHON_VERSION=3.11
+
+ENV UV_PYTHON=${PYTHON_VERSION}
 ENV OMPI_ALLOW_RUN_AS_ROOT=1
 ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
 # OS configuration
 # ----------------
 # Installing dependencies
+USER root
+
 RUN apt-get update && \
     apt-get install -y  \
     libgl1-mesa-glx \
@@ -154,21 +128,24 @@ RUN apt-get update && \
     libgomp1 \
     graphviz \
     git \
-    openssh-client
+    openssh-client \
+    curl \
+    # Installing uv
+    && curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set PATH to include uv for root user
+ENV PATH="/root/.local/bin:$PATH"
+
+RUN USER=mapdl && chown -R $USER:$USER /home/mapdl
+USER mapdl
 
 # Clone to install the libraries needed
 RUN git clone https://github.com/ansys/pymapdl.git .
 
-RUN python3 --version || (apt-get update && apt install -y \
-    python${PYTHON_VERSION}-venv \
-    python3-pip \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*)
-
-# Upgrade pip and install test dependencies
-RUN \
-    python3 -m pip install --upgrade pip && \
-    pip install .[tests]
+ENV PATH="$HOME/.local/bin:$PATH"
+RUN uv --version
 
 # Configuration
 # -------------
@@ -187,11 +164,12 @@ ENV ON_STUDENT=False
 ENV PYANSYS_OFF_SCREEN=True
 # Enable debugging for PyMAPDL
 ENV PYMAPDL_DEBUG_TESTING=True
-# To connect to an already alive or remote MAPDL instance
-ENV PYMAPDL_START_INSTANCE=False
+# Force launching an instance of MAPDL. This is needed to test the connection to a remote instance, which is what we want to do in this container.
+ENV PYMAPDL_START_INSTANCE=True
 # Set MAPDL port to connect to
 ENV PYMAPDL_PORT=50052
-
+# Set additional switches for MAPDL. In this case, we are enabling MPI with OpenMPI.
+ENV PYMAPDL_ADDITIONAL_SWITCHES="-mpi openmpi"
 # DPF testing
 # -----------
 # Not testing against DPF
@@ -207,13 +185,14 @@ ENV ON_SAME_CONTAINER=False
 
 # Pytest settings
 # ---------------
-ENV PYTEST_ARGUMENTS='-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers'
+ENV PYTEST_ARGUMENTS='--ignore_image_cache'
 
 # Setting entrypoint
 # ------------------
+USER root
 COPY start.sh /
 RUN chmod +x /start.sh
+USER mapdl
 
-EXPOSE 50052
-
-CMD [ "/bin/bash", "/start.sh" ]
+ENTRYPOINT [ "/bin/bash", "/start.sh" ]
+SHELL [ "/bin/bash" ]
