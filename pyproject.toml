@@ -32,7 +32,7 @@ dependencies = [
   "protobuf>=3.12.2",                          # minimum required based on latest ansys-grpc-mapdl
   "psutil>=5.9.4",
   "pyiges[full]>=0.3.1",                       # Since v0.3.0, the 'full' flag is needed in order to install 'geomdl'
-  "pyvista<=0.46.5",
+  "pyvista<=0.47.0",
   "scipy>=1.3.0",                              # for sparse (consider optional?)
   "tabulate>=0.8.0",                           # for cli plotting
   "tqdm>=4.45.0",
@@ -88,7 +88,7 @@ doc = [
   "ansys-mapdl-reader==0.55.2",
   "ansys-sphinx-theme==1.7.0",
   "ansys-tools-visualization-interface==0.12.1",
-  "grpcio==1.76.0",
+  "grpcio==1.78.0",
   "imageio-ffmpeg==0.6.0",
   "imageio==2.37.2",
   "jupyter==1.1.1",
