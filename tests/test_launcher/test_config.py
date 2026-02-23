@@ -247,9 +247,10 @@ class TestConfigResolution:
     """Tests for complete configuration resolution."""
 
     @pytest.fixture(autouse=True)
-    def _patch_get_mapdl_path_auto(self, patch_get_mapdl_path):
+    def _patch_get_mapdl_path_auto(self, patch_get_mapdl_path, monkeypatch):
         """Auto-apply get_mapdl_path patch to all tests in this class."""
-        pass
+        # To bypass auto-detection and use the mocked path, we set the env var to a known value
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/path/to/mapdl")
 
     def test_resolve_launch_config_all_specified(self):
         """Test resolve_launch_config with all parameters specified."""
