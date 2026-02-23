@@ -21,7 +21,7 @@ if str(_parent_dir) not in sys.path:
 
 # Re-export symbols from parent conftest for "from conftest import" statements
 # This is necessary because Python's import system will find this conftest first
-from conftest import VALID_PORTS, requires  # noqa: F401
+from conftest import ON_LOCAL, VALID_PORTS, requires  # noqa: F401
 
 
 @pytest.fixture(autouse=True, scope="function")

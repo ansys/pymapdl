@@ -34,7 +34,9 @@ from ansys.mapdl.core.launcher.models import TransportMode
 @pytest.fixture
 def patch_get_mapdl_path():
     """Patch get_mapdl_path when not ON_LOCAL to avoid finding docker containers."""
-    if not os.getenv("ON_LOCAL"):
+    from .conftest import ON_LOCAL
+
+    if not ON_LOCAL:
         with patch("ansys.tools.common.path.get_mapdl_path") as mock_get_mapdl:
             mock_get_mapdl.return_value = "/mock/path/to/mapdl"
             # Also patch os.path.isfile for the mock path
@@ -247,10 +249,9 @@ class TestConfigResolution:
     """Tests for complete configuration resolution."""
 
     @pytest.fixture(autouse=True)
-    def _patch_get_mapdl_path_auto(self, patch_get_mapdl_path, monkeypatch):
+    def _patch_get_mapdl_path_auto(self, patch_get_mapdl_path):
         """Auto-apply get_mapdl_path patch to all tests in this class."""
-        # To bypass auto-detection and use the mocked path, we set the env var to a known value
-        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/path/to/mapdl")
+        pass
 
     def test_resolve_launch_config_all_specified(self):
         """Test resolve_launch_config with all parameters specified."""
