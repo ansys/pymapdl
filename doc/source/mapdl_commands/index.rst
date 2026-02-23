@@ -107,36 +107,7 @@ These commands are used to load and solve the model.
    :maxdepth: 1
    :caption: Solution
 
-   solution/analysis_options
-   solution/nonlinear_options
-   solution/dynamic_options
-   solution/spectrum_options
-   solution/load_step_options
-   solution/solid_constraints
-   solution/solid_forces
-   solution/solid_surface_loads
-   solution/solid_body_loads
-   solution/inertia
-   solution/miscellaneous_loads
-   solution/load_step_operations
-   solution/master_dof
-   solution/gap_conditions
-   solution/rezoning
-   solution/2d_to_3d_analysis
-   solution/birth_and_death
-   solution/fe_constraints
-   solution/fe_forces
-   solution/fe_surface_loads
-   solution/fe_body_loads
-   solution/ocean
-   solution/solution_status
-   solution/radiosity
-   solution/multi_field_solver_definition_commands
-   solution/multi_field_solver_global_controls
-   solution/multi_field_solver_time_controls
-   solution/multi_field_solver_load_transfer
-   solution/multi_field_solver_convergence_controls
-   solution/multi_field_solver_interface_mapping
+   solution/index
 
 *****
 POST1
