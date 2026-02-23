@@ -71,7 +71,7 @@ class DefaultSymbol:
         self._configured = False
 
     def __call__(self, name):
-        if not self._configured:  # Temporal patch pending on #3568
+        if not self._configured:
             self._set_configuration()
             self._configured = True
 
