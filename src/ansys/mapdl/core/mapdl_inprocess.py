@@ -81,6 +81,12 @@ class MapdlInProcess(MapdlBase):
     def exit(self) -> None:
         self._in_process_backend.exit()
 
+    @property
+    def db(self):
+        raise AttributeError(
+            f"{type(self).__name__!s} doesn't support the 'db' backend, check documentation for alternatives."
+        )
+
     @MapdlBase.name.getter
     def name(self) -> str:
         return "MapdlInProcess"
