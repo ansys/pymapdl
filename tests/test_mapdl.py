@@ -2079,7 +2079,10 @@ def test_get_not_muted(mapdl, cleared):
     mock_not_muted.assert_not_called()
 
 
-def test_session_id(mapdl, cleared, running_test):
+def test_session_id(mapdl, running_test):
+    # Calling here to make sure we have a session id before testing it.
+    mapdl.clear()
+
     mapdl._strict_session_id_check = True
     assert mapdl._session_id is not None
 
@@ -3050,7 +3053,10 @@ def test_timeout_when_exiting(mapdl, is_exited):
         ("modopt", None),
     ),
 )
-def test_none_as_argument(mapdl, make_block, cmd, arg):
+def test_none_as_argument(mapdl, cmd, arg):
+    mapdl.clear()
+    mapdl.prep7()
+
     if "sel" in cmd:
         kwargs = {"wraps": mapdl._run}
     else:
