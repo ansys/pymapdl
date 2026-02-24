@@ -397,8 +397,10 @@ class Test_components(TestClass):
 def test_big_component(mapdl, cleared):
     mapdl.prep7()
 
-    for i in range(1000):
-        mapdl.n(i, i, 0, 0)
+    with mapdl.non_interactive:
+        mapdl.run("*do,i,1,999")
+        mapdl.run("n,i,i,0,0")
+        mapdl.run("*enddo")
 
     mapdl.allsel()
     mapdl.cm("many_nodes", "NODE")
