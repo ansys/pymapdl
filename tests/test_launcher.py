@@ -203,6 +203,10 @@ def test_catch_version_from_path():
 def test_find_mapdl_linux(my_fs, path, version, raises):
     my_fs.os = OSType.LINUX
     my_fs.create_file(path)
+    # Ensure a 'mapdl' executable exists in the same bin directory so
+    # find_mapdl can detect installations that expect a 'mapdl' file.
+    if not path.endswith("mapdl"):
+        my_fs.create_file(os.path.join(os.path.dirname(path), "mapdl"))
 
     from ansys.tools.common.path import find_mapdl
 
@@ -222,7 +226,9 @@ def test_find_mapdl_linux(my_fs, path, version, raises):
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
 @patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
 @patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
-def test_invalid_mode(mapdl, my_fs, cleared, monkeypatch):
+def test_invalid_mode(mapdl, my_fs, monkeypatch):
+    mapdl.clear()
+
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
     monkeypatch.delenv("PYMAPDL_IP", False)
     monkeypatch.delenv("PYMAPDL_PORT", False)
@@ -240,7 +246,9 @@ def test_invalid_mode(mapdl, my_fs, cleared, monkeypatch):
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
 @patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
 @patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
-def test_old_version_not_version(mapdl, my_fs, cleared, monkeypatch, version):
+def test_old_version_not_version(mapdl, my_fs, monkeypatch, version):
+    mapdl.clear()
+
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
     monkeypatch.delenv("PYMAPDL_IP", False)
     monkeypatch.delenv("PYMAPDL_PORT", False)
@@ -265,7 +273,9 @@ def test_old_version_not_version(mapdl, my_fs, cleared, monkeypatch, version):
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
 @patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
 @patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
-def test_not_valid_versions(mapdl, my_fs, cleared, monkeypatch, version):
+def test_not_valid_versions(mapdl, my_fs, monkeypatch, version):
+    mapdl.clear()
+
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
     monkeypatch.delenv("PYMAPDL_IP", False)
     monkeypatch.delenv("PYMAPDL_PORT", False)
