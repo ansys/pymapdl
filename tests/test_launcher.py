@@ -36,6 +36,7 @@ import pytest
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import (
     IncorrectMPIConfigurationError,
+    MapdlConnectionError,
     MapdlDidNotStart,
     NotAvailableLicenses,
     NotEnoughResources,
@@ -2179,7 +2180,6 @@ def test_env_vars_with_slurm_bootstrap(monkeypatch):
         nonlocal captured_env_vars
         captured_env_vars = env_vars
         # Mock process object
-        from tests.test_launcher import get_fake_process
 
         return get_fake_process("Submitted batch job 1001")
 
@@ -2393,3 +2393,315 @@ def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
                 finally:
                     # Restore original _launch
                     mapdl._launch = original_launch
+
+
+@requires("local")
+@requires("nostudent")
+def test_multi_connect_with_valid_process(mapdl, cleared):
+    """Test that _multi_connect successfully connects when MAPDL process is alive."""
+    # Create a new MAPDL instance to test connection
+    port = 50060
+    new_mapdl = launch_mapdl(
+        port=port,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+        start_timeout=30,
+    )
+
+    try:
+        # Verify it connected successfully
+        assert new_mapdl.is_alive
+        assert new_mapdl._mapdl_process is not None
+        assert psutil.pid_exists(new_mapdl._mapdl_process.pid)
+
+        # Force a reconnection to test _multi_connect
+        new_mapdl._exited = True
+        new_mapdl.reconnect_to_mapdl(timeout=10)
+
+        # Verify connection is restored
+        assert new_mapdl.is_alive
+
+    finally:
+        new_mapdl.exit(force=True)
+
+
+@requires("local")
+@requires("nostudent")
+def test_multi_connect_early_exit_on_process_death(tmpdir):
+    """Test that _multi_connect exits early when MAPDL process dies during connection."""
+    from ansys.mapdl.core.cli.core import get_ansys_process_from_port
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    run_location = str(tmpdir)
+
+    # Start process
+    mapdl_0 = launch_mapdl(
+        run_location=run_location,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+    )
+    original_process = mapdl_0._mapdl_process
+    port = mapdl_0.port
+
+    # Give it a moment to start
+    sleep(1)
+
+    # On Windows the launcher starts a terminal process that in turn starts MAPDL.
+    # We need to get the actual MAPDL process to kill it.
+    process = get_ansys_process_from_port(port)
+
+    try:
+        # Create MapdlGrpc instance with the process
+        start_parm = {
+            "process": original_process,
+            "local": True,
+            "launched": True,
+            "run_location": run_location,
+            "jobname": "test_early_exit",
+        }
+
+        # Kill the process before attempting connection
+        if psutil.pid_exists(process.pid):
+            process.kill()
+            sleep(0.5)
+
+        # Now try to connect - should fail quickly instead of timing out
+        start_time = __import__("time").time()
+
+        with pytest.raises((MapdlConnectionError, MapdlDidNotStart)):
+            mapdl = MapdlGrpc(
+                port=port,
+                timeout=30,  # Long timeout - but should exit early
+                **start_parm,
+            )
+
+        elapsed_time = __import__("time").time() - start_time
+
+        # Verify it failed much faster than the 30 second timeout
+        # It should detect the dead process within a few seconds
+        assert (
+            elapsed_time < 10
+        ), f"Took {elapsed_time}s, expected < 10s due to early exit"
+
+    finally:
+        # Cleanup
+        if process.is_running():
+            process.kill()
+        mapdl_0.exit(force=True)
+
+
+@pytest.mark.parametrize(
+    "has_process,has_path,should_monitor",
+    [
+        (True, True, True),  # Local with process and path -> should monitor
+        (True, False, False),  # Local with process but no path -> no monitor
+        (False, True, False),  # Local with path but no process -> no monitor
+        (False, False, False),  # Local with neither -> no monitor
+    ],
+)
+def test_multi_connect_monitoring_conditions(
+    mapdl, has_process, has_path, should_monitor
+):
+    """Test that monitoring thread only starts under correct conditions."""
+    # Mock the internal state
+    original_local = mapdl._local
+    original_process = mapdl._mapdl_process
+    original_path = mapdl._path
+
+    try:
+        mapdl._local = True
+        mapdl._mapdl_process = Mock() if has_process else None
+        mapdl._path = "/some/path" if has_path else None
+
+        # Mock _check_process_is_alive to not raise exceptions during monitoring
+        with patch("ansys.mapdl.core.launcher._check_process_is_alive"):
+            # Mock _connect to succeed immediately
+            with patch.object(mapdl, "_connect", return_value=True):
+                # Track if thread was started by checking log calls
+                with patch.object(mapdl._log, "debug") as mock_debug:
+                    mapdl._multi_connect(n_attempts=1, timeout=1)
+
+                    # Check if monitoring thread debug message was logged
+                    debug_calls = [str(call) for call in mock_debug.call_args_list]
+                    thread_started = any(
+                        "Started MAPDL monitoring thread" in str(call)
+                        for call in debug_calls
+                    )
+
+                    if should_monitor:
+                        assert thread_started, "Monitoring thread should have started"
+                    else:
+                        assert (
+                            not thread_started
+                        ), "Monitoring thread should not have started"
+
+    finally:
+        # Restore original state
+        mapdl._local = original_local
+        mapdl._mapdl_process = original_process
+        mapdl._path = original_path
+
+
+def test_multi_connect_monitoring_thread_cleanup(mapdl):
+    """Test that monitoring thread is properly cleaned up after connection."""
+    import threading
+
+    original_process = mapdl._mapdl_process
+    original_path = mapdl._path
+    original_local = mapdl._local
+
+    try:
+        # Setup for monitoring
+        mapdl._local = True
+        mapdl._mapdl_process = Mock(pid=12345)
+        mapdl._path = "/some/path"
+
+        # Mock _check_process_is_alive to not raise exceptions
+        with patch("ansys.mapdl.core.launcher._check_process_is_alive"):
+            # Mock psutil to say process exists
+            with patch("psutil.pid_exists", return_value=True):
+                # Mock _connect to succeed quickly
+                with patch.object(mapdl, "_connect", return_value=True):
+                    # Track active threads before
+                    threads_before = threading.active_count()
+
+                    # Call _multi_connect
+                    mapdl._multi_connect(n_attempts=1, timeout=2)
+
+                    # Give a moment for thread cleanup
+                    sleep(0.2)
+
+                    # Thread count should be back to normal (or close)
+                    threads_after = threading.active_count()
+                    # Allow for some variance in thread count
+                    assert (
+                        abs(threads_after - threads_before) <= 1
+                    ), "Monitoring thread should be cleaned up"
+
+    finally:
+        mapdl._local = original_local
+        mapdl._mapdl_process = original_process
+        mapdl._path = original_path
+
+
+def test_multi_connect_monitor_detects_process_death(mapdl):
+    """Test that monitor thread detects when process dies during connection."""
+    import time
+
+    original_process = mapdl._mapdl_process
+    original_path = mapdl._path
+    original_local = mapdl._local
+
+    try:
+        # Create a mock process that will "die"
+        mock_process = Mock()
+        mock_process.poll.return_value = 1  # Process has exited
+
+        mapdl._local = True
+        mapdl._mapdl_process = mock_process
+        mapdl._path = "/some/path"
+
+        # Mock _check_process_is_alive to raise exception (process died)
+        with patch("ansys.mapdl.core.launcher._check_process_is_alive") as mock_check:
+            mock_check.side_effect = MapdlDidNotStart("MAPDL process died.")
+
+            # Mock _connect to always fail (would timeout normally)
+            with patch.object(mapdl, "_connect", return_value=False):
+                # This should raise an exception from the monitor, not timeout
+                start_time = time.time()
+
+                with pytest.raises(MapdlDidNotStart, match="MAPDL process died"):
+                    mapdl._multi_connect(n_attempts=5, timeout=10)
+
+                elapsed = time.time() - start_time
+
+                # Should fail quickly (within monitoring interval + some margin)
+                assert elapsed < 3, f"Should fail quickly, took {elapsed}s"
+
+    finally:
+        mapdl._local = original_local
+        mapdl._mapdl_process = original_process
+        mapdl._path = original_path
+
+
+def test_multi_connect_with_successful_connection_stops_monitoring(mapdl):
+    """Test that successful connection stops the monitoring thread."""
+    import time
+
+    original_process = mapdl._mapdl_process
+    original_path = mapdl._path
+    original_local = mapdl._local
+
+    try:
+        mapdl._local = True
+        mapdl._mapdl_process = Mock(pid=12345)
+        mapdl._path = "/some/path"
+
+        monitor_check_count = {"count": 0}
+
+        def mock_check_process(*args, **kwargs):
+            monitor_check_count["count"] += 1
+            time.sleep(0.1)
+            # Don't raise exception - process is alive
+
+        with patch(
+            "ansys.mapdl.core.launcher._check_process_is_alive",
+            side_effect=mock_check_process,
+        ):
+            with patch("psutil.pid_exists", return_value=True):
+                # Make _connect succeed on second attempt
+                connect_attempts = {"count": 0}
+
+                def mock_connect(*args, **kwargs):
+                    connect_attempts["count"] += 1
+                    return connect_attempts["count"] >= 2
+
+                with patch.object(mapdl, "_connect", side_effect=mock_connect):
+                    mapdl._multi_connect(n_attempts=5, timeout=10)
+
+                    # Give monitoring thread time to cleanup
+                    time.sleep(0.5)
+
+                    # Store the count when connection succeeded
+                    count_at_success = monitor_check_count["count"]
+
+                    # Wait a bit more
+                    time.sleep(1.0)
+
+                    # Count should not increase much after connection success
+                    # (maybe 1-2 more checks before thread stops)
+                    assert (
+                        monitor_check_count["count"] - count_at_success <= 3
+                    ), "Monitor should stop checking after successful connection"
+
+    finally:
+        mapdl._local = original_local
+        mapdl._mapdl_process = original_process
+        mapdl._path = original_path
+
+
+def test_multi_connect_remote_no_monitoring(mapdl):
+    """Test that monitoring thread doesn't start for remote instances."""
+    original_local = mapdl._local
+
+    try:
+        # Set as remote instance
+        mapdl._local = False
+        mapdl._mapdl_process = Mock()  # Even with a process
+        mapdl._path = "/some/path"  # And a path
+
+        with patch.object(mapdl, "_connect", return_value=True):
+            with patch.object(mapdl._log, "debug") as mock_debug:
+                mapdl._multi_connect(n_attempts=1, timeout=1)
+
+                # Verify no monitoring thread was started
+                debug_calls = [str(call) for call in mock_debug.call_args_list]
+                thread_started = any(
+                    "Started MAPDL monitoring thread" in str(call)
+                    for call in debug_calls
+                )
+
+                assert (
+                    not thread_started
+                ), "Monitoring should not start for remote instances"
+
+    finally:
+        mapdl._local = original_local

@@ -295,7 +295,7 @@ jobs:
       upload-logs: true
 
 
-  build-test-ubuntu-minimal: # TODO: Enable again when minimal builds are stable
+  build-test-ubuntu-minimal:
     name: "Local-min: ${{ matrix.mapdl-version }}"
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [build-test-ubuntu-local, build-test-remote]
