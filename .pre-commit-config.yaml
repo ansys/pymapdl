@@ -33,7 +33,7 @@ repos:
     - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
-  rev: 0a09c783808cfe77bb3269250f663ff733d23302  # frozen: 7.0.0
+  rev: 3459bdee0962449aad91235273c3fd1306dfebe5  # frozen: 8.0.0
   hooks:
   - id: isort
 
