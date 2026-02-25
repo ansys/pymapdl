@@ -111,6 +111,7 @@ extensions = [
     "sphinx.ext.graphviz",
     "ansys_sphinx_theme.extension.linkcode",
     "sphinx.ext.mathjax",
+    "sphinx.ext.imgconverter",
 ]
 
 # Intersphinx mapping
