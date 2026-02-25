@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class AnalysisOptions:
+
+class AnalysisOptions(CommandsBase):
 
     def abextract(self, mode1: str = "", mode2: str = "", **kwargs):
         r"""Extracts the alpha-beta damping multipliers for Rayleigh damping.

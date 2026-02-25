@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class SolidForces:
+
+class SolidForces(CommandsBase):
 
     def fk(
         self, kpoi: str = "", lab: str = "", value: str = "", value2: str = "", **kwargs

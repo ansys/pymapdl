@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class BirthAndDeath:
+
+class BirthAndDeath(CommandsBase):
 
     def ealive(self, elem: str = "", **kwargs):
         r"""Reactivates an element (for the birth and death capability).

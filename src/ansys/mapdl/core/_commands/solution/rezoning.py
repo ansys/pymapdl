@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Rezoning:
+
+class Rezoning(CommandsBase):
 
     def aremesh(self, lcomb: int | str = "", angle: str = "", **kwargs):
         r"""Generates an area in which to create a new mesh for rezoning.

@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class NonlinearOptions:
+
+class NonlinearOptions(CommandsBase):
 
     def arclen(self, key: str = "", maxarc: str = "", minarc: str = "", **kwargs):
         r"""Activates the arc-length method.

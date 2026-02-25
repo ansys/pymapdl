@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Analysis2DTo3D:
+
+class Analysis2DTo3D(CommandsBase):
 
     def map2dto3d(self, action: str = "", value1: str = "", value2: str = "", **kwargs):
         r"""Initiates a 2D to 3D analysis and maps variables.

@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class DynamicOptions:
+
+class DynamicOptions(CommandsBase):
 
     def alphad(self, value: str = "", **kwargs):
         r"""Defines the mass matrix multiplier for damping.

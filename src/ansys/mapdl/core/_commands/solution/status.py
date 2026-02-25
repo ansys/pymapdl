@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Status:
+
+class Status(CommandsBase):
 
     def atype(self, **kwargs):
         r"""Specifies "Analysis types" as the subsequent status topic.

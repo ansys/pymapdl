@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Radiosity:
+
+class Radiosity(CommandsBase):
 
     def hemiopt(self, hres: str = "", tolerance: str = "", **kwargs):
         r"""Specifies options for Hemicube view factor calculation.
