@@ -6,17 +6,17 @@
 ARG DOCKER_IMAGE="mapdl:latest"
 
 #######################################################
-FROM ubuntu:22.04 AS python-main
+FROM ubuntu:22.04 AS python-container
 #######################################################
 
-ARG USE_LOCAL_REPO=yes
+
+ARG USE_LOCAL_REPO
 ARG PYTHON_VERSION=3.11
 
 ENV USE_LOCAL_REPO=${USE_LOCAL_REPO}
 ENV UV_PYTHON=${PYTHON_VERSION}
 
-# Set workdir
-WORKDIR /workspace
+WORKDIR /home
 
 # Install system dependencies
 RUN apt-get update && \
@@ -27,17 +27,23 @@ RUN apt-get update && \
     graphviz \
     git \
     openssh-client \
-    curl
+    curl && \
     # Installing uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+    curl -LsSf https://astral.sh/uv/install.sh | sh \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/ansys/pymapdl.git . \
-    && git config --global --add safe.directory /workspace
+RUN ls -al
+
+# Cloning repo if needed.
+RUN if [ "$USE_LOCAL_REPO" = "false" ]; then \
+        echo "Cloning PyMAPDL repository..." && \
+        git clone https://github.com/ansys/pymapdl.git . && \
+        git config --global --add safe.directory $(pwd); \
+    fi
 
 # Set PATH to include uv
-ENV PATH="/root/.local/bin:$PATH"
+ENV PATH="/root/.local/bin:$HOME/.local/bin:$PATH"
 RUN uv --version
 
 # Configuration
@@ -87,32 +93,22 @@ COPY start.sh /
 RUN chmod +x /start.sh
 
 ENTRYPOINT [ "/bin/bash", "/start.sh" ]
-SHELL [ "/bin/bash" ]
+
+SHELL [ "/bin/bash", "-c" ]
+
 
 #######################################################
-FROM python-main AS test-clone-pymapdl
-#######################################################
-
-ENV USE_LOCAL_REPO=false
-
-#######################################################
-FROM python-main AS test-local-pymapdl
-#######################################################
-
-ENV USE_LOCAL_REPO=true
-
-# Remove cloned repo so the local repo can be mounted.
-RUN rm -rf /workspace/* >/dev/null 2>&1
-
-#######################################################
-FROM ${DOCKER_IMAGE} AS mapdl-local-container-pymapdl
+FROM ${DOCKER_IMAGE} AS mapdl-container
 #######################################################
 #
 # WARNING: This container is designed to work using an Ubuntu base image.
 #
+ARG USE_LOCAL_REPO
 ARG PYTHON_VERSION=3.11
 
 ENV UV_PYTHON=${PYTHON_VERSION}
+ENV USE_LOCAL_REPO=${USE_LOCAL_REPO}
+
 ENV OMPI_ALLOW_RUN_AS_ROOT=1
 ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
@@ -141,11 +137,15 @@ ENV PATH="/root/.local/bin:$PATH"
 RUN USER=mapdl && chown -R $USER:$USER /home/mapdl
 USER mapdl
 
-# Clone to install the libraries needed
-RUN git clone https://github.com/ansys/pymapdl.git .
-
 ENV PATH="$HOME/.local/bin:$PATH"
-RUN uv --version
+
+# Cloning repo if needed.
+RUN if [ "$USE_LOCAL_REPO" = "false" ]; then \
+        echo "Cloning PyMAPDL repository..." && \
+        git clone https://github.com/ansys/pymapdl.git . && \
+        git config --global --add safe.directory /workspace; \
+    fi && \
+    uv --version
 
 # Configuration
 # -------------
