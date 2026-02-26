@@ -73,8 +73,6 @@ echo "  Executable: ${EXEC_PATH}"
 echo "  Mode: -${DISTRIBUTED_MODE}"
 echo "  Processors: -np ${NUM_PROCESSORS}"
 echo "  Transport: -transport ${TRANSPORT}"
-echo "  DB Memory: -db ${MEMORY_DB_MB}"
-echo "  Workspace Memory: -m ${MEMORY_WORKSPACE_MB}"
 
 # Construct the MAPDL command
 MAPDL_CMD="${EXEC_PATH} -grpc -dir /jobs -${DISTRIBUTED_MODE} -transport ${TRANSPORT} -allowremote true -np ${NUM_PROCESSORS} -db ${MEMORY_DB_MB} -m ${MEMORY_WORKSPACE_MB}"

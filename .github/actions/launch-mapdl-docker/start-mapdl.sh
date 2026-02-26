@@ -35,21 +35,6 @@ MEMORY_WORKSPACE_MB="${MEMORY_WORKSPACE_MB:-6000}"
 TRANSPORT="${TRANSPORT:-insecure}"
 TIMEOUT="${TIMEOUT:-60}"
 
-echo "Configuration:"
-echo "  MAPDL Version: ${MAPDL_VERSION}"
-echo "  MAPDL Image: ${MAPDL_IMAGE}"
-echo "  Instance Name: ${INSTANCE_NAME}"
-echo "  License Server: ${LICENSE_SERVER}"
-echo "  PyMAPDL Port: ${PYMAPDL_PORT}"
-echo "  PyMAPDL DB Port: ${PYMAPDL_DB_PORT}"
-echo "  DPF Port: ${DPF_PORT}"
-echo "  Enable DPF: ${ENABLE_DPF_SERVER}"
-echo "  Distributed Mode: ${DISTRIBUTED_MODE}"
-echo "  Number of Processors: ${NUM_PROCESSORS}"
-echo "  MPI Type: ${MPI_TYPE}"
-echo "  Memory: ${MEMORY_MB} MB"
-echo "  Transport: ${TRANSPORT}"
-
 echo ""
 echo "Pulling Docker image: ${MAPDL_IMAGE}"
 docker pull "${MAPDL_IMAGE}"
@@ -107,9 +92,11 @@ fi
 
 vendor=$(awk -F: '/vendor_id/{print $2; exit}' /proc/cpuinfo | tr -d ' \t')
 if [[ "$vendor" == "GenuineIntel" ]]; then
-  echo "CPU architecture: Intel"
+#   echo "CPU architecture: Intel"
+  export CPU_VENDOR="INTEL"
 elif [[ "$vendor" == "AuthenticAMD" ]]; then
-  echo "CPU architecture: AMD"
+#   echo "CPU architecture: AMD"
+  export CPU_VENDOR="AMD"
 else
   echo "Unknown (vendor_id: $vendor)"
 fi
@@ -131,16 +118,48 @@ if [[ "$vendor" == "AuthenticAMD" ]]; then
 fi
 
 echo ""
-echo "Container Configuration:"
-echo "  Image: ${MAPDL_IMAGE}"
-echo "  Version: ${VERSION}"
-echo "  CPU Vendor: ${vendor}"
-echo "  MPI Arguments: ${MPI_ARG}"
+echo "==================================="
+echo "✅ MAPDL Container Launch Complete"
+echo "==================================="
+
+echo "Configuration:"
+echo "  Container configuration:"
+echo "  MAPDL Image: ${MAPDL_IMAGE}"
+echo "  Instance Name: ${INSTANCE_NAME}"
+echo "  CPU Vendor: ${CPU_VENDOR}"
+echo "  Reserved memory: ${MEMORY_MB}"
+echo "  Reserved swap memory: ${MEMORY_SWAP_MB}"
+echo ""
+
+echo "MAPDL Configuration:"
+echo "  MAPDL Version: ${MAPDL_VERSION} (Version number: ${VERSION})"
 echo "  Executable Path: ${EXEC_PATH}"
+echo "  DB Memory: -db ${MEMORY_DB_MB}"
+echo "  Workspace Memory: -m ${MEMORY_WORKSPACE_MB}"
+echo "  Transport: ${TRANSPORT}"
+echo "  License Server: ${LICENSE_SERVER}"
 echo "  Schema Path: ${P_SCHEMA}"
-echo "  DPF Port Mapping: ${DPF_PORT_ARGS[*]}"
-echo "  DB Internal Port: ${DB_INT_PORT}"
+echo ""
+
+echo "MPI Configuration"
 echo "  Distributed Mode: ${DISTRIBUTED_MODE}"
+echo "  Number of Processors: ${NUM_PROCESSORS}"
+echo "  MPI Type: ${MPI_TYPE}"
+echo "  Memory: ${MEMORY_MB} MB"
+echo "  MPI Arguments: ${MPI_ARG}"
+echo ""
+
+echo "PyMAPDL Configuration:"
+echo "  PyMAPDL Port: ${PYMAPDL_PORT}"
+echo "  PyMAPDL DB Port: ${PYMAPDL_DB_PORT}"
+echo "  DB Internal Port: ${DB_INT_PORT}"
+echo ""
+
+echo "DPF Configuration:"
+echo "  Enable DPF: ${ENABLE_DPF_SERVER}"
+echo "  DPF Port: ${DPF_PORT}"
+echo "  DPF Port Mapping: ${DPF_PORT_ARGS[*]}"
+echo ""
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -150,10 +169,11 @@ ENTRYPOINT_PATH="${SCRIPT_DIR}/entrypoint.sh"
 
 # Build Docker run command
 echo ""
-echo "Building Docker container..."
+echo "Running Docker container..."
 
 # Build docker command with all configurations
 docker run \
+  --detach \
   --entrypoint /bin/bash \
   --name "${INSTANCE_NAME}" \
   --restart unless-stopped \
@@ -224,7 +244,3 @@ echo ""
 echo "==================================="
 echo "✅ MAPDL Container Launch Complete"
 echo "==================================="
-echo "Container Name: ${INSTANCE_NAME}"
-echo "PyMAPDL Port: ${PYMAPDL_PORT}"
-echo "DPF Port: ${DPF_PORT}"
-echo "Log File: ${LOG_FILE}"
