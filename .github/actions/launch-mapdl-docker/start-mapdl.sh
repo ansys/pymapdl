@@ -109,6 +109,15 @@ echo "====="
 lscpu || echo "Failed lscpu, not available in this image"
 cat /proc/cpuinfo || echo "Failed to read /proc/cpuinfo"
 echo "====="
+#!/bin/bash
+vendor=$(awk -F: '/vendor_id/{print $2; exit}' /proc/cpuinfo | tr -d ' \t')
+if [[ "$vendor" == "GenuineIntel" ]]; then
+  echo "Intel"
+elif [[ "$vendor" == "AuthenticAMD" ]]; then
+  echo "AMD"
+else
+  echo "Unknown (vendor_id: $vendor)"
+fi
 
 
 # Determine MPI type
