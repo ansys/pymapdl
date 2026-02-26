@@ -179,7 +179,7 @@ async function run() {
     if (wait === 'true') {
       core.startGroup('Waiting for MAPDL services to be ready');
       const waitScriptPath = path.join(__dirname, '..', 'wait-services.sh');
-      await exec.exec('bash', [waitScriptPath]);
+      await exec.exec('bash', [waitScriptPath], {silent: !DEBUG});
       core.endGroup();
       console.log('✅ MAPDL instance is ready!');
     } else {
