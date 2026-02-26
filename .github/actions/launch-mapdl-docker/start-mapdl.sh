@@ -132,11 +132,14 @@ fi
 
 echo ""
 echo "Container Configuration:"
+echo "  Image: ${MAPDL_IMAGE}"
+echo "  Version: ${VERSION}"
+echo "  CPU Vendor: ${vendor}"
+echo "  MPI Arguments: ${MPI_ARG}"
 echo "  Executable Path: ${EXEC_PATH}"
 echo "  Schema Path: ${P_SCHEMA}"
 echo "  DPF Port Mapping: ${DPF_PORT_ARGS[*]}"
 echo "  DB Internal Port: ${DB_INT_PORT}"
-echo "  MPI Arguments: ${MPI_ARG}"
 echo "  Distributed Mode: ${DISTRIBUTED_MODE}"
 
 # Get the directory where this script is located
