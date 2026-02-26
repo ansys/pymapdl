@@ -175,8 +175,7 @@ if [[ "$CPU_VENDOR" == "AMD" ]]; then
     fi
 fi
 
-echo ""
-echo "Container Configuration:"
+echo -e "\nContainer Configuration:"
 echo "  MAPDL Image: ${MAPDL_IMAGE}"
 echo "  Instance Name: ${INSTANCE_NAME}"
 echo "  CPU Vendor: ${CPU_VENDOR}"
@@ -184,7 +183,7 @@ echo "  Reserved memory: ${MEMORY_MB}"
 echo "  Reserved swap memory: ${MEMORY_SWAP_MB}"
 echo ""
 
-echo "MAPDL Configuration:"
+echo -e "\nMAPDL Configuration:"
 echo "  MAPDL Version: ${MAPDL_VERSION} (Version number: ${VERSION})"
 echo "  Executable Path: ${EXEC_PATH}"
 echo "  DB Memory: -db ${MEMORY_DB_MB}"
@@ -194,7 +193,7 @@ echo "  License Server: ${LICENSE_SERVER}"
 echo "  Schema Path: ${P_SCHEMA}"
 echo ""
 
-echo "MPI Configuration"
+echo -e "\nMPI Configuration:"
 echo "  Distributed Mode: ${DISTRIBUTED_MODE}"
 echo "  Number of Processors: ${NUM_PROCESSORS}"
 echo "  MPI Type: ${MPI_TYPE}"
@@ -202,13 +201,13 @@ echo "  Memory: ${MEMORY_MB} MB"
 echo "  MPI Arguments: ${MPI_ARG}"
 echo ""
 
-echo "PyMAPDL Configuration:"
+echo -e "\nPyMAPDL Configuration:"
 echo "  PyMAPDL Port: ${PYMAPDL_PORT}"
 echo "  PyMAPDL DB Port: ${PYMAPDL_DB_PORT}"
 echo "  DB Internal Port: ${DB_INT_PORT}"
 echo ""
 
-echo "DPF Configuration:"
+echo -e "\nDPF Configuration:"
 echo "  Enable DPF: ${ENABLE_DPF_SERVER}"
 echo "  DPF Port: ${DPF_PORT}"
 echo "  DPF Port Mapping: ${DPF_PORT_ARGS[*]}"

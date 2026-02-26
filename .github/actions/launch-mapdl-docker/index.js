@@ -9,6 +9,8 @@ async function run() {
     const mapdlImage = core.getInput('mapdl-image');
     const licenseServer = core.getInput('license-server', { required: true });
     const instanceName = core.getInput('instance-name') || 'MAPDL_0';
+    const isDebug = process.env.RUNNER_DEBUG === '1' || core.isDebug();
+    const DEBUG = core.getInput('debug') === 'true' || isDebug;
 
     // Validate inputs
     if (!mapdlVersion && !mapdlImage) {
@@ -95,26 +97,25 @@ async function run() {
     }
     instanceNames.push(instanceName);
     core.saveState('instance-names', JSON.stringify(instanceNames));
+    core.saveState('debug', JSON.stringify(DEBUG));
 
-    core.startGroup('MAPDL Docker Container Configuration');
-    console.log('Configuration:');
-    console.log(`  MAPDL Version: ${versionNumber}`);
-    console.log(`  MAPDL Image: ${fullImageRef}`);
-    console.log(`  Instance Name: ${instanceName}`);
-    console.log(`  PyMAPDL Port: ${pymapdlPort}`);
-    console.log(`  Transport: ${transport}`);
-    console.log(`  --`);
-    console.log(`  Enable DPF Server: ${enableDpfServer}`);
-    console.log(`  DPF Port: ${dpfPort}`);
-    console.log(`  --`);
-    console.log(`  Distributed Mode: ${distributedMode}`);
-    console.log(`  Number of Processors: ${numProcessors}`);
-    console.log(`  MPI Type: ${mpiType}`);
-    console.log(`  Working Directory: ${workingDirectory}`);
-    console.log(`  Memory (MB): ${memoryMb}`);
-    console.log(`  Memory DB (MB): ${memoryDbMb}`);
-    console.log(`  Memory Workspace (MB): ${memoryWorkspaceMb}`);
-    core.endGroup();
+    core.debug('Configuration:');
+    core.debug(`  MAPDL Version: ${versionNumber}`);
+    core.debug(`  MAPDL Image: ${fullImageRef}`);
+    core.debug(`  Instance Name: ${instanceName}`);
+    core.debug(`  PyMAPDL Port: ${pymapdlPort}`);
+    core.debug(`  Transport: ${transport}`);
+    core.debug(`  --`);
+    core.debug(`  Enable DPF Server: ${enableDpfServer}`);
+    core.debug(`  DPF Port: ${dpfPort}`);
+    core.debug(`  --`);
+    core.debug(`  Distributed Mode: ${distributedMode}`);
+    core.debug(`  Number of Processors: ${numProcessors}`);
+    core.debug(`  MPI Type: ${mpiType}`);
+    core.debug(`  Working Directory: ${workingDirectory}`);
+    core.debug(`  Memory (MB): ${memoryMb}`);
+    core.debug(`  Memory DB (MB): ${memoryDbMb}`);
+    core.debug(`  Memory Workspace (MB): ${memoryWorkspaceMb}`);
 
     // Set environment variables for the bash script
     process.env.MAPDL_VERSION = versionNumber;
@@ -135,6 +136,7 @@ async function run() {
     process.env.MEMORY_WORKSPACE_MB = memoryWorkspaceMb;
     process.env.TRANSPORT = transport;
     process.env.TIMEOUT = timeout.toString();
+    process.env.DEBUG = DEBUG ? 'true' : 'false';
 
     // Run the launch script (from parent directory when compiled to dist/)
     core.startGroup('Launch MAPDL Docker Container');
