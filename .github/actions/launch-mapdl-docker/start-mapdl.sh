@@ -134,7 +134,6 @@ echo "Building Docker container..."
 
 # Build docker command with all configurations
 docker run \
-  --detach \
   --entrypoint /bin/bash \
   --name "${INSTANCE_NAME}" \
   --restart unless-stopped \
