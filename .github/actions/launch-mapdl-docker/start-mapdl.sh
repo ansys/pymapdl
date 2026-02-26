@@ -165,7 +165,7 @@ docker run \
   -e OMPI_ALLOW_RUN_AS_ROOT=1 \
   -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
   "${MAPDL_IMAGE}" \
-  -c "/entrypoint.sh"
+  -c "chmod +x /entrypoint.sh && /entrypoint.sh"
 
 echo ""
 echo "Container started. Waiting for MAPDL to initialize..."
