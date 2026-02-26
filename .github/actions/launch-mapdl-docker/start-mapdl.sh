@@ -105,6 +105,12 @@ if [[ "${DISTRIBUTED_MODE}" == "None" ]]; then
     DISTRIBUTED_MODE="smp"
 fi
 
+echo "====="
+lscpu || echo "Failed lscpu, not available in this image"
+cat /proc/cpuinfo || echo "Failed to read /proc/cpuinfo"
+echo "====="
+
+
 # Determine MPI type
 if [[ "${MPI_TYPE}" == "auto" ]]; then
     if [[ $MAPDL_IMAGE == *"cicd"* ]]; then
