@@ -5,9 +5,10 @@ async function cleanup() {
   try {
     // Get instance names - stored as JSON array in state
     const instanceNamesJson = core.getState('instance-names');
+    const debug = JSON.parse(core.getState('debug') || 'false');
 
     if (!instanceNamesJson) {
-      console.log('No instance names found in state, skipping cleanup');
+      core.error('No instance names found in state, skipping cleanup');
       return;
     }
 
@@ -15,12 +16,12 @@ async function cleanup() {
     try {
       instanceNames = JSON.parse(instanceNamesJson);
     } catch (error) {
-      console.log('Failed to parse instance names from state');
+      core.error('Failed to parse instance names from state');
       return;
     }
 
     if (!Array.isArray(instanceNames) || instanceNames.length === 0) {
-      console.log('No instances to cleanup');
+      core.error('No instances to cleanup');
       return;
     }
 
@@ -33,7 +34,8 @@ async function cleanup() {
       // Stop the container
       try {
         await exec.exec('docker', ['stop', instanceName], {
-          ignoreReturnCode: true
+          ignoreReturnCode: true,
+          silent: !debug // Only show output if debug is true
         });
         console.log(`✅ Container ${instanceName} stopped`);
       } catch (error) {
@@ -43,7 +45,8 @@ async function cleanup() {
       // Remove the container
       try {
         await exec.exec('docker', ['rm', instanceName], {
-          ignoreReturnCode: true
+          ignoreReturnCode: true,
+          silent: !debug // Only show output if debug is true
         });
         console.log(`✅ Container ${instanceName} removed`);
       } catch (error) {
