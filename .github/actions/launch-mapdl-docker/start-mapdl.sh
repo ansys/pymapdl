@@ -105,34 +105,29 @@ if [[ "${DISTRIBUTED_MODE}" == "None" ]]; then
     DISTRIBUTED_MODE="smp"
 fi
 
-echo "====="
-lscpu || echo "Failed lscpu, not available in this image"
-cat /proc/cpuinfo || echo "Failed to read /proc/cpuinfo"
-echo "====="
-#!/bin/bash
 vendor=$(awk -F: '/vendor_id/{print $2; exit}' /proc/cpuinfo | tr -d ' \t')
 if [[ "$vendor" == "GenuineIntel" ]]; then
-  echo "Intel"
+  echo "CPU architecture: Intel"
 elif [[ "$vendor" == "AuthenticAMD" ]]; then
-  echo "AMD"
+  echo "CPU architecture: AMD"
 else
   echo "Unknown (vendor_id: $vendor)"
 fi
 
-
 # Determine MPI type
-if [[ "${MPI_TYPE}" == "auto" ]]; then
-    if [[ $MAPDL_IMAGE == *"cicd"* ]]; then
-        MPI_ARG="-mpi openmpi"
-    else
-        MPI_ARG=""
-    fi
-elif [[ "${MPI_TYPE}" == "openmpi" ]]; then
+if [[ "${MPI_TYPE}" == "openmpi" ]]; then
     MPI_ARG="-mpi openmpi"
 elif [[ "${MPI_TYPE}" == "intelmpi" ]]; then
     MPI_ARG="-mpi intelmpi"
 else
     MPI_ARG=""
+fi
+
+if [[ "$vendor" == "AuthenticAMD" ]]; then
+    if [[ -z "${MPI_ARG}" ]]; then
+        echo "No MPI type specified, defaulting to OpenMPI for AMD CPU"
+        MPI_ARG="-mpi openmpi"
+    fi
 fi
 
 echo ""
