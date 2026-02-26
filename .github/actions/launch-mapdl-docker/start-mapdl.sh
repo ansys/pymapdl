@@ -165,10 +165,7 @@ docker run \
   -e OMPI_ALLOW_RUN_AS_ROOT=1 \
   -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
   "${MAPDL_IMAGE}" \
-  ls -al
-
-
-#  "/ansys_inc/v252/ansys/bin/mapdl -grpc -dir /jobs -dmp -transport insecure -allowremote true -np 2 -db 6000 -m 6000 -mpi openmpi"
+  -c "/entrypoint.sh"
 
 echo ""
 echo "Container started. Waiting for MAPDL to initialize..."
