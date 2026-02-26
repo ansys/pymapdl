@@ -65,7 +65,6 @@ else
     echo "DPF server disabled"
 fi
 
-DISTRIBUTED_MODE='smp'
 
 # Build MAPDL command
 echo ""

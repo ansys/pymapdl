@@ -24,7 +24,7 @@ PYMAPDL_PORT="${PYMAPDL_PORT:-50052}"
 PYMAPDL_DB_PORT="${PYMAPDL_DB_PORT:-50055}"
 DPF_PORT="${DPF_PORT:-50056}"
 ENABLE_DPF_SERVER="${ENABLE_DPF_SERVER:-false}"
-DISTRIBUTED_MODE="${DISTRIBUTED_MODE:-smp}"
+DISTRIBUTED_MODE="${DISTRIBUTED_MODE:-None}"
 NUM_PROCESSORS="${NUM_PROCESSORS:-2}"
 MPI_TYPE="${MPI_TYPE:-auto}"
 WORKING_DIRECTORY="${WORKING_DIRECTORY:-/jobs}"
@@ -93,9 +93,16 @@ if [[ $MAPDL_IMAGE == *"cicd"* ]]; then
 
     # CICD versions force DMP mode
     echo "  Overriding distributed mode to 'dmp' for CICD version"
-    DISTRIBUTED_MODE="dmp"
+    if [[ "${DISTRIBUTED_MODE}" == "None" ]]; then
+        DISTRIBUTED_MODE="dmp"
+    fi
 else
     DB_INT_PORT="50055"
+fi
+
+if [[ "${DISTRIBUTED_MODE}" == "None" ]]; then
+    echo "No distributed mode specified, defaulting to SMP"
+    DISTRIBUTED_MODE="smp"
 fi
 
 # Determine MPI type
