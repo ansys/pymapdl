@@ -162,8 +162,10 @@ docker run \
   --memory="${MEMORY_MB}MB" \
   --memory-swap="${MEMORY_SWAP_MB}MB" \
   --mount type=bind,src="${ENTRYPOINT_PATH}",dst=/entrypoint.sh \
+  -e OMPI_ALLOW_RUN_AS_ROOT=1 \
+  -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
   "${MAPDL_IMAGE}" \
-  /entrypoint.sh
+  /ansys_inc/v252/ansys/bin/mapdl -grpc -dir /jobs -dmp -transport insecure -allowremote true -np 2 -db 6000 -m 6000 -mpi openmpi
 
 echo ""
 echo "Container started. Waiting for MAPDL to initialize..."
