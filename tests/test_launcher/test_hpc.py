@@ -554,8 +554,8 @@ class TestWaitForJobReady:
         with (
             patch("subprocess.run") as mock_run,
             patch("socket.gethostbyname") as mock_gethostbyname,
-            patch("time.time") as mock_time,
-            patch("time.sleep"),
+            patch("ansys.mapdl.core.launcher.hpc.time.time") as mock_time,
+            patch("ansys.mapdl.core.launcher.hpc.time.sleep"),
         ):
             # Mock time progression: start_time (0), first loop (1), second loop (2)
             mock_time.side_effect = [0, 1, 2]
@@ -579,8 +579,8 @@ class TestWaitForJobReady:
 
         with (
             patch("subprocess.run") as mock_run,
-            patch("time.time") as mock_time,
-            patch("time.sleep"),
+            patch("ansys.mapdl.core.launcher.hpc.time.time") as mock_time,
+            patch("ansys.mapdl.core.launcher.hpc.time.sleep"),
         ):
             mock_run.return_value = Mock(stdout=pending_output)
 
