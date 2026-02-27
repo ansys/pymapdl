@@ -174,7 +174,7 @@ jobs:
 
       - name: "Launch first MAPDL instance using action"
         id: mapdl_0
-        uses: ./.github/actions/launch-mapdl-docker@ci/update-launch_mapdl-action-logic
+        uses: ./.github/actions/launch-mapdl-docker
         with:
           mapdl-image: ${{ env.MAPDL_PACKAGE }}:${{ inputs.mapdl-version }}
           instance-name: 'MAPDL_0'
@@ -188,7 +188,7 @@ jobs:
 
       - name: "Launch second MAPDL instance for pool testing using action"
         id: mapdl_1
-        uses: ./.github/actions/launch-mapdl-docker@ci/update-launch_mapdl-action-logic
+        uses: ./.github/actions/launch-mapdl-docker
         with:
           mapdl-image: ${{ env.MAPDL_PACKAGE }}:${{ inputs.mapdl-version }}
           instance-name: 'MAPDL_1'
