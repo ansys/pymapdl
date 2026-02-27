@@ -920,6 +920,8 @@ def test_ip_and_start_instance(
     # Removing env var coming from CICD.
     if "PYMAPDL_START_INSTANCE" in os.environ:
         monkeypatch.delenv("PYMAPDL_START_INSTANCE")
+    if "PYMAPDL_IP" in os.environ:
+        monkeypatch.delenv("PYMAPDL_IP")
 
     ###################
     # Injecting env vars for the test

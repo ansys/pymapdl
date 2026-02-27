@@ -84,7 +84,7 @@ class TestMapdlPool:
     def pool_creator(self, tmpdir_factory):
         run_path = str(tmpdir_factory.mktemp("ansys_pool"))
 
-        port = os.environ.get("PYMAPDL_PORT", 50056)
+        port = int(os.environ.get("PYMAPDL_PORT", 50056))
 
         if ON_LOCAL:
             mapdl_pool = MapdlPool(
@@ -99,7 +99,7 @@ class TestMapdlPool:
                 wait=True,  # make sure that the pool is ready before testing
             )
         else:
-            port2 = os.environ.get("PYMAPDL_PORT2", 50057)
+            port2 = int(os.environ.get("PYMAPDL_PORT2", 50057))
 
             mapdl_pool = MapdlPool(
                 2,
