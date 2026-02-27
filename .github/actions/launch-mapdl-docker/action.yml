@@ -11,6 +11,7 @@ inputs:
   mapdl-image:
     description: 'Full MAPDL Docker image reference with tag (e.g., ghcr.io/ansys/mapdl:v25.2-ubuntu-cicd). Mutually exclusive with mapdl-version.'
     required: false
+    type: string
 
   instance-name:
     description: 'Name for the Docker container instance'
