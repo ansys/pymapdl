@@ -170,6 +170,7 @@ async function run() {
     // Get container ID
     let psOutput = '';
     await exec.exec('docker', ['ps', '-aqf', `name=^/${instanceName}$`], {
+      silent: !DEBUG,
       listeners: {
         stdout: (data) => {
           psOutput += data.toString();
