@@ -40,7 +40,6 @@ debug_file() {
 
 if [[ "${DEBUG}" == "true" ]]; then
     debug "Debug mode enabled"
-    set -x
 fi
 
 echo "==================================="
