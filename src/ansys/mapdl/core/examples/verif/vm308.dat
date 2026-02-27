@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -25,8 +25,8 @@
 /TITLE,VM308,STEADY HEAT CONDUCTION IN FUNCTIONALLY GRADED HOLLOW CYLINDER AND SPHERE
 /COM,
 /COM, REF: YOSHIHIRO OBATA AND NAOTAKE NODA (1994),
-/COM,      STEADY THERMAL STRESSES IN A HOLLOW CIRCULAR 
-/COM,      CYLINDER AND A HOLLOW SPHERE OF A FUNCTIONALLY 
+/COM,      STEADY THERMAL STRESSES IN A HOLLOW CIRCULAR
+/COM,      CYLINDER AND A HOLLOW SPHERE OF A FUNCTIONALLY
 /COM,      GRADIENT MATERIAL, JOURNAL OF THERMAL STRESSES,
 /COM,      17:3, 471-487.
 /COM,

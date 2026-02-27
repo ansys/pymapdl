@@ -78,7 +78,7 @@ Selecting a component and retrieving it:
 Component object
 ================
 
-The :class:`Component object <ansys.mapdl.core.component.Component>` is the object returned by 
+The :class:`Component object <ansys.mapdl.core.component.Component>` is the object returned by
 :attr:`Mapdl.components <ansys.mapdl.core.Mapdl.components>` when you query it with a component name.
 This object has two main attributes: :attr:`type <Component.type>` and :attr:`items <Component.items>`.
 The former returns the component type (``"ELEM"``, ``"NODE"``, ``"KP"``, etc) and the later returns
@@ -94,4 +94,3 @@ a tuple with the index of the entities which belong to that component.
 
 It should be noticed that the component object is not linked to the MAPDL component, so any change on it
 is not reflected in the MAPDL counterpart.
-

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -44,7 +44,6 @@ from common import (
     is_on_ci,
     is_on_local,
     is_on_ubuntu,
-    is_running_on_student,
     is_smp,
     log_end_test,
     log_start_test,
@@ -66,7 +65,6 @@ TEST_DPF_BACKEND = testing_dpf_backend()
 
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
-ON_STUDENT = is_running_on_student()
 
 ON_UBUNTU = is_on_ubuntu()  # Tells if MAPDL is running on Ubuntu system or not.
 # Whether PyMAPDL is running on an ubuntu or different machine is irrelevant.
@@ -124,11 +122,6 @@ requires_on_cicd = pytest.mark.skipif(
     not ON_CI, reason="This test requires to be on CICD"
 )
 
-skip_if_running_student_version = pytest.mark.skipif(
-    ON_STUDENT,
-    reason="This tests does not work on student version.",
-)
-
 
 def requires(requirement: str):
     """Check requirements"""
@@ -166,9 +159,6 @@ def requires(requirement: str):
 
     elif "nowindows" == requirement:
         return skip_on_windows
-
-    elif "nostudent" == requirement:
-        return skip_if_running_student_version
 
     elif "console" == requirement:
         return pytest.mark.console
@@ -290,7 +280,7 @@ def pytest_report_header(config, start_path, startdir):
         f"OS dependent: ON_LINUX ({ON_LINUX}), ON_UBUNTU ({ON_UBUNTU}), ON_WINDOWS ({ON_WINDOWS}), ON_MACOS ({ON_MACOS})"
     ]
     text += [
-        f"MAPDL dependent: ON_LOCAL ({ON_LOCAL}), ON_STUDENT ({ON_STUDENT}), HAS_GRPC ({HAS_GRPC}), HAS_DPF ({HAS_DPF}), IS_SMP ({IS_SMP})"
+        f"MAPDL dependent: ON_LOCAL ({ON_LOCAL}), HAS_GRPC ({HAS_GRPC}), HAS_DPF ({HAS_DPF}), IS_SMP ({IS_SMP})"
     ]
 
     text += ["Environment variables".center(get_terminal_size()[0], "-")]
@@ -598,8 +588,9 @@ def run_before_and_after_tests(
     # Returning to default
     mapdl.graphics("full")
 
-    # Handling extra instances
-    make_sure_not_instances_are_left_open(VALID_PORTS)
+    if DEBUG_TESTING:
+        # Handling extra instances
+        make_sure_not_instances_are_left_open(VALID_PORTS)
 
     # Teardown
     if mapdl.is_local and mapdl._exited:
@@ -648,21 +639,35 @@ def path_tests(tmpdir):
 
 
 def clear(mapdl):
-    mapdl.finish()
-    # *MUST* be NOSTART.  With START fails after 20 calls...
-    # this has been fixed in later pymapdl and MAPDL releases
-    mapdl.clear("NOSTART")
-    mapdl.header("DEFA")
-    mapdl.format("DEFA")
-    mapdl.page("DEFA")
+    with mapdl.non_interactive:
+        mapdl.finish()
+        # *MUST* be NOSTART.  With START fails after 20 calls...
+        # this has been fixed in later pymapdl and MAPDL releases
+        mapdl.clear("NOSTART")
+        mapdl.header("DEFA")
+        mapdl.format("DEFA")
+        mapdl.page("DEFA")
 
-    mapdl.prep7()
+        mapdl.prep7()
 
 
 @pytest.fixture(scope="function")
 def cleared(mapdl):
     clear(mapdl)
     yield
+
+
+@pytest.fixture(scope="function")
+def clear_at_end(mapdl):
+    yield
+    clear(mapdl)
+
+
+@pytest.fixture(scope="function")
+def clear_at_start_and_end(mapdl):
+    clear(mapdl)
+    yield
+    clear(mapdl)
 
 
 ################################################################

@@ -12,10 +12,10 @@
 <line fill="none" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" stroke-dasharray="5.76,5.76" x1="222.6" y1="114.8" x2="222.6" y2="76.4"/>
 <polyline fill="#FFFFFF" stroke="#000000" points="12.7,181.1 136.1,204.4 222.6,114.8 "/>
 <line fill="none" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" x1="12.1" y1="107.3" x2="12.7" y2="181.1"/>
-<polyline fill="#FFFFFF" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" points="136.4,131.6 136.4,204.4 
+<polyline fill="#FFFFFF" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" points="136.4,131.6 136.4,204.4
 	136.4,131.6 12,107.3 "/>
 <line fill="none" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" x1="222" y1="42.5" x2="136.4" y2="131.6"/>
-<polygon fill="none" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" points="223,41.3 136.4,131.6 12,107.3 
+<polygon fill="none" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" points="223,41.3 136.4,131.6 12,107.3
 	98.7,19.9 "/>
 <line fill="none" stroke="#000000" x1="104.6" y1="188.2" x2="135.9" y2="194.4"/>
 <line fill="none" stroke="#000000" x1="12.6" y1="171.6" x2="33.9" y2="175.8"/>

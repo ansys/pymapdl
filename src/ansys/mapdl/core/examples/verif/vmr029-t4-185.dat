@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -58,14 +58,14 @@ ALLSEL,ALL
 FINISH
 /SOLU
 ANTYPE,STATIC
-RESCONTROL,LINEAR,ALL,1         ! RESTART FILES FOR SUBSEQUENT LINEAR PERTURBATION 
+RESCONTROL,LINEAR,ALL,1         ! RESTART FILES FOR SUBSEQUENT LINEAR PERTURBATION
 EQSLV,SPARSE
 SOLVE
 FINISH
 /SOLU
 ANTYPE,STATIC,RESTART,,,PERTURB ! PERFORM A PERTURBATION ANALYSIS
-PERTURB,BUCKLE,,,ALLKEEP        ! PERTURBED BUCKLING SOLVE 
-SOLVE,ELFORM   
+PERTURB,BUCKLE,,,ALLKEEP        ! PERTURBED BUCKLING SOLVE
+SOLVE,ELFORM
 
 OUTRES,ALL,ALL
 bucopt,LANB,4,,,range

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -575,7 +575,7 @@ class CommandOutput(str):
         return self._cmd
 
     @command.setter
-    def command(self):
+    def command(self, value):
         """Not allowed to change the value of ``command``."""
         pass
 

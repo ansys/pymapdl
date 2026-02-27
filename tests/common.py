@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Shared testing module"""
+
 from collections import namedtuple
 import os
 import subprocess
@@ -146,10 +147,6 @@ def support_plotting():
 
     except ModuleNotFoundError:
         return False
-
-
-def is_running_on_student():
-    return os.environ.get("ON_STUDENT", "NO").upper().strip() in ["YES", "TRUE"]
 
 
 def testing_minimal():

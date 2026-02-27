@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -269,7 +269,7 @@ mp,dens,3,0.32972E-03                   ! Density of the internal fluid
 mat,1
 type,3
 secnum,4
-l,1,2	
+l,1,2
 l,2,3
 l,3,4
 l,4,5
@@ -341,7 +341,7 @@ allsel
 mat,1
 type,3
 secnum,9
-l,19,21		
+l,19,21
 l,20,22
 l,21,25
 l,22,26
@@ -841,7 +841,7 @@ esel,all
 /com,  Node J
 /com,==========
 
-/com, Element #28 (Pipe289 elements)  
+/com, Element #28 (Pipe289 elements)
 /com,************************
 
 esel,s,elem,,28

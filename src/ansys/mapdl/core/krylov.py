@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import os
-from typing import List, Literal, Optional, Tuple, Union
+from typing import List, Literal, Optional, Tuple, TypeAlias, Union
 import weakref
 
 from ansys.math.core.math import AnsMath, AnsVec
@@ -30,6 +30,7 @@ import numpy as np
 from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
 
+# Residual algorithm options - single source of truth
 RESIDUAL_ALGORITHM: List[str] = [
     "l-inf",
     "linf",
@@ -39,7 +40,10 @@ RESIDUAL_ALGORITHM: List[str] = [
     "l2",
 ]
 
-RESIDUAL_ALGORITHM_LITERAL = Literal[tuple(RESIDUAL_ALGORITHM)]
+# Type alias derived from the list above
+RESIDUAL_ALGORITHM_LITERAL: TypeAlias = Literal[
+    "l-inf", "linf", "l-1", "l1", "l-2", "l2"
+]
 
 
 class KrylovSolver:
@@ -110,7 +114,7 @@ class KrylovSolver:
         """Return the weakly referenced instance of mapdl."""
         return self._mapdl_weakref()
 
-    def _check_full_file_exists(self, full_file: str = None) -> None:
+    def _check_full_file_exists(self, full_file: Optional[str] = None) -> None:
         """Check full file exists."""
         current_dir = self._mapdl.directory
         # Check if full file exists
@@ -169,7 +173,11 @@ class KrylovSolver:
             )
 
     def _check_input_solve(
-        self, freq_start: int, freq_end: int, freq_steps: int, ramped_load: bool
+        self,
+        freq_start: Union[int, str],
+        freq_end: Union[int, str],
+        freq_steps: Union[int, str],
+        ramped_load: bool,
     ):
         """Validate the inputs to the ``solve`` method."""
 
@@ -201,7 +209,7 @@ class KrylovSolver:
         self,
         return_solution: bool,
         residual_computation: bool,
-        residual_algorithm: RESIDUAL_ALGORITHM_LITERAL,
+        residual_algorithm: Optional[RESIDUAL_ALGORITHM_LITERAL],
     ):
         """Validate the inputs to the ``expand`` method."""
 
@@ -211,7 +219,7 @@ class KrylovSolver:
             )
         if not isinstance(residual_computation, bool):
             raise ValueError("The 'residual_computation' must be True or False.")
-        if (
+        if residual_algorithm is not None and (
             not isinstance(residual_algorithm, str)
             or residual_algorithm.lower() not in RESIDUAL_ALGORITHM
         ):
@@ -488,14 +496,14 @@ class KrylovSolver:
 
         # Loop over frequency range
         omega = self.freq_start * 2 * np.pi
-        self.intV = (self.freq_end - self.freq_start) / self.freq_steps
+        self.intV = (self.freq_end - self.freq_start) / self.freq_steps  # type: ignore[operator]
 
-        for iFreq in range(1, self.freq_steps + 1):
+        for iFreq in range(1, self.freq_steps + 1):  # type: ignore[operator]
             # form RHS at the i-th frequency point
             self.iRHS.zeros()
             if self.ramped_load == 0:
                 # apply ramped loading
-                ratio = 2 * iFreq / self.freq_steps
+                ratio = 2 * iFreq / self.freq_steps  # type: ignore[operator]
                 if self.freq_steps == 1:
                     ratio = 1.00
             else:
@@ -588,7 +596,7 @@ class KrylovSolver:
             # To avoid having to set residual computation.
             residual_computation = True
         elif residual_algorithm is None:
-            residual_algorithm = "L-Inf"
+            residual_algorithm = "L-Inf"  # type: ignore[assignment]
 
         # Check inputs before executing the method
         self._check_input_expand(
@@ -613,7 +621,7 @@ class KrylovSolver:
         omega = self.freq_start * 2 * np.pi  # circular frequency at starting point
         xii_usr_ordered = []
 
-        for iFreq in range(1, self.freq_steps + 1):
+        for iFreq in range(1, self.freq_steps + 1):  # type: ignore[operator]
             self._mapdl.vec(self.iY.id, "Z", "LINK", self.Yz.id, iFreq)
             # vector of solution in solver space
             self._mapdl.vec("Xi", "Z", "LINK", self.DzV.id, iFreq)
@@ -636,15 +644,19 @@ class KrylovSolver:
                 xii_usr_ordered.append(dof_each_freq)
 
             # Compute residual norm (if requested)
-            if residual_computation or residual_algorithm.lower() in [
-                "no",
-                "off",
-            ]:
-                norm_rz, norm_fz = self.compute_residuals(iFreq, RzV, Xi, omega)
-                if not self.residuals:
-                    self.residuals = []
+            if residual_computation or (
+                residual_algorithm
+                and residual_algorithm.lower()
+                in [
+                    "no",
+                    "off",
+                ]
+            ):
+                norm_rz, norm_fz = self.compute_residuals(iFreq, RzV, Xi, omega)  # type: ignore[misc]
+                if self.residuals is None:
+                    self.residuals = []  # type: ignore[assignment]
 
-                self.residuals.append([iFreq, norm_rz, norm_fz])
+                self.residuals.append([iFreq, norm_rz, norm_fz])  # type: ignore[attr-defined]
 
         # Storing solution in class
         if compute_solution_vectors:
@@ -664,7 +676,7 @@ class KrylovSolver:
         self.iRHS.zeros()
         if self.ramped_load:
             # apply ramped loading
-            ratio = 2 * iFreq / self.freq_steps
+            ratio = 2 * iFreq / self.freq_steps  # type: ignore[operator]
             if self.freq_steps == 1:
                 ratio = 1.0
         else:
@@ -696,19 +708,28 @@ class KrylovSolver:
         # Output norms of residual vector
         norm_rz = 0.0
 
-        if self._residual_algorithm.lower() in ["l-inf", "linf"]:  # L-inf norm
+        if self._residual_algorithm and self._residual_algorithm.lower() in [
+            "l-inf",
+            "linf",
+        ]:  # L-inf norm
             norm_rz = Rzi.norm("NRMINF")
             norm_fz = self.iRHS.norm("NRMINF")
             if norm_fz != 0.0:
                 norm_rz = norm_rz / norm_fz
 
-        elif self._residual_algorithm.lower() in ["l-1", "l1"]:
+        elif self._residual_algorithm and self._residual_algorithm.lower() in [
+            "l-1",
+            "l1",
+        ]:
             norm_rz = Rzi.norm("NRM1")
             norm_fz = self.iRHS.norm("NRM1")
             if norm_fz != 0.0:
                 norm_rz = norm_rz / norm_fz
 
-        elif self._residual_algorithm.lower() in ["l-2", "l2"]:
+        elif self._residual_algorithm and self._residual_algorithm.lower() in [
+            "l-2",
+            "l2",
+        ]:
             norm_rz = Rzi.norm("NRM2")
             norm_fz = self.iRHS.norm("NRM2")
             if norm_fz != 0.0:

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -64,13 +64,13 @@ keyopt,6,3,2				! 3D Mass with Rotary Inertia
 /com, Material Properties
 /com,*********************
 
-mp,ex,1,24e6				
-mp,prxy,1,.3				
-mp,dens,1,0.001057			
+mp,ex,1,24e6
+mp,prxy,1,.3
+mp,dens,1,0.001057
 
-mp,ex,2,24e6				
-mp,prxy,2,.3				
-mp,dens,2,0.001057			
+mp,ex,2,24e6
+mp,prxy,2,.3
+mp,dens,2,0.001057
 
 /com, Real Constants
 /com,****************
@@ -85,7 +85,7 @@ r,6,1.518					! Real Constant Set 6
 /com, Nodes
 /com,*******
 
-n,1,0,0,0					
+n,1,0,0,0
 n,2,0,54.45,0
 n,3,0,108.9,0
 n,4,10.632,134.568,0
@@ -109,7 +109,7 @@ n,21,224.6,145.2,20
 
 /com, Elastic support Nodes
 /com,***********************
- 
+
 n,22,1,0,0
 n,23,0,1,0
 n,24,0,0,1
@@ -132,7 +132,7 @@ type,1					! Element Type 1
 real,1					! Real Constant Set 1
 mat,1						! Material ID 1
 
-en,1, 1, 2					
+en,1, 1, 2
 en,2, 2, 3
 en,5, 5, 6
 en,6, 6, 7
@@ -172,30 +172,30 @@ nrotat,15
 nrotat,29
 csys,0
 
-real,3 									
-type,4 					
+real,3
+type,4
 en,21,11,27
 en,22,13,28
 
-real,4 					
-type,3 					
+real,4
+type,3
 en,23,9,26
 en,24,15,29
-type,5 					
+type,5
 en,25,7,25
 
-real,5 					
-type,3 					
+real,5
+type,3
 en,26,1,22
 en,27,17,30
 en,28,21,33
 
-type,4 					
+type,4
 en,29,1,23
 en,30,17,31
 en,31,21,34
 
-type,5 					
+type,5
 en,32,1,24
 en,33,17,32
 en,34,21,35
@@ -235,11 +235,11 @@ finish
 
 /solution
 antype,modal				! Perform Modal Analysis
-modopt,lanb,10				
+modopt,lanb,10
 mxpand,,,,yes				! Expand solution with Element Calculations ON
 lumpm,on					! Use Lumped Mass Approximation
-solve						
-save						
+solve
+save
 fini
 
 
@@ -272,7 +272,7 @@ fini
 
 *status,freq_err
 save,table_1
-finish					
+finish
 
 /com,
 /com,================
@@ -322,7 +322,7 @@ solve
 fini
 
 /post1
-/input,,mcom  		
+/input,,mcom
 
 /com, *Labels*
 *dim,label2,char,1,6
@@ -684,9 +684,9 @@ resume,table_1
 
 /out,vm-nr1677-1-3a-a,vrt
 
-/com, 
+/com,
 /com, =============================================
-/com,		  COMPARISON OF MODAL FREQUENCY 
+/com,		  COMPARISON OF MODAL FREQUENCY
 /com,			WITH EXPECTED RESULTS
 /com, =============================================
 /com,
@@ -748,7 +748,7 @@ resume,table_3
 /com,------------------------------------------------
 /com,	Note: Element Forces and Moments along Y & Z
 /com,		directions are flipped between Mechanical APDL
-/com,		and NRC results 
+/com,		and NRC results
 /com,------------------------------------------------
 
 /com,				Result | Expected | Mechanical APDL |  Ratio

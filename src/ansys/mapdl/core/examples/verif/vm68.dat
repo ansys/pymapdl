@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -27,32 +27,32 @@
 /TITLE, VM68, PSD RESPONSE OF TWO DOF SPRING-MASS SYSTEM
 !     "VIBRATION ANALYSIS" R.K. VIERK ,2ND EDITION ,(CHAPTER 7)
 ET,1,COMBIN40            ! DISPLACEMENT ALONG X AXIS, MASS AT NODE I
-R,1,42832.,,0.50  
-R,2,32416.,,1.0   
+R,1,42832.,,0.50
+R,2,32416.,,1.0
 MP,EX,1,1                ! NOT USED, DUMMY PROPERTY
 N,1                      ! DEFINE MODEL
-N,2,1  
+N,2,1
 N,3,2
 E,2,1
-REAL,2   
+REAL,2
 E,3,2
 D,1,UX,0.0               ! CONSTRAINT THE BASE
 OUTPR,ALL,ALL
 FINISH
 
-/SOLU    
+/SOLU
 ANTYPE,MODAL             ! PERFORM A MODAL ANALYSIS
 MODOPT,LANB,2            ! LANB EXTRACTION METHOD
                          ! EXTRACT 2 MODES FROM ENTIRE FREQUENCY RANGE
 MXPAND,2,,,YES           ! EXPAND 2 MODES, DO ELEMENT STRESS CALCULATIONS
 /OUT,vm68_SCRATCH
 SOLVE
-/OUT 
+/OUT
 *GET,FREQ1,MODE,1,FREQ
 *GET,FREQ2,MODE,2,FREQ
 FINISH
 
-/SOLU    
+/SOLU
 ANTYPE,SPECTR            ! PERFORM SPECTRUM ANALYSIS
 SPOPT,PSD,2,ON           ! USE FIRST 2 MODES FROM MODAL ANALYSIS
 
@@ -70,7 +70,7 @@ PSDCOM                   ! COMBINE MODES FOR PSD, USE DEFAULT SIGNIFICANCE LEVEL
 PSDRES,ACEL,REL          ! CALCULATE RELATIVE ACCELERATION SOLUTIONS
 /OUT,vm68_SCRATCH,,,APPEND
 SOLVE
-/OUT 
+/OUT
 FINISH
 
 /POST1

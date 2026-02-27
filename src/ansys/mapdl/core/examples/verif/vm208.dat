@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@
 /NOPR
 ET,1,CIRCU124,4    ! VOLTAGE SOURCE
 ET,2,CIRCU124,3    ! CURRENT SOURCE
-ET,3,CIRCU124,0    ! RESISTOR 
+ET,3,CIRCU124,0    ! RESISTOR
 ET,4,CIRCU124,1    ! INDUCTOR
 ET,5,CIRCU124,12   ! CURRENT CONTROLLED CURRENT SOURCE
 
@@ -57,7 +57,7 @@ TYPE,3
 REAL,4
 E,3,4              ! R2
 TYPE,5
-REAL,6   
+REAL,6
 E,3,4,5,2,1,7      ! CCCS
 TYPE,2
 REAL,2

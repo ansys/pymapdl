@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -23,6 +23,8 @@
 from typing import Optional
 
 import click
+
+from ansys.mapdl.core.cli.helpers import can_access_process
 
 
 @click.command(
@@ -96,7 +98,7 @@ def stop(port: int, pid: Optional[int], all: bool) -> None:
         for proc in psutil.process_iter():
             try:
                 # First check if we can access the process
-                if not _can_access_process(proc):
+                if not can_access_process(proc):
                     continue
 
                 if _is_valid_ansys_process(PROCESS_OK_STATUS, proc):
@@ -167,37 +169,6 @@ def stop(port: int, pid: Optional[int], all: bool) -> None:
                 + f"The process with PID {pid} and its children have been stopped."
             )
         return
-
-
-def _can_access_process(proc):
-    """Check if we have permission to access and kill a process.
-
-    Returns True if:
-    1. We can access the process information (no AccessDenied)
-    2. The process belongs to the current user
-
-    Parameters
-    ----------
-    proc : psutil.Process
-        The process to check
-
-    Returns
-    -------
-    bool
-        True if we can safely access and kill the process
-    """
-    import getpass
-
-    import psutil
-
-    try:
-        # Check if we can access basic process info and if it belongs to current user
-        current_user = getpass.getuser()
-        process_user = proc.username()
-        return process_user == current_user
-    except (psutil.AccessDenied, psutil.NoSuchProcess):
-        # Cannot access process or process doesn't exist
-        return False
 
 
 def _kill_process(proc):

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -23,12 +23,12 @@
 import os
 from pathlib import Path
 import time
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-from conftest import ON_LOCAL, ON_STUDENT, has_dependency
+from conftest import ON_LOCAL, has_dependency
 
 if has_dependency("ansys-tools-common"):
     from ansys.tools.common.path import find_mapdl
@@ -49,10 +49,10 @@ pytestmark = requires("grpc")
 # Check env var
 IGNORE_POOL = os.environ.get("IGNORE_POOL", "").upper() == "TRUE"
 
-# skipping if ON_STUDENT because we cannot spawn that many instances.
+
 skip_if_ignore_pool = pytest.mark.skipif(
-    IGNORE_POOL or ON_STUDENT,
-    reason=f"Ignoring Pool tests because {'of the IGNORE_POOL env var' if IGNORE_POOL else 'running on student'}.",
+    IGNORE_POOL,
+    reason="Ignoring Pool tests because of the IGNORE_POOL env var.",
 )
 
 
@@ -66,8 +66,16 @@ NPROC = 1
 
 
 def patch_spawn_mapdl(*args, **kwargs):
-    kwargs["index"] = args[0]
-    return kwargs
+    class MockedDict(dict):
+        def join(self, *args, **kwargs):
+            return self
+
+    mock_thread = MockedDict()
+    mock_thread["index"] = args[0]
+
+    for key, val in kwargs.items():
+        mock_thread[key] = val
+    return mock_thread
 
 
 class TestMapdlPool:
@@ -844,3 +852,353 @@ class TestMapdlPool:
             assert exec_files == [
                 "/ansys_inc/v222/ansys/bin/ansys222" for i in range(exp_n_instances)
             ]
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    @patch(
+        "ansys.mapdl.core.pool.available_ports",
+        lambda n, start: list(range(start, start + n)),
+    )
+    def test_increase_default(self, monkeypatch):
+        """Test increasing pool by default (1 instance)"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+
+        pool = MapdlPool(
+            2,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+
+        initial_count = pool._n_instances
+        assert initial_count == 2
+
+        pool.increase()
+
+        assert pool._n_instances == 3
+        assert len(pool._instances) == 3
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    @patch(
+        "ansys.mapdl.core.pool.available_ports",
+        lambda n, start: list(range(start, start + n)),
+    )
+    def test_increase_multiple(self, monkeypatch):
+        """Test increasing pool by multiple instances"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+
+        pool = MapdlPool(
+            1,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+
+        initial_count = pool._n_instances
+        assert initial_count == 1
+
+        pool.increase(3)
+
+        assert pool._n_instances == 4
+        assert len(pool._instances) == 4
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    def test_increase_invalid_type(self, monkeypatch):
+        """Test that increase raises TypeError for non-integer input"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+
+        pool = MapdlPool(
+            1,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+
+        with pytest.raises(TypeError, match="Argument 'n' must be an integer"):
+            pool.increase("2")
+
+        with pytest.raises(TypeError, match="Argument 'n' must be an integer"):
+            pool.increase(2.5)
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    def test_increase_invalid_value(self, monkeypatch):
+        """Test that increase raises ValueError for values < 1"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+
+        pool = MapdlPool(
+            1,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+
+        with pytest.raises(ValueError, match="Must add at least 1 instance"):
+            pool.increase(0)
+
+        with pytest.raises(ValueError, match="Must add at least 1 instance"):
+            pool.increase(-1)
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    def test_increase_remote_pool_error(self, monkeypatch):
+        """Test that increase raises error for remote pools"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+
+        pool = MapdlPool(
+            1,
+            ip="123.0.0.1",
+            port=[50052],
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+
+        with pytest.raises(
+            ValueError,
+            match="Cannot automatically increase pool when 'start_instance' is False",
+        ):
+            pool.increase()
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    @patch("ansys.mapdl.core.pool.MapdlPool.exit")
+    def test_reduce_default(self, mock_exit, monkeypatch):
+        """Test reducing pool by default (1 instance)"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+
+        # Create mock instances
+        from ansys.mapdl.core.mapdl import MapdlBase
+
+        mock_instances = []
+        for i in range(3):
+            mock_inst = MagicMock(spec=MapdlBase)
+            mock_inst._exited = False
+            mock_inst._port = 50052 + i
+            mock_inst.exit = MagicMock()
+            mock_instances.append(mock_inst)
+
+        pool = MapdlPool(
+            3,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+
+        # Manually set instances for testing
+        pool._instances = mock_instances[:]
+
+        initial_count = pool._n_instances
+        assert initial_count == 3
+
+        pool.reduce()
+
+        assert pool._n_instances == 2
+        assert len(pool._instances) == 2
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    def test_reduce_multiple(self, monkeypatch):
+        """Test reducing pool by multiple instances"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+
+        # Create mock instances
+        from ansys.mapdl.core.mapdl import MapdlBase
+
+        mock_instances = []
+        for i in range(5):
+            mock_inst = MagicMock(spec=MapdlBase)
+            mock_inst._exited = False
+            mock_inst._port = 50052 + i
+            mock_inst.exit = MagicMock()
+            mock_instances.append(mock_inst)
+
+        pool = MapdlPool(
+            5,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+
+        # Manually set instances for testing
+        pool._instances = mock_instances[:]
+
+        initial_count = pool._n_instances
+        assert initial_count == 5
+
+        pool.reduce(3)
+
+        assert pool._n_instances == 2
+        assert len(pool._instances) == 2
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    def test_reduce_to_zero_error(self, monkeypatch):
+        """Test that reducing to 0 instances raises an error"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+
+        pool = MapdlPool(
+            1,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+
+        with pytest.raises(
+            ValueError, match="Cannot reduce pool to less than 1 instance"
+        ):
+            pool.reduce(1)
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    def test_reduce_to_negative_error(self, monkeypatch):
+        """Test that reducing to negative instances raises an error"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+
+        pool = MapdlPool(
+            2,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+
+        with pytest.raises(
+            ValueError, match="Cannot reduce pool to less than 1 instance"
+        ):
+            pool.reduce(3)
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    def test_reduce_invalid_type(self, monkeypatch):
+        """Test that reduce raises TypeError for non-integer input"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+
+        pool = MapdlPool(
+            3,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+
+        with pytest.raises(TypeError, match="Argument 'n' must be an integer"):
+            pool.reduce("1")
+
+        with pytest.raises(TypeError, match="Argument 'n' must be an integer"):
+            pool.reduce(1.5)
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    def test_reduce_invalid_value(self, monkeypatch):
+        """Test that reduce raises ValueError for values < 1"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+
+        pool = MapdlPool(
+            3,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+
+        with pytest.raises(ValueError, match="Must remove at least 1 instance"):
+            pool.reduce(0)
+
+        with pytest.raises(ValueError, match="Must remove at least 1 instance"):
+            pool.reduce(-1)
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    @patch("ansys.mapdl.core.pool.launch_mapdl")
+    def test_add_existing_instance(self, mock_launch, monkeypatch):
+        """Test adding an existing MAPDL instance to the pool"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+
+        # Create a pool
+        pool = MapdlPool(
+            1,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+
+        initial_count = pool._n_instances
+        assert initial_count == 1
+
+        # Create a mock MAPDL instance
+        from ansys.mapdl.core.mapdl import MapdlBase
+
+        mock_mapdl = MagicMock(spec=MapdlBase)
+        mock_mapdl._exited = False
+        mock_mapdl._port = 50053
+
+        pool.add(mock_mapdl)
+
+        assert pool._n_instances == 2
+        assert len(pool._instances) == 2
+        assert pool._instances[-1] == mock_mapdl
+        assert mock_mapdl.on_pool is True
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    def test_add_invalid_type(self, monkeypatch):
+        """Test that add raises TypeError for non-MAPDL instance"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+
+        pool = MapdlPool(
+            1,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+
+        with pytest.raises(
+            TypeError, match="Argument 'mapdl' must be a MAPDL instance"
+        ):
+            pool.add("not a mapdl instance")
+
+        with pytest.raises(
+            TypeError, match="Argument 'mapdl' must be a MAPDL instance"
+        ):
+            pool.add(123)
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    def test_add_exited_instance(self, monkeypatch):
+        """Test that add raises ValueError for exited MAPDL instance"""
+        monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+
+        pool = MapdlPool(
+            1,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
+        )
+
+        # Create a mock exited MAPDL instance
+        from ansys.mapdl.core.mapdl import MapdlBase
+
+        mock_mapdl = MagicMock(spec=MapdlBase)
+        mock_mapdl._exited = True
+
+        with pytest.raises(ValueError, match="Cannot add an exited MAPDL instance"):
+            pool.add(mock_mapdl)

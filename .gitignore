@@ -23,7 +23,7 @@ _old/
 # Pip generated folders #
 #########################
 *.egg-info/
-build/
+./build/
 dist/
 
 # MISC
@@ -67,7 +67,10 @@ coverage.xml
 wheelhouse/
 
 # jupyterlab
-node_modules
+# Node modules (but allow compiled GitHub Action dist/)
+node_modules/
+!.github/actions/**/dist/
+!.github/actions/**/dist-post/
 yarn.lock
 jupyterlab/docker/*.tar.gz
 examples/.local

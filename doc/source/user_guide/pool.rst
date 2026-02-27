@@ -4,7 +4,7 @@ Create a pool of MAPDL instances
 ================================
 
 PyMAPDL contains the :class:`MapdlPool <ansys.mapdl.core.pool.MapdlPool>`
-class to simplify creating multiple local instances of the 
+class to simplify creating multiple local instances of the
 :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
 class for batch processing. This can be used for the batch processing of a
 set of input files, convergence analysis, or other batch related
@@ -41,7 +41,7 @@ their ports when creating the pool.
     'MAPDL Pool with 5 active instances'
     >>> pool.exit(block=True)
 
-You can also specify a list of IP addresses to connect to: 
+You can also specify a list of IP addresses to connect to:
 
 .. code:: pycon
 
@@ -225,7 +225,7 @@ You can close the PyMAPDL pool with the
 :meth:`MapdlPool.exit() <ansys.mapdl.core.MapdlPool.exit>` command.
 
 .. code:: pycon
-    
+
     >>> pool.exit()
 
 

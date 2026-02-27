@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -152,6 +152,11 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "on_pool",
     "graphics_backend",
     "use_reader_backend",
+    # Transport-related args
+    "transport_mode",
+    "uds_dir",
+    "uds_id",
+    "certs_dir",
 ]
 
 ON_WSL = os.name == "posix" and (
@@ -435,6 +440,7 @@ def generate_mapdl_launch_command(
     ram: Optional[int] = None,
     port: int = MAPDL_DEFAULT_PORT,
     additional_switches: str = "",
+    mapdl_output: Optional[str] = None,
 ) -> list[str]:
     """Generate the command line to start MAPDL in gRPC mode.
 
@@ -469,6 +475,9 @@ def generate_mapdl_launch_command(
         these are already included to start up the MAPDL server.  See
         the notes section for additional details.
 
+    mapdl_output : str, optional
+        File path to redirect MAPDL console output (stdout). If not specified,
+        a default temporary output file is used on Windows.
 
     Returns
     -------
@@ -489,7 +498,9 @@ def generate_mapdl_launch_command(
 
     # Windows will spawn a new window, special treatment
     if os.name == "nt":
-        exec_file = f"{exec_file}"
+
+        tmp_out = mapdl_output if mapdl_output else ".__tmp__.out"
+
         # must start in batch mode on windows to hide APDL window
         tmp_inp = ".__tmp__.inp"
         command_parm = [
@@ -500,7 +511,7 @@ def generate_mapdl_launch_command(
             "-i",
             tmp_inp,
             "-o",
-            ".__tmp__.out",
+            tmp_out,
             additional_switches,
             port_sw,
             grpc_sw,
@@ -586,7 +597,7 @@ def launch_grpc(
     )
 
     if mapdl_output:
-        stdout = open(str(mapdl_output), "wb", 0)
+        stdout = open(str(mapdl_output), "ab", 0)
         stderr = subprocess.STDOUT
     else:
         stdout = subprocess.PIPE  # type: ignore
@@ -1149,6 +1160,11 @@ def launch_mapdl(
     start_instance: Optional[bool] = None,
     start_timeout: Optional[int] = None,
     version: Optional[Union[int, str]] = None,
+    # Transport-related parameters
+    transport_mode: Optional[str] = None,
+    uds_dir: Optional[str] = None,
+    uds_id: Optional[str] = None,
+    certs_dir: Optional[str] = None,
     **kwargs: Dict[str, Any],
 ) -> "MapdlGrpc | MapdlConsole | list[Any]":
     """Start MAPDL locally.
@@ -1399,6 +1415,24 @@ def launch_mapdl(
         However the argument (if specified) has precedence over the environment
         variable. If this environment variable is empty, it is as it is not set.
         Defaults to latest available version (:class:`None`).
+
+    transport_mode : str, optional
+        Transport mode for gRPC channel creation. Supported modes are:
+        ``'insecure'``, ``'uds'``, ``'wnua'``, ``'mtls'``.
+        Defaults to :class:`None`, which selects the appropriate mode based on
+        platform and environment variables.
+
+    uds_dir : str, optional
+        Directory for Unix Domain Socket (UDS) files when using ``'uds'`` transport.
+        Defaults to :class:`None`, which uses ``~/.conn``.
+
+    uds_id : str, optional
+        Identifier for UDS socket file when using ``'uds'`` transport.
+        Defaults to :class:`None`, which uses ``mapdl-{port}``.
+
+    certs_dir : str, optional
+        Directory containing certificates for ``'mtls'`` transport.
+        Defaults to :class:`None`.
 
     kwargs : dict, Optional
         These keyword arguments are interface-specific or for
@@ -1770,6 +1804,7 @@ def launch_mapdl(
             ram=args["ram"],
             port=args["port"],
             additional_switches=args["additional_switches"],
+            mapdl_output=args["mapdl_output"],
         )
 
         if args["launch_on_hpc"]:

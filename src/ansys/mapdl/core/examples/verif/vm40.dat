@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM40
-/PREP7                
+/PREP7
 MP,PRXY,,0.3
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
@@ -41,7 +41,7 @@ N,2,10
 E,1,2                 ! DEFINE ELEMENT
 FINISH
 /OUT,SCRATCH
-/SOLU    
+/SOLU
 D,1,ROTZ,PI*2         ! ONE COMPLETE REVOLUTION
 D,1,UX,,,,,UY         ! CONSTRAIN NODE 1 (PINNED END OF BEAM)
 D,ALL,UZ
@@ -102,4 +102,3 @@ LABEL(1,2) = ' UX (in)',' UY (in)',' UX (in)',' UX (in)',' UX (in)',' UX (in)'
 /OUT
 FINISH
 *LIST,vm40,vrt
-

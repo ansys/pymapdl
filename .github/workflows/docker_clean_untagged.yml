@@ -15,15 +15,15 @@ jobs:
     name: Cleaning unnecessary packages
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: write
+      contents: read  # Needed to read repository contents
+      packages: write  # Needed to delete untagged Docker images
     env:
       PACKAGE_DELETION_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
 
     - name: "Perform versions cleanup - except certain tags"
-      uses: ansys/actions/hk-package-clean-untagged@c2fa7c93f6883114e0e643599431b33d29f0b13f #v10.1.4
+      uses: ansys/actions/hk-package-clean-untagged@3931ac9351b13ae11b1203c2ef6b51e5c75502ea #v10.2.5
       with:
         package-name: 'mapdl'
         token: ${{ secrets.GITHUB_TOKEN }}

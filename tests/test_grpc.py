@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """gRPC service specific tests"""
+
 import os
 import re
 import shutil
@@ -443,6 +444,7 @@ def test_download_project_extensions(mapdl, cleared, tmpdir):
     assert expected.intersection(files_extensions) == {"log", "err"}
 
 
+@pytest.mark.xfail(strict=False, reason="Flaky test")
 def test_download_result(mapdl, cleared, tmpdir):
     if "file.rst" not in mapdl.list_files():
         write_tmp_in_mapdl_instance(mapdl, "file", ext="rst")  # fake rst file

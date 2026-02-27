@@ -2,7 +2,7 @@
 # after they have been merged or closed.
 # The docs deployment is implemented in the main CICD file (`ci.yml`)
 # since it is in that workflow where the docs are built.
-# 
+#
 # For more information see:
 # https://actions.docs.ansys.com/version/stable/doc-actions/index.html#doc-deploy-pr-action
 
@@ -17,14 +17,18 @@ env:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   clean-docs-pr:
     name: "Deploy PR documentation"
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write  # Needed to remove documentation from gh-pages branch
     steps:
-      - uses: ansys/actions/doc-deploy-pr@c2fa7c93f6883114e0e643599431b33d29f0b13f # v10.1.4
+      - uses: ansys/actions/doc-deploy-pr@3931ac9351b13ae11b1203c2ef6b51e5c75502ea # v10.2.5
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}

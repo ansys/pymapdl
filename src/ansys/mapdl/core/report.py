@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,7 +21,9 @@
 # SOFTWARE.
 
 """Module for report features"""
+
 import os
+from typing import Type
 
 from ansys.mapdl.core import _HAS_ATC, _HAS_PYANSYS_REPORT, _HAS_PYVISTA
 
@@ -189,12 +191,12 @@ class Plain_Report:
 # Determine which type of report will be used (depending on the
 # available packages)
 if _HAS_PYANSYS_REPORT:
-    base_report_class = pyansys_report.Report
+    base_report_class: Type[pyansys_report.Report] = pyansys_report.Report
 else:  # pragma: no cover
     base_report_class = Plain_Report
 
 
-class Report(base_report_class):
+class Report(base_report_class):  # type: ignore[misc]
     """A class for custom scooby.Report."""
 
     def __init__(

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,12 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core import _HAS_CLICK
+try:
+    import click  # noqa: F401
+
+    _HAS_CLICK = True
+except ImportError:  # pragma: no cover
+    _HAS_CLICK = False
 
 if _HAS_CLICK:
     ###################################
     # PyMAPDL CLI
-    import click
 
     @click.group(invoke_without_command=True)
     @click.pass_context
@@ -38,9 +42,9 @@ if _HAS_CLICK:
     from ansys.mapdl.core.cli.stop import stop as stop_cmd
 
     main.add_command(convert_cmd, name="convert")
+    main.add_command(list_instances, name="list")
     main.add_command(start_cmd, name="start")
     main.add_command(stop_cmd, name="stop")
-    main.add_command(list_instances, name="list")
 
 
 else:
@@ -50,11 +54,9 @@ else:
 
 
 def old_pymapdl_convert_script_entry_point():
-    print(
-        """This CLI function has been deprecated. Use the following instead:
+    print("""This CLI function has been deprecated. Use the following instead:
 
 pymapdl convert input_file.inp -o output_file.out ...
 
 Go to https://mapdl.docs.pyansys.com/version/dev/user_guide/cli.html for more information.
-"""
-    )
+""")

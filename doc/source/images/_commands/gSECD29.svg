@@ -19,7 +19,7 @@
 <polygon fill="none" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" stroke-dasharray="5.76,5.76" points="
 	256.3,21 169.7,112.3 45.3,87.9 132.1,0.5 "/>
 <g>
-	
+
 		<line fill="none" stroke="#000000" stroke-width="0.9971" stroke-dasharray="5.76,5.76" x1="46.1" y1="227.4" x2="132.1" y2="140.8"/>
 	<polyline fill="none" stroke="#000000" stroke-dasharray="5.76,5.76" points="46,228.8 169.5,252 256,162.5 	"/>
 </g>
@@ -333,7 +333,7 @@
 <g>
 	<g>
 		<path fill="none" stroke="#000000" stroke-width="0.7558" stroke-linecap="square" d="M105.2,47.3"/>
-		<polyline fill="#ED1C24" stroke="#ED1C24" stroke-width="0.7558" stroke-linecap="square" points="123.6,110.8 201,20.5 
+		<polyline fill="#ED1C24" stroke="#ED1C24" stroke-width="0.7558" stroke-linecap="square" points="123.6,110.8 201,20.5
 			196.9,17.7 119.3,107.8 123.6,110.8 		"/>
 	</g>
 	<path stroke="#000000" stroke-width="0.755" d="M201.1,19.9c0,1.2-1.1,1.8-2.5,1.5s-2.6-1.5-2.6-2.6c0-1.2,1.1-1.8,2.5-1.5

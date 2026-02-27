@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -59,6 +59,115 @@ def update_information_first(update: bool = False) -> Callable[[Callable], Calla
         return wrapper
 
     return decorator
+
+
+class UnitsDict(dict):
+    """
+    A dictionary-like class for storing unit information with case-insensitive access.
+
+    This class stores unit mappings and supports access by both full names (e.g., "LENGTH")
+    and short names (e.g., "l"). It also provides pretty printing via __repr__ and __str__
+    that returns the original formatted string.
+
+    Parameters
+    ----------
+    units_string : str
+        The raw units string from MAPDL output.
+
+    Examples
+    --------
+    >>> units = UnitsDict(units_string)
+    >>> units['CHARGE']
+    'coulomb'
+    >>> units['Q']
+    'coulomb'
+    >>> units['length']
+    'meter'
+    >>> print(units)
+    MKS UNITS SPECIFIED FOR INTERNAL
+      LENGTH        (l)  = METER (M)
+      ...
+    """
+
+    def __init__(self, units_string: str):
+        super().__init__()
+        self._original_string = units_string
+        self._parse_units(units_string)
+
+    def _parse_units(self, units_string: str):
+        """Parse the units string and populate the dictionary."""
+        lines = units_string.splitlines()
+
+        for line in lines:
+            line = line.strip()
+            if not line or "UNITS SPECIFIED" in line:
+                continue
+
+            # Match lines like "LENGTH        (l)  = METER (M)"
+            # or "TOFFSET            = 273.0"
+            # Pattern explanation:
+            # - [A-Z](?:[A-Z\s]*)? matches one uppercase letter, optionally followed by
+            #   zero or more uppercase letters or spaces
+            # - (?:\(([a-zA-Z])\))? optionally matches the short name in parentheses
+            # - \s*=\s* matches equals sign with optional whitespace
+            # - (.+) matches the value
+            match = re.match(
+                r"^([A-Z](?:[A-Z\s]*)?)\s*(?:\(([a-zA-Z])\))?\s*=\s*(.+)$", line
+            )
+
+            if match:
+                full_name = match.group(1).strip()
+                short_name = match.group(2)
+                value = match.group(3).strip()
+
+                # Extract the first word before parentheses as the base unit value
+                # For "METER (M)", extract "METER"
+                # For numeric values like "273.0", keep them as-is
+                unit_match = re.match(r"^([A-Z]+)", value)
+                if unit_match:
+                    base_value = unit_match.group(1).lower()
+                else:
+                    # For numeric values or other formats
+                    base_value = (
+                        value.split()[0].lower() if value.split() else value.lower()
+                    )
+
+                # Store with full name (case-insensitive key)
+                full_name_key = full_name.lower()
+                self[full_name_key] = base_value
+
+                # Store with short name if available (only if not already set)
+                # Use super().__contains__() to check the actual dict without case conversion
+                if short_name:
+                    short_name_key = short_name.lower()
+                    if not super().__contains__(short_name_key):
+                        self[short_name_key] = base_value
+
+    def __getitem__(self, key):
+        """Get item with case-insensitive key."""
+        if not isinstance(key, str):
+            raise TypeError(f"Key must be a string, not {type(key).__name__}")
+        return super().__getitem__(key.lower())
+
+    def __contains__(self, key):
+        """Check if key exists (case-insensitive)."""
+        if not isinstance(key, str):
+            return False
+        return super().__contains__(key.lower())
+
+    def get(self, key, default=None):
+        """Get item with case-insensitive key and default value."""
+        if not isinstance(key, str):
+            return default
+        return super().get(key.lower(), default)
+
+    def __repr__(self):
+        """Return the original formatted string."""
+        return self._original_string
+
+    def __str__(self):
+        """Return the original formatted string."""
+        return self._original_string
 
 
 class Information:
@@ -400,15 +509,32 @@ class Information:
 
     @property
     @update_information_first(True)
-    def units(self) -> str:
+    def units(self) -> UnitsDict:
         """Retrieve the units from the MAPDL instance.
 
         Returns
         -------
-        str
-            The units from the MAPDL instance.
+        UnitsDict
+            A dictionary-like object containing the units from the MAPDL instance.
+            Supports both full names (e.g., 'LENGTH') and short names (e.g., 'l')
+            with case-insensitive access. Printing the object returns the original
+            formatted string.
+
+        Examples
+        --------
+        >>> mapdl.info.units['CHARGE']
+        'coulomb'
+        >>> mapdl.info.units['Q']
+        'coulomb'
+        >>> mapdl.info.units['length']
+        'meter'
+        >>> print(mapdl.info.units)
+        MKS UNITS SPECIFIED FOR INTERNAL
+          LENGTH        (l)  = METER (M)
+          MASS          (M)  = KILOGRAM (KG)
+          ...
         """
-        return self._get_units()
+        return UnitsDict(self._get_units())
 
     @property
     @update_information_first(True)

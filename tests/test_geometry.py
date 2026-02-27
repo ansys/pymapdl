@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Test geometry commands"""
+
 import numpy as np
 import pytest
 
@@ -319,7 +320,7 @@ def test_blc4(cleared, mapdl):
     assert mapdl.blc4(0, 0, 1, 1) == 1
 
 
-def test_kbetw(cleared, mapdl):
+def test_kbetw_blc4(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     assert mapdl.kbetw(k0, k1) == 3
@@ -422,7 +423,7 @@ def test_bsplin(cleared, mapdl):
     assert l0 == 1
 
 
-def test_a(cleared, mapdl):
+def test_a_bsplin(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 1, 1, 0)

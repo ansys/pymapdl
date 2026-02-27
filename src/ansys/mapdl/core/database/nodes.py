@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -24,6 +24,7 @@ Contains the Node implementation of the MapdlDb class.
 
 This allows access to the Nodes in the MAPDL DB from Python.
 """
+
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
