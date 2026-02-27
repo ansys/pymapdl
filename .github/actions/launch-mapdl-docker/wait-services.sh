@@ -61,14 +61,17 @@ debug "  Instance Name: ${INSTANCE_NAME}"
 debug ""
 debug "Docker services:"
 docker ps > "docker_ps.log" 2>&1 &
-debug_file "docker_ps.log"
+
+sleep 1  # Give it a moment to populate the log
+debug_file "docker_ps.log" || echo "Failed to get Docker services"
 
 
 # Show processes in container (for debugging)
 debug ""
 debug "Container processes:"
 { docker exec "${INSTANCE_NAME}" ps aux > "docker_ps_aux.log" 2>&1 & } || debug "Failed to get processes from container ${INSTANCE_NAME}"
-debug_file "docker_ps_aux.log"
+sleep 1  # Give it a moment to populate the log
+debug_file "docker_ps_aux.log" || echo "Failed to get processes from container ${INSTANCE_NAME}"
 
 # Wait for PyMAPDL gRPC port
 echo -e "\n"
