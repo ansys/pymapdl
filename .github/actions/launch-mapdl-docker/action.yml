@@ -97,6 +97,11 @@ inputs:
     required: false
     default: 'true'
 
+  debug:
+    description: 'Enable debug logging in the action'
+    required: false
+    default: 'false'
+
 outputs:
   container-id:
     description: 'Docker container ID'

@@ -9,8 +9,12 @@ async function run() {
     const mapdlImage = core.getInput('mapdl-image');
     const licenseServer = core.getInput('license-server', { required: true });
     const instanceName = core.getInput('instance-name') || 'MAPDL_0';
-    const isDebug = process.env.RUNNER_DEBUG === '1' || core.isDebug();
-    const DEBUG = core.getInput('debug') === 'true' || isDebug;
+    const DEBUG = core.getInput('debug') === 'true' || process.env.RUNNER_DEBUG === '1' || core.isDebug();
+
+    if (DEBUG) {
+      core.isDebug(true);
+      core.debug('Debug mode is enabled');
+    }
 
     // Validate inputs
     if (!mapdlVersion && !mapdlImage) {
