@@ -185,7 +185,6 @@ jobs:
           enable-dpf-server: 'true'
           distributed-mode: ${{ steps.distributed_mode.outputs.distributed_mode }}
           wait: 'false'
-          debug: 'true'
 
       - name: "Launch second MAPDL instance for pool testing using action"
         id: mapdl_1
