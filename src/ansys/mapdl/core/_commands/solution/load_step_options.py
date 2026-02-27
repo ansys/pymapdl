@@ -20,7 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class LoadStepOptions:
+from ansys.mapdl.core._commands import CommandsBase
+
+
+class LoadStepOptions(CommandsBase):
 
     def autots(self, key: str = "", **kwargs):
         r"""Specifies whether to use automatic time stepping or load stepping.
@@ -360,6 +363,7 @@ class LoadStepOptions:
 
                   When used in problems with both current sources and iron regions, errors may result due to
                   numerical cancellation.
+
             * ``1`` - Calculate and store a preliminary H field in "iron" regions (μ:sub:`r` ≠ 1). Requires
               flux-parallel boundary conditions to be specified on exterior iron boundaries. Used in conjunction
               with subsequent solutions with ``VALUE`` = 2 followed by ``VALUE`` = 3. Applicable to multiply-
@@ -783,7 +787,7 @@ class LoadStepOptions:
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_the/Hlp_G_THE4.html>`_ for more
         information on applying boundary conditions via tabular input. See `Transient
         Thermal Analysis
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_the/Hlp_G_THE3_12.html>`_   of
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_the/Hlp_G_THE3_12.html>`_  of
         the `Thermal Analysis Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_the/Hlp_G_THE4.html>`_ for more
         information on defining the key time array.

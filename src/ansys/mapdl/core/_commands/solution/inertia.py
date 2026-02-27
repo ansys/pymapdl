@@ -20,7 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class Inertia:
+from ansys.mapdl.core._commands import CommandsBase
+
+
+class Inertia(CommandsBase):
 
     def acel(self, acel_x: str = "", acel_y: str = "", acel_z: str = "", **kwargs):
         r"""Specifies the linear acceleration of the global Cartesian reference frame for the analysis.

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class MiscLoads:
+
+class MiscLoads(CommandsBase):
 
     def anpres(
         self,
@@ -2419,7 +2421,7 @@ class MiscLoads:
         return self.run(command, **kwargs)
 
     def sbctran(self, **kwargs):
-        r"""Transfers solid model loads and boundary conditions to the FE  model.
+        r"""Transfers solid model loads and boundary conditions to the FE model.
 
         Mechanical APDL Command: `SBCTRAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SBCTRAN.html>`_
 

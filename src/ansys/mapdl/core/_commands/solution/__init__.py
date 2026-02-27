@@ -46,7 +46,6 @@ from . import (
     solid_constraints,
     solid_forces,
     solid_surface_loads,
-    solution_status,
     spectrum_options,
-    twod_to_3d_analysis,
+    status,
 )

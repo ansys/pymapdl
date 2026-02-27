@@ -20,7 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class FeSurfaceLoads:
+from ansys.mapdl.core._commands import CommandsBase
+
+
+class FeSurfaceLoads(CommandsBase):
 
     def sf(
         self,
@@ -469,7 +472,8 @@ class FeSurfaceLoads:
             * 2 - Load varies with respect to the initial element locations. The load magnitude for each element
               remains constant throughout the solution..
 
-            For more information, see :ref:`globaltaperedloads`.
+            For more information, see `Global Tapered Load Behavior ( KTAPER)
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SFCONTROL.html#eqe496c857-2a2d-48ed-b870-62b172b56f6a>`_.
 
         kuse : str
             Load direction with respect to the surface normal of the selected face:
@@ -500,7 +504,8 @@ class FeSurfaceLoads:
             * 0 - The load maintains a fixed direction (default).
             * 1 -The load follows the element deformation.
 
-            For more information, see :ref:`scfofollowloadbehav`.
+            For more information, see `Follower Load Behavior
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SFCONTROL.html#>`_.
 
         Notes
         -----
@@ -1008,11 +1013,12 @@ class FeSurfaceLoads:
 
         .. warning::
 
-            You cannot use SFE with the INFIN110or INFIN111elements without prior knowledge of element-face
-            orientation (that is, you must know which face is the exterior in order to flag it). Also, for
-            surface-effect elements SURF153and SURF154, use LKEYto enable tangential and other loads. For
-            supported structural solid and shell elements, issue SFCONTROL to define tangential and other
-            loads.
+            You cannot use :ref:`sfe` with the ``INFIN110`` or ``INFIN111`` elements without prior knowledge
+            of element-face orientation (that is, you must know which face is the exterior in order to flag
+            it). Also, for surface-effect elements ``SURF153`` and ``SURF154``, use ``LKEY`` to enable
+            tangential and other loads. For `supported structural solid and shell elements
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SFCONTROL.html#>`_, issue
+            :ref:`sfcontrol` to define tangential and other loads.
 
         :ref:`sfe` can apply tapered loads over the faces of most elements.
 

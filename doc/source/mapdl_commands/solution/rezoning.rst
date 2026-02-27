@@ -1,18 +1,22 @@
-.. _ref_rezoning_commands_api:
 
-********
+.. _ref_rezoning:
+
+
 Rezoning
-********
+========
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands apply to analyses that use rezoning.
+.. currentmodule:: ansys.mapdl.core._commands.solution.rezoning
+
+.. autoclass:: ansys.mapdl.core._commands.solution.rezoning.Rezoning
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.rezone
-   Mapdl.mapsolve
-   Mapdl.mapvar
-   Mapdl.remesh
-   Mapdl.aremesh
+
+   Rezoning.aremesh
+   Rezoning.mapsolve
+   Rezoning.mapvar
+   Rezoning.remesh
+   Rezoning.rezone
