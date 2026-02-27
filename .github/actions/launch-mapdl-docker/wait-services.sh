@@ -13,7 +13,6 @@ debug() {
 
 if [[ "${DEBUG}" == "true" ]]; then
     debug "Debug mode enabled"
-    set -x
 fi
 
 # Print file contents when debugging is enabled
