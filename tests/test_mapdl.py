@@ -3189,6 +3189,7 @@ def test_set_no_abort_parameter_passing(monkeypatch, set_no_abort):
     ):
         mapdl = launch_mapdl(
             set_no_abort=set_no_abort,
+            start_instance=start_instance,
             transport_mode="insecure",
         )
 
