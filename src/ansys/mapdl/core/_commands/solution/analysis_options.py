@@ -844,7 +844,9 @@ class AnalysisOptions(CommandsBase):
 
         nstartvn : str
             Node number to be assigned to the first virtual node created to store the generalized
-            coordinates. See :ref:`CMSOPT_notes` for more information.
+            coordinates. See `Notes
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CMSOPT.html#CMSOPT.prodres>`_
+            for more information.
 
         Notes
         -----

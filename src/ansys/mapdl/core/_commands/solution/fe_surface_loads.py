@@ -472,7 +472,8 @@ class FeSurfaceLoads(CommandsBase):
             * 2 - Load varies with respect to the initial element locations. The load magnitude for each element
               remains constant throughout the solution..
 
-            For more information, see :ref:`globaltaperedloads`.
+            For more information, see `Global Tapered Load Behavior ( KTAPER)
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SFCONTROL.html#eqe496c857-2a2d-48ed-b870-62b172b56f6a>`_.
 
         kuse : str
             Load direction with respect to the surface normal of the selected face:
@@ -503,7 +504,8 @@ class FeSurfaceLoads(CommandsBase):
             * 0 - The load maintains a fixed direction (default).
             * 1 -The load follows the element deformation.
 
-            For more information, see :ref:`scfofollowloadbehav`.
+            For more information, see `Follower Load Behavior
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SFCONTROL.html#>`_.
 
         Notes
         -----

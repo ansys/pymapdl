@@ -321,7 +321,9 @@ class Ocean(CommandsBase):
         .. _ocdataZONE:
 
         An ocean zone is a local space where you can override global ocean-loading parameters. The following
-        arguments specifying the ocean zone values are described in more detail under :ref:`ocdataBASIC`.
+        arguments specifying the ocean zone values are described in more detail under `Ocean Data Type:
+        Basic ( OCTYPE,BASIC)
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_OCDATA.html#ocdatafigbasic>`_.
 
         * ``VAL1`` - ``KFLOOD`` -- The inside-outside fluid-interaction key.
 
