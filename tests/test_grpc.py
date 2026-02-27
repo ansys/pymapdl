@@ -461,11 +461,11 @@ def test_download_result(mapdl, cleared, tmpdir):
     mapdl.download_result(preference="rth")
     try:
         os.remove("file.rst")
-    except Exception:
+    except OSError:
         pass
     try:
         os.remove("file.rth")
-    except Exception:
+    except OSError:
         pass
 
 

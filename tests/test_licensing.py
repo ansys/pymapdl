@@ -192,7 +192,7 @@ def test_check_license_file(mapdl, cleared, tmpdir):
     try:
         mapdl_ = launch_mapdl(
             license_server_check=False,
-            start_timeout=timeout,
+            timeout=timeout,
             additional_switches=QUICK_LAUNCH_SWITCHES,
             port=mapdl.port + 1,
         )
