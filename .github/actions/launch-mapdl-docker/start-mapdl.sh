@@ -273,7 +273,6 @@ DOCKER_LOGS_PID=$!
 debug "Following container logs (PID: ${DOCKER_LOGS_PID})..."
 debug "Waiting for 'Server listening on' message to confirm MAPDL is ready..."
 debug "Logs will be saved to: ${LOG_FILE}"
-debug_file "${LOG_FILE}"
 
 # Wait for server to be ready
 ELAPSED=0
@@ -286,6 +285,9 @@ while [ $ELAPSED -lt "$TIMEOUT" ]; do
     ELAPSED=$((ELAPSED + 1))
     debug "Waiting for MAPDL server... (${ELAPSED}s elapsed)"
 done
+
+debug "Final logs after waiting for server:"
+debug_file "${LOG_FILE}"
 
 # Stop following logs
 if kill "${DOCKER_LOGS_PID}" 2>/dev/null; then
