@@ -225,7 +225,7 @@ jobs:
 
   build-test-remote:
     name: "Remote: ${{ matrix.mapdl-version }}"
-    needs: [smoke-tests, build-test-remote-matrix]
+    needs: [ build-test-remote-matrix] #smoke-tests,
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-test-remote-matrix.outputs.matrix) }}

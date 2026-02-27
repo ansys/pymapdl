@@ -6,9 +6,40 @@ set -e
 # Setting debug mode.
 DEBUG="${DEBUG:-false}"
 
+# Helper for debug-only output
+debug() {
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "$@"
+    fi
+}
+
+# Print file contents when debugging is enabled
+debug_file() {
+    local file="$1"
+    if [[ "${DEBUG}" != "true" ]]; then
+        return 0
+    fi
+
+    if [[ -z "${file}" ]]; then
+        debug "debug_file: no file specified"
+        return 1
+    fi
+
+    if [[ ! -f "${file}" ]]; then
+        debug "debug_file: file not found: ${file}"
+        return 1
+    fi
+
+    debug "=== ${file} ==="
+    while IFS= read -r _line; do
+        debug "${_line}"
+    done < "${file}"
+    debug "=== end ${file} ==="
+}
+
+
 if [[ "${DEBUG}" == "true" ]]; then
     debug "Debug mode enabled"
-    set -x
 fi
 
 echo "==================================="
@@ -43,39 +74,8 @@ MEMORY_WORKSPACE_MB="${MEMORY_WORKSPACE_MB:-6000}"
 TRANSPORT="${TRANSPORT:-insecure}"
 TIMEOUT="${TIMEOUT:-60}"
 
-# Helper for debug-only output
-debug() {
-    if [[ "${DEBUG}" == "true" ]]; then
-        echo "$@"
-    fi
-}
 
-# Print file contents when debugging is enabled
-debug_file() {
-    local file="$1"
-    if [[ "${DEBUG}" != "true" ]]; then
-        return 0
-    fi
-
-    if [[ -z "${file}" ]]; then
-        debug "debug_file: no file specified"
-        return 1
-    fi
-
-    if [[ ! -f "${file}" ]]; then
-        debug "debug_file: file not found: ${file}"
-        return 1
-    fi
-
-    debug "=== ${file} ==="
-    while IFS= read -r _line; do
-        debug "${_line}"
-    done < "${file}"
-    debug "=== end ${file} ==="
-}
-
-
-echo ""
+echo -e "\n"
 echo "Pulling Docker image: ${MAPDL_IMAGE}"
 if docker pull "${MAPDL_IMAGE}" > pull.log 2>&1; then
     echo "Image pulled successfully"
@@ -181,7 +181,7 @@ echo "  Instance Name: ${INSTANCE_NAME}"
 echo "  CPU Vendor: ${CPU_VENDOR}"
 echo "  Reserved memory: ${MEMORY_MB}"
 echo "  Reserved swap memory: ${MEMORY_SWAP_MB}"
-echo ""
+echo -e "\n"
 
 echo -e "\nMAPDL Configuration:"
 echo "  MAPDL Version: ${MAPDL_VERSION} (Version number: ${VERSION})"
@@ -191,7 +191,7 @@ echo "  Workspace Memory: -m ${MEMORY_WORKSPACE_MB}"
 echo "  Transport: ${TRANSPORT}"
 echo "  License Server: ${LICENSE_SERVER}"
 echo "  Schema Path: ${P_SCHEMA}"
-echo ""
+echo -e "\n"
 
 echo -e "\nMPI Configuration:"
 echo "  Distributed Mode: ${DISTRIBUTED_MODE}"
@@ -199,19 +199,19 @@ echo "  Number of Processors: ${NUM_PROCESSORS}"
 echo "  MPI Type: ${MPI_TYPE}"
 echo "  Memory: ${MEMORY_MB} MB"
 echo "  MPI Arguments: ${MPI_ARG}"
-echo ""
+echo -e "\n"
 
 echo -e "\nPyMAPDL Configuration:"
 echo "  PyMAPDL Port: ${PYMAPDL_PORT}"
 echo "  PyMAPDL DB Port: ${PYMAPDL_DB_PORT}"
 echo "  DB Internal Port: ${DB_INT_PORT}"
-echo ""
+echo -e "\n"
 
 echo -e "\nDPF Configuration:"
 echo "  Enable DPF: ${ENABLE_DPF_SERVER}"
 echo "  DPF Port: ${DPF_PORT}"
 echo "  DPF Port Mapping: ${DPF_PORT_ARGS[*]}"
-echo ""
+echo -e "\n"
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -222,7 +222,7 @@ ENTRYPOINT_PATH="${SCRIPT_DIR}/entrypoint.sh"
 debug "Entrypoint script path: ${ENTRYPOINT_PATH}"
 
 # Build Docker run command
-echo ""
+echo -e "\n"
 echo "Running Docker container..."
 
 # Build docker command with all configurations
@@ -262,7 +262,7 @@ docker run \
   "${MAPDL_IMAGE}" \
   -c "chmod +x /entrypoint.sh && /entrypoint.sh"
 
-echo ""
+echo -e "\n"
 echo "Container started. Waiting for MAPDL to initialize..."
 
 # Wait for "Server listening" message in logs
@@ -273,7 +273,6 @@ DOCKER_LOGS_PID=$!
 debug "Following container logs (PID: ${DOCKER_LOGS_PID})..."
 debug "Waiting for 'Server listening on' message to confirm MAPDL is ready..."
 debug "Logs will be saved to: ${LOG_FILE}"
-debug_file "${LOG_FILE}"
 
 # Wait for server to be ready
 ELAPSED=0
@@ -286,6 +285,9 @@ while [ $ELAPSED -lt "$TIMEOUT" ]; do
     ELAPSED=$((ELAPSED + 1))
     debug "Waiting for MAPDL server... (${ELAPSED}s elapsed)"
 done
+
+debug "Final logs after waiting for server:"
+debug_file "${LOG_FILE}"
 
 # Stop following logs
 if kill "${DOCKER_LOGS_PID}" 2>/dev/null; then
@@ -301,11 +303,11 @@ if [ $ELAPSED -ge "$TIMEOUT" ]; then
     exit 1
 fi
 
-echo ""
+echo -e "\n"
 echo "Container logs:"
 cat "${LOG_FILE}"
 
-echo ""
+echo -e "\n"
 echo "==================================="
 echo "MAPDL Container Launch Complete"
 echo "==================================="
