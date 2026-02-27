@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import parse
+from ansys.mapdl.core._commands import CommandsBase, parse
 
 
-class Volumes:
+class Volumes(CommandsBase):
 
     def extopt(
         self,
@@ -715,9 +715,11 @@ class Volumes:
 
         .. warning::
 
-            Use of the VEXT command can produce unexpected results when operating in a non-Cartesian
+            Use of the :ref:`vext` command can produce unexpected results when operating in a non-Cartesian
             coordinate system. For a detailed description of the possible problems that may occur, see
-            Solid Modelingin the `Modeling and Meshing Guide <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_.
+            `Solid Modeling
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD5_10.html>`_ in the
+            `Modeling and Meshing Guide <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_.
         """
         command = f"VEXT,{na1},{na2},{ninc},{dx},{dy},{dz},{rx},{ry},{rz}"
         return self.run(command, **kwargs)

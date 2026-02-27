@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Piping:
+
+class Piping(CommandsBase):
 
     def bellow(
         self,
@@ -163,7 +165,9 @@ class Piping:
         .. _BRANCH_notes:
 
         Notes
-        See the RUN command in :ref:`archlegacycommands` for information about piping models.
+        See the RUN command in `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_ for information
+        about piping models.
 
         .. warning::
 
@@ -222,8 +226,8 @@ class Piping:
         .. _FLANGE_notes:
 
         Defines a flange (straight-pipe element PIPE16 with adjusted specifications and loadings) at a given
-        location in a piping run. (See the RUN command, and other commands described here, in
-        :ref:`archlegacycommands`.)
+        location in a piping run. (See the RUN command, and other commands described here, in `Archived
+        Commands <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.)
 
         The FLANGE command is similar to the VALVE command except for a different flexibility factor
         default. The location may be 1) between two adjacent colinear straight pipes, 2) between an adjacent
@@ -294,7 +298,8 @@ class Piping:
         Defines a mitered bend of piecewise straight-pipe PIPE16 elements in place of the intersection of
         two previously defined straight pipe elements (RUN). This command is similar to the BEND command
         except that straight pipe elements are used to form the bend instead of curved (elbow) elements.
-        (See the RUN and BEND command descriptions in :ref:`archlegacycommands`.)
+        (See the RUN and BEND command descriptions in `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.)
 
         .. warning::
 
@@ -320,7 +325,8 @@ class Piping:
         .. _PCORRO_notes:
 
         Specifies the allowable exterior corrosion thickness for a piping run. (See the RUN command
-        description in :ref:`archlegacycommands`.)
+        description in `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.)
 
         .. warning::
 
@@ -388,9 +394,10 @@ class Piping:
         .. _PDRAG_notes:
 
         Defines the external fluid drag loading (pressure) as a function of height for a piping run. (See
-        the RUN command description in :ref:`archlegacycommands`.) The element drag pressure is determined
-        from the centroid height and linear interpolation. Pressures are assigned to the elements as they
-        are generated.
+        the RUN command description in `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.) The element
+        drag pressure is determined from the centroid height and linear interpolation. Pressures are
+        assigned to the elements as they are generated.
 
         .. warning::
 
@@ -415,7 +422,8 @@ class Piping:
 
         .. _PFLUID_notes:
 
-        See the RUN command description in :ref:`archlegacycommands`.
+        See the RUN command description in `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.
 
         .. warning::
 
@@ -473,7 +481,8 @@ class Piping:
 
         Defines a spring-gap constraint (gap element CONTAC52) at a given location in a piping run. Gives
         spring constraint resistance after a specified gap is closed. (See the RUN command description in
-        :ref:`archlegacycommands`.)
+        `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.)
 
         .. warning::
 
@@ -508,7 +517,8 @@ class Piping:
         .. _PINSUL_notes:
 
         Defines the external insulation constants in a piping run. (See the RUN command description in
-        :ref:`archlegacycommands`.)
+        `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.)
 
         .. warning::
 
@@ -545,7 +555,8 @@ class Piping:
 
         Selects the piping analysis standard for a piping run (RUN). Affects only the flexibility and stress
         intensification factors applied to the curved pipe elements. (See the RUN command description in
-        :ref:`archlegacycommands`.)
+        `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.)
 
         .. warning::
 
@@ -571,7 +582,8 @@ class Piping:
         .. _PPRES_notes:
 
         Defines the pipe internal pressure for a piping run (RUN). These pressures are assigned to the
-        elements as they are generated. (See the RUN command description in :ref:`archlegacycommands`.)
+        elements as they are generated. (See the RUN command description in `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.)
 
         .. warning::
 
@@ -632,8 +644,8 @@ class Piping:
 
         .. _PSPEC_notes:
 
-        Defines pipe material and dimensions. (See the RUN command description in
-        :ref:`archlegacycommands`.)
+        Defines pipe material and dimensions. (See the RUN command description in `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.)
 
         .. warning::
 
@@ -698,7 +710,8 @@ class Piping:
         .. _PSPRNG_notes:
 
         Defines a spring constraint (spring element ``COMBIN14`` ) at a given location in a piping run. (See
-        the RUN command description in :ref:`archlegacycommands`.)
+        the RUN command description in `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.)
 
         .. warning::
 
@@ -734,7 +747,8 @@ class Piping:
         .. _PTEMP_notes:
 
         Defines the pipe wall temperatures in a piping run. These temperatures are assigned to the elements
-        as they are generated. (See the RUN command description in :ref:`archlegacycommands`.)
+        as they are generated. (See the RUN command description in `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.)
 
         .. warning::
 
@@ -818,9 +832,11 @@ class Piping:
 
         Defines a reducer (straight-pipe element PIPE16 with averaged specifications) in place of the
         intersection of two previously defined straight pipe elements in a piping run. (See the RUN command
-        description in :ref:`archlegacycommands`.) Two new nodes are generated at the ends of the reducer.
-        The two straight pipes are automatically "shortened" to meet the ends of the reducer. The reducer
-        specifications and loadings are taken from the corresponding two straight pipes.
+        description in `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.) Two new nodes
+        are generated at the ends of the reducer. The two straight pipes are automatically "shortened" to
+        meet the ends of the reducer. The reducer specifications and loadings are taken from the
+        corresponding two straight pipes.
 
         .. warning::
 
@@ -893,7 +909,9 @@ class Piping:
         Items may also be modified ( :ref:`nmodif`, :ref:`emodif`, :ref:`rmodif`, etc.) or redefined as
         desired.
 
-        See :ref:`aCcQxq3dbmcm` for more information.
+        See `Piping Models
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/aDcQxq3aemcm.html>`_ for more
+        information.
 
         .. warning::
 
@@ -972,7 +990,8 @@ class Piping:
         .. _TEE_notes:
 
         Defines a tee in place of the tee intersection of three previously defined straight pipe elements.
-        (See the RUN command description in :ref:`archlegacycommands`.)
+        (See the RUN command description in `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.)
 
         The new tee is also composed of three PIPE16 straight pipe elements, but of the leg lengths
         specified and with the appropriate tee factors calculated.
@@ -1038,9 +1057,10 @@ class Piping:
         .. _VALVE_notes:
 
         Defines a valve (straight-pipe element PIPE16 with adjusted specifications and loadings) at a given
-        location in a piping run. (See the RUN command description in :ref:`archlegacycommands`.) The
-        location may be 1) between two adjacent colinear straight pipes, 2) between an adjacent straight
-        pipe and a different piping component, or 3) at the end of a straight pipe.
+        location in a piping run. (See the RUN command description in `Archived Commands
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/Hlp_C_VALVE.html>`_.) The location
+        may be 1) between two adjacent colinear straight pipes, 2) between an adjacent straight pipe and a
+        different piping component, or 3) at the end of a straight pipe.
 
         For Case 1, two new nodes are generated at the ends of the valve. The two straight pipes are
         automatically "shortened" to meet the ends of the valve. The valve specifications and loadings are

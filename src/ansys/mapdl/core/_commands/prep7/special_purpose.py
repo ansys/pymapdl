@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class SpecialPurpose:
+
+class SpecialPurpose(CommandsBase):
 
     def adpci(
         self,
@@ -109,8 +111,22 @@ class SpecialPurpose:
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ADPCI.html>`_ for further
             information.
 
-        Other Parameters
-        ----------------
+        Notes
+        -----
+
+        .. _adpci_notes:
+
+        For :ref:`adpci`,GEOM,LCS, the ellipse center locates at the origin of the local coordinate system.
+        The local coordinate system Y axis defines the plane normal of the ellipse, and X and Z axes define
+        two orientations of the ellipse. (The LCS argument is equivalent to combining the CENTER and AXES
+        arguments. Separate :ref:`adpci`,GEOM commands to specify those arguments are therefore not issued.)
+
+        For more information about using :ref:`adpci` in a crack-initiation analysis, see `SMART Method for
+        Crack-Initiation Simulation
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fractSMARTinit.html#SMARTcrackinitexamp>`_
+
+        Command Specifications
+        ~~~~~~~~~~~~~~~~~~~~~~
         **Command Specification for Action= DEFINE**
 
         .. _adpci_define:
@@ -182,20 +198,6 @@ class SpecialPurpose:
         .. _adpci_ncontour:
 
         * ``Par1`` - :ref:`adpci` ID number (default = ALL).
-
-        Notes
-        -----
-
-        .. _adpci_notes:
-
-        For :ref:`adpci`,GEOM,LCS, the ellipse center locates at the origin of the local coordinate system.
-        The local coordinate system Y axis defines the plane normal of the ellipse, and X and Z axes define
-        two orientations of the ellipse. (The LCS argument is equivalent to combining the CENTER and AXES
-        arguments. Separate :ref:`adpci`,GEOM commands to specify those arguments are therefore not issued.)
-
-        For more information about using :ref:`adpci` in a crack-initiation analysis, see `SMART Method for
-        Crack-Initiation Simulation
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fractSMARTinit.html#SMARTcrackinitexamp>`_
         """
         command = (
             f"ADPCI,{action},{par1},{par2},{par3},{par4},{par5},{par6},{par7},{par8}"
@@ -237,8 +239,9 @@ class SpecialPurpose:
 
         aerospecs : str
             Name of numerical array containing data organized to correspond to the ``AeroMappedFiles``
-            array. See the :ref:`AEROCOEFF_notes` section for specific information that must be in the
-            array.
+            array. See the `Notes
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_AEROCOEFF.html#eqa9a6f813-34bd-4f85-8d90-03fa1e97fbae>`_
+            section for specific information that must be in the array.
 
         aeroscalar : str
             Scaling value(s) to handle any modal scaling difference between structural and CFD modes. The
@@ -462,8 +465,75 @@ class SpecialPurpose:
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CINT.html>`_ for further
             information.
 
-        Other Parameters
-        ----------------
+        Notes
+        -----
+
+        .. _cint_notes:
+
+        Initiate a new calculation via the ``Action`` = NEW parameter. Subsequent :ref:`cint` commands (with
+        parameters other than NEW) define the input required for the fracture-parameter calculations.
+
+        The simplest method is to define crack information via ``Action`` = CTNC; however, this method
+        limits you to only one node for a given location along the crack front. Use the CTNC option only
+        when all nodes that define the crack front lie in a single plane.
+
+        For ``Action`` = SURF, ``Par1`` and ``Par2`` can be the top or bottom crack-face node component. No
+        order is required, provided that if one value the top crach-face node component, the other must be
+        the bottom, and vice-versa. This option is valid only with :ref:`cgrow` for crack-growth simulation.
+
+        To define crack information at multiple locations along the crack front, use ``Action`` = CENC. You
+        can issue :ref:`cint`,CENC, ``Par1``, etc. multiple times to define the crack-extension node
+        component, the crack tip, and the crack-extension directions at multiple locations along the crack
+        front.
+
+        Although you can vary the sequence of your definitions, all specified crack-tip nodes must be at the
+        crack front, and no crack-tip node can be omitted.
+
+        You can define the crack-extension direction directly by specifying either ``Action`` = CENC or
+        ``Action`` = NORM.
+
+        The crack-assist extension direction ( ``Action`` = EDIR) provides a generic extension direction
+        when ``Action`` = CTNC. It helps to define crack-extension directions based on the connectivity of
+        the crack-front elements. For a 2D case when the crack tangent cannot be calculated, the program
+        uses the provided crack-assist extension direction directly.
+
+        For an `XFEM-based crack-growth
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_FRACXFEM.html#fracxfemreferences>`_
+        analysis:
+
+        * ``Action`` = CTNC, CENC, NCON, SYMM, UMM, or EDIR have no effect.
+
+        * ``Action`` = CXFE, RADIUS, or RSWEEP are XFEM-specific and invalid for any other type of crack-
+          growth analysis.
+
+        * For :ref:`cint`,TYPE, only ``Par1`` = PSMAX or STTMAX are valid. Other ``Par1`` values have no
+          effect.
+
+        The stress-intensity factors calculation ( :ref:`cint`,TYPE,SIFS) applies only to isotropic linear
+        elasticity. Use only one material type for the crack-tip elements that are used for the
+        calculations.
+
+        When calculating energy release rates ( :ref:`cint`,TYPE,VCCT), do not restrict the results from
+        being written to the database ( :ref:`config`,NOELDB,1) after solution processing; otherwise,
+        incorrect and potentially random results are possible.
+
+        Fracture-parameter calculations based on domain integrations such as stress-intensity factors,
+        J-integral, or material force are not supported when contact elements exist inside the domain. The
+        calculations may become path-dependent unless the contact pressure is negligible.
+
+        For ``Action`` = UMM, the default value can be OFF or ON `depending on the element type
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracumm.html#cintondefaulttab>`_.
+        The :ref:`cint` command overrides the default setting for the given element.
+
+        The :ref:`cint` command supports only strain data for initial state (
+        :ref:`inistate`,SET,DTYP,EPEL). Other initial-state capabilities are not supported.
+
+        For more information about using the :ref:`cint` command, including supported element types and
+        material behavior, see `Calculating Fracture Parameters
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracumm.html>`_
+
+        Command Specifications
+        ~~~~~~~~~~~~~~~~~~~~~~
         **Command Specification for Action= NEW**
 
         .. _cint_new:
@@ -699,73 +769,6 @@ class SpecialPurpose:
         surfaces, then determines the equivalent traction at the element face based on its orientation.
 
         For more information, see and
-
-        Notes
-        -----
-
-        .. _cint_notes:
-
-        Initiate a new calculation via the ``Action`` = NEW parameter. Subsequent :ref:`cint` commands (with
-        parameters other than NEW) define the input required for the fracture-parameter calculations.
-
-        The simplest method is to define crack information via ``Action`` = CTNC; however, this method
-        limits you to only one node for a given location along the crack front. Use the CTNC option only
-        when all nodes that define the crack front lie in a single plane.
-
-        For ``Action`` = SURF, ``Par1`` and ``Par2`` can be the top or bottom crack-face node component. No
-        order is required, provided that if one value the top crach-face node component, the other must be
-        the bottom, and vice-versa. This option is valid only with :ref:`cgrow` for crack-growth simulation.
-
-        To define crack information at multiple locations along the crack front, use ``Action`` = CENC. You
-        can issue :ref:`cint`,CENC, ``Par1``, etc. multiple times to define the crack-extension node
-        component, the crack tip, and the crack-extension directions at multiple locations along the crack
-        front.
-
-        Although you can vary the sequence of your definitions, all specified crack-tip nodes must be at the
-        crack front, and no crack-tip node can be omitted.
-
-        You can define the crack-extension direction directly by specifying either ``Action`` = CENC or
-        ``Action`` = NORM.
-
-        The crack-assist extension direction ( ``Action`` = EDIR) provides a generic extension direction
-        when ``Action`` = CTNC. It helps to define crack-extension directions based on the connectivity of
-        the crack-front elements. For a 2D case when the crack tangent cannot be calculated, the program
-        uses the provided crack-assist extension direction directly.
-
-        For an `XFEM-based crack-growth
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_FRACXFEM.html#fracxfemreferences>`_
-        analysis:
-
-        * ``Action`` = CTNC, CENC, NCON, SYMM, UMM, or EDIR have no effect.
-
-        * ``Action`` = CXFE, RADIUS, or RSWEEP are XFEM-specific and invalid for any other type of crack-
-          growth analysis.
-
-        * For :ref:`cint`,TYPE, only ``Par1`` = PSMAX or STTMAX are valid. Other ``Par1`` values have no
-          effect.
-
-        The stress-intensity factors calculation ( :ref:`cint`,TYPE,SIFS) applies only to isotropic linear
-        elasticity. Use only one material type for the crack-tip elements that are used for the
-        calculations.
-
-        When calculating energy release rates ( :ref:`cint`,TYPE,VCCT), do not restrict the results from
-        being written to the database ( :ref:`config`,NOELDB,1) after solution processing; otherwise,
-        incorrect and potentially random results are possible.
-
-        Fracture-parameter calculations based on domain integrations such as stress-intensity factors,
-        J-integral, or material force are not supported when contact elements exist inside the domain. The
-        calculations may become path-dependent unless the contact pressure is negligible.
-
-        For ``Action`` = UMM, the default value can be OFF or ON `depending on the element type
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracumm.html#cintondefaulttab>`_.
-        The :ref:`cint` command overrides the default setting for the given element.
-
-        The :ref:`cint` command supports only strain data for initial state (
-        :ref:`inistate`,SET,DTYP,EPEL). Other initial-state capabilities are not supported.
-
-        For more information about using the :ref:`cint` command, including supported element types and
-        material behavior, see `Calculating Fracture Parameters
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracumm.html>`_
         """
         command = f"CINT,{action},{par1},{par2},{par3},{par4},{par5},{par6},{par7}"
         return self.run(command, **kwargs)
@@ -825,6 +828,7 @@ class SpecialPurpose:
 
                     Plots with fewer than the maximum number of repetitions may have missing element faces at the
                     sector boundaries.
+
               * ``0 or OFF`` - Averages stresses or strains across sector boundaries. This value is the default
                 (although the default reverts to 1 or ON if the cyclic count varies between active windows).
 

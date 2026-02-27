@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class CrossSections:
+
+class CrossSections(CommandsBase):
 
     def bsax(self, val1: str = "", val2: str = "", t: str = "", **kwargs):
         r"""Specifies the axial strain and axial force relationship for beam sections.
@@ -2178,27 +2180,31 @@ class CrossSections:
             The section ID number (as defined via the :ref:`sectype` command).
 
         val1 : str
-            Values that control the information to be plotted. See the :ref:`SECPLOT_notes` section of this
-            command description for more information. For clarity, the labels ``VAL1``, ``VAL2``, and
-            ``VAL3`` are renamed according to the section type.
+            Values that control the information to be plotted. See the `Notes
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SECPLOT.html#SECPLOT.reinf>`_
+            section of this command description for more information. For clarity, the labels ``VAL1``,
+            ``VAL2``, and ``VAL3`` are renamed according to the section type.
 
         val2 : str
-            Values that control the information to be plotted. See the :ref:`SECPLOT_notes` section of this
-            command description for more information. For clarity, the labels ``VAL1``, ``VAL2``, and
-            ``VAL3`` are renamed according to the section type.
+            Values that control the information to be plotted. See the `Notes
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SECPLOT.html#SECPLOT.reinf>`_
+            section of this command description for more information. For clarity, the labels ``VAL1``,
+            ``VAL2``, and ``VAL3`` are renamed according to the section type.
 
         val3 : str
-            Values that control the information to be plotted. See the :ref:`SECPLOT_notes` section of this
-            command description for more information. For clarity, the labels ``VAL1``, ``VAL2``, and
-            ``VAL3`` are renamed according to the section type.
+            Values that control the information to be plotted. See the `Notes
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SECPLOT.html#SECPLOT.reinf>`_
+            section of this command description for more information. For clarity, the labels ``VAL1``,
+            ``VAL2``, and ``VAL3`` are renamed according to the section type.
 
         Notes
         -----
 
         .. _SECPLOT_notes:
 
-        :ref:`secplot` is valid for :ref:`SECPLOT_beams`, :ref:`SECPLOT_shells`, and :ref:`SECPLOT_reinf`
-        only. The command is not valid for ``ELBOW290``.
+        :ref:`secplot` is valid for `Beams and Pipes
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SECPLOT.html#SECP.fig.1>`_,
+        :ref:`SECPLOT_shells`, and :ref:`SECPLOT_reinf` only. The command is not valid for ``ELBOW290``.
 
         :ref:`secplot` cannot display the plot of an ASEC (arbitrary section) subtype.
 
@@ -2315,8 +2321,10 @@ class CrossSections:
 
             * ``MESH`` - Reads in a user mesh section file containing the cell connectivity, cell flags, and
               nodal coordinates for the current beam section of subtype MESH as defined by :ref:`sectype`. See the
-              :ref:`SECREAD_notes` section of this command description for details about user mesh section files.
-              :ref:`secwrite` builds mesh files based on 2D models you create.
+              `Notes
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SECREAD.html#SECREAD.extranote1>`_
+              section of this command description for details about user mesh section files. :ref:`secwrite`
+              builds mesh files based on 2D models you create.
 
         Notes
         -----

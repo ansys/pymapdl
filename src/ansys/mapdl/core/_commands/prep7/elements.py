@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import parse
+from ansys.mapdl.core._commands import CommandsBase, parse
 
 
-class Elements:
+class Elements(CommandsBase):
 
     def afsurf(self, sarea: str = "", tline: str = "", **kwargs):
         r"""Generates surface elements overlaid on the surface of existing solid elements and assigns the extra
@@ -1679,7 +1679,9 @@ class Elements:
 
             To release all selected elements, set ``TOLERANCE`` = -1.
 
-            See :ref:`ENDRELEASE_notes` for information about using this argument with ``KCHECK``.
+            See `Notes
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_ENDRELEASE.html#>`_ for
+            information about using this argument with ``KCHECK``.
 
         dof1 : str
             Degrees of freedom to release. If ``Dof1`` is blank, WARP is assumed and ``Dof2``, ``Dof3``, and
@@ -3190,12 +3192,14 @@ class Elements:
 
         .. warning::
 
-            Do not rename or manually delete generated components. Use the SHSD command to delete generated
-            components. Renaming or manually deleting generated components will cause these components to be
-            ignored when SHSD, RID,DELETE is executed and when the program searches for these components to
-            verify if SHSD, RID,EDGE or SURFACE can be safely executed. Manually renaming or deleting
-            generated components and reissuing SHSD, RID,EDGE or SURFACE may result in erroneous generation
-            of virtual shell or contact elements.
+            Do not rename or manually delete generated components. Use the :ref:`shsd` command to delete
+            generated components.
+
+            Renaming or manually deleting generated components will cause these components to be ignored
+            when :ref:`shsd`, ``RID``,DELETE is executed and when the program searches for these components
+            to verify if :ref:`shsd`, ``RID``,EDGE or SURFACE can be safely executed. Manually renaming or
+            deleting generated components and reissuing :ref:`shsd`, ``RID``,EDGE or SURFACE may result in
+            erroneous generation of virtual shell or contact elements.
 
         :ref:`shsd` does not support assemblies that contain a preintegrated shell section (
         :ref:`sectype`,,GENS).

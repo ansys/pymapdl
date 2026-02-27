@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class DataTables:
+
+class DataTables(CommandsBase):
 
     def cbtmp(self, temp: str = "", **kwargs):
         r"""Specifies a temperature for composite-beam input.
@@ -147,8 +149,73 @@ class DataTables:
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CGROW.html>`_ for further
             information.
 
-        Other Parameters
-        ----------------
+        Notes
+        -----
+
+        .. _CGROW_notes:
+
+        When ``Action`` = NEW, the :ref:`cgrow` command initializes a crack-growth simulation set.
+        Subsequent :ref:`cgrow` commands define the parameters necessary for the simulation.
+
+        For multiple cracks, issue multiple :ref:`cgrow`,NEW commands (and any subsequent :ref:`cgrow`
+        commands necessary to define the parameters) for each crack.
+
+        If the analysis is restarted ( :ref:`antype`,,RESTART), the :ref:`cgrow` command must be re-issued.
+
+        If the :ref:`save` command is issued after any :ref:`cgrow` commands are issued, the :ref:`cgrow`
+        commands are not saved to the database. Reissue the :ref:`cgrow` command(s) when the database is
+        resumed.
+
+        **For** `SMART
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_
+        -based crack-growth:
+
+        * ``Action`` = CPATH has no effect.
+
+        * ``Action`` = STOP affects both SMART-based `static
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#frackbasedsifs>`_
+          and `fatigue
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#fracfcgreferences>`_
+          crack-growth analyses.
+
+        * When ``Action`` = CSFL with ``Option`` = CZM, the remeshing for cracks associated with this option
+          is enforced at the end of the first load step and the first substep whether or not the crack grows
+          at this moment. On original crack surfaces (defined via :ref:`cint`,SURF), ``INTER204`` elements
+          are initialized fully damaged, as they are used for crack-closure only and do not contribute
+          bonding tractions on crack surfaces. The cohesive tractions on the new open crack surface are
+          defined via the cohesive zone material model type ( :ref:`tb`,CZM) and :ref:`cgrow`,CSFL,CZM. This
+          option can be combined with :ref:`adpci` to initialize a crack with cohesive effect.
+
+        **For** `VCCT
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_STR_VCCT.html#vcctsimassum>`_
+        -based crack-growth:
+
+        * Crack-growth element components must use the crack tip nodes as the starting nodes of the crack
+          path.
+
+        * Fracture criteria ( ``Action`` = FCOPTION) use energy-release rates calculated via VCCT technology
+          ( :ref:`cint`,TYPE,VCCT). For information about the fracture criteria available, see `Fracture
+          Criteria
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_STR_VCCT.html#vcctuserdeffractcrit>`_
+          :ref:`tb`, `CGCR -- Crack-Growth Fracture Criterion
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_TB.html#eq4d382484-99d1-41ac-82dc-5a82d9911274>`_
+          CGCR.
+
+        **For** `XFEM
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_FRACXFEM.html#fracxfemreferences>`_
+        -based crack-growth:
+
+        * The crack specification originates via the :ref:`xfenrich`, :ref:`xfdata`, or :ref:`xfcrkmesh`
+          command.
+
+        * ``Action`` = CPATH, DTMIN, or DTMAX has no effect.
+
+        * ``Action`` = STOP affects `fatigue
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracfcgxfem.html#fracfcgxfemexample>`_
+          crack-growth analysis only.
+
+        Command Specifications
+        ~~~~~~~~~~~~~~~~~~~~~~
         **Command Specification for Action= NEW**
 
         .. _CGROW_NEW:
@@ -468,71 +535,6 @@ class DataTables:
         * ``Par3`` - For ``Par2`` = KLOC:
 
           * ``w`` - Parameter-fitting value between 0 and 1. Default = 0.5.
-
-        Notes
-        -----
-
-        .. _CGROW_notes:
-
-        When ``Action`` = NEW, the :ref:`cgrow` command initializes a crack-growth simulation set.
-        Subsequent :ref:`cgrow` commands define the parameters necessary for the simulation.
-
-        For multiple cracks, issue multiple :ref:`cgrow`,NEW commands (and any subsequent :ref:`cgrow`
-        commands necessary to define the parameters) for each crack.
-
-        If the analysis is restarted ( :ref:`antype`,,RESTART), the :ref:`cgrow` command must be re-issued.
-
-        If the :ref:`save` command is issued after any :ref:`cgrow` commands are issued, the :ref:`cgrow`
-        commands are not saved to the database. Reissue the :ref:`cgrow` command(s) when the database is
-        resumed.
-
-        **For** `SMART
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_
-        -based crack-growth:
-
-        * ``Action`` = CPATH has no effect.
-
-        * ``Action`` = STOP affects both SMART-based `static
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#frackbasedsifs>`_
-          and `fatigue
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#fracfcgreferences>`_
-          crack-growth analyses.
-
-        * When ``Action`` = CSFL with ``Option`` = CZM, the remeshing for cracks associated with this option
-          is enforced at the end of the first load step and the first substep whether or not the crack grows
-          at this moment. On original crack surfaces (defined via :ref:`cint`,SURF), ``INTER204`` elements
-          are initialized fully damaged, as they are used for crack-closure only and do not contribute
-          bonding tractions on crack surfaces. The cohesive tractions on the new open crack surface are
-          defined via the cohesive zone material model type ( :ref:`tb`,CZM) and :ref:`cgrow`,CSFL,CZM. This
-          option can be combined with :ref:`adpci` to initialize a crack with cohesive effect.
-
-        **For** `VCCT
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_STR_VCCT.html#vcctsimassum>`_
-        -based crack-growth:
-
-        * Crack-growth element components must use the crack tip nodes as the starting nodes of the crack
-          path.
-
-        * Fracture criteria ( ``Action`` = FCOPTION) use energy-release rates calculated via VCCT technology
-          ( :ref:`cint`,TYPE,VCCT). For information about the fracture criteria available, see `Fracture
-          Criteria
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_STR_VCCT.html#vcctuserdeffractcrit>`_
-          :ref:`tb`, `CGCR -- Crack-Growth Fracture Criterion
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_TB.html#eq4d382484-99d1-41ac-82dc-5a82d9911274>`_
-          CGCR.
-
-        **For** `XFEM
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_FRACXFEM.html#fracxfemreferences>`_
-        -based crack-growth:
-
-        * The crack specification originates via the :ref:`xfenrich`, :ref:`xfdata`, or :ref:`xfcrkmesh`
-          command.
-
-        * ``Action`` = CPATH, DTMIN, or DTMAX has no effect.
-
-        * ``Action`` = STOP affects `fatigue
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracfcgxfem.html#fracfcgxfemexample>`_
-          crack-growth analysis only.
         """
         command = f"CGROW,{action},{par1},{par2},{par3}"
         return self.run(command, **kwargs)
@@ -562,25 +564,33 @@ class DataTables:
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_adv/Hlp_G_INSTWRITVAL.html>`_ data:
 
             * ``SET`` - Use ``Action`` = SET to designate initial-state coordinate system, data type, and
-              material type parameters. See :ref:`inistate_set`.
+              material type parameters. See `Command Specification for Action= SET
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_INISTATE.html#>`_.
 
             * ``DEFINE`` - Use ``Action`` = DEFINE to specify the actual state values, and the corresponding
-              element, integration point, or layer information. See :ref:`inistate_define`.
+              element, integration point, or layer information. See `Command Specifications for Action= DEFINE
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_INISTATE.html#>`_.
 
               Use ``Action`` = DEFINE for `function-based
               <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_adv/Hlp_G_INSTAPPL.html#>`_ initial
-              state. See :ref:`inistate_deffuncbased`.
+              state. See `Command Specifications for Action= DEFINE (Function-Based Option)
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_INISTATE.html#>`_.
 
             * ``WRITE`` - Use ``Action`` = WRITE to write the initial-state values to a file when the
-              :ref:`solve` command is issued. See :ref:`inistate_write`.
+              :ref:`solve` command is issued. See `Command Specifications for Action= WRITE
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_INISTATE.html#>`_.
 
-            * ``READ`` - Use ``Action`` = READ to read the initial-state values from a file. See
-              :ref:`inistate_read`.
+            * ``READ`` - Use ``Action`` = READ to read the initial-state values from a file. See `Command
+              Specifications for Action= READ
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_INISTATE.html#>`_.
 
-            * ``LIST`` - Use ``Action`` = LIST to read out the initial-state data. See :ref:`inistate_list`.
+            * ``LIST`` - Use ``Action`` = LIST to read out the initial-state data. See `Command Specifications
+              for Action= LIST
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_INISTATE.html#>`_.
 
             * ``DELETE`` - Use ``Action`` = DELE to delete initial-state data from a selected set of elements.
-              See :ref:`inistate_delete`
+              See `Command Specifications for Action= DELETE
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_INISTATE.html#>`_
 
         val1 : str
             Input values based on the ``Action`` type.
@@ -609,8 +619,43 @@ class DataTables:
         val9 : str
             Input values based on the ``Action`` type.
 
-        Other Parameters
-        ----------------
+        Notes
+        -----
+        :ref:`inistate` is available for `current-technology elements
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/EL2oldnewtable.html#EL2curtechelembenefits>`_.
+
+        The command can also be used with ``MESH200`` (via the `mesh-independent method
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/strreinfworkflow.html#strinistmesh200>`_
+        for defining `reinforcing
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/str_compreinfdirectemb.html>`_ ) to
+        apply an initial state to all generated reinforcing elements automatically. For more information,
+        see `Applying an Initial State to Reinforcing Elements
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/strreinfworkflow.html#strinistmesh200>`_
+
+        Initial-state support for a given element is indicated in the documentation for the element under
+        **Special Features**.
+
+        Initial-strain input ( :ref:`inistate`,SET,DTYPE,EPEL) enables the nonlinear solver option
+        automatically even if no nonlinear materials are involved.
+
+        The command does not support kinematic hardening material properties (such as :ref:`tb`
+        ,PLAS,,,,BKIN) or the shape memory alloy material model ( :ref:`tb`,SMA).
+
+        :ref:`inistate` with elastic strain alone is not supported for gasket materials ( :ref:`tb`,GASK)
+        and hyperelastic materials ( :ref:`tb` ,HYPER, :ref:`tb` ,BB, :ref:`tb`,AHYPER, :ref:`tb`,CDM,
+        :ref:`tb`,EXPE).
+
+        :ref:`inistate` with initial stress alone is not supported for gasket materials ( :ref:`tb`,GASK).
+
+        :ref:`inistate` with plastic strain (which must include initial strain or stress, plastic strain,
+        and accumulated plastic strain) does not support gasket materials ( :ref:`tb`,GASK), rate-dependent
+        plasticity ( :ref:`tb`,RATE), and viscoelasticity ( :ref:`tb`,PRONY, :ref:`tb`,SHIFT).
+
+        For more information about using the initial-state capability, see `Initial State
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_adv/Hlp_G_INSTWRITVAL.html>`_
+
+        Command Specifications
+        ~~~~~~~~~~~~~~~~~~~~~~
         **Command Specification for Action= SET**
 
         .. _inistate_set:
@@ -805,41 +850,6 @@ class DataTables:
         unspecified, all initial-state data for all selected elements are deleted.
 
         If using the mesh-independent method, specify ``ELID`` = MIND to delete initial-state data.
-
-        Notes
-        -----
-        :ref:`inistate` is available for `current-technology elements
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/EL2oldnewtable.html#EL2curtechelembenefits>`_.
-
-        The command can also be used with ``MESH200`` (via the `mesh-independent method
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/strreinfworkflow.html#strinistmesh200>`_
-        for defining `reinforcing
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/str_compreinfdirectemb.html>`_ ) to
-        apply an initial state to all generated reinforcing elements automatically. For more information,
-        see `Applying an Initial State to Reinforcing Elements
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/strreinfworkflow.html#strinistmesh200>`_
-
-        Initial-state support for a given element is indicated in the documentation for the element under
-        **Special Features**.
-
-        Initial-strain input ( :ref:`inistate`,SET,DTYPE,EPEL) enables the nonlinear solver option
-        automatically even if no nonlinear materials are involved.
-
-        The command does not support kinematic hardening material properties (such as :ref:`tb`
-        ,PLAS,,,,BKIN) or the shape memory alloy material model ( :ref:`tb`,SMA).
-
-        :ref:`inistate` with elastic strain alone is not supported for gasket materials ( :ref:`tb`,GASK)
-        and hyperelastic materials ( :ref:`tb` ,HYPER, :ref:`tb` ,BB, :ref:`tb`,AHYPER, :ref:`tb`,CDM,
-        :ref:`tb`,EXPE).
-
-        :ref:`inistate` with initial stress alone is not supported for gasket materials ( :ref:`tb`,GASK).
-
-        :ref:`inistate` with plastic strain (which must include initial strain or stress, plastic strain,
-        and accumulated plastic strain) does not support gasket materials ( :ref:`tb`,GASK), rate-dependent
-        plasticity ( :ref:`tb`,RATE), and viscoelasticity ( :ref:`tb`,PRONY, :ref:`tb`,SHIFT).
-
-        For more information about using the initial-state capability, see `Initial State
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_adv/Hlp_G_INSTWRITVAL.html>`_
         """
         command = f"INISTATE,{action},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9}"
         return self.run(command, **kwargs)
@@ -3270,8 +3280,20 @@ class DataTables:
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TBIN.html>`_ for further
             information.
 
-        Other Parameters
-        ----------------
+        Notes
+        -----
+
+        .. _TBIN_notes:
+
+        For a list of the supported material data tables ( :ref:`tb` ), see `Logarithmic Interpolation and
+        Scaling <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/mat_loginterpscal.html#>`_
+
+        ``Oper`` = DEFA, BNDS, NORM and CACH are supported for the `linear multivariate
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/matexampFVinterp.html#exlinmult4>`_
+        ( :ref:`tbin`,ALGO,LMUL) interpolation algorithm only.
+
+        Command Specifications
+        ~~~~~~~~~~~~~~~~~~~~~~
         **Interpolation Parameters for Oper= ALGO**
 
         .. _tbinoperalgo:
@@ -3360,18 +3382,6 @@ class DataTables:
 
         * ``Par4`` - Scale to use for the dependent variable (the material parameter specified via ``Par2``
           ). Valid options are LINEAR (linear) or LOG (logarithmic).
-
-        Notes
-        -----
-
-        .. _TBIN_notes:
-
-        For a list of the supported material data tables ( :ref:`tb` ), see `Logarithmic Interpolation and
-        Scaling <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/mat_loginterpscal.html#>`_
-
-        ``Oper`` = DEFA, BNDS, NORM and CACH are supported for the `linear multivariate
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/matexampFVinterp.html#exlinmult4>`_
-        ( :ref:`tbin`,ALGO,LMUL) interpolation algorithm only.
         """
         command = f"TBIN,{oper},{par1},{par2},{par3},{par4}"
         return self.run(command, **kwargs)
