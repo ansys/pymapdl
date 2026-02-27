@@ -19,10 +19,14 @@ on:
         type: number
         required: true
 
-  issue_comment:                                     
+  issue_comment:
     types: [created, edited]
 
 permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   autoapprove:
@@ -33,7 +37,7 @@ jobs:
           github.event.comment.user.login == 'germa89'
         )) || ( github.event_name == 'workflow_dispatch' )
     permissions:
-      pull-requests: write
+      pull-requests: write  # Needed to approve pull requests
     runs-on: ubuntu-latest
     steps:
 

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@
     /COM,   NAFEMS BY W.S. ATKINS ENGINEERING SCIENCES, REPORT NO. 20939.01, ISSUE
     /COM,   JUNE 1987, TEST CASE NO. 14. (MODIFIED)
     /COM,
-	
+
 _GEOMGEN = 0   ! SET TO 1 TO WRITE CDB FILES IF ANY INPUT FILE MODIFICATIONS
 
 /OUT,vmc4_scratch
@@ -93,7 +93,7 @@ frequency(1,1)=1.870,5.137,5.137,9.673,9.673,14.850,15.573,15.573,18.382
     *ENDIF
 
     *IF,_GEOMGEN,EQ,1,THEN
-	
+
     ANTYPE,MODAL                 ! MODAL ANALYSIS
     MODOPT,LANB,9                ! LANB EXTRACTION METHOD
     ET,1,ETYP                    ! DEFINE ELEMENT TYPE PARAMETRICALLY
@@ -132,12 +132,12 @@ frequency(1,1)=1.870,5.137,5.137,9.673,9.673,14.850,15.573,15.573,18.382
     NROTAT,ALL                   ! ROTATE NODES INTO CYLINDRICAL C.S.
     D,ALL,UZ,0,,,,ROTX           ! FIX UZ AND ROTX IN CSYS,1
     NSEL,ALL
-	
+
     cdwrite,db,vmc4-%I%,cdb
     *ELSE
     cdread,db,vmc4-%I%,cdb
     *ENDIF
-	
+
     NARAY(I,2)=ARG1              ! STORE N1
     NARAY(I,3)=ARG2              ! STORE N2
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,7 +22,6 @@
 
 """Module for helper functions"""
 
-from functools import namedtuple
 import importlib.util
 import os
 import sys
@@ -45,7 +44,7 @@ def is_installed(package_name: str) -> bool:
     return True
 
 
-def get_python_version() -> namedtuple:
+def get_python_version():  # type: ignore[misc]
     return sys.version_info
 
 

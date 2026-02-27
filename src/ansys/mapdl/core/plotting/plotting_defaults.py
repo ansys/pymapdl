@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -71,7 +71,7 @@ class DefaultSymbol:
         self._configured = False
 
     def __call__(self, name):
-        if True:  # not self._configured: # Temporal patch pending on #3568
+        if not self._configured:
             self._set_configuration()
             self._configured = True
 

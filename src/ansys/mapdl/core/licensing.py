@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -29,7 +29,7 @@ import socket
 # the input is controlled by the library. Excluding bandit check.
 import subprocess  # nosec B404
 import time
-from typing import Iterator, Literal
+from typing import Any, Iterator, Literal, Optional, Union
 
 from ansys.mapdl.core import _HAS_ATC, LOG
 from ansys.mapdl.core.errors import LicenseServerConnectionError
@@ -81,11 +81,11 @@ class LicenseChecker:
     """
 
     def __init__(self, timeout: int = 30, verbose: bool | None = None):
-        self._license_file_msg = []
-        self._license_file_success = None
+        self._license_file_msg: list[str] = []
+        self._license_file_success: Optional[bool] = None
 
-        self._license_checkout_msg = []
-        self._license_checkout_success = None
+        self._license_checkout_msg: list[str] = []
+        self._license_checkout_success: Optional[bool] = None
         self._timeout = timeout
 
         if verbose is not None:
@@ -131,6 +131,7 @@ class LicenseChecker:
 
     @threaded_daemon
     def checkout_license(self, host: str | None = None):
+        self._license_checkout_success = None
         try:
             self._check_mech_license_available(host)
         except Exception as error:
@@ -355,7 +356,10 @@ class LicenseChecker:
             stderr=subprocess.STDOUT,
             env=env,
         )  # nosec B603
-        output = process.stdout.read().decode()
+        if process.stdout:
+            output = process.stdout.read().decode()
+        else:
+            output = ""
 
         t_elap = time.time() - tstart
         LOG.debug(f"License check complete in {t_elap:.2} seconds.\n")
@@ -364,7 +368,7 @@ class LicenseChecker:
         return output
 
     def _check_mech_license_available(
-        self, host: str | None = None, licenses: Allowable_licenses | None = None
+        self, host: str | None = None, licenses: Allowable_licenses | str | None = None
     ) -> bool:  # pragma: no cover
         """Check if there mechanical license available by running 'ansysli_util'.
 
@@ -400,16 +404,19 @@ class LicenseChecker:
             When errors messages found in the output of the license file.
         """
 
+        licenses_list: list[str]
         if licenses is None:
-            licenses = LIC_TO_CHECK
+            licenses_list = list(LIC_TO_CHECK)
         elif isinstance(licenses, str):
-            licenses = [licenses]
+            licenses_list = [licenses]
+        else:
+            licenses_list = [licenses]
 
         msg1 = "No such feature exists"
         msg2 = "The server is down or is not responsive."
-        for each_license in licenses:
+        for each_license in licenses_list:
             output = self._checkout_license(each_license, host)
-            if msg1 in output or msg2 in output:
+            if isinstance(output, str) and (msg1 in output or msg2 in output):
                 raise LicenseServerConnectionError(output)
 
         return True
@@ -518,9 +525,10 @@ def get_ansys_license_debug_file_name() -> str:  # pragma: no cover
     hostname = socket.gethostname()
     appname = APP_NAME
     # This is the type of license my client requests (Windows 10, 2021R2)
-    version = version_from_path("mapdl", get_mapdl_path(allow_input=False))
+    version: int = version_from_path("mapdl", get_mapdl_path(allow_input=False))
     ending = "out"
 
+    parts: Union[tuple[str, str, Any, str], tuple[str, str, str, Any, str]]
     if version < 221:
         parts = (name, appname, version, ending)
     else:
@@ -547,6 +555,8 @@ def get_ansys_license_debug_file_path() -> str:  # pragma: no cover
     else:
         raise OSError(f"Unsupported OS {os.name}")
 
+    if folder is None:
+        raise OSError(f"Could not determine home directory for OS {os.name}")
     return os.path.join(folder, ".ansys")
 
 

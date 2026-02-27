@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -21,13 +21,13 @@
 ! SOFTWARE.
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
-/VERIFY,VM189 
+/VERIFY,VM189
 /TITLE,VM189,STRESS RELAXATION OF A CHLOROPRENE RUBBER
 /COM,
 /COM, REFERENCE:
 /COM, HUSNU DAL, MICHAEL KALISKE, "BERGSTROM-BOYCE MODEL FOR
 /COM, NONLINEAR FINITE RUBBER VISCOELASTICITY: THEORITICAL
-/COM, ASPECTS AND ALGORITHMIC TREATMENT FOR THE FE METHOD  
+/COM, ASPECTS AND ALGORITHMIC TREATMENT FOR THE FE METHOD
 /COM,
 
 /PREP7
@@ -127,23 +127,23 @@ FINISH
 /OUT,
 SET,FIRST
 *GET,SZ1,NODE,NODE(1,1,1),S,Z
-TS1=-0.65                         !TARGET 
+TS1=-0.65                         !TARGET
 R1=SZ1/TS1
 SET,3
 *GET,SZ3,NODE,NODE(1,1,1),S,Z
-TS3=-1.16                         !TARGET 
+TS3=-1.16                         !TARGET
 R2=SZ3/TS3
 SET,5
 *GET,SZ5,NODE,NODE(1,1,1),S,Z
-TS5=-1.58                         !TARGET 
+TS5=-1.58                         !TARGET
 R3=SZ5/TS5
 SET,6
 *GET,SZ6,NODE,NODE(1,1,1),S,Z
-TS6=-0.84                          !TARGET 
+TS6=-0.84                          !TARGET
 R4=SZ6/TS6
 SET,8
 *GET,SZ8,NODE,NODE(1,1,1),S,Z
-TS8=-0.40                          !TARGET 
+TS8=-0.40                          !TARGET
 R5=SZ8/TS8
 
 *DIM,LABEL,CHAR,5,1
@@ -165,6 +165,3 @@ LABEL(1,1)='SET1','SET3','SET5','SET6','SET8'
 *LIST,vm189,vrt
 FINISH
 /EXIT,NOSAVE
-
-
-

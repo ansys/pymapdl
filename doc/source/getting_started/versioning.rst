@@ -22,7 +22,7 @@ for remote management of MAPDL with rapid streaming of mesh, results,
 and files from the MAPDL service.
 
 This interface also works with a Docker image.
-If you have the applicable license, you can install and use 
+If you have the applicable license, you can install and use
 MAPDL within Docker, enabling you
 to run and solve even on officially unsupported platforms like Mac
 OS. For more information, see :ref:`pymapdl_docker`.
@@ -49,9 +49,9 @@ text to and from the MAPDL service, relying on file IO for all other
 operations. While not as performant as gRPC, this interface still
 allows you to control a local instance of MAPDL. These versions of
 MAPDL support specific versions of Windows and Linux.
-For more information on supported platforms, see 
+For more information on supported platforms, see
 `Ansys Platform Support <ansys_platform_support_>`_.
-    
+
 The CORBA interface is an outdate interface, and its usage is not
 recommended. The gRPC interface is recommended since it is faster,
 more stable, and can run in both local and remote connection configurations.
@@ -184,4 +184,4 @@ MAPDL-supported operative systems
 You can obtain the list of MAPDL-supported operative systems on the
 `Platform Support <ansys_platform_support_>`_ page of the Ansys website.
 
-Or, you can `download <ansys_current_supported_os_>`_ the list for the current release. 
+Or, you can `download <ansys_current_supported_os_>`_ the list for the current release.

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM142
-/FILNAM,vm142         ! DEFINE JOBNAME FOR THE COARSE MODEL 
+/FILNAM,vm142         ! DEFINE JOBNAME FOR THE COARSE MODEL
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /GRAPH,POWER
@@ -63,7 +63,7 @@ LSEL,ALL
 NSEL,ALL
 CSYS,1
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 SAVE                  ! SAVE FILE AS VM142.DB
@@ -100,9 +100,9 @@ K,11,.5,90
 K,12,1.5,45
 K,13,1.5,90
 A,10,12,13,11
-ESIZE,,8              ! 8 DIVISIONS 
+ESIZE,,8              ! 8 DIVISIONS
 MSHK,1                    ! MAPPED AREA MESH
-MSHA,0,2D                 ! USING QUADS 
+MSHA,0,2D                 ! USING QUADS
 AMESH,1
 LSEL,S,LINE,,1,2
 NSLL,,1               ! SELECT NODES OF CUT BOUNDARY
@@ -112,7 +112,7 @@ NSEL,ALL
 FINISH
 SAVE                  ! SAVE SUBMODEL DATA IN FILE SUBMODEL.DB
 /POST1
-RESUME,vm142,db       ! RESUME FROM FILE VM142.DB 
+RESUME,vm142,db       ! RESUME FROM FILE VM142.DB
 FILE,vm142,rst        ! DEFINE RESULTS FILE NAME
 CBDOF,,,,,,,0,,0      ! ACTIVATE CUT BOUNDARY INTERPOLATION
 FINISH
@@ -125,7 +125,7 @@ RESUME                ! RESUME SUBMODEL FROM FILE SUBMODEL.DB
 LSEL,S,LINE,,3        ! APPLY REMAINING BOUNDARY CONDITIONS
 DL,ALL,,SYMM
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 /POST1
@@ -145,7 +145,7 @@ SAVE,TABLE_2
 FINISH
 /CLEAR,NOSTART
 RESUME,TABLE_1
-/OUT,vm142,vrt 
+/OUT,vm142,vrt
 /COM,-------------------(VM142)RESULTS COMPARISON---------------
 /COM,
 /COM,                 |   TARGET   |   Mechanical APDL   |   RATIO

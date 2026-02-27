@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -35,6 +35,7 @@ psi and Poission's ratio of 0.25) and unit thickness, providing a live
 implementation of the discussions in Daryl Logan's A First Course in the Finite
 Element Method (2nd Ed., PWS Publishing 1993).
 """
+
 # sphinx_gallery_thumbnail_number = 2
 import itertools
 

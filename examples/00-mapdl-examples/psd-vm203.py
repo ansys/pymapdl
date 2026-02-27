@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -51,6 +51,7 @@ The model is solved using SHELL281 elements and generic materials.
 Import modules
 ==============
 """
+
 import matplotlib.pyplot as plt
 from tabulate import tabulate
 

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM72
-/PREP7                    
+/PREP7
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /TITLE, VM72, LOGARITHMIC DECREMENT
@@ -78,7 +78,7 @@ TD3_4 = .558 - .372
 *DIM,VALUE_1,,3,4
 LABEL_1(1,1) = 'PEAK NUM','MAX. AMP','TIME,   '
 LABEL_1(1,2) = 'BER     ',', in    ',' sec    '
-*VFILL,VALUE_1(1,1),DATA,1,AMP1,0  
+*VFILL,VALUE_1(1,1),DATA,1,AMP1,0
 *VFILL,VALUE_1(1,2),DATA,2,AMP2,.186
 *VFILL,VALUE_1(1,3),DATA,3,AMP3,.372
 *VFILL,VALUE_1(1,4),DATA,4,AMP4,.558

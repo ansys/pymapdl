@@ -36,7 +36,7 @@ compatible format. For example, ``ESEL`` is now the
             # is between 1 and 2.
             # returns an array of selected elements ids
             mapdl.esel("S", "CENT", "X", 1, 2)
-    
+
 
 Additionally, MAPDL commands
 containing a ``/`` or ``*`` have had those characters removed, unless
@@ -66,9 +66,9 @@ start with ``star (*)``.
 
             mapdl.startstatus()
             mapdl.slashsolu()
-    
 
-MAPDL commands that can accept an empty space as argument, such as 
+
+MAPDL commands that can accept an empty space as argument, such as
 ``ESEL,S,TYPE,,1``, should include an empty string when called by Python,
 or, these commands can be called using keyword arguments:
 
@@ -88,7 +88,7 @@ or, these commands can be called using keyword arguments:
 
             mapdl.esel("s", "type", "", 1)
             mapdl.esel("s", "type", vmin=1)
-    
+
 
 None of these restrictions apply to commands run with the :func:`Mapdl.run()
 <ansys.mapdl.core.Mapdl.run>` method. It might be easier to run some of
@@ -198,7 +198,7 @@ The preceding code generates this input for MAPDL:
 
 .. code:: apdl
 
-    NSEL,ALL   
+    NSEL,ALL
     NSEL,R,LOC,Z,10
 
 This MAPDL input is executed with a :meth:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` method call.
@@ -535,11 +535,11 @@ running a command in the wrong session raises an error:
     >>> mapdl.finish()
     >>> mapdl.k()
 
-    Exception: 
-    K, , , , 
+    Exception:
+    K, , , ,
 
      *** WARNING ***                         CP =       0.307   TIME= 11:05:01
-     K is not a recognized BEGIN command, abbreviation, or macro.  This      
+     K is not a recognized BEGIN command, abbreviation, or macro.  This
      command will be ignored.
 
 You can change this behavior so ignored commands can be logged as
@@ -554,7 +554,7 @@ warnings and not raised as exceptions by using the
 Exception hierarchy
 ~~~~~~~~~~~~~~~~~~~
 
-PyMAPDL defines a comprehensive hierarchy of exceptions to help you handle different 
+PyMAPDL defines a comprehensive hierarchy of exceptions to help you handle different
 types of errors appropriately. All PyMAPDL exceptions inherit from :class:`MapdlException <ansys.mapdl.core.errors.MapdlException>`:
 
 **Main exception classes:**
@@ -617,7 +617,7 @@ is automatically enabled with the ``log_apdl='apdl.log'`` parameter.
 Enabling this parameter causes the
 :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class to write each
 command run into a log file named ``"apdl.log"`` in the active
-:attr:`Mapdl.directory <ansys.mapdl.core.Mapdl.directory>`. 
+:attr:`Mapdl.directory <ansys.mapdl.core.Mapdl.directory>`.
 For example:
 
 .. code:: pycon
@@ -886,7 +886,7 @@ the chained commands with the
 
 .. note::
    Command chaining is not supported in distributed MAPDL.  To improve
-   performances, use the ``mute=True`` or 
+   performances, use the ``mute=True`` or
    :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
    context manager.
 
@@ -945,7 +945,7 @@ function. For example, the following code lists the remote files and downloads o
 
    This feature is only available in MAPDL 2021 R1 and later.
 
-Alternatively, you can download several files at once using the glob pattern 
+Alternatively, you can download several files at once using the glob pattern
 or a list of file names in the :func:`Mapdl.download() <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download>`
 method:
 
@@ -1039,7 +1039,7 @@ Table-1_ Comprehensive information on commands that are unavailable
 
 **Table 1. Non-available commands.**
 
-.. table:: 
+.. table::
   :class: longtable
 
   +---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1092,7 +1092,7 @@ Table-1_ Comprehensive information on commands that are unavailable
 .. note::
     * **Interactive** means there is a method, such as the
       :func:`Mapdl.prep7() <ansys.mapdl.core.Mapdl.prep7>` method.
-    * **Non-interactive** means it is run inside a 
+    * **Non-interactive** means it is run inside a
       :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>` context block,
       the :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` method, or
       the :func:`Mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>` method.
@@ -1103,7 +1103,7 @@ Table-1_ Comprehensive information on commands that are unavailable
           with mapdl.non_interactive:
               mapdl.prep7()
 
-    * **Direct run** means that the :func:`mapdl.run() <ansys.mapdl.core.Mapdl.run>` 
+    * **Direct run** means that the :func:`mapdl.run() <ansys.mapdl.core.Mapdl.run>`
       method is used to run the MAPDL command.
       An example is the :func:`mapdl.run("/PREP7") <ansys.mapdl.core.Mapdl.run>` method.
 
@@ -1165,7 +1165,7 @@ priority over the arguments given in the corresponding functions.
 Consider this command:
 
 .. code-block:: console
-    
+
     user@machine:~$ export PYMAPDL_PORT=50052
     user@machine:~$ python -c "from ansys.mapdl.core import launch_mapdl; mapdl=launch_mapdl(port=60053)"
 

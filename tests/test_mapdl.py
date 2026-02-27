@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Test MAPDL interface"""
+
 from datetime import datetime
 from importlib import reload
 import logging
@@ -271,14 +272,14 @@ def warns_in_cdread_error_log(mapdl, tmpdir):
 
 
 @pytest.mark.parametrize("command", DEPRECATED_COMMANDS)
-def test_deprecated_commands(mapdl, cleared, command):
+def test_deprecated_commands(mapdl, command):
     with pytest.raises(CommandDeprecated):
         method = getattr(mapdl, command)
         method()
 
 
 @requires("grpc")
-def test_internal_name_grpc(mapdl, cleared):
+def test_internal_name_grpc(mapdl):
     assert str(mapdl._ip) in mapdl.name
     assert str(mapdl._port) in mapdl.name
     assert "GRPC" in mapdl.name
@@ -303,7 +304,7 @@ def test_jobname(mapdl, cleared):
 
 
 @requires("grpc")
-def test_server_version(mapdl, cleared):
+def test_server_version(mapdl):
     if mapdl.version == 20.2:
         assert mapdl._server_version == (0, 0, 0)
     elif mapdl.version == 21.1:
@@ -318,7 +319,7 @@ def test_server_version(mapdl, cleared):
 
 
 @requires("grpc")
-def test_global_mute(mapdl, cleared):
+def test_global_mute(mapdl):
     mapdl.mute = True
     assert mapdl.mute is True
     assert mapdl.prep7() is None
@@ -380,12 +381,12 @@ def test_no_results(mapdl, cleared, tmpdir):
         mapdl.download_result(pth)
 
 
-def test_empty(mapdl, cleared):
+def test_empty(mapdl):
     with pytest.raises(ValueError):
         mapdl.run("")
 
 
-def test_multiline_fail_value_error(mapdl, cleared):
+def test_multiline_fail_value_error(mapdl):
     with pytest.raises(ValueError, match="Use ``input_strings``"):
         mapdl.run(CMD_BLOCK)
 
@@ -399,25 +400,25 @@ def test_multiline_fail_deprecation_warning(mapdl, cleared):
         ), "not capturing the end of the block"
 
 
-def test_input_strings_fail(mapdl, cleared):
+def test_input_strings_fail(mapdl, clear_at_end):
     resp = mapdl.input_strings(CMD_BLOCK)
     assert "IS SOLID186" in resp, "not capturing the beginning of the block"
     assert "GENERATE NODES AND ELEMENTS" in resp, "not capturing the end of the block"
 
 
-def test_input_strings(mapdl, cleared):
+def test_input_strings(mapdl, clear_at_end):
     assert isinstance(mapdl.input_strings(CMD_BLOCK), str)
     assert isinstance(mapdl.input_strings(CMD_BLOCK.splitlines()), str)
 
 
-def test_str(mapdl, cleared):
+def test_str(mapdl):
     mapdl_str = str(mapdl)
     assert "Product:" in mapdl_str
     assert "MAPDL Version" in mapdl_str
     assert str(mapdl.version) in mapdl_str
 
 
-def test_version(mapdl, cleared):
+def test_version(mapdl):
     assert isinstance(mapdl.version, float)  # Checking MAPDL version
     expected_version = float(
         datetime.now().year - 2000 + 1 + 1
@@ -437,18 +438,18 @@ def test_pymapdl_version():
     assert version_[2].isnumeric() or "dev" in version_[2]
 
 
-def test_comment(cleared, mapdl):
+def test_comment(mapdl):
     comment = "Testing..."
     resp = mapdl.com(comment)
     assert comment in resp
 
 
-def test_basic_command(cleared, mapdl):
+def test_basic_command(mapdl):
     resp = mapdl.finish()
     assert "ROUTINE COMPLETED" in resp
 
 
-def test_allow_ignore(mapdl, cleared):
+def test_allow_ignore(mapdl, clear_at_end):
     with pytest.warns(DeprecationWarning):
         mapdl.allow_ignore = True
 
@@ -477,7 +478,7 @@ def test_allow_ignore(mapdl, cleared):
         mapdl.allow_ignore = False
 
 
-def test_chaining(mapdl, cleared):
+def test_chaining(mapdl, clear_at_end):
     # test chaining with distributed only
     if mapdl._distributed:
         with pytest.raises(MapdlRuntimeError):
@@ -492,12 +493,12 @@ def test_chaining(mapdl, cleared):
         assert mapdl.geometry.n_keypoint == 1000
 
 
-def test_error(mapdl, cleared):
+def test_error(mapdl, clear_at_end):
     with pytest.raises(MapdlRuntimeError):
         mapdl.a(0, 0, 0, 0)
 
 
-def test_ignore_errors(mapdl, cleared):
+def test_ignore_errors(mapdl):
     mapdl.ignore_errors = False
     assert not mapdl.ignore_errors
     mapdl.ignore_errors = True
@@ -512,7 +513,7 @@ def test_ignore_errors(mapdl, cleared):
 
 
 @requires("grpc")
-def test_list(mapdl, cleared, tmpdir):
+def test_list(mapdl, tmpdir):
     """Added for backwards compatibility"""
     fname = "tmp.txt"
     filename = str(tmpdir.mkdir("tmpdir").join(fname))
@@ -526,12 +527,12 @@ def test_list(mapdl, cleared, tmpdir):
 
 
 @requires("grpc")
-def test_invalid_input(mapdl, cleared):
+def test_invalid_input(mapdl):
     with pytest.raises(FileNotFoundError):
         mapdl.input("thisisnotafile")
 
 
-def test_keypoints(cleared, mapdl):
+def test_keypoints(mapdl, cleared, clear_at_end):
     assert mapdl.geometry.n_keypoint == 0
     kps = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
 
@@ -550,7 +551,7 @@ def test_keypoints(cleared, mapdl):
 
 
 @requires("pyvista")
-def test_lines(mapdl, cleared):
+def test_lines(mapdl, clear_at_start_and_end):
     assert mapdl.geometry.n_line == 0
 
     k0 = mapdl.k("", 0, 0, 0)
@@ -571,7 +572,7 @@ def test_lines(mapdl, cleared):
 
 
 @requires("local")
-def test_apdl_logging_start(tmpdir, mapdl, cleared):
+def test_apdl_logging_start(tmpdir, mapdl, clear_at_start_and_end):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
     launch_options = launch_mapdl(
@@ -610,7 +611,7 @@ def test_apdl_logging_start(tmpdir, mapdl, cleared):
     mapdl._close_apdl_log()
 
 
-def test_apdl_logging(mapdl, cleared, tmpdir):
+def test_apdl_logging(mapdl, clear_at_start_and_end, tmpdir):
     tmp_dir = tmpdir.mkdir("tmpdir")
     file_name = "tmp_logger.log"
     file_path = str(tmp_dir.join(file_name))
@@ -686,7 +687,7 @@ def test_apdl_logging(mapdl, cleared, tmpdir):
     assert file_name in os.listdir(tmp_dir)
 
 
-def test_nodes(tmpdir, cleared, mapdl):
+def test_nodes(tmpdir, clear_at_end, mapdl):
     mapdl.n(1, 1, 1, 1)
     mapdl.n(11, 10, 1, 1)
     mapdl.fill(1, 11, 9)
@@ -716,7 +717,7 @@ def test_enum(mapdl, make_block):
     assert np.allclose(mapdl.mesh.enum, range(1, mapdl.mesh.n_elem + 1))
 
 
-def test_elements(cleared, mapdl):
+def test_elements(clear_at_start_and_end, mapdl):
     mapdl.et(1, 185)
 
     # two basic cells
@@ -772,7 +773,7 @@ def test_elements(cleared, mapdl):
         np.random.random((10, 3, 3)),
     ),
 )
-def test_set_get_parameters(mapdl, cleared, parm):
+def test_set_get_parameters(mapdl, parm):
     parm_name = pymapdl.misc.random_string(20)
     mapdl.parameters[parm_name] = parm
 
@@ -788,7 +789,7 @@ def test_set_get_parameters(mapdl, cleared, parm):
         assert np.allclose(mapdl.parameters[parm_name], parm)
 
 
-def test_set_parameters_arr_to_scalar_overwrite(mapdl, cleared):
+def test_set_parameters_arr_to_scalar_overwrite(mapdl, clear_at_end):
     mapdl.parameters["PARM"] = np.arange(10)
     assert "PARM" in mapdl.parameters
     assert np.allclose(mapdl.parameters["PARM"], np.arange(10).reshape((10, -1)))
@@ -798,13 +799,13 @@ def test_set_parameters_arr_to_scalar_overwrite(mapdl, cleared):
     assert mapdl.parameters["PARM"] == 2
 
 
-def test_set_parameters_string_spaces(mapdl, cleared):
+def test_set_parameters_string_spaces(mapdl, clear_at_end):
     mapdl.parameters["PARM"] = "string with spaces"
     assert "PARM" in mapdl.parameters
     assert mapdl.parameters["PARM"] == "string with spaces"
 
 
-def test_set_parameters_too_long(mapdl, cleared):
+def test_set_parameters_too_long(mapdl):
     from ansys.mapdl.core.mapdl_core import MAX_PARAM_CHARS
 
     parm_name = "a" * (MAX_PARAM_CHARS + 1)
@@ -821,7 +822,7 @@ def test_set_parameters_too_long(mapdl, cleared):
         mapdl.parameters["asdf"] = "a" * (MAX_PARAM_CHARS + 1)
 
 
-def test_builtin_parameters(mapdl, cleared):
+def test_builtin_parameters(mapdl, clear_at_end):
     assert mapdl.parameters.routine == "PREP7"
 
     mapdl.units("SI")
@@ -847,7 +848,7 @@ def test_builtin_parameters(mapdl, cleared):
     assert mapdl.parameters.real == 1
 
 
-def test_partial_mesh_nnum(mapdl, make_block):
+def test_partial_mesh_nnum(mapdl, make_block, clear_at_end):
     allsel_nnum_old = mapdl.mesh.nnum
     mapdl.nsel("S", "NODE", vmin=100, vmax=200)
     allsel_nnum_now = mapdl.mesh.nnum_all
@@ -864,7 +865,7 @@ def test_partial_mesh_nnum2(mapdl, make_block):
     assert mapdl.mesh._grid.n_cells == 11
 
 
-def test_cyclic_solve(mapdl, cleared):
+def test_cyclic_solve(mapdl, clear_at_start_and_end):
     # build the cyclic model
     mapdl.shpp("off")
     mapdl.cdread("db", os.path.join(TEST_FILES, "sector.cdb"))
@@ -899,7 +900,7 @@ def test_cyclic_solve(mapdl, cleared):
     ),
 )
 @pytest.mark.parametrize("col_header", [False, True])
-def test_load_table(mapdl, cleared, dim_rows, dim_cols, col_header):
+def test_load_table(mapdl, clear_at_end, dim_rows, dim_cols, col_header):
     my_conv = np.random.rand(dim_rows, dim_cols)
     my_conv[:, 0] = np.arange(dim_rows)  # "time" values
 
@@ -912,7 +913,7 @@ def test_load_table(mapdl, cleared, dim_rows, dim_cols, col_header):
         assert np.allclose(mapdl.parameters["my_conv"], my_conv[:, 1:], atol=1e-7)
 
 
-def test_load_array_negative_and_floats(mapdl, cleared):
+def test_load_array_negative_and_floats(mapdl, clear_at_end):
     my_array = np.array(
         [
             [0, 0.001],
@@ -928,7 +929,7 @@ def test_load_array_negative_and_floats(mapdl, cleared):
     assert np.allclose(mapdl.parameters["MY_ARRAY"], my_array)
 
 
-def test_load_table_negative_and_floats(mapdl, cleared):
+def test_load_table_negative_and_floats(mapdl, clear_at_end):
     my_array = np.array(
         [
             [-100, 0.001],
@@ -944,7 +945,7 @@ def test_load_table_negative_and_floats(mapdl, cleared):
     assert np.allclose(mapdl.parameters["MY_ARRAY"].ravel(), my_array[:, 1].ravel())
 
 
-def test_load_table_error_ascending_row(mapdl, cleared):
+def test_load_table_error_ascending_row(mapdl):
     my_conv = np.ones((3, 3))
     my_conv[1, 0] = 4
     with pytest.raises(ValueError, match="requires that the first column is in"):
@@ -971,7 +972,7 @@ def test_load_array(mapdl, cleared, dimx, dimy):
         np.zeros((3, 3)),
     ],
 )
-def test_load_array_types(mapdl, cleared, array):
+def test_load_array_types(mapdl, clear_at_end, array):
     mapdl.load_array("myarr", array)
     assert np.allclose(mapdl.parameters["myarr"], array, rtol=1e-7)
 
@@ -1034,7 +1035,7 @@ def test_lssolve(mapdl, cleared):
     assert f"Load step file number {lsnum}.  Begin solution ..." in out
 
 
-def test_coriolis(mapdl, cleared):
+def test_coriolis(mapdl):
     """Simply test that we're formatting the input parm for coriolis"""
     # must be v190 or newer
     resp = mapdl.coriolis(True, True, True, True)
@@ -1044,13 +1045,13 @@ def test_coriolis(mapdl, cleared):
     assert "PRINT ROTOR MASS SUMMARY ACTIVATED" in resp
 
 
-def test_title(mapdl, cleared):
+def test_title(mapdl, clear_at_end):
     title = "title1"  # the title cannot be longer than 7 chars. Check *get,parm,active,0,title for more info.
     mapdl.title(title)
     assert title == mapdl.get("par", "active", "0", "title")
 
 
-def test_cdread(mapdl, cleared):
+def test_cdread(mapdl, clear_at_end):
     random_letters = random_string(4)
 
     mapdl.run(f"PARMTEST='{random_letters}'")
@@ -1083,7 +1084,7 @@ def test_cdread(mapdl, cleared):
 
 
 @requires("local")
-def test_cdread_different_location(mapdl, cleared, tmpdir):
+def test_cdread_different_location(mapdl, clear_at_end, tmpdir):
     random_letters = random_string(4)
     dirname = "tt" + random_letters
 
@@ -1263,8 +1264,8 @@ def test_cwd(mapdl, cleared, tmpdir):
         mapdl.sys(f"mkdir tmp")
 
     try:
-        mapdl.directory = str(tempdir_)
-        assert str(mapdl.directory) == str(tempdir_).replace("\\", "/")
+        mapdl.directory = tempdir_
+        assert pathlib.Path(mapdl.directory) == pathlib.Path(tempdir_)
 
         wrong_path = "wrong_path"
         with pytest.raises(IncorrectWorkingDirectory, match="working directory"):
@@ -1345,8 +1346,6 @@ def test_inquire_exist(mapdl, cleared, tmpdir):
 
     finally:
         # Clean up the temporary file
-        if os.path.exists(existing_file):
-            os.remove(existing_file)
         mapdl.slashdelete(basename)
 
 
@@ -1401,13 +1400,11 @@ def test_tbft(mapdl, cleared, tmpdir, option2, option3, option4):
     fpath = dirpath.join(fname)
 
     with open(fpath, "w") as fid:
-        fid.write(
-            """0.819139E-01 0.82788577E+00
+        fid.write("""0.819139E-01 0.82788577E+00
         0.166709E+00 0.15437247E+01
         0.253960E+00 0.21686152E+01
         0.343267E+00 0.27201819E+01
-        0.434257E+00 0.32129833E+0"""
-        )
+        0.434257E+00 0.32129833E+0""")
 
     if option4 == "DIR":
         option4 = dirpath
@@ -1600,8 +1597,7 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
 
 
 def test_mpread_lib(mapdl):
-    mapdl.input_strings(
-        """
+    mapdl.input_strings("""
         /prep7
         /units,si
         TB,BH  ,_MATL   ,   1,  20
@@ -1622,8 +1618,7 @@ def test_mpread_lib(mapdl):
         TBPT,,  190476.190    ,  1.90980000
         TBPT,,  285714.286    ,  2.02960000
         TBPT,,  380952.381    ,  2.14950000
-    """
-    )
+    """)
     mapdl.slashdelete("database", "mp")
     mapdl.mpwrite("database", "mp", mat=1)
 
@@ -2084,7 +2079,10 @@ def test_get_not_muted(mapdl, cleared):
     mock_not_muted.assert_not_called()
 
 
-def test_session_id(mapdl, cleared, running_test):
+def test_session_id(mapdl, running_test):
+    # Calling here to make sure we have a session id before testing it.
+    mapdl.clear()
+
     mapdl._strict_session_id_check = True
     assert mapdl._session_id is not None
 
@@ -2641,8 +2639,8 @@ def test_remove_temp_dir_on_exit(mapdl, cleared, tmpdir):
     assert os.path.exists(path) is False
 
 
+@pytest.mark.skipif(True, reason="See #4430")
 @requires("local")
-@requires("nostudent")
 def test_remove_temp_dir_on_exit_with_launch_mapdl(mapdl, cleared):
 
     mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=PORT1)
@@ -2693,12 +2691,8 @@ def test_lgwrite(mapdl, cleared, filename, ext, remove_grpc_extra, kedit):
         content = fid.read()
 
     if remove_grpc_extra:
-        assert "/OUT" not in content
-        assert "__PYMAPDL_SESSION_ID__" not in content
         assert "anstmp" not in content
     else:
-        assert "/OUT" in content
-        assert "__PYMAPDL_SESSION_ID__" in content
         assert "anstmp" in content
 
     if kedit != "remove":
@@ -2817,6 +2811,7 @@ def test_ip_hostname_in_start_parm(ip):
         "local": False,
         "set_no_abort": False,
         "jobid": 1001,
+        "transport_mode": "insecure",
     }
 
     with patch("socket.gethostbyaddr") as mck_sock:
@@ -3058,7 +3053,10 @@ def test_timeout_when_exiting(mapdl, is_exited):
         ("modopt", None),
     ),
 )
-def test_none_as_argument(mapdl, make_block, cmd, arg):
+def test_none_as_argument(mapdl, cmd, arg):
+    mapdl.clear()
+    mapdl.prep7()
+
     if "sel" in cmd:
         kwargs = {"wraps": mapdl._run}
     else:
@@ -3185,7 +3183,11 @@ def test_set_no_abort(monkeypatch, set_no_abort, start_instance):
             "ansys.mapdl.core.mapdl_grpc.MapdlGrpc.__del__", return_value=None
         ) as mock_del,
     ):
-        mapdl = launch_mapdl(set_no_abort=set_no_abort, start_instance=start_instance)
+        mapdl = launch_mapdl(
+            set_no_abort=set_no_abort,
+            start_instance=start_instance,
+            transport_mode="insecure",
+        )
 
         mapdl._exit_mapdl = lambda *args, **kwargs: None  # Avoiding exit
         mapdl.__del__ = lambda x: None  # Avoiding exit

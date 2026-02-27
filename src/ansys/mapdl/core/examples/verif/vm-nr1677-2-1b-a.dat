@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -28,8 +28,8 @@
 /com, Reference: Piping benchmark problems,Dynamic analysis independant support
 /com,            motion response spectrum method, P. Bezler, M. Subudhi and
 /com,            M.Hartzman, NUREG/CR--1677-Vol.2, August 1985.
-/com, 
-/com, 
+/com,
+/com,
 /com, Elements used: Pipe16, Pipe18, Combin14
 /com,
 /com, Results comparsion:
@@ -51,7 +51,7 @@ WMass=1.042868e-03                              ! Density
 WTick=0.216                                     ! Wall Thickness
 OD=3.5                                          ! Outer Diameter
 RADCUR=48.003                                   ! Radius curvature
-temp=80                                         ! Temperature                                             
+temp=80                                         ! Temperature
 maxm=15                                         ! Number of modes to extract
 
 et,1,pipe16							! Element 1 - PIPE16
@@ -85,22 +85,22 @@ r,7,0.2e+5
 /com, Material Properties
 /com,*********************
 
-mp,ex,1,YoungModulus1					
-mp,nuxy,1,Nu						
-mp,gxy,1,ShearModulus1					
-mp,dens,1,WMass						
+mp,ex,1,YoungModulus1
+mp,nuxy,1,Nu
+mp,gxy,1,ShearModulus1
+mp,dens,1,WMass
 
-mp,ex,2,YoungModulus1					
-mp,nuxy,2,Nu						
-mp,gxy,2,ShearModulus1					
-mp,dens,2,WMass						
+mp,ex,2,YoungModulus1
+mp,nuxy,2,Nu
+mp,gxy,2,ShearModulus1
+mp,dens,2,WMass
 
 /com,------------------------------------------------------------------------------------
 
 /com, Nodes
 /com,*******
 
-n,1,0,0,0							
+n,1,0,0,0
 n,2,0,12,0
 n,3,35.687,60,32.110
 n,4,55,60,49.5
@@ -169,7 +169,7 @@ mat,1								! Material ID 1
 type,1							! Element Type 1
 real,1							! Real Constant 1
 
-e, 1, 2							
+e, 1, 2
 e, 3, 4
 e, 4, 5
 e, 6, 7
@@ -310,7 +310,7 @@ finish
 
 /solution
 antype,modal						! Perform Modal Analysis
-modopt,lanb,maxm						
+modopt,lanb,maxm
 lumpm,on							! Use Lumped Mass Matrix Approximation
 mxpand,maxm,,,yes						! Expand Solution with Element Calculations ON
 solve
@@ -384,7 +384,7 @@ spval,2,,  0.667 ,  0.667,  0.584
 
 spunit, 3,accg, gval
 spfrq,3, 3.0  , 4.0  ,  7.0,  12.5,   14.1,  15.87,  21.74
-spval,3,,  1.4  , 1.4  , 0.75, 0.875,    0.7,    0.7,   0.8    
+spval,3,,  1.4  , 1.4  , 0.75, 0.875,    0.7,    0.7,   0.8
 spfrq,3,  23.25,  27.03,  31.25, 34.48
 spval,3,,    0.75,   0.75,    0.7,  0.6
 
@@ -396,7 +396,7 @@ spunit,4,accg, gval
 spfrq,4, 3.0  , 4.0  ,  7.0,  12.5,   14.1,  15.87,  21.74
 spval,4,,  0.934, 0.934, 0.5 , 0.584,  0.467, 0.467,  0.534
 spfrq,4,  23.25,  27.03,  31.25, 34.48
-spval,4,,    0.5,     0.5,  0.467,  0.4 
+spval,4,,    0.5,     0.5,  0.467,  0.4
 
 /com,
 /com, node components for excitation points
@@ -410,13 +410,13 @@ cm,lowerLevel,node
 allsel
 
 /com, -- upper level - spectrum 1
-d,37,ux,1,,39    
+d,37,ux,1,,39
 d,41,uy,1,,42
 pfact,1
 d,upperLevel,all,0
 
 /com, -- upper level - spectrum 2
-d,37,uy,1,,39 
+d,37,uy,1,,39
 d,40,ux,1
 d,41,uz,1,,42
 pfact,2
@@ -592,7 +592,7 @@ esel,a,ename,,18
 /com,	 Node I
 /com,==========
 
-/com, Element #1 
+/com, Element #1
 /com,***********
 
 *get,pxi(1,1),elem,1,smisc,1
@@ -648,7 +648,7 @@ esel,a,ename,,18
 /com,  Node J
 /com,==========
 
-/com, Element #1 
+/com, Element #1
 /com,************
 
 *get,pxj(1,1),elem,1,smisc,7
@@ -874,7 +874,7 @@ save,table_4
 
 /com,
 /com, ---------------------vm-nr1677-2-1b-a Results Verification---------------------------
-/com, 
+/com,
 
 /nopr
 resume,table_1
@@ -884,7 +884,7 @@ resume,table_1
 
 /com,
 /com, ===========================================
-/com,  COMPARISON OF MODAL FREQUENCY 
+/com,  COMPARISON OF MODAL FREQUENCY
 /com,      WITH EXPECTED RESULTS
 /com, ===========================================
 /com,
@@ -939,7 +939,7 @@ resume,table_4
 
 /com,
 /com, ===========================================
-/com,  COMPARISON OF REACTION FORCES 
+/com,  COMPARISON OF REACTION FORCES
 /com,      WITH EXPECTED RESULTS
 /com, ===========================================
 /com,
@@ -969,7 +969,7 @@ resume,table_3
 /com,------------------------------------------------
 /com,	Note: Element Forces and Moments for some elements
 /com,       along Y & Z directions are flipped between Mechanical APDL
-/com,		and NRC results 
+/com,		and NRC results
 /com,
 /com,       Element numbers from Mechanical APDL and NRC are
 /com,       different.
@@ -1038,4 +1038,3 @@ resume,table_3
 *list,vm-nr1677-2-1b-a,vrt
 finish
 /exit,nosave
-

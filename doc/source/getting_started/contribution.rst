@@ -13,7 +13,7 @@ Contributing
    develop_pymapdl
 
 
-There are several ways to contribute to PyMAPDL. 
+There are several ways to contribute to PyMAPDL.
 
 * `Answer discussions`_
 * `Post issues`_
@@ -57,7 +57,7 @@ repository, and PyMAPDL as a whole. It allows you to voice concerns, suggest
 improvements, or report bugs, which can lead to a more robust and user-friendly
 project. It also offers an opportunity for you to engage with the project's
 community, learn from others, and gain experience in issue tracking and
-collaboration. 
+collaboration.
 For the repository, issues serve as a structured way to track and
 prioritize work, helping maintainers understand the needs of users and guide the
 project's development. It's an excellent way to contribute because it enhances

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,10 +22,11 @@
 
 from typing import Optional
 
+from ansys.mapdl.core._commands import CommandsBase
 from ansys.mapdl.core.mapdl_types import MapdlFloat, MapdlInt
 
 
-class ExplicitDynamics:
+class ExplicitDynamics(CommandsBase):
     def edasmp(
         self,
         option="",

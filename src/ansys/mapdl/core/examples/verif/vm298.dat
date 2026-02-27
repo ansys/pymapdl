@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@
 /COM,
 /COM, REFERENCE: J.N.YANG,Y.K.LIN,"ALONG-WIND MOTION OF MULTISTORY BUILDING"
 /COM,            ASCE PUBLICATIONS, APRIL 1981.
-/COM, 
+/COM,
 
 /COM,
 /COM, STRUCTURAL PARAMETERS OF BUILDING
@@ -55,7 +55,7 @@ _PI     = 4*ATAN(1)
 
 /COM, NODES ALONG X
 *DO,i,1,_N+1
-    N,i,0,_H*(i-1),0        
+    N,i,0,_H*(i-1),0
 *ENDDO
 
 /COM, SPRING-DAMPER ELEMENTS
@@ -117,7 +117,7 @@ OMG_1 = 2*_PI*FREQ_1
 /COM, **************************
 FREQ_PTS = 120
 FREQ_END = 2/(2*_PI)
-FREQ_BEGIN = 1E-03          
+FREQ_BEGIN = 1E-03
 FREQ_INC = (FREQ_END - FREQ_BEGIN)/FREQ_PTS
 
 /COM, FREQUENCY TABLE (HZ)
@@ -145,7 +145,7 @@ OMG_INC = 2*_PI*FREQ_INC
             TERM1 = (600*OMG/(_PI*_Ur))**2
             TERM1 = TERM1/(1 + TERM1)**(4/3)
             EXPO  = -(_C1*OMG*ABS(j-k)*_H)/(2*_PI*_Ur)
-            _COPHIFF(j,k,i) = COEFV*TERM1*EXP(EXPO)/(COEFU*OMG) 
+            _COPHIFF(j,k,i) = COEFV*TERM1*EXP(EXPO)/(COEFU*OMG)
         *ENDDO
     *ENDDO
 *ENDDO
@@ -158,40 +158,40 @@ ANTYPE,SPECTRUM                     ! PERFORM SPECTRUM ANALYSIS
 SPOPT,PSD                           ! POWER SPECTRAL DENSITY ANALYSIS
 
 _FACT = 4*_PI                       ! CONVERSION FACTOR FROM 2-SIDED INPUT PSD IN M2/RAD/S
-                                    ! TO 1-SIDED INPUT PSD IN M2/HZ 
-/COM, WIND SPECTRUM LOADING 
+                                    ! TO 1-SIDED INPUT PSD IN M2/HZ
+/COM, WIND SPECTRUM LOADING
 *DO,j,1,_N
-    
+
     PSDUNIT,j,FORC
     *DO,k,j,_N
         *DO,i,1,FREQ_PTS
             PSDFRQ,j,k,_FREQ_ARRAY(i)
             *IF,j,EQ,k,THEN
                PSDVAL,j,_COPHIFF(j,j,i)*_FACT
-            *ELSE 
+            *ELSE
                COVAL,j,k,_COPHIFF(j,k,i)*_FACT
-            *ENDIF          
-        *ENDDO  
+            *ENDIF
+        *ENDDO
     *ENDDO
-    
+
     *IF,j,EQ,40,THEN
         /SHOW,PNG,REV
-        /PLOPTS,DATE,0  
-        PSDGRAPH,j-1,j,3            ! DISPLAY APPLIED WIND EXCITATION PSD SPECTRUM 
-    *ENDIF
-    
-    *IF,j,EQ,1,THEN
-        /SHOW,PNG,REV
-        /PLOPTS,DATE,0  
+        /PLOPTS,DATE,0
         PSDGRAPH,j-1,j,3            ! DISPLAY APPLIED WIND EXCITATION PSD SPECTRUM
     *ENDIF
-    
-    FDEL,j,FX                       ! DELETE PREVIOUS WIND SPECTRUM LOAD    
-    F,j+1,FX,1.0                    ! APPLY WIND LOAD ALONG X-DIRECTION     
+
+    *IF,j,EQ,1,THEN
+        /SHOW,PNG,REV
+        /PLOPTS,DATE,0
+        PSDGRAPH,j-1,j,3            ! DISPLAY APPLIED WIND EXCITATION PSD SPECTRUM
+    *ENDIF
+
+    FDEL,j,FX                       ! DELETE PREVIOUS WIND SPECTRUM LOAD
+    F,j+1,FX,1.0                    ! APPLY WIND LOAD ALONG X-DIRECTION
     PFACT,j,NODE                    ! PERFORM THE PARTICIPATION FACTOR CALCULATION
-*ENDDO  
+*ENDDO
 /SHOW,CLOSE
-    
+
 FDEL,ALL,FX                         ! DELETE PREVIOUS NODAL WIND FORCE
 
 PSDRES,DISP                         ! DISPLACEMENT RESPONSE (RELATIVE BY DEFAULT)
@@ -243,7 +243,7 @@ PLVAR,5
 
 ! PLOT RPSD LOG-LOG
 /XRANGE,1E-2,2
-/GROPT,LOGX,ON                          
+/GROPT,LOGX,ON
 PLVAR,5
 /SHOW,CLOSE
 
@@ -276,7 +276,7 @@ LABEL(1,2)='STD_DEV'
 /COM,
 /COM, --------------- RESULT COMPARISON -------------------------------
 /COM,
-/COM,                 |  TARGET  |  MECHANICAL APDL  | RATIO     
+/COM,                 |  TARGET  |  MECHANICAL APDL  | RATIO
 /COM,
 /COM,-------------------------------------------------------------------
 /COM,  MODAL FREQUENCY

@@ -31,12 +31,12 @@
 <line fill="none" stroke="#000000" x1="135.9" y1="178.9" x2="167.2" y2="185.1"/>
 <line fill="none" stroke="#000000" x1="43.9" y1="162.3" x2="65.3" y2="166.5"/>
 <g>
-	
+
 		<line fill="none" stroke="#000000" stroke-width="0.9971" stroke-dasharray="5.76,5.76" x1="44.1" y1="227.4" x2="130.1" y2="140.8"/>
 	<polyline fill="none" stroke="#000000" stroke-dasharray="5.76,5.76" points="44,228.8 167.5,252 254,162.5 	"/>
 </g>
 <line fill="none" stroke="#000000" x1="63.3" y1="159.8" x2="95.3" y2="166.1"/>
-<polygon fill="#B3B3B3" stroke="#000000" stroke-width="1.44" stroke-linecap="round" stroke-linejoin="round" points="167.2,155.3 
+<polygon fill="#B3B3B3" stroke="#000000" stroke-width="1.44" stroke-linecap="round" stroke-linejoin="round" points="167.2,155.3
 	253.7,64.2 254.2,44.1 167.2,135.2 "/>
 <polygon fill="#B3B3B3" stroke="#000000" stroke-width="1.44" points="167.2,135 43.9,110.6 43.9,130.7 167.2,155 "/>
 <line fill="none" stroke="#000000" stroke-width="0.9971" stroke-dasharray="5.76,5.76" x1="130.1" y1="141.8" x2="130.1" y2="1"/>
@@ -384,7 +384,7 @@
 <g>
 	<g>
 		<path fill="none" stroke="#000000" stroke-width="0.7558" stroke-linecap="square" d="M97.2,73.5"/>
-		<polyline fill="#ED1C24" stroke="#ED1C24" stroke-width="0.7558" stroke-linecap="square" points="115.6,136.9 193,46.6 
+		<polyline fill="#ED1C24" stroke="#ED1C24" stroke-width="0.7558" stroke-linecap="square" points="115.6,136.9 193,46.6
 			188.9,43.9 111.3,133.9 115.6,136.9 		"/>
 	</g>
 	<path stroke="#000000" stroke-width="0.755" d="M193.1,46.1c0,1.2-1.1,1.8-2.5,1.5S188,46.1,188,45c0-1.2,1.1-1.8,2.5-1.5

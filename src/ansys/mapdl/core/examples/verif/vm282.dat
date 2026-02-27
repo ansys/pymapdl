@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 /TITLE,VM282,STEADY STATE VIBRATION ANALYSIS OF PISTON-FLUID SYSTEM
 /COM, --------------------------------------------------------------
 /COM, REFERENCE:
-/COM, F. AXISA and J. ANTUNES, MODELLING OF MECHANICAL SYSTEMS: 
+/COM, F. AXISA and J. ANTUNES, MODELLING OF MECHANICAL SYSTEMS:
 /COM, FLUID-STRUCTURE INTERACTION, VOLUME 3, 2007, PAGE:486.
 /COM, --------------------------------------------------------------
 JPGPRF,500,100,1
@@ -49,9 +49,9 @@ KS = KF 									! SPRING STIFFNESS (GAMMA = KF/KS = 1)
 MS = MF/2                                   ! POINT MASS  (MU = MF/MS = 2)
 F0 = 1000									! APPLIED FORCE
 /PREP7
-LOCAL,13,0,0,0,0, , , 90,1,1,  
-WPCSYS,-1,13,   
-CYl4,0,0,RAD, , , ,LF  
+LOCAL,13,0,0,0,0, , , 90,1,1,
+WPCSYS,-1,13,
+CYl4,0,0,RAD, , , ,LF
 CSYS,0
 N,1,-1,0,0
 N,2,0,0,0
@@ -69,7 +69,7 @@ ET,4,CONTA174								! ELEMENT 4 - CONTACT ELEMENTS
 R,4
 KEYOPT,4,2,2               					! MPC STYLE CONTACT
 KEYOPT,4,4,2               					! RIGID CERIG STYLE LOAD
-KEYOPT,4,12,5              					! BONDED CONTACT 
+KEYOPT,4,12,5              					! BONDED CONTACT
 ET,5,TARGE170								! ELEMENT 5 - PILOT NODE
 KEYOPT,5,2,1               					! DON'T FIX THE PILOT NODE
 KEYOPT,5,4,111111
@@ -104,7 +104,7 @@ F,2,FX,F0
 ALLSEL,ALL,ALL
 SAVE
 FINISH
-! *** SOLUTION CONTROLS FOR MODAL ANALYSIS *** 
+! *** SOLUTION CONTROLS FOR MODAL ANALYSIS ***
 ! --------------------------------------------
 /SOLUTION
 ANTYPE,MODAL
@@ -117,7 +117,7 @@ SOLVE
 *GET,FREQ_4,MODE,5,FREQ
 *GET,FREQ_5,MODE,6,FREQ
 FINISH
-! *** SOLUTION CONTROLS FOR MSUP HARMONIC ANALYSIS *** 
+! *** SOLUTION CONTROLS FOR MSUP HARMONIC ANALYSIS ***
 ! ----------------------------------------------------
 /SOLUTION
 ANTYPE,HARM
@@ -135,7 +135,7 @@ FDELE,ALL
 LVSCALE,1
 SOLVE
 FINISH
-! *** EXPANSION PASS *** 
+! *** EXPANSION PASS ***
 ! ----------------------
 /SOLUTION
 EXPASS,ON
@@ -151,7 +151,7 @@ SET,,,,3,9.9
 *GET,RES_2,NODE,2,U,X
 *GET,PRES_2,NODE,1712,PRES
 FINISH
-! *** TIME HISTORY POST PROCESSOR *** 
+! *** TIME HISTORY POST PROCESSOR ***
 ! -----------------------------------
 /POST26
 /GROPT,LOGX,ON
@@ -192,8 +192,8 @@ FINISH
 
 *DIM,LABEL,CHAR,5,3
 *DIM,VALUE,,5,3
-LABEL(1,1) = 'FREQ(f1),      ','FREQ(f2)  ','FREQ(f3)  ','FREQ(f4)  ','FREQ(f5)  '  
-LABEL(1,2) = '     Hz','     Hz','     Hz','     Hz','     Hz' 
+LABEL(1,1) = 'FREQ(f1),      ','FREQ(f2)  ','FREQ(f3)  ','FREQ(f4)  ','FREQ(f5)  '
+LABEL(1,2) = '     Hz','     Hz','     Hz','     Hz','     Hz'
 *VFILL,VALUE(1,1),DATA,9.916,24.583,43.729,63.895,84.395
 *VFILL,VALUE(1,2),DATA,FREQ_1,FREQ_2,FREQ_3,FREQ_4,FREQ_5
 *VFILL,VALUE(1,3),DATA,FREQ_1/9.9167,FREQ_2/24.5833,FREQ_3/43.7292,FREQ_4/63.8958,FREQ_5/84.3958

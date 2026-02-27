@@ -27,7 +27,7 @@ To start MAPDL, just type on your activated virtual environment:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl start
@@ -49,7 +49,7 @@ If you want to specify an argument, for instance the port, then you need to call
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl start --port 50054
@@ -68,15 +68,15 @@ For instance, you could specify the working directory:
 
         .. code:: pwsh-session
 
-            (.venv) PS C:\Users\user\pymapdl> pymapdl start --run_location C:\Users\user\temp\    
+            (.venv) PS C:\Users\user\pymapdl> pymapdl start --run_location C:\Users\user\temp\
             Success: Launched an MAPDL instance (PID=32612) at 127.0.0.1:50052
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
-            (.venv) user@machine:~$ pymapdl start --run_location /home/user/tmp    
+            (.venv) user@machine:~$ pymapdl start --run_location /home/user/tmp
             Success: Launched an MAPDL instance (PID=32612) at 127.0.0.1:50052
 
 
@@ -100,7 +100,7 @@ You can use the ``pymapdl stop`` command to stop MAPDL instances like this:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl stop
@@ -124,7 +124,7 @@ You can specify the instance running on a different port using `--port` argument
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl stop --port 50053
@@ -146,7 +146,7 @@ Or an instance with a given process id (PID):
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl stop --pid 40952
@@ -163,15 +163,15 @@ Alternatively, you can stop all the running instances by using:
 
         .. code:: pwsh-session
 
-            (.venv) PS C:\Users\user\pymapdl> pymapdl stop --all      
+            (.venv) PS C:\Users\user\pymapdl> pymapdl stop --all
             Success: Ansys instances have been stopped.
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
-            (.venv) user@machine:~$ pymapdl stop --all      
+            (.venv) user@machine:~$ pymapdl stop --all
             Success: Ansys instances have been stopped.
 
 
@@ -198,7 +198,7 @@ If you want to list MAPDL process, just use the following command:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl list
@@ -227,7 +227,7 @@ processes), just type:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl list -i
@@ -258,7 +258,7 @@ argument `--long` or `-l`:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl list -l
@@ -270,7 +270,7 @@ argument `--long` or `-l`:
 
 
 The converter module has its own command line interface to convert
-MAPDL files to PyMAPDL. For more information, see 
+MAPDL files to PyMAPDL. For more information, see
 :ref:`ref_cli_converter`.
 
 
@@ -293,17 +293,17 @@ Here is how you use the ``pymapdl convert`` command:
         .. code:: pwsh-session
 
             (.venv) PS C:\Users\user\pymapdl> pymapdl convert mapdl.dat -o python.py
-            
+
             The ``mapdl.dat`` file is successfully converted to the ``python.py`` file.
 
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl convert mapdl.dat -o python.py
-            
+
             File mapdl.dat successfully converted to python.py.
 
 To obtain help on converter usage, options, and examples, type this command:
@@ -317,8 +317,8 @@ To obtain help on converter usage, options, and examples, type this command:
         .. code:: pwsh-session
 
             (.venv) PS C:\Users\user\pymapdl> pymapdl convert --help
-            
-            
+
+
             Usage: pymapdl convert [OPTIONS] FILENAME_IN
 
             PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.
@@ -330,11 +330,11 @@ To obtain help on converter usage, options, and examples, type this command:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl convert --help
-            
+
             Usage: pymapdl convert [OPTIONS] FILENAME_IN
 
             PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.

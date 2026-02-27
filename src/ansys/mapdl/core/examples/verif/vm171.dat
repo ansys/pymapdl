@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 ET,1,PLANE13,4                  ! 2-D COUPLED-FIELD SOLID (UX,UY,AZ DOF'S)
 ET,2,COMBIN14,,,2
 R,1,1.6534E5                    ! SPRING CONSTANT
-MP,EX,1,1E2                     
+MP,EX,1,1E2
 MP,EX,2,10E10
 MP,EX,3,10E10
 MP,EX,4,10E10
@@ -92,7 +92,7 @@ SF,ALL,MXWF                     ! APPLY MAXWELL PRESSURE SURFACE
 NSEL,ALL
 ESEL,ALL
 FINISH
-/SOLU    
+/SOLU
 NLGEOM,ON                       ! ACTIVATE LARGE DEFLECTION
 CNVTOL,F                        ! SET FORCE CONVERGENCE (USE DEFAULTS)
 CNVTOL,CSG                      ! SET CSG CONVERGENCE (.001% OF DEFAULT)
@@ -133,7 +133,7 @@ keyop,3,4,0
 ET,4,PLANE223,10001             ! keeper
 keyop,4,4,0
 R,1,1.6534E5                    ! SPRING CONSTANT
-MP,EX,1,1E2                     
+MP,EX,1,1E2
 MP,EX,2,10E10
 MP,EX,3,10E10
 MP,EX,4,10E10
@@ -190,7 +190,7 @@ CP,1,AZ,27,28,29
 NSLE                            ! SELECT ONLY NODES USED IN MODEL
 D,ALL,UX,0                      ! CONSTRAIN ALL HORIZONTAL DISPLACEMENTS
 FINISH
-/SOLU    
+/SOLU
 NLGEOM,ON                       ! ACTIVATE LARGE DEFLECTION
 CNVTOL,F                        ! SET FORCE CONVERGENCE (USE DEFAULTS)
 CNVTOL,CSG                      ! SET CSG CONVERGENCE (.001% OF DEFAULT)

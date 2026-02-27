@@ -1,4 +1,4 @@
-ansys-api-mapdl==0.5.2
+ansys-api-mapdl==0.6.0
 ansys-api-platform-instancemanagement==1.0.0
 ansys-mapdl-core==0.68.1
 ansys-mapdl-reader==0.55.0
@@ -37,5 +37,5 @@ scooby==0.9.2
 six==1.16.0
 tabulate==0.9.0
 tqdm==4.66.3
-urllib3==2.5.0
+urllib3==2.6.3
 vtk==9.3.0

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """This module is for threaded implementations of the mapdl interface"""
+
 import os
 import shutil
 import socket
@@ -195,7 +196,7 @@ class MapdlPool:
 
     def __init__(
         self,
-        n_instances: int = None,
+        n_instances: Optional[int] = None,
         wait: bool = True,
         run_location: Optional[str] = None,
         ip: Optional[Union[str, List[str]]] = None,
@@ -205,7 +206,7 @@ class MapdlPool:
         remove_temp_dir_on_exit: bool = True,
         names: Optional[str] = None,
         override=True,
-        start_instance: bool = None,
+        start_instance: Optional[bool] = None,
         exec_file: Optional[str] = None,
         timeout: int = 30,
         **kwargs,
@@ -252,6 +253,9 @@ class MapdlPool:
         n_instances, ips, ports = self._set_n_instance_ip_port_args(
             n_instances, ip, port
         )
+
+        # Update _n_instances with the resolved value
+        self._n_instances = n_instances
 
         self._ips = ips
         LOG.debug(f"Using ports: {ports}")
@@ -398,14 +402,15 @@ class MapdlPool:
 
     def wait_for_ready(self, timeout: Optional[int] = 180) -> bool:
         """Wait until pool is ready."""
-        timeout_ = time.time() + timeout
+        timeout_value = timeout if timeout is not None else 180
+        timeout_ = time.time() + timeout_value
         while time.time() < timeout_:
             if self.ready:
                 break
             time.sleep(0.1)
         else:
             raise TimeoutError(
-                f"MapdlPool is not ready after waiting {timeout} seconds."
+                f"MapdlPool is not ready after waiting {timeout_value} seconds."
             )
 
     def _verify_unique_ports(self) -> None:
@@ -837,6 +842,204 @@ class MapdlPool:
         if block:
             [thread.join() for thread in threads]
 
+    def increase(self, n: int = 1) -> None:
+        """Add instances to the pool.
+
+        Parameters
+        ----------
+        n : int, optional
+            Number of instances to add. Default is 1.
+
+        Raises
+        ------
+        ValueError
+            If trying to increase pool when start_instance is False.
+
+        Examples
+        --------
+        >>> pool = MapdlPool(2)
+        >>> pool.increase()  # add 1 instance
+        >>> pool.increase(2)  # add 2 more instances
+        """
+        if not isinstance(n, int):
+            raise TypeError(
+                f"Argument 'n' must be an integer, got {type(n).__name__} instead"
+            )
+        if n < 1:
+            raise ValueError(f"Must add at least 1 instance. Got n={n}")
+
+        # Runtime check for pool initialization (also helps mypy)
+        if self._n_instances is None:
+            raise RuntimeError("Pool must be initialized before calling increase()")
+
+        if not self._start_instance:
+            raise ValueError(
+                "Cannot automatically increase pool when 'start_instance' is False. "
+                "Use the 'add()' method to add existing MAPDL instances instead."
+            )
+
+        LOG.debug("Increasing pool size by {n} instances")
+
+        # Determine starting index for new instances
+        current_count = self._n_instances
+
+        # Extend the instances list with None placeholders
+        self._instances.extend([None for _ in range(n)])
+
+        # Update the total count
+        self._n_instances += n
+
+        # Get available ports for new instances
+        # Find the highest current port and start from there
+        current_ports = [inst._port for inst in self if inst is not None]
+        if current_ports:
+            starting_port = max(current_ports) + 1
+        else:
+            starting_port = MAPDL_DEFAULT_PORT
+
+        new_ports = available_ports(n, starting_port)
+
+        # Spawn new instances
+        threads = []
+        for i in range(n):
+            index = current_count + i
+            port = new_ports[i]
+            ip = LOCALHOST
+
+            thread = self._spawn_mapdl(
+                index,
+                ip=ip,
+                port=port,
+                name=self._names(index),
+                thread_name=self._names(index),
+                start_instance=self._start_instance,
+                exec_file=self._exec_file,
+            )
+            threads.append(thread)
+
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
+
+        LOG.debug(f"Successfully increased pool size to {self._n_instances} instances")
+
+    def reduce(self, n: int = 1) -> None:
+        """Remove instances from the pool.
+
+        Parameters
+        ----------
+        n : int, optional
+            Number of instances to remove. Default is 1.
+
+        Raises
+        ------
+        ValueError
+            If trying to reduce to 0 or negative instances.
+
+        Examples
+        --------
+        >>> pool = MapdlPool(3)
+        >>> pool.reduce()  # remove 1 instance
+        >>> pool.reduce(1)  # remove 1 more instance
+        """
+        if not isinstance(n, int):
+            raise TypeError(
+                f"Argument 'n' must be an integer, got {type(n).__name__} instead"
+            )
+        if n < 1:
+            raise ValueError(f"Must remove at least 1 instance. Got n={n}")
+
+        # Runtime check for pool initialization (also helps mypy)
+        if self._n_instances is None:
+            raise RuntimeError("Pool must be initialized before calling reduce()")
+
+        if self._n_instances - n < 1:
+            raise ValueError(
+                f"Cannot reduce pool to less than 1 instance. "
+                f"Current instances: {self._n_instances}, trying to remove: {n}"
+            )
+
+        LOG.debug(f"Reducing pool size by {n} instances")
+
+        # Exit the last n instances
+        instances_to_exit: List[tuple] = []
+        for i in range(self._n_instances - 1, self._n_instances - n - 1, -1):
+            instance = self._instances[i]
+            if instance is not None:
+                instances_to_exit.append((i, instance))
+
+        # Exit instances in threads
+        @threaded
+        def threaded_exit(index, instance):
+            self._exiting_i += 1
+            try:
+                instance.exit()
+            except MapdlRuntimeError as e:
+                LOG.warning(
+                    f"Unable to exit instance {index} because of the following reason:\n{str(e)}"
+                )
+            self._instances[index] = None
+            LOG.debug(f"Exited instance: {instance}")
+            self._exiting_i -= 1
+
+        threads = []
+        for index, instance in instances_to_exit:
+            threads.append(threaded_exit(index, instance))
+
+        # Wait for all exits to complete
+        for thread in threads:
+            thread.join()
+
+        # Remove the last n entries from instances list
+        self._instances = self._instances[:-n]
+
+        # Update the total count
+        self._n_instances -= n
+
+        LOG.debug(f"Successfully reduced pool size to {self._n_instances} instances")
+
+    def add(self, mapdl) -> None:
+        """Add an existing MAPDL instance to the pool.
+
+        Parameters
+        ----------
+        mapdl : ansys.mapdl.core.Mapdl
+            An existing MAPDL instance to add to the pool.
+
+        Examples
+        --------
+        >>> from ansys.mapdl.core import launch_mapdl, MapdlPool
+        >>> mapdl = launch_mapdl()
+        >>> pool = MapdlPool(1)
+        >>> pool.add(mapdl)
+        """
+        from ansys.mapdl.core.mapdl import MapdlBase
+
+        if not isinstance(mapdl, MapdlBase):
+            raise TypeError(
+                f"Argument 'mapdl' must be a MAPDL instance, got {type(mapdl).__name__} instead"
+            )
+
+        if mapdl._exited:
+            raise ValueError("Cannot add an exited MAPDL instance to the pool")
+
+        # Runtime check for pool initialization (also helps mypy)
+        if self._n_instances is None:
+            raise RuntimeError("Pool must be initialized before calling add()")
+
+        LOG.debug("Adding existing MAPDL instance to pool")
+
+        # Add to instances list
+        self._instances.append(mapdl)
+
+        # Update the total count
+        self._n_instances += 1
+
+        # Mark instance as part of pool
+        mapdl.on_pool = True
+
+        LOG.debug(f"Successfully added instance. Pool size now: {self._n_instances}")
+
     def __len__(self):
         count = 0
         for instance in self._instances:
@@ -876,8 +1079,8 @@ class MapdlPool:
     def _spawn_mapdl(
         self,
         index: int,
-        ip: str = None,
-        port: int = None,
+        ip: Optional[str] = None,
+        port: Optional[int] = None,
         pbar: Optional[bool] = None,
         name: str = "",
         start_instance=True,
@@ -905,9 +1108,9 @@ class MapdlPool:
 
         # Waiting for the instance being fully initialized.
         # This is introduce to mitigate #2173
-        timeout = time.time() + timeout
+        timeout_end = time.time() + timeout
 
-        while timeout > time.time():
+        while timeout_end > time.time():
             if self.is_initialized(index):
                 break
             time.sleep(0.1)
@@ -919,7 +1122,7 @@ class MapdlPool:
 
         # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
-            pbar.update(1)
+            pbar.update(1)  # type: ignore[attr-defined]
 
         self._spawning_i -= 1
 

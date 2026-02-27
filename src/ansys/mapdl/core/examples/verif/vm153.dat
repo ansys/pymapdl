@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 /VERIFY,VM153
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
-/TITLE, VM153, NONAXISYM. VIBR. OF A STRETCHED CIRCULAR MEMBRANE 
+/TITLE, VM153, NONAXISYM. VIBR. OF A STRETCHED CIRCULAR MEMBRANE
 C***           VIBRATION PROBS. IN ENGR., TIMOSHENKO, PAGE 439, ARTICLE 69
 C*** USING SHELL181 MEMBRANE SHELL OPTION
 /PREP7
@@ -53,7 +53,7 @@ NSEL,S,LOC,X,3
 CM,INNER,NODE
 NSEL,ALL
 /NOPR
-CYCLIC              
+CYCLIC
 /GOPR
 D,ALL,ALL,0              ! FIX ALL DISPLACEMENTS TO APPLY PRESTRESS
 TREF,0                   ! REFERENCE TEMPERATURE

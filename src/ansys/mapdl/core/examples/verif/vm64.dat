@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ ANTYPE,STATIC                ! STATIC ANALYSIS
 ET,1,CONTA175                ! CONTACT ELEMENT
 R,1                          ! USE DEFAULTS
 KEYOPT,1,12,4                ! NO SEPARATION
-KEYOPT,1,10,1 
+KEYOPT,1,10,1
 ET,2,PLANE182,2,,3
 R,2,1                        ! THICKNESS = 1
 ET,3,TARGE169                ! TARGET SURFACE
@@ -51,7 +51,7 @@ TYPE,3
 REAL,1
 TSHAP,LINE
 E,11,12                      ! TARGET ELEMENT
-TYPE,2  
+TYPE,2
 REAL,2
 E,1,2,3,4                    ! BAR
 TREF,70
@@ -60,7 +60,7 @@ D,3,ALL,,,4
 D,1,UX,,,2,1
 OUTPR,BASIC,LAST
 FINISH
-/SOLU    
+/SOLU
 /OUT,SCRATCH
 
 SOLVE

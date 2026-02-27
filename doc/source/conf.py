@@ -14,12 +14,10 @@ import plotly.io as pio
 from plotly.io._sg_scraper import plotly_sg_scraper
 import pyvista
 from sphinx.application import Sphinx
-from sphinx.builders.latex import LaTeXBuilder
 from sphinx.util import logging
 from sphinx_gallery.sorting import FileNameSortKey
 
 pio.renderers.default = "sphinx_gallery"
-LaTeXBuilder.supported_image_types = ["image/png", "image/pdf", "image/svg+xml"]
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
@@ -132,6 +130,7 @@ intersphinx_mapping = {
 }
 
 suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
+sd_fontawesome_latex = True
 
 # Graphviz diagrams configuration
 graphviz_output_format = "png"
@@ -377,20 +376,9 @@ htmlhelp_basename = "pymapdldoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
-latex_elements: dict[Any, Any] = {
-    "preamble": r"""
-\usepackage[inkscapelatex=false]{svg}
-\usepackage{graphicx}
-    """,
-    # Enable shell escape for SVG conversion
-    "extraclassoptions": "openany",
-}
+latex_elements: dict[Any, Any] = {}
 
 latex_engine = "xelatex"
-
-# Enable shell escape for SVG package (requires inkscape or rsvg-convert installed)
-latex_use_xindy = False
-latex_additional_files = []
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,

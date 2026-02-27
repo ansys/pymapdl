@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,9 +21,10 @@
 # SOFTWARE.
 
 """Tests comparing results of krylov pymadl function with apdl macro"""
+
 import os
 
-from ansys.tools.versioning.utils import server_meets_version
+from ansys.tools.common.versioning import server_meets_version
 import numpy as np
 import pytest
 

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -54,7 +54,7 @@ OUTPR,BASIC,1
 D,1,UY,,,4
 D,1,UX,,,4,3
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 
 /post1
@@ -87,7 +87,7 @@ LABEL(4,2) = ' '
 
 *VFILL,VALUE(1,1),DATA,2.5814
 *VFILL,VALUE(1,2),DATA,FREQ1
-*VFILL,VALUE(1,3),DATA,ABS(FREQ1/2.5814 ) 
+*VFILL,VALUE(1,3),DATA,ABS(FREQ1/2.5814 )
 
 *VFILL,VALUE(2,1),DATA,8.3263
 *VFILL,VALUE(2,2),DATA,FREQ2

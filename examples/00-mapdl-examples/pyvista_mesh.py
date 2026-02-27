@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -29,6 +29,7 @@ PyVista Mesh Integration
 Run a modal analysis on a mesh generated from pyvista within MAPDL.
 
 """
+
 # sphinx_gallery_thumbnail_number = 2
 
 import os

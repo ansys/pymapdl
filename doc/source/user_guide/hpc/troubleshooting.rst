@@ -22,7 +22,7 @@ Debugging jobs
       python /home/user/pymapdl.py
 
 - Check SLURM logs for error messages and debugging information.
-- It is also good idea to print the environment variables in your bash script, using 
+- It is also good idea to print the environment variables in your bash script, using
   ``printenv`` *bash* command.
   Additionally, you can filter its output using ``grep`` *bash* command.
 
@@ -49,7 +49,7 @@ Debugging jobs
 
 Python virtual environment is not accessible
 --------------------------------------------
-If there is an error while testing the Python installation, it might mean 
+If there is an error while testing the Python installation, it might mean
 that the Python environment is not accessible to the compute nodes.
 For example, assume you have the following `test.sh` *bash* script:
 
@@ -216,7 +216,7 @@ the compute nodes:
 
 4. Install PyMAPDL:
 
-   .. code-block:: console 
+   .. code-block:: console
 
       (.venv) user@machine:~$ python -m pip install ansys-mapdl-core
 

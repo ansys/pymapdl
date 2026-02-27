@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,8 +22,10 @@
 
 import warnings
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Style:
+
+class Style(CommandsBase):
 
     def cplane(self, key: int | str = "", **kwargs):
         r"""Specifies the cutting plane for section and capped displays.
