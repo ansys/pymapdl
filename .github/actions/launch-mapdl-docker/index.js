@@ -11,6 +11,10 @@ async function run() {
     const instanceName = core.getInput('instance-name') || 'MAPDL_0';
     const DEBUG = core.getInput('debug') === 'true' || process.env.RUNNER_DEBUG === '1' || core.isDebug();
 
+    console.log('===================================');
+    console.log(`🚀 Launching MAPDL Docker Container with instance name: ${instanceName}`);
+    console.log('===================================');
+
     if (DEBUG) {
       core.isDebug(true);
       core.debug('Debug mode is enabled');
