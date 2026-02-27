@@ -58,19 +58,21 @@ async function run() {
       if (!/^\d{2}\.\d$/.test(mapdlVersion) && !/^\d{2,}\.\d{1,}$/.test(mapdlVersion)) {
         throw new Error(`Invalid mapdl-version format: ${mapdlVersion}. Expected format: XX.Y`);
       }
+
       fullImageRef = mapdlImage;
       versionNumber = mapdlVersion;
 
-    } else {
-      // User provided version number (e.g., 25.2)
-      // Validate version format (XX.Y)
+    } else if (mapdlVersion) {
+      // User provided version number but no custom image - use official image reference format
       if (!/^\d{2}\.\d$/.test(mapdlVersion) && !/^\d{2,}\.\d{1,}$/.test(mapdlVersion)) {
         throw new Error(`Invalid mapdl-version format: ${mapdlVersion}. Expected format: XX.Y`);
       }
 
-      // Default to ubuntu-cicd variant
       fullImageRef = `ghcr.io/ansys/mapdl:v${mapdlVersion}-ubuntu-cicd`;
       versionNumber = mapdlVersion;
+
+    } else {
+      throw new Error('Unexpected error determining MAPDL image reference and version number');
     }
 
     core.debug(`Determined image reference: ${fullImageRef}`);
