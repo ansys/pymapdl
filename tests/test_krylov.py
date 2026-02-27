@@ -115,6 +115,7 @@ def solu_krylov(mapdl, frq):
     mapdl.finish()
 
 
+@pytest.mark.krylov_tests
 def test_krylov_with_point_load(mapdl, cleared):
     if not server_meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL 2022 R2 or later.")
@@ -143,6 +144,7 @@ def test_krylov_with_point_load(mapdl, cleared):
     assert np.allclose(Xii_macro_pt_load, Xii_py, rtol, atol)
 
 
+@pytest.mark.krylov_tests
 @pytest.mark.parametrize(
     "residual_algorithm", ["L-inf", "Linf", "L-1", "L1", "L-2", "L2"]
 )

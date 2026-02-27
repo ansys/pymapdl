@@ -88,10 +88,12 @@ def test_logger(mapdl, cleared):
 def test_parsing_too_many_components(mapdl, cleared):
     mapdl.prep7()
 
-    for i in range(1, 100):
-        mapdl.nsel("NONE")
-        mapdl.n(i, i, 0, 0)
-        mapdl.cm(f"node_{i:03.0f}", "NODE")
+    with mapdl.non_interactive:
+        mapdl.run("*do,i,1,99")
+        mapdl.run("nsel,none")
+        mapdl.run("n,i,i,0,0")
+        mapdl.run(f"cm,NODE_%i%, node")
+        mapdl.run("*enddo")
 
     s = mapdl.components.__str__()
     assert len(mapdl.components._comp) == 99
@@ -100,7 +102,7 @@ def test_parsing_too_many_components(mapdl, cleared):
     assert "***" not in s
     assert "*****MAPDL" not in s
     for i in range(1, 100):
-        assert re.search(f"NODE_{i:03.0f}" + r"\s+: NODE", s)
+        assert re.search(f"NODE_{i}" + r"\s+: NODE", s)
 
 
 class Test_components(TestClass):
@@ -397,8 +399,10 @@ class Test_components(TestClass):
 def test_big_component(mapdl, cleared):
     mapdl.prep7()
 
-    for i in range(1000):
-        mapdl.n(i, i, 0, 0)
+    with mapdl.non_interactive:
+        mapdl.run("*do,i,1,999")
+        mapdl.run("n,i,i,0,0")
+        mapdl.run("*enddo")
 
     mapdl.allsel()
     mapdl.cm("many_nodes", "NODE")
