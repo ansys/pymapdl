@@ -76,7 +76,6 @@ TRANSPORT="${TRANSPORT:-insecure}"
 TIMEOUT="${TIMEOUT:-60}"
 
 
-
 echo -e "\n"
 echo "Pulling Docker image: ${MAPDL_IMAGE}"
 if docker pull "${MAPDL_IMAGE}" > pull.log 2>&1; then
