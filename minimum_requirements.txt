@@ -1,6 +1,6 @@
 ansys-api-mapdl==0.6.0
 ansys-tools-common>=0.3.0
 numpy==2.2.6
-platformdirs==4.5.1
+platformdirs==4.9.2
 psutil==7.2.2
-ansys-tools-common==0.4.3
+ansys-tools-common==0.4.4
