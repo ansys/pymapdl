@@ -1,34 +1,39 @@
-.. _ref_status_commands_api:
 
-******
+.. _ref_status:
+
+
 Status
-******
+======
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are for use with the STAT command.
+.. currentmodule:: ansys.mapdl.core._commands.prep7.status
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.status.Status
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.areas
-   Mapdl.bool
-   Mapdl.ceqn
-   Mapdl.couple
-   Mapdl.digit
-   Mapdl.elem
-   Mapdl.etype
-   Mapdl.febody
-   Mapdl.fecons
-   Mapdl.fefor
-   Mapdl.fesurf
-   Mapdl.geometry
-   Mapdl.keypts
-   Mapdl.line
-   Mapdl.mater
-   Mapdl.nodes
-   Mapdl.prim
-   Mapdl.rcon
-   Mapdl.selm
-   Mapdl.tble
-   Mapdl.volumes
+
+   Status.areas
+   Status.bool
+   Status.ceqn
+   Status.couple
+   Status.elem
+   Status.etype
+   Status.febody
+   Status.fecons
+   Status.fefor
+   Status.fesurf
+   Status.geometry
+   Status.keypts
+   Status.line
+   Status.mater
+   Status.meshing
+   Status.nodes
+   Status.pipe
+   Status.prim
+   Status.rcon
+   Status.selm
+   Status.tble
+   Status.volumes

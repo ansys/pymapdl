@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Database:
+
+class Database(CommandsBase):
 
     def aflist(self, **kwargs):
         r"""Lists the current data in the database.
@@ -1021,14 +1023,17 @@ class Database:
         .. warning::
 
             Section properties assigned to areas, lines and other solid model entities are not maintained
-            when the model is exported via IGESOUT. Issuing IGESOUT after generating a beam mesh with
-            orientation nodes causes the orientation keypoints specified for the line ( LATT ) to no longer
-            be associated with the line and are therefore not written out to the IGES file. The line does
-            not recognize that orientation keypoints were ever assigned to it. Therefore, IGESOUT does not
-            support (for beam meshing) any line operation relying on solid model associativity. (For
-            example, meshing the areas adjacent to the meshed line, plotting the line that contains the
-            orientation nodes, or clearing the mesh from the line that contains orientation nodes may not
-            work as expected.) For more information about beam meshing, see Meshing Your Solid Model.
+            when the model is exported via :ref:`igesout`.
+
+            Issuing :ref:`igesout` after generating a beam mesh with orientation nodes causes the
+            orientation keypoints specified for the line ( :ref:`latt` ) to no longer be associated with the
+            line and are therefore not written out to the IGES file. The line does not recognize that
+            orientation keypoints were ever assigned to it. Therefore, :ref:`igesout` does not support (for
+            beam meshing) any line operation relying on solid model associativity. (For example, meshing the
+            areas adjacent to the meshed line, plotting the line that contains the orientation nodes, or
+            clearing the mesh from the line that contains orientation nodes may not work as expected.) For
+            more information about beam meshing, see `Meshing Your Solid Model
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD7_8.html>`_.
         """
         command = f"IGESOUT,{fname},{ext},,{att}"
         return self.run(command, **kwargs)
@@ -1263,10 +1268,11 @@ class Database:
         .. warning::
 
             When merging entities in a model that has already been meshed, the order in which you issue
-            multiple NUMMRG commands is significant. To merge two adjacent meshed regions having coincident
-            nodes and keypoints, always merge nodes ( NUMMRG,NODE) beforemerging keypoints ( NUMMRG,KP);
-            otherwise, some of the nodes may lose their association with the solid model (causing other
-            operations to fail). To prevent mesh failure, avoid multiple merging and meshing operations.
+            multiple :ref:`nummrg` commands is significant. To merge two adjacent meshed regions having
+            coincident nodes and keypoints, always merge nodes ( :ref:`nummrg`,NODE) before merging
+            keypoints ( :ref:`nummrg`,KP); otherwise, some of the nodes may lose their association with the
+            solid model (causing other operations to fail). To prevent mesh failure, avoid multiple merging
+            and meshing operations.
 
         After a :ref:`nummrg`,NODE command executes, some nodes may be attached to more than one solid
         entity. As a result, subsequent attempts to transfer solid model loads to the elements may not be

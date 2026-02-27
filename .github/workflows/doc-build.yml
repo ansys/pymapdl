@@ -158,7 +158,7 @@ jobs:
       - name: "Install OS packages"
         shell: bash
         run: |
-          sudo apt update && sudo apt install zip pandoc libgl1 libglx-mesa0 xvfb texlive-latex-extra latexmk graphviz texlive-xetex texlive-fonts-extra qpdf xindy
+          sudo apt update && sudo apt install zip pandoc libgl1 libglx-mesa0 xvfb texlive-latex-extra latexmk graphviz texlive-xetex texlive-fonts-extra qpdf xindy imagemagick
 
       - name: "Test virtual framebuffer"
         shell: bash

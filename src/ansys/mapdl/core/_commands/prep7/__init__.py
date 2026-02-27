@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -40,4 +40,12 @@ from . import (
     materials,
     meshing,
     morphing,
+    nodes,
+    piping,
+    primitives,
+    real_constants,
+    special_purpose,
+    status,
+    superelements,
+    volumes,
 )

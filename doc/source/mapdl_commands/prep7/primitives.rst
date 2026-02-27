@@ -1,34 +1,38 @@
-.. _ref_primitives_commands_api:
 
-**********
+.. _ref_primitives:
+
+
 Primitives
-**********
+==========
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to create primitive shapes for modeling.
+.. currentmodule:: ansys.mapdl.core._commands.prep7.primitives
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.primitives.Primitives
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.blc4
-   Mapdl.blc5
-   Mapdl.block
-   Mapdl.con4
-   Mapdl.cone
-   Mapdl.cyl4
-   Mapdl.cyl5
-   Mapdl.cylind
-   Mapdl.pcirc
-   Mapdl.poly
-   Mapdl.pri2
-   Mapdl.prism
-   Mapdl.ptxy
-   Mapdl.rectng
-   Mapdl.rpoly
-   Mapdl.rpr4
-   Mapdl.rprism
-   Mapdl.sph4
-   Mapdl.sph5
-   Mapdl.sphere
-   Mapdl.torus
+
+   Primitives.blc4
+   Primitives.blc5
+   Primitives.block
+   Primitives.con4
+   Primitives.cone
+   Primitives.cyl4
+   Primitives.cyl5
+   Primitives.cylind
+   Primitives.pcirc
+   Primitives.poly
+   Primitives.pri2
+   Primitives.prism
+   Primitives.ptxy
+   Primitives.rectng
+   Primitives.rpoly
+   Primitives.rpr4
+   Primitives.rprism
+   Primitives.sph4
+   Primitives.sph5
+   Primitives.sphere
+   Primitives.torus
