@@ -46,6 +46,10 @@ RUN if [ "$USE_LOCAL_REPO" = "false" ]; then \
 ENV PATH="/root/.local/bin:$HOME/.local/bin:$PATH"
 RUN uv --version
 
+# Pre-install Python in container-local directory to avoid re-downloads
+# This creates a Python installation that persists in the container layer
+RUN uv python install ${PYTHON_VERSION}
+
 # Configuration
 # -------------
 # Variable for running as if it were on CICD while testing

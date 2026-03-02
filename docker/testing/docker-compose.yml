@@ -115,6 +115,8 @@ services:
       - PYMAPDL_IP=mapdl # Use the MAPDL service name
       # If empty, it will use the default 'main' branch
       - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-main}
+      # Explicitly use copy mode to avoid hardlink failures across filesystems
+      - UV_LINK_MODE=copy
 
 
   pymapdl-host:
@@ -136,6 +138,10 @@ services:
       - PYMAPDL_IP=mapdl # Use the MAPDL service name
       # If empty, it will use the default 'main' branch
       - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-main}
+      # Explicitly use copy mode to avoid hardlink failures across filesystems
+      - UV_LINK_MODE=copy
+      # Enable pytest timing for debugging startup delays
+      - PYTEST_DEBUG_TIMING=${PYTEST_DEBUG_TIMING:-1}
     working_dir: /workspace/pymapdl
     volumes:
       - ../../../:/workspace
@@ -169,6 +175,8 @@ services:
       - OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
       - PYMAPDL_GRPC_TRANSPORT=insecure
+      # Explicitly use copy mode to avoid hardlink failures across filesystems
+      - UV_LINK_MODE=copy
     volumes:
       - ../../:/home/mapdl/jobs
 
@@ -202,6 +210,8 @@ services:
       - OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
       - PYMAPDL_GRPC_TRANSPORT=insecure
+      # Explicitly use copy mode to avoid hardlink failures across filesystems
+      - UV_LINK_MODE=copy
 
 networks:
   pymapdl-net:
