@@ -70,10 +70,6 @@ echo "Starting pytest at: $(date +%H:%M:%S)"
 # to the mounted volume.
 uv pip install --python "${VENV_PATH}" -e ".[tests]"
 
-# Removed --no-cache flag to enable package caching for better performance
-# Disable problematic plugins that cause I/O overhead:
-# -p no:cacheprovider  = disable pytest cache (saves ~10-20s on mounted volumes)
-# --basetemp           = redirect all pytest tmp_path/tmpdir writes to /tmp
 # shellcheck disable=SC2086
 time xvfb-run -a "${VENV_PATH}/bin/pytest" tests \
   -p no:cacheprovider \
@@ -81,4 +77,6 @@ time xvfb-run -a "${VENV_PATH}/bin/pytest" tests \
   -vv \
   ${PYTEST_ARGUMENTS}
 
+PYTEST_EXIT=$?
 echo "Pytest finished at: $(date +%H:%M:%S)"
+exit $PYTEST_EXIT
