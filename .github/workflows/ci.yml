@@ -394,6 +394,15 @@ jobs:
           ANSYSLMD_LICENSE_FILE: ""
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
         run: |
+          echo "::group:: MAPDL-remote logs"
+          docker compose logs mapdl-remote
+          echo "::endgroup::"
+
+          echo "::group:: Python host logs"
+          docker compose logs pymapdl-host
+          echo "::endgroup::"
+
+          echo "Stopping all services..."
           docker compose --profile remote-host down -v
 
   docker-compose-test-local:
@@ -437,6 +446,11 @@ jobs:
           ANSYSLMD_LICENSE_FILE: ""
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
         run: |
+          echo "::group:: MAPDL-remote logs"
+          docker compose logs mapdl-local-host
+          echo "::endgroup::"
+
+          echo "Stopping all services..."
           docker compose --profile local-host down -v
 
   package:
