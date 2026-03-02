@@ -64,23 +64,20 @@ Reviewer **blocks merge** if any quality condition fails.
 - [ ] PR description is clear and complete
 - [ ] Code review comments addressed
 
-## Review Commands
+## Key Commands
 
 ```sh
-# Run all quality checks
+# Complete review checklist
+uv run pre-commit run --all-files                           # Code quality
+uv run pytest --cov=src/ansys/mapdl/core --cov-report=term  # Tests + coverage
+cd doc && make clean && make html                           # Documentation
+uv run bandit -c pyproject.toml -r src/                     # Security
+uv run mypy src/ --config-file=pyproject.toml               # Type checking
+
+# Review PR from command line
+gh pr checkout <pr-number>
 uv run pre-commit run --all-files
-
-# Run tests with coverage
-uv run pytest --cov=src/ansys/mapdl/core --cov-report=term --cov-report=html
-
-# Build documentation
-cd doc && make clean && make html
-
-# Security checks
-uv run bandit -c pyproject.toml -r src/
-
-# Check for common issues
-uv run mypy src/ --follow-imports=silent --config-file=pyproject.toml
+uv run pytest
 ```
 
 ## GitHub PR Integration

@@ -86,23 +86,26 @@ Minimum **90% coverage**
 - `pyproject.toml` - pytest configuration under `[tool.pytest.ini_options]`
 - `codecov.yml` - Coverage requirements and exclusions
 
-## Test Commands
+## Key Commands
 
 ```sh
-# Run all tests with minimal dependencies (no MAPDL instance)
+# Run tests without MAPDL instance (recommended for development)
 SET PYMAPDL_START_INSTANCE=False
 SET TESTING_MINIMAL=YES
 uv run pytest
 
 # Run with coverage report
-uv run pytest --cov=src/ansys/mapdl/core --cov-report=html
+uv run pytest --cov=src/ansys/mapdl/core --cov-report=html --cov-report=term
 
-# Run specific test modes
-uv run pytest -m "not local"  # Skip local tests
-uv run pytest tests/test_specific.py::test_function -v
+# Run specific tests
+uv run pytest tests/test_specific.py -v
+uv run pytest tests/test_file.py::test_function -v
 
 # Run without random order for debugging
-uv run pytest -p no:randomly tests/
+uv run pytest -p no:randomly --maxfail=100 tests/
+
+# Run only fast tests (skip integration)
+uv run pytest -m "not slow"
 ```
 
 ## Best Practices

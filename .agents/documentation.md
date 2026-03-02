@@ -54,6 +54,22 @@ Expert in technical documentation, style guides, and documentation quality assur
 - `.pre-commit-config.yaml` - Includes numpydoc-validation, codespell, blacken-docs
 - `pyproject.toml` - Contains numpydoc validation rules under `[tool.numpydoc_validation]`
 
+## Key Commands
+
+```sh
+# Documentation build
+cd doc && make html                    # Build HTML docs
+cd doc && make clean && make html      # Clean rebuild
+
+# Style and spelling checks
+vale doc/source/                       # Check style
+uv run codespell doc/ src/             # Check spelling
+uv run pre-commit run --files doc/**/* # Run doc-related hooks
+
+# Add words to dictionary
+echo "technical_term" >> doc\styles\config\vocabularies\ANSYS\accept.txt
+```
+
 ## Quality Checklist
 
 - Are parameters documented?

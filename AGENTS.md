@@ -60,6 +60,62 @@ And two connection types:
 | `PYMAPDL_START_INSTANCE` | `False` → connect to an existing instance instead of launching one |
 | `PYMAPDL_PORT` | Port of the MAPDL gRPC server (default `50052`) |
 | `PYMAPDL_IP` | IP of the MAPDL gRPC server (default `127.0.0.1`) |
+| `ON_LOCAL` | Force `local` mode detection (`true`/`false`) |
+| `TESTING_MINIMAL` | `YES` → skip tests requiring heavy dependencies or live MAPDL |
+| `ON_CI` | Marks the run as CI environment; some tests skip on CI |
+| `PYMAPDL_DEBUG_TESTING` | `true` → enable DEBUG logging + write `pymapdl.log` |
+
+## Testing
+
+Test configurations by connectivity: `local`, `remote`, `local-min` (minimal dependencies), `local-console` (console connection type).
+
+### Running tests without a live MAPDL instance
+
+Most tests require a running MAPDL process. To run only unit tests that don't need one:
+
+```sh
+# Linux/macOS
+export PYMAPDL_START_INSTANCE=False
+export TESTING_MINIMAL=YES
+
+# Windows
+SET PYMAPDL_START_INSTANCE=False
+SET TESTING_MINIMAL=YES
+```
+
+Then run pytest:
+```sh
+uv run pytest
+```
+
+Pytest is configured with `--maxfail=2` in `pyproject.toml`. Override locally:
+```sh
+uv run pytest -p no:randomly --maxfail=100 tests/test_foo.py
+```
+
+### Conditional test skipping
+
+Use the `requires()` helper from `tests/conftest.py` instead of `pytest.mark.skipif`:
+
+```python
+from conftest import requires
+
+
+@requires("local")
+def test_something_local(mapdl): ...
+
+
+@requires("remote")
+def test_something_remote(mapdl): ...
+```
+
+Accepted strings: `"local"`, `"remote"`, `"grpc"`, `"dpf"`, `"linux"`, `"nolinux"`, `"windows"`, `"nowindows"`, `"xserver"`, `"cicd"`, `"nocicd"`, `"console"`, `"gui"`, or any importable package name.
+
+## Developing
+
+### Mapdl class
+
+You cannot change files in `src\ansys\mapdl\core\_commands`. To modify command behavior, overwrite in `_MapdlCommandExtended` class in `src\ansys\mapdl\core\mapdl_extended.py`.
 
 ## Pre-commit hooks
 
@@ -87,3 +143,7 @@ uv lock
 ```
 
 Do **not** commit `uv.lock` changes as side-effects of unrelated work.
+
+## How to Use These Agents
+
+See [.github/HOW_TO_USE_AGENTS.md](.github/HOW_TO_USE_AGENTS.md) for detailed instructions on invoking agents in different IDEs (VS Code, Cursor, JetBrains, etc.).

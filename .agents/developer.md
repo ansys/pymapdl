@@ -52,6 +52,23 @@ Expert Python developer specialized in PyMAPDL features, MAPDL integration, and 
 - `pyproject.toml` - Project configuration and dependencies
 - `.pre-commit-config.yaml` - Code quality checks
 
+## Key Commands
+
+```sh
+# Setup and validation
+uv run pre-commit install              # Setup hooks (once)
+uv run pre-commit run --all-files      # Run all checks
+
+# Code quality
+uv run black src/                      # Format code
+uv run isort src/                      # Sort imports
+uv run flake8 src/                     # Lint code
+uv run mypy src/ --config-file=pyproject.toml  # Type checking
+
+# Security
+uv run bandit -c pyproject.toml -r src/  # Security scan
+```
+
 ## Testing Commands
 
 ```sh
