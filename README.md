@@ -75,6 +75,17 @@ You can contribute to PyMAPDL by developing new features, fixing bugs, improving
 fixing typos, writing examples, etc.
 To learn how to contribute to PyMAPDL, visit [Contributing section](https://mapdl.docs.pyansys.com/version/stable/getting_started/contribution.html).
 
+### AI-Assisted Development with Specialized Agents
+
+PyMAPDL includes specialized AI agent configurations to help with development, testing, documentation, and code review. These agents work with any LLM-enabled IDE (GitHub Copilot, Cursor, JetBrains AI, etc.):
+
+- **Documentation Specialist**: Reviews docs, validates docstrings, checks spelling and style
+- **PyMAPDL Developer**: Writes features, fixes bugs, ensures code quality
+- **Test Engineer**: Maintains test coverage, implements mocking strategies
+- **Code Reviewer**: Comprehensive PR reviews ensuring quality standards
+
+See [AGENTS.md](AGENTS.md) for detailed agent specifications and [.github/AGENTS_GUIDE.md](.github/AGENTS_GUIDE.md) for usage examples.
+
 
 ## Project transition -  legacy support
 
