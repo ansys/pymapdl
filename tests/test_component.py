@@ -92,7 +92,7 @@ def test_parsing_too_many_components(mapdl, cleared):
         mapdl.run("*do,i,1,99")
         mapdl.run("nsel,none")
         mapdl.run("n,i,i,0,0")
-        mapdl.run(f"cm,NODE_%i%, node")
+        mapdl.run("cm,NODE_%i%, node")
         mapdl.run("*enddo")
 
     s = mapdl.components.__str__()
