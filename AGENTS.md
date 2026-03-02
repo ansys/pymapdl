@@ -202,10 +202,10 @@ uv run pytest tests/test_specific.py -v
      ```
 4. Configure test environment variables appropriately:
    - `PYMAPDL_START_INSTANCE=False` - Connect to existing instance
-   - `TESTING_MINIMAL=YES` - Skip tests requiring heavy dependencies or live MAPDL
+   - `TESTING_MINIMAL=YES` - Used when testing console or minimal requirements.
    - `PYMAPDL_PORT`, `PYMAPDL_IP` - Connection details
    - `ON_LOCAL`, `ON_CI` - Environment detection
-   - `PYMAPDL_DEBUG_TESTING=true` - Enable debug logging
+   - `PYMAPDL_DEBUG_TESTING=true` - Enable debug when testing.
 5. Write comprehensive tests covering:
    - Happy path scenarios
    - Edge cases and boundary conditions
