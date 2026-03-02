@@ -5,6 +5,10 @@ echo "Running tests in PyMAPDL Testing environment..."
 echo "==============================================="
 echo ""
 
+# Mark all directories as safe for git to handle mounted volumes owned by a
+# different host user (common when running the container as root).
+git config --global --add safe.directory '*'
+
 # Use container-local venv to avoid Docker volume mount performance issues
 VENV_PATH="/tmp/.venv_container"
 
@@ -20,9 +24,6 @@ if [[ "${USE_LOCAL_REPO}" == "true" ]]; then
     fi
     # shellcheck disable=SC1091
     source "${VENV_PATH}/bin/activate"
-
-    # Adding
-    git config --global --add safe.directory .
 
 else
     echo "Using cloned PyMAPDL repository for testing."
