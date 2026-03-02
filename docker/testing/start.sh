@@ -21,6 +21,9 @@ if [[ "${USE_LOCAL_REPO}" == "true" ]]; then
     # shellcheck disable=SC1091
     source "${VENV_PATH}/bin/activate"
 
+    # Adding
+    git config --global --add safe.directory .
+
 else
     echo "Using cloned PyMAPDL repository for testing."
     uv venv .venv

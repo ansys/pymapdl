@@ -143,6 +143,7 @@ services:
       # Enable pytest timing for debugging startup delays
       - PYTEST_DEBUG_TIMING=${PYTEST_DEBUG_TIMING:-1}
     working_dir: /workspace/pymapdl
+    user: root
     volumes:
       - ../../../:/workspace
 
