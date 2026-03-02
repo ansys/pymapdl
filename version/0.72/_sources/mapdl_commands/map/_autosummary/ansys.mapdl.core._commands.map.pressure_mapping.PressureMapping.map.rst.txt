@@ -1,0 +1,6 @@
+﻿map
+===
+
+.. currentmodule:: ansys.mapdl.core._commands.map.pressure_mapping
+
+.. automethod:: PressureMapping.map

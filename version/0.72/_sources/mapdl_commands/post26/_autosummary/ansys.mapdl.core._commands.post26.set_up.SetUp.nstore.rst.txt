@@ -1,0 +1,6 @@
+﻿nstore
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.post26.set_up
+
+.. automethod:: SetUp.nstore

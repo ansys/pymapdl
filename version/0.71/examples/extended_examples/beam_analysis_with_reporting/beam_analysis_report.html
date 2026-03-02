@@ -1,0 +1,1664 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>I-Beam Analysis with Automated Report Generation &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=9e79609d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=9e79609d" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=aadf6d2c"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/extended_examples/beam_analysis_with_reporting/beam_analysis_report';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.71';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="PyMAPDL Developer Portal articles" href="../../devportal.html" />
+    <link rel="prev" title="Create training data for a 3D static reduced order model (ROM)" href="../static_rom/static_rom_data_generation.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.71.3" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/examples/extended_examples/beam_analysis_with_reporting/beam_analysis_report.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../mapdl_commands/index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="../../index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    <div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(
+      (text) => (document.getElementById("announcement_msg").innerHTML = text),
+    )
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../mapdl_commands/index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../gallery_examples/00-mapdl-examples/index.html">Full examples using PyMAPDL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gallery_examples/01-geometry/index.html">Geometry examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gallery_examples/02-tips-n-tricks/index.html">Miscellaneous examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gallery_examples/03-general-fea/index.html">Academic finite element examples</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Extended examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference external" href="http://cartpole.mapdl.docs.pyansys.com/ml-rl-notebook.html">Cart-Pole Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ex_01-gmsh_example/ex_01-gmsh_example.html">Gmsh example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Krylov/krylov_example.html">Harmonic analysis using the frequency-sweep Krylov method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dash/dash_example.html">Use Dash to build a PyMAPDL web app</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../executable/executable.html">Create your own Python command-line app</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gui/executable.html">Create a GUI app in Python with PySide6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../hpc/hpc_ml_ga.html">Genetic algorithms and PyMAPDL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sfem/stochastic_fem.html">Stochastic finite element method with PyMAPDL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../static_rom/static_rom_data_generation.html">Create training data for a 3D static reduced order model (ROM)</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">I-Beam Analysis with Automated Report Generation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devportal.html">PyMAPDL Developer Portal articles</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://examples.mapdl.docs.pyansys.com/verif-manual/index.html">Verification Manual</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html">Technology Showcases</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item"> 
+<div class="tocsection editthispage">
+  <a href="https://github.com/ansys/pymapdl/edit/main/doc/source/examples/extended_examples/beam_analysis_with_reporting/beam_analysis_report.rst">
+    <i class="fa-solid fa-pencil"></i>
+       Edit
+    on GitHub  
+  </a>
+</div>
+
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">Examples</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../index.html" class="nav-link">Extended examples</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">I-Beam Analysis with Automated Report Generation</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="i-beam-analysis-with-automated-report-generation">
+<span id="beam-analysis-report-example"></span><h1>I-Beam Analysis with Automated Report Generation<a class="headerlink" href="#i-beam-analysis-with-automated-report-generation" title="Link to this heading">#</a></h1>
+<p>This comprehensive example demonstrates how to perform a complete structural analysis
+of an I-beam using PyMAPDL and automatically generate detailed engineering reports.
+The example showcases advanced PyMAPDL capabilities including parameterized modeling,
+result extraction, and automated documentation generation.</p>
+<p><strong>What this example demonstrates:</strong></p>
+<ul class="simple">
+<li><p>Parameterized I-beam geometry creation</p></li>
+<li><p>Material property definition and assignment</p></li>
+<li><p>Fully constrained beam at both ends</p></li>
+<li><p>Distributed load applied using nodal forces</p></li>
+<li><p>Comprehensive result extraction and postprocessing</p></li>
+<li><p>Automated report generation in Markdown and Word formats</p></li>
+<li><p>Analytical verification of finite element results</p></li>
+</ul>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<p>Engineering analysis often requires not only obtaining results but also documenting
+the analysis process, assumptions, and findings in a professional report format.
+This example shows how PyMAPDL can be used to create a complete analysis workflow
+that includes automated report generation.</p>
+<p>The analysis focuses on a fully constrained I-beam subjected to a uniformly distributed
+load, a fundamental structural engineering problem. The results are verified against
+analytical solutions and presented in professional report formats.</p>
+</section>
+<section id="problem-definition">
+<h2>Problem Definition<a class="headerlink" href="#problem-definition" title="Link to this heading">#</a></h2>
+<p>Analyze a I-beam with the following characteristics:</p>
+<p><strong>Geometry:</strong></p>
+<ul class="simple">
+<li><p>Length: 5.0 meters</p></li>
+<li><p>I-section with typical structural steel proportions</p></li>
+<li><p>Fully constrained at both ends</p></li>
+</ul>
+<p><strong>Loading:</strong></p>
+<ul class="simple">
+<li><p>Uniformly distributed load of 50 kN/m (downward)</p></li>
+<li><p>Static analysis (no dynamic effects)</p></li>
+</ul>
+<p><strong>Material:</strong></p>
+<ul class="simple">
+<li><p>Structural steel (S355 grade)</p></li>
+<li><p>Linear elastic behavior assumed</p></li>
+</ul>
+<p><strong>Objectives:</strong></p>
+<ul class="simple">
+<li><p>Determine maximum displacement and location</p></li>
+<li><p>Calculate maximum bending stress</p></li>
+<li><p>Verify safety against yielding</p></li>
+<li><p>Generate comprehensive documentation</p></li>
+</ul>
+</section>
+<section id="model-setup-and-parametrization">
+<h2>Model Setup and Parametrization<a class="headerlink" href="#model-setup-and-parametrization" title="Link to this heading">#</a></h2>
+<p>The example begins by defining all analysis parameters in dictionaries for easy
+modification and reuse:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># I-beam geometric parameters (all dimensions in mm)</span>
+<span class="n">beam_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="mf">5000.0</span><span class="p">,</span>  <span class="c1"># Total beam length (5 meters)</span>
+    <span class="s2">&quot;flange_width&quot;</span><span class="p">:</span> <span class="mf">200.0</span><span class="p">,</span>  <span class="c1"># Width of top and bottom flanges</span>
+    <span class="s2">&quot;web_height&quot;</span><span class="p">:</span> <span class="mf">400.0</span><span class="p">,</span>  <span class="c1"># Height of the web (total beam height)</span>
+    <span class="s2">&quot;flange_thickness&quot;</span><span class="p">:</span> <span class="mf">20.0</span><span class="p">,</span>  <span class="c1"># Thickness of flanges</span>
+    <span class="s2">&quot;web_thickness&quot;</span><span class="p">:</span> <span class="mf">12.0</span><span class="p">,</span>  <span class="c1"># Thickness of web</span>
+<span class="p">}</span>
+<span class="n">beam_params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">beam_params</span><span class="p">})</span>
+
+<span class="c1"># Material properties for structural steel (S355)</span>
+<span class="n">material_props</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;elastic_modulus&quot;</span><span class="p">:</span> <span class="mf">200000.0</span><span class="p">,</span>  <span class="c1"># Young&#39;s modulus in MPa (200 GPa = 200,000 MPa)</span>
+    <span class="s2">&quot;poisson_ratio&quot;</span><span class="p">:</span> <span class="mf">0.30</span><span class="p">,</span>  <span class="c1"># Poisson&#39;s ratio</span>
+    <span class="s2">&quot;density&quot;</span><span class="p">:</span> <span class="mf">7850e-6</span><span class="p">,</span>  <span class="c1"># Density in kg/mm³ (7850 kg/m³)</span>
+    <span class="s2">&quot;yield_strength&quot;</span><span class="p">:</span> <span class="mf">355.0</span><span class="p">,</span>  <span class="c1"># Yield strength in MPa</span>
+<span class="p">}</span>
+<span class="c1"># Update with any additional parameters</span>
+<span class="n">material_props</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">material_props</span><span class="p">})</span>
+
+<span class="c1"># Loading and boundary conditions</span>
+<span class="n">load_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;distributed_load&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">50.0</span><span class="p">,</span>  <span class="c1"># Distributed load in N/mm (50 kN/m downward)</span>
+    <span class="s2">&quot;safety_factor&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span>  <span class="c1"># Design safety factor</span>
+<span class="p">}</span>
+<span class="n">load_params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">load_params</span><span class="p">})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Beam Length: </span><span class="si">{</span><span class="n">beam_params</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> mm&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;I-Section: </span><span class="si">{</span><span class="n">beam_params</span><span class="p">[</span><span class="s1">&#39;flange_width&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">beam_params</span><span class="p">[</span><span class="s1">&#39;web_height&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">beam_params</span><span class="p">[</span><span class="s1">&#39;web_thickness&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Material: Steel E = </span><span class="si">{</span><span class="n">material_props</span><span class="p">[</span><span class="s1">&#39;elastic_modulus&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> MPa&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Load: </span><span class="si">{</span><span class="n">load_params</span><span class="p">[</span><span class="s1">&#39;distributed_load&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> N/mm&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This parameterized approach allows for:</p>
+<ul class="simple">
+<li><p>Easy modification of beam dimensions</p></li>
+<li><p>Material property changes</p></li>
+<li><p>Load case variations</p></li>
+<li><p>Design optimization studies</p></li>
+</ul>
+</section>
+<section id="preprocessing-geometry-and-meshing">
+<h2>Preprocessing - Geometry and Meshing<a class="headerlink" href="#preprocessing-geometry-and-meshing" title="Link to this heading">#</a></h2>
+<section id="element-type-selection">
+<h3>Element Type Selection<a class="headerlink" href="#element-type-selection" title="Link to this heading">#</a></h3>
+<p>The analysis uses BEAM188 elements, which are:</p>
+<ul class="simple">
+<li><p>3D linear finite strain beam elements</p></li>
+<li><p>Suitable for thin to moderately thick beam structures</p></li>
+<li><p>Capable of handling large deflection effects (if needed)</p></li>
+<li><p>Provide comprehensive stress output</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define element type - BEAM188 (3D linear finite strain beam)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">et</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;BEAM188&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">keyopt</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Enable transverse shear stress output</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">keyopt</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Enable stress output at intermediate stations</span>
+</pre></div>
+</div>
+</section>
+<section id="cross-section-definition">
+<h3>Cross-Section Definition<a class="headerlink" href="#cross-section-definition" title="Link to this heading">#</a></h3>
+<p>The I-beam cross-section is defined using PyMAPDL’s section commands:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">SECDATA</span></code> command defines the I-beam geometry where:</p>
+<ul class="simple">
+<li><p>First two parameters: top and bottom flange widths</p></li>
+<li><p>Third parameter: total beam height</p></li>
+<li><p>Fourth and fifth parameters: flange thicknesses</p></li>
+<li><p>Sixth parameter: web thickness</p></li>
+</ul>
+</section>
+<section id="node-and-element-generation">
+<h3>Node and Element Generation<a class="headerlink" href="#node-and-element-generation" title="Link to this heading">#</a></h3>
+<p>Nodes are created along the beam length with uniform spacing:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create nodes along the beam length</span>
+<span class="n">num_elements</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># Number of elements for discretization</span>
+<span class="n">beam_params</span><span class="p">[</span><span class="s2">&quot;num_elements&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_elements</span>  <span class="c1"># Store for report</span>
+
+<span class="n">node_spacing</span> <span class="o">=</span> <span class="n">beam_params</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">num_elements</span>
+
+<span class="c1"># Generate nodes from 0 to beam length</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_elements</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">x_coord</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">node_spacing</span>
+    <span class="n">mapdl</span><span class="o">.</span><span class="n">n</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x_coord</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Create beam elements connecting consecutive nodes</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_elements</span><span class="p">):</span>
+    <span class="n">mapdl</span><span class="o">.</span><span class="n">e</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The mesh uses 20 elements along the beam length, providing sufficient resolution
+for accurate results while maintaining computational efficiency.</p>
+</section>
+</section>
+<section id="boundary-conditions-and-loading">
+<h2>Boundary Conditions and Loading<a class="headerlink" href="#boundary-conditions-and-loading" title="Link to this heading">#</a></h2>
+<section id="fully-constrained-end-conditions">
+<h3>Fully Constrained End Conditions<a class="headerlink" href="#fully-constrained-end-conditions" title="Link to this heading">#</a></h3>
+<p>Fully clamped boundary conditions on the ends are implemented as:</p>
+</section>
+<section id="distributed-load-application">
+<h3>Distributed Load Application<a class="headerlink" href="#distributed-load-application" title="Link to this heading">#</a></h3>
+<p>The uniformly distributed load is applied as equivalent nodal forces:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Apply distributed load as nodal forces</span>
+<span class="c1"># Convert distributed load to equivalent nodal forces using trapezoidal rule</span>
+<span class="c1"># For uniformly distributed load: interior nodes get w*L/n, end nodes get w*L/(2*n)</span>
+
+<span class="n">nodal_force</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">load_params</span><span class="p">[</span><span class="s2">&quot;distributed_load&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">node_spacing</span>
+<span class="p">)</span>  <span class="c1"># Force per interior node</span>
+<span class="n">end_nodal_force</span> <span class="o">=</span> <span class="n">nodal_force</span> <span class="o">/</span> <span class="mi">2</span>  <span class="c1"># Force per end node</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Applying distributed load as nodal forces:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;End nodes (1, </span><span class="si">{</span><span class="n">last_node</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">end_nodal_force</span><span class="si">}</span><span class="s2"> N each&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Interior nodes (2 to </span><span class="si">{</span><span class="n">num_elements</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">nodal_force</span><span class="si">}</span><span class="s2"> N each&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Node spacing: </span><span class="si">{</span><span class="n">node_spacing</span><span class="si">}</span><span class="s2"> mm&quot;</span><span class="p">)</span>
+
+<span class="c1"># Apply forces to all nodes</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;FY&quot;</span><span class="p">,</span> <span class="n">end_nodal_force</span><span class="p">)</span>  <span class="c1"># End node gets half force</span>
+<span class="n">force_sum</span> <span class="o">=</span> <span class="n">end_nodal_force</span>
+<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_elements</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>  <span class="c1"># Interior nodes</span>
+    <span class="n">mapdl</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">&quot;FY&quot;</span><span class="p">,</span> <span class="n">nodal_force</span><span class="p">)</span>
+    <span class="n">force_sum</span> <span class="o">+=</span> <span class="n">nodal_force</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">last_node</span><span class="p">,</span> <span class="s2">&quot;FY&quot;</span><span class="p">,</span> <span class="n">end_nodal_force</span><span class="p">)</span>  <span class="c1"># End node gets half force</span>
+</pre></div>
+</div>
+<p>This approach:</p>
+<ul class="simple">
+<li><p>Converts the continuous load to discrete nodal forces</p></li>
+<li><p>Maintains load equilibrium</p></li>
+<li><p>Provides accurate representation of the distributed loading</p></li>
+</ul>
+<p>Alternatively, the load can be applied using the <code class="docutils literal notranslate"><span class="pre">SFBEAM</span></code> command for surface loads on BEAM and PIPE elements.</p>
+</section>
+</section>
+<section id="solution-process">
+<h2>Solution Process<a class="headerlink" href="#solution-process" title="Link to this heading">#</a></h2>
+<p>The static structural solution is configured and executed:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enter solution processor and solve</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">-- Solving MAPDL model --&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">solution</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">antype</span><span class="p">(</span><span class="s2">&quot;STATIC&quot;</span><span class="p">)</span>  <span class="c1"># Static structural analysis</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">nlgeom</span><span class="p">(</span><span class="s2">&quot;OFF&quot;</span><span class="p">)</span>  <span class="c1"># Linear analysis (small deflection)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Solving...&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Solution completed successfully&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The solution uses:</p>
+<ul class="simple">
+<li><p>Static analysis type (no time-dependent effects)</p></li>
+<li><p>Linear analysis (small deflection theory)</p></li>
+<li><p>Direct solver for optimal accuracy</p></li>
+</ul>
+</section>
+<section id="post-processing-and-result-extraction">
+<h2>Post-Processing and Result Extraction<a class="headerlink" href="#post-processing-and-result-extraction" title="Link to this heading">#</a></h2>
+<section id="displacement-results">
+<h3>Displacement Results<a class="headerlink" href="#displacement-results" title="Link to this heading">#</a></h3>
+<p>The maximum displacement is extracted using the <cite>post_processing</cite> module:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get nodal displacements</span>
+<span class="c1"># Extract displacement results - Y direction only</span>
+<span class="n">displacements</span> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">post_processing</span><span class="o">.</span><span class="n">nodal_displacement</span><span class="p">(</span><span class="s2">&quot;Y&quot;</span><span class="p">)</span>
+<span class="n">max_displacement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">displacements</span><span class="p">)</span>  <span class="c1"># Minimum (most negative) Y displacement</span>
+<span class="n">max_displacement_location</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">displacements</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="moment-results">
+<h3>Moment Results<a class="headerlink" href="#moment-results" title="Link to this heading">#</a></h3>
+<p>The moment at both nodes are extracted using <code class="docutils literal notranslate"><span class="pre">ETABLE</span></code> command, with <code class="docutils literal notranslate"><span class="pre">SMISC</span></code> items:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get moment values</span>
+<span class="c1"># Create element tables</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">etable</span><span class="p">(</span><span class="s2">&quot;MOMY_I&quot;</span><span class="p">,</span> <span class="s2">&quot;SMISC&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># Moment Y at node I</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">etable</span><span class="p">(</span><span class="s2">&quot;MOMY_J&quot;</span><span class="p">,</span> <span class="s2">&quot;SMISC&quot;</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>  <span class="c1"># Moment Y at node J</span>
+
+<span class="n">max_moment_i</span> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">get_array</span><span class="p">(</span><span class="s2">&quot;ELEM&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;ETAB&quot;</span><span class="p">,</span> <span class="s2">&quot;MOMY_I&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="n">max_moment_j</span> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">get_array</span><span class="p">(</span><span class="s2">&quot;ELEM&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;ETAB&quot;</span><span class="p">,</span> <span class="s2">&quot;MOMY_J&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="n">max_moment_fem</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_moment_i</span><span class="p">,</span> <span class="n">max_moment_j</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="bending-stress-results">
+<h3>Bending Stress Results<a class="headerlink" href="#bending-stress-results" title="Link to this heading">#</a></h3>
+<p>Again <code class="docutils literal notranslate"><span class="pre">ETABLE</span></code> is used to retrieve MAPDL values:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get bending stress values</span>
+<span class="c1"># Bending stress on the element +Y side of the beam</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">etable</span><span class="p">(</span><span class="s2">&quot;SByT&quot;</span><span class="p">,</span> <span class="s2">&quot;SMISC&quot;</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+<span class="c1"># Bending stress on the element -Y side of the beam</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">etable</span><span class="p">(</span><span class="s2">&quot;SByB&quot;</span><span class="p">,</span> <span class="s2">&quot;SMISC&quot;</span><span class="p">,</span> <span class="mi">33</span><span class="p">)</span>
+
+<span class="n">bending_stress_top</span> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">get_array</span><span class="p">(</span><span class="s2">&quot;ELEM&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;ETAB&quot;</span><span class="p">,</span> <span class="s2">&quot;SByT&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="n">bending_stress_bottom</span> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">get_array</span><span class="p">(</span><span class="s2">&quot;ELEM&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;ETAB&quot;</span><span class="p">,</span> <span class="s2">&quot;SByB&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="n">max_stress_fem</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">bending_stress_top</span><span class="p">,</span> <span class="n">bending_stress_bottom</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="bending-strain-results">
+<h3>Bending Strain Results<a class="headerlink" href="#bending-strain-results" title="Link to this heading">#</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get bending strain values</span>
+<span class="c1"># Bending strain on the element +Y side of the beam</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">etable</span><span class="p">(</span><span class="s2">&quot;EPELByT&quot;</span><span class="p">,</span> <span class="s2">&quot;SMISC&quot;</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
+<span class="c1"># Bending strain on the element -Y side of the beam</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">etable</span><span class="p">(</span><span class="s2">&quot;EPELByB&quot;</span><span class="p">,</span> <span class="s2">&quot;SMISC&quot;</span><span class="p">,</span> <span class="mi">43</span><span class="p">)</span>
+
+<span class="n">bending_strain_top</span> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">get_array</span><span class="p">(</span><span class="s2">&quot;ELEM&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;ETAB&quot;</span><span class="p">,</span> <span class="s2">&quot;EPELByT&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="n">bending_strain_bottom</span> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">get_array</span><span class="p">(</span><span class="s2">&quot;ELEM&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;ETAB&quot;</span><span class="p">,</span> <span class="s2">&quot;EPELByB&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="n">max_strain_fem</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">bending_strain_top</span><span class="p">,</span> <span class="n">bending_strain_bottom</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="report-generation-features">
+<h2>Report Generation Features<a class="headerlink" href="#report-generation-features" title="Link to this heading">#</a></h2>
+<section id="markdown-report">
+<h3>Markdown Report<a class="headerlink" href="#markdown-report" title="Link to this heading">#</a></h3>
+<p>The Markdown report includes:</p>
+<ul class="simple">
+<li><p>Executive summary with key results</p></li>
+<li><p>Detailed model description with parameter tables</p></li>
+<li><p>Comprehensive results presentation</p></li>
+<li><p>Analytical verification section</p></li>
+<li><p>Professional formatting with tables and equations</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_markdown_report</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a comprehensive Markdown report of the analysis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : dict</span>
+<span class="sd">        Analysis data dictionary</span>
+<span class="sd">    output_dir : Path</span>
+<span class="sd">        Directory to save the report</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        Path to generated Markdown file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+
+    <span class="n">markdown_content</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;# </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span>
+
+<span class="s2">- **Generated:** </span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span>
+<span class="s2">- **Analysis Type:** Static Structural Analysis</span>
+<span class="s2">- **Software:** PyMAPDL (Ansys MAPDL)</span>
+
+<span class="s2">## Executive Summary</span>
+
+<span class="s2">This report presents the results of a static structural analysis of a fully</span>
+<span class="s2">constrained I-beam at both ends, subjected to a uniformly distributed load.</span>
+<span class="s2">The analysis was performed using finite element methods via PyMAPDL.</span>
+
+<span class="s2">### Key Results</span>
+
+<span class="s2">- **Maximum Displacement:** </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;max_displacement&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> mm</span>
+<span class="s2">- **Maximum Stress:** </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;max_stress&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MPa</span>
+<span class="s2">- **Safety Factor:** </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;safety_factor&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span>
+<span class="s2">- **Total Applied Load:** </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;total_load&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> kN</span>
+
+<span class="s2">## Model Description</span>
+
+<span class="s2">### Geometry</span>
+
+<span class="s2">The analyzed structure is an I-beam with the following dimensions:</span>
+
+<span class="s2">| Parameter | Value | Unit |</span>
+<span class="s2">|-----------|-------|------|</span>
+<span class="s2">| Length | </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;beam_params&#39;</span><span class="p">][</span><span class="s1">&#39;length&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> | mm |</span>
+<span class="s2">| Flange Width | </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;beam_params&#39;</span><span class="p">][</span><span class="s1">&#39;flange_width&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> | mm |</span>
+<span class="s2">| Web Height | </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;beam_params&#39;</span><span class="p">][</span><span class="s1">&#39;web_height&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> | mm |</span>
+<span class="s2">| Flange Thickness | </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;beam_params&#39;</span><span class="p">][</span><span class="s1">&#39;flange_thickness&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> | mm |</span>
+<span class="s2">| Web Thickness | </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;beam_params&#39;</span><span class="p">][</span><span class="s1">&#39;web_thickness&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> | mm |</span>
+
+
+<span class="s2">![Beam section plot](ibeam_section.png)</span>
+
+<span class="s2">*Figure 1: I-beam cross-section showing key dimensions*</span>
+
+
+<span class="s2">![Beam elements plot](geometry.png)</span>
+
+<span class="s2">*Figure 2: Beam showing elements*</span>
+
+<span class="s2">### Material Properties</span>
+
+<span class="s2">The beam is modeled using structural steel with the following properties:</span>
+
+<span class="s2">| Property | Value | Unit |</span>
+<span class="s2">|----------|-------|------|</span>
+<span class="s2">| Elastic Modulus | </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;material_props&#39;</span><span class="p">][</span><span class="s1">&#39;elastic_modulus&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> | MPa |</span>
+<span class="s2">| Poisson&#39;s Ratio | </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;material_props&#39;</span><span class="p">][</span><span class="s1">&#39;poisson_ratio&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> | - |</span>
+<span class="s2">| Density | </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;material_props&#39;</span><span class="p">][</span><span class="s1">&#39;density&#39;</span><span class="p">]</span><span class="o">*</span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> | kg/m³ |</span>
+<span class="s2">| Yield Strength | </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;material_props&#39;</span><span class="p">][</span><span class="s1">&#39;yield_strength&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> | MPa |</span>
+
+<span class="s2">### Loading and Boundary Conditions</span>
+
+<span class="s2">- **Support Type:** Fully constrained at both ends.</span>
+<span class="s2">- **Load Type:** Uniformly distributed load</span>
+<span class="s2">- **Load Magnitude:** </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;load_params&#39;</span><span class="p">][</span><span class="s1">&#39;distributed_load&#39;</span><span class="p">])</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> N/mm</span>
+
+<span class="s2">## Analysis Results</span>
+
+<span class="s2">### Displacement Results</span>
+
+<span class="s2">- **Maximum vertical displacement:** </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;max_displacement&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> mm</span>
+<span class="s2">- **Location:** Node </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;max_displacement_node&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> (approximately mid-span)</span>
+
+<span class="s2">### Stress Results</span>
+
+<span class="s2">- **Maximum bending stress:** </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;max_stress&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MPa</span>
+<span class="s2">- **Location:** Extreme fibers at mid-span</span>
+<span class="s2">- **Safety factor:** </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;safety_factor&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span>
+
+<span class="s2">### Section Properties</span>
+
+<span class="s2">| Property | Value | Unit |</span>
+<span class="s2">|----------|-------|------|</span>
+<span class="s2">| Cross-sectional Area | </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;section_props&#39;</span><span class="p">][</span><span class="s1">&#39;Area&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> | mm² |</span>
+<span class="s2">| Moment of Inertia (Iyy) | </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;section_props&#39;</span><span class="p">][</span><span class="s1">&#39;Iyy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> | mm⁴ |</span>
+<span class="s2">| Section Modulus | </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;section_props&#39;</span><span class="p">][</span><span class="s1">&#39;Section_modulus&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> | mm³ |</span>
+
+<span class="s2">### Analysis Plots</span>
+
+<span class="s2">The following plots visualize the analysis results:</span>
+
+<span class="s2">#### Displacement Contours</span>
+
+<span class="s2">![Displacement Plot](displacement_plot.png)</span>
+
+<span class="s2">*Figure 3: Y-direction displacement contours showing maximum deformation at mid-span*</span>
+
+<span class="s2">#### Stress Distribution</span>
+
+<span class="s2">![Stress Plot](stress_plot.png)</span>
+
+<span class="s2">*Figure 4: Equivalent stress distribution showing maximum stress at beam extreme fibers*</span>
+
+<span class="s2">## Conclusions</span>
+
+<span class="s2">1. **Structural Adequacy:** The beam safely carries the applied load with a</span>
+<span class="s2">safety factor of </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;safety_factor&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">.</span>
+
+<span class="s2">2. **Displacement:** The maximum displacement of </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;max_displacement&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> mm is within acceptable limits for most structural applications.</span>
+
+<span class="s2">3. **Recommendation:** The I-beam design is adequate for the specified loading conditions.</span>
+
+<span class="s2">## Analysis Details</span>
+
+<span class="s2">- **Element Type:** BEAM188 (3D linear finite strain beam)</span>
+<span class="s2">- **Number of Elements:** </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;beam_params&quot;</span><span class="p">][</span><span class="s2">&quot;num_elements&quot;</span><span class="p">]</span><span class="si">}</span>
+<span class="s2">- **Solution Type:** Static linear analysis</span>
+<span class="s2">- **Convergence:** Solution converged successfully</span>
+
+<span class="s2">---</span>
+<span class="s2">*This report was automatically generated using PyMAPDL*</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+    <span class="c1"># Write to file</span>
+    <span class="n">report_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;ibeam_analysis_report.md&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">report_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">markdown_content</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">report_file</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="word-document-report">
+<h3>Word Document Report<a class="headerlink" href="#word-document-report" title="Link to this heading">#</a></h3>
+<p>The Word document report provides:</p>
+<ul class="simple">
+<li><p>Professional document formatting</p></li>
+<li><p>Tables for organized data presentation</p></li>
+<li><p>Structured sections and headings</p></li>
+<li><p>Executive summary format</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_word_report</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a Word document report of the analysis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : dict</span>
+<span class="sd">        Analysis data dictionary</span>
+<span class="sd">    output_dir : Path</span>
+<span class="sd">        Directory to save the report</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        Path to generated Word file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">docx</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">docx.enum.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">WD_ALIGN_PARAGRAPH</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">docx.shared</span><span class="w"> </span><span class="kn">import</span> <span class="n">Inches</span>
+
+    <span class="c1"># Create new document</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="p">()</span>
+
+    <span class="c1"># Title</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_heading</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">title</span><span class="o">.</span><span class="n">alignment</span> <span class="o">=</span> <span class="n">WD_ALIGN_PARAGRAPH</span><span class="o">.</span><span class="n">CENTER</span>
+
+    <span class="c1"># Metadata</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated: </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span><span class="s2">&quot;Analysis Type: Static Structural Analysis&quot;</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span><span class="s2">&quot;Software: PyMAPDL (Ansys MAPDL)&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Executive Summary</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">add_heading</span><span class="p">(</span><span class="s2">&quot;Executive Summary&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span>
+        <span class="s2">&quot;This report presents the results of a static structural analysis of a &quot;</span>
+        <span class="s2">&quot;fully constrained I-beam at both ends, subjected to a uniformly distributed load.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Key Results table</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">add_heading</span><span class="p">(</span><span class="s2">&quot;Key Results&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">results_data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s2">&quot;Maximum Displacement&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;max_displacement&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> mm&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Maximum Stress&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;max_stress&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MPa&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Safety Factor&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;safety_factor&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Total Applied Load&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;total_load&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> kN&quot;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="n">table</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_table</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">results_data</span><span class="p">),</span> <span class="n">cols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">table</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;Table Grid&quot;</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">results_data</span><span class="p">):</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">param</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c1"># Model Description</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">add_heading</span><span class="p">(</span><span class="s2">&quot;Model Description&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Geometry table</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">add_heading</span><span class="p">(</span><span class="s2">&quot;Geometry&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">geom_data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s2">&quot;Length&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;beam_params&#39;</span><span class="p">][</span><span class="s1">&#39;length&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;mm&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Flange Width&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;beam_params&#39;</span><span class="p">][</span><span class="s1">&#39;flange_width&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;mm&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Web Height&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;beam_params&#39;</span><span class="p">][</span><span class="s1">&#39;web_height&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;mm&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Flange Thickness&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;beam_params&#39;</span><span class="p">][</span><span class="s1">&#39;flange_thickness&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;mm&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Web Thickness&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;beam_params&#39;</span><span class="p">][</span><span class="s1">&#39;web_thickness&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;mm&quot;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Create table with header row + data rows</span>
+    <span class="n">geom_table</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_table</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">geom_data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">geom_table</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="s2">&quot;Table Grid&quot;</span>
+
+    <span class="c1"># Headers</span>
+    <span class="n">geom_table</span><span class="o">.</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Parameter&quot;</span>
+    <span class="n">geom_table</span><span class="o">.</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Value&quot;</span>
+    <span class="n">geom_table</span><span class="o">.</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Unit&quot;</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">geom_data</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">geom_table</span><span class="o">.</span><span class="n">rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">param</span>
+        <span class="n">geom_table</span><span class="o">.</span><span class="n">rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">geom_table</span><span class="o">.</span><span class="n">rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">unit</span>
+
+    <span class="k">if</span> <span class="s2">&quot;plot_files&quot;</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;plot_files&quot;</span><span class="p">]:</span>
+        <span class="c1"># Add beam section plot</span>
+        <span class="k">if</span> <span class="s2">&quot;section&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;plot_files&quot;</span><span class="p">]:</span>
+            <span class="n">section_plot_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;plot_files&quot;</span><span class="p">][</span><span class="s2">&quot;section&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">section_plot_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">add_heading</span><span class="p">(</span><span class="s2">&quot;Beam Section Plot&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">add_picture</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">section_plot_path</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">Inches</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span>
+                    <span class="s2">&quot;Figure 1: I-beam cross-section showing key dimensions&quot;</span><span class="p">,</span>
+                    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;Caption&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;geometry&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;plot_files&quot;</span><span class="p">]:</span>
+            <span class="n">geometry_plot_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;plot_files&quot;</span><span class="p">][</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">geometry_plot_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">add_heading</span><span class="p">(</span><span class="s2">&quot;Beam Geometry Plot&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">add_picture</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">geometry_plot_path</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">Inches</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span><span class="s2">&quot;Figure 2: I-beam geometry&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;Caption&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Results section</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">add_heading</span><span class="p">(</span><span class="s2">&quot;Analysis Results&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;The maximum vertical displacement is </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;max_displacement&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> mm, &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;occurring at approximately mid-span.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;The maximum bending stress is </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;max_stress&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MPa, &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;resulting in a safety factor of </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;safety_factor&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;against yielding.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Add plots if they exist</span>
+    <span class="k">if</span> <span class="s2">&quot;plot_files&quot;</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;plot_files&quot;</span><span class="p">]:</span>
+        <span class="c1"># Analysis Plots</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">add_heading</span><span class="p">(</span><span class="s2">&quot;Analysis Plots&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;displacement&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;plot_files&quot;</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">disp_plot_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;plot_files&quot;</span><span class="p">][</span><span class="s2">&quot;displacement&quot;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">disp_plot_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span><span class="s2">&quot;Displacement Contours:&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;Heading 3&quot;</span><span class="p">)</span>
+
+                    <span class="n">doc</span><span class="o">.</span><span class="n">add_picture</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">disp_plot_path</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">Inches</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+                    <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span>
+                        <span class="s2">&quot;Figure 3: Y-direction displacement contours showing maximum deformation at mid-span&quot;</span><span class="p">,</span>
+                        <span class="n">style</span><span class="o">=</span><span class="s2">&quot;Caption&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Displacement plot could not be loaded: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;stress&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;plot_files&quot;</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">stress_plot_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;plot_files&quot;</span><span class="p">][</span><span class="s2">&quot;stress&quot;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">stress_plot_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span><span class="s2">&quot;Stress Distribution:&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;Heading 3&quot;</span><span class="p">)</span>
+
+                    <span class="n">doc</span><span class="o">.</span><span class="n">add_picture</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">stress_plot_path</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">Inches</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+                    <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span>
+                        <span class="s2">&quot;Figure 4: Equivalent stress distribution showing maximum stress at beam extreme fibers&quot;</span><span class="p">,</span>
+                        <span class="n">style</span><span class="o">=</span><span class="s2">&quot;Caption&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stress plot could not be loaded: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Conclusions</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">add_heading</span><span class="p">(</span><span class="s2">&quot;Conclusions&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">conclusions</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">&quot;The beam safely carries the applied load with a safety factor of </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;safety_factor&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;The maximum displacement of </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;max_displacement&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> mm is within acceptable limits.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;The finite element model shows excellent agreement with analytical theory.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;The I-beam design is adequate for the specified loading conditions.&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">conclusion</span> <span class="ow">in</span> <span class="n">conclusions</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;• </span><span class="si">{</span><span class="n">conclusion</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Save document</span>
+    <span class="n">word_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;ibeam_analysis_report.docx&quot;</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">word_file</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">word_file</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Note:</strong> Word report generation requires the <code class="docutils literal notranslate"><span class="pre">python-docx</span></code> package:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>python-docx
+</pre></div>
+</div>
+</section>
+<section id="plot-generation">
+<h3>Plot Generation<a class="headerlink" href="#plot-generation" title="Link to this heading">#</a></h3>
+<p>The example includes the capability to generate analysis plots:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_analysis_plots</span><span class="p">(</span><span class="n">mapdl</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate plots for the analysis report.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mapdl : ansys.mapdl.core.Mapdl</span>
+<span class="sd">        MAPDL instance</span>
+<span class="sd">    output_dir : Path</span>
+<span class="sd">        Directory to save plots</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Dictionary of generated plot file paths</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">plot_files</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Beam section plot</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">prep7</span><span class="p">()</span>
+        <span class="n">ibeam_plot_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;ibeam_section.png&quot;</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">secplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">savefig</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">ibeam_plot_file</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">ibeam_plot_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">plot_files</span><span class="p">[</span><span class="s2">&quot;section&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ibeam_plot_file</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated I-beam section plot: </span><span class="si">{</span><span class="n">ibeam_plot_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">eplot_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;geometry.png&quot;</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;eshape,1,1&quot;</span><span class="p">)</span>  <span class="c1"># Using run to avoid warning</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">eplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">graphics_backend</span><span class="o">=</span><span class="n">GraphicsBackend</span><span class="o">.</span><span class="n">MAPDL</span><span class="p">,</span> <span class="n">savefig</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">eplot_file</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">eplot_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">plot_files</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">eplot_file</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated element plot: </span><span class="si">{</span><span class="n">eplot_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">post1</span><span class="p">()</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;LAST&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Displacement plot</span>
+        <span class="n">disp_plot_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;displacement_plot.png&quot;</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">plnsol</span><span class="p">(</span><span class="s2">&quot;U&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="n">savefig</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">disp_plot_file</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">disp_plot_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">plot_files</span><span class="p">[</span><span class="s2">&quot;displacement&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">disp_plot_file</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated displacement plot: </span><span class="si">{</span><span class="n">disp_plot_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Stress plot</span>
+        <span class="n">stress_plot_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;stress_plot.png&quot;</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">plesol</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;EQV&quot;</span><span class="p">,</span> <span class="n">savefig</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">stress_plot_file</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">stress_plot_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">plot_files</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">stress_plot_file</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated stress plot: </span><span class="si">{</span><span class="n">stress_plot_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Could not generate plots: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;This may be due to graphics/display limitations in the current environment.&quot;</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;Note: Reports include plot references that will display when graphics are available.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">plot_files</span>
+</pre></div>
+</div>
+<p>Generated plots include:</p>
+<ul class="simple">
+<li><p>Displacement contours showing deformed shape</p></li>
+<li><p>Stress contours highlighting critical regions</p></li>
+<li><p>Node and element plots for model verification</p></li>
+</ul>
+</section>
+</section>
+<section id="running-the-example">
+<h2>Running the Example<a class="headerlink" href="#running-the-example" title="Link to this heading">#</a></h2>
+<section id="basic-execution">
+<h3>Basic Execution<a class="headerlink" href="#basic-execution" title="Link to this heading">#</a></h3>
+<p>To run the complete analysis and generate reports:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">beam_with_report</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_ibeam_analysis_and_report</span>
+
+<span class="c1"># Run complete analysis</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">create_ibeam_analysis_and_report</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Or execute the script directly:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>beam_with_report.py
+</pre></div>
+</div>
+</section>
+<section id="output-files">
+<h3>Output Files<a class="headerlink" href="#output-files" title="Link to this heading">#</a></h3>
+<p>The analysis generates several output files in the <code class="docutils literal notranslate"><span class="pre">beam_analysis_output</span></code> directory:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ibeam_analysis_report.md</span></code> - Markdown report</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ibeam_analysis_report.docx</span></code> - Word document</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">displacement_plot.png</span></code> - Displacement visualization</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stress_plot.png</span></code> - Stress visualization</p></li>
+</ul>
+</section>
+</section>
+<section id="customization-options">
+<h2>Customization Options<a class="headerlink" href="#customization-options" title="Link to this heading">#</a></h2>
+<section id="parameter-modification">
+<h3>Parameter Modification<a class="headerlink" href="#parameter-modification" title="Link to this heading">#</a></h3>
+<p>Easily modify analysis parameters by changing the dictionaries:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Modify beam dimensions</span>
+<span class="n">beam_params</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">8000.0</span>  <span class="c1"># Change to 8 meters</span>
+<span class="n">beam_params</span><span class="p">[</span><span class="s2">&quot;web_height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">500.0</span>  <span class="c1"># Increase height</span>
+
+<span class="c1"># Change material</span>
+<span class="n">material_props</span><span class="p">[</span><span class="s2">&quot;elastic_modulus&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">200000.0</span>  <span class="c1"># Different steel grade</span>
+
+<span class="c1"># Modify loading</span>
+<span class="n">load_params</span><span class="p">[</span><span class="s2">&quot;distributed_load&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">75.0</span>  <span class="c1"># Increase load intensity</span>
+</pre></div>
+</div>
+</section>
+<section id="multiple-load-cases">
+<h3>Multiple Load Cases<a class="headerlink" href="#multiple-load-cases" title="Link to this heading">#</a></h3>
+<p>The framework can be extended for multiple load cases:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">load_cases</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Service Load&quot;</span><span class="p">,</span> <span class="s2">&quot;distributed_load&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">50.0</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ultimate Load&quot;</span><span class="p">,</span> <span class="s2">&quot;distributed_load&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">75.0</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Wind Load&quot;</span><span class="p">,</span> <span class="s2">&quot;distributed_load&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">25.0</span><span class="p">},</span>
+<span class="p">]</span>
+
+<span class="k">for</span> <span class="n">case</span> <span class="ow">in</span> <span class="n">load_cases</span><span class="p">:</span>
+    <span class="c1"># Run analysis for each case</span>
+    <span class="c1"># Generate separate reports</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">create_ibeam_analysis_and_report</span><span class="p">(</span><span class="o">**</span><span class="n">case</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This parameterized approach enables design optimization studies.</p>
+</section>
+</section>
+<section id="advanced-analysis-options">
+<h2>Advanced Analysis Options<a class="headerlink" href="#advanced-analysis-options" title="Link to this heading">#</a></h2>
+<p>The example can be extended for more sophisticated analyses.</p>
+<section id="nonlinear-analysis">
+<h3>Nonlinear Analysis<a class="headerlink" href="#nonlinear-analysis" title="Link to this heading">#</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enable geometric nonlinearity</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">nlgeom</span><span class="p">(</span><span class="s2">&quot;ON&quot;</span><span class="p">)</span>
+
+<span class="c1"># Material nonlinearity</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">mp</span><span class="p">(</span><span class="s2">&quot;BISO&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">yield_strength</span><span class="p">,</span> <span class="n">hardening_modulus</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="dynamic-analysis">
+<h3>Dynamic Analysis<a class="headerlink" href="#dynamic-analysis" title="Link to this heading">#</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Modal analysis</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">antype</span><span class="p">(</span><span class="s2">&quot;MODAL&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">modopt</span><span class="p">(</span><span class="s2">&quot;LANB&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>  <span class="c1"># First 10 modes</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="additional-report-features">
+<h2>Additional Report Features<a class="headerlink" href="#additional-report-features" title="Link to this heading">#</a></h2>
+<section id="pdf-generation">
+<h3>PDF Generation<a class="headerlink" href="#pdf-generation" title="Link to this heading">#</a></h3>
+<p>If you install <a class="reference external" href="https://pandoc.org">pandoc</a>, you can convert the Markdown report to a PDF file as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Convert Markdown to PDF using pandoc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+
+<span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="p">[</span><span class="s2">&quot;pandoc&quot;</span><span class="p">,</span> <span class="s2">&quot;ibeam_analysis_report.md&quot;</span><span class="p">,</span> <span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;ibeam_analysis_report.pdf&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="excel-export">
+<h3>Excel Export<a class="headerlink" href="#excel-export" title="Link to this heading">#</a></h3>
+<p>You can export results to Excel using <cite>pandas</cite>. This is quite useful when reporting parametric studies:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">load_cases</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Service Load&quot;</span><span class="p">,</span> <span class="s2">&quot;distributed_load&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">50.0</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ultimate Load&quot;</span><span class="p">,</span> <span class="s2">&quot;distributed_load&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">75.0</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Wind Load&quot;</span><span class="p">,</span> <span class="s2">&quot;distributed_load&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">25.0</span><span class="p">},</span>
+<span class="p">]</span>
+
+<span class="n">df_result</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">case</span> <span class="ow">in</span> <span class="n">load_cases</span><span class="p">:</span>
+    <span class="c1"># Run analysis for each case</span>
+    <span class="c1"># Generate separate reports</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">create_ibeam_analysis_and_report</span><span class="p">(</span><span class="o">**</span><span class="n">case</span><span class="p">)</span>
+
+    <span class="c1"># Create DataFrame from results</span>
+    <span class="n">df_result</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">df_result</span><span class="p">,</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;Load Case&quot;</span><span class="p">:</span> <span class="n">case</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;Max Displacement (mm)&quot;</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;max_displacement&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;Max Bending Moment (Nm)&quot;</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;max_moment&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;Max Bending Stress (MPa)&quot;</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;max_stress&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;Max Bending Strain&quot;</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;max_strain&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;Safety Factor&quot;</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;safety_factor&quot;</span><span class="p">],</span>
+                <span class="p">}</span>
+            <span class="p">),</span>
+        <span class="p">],</span>
+        <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="c1"># Save to Excel</span>
+<span class="n">df_result</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="s2">&quot;ibeam_load_cases_analysis_results.xlsx&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="email-reports">
+<h3>Email Reports<a class="headerlink" href="#email-reports" title="Link to this heading">#</a></h3>
+<p>Using Python you can send the generated reports via email:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># The following code is not tested</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">smtplib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">email.mime.multipart</span><span class="w"> </span><span class="kn">import</span> <span class="n">MIMEMultipart</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">email.mime.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">MIMEText</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">email.mime.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">MIMEBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">email</span><span class="w"> </span><span class="kn">import</span> <span class="n">encoders</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">send_analysis_report_email</span><span class="p">(</span>
+    <span class="n">smtp_server</span><span class="o">=</span><span class="s2">&quot;smtp.gmail.com&quot;</span><span class="p">,</span>
+    <span class="n">smtp_port</span><span class="o">=</span><span class="mi">587</span><span class="p">,</span>
+    <span class="n">sender_email</span><span class="o">=</span><span class="s2">&quot;your-email@gmail.com&quot;</span><span class="p">,</span>
+    <span class="n">sender_password</span><span class="o">=</span><span class="s2">&quot;your-app-password&quot;</span><span class="p">,</span>
+    <span class="n">recipient_emails</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;recipient@example.com&quot;</span><span class="p">],</span>
+    <span class="n">subject</span><span class="o">=</span><span class="s2">&quot;I-Beam Analysis Report&quot;</span><span class="p">,</span>
+    <span class="n">body_text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">attachments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Send analysis reports via email with attachments</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    smtp_server : str</span>
+<span class="sd">       SMTP server address (e.g., &#39;smtp.gmail.com&#39;, &#39;smtp.outlook.com&#39;)</span>
+<span class="sd">    smtp_port : int</span>
+<span class="sd">       SMTP port (587 for TLS, 465 for SSL)</span>
+<span class="sd">    sender_email : str</span>
+<span class="sd">       Sender&#39;s email address</span>
+<span class="sd">    sender_password : str</span>
+<span class="sd">       Sender&#39;s email password or app-specific password</span>
+<span class="sd">    recipient_emails : list</span>
+<span class="sd">       List of recipient email addresses</span>
+<span class="sd">    subject : str</span>
+<span class="sd">       Email subject line</span>
+<span class="sd">    body_text : str</span>
+<span class="sd">       Email body content</span>
+<span class="sd">    attachments : list</span>
+<span class="sd">       List of file paths to attach</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Create message container</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">MIMEMultipart</span><span class="p">()</span>
+    <span class="n">msg</span><span class="p">[</span><span class="s2">&quot;From&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender_email</span>
+    <span class="n">msg</span><span class="p">[</span><span class="s2">&quot;To&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">recipient_emails</span><span class="p">)</span>
+    <span class="n">msg</span><span class="p">[</span><span class="s2">&quot;Subject&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subject</span>
+
+    <span class="c1"># Add body to email</span>
+    <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">MIMEText</span><span class="p">(</span><span class="n">body_text</span><span class="p">,</span> <span class="s2">&quot;plain&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Add attachments</span>
+    <span class="k">if</span> <span class="n">attachments</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">attachments</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">attachment</span><span class="p">:</span>
+                    <span class="c1"># Instance of MIMEBase and named as part</span>
+                    <span class="n">part</span> <span class="o">=</span> <span class="n">MIMEBase</span><span class="p">(</span><span class="s2">&quot;application&quot;</span><span class="p">,</span> <span class="s2">&quot;octet-stream&quot;</span><span class="p">)</span>
+                    <span class="n">part</span><span class="o">.</span><span class="n">set_payload</span><span class="p">(</span><span class="n">attachment</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+                <span class="c1"># Encode file in ASCII characters to send by email</span>
+                <span class="n">encoders</span><span class="o">.</span><span class="n">encode_base64</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+
+                <span class="c1"># Add header as key/value pair to attachment part</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+                <span class="n">part</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span>
+                    <span class="s2">&quot;Content-Disposition&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;attachment; filename= </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Attach the part to message</span>
+                <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Create SMTP session</span>
+        <span class="n">server</span> <span class="o">=</span> <span class="n">smtplib</span><span class="o">.</span><span class="n">SMTP</span><span class="p">(</span><span class="n">smtp_server</span><span class="p">,</span> <span class="n">smtp_port</span><span class="p">)</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">starttls</span><span class="p">()</span>  <span class="c1"># Enable security</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">sender_email</span><span class="p">,</span> <span class="n">sender_password</span><span class="p">)</span>
+
+        <span class="c1"># Send email</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">as_string</span><span class="p">()</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="n">sender_email</span><span class="p">,</span> <span class="n">recipient_emails</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Email sent successfully to </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">recipient_emails</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error sending email: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading">#</a></h2>
+<p>This example demonstrates a complete PyMAPDL workflow that goes beyond simple
+analysis to include professional documentation and reporting.
+It provides a foundation for developing robust engineering analysis tools and
+workflows using PyMAPDL by combining:</p>
+<ul class="simple">
+<li><p>Parameterized modeling</p></li>
+<li><p>Comprehensive result extraction</p></li>
+<li><p>Analytical verification</p></li>
+<li><p>Automated report generation</p></li>
+</ul>
+<p>The approach shown here can be adapted for various structural analysis problems
+and extended with additional features as needed for specific engineering applications.</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>PyMAPDL Documentation: <a class="reference external" href="https://mapdl.docs.pyansys.com/">https://mapdl.docs.pyansys.com/</a></p></li>
+<li><p>Ansys Mechanical APDL Element Reference</p></li>
+</ul>
+</section>
+<section id="additional-files">
+<h2>Additional files<a class="headerlink" href="#additional-files" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><code class="xref download docutils literal notranslate"><span class="pre">beam_with_report.py</span></code>: Complete Python script.</p></li>
+</ul>
+<p>Examples of the generated report files are:</p>
+<ul class="simple">
+<li><p><a class="reference download internal" download="" href="../../../_downloads/ec0679cdbd3505ecb2669c3fb9fcd3e4/ibeam_analysis_report.md"><code class="xref download docutils literal notranslate"><span class="pre">ibeam_analysis_report.md</span></code></a>: Markdown report file.</p></li>
+<li><p><a class="reference download internal" download="" href="../../../_downloads/6f2b9981e68ce2f33d35e9c1c9201635/ibeam_analysis_report.docx"><code class="xref download docutils literal notranslate"><span class="pre">ibeam_analysis_report.docx</span></code></a>: Word document file.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.71.3 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.6.3. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

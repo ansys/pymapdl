@@ -1,0 +1,6 @@
+show
+====
+
+.. currentmodule:: ansys.mapdl.core.plotting.visualizer
+
+.. automethod:: MapdlPlotter.show

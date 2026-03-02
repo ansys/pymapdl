@@ -1,0 +1,1493 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>esol &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=9e79609d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=9e79609d" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=0f5839ad"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/post26/_autosummary/ansys.mapdl.core._commands.post26.set_up.SetUp.esol';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.72';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="gssol" href="ansys.mapdl.core._commands.post26.set_up.SetUp.gssol.html" />
+    <link rel="prev" title="enersol" href="ansys.mapdl.core._commands.post26.set_up.SetUp.enersol.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.72.0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/post26/_autosummary/ansys.mapdl.core._commands.post26.set_up.SetUp.esol.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    <div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(
+      (text) => (document.getElementById("announcement_msg").innerHTML = text),
+    )
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Session</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../session/index.html">Session</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Database</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../database/index.html">Database</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Graphics</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../graphics/index.html">Graphics</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">APDL</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/abbreviations.html">Abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/parameter_definition.html">ParameterDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/matrix_operations.html">MatrixOperations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/macro_files.html">MacroFiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/encryption_decryption.html">EncryptionDecryption</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/array_parameters.html">ArrayParameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/process_controls.html">ProcessControls</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Preprocessing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/element_type.html">Element type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/real_constants.html">Real constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/materials.html">Materials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/material_data_tables.html">Material data tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/primitives.html">Primitives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/keypoints.html">Keypoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/hard_points.html">Hard points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/lines.html">Lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/areas.html">Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/volumes.html">Volumes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/booleans.html">Booleans</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/meshing.html">Meshing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/nodes.html">Nodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/elements.html">Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/superelements.html">Superelements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/digitizing.html">Digitizing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/coupled_dof.html">Coupled degrees of freedom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/constraint_equations.html">Constraint equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/status.html">Status</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/explicit_dynamics.html">Explicit dynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/sections.html">Sections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/morphing.html">Morphing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/artificially_matched_layers.html">Artificially matched layers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/special_purpose.html">Special purpose</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Solution</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../solution/analysis_options.html">Analysis options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/nonlinear_options.html">Nonlinear options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/dynamic_options.html">Dynamic options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/spectrum_options.html">Spectrum options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/load_step_options.html">Load step options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_constraints.html">Solid constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_forces.html">Solid forces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_surface_loads.html">Solid surface loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_body_loads.html">Solid body loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/inertia.html">Inertia</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/miscellaneous_loads.html">Miscellaneous loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/load_step_operations.html">Load step operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/master_dof.html">Master degrees of freedom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/gap_conditions.html">Gap conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/rezoning.html">Rezoning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/2d_to_3d_analysis.html">2D to 3D analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/birth_and_death.html">Birth and death</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_constraints.html">FE constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_forces.html">FE forces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_surface_loads.html">FE surface loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_body_loads.html">FE body loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/ocean.html">Ocean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solution_status.html">Solution status</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/radiosity.html">Radiosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_definition_commands.html">Multi-Field solver definition commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_global_controls.html">Multi-Field solver global controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_time_controls.html">Multi-Field solver time controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_load_transfer.html">Multi-Field solver load transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_convergence_controls.html">Multi-Field solver convergence controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_interface_mapping.html">Multi-Field solver interface mapping</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post1/index.html">Post1</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST26</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Post26</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../operations.html">Operations</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../set_up.html">SetUp</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.ansol.html">ansol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.cisol.html">cisol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.data.html">data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.enersol.html">enersol</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">esol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.gssol.html">gssol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.jsol.html">jsol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.nsol.html">nsol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.nstore.html">nstore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.numvar.html">numvar</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.rforce.html">rforce</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.rgb.html">rgb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.solu.html">solu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.store.html">store</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.timerange.html">timerange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.vardel.html">vardel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post26.set_up.SetUp.varnam.html">varnam</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../controls.html">Controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../special_purpose.html">SpecialPurpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../listing.html">Listing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_set_up.html">SetUp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../display.html">Display</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../status.html">Status</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux2/index.html">Aux2</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux3/index.html">Aux3</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX12</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux12/index.html">Aux12</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX15</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux15/index.html">Aux15</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">MAP</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../map/index.html">Map</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Connection</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../conn.html">Connection commands</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../misc.html">Miscellaneous</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Undocumented</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../inqfun.html">Undocumented inquire commands</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item"> 
+<div class="tocsection editthispage">
+  <a href="None">
+    <i class="fa-solid fa-pencil"></i>
+       Edit
+    on GitHub  
+  </a>
+</div>
+
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">MAPDL commands</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../index.html" class="nav-link">Post26</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../set_up.html" class="nav-link">SetUp</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">esol</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="esol">
+<h1>esol<a class="headerlink" href="#esol" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core._commands.post26.set_up.SetUp.esol">
+<span class="sig-prename descclassname"><span class="pre">SetUp.</span></span><span class="sig-name descname"><span class="pre">esol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core._commands.post26.set_up.SetUp.esol" title="Link to this definition">#</a></dt>
+<dd><p>Specifies element data to be stored from the results file.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ESOL.html">ESOL</a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>nvar</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Arbitrary reference number assigned to this variable (2 to <code class="docutils literal notranslate"><span class="pre">NV</span></code> ( <span class="xref std std-ref">numvar</span> )). Overwrites
+any existing results for this variable.</p>
+</dd>
+<dt><strong>elem</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Element for which data are to be stored. If <code class="docutils literal notranslate"><span class="pre">ELEM</span></code> = P, graphical picking is enabled (valid
+only in the GUI).</p>
+</dd>
+<dt><strong>node</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Node number on this element for which data are to be stored. If blank, store the average element
+value (except for <code class="docutils literal notranslate"><span class="pre">FMAG</span></code> values, which are summed instead of averaged). If <code class="docutils literal notranslate"><span class="pre">NODE</span></code> = P,
+graphical picking is enabled (valid only in the GUI).</p>
+</dd>
+<dt><strong>item</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Label identifying the item. General item labels are shown in <a class="reference internal" href="#esol-tab-1"><span class="std std-ref">ESOL - General Result Item and Component Labels</span></a>. Some items also
+require a component label.</p>
+</dd>
+<dt><strong>comp</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Component of the item (if required). General component labels are shown in <a class="reference internal" href="#esol-tab-1"><span class="std std-ref">ESOL - General Result Item and Component Labels</span></a>
+below. If <code class="docutils literal notranslate"><span class="pre">Comp</span></code> is a sequence number ( <code class="docutils literal notranslate"><span class="pre">n</span></code> ), the <code class="docutils literal notranslate"><span class="pre">NODE</span></code> field is ignored.</p>
+</dd>
+<dt><strong>name</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>32-character name for identifying the item on the printout and displays. Defaults to a label
+formed by concatenating the first four characters of the <code class="docutils literal notranslate"><span class="pre">Item</span></code> and <code class="docutils literal notranslate"><span class="pre">Comp</span></code> labels.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p id="esol-notes">See <a class="reference internal" href="#esol-tab-1"><span class="std std-ref">ESOL - General Result Item and Component Labels</span></a> for a list of item and component labels for element (excluding line element)
+results. See <a class="reference internal" href="#esol-tab-2"><span class="std std-ref">ESOL - Selected Result Component Labels</span></a> for a list of valid selected result ( <code class="docutils literal notranslate"><span class="pre">Item</span></code> = SRES) components.</p>
+<p><span class="xref std std-ref">esol</span> defines element results data to be stored from a results file ( <span class="xref std std-ref">file</span> ). Not all
+items are valid for all elements. To see the available items for a given element, refer to the input
+and output summary tables in the documentation for that element.</p>
+<p>Two methods of data access are available via the <span class="xref std std-ref">esol</span> command. You can access some data by
+using a generic label ( component name method ), while others require a label and number ( sequence
+number method ).</p>
+<p>Use the component name method to access general element data (that is, element data generally
+available to most element types or groups of element types). Element results are in the element
+coordinate system, except for layered elements where results are in the layer coordinate system.
+Element forces and moments are in the nodal coordinate system. Results are obtainable for an element
+at a specified node. Further location specifications can be made for some elements via <span class="xref std std-ref">shell</span>,
+<span class="xref std std-ref">layerp26</span>, and <span class="xref std std-ref">force</span>.</p>
+<p>The sequence number method is required for data that is not averaged (such as pressures at nodes and
+temperatures at integration points), or data that is not easily described generically (such as all
+derived data for structural line elements and contact elements, all derived data for thermal line
+elements, and layer data for layered elements).</p>
+<p>In a <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_adv/Hlp_G_ADV2DTO3DREST.html">2D to 3D analysis</a>, this
+command not supported in the POST26 postprocessor and is ignored.</p>
+<section id="esol-general-result-item-and-component-labels">
+<span id="esol-tab-1"></span><h2>ESOL - General Result Item and Component Labels<a class="headerlink" href="#esol-general-result-item-and-component-labels" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id4">
+<caption><span class="caption-text">Component Name Method</span><a class="headerlink" href="#id4" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Item</p></th>
+<th class="head"><p>Comp</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td rowspan="4"><p> S</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Component stress.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td><p>Principal stress.</p></td>
+</tr>
+<tr class="row-even"><td><p>INT</p></td>
+<td><p>Stress intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EQV</p></td>
+<td><p>Equivalent stress.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><p> EPEL</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Component elastic strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td><p>Principal elastic strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>INT</p></td>
+<td><p>Elastic strain intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EQV</p></td>
+<td><p>Elastic equivalent strain.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><p> EPTH</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Component thermal strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td><p>Principal thermal strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>INT</p></td>
+<td><p>Thermal strain intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EQV</p></td>
+<td><p>Thermal equivalent strain.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><p> EPPL</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Component plastic strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td><p>Principal plastic strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>INT</p></td>
+<td><p>Plastic strain intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EQV</p></td>
+<td><p>Plastic equivalent strain.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><p> EPCR</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Component creep strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1,2,3</p></td>
+<td><p>Principal creep strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>INT</p></td>
+<td><p>Creep strain intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EQV</p></td>
+<td><p>Creep equivalent strain.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><p> EPDI</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Component diffusion strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td><p>Principal diffusion strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>INT</p></td>
+<td><p>Diffusion strain intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EQV</p></td>
+<td><p>Diffusion equivalent strain.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="7"><p> NL</p></td>
+<td><p>SEPL</p></td>
+<td><p>Equivalent stress (from stress-strain curve).</p></td>
+</tr>
+<tr class="row-odd"><td><p>SRAT</p></td>
+<td><p>Stress state ratio.</p></td>
+</tr>
+<tr class="row-even"><td><p>HPRES</p></td>
+<td><p>Hydrostatic pressure.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EPEQ</p></td>
+<td><p>Accumulated equivalent plastic strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>CREQ</p></td>
+<td><p>Accumulated equivalent creep strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>PSV</p></td>
+<td><p>Plastic state variable.</p></td>
+</tr>
+<tr class="row-even"><td><p>PLWK</p></td>
+<td><p>Plastic work/volume.</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="8"><p> SEND</p></td>
+<td><p>ELASTIC The results for this postprocessing SEND component are invalid for <code class="docutils literal notranslate"><span class="pre">ELBOW290</span></code> if that element is used with viscoelastic or viscohyperelastic materials.</p></td>
+<td><p>Elastic strain energy density. (For <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/evis.html#mat_harmvisco">viscoelastic</a> and <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/amp8sq21dldm.html#">sintering</a> materials, the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/evis.html#eq92b60ee3-7e22-457b-9543-53f86d16432a">stored energy</a>.)</p></td>
+</tr>
+<tr class="row-even"><td><p>PLASTIC</p></td>
+<td><p>Plastic strain energy density.</p></td>
+</tr>
+<tr class="row-odd"><td><p>CREEP</p></td>
+<td><p>Creep strain energy density.</p></td>
+</tr>
+<tr class="row-even"><td><p>DAMAGE</p></td>
+<td><p>Damage strain energy density.</p></td>
+</tr>
+<tr class="row-odd"><td><p>VDAM</p></td>
+<td><p>Viscoelastic dissipation energy density.</p></td>
+</tr>
+<tr class="row-even"><td><p>VREG</p></td>
+<td><p>Visco-regularization strain energy density.</p></td>
+</tr>
+<tr class="row-odd"><td><p>DISS</p></td>
+<td><p>Structural-thermal dissipation.</p></td>
+</tr>
+<tr class="row-even"><td><p>ENTO</p></td>
+<td><p>Total strain energy density (sum of ELASTIC, PLASTIC, and CREEP strain energy densities).</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><p> CDM</p></td>
+<td><p>DMG</p></td>
+<td><p>Damage variable.</p></td>
+</tr>
+<tr class="row-even"><td><p>LM</p></td>
+<td><p>Maximum previous strain energy for virgin material.</p></td>
+</tr>
+<tr class="row-odd"><td><p>GKS</p></td>
+<td><p>X</p></td>
+<td><p>Gasket component stress (also gasket pressure).</p></td>
+</tr>
+<tr class="row-even"><td><p>GKD</p></td>
+<td><p>X</p></td>
+<td><p>Gasket component total closure.</p></td>
+</tr>
+<tr class="row-odd"><td><p>GKDI</p></td>
+<td><p>X</p></td>
+<td><p>Gasket component total inelastic closure.</p></td>
+</tr>
+<tr class="row-even"><td><p>GKTH</p></td>
+<td><p>X</p></td>
+<td><p>Gasket component thermal closure.</p></td>
+</tr>
+<tr class="row-odd"><td><p>SS</p></td>
+<td><p>X, XY, XZ</p></td>
+<td><p>Interface traction (stress).</p></td>
+</tr>
+<tr class="row-even"><td><p>SD</p></td>
+<td><p>X,XY,XZ</p></td>
+<td><p>Interface separation.</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="10"><p> CONT</p></td>
+<td><p>STAT For more information about the meaning of contact status and its possible values, see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_revresu.html#ctecpostslide">Reviewing Results in POST1</a></p></td>
+<td><p>Contact status.</p></td>
+</tr>
+<tr class="row-even"><td><p>PENE</p></td>
+<td><p>Contact penetration.</p></td>
+</tr>
+<tr class="row-odd"><td><p>PRES</p></td>
+<td><p>Contact pressure.</p></td>
+</tr>
+<tr class="row-even"><td><p>SFRIC</p></td>
+<td><p>Contact friction stress.</p></td>
+</tr>
+<tr class="row-odd"><td><p>STOT</p></td>
+<td><p>Contact total stress (pressure plus friction).</p></td>
+</tr>
+<tr class="row-even"><td><p>SLIDE</p></td>
+<td><p>Contact sliding distance.</p></td>
+</tr>
+<tr class="row-odd"><td><p>GAP</p></td>
+<td><p>Contact gap distance.</p></td>
+</tr>
+<tr class="row-even"><td><p>FLUX</p></td>
+<td><p>Total heat flux at contact surface.</p></td>
+</tr>
+<tr class="row-odd"><td><p>CNOS</p></td>
+<td><p>Total number of contact status changes during substep.</p></td>
+</tr>
+<tr class="row-even"><td><p>FPRS</p></td>
+<td><p>Fluid penetration pressure.</p></td>
+</tr>
+<tr class="row-odd"><td><p>TG For <code class="docutils literal notranslate"><span class="pre">SHELL131</span></code> and <code class="docutils literal notranslate"><span class="pre">SHELL132</span></code> elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3, …, HTOP instead of HEAT.</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component thermal gradient or vector sum.</p></td>
+</tr>
+<tr class="row-even"><td><p>TF</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component thermal flux or vector sum.</p></td>
+</tr>
+<tr class="row-odd"><td><p>PG</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component pressure gradient or vector sum.</p></td>
+</tr>
+<tr class="row-even"><td><p>EF</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component electric field or vector sum.</p></td>
+</tr>
+<tr class="row-odd"><td><p>D</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component electric flux density or vector sum.</p></td>
+</tr>
+<tr class="row-even"><td><p>H</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component magnetic field intensity or vector sum.</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component magnetic flux density or vector sum.</p></td>
+</tr>
+<tr class="row-even"><td><p>CG</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component concentration gradient or vector sum.</p></td>
+</tr>
+<tr class="row-odd"><td><p>DF</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component diffusion flux density or vector sum.</p></td>
+</tr>
+<tr class="row-even"><td><p>FMAG</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component electromagnetic forces or vector sum.</p></td>
+</tr>
+<tr class="row-odd"><td><p>P</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Poynting vector components or vector sum</p></td>
+</tr>
+<tr class="row-even"><td><p>F</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>Component structural force.</p></td>
+</tr>
+<tr class="row-odd"><td><p>M</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>Component structural moment.</p></td>
+</tr>
+<tr class="row-even"><td><p>HEAT</p></td>
+<td></td>
+<td><p>Heat flow.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FLOW</p></td>
+<td></td>
+<td><p>Fluid flow.</p></td>
+</tr>
+<tr class="row-even"><td><p>AMPS</p></td>
+<td></td>
+<td><p>Current flow.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FLUX</p></td>
+<td></td>
+<td><p>Magnetic flux.</p></td>
+</tr>
+<tr class="row-even"><td><p>CSG</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>Component magnetic current segment.</p></td>
+</tr>
+<tr class="row-odd"><td><p>RATE</p></td>
+<td></td>
+<td><p>Diffusion flow rate.</p></td>
+</tr>
+<tr class="row-even"><td><p>SENE</p></td>
+<td></td>
+<td><p>“Stiffness” energy.</p></td>
+</tr>
+<tr class="row-odd"><td><p>STEN</p></td>
+<td></td>
+<td><p>Elemental energy dissipation due to <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_STRUNST.html#">stabilization</a>.</p></td>
+</tr>
+<tr class="row-even"><td><p>KENE</p></td>
+<td></td>
+<td><p>Kinetic energy.</p></td>
+</tr>
+<tr class="row-odd"><td><p>ASENE</p></td>
+<td></td>
+<td><p>Amplitude stiffness energy.</p></td>
+</tr>
+<tr class="row-even"><td><p>PSENE</p></td>
+<td></td>
+<td><p>Peak stiffness energy.</p></td>
+</tr>
+<tr class="row-odd"><td><p>AKENE</p></td>
+<td></td>
+<td><p>Amplitude kinetic energy.</p></td>
+</tr>
+<tr class="row-even"><td><p>PKENE</p></td>
+<td></td>
+<td><p>Peak kinetic energy.</p></td>
+</tr>
+<tr class="row-odd"><td><p>DENE</p></td>
+<td></td>
+<td><p>Damping energy.</p></td>
+</tr>
+<tr class="row-even"><td><p>WEXT WEXT is calculated for element-based loading only (and not for nodal-force loading). WEXT is stored on elements to which loading has been applied; if surface elements are added on top of other elements, for example, and pressure loading is applied to the surface elements, WEXT is available for the surface elements only.</p></td>
+<td></td>
+<td><p>Work due to external load.</p></td>
+</tr>
+<tr class="row-odd"><td><p>AENE</p></td>
+<td></td>
+<td><p>Artificial energy due to hourglass control/drill stiffness or due to contact stabilization.</p></td>
+</tr>
+<tr class="row-even"><td><p>JHEAT</p></td>
+<td></td>
+<td><p>Element Joule heat generation.</p></td>
+</tr>
+<tr class="row-odd"><td><p>JC</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Conduction current density for elements that support conduction current calculation. Components (X, Y, Z) and vector sum (SUM).</p></td>
+</tr>
+<tr class="row-even"><td><p>JS</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>Source current density for low-frequency magnetic analyses. Total current density (sum of conduction and displacement current densities) in low-frequency electric analyses. Components (X, Y, Z).</p></td>
+</tr>
+<tr class="row-odd"><td><p>JT</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Total measurable current density in low-frequency electromagnetic analyses. (Conduction current density in a low-frequency electric analysis.) Components (X, Y, Z) and vector sum (SUM).</p></td>
+</tr>
+<tr class="row-even"><td><p>MRE</p></td>
+<td></td>
+<td><p>Magnetics Reynolds number.</p></td>
+</tr>
+<tr class="row-odd"><td><p>VOLU</p></td>
+<td></td>
+<td><p>Volume of volume element.</p></td>
+</tr>
+<tr class="row-even"><td><p>BFE</p></td>
+<td><p>TEMP</p></td>
+<td><p>Body temperatures (calculated from applied temperatures) as used in solution (area and volume elements only).</p></td>
+</tr>
+<tr class="row-odd"><td><p>FICT</p></td>
+<td><p>TEMP</p></td>
+<td><p>Fictive temperature.</p></td>
+</tr>
+<tr class="row-even"><td><p>CAP</p></td>
+<td><p>C0,X0,K0,ZONE, DPLS,VPLS</p></td>
+<td><p>Material cap plasticity model only: Cohesion; hydrostatic compaction yielding stress; I1 at the transition point at which the shear and compaction envelopes intersect; zone = 0: elastic state, zone = 1: compaction zone, zone = 2: shear zone, zone = 3: expansion zone; effective deviatoric plastic strain; volume plastic strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EDPC</p></td>
+<td><p>CSIG,CSTR</p></td>
+<td><p>Material EDP creep model only (not including the cap model): Equivalent creep stress; equivalent creep strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>FFLX</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>Fluid flux flow in poromechanics.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FGRA</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>Fluid pore pressure gradient in poromechanics.</p></td>
+</tr>
+<tr class="row-even"><td><p>PMSV</p></td>
+<td><p>VRAT, PPRE, DSAT, RPER</p></td>
+<td><p>Void volume ratio, pore pressure, degree of saturation, and relative permeability for coupled pore-pressure-thermal elements.</p></td>
+</tr>
+<tr class="row-odd"><td><p>YSIDX</p></td>
+<td><p>TENS,SHEA</p></td>
+<td><p>Yield surface activity status for Mohr-Coulomb, soil, concrete, and joint rock material models: 1 = yielded, 0 = not yielded.</p></td>
+</tr>
+<tr class="row-even"><td><p>FPIDX</p></td>
+<td><p>TF01,SF01, TF02,SF02, TF03,SF03, TF04,SF04</p></td>
+<td><p>Failure plane surface activity status for concrete and joint rock material models: 1 = yielded, 0 = not yielded. Tension and shear failure status are available for all four sets of failure planes.</p></td>
+</tr>
+<tr class="row-odd"><td><p>NS</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p><a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_mat5.html#eq4dc2eb28-41da-4d81-b0d0-8716ce41a6e1">Nominal strain</a> for hyperelastic material, reported in the current configuration (unaffected by <span class="xref std std-ref">rsys</span> ).</p></td>
+</tr>
+<tr class="row-even"><td><p>MPLA</p></td>
+<td><p>DMAC, DMAX</p></td>
+<td><p>Microplane damage, macroscopic and maximum values.</p></td>
+</tr>
+<tr class="row-odd"><td><p>MPDP</p></td>
+<td><p>TOTA, TENS, COMP, RW</p></td>
+<td><p>Microplane homogenized total, tension, and compression damages (TOTA, TENS, COMP), and split weight factor (RW).</p></td>
+</tr>
+<tr class="row-even"><td><p>DAMAGE</p></td>
+<td><p>1,2,3,MAX</p></td>
+<td><p>Damage in directions 1, 2, 3 (1, 2, 3) and the maximum damage (MAX).</p></td>
+</tr>
+<tr class="row-odd"><td><p>GDMG</p></td>
+<td></td>
+<td><p>Damage</p></td>
+</tr>
+<tr class="row-even"><td><p>IDIS</p></td>
+<td></td>
+<td><p>Structural-thermal dissipation rate</p></td>
+</tr>
+<tr class="row-odd"><td><p>BKS</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Total <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/amp8sq21dldm.html#">nonlinear kinematic backstress</a> reported in the current configuration (unaffected by <span class="xref std std-ref">rsys</span> ). Available for 3D, plane strain, and axisymmetric elements.</p></td>
+</tr>
+<tr class="row-even"><td><p>BKS1,…,BKS5</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Superimposed components of the total <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/amp8sq21dldm.html#">nonlinear kinematic backstress</a> reported in the current configuration (unaffected by <span class="xref std std-ref">rsys</span> ). Available for 3D, plane strain, and axisymmetric elements when more than one superimposed back-stress component is defined.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EPFR</p></td>
+<td></td>
+<td><p>Free strain in porous media</p></td>
+</tr>
+<tr class="row-even"><td><p>FC1S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>First set of six components of FCC crystal slip. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FC2S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Second set of six components of FCC crystal slip. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>HC1S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Six components of HCP crystal slip on basal and prismatic systems. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>HC2S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Six components of HCP crystal slip on pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>HC3S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>First set of six components of HCP crystal slip on the first-order pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>HC4S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Second set of six components of HCP crystal slip on the first-order pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>HC5S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Six components of HCP crystal slip on the second-order pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC1S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>First set of six components of BCC slip on 111 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC2S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Second set of six components of BCC slip on 111 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC3S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>First set of six components of BCC slip on 112 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC4S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Second set of six components of BCC slip on 112 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC5S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>First set of six components of BCC slip on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC6S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Second set of six components of BCC slip on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC7S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Third set of six components of BCC slip on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC8S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Fourth set of six components of BCC slip on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FC1H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>First set of six components of FCC crystal hardness. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>FC2H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Second set of six components of FCC crystal hardness. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>HC1H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Sixcomponents of HCP crystal hardness on basal and prismatic systems. Available for 3D elements.</p></td>
+</tr>
+<tr class="row-even"><td><p>HC2H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Six components of HCP crystal hardness on pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>HC3H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>First set of six components of HCP crystal hardness on the first-order pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>HC4H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Second set of six components of HCP crystal hardness on the first-order pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>HC5H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Six components of HCP crystal hardness on the second-order pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC1H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>First set of six components of BCC hardness on 111 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC2H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Second set of six components of BCC hardness on 111 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC3H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>First set of six components of BCC hardness on 112 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC4H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Second set of six components of BCC hardness on 112 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC5H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>First set of six components of BCC hardness on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC6H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Second set of six components of BCC hardness on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC7H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Third set of six components of BCC hardness on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC8H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td><p>Fourth set of six components of BCC hardness on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>XELG</p></td>
+<td><p>1,2,3,45,6,EQV</p></td>
+<td><p>Crystal Lagrangian strain in 11, 22, 33, 12, 23,13 directions and its equivalent. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>SINT</p></td>
+<td><p>RHO, ETA, SSTR, GRAIN</p></td>
+<td><p>Sintering relative density, viscosity, sintering stress, and average grain size values.</p></td>
+</tr>
+<tr class="row-even"><td colspan="3"><p><strong>Sequence Number Method</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Item</strong></p></td>
+<td><p><strong>Comp</strong></p></td>
+<td><p><strong>Description</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>SMISC</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">snum</span></code></p></td>
+<td><p>Summable items.</p></td>
+</tr>
+<tr class="row-odd"><td><p>NMISC</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">snum</span></code></p></td>
+<td><p>Nonsummable items.</p></td>
+</tr>
+<tr class="row-even"><td><p>LS</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">snum</span></code></p></td>
+<td><p>Line element elastic stresses.</p></td>
+</tr>
+<tr class="row-odd"><td><p>LEPEL</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">snum</span></code></p></td>
+<td><p>Line element strains.</p></td>
+</tr>
+<tr class="row-even"><td><p>LEPTH</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">snum</span></code></p></td>
+<td><p>Line element thermal strains.</p></td>
+</tr>
+<tr class="row-odd"><td><p>LEPPL</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">snum</span></code></p></td>
+<td><p>Line element plastic strains.</p></td>
+</tr>
+<tr class="row-even"><td><p>LEPCR</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">snum</span></code></p></td>
+<td><p>Line element creep strains.</p></td>
+</tr>
+<tr class="row-odd"><td><p>LBFE</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">snum</span></code></p></td>
+<td><p>Line element temperatures.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="esol-selected-result-component-labels">
+<span id="esol-tab-2"></span><h2>ESOL - Selected Result Component Labels<a class="headerlink" href="#esol-selected-result-component-labels" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Comp</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>SVAR <code class="docutils literal notranslate"><span class="pre">n</span></code></p></td>
+<td><p>The <code class="docutils literal notranslate"><span class="pre">n</span></code> th state variable.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FLDUF0 <code class="docutils literal notranslate"><span class="pre">n</span></code></p></td>
+<td><p>The <code class="docutils literal notranslate"><span class="pre">n</span></code> th user-defined field variable.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.72.0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.6.4. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

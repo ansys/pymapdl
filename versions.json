@@ -1,0 +1,37 @@
+[
+  {
+    "name": "dev",
+    "version": "dev",
+    "url": "https://mapdl.docs.pyansys.com/version/dev/"
+  },
+  {
+    "name": "0.72 (stable)",
+    "version": "0.72",
+    "url": "https://mapdl.docs.pyansys.com/version/stable/"
+  },
+  {
+    "name": "0.71",
+    "version": "0.71",
+    "url": "https://mapdl.docs.pyansys.com/version/0.71/"
+  },
+  {
+    "name": "0.70",
+    "version": "0.70",
+    "url": "https://mapdl.docs.pyansys.com/version/0.70/"
+  },
+  {
+    "name": "0.69",
+    "version": "0.69",
+    "url": "https://mapdl.docs.pyansys.com/version/0.69/"
+  },
+  {
+    "name": "0.68",
+    "version": "0.68",
+    "url": "https://mapdl.docs.pyansys.com/version/0.68/"
+  },
+  {
+    "name": "Older version",
+    "version": "N/A",
+    "url": "https://mapdl.docs.pyansys.com/version/"
+  }
+]

@@ -1,0 +1,6 @@
+﻿gropt
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.graphics.graphs
+
+.. automethod:: Graphs.gropt

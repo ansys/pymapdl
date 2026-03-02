@@ -1,0 +1,16 @@
+User-agent: *
+
+Disallow: /version/0.71
+Disallow: /version/0.70
+Disallow: /version/0.69
+Disallow: /version/0.68
+Disallow: /version/0.67
+Disallow: /version/0.66
+Disallow: /version/0.65
+Disallow: /version/0.64
+Disallow: /version/0.63
+Disallow: /version/0.62
+Disallow: /version/0.61
+Disallow: /pull/
+
+Sitemap: https://mapdl.docs.pyansys.com/sitemap.xml

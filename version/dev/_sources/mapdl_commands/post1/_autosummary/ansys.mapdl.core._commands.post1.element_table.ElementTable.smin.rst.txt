@@ -1,0 +1,6 @@
+﻿smin
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.element_table
+
+.. automethod:: ElementTable.smin

@@ -1,0 +1,6 @@
+﻿force
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.controls
+
+.. automethod:: Controls.force

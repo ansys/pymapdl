@@ -1,0 +1,6 @@
+add
+===
+
+.. currentmodule:: ansys.mapdl.core.pool
+
+.. automethod:: MapdlPool.add

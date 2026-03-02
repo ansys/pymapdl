@@ -1,0 +1,1638 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>starvget &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=9e79609d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=9e79609d" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=0f5839ad"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/apdl/_autosummary/ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.starvget';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.72';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="taxis" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.taxis.html" />
+    <link rel="prev" title="starstatus" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.starstatus.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.72.0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/apdl/_autosummary/ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.starvget.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    <div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(
+      (text) => (document.getElementById("announcement_msg").innerHTML = text),
+    )
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Session</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../session/index.html">Session</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Database</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../database/index.html">Database</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Graphics</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../graphics/index.html">Graphics</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">APDL</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../abbreviations.html">Abbreviations</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../parameter_definition.html">ParameterDefinition</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.afun.html">afun</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.dim.html">dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.get.html">get</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.inquire.html">inquire</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.parres.html">parres</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.parsav.html">parsav</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.starset.html">starset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.starstatus.html">starstatus</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">starvget</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.taxis.html">taxis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.tread.html">tread</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.vfill.html">vfill</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.vread.html">vread</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../matrix_operations.html">MatrixOperations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../macro_files.html">MacroFiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../encryption_decryption.html">EncryptionDecryption</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../array_parameters.html">ArrayParameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../process_controls.html">ProcessControls</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Preprocessing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/element_type.html">Element type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/real_constants.html">Real constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/materials.html">Materials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/material_data_tables.html">Material data tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/primitives.html">Primitives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/keypoints.html">Keypoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/hard_points.html">Hard points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/lines.html">Lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/areas.html">Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/volumes.html">Volumes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/booleans.html">Booleans</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/meshing.html">Meshing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/nodes.html">Nodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/elements.html">Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/superelements.html">Superelements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/digitizing.html">Digitizing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/coupled_dof.html">Coupled degrees of freedom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/constraint_equations.html">Constraint equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/status.html">Status</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/explicit_dynamics.html">Explicit dynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/sections.html">Sections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/morphing.html">Morphing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/artificially_matched_layers.html">Artificially matched layers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/special_purpose.html">Special purpose</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Solution</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../solution/analysis_options.html">Analysis options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/nonlinear_options.html">Nonlinear options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/dynamic_options.html">Dynamic options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/spectrum_options.html">Spectrum options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/load_step_options.html">Load step options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_constraints.html">Solid constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_forces.html">Solid forces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_surface_loads.html">Solid surface loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_body_loads.html">Solid body loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/inertia.html">Inertia</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/miscellaneous_loads.html">Miscellaneous loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/load_step_operations.html">Load step operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/master_dof.html">Master degrees of freedom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/gap_conditions.html">Gap conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/rezoning.html">Rezoning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/2d_to_3d_analysis.html">2D to 3D analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/birth_and_death.html">Birth and death</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_constraints.html">FE constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_forces.html">FE forces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_surface_loads.html">FE surface loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_body_loads.html">FE body loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/ocean.html">Ocean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solution_status.html">Solution status</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/radiosity.html">Radiosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_definition_commands.html">Multi-Field solver definition commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_global_controls.html">Multi-Field solver global controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_time_controls.html">Multi-Field solver time controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_load_transfer.html">Multi-Field solver load transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_convergence_controls.html">Multi-Field solver convergence controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_interface_mapping.html">Multi-Field solver interface mapping</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post1/index.html">Post1</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST26</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post26/index.html">Post26</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux2/index.html">Aux2</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux3/index.html">Aux3</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX12</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux12/index.html">Aux12</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX15</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux15/index.html">Aux15</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">MAP</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../map/index.html">Map</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Connection</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../conn.html">Connection commands</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../misc.html">Miscellaneous</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Undocumented</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../inqfun.html">Undocumented inquire commands</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item"> 
+<div class="tocsection editthispage">
+  <a href="None">
+    <i class="fa-solid fa-pencil"></i>
+       Edit
+    on GitHub  
+  </a>
+</div>
+
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">MAPDL commands</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../index.html" class="nav-link">&lt;no title&gt;</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../parameter_definition.html" class="nav-link">ParameterDefinition</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">starvget</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="starvget">
+<h1>starvget<a class="headerlink" href="#starvget" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.starvget">
+<span class="sig-prename descclassname"><span class="pre">ParameterDefinition.</span></span><span class="sig-name descname"><span class="pre">starvget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entnum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">it1num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">it2num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kloop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition.starvget" title="Link to this definition">#</a></dt>
+<dd><p>Retrieves values and stores them into an array parameter.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VGET_st.html">*VGET</a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>parr</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The name of the resulting vector array parameter. See <span class="xref std std-ref">starset</span> for name restrictions. The
+program creates the array parameter if it does not exist.</p>
+</dd>
+<dt><strong>entity</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Entity keyword. Valid keywords are NODE, ELEM, KP, LINE, AREA, VOLU, etc. as shown for
+<code class="docutils literal notranslate"><span class="pre">Entity</span></code> = in the tables below.</p>
+</dd>
+<dt><strong>entnum</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The number of the entity (as shown for <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = in the tables below).</p>
+</dd>
+<dt><strong>item1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The name of a particular item for the given entity. Valid items are as shown in the <code class="docutils literal notranslate"><span class="pre">Item1</span></code>
+columns of the tables below.</p>
+</dd>
+<dt><strong>it1num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The number (or label) for the specified <code class="docutils literal notranslate"><span class="pre">Item1</span></code> (if any). Valid <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code> values are as shown
+in the <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code> columns of the tables below. Some <code class="docutils literal notranslate"><span class="pre">Item1</span></code> labels do not require an
+<code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code> value.</p>
+</dd>
+<dt><strong>item2</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>A second set of item labels and numbers to further qualify the item for which data is to be
+retrieved. Most items do not require this level of information.</p>
+</dd>
+<dt><strong>it2num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>A second set of item labels and numbers to further qualify the item for which data is to be
+retrieved. Most items do not require this level of information.</p>
+</dd>
+<dt><strong>kloop</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Field to be looped on:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">or</span> <span class="pre">2</span></code> - Loop on the <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> field (default).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">3</span></code> - Loop on the <code class="docutils literal notranslate"><span class="pre">Item1</span></code> field.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">4</span></code> - Loop on the <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code> field. Successive items are as shown with <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">5</span></code> - Loop on the <code class="docutils literal notranslate"><span class="pre">Item2</span></code> field.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">6</span></code> - Loop on the <code class="docutils literal notranslate"><span class="pre">IT2NUM</span></code> field. Successive items are as shown with <code class="docutils literal notranslate"><span class="pre">IT2NUM</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This function contains specificities regarding the argument definitions.
+Please refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VGET_st.html">command documentation</a>
+for further explanations.</p>
+</div>
+<p><strong>Argument Descriptions</strong></p>
+<ul class="simple" id="a-vget-argdescript">
+<li><p><code class="docutils literal notranslate"><span class="pre">parr</span> <span class="pre">:</span> <span class="pre">str</span></code> - The name of the resulting vector array parameter. See <span class="xref std std-ref">starset</span> for name
+restrictions. The program creates the array parameter if it does not exist.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">entity</span> <span class="pre">:</span> <span class="pre">str</span></code> - Entity keyword. Valid keywords are NODE, ELEM, KP, LINE, AREA, VOLU, etc. as
+shown for <code class="docutils literal notranslate"><span class="pre">Entity</span></code> = in the tables below.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">entnum</span> <span class="pre">:</span> <span class="pre">str</span></code> - The number of the entity (as shown for <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = in the tables below).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">item1</span> <span class="pre">:</span> <span class="pre">str</span></code> - The name of a particular item for the given entity. Valid items are as shown in
+the <code class="docutils literal notranslate"><span class="pre">Item1</span></code> columns of the tables below.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">it1num</span> <span class="pre">:</span> <span class="pre">str</span></code> - The number (or label) for the specified <code class="docutils literal notranslate"><span class="pre">Item1</span></code> (if any). Valid <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>
+values are as shown in the <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code> columns of the tables below. Some <code class="docutils literal notranslate"><span class="pre">Item1</span></code> labels do not
+require an <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code> value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">item2,</span> <span class="pre">it2num</span> <span class="pre">:</span> <span class="pre">str</span></code> - A second set of item labels and numbers to further qualify the item for
+which data is to be retrieved. Most items do not require this level of information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kloop</span> <span class="pre">:</span> <span class="pre">str</span></code> - Field to be looped on:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">or</span> <span class="pre">2</span></code> - Loop on the <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> field (default).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">3</span></code> - Loop on the <code class="docutils literal notranslate"><span class="pre">Item1</span></code> field.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">4</span></code> - Loop on the <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code> field. Successive items are as shown with <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">5</span></code> - Loop on the <code class="docutils literal notranslate"><span class="pre">Item2</span></code> field.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">6</span></code> - Loop on the <code class="docutils literal notranslate"><span class="pre">IT2NUM</span></code> field. Successive items are as shown with <code class="docutils literal notranslate"><span class="pre">IT2NUM</span></code>.</p></li>
+</ul>
+</li>
+</ul>
+<p id="a-vget-notes">Retrieves values for specified items and stores the values in an output vector of a user-named array
+parameter according to: <code class="docutils literal notranslate"><span class="pre">ParR</span></code> = f( <code class="docutils literal notranslate"><span class="pre">Entity</span></code>, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>, <code class="docutils literal notranslate"><span class="pre">Item2</span></code>,
+<code class="docutils literal notranslate"><span class="pre">IT2NUM</span></code> )</p>
+<p>where (f) is the <span class="xref std std-ref">get</span> function; <code class="docutils literal notranslate"><span class="pre">Entity</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, and <code class="docutils literal notranslate"><span class="pre">Item2</span></code> are keywords; and
+<code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>, and <code class="docutils literal notranslate"><span class="pre">IT2NUM</span></code> are numbers or labels corresponding to the keywords. Looping
+continues over successive entity numbers ( <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> ) for the <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code> default. For example,
+<span class="xref std std-ref">starvget</span>,A(1),ELEM,5,CENT,X returns the centroid x-location of element 5 and stores the
+result in the first location of A. Retrieving continues with element 6, 7, 8, etc., regardless of
+whether the element exists or is selected, until successive array locations are filled. Use
+<span class="xref std std-ref">vlen</span> or <span class="xref std std-ref">vmask</span> to skip locations. Absolute values and scale factors may be applied to
+the result parameter ( <span class="xref std std-ref">vabs</span>, <span class="xref std std-ref">vfact</span> ). Results may be cumulative ( <span class="xref std std-ref">vcum</span> ). See
+the <span class="xref std std-ref">voper</span> command for general details. Results can be put back into an analysis by writing a
+file of the desired input commands with the <span class="xref std std-ref">vwrite</span> command. See also the <span class="xref std std-ref">starvput</span>
+command.</p>
+<p>Both <span class="xref std std-ref">get</span> and <span class="xref std std-ref">starvget</span> retrieve information from the active data stored in memory. The
+database is often the source, and sometimes the information is retrieved from common memory blocks
+that Mechanical APDL uses to manipulate information. Although POST1 and POST26 operations use a
+<code class="file docutils literal notranslate"><span class="pre">*.rst</span></code> file, GET data is accessed from the database or from the common blocks. Get
+operations do not access the <code class="file docutils literal notranslate"><span class="pre">*.rst</span></code> file directly.</p>
+<p>The <span class="xref std std-ref">starvget</span> command retrieves both the unprocessed real and the imaginary parts (original
+and duplicate sector nodes and elements) of a <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/cycsym_example.html">cyclic symmetry</a> solution.</p>
+<p>Each of the sections for accessing *VGET parameters are shown in the following order:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_VGET_st.html#vget.prep7.tlab">*VGET PREP7 Items</a>
+*VGET PREP7 Items</p></li>
+<li><p><a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_VGET_st.html#vget.post1.node.ndof">*VGET POST1 Items</a>
+*VGET POST1 Items</p></li>
+</ul>
+<p>This command is valid in any processor.</p>
+<p><strong>*VGET PREP7 Items</strong></p>
+<ul class="simple" id="vget-prep7">
+<li><p><a class="reference internal" href="#vget-prep7-node"><span class="std std-ref">*VGET PREP7 Items, Entity = NODE</span></a></p></li>
+<li><p><a class="reference internal" href="#vget-prep7-elem"><span class="std std-ref">*VGET PREP7 Items, Entity = ELEM</span></a></p></li>
+<li><p><a class="reference internal" href="#vget-prep7-kp"><span class="std std-ref">*VGET PREP7 Items, Entity = KP</span></a></p></li>
+<li><p><a class="reference internal" href="#vget-prep7-line"><span class="std std-ref">*VGET PREP7 Items, Entity = LINE</span></a></p></li>
+<li><p><a class="reference internal" href="#vget-prep7-area"><span class="std std-ref">*VGET PREP7 Items, Entity = AREA</span></a></p></li>
+<li><p><a class="reference internal" href="#vget-prep7-volu"><span class="std std-ref">*VGET PREP7 Items, Entity = VOLU</span></a></p></li>
+<li><p><a class="reference internal" href="#vget-prep7-cdsy"><span class="std std-ref">*VGET PREP7 Items, Entity = CDSY</span></a></p></li>
+<li><p><a class="reference internal" href="#vget-prep7-rcon"><span class="std std-ref">*VGET PREP7 Items, Entity = RCON</span></a></p></li>
+<li><p><a class="reference internal" href="#vget-prep7-tlab"><span class="std std-ref">*VGET PREP7 Items, Entity = TLAB</span></a></p></li>
+</ul>
+<section id="vget-prep7-items-entity-node">
+<span id="vget-prep7-node"></span><h2>*VGET PREP7 Items, Entity = NODE<a class="headerlink" href="#vget-prep7-items-entity-node" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id3">
+<caption><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Entity</span></code> = NODE, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = <code class="docutils literal notranslate"><span class="pre">n</span></code> (node number)</span><a class="headerlink" href="#id3" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head" colspan="3"><p><span class="xref std std-ref">starvget</span>, <code class="docutils literal notranslate"><span class="pre">ParR</span></code>, NODE, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>,, <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Item1</p></th>
+<th class="head"><p>IT1NUM</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>LOC</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>X, Y, or Z location in the active coordinate system</p></td>
+</tr>
+<tr class="row-even"><td><p>ANG</p></td>
+<td><p>XY, YZ, ZX</p></td>
+<td><p>THXY, THYZ, THZX rotation angle</p></td>
+</tr>
+<tr class="row-odd"><td><p>NSEL</p></td>
+<td></td>
+<td><p>Select status of node <code class="docutils literal notranslate"><span class="pre">n</span></code> : -1 = unselected, 0 = undefined, 1 = selected</p></td>
+</tr>
+<tr class="row-even"><td><p>NLIST</p></td>
+<td></td>
+<td><p>Returns the list of selected nodes ( <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> is ignored)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="vget-prep7-items-entity-elem">
+<span id="vget-prep7-elem"></span><h2>*VGET PREP7 Items, Entity = ELEM<a class="headerlink" href="#vget-prep7-items-entity-elem" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id4">
+<caption><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Entity</span></code> = ELEM, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = <code class="docutils literal notranslate"><span class="pre">n</span></code> (element number)</span><a class="headerlink" href="#id4" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head" colspan="3"><p><span class="xref std std-ref">starvget</span>, <code class="docutils literal notranslate"><span class="pre">ParR</span></code>, ELEM, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>,, <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Item1</p></th>
+<th class="head"><p>IT1NUM</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>NODE</p></td>
+<td><p>1, 2,… 20</p></td>
+<td><p>Node number at position 1, 2,… 20 of element <code class="docutils literal notranslate"><span class="pre">n</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>CENT</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>Centroid X, Y, or Z location (based on shape function) in the active coordinate system</p></td>
+</tr>
+<tr class="row-odd"><td><p>ADJ</p></td>
+<td><p>1, 2,… 6</p></td>
+<td><p>Number of elements adjacent to face 1, 2,… 6</p></td>
+</tr>
+<tr class="row-even"><td><p>ATTR</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>Number assigned to specified attribute; <code class="docutils literal notranslate"><span class="pre">name</span></code> = MAT, TYPE, REAL, ESYS, ENAM, or SECN</p></td>
+</tr>
+<tr class="row-odd"><td><p>GEOM</p></td>
+<td></td>
+<td><p>Characteristic element geometry. Length of line element (straight line between ends), area of area element, or volume of volume element. Issuing <span class="xref std std-ref">starvget</span> for an element returns a signed value. To always get a positive value, issue <span class="xref std std-ref">vabs</span>,1 prior to issuing the <span class="xref std std-ref">starvget</span> command.</p></td>
+</tr>
+<tr class="row-even"><td><p>ESEL</p></td>
+<td></td>
+<td><p>Select status of element <code class="docutils literal notranslate"><span class="pre">n</span></code> : -1 = unselected, 0 = undefined, 1 = selected</p></td>
+</tr>
+<tr class="row-odd"><td><p>SHPAR</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Test</span></code></p></td>
+<td><p>Element shape test result for selected element <code class="docutils literal notranslate"><span class="pre">n</span></code>, where <code class="docutils literal notranslate"><span class="pre">Test</span></code> = ASPE (aspect ratio), JACR (Jacobian ratio), MAXA (maximum corner angle), PARA (deviation from parallelism of opposite edges), or WARP (warping factor)</p></td>
+</tr>
+<tr class="row-even"><td><p>ELIST</p></td>
+<td></td>
+<td><p>Returns the list of selected elements ( <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> is ignored)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="vget-prep7-items-entity-kp">
+<span id="vget-prep7-kp"></span><h2>*VGET PREP7 Items, Entity = KP<a class="headerlink" href="#vget-prep7-items-entity-kp" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id5">
+<caption><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Entity</span></code> = KP, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = <code class="docutils literal notranslate"><span class="pre">n</span></code> (keypoint number)</span><a class="headerlink" href="#id5" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head" colspan="3"><p><span class="xref std std-ref">starvget</span>, <code class="docutils literal notranslate"><span class="pre">ParR</span></code>, KP, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>,, <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Item1</p></th>
+<th class="head"><p>IT1NUM</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>LOC</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>X, Y, or Z location in the active coordinate system</p></td>
+</tr>
+<tr class="row-even"><td><p>ATTR</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>Number assigned to specified attribute; <code class="docutils literal notranslate"><span class="pre">name</span></code> = MAT, TYPE, REAL, ESYS, NODE, or ELEM</p></td>
+</tr>
+<tr class="row-odd"><td><p>DIV</p></td>
+<td></td>
+<td><p>Divisions (element size setting) from <span class="xref std std-ref">kesize</span></p></td>
+</tr>
+<tr class="row-even"><td><p>KSEL</p></td>
+<td></td>
+<td><p>Select status of keypoint <code class="docutils literal notranslate"><span class="pre">n</span></code> : -1 = unselected, 0 = undefined, 1 = selected</p></td>
+</tr>
+<tr class="row-odd"><td><p>KLIST</p></td>
+<td></td>
+<td><p>Returns the list of selected keypoints ( <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> is ignored)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="vget-prep7-items-entity-line">
+<span id="vget-prep7-line"></span><h2>*VGET PREP7 Items, Entity = LINE<a class="headerlink" href="#vget-prep7-items-entity-line" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id6">
+<caption><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Entity</span></code> = LINE, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = <code class="docutils literal notranslate"><span class="pre">n</span></code> (line number)</span><a class="headerlink" href="#id6" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head" colspan="3"><p><span class="xref std std-ref">starvget</span>, <code class="docutils literal notranslate"><span class="pre">ParR</span></code>, LINE, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>,, <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Item1</p></th>
+<th class="head"><p>IT1NUM</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>KP</p></td>
+<td><p>1, 2</p></td>
+<td><p>Keypoint number at position 1 or 2</p></td>
+</tr>
+<tr class="row-even"><td><p>ATTR</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>Number assigned to specified attribute; <code class="docutils literal notranslate"><span class="pre">name</span></code> = MAT, TYPE, REAL, ESYS, NNOD, NELM, or NDIV (NNOD = number of nodes, NELM = number of elements, NDIV = number of divisions)</p></td>
+</tr>
+<tr class="row-odd"><td><p>LENG</p></td>
+<td></td>
+<td><p>Length</p></td>
+</tr>
+<tr class="row-even"><td><p>LSEL</p></td>
+<td></td>
+<td><p>Select status of line <code class="docutils literal notranslate"><span class="pre">n</span></code> : -1 = unselected, 0 = undefined, 1 = selected</p></td>
+</tr>
+<tr class="row-odd"><td><p>LLIST</p></td>
+<td></td>
+<td><p>Returns the list of selected lines ( <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> is ignored)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="vget-prep7-items-entity-area">
+<span id="vget-prep7-area"></span><h2>*VGET PREP7 Items, Entity = AREA<a class="headerlink" href="#vget-prep7-items-entity-area" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id7">
+<caption><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Entity</span></code> = AREA, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = <code class="docutils literal notranslate"><span class="pre">n</span></code> (area number)</span><a class="headerlink" href="#id7" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head" colspan="5"><p><span class="xref std std-ref">starvget</span>, <code class="docutils literal notranslate"><span class="pre">ParR</span></code>, AREA, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>, <code class="docutils literal notranslate"><span class="pre">Item2</span></code>, <code class="docutils literal notranslate"><span class="pre">IT2NUM</span></code>, <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Item1</p></th>
+<th class="head"><p>IT1NUM</p></th>
+<th class="head"><p>Item2</p></th>
+<th class="head"><p>IT2NUM</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>LOOP</p></td>
+<td><p>1,2,…</p></td>
+<td><p>LINE</p></td>
+<td><p>1, 2,… <code class="docutils literal notranslate"><span class="pre">p</span></code></p></td>
+<td><p>IT1NUM is the loop number, and must be input if LINE is to be retrieved. IT2NUM is line number at position 1, 2,… <code class="docutils literal notranslate"><span class="pre">p</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>ATTR</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td rowspan="4"><p></p></td>
+<td rowspan="4"><p></p></td>
+<td><p>Number assigned to specified attribute; <code class="docutils literal notranslate"><span class="pre">name</span></code> = MAT, TYPE, REAL, ESYS, SECN, NNOD, or NELM (NNOD = number of nodes, NELM = number of elements)</p></td>
+</tr>
+<tr class="row-odd"><td><p>AREA</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>Area (after last <span class="xref std std-ref">asum</span> )</p></td>
+</tr>
+<tr class="row-even"><td><p>ASEL</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>Select status of area <code class="docutils literal notranslate"><span class="pre">n</span></code> : -1 = unselected, 0 = undefined, 1 = selected</p></td>
+</tr>
+<tr class="row-odd"><td><p>ALIST</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>Returns the list of selected areas ( <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> is ignored)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="vget-prep7-items-entity-volu">
+<span id="vget-prep7-volu"></span><h2>*VGET PREP7 Items, Entity = VOLU<a class="headerlink" href="#vget-prep7-items-entity-volu" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id8">
+<caption><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Entity</span></code> = VOLU, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = <code class="docutils literal notranslate"><span class="pre">n</span></code> (volume number)</span><a class="headerlink" href="#id8" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head" colspan="5"><p><span class="xref std std-ref">starvget</span>, <code class="docutils literal notranslate"><span class="pre">ParR</span></code>, VOLU, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>, <code class="docutils literal notranslate"><span class="pre">Item2</span></code>, <code class="docutils literal notranslate"><span class="pre">IT2NUM</span></code>, <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Item1</p></th>
+<th class="head"><p>IT1NUM</p></th>
+<th class="head"><p>Item2</p></th>
+<th class="head"><p>IT2NUM</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>SHELL</p></td>
+<td><p>1, 2,…</p></td>
+<td><p>AREA</p></td>
+<td><p>1, 2,… <code class="docutils literal notranslate"><span class="pre">p</span></code></p></td>
+<td><p>IT1NUM is the shell number, and must be input if AREA is to be retrieved. IT2NUM is area number at position 1, 2… <code class="docutils literal notranslate"><span class="pre">p</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>ATTR</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td rowspan="4"><p></p></td>
+<td rowspan="4"><p></p></td>
+<td><p>Number assigned to specified attribute; <code class="docutils literal notranslate"><span class="pre">name</span></code> = MAT, TYPE, REAL, ESYS, NNOD, or NELM (NNOD = number of nodes, NELM = number of elements)</p></td>
+</tr>
+<tr class="row-odd"><td><p>VOLU</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>Volume (after last <span class="xref std std-ref">vsum</span> )</p></td>
+</tr>
+<tr class="row-even"><td><p>VSEL</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>Select status of volume <code class="docutils literal notranslate"><span class="pre">n</span></code> : -1 = unselected, 0 = undefined, 1 = selected</p></td>
+</tr>
+<tr class="row-odd"><td><p>VLIST</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>Returns the list of selected volumes ( <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> is ignored)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="vget-prep7-items-entity-cdsy">
+<span id="vget-prep7-cdsy"></span><h2>*VGET PREP7 Items, Entity = CDSY<a class="headerlink" href="#vget-prep7-items-entity-cdsy" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id9">
+<caption><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Entity</span></code> = CDSY, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = <code class="docutils literal notranslate"><span class="pre">n</span></code> (coordinate system number)</span><a class="headerlink" href="#id9" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head" colspan="3"><p><span class="xref std std-ref">starvget</span>, <code class="docutils literal notranslate"><span class="pre">ParR</span></code>, CDSY, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>,, <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Item1</p></th>
+<th class="head"><p>IT1NUM</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>LOC</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>X, Y, or Z origin location (global Cartesian coordinate)</p></td>
+</tr>
+<tr class="row-even"><td><p>ANG</p></td>
+<td><p>XY, YZ, ZX</p></td>
+<td><p>THXY, THYZ, or THZX rotation angle (°) relative to the global Cartesian coordinate system</p></td>
+</tr>
+<tr class="row-odd"><td><p>ATTR</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>Number assigned to specified attribute; <code class="docutils literal notranslate"><span class="pre">name</span></code> = KCS, KTHET, KPHI, PAR1, or PAR2. If the coordinate system is undefined, KCS returns as -1.0</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="vget-prep7-items-entity-rcon">
+<span id="vget-prep7-rcon"></span><h2>*VGET PREP7 Items, Entity = RCON<a class="headerlink" href="#vget-prep7-items-entity-rcon" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id10">
+<caption><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Entity</span></code> = RCON, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = <code class="docutils literal notranslate"><span class="pre">n</span></code> (real constant set number)</span><a class="headerlink" href="#id10" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head" colspan="3"><p><span class="xref std std-ref">starvget</span>, <code class="docutils literal notranslate"><span class="pre">ParR</span></code>, RCON, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>,, <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Item1</p></th>
+<th class="head"><p>IT1NUM</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>CONST</p></td>
+<td><p>1, 2,… <code class="docutils literal notranslate"><span class="pre">m</span></code></p></td>
+<td><p>Real constant value for constant 1, 2,… <code class="docutils literal notranslate"><span class="pre">m</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="vget-prep7-items-entity-tlab">
+<span id="vget-prep7-tlab"></span><h2>*VGET PREP7 Items, Entity = TLAB<a class="headerlink" href="#vget-prep7-items-entity-tlab" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id11">
+<caption><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Entity</span></code> = <code class="docutils literal notranslate"><span class="pre">TLAB</span></code>, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = <code class="docutils literal notranslate"><span class="pre">n</span></code> ( <code class="docutils literal notranslate"><span class="pre">TLAB</span></code> is the <code class="docutils literal notranslate"><span class="pre">Lab</span></code> data table label on the <span class="xref std std-ref">tb</span> command. <code class="docutils literal notranslate"><span class="pre">n</span></code> is the material number.)</span><a class="headerlink" href="#id11" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head" colspan="5"><p><span class="xref std std-ref">starvget</span>, <code class="docutils literal notranslate"><span class="pre">ParR</span></code>, <code class="docutils literal notranslate"><span class="pre">TLAB</span></code>, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>,, <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Item1</p></th>
+<th class="head"><p>IT1NUM</p></th>
+<th class="head"><p>Item2</p></th>
+<th class="head"><p>IT2NUM</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>TEMP</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">val</span></code></p></td>
+<td><p>CONST</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">num</span></code></p></td>
+<td><p>IT1NUM <code class="docutils literal notranslate"><span class="pre">value</span></code> is the temperature value at which to retrieve table data. <code class="docutils literal notranslate"><span class="pre">num</span></code> is the constant number whose value is to be retrieved. For constants input as X, Y points, the constant numbers are consecutive with the X constants being the odd numbers, beginning with one.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>*VGET POST1 Items</strong></p>
+<ul class="simple" id="vget-post1">
+<li><p><a class="reference internal" href="#vget-post1-cyccalc"><span class="std std-ref">*VGET POST1 Items, Entity = CYCCALC</span></a></p></li>
+<li><p><a class="reference internal" href="#vget-post1-elem"><span class="std std-ref">*VGET POST1 Items, Entity = ELEM</span></a></p></li>
+<li><p><a class="reference internal" href="#vget-post1-member"><span class="std std-ref">*VGET POST1 Items, Entity = MEMBER</span></a></p></li>
+<li><p><a class="reference internal" href="#vget-post1-node-enode"><span class="std std-ref">*VGET POST1 Items, Entity = NODE, Element Nodal Results</span></a></p></li>
+<li><p><a class="reference internal" href="#vget-post1-node-ndof"><span class="std std-ref">*VGET POST1 Items, Entity = NODE, Nodal Degree of Freedom Results</span></a></p></li>
+</ul>
+<p>Vector items are in the active results coordinate system unless otherwise specified.</p>
+</section>
+<section id="vget-post1-items-entity-cyccalc">
+<span id="vget-post1-cyccalc"></span><h2>*VGET POST1 Items, Entity = CYCCALC<a class="headerlink" href="#vget-post1-items-entity-cyccalc" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id12">
+<caption><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Entity</span></code> = CYCCALC, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = <code class="docutils literal notranslate"><span class="pre">n</span></code> ( <span class="xref std std-ref">cycspec</span> specification number)</span><a class="headerlink" href="#id12" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head" colspan="5"><p><span class="xref std std-ref">starvget</span>, <code class="docutils literal notranslate"><span class="pre">ParR</span></code>, CYCCALC, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>, <code class="docutils literal notranslate"><span class="pre">Item2</span></code>, <code class="docutils literal notranslate"><span class="pre">IT2NUM</span></code>, <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Item1</p></th>
+<th class="head"><p>IT1NUM</p></th>
+<th class="head"><p>Item2</p></th>
+<th class="head"><p>IT2NUm</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td rowspan="2"><p> FREQ</p></td>
+<td rowspan="2"><p> <code class="docutils literal notranslate"><span class="pre">Frequency</span> <span class="pre">point</span></code></p></td>
+<td><p>SECTOR</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sector</span></code></p></td>
+<td><p><span class="xref std std-ref">cycspec</span> results at the IT1NUM frequency or sector (depending on <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code> )</p></td>
+</tr>
+<tr class="row-even"><td><p>SECMAX</p></td>
+<td></td>
+<td><p><span class="xref std std-ref">cycspec</span> maximum results</p></td>
+</tr>
+<tr class="row-odd"><td colspan="5"><p>The frequency point refers to the harmonic solution data set number ( <code class="docutils literal notranslate"><span class="pre">NSET</span></code> on the <a class="reference external" href="https://docs.python.org/3/reference/expressions.html#set" title="(in Python v3.14)"><span>Set displays</span></a> command).   For <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code> = 4 or SECMAX, returns the requested sector results for all frequencies and <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code> is ignored.   For <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code> = 6, returns the requested frequency results for all sectors and <code class="docutils literal notranslate"><span class="pre">IT2NUM</span></code> is ignored.   All other <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code> options are invalid.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="vget-post1-items-entity-elem">
+<span id="vget-post1-elem"></span><h2>*VGET POST1 Items, Entity = ELEM<a class="headerlink" href="#vget-post1-items-entity-elem" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id13">
+<caption><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Entity</span></code> = ELEM, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = <code class="docutils literal notranslate"><span class="pre">n</span></code> (element number)</span><a class="headerlink" href="#id13" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head" colspan="3"><p><span class="xref std std-ref">starvget</span>, <code class="docutils literal notranslate"><span class="pre">ParR</span></code>, ELEM, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>,, <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Item1</p></th>
+<th class="head"><p>IT1NUM</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>ETAB</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Label</span></code></p></td>
+<td><p>Any user-defined element table label (see <span class="xref std std-ref">etable</span> command)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="vget-post1-items-entity-member">
+<span id="vget-post1-member"></span><h2>*VGET POST1 Items, Entity = MEMBER<a class="headerlink" href="#vget-post1-items-entity-member" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id14">
+<caption><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Entity</span></code> = MEMBER, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = <code class="docutils literal notranslate"><span class="pre">N</span></code> (GroupID)</span><a class="headerlink" href="#id14" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head" colspan="3"><p><span class="xref std std-ref">starvget</span>, <code class="docutils literal notranslate"><span class="pre">Par</span></code> ,MEMBER, <code class="docutils literal notranslate"><span class="pre">N</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>,, <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Item1</p></th>
+<th class="head"><p>IT1NUM</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>TEMP</p></td>
+<td><p>MIN, MAX</p></td>
+<td><p>Minimum or maximum temperature of members (individual reinforcings) with GroupID = <code class="docutils literal notranslate"><span class="pre">N</span></code> in the selected set of reinforcing elements</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="vget-post1-items-entity-node-element-nodal-results">
+<span id="vget-post1-node-enode"></span><h2>*VGET POST1 Items, Entity = NODE, Element Nodal Results<a class="headerlink" href="#vget-post1-items-entity-node-element-nodal-results" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id15">
+<caption><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Entity</span></code> = NODE, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = <code class="docutils literal notranslate"><span class="pre">n</span></code> (node number)</span><a class="headerlink" href="#id15" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head" colspan="4"><p><span class="xref std std-ref">starvget</span>, <code class="docutils literal notranslate"><span class="pre">ParR</span></code>, NODE, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>,, <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Item1</p></th>
+<th class="head"><p>IT1NUM</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Item2</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td rowspan="3"><p> S</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Component stress</p></td>
+<td rowspan="3"><p> <code class="docutils literal notranslate"><span class="pre">Item2</span></code> controls whether <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost">nodal-averaged results</a> are used. Valid labels are: AUTO - Use nodal-averaged results, if available. Otherwise use element-based results.   ESOL- Use element-based results only.   NAR - Use nodal-averaged results only.</p></td>
+</tr>
+<tr class="row-even"><td><p>1, 2, 3</p></td>
+<td><p>Principal stress</p></td>
+</tr>
+<tr class="row-odd"><td><p>INT, EQV</p></td>
+<td><p>Stress intensity or equivalent stress</p></td>
+</tr>
+<tr class="row-even"><td rowspan="3"><p> EPTO</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Component total strain (EPEL + EPPL + EPCR)</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td><p>Principal total strain</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>INT, EQV</p></td>
+<td><p>Total strain intensity or total equivalent strain</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><p> EPEL</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Component elastic strain</p></td>
+<td rowspan="3"><p> <code class="docutils literal notranslate"><span class="pre">Item2</span></code> controls whether <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost">nodal-averaged results</a> are used. Valid labels are: AUTO - Use nodal-averaged results, if available. Otherwise use element-based results.   ESOL- Use element-based results only.   NAR - Use nodal-averaged results only.</p></td>
+</tr>
+<tr class="row-even"><td><p>1, 2, 3</p></td>
+<td><p>Principal elastic strain</p></td>
+</tr>
+<tr class="row-odd"><td><p>INT, EQV</p></td>
+<td><p>Elastic strain intensity or elastic equivalent strain</p></td>
+</tr>
+<tr class="row-even"><td rowspan="3"><p> EPPL</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Component plastic strain</p></td>
+<td rowspan="3"><p> <code class="docutils literal notranslate"><span class="pre">Item2</span></code> controls whether <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost">nodal-averaged results</a> are used. Valid labels are: AUTO - Use nodal-averaged results, if available. Otherwise use element-based results.   ESOL- Use element-based results only.   NAR - Use nodal-averaged results only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td><p>Principal plastic strain</p></td>
+</tr>
+<tr class="row-even"><td><p>INT, EQV</p></td>
+<td><p>Plastic strain intensity or plastic equivalent strain</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><p> EPCR</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Component creep strain</p></td>
+<td rowspan="3"><p> <code class="docutils literal notranslate"><span class="pre">Item2</span></code> controls whether <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost">nodal-averaged results</a> are used. Valid labels are: AUTO - Use nodal-averaged results, if available. Otherwise use element-based results.   ESOL- Use element-based results only.   NAR - Use nodal-averaged results only.</p></td>
+</tr>
+<tr class="row-even"><td><p>1, 2, 3</p></td>
+<td><p>Principal creep strain</p></td>
+</tr>
+<tr class="row-odd"><td><p>INT, EQV</p></td>
+<td><p>Creep strain intensity or creep equivalent strain</p></td>
+</tr>
+<tr class="row-even"><td rowspan="3"><p> EPTH</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Component thermal strain</p></td>
+<td rowspan="3"><p> <code class="docutils literal notranslate"><span class="pre">Item2</span></code> controls whether <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost">nodal-averaged results</a> are used. Valid labels are: AUTO - Use nodal-averaged results, if available. Otherwise use element-based results.   ESOL- Use element-based results only.   NAR - Use nodal-averaged results only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td><p>Principal thermal strain</p></td>
+</tr>
+<tr class="row-even"><td><p>INT, EQV</p></td>
+<td><p>Thermal strain intensity or thermal equivalent strain</p></td>
+</tr>
+<tr class="row-odd"><td><p>EPSW</p></td>
+<td></td>
+<td><p>Swelling strain</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Item2</span></code> controls whether <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost">nodal-averaged results</a> are used. Valid labels are: AUTO - Use nodal-averaged results, if available. Otherwise use element-based results.   ESOL- Use element-based results only.   NAR - Use nodal-averaged results only.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="3"><p> EPDI</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td><p>Component diffusion strain</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td><p>Principal diffusion strain</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>INT, EQV</p></td>
+<td><p>Diffusion strain intensity or diffusion equivalent strain</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><p> NL</p></td>
+<td><p>SEPL</p></td>
+<td><p>Equivalent stress (from stress-strain curve)</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>SRAT</p></td>
+<td><p>Stress state ratio</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>HPRES</p></td>
+<td><p>Hydrostatic pressure</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>EPEQ</p></td>
+<td><p>Accumulated equivalent plastic strain</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>PSV</p></td>
+<td><p>Plastic state variable</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>PLWK</p></td>
+<td><p>Plastic work/volume</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>HS</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>Component magnetic field intensity from current sources (in the global Cartesian coordinate system)</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>BFE</p></td>
+<td><p>TEMP</p></td>
+<td><p>Body temperatures (calculated from applied temperatures) as used in solution</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>TG</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component thermal gradient and sum</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>TF</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component thermal flux and sum</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>PG</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component pressure gradient and sum</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>EF</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component electric field and sum</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>D</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component electric flux density and sum</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>H</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component magnetic field intensity and sum</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component magnetic flux density and sum</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>FMAG</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td><p>Component electromagnetic force and sum</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td rowspan="10"><p> CONT</p></td>
+<td><p>STAT</p></td>
+<td><p>Contact status</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>PENE</p></td>
+<td><p>Contact penetration</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>PRES</p></td>
+<td><p>Contact pressure</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>SFRIC</p></td>
+<td><p>Contact friction stress</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>STOT</p></td>
+<td><p>Contact total stress (pressure plus friction)</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>SLIDE</p></td>
+<td><p>Contact sliding distance</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>GAP</p></td>
+<td><p>Contact gap distance</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>FLUX</p></td>
+<td><p>Total heat flux at contact surface</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>CNOS</p></td>
+<td><p>Total number of contact status changes during substep</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>FPRS</p></td>
+<td><p>Actual applied fluid penetration pressure</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td colspan="4"><p>Element nodal results are the average nodal value of the selected elements</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="vget-post1-items-entity-node-nodal-degree-of-freedom-results">
+<span id="vget-post1-node-ndof"></span><h2>*VGET POST1 Items, Entity = NODE, Nodal Degree of Freedom Results<a class="headerlink" href="#vget-post1-items-entity-node-nodal-degree-of-freedom-results" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id16">
+<caption><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Entity</span></code> = NODE, <code class="docutils literal notranslate"><span class="pre">ENTNUM</span></code> = <code class="docutils literal notranslate"><span class="pre">n</span></code> (node number)</span><a class="headerlink" href="#id16" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head" colspan="3"><p><span class="xref std std-ref">starvget</span>, <code class="docutils literal notranslate"><span class="pre">ParR</span></code>, NODE, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">Item1</span></code>, <code class="docutils literal notranslate"><span class="pre">IT1NUM</span></code>,, <code class="docutils literal notranslate"><span class="pre">KLOOP</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Item1</p></th>
+<th class="head"><p>IT1NUM</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>U</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>X, Y, or Z structural displacement</p></td>
+</tr>
+<tr class="row-even"><td><p>ROT</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>X, Y, or Z structural rotation</p></td>
+</tr>
+<tr class="row-odd"><td><p>TEMP</p></td>
+<td></td>
+<td><p>Temperature. For <code class="docutils literal notranslate"><span class="pre">SHELL131</span></code> and <code class="docutils literal notranslate"><span class="pre">SHELL132</span></code> elements with KEYOPT(3) = 0 or 1, use TBOT, TE2, TE3,…, TTOP instead of TEMP. Alternative get functions: TEMP(N), TBOT(N), TE2(N), etc.</p></td>
+</tr>
+<tr class="row-even"><td><p>PRES</p></td>
+<td></td>
+<td><p>Pressure</p></td>
+</tr>
+<tr class="row-odd"><td><p>VOLT</p></td>
+<td></td>
+<td><p>Electric potential</p></td>
+</tr>
+<tr class="row-even"><td><p>MAG</p></td>
+<td></td>
+<td><p>Magnetic scalar potential</p></td>
+</tr>
+<tr class="row-odd"><td><p>V</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>X, Y, or Z fluid velocity; X, Y, or Z nodal velocity in a transient structural analysis (analysis with <span class="xref std std-ref">antype</span>,TRANS)</p></td>
+</tr>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>X, Y, Z</p></td>
+<td><p>X, Y, or Z magnetic vector potential; X, Y or Z nodal acceleration in a transient structural analysis (analysis with <span class="xref std std-ref">antype</span>,TRANS)</p></td>
+</tr>
+<tr class="row-odd"><td><p>CURR</p></td>
+<td></td>
+<td><p>Current</p></td>
+</tr>
+<tr class="row-even"><td><p>EMF</p></td>
+<td></td>
+<td><p>Electromotive force drop</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.72.0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.6.4. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

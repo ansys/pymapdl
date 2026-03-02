@@ -1,0 +1,1640 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>plnsol &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=affbdea0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/post1/_autosummary/ansys.mapdl.core._commands.post1.results.Results.plnsol';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="plorb" href="ansys.mapdl.core._commands.post1.results.Results.plorb.html" />
+    <link rel="prev" title="plesol" href="ansys.mapdl.core._commands.post1.results.Results.plesol.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.72.dev0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/post1/_autosummary/ansys.mapdl.core._commands.post1.results.Results.plnsol.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Session</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../session/index.html">Session</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Database</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../database/index.html">Database</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Graphics</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../graphics/index.html">Graphics</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">APDL</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/abbreviations.html">Abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/parameter_definition.html">ParameterDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/matrix_operations.html">MatrixOperations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/macro_files.html">MacroFiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/encryption_decryption.html">EncryptionDecryption</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/array_parameters.html">ArrayParameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/process_controls.html">ProcessControls</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Preprocessing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/element_type.html">Element type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/real_constants.html">Real constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/materials.html">Materials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/material_data_tables.html">Material data tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/primitives.html">Primitives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/keypoints.html">Keypoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/hard_points.html">Hard points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/lines.html">Lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/areas.html">Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/volumes.html">Volumes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/booleans.html">Booleans</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/meshing.html">Meshing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/nodes.html">Nodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/elements.html">Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/superelements.html">Superelements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/digitizing.html">Digitizing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/coupled_dof.html">Coupled degrees of freedom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/constraint_equations.html">Constraint equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/status.html">Status</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/explicit_dynamics.html">Explicit dynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/sections.html">Sections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/morphing.html">Morphing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/artificially_matched_layers.html">Artificially matched layers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/special_purpose.html">Special purpose</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Solution</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../solution/analysis_options.html">Analysis options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/nonlinear_options.html">Nonlinear options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/dynamic_options.html">Dynamic options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/spectrum_options.html">Spectrum options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/load_step_options.html">Load step options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_constraints.html">Solid constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_forces.html">Solid forces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_surface_loads.html">Solid surface loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solid_body_loads.html">Solid body loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/inertia.html">Inertia</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/miscellaneous_loads.html">Miscellaneous loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/load_step_operations.html">Load step operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/master_dof.html">Master degrees of freedom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/gap_conditions.html">Gap conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/rezoning.html">Rezoning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/2d_to_3d_analysis.html">2D to 3D analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/birth_and_death.html">Birth and death</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_constraints.html">FE constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_forces.html">FE forces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_surface_loads.html">FE surface loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/fe_body_loads.html">FE body loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/ocean.html">Ocean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/solution_status.html">Solution status</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/radiosity.html">Radiosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_definition_commands.html">Multi-Field solver definition commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_global_controls.html">Multi-Field solver global controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_time_controls.html">Multi-Field solver time controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_load_transfer.html">Multi-Field solver load transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_convergence_controls.html">Multi-Field solver convergence controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../solution/multi_field_solver_interface_mapping.html">Multi-Field solver interface mapping</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST1</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Post1</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../animation.html">Animation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../set_up.html">SetUp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../controls.html">Controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../special_purpose.html">SpecialPurpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../magnetics_calculations.html">MagneticsCalculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../element_table.html">ElementTable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../failure_criteria.html">FailureCriteria</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_fatigue.html">Fatigue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../listing.html">Listing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../path_operations.html">PathOperations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_special_purpose.html">SpecialPurpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../load_case_calculations.html">LoadCaseCalculations</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../results.html">Results</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.lcsum.html">lcsum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.nsort.html">nsort</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.nusort.html">nusort</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.plcint.html">plcint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.plcksurf.html">plcksurf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.pldisp.html">pldisp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.plesol.html">plesol</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">plnsol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.plorb.html">plorb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.plvect.html">plvect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.prcint.html">prcint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.prenergy.html">prenergy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.presol.html">presol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.prjsol.html">prjsol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.prnld.html">prnld</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.prnsol.html">prnsol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.prorb.html">prorb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.prrfor.html">prrfor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.prrsol.html">prrsol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.prvect.html">prvect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.post1.results.Results.sumtype.html">sumtype</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../trace_points.html">TracePoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../surface_operations.html">SurfaceOperations</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST26</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post26/index.html">Post26</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux2/index.html">Aux2</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux3/index.html">Aux3</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX12</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux12/index.html">Aux12</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX15</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux15/index.html">Aux15</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">MAP</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../map/index.html">Map</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Connection</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../conn.html">Connection commands</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../misc.html">Miscellaneous</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Undocumented</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../inqfun.html">Undocumented inquire commands</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="None" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">MAPDL commands</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../index.html" class="nav-link">Post1</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../results.html" class="nav-link">Results</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">plnsol</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="plnsol">
+<h1>plnsol<a class="headerlink" href="#plnsol" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core._commands.post1.results.Results.plnsol">
+<span class="sig-prename descclassname"><span class="pre">Results.</span></span><span class="sig-name descname"><span class="pre">plnsol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kund</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fileid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datakey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core._commands.post1.results.Results.plnsol" title="Link to this definition">#</a></dt>
+<dd><p>Displays solution results as continuous element contours.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PLNSOL.html">PLNSOL</a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>item</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Label identifying the item. Valid item labels are shown in the table below. Some items also
+require a component label.</p>
+</dd>
+<dt><strong>comp</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Component of the item (if required). Valid component labels are shown in the table below.</p>
+</dd>
+<dt><strong>kund</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Undisplaced shape key:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> - Do not overlay undeformed structure display.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> - Overlay displaced contour plot with undeformed display (appearance is system-dependent).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> - Overlay displaced contour plot with undeformed edge display (appearance is system-
+dependent).</p></li>
+</ul>
+</dd>
+<dt><strong>fact</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Scale factor for 2D display for contact items. Default value is 1. A negative scaling factor
+inverts the display.</p>
+</dd>
+<dt><strong>fileid</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The file index number (obtained via <span class="xref std std-ref">nldiag</span>,NRRE,ON). Valid only for <code class="docutils literal notranslate"><span class="pre">Item</span></code> = NRRE.</p>
+</dd>
+<dt><strong>avg</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Specifies whether random acoustic results are averaged. Valid only for <code class="docutils literal notranslate"><span class="pre">Item</span></code> = U and PRES.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">(blank)</span></code> - No averaging (default).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AVG</span></code> - Display averaged results for random acoustics.</p></li>
+</ul>
+</dd>
+<dt><strong>datakey</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Key to specify which data is plotted:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">AUTO</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost">Nodal-averaged results</a> are
+used, if available; otherwise, the element-based data is used, if available. (Default.)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ESOL</span></code> - Only element-based results are used. If they are not available, the command is ignored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NAR</span></code> - Only nodal-averaged results are used. If they are not available, the command is ignored.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p id="plnsol-notes"><span class="xref std std-ref">plnsol</span> displays the solution results as continuous contours across element boundaries for the
+selected nodes and elements.</p>
+<p>For example, <span class="xref std std-ref">plnsol</span>,S,X displays the X component of stress S (that is, the SX stress
+component). Various element results depend upon the recalculation method and the selected results
+location ( <span class="xref std std-ref">avprin</span>, <span class="xref std std-ref">rsys</span>, <span class="xref std std-ref">layer</span>, <span class="xref std std-ref">shell</span>, and <span class="xref std std-ref">nsel</span> ).</p>
+<p>Contours are determined by linear interpolation within each element from the nodal values, averaged
+at a node whenever two or more elements connect to the same node. (The exception is FMAG, which is
+summed at the node.)</p>
+<p>For <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/str_compreinfdirectemb.html">reinforcing</a>
+elements (REINF <code class="docutils literal notranslate"><span class="pre">nnn</span></code> ), contours are determined by interpolation within each reinforcing member
+of reinforcing elements from the results of the base elements. Element results of members within the
+same reinforcing element are smoothed based on the order of its base element. <span class="xref std std-ref">plnsol</span> displays
+constant results for a reinforcing element if the base elements are low-order, and linear results
+when the base elements are high-order.</p>
+<p>For PowerGraphics displays ( <span class="xref std std-ref">graphics</span>,POWER), results are plotted for the model exterior
+surface only. Items not supported by PowerGraphics are noted in <a class="reference internal" href="#plnsol-tab-1"><span class="std std-ref">PLNSOL - Valid Item and Component Labels</span></a>.</p>
+<p>To plot midside nodes, first issue <span class="xref std std-ref">efacet</span>,2.</p>
+<p>If <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost">nodal-averaged results</a> (
+<span class="xref std std-ref">outres</span>,NAR or another nodal-averaged label) are in the database, then <span class="xref std std-ref">plnsol</span> uses the
+nodal-averaged data for the applicable items (S, EPEL, EPPL, EPCR, EPTH, EPSW) by default. You can
+change this behavior via the <code class="docutils literal notranslate"><span class="pre">DataKey</span></code> argument. Keep these points in mind when using nodal-
+averaged results:</p>
+<ul class="simple">
+<li><p>The <span class="xref std std-ref">layer</span> and <span class="xref std std-ref">rsys</span>,SOLU commands are not valid with nodal-averaged results. If these
+commands are used, the element solution is plotted instead if applicable.</p></li>
+<li><p>Issuing <span class="xref std std-ref">esel</span> before plotting nodal-averaged results has no effect on the output.</p></li>
+<li><p>PowerGraphics is supported. The output is equivalent to the full model graphics output, but only
+the appropriate surface nodes are plotted. See <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#">Postprocessing Nodal-Averaged Results</a></p></li>
+</ul>
+<p>For <code class="docutils literal notranslate"><span class="pre">Item</span></code> = SRES, selected result ( <span class="xref std std-ref">osresult</span> ) values are output. See <a class="reference internal" href="#plnsol-tab-2"><span class="std std-ref">PLNSOL - Selected Result Component Labels</span></a>.</p>
+<section id="plnsol-valid-item-and-component-labels">
+<span id="plnsol-tab-1"></span><h2>PLNSOL - Valid Item and Component Labels<a class="headerlink" href="#plnsol-valid-item-and-component-labels" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id6">
+<caption><span class="caption-text">General Item and Component Labels <span class="xref std std-ref">plnsol</span>, <code class="docutils literal notranslate"><span class="pre">Item,</span> <span class="pre">Comp</span></code></span><a class="headerlink" href="#id6" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Item</p></th>
+<th class="head"><p>Comp</p></th>
+<th class="head" colspan="2"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td colspan="4"><p><strong>Valid item and component labels for nodal degree of freedom results are:</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>U</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>X, Y, or Z structural displacement or vector sum.</p></td>
+</tr>
+<tr class="row-even"><td><p>ROT</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>X, Y, or Z structural rotation or vector sum.</p></td>
+</tr>
+<tr class="row-odd"><td><p>TEMP For <code class="docutils literal notranslate"><span class="pre">SHELL131</span></code> and <code class="docutils literal notranslate"><span class="pre">SHELL132</span></code> elements with KEYOPT(3) = 0 or 1, use the labels TBOT, TE2, TE3, …, TTOP instead of TEMP to view the individual temperature degree of freedom. When other thermal elements are included in the model, deselect them to avoid plotting undefined information. To view all temperatures in the same plot, set <span class="xref std std-ref">eshape</span> ,1 and <span class="xref std std-ref">graphics</span>,POWER and issue <span class="xref std std-ref">plnsol</span>,TEMP.</p></td>
+<td></td>
+<td colspan="2"><p>Temperature.</p></td>
+</tr>
+<tr class="row-even"><td><p>PRES</p></td>
+<td></td>
+<td colspan="2"><p>Pressure.</p></td>
+</tr>
+<tr class="row-odd"><td><p>GFV1, GFV2, GFV3</p></td>
+<td></td>
+<td colspan="2"><p>Nonlocal field values 1, 2, and 3.</p></td>
+</tr>
+<tr class="row-even"><td><p>VOLT</p></td>
+<td></td>
+<td colspan="2"><p>Electric potential.</p></td>
+</tr>
+<tr class="row-odd"><td><p>MAG</p></td>
+<td></td>
+<td colspan="2"><p>Magnetic scalar potential.</p></td>
+</tr>
+<tr class="row-even"><td><p>CONC</p></td>
+<td></td>
+<td colspan="2"><p>Concentration. Not supported by PowerGraphics.</p></td>
+</tr>
+<tr class="row-odd"><td><p>V</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>X, Y, or Z fluid velocity or vector sum in a fluid analysis.</p></td>
+</tr>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>X, Y, or Z magnetic vector potential or vector sum in an electromagnetic analysis.</p></td>
+</tr>
+<tr class="row-odd"><td><p>VEL</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>X, Y, or Z velocity or vector sum in a structural transient dynamic analysis ( <span class="xref std std-ref">antype</span>,TRANS).</p></td>
+</tr>
+<tr class="row-even"><td><p>ACC</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>X, Y, or Z acceleration or vector sum in a structural transient dynamic analysis ( <span class="xref std std-ref">antype</span>,TRANS).</p></td>
+</tr>
+<tr class="row-odd"><td><p>OMG</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>X, Y, or Z rotational velocity or vector sum in a structural transient dynamic analysis ( <span class="xref std std-ref">antype</span>,TRANS).</p></td>
+</tr>
+<tr class="row-even"><td><p>DMG</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>X, Y, or Z rotational acceleration or vector sum in a structural transient dynamic analysis ( <span class="xref std std-ref">antype</span>,TRANS).</p></td>
+</tr>
+<tr class="row-odd"><td><p>WARP</p></td>
+<td></td>
+<td colspan="2"><p>Warping.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="2"><p> NRRE</p></td>
+<td><p>FX, FY, FZ, FNRM, MX, MY, MZ, MNRM</p></td>
+<td colspan="2"><p>Plot the Newton-Raphson residuals from the file you obtained via the <span class="xref std std-ref">nldiag</span>,NRRE,ON command. The FNRM and MNRM labels are computed as the square root of the sum of the squares of the residual component forces or moments (FX,FY,FZ, MX, MY, MZ). When plotting Newton-Raphson residual items ( <code class="docutils literal notranslate"><span class="pre">Item</span></code> = NRRE) from a file on the deformed geometry, the displacements are based on the current set of results in the database. These displacements may not correspond to the loadstep and substep in the <code class="file docutils literal notranslate"><span class="pre">.nrxxxxx</span></code> file. (For more information about <code class="file docutils literal notranslate"><span class="pre">.nrxxxxx</span></code> files and nonlinear diagnostics postprocessing, see the description of the <span class="xref std std-ref">nldpost</span> command and.)</p></td>
+</tr>
+<tr class="row-odd"><td><p>SPL</p></td>
+<td></td>
+<td><p>Sound pressure level.</p></td>
+</tr>
+<tr class="row-even"><td><p>SPLA</p></td>
+<td></td>
+<td colspan="2"><p>A-weighted sound pressure level (dBA).</p></td>
+</tr>
+<tr class="row-odd"><td><p>VNS</p></td>
+<td></td>
+<td colspan="2"><p>Normal velocity on the structural surface. Valid only for <code class="docutils literal notranslate"><span class="pre">SHELL181</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLID185</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLID186</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLID187</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLSH190</span></code>, and <code class="docutils literal notranslate"><span class="pre">SHELL281</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p>ENKE</p></td>
+<td></td>
+<td colspan="2"><p>Acoustic diffusion energy density</p></td>
+</tr>
+<tr class="row-odd"><td colspan="4"><p><strong>Valid item and component labels for element results are:</strong></p></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><p> S</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td colspan="2"><p>Component stress. This item plots the solution using <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost">nodal-averaged results</a> if they are available on the results file.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td colspan="2"><p>Principal stress.</p></td>
+</tr>
+<tr class="row-even"><td><p>INT</p></td>
+<td colspan="2"><p>Stress intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EQV</p></td>
+<td colspan="2"><p>Equivalent stress.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><p> EPEL</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td colspan="2"><p>Component elastic strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td colspan="2"><p>Principal elastic strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>INT</p></td>
+<td colspan="2"><p>Elastic strain intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EQV</p></td>
+<td colspan="2"><p>Elastic equivalent strain.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><p> EPTH</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td colspan="2"><p>Component thermal strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td colspan="2"><p>Principal thermal strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>INT</p></td>
+<td colspan="2"><p>Thermal strain intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EQV</p></td>
+<td colspan="2"><p>Thermal equivalent strain.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><p> EPDI</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td colspan="2"><p>Component diffusion strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td colspan="2"><p>Principal diffusion strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>INT</p></td>
+<td colspan="2"><p>Diffusion strain intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EQV</p></td>
+<td colspan="2"><p>Diffusion equivalent strain.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><p> EPPL</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td colspan="2"><p>Component plastic strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td colspan="2"><p>Principal plastic strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>INT</p></td>
+<td colspan="2"><p>Plastic strain intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EQV</p></td>
+<td colspan="2"><p>Plastic equivalent strain.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><p> EPCR</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td colspan="2"><p>Component creep strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1, 2, 3</p></td>
+<td colspan="2"><p>Principal creep strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>INT</p></td>
+<td colspan="2"><p>Creep strain intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EQV</p></td>
+<td colspan="2"><p>Creep equivalent strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>EPSW</p></td>
+<td></td>
+<td colspan="2"><p>Swelling strain.</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="4"><p> EPTO</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td colspan="2"><p>Component total mechanical strain (EPEL + EPPL + EPCR).</p></td>
+</tr>
+<tr class="row-even"><td><p>1, 2, 3</p></td>
+<td colspan="2"><p>Principal total mechanical strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>INT</p></td>
+<td colspan="2"><p>Total mechanical strain intensity.</p></td>
+</tr>
+<tr class="row-even"><td><p>EQV</p></td>
+<td colspan="2"><p>Total mechanical equivalent strain.</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="4"><p> EPTT</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td colspan="2"><p>Component total mechanical, thermal, diffusion, and swelling strain (EPEL + EPPL + EPCR + EPTH + EPDI + EPSW).</p></td>
+</tr>
+<tr class="row-even"><td><p>1, 2, 3</p></td>
+<td colspan="2"><p>Principal total, mechanical, thermal, diffusion, and swelling strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>INT</p></td>
+<td colspan="2"><p>Total mechanical, thermal, diffusion, and swelling strain intensity.</p></td>
+</tr>
+<tr class="row-even"><td><p>EQV</p></td>
+<td colspan="2"><p>Total mechanical, thermal, diffusion, and swelling equivalent strain.</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="4"><p> ESIG</p></td>
+<td><p>X,Y,Z,XY,YZ,ZX</p></td>
+<td colspan="2"><p>Components of Biot``s effective stress.</p></td>
+</tr>
+<tr class="row-even"><td><p>1, 2, 3</p></td>
+<td colspan="2"><p>Principal stresses of Biot``s effective stress.</p></td>
+</tr>
+<tr class="row-odd"><td><p>INT</p></td>
+<td colspan="2"><p>Stress intensity of Biot``s effective stress.</p></td>
+</tr>
+<tr class="row-even"><td><p>EQV</p></td>
+<td colspan="2"><p>Equivalent stress of Biot``s effective stress.</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><p> DPAR</p></td>
+<td><p>TPOR</p></td>
+<td colspan="2"><p>Total porosity (Gurson material model).</p></td>
+</tr>
+<tr class="row-even"><td><p>GPOR</p></td>
+<td colspan="2"><p>Porosity due to void growth.</p></td>
+</tr>
+<tr class="row-odd"><td><p>NPOR</p></td>
+<td colspan="2"><p>Porosity due to void nucleation.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="7"><p> NL</p></td>
+<td><p>SEPL</p></td>
+<td colspan="2"><p>Equivalent stress (from stress-strain curve).</p></td>
+</tr>
+<tr class="row-odd"><td><p>SRAT</p></td>
+<td colspan="2"><p>Stress state ratio.</p></td>
+</tr>
+<tr class="row-even"><td><p>HPRES</p></td>
+<td colspan="2"><p>Hydrostatic pressure.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EPEQ</p></td>
+<td colspan="2"><p>Accumulated equivalent plastic strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>CREQ</p></td>
+<td colspan="2"><p>Accumulated equivalent creep strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>PSV</p></td>
+<td colspan="2"><p>Plastic state variable.</p></td>
+</tr>
+<tr class="row-even"><td><p>PLWK</p></td>
+<td colspan="2"><p>Plastic work/volume.</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="8"><p> SEND</p></td>
+<td><p>ELASTIC The results for this postprocessing SEND component are invalid for <code class="docutils literal notranslate"><span class="pre">ELBOW290</span></code> if that element is used with viscoelastic or viscohyperelastic materials.</p></td>
+<td colspan="2"><p>Elastic strain energy density. (For <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/evis.html#mat_harmvisco">viscoelastic</a> and <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/amp8sq21dldm.html#">sintering</a> materials, the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/evis.html#eq92b60ee3-7e22-457b-9543-53f86d16432a">stored energy</a>.)</p></td>
+</tr>
+<tr class="row-even"><td><p>PLASTIC</p></td>
+<td colspan="2"><p>Plastic strain energy density.</p></td>
+</tr>
+<tr class="row-odd"><td><p>CREEP</p></td>
+<td colspan="2"><p>Creep strain energy density.</p></td>
+</tr>
+<tr class="row-even"><td><p>DAMAGE</p></td>
+<td colspan="2"><p>Damage strain energy density.</p></td>
+</tr>
+<tr class="row-odd"><td><p>VDAM</p></td>
+<td colspan="2"><p>Viscoelastic dissipation energy density.</p></td>
+</tr>
+<tr class="row-even"><td><p>VREG</p></td>
+<td colspan="2"><p>Visco-regularization strain energy density.</p></td>
+</tr>
+<tr class="row-odd"><td><p>DISS</p></td>
+<td colspan="2"><p>Structural-thermal dissipation.</p></td>
+</tr>
+<tr class="row-even"><td><p>ENTO</p></td>
+<td colspan="2"><p>Total strain energy density (sum of ELASTIC, PLASTIC, and CREEP strain energy densities).</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><p> CDM</p></td>
+<td><p>DMG</p></td>
+<td colspan="2"><p>Damage variable.</p></td>
+</tr>
+<tr class="row-even"><td><p>LM</p></td>
+<td colspan="2"><p>Maximum previous strain energy for virgin material.</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="14"><p> FAIL</p></td>
+<td><p>MAX</p></td>
+<td colspan="2"><p>Maximum of all active failure criteria defined at the current location. (See <span class="xref std std-ref">fctyp</span>.)  Works only if failure criteria are provided ( <span class="xref std std-ref">fc</span> and <span class="xref std std-ref">tb</span> ).</p></td>
+</tr>
+<tr class="row-even"><td><p>EMAX</p></td>
+<td colspan="2"><p>Maximum Strain Failure Criterion.</p></td>
+</tr>
+<tr class="row-odd"><td><p>SMAX</p></td>
+<td colspan="2"><p>Maximum Stress Failure Criterion.</p></td>
+</tr>
+<tr class="row-even"><td><p>TWSI</p></td>
+<td colspan="2"><p>Tsai-Wu Strength Index Failure Criterion.</p></td>
+</tr>
+<tr class="row-odd"><td><p>TWSR</p></td>
+<td colspan="2"><p>Inverse of Tsai-Wu Strength Ratio Index Failure Criterion.</p></td>
+</tr>
+<tr class="row-even"><td><p>HFIB</p></td>
+<td colspan="2"><p>Hashin Fiber Failure Criterion.   Must first be added ( <span class="xref std std-ref">fctyp</span> ).</p></td>
+</tr>
+<tr class="row-odd"><td><p>HMAT</p></td>
+<td colspan="2"><p>Hashin Matrix Failure Criterion.</p></td>
+</tr>
+<tr class="row-even"><td><p>PFIB</p></td>
+<td colspan="2"><p>Puck Fiber Failure Criterion.</p></td>
+</tr>
+<tr class="row-odd"><td><p>PMAT</p></td>
+<td colspan="2"><p>Puck Matrix Failure Criterion.</p></td>
+</tr>
+<tr class="row-even"><td><p>L3FB</p></td>
+<td colspan="2"><p>LaRc03 Fiber Failure Criterion.</p></td>
+</tr>
+<tr class="row-odd"><td><p>L3MT</p></td>
+<td colspan="2"><p>LaRc03 Matrix Failure Criterion.</p></td>
+</tr>
+<tr class="row-even"><td><p>L4FB</p></td>
+<td colspan="2"><p>LaRc04 Fiber Failure Criterion.</p></td>
+</tr>
+<tr class="row-odd"><td><p>L4MT</p></td>
+<td colspan="2"><p>LaRc04 Matrix Failure Criterion.</p></td>
+</tr>
+<tr class="row-even"><td><p>USR1, USR2,…, USR9</p></td>
+<td colspan="2"><p>User-defined failure criteria.    USR1 through USR9 require a failure-criteria routine.</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="5"><p> PFC</p></td>
+<td><p>MAX Failure criteria are based on the effective stresses in the damaged material.</p></td>
+<td colspan="2"><p>Maximum of all failure criteria defined at current location.</p></td>
+</tr>
+<tr class="row-even"><td><p>FT</p></td>
+<td colspan="2"><p>Fiber tensile failure criteria.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FC</p></td>
+<td colspan="2"><p>Fiber compressive failure criteria.</p></td>
+</tr>
+<tr class="row-even"><td><p>MT</p></td>
+<td colspan="2"><p>Matrix tensile failure criteria.</p></td>
+</tr>
+<tr class="row-odd"><td><p>MC</p></td>
+<td colspan="2"><p>Matrix compressive failure criteria.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="8"><p> PDMG</p></td>
+<td><p>STAT</p></td>
+<td colspan="2"><p>Damage status (0 = undamaged, 1 = damaged, 2 = completely damaged).</p></td>
+</tr>
+<tr class="row-odd"><td><p>FT</p></td>
+<td colspan="2"><p>Fiber tensile damage variable.</p></td>
+</tr>
+<tr class="row-even"><td><p>FC</p></td>
+<td colspan="2"><p>Fiber compressive damage variable.</p></td>
+</tr>
+<tr class="row-odd"><td><p>MT</p></td>
+<td colspan="2"><p>Matrix tensile damage variable.</p></td>
+</tr>
+<tr class="row-even"><td><p>MC</p></td>
+<td colspan="2"><p>Matrix compressive damage variable.</p></td>
+</tr>
+<tr class="row-odd"><td><p>S</p></td>
+<td colspan="2"><p>Shear damage variable (S).</p></td>
+</tr>
+<tr class="row-even"><td><p>SED</p></td>
+<td colspan="2"><p>Energy dissipated per unit volume.</p></td>
+</tr>
+<tr class="row-odd"><td><p>SEDV</p></td>
+<td colspan="2"><p>Energy per unit volume due to viscous damping.</p></td>
+</tr>
+<tr class="row-even"><td><p>SVAR</p></td>
+<td><p>1, 2, 3,… N</p></td>
+<td colspan="2"><p>State variable.</p></td>
+</tr>
+<tr class="row-odd"><td><p>GKS</p></td>
+<td><p>X, XY, XZ</p></td>
+<td colspan="2"><p>Gasket component stress.</p></td>
+</tr>
+<tr class="row-even"><td><p>GKD</p></td>
+<td><p>X, XY, XZ</p></td>
+<td colspan="2"><p>Gasket component total closure.</p></td>
+</tr>
+<tr class="row-odd"><td><p>GKDI</p></td>
+<td><p>X, XY, XZ</p></td>
+<td colspan="2"><p>Gasket component total inelastic closure.</p></td>
+</tr>
+<tr class="row-even"><td><p>GKTH</p></td>
+<td><p>X, XY, XZ</p></td>
+<td colspan="2"><p>Gasket component thermal closure.</p></td>
+</tr>
+<tr class="row-odd"><td><p>SS</p></td>
+<td><p>X, XY, XZ</p></td>
+<td colspan="2"><p>Interface traction (stress).</p></td>
+</tr>
+<tr class="row-even"><td><p>SD</p></td>
+<td><p>X, XY, XZ</p></td>
+<td colspan="2"><p>Interface separation.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FICT</p></td>
+<td><p>TEMP</p></td>
+<td colspan="2"><p>Fictive temperature.</p></td>
+</tr>
+<tr class="row-even"><td rowspan="10"><p> CONT For contact results, PowerGraphics is supported for 3D models only.   For the CONT items for elements <code class="docutils literal notranslate"><span class="pre">CONTA172</span></code>, <code class="docutils literal notranslate"><span class="pre">CONTA174</span></code>, <code class="docutils literal notranslate"><span class="pre">CONTA175</span></code>, and <code class="docutils literal notranslate"><span class="pre">CONTA177</span></code>, the reported data is averaged across the element. To obtain a more meaningful STAT value, use <span class="xref std std-ref">plesol</span>.</p></td>
+<td><p>STAT</p></td>
+<td colspan="2"><p>Contact status For MPC-based contact definitions, the value of STAT can be negative, indicating that one or more contact constraints were intentionally removed to prevent overconstraint. STAT = -3 is used for MPC bonded contact; STAT = -2 is used for MPC no-separation contact.   :   * 3 = closed and sticking * 2 = closed and sliding * 1 = open but near contact * 0 = open and not near contact</p></td>
+</tr>
+<tr class="row-odd"><td><p>PENE</p></td>
+<td colspan="2"><p>Contact penetration.</p></td>
+</tr>
+<tr class="row-even"><td><p>PRES</p></td>
+<td colspan="2"><p>Contact pressure.</p></td>
+</tr>
+<tr class="row-odd"><td><p>SFRIC</p></td>
+<td colspan="2"><p>Contact friction stress.</p></td>
+</tr>
+<tr class="row-even"><td><p>STOT</p></td>
+<td colspan="2"><p>Contact total stress (pressure plus friction).</p></td>
+</tr>
+<tr class="row-odd"><td><p>SLIDE</p></td>
+<td colspan="2"><p>Contact sliding distance.</p></td>
+</tr>
+<tr class="row-even"><td><p>GAP</p></td>
+<td colspan="2"><p>Contact gap distance.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FLUX</p></td>
+<td colspan="2"><p>Total heat flux at contact surface.</p></td>
+</tr>
+<tr class="row-even"><td><p>CNOS</p></td>
+<td colspan="2"><p>Total number of contact status changes during substep.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FPRS</p></td>
+<td colspan="2"><p>Fluid penetration pressure.</p></td>
+</tr>
+<tr class="row-even"><td><p>TG <code class="docutils literal notranslate"><span class="pre">Comp</span></code> = SUM is not supported for coupled pore-pressure-thermal (CPT <code class="docutils literal notranslate"><span class="pre">nnn</span></code> ) elements.</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>Component thermal gradient or vector sum.</p></td>
+</tr>
+<tr class="row-odd"><td><p>TF</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>Component thermal flux or vector sum.</p></td>
+</tr>
+<tr class="row-even"><td><p>PG</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>Component or vector sum of velocity or energy density flux (room acoustics).</p></td>
+</tr>
+<tr class="row-odd"><td><p>EF</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>Component electric field or vector sum.</p></td>
+</tr>
+<tr class="row-even"><td><p>D</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>Component electric flux density or vector sum.</p></td>
+</tr>
+<tr class="row-odd"><td><p>H</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>Component magnetic field intensity or vector sum.</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>Component magnetic flux density or vector sum.</p></td>
+</tr>
+<tr class="row-odd"><td><p>CG</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>Component concentration gradient or vector sum.</p></td>
+</tr>
+<tr class="row-even"><td><p>DF</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>Component diffusion flux density or vector sum.</p></td>
+</tr>
+<tr class="row-odd"><td><p>CAP</p></td>
+<td><p>C0,X0,K0,ZONE, DPLS,VPLS</p></td>
+<td colspan="2"><p>Material cap plasticity model only: Cohesion; hydrostatic compaction yielding stress; I1 at the transition point at which the shear and compaction envelopes intersect; zone = 0: elastic state, zone = 1: compaction zone, zone = 2: shear zone, zone = 3: expansion zone; effective deviatoric plastic strain; volume plastic strain.</p></td>
+</tr>
+<tr class="row-even"><td><p>EDPC</p></td>
+<td><p>CSIG,CSTR</p></td>
+<td colspan="2"><p>Material EDP creep model only (not including the cap model): Equivalent creep stress; equivalent creep strain.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FFLX</p></td>
+<td><p>X,Y,Z</p></td>
+<td colspan="2"><p>Fluid flow flux in poromechanics.</p></td>
+</tr>
+<tr class="row-even"><td><p>FGRA</p></td>
+<td><p>X,Y,Z</p></td>
+<td colspan="2"><p>Fluid pore-pressure gradient in poromechanics.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FMAG</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>Component electromagnetic force or vector sum.</p></td>
+</tr>
+<tr class="row-even"><td><p>JC</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>Conduction current density for elements that support conduction current calculation. Components (X, Y, Z) and vector sum (SUM).</p></td>
+</tr>
+<tr class="row-odd"><td><p>BFE</p></td>
+<td><p>TEMP</p></td>
+<td colspan="2"><p>Body temperatures (calculated from applied temperatures) as used in solution (area and volume elements only).</p></td>
+</tr>
+<tr class="row-even"><td><p>PMSV</p></td>
+<td><p>VRAT, PPRE, DSAT, RPER</p></td>
+<td colspan="2"><p>Void volume ratio, pore pressure, degree of saturation, and relative permeability for coupled pore-pressure-thermal elements.</p></td>
+</tr>
+<tr class="row-odd"><td><p>NS</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td colspan="2"><p><a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_mat5.html#eq4dc2eb28-41da-4d81-b0d0-8716ce41a6e1">Nominal strain</a> for hyperelastic material, reported in the current configuration (unaffected by <span class="xref std std-ref">rsys</span> ).</p></td>
+</tr>
+<tr class="row-even"><td><p>MPLA</p></td>
+<td><p>DMAC, DMAX</p></td>
+<td colspan="2"><p>Microplane damage, macroscopic and maximum values.</p></td>
+</tr>
+<tr class="row-odd"><td><p>MPDP</p></td>
+<td><p>TOTA, TENS, COMP, RW</p></td>
+<td colspan="2"><p>Microplane homogenized total, tension, and compression damages (TOTA, TENS, COMP), and split weight factor (RW).</p></td>
+</tr>
+<tr class="row-even"><td><p>DAMAGE</p></td>
+<td><p>1,2,3,MAX</p></td>
+<td colspan="2"><p>Damage in directions 1, 2, 3 (1, 2, 3) and the maximum damage (MAX).</p></td>
+</tr>
+<tr class="row-odd"><td><p>GDMG</p></td>
+<td></td>
+<td colspan="2"><p>Damage</p></td>
+</tr>
+<tr class="row-even"><td><p>IDIS</p></td>
+<td></td>
+<td colspan="2"><p>Structural-thermal dissipation rate</p></td>
+</tr>
+<tr class="row-odd"><td><p>BKS</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td colspan="2"><p>Total <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/amp8sq21dldm.html#">nonlinear kinematic backstress</a> reported in the current configuration (unaffected by <span class="xref std std-ref">rsys</span> ). Available for 3D, plane strain, and axisymmetric elements.</p></td>
+</tr>
+<tr class="row-even"><td><p>BKS1,…,BKS5</p></td>
+<td><p>X, Y, Z, XY, YZ, XZ</p></td>
+<td colspan="2"><p>Superimposed components of the total <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/amp8sq21dldm.html#">nonlinear kinematic backstress</a> reported in the current configuration (unaffected by <span class="xref std std-ref">rsys</span> ). Available for 3D, plane strain, and axisymmetric elements when more than one superimposed back-stress component is defined.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EPFR</p></td>
+<td></td>
+<td colspan="2"><p>Free strain in porous media</p></td>
+</tr>
+<tr class="row-even"><td><p>SNDI</p></td>
+<td><p>X, Y, Z, SUM</p></td>
+<td colspan="2"><p>Component sound intensity or vector sum.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FC1S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>First set of six components of FCC crystal slip. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>FC2S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Second set of six components of FCC crystal slip. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>HC1S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Six components of HCP crystal slip on basal and prismatic systems. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>HC2S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Six components of HCP crystal slip on pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>HC3S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>First set of six components of HCP crystal slip on the first-order pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>HC4S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Second set of six components of HCP crystal slip on the first-order pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>HC5S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Six components of HCP crystal slip on the second-order pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC1S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>First set of six components of BCC slip on 111 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC2S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Second set of six components of BCC slip on 111 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC3S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>First set of six components of BCC slip on 112 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC4S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Second set of six components of BCC slip on 112 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC5S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>First set of six components of BCC slip on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC6S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Second set of six components of BCC slip on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC7S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Third set of six components of BCC slip on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC8S</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Fourth set of six components of BCC slip on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>FC1H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>First set of six components of FCC crystal hardness. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FC2H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Second set of six components of FCC crystal hardness. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>HC1H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Sixcomponents of HCP crystal hardness on basal and prismatic systems. Available for 3D elements.</p></td>
+</tr>
+<tr class="row-odd"><td><p>HC2H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Six components of HCP crystal hardness on pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>HC3H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>First set of six components of HCP crystal hardness on the first-order pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>HC4H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Second set of six components of HCP crystal hardness on the first-order pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>HC5H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Six components of HCP crystal hardness on the second-order pyramidal system. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC1H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>First set of six components of BCC hardness on 111 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC2H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Second set of six components of BCC hardness on 111 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC3H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>First set of six components of BCC hardness on 112 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC4H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Second set of six components of BCC hardness on 112 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC5H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>First set of six components of BCC hardness on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC6H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Second set of six components of BCC hardness on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>BC7H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Third set of six components of BCC hardness on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>BC8H</p></td>
+<td><p>1,2,3,4,5,6</p></td>
+<td colspan="2"><p>Fourth set of six components of BCC hardness on 123 plane. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-odd"><td><p>XELG</p></td>
+<td><p>1,2,3,45,6,EQV</p></td>
+<td colspan="2"><p>Crystal Lagrangian strain in 11, 22, 33, 12, 23,13 directions and its equivalent. Available for 3D elements only.</p></td>
+</tr>
+<tr class="row-even"><td><p>SINT</p></td>
+<td><p>RHO, ETA, SSTR, GRAIN</p></td>
+<td colspan="2"><p>Sintering relative density, viscosity, sintering stress, and average grain size values.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="plnsol-selected-result-component-labels">
+<span id="plnsol-tab-2"></span><h2>PLNSOL - Selected Result Component Labels<a class="headerlink" href="#plnsol-selected-result-component-labels" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table" id="id7">
+<caption><span class="caption-text">Selected Result Component Labels <span class="xref std std-ref">plnsol</span>,SRES, <code class="docutils literal notranslate"><span class="pre">Comp</span></code></span><a class="headerlink" href="#id7" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Comp</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>SVAR <code class="docutils literal notranslate"><span class="pre">n</span></code></p></td>
+<td><p>The <code class="docutils literal notranslate"><span class="pre">n</span></code> th state variable.</p></td>
+</tr>
+<tr class="row-odd"><td><p>FLDUF0 <code class="docutils literal notranslate"><span class="pre">n</span></code></p></td>
+<td><p>The <code class="docutils literal notranslate"><span class="pre">n</span></code> th user-defined field variable.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.72.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.7.0. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

@@ -1,0 +1,6 @@
+﻿wpoffs
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.database.working_plane
+
+.. automethod:: WorkingPlane.wpoffs
