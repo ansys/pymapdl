@@ -160,6 +160,13 @@ jobs:
         run: |
           sudo apt update && sudo apt install zip pandoc libgl1 libglx-mesa0 xvfb texlive-latex-extra latexmk graphviz texlive-xetex texlive-fonts-extra qpdf xindy imagemagick librsvg2-bin
 
+      - name: "Fix ImageMagick policy for SVG/PDF conversion"
+        shell: bash
+        run: |
+          # Update ImageMagick policy to allow PDF and SVG processing
+          sudo sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml || true
+          sudo sed -i 's/rights="none" pattern="SVG"/rights="read|write" pattern="SVG"/' /etc/ImageMagick-6/policy.xml || true
+
       - name: "Test virtual framebuffer"
         shell: bash
         run: |
