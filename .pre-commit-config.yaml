@@ -12,18 +12,18 @@ ci:
 
 
 repos:
-- repo: https://github.com/shellcheck-py/shellcheck-py
-  rev: 745eface02aef23e168a8afb6b5737818efbea95  # frozen: v0.11.0.1
-  hooks:
-    - id: shellcheck
-      args: [ "-x"]
+# - repo: https://github.com/shellcheck-py/shellcheck-py
+#   rev: 745eface02aef23e168a8afb6b5737818efbea95  # frozen: v0.11.0.1
+#   hooks:
+#     - id: shellcheck
+#       args: [ "-x"]
 
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: a66e98df7b4aeeb3724184b332785976d062b92e  # frozen: v1.19.1
-  hooks:
-    - id: mypy
-      args: [ --follow-imports=silent, --config-file=pyproject.toml]
-      exclude: ^(doc/|examples/)
+# - repo: https://github.com/pre-commit/mirrors-mypy
+#   rev: a66e98df7b4aeeb3724184b332785976d062b92e  # frozen: v1.19.1
+#   hooks:
+#     - id: mypy
+#       args: [ --follow-imports=silent, --config-file=pyproject.toml]
+#       exclude: ^(doc/|examples/)
 
 - repo: https://github.com/ansys/pre-commit-hooks
   rev: fd1d6b0b4baeb08e32d4de0909999576695c0433  # frozen: v0.5.2

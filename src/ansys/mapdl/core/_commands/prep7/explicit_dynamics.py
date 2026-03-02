@@ -22,11 +22,10 @@
 
 from typing import Optional
 
-from ansys.mapdl.core._commands import CommandsBase
 from ansys.mapdl.core.mapdl_types import MapdlFloat, MapdlInt
 
 
-class ExplicitDynamics(CommandsBase):
+class ExplicitDynamics:
     def edasmp(
         self,
         option="",

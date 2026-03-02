@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import parse
+from ansys.mapdl.core._commands import CommandsBase, parse
 
 
-class Keypoints:
+class Keypoints(CommandsBase):
 
     def gsum(self, **kwargs):
         r"""Calculates and prints geometry items.
@@ -238,10 +238,7 @@ class Keypoints:
         three locations on a line. Note that for method c, if a circular line is specified by ``VAL1``,
         ``VAL2`` through ``VAL4`` are not needed.
 
-        .. only:: html
-
-            .. figure:: ../../../images/_commands/gKCEN1.svg
-
+        .. figure:: ../../../images/_commands/gKCEN1.svg
 
         Examples
         --------
