@@ -389,6 +389,10 @@ jobs:
       - name: "Cleanup docker compose"
         if: always()
         working-directory: docker/testing
+        env:
+          # To avoid warnings
+          ANSYSLMD_LICENSE_FILE: ""
+          DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
         run: |
           docker compose --profile remote-host down -v
 
@@ -428,6 +432,10 @@ jobs:
       - name: "Cleanup docker compose"
         if: always()
         working-directory: docker/testing
+        env:
+          # To avoid warnings
+          ANSYSLMD_LICENSE_FILE: ""
+          DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
         run: |
           docker compose --profile local-host down -v
 
