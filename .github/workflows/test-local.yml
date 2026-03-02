@@ -279,8 +279,7 @@ jobs:
           unset PYMAPDL_PORT
 
           # Start MAPDL
-          echo "${PYMAPDL_MAPDL_EXEC}"
-          exec ${PYMAPDL_MAPDL_EXEC} -grpc
+          ansysgrpc
 
           exit 1
 
