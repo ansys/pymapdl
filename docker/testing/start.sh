@@ -32,6 +32,14 @@ if [[ "${USE_LOCAL_REPO}" == "true" ]]; then
     # shellcheck disable=SC1091
     source "${VENV_PATH}/bin/activate"
 
+    # overwrite the branch name with the one from the local repository if it exists
+    if [ -d ".git" ]; then
+        LOCAL_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+        if [ -n "${LOCAL_BRANCH}" ]; then
+            echo "Overriding PYMAPDL_BRANCH with local repository branch: ${LOCAL_BRANCH}"
+            export PYMAPDL_BRANCH="${LOCAL_BRANCH}"
+        fi
+    fi
 else
     echo "Using cloned PyMAPDL repository for testing."
     uv venv "${VENV_PATH}"
@@ -44,6 +52,7 @@ if [ -n "${PYMAPDL_BRANCH}" ]; then
   CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
   if [ "${CURRENT_BRANCH}" != "${PYMAPDL_BRANCH}" ]; then
     echo "PYMAPDL_BRANCH is set to '${PYMAPDL_BRANCH}'. Current branch: '${CURRENT_BRANCH}'. Checking out..."
+
     # Use shallow fetch to reduce git overhead
     git fetch --depth 1 origin "${PYMAPDL_BRANCH}"
     git checkout "${PYMAPDL_BRANCH}"
