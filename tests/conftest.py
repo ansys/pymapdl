@@ -452,28 +452,40 @@ def pytest_addoption(parser):
     parser.addoption(
         "--gui", action="store_true", default=False, dest="gui", help="run GUI tests"
     )
+    parser.addoption(
+        "--krylov",
+        action="store_true",
+        default=False,
+        dest="krylov",
+        help="run Krylov module tests",
+    )
 
 
 def pytest_collection_modifyitems(session, config, items):
-    if not config.getoption("--console"):
-        # --console given in cli: run console interface tests
-        skip_console = pytest.mark.skip(reason="need --console option to run")
+
+    console = config.getoption("--console")
+    gui = config.getoption("--gui")
+    krylov = config.getoption("--krylov")
+
+    skip_console = pytest.mark.skip(reason="need --console option to run")
+    skip_gui = pytest.mark.skip(reason="need --gui option to run")
+    skip_krylov = pytest.mark.skip(reason="need --krylov option to run")
+    skip_grpc = pytest.mark.skip(
+        reason="Requires gRPC connection (at least v211 to run)"
+    )
+
+    if not console or not gui or not krylov or not HAS_GRPC:
         for item in items:
-            if "console" in item.keywords:
+            if not console and "console" in item.keywords:
                 item.add_marker(skip_console)
 
-    if not config.getoption("--gui"):
-        skip_gui = pytest.mark.skip(reason="need --gui option to run")
-        for item in items:
-            if "gui" in item.keywords:
+            if not gui and "gui" in item.keywords:
                 item.add_marker(skip_gui)
 
-    if not HAS_GRPC:
-        skip_grpc = pytest.mark.skip(
-            reason="Requires gRPC connection (at least v211 to run)"
-        )
-        for item in items:
-            if "skip_grpc" in item.keywords:
+            if not krylov and "krylov_tests" in item.keywords:
+                item.add_marker(skip_krylov)
+
+            if not HAS_GRPC and "skip_grpc" in item.keywords:
                 item.add_marker(skip_grpc)
 
 
