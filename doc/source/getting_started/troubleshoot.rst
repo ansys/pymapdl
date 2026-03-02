@@ -37,6 +37,23 @@ script:
     # Using current directory as run location
     mapdl = launch_mapdl(run_location=os.getcwd(), loglevel="DEBUG")
 
+
+If you know the location of the executable file, you can also set it
+as the first parameter of the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` method.
+
+.. code:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    exec_loc = "C:/Program Files/ANSYS Inc/v241/ansys/bin/winx64/ANSYS241.exe"
+    mapdl = launch_mapdl(exec_loc, run_location=os.getcwd(), loglevel="DEBUG")
+
+If you do not specify the location of the executable file, PyMAPDL will use the default location.
+
+.. note:: If MAPDL launches when you specify the location of the executable file, but it does not when you don't,
+   it is very likely that the cached executable location is outdated.
+   Follow :ref:`ref_updating_mapdl_location` to update it.
+
 If MAPDL is not launching, check the content of log files in the current directory
 (specified using `run_location`) for more information on the issue.
 The main MAPDL log file is `.__tmp__.out`. This is the output file specified in the command line.
@@ -68,7 +85,7 @@ Or, in newer versions of MAPDL, it should show:
     Press Ctrl-C to stop the server...
 
 
-Additionally, MAPDL generates other files such as `file1.out`,` `file1.err` and `file1.log`
+Additionally, MAPDL generates other files such as `file1.out`, `file1.err`, and `file1.log`
 that can be useful to identify the issue.
 
 If MAPDL still does not launch, visit `Launching issues`_ for more information on
@@ -98,6 +115,22 @@ There are several issues that can cause MAPDL not to launch, including:
 - `Firewall settings`_
 
 If you cannot find your issue, see `More help needed?`_.
+
+
+.. _ref_updating_mapdl_installation:
+
+Updating MAPDL installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When you update or reinstall MAPDL, PyMAPDL may still reference the old installation path
+because it caches the location of the MAPDL executable.
+If you uninstall MAPDL and install a new version (or move the installation), PyMAPDL might fail
+to launch MAPDL due to the outdated cached path.
+
+To resolve this, update the cached executable location as described in the
+:ref:`ref_default_location_executable` section.
+Use the ``save_ansys_path`` function to set the correct path to your new MAPDL installation.
+This ensures PyMAPDL can find and launch the updated MAPDL version.
 
 
 Connection timeout
@@ -696,17 +729,14 @@ method.
             >>> exec_loc = "/usr/ansys_inc/v241/ansys/bin/ansys241"
             >>> mapdl = launch_mapdl(exec_loc)
 
+.. _ref_default_location_executable:
 
 Default location of the executable file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The first time that you run PyMAPDL, it detects the
-available Ansys installations.
-
-**On Windows**
+The first time that you run PyMAPDL, it detects the available Ansys installations.
 
 Ansys installations are normally under:
-
 
 .. tab-set::
 
@@ -731,9 +761,14 @@ Ansys installations are normally under:
             /ansys_inc/vXXX
 
 
-By default, Ansys installer uses the former one (``/usr/ansys_inc``) but also creates a symbolic to later one (``/ansys_inc``).
+By default, Ansys installer uses the former one (``/usr/ansys_inc``) but also creates a symbolic link to the latter one (``/ansys_inc``).
 
-If PyMAPDL finds a valid Ansys installation, it caches its
+.. _ref_updating_mapdl_location:
+
+Update the cached executable location
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The first time PyMAPDL finds a valid Ansys installation, it caches its
 path in the configuration file, ``config.txt``. The path for this file
 is shown in this code:
 
