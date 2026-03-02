@@ -63,13 +63,19 @@ echo "Using pytest arguments: ${PYTEST_ARGUMENTS}"
 # Add timing information for debugging startup delays
 echo "Starting pytest at: $(date +%H:%M:%S)"
 
+# Install the package with its test extras into the container-local venv.
+# This is done separately from `uv run` to avoid `--no-project` suppressing
+# the `--extra` flag (they are mutually exclusive in uv).
+# The uv.lock file is intentionally not updated (--frozen) to avoid writing
+# to the mounted volume.
+uv pip install --python "${VENV_PATH}" -e ".[tests]"
+
 # Removed --no-cache flag to enable package caching for better performance
 # Disable problematic plugins that cause I/O overhead:
 # -p no:cacheprovider  = disable pytest cache (saves ~10-20s on mounted volumes)
-# --no-project         = prevent uv from resolving/writing uv.lock in the mounted directory
 # --basetemp           = redirect all pytest tmp_path/tmpdir writes to /tmp
 # shellcheck disable=SC2086
-time xvfb-run -a uv run --active --no-project --extra tests pytest tests \
+time xvfb-run -a "${VENV_PATH}/bin/pytest" tests \
   -p no:cacheprovider \
   --basetemp=/tmp/pytest-tmp \
   -vv \
