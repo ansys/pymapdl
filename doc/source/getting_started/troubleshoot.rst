@@ -17,12 +17,16 @@ If you are having trouble with PyMAPDL, you can record some internal
 logs into a file using a logger.
 This file can be examined to help to identify any issue.
 
+Additionally, it is convenient to set the `run_location` to a known location,
+for example, the current directory, so that you can find MAPDL log files more easily.
+
 You can set the logger output file to be ``mylog.log`` by
 running the following commands in a Python terminal or at the beginning of your
 script:
 
 .. code:: python
 
+    import os
     from ansys.mapdl.core import LOG
 
     LOG.setLevel("DEBUG")
@@ -30,12 +34,50 @@ script:
 
     from ansys.mapdl.core import launch_mapdl
 
-    mapdl = launch_mapdl(loglevel="DEBUG")
+    # Using current directory as run location
+    mapdl = launch_mapdl(run_location=os.getcwd(), loglevel="DEBUG")
 
-You can attach this file to a bug report in the PyMAPDL GitHub repository for further investigation.
-If you are not able to identify the issue, you can open a discussion on the
-`PyMAPDL Discussions page <pymapdl_discussions_>`_.
+If MAPDL is not launching, check the content of log files in the current directory
+(specified using `run_location`) for more information on the issue.
+The main MAPDL log file is `.__tmp__.out`. This is the output file specified in the command line.
+If the launching is successful, it should show:
+
+.. code-block:: text
+
+   Start GRPC Server
+
+   ##############################
+   ### START GRPC SERVER      ###
+   ##############################
+
+   Server Executable   : MapdlGrpc Server
+   Server listening on : 0.0.0.0:50052
+
+Or, in newer versions of MAPDL, it should show:
+
+.. code-block:: text
+
+   ################################################
+   #####    *INSECURE* GRPC SERVER STARTED    #####
+   ################################################
+   Transport Mode           : INSECURE
+   Server Executable        : MapdlGrpc.Server
+   Server listening on      : 0.0.0.0:50052
+   Allow remote connections : True
+
+    Press Ctrl-C to stop the server...
+
+
+Additionally, MAPDL generates other files such as `file1.out`,` `file1.err` and `file1.log`
+that can be useful to identify the issue.
+
+If MAPDL still does not launch, visit `Launching issues`_ for more information on
+common launching issues and their solutions.
+
+If after examining all the log files you are not able to identify the issue, you can
+open a discussion on the `PyMAPDL Discussions page <pymapdl_discussions_>`_.
 If you believe you have found a bug, create an issue on the `PyMAPDL Issues page <pymapdl_issues_>`_.
+You can attach this file to a bug report in the PyMAPDL GitHub repository for further investigation.
 
 
 .. _ref_launching_issue:
