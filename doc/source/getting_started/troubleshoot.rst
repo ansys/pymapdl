@@ -17,7 +17,7 @@ If you are having trouble with PyMAPDL, you can record some internal
 logs into a file using a logger.
 This file can be examined to help to identify any issue.
 
-Additionally, it is convenient to set the `run_location` to a known location,
+Additionally, it is convenient to set the ``run_location`` to a known location,
 for example, the current directory, so that you can find MAPDL log files more easily.
 
 You can set the logger output file to be ``mylog.log`` by
@@ -38,7 +38,7 @@ script:
     mapdl = launch_mapdl(run_location=os.getcwd(), loglevel="DEBUG")
 
 
-If you know the location of the executable file, you can also set it
+If you know the location of the executable file, you can set it
 as the first parameter of the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` method.
 
 .. code:: python
@@ -48,14 +48,14 @@ as the first parameter of the :func:`launch_mapdl() <ansys.mapdl.core.launcher.l
     exec_loc = "C:/Program Files/ANSYS Inc/v241/ansys/bin/winx64/ANSYS241.exe"
     mapdl = launch_mapdl(exec_loc, run_location=os.getcwd(), loglevel="DEBUG")
 
-If you do not specify the location of the executable file, PyMAPDL will use the default location.
+If you do not specify the location of the executable file, PyMAPDL uses the default location.
 
 .. note:: If MAPDL launches when you specify the location of the executable file, but it does not when you don't,
    it is very likely that the cached executable location is outdated.
    Follow :ref:`ref_updating_mapdl_location` to update it.
 
 If MAPDL is not launching, check the content of log files in the current directory
-(specified using `run_location`) for more information on the issue.
+(specified using ``run_location``) for more information on the issue.
 The main MAPDL log file is `.__tmp__.out`. This is the output file specified in the command line.
 If the launching is successful, it should show:
 
