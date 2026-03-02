@@ -1,10 +1,48 @@
 #!/bin/bash
 # Wait for MAPDL and DPF services to be ready
 set -e
+# Setting debug mode.
+DEBUG="${DEBUG:-false}"
+
+# Helper for debug-only output
+debug() {
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "$@"
+    fi
+}
+
+if [[ "${DEBUG}" == "true" ]]; then
+    debug "Debug mode enabled"
+fi
+
+# Print file contents when debugging is enabled
+debug_file() {
+    local file="$1"
+    if [[ "${DEBUG}" != "true" ]]; then
+        return 0
+    fi
+
+    if [[ -z "${file}" ]]; then
+        debug "debug_file: no file specified"
+        return 1
+    fi
+
+    if [[ ! -f "${file}" ]]; then
+        debug "debug_file: file not found: ${file}"
+        return 1
+    fi
+
+    debug "=== ${file} ==="
+    while IFS= read -r _line; do
+        debug "${_line}"
+    done < "${file}"
+    debug "=== end ${file} ==="
+}
 
 echo "==================================="
 echo "Waiting for Services"
 echo "==================================="
+
 
 # Set defaults
 PYMAPDL_PORT="${PYMAPDL_PORT:-50052}"
@@ -12,28 +50,31 @@ DPF_PORT="${DPF_PORT:-50056}"
 ENABLE_DPF_SERVER="${ENABLE_DPF_SERVER:-false}"
 INSTANCE_NAME="${INSTANCE_NAME:-MAPDL_0}"
 
-echo "Configuration:"
-echo "  PyMAPDL Port: ${PYMAPDL_PORT}"
-echo "  DPF Port: ${DPF_PORT}"
-echo "  Enable DPF: ${ENABLE_DPF_SERVER}"
-echo "  Instance Name: ${INSTANCE_NAME}"
+debug "Configuration:"
+debug "  PyMAPDL Port: ${PYMAPDL_PORT}"
+debug "  DPF Port: ${DPF_PORT}"
+debug "  Enable DPF: ${ENABLE_DPF_SERVER}"
+debug "  Instance Name: ${INSTANCE_NAME}"
 
 # Show running Docker containers
-echo ""
-echo "Docker services:"
-docker ps
+debug ""
+debug "Docker services:"
+docker ps > "docker_ps.log" 2>&1 &
+
+sleep 1  # Give it a moment to populate the log
+debug_file "docker_ps.log" || echo "Failed to get Docker services"
+
 
 # Show processes in container (for debugging)
-echo ""
-echo "Container processes:"
-docker exec "${INSTANCE_NAME}" ps aux || echo "Could not list container processes"
+debug ""
+debug "Container processes:"
+{ docker exec "${INSTANCE_NAME}" ps aux > "docker_ps_aux.log" 2>&1 & } || debug "Failed to get processes from container ${INSTANCE_NAME}"
+sleep 1  # Give it a moment to populate the log
+debug_file "docker_ps_aux.log" || echo "Failed to get processes from container ${INSTANCE_NAME}"
 
 # Wait for PyMAPDL gRPC port
-echo ""
+echo -e "\n"
 echo "Waiting for PyMAPDL gRPC service on port ${PYMAPDL_PORT}..."
-
-# Try to connect to check if port is open
-nc -v -z localhost "${PYMAPDL_PORT}" 2>&1 || true
 
 # Wait up to 60 seconds for the port to be open
 TIMEOUT=${TIMEOUT:-60}

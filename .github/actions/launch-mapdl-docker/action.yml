@@ -3,14 +3,15 @@ description: 'Launch a MAPDL instance in a Docker container with configurable pa
 author: 'Ansys'
 
 inputs:
-  mapdl-version:
-    description: 'MAPDL version number (e.g., 25.2, 25.1, 24.2). By default it uses `vXX.Y-ubuntu-cicd` image. Mutually exclusive with mapdl-image.'
-    required: false
-    type: string
-
   mapdl-image:
     description: 'Full MAPDL Docker image reference with tag (e.g., ghcr.io/ansys/mapdl:v25.2-ubuntu-cicd). Mutually exclusive with mapdl-version.'
     required: false
+    type: string
+
+  mapdl-version:
+    description: 'MAPDL version number (e.g., 25.2, 25.1, 24.2). By default it uses `vXX.Y-ubuntu-cicd` image, which is the default for GH runners. Setting "mapdl-image" overrides this value.'
+    required: false
+    type: string
 
   instance-name:
     description: 'Name for the Docker container instance'
@@ -95,6 +96,11 @@ inputs:
     description: 'Wait for MAPDL services to be ready before completing the action'
     required: false
     default: 'true'
+
+  debug:
+    description: 'Enable debug logging in the action'
+    required: false
+    default: 'false'
 
 outputs:
   container-id:
