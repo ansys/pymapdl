@@ -345,6 +345,7 @@ class Prep7Commands(
     prep7.morphing.Morphing,
     prep7.nodes.Nodes,
     prep7.piping.Piping,
+    prep7.primitives.Primitives,
     prep7.real_constants.RealConstants,
     prep7.special_purpose.SpecialPurpose,
     prep7.status.Status,
