@@ -168,6 +168,7 @@ junit_family = "legacy"
 markers = [
   "console: run console test based",
   "gui: run gui test",
+  "krylov_tests: run tests that use Krylov module",
   "requires_gui: run tests that require to launch the GUI interface",
   "skip_grpc: skip tests using grpc",
 ]
