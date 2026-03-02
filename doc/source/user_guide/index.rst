@@ -17,11 +17,13 @@ This section provides a general overview of PyMAPDL and how you use it.
    :caption: Basic
 
    mapdl
+   ../getting_started/troubleshoot
    mesh_geometry
    plotting
    parameters
    components
    post
+
 
 .. toctree::
    :maxdepth: 1
