@@ -384,7 +384,7 @@ jobs:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
         run: |
-          docker compose --profile remote up --build --abort-on-container-exit --exit-code-from pymapdl-host
+          docker compose --profile remote up --build --abort-on-container-exit --exit-code-from remote #pymapdl-host
 
       - name: "Cleanup docker compose"
         if: always()
