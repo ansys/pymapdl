@@ -34,7 +34,7 @@ script:
 
     from ansys.mapdl.core import launch_mapdl
 
-    # Using current directory as run location
+    # Using current directory as ``run_location``
     mapdl = launch_mapdl(run_location=os.getcwd(), loglevel="DEBUG")
 
 
