@@ -862,6 +862,7 @@ class TestMapdlPool:
         """Test increasing pool by default (1 instance)"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
         monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
         pool = MapdlPool(
             2,
@@ -889,6 +890,7 @@ class TestMapdlPool:
         """Test increasing pool by multiple instances"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
         monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
         pool = MapdlPool(
             1,
@@ -912,6 +914,7 @@ class TestMapdlPool:
         """Test that increase raises TypeError for non-integer input"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
         monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
         pool = MapdlPool(
             1,
@@ -933,6 +936,7 @@ class TestMapdlPool:
         """Test that increase raises ValueError for values < 1"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
         monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
         pool = MapdlPool(
             1,
@@ -977,6 +981,8 @@ class TestMapdlPool:
     def test_reduce_default(self, mock_exit, monkeypatch):
         """Test reducing pool by default (1 instance)"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
         # Create mock instances
         from ansys.mapdl.core.mapdl import MapdlBase
@@ -1013,6 +1019,8 @@ class TestMapdlPool:
     def test_reduce_multiple(self, monkeypatch):
         """Test reducing pool by multiple instances"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
         # Create mock instances
         from ansys.mapdl.core.mapdl import MapdlBase
@@ -1049,6 +1057,8 @@ class TestMapdlPool:
     def test_reduce_to_zero_error(self, monkeypatch):
         """Test that reducing to 0 instances raises an error"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
         pool = MapdlPool(
             1,
@@ -1068,6 +1078,8 @@ class TestMapdlPool:
     def test_reduce_to_negative_error(self, monkeypatch):
         """Test that reducing to negative instances raises an error"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
         pool = MapdlPool(
             2,
@@ -1087,6 +1099,8 @@ class TestMapdlPool:
     def test_reduce_invalid_type(self, monkeypatch):
         """Test that reduce raises TypeError for non-integer input"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
         pool = MapdlPool(
             3,
@@ -1107,6 +1121,8 @@ class TestMapdlPool:
     def test_reduce_invalid_value(self, monkeypatch):
         """Test that reduce raises ValueError for values < 1"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
         pool = MapdlPool(
             3,
@@ -1128,6 +1144,8 @@ class TestMapdlPool:
     def test_add_existing_instance(self, mock_launch, monkeypatch):
         """Test adding an existing MAPDL instance to the pool"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
         # Create a pool
         pool = MapdlPool(
@@ -1160,6 +1178,8 @@ class TestMapdlPool:
     def test_add_invalid_type(self, monkeypatch):
         """Test that add raises TypeError for non-MAPDL instance"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
         pool = MapdlPool(
             1,
@@ -1184,6 +1204,8 @@ class TestMapdlPool:
     def test_add_exited_instance(self, monkeypatch):
         """Test that add raises ValueError for exited MAPDL instance"""
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
         pool = MapdlPool(
             1,
