@@ -21,6 +21,7 @@ WORKDIR /home
 # Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends  \
+    ca-certificates \
     libgl1-mesa-glx \
     xvfb \
     libgomp1 \
@@ -123,6 +124,7 @@ USER root
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    ca-certificates \
     libgl1-mesa-glx \
     xvfb \
     libgomp1 \
