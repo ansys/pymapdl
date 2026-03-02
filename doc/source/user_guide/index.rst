@@ -55,6 +55,11 @@ This section provides a general overview of PyMAPDL and how you use it.
    hpc/troubleshooting
 
 
+.. note::
+
+   For general PyMAPDL troubleshooting, see :ref:`ref_troubleshooting`.
+
+
 PyMAPDL overview
 ================
 The :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function
