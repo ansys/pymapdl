@@ -9,6 +9,13 @@ echo ""
 # different host user (common when running the container as root).
 git config --global --add safe.directory '*'
 
+# Prevent writing .pyc files to the mounted volume.
+export PYTHONDONTWRITEBYTECODE=1
+
+# Redirect uv cache to a container-local path so it never writes to the
+# mounted volume (overrides any default ~/.cache/uv or in-tree location).
+export UV_CACHE_DIR="/tmp/uv-cache"
+
 # Use container-local venv to avoid Docker volume mount performance issues
 VENV_PATH="/tmp/.venv_container"
 
@@ -27,8 +34,9 @@ if [[ "${USE_LOCAL_REPO}" == "true" ]]; then
 
 else
     echo "Using cloned PyMAPDL repository for testing."
-    uv venv .venv
-    source .venv/bin/activate
+    uv venv "${VENV_PATH}"
+    # shellcheck disable=SC1091
+    source "${VENV_PATH}/bin/activate"
 fi
 
 # Checkout to the specified branch if PYMAPDL_BRANCH is set
@@ -55,17 +63,15 @@ echo "Using pytest arguments: ${PYTEST_ARGUMENTS}"
 # Add timing information for debugging startup delays
 echo "Starting pytest at: $(date +%H:%M:%S)"
 
-# Optimize pytest to reduce I/O bottlenecks
-# Disable .pyc writing to mounted volume (speeds up by ~30-60s)
-export PYTHONDONTWRITEBYTECODE=1
-
 # Removed --no-cache flag to enable package caching for better performance
 # Disable problematic plugins that cause I/O overhead:
-# -p no:cacheprovider = disable pytest cache (saves ~10-20s on mounted volumes)
-# --no-project: prevents uv from resolving/writing uv.lock in the mounted directory
+# -p no:cacheprovider  = disable pytest cache (saves ~10-20s on mounted volumes)
+# --no-project         = prevent uv from resolving/writing uv.lock in the mounted directory
+# --basetemp           = redirect all pytest tmp_path/tmpdir writes to /tmp
 # shellcheck disable=SC2086
 time xvfb-run -a uv run --active --no-project --extra tests pytest tests \
   -p no:cacheprovider \
+  --basetemp=/tmp/pytest-tmp \
   -vv \
   ${PYTEST_ARGUMENTS}
 
