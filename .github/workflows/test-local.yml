@@ -278,6 +278,9 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           unset PYMAPDL_PORT
 
+          # Start MAPDL
+          ${PYMAPDL_MAPDL_EXEC}
+
           $cmd ${PYTEST_INPUT_ARGUMENTS} \
             ${PYTEST_ARGUMENTS} \
             --report-log=$file_name.jsonl \
