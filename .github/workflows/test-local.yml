@@ -280,7 +280,7 @@ jobs:
 
           # Start MAPDL
           echo "${PYMAPDL_MAPDL_EXEC}"
-          ${PYMAPDL_MAPDL_EXEC} -grpc
+          exec ${PYMAPDL_MAPDL_EXEC} -grpc
 
           exit 1
 
