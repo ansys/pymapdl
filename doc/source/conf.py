@@ -133,6 +133,11 @@ intersphinx_mapping = {
 suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
 sd_fontawesome_latex = True
 
+# Image converter configuration for PDF builds
+# Use rsvg-convert instead of ImageMagick for better SVG support
+image_converter = "rsvg-convert"
+image_converter_args = ["-f", "pdf"]
+
 # Graphviz diagrams configuration
 graphviz_output_format = "png"
 
