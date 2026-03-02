@@ -61,8 +61,9 @@ export PYTHONDONTWRITEBYTECODE=1
 # Removed --no-cache flag to enable package caching for better performance
 # Disable problematic plugins that cause I/O overhead:
 # -p no:cacheprovider = disable pytest cache (saves ~10-20s on mounted volumes)
+# --no-project: prevents uv from resolving/writing uv.lock in the mounted directory
 # shellcheck disable=SC2086
-time xvfb-run -a uv run --active --extra tests pytest tests \
+time xvfb-run -a uv run --active --no-project --extra tests pytest tests \
   -p no:cacheprovider \
   -vv \
   ${PYTEST_ARGUMENTS}

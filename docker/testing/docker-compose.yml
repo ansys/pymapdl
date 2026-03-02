@@ -178,6 +178,11 @@ services:
       - PYMAPDL_GRPC_TRANSPORT=insecure
       # Explicitly use copy mode to avoid hardlink failures across filesystems
       - UV_LINK_MODE=copy
+      # Redirect uv cache and project environment to container-local paths
+      # so uv never attempts to write to the read-only mounted volume.
+      - UV_CACHE_DIR=/tmp/uv-cache
+      - UV_PROJECT_ENVIRONMENT=/tmp/.venv_container
+    user: root
     volumes:
       - ../../:/home/mapdl/jobs
 
