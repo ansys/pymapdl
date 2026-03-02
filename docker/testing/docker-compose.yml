@@ -91,28 +91,10 @@ services:
       - ANSYS_LOCK=OFF
       - OMPI_ALLOW_RUN_AS_ROOT=1
       - OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
-      - I_MPI_SHM_LMT=shm
-      # MAPDL configuration — mirror what the CI entrypoint.sh expects
-      - VERSION=${MAPDL_VERSION}
-      - MAPDL_VERSION=${MAPDL_VERSION}
-      - EXEC_PATH=${EXEC_PATH:-ansys}
-      - DISTRIBUTED_MODE=${DISTRIBUTED_MODE:-smp}
-      - NUM_PROCESSORS=${NUM_PROCESSORS:-2}
-      # On AMD CPUs this must be set to "-mpi openmpi"
-      - MPI_ARG=${MPI_ARG:-}
-      - TRANSPORT=insecure
-      - MEMORY_DB_MB=${MEMORY_DB_MB:-6000}
-      - MEMORY_WORKSPACE_MB=${MEMORY_WORKSPACE_MB:-6000}
-      - ENABLE_DPF_SERVER=false
     image: ${DOCKER_IMAGE}
     platform: linux/amd64
     entrypoint: /bin/bash
-    # Run the same entrypoint.sh used by the CI action so the full MAPDL command
-    # (exec path, -dir, -transport, -np, -db, -m, MPI args, etc.) is built
-    # correctly, matching what works on GitHub runners.
-    command: ["-c", "chmod +x /entrypoint.sh && /entrypoint.sh"]
-    volumes:
-      - ../../../.github/actions/launch-mapdl-docker/entrypoint.sh:/entrypoint.sh:ro
+    command: ["-c", "exec ansys -grpc -smp -np 2 -transport insecure -allowremote true"]
     working_dir: /jobs
     user: root
 
