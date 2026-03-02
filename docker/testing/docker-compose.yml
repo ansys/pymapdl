@@ -66,9 +66,15 @@ services:
     # ---------------------
     # - `ANSYSLMD_LICENSE_FILE` (mandatory) for the license server
     # - `DOCKER_IMAGE` (mandatory) environment variable to specify the image to use.
-    # - `MAPDL_ENTRYPOINT` to specify the entrypoint for the container.
-    # - `MAPDL_EXEC_PATH` to specify the path to the MAPDL executable.
-    # - `MAPDL_EXTRA_ARGS` to specify any additional arguments for the MAPDL command.
+    # - `MAPDL_VERSION` (mandatory) MAPDL version string (e.g. v25.2-ubuntu-cicd) used
+    #    to derive EXEC_PATH and VERSION inside the entrypoint.
+    # - `EXEC_PATH` path to the MAPDL binary inside the image. Defaults to `ansys`.
+    #   For ubuntu images it is typically `/ansys_inc/v<VER>/ansys/bin/mapdl`.
+    # - `DISTRIBUTED_MODE` smp (default) or dmp.
+    # - `NUM_PROCESSORS` number of processors (default: 2).
+    # - `MPI_ARG` extra MPI arguments, e.g. `-mpi openmpi` (required on AMD CPUs).
+    # - `MEMORY_DB_MB` MAPDL -db flag value in MB (default: 6000).
+    # - `MEMORY_WORKSPACE_MB` MAPDL -m flag value in MB (default: 6000).
     #
     container_name: mapdl-remote
     profiles:
@@ -85,16 +91,29 @@ services:
       - ANSYS_LOCK=OFF
       - OMPI_ALLOW_RUN_AS_ROOT=1
       - OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
-
+      - I_MPI_SHM_LMT=shm
+      # MAPDL configuration — mirror what the CI entrypoint.sh expects
+      - VERSION=${MAPDL_VERSION}
+      - MAPDL_VERSION=${MAPDL_VERSION}
+      - EXEC_PATH=${EXEC_PATH:-ansys}
+      - DISTRIBUTED_MODE=${DISTRIBUTED_MODE:-smp}
+      - NUM_PROCESSORS=${NUM_PROCESSORS:-2}
+      # On AMD CPUs this must be set to "-mpi openmpi"
+      - MPI_ARG=${MPI_ARG:-}
+      - TRANSPORT=insecure
+      - MEMORY_DB_MB=${MEMORY_DB_MB:-6000}
+      - MEMORY_WORKSPACE_MB=${MEMORY_WORKSPACE_MB:-6000}
+      - ENABLE_DPF_SERVER=false
     image: ${DOCKER_IMAGE}
     platform: linux/amd64
-    # You might want to customize it
-    entrypoint: ${MAPDL_ENTRYPOINT:-"/bin/bash"}
-    command: [
-      "${MAPDL_EXEC_PATH:-ansys}",
-      "-grpc",
-      "${MAPDL_EXTRA_ARGS:-}"
-      ]
+    entrypoint: /bin/bash
+    # Run the same entrypoint.sh used by the CI action so the full MAPDL command
+    # (exec path, -dir, -transport, -np, -db, -m, MPI args, etc.) is built
+    # correctly, matching what works on GitHub runners.
+    command: ["-c", "chmod +x /entrypoint.sh && /entrypoint.sh"]
+    volumes:
+      - ../../../.github/actions/launch-mapdl-docker/entrypoint.sh:/entrypoint.sh:ro
+    working_dir: /jobs
     user: root
 
   pymapdl-clone:
