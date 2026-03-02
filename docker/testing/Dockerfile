@@ -20,7 +20,7 @@ WORKDIR /home
 
 # Install system dependencies
 RUN apt-get update && \
-    apt-get install -y  \
+    apt-get install -y --no-install-recommends  \
     libgl1-mesa-glx \
     xvfb \
     libgomp1 \
@@ -122,7 +122,7 @@ ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 USER root
 
 RUN apt-get update && \
-    apt-get install -y  \
+    apt-get install -y --no-install-recommends \
     libgl1-mesa-glx \
     xvfb \
     libgomp1 \
