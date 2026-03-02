@@ -279,7 +279,10 @@ jobs:
           unset PYMAPDL_PORT
 
           # Start MAPDL
-          ${PYMAPDL_MAPDL_EXEC}
+          echo "${PYMAPDL_MAPDL_EXEC}"
+          ${PYMAPDL_MAPDL_EXEC} -grpc
+
+          exit 1
 
           $cmd ${PYTEST_INPUT_ARGUMENTS} \
             ${PYTEST_ARGUMENTS} \
