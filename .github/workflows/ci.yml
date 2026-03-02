@@ -384,26 +384,25 @@ jobs:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
         run: |
-          docker compose --profile remote-host up --build --abort-on-container-exit --exit-code-from pymapdl-host
+          docker compose --profile remote-host up --build --abort-on-container-exit --exit-code-from pymapdl-host --no-attach mapdl-remote
 
       - name: "Cleanup docker compose"
         if: always()
-        working-directory: docker/testing
         env:
           # To avoid warnings
           ANSYSLMD_LICENSE_FILE: ""
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
         run: |
           echo "::group:: MAPDL-remote logs"
-          docker compose logs mapdl-remote
+          docker compose -f docker/testing/docker-compose.yml logs mapdl-remote || true
           echo "::endgroup::"
 
           echo "::group:: Python host logs"
-          docker compose logs pymapdl-host
+          docker compose -f docker/testing/docker-compose.yml logs pymapdl-host || true
           echo "::endgroup::"
 
           echo "Stopping all services..."
-          docker compose --profile remote-host down -v
+          docker compose -f docker/testing/docker-compose.yml --profile remote-host down -v || true
 
   docker-compose-test-local:
     name: "Docker Compose Local: ${{ matrix.mapdl-version }}"
