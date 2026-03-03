@@ -15,6 +15,7 @@ ARG PYTHON_VERSION=3.11
 
 ENV USE_LOCAL_REPO=${USE_LOCAL_REPO}
 ENV UV_PYTHON=${PYTHON_VERSION}
+ENV VENV_PATH="/tmp/.venv_container"
 
 WORKDIR /home
 
@@ -36,20 +37,20 @@ RUN apt-get update && \
 
 RUN ls -al
 
-# Cloning repo if needed.
-RUN if [ "$USE_LOCAL_REPO" = "false" ]; then \
+# Set PATH to include uv and pre-install Python interpreter.
+# Both must happen before the dep pre-install step below.
+ENV PATH="/root/.local/bin:$HOME/.local/bin:$PATH"
+
+# Pre-install test dependencies from PyPI, then clone the repo if needed.
+# The venv is always created here so start.sh only runs a fast editable install.
+RUN uv --version && uv python install ${PYTHON_VERSION} && \
+    uv venv "${VENV_PATH}" && \
+    UV_LINK_MODE=copy uv pip install --python "${VENV_PATH}" "ansys-mapdl-core[tests]" && \
+    if [ "$USE_LOCAL_REPO" = "false" ]; then \
         echo "Cloning PyMAPDL repository..." && \
         git clone https://github.com/ansys/pymapdl.git . && \
         git config --global --add safe.directory $(pwd); \
     fi
-
-# Set PATH to include uv
-ENV PATH="/root/.local/bin:$HOME/.local/bin:$PATH"
-RUN uv --version
-
-# Pre-install Python in container-local directory to avoid re-downloads
-# This creates a Python installation that persists in the container layer
-RUN uv python install ${PYTHON_VERSION}
 
 # Configuration
 # -------------
@@ -110,6 +111,7 @@ ARG PYTHON_VERSION=3.11
 
 ENV UV_PYTHON=${PYTHON_VERSION}
 ENV USE_LOCAL_REPO=${USE_LOCAL_REPO}
+ENV VENV_PATH="/tmp/.venv_container"
 
 ENV OMPI_ALLOW_RUN_AS_ROOT=1
 ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
@@ -142,13 +144,16 @@ USER mapdl
 
 ENV PATH="$HOME/.local/bin:$PATH"
 
-# Cloning repo if needed.
-RUN if [ "$USE_LOCAL_REPO" = "false" ]; then \
+# Pre-install test dependencies from PyPI, then clone the repo if needed.
+# The venv is always created here so start.sh only runs a fast editable install.
+RUN uv --version && \
+    uv venv "${VENV_PATH}" && \
+    UV_LINK_MODE=copy uv pip install --python "${VENV_PATH}" "ansys-mapdl-core[tests]" && \
+    if [ "$USE_LOCAL_REPO" = "false" ]; then \
         echo "Cloning PyMAPDL repository..." && \
         git clone https://github.com/ansys/pymapdl.git . && \
         git config --global --add safe.directory /workspace; \
-    fi && \
-    uv --version
+    fi
 
 # Configuration
 # -------------

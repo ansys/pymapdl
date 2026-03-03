@@ -120,7 +120,6 @@ services:
       # Explicitly use copy mode to avoid hardlink failures across filesystems
       - UV_LINK_MODE=copy
 
-
   pymapdl-host:
     # This service mount the local PyMAPDL repository and test it.
     profiles:

@@ -42,7 +42,12 @@ if [[ "${USE_LOCAL_REPO}" == "true" ]]; then
     fi
 else
     echo "Using cloned PyMAPDL repository for testing."
-    uv venv "${VENV_PATH}"
+    if [ -d "${VENV_PATH}" ]; then
+        echo "Existing virtual environment found at ${VENV_PATH}. Activating it."
+    else
+        echo "No existing virtual environment found at ${VENV_PATH}. Creating a new one."
+        uv venv "${VENV_PATH}"
+    fi
     # shellcheck disable=SC1091
     source "${VENV_PATH}/bin/activate"
 fi
@@ -80,11 +85,9 @@ echo "Using pytest arguments: ${PYTEST_ARGUMENTS}"
 # Add timing information for debugging startup delays
 echo "Starting pytest at: $(date +%H:%M:%S)"
 
-# Install the package with its test extras into the container-local venv.
-# This is done separately from `uv run` to avoid `--no-project` suppressing
-# the `--extra` flag (they are mutually exclusive in uv).
-# The uv.lock file is intentionally not updated (--frozen) to avoid writing
-# to the mounted volume.
+# Install the package in editable mode. Test dependencies are pre-installed in
+# the image layer so uv only needs to install/update the delta (typically just
+# the editable link for the project itself, making this near-instant).
 uv pip install --python "${VENV_PATH}" -e ".[tests]"
 
 # shellcheck disable=SC2086
