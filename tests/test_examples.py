@@ -23,6 +23,7 @@
 import os
 import re
 from subprocess import PIPE, STDOUT, Popen
+from unittest.mock import patch
 
 import pytest
 
@@ -123,46 +124,89 @@ def test_failed_download(running_test):
 @requires("requests")
 def test_download_cfx_mapping_example_data(running_test):
     with running_test():
-        assert all(download_cfx_mapping_example_data().values())
+        with patch(
+            "ansys.mapdl.core.examples.downloads._check_url_exist"
+        ) as mock_check:
+            mock_check.return_value = True
+            result = download_cfx_mapping_example_data()
+            assert all(result.values())
+            # Verify the function was called twice (once for each file)
+            assert mock_check.call_count == 2
 
 
 @requires("requests")
 def test_download_manifold_example_data(running_test):
     with running_test():
-        assert all(download_manifold_example_data().values())
+        with patch(
+            "ansys.mapdl.core.examples.downloads._check_url_exist"
+        ) as mock_check:
+            mock_check.return_value = True
+            result = download_manifold_example_data()
+            assert all(result.values())
+            # Verify the function was called twice (once for each file)
+            assert mock_check.call_count == 2
 
 
 @requires("requests")
 def test_download_bracket(running_test):
     with running_test():
-        assert download_bracket() is True
+        with patch(
+            "ansys.mapdl.core.examples.downloads._check_url_exist"
+        ) as mock_check:
+            mock_check.return_value = True
+            result = download_bracket()
+            assert result is True
+            mock_check.assert_called_once()
 
 
 @requires("requests")
 def test_download_vtk_rotor(running_test):
     with running_test():
-        assert download_vtk_rotor() is True
+        with patch(
+            "ansys.mapdl.core.examples.downloads._check_url_exist"
+        ) as mock_check:
+            mock_check.return_value = True
+            result = download_vtk_rotor()
+            assert result is True
+            mock_check.assert_called_once()
 
 
 @requires("requests")
 def test__download_rotor_tech_demo_vtk(running_test):
     with running_test():
-        assert _download_rotor_tech_demo_vtk() is True
+        with patch(
+            "ansys.mapdl.core.examples.downloads._check_url_exist"
+        ) as mock_check:
+            mock_check.return_value = True
+            result = _download_rotor_tech_demo_vtk()
+            assert result is True
+            mock_check.assert_called_once()
 
 
 @requires("requests")
 def test_download_example_data(running_test):
     with running_test():
-        assert download_example_data("LatheCutter.anf", "geometry") is True
+        with patch(
+            "ansys.mapdl.core.examples.downloads._check_url_exist"
+        ) as mock_check:
+            mock_check.return_value = True
+            result = download_example_data("LatheCutter.anf", "geometry")
+            assert result is True
+            mock_check.assert_called_once()
 
 
 @requires("requests")
 def test_download_tech_demo_data(running_test):
     with running_test():
-        assert (
-            download_tech_demo_data("td-21", "ring_stiffened_cylinder_mesh_file.cdb")
-            is True
-        )
+        with patch(
+            "ansys.mapdl.core.examples.downloads._check_url_exist"
+        ) as mock_check:
+            mock_check.return_value = True
+            result = download_tech_demo_data(
+                "td-21", "ring_stiffened_cylinder_mesh_file.cdb"
+            )
+            assert result is True
+            mock_check.assert_called_once()
 
 
 @requires("requests")
