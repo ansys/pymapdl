@@ -655,9 +655,9 @@ def test_table_interpolation(mapdl, tmpdir, use_load_table):
         table_data = np.genfromtxt(file_name, delimiter=",")
         mapdl.load_table("table", table_data, "time")
     else:
-        mapdl.upload(file_name)
+        file_name_ = mapdl.upload(file_name)
         mapdl.run("*DIM,table,TABLE,4,4,,time,,,")
-        mapdl.run(f"*TREAD,table,{file_name},,,")
+        mapdl.run(f"*TREAD,table,{file_name_},,,")
         mapdl.starstatus("table")
 
     mapdl.run("tmp_ = table(10, 1)")
