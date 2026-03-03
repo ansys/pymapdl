@@ -200,7 +200,6 @@ def test_check_license_file(cleared, tmpdir):
             license_server_check=False,
             start_timeout=timeout,
             additional_switches=QUICK_LAUNCH_SWITCHES,
-            port=mapdl.port + 1,
         )
         assert mapdl_._local
         mapdl_.exit()
