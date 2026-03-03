@@ -265,6 +265,10 @@ jobs:
           fi;
 
           echo "Version: $version"
+          if [[ "${MAPDL_VERSION}" == "v24.2-ubuntu-cicd" ]]; then
+            echo "testing 24.2 cicid"
+            xvfb-run python -c "from ansys.mapdl.core import LOG;LOG.setLevel('DEBUG');LOG.log_to_file('mylog.log');LOG.log_to_stdout(True);from ansys.mapdl.core import launch_mapdl;mapdl = launch_mapdl(loglevel='DEBUG');"
+          fi;
 
           # If minimal is true, we need to set the executable path.
           if [[ "${ON_MINIMAL}" == "true" ]]; then
