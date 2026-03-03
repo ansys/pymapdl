@@ -406,7 +406,7 @@ def _submit_job(cmd: List[str]) -> int:
         raise MapdlDidNotStart(f"Could not parse job ID from sbatch output: {e}")
 
 
-def _wait_for_job_ready(jobid: int, timeout: int) -> HPCJobInfo:
+def _wait_for_job_ready(jobid: int, timeout: int, time_step: int = 1) -> HPCJobInfo:
     """Wait for SLURM job to reach RUNNING state.
 
     Polls the job status using scontrol until the job reaches RUNNING state
@@ -490,7 +490,7 @@ def _wait_for_job_ready(jobid: int, timeout: int) -> HPCJobInfo:
         except subprocess.CalledProcessError as e:
             LOG.warning(f"scontrol error: {e.stderr}")
 
-        time.sleep(1)
+        time.sleep(time_step)
 
     # Timeout reached
     raise MapdlDidNotStart(

@@ -588,7 +588,7 @@ class TestWaitForJobReady:
             mock_time.side_effect = [0, 1, 2, 3]  # Final return simulates timeout
 
             with pytest.raises(MapdlDidNotStart, match="did not start within"):
-                _wait_for_job_ready(12345, timeout=2)
+                _wait_for_job_ready(12345, timeout=2, time_step=1)
 
 
 # ============================================================================
