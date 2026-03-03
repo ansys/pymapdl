@@ -4,6 +4,7 @@
 
 """Unit tests for launcher.hpc module."""
 
+import itertools
 import os
 import subprocess
 from unittest.mock import Mock, patch
@@ -557,8 +558,10 @@ class TestWaitForJobReady:
             patch("ansys.mapdl.core.launcher.hpc.time.time") as mock_time,
             patch("ansys.mapdl.core.launcher.hpc.time.sleep"),
         ):
-            # Mock time progression: start_time (0), first loop (1), second loop (2)
-            mock_time.side_effect = [0, 1, 2]
+            # Mock time progression: start at 0, increment by 1 each call.
+            # Using itertools.count avoids StopIteration if logging or other
+            # internal code calls time.time() extra times.
+            mock_time.side_effect = itertools.count(0)
 
             # First call returns PENDING, second returns RUNNING
             mock_run.side_effect = [
@@ -585,7 +588,7 @@ class TestWaitForJobReady:
             mock_run.return_value = Mock(stdout=pending_output)
 
             # Simulate timeout: return times that exceed the timeout
-            mock_time.side_effect = [0, 1, 2, 3]  # Final return simulates timeout
+            mock_time.side_effect = itertools.count(0)
 
             with pytest.raises(MapdlDidNotStart, match="did not start within"):
                 _wait_for_job_ready(12345, timeout=2, time_step=1)
