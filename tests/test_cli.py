@@ -666,6 +666,9 @@ def test_convert_passing(mock_conv, run_cli, tmpdir, arg, value):
     with open(input_file, "w") as fid:
         fid.write("/prep7\nBLOCK,0,1,0,1,0,1")
 
+    if arg == "output":
+        value = str(tmpdir.join("output.py"))
+
     default_ = DEFAULT_ARGS.copy()
     default_[arg] = value
     expect_error = False
