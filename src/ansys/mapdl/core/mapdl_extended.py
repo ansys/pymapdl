@@ -1629,7 +1629,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         # Let's download the file to the location
         if self.is_local:
-            src = self.directory / fname_
+            src = pathlib.Path(self.directory / fname_)
             dst = pathlib.Path(fname).resolve()
             if src.resolve() != dst:
                 shutil.copy(src, fname)
