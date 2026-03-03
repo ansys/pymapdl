@@ -68,6 +68,9 @@ class Test_static_solve(TestClass):
     @pytest.fixture(scope="class")
     def static_solve(mapdl):
         with mapdl.muted:
+            mapdl.clear("NOSTART")
+            mapdl.prep7()
+
             # cylinder and mesh parameters
             # torque = 100
             radius = 2

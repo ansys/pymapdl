@@ -499,6 +499,7 @@ def test_error(mapdl, clear_at_end):
 
 
 def test_ignore_errors(mapdl):
+    mapdl.prep7()
     mapdl.ignore_errors = False
     assert not mapdl.ignore_errors
     mapdl.ignore_errors = True
