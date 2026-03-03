@@ -90,7 +90,7 @@ uv run pytest
 
 Pytest is configured with `--maxfail=2` in `pyproject.toml`. Override locally:
 ```sh
-uv run pytest -p no:randomly --maxfail=100 tests/test_foo.py
+uv run pytest --maxfail=100 tests/test_foo.py
 ```
 
 ### Conditional test skipping
@@ -115,7 +115,7 @@ Accepted strings: `"local"`, `"remote"`, `"grpc"`, `"dpf"`, `"linux"`, `"nolinux
 
 ### Mapdl class
 
-You cannot change files in `src\ansys\mapdl\core\_commands`. To modify command behavior, overwrite in `_MapdlCommandExtended` class in `src\ansys\mapdl\core\mapdl_extended.py`.
+You cannot change files in `src/ansys/mapdl/core/_commands`. To modify command behavior, overwrite in `_MapdlCommandExtended` class in `src/ansys/mapdl/core/mapdl_extended.py`.
 
 ## Pre-commit hooks
 
@@ -126,7 +126,7 @@ uv run pre-commit install          # Install once
 uv run pre-commit run --all-files  # Run manually
 ```
 
-To skip spelling checks, add words to `doc\styles\config\vocabularies\ANSYS\accept.txt`.
+To skip spelling checks, add words to `doc/styles/config/vocabularies/ANSYS/accept.txt`.
 
 ## Docstrings
 
@@ -134,15 +134,9 @@ All public functions and methods must have **numpydoc**-style docstrings. Active
 
 ## Dependency Management
 
-Runtime dependencies are in `pyproject.toml` under `[project.dependencies]`. Test and doc extras use exact version pins (`==`). Lock file is `uv.lock`.
+Runtime dependencies are in `pyproject.toml` under the `dependencies` list in the `[project]` section. Test and doc extras are under `[project.optional-dependencies]` and use exact version pins (`==`).
 
-To add or upgrade dependencies:
-
-```sh
-uv lock
-```
-
-Do **not** commit `uv.lock` changes as side-effects of unrelated work.
+To add or upgrade dependencies, update `pyproject.toml` directly.
 
 ## How to Use These Agents
 
