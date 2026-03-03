@@ -139,7 +139,7 @@ services:
     environment:
       - PYMAPDL_IP=mapdl # Use the MAPDL service name
       # If empty, it will use the default 'main' branch
-      - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-main}
+      - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-}
       # Explicitly use copy mode to avoid hardlink failures across filesystems
       - UV_LINK_MODE=copy
       # Redirect uv cache and project environment to container-local paths
@@ -151,7 +151,7 @@ services:
     working_dir: /workspace/pymapdl
     user: root
     volumes:
-      - ../../../:/workspace
+      - ../../:/workspace/pymapdl
 
   mapdl-local-host:
     # This service clones PyMAPDL inside the MAPDL container and run the tests.

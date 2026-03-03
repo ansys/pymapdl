@@ -88,9 +88,6 @@ ENV TEST_DPF_BACKEND=False
 # MAPDL and DPF are running on the same container
 ENV ON_SAME_CONTAINER=False
 
-# Pytest settings
-# ---------------
-ENV PYTEST_ARGUMENTS='--ignore_image_cache'
 
 # Setting entrypoint
 # ------------------
@@ -188,10 +185,6 @@ ENV HAS_DPF=False
 ENV TEST_DPF_BACKEND=False
 # MAPDL and DPF are running on the same container
 ENV ON_SAME_CONTAINER=False
-
-# Pytest settings
-# ---------------
-ENV PYTEST_ARGUMENTS='--ignore_image_cache'
 
 # Setting entrypoint
 # ------------------

@@ -7,7 +7,7 @@ echo ""
 
 # Mark all directories as safe for git to handle mounted volumes owned by a
 # different host user (common when running the container as root).
-git config --global --add safe.directory '*'
+git config --global --add safe.directory '*' 2>/dev/null || true
 
 # Prevent writing .pyc files to the mounted volume.
 export PYTHONDONTWRITEBYTECODE=1
@@ -47,9 +47,15 @@ else
     source "${VENV_PATH}/bin/activate"
 fi
 
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+if [ -z "${CURRENT_BRANCH}" ]; then
+  echo "WARNING: Could not determine current branch (git worktree or non-git directory). Skipping branch checkout."
+else
+  echo "Current branch: ${CURRENT_BRANCH}"
+fi
+
 # Checkout to the specified branch if PYMAPDL_BRANCH is set
 if [ -n "${PYMAPDL_BRANCH}" ]; then
-  CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
   if [ "${CURRENT_BRANCH}" != "${PYMAPDL_BRANCH}" ]; then
     echo "PYMAPDL_BRANCH is set to '${PYMAPDL_BRANCH}'. Current branch: '${CURRENT_BRANCH}'. Checking out..."
 
@@ -67,6 +73,8 @@ if [ ! -d "tests" ]; then
   exit 1
 fi
 
+export PYTEST_ARGUMENTS=" --ignore_image_cache --image_cache_dir=/tmp/empty_dir ${PYTEST_ARGUMENTS}"
+
 echo "Using pytest arguments: ${PYTEST_ARGUMENTS}"
 
 # Add timing information for debugging startup delays
@@ -81,7 +89,6 @@ uv pip install --python "${VENV_PATH}" -e ".[tests]"
 
 # shellcheck disable=SC2086
 time xvfb-run -a "${VENV_PATH}/bin/pytest" tests \
-  -p no:cacheprovider \
   --basetemp=/tmp/pytest-tmp \
   -vv \
   ${PYTEST_ARGUMENTS}
