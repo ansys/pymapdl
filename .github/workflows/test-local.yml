@@ -278,11 +278,6 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           unset PYMAPDL_PORT
 
-          # Start MAPDL
-          ansysgrpc
-
-          exit 1
-
           $cmd ${PYTEST_INPUT_ARGUMENTS} \
             ${PYTEST_ARGUMENTS} \
             --report-log=$file_name.jsonl \
