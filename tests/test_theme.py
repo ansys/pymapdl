@@ -29,6 +29,13 @@ if not has_dependency("pyvista"):
         allow_module_level=True, reason="Skipping because 'pyvista' is not installed"
     )
 
+
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests(request: pytest.FixtureRequest):
+    """Override the global autouse fixture to prevent automatic MAPDL instance launching."""
+    yield
+
+
 import matplotlib
 import numpy as np
 

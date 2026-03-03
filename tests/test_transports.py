@@ -36,6 +36,12 @@ from ansys.mapdl.core.launcher import generate_start_parameters
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
 
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests(request: pytest.FixtureRequest):
+    """Override the global autouse fixture to prevent automatic MAPDL instance launching."""
+    yield
+
+
 def _make_fake_channel_ready(delay=0):
     """Return a dummy channel object and a channel_ready_future that can be
     controlled for testing `wait_until_healthy`.

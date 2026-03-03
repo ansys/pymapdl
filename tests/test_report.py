@@ -22,12 +22,20 @@
 
 """Test report features"""
 
+import pytest
+
 from conftest import has_dependency, requires
 
 if has_dependency("pyvista"):
     from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
+
+
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests(request: pytest.FixtureRequest):
+    """Override the global autouse fixture to prevent automatic MAPDL instance launching."""
+    yield
 
 
 @requires("pyvista")

@@ -34,6 +34,13 @@ from ansys.mapdl.core.convert import (
 from ansys.mapdl.core.plotting import GraphicsBackend
 from conftest import requires
 
+
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests(request: pytest.FixtureRequest):
+    """Override the global autouse fixture to prevent automatic MAPDL instance launching."""
+    yield
+
+
 nblock = """nblock,3,,326253
 (1i9,3e20.9e3)
         1     3.352881632E-03     1.110639271E-02     5.172433282E-03

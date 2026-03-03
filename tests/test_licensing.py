@@ -45,6 +45,12 @@ skip_no_lic_bin = pytest.mark.skipif(
 )
 
 
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests(request: pytest.FixtureRequest):
+    """Override the global autouse fixture to prevent automatic MAPDL instance launching."""
+    yield
+
+
 FAKE_CHECKOUT_SUCCESS = """
 2021/09/17 14:08:19    INFO                Starting Licensing Client Proxy server.
 2021/09/17 14:08:19    INFO                /usr/ansys_inc/v212/licensingclient/linx64/ansyscl -acl 3423788.77064 -nodaemon -log /home/USER/.ansys/ansyscl.HOST.3423788.77064.log
@@ -183,7 +189,7 @@ def test_license_checker(tmpdir, license_checker):
 
 @requires("local")
 @skip_no_lic_bin
-def test_check_license_file(mapdl, cleared, tmpdir):
+def test_check_license_file(cleared, tmpdir):
     timeout = 15
     checker = licensing.LicenseChecker(timeout=timeout)
     # start the license check in the background
