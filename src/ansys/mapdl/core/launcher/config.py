@@ -175,6 +175,9 @@ def resolve_launch_config(
     # Resolve transport mode
     resolved_transport_mode = resolve_transport_mode(transport_mode)
 
+    # Resolve additional switches (explicit arg or PYMAPDL_ADDITIONAL_SWITCHES env var)
+    resolved_additional_switches = resolve_additional_switches(additional_switches)
+
     # Resolve environment variables
     resolved_env_vars = env_vars if env_vars else {}
 
@@ -195,7 +198,7 @@ def resolve_launch_config(
         override=override,
         remove_temp_dir_on_exit=remove_temp_dir_on_exit,
         set_no_abort=set_no_abort,
-        additional_switches=additional_switches,
+        additional_switches=resolved_additional_switches,
         license_type=license_type,
         launch_on_hpc=launch_on_hpc,
         running_on_hpc=running_on_hpc,
@@ -695,3 +698,66 @@ def resolve_transport_mode(transport_mode: Optional[str]) -> Optional[TransportM
             f"Invalid transport_mode: '{transport_mode}'. "
             f"Must be one of: insecure, uds, wnua, mtls"
         )
+
+
+def _shares_substring(a: str, b: str, min_len: int = 4) -> bool:
+    """Return True if *a* and *b* share any common substring of length >= *min_len*."""
+    for i in range(len(a) - min_len + 1):
+        token = a[i : i + min_len]
+        if token in b:
+            return True
+    return False
+
+
+def resolve_additional_switches(additional_switches: str) -> str:
+    """Resolve additional MAPDL command line switches.
+
+    Resolution order:
+    1. Explicit ``additional_switches`` argument (if non-empty)
+    2. ``PYMAPDL_ADDITIONAL_SWITCHES`` environment variable
+    3. Default: empty string
+
+    When both the explicit argument and ``PYMAPDL_ADDITIONAL_SWITCHES`` are
+    provided, a general warning is issued.  If the two strings also share a
+    common substring of at least 4 characters, an additional warning is raised
+    to alert the user about possible duplicated or contradicting switches.
+
+    Parameters
+    ----------
+    additional_switches : str
+        Explicit additional switches string.
+
+    Returns
+    -------
+    str
+        Resolved additional switches string.
+    """
+    # Priority 1: Explicit argument
+    if additional_switches:
+        env_switches = os.environ.get("PYMAPDL_ADDITIONAL_SWITCHES")
+        if env_switches:
+            LOG.warning(
+                "Skipping injecting additional switches from env var because the "
+                "'additional_switches' argument is already set."
+            )
+            if _shares_substring(additional_switches, env_switches):
+                LOG.warning(
+                    "The 'additional_switches' argument and the "
+                    "'PYMAPDL_ADDITIONAL_SWITCHES' environment variable share "
+                    "common substrings. The environment variable might be "
+                    "injecting duplicated or contradicting switches."
+                )
+
+        return additional_switches
+
+    # Priority 2: Environment variable
+    env_switches = os.environ.get("PYMAPDL_ADDITIONAL_SWITCHES")
+    if env_switches:
+        LOG.debug(
+            f"Injecting additional switches from 'PYMAPDL_ADDITIONAL_SWITCHES' env var: "
+            f"{env_switches}"
+        )
+        return env_switches
+
+    # Priority 3: Default
+    return additional_switches

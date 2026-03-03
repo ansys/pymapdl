@@ -11,6 +11,7 @@ import pytest
 
 from ansys.mapdl.core.launcher import ConfigurationError, LaunchConfig, LaunchMode
 from ansys.mapdl.core.launcher.config import (
+    resolve_additional_switches,
     resolve_exec_file,
     resolve_ip,
     resolve_launch_config,
@@ -807,3 +808,81 @@ class TestResolveExecFileEdgeCases:
             ):
                 with pytest.raises(ConfigurationError):
                     resolve_exec_file(None, None, start_instance=True)
+
+
+class TestResolveAdditionalSwitches:
+    """Tests for additional switches resolution."""
+
+    def test_resolve_additional_switches_explicit(self, monkeypatch):
+        """Test explicit additional_switches is returned as-is (no env var set)."""
+        monkeypatch.delenv("PYMAPDL_ADDITIONAL_SWITCHES", raising=False)
+        result = resolve_additional_switches("-noinfo -nointel")
+        assert result == "-noinfo -nointel"
+
+    def test_resolve_additional_switches_empty_uses_env_var(self, monkeypatch):
+        """Test that empty string falls back to PYMAPDL_ADDITIONAL_SWITCHES env var."""
+        monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", "-dyn")
+        result = resolve_additional_switches("")
+        assert result == "-dyn"
+
+    def test_resolve_additional_switches_explicit_overrides_env_var(self, monkeypatch):
+        """Test that explicit arg takes precedence over env var with exactly one warning.
+
+        ``-explicit`` and ``-from-env`` share no 4-char substring, so only the
+        skip-env-var warning should fire (not the duplicate-substring warning).
+        """
+        monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", "-from-env")
+        with patch("ansys.mapdl.core.launcher.config.LOG") as mock_log:
+            result = resolve_additional_switches("-explicit")
+            assert result == "-explicit"
+            assert mock_log.warning.call_count == 1
+
+    def test_resolve_additional_switches_no_env_var_returns_empty(self, monkeypatch):
+        """Test that empty arg with no env var returns empty string."""
+        monkeypatch.delenv("PYMAPDL_ADDITIONAL_SWITCHES", raising=False)
+        result = resolve_additional_switches("")
+        assert result == ""
+
+    def test_resolve_additional_switches_duplicate_substring_warns(self, monkeypatch):
+        """Test that a shared 4-char substring triggers a duplicate warning."""
+        monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", "-noinfo")
+        with patch("ansys.mapdl.core.launcher.config.LOG") as mock_log:
+            result = resolve_additional_switches("-noinfo -nointel")
+            assert result == "-noinfo -nointel"
+            # Expect two warnings: skip-env-var + duplicate-substring
+            assert mock_log.warning.call_count == 2
+            messages = " ".join(
+                str(call.args[0]) for call in mock_log.warning.call_args_list
+            )
+            assert "duplicated" in messages or "contradicting" in messages
+
+    def test_resolve_additional_switches_no_duplicate_substring_no_extra_warn(
+        self, monkeypatch
+    ):
+        """Test that no shared 4-char substring yields only the skip warning."""
+        monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", "-abc")
+        with patch("ansys.mapdl.core.launcher.config.LOG") as mock_log:
+            resolve_additional_switches("-xyz")
+            # Only the skip-env-var warning, no duplicate warning
+            assert mock_log.warning.call_count == 1
+
+    def test_resolve_launch_config_injects_env_var_switches(self, monkeypatch):
+        """Test that resolve_launch_config picks up PYMAPDL_ADDITIONAL_SWITCHES."""
+        monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", "-myswitch")
+        config = resolve_launch_config(start_instance=False)
+        assert config.additional_switches == "-myswitch"
+
+    def test_resolve_launch_config_explicit_switches_skip_env_var(self, monkeypatch):
+        """Test that explicit additional_switches skips the env var."""
+        monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", "-from-env")
+        with patch("ansys.mapdl.core.launcher.config.LOG"):
+            config = resolve_launch_config(
+                additional_switches="-explicit", start_instance=False
+            )
+            assert config.additional_switches == "-explicit"
+
+    def test_resolve_launch_config_no_env_var_empty_switches(self, monkeypatch):
+        """Test that with no env var and no arg, additional_switches is empty."""
+        monkeypatch.delenv("PYMAPDL_ADDITIONAL_SWITCHES", raising=False)
+        config = resolve_launch_config(start_instance=False)
+        assert config.additional_switches == ""
