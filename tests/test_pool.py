@@ -462,6 +462,7 @@ class TestMapdlPool:
         ]
 
         monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
         pool = MapdlPool(
             ip=ips,
