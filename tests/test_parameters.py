@@ -635,7 +635,7 @@ def test_c_fullfile_parameter_types(param_name, param_type):
 
 
 @pytest.mark.parametrize("use_load_table", [True, False])
-def test_table_interpolation(mapdl, use_load_table):
+def test_table_interpolation(mapdl, tmpdir, use_load_table):
     file_name = "table.txt"
 
     table = """
@@ -645,6 +645,8 @@ def test_table_interpolation(mapdl, use_load_table):
     30, 0.3, 0.4, 0.5, 0.6
     40, 0.4, 0.5, 0.6, 0.7
     """
+
+    file_name = str(tmpdir.join("table.apdl"))
 
     with open(file_name, "w") as fid:
         fid.write(table)
