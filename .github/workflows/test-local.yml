@@ -267,7 +267,18 @@ jobs:
           echo "Version: $version"
           if [[ "${MAPDL_VERSION}" == "v24.2-ubuntu-cicd" ]]; then
             echo "testing 24.2 cicid"
-            xvfb-run python -c "from ansys.mapdl.core import LOG;LOG.setLevel('DEBUG');LOG.log_to_file('mylog.log');LOG.log_to_stdout(True);from ansys.mapdl.core import launch_mapdl;mapdl = launch_mapdl(loglevel='DEBUG');"
+            printenv
+            xvfb-run python -c "from ansys.mapdl.core import LOG;import os; print(os.environ); print('==='); LOG.setLevel('DEBUG');LOG.log_to_file('mylog.log');LOG.log_to_stdout(True);from ansys.mapdl.core import launch_mapdl;mapdl = launch_mapdl(loglevel='DEBUG', run_location='/tmp/ansys_mt2evozj');" || echo "Failed to launch MAPDL, but log should be created"
+            echo "Listing files in /tmp/ansys_mt2evozj:"
+            ls -l /tmp/ansys_mt2evozj
+
+            for file in /tmp/ansys_mt2evozj/*; do
+              if [ -f "$file" ]; then
+                echo "==== $file ===="
+                cat "$file"
+                echo ""
+              fi
+            done
           fi;
 
           # If minimal is true, we need to set the executable path.
