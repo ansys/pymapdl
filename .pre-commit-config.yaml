@@ -33,7 +33,7 @@ repos:
     - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
-  rev: 3459bdee0962449aad91235273c3fd1306dfebe5  # frozen: 8.0.0
+  rev: a333737ed43df02b18e6c95477ea1b285b3de15a  # frozen: 8.0.1
   hooks:
   - id: isort
 
@@ -97,7 +97,7 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: ec368acd16deee9c560c105ab6d27db4ee19a5ec  # frozen: 0.36.2
+  rev: 8db279a37c552206d2df62269ff6f9d31125815a  # frozen: 0.37.0
   hooks:
     - id: check-github-workflows
 
@@ -116,7 +116,7 @@ repos:
 
 # Security checks with bandit
 - repo: https://github.com/PyCQA/bandit
-  rev: 765f00d3f202f83f61d03f882f80a2d5142d81f8  # frozen: 1.9.3
+  rev: 92ae8b82fb422a639f0ed8d99e96cea769594e08  # frozen: 1.9.4
   hooks:
     - id: bandit
       args: ['-c', 'pyproject.toml']
