@@ -91,7 +91,7 @@ echo "Starting pytest at: $(date +%H:%M:%S)"
 uv pip install --python "${VENV_PATH}" -e ".[tests]"
 
 # shellcheck disable=SC2086
-time xvfb-run -a "${VENV_PATH}/bin/pytest" tests \
+time xvfb-run -a "${VENV_PATH}/bin/pytest" \
   --basetemp=/tmp/pytest-tmp \
   -vv \
   ${PYTEST_ARGUMENTS}
