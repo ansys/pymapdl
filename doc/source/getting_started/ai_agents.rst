@@ -35,8 +35,8 @@ Agent Usage
 -----------
 
 You can invoke agents by referencing their names in prompts or using slash commands
-in supported IDEs. See :ref:`how_to_use_agents` for detailed instructions and examples
-for each IDE.
+in supported IDEs. See :file:`.github/HOW_TO_USE_AGENTS.md` for detailed instructions
+and examples for each IDE.
 
 Agent Guidelines
 ----------------
@@ -48,8 +48,7 @@ Agent Guidelines
 
 For more information, see:
 
-- :ref:`how_to_use_agents`
+- :file:`.github/HOW_TO_USE_AGENTS.md`
 - :ref:`write_documentation`
 - :ref:`developing_pymapdl`
 - :file:`AGENTS.md`
-- :file:`.github/HOW_TO_USE_AGENTS.md`
