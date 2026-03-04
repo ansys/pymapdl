@@ -1,2 +1,2 @@
 
-The reviewer follows the guidelines given in `.agents/reviewer.md`.
+The reviewer follows the guidelines given in `.github/agents/reviewer.agent.md`.

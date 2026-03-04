@@ -1,3 +1,10 @@
+---
+name: developer
+description: >
+  Expert PyMAPDL Python developer. Use for implementing new features, fixing bugs,
+  performance optimization, and API design tasks in this repository.
+---
+
 # PyMAPDL Developer Agent
 
 ## Role

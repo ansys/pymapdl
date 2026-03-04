@@ -4,14 +4,38 @@ This guide shows how to invoke the specialized AI agents for PyMAPDL development
 
 ## Available Agents
 
-- **[Developer](.agents/developer.md)** - Implements features and fixes bugs
-- **[Documentation Specialist](.agents/documentation.md)** - Reviews and improves documentation
-- **[Tester](.agents/tester.md)** - Writes tests and ensures coverage
-- **[Reviewer](.agents/reviewer.md)** - Comprehensive PR reviews
+- **[Developer](.github/agents/developer.agent.md)** - Implements features and fixes bugs
+- **[Documentation Specialist](.github/agents/documentation.agent.md)** - Reviews and improves documentation
+- **[Tester](.github/agents/tester.agent.md)** - Writes tests and ensures coverage
+- **[Reviewer](.github/agents/reviewer.agent.md)** - Comprehensive PR reviews
 
 See [AGENTS.md](../AGENTS.md) for complete specifications.
 
 ## How to Invoke Agents by IDE
+
+### GitHub Copilot CLI
+
+Use the `/agent` slash command to browse and select an agent, or reference by name in a prompt:
+
+```
+/agent
+```
+
+```
+Use the developer agent to implement a new method for exporting mesh data
+```
+
+```
+Use the tester agent to add tests for the new export_mesh method with mocking
+```
+
+```
+Use the documentation agent to review docstrings in src/ansys/mapdl/core/mesh.py
+```
+
+```
+Use the reviewer agent to review my latest changes for quality and completeness
+```
 
 ### GitHub Copilot (VS Code)
 
@@ -33,6 +57,26 @@ Use `@workspace` to give Copilot access to the repository context including agen
 @workspace Acting as the Code Reviewer agent, review this PR for quality and completeness
 ```
 
+### Claude Code
+
+`CLAUDE.md` at the repo root loads the agent context automatically. Reference agents by name:
+
+```
+Act as the developer agent and implement a new method for exporting mesh data
+```
+
+```
+Act as the tester agent and add tests for the new export_mesh method with mocking
+```
+
+```
+Act as the documentation agent and review docstrings in src/ansys/mapdl/core/mesh.py
+```
+
+```
+Act as the reviewer agent and review my latest changes
+```
+
 ### Cursor IDE
 
 Cursor has built-in agent support. Use `@` to reference files:
@@ -42,7 +86,7 @@ Cursor has built-in agent support. Use `@` to reference files:
 ```
 
 ```
-@.agents/tester.md Write comprehensive tests for the new feature
+@.github/agents/tester.agent.md Write comprehensive tests for the new feature
 ```
 
 ```

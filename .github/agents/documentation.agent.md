@@ -1,3 +1,11 @@
+---
+name: documentation
+description: >
+  Expert in technical documentation, style guides, and documentation quality assurance.
+  Use for documentation changes, docstring reviews, style guide compliance, and
+  vale/codespell issues.
+---
+
 # Documentation Specialist Agent
 
 ## Role

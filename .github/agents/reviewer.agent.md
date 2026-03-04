@@ -1,3 +1,10 @@
+---
+name: reviewer
+description: >
+  Expert code reviewer ensuring quality, documentation, testing, and best practices
+  before merging. PR gatekeeper. Use for comprehensive PR reviews and quality gates.
+---
+
 # Code Reviewer Agent
 
 ## Role

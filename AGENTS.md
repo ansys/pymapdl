@@ -4,12 +4,12 @@ This repository uses structured AI agents for development governance and quality
 
 ## Agents
 
-Individual agent configurations are in the `.agents/` directory:
+Individual agent configurations are in the `.github/agents/` directory:
 
-- **[Developer](.agents/developer.md)** - Feature implementation, bug fixes, performance optimization, API design
-- **[Documentation Specialist](.agents/documentation.md)** - Documentation changes, docstring reviews, style guide compliance, vale/codespell issues
-- **[Tester](.agents/tester.md)** - Test coverage, mocking strategies, test infrastructure, flaky tests
-- **[Reviewer](.agents/reviewer.md)** - Comprehensive PR reviews and quality gates
+- **[Developer](.github/agents/developer.agent.md)** - Feature implementation, bug fixes, performance optimization, API design
+- **[Documentation Specialist](.github/agents/documentation.agent.md)** - Documentation changes, docstring reviews, style guide compliance, vale/codespell issues
+- **[Tester](.github/agents/tester.agent.md)** - Test coverage, mocking strategies, test infrastructure, flaky tests
+- **[Reviewer](.github/agents/reviewer.agent.md)** - Comprehensive PR reviews and quality gates
 
 **Workflow:** Developer → Tester → Documentation Specialist → Reviewer → Merge
 
