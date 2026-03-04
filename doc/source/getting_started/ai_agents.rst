@@ -5,8 +5,8 @@ AI Agents for Development
 ============================
 
 .. note::
-    This section is a work in progress and may be updated frequently as we
-    refine our AI agent strategy and implementation.
+    This section is a work in progress and may be updated frequently as
+    the AI agent strategy and implementation is refined.
 
 PyMAPDL uses structured AI agents to automate and improve development, testing,
 documentation, and code review. These agents are available in any LLM-enabled IDE
