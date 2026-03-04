@@ -94,8 +94,4 @@ def run_first_time() -> None:
 
 def run_every_import() -> None:
     # Run every time we import PyMAPDL
-    from ansys.mapdl.core import RUNNING_TESTS
-
-    # In case we want to do something specific for testing.
-    if RUNNING_TESTS:  # pragma: no cover
-        LOG.debug("Running tests on Pytest")
+    pass

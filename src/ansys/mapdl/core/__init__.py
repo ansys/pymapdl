@@ -60,7 +60,6 @@ VERSION_MAP: Dict[Tuple[int, int, int], str] = {
 }
 
 BUILDING_GALLERY: bool = False
-RUNNING_TESTS: bool = False
 
 DEPRECATING_MINIMUM_PYTHON_VERSION: bool = False
 MINIMUM_PYTHON_VERSION: Tuple[int, int] = (3, 10)
