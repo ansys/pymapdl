@@ -4,10 +4,10 @@ This guide shows how to invoke the specialized AI agents for PyMAPDL development
 
 ## Available Agents
 
-- **[Developer](.github/agents/developer.agent.md)** - Implements features and fixes bugs
-- **[Documentation Specialist](.github/agents/documentation.agent.md)** - Reviews and improves documentation
-- **[Tester](.github/agents/tester.agent.md)** - Writes tests and ensures coverage
-- **[Reviewer](.github/agents/reviewer.agent.md)** - Comprehensive PR reviews
+- **[Developer](agents/developer.agent.md)** - Implements features and fixes bugs
+- **[Documentation Specialist](agents/documentation.agent.md)** - Reviews and improves documentation
+- **[Tester](agents/tester.agent.md)** - Writes tests and ensures coverage
+- **[Reviewer](agents/reviewer.agent.md)** - Comprehensive PR reviews
 
 See [AGENTS.md](../AGENTS.md) for complete specifications.
 
