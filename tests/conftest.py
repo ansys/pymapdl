@@ -544,9 +544,20 @@ def run_before_and_after_tests(
         yield  # test doesn't use mapdl — skip everything
         return
 
-    if DEBUG_TESTING:
-        mapdl = request.getfixturevalue("mapdl")  # get the mapdl fixture
+    mapdl = request.getfixturevalue("mapdl")  # get the mapdl fixture
 
+    # Always verify clean state before any test that uses mapdl, regardless of
+    # DEBUG_TESTING — prevents silent state leaks (mute, non-interactive) from
+    # a previously failed test propagating to the next test.
+    assert (
+        not mapdl.mute
+    ), "mapdl.mute is True before the test. A previous test likely left it dirty."
+    assert (
+        not mapdl._store_commands
+    ), "mapdl._store_commands is True before the test. A previous test likely left it in non-interactive mode."
+    assert mapdl.prep7(), "MAPDL is not responding before the test. It should be!"
+
+    if DEBUG_TESTING:
         test_name = os.environ.get(
             "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
         )
@@ -560,7 +571,6 @@ def run_before_and_after_tests(
         # check if the local/remote state has changed or not
         prev = mapdl.is_local
         assert not mapdl.exited, "MAPDL is exited before the test. It should not!"
-        assert not mapdl.mute
 
     yield  # this is where the testing happens
 
