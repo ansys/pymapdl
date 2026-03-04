@@ -4,13 +4,6 @@ description: >
   Expert in Python testing, test coverage, mocking strategies, and PyMAPDL test
   infrastructure. Use for writing tests, improving coverage, fixing flaky tests,
   and reviewing test quality.
-tools:
-  - read_file
-  - write_file
-  - run_terminal_cmd
-  - grep_search
-  - file_search
-  - list_dir
 ---
 
 # Test Engineer Agent
