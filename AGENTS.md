@@ -61,9 +61,7 @@ And two connection types:
 | `PYMAPDL_PORT` | Port of the MAPDL gRPC server (default `50052`) |
 | `PYMAPDL_IP` | IP of the MAPDL gRPC server (default `127.0.0.1`) |
 | `ON_LOCAL` | Force `local` mode detection (`true`/`false`) |
-| `TESTING_MINIMAL` | `YES` → skip tests requiring heavy dependencies or live MAPDL |
 | `ON_CI` | Marks the run as CI environment; some tests skip on CI |
-| `PYMAPDL_DEBUG_TESTING` | `true` → enable DEBUG logging + write `pymapdl.log` |
 
 ## Testing
 
@@ -76,11 +74,9 @@ Most tests require a running MAPDL process. To run only unit tests that don't ne
 ```sh
 # Linux/macOS
 export PYMAPDL_START_INSTANCE=False
-export TESTING_MINIMAL=YES
 
 # Windows
 SET PYMAPDL_START_INSTANCE=False
-SET TESTING_MINIMAL=YES
 ```
 
 Then run pytest:
