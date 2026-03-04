@@ -43,6 +43,8 @@ from ansys.mapdl.core.examples.downloads import (
 )
 from conftest import requires
 
+DUMMY_PATH = "/dummy/download/path"
+
 
 def test_check_directory_exist(tmpdir):
     tmp_dir = os.path.join(tmpdir, "mytempdir")
@@ -91,10 +93,9 @@ def test_load_verif():
 
 
 @requires("requests")
-def test_bracket(mapdl, cleared, running_test):
+def test_bracket(mapdl, cleared):
     # note that this method just returns a file path
-    with running_test(False):  # To force downloading the file
-        bracket_file = examples.download_bracket()
+    bracket_file = examples.download_bracket()
 
     assert os.path.isfile(bracket_file)
 
@@ -112,101 +113,80 @@ def test_download_example_data_true_download():
 
 
 @requires("requests")
-def test_failed_download(running_test):
+def test_failed_download():
     from requests.exceptions import HTTPError
 
     filename = "non_existing_file"
     with pytest.raises(HTTPError):
-        with running_test(active=False):  # To force downloading the file
-            _download_file(filename, directory=None)
+        _download_file(filename, directory=None)
 
 
 @requires("requests")
-def test_download_cfx_mapping_example_data(running_test):
-    with running_test():
-        with patch(
-            "ansys.mapdl.core.examples.downloads._check_url_exist"
-        ) as mock_check:
-            mock_check.return_value = True
-            result = download_cfx_mapping_example_data()
-            assert all(result.values())
-            # Verify the function was called twice (once for each file)
-            assert mock_check.call_count == 2
+def test_download_cfx_mapping_example_data():
+    with patch(
+        "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
+    ) as mock_retrieve:
+        result = download_cfx_mapping_example_data()
+        mock_retrieve.assert_called()
+        assert all(v == DUMMY_PATH for v in result.values())
 
 
 @requires("requests")
-def test_download_manifold_example_data(running_test):
-    with running_test():
-        with patch(
-            "ansys.mapdl.core.examples.downloads._check_url_exist"
-        ) as mock_check:
-            mock_check.return_value = True
-            result = download_manifold_example_data()
-            assert all(result.values())
-            # Verify the function was called twice (once for each file)
-            assert mock_check.call_count == 2
+def test_download_manifold_example_data():
+    with patch(
+        "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
+    ) as mock_retrieve:
+        result = download_manifold_example_data()
+        mock_retrieve.assert_called()
+        assert all(v == DUMMY_PATH for v in result.values())
 
 
 @requires("requests")
-def test_download_bracket(running_test):
-    with running_test():
-        with patch(
-            "ansys.mapdl.core.examples.downloads._check_url_exist"
-        ) as mock_check:
-            mock_check.return_value = True
-            result = download_bracket()
-            assert result is True
-            mock_check.assert_called_once()
+def test_download_bracket():
+    with patch(
+        "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
+    ) as mock_retrieve:
+        assert download_bracket() == DUMMY_PATH
+        mock_retrieve.assert_called()
 
 
 @requires("requests")
-def test_download_vtk_rotor(running_test):
-    with running_test():
-        with patch(
-            "ansys.mapdl.core.examples.downloads._check_url_exist"
-        ) as mock_check:
-            mock_check.return_value = True
-            result = download_vtk_rotor()
-            assert result is True
-            mock_check.assert_called_once()
+def test_download_vtk_rotor():
+    with patch(
+        "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
+    ) as mock_retrieve:
+        assert download_vtk_rotor() == DUMMY_PATH
+        mock_retrieve.assert_called()
 
 
 @requires("requests")
-def test__download_rotor_tech_demo_vtk(running_test):
-    with running_test():
-        with patch(
-            "ansys.mapdl.core.examples.downloads._check_url_exist"
-        ) as mock_check:
-            mock_check.return_value = True
-            result = _download_rotor_tech_demo_vtk()
-            assert result is True
-            mock_check.assert_called_once()
+def test__download_rotor_tech_demo_vtk():
+    with patch(
+        "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
+    ) as mock_retrieve:
+        assert _download_rotor_tech_demo_vtk() == DUMMY_PATH
+        mock_retrieve.assert_called()
 
 
 @requires("requests")
-def test_download_example_data(running_test):
-    with running_test():
-        with patch(
-            "ansys.mapdl.core.examples.downloads._check_url_exist"
-        ) as mock_check:
-            mock_check.return_value = True
-            result = download_example_data("LatheCutter.anf", "geometry")
-            assert result is True
-            mock_check.assert_called_once()
+def test_download_example_data():
+    with patch(
+        "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
+    ) as mock_retrieve:
+        assert download_example_data("LatheCutter.anf", "geometry") == DUMMY_PATH
+        mock_retrieve.assert_called()
 
 
 @requires("requests")
-def test_download_tech_demo_data(running_test):
-    with running_test():
-        with patch(
-            "ansys.mapdl.core.examples.downloads._check_url_exist"
-        ) as mock_check:
-            mock_check.return_value = True
-            result = download_tech_demo_data(
-                "td-21", "ring_stiffened_cylinder_mesh_file.cdb"
-            )
-            assert result is True
-            mock_check.assert_called_once()
+def test_download_tech_demo_data():
+    with patch(
+        "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
+    ) as mock_retrieve:
+        assert (
+            download_tech_demo_data("td-21", "ring_stiffened_cylinder_mesh_file.cdb")
+            == DUMMY_PATH
+        )
+        mock_retrieve.assert_called()
 
 
 @requires("requests")
