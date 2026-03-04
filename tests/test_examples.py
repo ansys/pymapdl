@@ -43,6 +43,8 @@ from ansys.mapdl.core.examples.downloads import (
 )
 from conftest import requires
 
+DUMMY_PATH = "/dummy/download/path"
+
 
 def test_check_directory_exist(tmpdir):
     tmp_dir = os.path.join(tmpdir, "mytempdir")
@@ -121,46 +123,62 @@ def test_failed_download():
 
 @requires("requests")
 def test_download_cfx_mapping_example_data():
-    with patch("ansys.mapdl.core.examples.downloads._retrieve_file", return_value=True):
-        assert all(download_cfx_mapping_example_data().values())
+    with patch(
+        "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
+    ):
+        result = download_cfx_mapping_example_data()
+        assert all(v == DUMMY_PATH for v in result.values())
 
 
 @requires("requests")
 def test_download_manifold_example_data():
-    with patch("ansys.mapdl.core.examples.downloads._retrieve_file", return_value=True):
-        assert all(download_manifold_example_data().values())
+    with patch(
+        "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
+    ):
+        result = download_manifold_example_data()
+        assert all(v == DUMMY_PATH for v in result.values())
 
 
 @requires("requests")
 def test_download_bracket():
-    with patch("ansys.mapdl.core.examples.downloads._retrieve_file", return_value=True):
-        assert download_bracket() is True
+    with patch(
+        "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
+    ):
+        assert download_bracket() == DUMMY_PATH
 
 
 @requires("requests")
 def test_download_vtk_rotor():
-    with patch("ansys.mapdl.core.examples.downloads._retrieve_file", return_value=True):
-        assert download_vtk_rotor() is True
+    with patch(
+        "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
+    ):
+        assert download_vtk_rotor() == DUMMY_PATH
 
 
 @requires("requests")
 def test__download_rotor_tech_demo_vtk():
-    with patch("ansys.mapdl.core.examples.downloads._retrieve_file", return_value=True):
-        assert _download_rotor_tech_demo_vtk() is True
+    with patch(
+        "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
+    ):
+        assert _download_rotor_tech_demo_vtk() == DUMMY_PATH
 
 
 @requires("requests")
 def test_download_example_data():
-    with patch("ansys.mapdl.core.examples.downloads._retrieve_file", return_value=True):
-        assert download_example_data("LatheCutter.anf", "geometry") is True
+    with patch(
+        "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
+    ):
+        assert download_example_data("LatheCutter.anf", "geometry") == DUMMY_PATH
 
 
 @requires("requests")
 def test_download_tech_demo_data():
-    with patch("ansys.mapdl.core.examples.downloads._retrieve_file", return_value=True):
+    with patch(
+        "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
+    ):
         assert (
             download_tech_demo_data("td-21", "ring_stiffened_cylinder_mesh_file.cdb")
-            is True
+            == DUMMY_PATH
         )
 
 
