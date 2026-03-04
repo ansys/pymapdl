@@ -64,6 +64,7 @@ DevContainer
 Dimitris
 discretisation
 DMP
+docstrings
 dof
 ect
 eigenfrequency
