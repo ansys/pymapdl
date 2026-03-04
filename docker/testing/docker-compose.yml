@@ -121,6 +121,10 @@ services:
       - UV_LINK_MODE=copy
       # Allow passing additional pytest arguments, e.g. to run specific tests or increase verbosity.
       - PYTEST_ARGUMENTS=${PYTEST_ARGUMENTS:-""}
+      # Enable ON_CI flag
+      - ON_CI=${ON_CI:-false}
+      # Allow passing a file name for pytest reporting and coverage outputs. If not set, defaults will be used on CI.
+      - FILE_NAME=${FILE_NAME:-}
 
   pymapdl-host:
     # This service mount the local PyMAPDL repository and test it.
@@ -151,6 +155,10 @@ services:
       - PYTEST_DEBUG_TIMING=${PYTEST_DEBUG_TIMING:-1}
       # Allow passing additional pytest arguments, e.g. to run specific tests or increase verbosity.
       - PYTEST_ARGUMENTS=${PYTEST_ARGUMENTS:-""}
+      # Enable ON_CI flag
+      - ON_CI=${ON_CI:-false}
+      # Allow passing a file name for pytest reporting and coverage outputs. If not set, defaults will be used on CI.
+      - FILE_NAME=${FILE_NAME:-}
     working_dir: /workspace/pymapdl
     user: root
     volumes:
@@ -191,8 +199,12 @@ services:
       # so uv never attempts to write to the read-only mounted volume.
       - UV_CACHE_DIR=/tmp/uv-cache
       - UV_PROJECT_ENVIRONMENT=/tmp/.venv_container
+      # Enable ON_CI flag
+      - ON_CI=${ON_CI:-false}
       # Allow passing additional pytest arguments, e.g. to run specific tests or increase verbosity.
       - PYTEST_ARGUMENTS=${PYTEST_ARGUMENTS:-""}
+      # Allow passing a file name for pytest reporting and coverage outputs. If not set, defaults will be used on CI.
+      - FILE_NAME=${FILE_NAME:-}
     user: root
     volumes:
       - ../../:/home/mapdl/jobs

@@ -82,6 +82,21 @@ export PYTEST_ARGUMENTS=" --ignore_image_cache --image_cache_dir=/tmp/empty_dir 
 
 echo "Using pytest arguments: ${PYTEST_ARGUMENTS}"
 
+if [ "${ON_CI}" = "true" ] || [ "${ON_CI}" = "TRUE" ]; then
+  # On CI, always add the extra pytest arguments for reporting and coverage.
+  echo "Running on CI, adding extra pytest arguments."
+
+  if [ -n "${FILE_NAME}" ]; then
+    export PYTEST_ARGUMENTS=" --report-log=$FILE_NAME.jsonl --cov-report=xml:$FILE_NAME.xml ${PYTEST_ARGUMENTS}"
+  else
+    echo "Running on CI, but FILE_NAME is not set. Adding default pytest arguments for reporting and coverage."
+    export PYTEST_ARGUMENTS=" --report-log=pytest_report.jsonl --cov-report=xml:coverage_report.xml ${PYTEST_ARGUMENTS}"
+  fi
+
+else
+  : # Running on local machine, only add the extra pytest arguments if PYTEST_ARGUMENTS is already set.
+fi
+
 # Add timing information for debugging startup delays
 echo "Starting pytest at: $(date +%H:%M:%S)"
 
