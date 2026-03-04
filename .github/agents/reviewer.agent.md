@@ -3,13 +3,6 @@ name: reviewer
 description: >
   Expert code reviewer ensuring quality, documentation, testing, and best practices
   before merging. PR gatekeeper. Use for comprehensive PR reviews and quality gates.
-tools:
-  - read_file
-  - write_file
-  - run_terminal_cmd
-  - grep_search
-  - file_search
-  - list_dir
 ---
 
 # Code Reviewer Agent

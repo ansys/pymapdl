@@ -3,13 +3,6 @@ name: developer
 description: >
   Expert PyMAPDL Python developer. Use for implementing new features, fixing bugs,
   performance optimization, and API design tasks in this repository.
-tools:
-  - read_file
-  - write_file
-  - run_terminal_cmd
-  - grep_search
-  - file_search
-  - list_dir
 ---
 
 # PyMAPDL Developer Agent
