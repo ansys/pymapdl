@@ -66,7 +66,7 @@ if [ -n "${PYMAPDL_BRANCH}" ]; then
 
     # Use shallow fetch to reduce git overhead
     git fetch --depth 1 origin "${PYMAPDL_BRANCH}"
-    git checkout "${PYMAPDL_BRANCH}"
+    git checkout FETCH_HEAD
   else
     echo "Already on branch '${PYMAPDL_BRANCH}'. Skipping checkout."
   fi

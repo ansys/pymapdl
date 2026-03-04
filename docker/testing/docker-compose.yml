@@ -241,6 +241,16 @@ services:
       - PYMAPDL_GRPC_TRANSPORT=insecure
       # Explicitly use copy mode to avoid hardlink failures across filesystems
       - UV_LINK_MODE=copy
+      # Redirect uv cache and project environment to container-local paths
+      # so uv never attempts to write to the read-only mounted volume.
+      - UV_CACHE_DIR=/tmp/uv-cache
+      - UV_PROJECT_ENVIRONMENT=/tmp/.venv_container
+      # Enable ON_CI flag
+      - ON_CI=${ON_CI:-false}
+      # Allow passing additional pytest arguments, e.g. to run specific tests or increase verbosity.
+      - PYTEST_ARGUMENTS=${PYTEST_ARGUMENTS:-tests}
+      # Allow passing a file name for pytest reporting and coverage outputs. If not set, defaults will be used on CI.
+      - FILE_NAME=${FILE_NAME:-}
 
 networks:
   pymapdl-net:

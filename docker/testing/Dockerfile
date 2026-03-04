@@ -35,8 +35,6 @@ RUN apt-get update && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN ls -al
-
 # Set PATH to include uv and pre-install Python interpreter.
 # Both must happen before the dep pre-install step below.
 ENV PATH="/root/.local/bin:$HOME/.local/bin:$PATH"
@@ -199,4 +197,5 @@ RUN chmod +x /start.sh
 USER mapdl
 
 ENTRYPOINT [ "/bin/bash", "/start.sh" ]
-SHELL [ "/bin/bash" ]
+
+SHELL ["/bin/bash", "-c"]

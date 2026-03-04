@@ -366,7 +366,7 @@ jobs:
       matrix:
         mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu-cicd']
     env:
-      file_name: "local-docker-${{ matrix.mapdl-version }}"
+      file_name: "remote-docker-${{ matrix.mapdl-version }}"
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
@@ -385,6 +385,7 @@ jobs:
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
+          FILE_NAME: ${{ env.file_name }}
         run: |
           docker compose --profile remote-host up --build --abort-on-container-exit --exit-code-from pymapdl-host --no-attach mapdl-remote
 
@@ -452,7 +453,7 @@ jobs:
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
-          file_name: ${{ env.file_name }}
+          FILE_NAME: ${{ env.file_name }}
         run: |
           docker compose --profile local-host up --build --abort-on-container-exit --exit-code-from mapdl-local-host
 
@@ -479,11 +480,11 @@ jobs:
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
         run: |
           echo "::group:: MAPDL-remote logs"
-          docker compose logs mapdl-local-host
+          docker compose logs mapdl-local-host || true
           echo "::endgroup::"
 
           echo "Stopping all services..."
-          docker compose --profile local-host down -v
+          docker compose --profile local-host down -v || true
 
   package:
     name: "Package library"
