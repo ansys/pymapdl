@@ -1215,7 +1215,7 @@ class MapdlPool:
 
                 else:
                     n_instances = 1
-                    ports = [port or MAPDL_DEFAULT_PORT]
+                    ports = [port if port is not None else MAPDL_DEFAULT_PORT]
 
             elif isinstance(ip, list):
                 n_instances = len(ip)
@@ -1286,7 +1286,10 @@ class MapdlPool:
                         "you should provide as many ports as number of instances requested."
                     )
                 else:
-                    ports = port
+                    if isinstance(port, list):
+                        ports = port
+                    else:
+                        ports = [port if port is not None else MAPDL_DEFAULT_PORT]
 
             elif isinstance(ip, list):
                 if len(ip) != n_instances:
@@ -1296,7 +1299,10 @@ class MapdlPool:
 
                 ips = ip
                 if port is None or isinstance(port, int):
-                    ports = [port or MAPDL_DEFAULT_PORT for i in range(n_instances)]
+                    ports = [
+                        port if port is not None else MAPDL_DEFAULT_PORT
+                        for i in range(n_instances)
+                    ]
 
                 elif isinstance(port, list):
                     if len(port) != n_instances:
