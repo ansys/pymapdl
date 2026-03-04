@@ -85,11 +85,7 @@ def _check_url_exist(url: str) -> bool:
 
 
 @check_directory_exist(pymapdl.EXAMPLES_PATH)
-def _retrieve_file(url: str, filename: str, _test: bool = False) -> str:
-    # escape test
-    if pymapdl.RUNNING_TESTS:
-        return _check_url_exist(url)
-
+def _retrieve_file(url: str, filename: str) -> str:
     # First check if file has already been downloaded
     local_path = os.path.join(pymapdl.EXAMPLES_PATH, os.path.basename(filename))
     local_path_no_zip = local_path.replace(".zip", "")
@@ -109,12 +105,10 @@ def _retrieve_file(url: str, filename: str, _test: bool = False) -> str:
     return local_path
 
 
-def _download_file(
-    filename: str, directory: Optional[str] = None, _test: Optional[bool] = False
-) -> str:
+def _download_file(filename: str, directory: Optional[str] = None) -> str:
     url = _get_file_url(filename, directory)
     try:
-        return _retrieve_file(url, filename, _test)
+        return _retrieve_file(url, filename)
     except requests.exceptions.HTTPError as e:
         raise requests.exceptions.HTTPError(
             "Retrieving the file from internet failed.\n"

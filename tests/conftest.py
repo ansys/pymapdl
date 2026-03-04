@@ -214,10 +214,6 @@ if has_dependency("pyvista"):
     _apply_default_theme()
 
 
-import ansys.mapdl.core as pymapdl
-
-pymapdl.RUNNING_TESTS = True
-
 from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
@@ -528,17 +524,6 @@ if has_dependency("pytest-pyvista"):
         return verify_image_cache
 
 
-class Running_test:
-    def __init__(self, active: bool = True) -> None:
-        self._state = active
-
-    def __enter__(self) -> None:
-        pymapdl.RUNNING_TESTS = self._state
-
-    def __exit__(self, *args) -> None:
-        pymapdl.RUNNING_TESTS = not self._state
-
-
 class NullContext:
     def __enter__(self):
         pass
@@ -548,11 +533,6 @@ class NullContext:
 
     def __init__(self):
         pass
-
-
-@pytest.fixture(scope="function")
-def running_test():
-    return Running_test
 
 
 @pytest.fixture(autouse=True, scope="function")
