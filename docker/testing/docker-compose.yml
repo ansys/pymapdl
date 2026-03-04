@@ -120,7 +120,7 @@ services:
       # Explicitly use copy mode to avoid hardlink failures across filesystems
       - UV_LINK_MODE=copy
       # Allow passing additional pytest arguments, e.g. to run specific tests or increase verbosity.
-      - PYTEST_ARGUMENTS=${PYTEST_ARGUMENTS:-""}
+      - PYTEST_ARGUMENTS=${PYTEST_ARGUMENTS:-tests}
       # Enable ON_CI flag
       - ON_CI=${ON_CI:-false}
       # Allow passing a file name for pytest reporting and coverage outputs. If not set, defaults will be used on CI.
@@ -154,7 +154,7 @@ services:
       # Enable pytest timing for debugging startup delays
       - PYTEST_DEBUG_TIMING=${PYTEST_DEBUG_TIMING:-1}
       # Allow passing additional pytest arguments, e.g. to run specific tests or increase verbosity.
-      - PYTEST_ARGUMENTS=${PYTEST_ARGUMENTS:-""}
+      - PYTEST_ARGUMENTS=${PYTEST_ARGUMENTS:-tests}
       # Enable ON_CI flag
       - ON_CI=${ON_CI:-false}
       # Allow passing a file name for pytest reporting and coverage outputs. If not set, defaults will be used on CI.
@@ -202,7 +202,7 @@ services:
       # Enable ON_CI flag
       - ON_CI=${ON_CI:-false}
       # Allow passing additional pytest arguments, e.g. to run specific tests or increase verbosity.
-      - PYTEST_ARGUMENTS=${PYTEST_ARGUMENTS:-""}
+      - PYTEST_ARGUMENTS=${PYTEST_ARGUMENTS:-tests}
       # Allow passing a file name for pytest reporting and coverage outputs. If not set, defaults will be used on CI.
       - FILE_NAME=${FILE_NAME:-}
     user: root
