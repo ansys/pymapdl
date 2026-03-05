@@ -26,6 +26,7 @@ Functions for launching MAPDL on HPC clusters using SLURM scheduler.
 Currently supports SLURM only.
 """
 
+from dataclasses import replace
 import os
 import shlex
 import socket
@@ -187,8 +188,6 @@ def resolve_slurm_resources(config: LaunchConfig) -> LaunchConfig:
     slurm_ram = _calculate_slurm_ram()
 
     # Create updated config (immutable, so must create new)
-    from dataclasses import replace
-
     if slurm_nproc is not None and slurm_ram is not None:
         LOG.info(f"Using SLURM allocated CPUs: {slurm_nproc}")
         LOG.info(f"Using SLURM allocated RAM: {slurm_ram} MB")
@@ -255,11 +254,13 @@ def _generate_mapdl_command(config: LaunchConfig) -> List[str]:
 
     # Additional switches
     if config.additional_switches:
-        # Ensure -dis flag is present
         add_sw = config.additional_switches
         if "-dis " not in add_sw and not add_sw.endswith("-dis"):
             add_sw += " -dis"
-        cmd.extend(add_sw.split())
+        cmd.extend(shlex.split(add_sw))
+    else:
+        # Always ensure -dis flag for HPC mode
+        cmd.append("-dis")
 
     return cmd
 
@@ -375,16 +376,14 @@ def _submit_job(cmd: List[str]) -> int:
     - Joins command into string and executes with shell
     - Parses "Submitted batch job XXXXX" format from sbatch
     """
-    # Join command for shell execution
-    cmd_str = " ".join(cmd)
-    LOG.info(f"Submitting HPC job: {cmd_str}")
+    LOG.info(f"Submitting HPC job: {' '.join(cmd)}")
 
     try:
-        result = subprocess.run(
-            cmd_str,
+        result = subprocess.run(  # nosec B603
+            cmd,
             capture_output=True,
             text=True,
-            shell=True,  # nosec B602 - sbatch requires shell
+            shell=False,
             check=True,
         )
 
@@ -400,7 +399,9 @@ def _submit_job(cmd: List[str]) -> int:
 
     except subprocess.CalledProcessError as e:
         raise MapdlDidNotStart(
-            f"Failed to submit HPC job:\n" f"Command: {cmd_str}\n" f"Error: {e.stderr}"
+            f"Failed to submit HPC job:\n"
+            f"Command: {' '.join(cmd)}\n"
+            f"Error: {e.stderr}"
         )
     except ValueError as e:
         raise MapdlDidNotStart(f"Could not parse job ID from sbatch output: {e}")

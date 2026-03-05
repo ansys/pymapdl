@@ -66,7 +66,7 @@ def resolve_launch_config(
     additional_switches: str = "",
     license_type: Optional[str] = None,
     launch_on_hpc: bool = False,
-    running_on_hpc: bool = True,
+    running_on_hpc: bool = False,
     scheduler_options: Optional[Dict[str, Any]] = None,
     loglevel: str = "ERROR",
     log_apdl: Optional[str] = None,
@@ -90,55 +90,254 @@ def resolve_launch_config(
     2. Environment variable (if set)
     3. Default value
 
-    Parameters:
-        exec_file: Path to MAPDL executable
-        run_location: Working directory
-        jobname: MAPDL job name
-        nproc: Number of processors
-        port: gRPC port
-        ip: IP address
-        mode: Launch mode
-        version: MAPDL version
-        start_instance: Whether to start new instance
-        ram: RAM allocation in MB
-        timeout: Launch timeout in seconds
-        cleanup_on_exit: Clean up on exit
-        clear_on_connect: Clear on connection
-        override: Override existing instance
-        remove_temp_dir_on_exit: Remove temp dir on exit
-        set_no_abort: Set NO_ABORT flag
-        additional_switches: Additional command line switches
-        license_type: License type
-        launch_on_hpc: Launch on HPC cluster
-        running_on_hpc: Running on HPC
-        scheduler_options: HPC scheduler options
-        loglevel: Logging level
-        log_apdl: APDL log file path
-        print_com: Print commands
-        mapdl_output: Redirect MAPDL output
-        transport_mode: gRPC transport mode
-        uds_dir: Unix domain socket directory
-        uds_id: Unix domain socket ID
-        certs_dir: Certificates directory
-        env_vars: Environment variables
-        license_server_check: Check license server
-        force_intel: Force Intel MPI
-        graphics_backend: Graphics backend
-        start_timeout: Deprecated. Use ``timeout`` instead.
-        **kwargs: Additional arguments
+    This function combines user-provided arguments, environment variable
+    overrides, and system defaults to produce a complete ``LaunchConfig``
+    object suitable for launching or connecting to MAPDL.
 
-    Returns:
-        Complete, validated LaunchConfig
+    Parameters
+    ----------
+    exec_file : Optional[str]
+        The location of the MAPDL executable. For instance, on Windows:
 
-    Raises:
-        ConfigurationError: If configuration is invalid or conflicting
+        - ``C:\\Program Files\\ANSYS Inc\\v252\\ansys\\bin\\mapdl.exe``
 
-    Examples:
-        >>> config = resolve_launch_config(nproc=4, version=222)
-        >>> config.nproc
-        4
-        >>> config.version
-        222
+        And on Linux:
+
+        - ``/usr/ansys_inc/v252/ansys/bin/mapdl``
+
+        By default (:class:`None`), uses the cached location unless the
+        environment variable :envvar:`PYMAPDL_MAPDL_EXEC` is set.
+
+    run_location : Optional[str]
+        MAPDL working directory. If the directory doesn't exist, one is created.
+        Defaults to a temporary working directory created in the directory
+        obtained by ``tempfile.gettempdir()`` and starting with ``'ansys_'``
+        and a random string. The temporary directory is removed when MAPDL
+        exits if ``cleanup_on_exit`` is :class:`True`.
+
+    jobname : str
+        MAPDL jobname. Defaults to ``'file'``.
+
+    nproc : Optional[int]
+        Number of processors. If running on an HPC cluster, this value is
+        adjusted to the number of CPUs allocated to the job, unless the
+        ``running_on_hpc`` argument is set to ``False``.
+        Defaults to ``2`` CPUs.
+
+    port : Optional[int]
+        Port to launch MAPDL gRPC on. You can also provide this value through
+        the environment variable :envvar:`PYMAPDL_PORT`.
+        However, the argument (if specified) has precedence over the environment
+        variable. Defaults to ``50052``.
+
+    ip : Optional[str]
+        Specify the IP address of the MAPDL instance to connect to.
+        Used only when ``start_instance`` is :class:`False`.
+        You can also provide this value through the environment variable
+        :envvar:`PYMAPDL_IP`. Defaults to ``'127.0.0.1'`` (localhost).
+
+    mode : Optional[str]
+        Mode to launch MAPDL. Must be one of:
+
+        - ``'grpc'`` - Recommended, available on ANSYS 2021R1 or newer
+        - ``'console'`` - Legacy console mode, Linux only, not recommended
+
+        The gRPC mode is available on ANSYS 2021R1 or newer and provides
+        the best performance and stability.
+
+    version : Optional[int]
+        Version of MAPDL to launch. Versions can be provided as integers
+        (i.e. ``version=222``) or floats (i.e. ``version=22.2``).
+        You can also provide this value through the environment variable
+        :envvar:`PYMAPDL_MAPDL_VERSION`. Defaults to latest available version.
+
+    start_instance : Optional[bool]
+        When :class:`False`, connect to an existing MAPDL instance at ``ip``
+        and ``port``. When :class:`True`, launch a local instance of MAPDL.
+        You can also provide this value through the environment variable
+        :envvar:`PYMAPDL_START_INSTANCE`. Defaults to start locally (:class:`True`).
+
+    ram : Optional[int]
+        Total size in megabytes of the workspace (memory) used for the initial
+        allocation. To force a fixed size throughout the run, specify a negative
+        number. The default is :class:`None`, in which case 2 GB (2048 MB) is used.
+
+    timeout : Optional[int]
+        Maximum allowable time to connect to the MAPDL server.
+        By default it is 45 seconds, however, it is increased to 90 seconds
+        if running on HPC.
+
+    cleanup_on_exit : bool
+        Exit MAPDL when Python exits or the MAPDL Python instance is
+        garbage collected. Defaults to :class:`True`.
+
+    clear_on_connect : bool
+        Defaults to :class:`True`, giving you a fresh environment when
+        connecting to MAPDL. When ``start_instance`` is :class:`False`,
+        it defaults to :class:`True`.
+
+    override : bool
+        Attempts to delete the lock file at the ``run_location``.
+        Useful when a prior MAPDL session has exited prematurely and
+        the lock file has not been deleted. Defaults to :class:`False`.
+
+    remove_temp_dir_on_exit : bool
+        When this parameter is :class:`True`, the directory created to launch
+        MAPDL on temporary location will be deleted when MAPDL is exited.
+        Defaults to :class:`False`. Note: This option is not available
+        when running on HPC.
+
+    set_no_abort : bool
+        Sets MAPDL to not abort at the first error within /BATCH mode.
+        *(Development use only)*. Defaults to :class:`True`.
+
+    additional_switches : str
+        Additional switches for MAPDL, for example ``'aa_r'`` (academic
+        research license). Avoid adding switches like ``-i``, ``-o`` or ``-b``
+        as these are already included to start up the MAPDL server.
+        Defaults to an empty string.
+
+    license_type : Optional[str]
+        Enable license type selection. You can input a string for its
+        license name (for example ``'meba'`` or ``'ansys'``) or its description
+        ("enterprise solver" or "enterprise" respectively).
+        Defaults to :class:`None`, which means no specific license is requested.
+
+    launch_on_hpc : bool
+        If :class:`True`, uses the implemented scheduler (SLURM only) to
+        launch an MAPDL instance on the HPC. Pass the ``scheduler_options``
+        argument to specify scheduler options.
+        Defaults to :class:`False`.
+
+    running_on_hpc : bool
+        Whether to detect if PyMAPDL is running on an HPC cluster.
+        Currently only SLURM clusters are supported.
+        This option can be bypassed if the :envvar:`PYMAPDL_RUNNING_ON_HPC`
+        environment variable is set to :class:`True`.
+        Defaults to :class:`False`.
+
+    scheduler_options : Optional[Dict[str, Any]]
+        HPC scheduler options as a dictionary. For example:
+        ``{"nodes": "1", "ntasks-per-node": "16"}``.
+        See the HPC documentation for supported options.
+
+    loglevel : str
+        Sets which messages from the PyMAPDL Logger are printed to the console.
+
+        - ``'DEBUG'`` - Prints all PyMAPDL logs
+        - ``'INFO'`` - Informational messages only
+        - ``'WARNING'`` - Messages containing ANSYS warnings
+        - ``'ERROR'`` - Error messages only
+
+        Defaults to ``'ERROR'``.
+
+    log_apdl : Optional[str]
+        Enables logging of every APDL command to a file. This can be used
+        to "record" all the commands that are sent to MAPDL via PyMAPDL.
+        This argument is the path of the output file (e.g.
+        ``log_apdl='pymapdl_log.txt'``), or a boolean value. If it is
+        :class:`True`, the file will be created in the current working
+        directory with the name ``"apdl.log"``.
+        Defaults to :class:`None` (disabled).
+
+    print_com : bool
+        Print the command ``/COM`` arguments to the standard output.
+        Defaults to :class:`False`.
+
+    mapdl_output : Optional[str]
+        Redirect the MAPDL console output to a file. This is useful to check
+        the MAPDL output in case of errors. The file is created in the working
+        directory unless the path is included in the filename. If the file
+        already exists, it will be overwritten.
+        Defaults to :class:`None` (output not redirected).
+
+    transport_mode : Optional[str]
+        Transport mode for gRPC channel creation. Supported modes are:
+        ``'insecure'``, ``'uds'``, ``'wnua'``, ``'mtls'``.
+        Defaults to :class:`None`, which selects the appropriate mode based
+        on platform and environment variables.
+
+    uds_dir : Optional[str]
+        Directory for Unix Domain Socket (UDS) files when using ``'uds'``
+        transport. Defaults to :class:`None`, which uses ``~/.conn``.
+
+    uds_id : Optional[str]
+        Identifier for UDS socket file when using ``'uds'`` transport.
+        Defaults to :class:`None`, which uses ``mapdl-{port}``.
+
+    certs_dir : Optional[str]
+        Directory containing certificates for ``'mtls'`` transport.
+        Defaults to :class:`None`.
+
+    env_vars : Optional[Dict[str, str]]
+        Environment variables for the MAPDL process. These replace all
+        system environment variables.
+
+        .. warning:: Use with caution.
+           It replaces all system environment variables, including MPI and
+           license-related ones. You should manually inject them using this
+           argument if needed.
+
+        Defaults to :class:`None`, using system environment variables.
+
+    license_server_check : bool
+        Check if the license server is available if MAPDL fails to start.
+        Only available on ``mode='grpc'``. Defaults to :class:`False`.
+
+    force_intel : bool
+        Forces the use of Intel MPI in versions between ANSYS 2021R0 and 2022R2.
+        *(Development use only)*. Defaults to :class:`False`.
+
+    graphics_backend : Optional[str]
+        Graphics backend to use. Defaults to :class:`None`.
+
+    start_timeout : Optional[int]
+        **Deprecated. Use ``timeout`` instead.**
+        This parameter is maintained for backward compatibility and will be
+        removed in a future version.
+
+    **kwargs : Any
+        Additional arguments. Unknown arguments are ignored with a warning.
+
+    Returns
+    -------
+    LaunchConfig
+        Complete, validated ``LaunchConfig`` object ready for launching MAPDL.
+
+    Raises
+    ------
+    ConfigurationError
+        If the configuration is invalid or contains conflicting settings.
+
+    Examples
+    --------
+    Create a basic configuration for a local launch:
+
+    >>> config = resolve_launch_config(nproc=4, version=222)
+    >>> config.nproc
+    4
+    >>> config.version
+    222
+
+    Create a configuration for connecting to an existing instance:
+
+    >>> config = resolve_launch_config(
+    ...     start_instance=False,
+    ...     ip="192.168.1.100",
+    ...     port=50053
+    ... )
+    >>> config.ip
+    '192.168.1.100'
+
+    Create a configuration for HPC launch:
+
+    >>> config = resolve_launch_config(
+    ...     launch_on_hpc=True,
+    ...     nproc=16,
+    ...     scheduler_options={"nodes": "2", "ntasks-per-node": "8"}
+    ... )
+    >>> config.launch_on_hpc
+    True
     """
     import warnings
 
@@ -388,10 +587,12 @@ def resolve_ip(ip: Optional[str], start_instance: bool) -> str:
             LOG.debug(f"On WSL: Using Windows host IP: {wsl_ip}")
             return wsl_ip
         else:
-            raise ConfigurationError(
+            LOG.warning(
                 "Running on WSL but cannot determine Windows host IP address. "
-                "Please specify ip argument explicitly."
+                "Falling back to localhost. If you need the Windows host IP, "
+                "please specify the 'ip' argument explicitly."
             )
+            return LOCALHOST
 
     # Priority 4: Default localhost
     LOG.debug(f"Using default IP: {LOCALHOST}")

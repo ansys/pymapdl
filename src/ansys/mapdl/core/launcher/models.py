@@ -29,6 +29,7 @@ All models are immutable (where practical) to ensure predictability and thread s
 from dataclasses import dataclass, field
 from enum import Enum
 import subprocess  # nosec B404
+import types
 from typing import Any, Dict, List, Optional
 
 
@@ -241,6 +242,10 @@ class LaunchConfig:
     license_server_check: bool = False
     force_intel: bool = False
     graphics_backend: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        """Wrap env_vars in MappingProxyType to enforce immutability."""
+        object.__setattr__(self, "env_vars", types.MappingProxyType(self.env_vars))
 
 
 @dataclass(frozen=True)

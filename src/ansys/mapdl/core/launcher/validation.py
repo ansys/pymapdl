@@ -208,7 +208,7 @@ def _validate_resource_availability(
             )
 
         # Soft limit: warn if excessive
-        if config.nproc > available_cpus * 2:
+        elif config.nproc > available_cpus * 2:
             result.add_error(
                 f"Requested {config.nproc} processors but only {available_cpus} "
                 f"physical CPUs available. This is excessive and will likely fail."

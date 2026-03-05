@@ -28,6 +28,7 @@ and managing their lifecycle.
 
 import os
 from queue import Empty, Queue
+import shlex
 import subprocess  # nosec B404
 import threading
 import time
@@ -247,7 +248,7 @@ def _generate_launch_command(config: LaunchConfig) -> List[str]:
 
     # Additional switches
     if config.additional_switches:
-        cmd.extend(config.additional_switches.split())
+        cmd.extend(shlex.split(config.additional_switches))
 
     # Windows-specific temp file arguments
     if os.name == "nt":
@@ -618,8 +619,6 @@ def _check_grpc_server_ready(stdout_queue: Queue, timeout: int) -> None:
         if "GRPC SERVER" in output and "Server listening on" in output:
             LOG.debug("MAPDL gRPC server confirmed ready")
             return
-
-        time.sleep(0.1)
 
     raise MapdlDidNotStart(
         f"MAPDL gRPC server did not start within {timeout} seconds. "
