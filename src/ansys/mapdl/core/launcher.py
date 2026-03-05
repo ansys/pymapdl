@@ -630,7 +630,7 @@ def launch_grpc(
         )  # nosec B604
 
         # Store the file handle on the process object for cleanup
-        if stdout_file_handle is not None:
+        if stdout_file_handle is not None and process is not None:
             process._stdout_file_handle = stdout_file_handle  # type: ignore
 
         return process
