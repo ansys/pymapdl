@@ -1608,11 +1608,13 @@ class MapdlGrpc(MapdlBase):
                 process.terminate()
 
             # Close any open file handle for stdout redirect
-            if hasattr(process, "_stdout_file_handle"):
+            fh = getattr(process, "_stdout_file_handle", None)
+            if fh and not getattr(fh, "closed", False):
                 try:
-                    process._stdout_file_handle.close()  # type: ignore
+                    fh.close()
                     self._log.debug("Closed stdout file handle")
-                except (AttributeError, OSError) as e:
+                    setattr(process, "_stdout_file_handle", None)
+                except OSError as e:
                     self._log.debug(f"Error closing stdout file handle: {e}")
 
     def _kill_child_processes(self, timeout=2):
