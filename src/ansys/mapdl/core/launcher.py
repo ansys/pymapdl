@@ -618,21 +618,27 @@ def launch_grpc(
                 )
 
     LOG.debug("MAPDL starting in background.")
-    process = submitter(
-        cmd,
-        shell=shell,  # sbatch does not work without shell.
-        cwd=run_location,
-        stdin=subprocess.DEVNULL,
-        stdout=stdout,
-        stderr=stderr,
-        env_vars=env_vars,
-    )  # nosec B604
+    try:
+        process = submitter(
+            cmd,
+            shell=shell,  # sbatch does not work without shell.
+            cwd=run_location,
+            stdin=subprocess.DEVNULL,
+            stdout=stdout,
+            stderr=stderr,
+            env_vars=env_vars,
+        )  # nosec B604
 
-    # Store the file handle on the process object for cleanup
-    if stdout_file_handle is not None:
-        process._stdout_file_handle = stdout_file_handle  # type: ignore
+        # Store the file handle on the process object for cleanup
+        if stdout_file_handle is not None:
+            process._stdout_file_handle = stdout_file_handle  # type: ignore
 
-    return process
+        return process
+
+    except Exception as e:  # pragma: no cover
+        # Something went wrong during the launch, make sure to clean up the file handle if it was created
+        stdout_file_handle.close() if stdout_file_handle is not None else None
+        raise e
 
 
 def check_mapdl_launch(
