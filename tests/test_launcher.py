@@ -1288,6 +1288,37 @@ def test_launch_grpc(tmpdir, launch_on_hpc):
     assert isinstance(kwargs["stderr"], type(subprocess.PIPE))
 
 
+@patch("os.name", "nt")
+@patch("subprocess.Popen")
+def test_launch_grpc_with_output_file(mock_popen, tmpdir):
+    """Test that file handles are properly attached to the process object."""
+    # Create a mock process object
+    mock_process = MagicMock()
+    mock_process.poll.return_value = None
+    mock_popen.return_value = mock_process
+
+    cmd = "ansys.exe -b -i my_input.inp -o my_output.out".split(" ")
+    run_location = str(tmpdir)
+    output_file = os.path.join(run_location, "mapdl_output.log")
+
+    # Launch with output file redirection
+    process = launch_grpc(cmd, run_location, mapdl_output=output_file)
+
+    # Verify that the process object has the file handle attached
+    assert hasattr(
+        process, "_stdout_file_handle"
+    ), "Process should have _stdout_file_handle attribute"
+    assert process._stdout_file_handle is not None, "File handle should not be None"
+    assert not process._stdout_file_handle.closed, "File handle should be open"
+
+    # Clean up the file handle
+    process._stdout_file_handle.close()
+    assert process._stdout_file_handle.closed, "File handle should be closed"
+
+    # Verify output file was created
+    assert os.path.exists(output_file), "Output file should exist"
+
+
 @patch("psutil.cpu_count", lambda *args, **kwags: 5)
 @pytest.mark.parametrize("arg", [None, 3, 10])
 @pytest.mark.parametrize("env", [None, 3, 10])
