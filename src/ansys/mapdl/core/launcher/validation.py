@@ -201,17 +201,17 @@ def _validate_resource_availability(
     try:
         available_cpus = psutil.cpu_count(logical=False) or psutil.cpu_count() or 1
 
-        if config.nproc > available_cpus:
-            result.add_warning(
-                f"Requested {config.nproc} processors but only {available_cpus} "
-                f"physical CPUs available. Performance may be degraded."
-            )
-
-        # Soft limit: warn if excessive
-        elif config.nproc > available_cpus * 2:
+        # Hard limit: error if excessively high (> 2x available)
+        if config.nproc > available_cpus * 2:
             result.add_error(
                 f"Requested {config.nproc} processors but only {available_cpus} "
                 f"physical CPUs available. This is excessive and will likely fail."
+            )
+        # Soft limit: warn if requesting more than available
+        elif config.nproc > available_cpus:
+            result.add_warning(
+                f"Requested {config.nproc} processors but only {available_cpus} "
+                f"physical CPUs available. Performance may be degraded."
             )
     except Exception as e:
         LOG.debug(f"Could not check CPU availability: {e}")

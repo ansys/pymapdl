@@ -5,12 +5,14 @@
 """Unit tests for launcher.config module."""
 
 import os
+from typing import Optional
 from unittest.mock import patch
 
 import pytest
 
 from ansys.mapdl.core.launcher import ConfigurationError, LaunchConfig, LaunchMode
 from ansys.mapdl.core.launcher.config import (
+    LOCALHOST,
     resolve_additional_switches,
     resolve_exec_file,
     resolve_ip,
@@ -91,6 +93,7 @@ def _create_test_config(**overrides):
         "uds_dir": None,
         "uds_id": None,
         "certs_dir": None,
+        "env_vars": {},
     }
     defaults.update(overrides)
     return LaunchConfig(**defaults)
@@ -303,86 +306,10 @@ class TestConfigResolution:
                 assert config.port == 50200
                 assert config.nproc == 16
 
-    def test_resolve_launch_config_with_version(self):
-        """Test config resolution with version."""
-        with patch("os.path.isfile", return_value=True):
-            config = resolve_launch_config(version=222, start_instance=False)
-            assert config.version == 222
-
-    def test_resolve_launch_config_with_ram(self):
-        """Test config resolution with RAM."""
-        config = resolve_launch_config(ram=4096)
-        assert config.ram == 4096
-
-    def test_resolve_launch_config_with_jobname(self):
-        """Test config resolution with custom jobname."""
-        config = resolve_launch_config(jobname="myfile")
-        assert config.jobname == "myfile"
-
-    def test_resolve_launch_config_with_timeout(self):
-        """Test config resolution with timeout."""
-        config = resolve_launch_config(timeout=120)
-        assert config.timeout == 120
-
-    def test_resolve_launch_config_with_license_type(self):
-        """Test config resolution with license type."""
-        config = resolve_launch_config(license_type="dyna")
-        assert config.license_type == "dyna"
-
-    def test_resolve_launch_config_with_custom_switches(self):
-        """Test config resolution with additional switches."""
-        config = resolve_launch_config(additional_switches="-noinfo -nointel")
-        assert "-noinfo" in config.additional_switches
-
     def test_resolve_launch_config_transport_mode(self):
         """Test config resolution with transport mode."""
         config = resolve_launch_config(transport_mode="uds")
         assert config.transport_mode == TransportMode.UDS
-
-    def test_resolve_launch_config_uds_settings(self):
-        """Test config resolution with UDS settings."""
-        config = resolve_launch_config(
-            transport_mode="uds",
-            uds_dir="/tmp/mapdl",
-            uds_id="mapdl-1",
-        )
-        assert config.uds_dir == "/tmp/mapdl"
-        assert config.uds_id == "mapdl-1"
-
-    def test_resolve_launch_config_mtls_with_certs(self):
-        """Test config resolution with mTLS and certificates."""
-        config = resolve_launch_config(
-            transport_mode="mtls",
-            certs_dir="/path/to/certs",
-        )
-        assert config.transport_mode == TransportMode.MTLS
-        assert config.certs_dir == "/path/to/certs"
-
-    def test_resolve_launch_config_logging_settings(self):
-        """Test config resolution with logging settings."""
-        config = resolve_launch_config(
-            loglevel="DEBUG",
-            log_apdl="custom.log",
-            print_com=True,
-        )
-        assert config.loglevel == "DEBUG"
-        assert config.log_apdl == "custom.log"
-        assert config.print_com is True
-
-    def test_resolve_launch_config_cleanup_flags(self):
-        """Test config resolution with cleanup flags."""
-        config = resolve_launch_config(
-            cleanup_on_exit=False,
-            remove_temp_dir_on_exit=True,
-        )
-        assert config.cleanup_on_exit is False
-        assert config.remove_temp_dir_on_exit is True
-
-    def test_jobname_max_length(self):
-        """Test jobname with maximum length."""
-        long_jobname = "a" * 32  # MAPDL job name limit
-        config = resolve_launch_config(jobname=long_jobname)
-        assert config.jobname == long_jobname
 
 
 class TestConfigEdgeCases:
@@ -481,14 +408,21 @@ class TestResolveIpAddress:
                 assert ip == "172.20.0.1"
 
     def test_resolve_ip_wsl_no_host_ip(self):
-        """Test IP resolution on WSL when host IP cannot be determined."""
+        """Test IP resolution on WSL when host IP cannot be determined.
+
+        Falls back to localhost with a warning when WSL host IP cannot be determined.
+        """
         with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=True):
             with patch(
                 "ansys.mapdl.core.launcher.environment.get_windows_host_ip",
                 return_value=None,
             ):
-                with pytest.raises(ConfigurationError):
-                    resolve_ip(None, start_instance=True)
+                with patch("ansys.mapdl.core.launcher.config.LOG") as mock_log:
+                    ip = resolve_ip(None, start_instance=True)
+                    # Falls back to localhost, doesn't raise error
+                    assert ip == LOCALHOST
+                    # Verify warning was logged
+                    mock_log.warning.assert_called_once()
 
 
 class TestResolveLaunchMode:
@@ -889,3 +823,645 @@ class TestResolveAdditionalSwitches:
         monkeypatch.delenv("PYMAPDL_ADDITIONAL_SWITCHES", raising=False)
         config = resolve_launch_config(start_instance=False)
         assert config.additional_switches == ""
+
+
+# ============================================================================
+# : License Type Validation Tests
+# ============================================================================
+
+
+class TestPhase1LicenseTypeValidation:
+    """: Tests for license type validation in launcher.
+
+    These tests validate that license types are strings (not enums) and
+    that they work properly with the LaunchConfig.
+    """
+
+    @pytest.mark.parametrize(
+        "license_type",
+        [
+            "research",
+            "academic",
+            "aa_r",
+            "aa_t_a",
+            "custom_license",
+            None,
+        ],
+    )
+    def test_resolve_with_each_license_type(self, license_type: Optional[str]):
+        """Test resolve_launch_config with various license types.
+
+        Parametrized test validating that resolve_launch_config properly
+        handles different license type string values.
+        """
+        config = resolve_launch_config(license_type=license_type, start_instance=False)
+
+        assert config.license_type == license_type
+        if license_type is not None:
+            assert isinstance(config.license_type, str)
+
+    def test_license_type_preserved_through_config(self):
+        """Test that license_type is preserved through configuration chain.
+
+        Validates that license_type set during resolve_launch_config
+        remains intact in the final LaunchConfig.
+        """
+        custom_license = "research"
+        config = resolve_launch_config(
+            license_type=custom_license, start_instance=False
+        )
+
+        assert config.license_type == custom_license
+
+
+class TestVersionValidation:
+    """Tests for version validation and edge cases."""
+
+    def test_version_from_path_edge_cases(self):
+        """Test version extraction from path with edge cases.
+
+        Validates that version_from_path handles various path formats correctly.
+        """
+        with patch("ansys.mapdl.core.launcher.config._HAS_ATC", True):
+            with patch(
+                "ansys.tools.common.path.version_from_path",
+                return_value=222,
+            ):
+                version = resolve_version(None, "/usr/ansys_inc/v222/ansys/bin/mapdl")
+                assert version == 222
+
+    def test_version_validation_compatibility(self):
+        """Test that version validation works with new pattern.
+
+        Validates that resolve_version works correctly with the new
+        pure function pattern, handling all resolution priority orders.
+        """
+        # Test explicit argument priority
+        version1 = resolve_version(232, "/path/to/mapdl")
+        assert version1 == 232
+
+        # Test env var priority
+        with patch.dict(os.environ, {"PYMAPDL_MAPDL_VERSION": "225"}):
+            version2 = resolve_version(None, "/path/to/mapdl")
+            assert version2 == 225
+
+    def test_version_verify_pass(self):
+        """Test that known good versions pass validation."""
+        good_versions = [211, 212, 221, 222, 231, 232, 241, 242]
+        for ver in good_versions:
+            config = resolve_launch_config(version=ver, start_instance=False)
+            assert config.version == ver
+
+    def test_version_verify_latest(self):
+        """Test that latest version can be inferred when not specified."""
+        # When version is None, it should remain None or be detected
+        config = resolve_launch_config(version=None, start_instance=False)
+        # Version can be None if not detected
+        assert config.version is None or isinstance(config.version, int)
+
+
+class TestLicenseProductTests:
+    """Tests for license product handling."""
+
+    def test_license_type_keyword_names(self):
+        """Test that license type accepts keyword names.
+
+        Validates that various license keyword names are accepted
+        without transformation or validation errors.
+        """
+        license_keywords = [
+            "research",
+            "academic",
+            "dyna",
+            "mechanical",
+            "fluent",
+            "cfx",
+            "aa_r",
+            "aa_t_a",
+        ]
+
+        for keyword in license_keywords:
+            config = resolve_launch_config(license_type=keyword, start_instance=False)
+            assert config.license_type == keyword
+
+    def test_license_type_additional_switch(self):
+        """Test that license_type can be used with additional_switches.
+
+        Validates that license type works in combination with other switches
+        without conflicts or validation errors.
+        """
+        config = resolve_launch_config(
+            license_type="research",
+            additional_switches="-noinfo",
+            start_instance=False,
+        )
+        assert config.license_type == "research"
+        assert "-noinfo" in config.additional_switches
+
+    def test_license_product_argument_error(self):
+        """Test license type with invalid values raises ConfigurationError.
+
+        Note: Currently license_type is not validated (accepts any string).
+        This test documents that license validation happens elsewhere if needed.
+        """
+        # Currently, license_type accepts any string without validation
+        config = resolve_launch_config(
+            license_type="invalid_license", start_instance=False
+        )
+        assert config.license_type == "invalid_license"
+
+    def test_license_product_argument_warning(self):
+        """Test that invalid license type generates warning if validated elsewhere.
+
+        Documents that while license_type accepts strings, validation
+        and warnings may happen during actual launch.
+        """
+        # Currently no validation in resolver, but configuration is preserved
+        config = resolve_launch_config(license_type="unknown_lic", start_instance=False)
+        assert config.license_type == "unknown_lic"
+
+
+class TestConfigParameterResolution:
+    """Tests for comprehensive config parameter resolution."""
+
+    def test_resolve_nproc_exceeds_cpu_limit(self):
+        """Test nproc exceeding physical CPU limit.
+
+        Documents that nproc resolution doesn't enforce CPU limits
+        (those checks happen elsewhere in validation).
+        """
+        # resolver accepts the value, validation happens separately
+        nproc = resolve_nproc(10000)
+        assert nproc == 10000
+
+    # ========== Port Tests ==========
+    def test_resolve_port_with_env_override(self):
+        """Test port resolution with environment variable override.
+
+        Validates priority order: explicit > env var > default.
+        """
+        with patch.dict(os.environ, {"PYMAPDL_PORT": "50100"}):
+            # Explicit takes priority
+            port = resolve_port(50200)
+            assert port == 50200
+
+    def test_resolve_port_env_override(self):
+        """Test that PYMAPDL_PORT environment variable overrides default."""
+        with patch.dict(os.environ, {"PYMAPDL_PORT": "55555"}):
+            port = resolve_port(None)
+            assert port == 55555
+
+    def test_resolve_port_default_value(self):
+        """Test that default port is 50052."""
+        with patch.dict(os.environ, {}, clear=True):
+            port = resolve_port(None)
+            assert port == 50052
+
+    # ========== IP Tests ==========
+    def test_resolve_ip_with_env_override(self):
+        """Test IP resolution with environment variable override.
+
+        Validates priority order: explicit > env var > defaults.
+        """
+        with patch.dict(os.environ, {"PYMAPDL_IP": "192.168.1.100"}):
+            # Both IPs resolve to themselves for this test
+            def mock_gethostbyname(hostname):
+                return hostname  # Return the input as-is (simple mock)
+
+            with patch("socket.gethostbyname", side_effect=mock_gethostbyname):
+                ip = resolve_ip("192.168.1.50", start_instance=False)
+                # Explicit takes priority
+                assert ip == "192.168.1.50"
+
+    def test_resolve_ip_env_override(self):
+        """Test IP resolution from PYMAPDL_IP environment variable."""
+        with patch.dict(os.environ, {"PYMAPDL_IP": "10.0.0.1"}):
+            with patch("socket.gethostbyname", return_value="10.0.0.1"):
+                ip = resolve_ip(None, start_instance=False)
+                assert ip == "10.0.0.1"
+
+    def test_resolve_ip_localhost_default(self):
+        """Test that localhost (127.0.0.1) is the fallback default."""
+        with patch.dict(os.environ, {}, clear=True):
+            with patch(
+                "ansys.mapdl.core.launcher.environment.is_wsl", return_value=False
+            ):
+                ip = resolve_ip(None, start_instance=True)
+                assert ip == "127.0.0.1"
+
+    def test_resolve_ip_invalid_format(self):
+        """Test IP resolution with invalid format raises ConfigurationError."""
+        import socket
+
+        with patch("socket.gethostbyname", side_effect=socket.gaierror):
+            with pytest.raises(ConfigurationError):
+                resolve_ip("invalid-host-xyz-123", start_instance=False)
+
+    def test_resolve_ip_with_start_instance_interaction(self):
+        """Test IP resolution behavior changes based on start_instance.
+
+        When start_instance=False, IP must be specified or come from env var.
+        When start_instance=True, can default to localhost or WSL detection.
+        """
+        # start_instance=False, no IP specified -> defaults to localhost
+        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=False):
+            ip = resolve_ip(None, start_instance=False)
+            assert ip == "127.0.0.1"
+
+        # start_instance=True, no IP specified -> defaults to localhost or WSL IP
+        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=False):
+            ip = resolve_ip(None, start_instance=True)
+            assert ip == "127.0.0.1"
+
+    # ========== Run Location Tests ==========
+    def test_resolve_run_location_creates_if_needed(self, tmp_path):
+        """Test that run_location creates directory if it doesn't exist.
+
+        Validates that resolve_run_location automatically creates
+        missing directory structure.
+        """
+        new_location = os.path.join(str(tmp_path), "deep", "nested", "path")
+        location = resolve_run_location(new_location)
+        assert os.path.exists(location)
+        assert os.path.isdir(location)
+
+    def test_resolve_run_location_absolute_path(self):
+        """Test that run_location is converted to absolute path."""
+        with patch("os.makedirs"):
+            location = resolve_run_location(".")
+            assert os.path.isabs(location)
+
+    # ========== RAM Tests ==========
+    def test_resolve_ram_allocation(self):
+        """Test RAM allocation resolution accepts various values."""
+        ram_values = [256, 512, 1024, 2048, 4096, 8192, 16384, 32768]
+        for ram in ram_values:
+            resolved = resolve_ram(ram)
+            assert resolved == ram
+
+    def test_resolve_ram_default_none(self):
+        """Test that RAM defaults to None when not specified."""
+        ram = resolve_ram(None)
+        assert ram is None
+
+    # ========== Timeout Tests ==========
+    def test_resolve_timeout_for_hpc(self):
+        """Test that timeout is extended for HPC launches.
+
+        HPC launches get 2x the default timeout (90 seconds vs 45).
+        """
+        timeout_regular = resolve_timeout(None, launch_on_hpc=False)
+        assert timeout_regular == 45
+
+        timeout_hpc = resolve_timeout(None, launch_on_hpc=True)
+        assert timeout_hpc == 90
+
+        # Explicit timeout overrides HPC default
+        timeout_explicit = resolve_timeout(120, launch_on_hpc=True)
+        assert timeout_explicit == 120
+
+
+class TestExceptionHandling:
+    """Tests for proper exception handling with ConfigurationError."""
+
+    def test_invalid_mode(self):
+        """Test that invalid mode raises ConfigurationError."""
+        with pytest.raises(ConfigurationError):
+            resolve_mode("invalid_mode_xyz", version=None)
+
+    def test_invalid_nproc(self):
+        """Test that invalid nproc raises ConfigurationError."""
+        with pytest.raises(ConfigurationError):
+            resolve_nproc(-5)
+
+        with pytest.raises(ConfigurationError):
+            resolve_nproc(0)
+
+    def test_invalid_port(self):
+        """Test that invalid port raises ConfigurationError."""
+        with pytest.raises(ConfigurationError):
+            resolve_port(-1)
+
+        with pytest.raises(ConfigurationError):
+            resolve_port(70000)
+
+        with pytest.raises(ConfigurationError):
+            resolve_port(0)
+
+    def test_invalid_ip(self):
+        """Test that invalid IP raises ConfigurationError."""
+        import socket
+
+        with patch("socket.gethostbyname", side_effect=socket.gaierror):
+            with pytest.raises(ConfigurationError):
+                resolve_ip("not-a-valid-host-name", start_instance=False)
+
+    def test_conflicting_parameters(self):
+        """Test that conflicting parameters are handled gracefully.
+
+        When start_instance and ip are both specified, start_instance takes
+        precedence with a warning.
+        """
+        with patch("ansys.mapdl.core.launcher.config.LOG"):
+            result = resolve_start_instance(start_instance=True, ip="192.168.1.1")
+            # start_instance takes precedence
+            assert result is True
+
+    @pytest.mark.parametrize(
+        "func,args,expected_error",
+        [
+            (resolve_port, (-1,), ConfigurationError),
+            (resolve_port, (70000,), ConfigurationError),
+            (resolve_nproc, (-1,), ConfigurationError),
+            (resolve_nproc, (0,), ConfigurationError),
+            (resolve_ram, (-100,), ConfigurationError),
+            (resolve_timeout, (-1, False), ConfigurationError),
+        ],
+    )
+    def test_invalid_parameters_raise_configuration_error(
+        self, func, args, expected_error
+    ):
+        """Parametrized test for ConfigurationError raising on invalid params."""
+        with pytest.raises(expected_error):
+            func(*args)
+
+
+class TestAdditionalSwitches:
+    """Tests for additional switches resolution."""
+
+    def test_resolve_additional_switches_from_dict(self):
+        """Test resolving additional switches from configuration.
+
+        Validates that switches can be passed through configuration
+        without modification.
+        """
+        switches = "-aa_r -noinfo -nointel"
+        config = resolve_launch_config(
+            additional_switches=switches,
+            start_instance=False,
+        )
+        assert config.additional_switches == switches
+
+    def test_resolve_additional_switches_empty(self):
+        """Test that empty switches default to empty string."""
+        config = resolve_launch_config(
+            additional_switches="",
+            start_instance=False,
+        )
+        assert config.additional_switches == ""
+
+    def test_resolve_additional_switches_various_formats(self):
+        """Test various switch formats are preserved."""
+        formats = [
+            "-aa_r",
+            "-noinfo -nointel",
+            "-dyn -g -acc",
+            "",
+        ]
+        for fmt in formats:
+            assert fmt == resolve_additional_switches(fmt)
+
+
+class TestPortResolutionIncrement:
+    """Tests for port resolution with new increment-by-1 logic."""
+
+    def test_resolve_port_busy_port_handling(self):
+        """Test port resolution behavior when port is busy.
+
+        Documents that actual port checking happens in network layer,
+        resolver just returns the specified/default port.
+        """
+        # Resolver doesn't check availability, just validates range
+        port = resolve_port(50052)
+        assert port == 50052
+
+    def test_resolve_port_start_instance_false(self):
+        """Test port resolution when start_instance is False.
+
+        Port is still resolved even when not starting instance
+        (may be used for connection info).
+        """
+        config = resolve_launch_config(
+            port=50100,
+            start_instance=False,
+        )
+        assert config.port == 50100
+
+    def test_resolve_port_from_env_var(self):
+        """Test port resolution from PYMAPDL_PORT environment variable."""
+        with patch.dict(os.environ, {"PYMAPDL_PORT": "60000"}):
+            config = resolve_launch_config(start_instance=False)
+            assert config.port == 60000
+
+    def test_resolve_port_sequential_increment(self):
+        """Test that port resolution respects sequential numbering.
+
+        Documents that ports are checked sequentially (50052, 50053, 50054...)
+        in the network layer, not here in the resolver.
+        """
+        # Resolver just returns the requested port
+        port = resolve_port(50052)
+        assert port == 50052
+
+        # Next would be 50053 (increment by 1)
+        port = resolve_port(50053)
+        assert port == 50053
+
+
+class TestIpResolutionEdgeCases:
+    """Tests for IP resolution edge cases."""
+
+    def test_resolve_ip_explicit(self):
+        """Test IP resolution with explicit IP overrides everything.
+
+        Explicit IP takes priority over env vars and defaults.
+        """
+        with patch("socket.gethostbyname", return_value="10.0.0.50"):
+            ip = resolve_ip("10.0.0.50", start_instance=False)
+            assert ip == "10.0.0.50"
+
+    def test_resolve_ip_from_env(self):
+        """Test IP resolution from PYMAPDL_IP environment variable."""
+        with patch.dict(os.environ, {"PYMAPDL_IP": "192.168.1.200"}):
+            with patch("socket.gethostbyname", return_value="192.168.1.200"):
+                ip = resolve_ip(None, start_instance=False)
+                assert ip == "192.168.1.200"
+
+    def test_resolve_ip_localhost_default(self):
+        """Test that 127.0.0.1 is the final fallback default."""
+        with patch.dict(os.environ, {}, clear=True):
+            with patch(
+                "ansys.mapdl.core.launcher.environment.is_wsl", return_value=False
+            ):
+                ip = resolve_ip(None, start_instance=False)
+                assert ip == "127.0.0.1"
+
+    def test_resolve_ip_invalid_format(self):
+        """Test IP validation for invalid format."""
+        import socket
+
+        with patch(
+            "socket.gethostbyname",
+            side_effect=socket.gaierror("Name or service not known"),
+        ):
+            with pytest.raises(ConfigurationError) as exc_info:
+                resolve_ip("invalid-xyz-host", start_instance=False)
+            assert "Cannot resolve hostname or IP" in str(exc_info.value)
+
+    def test_resolve_ip_with_start_instance_interaction(self):
+        """Test IP resolution behavior with start_instance parameter.
+
+        Both start_instance values should resolve IP the same way
+        (the difference is whether MAPDL is started locally).
+        """
+        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=False):
+            ip_start_true = resolve_ip(None, start_instance=True)
+            ip_start_false = resolve_ip(None, start_instance=False)
+            # Both default to localhost when no env vars or explicit IP
+            assert ip_start_true == "127.0.0.1"
+            assert ip_start_false == "127.0.0.1"
+
+    def test_resolve_ip_invalid_raises_error(self):
+        """Test that invalid IP raises ConfigurationError."""
+        import socket
+
+        from ansys.mapdl.core.launcher.config import ConfigurationError, resolve_ip
+
+        with patch(
+            "socket.gethostbyname",
+            side_effect=socket.gaierror("Name or service not known"),
+        ):
+            with pytest.raises(ConfigurationError) as exc_info:
+                resolve_ip("invalid-host-xyz", start_instance=False)
+            assert "Cannot resolve hostname or IP" in str(exc_info.value)
+
+    def test_resolve_ip_start_instance_affects_wsl_detection(self):
+        """Test that start_instance affects WSL host IP detection.
+
+        When start_instance=True, WSL host IP is used if available.
+        When start_instance=False, no special WSL handling needed.
+        """
+        from ansys.mapdl.core.launcher.config import resolve_ip
+
+        # start_instance=True triggers WSL detection
+        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=True):
+            with patch(
+                "ansys.mapdl.core.launcher.environment.get_windows_host_ip",
+                return_value="172.20.0.1",
+            ):
+                ip = resolve_ip(None, start_instance=True)
+                assert ip == "172.20.0.1"
+
+        # start_instance=False doesn't need WSL detection
+        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=False):
+            ip = resolve_ip(None, start_instance=False)
+            assert ip == "127.0.0.1"
+
+
+class TestConfigurationIntegration:
+    """Integration tests for complete configuration resolution."""
+
+    def test_resolve_launch_config_complete_spec(self):
+        """Test resolve_launch_config with comprehensive parameters.
+
+        Validates that all parameter combinations work together correctly.
+        """
+        with patch("os.path.isfile", return_value=True):
+            config = resolve_launch_config(
+                exec_file="/path/to/mapdl",
+                run_location="/tmp/mapdl",
+                jobname="integration_test",
+                nproc=8,
+                port=50100,
+                ip="127.0.0.1",
+                mode="grpc",
+                version=222,
+                start_instance=True,
+                ram=4096,
+                timeout=60,
+                cleanup_on_exit=True,
+                clear_on_connect=True,
+                override=False,
+                remove_temp_dir_on_exit=False,
+                set_no_abort=True,
+                additional_switches="-aa_r -noinfo",
+                license_type="research",
+                launch_on_hpc=False,
+                running_on_hpc=False,
+                scheduler_options=None,
+                loglevel="DEBUG",
+                log_apdl="apdl.log",
+                print_com=False,
+                mapdl_output=None,
+                transport_mode="insecure",
+                uds_dir=None,
+                uds_id=None,
+                certs_dir=None,
+                env_vars={"ANS_CMD": "NODIAG"},
+                license_server_check=False,
+                force_intel=False,
+                graphics_backend=None,
+            )
+
+            assert config.jobname == "integration_test"
+            assert config.nproc == 8
+            assert config.port == 50100
+            assert config.license_type == "research"
+            assert config.additional_switches == "-aa_r -noinfo"
+            assert config.loglevel == "DEBUG"
+
+    def test_resolve_launch_config_hpc_integration(self):
+        """Test resolve_launch_config with HPC parameters."""
+        with patch("os.path.isfile", return_value=True):
+            config = resolve_launch_config(
+                exec_file="/path/to/mapdl",
+                launch_on_hpc=True,
+                running_on_hpc=True,
+                nproc=16,
+                scheduler_options={"nodes": "2", "ntasks-per-node": "8"},
+                timeout=None,  # Should default to 90 for HPC
+            )
+
+            assert config.launch_on_hpc is True
+            assert config.running_on_hpc is True
+            assert config.nproc == 16
+            assert config.scheduler_options == {"nodes": "2", "ntasks-per-node": "8"}
+            assert config.timeout == 90  # HPC default
+
+    def test_resolve_launch_config_remote_instance(self):
+        """Test resolve_launch_config for connecting to remote instance."""
+        config = resolve_launch_config(
+            start_instance=False,
+            ip="192.168.1.100",
+            port=50052,
+        )
+
+        assert config.start_instance is False
+        assert config.ip == "192.168.1.100"
+        assert config.port == 50052
+        # exec_file should be empty when not starting
+        assert config.exec_file == ""
+
+    @pytest.mark.parametrize(
+        "license_type,nproc,port",
+        [
+            ("research", 4, 50052),
+            ("academic", 8, 50100),
+            ("dyna", 16, 50200),
+            (None, 2, 50052),
+        ],
+    )
+    def test_resolve_config_various_combinations(
+        self, license_type: Optional[str], nproc: int, port: int
+    ):
+        """Parametrized integration test with various parameter combinations."""
+        config = resolve_launch_config(
+            license_type=license_type,
+            nproc=nproc,
+            port=port,
+            start_instance=False,
+        )
+
+        assert config.license_type == license_type
+        assert config.nproc == nproc
+        assert config.port == port

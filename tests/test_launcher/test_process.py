@@ -1,6 +1,7 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
+#
 
 """Unit tests for launcher.process module."""
 
@@ -628,3 +629,94 @@ class TestProcessInfo:
         )
         with pytest.raises(AttributeError):
             info.port = 50053
+
+
+class TestPhase4QueueMonitoringEdgeCases:
+    """Phase 4: Edge case tests for queue-based output monitoring.
+
+    Tests patterns found in queue investigation.
+    """
+
+    def test_monitor_stdout_creates_queue(self):
+        """Test that _monitor_stdout creates queue when stdout available."""
+        mock_stdout = Mock()
+        mock_stdout.readline = Mock(side_effect=[b"line1\n", b"line2\n", b""])
+
+        queue = process._monitor_stdout(mock_stdout)
+
+        assert queue is not None
+        from queue import Queue
+
+        assert isinstance(queue, Queue)
+
+    def test_monitor_stdout_returns_none_when_no_stdout(self):
+        """Test that _monitor_stdout returns None when stdout is None."""
+        queue = process._monitor_stdout(None)
+
+        assert queue is None
+
+    def test_check_grpc_server_ready_success(self):
+        """Test gRPC server ready detection with both patterns."""
+        test_queue = Queue()
+
+        # Put bytes in queue that contain both patterns
+        test_queue.put(b"Starting GRPC SERVER\n")
+        test_queue.put(b"Server listening on port 50052\n")
+
+        # Should not raise (success)
+        process._check_grpc_server_ready(test_queue, timeout=1)
+
+    def test_check_grpc_server_ready_timeout(self):
+        """Test that timeout is enforced when patterns not found."""
+        test_queue = Queue()
+
+        # Put only one pattern
+        test_queue.put(b"GRPC SERVER starting...\n")
+        # Missing: "Server listening on"
+
+        with pytest.raises(MapdlDidNotStart):
+            process._check_grpc_server_ready(test_queue, timeout=1)
+
+    def test_wait_directory_ready_success(self):
+        """Test waiting for directory to become ready."""
+        with patch("os.path.isdir") as mock_isdir:
+            mock_isdir.return_value = True
+
+            # Should return immediately
+            process._wait_directory_ready("/tmp/run", timeout=10)
+
+            assert mock_isdir.called
+
+    def test_wait_directory_ready_timeout(self):
+        """Test timeout when directory not ready."""
+        with patch("os.path.isdir") as mock_isdir:
+            mock_isdir.return_value = False
+
+            with pytest.raises(MapdlDidNotStart) as exc_info:
+                process._wait_directory_ready("/tmp/run", timeout=1)
+
+            assert "not ready" in str(exc_info.value)
+
+    def test_wait_for_error_file_found(self):
+        """Test detection of MAPDL error file (.err)."""
+        with patch("os.path.isdir") as mock_isdir:
+            with patch("os.listdir") as mock_listdir:
+                mock_isdir.return_value = True
+                mock_listdir.return_value = ["test.err", "file.txt"]
+
+                # Should find .err file and return
+                process._wait_for_error_file("/tmp/run", timeout=10)
+
+                mock_listdir.assert_called_with("/tmp/run")
+
+    def test_wait_for_error_file_not_found_timeout(self):
+        """Test timeout when error file not created."""
+        with patch("os.path.isdir") as mock_isdir:
+            with patch("os.listdir") as mock_listdir:
+                mock_isdir.return_value = True
+                mock_listdir.return_value = ["file.txt", "output.out"]  # No .err
+
+                with pytest.raises(MapdlDidNotStart) as exc_info:
+                    process._wait_for_error_file("/tmp/run", timeout=1)
+
+                assert ".err" in str(exc_info.value)

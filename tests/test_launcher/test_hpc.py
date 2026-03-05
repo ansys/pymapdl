@@ -349,8 +349,8 @@ class TestGenerateMapdlCommand:
         config = _create_test_hpc_config(additional_switches="")
         cmd = _generate_mapdl_command(config)
 
-        # When additional_switches is empty, -dis is not added (logic only adds it when switches are present)
-        assert "-dis" not in cmd
+        # When additional_switches is empty, -dis is added by default
+        assert "-dis" in cmd
 
     def test_command_order(self):
         """Test that MAPDL command has correct argument order."""

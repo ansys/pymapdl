@@ -8,10 +8,8 @@ import pytest
 
 from ansys.mapdl.core.launcher.models import (
     HPCJobInfo,
-    LaunchConfig,
     LaunchMode,
     PortStatus,
-    ProcessInfo,
     TransportMode,
     ValidationResult,
 )
@@ -47,77 +45,8 @@ class TestTransportMode:
         assert TransportMode("uds") == TransportMode.UDS
 
 
-@pytest.mark.skip(reason="LaunchConfig API has changed - needs update")
-class TestLaunchConfig:
-    """Tests for LaunchConfig dataclass."""
-
-    def test_minimal_config(self):
-        """Test creating config with minimal arguments."""
-        pass
-
-    def test_full_config(self):
-        """Test creating config with all arguments."""
-        pass
-
-    def test_immutable(self):
-        """Test that config is immutable (frozen)."""
-        pass
-
-    def test_defaults(self):
-        """Test default values."""
-        config = LaunchConfig(
-            mode=LaunchMode.LOCAL,
-            transport=TransportMode.GRPC,
-            exec_file="/path/to/mapdl",
-        )
-        assert config.start_instance is True
-        assert config.override is False
-        assert config.verbose is False
-        assert config.just_launch is False
-
-
 class TestProcessInfo:
     """Tests for ProcessInfo dataclass."""
-
-    @pytest.mark.skip(reason="Old API - ProcessInfo changed")
-    def test_create_process_info(self):
-        """Test creating ProcessInfo."""
-        info = ProcessInfo(
-            port=50052,
-            ip="127.0.0.1",
-            jobname="file",
-            run_location="/tmp/test",
-        )
-        assert info.port == 50052
-        assert info.ip == "127.0.0.1"
-        assert info.jobname == "file"
-        assert info.run_location == "/tmp/test"
-        assert info.process is None
-
-    @pytest.mark.skip(reason="Old API - ProcessInfo changed")
-    def test_with_process(self):
-        """Test creating ProcessInfo with process."""
-        # Can't create real subprocess in unit test, just test None
-        info = ProcessInfo(
-            port=50052,
-            ip="127.0.0.1",
-            jobname="file",
-            run_location="/tmp/test",
-            process=None,
-        )
-        assert info.process is None
-
-    @pytest.mark.skip(reason="Old API - ProcessInfo changed")
-    def test_immutable(self):
-        """Test that ProcessInfo is immutable."""
-        info = ProcessInfo(
-            port=50052,
-            ip="127.0.0.1",
-            jobname="file",
-            run_location="/tmp/test",
-        )
-        with pytest.raises(AttributeError):
-            info.port = 50053
 
 
 class TestValidationResult:

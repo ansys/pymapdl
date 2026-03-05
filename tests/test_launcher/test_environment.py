@@ -8,6 +8,8 @@ import os
 import subprocess
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from ansys.mapdl.core.launcher import LaunchConfig, LaunchMode
 from ansys.mapdl.core.launcher.environment import (
     _parse_ip_route,
@@ -55,7 +57,7 @@ def _create_test_config(**overrides):
         "uds_dir": None,
         "uds_id": None,
         "certs_dir": None,
-        "env_vars": None,
+        "env_vars": {},
     }
     defaults.update(overrides)
     return LaunchConfig(**defaults)
@@ -74,6 +76,7 @@ class TestEnvironmentDetection:
         with patch("platform.system", return_value="Windows"):
             result = is_wsl()
             assert isinstance(result, bool)
+            assert result is False
 
     def test_is_wsl_on_linux(self):
         """Test WSL detection on Linux."""
@@ -367,3 +370,103 @@ class TestEnvironmentEdgeCases:
         ):
             result = prepare_environment(config)
             assert result.replace_all is False
+
+
+# ============================================================================
+# PHASE 1: Environment Variable Injection Tests
+# ============================================================================
+
+
+class TestPhase1EnvironmentVariableInjection:
+    """Phase 1: Tests for environment variable handling in launcher.
+
+    These tests validate proper injection and handling of custom environment
+    variables through the LaunchConfig.env_vars field.
+    """
+
+    def test_prepare_environment_with_custom_vars(self):
+        """Test prepare_environment applies custom environment variables.
+
+        Validates that prepare_environment() function properly incorporates
+        custom environment variables from LaunchConfig into EnvironmentConfig.
+        """
+        custom_vars = {
+            "CUSTOM_VAR": "custom_value",
+            "ANS_CUSTOM": "custom_ansys_setting",
+        }
+        config = _create_test_config(env_vars=custom_vars)
+
+        result = prepare_environment(config)
+
+        assert isinstance(result, EnvironmentConfig)
+        assert result.replace_all is True
+        assert result.variables["CUSTOM_VAR"] == "custom_value"
+        assert result.variables["ANS_CUSTOM"] == "custom_ansys_setting"
+
+    def test_env_vars_in_launch_config(self):
+        """Test that LaunchConfig has env_vars field.
+
+        Validates that env_vars field exists and can be accessed from
+        LaunchConfig instance.
+        """
+        config = _create_test_config()
+
+        # Should have env_vars attribute
+        assert hasattr(config, "env_vars")
+        # env_vars is a MappingProxyType (immutable mapping), not a dict
+        from types import MappingProxyType
+
+        assert isinstance(config.env_vars, (dict, MappingProxyType))
+        assert len(config.env_vars) == 0
+
+    def test_launch_config_env_vars_immutable(self):
+        """Test that LaunchConfig.env_vars is immutable (frozen dataclass).
+
+        Validates that env_vars cannot be modified after creation due to
+        frozen dataclass protection.
+        """
+        custom_vars = {"VAR1": "value1"}
+        config = _create_test_config(env_vars=custom_vars)
+
+        # Frozen dataclass should prevent modification
+        with pytest.raises((AttributeError, TypeError)):
+            config.env_vars["VAR2"] = "value2"
+
+    @pytest.mark.parametrize(
+        "env_vars",
+        [
+            {"VAR": "value"},
+            {"VAR1": "value1", "VAR2": "value2"},
+            {"ANS_CMD_NODIAG": "TRUE", "I_MPI_SHM_LMT": "shm"},
+        ],
+    )
+    def test_prepare_environment_various_env_vars(self, env_vars):
+        """Test prepare_environment with various environment variable sets.
+
+        Parametrized test validating environment variable handling for
+        different configurations.
+        """
+        config = _create_test_config(env_vars=env_vars)
+
+        result = prepare_environment(config)
+
+        assert isinstance(result, EnvironmentConfig)
+        for key, value in env_vars.items():
+            assert result.variables[key] == value
+
+    def test_prepare_environment_ubuntu_special_vars(self):
+        """Test prepare_environment includes Ubuntu-specific variables.
+
+        Validates that when running on Ubuntu, special MPI variables like
+        I_MPI_SHM_LMT are included in the environment.
+        """
+        config = _create_test_config()
+
+        with patch(
+            "ansys.mapdl.core.launcher.environment.is_ubuntu", return_value=True
+        ):
+            result = prepare_environment(config)
+
+            assert isinstance(result, EnvironmentConfig)
+            assert "I_MPI_SHM_LMT" in result.variables
+            assert result.variables["I_MPI_SHM_LMT"] == "shm"
