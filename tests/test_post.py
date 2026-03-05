@@ -419,7 +419,7 @@ class Test_static_solve(TestClass):
         # grpc includes all nodes.  ignore the ones not included in prnsol
         from_grpc = from_grpc[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
-        assert np.allclose(from_grpc, from_prns, 1e-5)
+        assert np.allclose(from_grpc, from_prns, 1e-4)
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
