@@ -2598,12 +2598,19 @@ def test_get_array_non_interactive(mapdl, solved_box):
 
 
 def test_default_file_type_for_plots(mapdl, cleared):
-    assert mapdl.default_file_type_for_plots
+    prev = mapdl.default_file_type_for_plots
 
-    with pytest.raises(ValueError):
-        mapdl.default_file_type_for_plots = "dummy"
+    try:
+        assert mapdl.default_file_type_for_plots
 
-    mapdl.default_file_type_for_plots = "PNG"
+        with pytest.raises(ValueError):
+            mapdl.default_file_type_for_plots = "dummy"
+
+        mapdl.default_file_type_for_plots = "PNG"
+        assert mapdl.default_file_type_for_plots == "PNG"
+
+    finally:
+        mapdl.default_file_type_for_plots = prev
 
 
 @requires("matplotlib")
