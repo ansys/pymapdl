@@ -214,7 +214,6 @@ if has_dependency("pyvista"):
     _apply_default_theme()
 
 
-from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
@@ -537,59 +536,74 @@ class NullContext:
 
 @pytest.fixture(autouse=True, scope="function")
 def run_before_and_after_tests(
-    request: pytest.FixtureRequest, mapdl: Mapdl
-) -> Generator[Mapdl]:
-    """Fixture to execute asserts before and after a test is run"""
+    request: pytest.FixtureRequest,
+) -> Generator[None, None, None]:
+    """Fixture to execute asserts before and after a test is run on DEBUG mode"""
 
-    test_name = os.environ.get(
-        "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
-    )
+    if "mapdl" not in request.fixturenames:
+        yield  # test doesn't use mapdl — skip everything
+        return
 
-    # Relaunching MAPDL if dead
-    restart_mapdl(mapdl, test_name)
+    mapdl = request.getfixturevalue("mapdl")  # get the mapdl fixture
 
-    # Write test info to log_apdl
+    # Always verify clean state before any test that uses mapdl, regardless of
+    # DEBUG_TESTING — prevents silent state leaks (mute, non-interactive) from
+    # a previously failed test propagating to the next test.
+    assert (
+        not mapdl.mute
+    ), "mapdl.mute is True before the test. A previous test likely left it dirty."
+    assert (
+        not mapdl._store_commands
+    ), "mapdl._store_commands is True before the test. A previous test likely left it in non-interactive mode."
+    assert mapdl.prep7(), "MAPDL is not responding before the test. It should be!"
+
     if DEBUG_TESTING:
+        test_name = os.environ.get(
+            "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
+        )
+
+        # Relaunching MAPDL if dead
+        restart_mapdl(mapdl, test_name)
+
+        # Write test info to log_apdl
         log_start_test(mapdl, test_name)
 
-    # check if the local/remote state has changed or not
-    prev = mapdl.is_local
-    assert not mapdl.exited, "MAPDL is exited before the test. It should not!"
-    assert not mapdl.mute
+        # check if the local/remote state has changed or not
+        prev = mapdl.is_local
+        assert not mapdl.exited, "MAPDL is exited before the test. It should not!"
 
     yield  # this is where the testing happens
 
     if DEBUG_TESTING:
         log_end_test(mapdl, test_name)
 
-    mapdl.prep7()
+        mapdl.prep7()
 
-    # Check resetting state
-    assert not mapdl._store_commands
-    assert mapdl._stub is not None
-    assert prev == mapdl.is_local
-    assert not mapdl.exited, "MAPDL is exited after the test. It should have not!"
-    assert not mapdl._mapdl_on_hpc, "Mapdl class is on HPC mode. It should not!"
-    assert mapdl.finish_job_on_exit, "Mapdl class should finish the job!"
-    assert not mapdl.ignore_errors, "Mapdl class is ignoring errors!"
-    assert not mapdl.mute
-    assert mapdl.file_type_for_plots in VALID_DEVICES
-    assert mapdl._graphics_backend is GraphicsBackend.PYVISTA
-    assert mapdl._jobid is None
+        # Check resetting state
+        assert not mapdl._store_commands
+        assert mapdl._stub is not None
+        assert prev == mapdl.is_local
+        assert not mapdl.exited, "MAPDL is exited after the test. It should have not!"
+        assert not mapdl._mapdl_on_hpc, "Mapdl class is on HPC mode. It should not!"
+        assert mapdl.finish_job_on_exit, "Mapdl class should finish the job!"
+        assert not mapdl.ignore_errors, "Mapdl class is ignoring errors!"
+        assert not mapdl.mute
+        assert mapdl.file_type_for_plots in VALID_DEVICES
+        assert mapdl._graphics_backend is GraphicsBackend.PYVISTA
+        assert mapdl._jobid is None
 
-    # Returning to default
-    mapdl.graphics("full")
+        # Returning to default
+        mapdl.graphics("full")
 
-    if DEBUG_TESTING:
         # Handling extra instances
         make_sure_not_instances_are_left_open(VALID_PORTS)
 
-    # Teardown
-    if mapdl.is_local and mapdl._exited:
-        # The test exited MAPDL, so it has failed.
-        assert (
-            False
-        ), f"Test {test_name} failed at the teardown."  # this will fail the test
+        # Teardown
+        if mapdl.is_local and mapdl._exited:
+            # The test exited MAPDL, so it has failed.
+            assert (
+                False
+            ), f"Test {test_name} failed at the teardown."  # this will fail the test
 
 
 @pytest.fixture(scope="function")
