@@ -183,7 +183,7 @@ def test_license_checker(tmpdir, license_checker):
 
 @requires("local")
 @skip_no_lic_bin
-def test_check_license_file(mapdl, cleared, tmpdir):
+def test_check_license_file(cleared, tmpdir):
     timeout = 15
     checker = licensing.LicenseChecker(timeout=timeout)
     # start the license check in the background
@@ -194,7 +194,6 @@ def test_check_license_file(mapdl, cleared, tmpdir):
             license_server_check=False,
             start_timeout=timeout,
             additional_switches=QUICK_LAUNCH_SWITCHES,
-            port=mapdl.port + 1,
         )
         assert mapdl_._local
         mapdl_.exit()

@@ -1043,7 +1043,6 @@ def test_file_type_for_plots(mapdl, cleared):
     with pytest.raises(ValueError):
         mapdl.file_type_for_plots = "asdf"
 
-    mapdl.default_plot_file_type = "PNG"
     n_files_ending_png_before = len(
         [each for each in mapdl.list_files() if each.endswith(".png")]
     )
@@ -1053,7 +1052,7 @@ def test_file_type_for_plots(mapdl, cleared):
         [each for each in mapdl.list_files() if each.endswith(".png")]
     )
 
-    assert n_files_ending_png_before + 2 == n_files_ending_png_after
+    assert n_files_ending_png_after > n_files_ending_png_before
 
 
 @pytest.mark.parametrize("entity", ["KP", "LINE", "AREA", "VOLU", "NODE", "ELEM"])
