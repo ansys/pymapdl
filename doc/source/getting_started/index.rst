@@ -22,6 +22,7 @@ Getting started
 
    learning
    faq
+   troubleshoot
    versioning
 
 
