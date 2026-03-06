@@ -2111,6 +2111,25 @@ def test_args_pass(monkeypatch, arg, value, method):
     del mapdl
 
 
+@stack(*PATCH_MAPDL_START)
+@pytest.mark.parametrize("cleanup_on_exit", [True, False])
+def test_cleanup_on_exit_remote_connection(monkeypatch, cleanup_on_exit):
+    """Regression test: cleanup_on_exit must be forwarded to MapdlGrpc when
+    connecting to an existing (remote) instance (start_instance=False)."""
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
+
+    mapdl = launch_mapdl(
+        start_instance=False,
+        cleanup_on_exit=cleanup_on_exit,
+        transport_mode="insecure",
+    )
+    assert mapdl._cleanup == cleanup_on_exit
+
+    mapdl._ctrl = lambda *args, **kwargs: None
+    del mapdl
+
+
 def test_check_has_mapdl():
     assert check_has_mapdl() == ON_LOCAL
 
