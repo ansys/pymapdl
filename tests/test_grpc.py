@@ -463,11 +463,9 @@ def test_download_result(mapdl, cleared, tmpdir, monkeypatch):
         rth_file = f"{jobname}.rth"
 
         target_dir = str(tmpdir.mkdir(f"tmp_{random_string()}"))
-
         mapdl.download_result(target_dir)
         assert os.path.exists(os.path.join(target_dir, rst_file))
         assert not os.path.exists(rst_file)
-
         mapdl.download_result(preference="rst")  # with default argument
         assert os.path.exists(rst_file)
         os.remove(rst_file)
