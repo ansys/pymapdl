@@ -48,7 +48,7 @@ Launch MAPDL process without creating a client
 Sometimes you may want to launch a MAPDL process without immediately creating a
 client connection. This is useful for:
 
-* Starting MAPDL from the command-line interface (CLI)
+* Starting MAPDL from the command-line interface
 * Managing multiple MAPDL instances programmatically
 * Launching MAPDL in a separate process for later connection
 
