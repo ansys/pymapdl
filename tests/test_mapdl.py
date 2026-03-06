@@ -498,6 +498,7 @@ def test_error(mapdl, clear_at_end):
 
 
 def test_ignore_errors(mapdl):
+    mapdl.prep7()
     mapdl.ignore_errors = False
     assert not mapdl.ignore_errors
     mapdl.ignore_errors = True
@@ -1037,6 +1038,7 @@ def test_lssolve(mapdl, cleared):
 def test_coriolis(mapdl):
     """Simply test that we're formatting the input parm for coriolis"""
     # must be v190 or newer
+    mapdl.prep7()
     resp = mapdl.coriolis(True, True, True, True)
     assert "CORIOLIS IN STATIONARY REFERENCE FRAME" in resp
     assert "GYROSCOPIC DAMPING MATRIX WILL BE CALCULATED" in resp
