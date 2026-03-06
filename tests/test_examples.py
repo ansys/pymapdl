@@ -125,8 +125,9 @@ def test_failed_download():
 def test_download_cfx_mapping_example_data():
     with patch(
         "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
-    ):
+    ) as mock_retrieve:
         result = download_cfx_mapping_example_data()
+        mock_retrieve.assert_called()
         assert all(v == DUMMY_PATH for v in result.values())
 
 
@@ -134,8 +135,9 @@ def test_download_cfx_mapping_example_data():
 def test_download_manifold_example_data():
     with patch(
         "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
-    ):
+    ) as mock_retrieve:
         result = download_manifold_example_data()
+        mock_retrieve.assert_called()
         assert all(v == DUMMY_PATH for v in result.values())
 
 
@@ -143,43 +145,48 @@ def test_download_manifold_example_data():
 def test_download_bracket():
     with patch(
         "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
-    ):
+    ) as mock_retrieve:
         assert download_bracket() == DUMMY_PATH
+        mock_retrieve.assert_called()
 
 
 @requires("requests")
 def test_download_vtk_rotor():
     with patch(
         "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
-    ):
+    ) as mock_retrieve:
         assert download_vtk_rotor() == DUMMY_PATH
+        mock_retrieve.assert_called()
 
 
 @requires("requests")
 def test__download_rotor_tech_demo_vtk():
     with patch(
         "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
-    ):
+    ) as mock_retrieve:
         assert _download_rotor_tech_demo_vtk() == DUMMY_PATH
+        mock_retrieve.assert_called()
 
 
 @requires("requests")
 def test_download_example_data():
     with patch(
         "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
-    ):
+    ) as mock_retrieve:
         assert download_example_data("LatheCutter.anf", "geometry") == DUMMY_PATH
+        mock_retrieve.assert_called()
 
 
 @requires("requests")
 def test_download_tech_demo_data():
     with patch(
         "ansys.mapdl.core.examples.downloads._retrieve_file", return_value=DUMMY_PATH
-    ):
+    ) as mock_retrieve:
         assert (
             download_tech_demo_data("td-21", "ring_stiffened_cylinder_mesh_file.cdb")
             == DUMMY_PATH
         )
+        mock_retrieve.assert_called()
 
 
 @requires("requests")
