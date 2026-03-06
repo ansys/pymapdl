@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 import pytest
 
-from ansys.mapdl.core.launcher import ConfigurationError, LaunchConfig, LaunchMode
+from ansys.mapdl.core.launcher import ConfigurationError, LaunchMode
 from ansys.mapdl.core.launcher.config import (
     LOCALHOST,
     resolve_additional_switches,
@@ -37,7 +37,7 @@ from ansys.mapdl.core.launcher.models import TransportMode
 @pytest.fixture
 def patch_get_mapdl_path():
     """Patch get_mapdl_path when not ON_LOCAL to avoid finding docker containers."""
-    from .conftest import ON_LOCAL
+    from . import ON_LOCAL
 
     if not ON_LOCAL:
         with patch("ansys.tools.common.path.get_mapdl_path") as mock_get_mapdl:
@@ -54,49 +54,6 @@ def patch_get_mapdl_path():
                 yield mock_get_mapdl
     else:
         yield None
-
-
-# ============================================================================
-# Helper Functions
-# ============================================================================
-
-
-def _create_test_config(**overrides):
-    """Create a test LaunchConfig with defaults."""
-    defaults = {
-        "exec_file": "/path/to/mapdl",
-        "run_location": "/tmp",
-        "jobname": "file",
-        "nproc": 4,
-        "port": 50052,
-        "ip": "127.0.0.1",
-        "mode": LaunchMode.GRPC,
-        "version": 222,
-        "start_instance": True,
-        "ram": 4096,
-        "timeout": 45,
-        "cleanup_on_exit": True,
-        "clear_on_connect": True,
-        "override": False,
-        "remove_temp_dir_on_exit": False,
-        "set_no_abort": True,
-        "additional_switches": "",
-        "license_type": None,
-        "launch_on_hpc": False,
-        "running_on_hpc": False,
-        "scheduler_options": None,
-        "loglevel": "ERROR",
-        "log_apdl": None,
-        "print_com": False,
-        "mapdl_output": None,
-        "transport_mode": None,
-        "uds_dir": None,
-        "uds_id": None,
-        "certs_dir": None,
-        "env_vars": {},
-    }
-    defaults.update(overrides)
-    return LaunchConfig(**defaults)
 
 
 # ============================================================================
@@ -830,7 +787,7 @@ class TestResolveAdditionalSwitches:
 # ============================================================================
 
 
-class TestPhase1LicenseTypeValidation:
+class TestLicenseTypeValidation:
     """: Tests for license type validation in launcher.
 
     These tests validate that license types are strings (not enums) and

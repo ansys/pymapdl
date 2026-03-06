@@ -33,11 +33,6 @@ class TestNetworkPortStatus:
             result = check_port_status(50100, host="127.0.0.1")
             assert result.available is True
 
-    @pytest.mark.skip(reason="Socket mock doesn't work with actual implementation")
-    def test_check_port_status_in_use(self):
-        """Test checking port in use."""
-        pass
-
     def test_check_port_status_with_ipv6(self):
         """Test port checking with IPv6."""
         with patch("socket.socket") as mock_socket:

@@ -26,7 +26,6 @@ from ansys.mapdl.core.launcher.models import (
 # ============================================================================
 
 
-@pytest.mark.skip(reason="Uses old ProcessInfo API - needs update")
 class TestLaunchMapdlOrchestration:
     """Tests for main launch_mapdl orchestration."""
 
@@ -289,75 +288,3 @@ class TestLaunchMapdlOrchestration:
                 mock_env.assert_called_once()
             except Exception:
                 pass
-
-
-# ============================================================================
-# Full Integration Tests
-# ============================================================================
-
-
-class TestLaunchMapdlFullIntegration:
-    """Full end-to-end integration tests with actual launch_mapdl function."""
-
-    @pytest.mark.skip(reason="Requires full launcher stack mocking")
-    def test_launch_mapdl_local_grpc_basic(self):
-        """Test full launch_mapdl workflow for local gRPC mode."""
-        pass
-
-    @pytest.mark.skip(reason="Requires full launcher stack mocking")
-    def test_launch_mapdl_with_all_options(self):
-        """Test launch_mapdl with all configuration options."""
-        pass
-
-    @pytest.mark.skip(reason="Requires full launcher stack mocking")
-    def test_launch_mapdl_error_recovery(self):
-        """Test error recovery in launch_mapdl."""
-        pass
-
-
-# ============================================================================
-# Launch MAPDL Convenience Tests
-# ============================================================================
-
-
-class TestLaunchMapdlConvenience:
-    """Tests for launch_mapdl convenience features."""
-
-    @pytest.mark.skip(reason="Convenience features need API clarification")
-    def test_launch_mapdl_with_defaults(self):
-        """Test launching with all defaults."""
-        pass
-
-    @pytest.mark.skip(reason="Convenience features need API clarification")
-    def test_launch_mapdl_with_minimal_args(self):
-        """Test launching with minimal arguments."""
-        pass
-
-    @pytest.mark.skip(reason="Convenience features need API clarification")
-    def test_launch_mapdl_auto_port_selection(self):
-        """Test automatic port selection."""
-        pass
-
-
-# ============================================================================
-# Launch Workflow Tests
-# ============================================================================
-
-
-class TestLaunchWorkflow:
-    """Tests for the launch workflow orchestration."""
-
-    @pytest.mark.skip(reason="Workflow orchestration needs detailed mocking")
-    def test_workflow_config_validation_process_connection(self):
-        """Test workflow: config -> validation -> process -> connection."""
-        pass
-
-    @pytest.mark.skip(reason="Workflow orchestration needs detailed mocking")
-    def test_workflow_hpc_submission(self):
-        """Test HPC job submission workflow."""
-        pass
-
-    @pytest.mark.skip(reason="Workflow orchestration needs detailed mocking")
-    def test_workflow_error_at_each_stage(self):
-        """Test error handling at each workflow stage."""
-        pass

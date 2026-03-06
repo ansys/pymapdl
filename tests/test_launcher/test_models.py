@@ -90,7 +90,6 @@ class TestValidationResult:
 class TestPortStatus:
     """Tests for PortStatus dataclass."""
 
-    @pytest.mark.skip(reason="Old API - PortStatus changed")
     def test_port_available(self):
         """Test port available status."""
         status = PortStatus(
@@ -103,7 +102,6 @@ class TestPortStatus:
         assert status.reason == "Port is free"
         assert status.mapdl_instance is None
 
-    @pytest.mark.skip(reason="Old API - PortStatus changed")
     def test_port_unavailable_with_instance(self):
         """Test port unavailable with MAPDL instance."""
         status = PortStatus(
@@ -115,7 +113,6 @@ class TestPortStatus:
         assert status.is_available is False
         assert status.mapdl_instance is True
 
-    @pytest.mark.skip(reason="Old API - PortStatus changed")
     def test_immutable(self):
         """Test that PortStatus is immutable."""
         status = PortStatus(
