@@ -42,21 +42,21 @@ doc/source/images/auto-generated/*
 
 
 # Testing
-factory/
-Testing/
-UnitTesting/
-TODO
-test.sh
-.pytest_cache/
-tests/.coverage
-tests/htmlcov
-tests/cyclic/htmlcov
-.coverage
-*,cover
+./Testing/
 .benchmarks/
-test-output.xml
-coverage.xml
+.coverage
+.pytest_cache/
 .tox/
+*,cover
+coverage.xml
+factory/
+test-output.xml
+test.sh
+tests/.coverage
+tests/cyclic/htmlcov
+tests/htmlcov
+TODO
+UnitTesting/
 
 \#*
 .\#*
