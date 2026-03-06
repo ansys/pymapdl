@@ -75,9 +75,7 @@ class TestLaunchMapdlOrchestration:
             patch(
                 "ansys.mapdl.core.launcher.validation.validate_config"
             ) as mock_validate,
-            patch(
-                "ansys.mapdl.core.launcher.connection.connect_to_existing"
-            ) as mock_connect,
+            patch("ansys.mapdl.core.launcher.connect_to_existing") as mock_connect,
         ):
             mock_config.return_value = self._create_test_config(start_instance=False)
             mock_validate.return_value = ValidationResult(
@@ -103,9 +101,7 @@ class TestLaunchMapdlOrchestration:
             patch(
                 "ansys.mapdl.core.launcher.validation.validate_config"
             ) as mock_validate,
-            patch(
-                "ansys.mapdl.core.launcher.connection.connect_to_existing"
-            ) as mock_connect,
+            patch("ansys.mapdl.core.launcher.connect_to_existing") as mock_connect,
         ):
             mock_config.return_value = self._create_test_config(
                 mode=LaunchMode.GRPC,
@@ -127,15 +123,12 @@ class TestLaunchMapdlOrchestration:
         """Test launch_mapdl with console mode."""
         with (
             patch("os.path.isfile", return_value=True),
-            patch(
-                "ansys.mapdl.core.launcher.config.resolve_launch_config"
-            ) as mock_config,
-            patch(
-                "ansys.mapdl.core.launcher.validation.validate_config"
-            ) as mock_validate,
-            patch(
-                "ansys.mapdl.core.launcher.connection.create_console_client"
-            ) as mock_console,
+            patch("ansys.mapdl.core.launcher.resolve_launch_config") as mock_config,
+            patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
+            patch("ansys.mapdl.core.launcher.prepare_environment") as mock_env,
+            patch("ansys.mapdl.core.launcher._launch_mapdl_process") as mock_process,
+            patch("ansys.mapdl.core.launcher.create_console_client") as mock_console,
+            patch("os.name", "posix"),
         ):
             mock_config.return_value = self._create_test_config(
                 mode=LaunchMode.CONSOLE,
@@ -144,53 +137,34 @@ class TestLaunchMapdlOrchestration:
             mock_validate.return_value = ValidationResult(
                 valid=True, errors=[], warnings=[]
             )
+            mock_env.return_value = EnvironmentConfig(
+                variables={},
+            )
+            mock_process.return_value = ProcessInfo(
+                process=Mock(),
+                ip="123.45.67.89",
+                pid=12345,
+                port=50052,
+            )
             mock_console.return_value = Mock()
 
-            with (
-                patch(
-                    "ansys.mapdl.core.launcher.environment.prepare_environment"
-                ) as mock_env,
-                patch(
-                    "ansys.mapdl.core.launcher.process.launch_mapdl_process"
-                ) as mock_process,
-            ):
-
-                mock_env.return_value = EnvironmentConfig(
-                    variables={},
-                    is_wsl=False,
-                    is_ubuntu=False,
-                )
-                mock_process.return_value = ProcessInfo(
-                    pid=12345,
-                    port=50052,
-                    message="Started",
-                )
-
-                launch_mapdl(
-                    exec_file="/path/to/mapdl",
-                    mode="console",
-                )
+            launch_mapdl(
+                exec_file="/path/to/mapdl",
+                mode="console",
+            )
 
     def test_launch_mapdl_hpc_mode(self):
         """Test launch_mapdl with HPC mode."""
         with (
             patch("os.path.isfile", return_value=True),
-            patch(
-                "ansys.mapdl.core.launcher.config.resolve_launch_config"
-            ) as mock_config,
-            patch(
-                "ansys.mapdl.core.launcher.validation.validate_config"
-            ) as mock_validate,
-            patch(
-                "ansys.mapdl.core.launcher.environment.prepare_environment"
-            ) as mock_env,
-            patch(
-                "ansys.mapdl.core.launcher.hpc.detect_slurm_environment"
-            ) as mock_detect,
-            patch("ansys.mapdl.core.launcher.hpc.launch_on_hpc") as mock_hpc,
-            patch(
-                "ansys.mapdl.core.launcher.connection.create_grpc_client"
-            ) as mock_grpc,
+            patch("ansys.mapdl.core.launcher.resolve_launch_config") as mock_config,
+            patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
+            patch("ansys.mapdl.core.launcher.prepare_environment") as mock_env,
+            patch("ansys.mapdl.core.launcher.detect_slurm_environment") as mock_detect,
+            patch("ansys.mapdl.core.launcher._launch_on_hpc_fn") as mock_hpc,
+            patch("ansys.mapdl.core.launcher.create_grpc_client") as mock_grpc,
+            patch("os.name", "posix"),
+            patch("os.access", Mock(return_value=True)),
         ):
 
             mock_config.return_value = self._create_test_config(launch_on_hpc=True)
@@ -199,14 +173,13 @@ class TestLaunchMapdlOrchestration:
             )
             mock_env.return_value = EnvironmentConfig(
                 variables={},
-                is_wsl=False,
-                is_ubuntu=False,
             )
             mock_detect.return_value = False
             mock_hpc.return_value = ProcessInfo(
+                process=Mock,
+                ip="123.45.67.89",
                 pid=54321,
                 port=50052,
-                message="HPC job submitted",
             )
             mock_grpc.return_value = Mock()
 
@@ -272,13 +245,12 @@ class TestLaunchMapdlOrchestration:
             )
             mock_env.return_value = EnvironmentConfig(
                 variables={"TEST_VAR": "test_value"},
-                is_wsl=False,
-                is_ubuntu=False,
             )
             mock_process.return_value = ProcessInfo(
+                process=Mock,
+                ip="123.45.67.89",
                 pid=99999,
                 port=50052,
-                message="Started",
             )
             mock_grpc.return_value = Mock()
 

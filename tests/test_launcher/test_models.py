@@ -92,34 +92,23 @@ class TestPortStatus:
 
     def test_port_available(self):
         """Test port available status."""
-        status = PortStatus(
-            port=50052,
-            is_available=True,
-            reason="Port is free",
-        )
+        status = PortStatus(port=50052, available=True, used_by_mapdl=False)
         assert status.port == 50052
-        assert status.is_available is True
-        assert status.reason == "Port is free"
-        assert status.mapdl_instance is None
+        assert status.available is True
 
     def test_port_unavailable_with_instance(self):
         """Test port unavailable with MAPDL instance."""
         status = PortStatus(
             port=50052,
-            is_available=False,
-            reason="Port in use",
-            mapdl_instance=True,
+            available=False,
+            used_by_mapdl=True,
         )
-        assert status.is_available is False
-        assert status.mapdl_instance is True
+        assert status.available is False
+        assert status.used_by_mapdl is True
 
     def test_immutable(self):
         """Test that PortStatus is immutable."""
-        status = PortStatus(
-            port=50052,
-            is_available=True,
-            reason="Port is free",
-        )
+        status = PortStatus(port=50052, available=True, used_by_mapdl=False)
         with pytest.raises(AttributeError):
             status.port = 50053
 
