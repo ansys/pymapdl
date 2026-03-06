@@ -1603,9 +1603,19 @@ class MapdlGrpc(MapdlBase):
         if self._mapdl_process is not None:
             self._log.debug("Killing process using subprocess.Popen.terminate")
             process = self._mapdl_process
-            if process.poll() is not None:
+            if process.poll() is None:
                 # process hasn't terminated
-                process.kill()
+                process.terminate()
+
+            # Close any open file handle for stdout redirect
+            fh = getattr(process, "_stdout_file_handle", None)
+            if fh and not getattr(fh, "closed", False):
+                try:
+                    fh.close()
+                    self._log.debug("Closed stdout file handle")
+                    setattr(process, "_stdout_file_handle", None)
+                except OSError as e:
+                    self._log.debug(f"Error closing stdout file handle: {e}")
 
     def _kill_child_processes(self, timeout=2):
         pids = self._pids.copy()
