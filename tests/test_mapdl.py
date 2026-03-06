@@ -1563,7 +1563,7 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     mapdl.clear()
     mapdl.prep7()
     _ = capsys.readouterr()  # To flush it
-    output = mapdl.mpread(fname, ext, progress_bar=True)
+    output = mapdl.mpread(fname, ext)
     captured = capsys.readouterr()
 
     assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
