@@ -444,29 +444,41 @@ def test_download_project_extensions(mapdl, cleared, tmpdir):
     assert expected.intersection(files_extensions) == {"log", "err"}
 
 
-@pytest.mark.xfail(strict=False, reason="Flaky test")
-def test_download_result(mapdl, cleared, tmpdir):
-    if "file.rst" not in mapdl.list_files():
-        write_tmp_in_mapdl_instance(mapdl, "file", ext="rst")  # fake rst file
-    target_dir = str(tmpdir.mkdir(f"tmp_{random_string()}"))
-    mapdl.download_result(target_dir)
-    assert os.path.exists(os.path.join(target_dir, "file.rst"))
+def test_download_result(mapdl, cleared, tmpdir, monkeypatch):
+    monkeypatch.chdir(tmpdir)
 
-    assert not os.path.exists("file.rst")
-    mapdl.download_result(preference="rst")  # with default argument
-    assert os.path.exists("file.rst")
+    def fake_download(target, save_name, progress_bar=False):
+        dir_name = os.path.dirname(save_name)
+        if dir_name:
+            os.makedirs(dir_name, exist_ok=True)
+        with open(save_name, "w") as f:
+            f.write("dummy")
 
-    os.remove("file.rst")
+    with (
+        patch.object(mapdl, "list_files", return_value=["file.rst"]),
+        patch.object(mapdl, "_download", side_effect=fake_download),
+    ):
+        jobname = mapdl.jobname
+        rst_file = f"{jobname}.rst"
+        rth_file = f"{jobname}.rth"
 
-    mapdl.download_result(preference="rth")
-    try:
-        os.remove("file.rst")
-    except OSError:
-        pass
-    try:
-        os.remove("file.rth")
-    except OSError:
-        pass
+        target_dir = str(tmpdir.mkdir(f"tmp_{random_string()}"))
+        mapdl.download_result(target_dir)
+        assert os.path.exists(os.path.join(target_dir, rst_file))
+        assert not os.path.exists(rst_file)
+        mapdl.download_result(preference="rst")  # with default argument
+        assert os.path.exists(rst_file)
+        os.remove(rst_file)
+
+        mapdl.download_result(preference="rth")
+        try:
+            os.remove(rst_file)
+        except OSError:
+            pass
+        try:
+            os.remove(rth_file)
+        except OSError:
+            pass
 
 
 def test__channel_str(mapdl, cleared):
