@@ -1760,7 +1760,7 @@ def launch_mapdl(
         start_parm["launched"] = False
 
         mapdl = MapdlGrpc(
-            cleanup_on_exit=False,
+            cleanup_on_exit=args["cleanup_on_exit"],
             loglevel=args["loglevel"],
             set_no_abort=args["set_no_abort"],
             graphics_backend=args["graphics_backend"],
