@@ -1200,7 +1200,9 @@ class MapdlPool:
 
             elif isinstance(ip, str):
                 # only one IP
+                ips = [ip]
                 if isinstance(port, list):
+
                     if len(port) > 0:
                         n_instances = len(port)
                         ports = port
@@ -1209,6 +1211,15 @@ class MapdlPool:
                         raise ValueError(
                             "The number of ports should be higher than"
                             " zero if using only one IP address."
+                        )
+
+                else:
+                    if port is None or isinstance(port, int):
+                        n_instances = 1
+                        ports = [port if port is not None else MAPDL_DEFAULT_PORT]
+                    else:
+                        raise TypeError(
+                            "Argument 'port' does not support this type of argument."
                         )
 
             elif isinstance(ip, list):
@@ -1272,17 +1283,23 @@ class MapdlPool:
 
             elif isinstance(ip, str):
                 ips = [ip for i in range(n_instances)]
-                if (
-                    port is None
-                    or isinstance(port, int)
-                    or (isinstance(port, list) and len(port) != n_instances)
+                if (isinstance(port, list) and len(port) != n_instances) or (
+                    (isinstance(port, int) or port is None) and n_instances > 1
                 ):
                     raise ValueError(
                         "If using 'n_instances' and only one 'ip', "
                         "you should provide as many ports as number of instances requested."
                     )
                 else:
-                    ports = port
+                    if isinstance(port, list):
+                        ports = port
+                    else:
+                        if port is None or isinstance(port, int):
+                            ports = [port if port is not None else MAPDL_DEFAULT_PORT]
+                        else:
+                            raise TypeError(
+                                "Argument 'port' does not support this type of argument."
+                            )
 
             elif isinstance(ip, list):
                 if len(ip) != n_instances:
@@ -1292,7 +1309,10 @@ class MapdlPool:
 
                 ips = ip
                 if port is None or isinstance(port, int):
-                    ports = [port or MAPDL_DEFAULT_PORT for i in range(n_instances)]
+                    ports = [
+                        port if port is not None else MAPDL_DEFAULT_PORT
+                        for i in range(n_instances)
+                    ]
 
                 elif isinstance(port, list):
                     if len(port) != n_instances:
