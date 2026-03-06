@@ -407,6 +407,9 @@ class Test_static_solve(TestClass):
     @staticmethod
     @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
     def test_nodal_principal_stress(mapdl, resume, comp):
+        # Restoring graphics (necessary for precision)
+        mapdl.graphics("full")
+
         from_grpc = mapdl.post_processing.nodal_principal_stress(comp)
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
