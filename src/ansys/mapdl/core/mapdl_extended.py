@@ -1632,6 +1632,7 @@ class _MapdlCommandExtended(_MapdlCore):
             src = pathlib.Path(self.directory / fname_)
             dst = pathlib.Path(fname).resolve()
             if src.resolve() != dst:
+                dst.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy(src, fname)
         else:
             self._download(fname_, fname)
