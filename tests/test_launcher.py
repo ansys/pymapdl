@@ -1290,6 +1290,87 @@ def test_launch_grpc(tmpdir, launch_on_hpc):
     assert isinstance(kwargs["stderr"], type(subprocess.PIPE))
 
 
+@patch("os.name", "nt")
+@patch("subprocess.Popen")
+def test_launch_grpc_with_output_file(mock_popen, tmpdir):
+    """Test that file handles are properly attached to the process object."""
+    # Create a mock process object
+    mock_process = MagicMock()
+    mock_process.poll.return_value = None
+    mock_popen.return_value = mock_process
+
+    cmd = "ansys.exe -b -i my_input.inp -o my_output.out".split(" ")
+    run_location = str(tmpdir)
+    output_file = os.path.join(run_location, "mapdl_output.log")
+
+    # Launch with output file redirection
+    process = launch_grpc(cmd, run_location, mapdl_output=output_file)
+
+    # Verify that the process object has the file handle attached
+    assert hasattr(
+        process, "_stdout_file_handle"
+    ), "Process should have _stdout_file_handle attribute"
+    assert process._stdout_file_handle is not None, "File handle should not be None"
+    assert not process._stdout_file_handle.closed, "File handle should be open"
+
+    try:
+        # Clean up the file handle
+        process._stdout_file_handle.close()
+        assert process._stdout_file_handle.closed, "File handle should be closed"
+
+        # Verify output file was created
+        assert os.path.exists(output_file), "Output file should exist"
+    finally:
+        # Ensure handle is closed even if test fails
+        if (
+            hasattr(process, "_stdout_file_handle")
+            and process._stdout_file_handle is not None
+            and not process._stdout_file_handle.closed
+        ):
+            process._stdout_file_handle.close()
+
+
+@patch("os.name", "nt")
+@patch("subprocess.Popen")
+def test_mapdl_grpc_kill_process_closes_file_handle(mock_popen, tmpdir):
+    """Test that MapdlGrpc._kill_process() closes the stdout file handle."""
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    # Create a temporary output file
+    output_file = os.path.join(str(tmpdir), "mapdl_output.log")
+    actual_file_handle = open(output_file, "wb", 0)
+
+    try:
+        # Create a mock process with the file handle attached
+        mock_process = MagicMock()
+        mock_process.poll.return_value = None  # process hasn't terminated
+        mock_process._stdout_file_handle = actual_file_handle
+
+        # Create a MapdlGrpc instance with the mocked process
+        with patch.object(MapdlGrpc, "__init__", return_value=None):
+            mapdl = MapdlGrpc()
+            mapdl._mapdl_process = mock_process
+            mapdl._local = True
+            mapdl._log = Mock()
+
+            # Verify handle is open before cleanup
+            assert (
+                not actual_file_handle.closed
+            ), "File handle should be open before cleanup"
+
+            # Call _kill_process which should close the file handle
+            mapdl._kill_process()
+
+            # Verify the handle was closed
+            assert (
+                actual_file_handle.closed
+            ), "File handle should be closed after _kill_process()"
+    finally:
+        # Ensure handle is closed even if test fails
+        if not actual_file_handle.closed:
+            actual_file_handle.close()
+
+
 @patch("psutil.cpu_count", lambda *args, **kwags: 5)
 @pytest.mark.parametrize("arg", [None, 3, 10])
 @pytest.mark.parametrize("env", [None, 3, 10])
