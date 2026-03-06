@@ -920,6 +920,8 @@ def test_ip_and_start_instance(
     # Removing env var coming from CICD.
     if "PYMAPDL_START_INSTANCE" in os.environ:
         monkeypatch.delenv("PYMAPDL_START_INSTANCE")
+    if "PYMAPDL_IP" in os.environ:
+        monkeypatch.delenv("PYMAPDL_IP")
 
     ###################
     # Injecting env vars for the test
@@ -1530,6 +1532,7 @@ def test_exit_job(mock_popen, mapdl, cleared):
 @patch("ansys.mapdl.core.launcher.send_scontrol")
 def test_launch_on_hpc_found_ansys(mck_ssctrl, mck_launch_grpc, monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
     mck_launch_grpc.return_value = get_fake_process("Submitted batch job 1001")
     mck_ssctrl.return_value = get_fake_process(
@@ -1566,6 +1569,7 @@ def test_launch_on_hpc_found_ansys(mck_ssctrl, mck_launch_grpc, monkeypatch):
 @patch("ansys.mapdl.core.launcher.send_scontrol")
 def test_launch_on_hpc_not_found_ansys(mck_sc, mck_lgrpc, mck_kj, monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
     exec_file = "path/to/mapdl/v242/executable/ansys242"
 
     mck_lgrpc.return_value = get_fake_process("Submitted batch job 1001")
@@ -1610,6 +1614,7 @@ def test_launch_on_hpc_not_found_ansys(mck_sc, mck_lgrpc, mck_kj, monkeypatch):
 
 def test_launch_on_hpc_exception_launch_mapdl(monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
     exec_file = "path/to/mapdl/v242/ansys/bin/executable/ansys242"
 
     process = get_fake_process("ERROR")
@@ -1645,6 +1650,7 @@ def test_launch_on_hpc_exception_launch_mapdl(monkeypatch):
 
 def test_launch_on_hpc_exception_successfull_sbatch(monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
     exec_file = "path/to/mapdl/v242/ansys/bin/executable/ansys242"
 
     def raise_exception(*args, **kwargs):
@@ -2111,6 +2117,25 @@ def test_args_pass(monkeypatch, arg, value, method):
     del mapdl
 
 
+@stack(*PATCH_MAPDL_START)
+@pytest.mark.parametrize("cleanup_on_exit", [True, False])
+def test_cleanup_on_exit_remote_connection(monkeypatch, cleanup_on_exit):
+    """Regression test: cleanup_on_exit must be forwarded to MapdlGrpc when
+    connecting to an existing (remote) instance (start_instance=False)."""
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
+
+    mapdl = launch_mapdl(
+        start_instance=False,
+        cleanup_on_exit=cleanup_on_exit,
+        transport_mode="insecure",
+    )
+    assert mapdl._cleanup == cleanup_on_exit
+
+    mapdl._ctrl = lambda *args, **kwargs: None
+    del mapdl
+
+
 def test_check_has_mapdl():
     assert check_has_mapdl() == ON_LOCAL
 
@@ -2250,6 +2275,7 @@ def test_env_vars_with_slurm_bootstrap(monkeypatch):
     # This test verifies that when replace_env_vars is used with launch_on_hpc,
     # SLURM-specific environment variables are added
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
     env_vars_input = {"CUSTOM_VAR": "custom_value"}
 
