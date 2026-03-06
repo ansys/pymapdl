@@ -458,23 +458,25 @@ def test_download_result(mapdl, cleared, tmpdir, monkeypatch):
         patch.object(mapdl, "list_files", return_value=["file.rst"]),
         patch.object(mapdl, "_download", side_effect=fake_download),
     ):
+        jobname = mapdl.jobname
+        rst_file = f"{jobname}.rst"
+        rth_file = f"{jobname}.rth"
+
         target_dir = str(tmpdir.mkdir(f"tmp_{random_string()}"))
         mapdl.download_result(target_dir)
-        assert os.path.exists(os.path.join(target_dir, "file.rst"))
-
-        assert not os.path.exists("file.rst")
+        assert os.path.exists(os.path.join(target_dir, rst_file))
+        assert not os.path.exists(rst_file)
         mapdl.download_result(preference="rst")  # with default argument
-        assert os.path.exists("file.rst")
-
-        os.remove("file.rst")
+        assert os.path.exists(rst_file)
+        os.remove(rst_file)
 
         mapdl.download_result(preference="rth")
         try:
-            os.remove("file.rst")
+            os.remove(rst_file)
         except OSError:
             pass
         try:
-            os.remove("file.rth")
+            os.remove(rth_file)
         except OSError:
             pass
 
