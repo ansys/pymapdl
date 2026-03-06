@@ -49,7 +49,6 @@ from conftest import (
     TEST_DPF_BACKEND,
     VALID_PORTS,
     NullContext,
-    Running_test,
     has_dependency,
     requires,
 )
@@ -2079,7 +2078,7 @@ def test_get_not_muted(mapdl, cleared):
     mock_not_muted.assert_not_called()
 
 
-def test_session_id(mapdl, running_test):
+def test_session_id(mapdl):
     # Calling here to make sure we have a session id before testing it.
     mapdl.clear()
 
@@ -2098,8 +2097,7 @@ def test_session_id(mapdl, running_test):
 
     # Checking real case
     mapdl._session_id_ = copy_
-    with running_test():
-        assert isinstance(mapdl._check_session_id(), bool)
+    assert isinstance(mapdl._check_session_id(), bool)
 
     id_ = "123412341234"
     mapdl._session_id_ = id_
@@ -2124,8 +2122,7 @@ def test_check_empty_session_id(mapdl, cleared):
 @requires("requests")  # Requires 'requests' package
 def test_igesin_whitespace(mapdl, cleared, tmpdir):
     # make sure we download the IGES file
-    with Running_test(False):  # allow access to internet
-        bracket_file = pymapdl.examples.download_bracket()
+    bracket_file = pymapdl.examples.download_bracket()
 
     assert os.path.isfile(bracket_file)
 
