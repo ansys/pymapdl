@@ -805,24 +805,31 @@ class TestLicenseTypeValidation:
             None,
         ],
     )
-    def test_resolve_with_each_license_type(self, license_type: Optional[str]):
+    def test_resolve_with_each_license_type(
+        self, license_type: Optional[str], monkeypatch
+    ):
         """Test resolve_launch_config with various license types.
 
         Parametrized test validating that resolve_launch_config properly
         handles different license type string values.
         """
+        # Isolate from any PYMAPDL_IP set in the environment (e.g. in a
+        # docker container) so IP resolution never interferes with this
+        # license-type unit test.
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
         config = resolve_launch_config(license_type=license_type, start_instance=False)
 
         assert config.license_type == license_type
         if license_type is not None:
             assert isinstance(config.license_type, str)
 
-    def test_license_type_preserved_through_config(self):
+    def test_license_type_preserved_through_config(self, monkeypatch):
         """Test that license_type is preserved through configuration chain.
 
         Validates that license_type set during resolve_launch_config
         remains intact in the final LaunchConfig.
         """
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
         custom_license = "research"
         config = resolve_launch_config(
             license_type=custom_license, start_instance=False
