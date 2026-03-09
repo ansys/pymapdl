@@ -1159,16 +1159,20 @@ class TestAdditionalSwitches:
         )
         assert config.additional_switches == switches
 
-    def test_resolve_additional_switches_empty(self):
+    def test_resolve_additional_switches_empty(self, monkeypatch):
         """Test that empty switches default to empty string."""
+        monkeypatch.delenv("PYMAPDL_ADDITIONAL_SWITCHES", raising=False)
         config = resolve_launch_config(
             additional_switches="",
             start_instance=False,
         )
+
         assert config.additional_switches == ""
 
-    def test_resolve_additional_switches_various_formats(self):
+    def test_resolve_additional_switches_various_formats(self, monkeypatch):
         """Test various switch formats are preserved."""
+        monkeypatch.delenv("PYMAPDL_ADDITIONAL_SWITCHES", raising=False)
+
         formats = [
             "-aa_r",
             "-noinfo -nointel",
