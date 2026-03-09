@@ -71,31 +71,7 @@ These commands are used to create and set up the model.
    :maxdepth: 1
    :caption: Preprocessing
 
-   prep7/database
-   prep7/element_type
-   prep7/real_constants
-   prep7/materials
-   prep7/material_data_tables
-   prep7/primitives
-   prep7/keypoints
-   prep7/hard_points
-   prep7/lines
-   prep7/areas
-   prep7/volumes
-   prep7/booleans
-   prep7/meshing
-   prep7/nodes
-   prep7/elements
-   prep7/superelements
-   prep7/digitizing
-   prep7/coupled_dof
-   prep7/constraint_equations
-   prep7/status
-   prep7/explicit_dynamics
-   prep7/sections
-   prep7/morphing
-   prep7/artificially_matched_layers
-   prep7/special_purpose
+   prep7/index
 
 
 ********
