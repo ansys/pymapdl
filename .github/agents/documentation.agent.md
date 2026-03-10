@@ -89,11 +89,32 @@ echo "technical_term" >> doc\styles\config\vocabularies\ANSYS\accept.txt
 - Does codespell pass?
 - Are links in `links.rst` updated?
 
+
+## Recommendations
+- Prefer active voice and direct language in documentation for clarity and engagement.
+- Put the why before the link. For example, instead of saying "See the documentation for `mapdl.run()` for more details", say "To execute a command in MAPDL, use `mapdl.run()`. See the documentation for `mapdl.run()` for more details."
+- As in Google style guide, use sentence case for titles.
+- Use U.S. spellings instead of U.K. spellings.
+- Prefer non-hyphenated words. For example `postprocessing` instead of `post-processing`.
+- Include a noun after a code entity to indicate its type.
+- Make sure the tags (`:meth:`, `:class:`, `:func:`, and others) are properly formatted and consistent with numpydoc style and writing.
+- Use simple form of verbs in headings (rather than "-ing" forms).
+- Add links to relevant sections of the PyMAPDL documentation when mentioning specific features or commands, using the appropriate Sphinx directives to ensure proper linking and formatting.
+- Consistently either use or not use concluding punctuation in code comments.
+
+
 ## Don't
 
 - Don't modify auto-generated command documentation in `src/ansys/mapdl/core/_commands/`
 - Don't compromise technical accuracy for style
 - Don't add documentation for internal/private methods unless specifically requested
+- Avoid locations like above and below (according to Google dev doc style guide)
+- Avoid Latin phrases, prefer `such as`, `for example`, `in other words` over `e.g.`, `i.e.`, `etc.`
+- Don't use `ANSYS`, rather `Ansys`
+- If documenting a function/method, make sure you are using the correct directive (`:func:`, `:meth:`, `:class:`, and others) and that it is properly formatted with the code entity name. For example:
+  ```rst
+  :func:`save_ansys_path() <ansys.mapdl.core.save_ansys_path>`
+  ```
 
 ## Output
 
