@@ -498,6 +498,7 @@ def test_error(mapdl, clear_at_end):
 
 
 def test_ignore_errors(mapdl):
+    mapdl.prep7()
     mapdl.ignore_errors = False
     assert not mapdl.ignore_errors
     mapdl.ignore_errors = True
@@ -1037,6 +1038,7 @@ def test_lssolve(mapdl, cleared):
 def test_coriolis(mapdl):
     """Simply test that we're formatting the input parm for coriolis"""
     # must be v190 or newer
+    mapdl.prep7()
     resp = mapdl.coriolis(True, True, True, True)
     assert "CORIOLIS IN STATIONARY REFERENCE FRAME" in resp
     assert "GYROSCOPIC DAMPING MATRIX WILL BE CALCULATED" in resp
@@ -2598,12 +2600,19 @@ def test_get_array_non_interactive(mapdl, solved_box):
 
 
 def test_default_file_type_for_plots(mapdl, cleared):
-    assert mapdl.default_file_type_for_plots
+    prev = mapdl.default_file_type_for_plots
 
-    with pytest.raises(ValueError):
-        mapdl.default_file_type_for_plots = "dummy"
+    try:
+        assert mapdl.default_file_type_for_plots
 
-    mapdl.default_file_type_for_plots = "PNG"
+        with pytest.raises(ValueError):
+            mapdl.default_file_type_for_plots = "dummy"
+
+        mapdl.default_file_type_for_plots = "PNG"
+        assert mapdl.default_file_type_for_plots == "PNG"
+
+    finally:
+        mapdl.default_file_type_for_plots = prev
 
 
 @requires("matplotlib")

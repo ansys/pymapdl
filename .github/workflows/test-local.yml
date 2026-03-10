@@ -142,7 +142,7 @@ jobs:
       ON_LOCAL: true
       ON_UBUNTU: true
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
-      PYMAPDL_DEBUG_TESTING: True
+      PYMAPDL_DEBUG_TESTING: false
       PYMAPDL_GRPC_TRANSPORT: 'insecure'
       PYTEST_ARGUMENTS: ""
       PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
@@ -285,7 +285,7 @@ jobs:
 
       - name: "Upload pytest reports to GitHub"
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
         with:
           name: "reports-${{ inputs.file-name }}"
           path: ./${{ inputs.file-name }}.jsonl
@@ -332,7 +332,7 @@ jobs:
 
       - name: "Upload encrypted logs to GitHub"
         if: always() && inputs.upload-logs == true
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
         with:
           name: logs-${{ inputs.file-name }}-encrypted
           path: ./logs-${{ inputs.file-name }}.tgz.enc
@@ -348,7 +348,7 @@ jobs:
           flags: local-ubuntu-${{ inputs.mapdl-version }}-dmp-${{ inputs.tags }}
 
       - name: "Upload coverage artifacts"
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
         if: inputs.codecov-report == true
         with:
           name: ${{ inputs.file-name }}.xml

@@ -353,9 +353,142 @@ jobs:
       test_dpf: false
       upload-logs: true
 
+  docker-compose-test-remote:
+    name: "Docker Compose Remote: ${{ matrix.mapdl-version }}"
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [smoke-tests]
+    permissions:
+      contents: read  # Needed to read repository contents for tests
+      packages: read  # Needed to pull Docker images from GitHub packages
+    strategy:
+      fail-fast: false
+      matrix:
+        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu-cicd']
+    env:
+      file_name: "remote-docker-${{ matrix.mapdl-version }}"
+    steps:
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: "Login to GitHub Container Registry"
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 #v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Run docker compose tests (remote-host profile)"
+        working-directory: docker/testing
+        env:
+          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
+          DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
+          FILE_NAME: ${{ env.file_name }}
+        run: |
+          docker compose --profile remote-host up --build --abort-on-container-exit --exit-code-from pymapdl-host --no-attach mapdl-remote
+
+      - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
+        name: "Upload coverage to Codecov"
+        with:
+          token: ${{ secrets.codecov-token }} # required
+          root_dir: ${{ github.workspace }}
+          name: ${{ env.file_name }}.xml
+          flags: local,ubuntu,${{ matrix.mapdl-version }},dmp,docker
+
+      - name: "Upload coverage artifacts"
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
+        with:
+          name: ${{ env.file_name }}.xml
+          path: ./${{ env.file_name }}.xml
+
+      - name: "Cleanup docker compose"
+        if: always()
+        env:
+          # To avoid warnings
+          ANSYSLMD_LICENSE_FILE: ""
+          DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
+        run: |
+          echo "::group:: MAPDL-remote logs"
+          docker compose -f docker/testing/docker-compose.yml logs mapdl-remote || true
+          echo "::endgroup::"
+
+          echo "::group:: Python host logs"
+          docker compose -f docker/testing/docker-compose.yml logs pymapdl-host || true
+          echo "::endgroup::"
+
+          echo "Stopping all services..."
+          docker compose -f docker/testing/docker-compose.yml --profile remote-host down -v || true
+
+  docker-compose-test-local:
+    name: "Docker Compose Local: ${{ matrix.mapdl-version }}"
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [smoke-tests]
+    permissions:
+      contents: read  # Needed to read repository contents for tests
+      packages: read  # Needed to pull Docker images from GitHub packages
+    strategy:
+      fail-fast: false
+      matrix:
+        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu-cicd']
+    env:
+      file_name: "local-docker-${{ matrix.mapdl-version }}"
+    steps:
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: "Login to GitHub Container Registry"
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 #v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Run docker compose tests (local-host profile)"
+        working-directory: docker/testing
+        env:
+          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
+          DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
+          FILE_NAME: ${{ env.file_name }}
+        run: |
+          docker compose --profile local-host up --build --abort-on-container-exit --exit-code-from mapdl-local-host
+
+      - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
+        name: "Upload coverage to Codecov"
+        with:
+          token: ${{ secrets.codecov-token }} # required
+          root_dir: ${{ github.workspace }}
+          name: ${{ env.file_name }}.xml
+          flags: local,ubuntu,${{ matrix.mapdl-version }},dmp,docker
+
+      - name: "Upload coverage artifacts"
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
+        with:
+          name: ${{ env.file_name }}.xml
+          path: ./${{ env.file_name }}.xml
+
+      - name: "Cleanup docker compose"
+        if: always()
+        working-directory: docker/testing
+        env:
+          # To avoid warnings
+          ANSYSLMD_LICENSE_FILE: ""
+          DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
+        run: |
+          echo "::group:: MAPDL-remote logs"
+          docker compose logs mapdl-local-host || true
+          echo "::endgroup::"
+
+          echo "Stopping all services..."
+          docker compose --profile local-host down -v || true
+
   package:
     name: "Package library"
-    needs: [build-test-remote, build-test-ubuntu-local, docs-build, build-test-ubuntu-minimal]
+    needs: [build-test-remote, build-test-ubuntu-local, docs-build, build-test-ubuntu-minimal, docker-compose-test-remote, docker-compose-test-local]
     runs-on: ubuntu-latest
     permissions:
       contents: read  # Needed to read repository contents for packaging
@@ -379,7 +512,7 @@ jobs:
       contents: write  # Needed to create GitHub releases
     steps:
       - name: "Download the library artifacts from build-library step"
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: ${{ env.PACKAGE_NAME }}-artifacts
           path: ${{ env.PACKAGE_NAME }}-artifacts
@@ -440,7 +573,7 @@ jobs:
 
   notify:
     name: "Notify failed build"
-    needs: [smoke-tests, docs-build, build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal]
+    needs: [smoke-tests, docs-build, build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, docker-compose-test-remote, docker-compose-test-local]
     if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     permissions:
@@ -480,7 +613,7 @@ jobs:
   pytest-summary:
     name: Pytest summary for all the test jobs
     needs: [
-      build-test-remote, build-test-ubuntu-local, build-test-ubuntu-console, build-test-ubuntu-minimal
+      build-test-remote, build-test-ubuntu-local, build-test-ubuntu-console, build-test-ubuntu-minimal, docker-compose-test-remote, docker-compose-test-local
       ]
     if: always()
     runs-on: ubuntu-latest
