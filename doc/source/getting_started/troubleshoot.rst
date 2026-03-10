@@ -155,7 +155,7 @@ to launch MAPDL due to the outdated cached path.
 
 To resolve this, update the cached executable location as described in
 :ref:`ref_default_location_executable`.
-Use the ``save_ansys_path`` function to set the correct path to your new MAPDL installation.
+Use the :func:`save_ansys_path() <ansys.mapdl.core.save_ansys_path>` function to set the correct path to your new MAPDL installation.
 This ensures PyMAPDL can find and launch the updated MAPDL version.
 
 
