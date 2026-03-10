@@ -1,22 +1,25 @@
-.. _ref_fe_forces_commands_api:
 
-*********
-FE forces
-*********
+.. _ref_fe_forces:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to define nodal loads on the finite element model.
+FeForces
+========
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.fe_forces
+
+.. autoclass:: ansys.mapdl.core._commands.solution.fe_forces.FeForces
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.f
-   Mapdl.fcum
-   Mapdl.fdele
-   Mapdl.fj
-   Mapdl.fjdele
-   Mapdl.fjlist
-   Mapdl.flist
-   Mapdl.fscale
-   Mapdl.fssect
+
+   FeForces.f
+   FeForces.fcum
+   FeForces.fdele
+   FeForces.fj
+   FeForces.fjdele
+   FeForces.fjlist
+   FeForces.flist
+   FeForces.fscale
