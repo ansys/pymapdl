@@ -24,40 +24,66 @@ from ansys.mapdl.core._commands import CommandsBase
 
 
 class SpectrumOptions(CommandsBase):
-    def addam(self, af="", aa="", ab="", ac="", ad="", amin="", **kwargs):
-        """Specifies the acceleration spectrum computation constants for the
 
-        APDL Command: ADDAM
-        analysis of shock resistance of shipboard structures.
+    def addam(
+        self,
+        af: str = "",
+        aa: str = "",
+        ab: str = "",
+        ac: str = "",
+        ad: str = "",
+        amin: str = "",
+        **kwargs,
+    ):
+        r"""Specifies the acceleration spectrum computation constants for the analysis of shock resistance of
+        shipboard structures.
+
+        Mechanical APDL Command: `ADDAM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ADDAM.html>`_
 
         Parameters
         ----------
-        af
-            Direction-dependent acceleration coefficient for elastic or
-            elastic-plastic analysis option (default = 0).
+        af : str
+            Direction-dependent acceleration coefficient for elastic or elastic-plastic analysis option
+            (default = 0).
 
-        aa, ab, ac, ad
-            Coefficients for the DDAM acceleration spectrum equations. Default
-            for these coefficients is zero.
+        aa : str
+            Coefficients for the DDAM acceleration spectrum equations. Default for these coefficients is
+            zero.
 
-        amin
-            The minimum acceleration value in inch/sec2.  It defaults to 2316
-            inch/sec2 which equals 6g, where g is acceleration due to gravity
-            (g = 386 inch/sec2).
+        ab : str
+            Coefficients for the DDAM acceleration spectrum equations. Default for these coefficients is
+            zero.
+
+        ac : str
+            Coefficients for the DDAM acceleration spectrum equations. Default for these coefficients is
+            zero.
+
+        ad : str
+            Coefficients for the DDAM acceleration spectrum equations. Default for these coefficients is
+            zero.
+
+        amin : str
+            Minimum acceleration value. It defaults to 6g, where g is the acceleration due to gravity.
 
         Notes
         -----
-        This command specifies acceleration coefficients to analyze shock
-        resistance of shipboard equipment.  These coefficients are used to
-        compute mode coefficients according to the equations given in Dynamic
-        Design Analysis Method in the Mechanical APDL Theory Reference.  The
-        form of these equations is based on the Naval NRL Dynamic Design
-        Analysis Method.  This command, along with the VDDAM and SED commands,
-        is used with the spectrum (ANTYPE,SPECTR) analysis as a special purpose
-        alternative to the SV, FREQ, and SVTYP commands.  The mass and length
-        units of the model must be in pounds and inches, respectively.
 
-        DDASPEC may alternatively be used to calculate spectrum coefficients.
+        .. _ADDAM_notes:
+
+        This command specifies acceleration coefficients to analyze shock resistance of shipboard equipment.
+        These coefficients are used to compute mode coefficients according to the equations given in
+        `Dynamic Design Analysis Method
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_anproc7.html#eq1bf15231-590e-4b5a-a30a-aa31e15bf78f>`_
+        :ref:`vddam` and :ref:`sed` commands, is used with the spectrum ( :ref:`antype`,SPECTR) analysis as
+        a special purpose alternative to the :ref:`sv`, :ref:`freq`, and :ref:`svtyp` commands.
+
+        In order to perform a DDAM spectrum analysis using a units system other than BIN (default), you must
+        specify the units system complying with the mass and length units of the model using the
+        :ref:`units` command. Issue the :ref:`units` command before defining the shock spectrum computation
+        constants ( :ref:`addam` ). The :ref:`addam` command is not supported with the user-defined unite
+        system ( ``Label`` = USER on :ref:`units` ).
+
+        :ref:`ddaspec` may alternatively be used to calculate spectrum coefficients.
 
         This command is also valid in PREP7.
         """
@@ -66,201 +92,239 @@ class SpectrumOptions(CommandsBase):
 
     def coval(
         self,
-        tblno1="",
-        tblno2="",
-        sv1="",
-        sv2="",
-        sv3="",
-        sv4="",
-        sv5="",
-        sv6="",
-        sv7="",
+        tblno1: str = "",
+        tblno2: str = "",
+        sv1: str = "",
+        sv2: str = "",
+        sv3: str = "",
+        sv4: str = "",
+        sv5: str = "",
+        sv6: str = "",
+        sv7: str = "",
         **kwargs,
     ):
-        """Defines PSD cospectral values.
+        r"""Defines PSD cospectral values.
 
-        APDL Command: COVAL
+        Mechanical APDL Command: `COVAL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_COVAL.html>`_
 
         Parameters
         ----------
-        tblno1
+        tblno1 : str
             First input PSD table number associated with this spectrum.
 
-        tblno2
+        tblno2 : str
             Second input PSD table number associated with this spectrum.
 
-        sv1, sv2, sv3, . . . , sv7
-            PSD cospectral values corresponding to the frequency points
-            [PSDFRQ].
+        sv1 : str
+            PSD cospectral values corresponding to the frequency points ( :ref:`psdfrq` ).
+
+        sv2 : str
+            PSD cospectral values corresponding to the frequency points ( :ref:`psdfrq` ).
+
+        sv3 : str
+            PSD cospectral values corresponding to the frequency points ( :ref:`psdfrq` ).
+
+        sv4 : str
+            PSD cospectral values corresponding to the frequency points ( :ref:`psdfrq` ).
+
+        sv5 : str
+            PSD cospectral values corresponding to the frequency points ( :ref:`psdfrq` ).
+
+        sv6 : str
+            PSD cospectral values corresponding to the frequency points ( :ref:`psdfrq` ).
+
+        sv7 : str
+            PSD cospectral values corresponding to the frequency points ( :ref:`psdfrq` ).
 
         Notes
         -----
-        Defines PSD cospectral values to be associated with the previously
-        defined frequency points.  Two table references are required since
-        values are off-diagonal terms.  Unlike autospectra [PSDVAL], the
-        cospectra can be positive or negative.  The cospectral curve segment
-        where there is a sign change is interpolated linearly (the rest of the
-        curve segments use log-log interpolation).  For better accuracy, choose
-        as small a curve segment as possible wherever a sign change occurs.
 
-        Repeat COVAL command using the same table numbers for additional
-        points.  This command is valid for SPOPT,PSD only.
+        .. _COVAL_notes:
+
+        Defines PSD cospectral values to be associated with the previously defined frequency points.
+        Two table references are required since values are off- diagonal terms. Unlike autospectra (
+        :ref:`psdval` ), the cospectra can be positive or negative. The cospectral curve segment where there
+        is a sign change is interpolated linearly (the rest of the curve segments use log-log
+        interpolation). For better accuracy, choose as small a curve segment as possible wherever a sign
+        change occurs.
+
+        Repeat :ref:`coval` command using the same table numbers for additional points. This command is
+        valid for :ref:`spopt`,PSD only.
 
         This command is also valid in PREP7.
         """
         command = f"COVAL,{tblno1},{tblno2},{sv1},{sv2},{sv3},{sv4},{sv5},{sv6},{sv7}"
         return self.run(command, **kwargs)
 
-    def cqc(self, signif="", label="", forcetype="", **kwargs):
-        """Specifies the complete quadratic mode combination method.
+    def cqc(self, signif: str = "", label: str = "", forcetype: str = "", **kwargs):
+        r"""Specifies the complete quadratic mode combination method.
 
-        APDL Command: CQC
+        Mechanical APDL Command: `CQC <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CQC.html>`_
 
         Parameters
         ----------
-        signif
-            Combine only those modes whose significance level exceeds the
-            SIGNIF threshold.  For single point, multipoint, or DDAM response
-            (SPOPT,SPRS, MPRS or DDAM), the significance level of a mode is
-            defined as the mode coefficient of the mode, divided by the maximum
-            mode coefficient of all modes.  Any mode whose significance level
-            is less than SIGNIF is considered insignificant and is not
-            contributed to the mode combinations.  The higher the SIGNIF
-            threshold, the fewer the number of modes combined.  SIGNIF defaults
-            to 0.001.  If SIGNIF is specified as 0.0, it is taken as 0.0.
-            (This mode combination method is not valid for SPOPT,PSD.)
+        signif : str
+            Combine only those modes whose significance level exceeds the ``SIGNIF`` threshold. For single
+            point, multipoint, or DDAM response ( :ref:`spopt`,SPRS, MPRS or DDAM), the significance level
+            of a mode is defined as the mode coefficient divided by the maximum mode coefficient of all
+            modes. Any mode whose significance level is less than ``SIGNIF`` is considered insignificant and
+            is not contributed to the mode combinations. The higher the ``SIGNIF`` threshold, the fewer the
+            number of modes combined. ``SIGNIF`` defaults to 0.001. If ``SIGNIF`` is specified as 0.0, it is
+            taken as 0.0. (This mode combination method is not valid for :ref:`spopt`,PSD.)
 
-        label
+        label : str
             Label identifying the combined mode solution output.
 
-            DISP - Displacement solution (default).  Displacements, stresses, forces, etc., are
-                   available.
+            * ``DISP`` - Displacement solution (default). Displacements, stresses, forces, etc., are available.
 
-            VELO - Velocity solution.  Velocities, "stress velocities," "force velocities," etc.,
-                   are available.
+            * ``VELO`` - Velocity solution. Velocities, "stress velocities," "force velocities," etc., are
+              available.
 
-            ACEL - Acceleration solution.  Accelerations, "stress accelerations," "force
-                   accelerations," etc., are available.
+            * ``ACEL`` - Acceleration solution. Accelerations, "stress accelerations," "force accelerations,"
+              etc., are available.
 
-        forcetype
+        forcetype : str
             Label identifying the forces to be combined:
 
-            STATIC - Combine the modal static forces (default).
+            * ``STATIC`` - Combine the modal static forces (default).
 
-            TOTAL - Combine the modal static plus inertial forces.
+            * ``TOTAL`` - Combine the modal static plus inertial forces.
 
         Notes
         -----
-        Damping is required for this mode combination method.  The CQC command
-        is also valid for PREP7.
+
+        .. _CQC_notes:
+
+        Damping is required for this mode combination method. The :ref:`cqc` command is also valid for
+        PREP7.
         """
-        command = f"CQC,{signif},{label},{forcetype}"
+        command = f"CQC,{signif},{label},,{forcetype}"
         return self.run(command, **kwargs)
 
-    def ddaspec(self, keyref="", shptyp="", mountloc="", deftyp="", amin="", **kwargs):
-        """APDL Command: DDASPEC
+    def ddaspec(
+        self,
+        keyref: int | str = "",
+        shptyp: str = "",
+        mountloc: str = "",
+        deftyp: str = "",
+        amin: str = "",
+        **kwargs,
+    ):
+        r"""Specifies the shock spectrum computation constants for DDAM analysis.
 
-        Specifies the shock spectrum computation constants for DDAM analysis.
+        Mechanical APDL Command: `DDASPEC <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DDASPEC.html>`_
 
         Parameters
         ----------
-        keyref
+        keyref : int or str
             Key for reference catalog:
 
-            1 - The spectrum computation constants are based on NRL-1396 (default). For more
-                information, see Dynamic Design Analysis Method in the
-                Mechanical APDL Theory Reference
+            * ``1`` - The spectrum computation constants are based on NRL-1396 (default). For more information,
+              see `Dynamic Design Analysis Method
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_anproc7.html#eq1bf15231-590e-4b5a-a30a-aa31e15bf78f>`_
 
-        shptyp
+        shptyp : str
             Select the ship type:
 
-            SUBM - Submarine
+            * ``SUBM`` - Submarine
 
-            SURF - Surface ship
+            * ``SURF`` - Surface ship
 
-        mountloc
+        mountloc : str
             Select the mounting location:
 
-            HULL - Hull mounting location. These structures are mounted directly to basic hull
-                   structures like frames, structural bulkheads below the water
-                   line, and shell plating above the water line.
+            * ``HULL`` - Hull mounting location. These structures are mounted directly to basic hull structures
+              like frames, structural bulkheads below the water line, and shell plating above the water line.
 
-            DECK - Deck mounting location. These structures are mounted directly to decks, non-
-                   structural bulkheads, or to structural bulkheads above the
-                   water line.
+            * ``DECK`` - Deck mounting location. These structures are mounted directly to decks, non-structural
+              bulkheads, or to structural bulkheads above the water line.
 
-            SHEL - Shell plating mounting location. These structures are mounted directly to shell
-                   plating below the water line without intervening
-                   foundations.
+            * ``SHEL`` - Shell plating mounting location. These structures are mounted directly to shell plating
+              below the water line without intervening foundations.
 
-        deftyp
+        deftyp : str
             Select the deformation type:
 
-            ELAS - Elastic deformation (default)
+            * ``ELAS`` - Elastic deformation (default)
 
-            PLAS - Elastic-plastic deformation
+            * ``PLAS`` - Elastic-plastic deformation
 
-        amin
-            Minimum acceleration value in inch/sec2. It defaults to 2316
-            inch/sec2 which equals 6g, where g is the acceleration due to
-            gravity (g = 386 in/sec2).
+        amin : str
+            Minimum acceleration value. It defaults to 6g, where g is the acceleration due to gravity.
 
         Notes
         -----
-        The excitation direction is required to calculate the spectrum
-        coefficients. Issue the SED command before issuing DDASPEC.
 
-        ADDAM and VDDAM may alternatively be used to calculate spectrum
-        coefficients.
+        .. _DDASPEC_notes:
+
+        The excitation along one of the fore and aft, vertical or athwartship directions is required to
+        calculate the spectrum coefficients. Issue the :ref:`sed` command before issuing :ref:`ddaspec`. For
+        example, if you want to apply the excitation along the fore and aft direction, you should specify
+        ``SEDX`` = 1.0 on :ref:`sed`. Similarly, for excitation along vertical or athwartship direction,
+        specify ``SEDY`` = 1.0 or ``SEDZ`` = 1.0, respectively, on :ref:`sed`.
+
+        :ref:`addam` and :ref:`vddam` may alternatively be used to calculate spectrum coefficients.
+
+        In order to perform a DDAM spectrum analysis using a units system other than BIN (default), you must
+        specify the units system complying with the mass and length units of the model using the
+        :ref:`units` command. Issue the :ref:`units` command before defining the shock spectrum computation
+        constants ( :ref:`ddaspec` ). The DDASPEC command is not supported with the user-defined units
+        system ( ``Label`` = USER on :ref:`units` ).
 
         This command is also valid in PREP7.
         """
         command = f"DDASPEC,{keyref},{shptyp},{mountloc},{deftyp},{amin}"
         return self.run(command, **kwargs)
 
-    def dsum(self, signif="", label="", td="", forcetype="", **kwargs):
-        """Specifies the double sum mode combination method.
+    def dsum(
+        self,
+        signif: str = "",
+        label: str = "",
+        td: str = "",
+        forcetype: str = "",
+        **kwargs,
+    ):
+        r"""Specifies the double sum mode combination method.
 
-        APDL Command: DSUM
+        Mechanical APDL Command: `DSUM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DSUM.html>`_
 
         Parameters
         ----------
-        signif
-            Combine only those modes whose significance level exceeds the
-            SIGNIF threshold.  For single point, multipoint, or DDAM response
-            (SPOPT, SPRS, MPRS, or DDAM), the significance level of a mode is
-            defined as the mode coefficient of the mode, divided by the maximum
-            mode coefficient of all modes.  Any mode whose significance level
-            is less than SIGNIF is considered insignificant and is not
-            contributed to the mode combinations.  The higher the SIGNIF
-            threshold, the fewer the number of modes combined. SIGNIF defaults
-            to 0.001.  If SIGNIF is specified as 0.0, it is taken as 0.0.
-            (This mode combination method is not valid for SPOPT, PSD.)
+        signif : str
+            Combine only those modes whose significance level exceeds the ``SIGNIF`` threshold. For single
+            point, multipoint, or DDAM response ( :ref:`spopt`, SPRS, MPRS, or DDAM), the significance level
+            of a mode is defined as the mode coefficient divided by the maximum mode coefficient of all
+            modes. Any mode whose significance level is less than ``SIGNIF`` is considered insignificant and
+            is not contributed to the mode combinations. The higher the ``SIGNIF`` threshold, the fewer the
+            number of modes combined. ``SIGNIF`` defaults to 0.001. If ``SIGNIF`` is specified as 0.0, it is
+            taken as 0.0. (This mode combination method is not valid for :ref:`spopt`, PSD.)
 
-        label
+        label : str
             Label identifying the combined mode solution output.
 
-            DISP - Displacement solution (default).  Displacements, stresses, forces, etc., are
-                   available.
+            * ``DISP`` - Displacement solution (default). Displacements, stresses, forces, etc., are available.
 
-            VELO - Velocity solution.  Velocities, "stress velocities," "force velocities," etc.,
-                   are available.
+            * ``VELO`` - Velocity solution. Velocities, "stress velocities," "force velocities," etc., are
+              available.
 
-            ACEL - Acceleration solution.  Accelerations, "stress accelerations," "force
-                   accelerations," etc., are available.
+            * ``ACEL`` - Acceleration solution. Accelerations, "stress accelerations," "force accelerations,"
+              etc., are available.
 
-        td
-            Time duration for earthquake or shock spectrum.  TD defaults to 10.
+        td : str
+            Time duration for earthquake or shock spectrum. ``TD`` defaults to 10.
 
-        forcetype
+        forcetype : str
             Label identifying the forces to be combined:
 
-            STATIC - Combine the modal static forces (default).
+            * ``STATIC`` - Combine the modal static forces (default).
 
-            TOTAL - Combine the modal static plus inertial forces.
+            * ``TOTAL`` - Combine the modal static plus inertial forces.
 
         Notes
         -----
+
+        .. _DSUM_notes:
+
         This command is also valid for PREP7.
         """
         command = f"DSUM,{signif},{label},{td},{forcetype}"
@@ -268,425 +332,408 @@ class SpectrumOptions(CommandsBase):
 
     def freq(
         self,
-        freq1="",
-        freq2="",
-        freq3="",
-        freq4="",
-        freq5="",
-        freq6="",
-        freq7="",
-        freq8="",
-        freq9="",
+        freq1: str = "",
+        freq2: str = "",
+        freq3: str = "",
+        freq4: str = "",
+        freq5: str = "",
+        freq6: str = "",
+        freq7: str = "",
+        freq8: str = "",
+        freq9: str = "",
         **kwargs,
     ):
-        """Defines the frequency points for the SV vs. FREQ tables.
+        r"""Defines the frequency points for the :ref:`sv` vs. :ref:`freq` tables.
 
-        APDL Command: FREQ
+        Mechanical APDL Command: `FREQ <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FREQ.html>`_
 
         Parameters
         ----------
-        freq1, freq2, freq3, . . . , freq9
-            Frequency points for SV vs. FREQ tables.  Values must be in
-            ascending order. FREQ1 should be greater than zero.  Units are
-            cycles/time.
+        freq1 : str
+            Frequency points for SV vs. FREQ tables. Values must be in ascending order. ``FREQ1`` should be
+            greater than zero. Units are cycles/time.
+
+        freq2 : str
+            Frequency points for SV vs. FREQ tables. Values must be in ascending order. ``FREQ1`` should be
+            greater than zero. Units are cycles/time.
+
+        freq3 : str
+            Frequency points for SV vs. FREQ tables. Values must be in ascending order. ``FREQ1`` should be
+            greater than zero. Units are cycles/time.
+
+        freq4 : str
+            Frequency points for SV vs. FREQ tables. Values must be in ascending order. ``FREQ1`` should be
+            greater than zero. Units are cycles/time.
+
+        freq5 : str
+            Frequency points for SV vs. FREQ tables. Values must be in ascending order. ``FREQ1`` should be
+            greater than zero. Units are cycles/time.
+
+        freq6 : str
+            Frequency points for SV vs. FREQ tables. Values must be in ascending order. ``FREQ1`` should be
+            greater than zero. Units are cycles/time.
+
+        freq7 : str
+            Frequency points for SV vs. FREQ tables. Values must be in ascending order. ``FREQ1`` should be
+            greater than zero. Units are cycles/time.
+
+        freq8 : str
+            Frequency points for SV vs. FREQ tables. Values must be in ascending order. ``FREQ1`` should be
+            greater than zero. Units are cycles/time.
+
+        freq9 : str
+            Frequency points for SV vs. FREQ tables. Values must be in ascending order. ``FREQ1`` should be
+            greater than zero. Units are cycles/time.
 
         Notes
         -----
-        Repeat the FREQ command for additional frequency points (100 maximum).
-        Values are added after the last nonzero frequency.  If all fields
-        (FREQ1 -- FREQ9) are blank, erase SV vs. FREQ tables.
+
+        .. _FREQ_notes:
+
+        Repeat the :ref:`freq` command for additional frequency points (100 maximum). Values are added after
+        the last nonzero frequency. If all fields ( ``FREQ1`` -- ``FREQ9`` ) are blank, erase SV vs. FREQ
+        tables.
 
         Frequencies must be in ascending order.
 
-        Spectral values are input with the SV command and interpreted according
-        to the SVTYP command.  Applies only to the SPRS (single-point) option
-        of the SPOPT command.  See the SPFREQ command for frequency input in
-        MPRS (multi-point) analysis.
+        Spectral values are input with the :ref:`sv` command and interpreted according to the :ref:`svtyp`
+        command. Applies only to the SPRS (single-point) option of the :ref:`spopt` command. See the
+        :ref:`spfreq` command for frequency input in MPRS (multi-point) analysis.
 
-        Use the STAT command to list current frequency points.
+        Use the :ref:`stat` command to list current frequency points.
 
         This command is also valid in PREP7.
         """
         command = f"FREQ,{freq1},{freq2},{freq3},{freq4},{freq5},{freq6},{freq7},{freq8},{freq9}"
         return self.run(command, **kwargs)
 
-    def grp(self, signif="", label="", forcetype="", **kwargs):
-        """Specifies the grouping mode combination method.
+    def grp(self, signif: str = "", label: str = "", forcetype: str = "", **kwargs):
+        r"""Specifies the grouping mode combination method.
 
-        APDL Command: GRP
+        Mechanical APDL Command: `GRP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GRP.html>`_
 
         Parameters
         ----------
-        signif
-            Combine only those modes whose significance level exceeds the
-            SIGNIF  threshold.  For single point, multipoint, or DDAM response
-            (SPOPT,SPRS, MPRS or DDAM), the significance level of a mode is
-            defined as the mode coefficient of the mode, divided by the maximum
-            mode coefficient of all modes.  Any mode whose significance level
-            is less than SIGNIF is considered insignificant and is not
-            contributed to the mode combinations.  The higher the SIGNIF
-            threshold, the fewer the number of modes combined.  SIGNIF defaults
-            to 0.001.  If SIGNIF is specified as 0.0, it is taken as 0.0.
-            (This mode combination method is not valid for SPOPT,PSD.)
+        signif : str
+            Combine only those modes whose significance level exceeds the ``SIGNIF`` threshold. For single
+            point, multipoint, or DDAM response ( :ref:`spopt`,SPRS, MPRS or DDAM), the significance level
+            of a mode is defined as the mode coefficient divided by the maximum mode coefficient of all
+            modes. Any mode whose significance level is less than ``SIGNIF`` is considered insignificant and
+            is not contributed to the mode combinations. The higher the ``SIGNIF`` threshold, the fewer the
+            number of modes combined. ``SIGNIF`` defaults to 0.001. If ``SIGNIF`` is specified as 0.0, it is
+            taken as 0.0. (This mode combination method is not valid for :ref:`spopt`,PSD.)
 
-        label
+        label : str
             Label identifying the combined mode solution output.
 
-            DISP - Displacement solution (default).  Displacements, stresses, forces, etc., are
-                   available.
+            * ``DISP`` - Displacement solution (default). Displacements, stresses, forces, etc., are available.
 
-            VELO - Velocity solution.  Velocities, "stress velocities," "force velocities," etc.,
-                   are available.
+            * ``VELO`` - Velocity solution. Velocities, "stress velocities," "force velocities," etc., are
+              available.
 
-            ACEL - Acceleration solution.  Accelerations, "stress accelerations," "force
-                   accelerations," etc., are available.
+            * ``ACEL`` - Acceleration solution. Accelerations, "stress accelerations," "force accelerations,"
+              etc., are available.
 
-        forcetype
+        forcetype : str
             Label identifying the forces to be combined:
 
-            STATIC - Combine the modal static forces (default).
+            * ``STATIC`` - Combine the modal static forces (default).
 
-            TOTAL - Combine the modal static plus inertial forces.
+            * ``TOTAL`` - Combine the modal static plus inertial forces.
 
         Notes
         -----
-        The SIGNIF value set with this command (including the default value of
-        0.001) overrides the SIGNIF value set with the MXPAND command.
+
+        .. _GRP_notes:
+
+        The ``SIGNIF`` value set with this command (including the default value of 0.001) overrides the
+        ``SIGNIF`` value set with the :ref:`mxpand` command.
 
         This command is also valid for PREP7.
         """
-        command = f"GRP,{signif},{label},{forcetype}"
+        command = f"GRP,{signif},{label},,{forcetype}"
         return self.run(command, **kwargs)
 
-    def mmass(self, option="", zpa="", **kwargs):
-        """Specifies the missing mass response calculation.
+    def mmass(self, option: str = "", zpa: str = "", **kwargs):
+        r"""Specifies the missing mass response calculation.
 
-        APDL Command: MMASS
+        Mechanical APDL Command: `MMASS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MMASS.html>`_
 
         Parameters
         ----------
-        option
+        option : str
             Flag to activate or deactivate missing mass response calculation.
 
-            0 (OFF or NO) - Deactivate (default).
+            * ``0 (OFF or NO)`` - Deactivate (default).
 
-            1 (ON or YES) - Activate.
+            * ``1 (ON or YES)`` - Activate.
 
-        zpa
-            Zero Period Acceleration Value. If a scale factor FACT is defined
-            on the SVTYP command, it is applied to this value.
+        zpa : str
+            Zero Period Acceleration Value. If a scale factor FACT is defined on the :ref:`svtyp` command,
+            it is applied to this value.
 
         Notes
         -----
-        The missing mass calculation is valid only for single point excitation
-        response spectrum analysis (SPOPT, SPRS) and for multiple point
-        response spectrum analysis (SPOPT, MPRS) performed with base excitation
-        using acceleration response spectrum loading. Missing mass is supported
-        in a spectrum analysis only when the preceding modal analysis is
-        performed with the Block Lanczos, PCG Lanczos, Supernode, or Subspace
-        eigensolver (Method =LANB, LANPCG, SNODE, or SUBSP on the MODOPT
-        command).
 
-        The velocity solution is not available (Label = VELO on the combination
-        command: SRSS, CQC...) when the missing mass calculation is activated.
+        .. _MMASS_notes:
 
-        The missing mass calculation is not supported when the spectrum
-        analysis is based on a linear perturbation modal analysis performed
-        after a nonlinear base analysis.
+        The missing mass calculation is valid only for single point excitation response spectrum analysis (
+        :ref:`spopt`, SPRS) and for multiple point response spectrum analysis ( :ref:`spopt`, MPRS)
+        performed with base excitation using acceleration response spectrum loading. Missing mass is
+        supported in a spectrum analysis only when the preceding modal analysis is performed with the Block
+        Lanczos, PCG Lanczos, Supernode, or Subspace eigensolver (Method =LANB, LANPCG, SNODE, or SUBSP on
+        the :ref:`modopt` command).
+
+        The velocity solution is not available ( ``Label`` = VELO on the combination command: :ref:`srss`,
+        :ref:`cqc`...) when the missing mass calculation is activated.
+
+        The missing mass calculation is not supported when the spectrum analysis is based on a linear
+        perturbation modal analysis performed after a nonlinear base analysis.
 
         The missing mass is not supported when superelements are present.
 
-        To take into account the contribution of the truncated modes, the
-        residual vector (RESVEC) can be used in place of the missing mass
-        response. This is of particular interest if the velocity solution is
-        requested or if a nonlinear prestress is included in the analysis
-        (linear perturbation), or if a superelement is present, since the
-        missing mass cannot be used in these cases.
+        To take into account the contribution of the truncated modes, the residual vector ( :ref:`resvec` )
+        can be used in place of the missing mass response. This is of particular interest if the velocity
+        solution is requested or if a nonlinear prestress is included in the analysis (linear perturbation),
+        or if a superelement is present, since the missing mass cannot be used in these cases.
 
-        In a multiple point response spectrum analysis (SPOPT,MPRS), the MMASS
-        command must precede the participation factor calculation command
-        (PFACT).
+        In a multiple point response spectrum analysis ( :ref:`spopt`,MPRS), the :ref:`mmass` command must
+        precede the participation factor calculation command ( :ref:`pfact` ).
 
         This command is also valid in PREP7.
+
+        * `Performing a Single-Point Response Spectrum (SPRS) Analysis
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_STR6_4.html#aYACegwrd>`_
+        * `Performing a Multi-Point Response Spectrum (MPRS) Analysis
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_STR6_10.html#spectrum_multipoint>`_
+        * `Missing-Mass Response
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_anproc7.html#eq7fe0e910-baf8-4b0e-8a3e-67dc4190f121>`_
+        * :ref:`rigresp` command
         """
         command = f"MMASS,{option},{zpa}"
         return self.run(command, **kwargs)
 
-    def nrlsum(self, signif="", label="", labelcsm="", forcetype="", **kwargs):
-        """Specifies the Naval Research Laboratory (NRL) sum mode combination
+    def nrlsum(
+        self,
+        signif: str = "",
+        label: str = "",
+        labelcsm: str = "",
+        forcetype: str = "",
+        **kwargs,
+    ):
+        r"""Specifies the Naval Research Laboratory (NRL) sum mode combination method.
 
-        APDL Command: NRLSUM
-        method.
+        Mechanical APDL Command: `NRLSUM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NRLSUM.html>`_
 
         Parameters
         ----------
-        signif
-            Combine only those modes whose significance level exceeds the
-            SIGNIF threshold. For single point, multipoint, or DDAM response
-            (SPOPT,SPRS, MPRS or DDAM), the significance level of a mode is
-            defined as the mode coefficient of the mode, divided by the maximum
-            mode coefficient of all modes. Any mode whose significance level is
-            less than SIGNIF is considered insignificant and is not contributed
-            to the mode combinations. The higher the SIGNIF threshold, the
-            fewer the number of modes combined. SIGNIF defaults to 0.001. If
-            SIGNIF is specified as 0.0, it is taken as 0.0. (This mode
-            combination method is not valid for SPOPT,PSD.)
+        signif : str
+            Combine only those modes whose significance level exceeds the ``SIGNIF`` threshold. For single
+            point, multipoint, or DDAM response ( :ref:`spopt`,SPRS, MPRS or DDAM), the significance level
+            of a mode is defined as the mode coefficient divided by the maximum mode coefficient of all
+            modes. Any mode whose significance level is less than ``SIGNIF`` is considered insignificant and
+            is not contributed to the mode combinations. The higher the ``SIGNIF`` threshold, the fewer the
+            number of modes combined. ``SIGNIF`` defaults to 0.001. If ``SIGNIF`` is specified as 0.0, it is
+            taken as 0.0. (This mode combination method is not valid for :ref:`spopt`,PSD.)
 
-        label
+        label : str
             Label identifying the combined mode solution output.
 
-            DISP - Displacement solution (default). Displacements, stresses, forces, etc., are
-                   available.
+            * ``DISP`` - Displacement solution (default). Displacements, stresses, forces, etc., are available.
 
-            VELO - Velocity solution. Velocities, "stress velocities," "force velocities," etc.,
-                   are available.
+            * ``VELO`` - Velocity solution. Velocities, "stress velocities," "force velocities," etc., are
+              available.
 
-            ACEL - Acceleration solution. Accelerations, "stress accelerations," "force
-                   accelerations," etc., are available.
+            * ``ACEL`` - Acceleration solution. Accelerations, "stress accelerations," "force accelerations,"
+              etc., are available.
 
-        labelcsm
+        labelcsm : str
             Label identifying the CSM (Closely Spaced Modes) method.
 
-            CSM - Use the CSM method.
+            * ``CSM`` - Use the CSM method.
 
-            Blank  - Do not use the CSM method (default).
+            * ```` - Do not use the CSM method (default).
 
-        forcetype
+        forcetype : str
             Label identifying the forces to be combined:
 
-            STATIC - Combine the modal static forces (default).
+            * ``STATIC`` - Combine the modal static forces (default).
 
-            TOTAL - Combine the modal static plus inertial forces.
+            * ``TOTAL`` - Combine the modal static plus inertial forces.
 
         Notes
         -----
-        This command is also valid in PREP7. This mode combination method is
-        usually used for SPOPT,DDAM.
 
-        This CSM method is only applicable in a DDAM analysis (SPOPT,DDAM). The
-        CSM method combines two closely spaced modes into one mode when their
-        frequencies are within 10 percent of the common mean frequency and
-        their responses are opposite in sign. The contribution of these closely
-        spaced modes is then included in the NRL sum as a single effective
-        mode. Refer to Closely Spaced Modes (CSM) Method in the Mechanical APDL
-        Theory Reference for more information.
+        .. _NRLSUM_notes:
 
-        NRLSUM is not allowed in ANSYS Professional.
+        This command is also valid in PREP7. This mode combination method is usually used for
+        :ref:`spopt`,DDAM.
+
+        This CSM method is only applicable in a DDAM analysis ( :ref:`spopt`, ``DDAM`` ). Element results
+        calculation based on modal element results ( ``Elcalc`` on :ref:`spopt` ) is not supported and is
+        automatically reset for this method. The CSM method combines two closely spaced modes into one mode
+        when their frequencies are within 10 percent of the common mean frequency and their responses are
+        opposite in sign. The contribution of these closely spaced modes is then included in the NRL sum as
+        a single effective mode. Refer to `Closely Spaced Modes (CSM) Method
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_anproc7.html#eqe88ee1e2-71f7-4a8d-910a-d28d1d27641b>`_
         """
         command = f"NRLSUM,{signif},{label},{labelcsm},{forcetype}"
         return self.run(command, **kwargs)
 
-    def pfact(self, tblno="", excit="", parcor="", **kwargs):
-        """Calculates participation factors for the PSD or multi-point response
+    def pfact(self, tblno: str = "", excit: str = "", parcor: str = "", **kwargs):
+        r"""Calculates participation factors for the PSD or multi-point response spectrum table.
 
-        APDL Command: PFACT
-        spectrum table.
+        Mechanical APDL Command: `PFACT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PFACT.html>`_
 
         Parameters
         ----------
-        tblno
-            Input PSD (Power Spectral Density) table number for which
-            participation factors are to be calculated.
+        tblno : str
+            Input PSD (Power Spectral Density) table number for which participation factors are to be
+            calculated.
 
-        excit
+        excit : str
             Label defining the location of excitation:
 
-            BASE - Base excitation (default).
+            * ``BASE`` - Base excitation (default).
 
-            NODE - Nodal excitation.
+            * ``NODE`` - Nodal excitation.
 
-        parcor
-            Label defining excitation type (applies only to SPOPT,PSD
-            analysis).  Used only when partially correlated excitation is due
-            to wave propagation or spatial correlation.  Defaults to partially
-            correlated excitation as defined by COVAL and QDVAL commands.
+        parcor : str
+            Label defining excitation type (applies only to :ref:`spopt`,PSD analysis). Used only when partially correlated excitation is due to wave propagation or spatial correlation. Defaults to partially correlated excitation as defined by :ref:`coval` and :ref:`qdval` commands.
 
-            WAVE - Excitation defined by PSDWAV command.
+            * ``WAVE`` - Excitation defined by :ref:`psdwav` command.
 
-            SPAT - Excitation defined by PSDSPL command.
+            * ``SPAT`` - Excitation defined by :ref:`psdspl` command.
 
         Notes
         -----
-        Calculates the participation factors for a particular PSD or multi-
-        point response spectrum table defined with the PSDVAL or SPVAL command.
-        The Jobname.DB file must contain modal solution data in order for this
-        command to calculate the participation factor.  There must be a PFACT
-        command for each excitation spectrum. You are limited to 300
-        excitations.
+
+        .. _PFACT_notes:
+
+        Calculates the participation factors for a particular PSD or multi-point response spectrum table
+        defined with the :ref:`psdval` or :ref:`spval` command. The :file:`Jobname.DB` file must contain
+        modal solution data in order for this command to calculate the participation factor. There must be a
+        :ref:`pfact` command for each excitation spectrum. You are limited to 300 excitations.
 
         This command is also valid in PREP7.
         """
         command = f"PFACT,{tblno},{excit},{parcor}"
         return self.run(command, **kwargs)
 
-    def pivcheck(self, key="", prntcntrl="", **kwargs):
-        """Controls the behavior of an analysis when a negative or zero equation solver pivot value is encountered.
+    def psdcom(self, signif: str = "", comode: str = "", forcetype: str = "", **kwargs):
+        r"""Specifies the power spectral density mode combination method.
 
-        APDL Command: PIVCHECK
-
-        Parameters
-        ----------
-        key
-            Determines whether to stop or continue an analysis when a negative
-            or zero equation solver pivot value is encountered:
-
-            AUTO - Check for negative or zero pivot values for analyses
-                   performed with the sparse and PCG solvers. When one is
-                   encountered, an error or warning is issued, per various
-                   criteria relating to the type of analysis being
-                   solved. An error causes the analysis to stop; a warning
-                   allows the analysis to continue. A negative pivot value
-                   may be valid for some nonlinear and multiphysics
-                   analyses (for example, electromagnetic and thermal
-                   analyses); this key has no effect in these cases.
-
-            ERROR - Check for negative or zero pivot values for analyses
-                    performed with the sparse and PCG solvers. When one is
-                    encountered, an error is issued, stopping the
-                    analysis. A negative pivot value may be valid for some
-                    nonlinear and multiphysics analyses (for example,
-                    electromagnetic and thermal analyses); this key has no
-                    effect in these cases.
-
-            WARN - Check for negative or zero pivot values for analyses
-                   performed with the sparse and PCG solvers. When one is
-                   encountered, a warning is issued and the analysis
-                   continues. A negative pivot value may be valid for some
-                   nonlinear and multiphysics analyses (for example,
-                   electromagnetic and thermal analyses); this key has no
-                   effect in these cases.
-
-            OFF - Pivot values are not checked. This key causes the
-                  analysis to continue in spite of a negative or zero
-                  pivot value.
-
-        prntcntrl
-            Provides print options. Print output with these options will be
-            sent to the default output file, not to the files created by the
-            nonlinear diagnostic tools (NLDIAG).
-
-            ONCE - Print only the maximum and minimum pivot information on
-                   the first call to the sparse solver (which is the
-                   default solver). This is the default behavior.
-
-            EVERY - Print the maximum and minimum pivot information at
-                    every call to the sparse solver. This option is
-                    provided for nonlinear analysis diagnostics.
-
-        Notes
-        -----
-        This command is valid for all analyses. In a nonlinear analysis, a
-        negative pivot may be valid. In some cases, rigid body motions in
-        a nonlinear analysis will be trapped by error routines checking
-        infinitely large displacements (DOF limit exceeded) or
-        nonconvergence status. An under-constrained model may avoid the
-        pivot check, but fail with a DOF limit exceeded error.
-
-        Machine precision may affect whether a small pivot triggers an
-        error or bypasses this checking logic. You may wish to review the
-        ratio of the maximum to absolute minimum pivot values. For ratios
-        exceeding 12 to 14 orders of magnitude, the accuracy of the
-        computed solution may be degraded by the severe ill-conditioning
-        of the assembled matrix.
-
-        Note that negative pivots corresponding to Lagrange multiplier
-        based mixed u-P elements are not checked or reported by this
-        command.  Negative pivots arising from the u-P element formulation
-        and related analyses can occur and lead to correct solutions.
-
-        This command is also valid in PREP7.
-        """
-        command = f"PIVCHECK,{key},{prntcntrl}"
-        return self.run(command, **kwargs)
-
-    def psdcom(self, signif="", comode="", forcetype="", **kwargs):
-        """Specifies the power spectral density mode combination method.
-
-        APDL Command: PSDCOM
+        Mechanical APDL Command: `PSDCOM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PSDCOM.html>`_
 
         Parameters
         ----------
-        signif
-            Combine only those modes whose significance level exceeds theSIGNIF
-            threshold.  For PSD response (SPOPT,PSD), the significance level is
-            defined as the modal covariance matrix term, divided by the maximum
-            modal covariance matrix term.  Any term whose significance level is
-            less than SIGNIF is considered insignificant and is not contributed
-            to the mode combinations.  The higher the SIGNIF threshold, the
-            fewer the number of terms used. SIGNIF defaults to 0.0001.  If
-            SIGNIF is specified as 0.0, it is taken as 0.0.
+        signif : str
+            Combine only those modes whose significance level exceeds the ``SIGNIF`` threshold. For PSD
+            response ( :ref:`spopt`,PSD), the significance level is defined as the modal covariance matrix
+            term, divided by the maximum modal covariance matrix term. Any term whose significance level is
+            less than ``SIGNIF`` is considered insignificant and is not contributed to the mode
+            combinations. The higher the ``SIGNIF`` threshold, the fewer the number of terms used.
+            ``SIGNIF`` defaults to 0.0001. If ``SIGNIF`` is specified as 0.0, it is taken as 0.0.
 
-        comode
-            First COMODE number of modes to be actually combined.  COMODE must
-            always be less than or equal to NMODE (input quantity NMODE on the
-            SPOPT command).  COMODE defaults to NMODE.  COMODE performs a
-            second level of control for the first sequential COMODE number of
-            modes to be combined.  It uses the significance level threshold
-            indicated by SIGNIF and operates only on the significant modes.
+        comode : str
+            First ``COMODE`` number of modes to be actually combined. ``COMODE`` must always be less than or
+            equal to ``NMODE`` (input quantity ``NMODE`` on the :ref:`spopt` command). ``COMODE`` defaults
+            to ``NMODE``. ``COMODE`` performs a second level of control for the first sequential ``COMODE``
+            number of modes to be combined. It uses the significance level threshold indicated by ``SIGNIF``
+            and operates only on the significant modes.
 
-        forcetype
+        forcetype : str
             Label identifying the forces to be combined:
 
-            STATIC - Combine the modal static forces (default).
+            * ``STATIC`` - Combine the modal static forces (default).
 
-            TOTAL - Combine the modal static plus inertial forces.
+            * ``TOTAL`` - Combine the modal static plus inertial forces.
 
         Notes
         -----
-        This command is also valid for PREP7.   This command is valid only for
-        SPOPT,PSD.
 
-        PSDCOM is not allowed in ANSYS Professional.
+        .. _PSDCOM_notes:
+
+        This command is also valid for PREP7. This command is valid only for :ref:`spopt`,PSD.
         """
-        command = f"PSDCOM,{signif},{comode},{forcetype}"
+        command = f"PSDCOM,{signif},{comode},,{forcetype}"
         return self.run(command, **kwargs)
 
     def psdfrq(
         self,
-        tblno1="",
-        tblno2="",
-        freq1="",
-        freq2="",
-        freq3="",
-        freq4="",
-        freq5="",
-        freq6="",
-        freq7="",
+        tblno1: str = "",
+        tblno2: str = "",
+        freq1: str = "",
+        freq2: str = "",
+        freq3: str = "",
+        freq4: str = "",
+        freq5: str = "",
+        freq6: str = "",
+        freq7: str = "",
         **kwargs,
     ):
-        """Defines the frequency points for the input spectrum tables PSDVAL vs.
+        r"""Defines the frequency points for the input spectrum tables PSDVAL vs. PSDFRQ for PSD analysis.
 
-        APDL Command: PSDFRQ
-        PSDFRQ for PSD analysis.
+        Mechanical APDL Command: `PSDFRQ <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PSDFRQ.html>`_
 
         Parameters
         ----------
-        tblno1
-            Input table number.  When used with the COVAL or the QDVAL command,
-            TBLNO1 represents the row number of this table. Up to 200 tables
-            may be defined.
+        tblno1 : str
+            Input table number. When used with the :ref:`coval` or the :ref:`qdval` command, ``TBLNO1``
+            represents the row number of this table. Up to 200 tables may be defined.
 
-        tblno2
-            Input table number.  TBLNO2 is used only for the COVAL or the QDVAL
-            commands and represents the column number of this table.
+        tblno2 : str
+            Input table number. ``TBLNO2`` is used only for the :ref:`coval` or the :ref:`qdval` commands
+            and represents the column number of this table.
 
-        freq1, freq2, freq3, . . . , freq7
-            Frequency points (cycles/time) for spectrum vs. frequency tables.
-            FREQ1 should be greater than zero, and values must be in ascending
-            order.  Log-log interpolation will be used between frequency
-            points.
+        freq1 : str
+            Frequency points (cycles/time) for spectrum vs. frequency tables. ``FREQ1`` should be greater
+            than zero, and values must be in ascending order. Log-log interpolation will be used between
+            frequency points.
+
+        freq2 : str
+            Frequency points (cycles/time) for spectrum vs. frequency tables. ``FREQ1`` should be greater
+            than zero, and values must be in ascending order. Log-log interpolation will be used between
+            frequency points.
+
+        freq3 : str
+            Frequency points (cycles/time) for spectrum vs. frequency tables. ``FREQ1`` should be greater
+            than zero, and values must be in ascending order. Log-log interpolation will be used between
+            frequency points.
+
+        freq4 : str
+            Frequency points (cycles/time) for spectrum vs. frequency tables. ``FREQ1`` should be greater
+            than zero, and values must be in ascending order. Log-log interpolation will be used between
+            frequency points.
+
+        freq5 : str
+            Frequency points (cycles/time) for spectrum vs. frequency tables. ``FREQ1`` should be greater
+            than zero, and values must be in ascending order. Log-log interpolation will be used between
+            frequency points.
+
+        freq6 : str
+            Frequency points (cycles/time) for spectrum vs. frequency tables. ``FREQ1`` should be greater
+            than zero, and values must be in ascending order. Log-log interpolation will be used between
+            frequency points.
+
+        freq7 : str
+            Frequency points (cycles/time) for spectrum vs. frequency tables. ``FREQ1`` should be greater
+            than zero, and values must be in ascending order. Log-log interpolation will be used between
+            frequency points.
 
         Notes
         -----
-        The spectrum values may be input with the PSDVAL, COVAL , or QDVAL
-        commands.  A separate PSDFRQ command must be used for each table and
-        cross table defined.  Frequencies must be in ascending order.
 
-        Repeat PSDFRQ command for additional frequency points.  Values are
-        added after the last nonzero frequency.  If all fields after PSDFRQ are
-        blank, all input vs. frequency tables are erased.  If TBLNO1 is
-        nonblank, all corresponding PSDVAL tables are erased.  If both TBLNO1
-        and TBLNO2 are nonblank,  all corresponding COVAL and QDVAL tables are
+        .. _PSDFRQ_notes:
+
+        The spectrum values may be input with the :ref:`psdval`, :ref:`coval`, or :ref:`qdval` commands. A
+        separate :ref:`psdfrq` command must be used for each table and cross table defined. Frequencies must
+        be in ascending order.
+
+        Repeat :ref:`psdfrq` command for additional frequency points. Values are added after the last
+        nonzero frequency. If all fields after :ref:`psdfrq` are blank, all input vs. frequency tables are
+        erased. If ``TBLNO1`` is nonblank, all corresponding :ref:`psdval` tables are erased. If both
+        ``TBLNO1`` and ``TBLNO2`` are nonblank, all corresponding :ref:`coval` and :ref:`qdval` tables are
         erased.
 
         This command is also valid in PREP7.
@@ -694,167 +741,185 @@ class SpectrumOptions(CommandsBase):
         command = f"PSDFRQ,{tblno1},{tblno2},{freq1},{freq2},{freq3},{freq4},{freq5},{freq6},{freq7}"
         return self.run(command, **kwargs)
 
-    def psdgraph(self, tblno1="", tblno2="", displaykey="", **kwargs):
-        """Displays input PSD curves
+    def psdgraph(
+        self, tblno1: str = "", tblno2: str = "", displaykey: int | str = "", **kwargs
+    ):
+        r"""Displays input PSD curves.
 
-        APDL Command: PSDGRAPH
+        Mechanical APDL Command: `PSDGRAPH <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PSDGRAPH.html>`_
 
         Parameters
         ----------
-        tblno1
+        tblno1 : str
             PSD table number to display.
 
-        tblno2
-            Second PSD table number to display. TBLNO2 is used only in
-            conjunction with the COVAL or the QDVAL commands.
+        tblno2 : str
+            Second PSD table number to display. ``TBLNO2`` is used only in conjunction with the :ref:`coval`
+            or the :ref:`qdval` commands.
 
-        displaykey
+        displaykey : int or str
             Key to display the points markers and numbering:
 
-                0 - Display points markers and numbering (default).
-                1 - Display points numbering only.
-                2 - Display points markers only.
-                3 - No points markers or numbering.
+            * ``0`` - Display points markers and numbering (default).
+
+            * ``1`` - Display points numbering only.
+
+            * ``2`` - Display points markers only.
+
+            * ``3`` - No points markers or numbering.
 
         Notes
         -----
-        The input PSD tables are displayed in log-log format as dotted lines.
-        The best-fit curves, used to perform the closed-form integration, are
-        displayed as solid lines. If there is a significant discrepancy between
-        the two, then you should add one or more intermediate points to the
-        table to obtain a better fit.
 
-        If TBLNO2 is zero, blank, or equal to TBLNO1, then the autospectra
-        (PSDVAL) are displayed for TBLNO1. If TBLNO2 is also specified, then
-        the autospectra for TBLNO1 and TBLNO2 are displayed, along with the
-        corresponding cospectra (COVAL) and quadspectra (QDVAL), if they are
-        defined.
+        .. _PSDGRAPH_notes:
+
+        The input PSD tables are displayed in log-log format as dotted lines. The best-fit curves, used to
+        perform the closed-form integration, are displayed as solid lines. If there is a significant
+        discrepancy between the two, then you should add one or more intermediate points to the table to
+        obtain a better fit.
+
+        If ``TBLNO2`` is zero, blank, or equal to ``TBLNO1``, then the autospectra ( :ref:`psdval` ) are
+        displayed for ``TBLNO1``. If ``TBLNO2`` is also specified, then the autospectra for ``TBLNO1`` and
+        ``TBLNO2`` are displayed, along with the corresponding cospectra ( :ref:`coval` ) and quadspectra (
+        :ref:`qdval` ), if they are defined.
 
         This command is valid in any processor.
         """
         command = f"PSDGRAPH,{tblno1},{tblno2},{displaykey}"
         return self.run(command, **kwargs)
 
-    def psdres(self, lab="", relkey="", **kwargs):
-        """Controls solution output written to the results file from a PSD
+    def psdres(self, lab: str = "", relkey: str = "", **kwargs):
+        r"""Controls solution output written to the results file from a PSD analysis.
 
-        APDL Command: PSDRES
-        analysis.
+        Mechanical APDL Command: `PSDRES <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PSDRES.html>`_
+
+        **Command default:**
+
+        .. _PSDRES_default:
+
+        Relative displacement solution, no velocity or acceleration solution for 1 σ results.
 
         Parameters
         ----------
-        lab
+        lab : str
             Label identifying the solution output:
 
-            DISP - Displacement solution (default).  One-sigma displacements, stresses, forces,
-                   etc.  Written as load step 3 on File.RST.
+            * ``DISP`` - Displacement solution (default). One-sigma displacements, stresses, forces, etc.
+              Written as load step 3 on :file:`FileRST`.
 
-            VELO - Velocity solution.  One-sigma velocities, "stress velocities," "force
-                   velocities," etc.  Written as load step 4 of File.RST.
+            * ``VELO`` - Velocity solution. One-sigma velocities, "stress velocities," "force velocities," etc.
+              Written as load step 4 of :file:`FileRST`.
 
-            ACEL - Acceleration solution.  One-sigma accelerations, "stress accelerations," "force
-                   accelerations," etc.  Written as load step 5 on File.RST.
+            * ``ACEL`` - Acceleration solution. One-sigma accelerations, "stress accelerations," "force
+              accelerations," etc. Written as load step 5 on :file:`FileRST`.
 
-        relkey
+        relkey : str
             Key defining relative or absolute calculations:
 
-            REL - Calculations are relative to the base excitation (default).
+            * ``REL`` - Calculations are relative to the base excitation (default).
 
-            ABS - Calculations are absolute.
+            * ``ABS`` - Calculations are absolute.
 
-            OFF - No calculation of solution output identified by Lab.
+            * ``OFF`` - No calculation of solution output identified by ``Lab``.
 
         Notes
         -----
-        Controls the amount and form of solution output written to the results
-        file from a PSD analysis.  One-sigma values of the relative or absolute
-        displacement solution, relative or absolute velocity solution, relative
-        or absolute acceleration solution, or any combination may be included
-        on the results file.
+
+        .. _PSDRES_notes:
+
+
+        Controls the amount and form of solution output written to the results file from a PSD analysis.
+        One-sigma values of the relative or absolute displacement solution, relative or absolute velocity
+        solution, relative or absolute acceleration solution, or any combination may be included on the
+        results file.
 
         This command is also valid in PREP7.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
         """
         command = f"PSDRES,{lab},{relkey}"
         return self.run(command, **kwargs)
 
-    def psdspl(self, tblno="", rmin="", rmax="", **kwargs):
-        """Defines a partially correlated excitation in a PSD analysis.
+    def psdspl(self, tblno: str = "", rmin: str = "", rmax: str = "", **kwargs):
+        r"""Defines a partially correlated excitation in a PSD analysis.
 
-        APDL Command: PSDSPL
+        Mechanical APDL Command: `PSDSPL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PSDSPL.html>`_
 
         Parameters
         ----------
-        tblno
-            Input PSD table number defined with PSDVAL command.
+        tblno : str
+            Input PSD table number defined with :ref:`psdval` command.
 
-        rmin
-            Minimum distance between excitation points which are partially
-            correlated. Excited nodes closer than RMIN will be fully
-            correlated.
+        rmin : str
+            Minimum distance between excitation points which are partially correlated. Excited nodes closer
+            than ``RMIN`` will be fully correlated.
 
-        rmax
-            Maximum distance between excitation points which are partially
-            correlated. Excited nodes farther apart than RMAX will be
-            uncorrelated.
+        rmax : str
+            Maximum distance between excitation points which are partially correlated. Excited nodes farther
+            apart than ``RMAX`` will be uncorrelated.
 
         Notes
         -----
-        Defines a partially correlated excitation in terms of a sphere of
-        influence relating excitation point geometry (in a PSD analysis).  If
-        the distance between any two excitation points is less than RMIN, then
-        the excitation is fully correlated.  If the distance is greater than
-        RMAX, then the excitation is uncorrelated.  If the distance lies
-        between RMIN and RMAX, then the excitation is partially correlated with
-        the degree of correlation dependent on the separation distance between
-        the points. This command is not available for a pressure PSD analysis.
+
+        .. _PSDSPL_notes:
+
+        Notes
+        Defines a partially correlated excitation in terms of a sphere of influence relating excitation
+        point geometry (in a PSD analysis). If the distance between any two excitation points is less than
+        ``RMIN``, then the excitation is fully correlated. If the distance is greater than ``RMAX``, then
+        the excitation is uncorrelated. If the distance lies between ``RMIN`` and ``RMAX``, then the
+        excitation is partially correlated with the degree of correlation dependent on the separation
+        distance between the points. This command is not available for a pressure PSD analysis.
 
         This command is also valid in PREP7.
         """
         command = f"PSDSPL,{tblno},{rmin},{rmax}"
         return self.run(command, **kwargs)
 
-    def psdunit(self, tblno="", type_="", gvalue="", **kwargs):
-        """Defines the type of input PSD.
+    def psdunit(self, tblno: str = "", type_: str = "", gvalue: str = "", **kwargs):
+        r"""Defines the type of input PSD.
 
-        APDL Command: PSDUNIT
+        Mechanical APDL Command: `PSDUNIT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PSDUNIT.html>`_
+
+        **Command default:**
+
+        .. _PSDUNIT_default:
+
+        Acceleration (ACEL) spectrum (acceleration :sup:`2` /Hz).
 
         Parameters
         ----------
-        tblno
+        tblno : str
             Input table number.
 
-        type\\_
+        type_ : str
             Label identifying the type of spectrum:
 
-            DISP - Displacement spectrum (in terms of displacement2/Hz ).
+            * ``DISP`` - Displacement spectrum (in terms of displacement :sup:`2` /Hz ).
 
-            VELO - Velocity spectrum (in terms of velocity2/Hz ).
+            * ``VELO`` - Velocity spectrum (in terms of velocity :sup:`2` /Hz ).
 
-            ACEL - Acceleration spectrum (in terms of acceleration2/Hz ).
+            * ``ACEL`` - Acceleration spectrum (in terms of acceleration :sup:`2` /Hz ).
 
-            ACCG - Acceleration spectrum (in terms of g2/Hz ).
+            * ``ACCG`` - Acceleration spectrum (in terms of g :sup:`2` /Hz ).
 
-            FORC - Force spectrum (in terms of force2/Hz ).
+            * ``FORC`` - Force spectrum (in terms of force :sup:`2` /Hz ).
 
-            PRES - Pressure spectrum (in terms of pressure2/Hz ).
+            * ``PRES`` - Pressure spectrum (in terms of pressure :sup:`2` /Hz ).
 
-        gvalue
-            Value of acceleration due to gravity in any arbitrary units for
-            Type=ACCG.  Default is 386.4 in/sec2.
+        gvalue : str
+            Value of acceleration due to gravity in any arbitrary units for Type=ACCG. Default is 386.4
+            in/sec :sup:`2`.
 
         Notes
         -----
-        Defines the type of PSD defined by the PSDVAL, COVAL, and QDVAL
-        commands.
 
-        Force (FORC) and pressure (PRES) type spectra can be used only as a
-        nodal excitation.
+        .. _PSDUNIT_notes:
 
-        GVALUE is valid only when type ACCG is specified.  A zero or negative
-        value cannot be used.  A parameter substitution can also be performed.
+        Defines the type of PSD defined by the :ref:`psdval`, :ref:`coval`, and :ref:`qdval` commands.
+
+        Force (FORC) and pressure (PRES) type spectra can be used only as a nodal excitation.
+
+        ``GVALUE`` is valid only when type ACCG is specified. A zero or negative value cannot be used. A
+        parameter substitution can also be performed.
 
         This command is also valid in PREP7.
         """
@@ -863,66 +928,96 @@ class SpectrumOptions(CommandsBase):
 
     def psdval(
         self,
-        tblno="",
-        sv1="",
-        sv2="",
-        sv3="",
-        sv4="",
-        sv5="",
-        sv6="",
-        sv7="",
+        tblno: str = "",
+        sv1: str = "",
+        sv2: str = "",
+        sv3: str = "",
+        sv4: str = "",
+        sv5: str = "",
+        sv6: str = "",
+        sv7: str = "",
         **kwargs,
     ):
-        """Defines PSD values.
+        r"""Defines PSD values.
 
-        APDL Command: PSDVAL
+        Mechanical APDL Command: `PSDVAL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PSDVAL.html>`_
 
         Parameters
         ----------
-        tblno
+        tblno : str
             Input table number being defined.
 
-        sv1, sv2, sv3, . . . , sv7
-            Spectral values corresponding to the frequency points [PSDFRQ].
-            Values are interpreted as defined with the PSDUNIT command.
+        sv1 : str
+            Spectral values corresponding to the frequency points ( :ref:`psdfrq` ). Values are interpreted
+            as defined with the :ref:`psdunit` command.
+
+        sv2 : str
+            Spectral values corresponding to the frequency points ( :ref:`psdfrq` ). Values are interpreted
+            as defined with the :ref:`psdunit` command.
+
+        sv3 : str
+            Spectral values corresponding to the frequency points ( :ref:`psdfrq` ). Values are interpreted
+            as defined with the :ref:`psdunit` command.
+
+        sv4 : str
+            Spectral values corresponding to the frequency points ( :ref:`psdfrq` ). Values are interpreted
+            as defined with the :ref:`psdunit` command.
+
+        sv5 : str
+            Spectral values corresponding to the frequency points ( :ref:`psdfrq` ). Values are interpreted
+            as defined with the :ref:`psdunit` command.
+
+        sv6 : str
+            Spectral values corresponding to the frequency points ( :ref:`psdfrq` ). Values are interpreted
+            as defined with the :ref:`psdunit` command.
+
+        sv7 : str
+            Spectral values corresponding to the frequency points ( :ref:`psdfrq` ). Values are interpreted
+            as defined with the :ref:`psdunit` command.
 
         Notes
         -----
-        Defines PSD values to be associated with the previously defined
-        frequency points.
 
-        Repeat PSDVAL command for additional values, up to the number of
-        frequency points [PSDFRQ].  Values are added after the last nonzero
-        value.
+        .. _PSDVAL_notes:
+
+        Defines PSD values to be associated with the previously defined frequency points.
+
+        Repeat :ref:`psdval` command for additional values, up to the number of frequency points (
+        :ref:`psdfrq` ). Values are added after the last nonzero value.
 
         This command is also valid in PREP7.
         """
         command = f"PSDVAL,{tblno},{sv1},{sv2},{sv3},{sv4},{sv5},{sv6},{sv7}"
         return self.run(command, **kwargs)
 
-    def psdwav(self, tblno="", vx="", vy="", vz="", **kwargs):
-        """Defines a wave propagation excitation in a PSD analysis.
+    def psdwav(
+        self, tblno: str = "", vx: str = "", vy: str = "", vz: str = "", **kwargs
+    ):
+        r"""Defines a wave propagation excitation in a PSD analysis.
 
-        APDL Command: PSDWAV
+        Mechanical APDL Command: `PSDWAV <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PSDWAV.html>`_
 
         Parameters
         ----------
-        tblno
-            Input PSD table number defined with PSDVAL command.
+        tblno : str
+            Input PSD table number defined with :ref:`psdval` command.
 
-        vx
+        vx : str
             Global Cartesian X-velocity of traveling wave.
 
-        vy
+        vy : str
             Global Cartesian Y-velocity of traveling wave.
 
-        vz
+        vz : str
             Global Cartesian Z-velocity of traveling wave.
 
         Notes
         -----
-        Defines a traveling wave in a PSD analysis. This command is not
-        available for a pressure PSD analysis.
+
+        .. _PSDWAV_notes:
+
+        Defines a traveling wave in a PSD analysis. This command is not available for a pressure PSD
+        analysis.
 
         This command is also valid in PREP7.
         """
@@ -931,458 +1026,588 @@ class SpectrumOptions(CommandsBase):
 
     def qdval(
         self,
-        tblno1="",
-        tblno2="",
-        sv1="",
-        sv2="",
-        sv3="",
-        sv4="",
-        sv5="",
-        sv6="",
-        sv7="",
+        tblno1: str = "",
+        tblno2: str = "",
+        sv1: str = "",
+        sv2: str = "",
+        sv3: str = "",
+        sv4: str = "",
+        sv5: str = "",
+        sv6: str = "",
+        sv7: str = "",
         **kwargs,
     ):
-        """Defines PSD quadspectral values.
+        r"""Defines PSD quadspectral values.
 
-        APDL Command: QDVAL
+        Mechanical APDL Command: `QDVAL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_QDVAL.html>`_
 
         Parameters
         ----------
-        tblno1
+        tblno1 : str
             First input PSD table number associated with this spectrum.
 
-        tblno2
+        tblno2 : str
             Second input PSD table number associated with this spectrum.
 
-        sv1, sv2, sv3, . . . , sv7
-            PSD quadspectral values corresponding to the frequency points
-            [PSDFRQ].
+        sv1 : str
+            PSD quadspectral values corresponding to the frequency points ( :ref:`psdfrq` ).
+
+        sv2 : str
+            PSD quadspectral values corresponding to the frequency points ( :ref:`psdfrq` ).
+
+        sv3 : str
+            PSD quadspectral values corresponding to the frequency points ( :ref:`psdfrq` ).
+
+        sv4 : str
+            PSD quadspectral values corresponding to the frequency points ( :ref:`psdfrq` ).
+
+        sv5 : str
+            PSD quadspectral values corresponding to the frequency points ( :ref:`psdfrq` ).
+
+        sv6 : str
+            PSD quadspectral values corresponding to the frequency points ( :ref:`psdfrq` ).
+
+        sv7 : str
+            PSD quadspectral values corresponding to the frequency points ( :ref:`psdfrq` ).
 
         Notes
         -----
-        Defines PSD quadspectral values to be associated with the previously
-        defined frequency points.  Repeat QDVAL command with the same table
-        number for additional points.  Unlike autospectra [PSDVAL], the
-        quadspectra can be positive or negative.  The quadspectral curve
-        segment where there is a sign change is interpolated linearly (the rest
-        of the curve segments use log-log interpolation).  For better accuracy,
-        choose as small a curve segment as possible wherever a sign change
-        occurs.
 
-        Two table numbers are required since values are off-diagonal terms.
-        This command is valid for SPOPT,PSD only.
+        .. _QDVAL_notes:
+
+        Defines PSD quadspectral values to be associated with the previously defined frequency points.
+        Repeat :ref:`qdval` command with the same table number for additional points. Unlike autospectra (
+        :ref:`psdval` ), the quadspectra can be positive or negative. The quadspectral curve segment where
+        there is a sign change is interpolated linearly (the rest of the curve segments use log-log
+        interpolation). For better accuracy, choose as small a curve segment as possible wherever a sign
+        change occurs.
+
+        Two table numbers are required since values are off-diagonal terms. This command is valid for
+        :ref:`spopt`,PSD only.
 
         This command is also valid in PREP7.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
         """
         command = f"QDVAL,{tblno1},{tblno2},{sv1},{sv2},{sv3},{sv4},{sv5},{sv6},{sv7}"
         return self.run(command, **kwargs)
 
-    def rock(self, cgx="", cgy="", cgz="", omx="", omy="", omz="", **kwargs):
-        """Specifies a rocking response spectrum.
+    def rigresp(
+        self,
+        option: str = "",
+        method: str = "",
+        val1: str = "",
+        val2: str = "",
+        **kwargs,
+    ):
+        r"""Specifies the rigid response calculation.
 
-        APDL Command: ROCK
+        Mechanical APDL Command: `RIGRESP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RIGRESP.html>`_
 
         Parameters
         ----------
-        cgx, cgy, cgz
-            Global Cartesian X, Y, and Z location of center of rotation about
-            which rocking occurs.
+        option : str
+            Flag to activate or deactivate the rigid response calculation:
 
-        omx, omy, omz
-            Global Cartesian angular velocity components associated with the
-            rocking.
+            * ``1 (ON or YES)`` - Activate.
+
+            * ``2 (OFF or NO)`` - Deactivate. This value is the default.
+
+        method : str
+            Method used to calculate the rigid response:
+
+            * ``GUPTA`` - Gupta method.
+
+            * ``LINDLEY`` - Lindley-Yow method.
+
+        val1 : str
+            If ``Method`` = GUPTA, ``Val1`` represents the frequency F:sub:`1` in Hertz.
+
+            If ``Method`` = LINDLEY, ``Val1`` is the Zero Period Acceleration (ZPA). If a scale factor is
+            defined (FACT in the :ref:`svtyp` command), it is used to scale this value
+
+        val2 : str
+            If ``Method`` = GUPTA, ``Val2`` represents the frequency F:sub:`2` in Hertz.
 
         Notes
         -----
-        Specifies a rocking response spectrum effect in the spectrum
-        (ANTYPE,SPECTR) analysis.
 
-        The excitation direction with rocking included is not normalized to
-        one; rather, it scales the spectrum. For more information, see
-        Participation Factors and Mode Coefficients.
+        .. _RIGRESP_notes:
+
+        This rigid response calculation is only valid for single point response spectrum analysis (
+        :ref:`spopt`, SPRS) and multiple point response spectrum analysis ( :ref:`spopt`, MPRS) with
+        combination methods ( :ref:`srss` ), complete quadratic ( :ref:`cqc` ) or Rosenblueth ( :ref:`rose`
+        )
+
+        This command is also valid in PREP7.
+
+        * `Performing a Single-Point Response Spectrum (SPRS) Analysis
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_STR6_4.html#aYACegwrd>`_
+        * `Performing a Multi-Point Response Spectrum (MPRS) Analysis
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_STR6_10.html#spectrum_multipoint>`_
+        * `Rigid Responses
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_anproc7.html#eqfa88cef4-37ad-4f72-9bc5-082358cc4a12>`_
+          in the `Mechanical APDL Theory Reference <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_biblio.html>`_
+        * :ref:`mmass` command
+        """
+        command = f"RIGRESP,{option},{method},{val1},{val2}"
+        return self.run(command, **kwargs)
+
+    def rock(
+        self,
+        cgx: str = "",
+        cgy: str = "",
+        cgz: str = "",
+        omx: str = "",
+        omy: str = "",
+        omz: str = "",
+        **kwargs,
+    ):
+        r"""Specifies a rocking response spectrum.
+
+        Mechanical APDL Command: `ROCK <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ROCK.html>`_
+
+        Parameters
+        ----------
+        cgx : str
+            Global Cartesian X, Y, and Z location of center of rotation about which rocking occurs.
+
+        cgy : str
+            Global Cartesian X, Y, and Z location of center of rotation about which rocking occurs.
+
+        cgz : str
+            Global Cartesian X, Y, and Z location of center of rotation about which rocking occurs.
+
+        omx : str
+            Global Cartesian angular components of the rocking.
+
+        omy : str
+            Global Cartesian angular components of the rocking.
+
+        omz : str
+            Global Cartesian angular components of the rocking.
+
+        Notes
+        -----
+
+        .. _ROCK_notes:
+
+        Specifies a rocking response spectrum effect in the spectrum ( :ref:`antype`,SPECTR) analysis.
+
+        The excitation direction with rocking included is not normalized to one; rather, it scales the
+        spectrum. For example, consider a node at coordinates (1,1,0), subject to an excitation in the X
+        direction ( ``SEDX`` = 1.0 on :ref:`sed` ), and a rocking with center ``CGX`` = 1.0, ``CGY`` =
+        ``CGZ`` = 0, and angular component about Z ( ``OMZ`` = 0.5). The total excitation direction at this
+        node is:
+
+        .. math::
+
+            equation not available
+
+        So that half the spectrum input is applied at this node.
+
+        For more information on the equations, see `Participation Factors and Mode Coefficients
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_anproc7.html#eqe483f2f2-aaa1-4080-a835-10c0e1e18f57>`_
 
         This command is also valid in PREP7.
         """
         command = f"ROCK,{cgx},{cgy},{cgz},{omx},{omy},{omz}"
         return self.run(command, **kwargs)
 
-    def rose(self, signif="", label="", td="", forcetype="", **kwargs):
-        """Specifies the Rosenblueth mode combination method.
+    def rose(
+        self,
+        signif: str = "",
+        label: str = "",
+        td: str = "",
+        forcetype: str = "",
+        **kwargs,
+    ):
+        r"""Specifies the Rosenblueth mode combination method.
 
-        APDL Command: ROSE
+        Mechanical APDL Command: `ROSE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ROSE.html>`_
 
         Parameters
         ----------
-        signif
-            Combine only those modes whose significance level exceeds the
-            SIGNIF threshold. For single point, multipoint, or DDAM response
-            (SPOPT, SPRS, MPRS, or DDAM), the significance level of a mode is
-            defined as the mode coefficient of the mode, divided by the maximum
-            mode coefficient of all modes. Any mode whose significance level is
-            less than SIGNIF is considered insignificant and does not
-            contribute to the mode combinations. The higher the SIGNIF
-            threshold, the fewer the number of modes combined. SIGNIF defaults
-            to 0.001. If SIGNIF is specified as 0.0, it is taken as 0.0.
+        signif : str
+            Combine only those modes whose significance level exceeds the SIGNIF threshold. For single
+            point, multipoint, or DDAM response ( :ref:`spopt`, SPRS, MPRS, or DDAM), the significance level
+            of a mode is defined as the mode coefficient divided by the maximum mode coefficient of all
+            modes. Any mode whose significance level is less than ``SIGNIF`` is considered insignificant and
+            does not contribute to the mode combinations. The higher the SIGNIF threshold, the fewer the
+            number of modes combined. ``SIGNIF`` defaults to 0.001. If SIGNIF is specified as 0.0, it is
+            taken as 0.0. (This mode combination method is not valid for :ref:`spopt`,PSD.)
 
-        label
+        label : str
             Label identifying the combined mode solution output.
 
-            DISP - Displacement solution (default). Displacements, stresses, forces, etc., are
-                   available.
+            * ``DISP`` - Displacement solution (default). Displacements, stresses, forces, etc., are available.
 
-            VELO - Velocity solution. Velocities, "stress velocities," "force velocities," etc.,
-                   are available.
+            * ``VELO`` - Velocity solution. Velocities, "stress velocities," "force velocities," etc., are
+              available.
 
-            ACEL - Acceleration solution. Accelerations, "stress accelerations," "force
-                   accelerations," etc. are available.
+            * ``ACEL`` - Acceleration solution. Accelerations, "stress accelerations," "force accelerations,"
+              etc. are available.
 
-        td
-            Time duration for earthquake or shock spectrum. TD defaults to 10.
+        td : str
+            Time duration for earthquake or shock spectrum. ``TD`` defaults to 10.
 
-        forcetype
+        forcetype : str
             Label identifying the forces to be combined:
 
-            STATIC - Combine the modal static forces (default).
+            * ``STATIC`` - Combine the modal static forces (default).
 
-            TOTAL - Combine the modal static plus inertial forces.
+            * ``TOTAL`` - Combine the modal static plus inertial forces.
 
         Notes
         -----
-        For more information on spectrum analysis combination methods, see
-        Combination of Modes
+
+        .. _ROSE_notes:
+
+        For more information on spectrum analysis combination methods, see `Combination of Modes
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_anproc7.html#rosemeth1f>`_
 
         This command is also valid in PREP7.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
         """
         command = f"ROSE,{signif},{label},{td},{forcetype}"
         return self.run(command, **kwargs)
 
-    def rigresp(self, option="", method="", val1="", val2="", **kwargs):
-        """Specifies the rigid response calculation.
+    def sed(
+        self, sedx: str = "", sedy: str = "", sedz: str = "", cname: str = "", **kwargs
+    ):
+        r"""Defines the excitation direction for response spectrum and PSD analyses.
 
-        APDL Command: RIGRESP
-
-        Parameters
-        ----------
-        option
-            Flag to activate or deactivate the rigid response calculation:
-
-            1 (ON or YES) - Activate.
-
-            2 (OFF or NO) - Deactivate. This value is the default.
-
-        method
-            Method used to calculate the rigid response:
-
-            GUPTA - Gupta method.
-
-            LINDLEY - Lindley-Yow method.
-
-        val1
-            If Method = GUPTA, Val1 represents the frequency F1 in Hertz.
-
-        val2
-            If Method = GUPTA, Val2 represents the frequency F2 in Hertz.
-
-        Notes
-        -----
-        This rigid response calculation is only valid for single point response
-        spectrum analysis (SPOPT, SPRS) and multiple point response spectrum
-        analysis (SPOPT, MPRS) with combination methods (SRSS), complete
-        quadratic (CQC) or Rosenblueth (ROSE)
-
-        This command is also valid in PREP7.
-
-        Only Sptype = SPRS is allowed in ANSYS Professional.
-        """
-        command = f"RIGRESP,{option},{method},{val1},{val2}"
-        return self.run(command, **kwargs)
-
-    def sed(self, sedx="", sedy="", sedz="", cname="", **kwargs):
-        """Defines the excitation direction for response spectrum and PSD
-
-        APDL Command: SED
-        analyses.
+        Mechanical APDL Command: `SED <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SED.html>`_
 
         Parameters
         ----------
-        sedx, sedy, sedz
-            Global Cartesian coordinates of a point that defines a line
-            (through the origin) corresponding to the excitation direction.
-            For example: 0.0, 1.0, 0.0 defines global Y as the spectrum
+        sedx : str
+            Global Cartesian coordinates of a point that defines a line (through the origin) corresponding
+            to the excitation direction. For example: 0.0, 1.0, 0.0 defines global Y as the spectrum
             direction.
 
-        cname
-            The component name corresponding to the group of excited nodes.
-            Only applies to base excitation multi-point response spectrum
-            analysis (SPOPT, MPRS) and power spectral density analysis (SPOPT,
-            PSD). Defaults to no component.
+        sedy : str
+            Global Cartesian coordinates of a point that defines a line (through the origin) corresponding
+            to the excitation direction. For example: 0.0, 1.0, 0.0 defines global Y as the spectrum
+            direction.
+
+        sedz : str
+            Global Cartesian coordinates of a point that defines a line (through the origin) corresponding
+            to the excitation direction. For example: 0.0, 1.0, 0.0 defines global Y as the spectrum
+            direction.
+
+        cname : str
+            The component name corresponding to the group of excited nodes. Only applies to base excitation
+            multi-point response spectrum analysis ( :ref:`spopt`, MPRS) and power spectral density analysis
+            ( :ref:`spopt`, PSD). Defaults to no component.
 
         Notes
         -----
-        In single-point response spectrum analysis (SPOPT,SPRS), the excitation
-        direction without rocking (ROCK) is normalized to one so that the SEDX,
-        SEDY, and SEDZ values do not scale the spectrum.  The excitation
-        direction with rocking is not normalized. The SEDX, SEDY, and SEDZ
-        values must be consistent with the OMX, OMY, and OMZ values on the ROCK
-        command. The calculated direction then scales the spectrum. For more
-        information, see Participation Factors and Mode Coefficients.
 
-        In multi-point response spectrum analysis (SPOPT,MPRS) and power
-        spectral density analysis (SPOPT,PSD), the excitation direction is
-        normalized to one so that the SEDX, SEDY, and SEDZ values do not scale
-        the spectrum.  The component name (Cname) is required. The constraints
-        corresponding to the excitation direction are applied to the component
-        nodes.
+        .. _SED_notes:
+
+        In single-point response spectrum analysis ( :ref:`spopt`,SPRS), the excitation direction without
+        rocking ( :ref:`rock` ) is normalized to one so that the ``SEDX``, ``SEDY``, and ``SEDZ`` values do
+        not scale the spectrum. The excitation direction with rocking is not normalized. The ``SEDX``,
+        ``SEDY``, and ``SEDZ`` values must be consistent with the linear components of ``OMX``, ``OMY``, and
+        ``OMZ`` values on the :ref:`rock` command. The calculated direction then scales the spectrum. For
+        more information, see `Participation Factors and Mode Coefficients
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_anproc7.html#eqe483f2f2-aaa1-4080-a835-10c0e1e18f57>`_.
+
+        In multi-point response spectrum analysis ( :ref:`spopt`,MPRS) and power spectral density analysis
+        ( :ref:`spopt`,PSD), the excitation direction is normalized to one so that the ``SEDX``, ``SEDY``,
+        and ``SEDZ`` values do not scale the spectrum. The component name ( ``Cname`` ) is required. The
+        constraints corresponding to the excitation direction are applied to the component nodes.
 
         This command is also valid in PREP7.
         """
         command = f"SED,{sedx},{sedy},{sedz},{cname}"
         return self.run(command, **kwargs)
 
-    def spdamp(self, tblno="", curvno="", dampratio="", **kwargs):
-        """Defines input spectrum damping in a multi-point response spectrum
+    def spdamp(self, tblno: str = "", curvno: str = "", dampratio: str = "", **kwargs):
+        r"""Defines input spectrum damping in a multi-point response spectrum analysis.
 
-        APDL Command: SPDAMP
-        analysis.
+        Mechanical APDL Command: `SPDAMP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPDAMP.html>`_
 
         Parameters
         ----------
-        tblno
-            Input table number. Corresponds to the frequency table number
-            (TBLNO on the SPFREQ command).
+        tblno : str
+            Input table number. Corresponds to the frequency table number ( ``TBLNO`` on the :ref:`spfreq`
+            command).
 
-        curvno
-            Input curve number. Corresponds to the spectrum values curve number
-            (CURVNO on the SPVAL command).
+        curvno : str
+            Input curve number. Corresponds to the spectrum values curve number ( ``CURVNO`` on the
+            :ref:`spval` command).
 
-        dampratio
-            Damping ratio for the response spectrum curve. Up to 20 different
-            curves may be defined, each with a different damping ratio. Damping
-            values must be input in ascending order.
+        dampratio : str
+            Damping ratio for the response spectrum curve. Up to 20 different curves may be defined, each
+            with a different damping ratio. Damping values must be input in ascending order.
 
         Notes
         -----
-        Defines multi-point response spectrum damping value to be associated
-        with:
 
-        Previously defined frequency points (SPFREQ).
+        .. _SPDAMP_notes:
 
-        Subsequently defined spectrum points (SPVAL).
+        Defines multi-point response spectrum damping value to be associated with:
 
-        Damping values are used only to identify input spectrum values for the
-        mode coefficients calculation.
+        * Previously defined frequency points ( :ref:`spfreq` ).
+
+        * Subsequently defined spectrum points ( :ref:`spval` ).
+
+        Damping values are used only to identify input spectrum values for the mode coefficients
+        calculation.
 
         The curve number must be input in ascending order starting with 1.
 
         This command is also valid in PREP7.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
         """
         command = f"SPDAMP,{tblno},{curvno},{dampratio}"
         return self.run(command, **kwargs)
 
     def spfreq(
         self,
-        tblno="",
-        freq1="",
-        freq2="",
-        freq3="",
-        freq4="",
-        freq5="",
-        freq6="",
-        freq7="",
+        tblno: str = "",
+        freq1: str = "",
+        freq2: str = "",
+        freq3: str = "",
+        freq4: str = "",
+        freq5: str = "",
+        freq6: str = "",
+        freq7: str = "",
         **kwargs,
     ):
-        """Defines the frequency points for the input spectrum tables SPVAL vs.
+        r"""Defines the frequency points for the input spectrum tables :ref:`spval` vs. :ref:`spfreq` for multi-
+        point spectrum analysis.
 
-        APDL Command: SPFREQ
-        SPFREQ for multi-point spectrum analysis.
+        Mechanical APDL Command: `SPFREQ <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPFREQ.html>`_
 
         Parameters
         ----------
-        tblno
+        tblno : str
             Input table number. Up to 200 tables may be defined.
 
-        freq1, freq2, freq3,..., freq7
-            Frequency points (Hz) for spectrum vs. frequency tables. FREQ1
-            should be greater than zero, and values must be in ascending order.
+        freq1 : str
+            Frequency points (Hz) for spectrum vs. frequency tables. ``FREQ1`` should be greater than zero,
+            and values must be in ascending order.
+
+        freq2 : str
+            Frequency points (Hz) for spectrum vs. frequency tables. ``FREQ1`` should be greater than zero,
+            and values must be in ascending order.
+
+        freq3 : str
+            Frequency points (Hz) for spectrum vs. frequency tables. ``FREQ1`` should be greater than zero,
+            and values must be in ascending order.
+
+        freq4 : str
+            Frequency points (Hz) for spectrum vs. frequency tables. ``FREQ1`` should be greater than zero,
+            and values must be in ascending order.
+
+        freq5 : str
+            Frequency points (Hz) for spectrum vs. frequency tables. ``FREQ1`` should be greater than zero,
+            and values must be in ascending order.
+
+        freq6 : str
+            Frequency points (Hz) for spectrum vs. frequency tables. ``FREQ1`` should be greater than zero,
+            and values must be in ascending order.
+
+        freq7 : str
+            Frequency points (Hz) for spectrum vs. frequency tables. ``FREQ1`` should be greater than zero,
+            and values must be in ascending order.
 
         Notes
         -----
-        The spectrum values are input with the SPVAL command. A separate SPFREQ
-        command must be used for each table defined. Frequencies must be in
-        ascending order.
 
-        Repeat SPFREQ command for additional frequency points. Values are added
-        after the last nonzero frequency.
+        .. _SPFREQ_notes:
 
-        If all fields after SPFREQ are blank, all input vs. frequency tables
-        are erased. If TBLNO is the only non-blank field, all corresponding
-        SPVAL curves are erased.
+        The spectrum values are input with the :ref:`spval` command. A separate :ref:`spfreq` command must
+        be used for each table defined. Frequencies must be in ascending order.
 
-        Use the SPTOPT and STAT commands to list current frequency points.
+        Repeat :ref:`spfreq` command for additional frequency points. Values are added after the last
+        nonzero frequency.
+
+        If all fields after :ref:`spfreq` are blank, all input vs. frequency tables are erased. If ``TBLNO``
+        is the only non-blank field, all corresponding :ref:`spval` curves are erased.
+
+        Use the :ref:`sptopt` and :ref:`stat` commands to list current frequency points.
 
         This command is also valid in PREP7.
-
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
         """
         command = (
             f"SPFREQ,{tblno},{freq1},{freq2},{freq3},{freq4},{freq5},{freq6},{freq7}"
         )
         return self.run(command, **kwargs)
 
-    def spgraph(self, tblno="", curvno="", curvnobeg="", **kwargs):
-        """Displays input spectrum curves for MPRS analysis.
+    def spgraph(self, tblno: str = "", curvno: str = "", curvnobeg: str = "", **kwargs):
+        r"""Displays input spectrum curves for MPRS analysis.
 
-        APDL Command: SPGRAPH
+        Mechanical APDL Command: `SPGRAPH <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPGRAPH.html>`_
 
         Parameters
         ----------
-        tblno
-            Table number to display.  Defaults to 1.
+        tblno : str
+            Table number to display. Defaults to 1.
 
-        curvno
+        curvno : str
             Curve number to display. Defaults to none.
 
-        curvnobeg
+        curvnobeg : str
             Beginning of the curve number range to display. Defaults to 1.
 
         Notes
         -----
-        You can display up to 10 input spectrum curves (SPVAL and SPFREQ
-        commands) with log X scale.
 
-        If the input spectrum curves are not associated with a damping value
-        (SPDAMP command), CURVNO and CURVNOBeg are not applicable and table
-        TBLNO is displayed. Otherwise, specify CURVNO or CURVNOBeg:
+        .. _SPGRAPH_notes:
 
-        if CURVNO is used, one curve is displayed.
+        You can display up to 10 input spectrum curves ( :ref:`spval` and :ref:`spfreq` commands) with log X
+        scale.
 
-        if CURVNOBeg is used, up to 10 curves are displayed. CURVNOBeg is the
-        beginning of the curve number range of interest.
+        If the input spectrum curves are not associated with a damping value ( :ref:`spdamp` command),
+        ``CURVNO`` and ``CURVNOBeg`` are not applicable and table ``TBLNO`` is displayed. Otherwise, specif
+        y ``CURVNO`` or ``CURVNOBeg`` :
+
+        * if ``CURVNO`` is used, one curve is displayed.
+
+        * if ``CURVNOBeg`` is used, up to 10 curves are displayed. ``CURVNOBeg`` is the beginning of the
+          curve number range of interest.
         """
         command = f"SPGRAPH,{tblno},{curvno},{curvnobeg}"
         return self.run(command, **kwargs)
 
-    def spopt(self, sptype="", nmode="", elcalc="", modereusekey="", **kwargs):
-        """Selects the spectrum type and other spectrum options.
+    def spopt(
+        self,
+        spectype: str = "",
+        nmode: str = "",
+        elcalc: str = "",
+        modereusekey: str = "",
+        **kwargs,
+    ):
+        r"""Selects the spectrum type and other spectrum options.
 
-        APDL Command: SPOPT
+        Mechanical APDL Command: `SPOPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPOPT.html>`_
 
         Parameters
         ----------
-        sptype
+        spectype : str
             Spectrum type:
 
-            SPRS - Single point excitation response spectrum (default).  See also the SVTYP
-                   command.
+            * ``SPRS`` - Single point excitation response spectrum (default). See also :ref:`svtyp`.
 
-            MPRS - Multiple point excitation response spectrum.
+            * ``MPRS`` - Multiple point excitation response spectrum.
 
-            DDAM - Dynamic design analysis method.
+            * ``DDAM`` - Dynamic design analysis method.
 
-            PSD - Power spectral density.
+            * ``PSD`` - Power spectral density.
 
-        nmode
-            Use the first NMODE modes from the modal analysis.  Defaults to all
-            extracted modes, as specified by the MODOPT and BUCOPT commands.
-            NMODE cannot be larger than 10000.
+        nmode : str
+            Use the first ``NMODE`` modes from the modal analysis. Defaults to all extracted modes, as
+            specified by the :ref:`modopt` and :ref:`bucopt` commands. ``NMODE`` cannot be larger than
+            10000.
 
-        elcalc
-            Element results calculation key (for Sptype = PSD only):
+        elcalc : str
+            Element results calculation key:
 
-            NO - Do not calculate element results and reaction forces (default).
+            * ``NO`` - Do not calculate element results and reaction forces (default).
 
-            YES - Calculate element results and reaction forces, as well as the nodal degree of
-                  freedom solution.
+            * ``YES`` - Calculate element results and reaction forces, as well as the nodal degree of freedom
+              solution.
 
-        modereusekey
-            Key for existing MODE file reuse when running multiple spectrum
-            analyses:
+        modereusekey : str
+            Key for existing ``MODE`` file reuse when running multiple spectrum analyses:
 
-            NO - No spectrum analysis has been performed yet (default).
+            * ``NO`` - No spectrum analysis has been performed yet (default).
 
-            YES - This is not the first spectrum analysis.  The MODE file will be reused and the
-                  necessary files will be cleaned up for the new spectrum
-                  analysis.
+            * ``YES`` - This is not the first spectrum analysis. The ``MODE`` file will be reused and the
+              necessary files will be cleaned up for the new spectrum analysis.
 
         Notes
         -----
-        Valid only for a spectrum analysis (ANTYPE,SPECTR).  This operation
-        must be preceded by a modal solution (ANTYPE,MODAL) with the
-        appropriate files available.  Both the spectrum analysis and the
-        preceding modal analysis must be performed under the same ANSYS version
+
+        .. _SPOPT_notes:
+
+        Valid only for a spectrum analysis ( :ref:`antype`,SPECTR). This operation must be preceded by a
+        modal solution ( :ref:`antype`,MODAL) with the appropriate files available. Both the spectrum
+        analysis and the preceding modal analysis must be performed under the same Mechanical APDL version
         number.
 
-        If used in SOLUTION, this command is valid only within the first load
-        step.
+        If used in SOLUTION, this command is valid only within the first load step.
+
+        Element results are calculated ( ``Elcalc`` = YES) only if the element modal results are available
+        (written to the :file:`Jobname.mode` file with ``MSUPkey`` = YES on the :ref:`mxpand` command). For
+        ``Sptype`` = SPRS, MPRS, and DDAM, if the element results calculation is activated ( ``Elcalc`` =
+        YES) and element modal results are not available, it is deactivated automatically.
+
+        For SPRS, DDAM or MPRS analyses, modal responses can be combined and stored directly in the
+        :file:`Jobname.rst` file during spectrum solution according to the mode combination method command
+        issued ( :ref:`srss`, :ref:`cqc`, etc.) for ``Elcalc`` = YES. This can save significant time
+        compared to the method for ``Elcalc`` = NO, which requires generating the file of POST1 commands (
+        :file:`Jobname.mcom` file) to be read in POST1 to do the mode combinations. For details and example
+        usage, see `Spectrum Analysis
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_STR6_10.html>`_, and Example:
+        Multi-Point Response Spectrum (MPRS) Analysis.
 
         This command is also valid in PREP7.
-
-        Only Sptype = SPRS is allowed in ANSYS Professional.
         """
-        command = f"SPOPT,{sptype},{nmode},{elcalc},{modereusekey}"
+        command = f"SPOPT,{spectype},{nmode},{elcalc},{modereusekey}"
         return self.run(command, **kwargs)
 
-    def spunit(self, tblno="", type_="", gvalue="", keyinterp="", **kwargs):
-        """Defines the type of multi-point response spectrum.
+    def spunit(
+        self,
+        tblno: str = "",
+        type_: str = "",
+        gvalue: str = "",
+        keyinterp: str = "",
+        **kwargs,
+    ):
+        r"""Defines the type of multi-point response spectrum.
 
-        APDL Command: SPUNIT
+        Mechanical APDL Command: `SPUNIT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPUNIT.html>`_
 
         Parameters
         ----------
-        tblno
+        tblno : str
             Input table number.
 
-        type\\_
+        type_ : str
             Label identifying the type of spectrum:
 
-            DISP   - Displacement spectrum (SPVAL values interpreted as displacements with units of
-                     length).
+            * ``DISP`` - Displacement spectrum ( :ref:`spval` values interpreted as displacements with units of
+              length).
 
-            VELO   - Velocity spectrum (SPVAL values interpreted as velocities with units of
-                     length/time).
+            * ``VELO`` - Velocity spectrum ( :ref:`spval` values interpreted as velocities with units of
+              length/time).
 
-            ACEL   - Acceleration spectrum (SPVAL values interpreted as accelerations with units of
-                     length/time2).
+            * ``ACEL`` - Acceleration spectrum ( :ref:`spval` values interpreted as accelerations with units of
+              length/time :sup:`2` ).
 
-            ACCG   - Acceleration spectrum (SPVAL values interpreted as accelerations with units of
-                     g/time2).
+            * ``ACCG`` - Acceleration spectrum ( :ref:`spval` values interpreted as accelerations with units of
+              g/time :sup:`2` ).
 
-            FORC   - Force spectrum.
+            * ``FORC`` - Force spectrum.
 
-            PRES   - Pressure spectrum.
+            * ``PRES`` - Pressure spectrum.
 
-        gvalue
-            Value of acceleration due to gravity in any arbitrary units for
-            Type=ACCG table. Default is 386.4 in/sec2.
+        gvalue : str
+            Value of acceleration due to gravity in any arbitrary units for Type=ACCG table. Default is
+            386.4 in/sec :sup:`2`.
 
-        keyinterp
-            Key to activate or deactivate the linear interpolation between
-            input response spectrum points and input response spectrum curves:
+        keyinterp : str
+            Key to activate or deactivate the linear interpolation between input response spectrum points and
+            input response spectrum curves:
 
-            0 (OFF or NO) - Deactivate linear and use logarithmic interpolation. This value is the default.
+            * ``0 (OFF or NO)`` - Deactivate linear and use logarithmic interpolation. This value is the
+              default.
 
-            1 (ON or YES) - Activate linear interpolation.
+            * ``1 (ON or YES)`` - Activate linear interpolation.
 
         Notes
         -----
-        Defines the type of multi-point response spectrum defined by the SPFREQ
-        and  SPVAL commands.
 
-        Force (FORC) and pressure (PRES) type spectra can be used only as a
-        nodal excitation.
+        .. _SPUNIT_notes:
 
-        GVALUE is valid only when type=ACCG is specified. A zero or negative
-        value cannot be used. A parameter substitution can also be performed.
+        Defines the type of multi-point response spectrum defined by the :ref:`spfreq` and :ref:`spval`
+        commands.
+
+        Force ( **FORC** ) and pressure ( **PRES** ) type spectra can be used only as a nodal excitation.
+
+        ``GVALUE`` is valid only when ``Type`` = ACCG is specified. A zero or negative value cannot be used.
+        A parameter substitution can also be performed.
 
         This command is also valid in PREP7.
         """
@@ -1391,106 +1616,138 @@ class SpectrumOptions(CommandsBase):
 
     def spval(
         self,
-        tblno="",
-        curvno="",
-        sv1="",
-        sv2="",
-        sv3="",
-        sv4="",
-        sv5="",
-        sv6="",
-        sv7="",
+        tblno: str = "",
+        curvno: str = "",
+        sv1: str = "",
+        sv2: str = "",
+        sv3: str = "",
+        sv4: str = "",
+        sv5: str = "",
+        sv6: str = "",
+        sv7: str = "",
         **kwargs,
     ):
-        """Defines multi-point response spectrum values.
+        r"""Defines multi-point response spectrum values.
 
-        APDL Command: SPVAL
+        Mechanical APDL Command: `SPVAL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPVAL.html>`_
 
         Parameters
         ----------
-        tblno
-            Input table number. It corresponds to TBLNO on the SPFREQ command.
+        tblno : str
+            Input table number. It corresponds to ``TBLNO`` on the :ref:`spfreq` command.
 
-        curvno
-            Input curve number. It corresponds to CURVNO on the SPDAMP command
-            (optional).
+        curvno : str
+            Input curve number. It corresponds to ``CURVNO`` on the :ref:`spdamp` command (optional).
 
-        sv1, sv2, sv3, , , . . . , sv7
-            Spectral values corresponding to the frequency points (SPFREQ) and
-            damping ratio (SPDAMP). Values are interpreted as defined with the
-            SPUNIT command.
+        sv1 : str
+            Spectral values corresponding to the frequency points ( :ref:`spfreq` ) and damping ratio (
+            :ref:`spdamp` ). Values are interpreted as defined with the :ref:`spunit` command.
+
+        sv2 : str
+            Spectral values corresponding to the frequency points ( :ref:`spfreq` ) and damping ratio (
+            :ref:`spdamp` ). Values are interpreted as defined with the :ref:`spunit` command.
+
+        sv3 : str
+            Spectral values corresponding to the frequency points ( :ref:`spfreq` ) and damping ratio (
+            :ref:`spdamp` ). Values are interpreted as defined with the :ref:`spunit` command.
+
+        sv4 : str
+            Spectral values corresponding to the frequency points ( :ref:`spfreq` ) and damping ratio (
+            :ref:`spdamp` ). Values are interpreted as defined with the :ref:`spunit` command.
+
+        sv5 : str
+            Spectral values corresponding to the frequency points ( :ref:`spfreq` ) and damping ratio (
+            :ref:`spdamp` ). Values are interpreted as defined with the :ref:`spunit` command.
+
+        sv6 : str
+            Spectral values corresponding to the frequency points ( :ref:`spfreq` ) and damping ratio (
+            :ref:`spdamp` ). Values are interpreted as defined with the :ref:`spunit` command.
+
+        sv7 : str
+            Spectral values corresponding to the frequency points ( :ref:`spfreq` ) and damping ratio (
+            :ref:`spdamp` ). Values are interpreted as defined with the :ref:`spunit` command.
 
         Notes
         -----
-        Defines multi-point response spectrum values to be associated with the
-        previously defined frequency points (SPFREQ). It can also be associated
-        with the previously defined damping value (SPDAMP). If CURVNO is not
-        specified, the input spectrum is not associated with a damping value.
 
-        Repeat SPVAL command for additional values, up to the number of
-        frequency points (SPFREQ). Values are added after the last nonzero
+        .. _SPVAL_notes:
+
+        Notes
+        Defines multi-point response spectrum values to be associated with the previously defined frequency
+        points ( :ref:`spfreq` ). It can also be associated with the previously defined damping value (
+        :ref:`spdamp` ). If ``CURVNO`` is not specified, the input spectrum is not associated with a damping
         value.
 
-        The interpolation method between response spectrum points and curves is
-        specified using KeyInterp on the SPUNIT command. It is logarithmic by
-        default.
+        Repeat :ref:`spval` command for additional values, up to the number of frequency points (
+        :ref:`spfreq` ). Values are added after the last nonzero value.
 
-        Use the SPTOPT and STAT commands to list current spectrum curve values.
+        The interpolation method between response spectrum points and curves is specified using
+        ``KeyInterp`` on the :ref:`spunit` command. It is logarithmic by default.
+
+        Use the :ref:`sptopt` and :ref:`stat` commands to list current spectrum curve values.
 
         This command is also valid in PREP7.
         """
         command = f"SPVAL,{tblno},{curvno},{sv1},{sv2},{sv3},{sv4},{sv5},{sv6},{sv7}"
         return self.run(command, **kwargs)
 
-    def srss(self, signif="", label="", abssumkey="", forcetype="", **kwargs):
-        """Specifies the square root of sum of squares mode combination method.
+    def srss(
+        self,
+        signif: str = "",
+        label: str = "",
+        abssumkey: str = "",
+        forcetype: str = "",
+        **kwargs,
+    ):
+        r"""Specifies the square root of sum of squares mode combination method.
 
-        APDL Command: SRSS
+        Mechanical APDL Command: `SRSS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SRSS.html>`_
 
         Parameters
         ----------
-        signif
-            Combine only those modes whose significance level exceeds the
-            SIGNIF threshold.  For single point, multipoint, or DDAM response
-            (SPOPT,SPRS, MPRS or DDAM), the significance level of a mode is
-            defined as the mode coefficient of the mode, divided by the maximum
-            mode coefficient of all modes.  Any mode whose significance level
-            is less than SIGNIF is considered insignificant and is not
-            contributed to the mode combinations.  The higher the SIGNIF
-            threshold, the fewer the number of modes combined. SIGNIF defaults
-            to 0.001.  If SIGNIF is specified as 0.0, it is taken as 0.0.
-            (This mode combination method is not valid for SPOPT,PSD.)
+        signif : str
+            Combine only those modes whose significance level exceeds the ``SIGNIF`` threshold. For single
+            point, multipoint, or DDAM response ( :ref:`spopt`,SPRS, MPRS or DDAM), the significance level
+            of a mode is defined as the mode coefficient divided by the maximum mode coefficient of all
+            modes. Any mode whose significance level is less than ``SIGNIF`` is considered insignificant and
+            is not contributed to the mode combinations. The higher the ``SIGNIF`` threshold, the fewer the
+            number of modes combined. ``SIGNIF`` defaults to 0.001. If ``SIGNIF`` is specified as 0.0, it is
+            taken as 0.0. (This mode combination method is not valid for :ref:`spopt`,PSD.)
 
-        label
+        label : str
             Label identifying the combined mode solution output.
 
-            DISP - Displacement solution (default).  Displacements, stresses, forces, etc., are
-                   available.
+            * ``DISP`` - Displacement solution (default). Displacements, stresses, forces, etc., are available.
 
-            VELO - Velocity solution.  Velocities, "stress velocities," "force velocities," etc.,
-                   are available.
+            * ``VELO`` - Velocity solution. Velocities, "stress velocities," "force velocities," etc., are
+              available.
 
-            ACEL - Acceleration solution.  Accelerations, "stress accelerations," "force
-                   accelerations," etc., are available.
+            * ``ACEL`` - Acceleration solution. Accelerations, "stress accelerations," "force accelerations,"
+              etc., are available.
 
-        abssumkey
-            Absolute Sum combination key (for SPOPT,MPRS only):
+        abssumkey : str
+            Absolute Sum combination key (for :ref:`spopt`,MPRS only):
 
-            NO - Do not use the Absolute Sum method (default).
+            * ``NO`` - Do not use the Absolute Sum method (default).
 
-            YES - Combine the modes per excitation direction using the Absolute Sum method, then
-                  combine the resulting quantities using the square root of sum
-                  of squares method.
+            * ``YES`` - Combine the modes per excitation direction using the Absolute Sum method, then combine
+              the resulting quantities using the square root of sum of squares method.
 
-        forcetype
+              When using Absolute Sum combination, the excitation direction must be specified using the :ref:`sed`
+              command.
+
+        forcetype : str
             Label identifying the forces to be combined:
 
-            STATIC - Combine the modal static forces (default).
+            * ``STATIC`` - Combine the modal static forces (default).
 
-            TOTAL - Combine the modal static plus inertial forces.
+            * ``TOTAL`` - Combine the modal static plus inertial forces.
 
         Notes
         -----
+
+        .. _SRSS_notes:
+
         This command is also valid for PREP7.
         """
         command = f"SRSS,{signif},{label},{abssumkey},{forcetype}"
@@ -1498,180 +1755,234 @@ class SpectrumOptions(CommandsBase):
 
     def sv(
         self,
-        damp="",
-        sv1="",
-        sv2="",
-        sv3="",
-        sv4="",
-        sv5="",
-        sv6="",
-        sv7="",
-        sv8="",
-        sv9="",
+        damp: str = "",
+        sv1: str = "",
+        sv2: str = "",
+        sv3: str = "",
+        sv4: str = "",
+        sv5: str = "",
+        sv6: str = "",
+        sv7: str = "",
+        sv8: str = "",
+        sv9: str = "",
         **kwargs,
     ):
-        """Defines spectrum values to be associated with frequency points.
+        r"""Defines spectrum values to be associated with frequency points.
 
-        APDL Command: SV
+        Mechanical APDL Command: `SV <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SV.html>`_
 
         Parameters
         ----------
-        damp
-            Damping ratio for this response spectrum curve.  If the same as a
-            previously defined curve, the SV values are added to the previous
-            curve.  Up to four different curves may be defined, each with a
-            different damping ratio.  Damping values must be input in ascending
-            order.
+        damp : str
+            Damping ratio for this response spectrum curve. If the same as a previously defined curve, the
+            SV values are added to the previous curve. Up to four different curves may be defined, each with
+            a different damping ratio. Damping values must be input in ascending order.
 
-        sv1, sv2, sv3, . . . , sv9
-            Spectrum values corresponding to the frequency points [FREQ].
-            Values are interpreted as defined with the SVTYP command.   SV
-            values should not be zero.  Values required outside the frequency
-            range use the extreme input values.
+        sv1 : str
+            Spectrum values corresponding to the frequency points ( :ref:`freq` ). Values are interpreted as
+            defined with the :ref:`svtyp` command. SV values should not be zero. Values required outside the
+            frequency range use the extreme input values.
+
+        sv2 : str
+            Spectrum values corresponding to the frequency points ( :ref:`freq` ). Values are interpreted as
+            defined with the :ref:`svtyp` command. SV values should not be zero. Values required outside the
+            frequency range use the extreme input values.
+
+        sv3 : str
+            Spectrum values corresponding to the frequency points ( :ref:`freq` ). Values are interpreted as
+            defined with the :ref:`svtyp` command. SV values should not be zero. Values required outside the
+            frequency range use the extreme input values.
+
+        sv4 : str
+            Spectrum values corresponding to the frequency points ( :ref:`freq` ). Values are interpreted as
+            defined with the :ref:`svtyp` command. SV values should not be zero. Values required outside the
+            frequency range use the extreme input values.
+
+        sv5 : str
+            Spectrum values corresponding to the frequency points ( :ref:`freq` ). Values are interpreted as
+            defined with the :ref:`svtyp` command. SV values should not be zero. Values required outside the
+            frequency range use the extreme input values.
+
+        sv6 : str
+            Spectrum values corresponding to the frequency points ( :ref:`freq` ). Values are interpreted as
+            defined with the :ref:`svtyp` command. SV values should not be zero. Values required outside the
+            frequency range use the extreme input values.
+
+        sv7 : str
+            Spectrum values corresponding to the frequency points ( :ref:`freq` ). Values are interpreted as
+            defined with the :ref:`svtyp` command. SV values should not be zero. Values required outside the
+            frequency range use the extreme input values.
+
+        sv8 : str
+            Spectrum values corresponding to the frequency points ( :ref:`freq` ). Values are interpreted as
+            defined with the :ref:`svtyp` command. SV values should not be zero. Values required outside the
+            frequency range use the extreme input values.
+
+        sv9 : str
+            Spectrum values corresponding to the frequency points ( :ref:`freq` ). Values are interpreted as
+            defined with the :ref:`svtyp` command. SV values should not be zero. Values required outside the
+            frequency range use the extreme input values.
 
         Notes
         -----
-        Defines the spectrum values to be associated with the previously
-        defined frequency points [FREQ].  Applies only to the single-point
-        response spectrum.  Damping has no effect on the frequency solution.
-        Damping values are used only to identify SV curves for the mode
-        combinations calculation.  Only the curve with the lowest damping value
-        is used in the initial mode coefficient calculation.  Use STAT command
-        to list current spectrum curve values.
 
-        Repeat SV command for additional SV points (100 maximum per DAMP
-        curve).  SV values are added to the DAMP curve after the last nonzero
-        SV value.
+        .. _SV_notes:
 
-        The interpolation method between response spectrum points and curves is
-        specified using KeyInterp in the SVTYP command. It is logarithmic by
-        default.
+        Defines the spectrum values to be associated with the previously defined frequency points (
+        :ref:`freq` ). Applies only to the single-point response spectrum. Damping has no effect on the
+        frequency solution. Damping values are used only to identify SV curves for the mode combinations
+        calculation. Only the curve with the lowest damping value is used in the initial mode coefficient
+        calculation. Use :ref:`stat` command to list current spectrum curve values.
+
+        Repeat :ref:`sv` command for additional SV points (100 maximum per ``DAMP`` curve). SV values are
+        added to the ``DAMP`` curve after the last nonzero SV value.
+
+        The interpolation method between response spectrum points and curves is specified using
+        ``KeyInterp`` in the :ref:`svtyp`  command. It is logarithmic by default.
 
         This command is also valid in PREP7.
         """
         command = f"SV,{damp},{sv1},{sv2},{sv3},{sv4},{sv5},{sv6},{sv7},{sv8},{sv9}"
         return self.run(command, **kwargs)
 
-    def svplot(self, optionscale="", damp1="", damp2="", damp3="", damp4="", **kwargs):
-        """Displays input spectrum curves.
+    def svplot(
+        self,
+        optionscale: str = "",
+        damp1: str = "",
+        damp2: str = "",
+        damp3: str = "",
+        damp4: str = "",
+        **kwargs,
+    ):
+        r"""Displays input spectrum curves.
 
-        APDL Command: SVPLOT
+        Mechanical APDL Command: `SVPLOT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/None>`_
 
         Parameters
         ----------
-        optionscale
+        optionscale : str
             Flag to activate or deactivate input spectrum value scaling:
 
-            OFF  - Do not scale the input spectrum values with scale factor FACT (SVTYP command).
-                   This is the default value.
+            * ``OFF`` - Do not scale the input spectrum values with scale factor FACT ( :ref:`svtyp` command).
+              This is the default value.
 
-            ON  - Scale the input spectrum values with scale factor FACT (SVTYP command)
+            * ``ON`` - Scale the input spectrum values with scale factor FACT ( :ref:`svtyp` command)
 
-        damp1
-            Damping ratio corresponding to DAMP (SV command) defining the first
-            spectrum curve.
+        damp1 : str
+            Damping ratio corresponding to DAMP ( :ref:`sv` command) defining the first spectrum curve.
 
-        damp2
-            Damping ratio corresponding to DAMP (SV command) defining the
-            second spectrum curve.
+        damp2 : str
+            Damping ratio corresponding to DAMP ( :ref:`sv` command) defining the second spectrum curve.
 
-        damp3
-            Damping ratio corresponding to DAMP (SV command) defining the third
-            spectrum curve.
+        damp3 : str
+            Damping ratio corresponding to DAMP ( :ref:`sv` command) defining the third spectrum curve.
 
-        damp4
-            Damping ratio corresponding to DAMP (SV command) defining the
-            fourth spectrum curve.
+        damp4 : str
+            Damping ratio corresponding to DAMP ( :ref:`sv` command) defining the fourth spectrum curve.
 
         Notes
         -----
-        You can display up to four input spectrum tables (SV and FREQ commands)
-        with log X scale. If no damping ratio is specified, all spectrum tables
-        are displayed.
+
+        .. _SVPLOT_notes:
+
+        You can display up to four input spectrum tables ( :ref:`sv` and :ref:`freq` commands) with log X
+        scale. If no damping ratio is specified, all spectrum tables are displayed.
 
         This command is valid in any processor.
         """
         command = f"SVPLOT,{optionscale},{damp1},{damp2},{damp3},{damp4}"
         return self.run(command, **kwargs)
 
-    def svtyp(self, ksv="", fact="", keyinterp="", **kwargs):
-        """Defines the type of single-point response spectrum.
+    def svtyp(self, ksv: int | str = "", fact: str = "", keyinterp: str = "", **kwargs):
+        r"""Defines the type of single-point response spectrum.
 
-        APDL Command: SVTYP
+        Mechanical APDL Command: `SVTYP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SVTYP.html>`_
 
         Parameters
         ----------
-        ksv
+        ksv : int or str
             Response spectrum type:
 
-            0 - Seismic velocity response spectrum loading (SV values interpreted as velocities
-                with units of length/time).
+            * ``0`` - Seismic velocity response spectrum loading (SV values interpreted as velocities with units
+              of length/time).
 
-            1 - Force response spectrum loading (SV values interpreted as force amplitude
-                multipliers).
+            * ``1`` - Force response spectrum loading (SV values interpreted as force amplitude multipliers).
 
-            2 - Seismic acceleration response spectrum loading (SV values interpreted as
-                accelerations with units of length/time2).
+            * ``2`` - Seismic acceleration response spectrum loading (SV values interpreted as accelerations
+              with units of length/time :sup:`2` ).
 
-            3 - Seismic displacement response spectrum loading (SV values interpreted as
-                displacements with units of length).
+            * ``3`` - Seismic displacement response spectrum loading (SV values interpreted as displacements
+              with units of length).
 
-            4 - PSD loading (SV values interpreted as acceleration2/(cycles/time), such as
-                (in/sec2)2/Hz (not g2/Hz)).  (Not recommended)
+        fact : str
+            Scale factor applied to spectrum values (defaults to 1.0). Values are scaled when the solution
+            is initiated ( :ref:`solve` ). Database values remain the same.
 
-        fact
-            Scale factor applied to spectrum values (defaults to 1.0).  Values
-            are scaled when the solution is initiated [SOLVE].  Database values
-            remain the same.
+        keyinterp : str
+            Key to activate or deactivate the linear interpolation between input response spectrum points and
+            input response spectrum curves:
 
-        keyinterp
-            Key to activate or deactivate the linear interpolation between
-            input response spectrum points and input response spectrum curves:
+            * ``0 (OFF, or NO)`` - Deactivate linear and use logarithmic interpolation. This value is the
+              default.
 
-            0 (OFF or NO) - Deactivate linear and use logarithmic interpolation. This value is the default.
-
-            1 (ON or YES) - Activate linear interpolation.
+            * ``1 (ON, or YES)`` - Activate linear interpolation.
 
         Notes
         -----
-        Defines the type of single-point response spectrum [SPOPT].  The
-        seismic excitation direction is defined with the SED command.
+
+        .. _SVTYP_notes:
+
+        Defines the type of single-point response spectrum ( :ref:`spopt` ). The seismic excitation
+        direction is defined with the :ref:`sed` command.
 
         This command is also valid in PREP7.
         """
         command = f"SVTYP,{ksv},{fact},{keyinterp}"
         return self.run(command, **kwargs)
 
-    def vddam(self, vf="", va="", vb="", vc="", **kwargs):
-        """Specifies the velocity spectrum computation constants for the analysis
+    def vddam(self, vf: str = "", va: str = "", vb: str = "", vc: str = "", **kwargs):
+        r"""Specifies the velocity spectrum computation constants for the analysis of shock resistance of
+        shipboard structures.
 
-        APDL Command: VDDAM
-        of shock resistance of shipboard structures.
+        Mechanical APDL Command: `VDDAM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VDDAM.html>`_
 
         Parameters
         ----------
-        vf
-            Direction-dependent velocity coefficient for elastic or elastic-
-            plastic analysis option (Default = 0).
+        vf : str
+            Direction-dependent velocity coefficient for elastic or elastic-plastic analysis option (Default
+            = 0).
 
-        va, vb, vc
-            Coefficients for the DDAM velocity spectrum equations.  See Dynamic
-            Design Analysis Method in the Mechanical APDL Theory Reference.
-            Default for these coefficients is zero.
+        va : str
+            Coefficients for the DDAM velocity spectrum equations. See `Dynamic Design Analysis Method
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_anproc7.html#eq1bf15231-590e-4b5a-a30a-aa31e15bf78f>`_
+
+        vb : str
+            Coefficients for the DDAM velocity spectrum equations. See `Dynamic Design Analysis Method
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_anproc7.html#eq1bf15231-590e-4b5a-a30a-aa31e15bf78f>`_
+
+        vc : str
+            Coefficients for the DDAM velocity spectrum equations. See `Dynamic Design Analysis Method
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_anproc7.html#eq1bf15231-590e-4b5a-a30a-aa31e15bf78f>`_
 
         Notes
         -----
-        This command specifies velocity coefficients to analyze shock
-        resistance of shipboard equipment.  These coefficients are used to
-        compute mode coefficients according to the equations given in Dynamic
-        Design Analysis Method in the Mechanical APDL Theory Reference.  The
-        form of these equations is based on the Naval NRL Dynamic Design
-        Analysis Method.  This command, along with the ADDAM and SED commands,
-        is used with the spectrum (ANTYPE,SPECTR) analysis as a special purpose
-        alternative to the SV, FREQ, and SVTYP commands.  The mass and length
-        units of the model must be in pounds and inches, respectively.
 
-        DDASPEC may alternatively be used to calculate spectrum coefficients.
+        .. _VDDAM_notes:
+
+        This command specifies velocity coefficients to analyze shock resistance of shipboard equipment.
+        These coefficients are used to compute mode coefficients according to the equations given in
+        `Dynamic Design Analysis Method
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_anproc7.html#eq1bf15231-590e-4b5a-a30a-aa31e15bf78f>`_
+        :ref:`addam` and :ref:`sed` commands, is used with the spectrum ( :ref:`antype`,SPECTR) analysis as
+        a special purpose alternative to the :ref:`sv`, :ref:`freq`, and :ref:`svtyp` commands.
+
+        In order to perform a DDAM spectrum analysis using a units system other than BIN (default), you must
+        specify the units system complying with the mass and length units of the model using the
+        :ref:`units` command. Issue the :ref:`units` command before defining the shock spectrum computation
+        constants ( :ref:`vddam` ). The :ref:`vddam` command is not supported with the user-defined units
+        system ( ``Label`` = USER on the :ref:`units` command).
+
+        :ref:`ddaspec` may alternatively be used to calculate spectrum coefficients.
 
         This command is also valid in PREP7.
         """
