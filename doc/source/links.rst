@@ -158,7 +158,7 @@
 .. _pymapdl_repo: https://github.com/ansys/pymapdl
 .. _pymapdl_pypi: https://pypi.org/project/ansys-mapdl-core/
 .. _pymapdl_releases: https://github.com/ansys/pymapdl/releases
-.. _pymapdl_run_ubuntu: https://mapdl.docs.pyansys.com/version/dev/user_guide/troubleshoot.html#ubuntu
+.. _pymapdl_run_ubuntu: https://mapdl.docs.pyansys.com/version/dev/getting_started/troubleshoot.html#ubuntu
 .. _pymapdl_issues: https://github.com/ansys/pymapdl/issues
 .. _pymapdl_new_issue: https://github.com/ansys/pymapdl/issues/new/choose
 .. _pymapdl_new_blank_issue: https://github.com/ansys/pymapdl/issues/new
