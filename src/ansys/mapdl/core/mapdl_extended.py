@@ -24,6 +24,7 @@ from functools import wraps
 import os
 import pathlib
 import re
+import shutil
 import tempfile
 from typing import Union
 import warnings
@@ -1627,7 +1628,14 @@ class _MapdlCommandExtended(_MapdlCore):
         output = super().lgwrite(fname=fname_, ext="", kedit=kedit, **kwargs)
 
         # Let's download the file to the location
-        self._download(fname_, fname)
+        if self.is_local:
+            src = pathlib.Path(self.directory / fname_)
+            dst = pathlib.Path(fname).resolve()
+            if src.resolve() != dst:
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(src, fname)
+        else:
+            self._download(fname_, fname)
         fname_ = fname  # Update path
 
         # remove extra grpc /OUT commands

@@ -596,8 +596,10 @@ def launch_grpc(
         "\n============"
     )
 
+    stdout_file_handle = None
     if mapdl_output:
-        stdout = open(str(mapdl_output), "ab", 0)
+        stdout_file_handle = open(str(mapdl_output), "ab", 0)
+        stdout = stdout_file_handle
         stderr = subprocess.STDOUT
     else:
         stdout = subprocess.PIPE  # type: ignore
@@ -616,15 +618,27 @@ def launch_grpc(
                 )
 
     LOG.debug("MAPDL starting in background.")
-    return submitter(
-        cmd,
-        shell=shell,  # sbatch does not work without shell.
-        cwd=run_location,
-        stdin=subprocess.DEVNULL,
-        stdout=stdout,
-        stderr=stderr,
-        env_vars=env_vars,
-    )  # nosec B604
+    try:
+        process = submitter(
+            cmd,
+            shell=shell,  # sbatch does not work without shell.
+            cwd=run_location,
+            stdin=subprocess.DEVNULL,
+            stdout=stdout,
+            stderr=stderr,
+            env_vars=env_vars,
+        )  # nosec B604
+
+        # Store the file handle on the process object for cleanup
+        if stdout_file_handle is not None and process is not None:
+            process._stdout_file_handle = stdout_file_handle  # type: ignore
+
+        return process
+
+    except Exception as e:  # pragma: no cover
+        # Something went wrong during the launch, make sure to clean up the file handle if it was created
+        stdout_file_handle.close() if stdout_file_handle is not None else None
+        raise e
 
 
 def check_mapdl_launch(
@@ -1746,7 +1760,7 @@ def launch_mapdl(
         start_parm["launched"] = False
 
         mapdl = MapdlGrpc(
-            cleanup_on_exit=False,
+            cleanup_on_exit=args["cleanup_on_exit"],
             loglevel=args["loglevel"],
             set_no_abort=args["set_no_abort"],
             graphics_backend=args["graphics_backend"],
