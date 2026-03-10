@@ -100,7 +100,7 @@ echo "technical_term" >> doc\styles\config\vocabularies\ANSYS\accept.txt
 - Make sure the Sphinx roles (`:meth:`, `:class:`, `:func:`, and others) are properly formatted and consistent with numpydoc style and writing.
 - Use simple form of verbs in headings (rather than "-ing" forms).
 - Add links to relevant sections of the PyMAPDL documentation when mentioning specific features or commands, using the appropriate Sphinx directives to ensure proper linking and formatting.
-- Consistently either use or not use concluding punctuation in code comments.
+- Either consistently include or consistently omit concluding punctuation in code comments.
 
 
 ## Don't
