@@ -93,7 +93,7 @@ echo "technical_term" >> doc\styles\config\vocabularies\ANSYS\accept.txt
 ## Recommendations
 - Prefer active voice and direct language in documentation for clarity and engagement.
 - Put the why before the link. For example, instead of saying "See the documentation for `mapdl.run()` for more details", say "To execute a command in MAPDL, use `mapdl.run()`. See the documentation for `mapdl.run()` for more details."
-- As in Google style guide, use sentence case for titles.
+- As in the Google style guide, use sentence case for titles.
 - Use U.S. spellings instead of U.K. spellings.
 - Prefer non-hyphenated words. For example `postprocessing` instead of `post-processing`.
 - Include a noun after a code entity to indicate its type.
