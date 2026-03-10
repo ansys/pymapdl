@@ -1,31 +1,35 @@
-.. _ref_load_step_options_commands_api:
 
-*****************
-Load step options
-*****************
+.. _ref_load_step_options:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to define options for individual load steps.
+LoadStepOptions
+===============
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.load_step_options
+
+.. autoclass:: ansys.mapdl.core._commands.solution.load_step_options.LoadStepOptions
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.autots
-   Mapdl.campbell
-   Mapdl.cecmod
-   Mapdl.deltim
-   Mapdl.expsol
-   Mapdl.kbc
-   Mapdl.kuse
-   Mapdl.magopt
-   Mapdl.magsolv
-   Mapdl.mode
-   Mapdl.nsubst
-   Mapdl.numexp
-   Mapdl.time
-   Mapdl.tref
-   Mapdl.tsres
-   Mapdl.upcoord
-   Mapdl.usrcal
-   Mapdl.wrfull
+
+   LoadStepOptions.autots
+   LoadStepOptions.campbell
+   LoadStepOptions.cecmod
+   LoadStepOptions.deltim
+   LoadStepOptions.expsol
+   LoadStepOptions.kbc
+   LoadStepOptions.kuse
+   LoadStepOptions.magopt
+   LoadStepOptions.magsolv
+   LoadStepOptions.mode
+   LoadStepOptions.nsubst
+   LoadStepOptions.numexp
+   LoadStepOptions.time
+   LoadStepOptions.tref
+   LoadStepOptions.tsres
+   LoadStepOptions.upcoord
+   LoadStepOptions.usrcal
+   LoadStepOptions.wrfull
