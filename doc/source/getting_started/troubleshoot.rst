@@ -48,9 +48,9 @@ as the first parameter of the :func:`launch_mapdl() <ansys.mapdl.core.launcher.l
 
 If you do not specify the location of the executable file, PyMAPDL uses the default location.
 
-.. note:: If MAPDL launches when you specify the location of the executable file, but it does not when you don't,
-   it is very likely that the cached executable location is outdated.
-   Follow :ref:`ref_updating_mapdl_location` to update it.
+.. note:: If MAPDL launches when you specify the location of the executable file but not when you don't specify it,
+   the cached executable location is likely outdated. To update it, see
+:ref:`ref_updating_mapdl_location`.
 
 If MAPDL is not launching, check the content of log files in the current directory
 (specified using ``run_location``) for more information on the issue.
