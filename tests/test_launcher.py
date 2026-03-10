@@ -920,6 +920,8 @@ def test_ip_and_start_instance(
     # Removing env var coming from CICD.
     if "PYMAPDL_START_INSTANCE" in os.environ:
         monkeypatch.delenv("PYMAPDL_START_INSTANCE")
+    if "PYMAPDL_IP" in os.environ:
+        monkeypatch.delenv("PYMAPDL_IP")
 
     ###################
     # Injecting env vars for the test
@@ -1288,6 +1290,87 @@ def test_launch_grpc(tmpdir, launch_on_hpc):
     assert isinstance(kwargs["stderr"], type(subprocess.PIPE))
 
 
+@patch("os.name", "nt")
+@patch("subprocess.Popen")
+def test_launch_grpc_with_output_file(mock_popen, tmpdir):
+    """Test that file handles are properly attached to the process object."""
+    # Create a mock process object
+    mock_process = MagicMock()
+    mock_process.poll.return_value = None
+    mock_popen.return_value = mock_process
+
+    cmd = "ansys.exe -b -i my_input.inp -o my_output.out".split(" ")
+    run_location = str(tmpdir)
+    output_file = os.path.join(run_location, "mapdl_output.log")
+
+    # Launch with output file redirection
+    process = launch_grpc(cmd, run_location, mapdl_output=output_file)
+
+    # Verify that the process object has the file handle attached
+    assert hasattr(
+        process, "_stdout_file_handle"
+    ), "Process should have _stdout_file_handle attribute"
+    assert process._stdout_file_handle is not None, "File handle should not be None"
+    assert not process._stdout_file_handle.closed, "File handle should be open"
+
+    try:
+        # Clean up the file handle
+        process._stdout_file_handle.close()
+        assert process._stdout_file_handle.closed, "File handle should be closed"
+
+        # Verify output file was created
+        assert os.path.exists(output_file), "Output file should exist"
+    finally:
+        # Ensure handle is closed even if test fails
+        if (
+            hasattr(process, "_stdout_file_handle")
+            and process._stdout_file_handle is not None
+            and not process._stdout_file_handle.closed
+        ):
+            process._stdout_file_handle.close()
+
+
+@patch("os.name", "nt")
+@patch("subprocess.Popen")
+def test_mapdl_grpc_kill_process_closes_file_handle(mock_popen, tmpdir):
+    """Test that MapdlGrpc._kill_process() closes the stdout file handle."""
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    # Create a temporary output file
+    output_file = os.path.join(str(tmpdir), "mapdl_output.log")
+    actual_file_handle = open(output_file, "wb", 0)
+
+    try:
+        # Create a mock process with the file handle attached
+        mock_process = MagicMock()
+        mock_process.poll.return_value = None  # process hasn't terminated
+        mock_process._stdout_file_handle = actual_file_handle
+
+        # Create a MapdlGrpc instance with the mocked process
+        with patch.object(MapdlGrpc, "__init__", return_value=None):
+            mapdl = MapdlGrpc()
+            mapdl._mapdl_process = mock_process
+            mapdl._local = True
+            mapdl._log = Mock()
+
+            # Verify handle is open before cleanup
+            assert (
+                not actual_file_handle.closed
+            ), "File handle should be open before cleanup"
+
+            # Call _kill_process which should close the file handle
+            mapdl._kill_process()
+
+            # Verify the handle was closed
+            assert (
+                actual_file_handle.closed
+            ), "File handle should be closed after _kill_process()"
+    finally:
+        # Ensure handle is closed even if test fails
+        if not actual_file_handle.closed:
+            actual_file_handle.close()
+
+
 @patch("psutil.cpu_count", lambda *args, **kwags: 5)
 @pytest.mark.parametrize("arg", [None, 3, 10])
 @pytest.mark.parametrize("env", [None, 3, 10])
@@ -1449,6 +1532,7 @@ def test_exit_job(mock_popen, mapdl, cleared):
 @patch("ansys.mapdl.core.launcher.send_scontrol")
 def test_launch_on_hpc_found_ansys(mck_ssctrl, mck_launch_grpc, monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
     mck_launch_grpc.return_value = get_fake_process("Submitted batch job 1001")
     mck_ssctrl.return_value = get_fake_process(
@@ -1485,6 +1569,7 @@ def test_launch_on_hpc_found_ansys(mck_ssctrl, mck_launch_grpc, monkeypatch):
 @patch("ansys.mapdl.core.launcher.send_scontrol")
 def test_launch_on_hpc_not_found_ansys(mck_sc, mck_lgrpc, mck_kj, monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
     exec_file = "path/to/mapdl/v242/executable/ansys242"
 
     mck_lgrpc.return_value = get_fake_process("Submitted batch job 1001")
@@ -1529,6 +1614,7 @@ def test_launch_on_hpc_not_found_ansys(mck_sc, mck_lgrpc, mck_kj, monkeypatch):
 
 def test_launch_on_hpc_exception_launch_mapdl(monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
     exec_file = "path/to/mapdl/v242/ansys/bin/executable/ansys242"
 
     process = get_fake_process("ERROR")
@@ -1564,6 +1650,7 @@ def test_launch_on_hpc_exception_launch_mapdl(monkeypatch):
 
 def test_launch_on_hpc_exception_successfull_sbatch(monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
     exec_file = "path/to/mapdl/v242/ansys/bin/executable/ansys242"
 
     def raise_exception(*args, **kwargs):
@@ -2030,6 +2117,25 @@ def test_args_pass(monkeypatch, arg, value, method):
     del mapdl
 
 
+@stack(*PATCH_MAPDL_START)
+@pytest.mark.parametrize("cleanup_on_exit", [True, False])
+def test_cleanup_on_exit_remote_connection(monkeypatch, cleanup_on_exit):
+    """Regression test: cleanup_on_exit must be forwarded to MapdlGrpc when
+    connecting to an existing (remote) instance (start_instance=False)."""
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
+
+    mapdl = launch_mapdl(
+        start_instance=False,
+        cleanup_on_exit=cleanup_on_exit,
+        transport_mode="insecure",
+    )
+    assert mapdl._cleanup == cleanup_on_exit
+
+    mapdl._ctrl = lambda *args, **kwargs: None
+    del mapdl
+
+
 def test_check_has_mapdl():
     assert check_has_mapdl() == ON_LOCAL
 
@@ -2169,6 +2275,7 @@ def test_env_vars_with_slurm_bootstrap(monkeypatch):
     # This test verifies that when replace_env_vars is used with launch_on_hpc,
     # SLURM-specific environment variables are added
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
 
     env_vars_input = {"CUSTOM_VAR": "custom_value"}
 

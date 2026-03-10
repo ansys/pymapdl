@@ -6,6 +6,7 @@
 [Cc]ommand [Pp]rompt
 [Dd]ocker
 [Ee]igensolver
+[Ee]mail
 [Hh]yperelasticity
 [Kk]eypoints
 [Mm]atplotlib
@@ -65,6 +66,7 @@ DevContainer
 Dimitris
 discretisation
 DMP
+docstrings
 dof
 ect
 eigenfrequency
@@ -159,6 +161,7 @@ Rao
 righ
 RNNN
 Roark
+run_location
 sbatch
 singl
 Slurm

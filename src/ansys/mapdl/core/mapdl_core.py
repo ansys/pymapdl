@@ -327,7 +327,9 @@ class _MapdlCore(Commands):
         self._remove_tmp: bool = False
         self._stdout = None
         self._file_type_for_plots = file_type_for_plots
-        self._default_file_type_for_plots = file_type_for_plots
+        self._default_file_type_for_plots: VALID_FILE_TYPE_FOR_PLOT_LITERAL = (
+            file_type_for_plots
+        )
         self._version = None  # cached version
         self._mute = False
         self._save_selection_obj = None
@@ -551,7 +553,7 @@ class _MapdlCore(Commands):
         """
         if not isinstance(value, str) or value.upper() not in VALID_FILE_TYPE_FOR_PLOT:
             raise ValueError(f"'{value}' is not allowed as file output for plots.")
-        return self._default_file_type_for_plots
+        self._default_file_type_for_plots = value.upper()  # type: ignore[assignment]
 
     def _wrap_directory(self, path: Union[str, pathlib.Path]) -> pathlib.PurePath:
         if self.platform is None:
@@ -3408,7 +3410,7 @@ class _MapdlCore(Commands):
 
         if pymapdl_session_id is None or self._mapdl_session_id is None:
             return
-        elif pymapdl.RUNNING_TESTS or self._strict_session_id_check:
+        elif self._strict_session_id_check:
             if pymapdl_session_id != self._mapdl_session_id:
                 self._log.error("The session ids do not match")
 

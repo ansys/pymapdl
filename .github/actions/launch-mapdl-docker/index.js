@@ -9,8 +9,16 @@ async function run() {
     const mapdlImage = core.getInput('mapdl-image');
     const licenseServer = core.getInput('license-server', { required: true });
     const instanceName = core.getInput('instance-name') || 'MAPDL_0';
-    const isDebug = process.env.RUNNER_DEBUG === '1' || core.isDebug();
-    const DEBUG = core.getInput('debug') === 'true' || isDebug;
+    const DEBUG = core.getInput('debug') === 'true' || process.env.RUNNER_DEBUG === '1' || core.isDebug();
+
+    console.log('===================================');
+    console.log(`🚀 Launching MAPDL Docker Container with instance name: ${instanceName}`);
+    console.log('===================================');
+
+    if (DEBUG) {
+      core.isDebug(true);
+      core.debug('Debug mode is enabled');
+    }
 
     // Validate inputs
     if (!mapdlVersion && !mapdlImage) {
@@ -21,10 +29,7 @@ async function run() {
     const isOfficialRegistry = mapdlImage &&
       (mapdlImage.startsWith('ghcr.io/ansys/mapdl') || mapdlImage.startsWith('ansys/mapdl'));
 
-    // If custom image (not official registry), mapdl-version must be provided
-    if (mapdlImage && !isOfficialRegistry && !mapdlVersion) {
-      throw new Error('mapdl-version must be provided when using a custom image (not from ghcr.io/ansys/mapdl or ansys/mapdl)');
-    }
+    core.debug(`Using official registry: ${isOfficialRegistry}`);
 
     // Determine the full image reference and version number
     let fullImageRef;
@@ -32,7 +37,10 @@ async function run() {
 
     if (mapdlImage && isOfficialRegistry) {
       // Extract version number from official registry image tag (e.g., v25.1.0 -> 25.1)
+      core.debug(`Extracting version from official image: ${mapdlImage}`);
+
       const tagMatch = mapdlImage.match(/v?(\d+)\.(\d+)(?:\.\d+)?/);
+      core.debug(`Tag match result: ${tagMatch}`);
 
       if (tagMatch) {
         versionNumber = `${tagMatch[1]}.${tagMatch[2]}`;
@@ -41,30 +49,44 @@ async function run() {
           throw new Error(`Invalid version format extracted from image: ${versionNumber}. Expected format: XX.Y`);
         }
         // Map to standard image reference
-        fullImageRef = `ghcr.io/ansys/mapdl:v${versionNumber}-ubuntu-cicd`;
+        fullImageRef = mapdlImage; // Use the user-provided image reference directly
       } else {
         throw new Error('Could not extract version from official Ansys MAPDL image tag');
       }
+
     } else if (mapdlImage && !isOfficialRegistry) {
       // Custom image with mapdl-version provided
+
+      // Raising error if version is not provided with custom image
+      if (!mapdlVersion) {
+        throw new Error('"mapdl-version" must be provided in addition to "mapdl-image" when using a custom image (not from ghcr.io/ansys/mapdl or ansys/mapdl)');
+      }
+
+      // Validate version format (XX.Y)
+      if (!/^\d{2}\.\d$/.test(mapdlVersion) && !/^\d{2,}\.\d{1,}$/.test(mapdlVersion)) {
+        throw new Error(`Invalid mapdl-version format: ${mapdlVersion}. Expected format: XX.Y`);
+      }
+
       fullImageRef = mapdlImage;
-      // Validate version format (XX.Y)
-      if (!/^\d{2}\.\d$/.test(mapdlVersion) && !/^\d{2,}\.\d{1,}$/.test(mapdlVersion)) {
-        throw new Error(`Invalid mapdl-version format: ${mapdlVersion}. Expected format: XX.Y`);
-      }
       versionNumber = mapdlVersion;
-    } else {
-      // User provided version number (e.g., 25.2)
-      // Validate version format (XX.Y)
+
+    } else if (mapdlVersion) {
+      // User provided version number but no custom image - use official image reference format
       if (!/^\d{2}\.\d$/.test(mapdlVersion) && !/^\d{2,}\.\d{1,}$/.test(mapdlVersion)) {
         throw new Error(`Invalid mapdl-version format: ${mapdlVersion}. Expected format: XX.Y`);
       }
-      // Default to ubuntu-cicd variant
+
       fullImageRef = `ghcr.io/ansys/mapdl:v${mapdlVersion}-ubuntu-cicd`;
       versionNumber = mapdlVersion;
+
+    } else {
+      throw new Error('Unexpected error determining MAPDL image reference and version number');
     }
 
-    // Ensure versionNumber is set
+    core.debug(`Determined image reference: ${fullImageRef}`);
+    core.debug(`Determined version number: ${versionNumber}`);
+
+    // Sanity check: Ensure versionNumber is set
     if (!versionNumber) {
       throw new Error('Failed to determine MAPDL version number');
     }
@@ -96,6 +118,7 @@ async function run() {
       }
     }
     instanceNames.push(instanceName);
+
     core.saveState('instance-names', JSON.stringify(instanceNames));
     core.saveState('debug', JSON.stringify(DEBUG));
 
@@ -104,6 +127,7 @@ async function run() {
     core.debug(`  MAPDL Image: ${fullImageRef}`);
     core.debug(`  Instance Name: ${instanceName}`);
     core.debug(`  PyMAPDL Port: ${pymapdlPort}`);
+    core.debug(`  PyMAPDL DB Port: ${pymapdlDbPort}`);
     core.debug(`  Transport: ${transport}`);
     core.debug(`  --`);
     core.debug(`  Enable DPF Server: ${enableDpfServer}`);
@@ -116,6 +140,10 @@ async function run() {
     core.debug(`  Memory (MB): ${memoryMb}`);
     core.debug(`  Memory DB (MB): ${memoryDbMb}`);
     core.debug(`  Memory Workspace (MB): ${memoryWorkspaceMb}`);
+    core.debug(`  Memory Swap (MB): ${memorySwapMb}`);
+    core.debug(`  Timeout (s): ${timeout}`);
+    core.debug(`  Wait for Services: ${wait}`);
+
 
     // Set environment variables for the bash script
     process.env.MAPDL_VERSION = versionNumber;
@@ -146,6 +174,7 @@ async function run() {
     // Get container ID
     let psOutput = '';
     await exec.exec('docker', ['ps', '-aqf', `name=^/${instanceName}$`], {
+      silent: !DEBUG,
       listeners: {
         stdout: (data) => {
           psOutput += data.toString();

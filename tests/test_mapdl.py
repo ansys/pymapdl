@@ -49,7 +49,6 @@ from conftest import (
     TEST_DPF_BACKEND,
     VALID_PORTS,
     NullContext,
-    Running_test,
     has_dependency,
     requires,
 )
@@ -499,6 +498,7 @@ def test_error(mapdl, clear_at_end):
 
 
 def test_ignore_errors(mapdl):
+    mapdl.prep7()
     mapdl.ignore_errors = False
     assert not mapdl.ignore_errors
     mapdl.ignore_errors = True
@@ -1038,6 +1038,7 @@ def test_lssolve(mapdl, cleared):
 def test_coriolis(mapdl):
     """Simply test that we're formatting the input parm for coriolis"""
     # must be v190 or newer
+    mapdl.prep7()
     resp = mapdl.coriolis(True, True, True, True)
     assert "CORIOLIS IN STATIONARY REFERENCE FRAME" in resp
     assert "GYROSCOPIC DAMPING MATRIX WILL BE CALCULATED" in resp
@@ -1561,7 +1562,7 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     mapdl.clear()
     mapdl.prep7()
     _ = capsys.readouterr()  # To flush it
-    output = mapdl.mpread(fname, ext, progress_bar=True)
+    output = mapdl.mpread(fname, ext)
     captured = capsys.readouterr()
 
     assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
@@ -2079,7 +2080,7 @@ def test_get_not_muted(mapdl, cleared):
     mock_not_muted.assert_not_called()
 
 
-def test_session_id(mapdl, running_test):
+def test_session_id(mapdl):
     # Calling here to make sure we have a session id before testing it.
     mapdl.clear()
 
@@ -2098,8 +2099,7 @@ def test_session_id(mapdl, running_test):
 
     # Checking real case
     mapdl._session_id_ = copy_
-    with running_test():
-        assert isinstance(mapdl._check_session_id(), bool)
+    assert isinstance(mapdl._check_session_id(), bool)
 
     id_ = "123412341234"
     mapdl._session_id_ = id_
@@ -2124,8 +2124,7 @@ def test_check_empty_session_id(mapdl, cleared):
 @requires("requests")  # Requires 'requests' package
 def test_igesin_whitespace(mapdl, cleared, tmpdir):
     # make sure we download the IGES file
-    with Running_test(False):  # allow access to internet
-        bracket_file = pymapdl.examples.download_bracket()
+    bracket_file = pymapdl.examples.download_bracket()
 
     assert os.path.isfile(bracket_file)
 
@@ -2601,12 +2600,19 @@ def test_get_array_non_interactive(mapdl, solved_box):
 
 
 def test_default_file_type_for_plots(mapdl, cleared):
-    assert mapdl.default_file_type_for_plots
+    prev = mapdl.default_file_type_for_plots
 
-    with pytest.raises(ValueError):
-        mapdl.default_file_type_for_plots = "dummy"
+    try:
+        assert mapdl.default_file_type_for_plots
 
-    mapdl.default_file_type_for_plots = "PNG"
+        with pytest.raises(ValueError):
+            mapdl.default_file_type_for_plots = "dummy"
+
+        mapdl.default_file_type_for_plots = "PNG"
+        assert mapdl.default_file_type_for_plots == "PNG"
+
+    finally:
+        mapdl.default_file_type_for_plots = prev
 
 
 @requires("matplotlib")
