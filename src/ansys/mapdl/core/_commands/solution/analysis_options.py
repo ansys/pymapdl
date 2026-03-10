@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class AnalysisOptions:
+
+class AnalysisOptions(CommandsBase):
 
     def abextract(self, mode1: str = "", mode2: str = "", **kwargs):
         r"""Extracts the alpha-beta damping multipliers for Rayleigh damping.
@@ -51,7 +53,7 @@ class AnalysisOptions:
         are stored in parameters ALPHADMP and BETADMP and can be applied using the :ref:`alphad` and
         :ref:`betad` commands. Before calling :ref:`abextract`, you must issue :ref:`rmflvec` to extract the
         modal displacements. In addition, a node component FLUN must exist from all ``FLUID136`` nodes. See
-         for more information on thin film analyses.
+        for more information on thin film analyses.
 
         This command is also valid in PREP7. Distributed-Memory Parallel (DMP) Restriction This command is
         not supported in a DMP solution.
@@ -842,7 +844,9 @@ class AnalysisOptions:
 
         nstartvn : str
             Node number to be assigned to the first virtual node created to store the generalized
-            coordinates. See :ref:`CMSOPT_notes` for more information.
+            coordinates. See `Notes
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CMSOPT.html#CMSOPT.prodres>`_
+            for more information.
 
         Notes
         -----
@@ -1266,7 +1270,7 @@ class AnalysisOptions:
 
         .. _CUTCONTROL_PhysicsLimitSetDefault:
 
-        .. rubric:: **Command Default: If no :ref:`cutcontrol` commands are issued with labels from the DSPLIMIT set or the physics limit set, the default cutback trigger criterion is DSPLIMIT with VALUE = 1.0 x 10 :sup:`7`.**
+        .. rubric:: **Command Default: If no :ref:`cutcontrol` commands are issued with labels from the DSPLIMIT set or the physics limit set, the default cutback trigger criterion is DSPLIMIT with VALUE = 1.0 x 10 :sup:`7` .**
 
         Creep and Viscoelastic Analyses
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1490,7 +1494,7 @@ class AnalysisOptions:
         :ref:`rmflvec` command. In addition, a node component FLUN must exist from all ``FLUID136`` nodes.
         The computed damping ratio may be used to specify constant or modal damping by means of the
         :ref:`dmprat` or :ref:`mdamp` commands. For Rayleigh damping, use the :ref:`abextract` command to
-        compute ALPHAD and BETAD damping parameters. See Thin Film Analysis  for more information on
+        compute ALPHAD and BETAD damping parameters. See Thin Film Analysis for more information on
         thin film analyses.
 
         The macro uses the :ref:`lssolve` command to perform two load steps for each frequency. The first

@@ -19,7 +19,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-class LoadStepOperations:
+
+from ansys.mapdl.core._commands import CommandsBase
+
+
+class LoadStepOperations(CommandsBase):
 
     def lsclear(self, lab: str = "", **kwargs):
         r"""Clears loads and load step options from the database.

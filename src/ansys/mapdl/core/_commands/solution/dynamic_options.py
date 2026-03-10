@@ -20,7 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class DynamicOptions:
+from ansys.mapdl.core._commands import CommandsBase
+
+
+class DynamicOptions(CommandsBase):
 
     def alphad(self, value: str = "", **kwargs):
         r"""Defines the mass matrix multiplier for damping.
@@ -1037,7 +1040,7 @@ class DynamicOptions:
         For more information on how the midstep criterion is used by the program, see `Midstep Residual for
         Structural Dynamic Analysis
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_tool6.html#eq3ee0a0c7-284e-4f2b-ad70-338834430235>`_
-         in the `Mechanical APDL Theory Reference
+        in the `Mechanical APDL Theory Reference
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_biblio.html>`_.
 
         This command is also valid in PREP7.

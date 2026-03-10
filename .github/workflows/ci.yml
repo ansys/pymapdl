@@ -179,6 +179,10 @@ jobs:
       license-server: ${{ secrets.LICENSE_SERVER }}
       username: ${{ github.actor }}
       password: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      use_cache_autosummary: false
+      use_cache_examples: false
+      use_cache_doc_build: false
 
 
   doc-deploy-pr:
