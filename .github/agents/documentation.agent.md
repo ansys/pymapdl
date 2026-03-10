@@ -110,7 +110,7 @@ echo "technical_term" >> doc\styles\config\vocabularies\ANSYS\accept.txt
 - Don't add documentation for internal/private methods unless specifically requested
 - Avoid locations like above and below (according to Google dev doc style guide)
 - Avoid Latin phrases, prefer `such as`, `for example`, `in other words` over `e.g.`, `i.e.`, `etc.`
-- Don't use `ANSYS`; use `Ansys` instead.
+- Don't use `ANSYS` unless it is in a copyright notice. Use `Ansys` instead.
 - If documenting a function/method, make sure you are using the correct directive (`:func:`, `:meth:`, `:class:`, and others) and that it is properly formatted with the code entity name. For example:
   ```rst
   :func:`save_ansys_path() <ansys.mapdl.core.save_ansys_path>`
