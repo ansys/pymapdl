@@ -6,6 +6,7 @@
 [Cc]ommand [Pp]rompt
 [Dd]ocker
 [Ee]igensolver
+[Ee]mail
 [Hh]yperelasticity
 [Kk]eypoints
 [Mm]atplotlib
@@ -159,6 +160,7 @@ Rao
 righ
 RNNN
 Roark
+run_location
 sbatch
 singl
 Slurm
