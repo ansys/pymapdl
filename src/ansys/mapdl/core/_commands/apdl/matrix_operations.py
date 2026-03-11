@@ -121,12 +121,15 @@ class MatrixOperations(CommandsBase):
             method of compression: 1E-7 for SVD; 1E-14 for MGS; 1E-16 for SPARSE.
 
         val1 : str
-            Name of the vector used to store the :math:`equation not available`  values (see
-            :ref:`a-COMP_notes` below). This argument is optional.
+            Name of the vector used to store the :math:`equation not available`  values (see  `Notes
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_COMP.html#eq11850956-35ca-43ce-a803-b83b50b4d2af>`_
+            below). This argument is optional.
 
         val2 : str
             Name of the dense matrix used to store the :math:`equation not available`  output matrix (see
-            :ref:`a-COMP_notes` below). This argument is optional.
+            `Notes
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_COMP.html#eq11850956-35ca-43ce-a803-b83b50b4d2af>`_
+            below). This argument is optional.
 
         Notes
         -----
@@ -157,10 +160,14 @@ class MatrixOperations(CommandsBase):
         ``Val1`` and ``Val2`` are additional input used only for the SVD algorithm:
 
         * ``val1 : str`` - Name of the vector used to store the :math:`equation not available`  values (see
-          :ref:`a-COMP_notes` below). This argument is optional.
+          `Notes
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_COMP.html#eq11850956-35ca-43ce-a803-b83b50b4d2af>`_
+          below). This argument is optional.
 
         * ``val2 : str`` - Name of the dense matrix used to store the :math:`equation not available`  output
-          matrix (see :ref:`a-COMP_notes` below). This argument is optional.
+          matrix (see `Notes
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_COMP.html#eq11850956-35ca-43ce-a803-b83b50b4d2af>`_
+          below). This argument is optional.
 
         .. _a-COMP_notes:
 
@@ -373,13 +380,13 @@ class MatrixOperations(CommandsBase):
 
         .. code:: apdl
 
-           ...    DMIG stiff 1 2 1 2 29988.    1 6 149940. 2 2 -29988.    2 6 149940....
+           ...    DMIG stiff 1 2 1 2 29988.    1 6 149940. 2 2 -29988.    2 6 149940.    ...
 
         * A FREE field format file with a comma separator (using ``Val4`` = ``,``):
 
         .. code:: apdl
 
-           ...    DMIG,KF,22321,3,,22321,2,-5.00E+6    DMIG,KF,22320,3,,22320,2,-5.00E+6...
+           ...    DMIG,KF,22321,3,,22321,2,-5.00E+6    DMIG,KF,22320,3,,22320,2,-5.00E+6    ...
 
         **Requirement when importing matrices from a Nastran DMIG file:** To ensure that the :file:`.sub`
         file is properly generated from matrices imported from Nastran **DMIG** file, the generalized
@@ -762,14 +769,14 @@ class MatrixOperations(CommandsBase):
         The fast Fourier transformation can be used to create a filter to remove noise from a noisy input
         signal.
 
-        .. figure::../../../images/_commands/gFFT1.PNG
+        .. figure:: ../../../images/_commands/gFFT1.PNG
 
            Input Signal
 
         The input signal is decomposed in the Fourier space using the :ref:`fft`, ``FORW`` command so that
         the frequencies that compose the signal can be observed.
 
-        .. figure::../../../images/_commands/gFFT2.PNG
+        .. figure:: ../../../images/_commands/gFFT2.PNG
 
            Amplitude Spectrum of the FFT
 
@@ -778,7 +785,7 @@ class MatrixOperations(CommandsBase):
         significant. The inversion of the :ref:`fft` command ( :ref:`fft`, ``BACK`` command) rebuilds the
         signal from the remaining coefficients.
 
-        .. figure::../../../images/_commands/gFFT3.PNG
+        .. figure:: ../../../images/_commands/gFFT3.PNG
 
            Signal Obtained with the Filter
 
@@ -1050,7 +1057,7 @@ class MatrixOperations(CommandsBase):
 
         The following example demonstrates ``Method`` = DIAG:
 
-        .. figure::../../../images/_commands/gINIT1.svg
+        .. figure:: ../../../images/_commands/gINIT1.svg
 
         **The following** ``Valx`` fields are used with ``Method`` = FILTER:
 
@@ -1267,6 +1274,8 @@ class MatrixOperations(CommandsBase):
         :ref:`lsrestore` command.
 
         A BCS Sparse Solver can be dumped only if uses the ``INCORE`` memory option (see :ref:`bcsoption` ).
+
+
         """
         command = f"*LSDUMP,{enginename},{filename}"
         return self.run(command, **kwargs)
@@ -1427,6 +1436,8 @@ class MatrixOperations(CommandsBase):
 
         Restores a previously dumped Linear Solver (see the :ref:`lsdump` command). This Linear Solver can
         be used to solve a linear system using the :ref:`lsbac` command.
+
+
         """
         command = f"*LSRESTORE,{enginename},{filename}"
         return self.run(command, **kwargs)
@@ -1502,17 +1513,17 @@ class MatrixOperations(CommandsBase):
 
         The following two examples demonstrate merging columns into a dense matrix.
 
-        .. figure::../../../images/_commands/gMERGE1.png
+        .. figure:: ../../../images/_commands/gMERGE1.png
 
         The following example demonstrates merging rows into a dense matrix.
 
-        .. figure::../../../images/_commands/gMERGE3.png
+        .. figure:: ../../../images/_commands/gMERGE3.png
 
         :ref:`merge` can also be used to add new rows to a vector that was created by the :ref:`vec`
         command. In this case, ``Name1`` and ``Name2`` must both refer to vectors, as demonstrated in the
         example below.
 
-        .. figure::../../../images/_commands/gMERGE2.png
+        .. figure:: ../../../images/_commands/gMERGE2.png
 
         In all cases, the values of the original matrix or vector are retained, and the matrix or vector is
         resized to accommodate the additional rows or columns.
