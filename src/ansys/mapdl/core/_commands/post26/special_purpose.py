@@ -556,7 +556,7 @@ class SpecialPurpose(CommandsBase):
             Array parameter vector in the operation.
 
         ir : str
-            Arbitrary reference number assigned to this variable (1 to ``NV``   ( :ref:`numvar` )).
+            Arbitrary reference number assigned to this variable (1 to ``NV``  ( :ref:`numvar` )).
             Overwrites any existing results for this variable.
 
         tstrt : str
