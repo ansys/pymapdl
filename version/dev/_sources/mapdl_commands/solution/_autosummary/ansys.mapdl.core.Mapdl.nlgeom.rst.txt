@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.nlgeom
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.nlgeom

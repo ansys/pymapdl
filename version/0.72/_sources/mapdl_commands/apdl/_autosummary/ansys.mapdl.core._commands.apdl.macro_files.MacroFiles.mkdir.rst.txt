@@ -1,0 +1,6 @@
+﻿mkdir
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.apdl.macro_files
+
+.. automethod:: MacroFiles.mkdir

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.cgloc
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.cgloc

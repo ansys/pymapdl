@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.psdgraph
+===============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.psdgraph

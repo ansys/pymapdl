@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.sffun
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.sffun

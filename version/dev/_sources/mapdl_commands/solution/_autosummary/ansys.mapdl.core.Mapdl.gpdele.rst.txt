@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.gpdele
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.gpdele

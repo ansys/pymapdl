@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.sed
+==========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.sed

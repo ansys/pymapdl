@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.adams
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.adams

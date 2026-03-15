@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.abextract
+================================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.abextract
