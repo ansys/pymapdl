@@ -1,54 +1,62 @@
-.. _ref_elements_commands_api:
 
-********
+.. _ref_elements:
+
+
 Elements
-********
+========
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to create, modify, list, etc., elements.
+.. currentmodule:: ansys.mapdl.core._commands.prep7.elements
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.elements.Elements
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.afsurf
-   Mapdl.e
-   Mapdl.ecpchg
-   Mapdl.edele
-   Mapdl.eextrude
-   Mapdl.egen
-   Mapdl.einfin
-   Mapdl.eintf
-   Mapdl.elist
-   Mapdl.emid
-   Mapdl.emodif
-   Mapdl.emore
-   Mapdl.emtgen
-   Mapdl.en
-   Mapdl.endrelease
-   Mapdl.engen
-   Mapdl.enorm
-   Mapdl.ensym
-   Mapdl.eread
-   Mapdl.ereinf
-   Mapdl.errang
-   Mapdl.esurf
-   Mapdl.esym
-   Mapdl.ewrite
-   Mapdl.gcdef
-   Mapdl.gcgen
-   Mapdl.inistate
-   Mapdl.laylist
-   Mapdl.layplot
-   Mapdl.lfsurf
-   Mapdl.ndsurf
-   Mapdl.shsd
-   Mapdl.swadd
-   Mapdl.swdel
-   Mapdl.swgen
-   Mapdl.swlist
-   Mapdl.tshap
-   Mapdl.upgeom
-   Mapdl.usrdof
-   Mapdl.usrelem
-   Mapdl.wtbcreate
+
+   Elements.afsurf
+   Elements.dflab
+   Elements.e
+   Elements.ecpchg
+   Elements.edele
+   Elements.eembed
+   Elements.egen
+   Elements.egid
+   Elements.einfin
+   Elements.eintf
+   Elements.elbow
+   Elements.elist
+   Elements.emid
+   Elements.emodif
+   Elements.emore
+   Elements.emsel
+   Elements.emtgen
+   Elements.en
+   Elements.endrelease
+   Elements.engen
+   Elements.enorm
+   Elements.ensym
+   Elements.eplot
+   Elements.eread
+   Elements.ereinf
+   Elements.errang
+   Elements.esurf
+   Elements.esym
+   Elements.ewrite
+   Elements.gcdef
+   Elements.gcgen
+   Elements.laylist
+   Elements.layplot
+   Elements.lfsurf
+   Elements.ndsurf
+   Elements.shsd
+   Elements.swadd
+   Elements.swdel
+   Elements.swgen
+   Elements.swlist
+   Elements.tshap
+   Elements.upgeom
+   Elements.usrdof
+   Elements.usrelem
+   Elements.wtbcreate
