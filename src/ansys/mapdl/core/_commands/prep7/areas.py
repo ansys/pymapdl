@@ -1,12 +1,52 @@
-from ansys.mapdl.core._commands import parse
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase
+from ansys.mapdl.core._commands import CommandsBase, parse
+
 
 class Areas(CommandsBase):
 
-
-
-    def a(self, p1: str = "", p2: str = "", p3: str = "", p4: str = "", p5: str = "", p6: str = "", p7: str = "", p8: str = "", p9: str = "", p10: str = "", p11: str = "", p12: str = "", p13: str = "", p14: str = "", p15: str = "", p16: str = "", p17: str = "", p18: str = "", **kwargs):
+    def a(
+        self,
+        p1: str = "",
+        p2: str = "",
+        p3: str = "",
+        p4: str = "",
+        p5: str = "",
+        p6: str = "",
+        p7: str = "",
+        p8: str = "",
+        p9: str = "",
+        p10: str = "",
+        p11: str = "",
+        p12: str = "",
+        p13: str = "",
+        p14: str = "",
+        p15: str = "",
+        p16: str = "",
+        p17: str = "",
+        p18: str = "",
+        **kwargs,
+    ):
         r"""Defines an area by connecting keypoints.
 
         Mechanical APDL Command: `A <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_A.html>`_
@@ -134,10 +174,17 @@ class Areas(CommandsBase):
         >>> a0
         1
         """
-        command = f'A,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8},{p9},{p10},{p11},{p12},{p13},{p14},{p15},{p16},{p17},{p18}'
+        command = f"A,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8},{p9},{p10},{p11},{p12},{p13},{p14},{p15},{p16},{p17},{p18}"
         return parse.parse_a(self.run(command, **kwargs))
 
-    def adele(self, na1: str = "", na2: str = "", ninc: str = "", kswp: int | str = "", **kwargs):
+    def adele(
+        self,
+        na1: str = "",
+        na2: str = "",
+        ninc: str = "",
+        kswp: int | str = "",
+        **kwargs,
+    ):
         r"""Deletes unmeshed areas.
 
         Mechanical APDL Command: `ADELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ADELE.html>`_
@@ -183,8 +230,6 @@ class Areas(CommandsBase):
         command = f"ADELE,{na1},{na2},{ninc},{kswp}"
         return self.run(command, **kwargs)
 
-
-
     def adgl(self, na1: str = "", na2: str = "", ninc: str = "", **kwargs):
         r"""Lists keypoints of an area that lie on a parametric degeneracy.
 
@@ -227,9 +272,22 @@ class Areas(CommandsBase):
         command = f"ADGL,{na1},{na2},{ninc}"
         return self.run(command, **kwargs)
 
-
-
-    def adrag(self, nl1: str = "", nl2: str = "", nl3: str = "", nl4: str = "", nl5: str = "", nl6: str = "", nlp1: str = "", nlp2: str = "", nlp3: str = "", nlp4: str = "", nlp5: str = "", nlp6: str = "", **kwargs):
+    def adrag(
+        self,
+        nl1: str = "",
+        nl2: str = "",
+        nl3: str = "",
+        nl4: str = "",
+        nl5: str = "",
+        nl6: str = "",
+        nlp1: str = "",
+        nlp2: str = "",
+        nlp3: str = "",
+        nlp4: str = "",
+        nlp5: str = "",
+        nlp6: str = "",
+        **kwargs,
+    ):
         r"""Generates areas by dragging a line pattern along a path.
 
         Mechanical APDL Command: `ADRAG <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ADRAG.html>`_
@@ -326,8 +384,6 @@ class Areas(CommandsBase):
         command = f"ADRAG,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nlp1},{nlp2},{nlp3},{nlp4},{nlp5},{nlp6}"
         return self.run(command, **kwargs)
 
-
-
     def afillt(self, na1: str = "", na2: str = "", rad: str = "", **kwargs):
         r"""Generates a fillet at the intersection of two areas.
 
@@ -358,9 +414,20 @@ class Areas(CommandsBase):
         command = f"AFILLT,{na1},{na2},{rad}"
         return self.run(command, **kwargs)
 
-
-
-    def agen(self, itime: str = "", na1: str = "", na2: str = "", ninc: str = "", dx: str = "", dy: str = "", dz: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def agen(
+        self,
+        itime: str = "",
+        na1: str = "",
+        na2: str = "",
+        ninc: str = "",
+        dx: str = "",
+        dy: str = "",
+        dz: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Generates additional areas from a pattern of areas.
 
         Mechanical APDL Command: `AGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AGEN.html>`_
@@ -442,14 +509,25 @@ class Areas(CommandsBase):
         coordinate system is not recommended. Area and line numbers are automatically assigned, beginning
         with the lowest available values ( :ref:`numstr` ).
         """
-        command = f"AGEN,{itime},{na1},{na2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        command = (
+            f"AGEN,{itime},{na1},{na2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
+        )
         return self.run(command, **kwargs)
 
-
-
-
-
-    def al(self, l1: str = "", l2: str = "", l3: str = "", l4: str = "", l5: str = "", l6: str = "", l7: str = "", l8: str = "", l9: str = "", l10: str = "", **kwargs):
+    def al(
+        self,
+        l1: str = "",
+        l2: str = "",
+        l3: str = "",
+        l4: str = "",
+        l5: str = "",
+        l6: str = "",
+        l7: str = "",
+        l8: str = "",
+        l9: str = "",
+        l10: str = "",
+        **kwargs,
+    ):
         r"""Generates an area bounded by previously defined lines.
 
         Mechanical APDL Command: `AL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AL.html>`_
@@ -570,10 +648,12 @@ class Areas(CommandsBase):
         >>> anum
         1
         """
-        command = f'AL,{l1},{l2},{l3},{l4},{l5},{l6},{l7},{l8},{l9},{l10}'
+        command = f"AL,{l1},{l2},{l3},{l4},{l5},{l6},{l7},{l8},{l9},{l10}"
         return parse.parse_a(self.run(command, **kwargs))
 
-    def alist(self, na1: str = "", na2: str = "", ninc: str = "", lab: str = "", **kwargs):
+    def alist(
+        self, na1: str = "", na2: str = "", ninc: str = "", lab: str = "", **kwargs
+    ):
         r"""Lists the defined areas.
 
         Mechanical APDL Command: `ALIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ALIST.html>`_
@@ -624,8 +704,6 @@ class Areas(CommandsBase):
         command = f"ALIST,{na1},{na2},{ninc},{lab}"
         return self.run(command, **kwargs)
 
-
-
     def anorm(self, anum: str = "", noeflip: int | str = "", **kwargs):
         r"""Reorients area normals.
 
@@ -671,8 +749,6 @@ class Areas(CommandsBase):
         command = f"ANORM,{anum},{noeflip}"
         return self.run(command, **kwargs)
 
-
-
     def aoffst(self, narea: str = "", dist: str = "", kinc: str = "", **kwargs):
         r"""Generates an area, offset from a given area.
 
@@ -706,9 +782,15 @@ class Areas(CommandsBase):
         command = f"AOFFST,{narea},{dist},{kinc}"
         return self.run(command, **kwargs)
 
-
-
-    def aplot(self, na1: str = "", na2: str = "", ninc: str = "", degen: str = "", scale: str = "", **kwargs):
+    def aplot(
+        self,
+        na1: str = "",
+        na2: str = "",
+        ninc: str = "",
+        degen: str = "",
+        scale: str = "",
+        **kwargs,
+    ):
         r"""Displays the selected areas.
 
         Mechanical APDL Command: `APLOT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_APLOT.html>`_
@@ -752,8 +834,6 @@ class Areas(CommandsBase):
         """
         command = f"APLOT,{na1},{na2},{ninc},{degen},{scale}"
         return self.run(command, **kwargs)
-
-
 
     def areverse(self, anum: str = "", noeflip: int | str = "", **kwargs):
         r"""Reverses the normal of an area, regardless of its connectivity or mesh status.
@@ -799,9 +879,20 @@ class Areas(CommandsBase):
         command = f"AREVERSE,{anum},{noeflip}"
         return self.run(command, **kwargs)
 
-
-
-    def arotat(self, nl1: str = "", nl2: str = "", nl3: str = "", nl4: str = "", nl5: str = "", nl6: str = "", pax1: str = "", pax2: str = "", arc: str = "", nseg: str = "", **kwargs):
+    def arotat(
+        self,
+        nl1: str = "",
+        nl2: str = "",
+        nl3: str = "",
+        nl4: str = "",
+        nl5: str = "",
+        nl6: str = "",
+        pax1: str = "",
+        pax2: str = "",
+        arc: str = "",
+        nseg: str = "",
+        **kwargs,
+    ):
         r"""Generates cylindrical areas by rotating a line pattern about an axis.
 
         Mechanical APDL Command: `AROTAT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AROTAT.html>`_
@@ -876,12 +967,24 @@ class Areas(CommandsBase):
         and area numbers are automatically assigned, beginning with the lowest available values (
         :ref:`numstr` ). Adjacent lines use a common keypoint. Adjacent areas use a common line.
         """
-        command = f"AROTAT,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{pax1},{pax2},{arc},{nseg}"
+        command = (
+            f"AROTAT,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{pax1},{pax2},{arc},{nseg}"
+        )
         return self.run(command, **kwargs)
 
-
-
-    def arscale(self, na1: str = "", na2: str = "", ninc: str = "", rx: str = "", ry: str = "", rz: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def arscale(
+        self,
+        na1: str = "",
+        na2: str = "",
+        ninc: str = "",
+        rx: str = "",
+        ry: str = "",
+        rz: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Generates a scaled set of areas from a pattern of areas.
 
         Mechanical APDL Command: `ARSCALE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ARSCALE.html>`_
@@ -968,9 +1071,17 @@ class Areas(CommandsBase):
         command = f"ARSCALE,{na1},{na2},{ninc},{rx},{ry},{rz},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-
-
-    def arsym(self, ncomp: str = "", na1: str = "", na2: str = "", ninc: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def arsym(
+        self,
+        ncomp: str = "",
+        na1: str = "",
+        na2: str = "",
+        ninc: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Generates areas from an area pattern by symmetry reflection.
 
         Mechanical APDL Command: `ARSYM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ARSYM.html>`_
@@ -1045,9 +1156,19 @@ class Areas(CommandsBase):
         command = f"ARSYM,{ncomp},{na1},{na2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-
-
-    def askin(self, nl1: str = "", nl2: str = "", nl3: str = "", nl4: str = "", nl5: str = "", nl6: str = "", nl7: str = "", nl8: str = "", nl9: str = "", **kwargs):
+    def askin(
+        self,
+        nl1: str = "",
+        nl2: str = "",
+        nl3: str = "",
+        nl4: str = "",
+        nl5: str = "",
+        nl6: str = "",
+        nl7: str = "",
+        nl8: str = "",
+        nl9: str = "",
+        **kwargs,
+    ):
         r"""Generates an area by "skinning" a surface through guiding lines.
 
         Mechanical APDL Command: `ASKIN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASKIN.html>`_
@@ -1133,9 +1254,15 @@ class Areas(CommandsBase):
         command = f"ASKIN,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nl7},{nl8},{nl9}"
         return self.run(command, **kwargs)
 
-
-
-    def asub(self, na1: str = "", p1: str = "", p2: str = "", p3: str = "", p4: str = "", **kwargs):
+    def asub(
+        self,
+        na1: str = "",
+        p1: str = "",
+        p2: str = "",
+        p3: str = "",
+        p4: str = "",
+        **kwargs,
+    ):
         r"""Generates an area using the shape of an existing area.
 
         Mechanical APDL Command: `ASUB <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASUB.html>`_
@@ -1170,8 +1297,6 @@ class Areas(CommandsBase):
         """
         command = f"ASUB,{na1},{p1},{p2},{p3},{p4}"
         return self.run(command, **kwargs)
-
-
 
     def asum(self, lab: str = "", **kwargs):
         r"""Calculates and prints geometry statistics of the selected areas.
@@ -1216,9 +1341,17 @@ class Areas(CommandsBase):
         command = f"ASUM,{lab}"
         return self.run(command, **kwargs)
 
-
-
-    def atran(self, kcnto: str = "", na1: str = "", na2: str = "", ninc: str = "", kinc: str = "", noelem: int | str = "", imove: int | str = "", **kwargs):
+    def atran(
+        self,
+        kcnto: str = "",
+        na1: str = "",
+        na2: str = "",
+        ninc: str = "",
+        kinc: str = "",
+        noelem: int | str = "",
+        imove: int | str = "",
+        **kwargs,
+    ):
         r"""Transfers a pattern of areas to another coordinate system.
 
         Mechanical APDL Command: `ATRAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ATRAN.html>`_
@@ -1287,9 +1420,9 @@ class Areas(CommandsBase):
         command = f"ATRAN,{kcnto},{na1},{na2},{ninc},{kinc},{noelem},{imove}"
         return self.run(command, **kwargs)
 
-
-
-    def splot(self, na1: str = "", na2: str = "", ninc: str = "", mesh: str = "", **kwargs):
+    def splot(
+        self, na1: str = "", na2: str = "", ninc: str = "", mesh: str = "", **kwargs
+    ):
         r"""Displays the selected areas and a faceted view of their underlying surfaces
 
         Mechanical APDL Command: `SPLOT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPLOT.html>`_
@@ -1323,5 +1456,3 @@ class Areas(CommandsBase):
         """
         command = f"SPLOT,{na1},{na2},{ninc},{mesh}"
         return self.run(command, **kwargs)
-
-

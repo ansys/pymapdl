@@ -1,8 +1,53 @@
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from ansys.mapdl.core._commands import CommandsBase
+
 
 class CoupledDof(CommandsBase):
 
-    def cp(self, nset: str = "", lab: str = "", node1: str = "", node2: str = "", node3: str = "", node4: str = "", node5: str = "", node6: str = "", node7: str = "", node8: str = "", node9: str = "", node10: str = "", node11: str = "", node12: str = "", node13: str = "", node14: str = "", node15: str = "", node16: str = "", node17: str = "", **kwargs):
+    def cp(
+        self,
+        nset: str = "",
+        lab: str = "",
+        node1: str = "",
+        node2: str = "",
+        node3: str = "",
+        node4: str = "",
+        node5: str = "",
+        node6: str = "",
+        node7: str = "",
+        node8: str = "",
+        node9: str = "",
+        node10: str = "",
+        node11: str = "",
+        node12: str = "",
+        node13: str = "",
+        node14: str = "",
+        node15: str = "",
+        node16: str = "",
+        node17: str = "",
+        **kwargs,
+    ):
         r"""Defines (or modifies) a set of coupled degrees of freedom.
 
         Mechanical APDL Command: `CP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CP.html>`_
@@ -362,9 +407,9 @@ class CoupledDof(CommandsBase):
         command = f"CP,{nset},{lab},{node1},{node2},{node3},{node4},{node5},{node6},{node7},{node8},{node9},{node10},{node11},{node12},{node13},{node14},{node15},{node16},{node17}"
         return self.run(command, **kwargs)
 
-
-
-    def cpdele(self, nset1: str = "", nset2: str = "", ninc: str = "", nsel: str = "", **kwargs):
+    def cpdele(
+        self, nset1: str = "", nset2: str = "", ninc: str = "", nsel: str = "", **kwargs
+    ):
         r"""Deletes coupled degree of freedom sets.
 
         Mechanical APDL Command: `CPDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CPDELE.html>`_
@@ -402,8 +447,6 @@ class CoupledDof(CommandsBase):
         """
         command = f"CPDELE,{nset1},{nset2},{ninc},{nsel}"
         return self.run(command, **kwargs)
-
-
 
     def cpintf(self, lab: str = "", toler: str = "", **kwargs):
         r"""Defines coupled degrees of freedom at an interface.
@@ -446,9 +489,16 @@ class CoupledDof(CommandsBase):
         command = f"CPINTF,{lab},{toler}"
         return self.run(command, **kwargs)
 
-
-
-    def cplgen(self, nsetf: str = "", lab1: str = "", lab2: str = "", lab3: str = "", lab4: str = "", lab5: str = "", **kwargs):
+    def cplgen(
+        self,
+        nsetf: str = "",
+        lab1: str = "",
+        lab2: str = "",
+        lab3: str = "",
+        lab4: str = "",
+        lab5: str = "",
+        **kwargs,
+    ):
         r"""Generates sets of coupled nodes from an existing set.
 
         Mechanical APDL Command: `CPLGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CPLGEN.html>`_
@@ -491,9 +541,9 @@ class CoupledDof(CommandsBase):
         command = f"CPLGEN,{nsetf},{lab1},{lab2},{lab3},{lab4},{lab5}"
         return self.run(command, **kwargs)
 
-
-
-    def cplist(self, nset1: str = "", nset2: str = "", ninc: str = "", nsel: str = "", **kwargs):
+    def cplist(
+        self, nset1: str = "", nset2: str = "", ninc: str = "", nsel: str = "", **kwargs
+    ):
         r"""Lists the coupled degree of freedom sets.
 
         Mechanical APDL Command: `CPLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CPLIST.html>`_
@@ -532,8 +582,6 @@ class CoupledDof(CommandsBase):
         command = f"CPLIST,{nset1},{nset2},{ninc},{nsel}"
         return self.run(command, **kwargs)
 
-
-
     def cpmerge(self, lab: str = "", **kwargs):
         r"""Merges different couple sets with duplicate degrees of freedom into one couple set.
 
@@ -553,9 +601,15 @@ class CoupledDof(CommandsBase):
         command = f"CPMERGE,{lab}"
         return self.run(command, **kwargs)
 
-
-
-    def cpngen(self, nset: str = "", lab: str = "", node1: str = "", node2: str = "", ninc: str = "", **kwargs):
+    def cpngen(
+        self,
+        nset: str = "",
+        lab: str = "",
+        node1: str = "",
+        node2: str = "",
+        ninc: str = "",
+        **kwargs,
+    ):
         r"""Defines, modifies, or adds to a set of coupled degrees of freedom.
 
         Mechanical APDL Command: `CPNGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CPNGEN.html>`_
@@ -597,9 +651,9 @@ class CoupledDof(CommandsBase):
         command = f"CPNGEN,{nset},{lab},{node1},{node2},{ninc}"
         return self.run(command, **kwargs)
 
-
-
-    def cpsel(self, type_: str = "", vmin: str = "", vmax: str = "", vinc: str = "", **kwargs):
+    def cpsel(
+        self, type_: str = "", vmin: str = "", vmax: str = "", vinc: str = "", **kwargs
+    ):
         r"""Selects coupled degree-of-freedom sets via predefined reference numbers.
 
         Mechanical APDL Command: `CPSEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CPSEL.html>`_
@@ -666,9 +720,15 @@ class CoupledDof(CommandsBase):
         command = f"CPSEL,{type_},,,{vmin},{vmax},{vinc}"
         return self.run(command, **kwargs)
 
-
-
-    def cpsgen(self, itime: str = "", inc: str = "", nset1: str = "", nset2: str = "", ninc: str = "", **kwargs):
+    def cpsgen(
+        self,
+        itime: str = "",
+        inc: str = "",
+        nset1: str = "",
+        nset2: str = "",
+        ninc: str = "",
+        **kwargs,
+    ):
         r"""Generates sets of coupled nodes from existing sets.
 
         Mechanical APDL Command: `CPSGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CPSGEN.html>`_
@@ -711,5 +771,3 @@ class CoupledDof(CommandsBase):
         """
         command = f"CPSGEN,{itime},{inc},{nset1},{nset2},{ninc}"
         return self.run(command, **kwargs)
-
-

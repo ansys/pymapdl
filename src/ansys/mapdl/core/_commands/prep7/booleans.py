@@ -1,12 +1,43 @@
-from ansys.mapdl.core._commands import parse
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase
+from ansys.mapdl.core._commands import CommandsBase, parse
+
 
 class Booleans(CommandsBase):
 
-
-
-    def aadd(self, na1: str = "", na2: str = "", na3: str = "", na4: str = "", na5: str = "", na6: str = "", na7: str = "", na8: str = "", na9: str = "", **kwargs):
+    def aadd(
+        self,
+        na1: str = "",
+        na2: str = "",
+        na3: str = "",
+        na4: str = "",
+        na5: str = "",
+        na6: str = "",
+        na7: str = "",
+        na8: str = "",
+        na9: str = "",
+        **kwargs,
+    ):
         r"""Adds separate areas to create a single area.
 
         Mechanical APDL Command: `AADD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AADD.html>`_
@@ -78,10 +109,22 @@ class Booleans(CommandsBase):
         >>> a_comb
         3
         """
-        command = f'AADD,{na1},{na2},{na3},{na4},{na5},{na6},{na7},{na8},{na9}'
+        command = f"AADD,{na1},{na2},{na3},{na4},{na5},{na6},{na7},{na8},{na9}"
         return parse.parse_output_areas(self.run(command, **kwargs))
 
-    def aglue(self, na1: str = "", na2: str = "", na3: str = "", na4: str = "", na5: str = "", na6: str = "", na7: str = "", na8: str = "", na9: str = "", **kwargs):
+    def aglue(
+        self,
+        na1: str = "",
+        na2: str = "",
+        na3: str = "",
+        na4: str = "",
+        na5: str = "",
+        na6: str = "",
+        na7: str = "",
+        na8: str = "",
+        na9: str = "",
+        **kwargs,
+    ):
         r"""Generates new areas by "gluing" areas.
 
         Mechanical APDL Command: `AGLUE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AGLUE.html>`_
@@ -164,9 +207,19 @@ class Booleans(CommandsBase):
         command = f"AGLUE,{na1},{na2},{na3},{na4},{na5},{na6},{na7},{na8},{na9}"
         return self.run(command, **kwargs)
 
-
-
-    def aina(self, na1: str = "", na2: str = "", na3: str = "", na4: str = "", na5: str = "", na6: str = "", na7: str = "", na8: str = "", na9: str = "", **kwargs):
+    def aina(
+        self,
+        na1: str = "",
+        na2: str = "",
+        na3: str = "",
+        na4: str = "",
+        na5: str = "",
+        na6: str = "",
+        na7: str = "",
+        na8: str = "",
+        na9: str = "",
+        **kwargs,
+    ):
         r"""Finds the intersection of areas.
 
         Mechanical APDL Command: `AINA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AINA.html>`_
@@ -245,9 +298,19 @@ class Booleans(CommandsBase):
         command = f"AINA,{na1},{na2},{na3},{na4},{na5},{na6},{na7},{na8},{na9}"
         return self.run(command, **kwargs)
 
-
-
-    def ainp(self, na1: str = "", na2: str = "", na3: str = "", na4: str = "", na5: str = "", na6: str = "", na7: str = "", na8: str = "", na9: str = "", **kwargs):
+    def ainp(
+        self,
+        na1: str = "",
+        na2: str = "",
+        na3: str = "",
+        na4: str = "",
+        na5: str = "",
+        na6: str = "",
+        na7: str = "",
+        na8: str = "",
+        na9: str = "",
+        **kwargs,
+    ):
         r"""Finds the pairwise intersection of areas.
 
         Mechanical APDL Command: `AINP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AINP.html>`_
@@ -325,8 +388,6 @@ class Booleans(CommandsBase):
         command = f"AINP,{na1},{na2},{na3},{na4},{na5},{na6},{na7},{na8},{na9}"
         return self.run(command, **kwargs)
 
-
-
     def ainv(self, na: str = "", nv: str = "", **kwargs):
         r"""Finds the intersection of an area with a volume.
 
@@ -357,9 +418,19 @@ class Booleans(CommandsBase):
         command = f"AINV,{na},{nv}"
         return self.run(command, **kwargs)
 
-
-
-    def aovlap(self, na1: str = "", na2: str = "", na3: str = "", na4: str = "", na5: str = "", na6: str = "", na7: str = "", na8: str = "", na9: str = "", **kwargs):
+    def aovlap(
+        self,
+        na1: str = "",
+        na2: str = "",
+        na3: str = "",
+        na4: str = "",
+        na5: str = "",
+        na6: str = "",
+        na7: str = "",
+        na8: str = "",
+        na9: str = "",
+        **kwargs,
+    ):
         r"""Overlaps areas.
 
         Mechanical APDL Command: `AOVLAP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AOVLAP.html>`_
@@ -430,9 +501,19 @@ class Booleans(CommandsBase):
         command = f"AOVLAP,{na1},{na2},{na3},{na4},{na5},{na6},{na7},{na8},{na9}"
         return self.run(command, **kwargs)
 
-
-
-    def aptn(self, na1: str = "", na2: str = "", na3: str = "", na4: str = "", na5: str = "", na6: str = "", na7: str = "", na8: str = "", na9: str = "", **kwargs):
+    def aptn(
+        self,
+        na1: str = "",
+        na2: str = "",
+        na3: str = "",
+        na4: str = "",
+        na5: str = "",
+        na6: str = "",
+        na7: str = "",
+        na8: str = "",
+        na9: str = "",
+        **kwargs,
+    ):
         r"""Partitions areas.
 
         Mechanical APDL Command: `APTN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_APTN.html>`_
@@ -505,11 +586,15 @@ class Booleans(CommandsBase):
         command = f"APTN,{na1},{na2},{na3},{na4},{na5},{na6},{na7},{na8},{na9}"
         return self.run(command, **kwargs)
 
-
-
-
-
-    def asba(self, na1: str = "", na2: str = "", sepo: str = "", keep1: str = "", keep2: str = "", **kwargs):
+    def asba(
+        self,
+        na1: str = "",
+        na2: str = "",
+        sepo: str = "",
+        keep1: str = "",
+        keep2: str = "",
+        **kwargs,
+    ):
         r"""Subtracts areas from areas.
 
         Mechanical APDL Command: `ASBA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASBA.html>`_
@@ -589,10 +674,12 @@ class Booleans(CommandsBase):
         >>> aout
         3
         """
-        command = f'ASBA,{na1},{na2},{sepo},{keep1},{keep2}'
+        command = f"ASBA,{na1},{na2},{sepo},{keep1},{keep2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-    def asbl(self, na: str = "", nl: str = "", keepa: str = "", keepl: str = "", **kwargs):
+    def asbl(
+        self, na: str = "", nl: str = "", keepa: str = "", keepl: str = "", **kwargs
+    ):
         r"""Subtracts lines from areas.
 
         Mechanical APDL Command: `ASBL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASBL.html>`_
@@ -645,9 +732,15 @@ class Booleans(CommandsBase):
         command = f"ASBL,{na},{nl},,{keepa},{keepl}"
         return self.run(command, **kwargs)
 
-
-
-    def asbv(self, na: str = "", nv: str = "", sepo: str = "", keepa: str = "", keepv: str = "", **kwargs):
+    def asbv(
+        self,
+        na: str = "",
+        nv: str = "",
+        sepo: str = "",
+        keepa: str = "",
+        keepv: str = "",
+        **kwargs,
+    ):
         r"""Subtracts volumes from areas.
 
         Mechanical APDL Command: `ASBV <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASBV.html>`_
@@ -709,8 +802,6 @@ class Booleans(CommandsBase):
         command = f"ASBV,{na},{nv},{sepo},{keepa},{keepv}"
         return self.run(command, **kwargs)
 
-
-
     def asbw(self, na: str = "", sepo: str = "", keep: str = "", **kwargs):
         r"""Subtracts the intersection of the working plane from areas (divides areas).
 
@@ -767,8 +858,6 @@ class Booleans(CommandsBase):
         """
         command = f"ASBW,{na},{sepo},{keep}"
         return self.run(command, **kwargs)
-
-
 
     def boptn(self, lab: str = "", value: str = "", **kwargs):
         r"""Specifies Boolean operation options.
@@ -859,8 +948,6 @@ class Booleans(CommandsBase):
         command = f"BOPTN,{lab},{value}"
         return self.run(command, **kwargs)
 
-
-
     def btol(self, ptol: str = "", **kwargs):
         r"""Specifies the Boolean operation tolerances.
 
@@ -890,9 +977,19 @@ class Booleans(CommandsBase):
         command = f"BTOL,{ptol}"
         return self.run(command, **kwargs)
 
-
-
-    def lcsl(self, nl1: str = "", nl2: str = "", nl3: str = "", nl4: str = "", nl5: str = "", nl6: str = "", nl7: str = "", nl8: str = "", nl9: str = "", **kwargs):
+    def lcsl(
+        self,
+        nl1: str = "",
+        nl2: str = "",
+        nl3: str = "",
+        nl4: str = "",
+        nl5: str = "",
+        nl6: str = "",
+        nl7: str = "",
+        nl8: str = "",
+        nl9: str = "",
+        **kwargs,
+    ):
         r"""Divides intersecting lines at their point(s) of intersection.
 
         Mechanical APDL Command: `LCSL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LCSL.html>`_
@@ -957,9 +1054,19 @@ class Booleans(CommandsBase):
         command = f"LCSL,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nl7},{nl8},{nl9}"
         return self.run(command, **kwargs)
 
-
-
-    def lglue(self, nl1: str = "", nl2: str = "", nl3: str = "", nl4: str = "", nl5: str = "", nl6: str = "", nl7: str = "", nl8: str = "", nl9: str = "", **kwargs):
+    def lglue(
+        self,
+        nl1: str = "",
+        nl2: str = "",
+        nl3: str = "",
+        nl4: str = "",
+        nl5: str = "",
+        nl6: str = "",
+        nl7: str = "",
+        nl8: str = "",
+        nl9: str = "",
+        **kwargs,
+    ):
         r"""Generates new lines by "gluing" lines.
 
         Mechanical APDL Command: `LGLUE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LGLUE.html>`_
@@ -1042,8 +1149,6 @@ class Booleans(CommandsBase):
         command = f"LGLUE,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nl7},{nl8},{nl9}"
         return self.run(command, **kwargs)
 
-
-
     def lina(self, nl: str = "", na: str = "", **kwargs):
         r"""Finds the intersection of a line with an area.
 
@@ -1074,9 +1179,19 @@ class Booleans(CommandsBase):
         command = f"LINA,{nl},{na}"
         return self.run(command, **kwargs)
 
-
-
-    def linl(self, nl1: str = "", nl2: str = "", nl3: str = "", nl4: str = "", nl5: str = "", nl6: str = "", nl7: str = "", nl8: str = "", nl9: str = "", **kwargs):
+    def linl(
+        self,
+        nl1: str = "",
+        nl2: str = "",
+        nl3: str = "",
+        nl4: str = "",
+        nl5: str = "",
+        nl6: str = "",
+        nl7: str = "",
+        nl8: str = "",
+        nl9: str = "",
+        **kwargs,
+    ):
         r"""Finds the common intersection of lines.
 
         Mechanical APDL Command: `LINL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LINL.html>`_
@@ -1154,9 +1269,19 @@ class Booleans(CommandsBase):
         command = f"LINL,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nl7},{nl8},{nl9}"
         return self.run(command, **kwargs)
 
-
-
-    def linp(self, nl1: str = "", nl2: str = "", nl3: str = "", nl4: str = "", nl5: str = "", nl6: str = "", nl7: str = "", nl8: str = "", nl9: str = "", **kwargs):
+    def linp(
+        self,
+        nl1: str = "",
+        nl2: str = "",
+        nl3: str = "",
+        nl4: str = "",
+        nl5: str = "",
+        nl6: str = "",
+        nl7: str = "",
+        nl8: str = "",
+        nl9: str = "",
+        **kwargs,
+    ):
         r"""Finds the pairwise intersection of lines.
 
         Mechanical APDL Command: `LINP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LINP.html>`_
@@ -1234,8 +1359,6 @@ class Booleans(CommandsBase):
         command = f"LINP,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nl7},{nl8},{nl9}"
         return self.run(command, **kwargs)
 
-
-
     def linv(self, nl: str = "", nv: str = "", **kwargs):
         r"""Finds the intersection of a line with a volume.
 
@@ -1266,9 +1389,19 @@ class Booleans(CommandsBase):
         command = f"LINV,{nl},{nv}"
         return self.run(command, **kwargs)
 
-
-
-    def lovlap(self, nl1: str = "", nl2: str = "", nl3: str = "", nl4: str = "", nl5: str = "", nl6: str = "", nl7: str = "", nl8: str = "", nl9: str = "", **kwargs):
+    def lovlap(
+        self,
+        nl1: str = "",
+        nl2: str = "",
+        nl3: str = "",
+        nl4: str = "",
+        nl5: str = "",
+        nl6: str = "",
+        nl7: str = "",
+        nl8: str = "",
+        nl9: str = "",
+        **kwargs,
+    ):
         r"""Overlaps lines.
 
         Mechanical APDL Command: `LOVLAP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LOVLAP.html>`_
@@ -1346,9 +1479,19 @@ class Booleans(CommandsBase):
         command = f"LOVLAP,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nl7},{nl8},{nl9}"
         return self.run(command, **kwargs)
 
-
-
-    def lptn(self, nl1: str = "", nl2: str = "", nl3: str = "", nl4: str = "", nl5: str = "", nl6: str = "", nl7: str = "", nl8: str = "", nl9: str = "", **kwargs):
+    def lptn(
+        self,
+        nl1: str = "",
+        nl2: str = "",
+        nl3: str = "",
+        nl4: str = "",
+        nl5: str = "",
+        nl6: str = "",
+        nl7: str = "",
+        nl8: str = "",
+        nl9: str = "",
+        **kwargs,
+    ):
         r"""Partitions lines.
 
         Mechanical APDL Command: `LPTN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LPTN.html>`_
@@ -1417,9 +1560,15 @@ class Booleans(CommandsBase):
         command = f"LPTN,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nl7},{nl8},{nl9}"
         return self.run(command, **kwargs)
 
-
-
-    def lsba(self, nl: str = "", na: str = "", sepo: str = "", keepl: str = "", keepa: str = "", **kwargs):
+    def lsba(
+        self,
+        nl: str = "",
+        na: str = "",
+        sepo: str = "",
+        keepl: str = "",
+        keepa: str = "",
+        **kwargs,
+    ):
         r"""Subtracts areas from lines.
 
         Mechanical APDL Command: `LSBA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LSBA.html>`_
@@ -1480,9 +1629,15 @@ class Booleans(CommandsBase):
         command = f"LSBA,{nl},{na},{sepo},{keepl},{keepa}"
         return self.run(command, **kwargs)
 
-
-
-    def lsbl(self, nl1: str = "", nl2: str = "", sepo: str = "", keep1: str = "", keep2: str = "", **kwargs):
+    def lsbl(
+        self,
+        nl1: str = "",
+        nl2: str = "",
+        sepo: str = "",
+        keep1: str = "",
+        keep2: str = "",
+        **kwargs,
+    ):
         r"""Subtracts lines from lines.
 
         Mechanical APDL Command: `LSBL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LSBL.html>`_
@@ -1548,9 +1703,15 @@ class Booleans(CommandsBase):
         command = f"LSBL,{nl1},{nl2},{sepo},{keep1},{keep2}"
         return self.run(command, **kwargs)
 
-
-
-    def lsbv(self, nl: str = "", nv: str = "", sepo: str = "", keepl: str = "", keepv: str = "", **kwargs):
+    def lsbv(
+        self,
+        nl: str = "",
+        nv: str = "",
+        sepo: str = "",
+        keepl: str = "",
+        keepv: str = "",
+        **kwargs,
+    ):
         r"""Subtracts volumes from lines.
 
         Mechanical APDL Command: `LSBV <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LSBV.html>`_
@@ -1614,8 +1775,6 @@ class Booleans(CommandsBase):
         command = f"LSBV,{nl},{nv},{sepo},{keepl},{keepv}"
         return self.run(command, **kwargs)
 
-
-
     def lsbw(self, nl: str = "", sepo: str = "", keep: str = "", **kwargs):
         r"""Subtracts the intersection of the working plane from lines (divides lines).
 
@@ -1665,9 +1824,19 @@ class Booleans(CommandsBase):
         command = f"LSBW,{nl},{sepo},{keep}"
         return self.run(command, **kwargs)
 
-
-
-    def vadd(self, nv1: str = "", nv2: str = "", nv3: str = "", nv4: str = "", nv5: str = "", nv6: str = "", nv7: str = "", nv8: str = "", nv9: str = "", **kwargs):
+    def vadd(
+        self,
+        nv1: str = "",
+        nv2: str = "",
+        nv3: str = "",
+        nv4: str = "",
+        nv5: str = "",
+        nv6: str = "",
+        nv7: str = "",
+        nv8: str = "",
+        nv9: str = "",
+        **kwargs,
+    ):
         r"""Adds separate volumes to create a single volume.
 
         Mechanical APDL Command: `VADD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VADD.html>`_
@@ -1733,9 +1902,19 @@ class Booleans(CommandsBase):
         command = f"VADD,{nv1},{nv2},{nv3},{nv4},{nv5},{nv6},{nv7},{nv8},{nv9}"
         return self.run(command, **kwargs)
 
-
-
-    def vglue(self, nv1: str = "", nv2: str = "", nv3: str = "", nv4: str = "", nv5: str = "", nv6: str = "", nv7: str = "", nv8: str = "", nv9: str = "", **kwargs):
+    def vglue(
+        self,
+        nv1: str = "",
+        nv2: str = "",
+        nv3: str = "",
+        nv4: str = "",
+        nv5: str = "",
+        nv6: str = "",
+        nv7: str = "",
+        nv8: str = "",
+        nv9: str = "",
+        **kwargs,
+    ):
         r"""Generates new volumes by "gluing" volumes.
 
         Mechanical APDL Command: `VGLUE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VGLUE.html>`_
@@ -1819,9 +1998,19 @@ class Booleans(CommandsBase):
         command = f"VGLUE,{nv1},{nv2},{nv3},{nv4},{nv5},{nv6},{nv7},{nv8},{nv9}"
         return self.run(command, **kwargs)
 
-
-
-    def vinp(self, nv1: str = "", nv2: str = "", nv3: str = "", nv4: str = "", nv5: str = "", nv6: str = "", nv7: str = "", nv8: str = "", nv9: str = "", **kwargs):
+    def vinp(
+        self,
+        nv1: str = "",
+        nv2: str = "",
+        nv3: str = "",
+        nv4: str = "",
+        nv5: str = "",
+        nv6: str = "",
+        nv7: str = "",
+        nv8: str = "",
+        nv9: str = "",
+        **kwargs,
+    ):
         r"""Finds the pairwise intersection of volumes.
 
         Mechanical APDL Command: `VINP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VINP.html>`_
@@ -1900,9 +2089,19 @@ class Booleans(CommandsBase):
         command = f"VINP,{nv1},{nv2},{nv3},{nv4},{nv5},{nv6},{nv7},{nv8},{nv9}"
         return self.run(command, **kwargs)
 
-
-
-    def vinv(self, nv1: str = "", nv2: str = "", nv3: str = "", nv4: str = "", nv5: str = "", nv6: str = "", nv7: str = "", nv8: str = "", nv9: str = "", **kwargs):
+    def vinv(
+        self,
+        nv1: str = "",
+        nv2: str = "",
+        nv3: str = "",
+        nv4: str = "",
+        nv5: str = "",
+        nv6: str = "",
+        nv7: str = "",
+        nv8: str = "",
+        nv9: str = "",
+        **kwargs,
+    ):
         r"""Finds the intersection of volumes.
 
         Mechanical APDL Command: `VINV <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VINV.html>`_
@@ -1981,9 +2180,19 @@ class Booleans(CommandsBase):
         command = f"VINV,{nv1},{nv2},{nv3},{nv4},{nv5},{nv6},{nv7},{nv8},{nv9}"
         return self.run(command, **kwargs)
 
-
-
-    def vovlap(self, nv1: str = "", nv2: str = "", nv3: str = "", nv4: str = "", nv5: str = "", nv6: str = "", nv7: str = "", nv8: str = "", nv9: str = "", **kwargs):
+    def vovlap(
+        self,
+        nv1: str = "",
+        nv2: str = "",
+        nv3: str = "",
+        nv4: str = "",
+        nv5: str = "",
+        nv6: str = "",
+        nv7: str = "",
+        nv8: str = "",
+        nv9: str = "",
+        **kwargs,
+    ):
         r"""Overlaps volumes.
 
         Mechanical APDL Command: `VOVLAP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VOVLAP.html>`_
@@ -2062,9 +2271,19 @@ class Booleans(CommandsBase):
         command = f"VOVLAP,{nv1},{nv2},{nv3},{nv4},{nv5},{nv6},{nv7},{nv8},{nv9}"
         return self.run(command, **kwargs)
 
-
-
-    def vptn(self, nv1: str = "", nv2: str = "", nv3: str = "", nv4: str = "", nv5: str = "", nv6: str = "", nv7: str = "", nv8: str = "", nv9: str = "", **kwargs):
+    def vptn(
+        self,
+        nv1: str = "",
+        nv2: str = "",
+        nv3: str = "",
+        nv4: str = "",
+        nv5: str = "",
+        nv6: str = "",
+        nv7: str = "",
+        nv8: str = "",
+        nv9: str = "",
+        **kwargs,
+    ):
         r"""Partitions volumes.
 
         Mechanical APDL Command: `VPTN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VPTN.html>`_
@@ -2142,9 +2361,15 @@ class Booleans(CommandsBase):
         command = f"VPTN,{nv1},{nv2},{nv3},{nv4},{nv5},{nv6},{nv7},{nv8},{nv9}"
         return self.run(command, **kwargs)
 
-
-
-    def vsba(self, nv: str = "", na: str = "", sepo: str = "", keepv: str = "", keepa: str = "", **kwargs):
+    def vsba(
+        self,
+        nv: str = "",
+        na: str = "",
+        sepo: str = "",
+        keepv: str = "",
+        keepa: str = "",
+        **kwargs,
+    ):
         r"""Subtracts areas from volumes.
 
         Mechanical APDL Command: `VSBA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSBA.html>`_
@@ -2207,9 +2432,15 @@ class Booleans(CommandsBase):
         command = f"VSBA,{nv},{na},{sepo},{keepv},{keepa}"
         return self.run(command, **kwargs)
 
-
-
-    def vsbv(self, nv1: str = "", nv2: str = "", sepo: str = "", keep1: str = "", keep2: str = "", **kwargs):
+    def vsbv(
+        self,
+        nv1: str = "",
+        nv2: str = "",
+        sepo: str = "",
+        keep1: str = "",
+        keep2: str = "",
+        **kwargs,
+    ):
         r"""Subtracts volumes from volumes.
 
         Mechanical APDL Command: `VSBV <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSBV.html>`_
@@ -2275,8 +2506,6 @@ class Booleans(CommandsBase):
         command = f"VSBV,{nv1},{nv2},{sepo},{keep1},{keep2}"
         return self.run(command, **kwargs)
 
-
-
     def vsbw(self, nv: str = "", sepo: str = "", keep: str = "", **kwargs):
         r"""Subtracts intersection of the working plane from volumes (divides volumes).
 
@@ -2332,5 +2561,3 @@ class Booleans(CommandsBase):
         """
         command = f"VSBW,{nv},{sepo},{keep}"
         return self.run(command, **kwargs)
-
-

@@ -1,6 +1,27 @@
-from ansys.mapdl.core._commands import parse
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase
+from ansys.mapdl.core._commands import CommandsBase, parse
+
 
 class Elements(CommandsBase):
 
@@ -42,8 +63,6 @@ class Elements(CommandsBase):
         """
         command = f"AFSURF,{sarea},{tline}"
         return self.run(command, **kwargs)
-
-
 
     def dflab(self, dof: str = "", displab: str = "", forcelab: str = "", **kwargs):
         r"""Changes degree-of-freedom labels for user custom elements.
@@ -105,11 +124,18 @@ class Elements(CommandsBase):
         command = f"/DFLAB,{dof},{displab},{forcelab}"
         return self.run(command, **kwargs)
 
-
-
-
-
-    def e(self, i: str = "", j: str = "", k: str = "", l: str = "", m: str = "", n: str = "", o: str = "", p: str = "", **kwargs):
+    def e(
+        self,
+        i: str = "",
+        j: str = "",
+        k: str = "",
+        l: str = "",
+        m: str = "",
+        n: str = "",
+        o: str = "",
+        p: str = "",
+        **kwargs,
+    ):
         r"""Defines an element by node connectivity.
 
         Mechanical APDL Command: `E <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_E.html>`_
@@ -192,7 +218,7 @@ class Elements(CommandsBase):
         >>> mapdl.e(5, 6, 7, 8, 9, 10, 11, 12)
         2
         """
-        command = f'E,{i},{j},{k},{l},{m},{n},{o},{p}'
+        command = f"E,{i},{j},{k},{l},{m},{n},{o},{p}"
         return parse.parse_e(self.run(command, **kwargs))
 
     def ecpchg(self, **kwargs):
@@ -224,8 +250,6 @@ class Elements(CommandsBase):
         """
         command = "ECPCHG"
         return self.run(command, **kwargs)
-
-
 
     def edele(self, iel1: str = "", iel2: str = "", inc: str = "", **kwargs):
         r"""Deletes selected elements from the model.
@@ -269,8 +293,6 @@ class Elements(CommandsBase):
         """
         command = f"EDELE,{iel1},{iel2},{inc}"
         return self.run(command, **kwargs)
-
-
 
     def eembed(self, **kwargs):
         r"""Generates bonded connections between intersecting elements.
@@ -342,9 +364,23 @@ class Elements(CommandsBase):
         command = "EEMBED"
         return self.run(command, **kwargs)
 
-
-
-    def egen(self, itime: str = "", ninc: str = "", iel1: str = "", iel2: str = "", ieinc: str = "", minc: str = "", tinc: str = "", rinc: str = "", cinc: str = "", sinc: str = "", dx: str = "", dy: str = "", dz: str = "", **kwargs):
+    def egen(
+        self,
+        itime: str = "",
+        ninc: str = "",
+        iel1: str = "",
+        iel2: str = "",
+        ieinc: str = "",
+        minc: str = "",
+        tinc: str = "",
+        rinc: str = "",
+        cinc: str = "",
+        sinc: str = "",
+        dx: str = "",
+        dy: str = "",
+        dz: str = "",
+        **kwargs,
+    ):
         r"""Generates elements from an existing pattern.
 
         Mechanical APDL Command: `EGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EGEN.html>`_
@@ -443,8 +479,6 @@ class Elements(CommandsBase):
         command = f"EGEN,{itime},{ninc},{iel1},{iel2},{ieinc},{minc},{tinc},{rinc},{cinc},{sinc},{dx},{dy},{dz}"
         return self.run(command, **kwargs)
 
-
-
     def egid(self, val: str = "", **kwargs):
         r"""Specifies a global identifier for a set of ``MESH200`` elements.
 
@@ -480,9 +514,15 @@ class Elements(CommandsBase):
         command = f"EGID,{val}"
         return self.run(command, **kwargs)
 
-
-
-    def einfin(self, compname: str = "", pnode_nref1: str = "", nref2: str = "", nref3: str = "", matid: str = "", **kwargs):
+    def einfin(
+        self,
+        compname: str = "",
+        pnode_nref1: str = "",
+        nref2: str = "",
+        nref3: str = "",
+        matid: str = "",
+        **kwargs,
+    ):
         r"""Generates structural infinite elements from selected nodes.
 
         Mechanical APDL Command: `EINFIN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EINFIN.html>`_
@@ -786,9 +826,18 @@ class Elements(CommandsBase):
         command = f"EINFIN,{compname},{pnode_nref1},{nref2},{nref3},{matid}"
         return self.run(command, **kwargs)
 
-
-
-    def eintf(self, toler: str = "", k: str = "", tlab: str = "", kcn: str = "", dx: str = "", dy: str = "", dz: str = "", knonrot: str = "", **kwargs):
+    def eintf(
+        self,
+        toler: str = "",
+        k: str = "",
+        tlab: str = "",
+        kcn: str = "",
+        dx: str = "",
+        dy: str = "",
+        dz: str = "",
+        knonrot: str = "",
+        **kwargs,
+    ):
         r"""Defines two-node elements between coincident or offset nodes.
 
         Mechanical APDL Command: `EINTF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EINTF.html>`_
@@ -861,9 +910,17 @@ class Elements(CommandsBase):
         command = f"EINTF,{toler},{k},{tlab},{kcn},{dx},{dy},{dz},{knonrot}"
         return self.run(command, **kwargs)
 
-
-
-    def elbow(self, transkey: str = "", tol: str = "", dof: str = "", cons1: str = "", cons2: str = "", cons3: str = "", cons4: str = "", **kwargs):
+    def elbow(
+        self,
+        transkey: str = "",
+        tol: str = "",
+        dof: str = "",
+        cons1: str = "",
+        cons2: str = "",
+        cons3: str = "",
+        cons4: str = "",
+        **kwargs,
+    ):
         r"""Specifies degrees of freedom to be coupled for end release and applies section constraints to elbow
         elements.
 
@@ -983,9 +1040,15 @@ class Elements(CommandsBase):
         command = f"ELBOW,{transkey},{tol},{dof},{cons1},{cons2},{cons3},{cons4}"
         return self.run(command, **kwargs)
 
-
-
-    def elist(self, iel1: str = "", iel2: str = "", inc: str = "", nnkey: int | str = "", rkey: int | str = "", **kwargs):
+    def elist(
+        self,
+        iel1: str = "",
+        iel2: str = "",
+        inc: str = "",
+        nnkey: int | str = "",
+        rkey: int | str = "",
+        **kwargs,
+    ):
         r"""Lists the elements and their attributes.
 
         Mechanical APDL Command: `ELIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ELIST.html>`_
@@ -1040,8 +1103,6 @@ class Elements(CommandsBase):
         command = f"ELIST,{iel1},{iel2},{inc},{nnkey},{rkey}"
         return self.run(command, **kwargs)
 
-
-
     def emid(self, key: str = "", edges: str = "", **kwargs):
         r"""Adds or removes midside nodes.
 
@@ -1092,9 +1153,20 @@ class Elements(CommandsBase):
         command = f"EMID,{key},{edges}"
         return self.run(command, **kwargs)
 
-
-
-    def emodif(self, iel: str = "", stloc: str = "", i1: str = "", i2: str = "", i3: str = "", i4: str = "", i5: str = "", i6: str = "", i7: str = "", i8: str = "", **kwargs):
+    def emodif(
+        self,
+        iel: str = "",
+        stloc: str = "",
+        i1: str = "",
+        i2: str = "",
+        i3: str = "",
+        i4: str = "",
+        i5: str = "",
+        i6: str = "",
+        i7: str = "",
+        i8: str = "",
+        **kwargs,
+    ):
         r"""Modifies a previously defined element.
 
         Mechanical APDL Command: `EMODIF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EMODIF.html>`_
@@ -1259,9 +1331,18 @@ class Elements(CommandsBase):
         command = f"EMODIF,{iel},{stloc},{i1},{i2},{i3},{i4},{i5},{i6},{i7},{i8}"
         return self.run(command, **kwargs)
 
-
-
-    def emore(self, q: str = "", r: str = "", s: str = "", t: str = "", u: str = "", v: str = "", w: str = "", x: str = "", **kwargs):
+    def emore(
+        self,
+        q: str = "",
+        r: str = "",
+        s: str = "",
+        t: str = "",
+        u: str = "",
+        v: str = "",
+        w: str = "",
+        x: str = "",
+        **kwargs,
+    ):
         r"""Adds more nodes to the just-defined element.
 
         Mechanical APDL Command: `EMORE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EMORE.html>`_
@@ -1319,9 +1400,9 @@ class Elements(CommandsBase):
         command = f"EMORE,{q},{r},{s},{t},{u},{v},{w},{x}"
         return self.run(command, **kwargs)
 
-
-
-    def emsel(self, type_: str = "", vmin: str = "", vmax: str = "", vinc: str = "", **kwargs):
+    def emsel(
+        self, type_: str = "", vmin: str = "", vmax: str = "", vinc: str = "", **kwargs
+    ):
         r"""Selects a group of `reinforcing
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/str_compreinfdirectemb.html>`_
         members via a predefined global identifier.
@@ -1384,9 +1465,19 @@ class Elements(CommandsBase):
         command = f"EMSEL,{type_},,,{vmin},{vmax},{vinc}"
         return self.run(command, **kwargs)
 
-
-
-    def emtgen(self, ncomp: str = "", ecomp: str = "", pncomp: str = "", dof: str = "", gap: str = "", gapmin: str = "", fkn: str = "", epzero: str = "", smethod: str = "", **kwargs):
+    def emtgen(
+        self,
+        ncomp: str = "",
+        ecomp: str = "",
+        pncomp: str = "",
+        dof: str = "",
+        gap: str = "",
+        gapmin: str = "",
+        fkn: str = "",
+        epzero: str = "",
+        smethod: str = "",
+        **kwargs,
+    ):
         r"""Generates a set of ``TRANS126`` elements.
 
         Mechanical APDL Command: `EMTGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EMTGEN.html>`_
@@ -1488,9 +1579,19 @@ class Elements(CommandsBase):
         command = f"EMTGEN,{ncomp},{ecomp},{pncomp},{dof},{gap},{gapmin},{fkn},{epzero},,{smethod}"
         return self.run(command, **kwargs)
 
-
-
-    def en(self, iel: str = "", i: str = "", j: str = "", k: str = "", l: str = "", m: str = "", n: str = "", o: str = "", p: str = "", **kwargs):
+    def en(
+        self,
+        iel: str = "",
+        i: str = "",
+        j: str = "",
+        k: str = "",
+        l: str = "",
+        m: str = "",
+        n: str = "",
+        o: str = "",
+        p: str = "",
+        **kwargs,
+    ):
         r"""Defines an element by its number and node connectivity.
 
         Mechanical APDL Command: `EN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EN.html>`_
@@ -1553,9 +1654,17 @@ class Elements(CommandsBase):
         command = f"EN,{iel},{i},{j},{k},{l},{m},{n},{o},{p}"
         return self.run(command, **kwargs)
 
-
-
-    def endrelease(self, tolerance: str = "", dof1: str = "", dof2: str = "", dof3: str = "", dof4: str = "", kjct: str = "", kcheck: str = "", **kwargs):
+    def endrelease(
+        self,
+        tolerance: str = "",
+        dof1: str = "",
+        dof2: str = "",
+        dof3: str = "",
+        dof4: str = "",
+        kjct: str = "",
+        kcheck: str = "",
+        **kwargs,
+    ):
         r"""Specifies degrees of freedom to be decoupled for end release.
 
         Mechanical APDL Command: `ENDRELEASE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ENDRELEASE.html>`_
@@ -1757,9 +1866,24 @@ class Elements(CommandsBase):
         command = f"ENDRELEASE,,{tolerance},{dof1},{dof2},{dof3},{dof4},{kjct},{kcheck}"
         return self.run(command, **kwargs)
 
-
-
-    def engen(self, iinc: str = "", itime: str = "", ninc: str = "", iel1: str = "", iel2: str = "", ieinc: str = "", minc: str = "", tinc: str = "", rinc: str = "", cinc: str = "", sinc: str = "", dx: str = "", dy: str = "", dz: str = "", **kwargs):
+    def engen(
+        self,
+        iinc: str = "",
+        itime: str = "",
+        ninc: str = "",
+        iel1: str = "",
+        iel2: str = "",
+        ieinc: str = "",
+        minc: str = "",
+        tinc: str = "",
+        rinc: str = "",
+        cinc: str = "",
+        sinc: str = "",
+        dx: str = "",
+        dy: str = "",
+        dz: str = "",
+        **kwargs,
+    ):
         r"""Generates elements from an existing pattern.
 
         Mechanical APDL Command: `ENGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ENGEN.html>`_
@@ -1852,8 +1976,6 @@ class Elements(CommandsBase):
         command = f"ENGEN,{iinc},{itime},{ninc},{iel1},{iel2},{ieinc},{minc},{tinc},{rinc},{cinc},{sinc},{dx},{dy},{dz}"
         return self.run(command, **kwargs)
 
-
-
     def enorm(self, enum: str = "", **kwargs):
         r"""Reorients shell element normals or line element node connectivity.
 
@@ -1904,9 +2026,15 @@ class Elements(CommandsBase):
         command = f"ENORM,{enum}"
         return self.run(command, **kwargs)
 
-
-
-    def ensym(self, iinc: str = "", ninc: str = "", iel1: str = "", iel2: str = "", ieinc: str = "", **kwargs):
+    def ensym(
+        self,
+        iinc: str = "",
+        ninc: str = "",
+        iel1: str = "",
+        iel2: str = "",
+        ieinc: str = "",
+        **kwargs,
+    ):
         r"""Generates elements by symmetry reflection.
 
         Mechanical APDL Command: `ENSYM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ENSYM.html>`_
@@ -1974,8 +2102,6 @@ class Elements(CommandsBase):
         command = f"ENSYM,{iinc},,{ninc},{iel1},{iel2},{ieinc}"
         return self.run(command, **kwargs)
 
-
-
     def eplot(self, **kwargs):
         r"""Produces an element display.
 
@@ -2003,8 +2129,6 @@ class Elements(CommandsBase):
         """
         command = "EPLOT"
         return self.run(command, **kwargs)
-
-
 
     def eread(self, fname: str = "", ext: str = "", **kwargs):
         r"""Reads elements from a file.
@@ -2045,8 +2169,6 @@ class Elements(CommandsBase):
         """
         command = f"EREAD,{fname},{ext}"
         return self.run(command, **kwargs)
-
-
 
     def ereinf(self, koffalim: str = "", ktri: str = "", **kwargs):
         r"""Generates reinforcing elements from selected existing (base) elements.
@@ -2167,8 +2289,6 @@ class Elements(CommandsBase):
         command = f"EREINF,{koffalim},{ktri}"
         return self.run(command, **kwargs)
 
-
-
     def errang(self, emin: str = "", emax: str = "", einc: str = "", **kwargs):
         r"""Specifies the element range to be read from a file.
 
@@ -2199,8 +2319,6 @@ class Elements(CommandsBase):
         """
         command = f"ERRANG,{emin},{emax},{einc}"
         return self.run(command, **kwargs)
-
-
 
     def esurf(self, xnode: str = "", tlab: str = "", shape: str = "", **kwargs):
         r"""Generates elements overlaid on the free faces of selected nodes.
@@ -2309,9 +2427,9 @@ class Elements(CommandsBase):
         command = f"ESURF,{xnode},{tlab},{shape}"
         return self.run(command, **kwargs)
 
-
-
-    def esym(self, ninc: str = "", iel1: str = "", iel2: str = "", ieinc: str = "", **kwargs):
+    def esym(
+        self, ninc: str = "", iel1: str = "", iel2: str = "", ieinc: str = "", **kwargs
+    ):
         r"""Generates elements from a pattern by a symmetry reflection.
 
         Mechanical APDL Command: `ESYM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ESYM.html>`_
@@ -2373,9 +2491,14 @@ class Elements(CommandsBase):
         command = f"ESYM,,{ninc},{iel1},{iel2},{ieinc}"
         return self.run(command, **kwargs)
 
-
-
-    def ewrite(self, fname: str = "", ext: str = "", kappnd: int | str = "", format_: str = "", **kwargs):
+    def ewrite(
+        self,
+        fname: str = "",
+        ext: str = "",
+        kappnd: int | str = "",
+        format_: str = "",
+        **kwargs,
+    ):
         r"""Writes elements to a file.
 
         Mechanical APDL Command: `EWRITE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EWRITE.html>`_
@@ -2433,9 +2556,17 @@ class Elements(CommandsBase):
         command = f"EWRITE,{fname},{ext},,{kappnd},{format_}"
         return self.run(command, **kwargs)
 
-
-
-    def gcdef(self, option: str = "", sect1: str = "", sect2: str = "", matid: str = "", realid: str = "", sect1end: str = "", sect2end: str = "", **kwargs):
+    def gcdef(
+        self,
+        option: str = "",
+        sect1: str = "",
+        sect2: str = "",
+        matid: str = "",
+        realid: str = "",
+        sect1end: str = "",
+        sect2end: str = "",
+        **kwargs,
+    ):
         r"""Defines interface interactions between general contact surfaces.
 
         Mechanical APDL Command: `GCDEF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GCDEF.html>`_
@@ -2642,12 +2773,20 @@ class Elements(CommandsBase):
           ``REALID`` apply to all general surface interactions that include ``SECT1``, except where
           overridden by a more specific :ref:`gcdef` command.
         """
-        command = f"GCDEF,{option},{sect1},{sect2},{matid},{realid},{sect1end},{sect2end}"
+        command = (
+            f"GCDEF,{option},{sect1},{sect2},{matid},{realid},{sect1end},{sect2end}"
+        )
         return self.run(command, **kwargs)
 
-
-
-    def gcgen(self, option: str = "", featureangle: str = "", edgekey: int | str = "", splitkey: str = "", selopt: str = "", **kwargs):
+    def gcgen(
+        self,
+        option: str = "",
+        featureangle: str = "",
+        edgekey: int | str = "",
+        splitkey: str = "",
+        selopt: str = "",
+        **kwargs,
+    ):
         r"""Creates contact elements for general contact.
 
         Mechanical APDL Command: `GCGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GCGEN.html>`_
@@ -2758,9 +2897,15 @@ class Elements(CommandsBase):
         command = f"GCGEN,{option},{featureangle},{edgekey},{splitkey},{selopt}"
         return self.run(command, **kwargs)
 
-
-
-    def laylist(self, iel: str = "", layr1: str = "", layr2: str = "", mplab1: str = "", mplab2: str = "", **kwargs):
+    def laylist(
+        self,
+        iel: str = "",
+        layr1: str = "",
+        layr2: str = "",
+        mplab1: str = "",
+        mplab2: str = "",
+        **kwargs,
+    ):
         r"""Lists real constants material properties for layered elements.
 
         Mechanical APDL Command: `LAYLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LAYLIST.html>`_
@@ -2802,8 +2947,6 @@ class Elements(CommandsBase):
         """
         command = f"LAYLIST,{iel},{layr1},{layr2},{mplab1},{mplab2}"
         return self.run(command, **kwargs)
-
-
 
     def layplot(self, iel: str = "", layr1: str = "", layr2: str = "", **kwargs):
         r"""Displays the layer stacking sequence for layered elements.
@@ -2852,8 +2995,6 @@ class Elements(CommandsBase):
         command = f"LAYPLOT,{iel},{layr1},{layr2}"
         return self.run(command, **kwargs)
 
-
-
     def lfsurf(self, sline: str = "", tline: str = "", **kwargs):
         r"""Generates surface elements overlaid on the edge of existing solid elements and assigns the extra
         node as the closest fluid element node.
@@ -2892,8 +3033,6 @@ class Elements(CommandsBase):
         """
         command = f"LFSURF,{sline},{tline}"
         return self.run(command, **kwargs)
-
-
 
     def ndsurf(self, snode: str = "", telem: str = "", dimn: int | str = "", **kwargs):
         r"""Generates surface elements overlaid on the edge of existing elements and assigns the extra node as
@@ -2941,9 +3080,15 @@ class Elements(CommandsBase):
         command = f"NDSURF,{snode},{telem},{dimn}"
         return self.run(command, **kwargs)
 
-
-
-    def shsd(self, rid: str = "", action: str = "", chch_opt: str = "", cgap: str = "", cpen: str = "", **kwargs):
+    def shsd(
+        self,
+        rid: str = "",
+        action: str = "",
+        chch_opt: str = "",
+        cgap: str = "",
+        cpen: str = "",
+        **kwargs,
+    ):
         r"""Creates or deletes a shell-solid interface to be used in shell-to-solid assemblies.
 
         Mechanical APDL Command: `SHSD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SHSD.html>`_
@@ -3065,9 +3210,21 @@ class Elements(CommandsBase):
         command = f"SHSD,{rid},{action},{chch_opt},{cgap},{cpen}"
         return self.run(command, **kwargs)
 
-
-
-    def swadd(self, ecomp: str = "", shrd: str = "", ncm1: str = "", ncm2: str = "", ncm3: str = "", ncm4: str = "", ncm5: str = "", ncm6: str = "", ncm7: str = "", ncm8: str = "", ncm9: str = "", **kwargs):
+    def swadd(
+        self,
+        ecomp: str = "",
+        shrd: str = "",
+        ncm1: str = "",
+        ncm2: str = "",
+        ncm3: str = "",
+        ncm4: str = "",
+        ncm5: str = "",
+        ncm6: str = "",
+        ncm7: str = "",
+        ncm8: str = "",
+        ncm9: str = "",
+        **kwargs,
+    ):
         r"""Adds more surfaces to an existing spot weld set.
 
         Mechanical APDL Command: `SWADD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SWADD.html>`_
@@ -3129,8 +3286,6 @@ class Elements(CommandsBase):
         command = f"SWADD,{ecomp},{shrd},{ncm1},{ncm2},{ncm3},{ncm4},{ncm5},{ncm6},{ncm7},{ncm8},{ncm9}"
         return self.run(command, **kwargs)
 
-
-
     def swdel(self, ecomp: str = "", **kwargs):
         r"""Deletes spot weld sets.
 
@@ -3149,9 +3304,22 @@ class Elements(CommandsBase):
         command = f"SWDEL,{ecomp}"
         return self.run(command, **kwargs)
 
-
-
-    def swgen(self, ecomp: str = "", swrd: str = "", ncm1: str = "", ncm2: str = "", snd1: str = "", snd2: str = "", shrd: str = "", dirx: str = "", diry: str = "", dirz: str = "", itty: str = "", icty: str = "", **kwargs):
+    def swgen(
+        self,
+        ecomp: str = "",
+        swrd: str = "",
+        ncm1: str = "",
+        ncm2: str = "",
+        snd1: str = "",
+        snd2: str = "",
+        shrd: str = "",
+        dirx: str = "",
+        diry: str = "",
+        dirz: str = "",
+        itty: str = "",
+        icty: str = "",
+        **kwargs,
+    ):
         r"""Creates a new spot weld set.
 
         Mechanical APDL Command: `SWGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SWGEN.html>`_
@@ -3246,8 +3414,6 @@ class Elements(CommandsBase):
         command = f"SWGEN,{ecomp},{swrd},{ncm1},{ncm2},{snd1},{snd2},{shrd},{dirx},{diry},{dirz},{itty},{icty}"
         return self.run(command, **kwargs)
 
-
-
     def swlist(self, ecomp: str = "", **kwargs):
         r"""Lists spot weld sets.
 
@@ -3270,8 +3436,6 @@ class Elements(CommandsBase):
         """
         command = f"SWLIST,{ecomp}"
         return self.run(command, **kwargs)
-
-
 
     def tshap(self, shape: str = "", **kwargs):
         r"""Defines simple 2D and 3D geometric surfaces for target segment elements.
@@ -3326,9 +3490,16 @@ class Elements(CommandsBase):
         command = f"TSHAP,{shape}"
         return self.run(command, **kwargs)
 
-
-
-    def upgeom(self, factor: str = "", lstep: str = "", sbstep: str = "", fname: str = "", ext: str = "", upesys: str = "", **kwargs):
+    def upgeom(
+        self,
+        factor: str = "",
+        lstep: str = "",
+        sbstep: str = "",
+        fname: str = "",
+        ext: str = "",
+        upesys: str = "",
+        **kwargs,
+    ):
         r"""Adds displacements from a previous analysis and updates the geometry to the deformed configuration.
 
         Mechanical APDL Command: `UPGEOM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_UPGEOM.html>`_
@@ -3395,9 +3566,21 @@ class Elements(CommandsBase):
         command = f"UPGEOM,{factor},{lstep},{sbstep},{fname},{ext},,{upesys}"
         return self.run(command, **kwargs)
 
-
-
-    def usrdof(self, action: str = "", dof1: str = "", dof2: str = "", dof3: str = "", dof4: str = "", dof5: str = "", dof6: str = "", dof7: str = "", dof8: str = "", dof9: str = "", dof10: str = "", **kwargs):
+    def usrdof(
+        self,
+        action: str = "",
+        dof1: str = "",
+        dof2: str = "",
+        dof3: str = "",
+        dof4: str = "",
+        dof5: str = "",
+        dof6: str = "",
+        dof7: str = "",
+        dof8: str = "",
+        dof9: str = "",
+        dof10: str = "",
+        **kwargs,
+    ):
         r"""Specifies the degrees of freedom for the user-defined element ``USER300``.
 
         Mechanical APDL Command: `USRDOF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_USRDOF.html>`_
@@ -3472,9 +3655,20 @@ class Elements(CommandsBase):
         command = f"USRDOF,{action},{dof1},{dof2},{dof3},{dof4},{dof5},{dof6},{dof7},{dof8},{dof9},{dof10}"
         return self.run(command, **kwargs)
 
-
-
-    def usrelem(self, nnodes: str = "", ndim: str = "", keyshape: str = "", nreal: str = "", nsavevars: str = "", nrsltvar: str = "", keyansmat: int | str = "", nintpnts: str = "", kestress: int | str = "", keysym: int | str = "", **kwargs):
+    def usrelem(
+        self,
+        nnodes: str = "",
+        ndim: str = "",
+        keyshape: str = "",
+        nreal: str = "",
+        nsavevars: str = "",
+        nrsltvar: str = "",
+        keyansmat: int | str = "",
+        nintpnts: str = "",
+        kestress: int | str = "",
+        keysym: int | str = "",
+        **kwargs,
+    ):
         r"""Specifies the characteristics of the user-defined element ``USER300``.
 
         Mechanical APDL Command: `USRELEM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_USRELEM.html>`_
@@ -3591,8 +3785,6 @@ class Elements(CommandsBase):
         command = f"USRELEM,{nnodes},{ndim},{keyshape},{nreal},{nsavevars},{nrsltvar},{keyansmat},{nintpnts},{kestress},{keysym}"
         return self.run(command, **kwargs)
 
-
-
     def wtbcreate(self, iel: str = "", node: str = "", damp: int | str = "", **kwargs):
         r"""Creates a ``USER300`` element to model the turbine for full aeroelastic coupling analysis and
         specifies relevant settings for the analysis.
@@ -3645,5 +3837,3 @@ class Elements(CommandsBase):
         """
         command = f"WTBCREATE,{iel},{node},{damp}"
         return self.run(command, **kwargs)
-
-

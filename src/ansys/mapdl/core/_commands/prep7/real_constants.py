@@ -1,8 +1,41 @@
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from ansys.mapdl.core._commands import CommandsBase
+
 
 class RealConstants(CommandsBase):
 
-    def r(self, nset: str = "", r1: str = "", r2: str = "", r3: str = "", r4: str = "", r5: str = "", r6: str = "", **kwargs):
+    def r(
+        self,
+        nset: str = "",
+        r1: str = "",
+        r2: str = "",
+        r3: str = "",
+        r4: str = "",
+        r5: str = "",
+        r6: str = "",
+        **kwargs,
+    ):
         r"""Defines the element real constants.
 
         Mechanical APDL Command: `R <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_R.html>`_
@@ -70,9 +103,9 @@ class RealConstants(CommandsBase):
         command = f"R,{nset},{r1},{r2},{r3},{r4},{r5},{r6}"
         return self.run(command, **kwargs)
 
-
-
-    def rdele(self, nset1: str = "", nset2: str = "", ninc: str = "", lchk: str = "", **kwargs):
+    def rdele(
+        self, nset1: str = "", nset2: str = "", ninc: str = "", lchk: str = "", **kwargs
+    ):
         r"""Deletes real constant sets.
 
         Mechanical APDL Command: `RDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RDELE.html>`_
@@ -117,8 +150,6 @@ class RealConstants(CommandsBase):
         command = f"RDELE,{nset1},{nset2},{ninc},{lchk}"
         return self.run(command, **kwargs)
 
-
-
     def rlist(self, nset1: str = "", nset2: str = "", ninc: str = "", **kwargs):
         r"""Lists the real constant sets.
 
@@ -154,9 +185,18 @@ class RealConstants(CommandsBase):
         command = f"RLIST,{nset1},{nset2},{ninc}"
         return self.run(command, **kwargs)
 
-
-
-    def rmodif(self, nset: str = "", stloc: str = "", v1: str = "", v2: str = "", v3: str = "", v4: str = "", v5: str = "", v6: str = "", **kwargs):
+    def rmodif(
+        self,
+        nset: str = "",
+        stloc: str = "",
+        v1: str = "",
+        v2: str = "",
+        v3: str = "",
+        v4: str = "",
+        v5: str = "",
+        v6: str = "",
+        **kwargs,
+    ):
         r"""Modifies real constant sets.
 
         Mechanical APDL Command: `RMODIF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RMODIF.html>`_
@@ -219,9 +259,16 @@ class RealConstants(CommandsBase):
         command = f"RMODIF,{nset},{stloc},{v1},{v2},{v3},{v4},{v5},{v6}"
         return self.run(command, **kwargs)
 
-
-
-    def rmore(self, r7: str = "", r8: str = "", r9: str = "", r10: str = "", r11: str = "", r12: str = "", **kwargs):
+    def rmore(
+        self,
+        r7: str = "",
+        r8: str = "",
+        r9: str = "",
+        r10: str = "",
+        r11: str = "",
+        r12: str = "",
+        **kwargs,
+    ):
         r"""Adds real constants to a set.
 
         Mechanical APDL Command: `RMORE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RMORE.html>`_
@@ -267,9 +314,17 @@ class RealConstants(CommandsBase):
         command = f"RMORE,{r7},{r8},{r9},{r10},{r11},{r12}"
         return self.run(command, **kwargs)
 
-
-
-    def setfgap(self, gap: str = "", ropt: int | str = "", pamb: str = "", acf1: str = "", acf2: str = "", pref: str = "", mfp: str = "", **kwargs):
+    def setfgap(
+        self,
+        gap: str = "",
+        ropt: int | str = "",
+        pamb: str = "",
+        acf1: str = "",
+        acf2: str = "",
+        pref: str = "",
+        mfp: str = "",
+        **kwargs,
+    ):
         r"""Updates or defines the real constant table for squeeze film elements.
 
         Mechanical APDL Command: `SETFGAP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SETFGAP.html>`_
@@ -316,5 +371,3 @@ class RealConstants(CommandsBase):
         """
         command = f"SETFGAP,{gap},{ropt},,{pamb},{acf1},{acf2},{pref},{mfp}"
         return self.run(command, **kwargs)
-
-

@@ -1,8 +1,43 @@
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from ansys.mapdl.core._commands import CommandsBase
+
 
 class SpecialPurpose(CommandsBase):
 
-    def adpci(self, action: str = "", par1: str = "", par2: str = "", par3: str = "", par4: str = "", par5: str = "", par6: str = "", par7: str = "", par8: str = "", **kwargs):
+    def adpci(
+        self,
+        action: str = "",
+        par1: str = "",
+        par2: str = "",
+        par3: str = "",
+        par4: str = "",
+        par5: str = "",
+        par6: str = "",
+        par7: str = "",
+        par8: str = "",
+        **kwargs,
+    ):
         r"""Defines parameters associated with adaptive crack initiation.
 
         Mechanical APDL Command: `ADPCI <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ADPCI.html>`_
@@ -164,12 +199,21 @@ class SpecialPurpose(CommandsBase):
 
         * ``Par1`` - :ref:`adpci` ID number (default = ALL).
         """
-        command = f"ADPCI,{action},{par1},{par2},{par3},{par4},{par5},{par6},{par7},{par8}"
+        command = (
+            f"ADPCI,{action},{par1},{par2},{par3},{par4},{par5},{par6},{par7},{par8}"
+        )
         return self.run(command, **kwargs)
 
-
-
-    def aerocoeff(self, aeromodetype: str = "", aeromappedfilenames: str = "", aerospecs: str = "", aeroscalar: str = "", nblades: str = "", autofileread: str = "", **kwargs):
+    def aerocoeff(
+        self,
+        aeromodetype: str = "",
+        aeromappedfilenames: str = "",
+        aerospecs: str = "",
+        aeroscalar: str = "",
+        nblades: str = "",
+        autofileread: str = "",
+        **kwargs,
+    ):
         r"""Computes the aero-damping and stiffness coefficients and writes them to an APDL array.
 
         Mechanical APDL Command: `AEROCOEFF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AEROCOEFF.html>`_
@@ -285,9 +329,18 @@ class SpecialPurpose(CommandsBase):
         command = f"AEROCOEFF,{aeromodetype},{aeromappedfilenames},{aerospecs},{aeroscalar},{nblades},{autofileread}"
         return self.run(command, **kwargs)
 
-
-
-    def cint(self, action: str = "", par1: str = "", par2: str = "", par3: str = "", par4: str = "", par5: str = "", par6: str = "", par7: str = "", **kwargs):
+    def cint(
+        self,
+        action: str = "",
+        par1: str = "",
+        par2: str = "",
+        par3: str = "",
+        par4: str = "",
+        par5: str = "",
+        par6: str = "",
+        par7: str = "",
+        **kwargs,
+    ):
         r"""Defines parameters associated with fracture-parameter calculations.
 
         Mechanical APDL Command: `CINT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CINT.html>`_
@@ -720,9 +773,14 @@ class SpecialPurpose(CommandsBase):
         command = f"CINT,{action},{par1},{par2},{par3},{par4},{par5},{par6},{par7}"
         return self.run(command, **kwargs)
 
-
-
-    def cycexpand(self, wn: str = "", option: str = "", value1: str = "", value2: str = "", **kwargs):
+    def cycexpand(
+        self,
+        wn: str = "",
+        option: str = "",
+        value1: str = "",
+        value2: str = "",
+        **kwargs,
+    ):
         r"""Graphically expands displacements, stresses and strains of a cyclically symmetric model.
 
         Mechanical APDL Command: `/CYCEXPAND <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCEXPAND_sl.html>`_
@@ -860,9 +918,16 @@ class SpecialPurpose(CommandsBase):
         command = f"/CYCEXPAND,{wn},{option},{value1},{value2}"
         return self.run(command, **kwargs)
 
-
-
-    def cycfreq(self, option: str = "", value1: str = "", value2: str = "", value3: str = "", value4: str = "", value5: str = "", **kwargs):
+    def cycfreq(
+        self,
+        option: str = "",
+        value1: str = "",
+        value2: str = "",
+        value3: str = "",
+        value4: str = "",
+        value5: str = "",
+        **kwargs,
+    ):
         r"""Specifies solution options for a cyclic symmetry mode-superposition harmonic analysis.
 
         Mechanical APDL Command: `CYCFREQ <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCFREQ.html>`_
@@ -1054,9 +1119,16 @@ class SpecialPurpose(CommandsBase):
         command = f"CYCFREQ,{option},{value1},{value2},{value3},{value4},{value5}"
         return self.run(command, **kwargs)
 
-
-
-    def cyclic(self, nsector: str = "", angle: str = "", kcn: str = "", name: str = "", usrcomp: str = "", usrnmap: str = "", **kwargs):
+    def cyclic(
+        self,
+        nsector: str = "",
+        angle: str = "",
+        kcn: str = "",
+        name: str = "",
+        usrcomp: str = "",
+        usrnmap: str = "",
+        **kwargs,
+    ):
         r"""Specifies a cyclic symmetry analysis.
 
         Mechanical APDL Command: `CYCLIC <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCLIC.html>`_
@@ -1204,9 +1276,18 @@ class SpecialPurpose(CommandsBase):
         command = f"CYCLIC,{nsector},{angle},{kcn},{name},{usrcomp},{usrnmap}"
         return self.run(command, **kwargs)
 
-
-
-    def cycopt(self, option: str = "", value1: str = "", value2: str = "", value3: str = "", value4: str = "", value5: str = "", value6: str = "", value7: str = "", **kwargs):
+    def cycopt(
+        self,
+        option: str = "",
+        value1: str = "",
+        value2: str = "",
+        value3: str = "",
+        value4: str = "",
+        value5: str = "",
+        value6: str = "",
+        value7: str = "",
+        **kwargs,
+    ):
         r"""Specifies solution options for a cyclic symmetry analysis.
 
         Mechanical APDL Command: `CYCOPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCOPT.html>`_
@@ -1487,8 +1568,6 @@ class SpecialPurpose(CommandsBase):
         command = f"CYCOPT,{option},{value1},{value2},{value3},{value4},{value5},{value6},{value7}"
         return self.run(command, **kwargs)
 
-
-
     def emsym(self, nsect: str = "", **kwargs):
         r"""Specifies circular symmetry for electromagnetic sources.
 
@@ -1513,9 +1592,19 @@ class SpecialPurpose(CommandsBase):
         command = f"EMSYM,{nsect}"
         return self.run(command, **kwargs)
 
-
-
-    def msopt(self, option: str = "", sname: str = "", value1: str = "", value2: str = "", value3: str = "", value4: str = "", value5: str = "", value6: str = "", value7: str = "", **kwargs):
+    def msopt(
+        self,
+        option: str = "",
+        sname: str = "",
+        value1: str = "",
+        value2: str = "",
+        value3: str = "",
+        value4: str = "",
+        value5: str = "",
+        value6: str = "",
+        value7: str = "",
+        **kwargs,
+    ):
         r"""Specifies solution options for a `multistage cyclic symmetry analysis
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mstag/ans_mstag_introTheory.html>`_.
 
@@ -1672,9 +1761,9 @@ class SpecialPurpose(CommandsBase):
         command = f"MSOPT,{option},{sname},{value1},{value2},{value3},{value4},{value5},{value6},{value7}"
         return self.run(command, **kwargs)
 
-
-
-    def mstole(self, method: int | str = "", namesurf: str = "", namefluid: str = "", **kwargs):
+    def mstole(
+        self, method: int | str = "", namesurf: str = "", namefluid: str = "", **kwargs
+    ):
         r"""Adds two extra nodes from ``FLUID116`` elements to ``SURF151`` or ``SURF152`` elements for
         convection analyses.
 
@@ -1722,9 +1811,18 @@ class SpecialPurpose(CommandsBase):
         command = f"MSTOLE,{method},{namesurf},{namefluid}"
         return self.run(command, **kwargs)
 
-
-
-    def perbc2d(self, loc1: str = "", loc2: str = "", loctol: str = "", r1: str = "", r2: str = "", tolr: str = "", opt: int | str = "", plnopt: int | str = "", **kwargs):
+    def perbc2d(
+        self,
+        loc1: str = "",
+        loc2: str = "",
+        loctol: str = "",
+        r1: str = "",
+        r2: str = "",
+        tolr: str = "",
+        opt: int | str = "",
+        plnopt: int | str = "",
+        **kwargs,
+    ):
         r"""Generates periodic constraints for 2D planar magnetic field analyses.
 
         Mechanical APDL Command: `PERBC2D <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PERBC2D.html>`_
@@ -1805,9 +1903,17 @@ class SpecialPurpose(CommandsBase):
         command = f"PERBC2D,{loc1},{loc2},{loctol},{r1},{r2},{tolr},{opt},{plnopt}"
         return self.run(command, **kwargs)
 
-
-
-    def race(self, xc: str = "", yc: str = "", rad: str = "", tcur: str = "", dy: str = "", dz: str = "", cname: str = "", **kwargs):
+    def race(
+        self,
+        xc: str = "",
+        yc: str = "",
+        rad: str = "",
+        tcur: str = "",
+        dy: str = "",
+        dz: str = "",
+        cname: str = "",
+        **kwargs,
+    ):
         r"""Defines a "racetrack" current source.
 
         Mechanical APDL Command: `RACE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RACE.html>`_
@@ -1855,9 +1961,21 @@ class SpecialPurpose(CommandsBase):
         command = f"RACE,{xc},{yc},{rad},{tcur},{dy},{dz},,,{cname}"
         return self.run(command, **kwargs)
 
-
-
-    def sstate(self, action: str = "", cm_name: str = "", val1: str = "", val2: str = "", val3: str = "", val4: str = "", val5: str = "", val6: str = "", val7: str = "", val8: str = "", val9: str = "", **kwargs):
+    def sstate(
+        self,
+        action: str = "",
+        cm_name: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        val5: str = "",
+        val6: str = "",
+        val7: str = "",
+        val8: str = "",
+        val9: str = "",
+        **kwargs,
+    ):
         r"""Defines a steady-state rolling analysis.
 
         Mechanical APDL Command: `SSTATE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SSTATE.html>`_
@@ -1979,9 +2097,9 @@ class SpecialPurpose(CommandsBase):
         command = f"SSTATE,{action},{cm_name},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9}"
         return self.run(command, **kwargs)
 
-
-
-    def xfcrkmesh(self, enrichmentid: str = "", elemcomp: str = "", nodecomp: str = "", **kwargs):
+    def xfcrkmesh(
+        self, enrichmentid: str = "", elemcomp: str = "", nodecomp: str = "", **kwargs
+    ):
         r"""Defines a crack in the model when the crack surface is discretized by ``MESH200`` elements
 
         Mechanical APDL Command: `XFCRKMESH <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_XFCRKMESH.html>`_
@@ -2016,9 +2134,16 @@ class SpecialPurpose(CommandsBase):
         command = f"XFCRKMESH,{enrichmentid},{elemcomp},{nodecomp}"
         return self.run(command, **kwargs)
 
-
-
-    def xfdata(self, enrichmentid: str = "", lsm: str = "", elemnum: str = "", nodenum: str = "", phi: str = "", psi: str = "", **kwargs):
+    def xfdata(
+        self,
+        enrichmentid: str = "",
+        lsm: str = "",
+        elemnum: str = "",
+        nodenum: str = "",
+        phi: str = "",
+        psi: str = "",
+        **kwargs,
+    ):
         r"""Defines a crack in the model by specifying nodal level set values
 
         Mechanical APDL Command: `XFDATA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_XFDATA.html>`_
@@ -2059,9 +2184,16 @@ class SpecialPurpose(CommandsBase):
         command = f"XFDATA,{enrichmentid},{lsm},{elemnum},{nodenum},{phi},{psi}"
         return self.run(command, **kwargs)
 
-
-
-    def xfenrich(self, enrichmentid: str = "", compname: str = "", mat_id: str = "", method: str = "", radius: str = "", snaptoler: str = "", **kwargs):
+    def xfenrich(
+        self,
+        enrichmentid: str = "",
+        compname: str = "",
+        mat_id: str = "",
+        method: str = "",
+        radius: str = "",
+        snaptoler: str = "",
+        **kwargs,
+    ):
         r"""Defines parameters associated with crack propagation using XFEM
 
         Mechanical APDL Command: `XFENRICH <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_XFENRICH.html>`_
@@ -2116,10 +2248,10 @@ class SpecialPurpose(CommandsBase):
 
         This command is valid in PREP7 ( :ref:`prep7` ) only.
         """
-        command = f"XFENRICH,{enrichmentid},{compname},{mat_id},{method},{radius},{snaptoler}"
+        command = (
+            f"XFENRICH,{enrichmentid},{compname},{mat_id},{method},{radius},{snaptoler}"
+        )
         return self.run(command, **kwargs)
-
-
 
     def xflist(self, enrichmentid: str = "", **kwargs):
         r"""Lists enrichment details and associated crack information
@@ -2143,5 +2275,3 @@ class SpecialPurpose(CommandsBase):
         """
         command = f"XFLIST,{enrichmentid}"
         return self.run(command, **kwargs)
-
-

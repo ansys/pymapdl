@@ -1,12 +1,39 @@
-from ansys.mapdl.core._commands import parse
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase
+from ansys.mapdl.core._commands import CommandsBase, parse
+
 
 class Primitives(CommandsBase):
 
-
-
-    def blc4(self, xcorner: str = "", ycorner: str = "", width: str = "", height: str = "", depth: str = "", **kwargs):
+    def blc4(
+        self,
+        xcorner: str = "",
+        ycorner: str = "",
+        width: str = "",
+        height: str = "",
+        depth: str = "",
+        **kwargs,
+    ):
         r"""Creates a rectangular area or block volume by corner points.
 
         Mechanical APDL Command: `BLC4 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BLC4.html>`_
@@ -57,12 +84,18 @@ class Primitives(CommandsBase):
         >>> vnum
         1
         """
-        command = f'BLC4,{xcorner},{ycorner},{width},{height},{depth}'
+        command = f"BLC4,{xcorner},{ycorner},{width},{height},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-
-
-    def blc5(self, xcenter: str = "", ycenter: str = "", width: str = "", height: str = "", depth: str = "", **kwargs):
+    def blc5(
+        self,
+        xcenter: str = "",
+        ycenter: str = "",
+        width: str = "",
+        height: str = "",
+        depth: str = "",
+        **kwargs,
+    ):
         r"""Creates a rectangular area or block volume by center and corner points.
 
         Mechanical APDL Command: `BLC5 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BLC5.html>`_
@@ -120,12 +153,19 @@ class Primitives(CommandsBase):
         >>> vnum
         1
         """
-        command = f'BLC5,{xcenter},{ycenter},{width},{height},{depth}'
+        command = f"BLC5,{xcenter},{ycenter},{width},{height},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-
-
-    def block(self, x1: str = "", x2: str = "", y1: str = "", y2: str = "", z1: str = "", z2: str = "", **kwargs):
+    def block(
+        self,
+        x1: str = "",
+        x2: str = "",
+        y1: str = "",
+        y2: str = "",
+        z1: str = "",
+        z2: str = "",
+        **kwargs,
+    ):
         r"""Creates a block volume based on working plane coordinates.
 
         Mechanical APDL Command: `BLOCK <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BLOCK.html>`_
@@ -175,12 +215,18 @@ class Primitives(CommandsBase):
         >>> vnum
         1
         """
-        command = f'BLOCK,{x1},{x2},{y1},{y2},{z1},{z2}'
+        command = f"BLOCK,{x1},{x2},{y1},{y2},{z1},{z2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-
-
-    def con4(self, xcenter: str = "", ycenter: str = "", rad1: str = "", rad2: str = "", depth: str = "", **kwargs):
+    def con4(
+        self,
+        xcenter: str = "",
+        ycenter: str = "",
+        rad1: str = "",
+        rad2: str = "",
+        depth: str = "",
+        **kwargs,
+    ):
         r"""Creates a conical volume anywhere on the working plane.
 
         Mechanical APDL Command: `CON4 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CON4.html>`_
@@ -236,12 +282,19 @@ class Primitives(CommandsBase):
         >>> vnum
         1
         """
-        command = f'CON4,{xcenter},{ycenter},{rad1},{rad2},{depth}'
+        command = f"CON4,{xcenter},{ycenter},{rad1},{rad2},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-
-
-    def cone(self, rbot: str = "", rtop: str = "", z1: str = "", z2: str = "", theta1: str = "", theta2: str = "", **kwargs):
+    def cone(
+        self,
+        rbot: str = "",
+        rtop: str = "",
+        z1: str = "",
+        z2: str = "",
+        theta1: str = "",
+        theta2: str = "",
+        **kwargs,
+    ):
         r"""Creates a conical volume centered about the working plane origin.
 
         Mechanical APDL Command: `CONE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CONE.html>`_
@@ -309,12 +362,20 @@ class Primitives(CommandsBase):
         >>> vnum
         1
         """
-        command = f'CONE,{rbot},{rtop},{z1},{z2},{theta1},{theta2}'
+        command = f"CONE,{rbot},{rtop},{z1},{z2},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-
-
-    def cyl4(self, xcenter: str = "", ycenter: str = "", rad1: str = "", theta1: str = "", rad2: str = "", theta2: str = "", depth: str = "", **kwargs):
+    def cyl4(
+        self,
+        xcenter: str = "",
+        ycenter: str = "",
+        rad1: str = "",
+        theta1: str = "",
+        rad2: str = "",
+        theta2: str = "",
+        depth: str = "",
+        **kwargs,
+    ):
         r"""Creates a circular area or cylindrical volume anywhere on the working plane.
 
         Mechanical APDL Command: `CYL4 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYL4.html>`_
@@ -399,12 +460,18 @@ class Primitives(CommandsBase):
         >>> vnum = mapdl.cyl4(0, 0, rad1=1.9, rad2=2.0, depth=10)
         2
         """
-        command = f'CYL4,{xcenter},{ycenter},{rad1},{theta1},{rad2},{theta2},{depth}'
+        command = f"CYL4,{xcenter},{ycenter},{rad1},{theta1},{rad2},{theta2},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-
-
-    def cyl5(self, xedge1: str = "", yedge1: str = "", xedge2: str = "", yedge2: str = "", depth: str = "", **kwargs):
+    def cyl5(
+        self,
+        xedge1: str = "",
+        yedge1: str = "",
+        xedge2: str = "",
+        yedge2: str = "",
+        depth: str = "",
+        **kwargs,
+    ):
         r"""Creates a circular area or cylindrical volume by end points.
 
         Mechanical APDL Command: `CYL5 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYL5.html>`_
@@ -462,12 +529,19 @@ class Primitives(CommandsBase):
         >>> vnum
         1
         """
-        command = f'CYL5,{xedge1},{yedge1},{xedge2},{yedge2},{depth}'
+        command = f"CYL5,{xedge1},{yedge1},{xedge2},{yedge2},{depth}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-
-
-    def cylind(self, rad1: str = "", rad2: str = "", z1: str = "", z2: str = "", theta1: str = "", theta2: str = "", **kwargs):
+    def cylind(
+        self,
+        rad1: str = "",
+        rad2: str = "",
+        z1: str = "",
+        z2: str = "",
+        theta1: str = "",
+        theta2: str = "",
+        **kwargs,
+    ):
         r"""Creates a cylindrical volume centered about the working plane origin.
 
         Mechanical APDL Command: `CYLIND <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYLIND.html>`_
@@ -535,12 +609,17 @@ class Primitives(CommandsBase):
         >>> vnum
         1
         """
-        command = f'CYLIND,{rad1},{rad2},{z1},{z2},{theta1},{theta2}'
+        command = f"CYLIND,{rad1},{rad2},{z1},{z2},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-
-
-    def pcirc(self, rad1: str = "", rad2: str = "", theta1: str = "", theta2: str = "", **kwargs):
+    def pcirc(
+        self,
+        rad1: str = "",
+        rad2: str = "",
+        theta1: str = "",
+        theta2: str = "",
+        **kwargs,
+    ):
         r"""Creates a circular area centered about the working plane origin.
 
         Mechanical APDL Command: `PCIRC <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PCIRC.html>`_
@@ -594,7 +673,7 @@ class Primitives(CommandsBase):
         >>> anum
         1
         """
-        command = f'PCIRC,{rad1},{rad2},{theta1},{theta2}'
+        command = f"PCIRC,{rad1},{rad2},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
     def poly(self, **kwargs):
@@ -613,8 +692,6 @@ class Primitives(CommandsBase):
         """
         command = "POLY"
         return self.run(command, **kwargs)
-
-
 
     def pri2(self, p51x: str = "", z1: str = "", z2: str = "", **kwargs):
         r"""Creates a polygonal area or a prism volume by vertices (GUI).
@@ -672,8 +749,6 @@ class Primitives(CommandsBase):
         command = f"PRI2,{p51x},{z1},{z2}"
         return self.run(command, **kwargs)
 
-
-
     def prism(self, z1: str = "", z2: str = "", **kwargs):
         r"""Creates a prism volume based on working plane coordinate pairs.
 
@@ -700,9 +775,18 @@ class Primitives(CommandsBase):
         command = f"PRISM,{z1},{z2}"
         return self.run(command, **kwargs)
 
-
-
-    def ptxy(self, x1: str = "", y1: str = "", x2: str = "", y2: str = "", x3: str = "", y3: str = "", x4: str = "", y4: str = "", **kwargs):
+    def ptxy(
+        self,
+        x1: str = "",
+        y1: str = "",
+        x2: str = "",
+        y2: str = "",
+        x3: str = "",
+        y3: str = "",
+        x4: str = "",
+        y4: str = "",
+        **kwargs,
+    ):
         r"""Defines coordinate pairs for use in polygons and prisms.
 
         Mechanical APDL Command: `PTXY <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PTXY.html>`_
@@ -749,10 +833,6 @@ class Primitives(CommandsBase):
         command = f"PTXY,{x1},{y1},{x2},{y2},{x3},{y3},{x4},{y4}"
         return self.run(command, **kwargs)
 
-
-
-
-
     def rectng(self, x1: str = "", x2: str = "", y1: str = "", y2: str = "", **kwargs):
         r"""Creates a rectangular area anywhere on the working plane.
 
@@ -780,10 +860,17 @@ class Primitives(CommandsBase):
         The area will be defined with four keypoints and four lines. See the :ref:`blc4` and :ref:`blc5`
         commands for alternate ways to create rectangles.
         """
-        command = f'RECTNG,{x1},{x2},{y1},{y2}'
+        command = f"RECTNG,{x1},{x2},{y1},{y2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-    def rpoly(self, nsides: str = "", lside: str = "", majrad: str = "", minrad: str = "", **kwargs):
+    def rpoly(
+        self,
+        nsides: str = "",
+        lside: str = "",
+        majrad: str = "",
+        minrad: str = "",
+        **kwargs,
+    ):
         r"""Creates a regular polygonal area centered about the working plane origin.
 
         Mechanical APDL Command: `RPOLY <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RPOLY.html>`_
@@ -816,9 +903,16 @@ class Primitives(CommandsBase):
         command = f"RPOLY,{nsides},{lside},{majrad},{minrad}"
         return self.run(command, **kwargs)
 
-
-
-    def rpr4(self, nsides: str = "", xcenter: str = "", ycenter: str = "", radius: str = "", theta: str = "", depth: str = "", **kwargs):
+    def rpr4(
+        self,
+        nsides: str = "",
+        xcenter: str = "",
+        ycenter: str = "",
+        radius: str = "",
+        theta: str = "",
+        depth: str = "",
+        **kwargs,
+    ):
         r"""Creates a regular polygonal area or prism volume anywhere on the working plane.
 
         Mechanical APDL Command: `RPR4 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RPR4.html>`_
@@ -860,9 +954,16 @@ class Primitives(CommandsBase):
         command = f"RPR4,{nsides},{xcenter},{ycenter},{radius},{theta},{depth}"
         return self.run(command, **kwargs)
 
-
-
-    def rprism(self, z1: str = "", z2: str = "", nsides: str = "", lside: str = "", majrad: str = "", minrad: str = "", **kwargs):
+    def rprism(
+        self,
+        z1: str = "",
+        z2: str = "",
+        nsides: str = "",
+        lside: str = "",
+        majrad: str = "",
+        minrad: str = "",
+        **kwargs,
+    ):
         r"""Creates a regular prism volume centered about the working plane origin.
 
         Mechanical APDL Command: `RPRISM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RPRISM.html>`_
@@ -905,11 +1006,14 @@ class Primitives(CommandsBase):
         command = f"RPRISM,{z1},{z2},{nsides},{lside},{majrad},{minrad}"
         return self.run(command, **kwargs)
 
-
-
-
-
-    def sph4(self, xcenter: str = "", ycenter: str = "", rad1: str = "", rad2: str = "", **kwargs):
+    def sph4(
+        self,
+        xcenter: str = "",
+        ycenter: str = "",
+        rad1: str = "",
+        rad2: str = "",
+        **kwargs,
+    ):
         r"""Creates a spherical volume anywhere on the working plane.
 
         Mechanical APDL Command: `SPH4 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPH4.html>`_
@@ -958,12 +1062,17 @@ class Primitives(CommandsBase):
         >>> vnum
         1
         """
-        command = f'SPH4,{xcenter},{ycenter},{rad1},{rad2}'
+        command = f"SPH4,{xcenter},{ycenter},{rad1},{rad2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-
-
-    def sph5(self, xedge1: str = "", yedge1: str = "", xedge2: str = "", yedge2: str = "", **kwargs):
+    def sph5(
+        self,
+        xedge1: str = "",
+        yedge1: str = "",
+        xedge2: str = "",
+        yedge2: str = "",
+        **kwargs,
+    ):
         r"""Creates a spherical volume by diameter end points.
 
         Mechanical APDL Command: `SPH5 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPH5.html>`_
@@ -1007,12 +1116,17 @@ class Primitives(CommandsBase):
         >>> vnum
         1
         """
-        command = f'SPH5,{xedge1},{yedge1},{xedge2},{yedge2}'
+        command = f"SPH5,{xedge1},{yedge1},{xedge2},{yedge2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-
-
-    def sphere(self, rad1: str = "", rad2: str = "", theta1: str = "", theta2: str = "", **kwargs):
+    def sphere(
+        self,
+        rad1: str = "",
+        rad2: str = "",
+        theta1: str = "",
+        theta2: str = "",
+        **kwargs,
+    ):
         r"""Creates a spherical volume centered about the working plane origin.
 
         Mechanical APDL Command: `SPHERE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPHERE.html>`_
@@ -1069,12 +1183,18 @@ class Primitives(CommandsBase):
         >>> vnum
         1
         """
-        command = f'SPHERE,{rad1},{rad2},{theta1},{theta2}'
+        command = f"SPHERE,{rad1},{rad2},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))
 
-
-
-    def torus(self, rad1: str = "", rad2: str = "", rad3: str = "", theta1: str = "", theta2: str = "", **kwargs):
+    def torus(
+        self,
+        rad1: str = "",
+        rad2: str = "",
+        rad3: str = "",
+        theta1: str = "",
+        theta2: str = "",
+        **kwargs,
+    ):
         r"""Creates a toroidal volume.
 
         Mechanical APDL Command: `TORUS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TORUS.html>`_
@@ -1154,5 +1274,5 @@ class Primitives(CommandsBase):
         >>> vnum
         1
         """
-        command = f'TORUS,{rad1},{rad2},{rad3},{theta1},{theta2}'
+        command = f"TORUS,{rad1},{rad2},{rad3},{theta1},{theta2}"
         return parse.parse_output_volume_area(self.run(command, **kwargs))

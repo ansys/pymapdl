@@ -1,4 +1,27 @@
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from ansys.mapdl.core._commands import CommandsBase
+
 
 class Status(CommandsBase):
 
@@ -23,8 +46,6 @@ class Status(CommandsBase):
         command = "AREAS"
         return self.run(command, **kwargs)
 
-
-
     def bool(self, **kwargs):
         r"""Specifies "Booleans" as the subsequent status topic.
 
@@ -45,8 +66,6 @@ class Status(CommandsBase):
         """
         command = "BOOL"
         return self.run(command, **kwargs)
-
-
 
     def ceqn(self, **kwargs):
         r"""Specifies "Constraint equations" as the subsequent status topic.
@@ -69,8 +88,6 @@ class Status(CommandsBase):
         command = "CEQN"
         return self.run(command, **kwargs)
 
-
-
     def couple(self, **kwargs):
         r"""Specifies "Node coupling" as the subsequent status topic.
 
@@ -91,8 +108,6 @@ class Status(CommandsBase):
         """
         command = "COUPLE"
         return self.run(command, **kwargs)
-
-
 
     def elem(self, **kwargs):
         r"""Specifies "Elements" as the subsequent status topic.
@@ -115,8 +130,6 @@ class Status(CommandsBase):
         command = "ELEM"
         return self.run(command, **kwargs)
 
-
-
     def etype(self, **kwargs):
         r"""Specifies "Element types" as the subsequent status topic.
 
@@ -137,8 +150,6 @@ class Status(CommandsBase):
         """
         command = "ETYPE"
         return self.run(command, **kwargs)
-
-
 
     def febody(self, **kwargs):
         r"""Specifies "Body loads on elements" as the subsequent status topic.
@@ -161,8 +172,6 @@ class Status(CommandsBase):
         command = "FEBODY"
         return self.run(command, **kwargs)
 
-
-
     def fecons(self, **kwargs):
         r"""Specifies "Constraints on nodes" as the subsequent status topic.
 
@@ -183,8 +192,6 @@ class Status(CommandsBase):
         """
         command = "FECONS"
         return self.run(command, **kwargs)
-
-
 
     def fefor(self, **kwargs):
         r"""Specifies "Forces on nodes" as the subsequent status topic.
@@ -207,8 +214,6 @@ class Status(CommandsBase):
         command = "FEFOR"
         return self.run(command, **kwargs)
 
-
-
     def fesurf(self, **kwargs):
         r"""Specifies "Surface loads on elements" as the subsequent status topic.
 
@@ -229,8 +234,6 @@ class Status(CommandsBase):
         """
         command = "FESURF"
         return self.run(command, **kwargs)
-
-
 
     def geometry(self, **kwargs):
         r"""Specifies "Geometry" as the subsequent status topic.
@@ -253,8 +256,6 @@ class Status(CommandsBase):
         command = "GEOMETRY"
         return self.run(command, **kwargs)
 
-
-
     def keypts(self, **kwargs):
         r"""Specifies "Keypoints" as the subsequent status topic.
 
@@ -275,8 +276,6 @@ class Status(CommandsBase):
         """
         command = "KEYPTS"
         return self.run(command, **kwargs)
-
-
 
     def line(self, **kwargs):
         r"""Specifies "Lines" as the subsequent status topic.
@@ -299,8 +298,6 @@ class Status(CommandsBase):
         command = "LINE"
         return self.run(command, **kwargs)
 
-
-
     def mater(self, **kwargs):
         r"""Specifies "Material properties" as the subsequent status topic.
 
@@ -321,8 +318,6 @@ class Status(CommandsBase):
         """
         command = "MATER"
         return self.run(command, **kwargs)
-
-
 
     def meshing(self, **kwargs):
         r"""Specifies "Meshing" as the subsequent status topic.
@@ -345,8 +340,6 @@ class Status(CommandsBase):
         command = "MESHING"
         return self.run(command, **kwargs)
 
-
-
     def nodes(self, **kwargs):
         r"""Specifies "Nodes" as the subsequent status topic.
 
@@ -367,8 +360,6 @@ class Status(CommandsBase):
         """
         command = "NODES"
         return self.run(command, **kwargs)
-
-
 
     def pipe(self, **kwargs):
         r"""Specifies "Pipe modeling" as the subsequent status topic.
@@ -392,8 +383,6 @@ class Status(CommandsBase):
         command = "PIPE"
         return self.run(command, **kwargs)
 
-
-
     def prim(self, **kwargs):
         r"""Specifies "Solid model primitives" as the subsequent status topic.
 
@@ -414,8 +403,6 @@ class Status(CommandsBase):
         """
         command = "PRIM"
         return self.run(command, **kwargs)
-
-
 
     def rcon(self, **kwargs):
         r"""Specifies "Real constants" as the subsequent status topic.
@@ -438,8 +425,6 @@ class Status(CommandsBase):
         command = "RCON"
         return self.run(command, **kwargs)
 
-
-
     def selm(self, **kwargs):
         r"""Specifies "Superelements" as the subsequent status topic.
 
@@ -460,8 +445,6 @@ class Status(CommandsBase):
         """
         command = "SELM"
         return self.run(command, **kwargs)
-
-
 
     def tble(self, **kwargs):
         r"""Specifies "Data table properties" as the subsequent status topic.
@@ -484,8 +467,6 @@ class Status(CommandsBase):
         command = "TBLE"
         return self.run(command, **kwargs)
 
-
-
     def volumes(self, **kwargs):
         r"""Specifies "Volumes" as the subsequent status topic.
 
@@ -506,5 +487,3 @@ class Status(CommandsBase):
         """
         command = "VOLUMES"
         return self.run(command, **kwargs)
-
-

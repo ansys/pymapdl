@@ -1,4 +1,27 @@
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from ansys.mapdl.core._commands import CommandsBase
+
 
 class DataTables(CommandsBase):
 
@@ -30,9 +53,9 @@ class DataTables(CommandsBase):
         command = f"CBTMP,{temp}"
         return self.run(command, **kwargs)
 
-
-
-    def cgrow(self, action: str = "", par1: str = "", par2: str = "", par3: str = "", **kwargs):
+    def cgrow(
+        self, action: str = "", par1: str = "", par2: str = "", par3: str = "", **kwargs
+    ):
         r"""Specifies crack-growth options in a fracture analysis.
 
         Mechanical APDL Command: `CGROW <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CGROW.html>`_
@@ -516,9 +539,20 @@ class DataTables(CommandsBase):
         command = f"CGROW,{action},{par1},{par2},{par3}"
         return self.run(command, **kwargs)
 
-
-
-    def inistate(self, action: str = "", val1: str = "", val2: str = "", val3: str = "", val4: str = "", val5: str = "", val6: str = "", val7: str = "", val8: str = "", val9: str = "", **kwargs):
+    def inistate(
+        self,
+        action: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        val5: str = "",
+        val6: str = "",
+        val7: str = "",
+        val8: str = "",
+        val9: str = "",
+        **kwargs,
+    ):
         r"""Defines initial-state data and parameters.
 
         Mechanical APDL Command: `INISTATE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_INISTATE.html>`_
@@ -820,9 +854,16 @@ class DataTables(CommandsBase):
         command = f"INISTATE,{action},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9}"
         return self.run(command, **kwargs)
 
-
-
-    def tb(self, lab: str = "", matid: str = "", ntemp: str = "", npts: str = "", tbopt: str = "", funcname: str = "", **kwargs):
+    def tb(
+        self,
+        lab: str = "",
+        matid: str = "",
+        ntemp: str = "",
+        npts: str = "",
+        tbopt: str = "",
+        funcname: str = "",
+        **kwargs,
+    ):
         r"""Activates a data table for material properties or special element input.
 
         Mechanical APDL Command: `TB <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TB.html>`_
@@ -2872,8 +2913,6 @@ class DataTables(CommandsBase):
         command = f"TB,{lab},{matid},{ntemp},{npts},{tbopt},,{funcname}"
         return self.run(command, **kwargs)
 
-
-
     def tbcopy(self, lab: str = "", matf: str = "", matt: str = "", **kwargs):
         r"""Copies a data table from one material to another.
 
@@ -2913,9 +2952,17 @@ class DataTables(CommandsBase):
         command = f"TBCOPY,{lab},{matf},{matt}"
         return self.run(command, **kwargs)
 
-
-
-    def tbdata(self, stloc: str = "", c1: str = "", c2: str = "", c3: str = "", c4: str = "", c5: str = "", c6: str = "", **kwargs):
+    def tbdata(
+        self,
+        stloc: str = "",
+        c1: str = "",
+        c2: str = "",
+        c3: str = "",
+        c4: str = "",
+        c5: str = "",
+        c6: str = "",
+        **kwargs,
+    ):
         r"""Defines data for the material data table.
 
         Mechanical APDL Command: `TBDATA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TBDATA.html>`_
@@ -2975,9 +3022,15 @@ class DataTables(CommandsBase):
         command = f"TBDATA,{stloc},{c1},{c2},{c3},{c4},{c5},{c6}"
         return self.run(command, **kwargs)
 
-
-
-    def tbdele(self, lab: str = "", mat1: str = "", mat2: str = "", inc: str = "", tbopt: str = "", **kwargs):
+    def tbdele(
+        self,
+        lab: str = "",
+        mat1: str = "",
+        mat2: str = "",
+        inc: str = "",
+        tbopt: str = "",
+        **kwargs,
+    ):
         r"""Deletes previously defined material data tables.
 
         Mechanical APDL Command: `TBDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TBDELE.html>`_
@@ -3020,8 +3073,6 @@ class DataTables(CommandsBase):
         """
         command = f"TBDELE,{lab},{mat1},{mat2},{inc},{tbopt}"
         return self.run(command, **kwargs)
-
-
 
     def tbeo(self, par: str = "", value: str = "", **kwargs):
         r"""Sets special options or parameters for material data tables.
@@ -3081,8 +3132,6 @@ class DataTables(CommandsBase):
         """
         command = f"TBEO,{par},{value}"
         return self.run(command, **kwargs)
-
-
 
     def tbfield(self, type_: str = "", value: str = "", **kwargs):
         r"""Defines values of field variables for material data tables.
@@ -3168,9 +3217,15 @@ class DataTables(CommandsBase):
         command = f"TBFIELD,{type_},{value}"
         return self.run(command, **kwargs)
 
-
-
-    def tbin(self, oper: str = "", par1: str = "", par2: str = "", par3: str = "", par4: str = "", **kwargs):
+    def tbin(
+        self,
+        oper: str = "",
+        par1: str = "",
+        par2: str = "",
+        par3: str = "",
+        par4: str = "",
+        **kwargs,
+    ):
         r"""Sets parameters used for `interpolation
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/mat_loginterpscal.html#>`_ of the
         material data tables.
@@ -3331,8 +3386,6 @@ class DataTables(CommandsBase):
         command = f"TBIN,{oper},{par1},{par2},{par3},{par4}"
         return self.run(command, **kwargs)
 
-
-
     def tblist(self, lab: str = "", mat: str = "", **kwargs):
         r"""Lists the material data tables.
 
@@ -3357,8 +3410,6 @@ class DataTables(CommandsBase):
         """
         command = f"TBLIST,{lab},{mat}"
         return self.run(command, **kwargs)
-
-
 
     def tbmodif(self, row: str = "", col: str = "", value: str = "", **kwargs):
         r"""Modifies data for the material data table (GUI).
@@ -3421,9 +3472,15 @@ class DataTables(CommandsBase):
         command = f"TBMODIF,{row},{col},{value}"
         return self.run(command, **kwargs)
 
-
-
-    def tbplot(self, lab: str = "", mat: str = "", tbopt: str = "", temp: str = "", segn: str = "", **kwargs):
+    def tbplot(
+        self,
+        lab: str = "",
+        mat: str = "",
+        tbopt: str = "",
+        temp: str = "",
+        segn: str = "",
+        **kwargs,
+    ):
         r"""Displays the material data table.
 
         Mechanical APDL Command: `TBPLOT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TBPLOT.html>`_
@@ -3499,9 +3556,15 @@ class DataTables(CommandsBase):
         command = f"TBPLOT,{lab},{mat},{tbopt},{temp},{segn}"
         return self.run(command, **kwargs)
 
-
-
-    def tbpt(self, oper: str = "", x1: str = "", x2: str = "", x3: str = "", xn: str = "", **kwargs):
+    def tbpt(
+        self,
+        oper: str = "",
+        x1: str = "",
+        x2: str = "",
+        x3: str = "",
+        xn: str = "",
+        **kwargs,
+    ):
         r"""Defines a point on a nonlinear data curve.
 
         Mechanical APDL Command: `TBPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TBPT.html>`_
@@ -3547,8 +3610,6 @@ class DataTables(CommandsBase):
         command = f"TBPT,{oper},{x1},{x2},{x3},{xn}"
         return self.run(command, **kwargs)
 
-
-
     def tbtemp(self, temp: str = "", kmod: str = "", **kwargs):
         r"""Defines a temperature for a material data table.
 
@@ -3579,5 +3640,3 @@ class DataTables(CommandsBase):
         """
         command = f"TBTEMP,{temp},{kmod}"
         return self.run(command, **kwargs)
-
-

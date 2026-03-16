@@ -1,10 +1,39 @@
-from ansys.mapdl.core._commands import parse
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase
+from ansys.mapdl.core._commands import CommandsBase, parse
+
 
 class Nodes(CommandsBase):
 
-    def center(self, node: str = "", node1: str = "", node2: str = "", node3: str = "", radius: int | str = "", **kwargs):
+    def center(
+        self,
+        node: str = "",
+        node1: str = "",
+        node2: str = "",
+        node3: str = "",
+        radius: int | str = "",
+        **kwargs,
+    ):
         r"""Defines a node at the center of curvature of 2 or 3 nodes.
 
         Mechanical APDL Command: `CENTER <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CENTER.html>`_
@@ -37,9 +66,17 @@ class Nodes(CommandsBase):
         command = f"CENTER,{node},{node1},{node2},{node3},{radius}"
         return self.run(command, **kwargs)
 
-
-
-    def eextrude(self, action: str = "", nelem: str = "", space: str = "", dist: str = "", theta: str = "", tfact: str = "", bckey: str = "", **kwargs):
+    def eextrude(
+        self,
+        action: str = "",
+        nelem: str = "",
+        space: str = "",
+        dist: str = "",
+        theta: str = "",
+        tfact: str = "",
+        bckey: str = "",
+        **kwargs,
+    ):
         r"""Extrudes 2D plane elements into 3D solids during a 2D to 3D analysis.
 
         Mechanical APDL Command: `EEXTRUDE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EEXTRUDE.html>`_
@@ -203,9 +240,18 @@ class Nodes(CommandsBase):
         command = f"EEXTRUDE,{action},{nelem},{space},{dist},{theta},{tfact},,{bckey}"
         return self.run(command, **kwargs)
 
-
-
-    def fill(self, node1: str = "", node2: str = "", nfill: str = "", nstrt: str = "", ninc: str = "", itime: str = "", inc: str = "", space: str = "", **kwargs):
+    def fill(
+        self,
+        node1: str = "",
+        node2: str = "",
+        nfill: str = "",
+        nstrt: str = "",
+        ninc: str = "",
+        itime: str = "",
+        inc: str = "",
+        space: str = "",
+        **kwargs,
+    ):
         r"""Generates a line of nodes between two existing nodes.
 
         Mechanical APDL Command: `FILL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FILL.html>`_
@@ -261,9 +307,19 @@ class Nodes(CommandsBase):
         command = f"FILL,{node1},{node2},{nfill},{nstrt},{ninc},{itime},{inc},{space}"
         return self.run(command, **kwargs)
 
-
-
-    def move(self, node: str = "", kc1: str = "", x1: str = "", y1: str = "", z1: str = "", kc2: str = "", x2: str = "", y2: str = "", z2: str = "", **kwargs):
+    def move(
+        self,
+        node: str = "",
+        kc1: str = "",
+        x1: str = "",
+        y1: str = "",
+        z1: str = "",
+        kc2: str = "",
+        x2: str = "",
+        y2: str = "",
+        z2: str = "",
+        **kwargs,
+    ):
         r"""Calculates and moves a node to an intersection.
 
         Mechanical APDL Command: `MOVE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MOVE.html>`_
@@ -345,11 +401,17 @@ class Nodes(CommandsBase):
         command = f"MOVE,{node},{kc1},{x1},{y1},{z1},{kc2},{x2},{y2},{z2}"
         return self.run(command, **kwargs)
 
-
-
-
-
-    def n(self, node: str = "", x: str = "", y: str = "", z: str = "", thxy: str = "", thyz: str = "", thzx: str = "", **kwargs):
+    def n(
+        self,
+        node: str = "",
+        x: str = "",
+        y: str = "",
+        z: str = "",
+        thxy: str = "",
+        thyz: str = "",
+        thzx: str = "",
+        **kwargs,
+    ):
         r"""Defines a node.
 
         Mechanical APDL Command: `N <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_N.html>`_
@@ -413,10 +475,23 @@ class Nodes(CommandsBase):
         >>> nnum
         10
         """
-        command = f'N,{node},{x},{y},{z},{thxy},{thyz},{thzx}'
+        command = f"N,{node},{x},{y},{z},{thxy},{thyz},{thzx}"
         return parse.parse_n(self.run(command, **kwargs))
 
-    def nang(self, node: str = "", x1: str = "", x2: str = "", x3: str = "", y1: str = "", y2: str = "", y3: str = "", z1: str = "", z2: str = "", z3: str = "", **kwargs):
+    def nang(
+        self,
+        node: str = "",
+        x1: str = "",
+        x2: str = "",
+        x3: str = "",
+        y1: str = "",
+        y2: str = "",
+        y3: str = "",
+        z1: str = "",
+        z2: str = "",
+        z3: str = "",
+        **kwargs,
+    ):
         r"""Rotates a nodal coordinate system by direction cosines.
 
         Mechanical APDL Command: `NANG <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NANG.html>`_
@@ -467,8 +542,6 @@ class Nodes(CommandsBase):
         """
         command = f"NANG,{node},{x1},{x2},{x3},{y1},{y2},{y3},{z1},{z2},{z3}"
         return self.run(command, **kwargs)
-
-
 
     def naxis(self, action: str = "", val: str = "", **kwargs):
         r"""Generates nodes for general axisymmetric element sections.
@@ -536,8 +609,6 @@ class Nodes(CommandsBase):
         command = f"NAXIS,{action},{val}"
         return self.run(command, **kwargs)
 
-
-
     def ndele(self, node1: str = "", node2: str = "", ninc: str = "", **kwargs):
         r"""Deletes nodes.
 
@@ -579,10 +650,6 @@ class Nodes(CommandsBase):
         """
         command = f"NDELE,{node1},{node2},{ninc}"
         return self.run(command, **kwargs)
-
-
-
-
 
     def ndist(self, nd1: str = "", nd2: str = "", **kwargs):
         r"""Calculates and lists the distance between two nodes.
@@ -633,9 +700,21 @@ class Nodes(CommandsBase):
         >>> node_dist
         [16.673332000533065, 13.0, -3.0, 10.0]
         """
-        return parse.parse_ndist(self.run(f'NDIST,{nd1},{nd2}', **kwargs))
+        return parse.parse_ndist(self.run(f"NDIST,{nd1},{nd2}", **kwargs))
 
-    def ngen(self, itime: str = "", inc: str = "", node1: str = "", node2: str = "", ninc: str = "", dx: str = "", dy: str = "", dz: str = "", space: str = "", **kwargs):
+    def ngen(
+        self,
+        itime: str = "",
+        inc: str = "",
+        node1: str = "",
+        node2: str = "",
+        ninc: str = "",
+        dx: str = "",
+        dy: str = "",
+        dz: str = "",
+        space: str = "",
+        **kwargs,
+    ):
         r"""Generates additional nodes from a pattern of nodes.
 
         Mechanical APDL Command: `NGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NGEN.html>`_
@@ -704,8 +783,6 @@ class Nodes(CommandsBase):
         command = f"NGEN,{itime},{inc},{node1},{node2},{ninc},{dx},{dy},{dz},{space}"
         return self.run(command, **kwargs)
 
-
-
     def nkpt(self, node: str = "", npt: str = "", **kwargs):
         r"""Defines a node at an existing keypoint location.
 
@@ -726,9 +803,18 @@ class Nodes(CommandsBase):
         command = f"NKPT,{node},{npt}"
         return self.run(command, **kwargs)
 
-
-
-    def nlist(self, node1: str = "", node2: str = "", ninc: str = "", lcoord: str = "", sort1: str = "", sort2: str = "", sort3: str = "", kinternal: str = "", **kwargs):
+    def nlist(
+        self,
+        node1: str = "",
+        node2: str = "",
+        ninc: str = "",
+        lcoord: str = "",
+        sort1: str = "",
+        sort2: str = "",
+        sort3: str = "",
+        kinternal: str = "",
+        **kwargs,
+    ):
         r"""Lists nodes.
 
         Mechanical APDL Command: `NLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NLIST.html>`_
@@ -793,12 +879,22 @@ class Nodes(CommandsBase):
 
         This command is valid in any processor.
         """
-        command = f"NLIST,{node1},{node2},{ninc},{lcoord},{sort1},{sort2},{sort3},{kinternal}"
+        command = (
+            f"NLIST,{node1},{node2},{ninc},{lcoord},{sort1},{sort2},{sort3},{kinternal}"
+        )
         return self.run(command, **kwargs)
 
-
-
-    def nmodif(self, node: str = "", x: str = "", y: str = "", z: str = "", thxy: str = "", thyz: str = "", thzx: str = "", **kwargs):
+    def nmodif(
+        self,
+        node: str = "",
+        x: str = "",
+        y: str = "",
+        z: str = "",
+        thxy: str = "",
+        thyz: str = "",
+        thzx: str = "",
+        **kwargs,
+    ):
         r"""Modifies an existing node.
 
         Mechanical APDL Command: `NMODIF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NMODIF.html>`_
@@ -852,8 +948,6 @@ class Nodes(CommandsBase):
         command = f"NMODIF,{node},{x},{y},{z},{thxy},{thyz},{thzx}"
         return self.run(command, **kwargs)
 
-
-
     def nora(self, area: str = "", ndir: str = "", **kwargs):
         r"""Rotates nodal coordinate systems to surface normal
 
@@ -888,8 +982,6 @@ class Nodes(CommandsBase):
         """
         command = f"NORA,{area},{ndir}"
         return self.run(command, **kwargs)
-
-
 
     def norl(self, line: str = "", area: str = "", ndir: str = "", **kwargs):
         r"""Rotates nodal coordinate systems perpendicular to line normal
@@ -929,8 +1021,6 @@ class Nodes(CommandsBase):
         command = f"NORL,{line},{area},{ndir}"
         return self.run(command, **kwargs)
 
-
-
     def nplot(self, knum: int | str = "", **kwargs):
         r"""Displays nodes.
 
@@ -957,8 +1047,6 @@ class Nodes(CommandsBase):
         """
         command = f"NPLOT,{knum}"
         return self.run(command, **kwargs)
-
-
 
     def nread(self, fname: str = "", ext: str = "", **kwargs):
         r"""Reads nodes from a file.
@@ -995,8 +1083,6 @@ class Nodes(CommandsBase):
         """
         command = f"NREAD,{fname},{ext}"
         return self.run(command, **kwargs)
-
-
 
     def nrotat(self, node1: str = "", node2: str = "", ninc: str = "", **kwargs):
         r"""Rotates nodal coordinate systems into the active system.
@@ -1049,8 +1135,6 @@ class Nodes(CommandsBase):
         command = f"NROTAT,{node1},{node2},{ninc}"
         return self.run(command, **kwargs)
 
-
-
     def nrrang(self, nmin: str = "", nmax: str = "", ninc: str = "", **kwargs):
         r"""Specifies the range of nodes to be read from the node file.
 
@@ -1081,9 +1165,17 @@ class Nodes(CommandsBase):
         command = f"NRRANG,{nmin},{nmax},{ninc}"
         return self.run(command, **kwargs)
 
-
-
-    def nscale(self, inc: str = "", node1: str = "", node2: str = "", ninc: str = "", rx: str = "", ry: str = "", rz: str = "", **kwargs):
+    def nscale(
+        self,
+        inc: str = "",
+        node1: str = "",
+        node2: str = "",
+        ninc: str = "",
+        rx: str = "",
+        ry: str = "",
+        rz: str = "",
+        **kwargs,
+    ):
         r"""Generates a scaled set of nodes from a pattern of nodes.
 
         Mechanical APDL Command: `NSCALE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSCALE.html>`_
@@ -1143,8 +1235,6 @@ class Nodes(CommandsBase):
         command = f"NSCALE,{inc},{node1},{node2},{ninc},{rx},{ry},{rz}"
         return self.run(command, **kwargs)
 
-
-
     def nsmooth(self, npass: str = "", **kwargs):
         r"""Smooths selected nodes among selected elements.
 
@@ -1169,9 +1259,15 @@ class Nodes(CommandsBase):
         command = f"NSMOOTH,{npass}"
         return self.run(command, **kwargs)
 
-
-
-    def nsym(self, ncomp: str = "", inc: str = "", node1: str = "", node2: str = "", ninc: str = "", **kwargs):
+    def nsym(
+        self,
+        ncomp: str = "",
+        inc: str = "",
+        node1: str = "",
+        node2: str = "",
+        ninc: str = "",
+        **kwargs,
+    ):
         r"""Generates a reflected set of nodes.
 
         Mechanical APDL Command: `NSYM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSYM.html>`_
@@ -1233,8 +1329,6 @@ class Nodes(CommandsBase):
         command = f"NSYM,{ncomp},{inc},{node1},{node2},{ninc}"
         return self.run(command, **kwargs)
 
-
-
     def nwrite(self, fname: str = "", ext: str = "", kappnd: int | str = "", **kwargs):
         r"""Writes nodes to a file.
 
@@ -1276,9 +1370,17 @@ class Nodes(CommandsBase):
         command = f"NWRITE,{fname},{ext},,{kappnd}"
         return self.run(command, **kwargs)
 
-
-
-    def quad(self, node1: str = "", nintr: str = "", node2: str = "", nfill: str = "", nstrt: str = "", ninc: str = "", pkfac: str = "", **kwargs):
+    def quad(
+        self,
+        node1: str = "",
+        nintr: str = "",
+        node2: str = "",
+        nfill: str = "",
+        nstrt: str = "",
+        ninc: str = "",
+        pkfac: str = "",
+        **kwargs,
+    ):
         r"""Generates a quadratic line of nodes from three nodes.
 
         Mechanical APDL Command: `QUAD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_QUAD.html>`_
@@ -1344,9 +1446,15 @@ class Nodes(CommandsBase):
         command = f"QUAD,{node1},{nintr},{node2},{nfill},{nstrt},{ninc},{pkfac}"
         return self.run(command, **kwargs)
 
-
-
-    def transfer(self, kcnto: str = "", inc: str = "", node1: str = "", node2: str = "", ninc: str = "", **kwargs):
+    def transfer(
+        self,
+        kcnto: str = "",
+        inc: str = "",
+        node1: str = "",
+        node2: str = "",
+        ninc: str = "",
+        **kwargs,
+    ):
         r"""Transfers a pattern of nodes to another coordinate system.
 
         Mechanical APDL Command: `TRANSFER <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TRANSFER.html>`_
@@ -1406,5 +1514,3 @@ class Nodes(CommandsBase):
         """
         command = f"TRANSFER,{kcnto},{inc},{node1},{node2},{ninc}"
         return self.run(command, **kwargs)
-
-

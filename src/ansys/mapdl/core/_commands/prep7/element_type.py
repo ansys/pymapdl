@@ -1,10 +1,44 @@
-from ansys.mapdl.core._commands import parse
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase
+from ansys.mapdl.core._commands import CommandsBase, parse
+
 
 class ElementType(CommandsBase):
 
-    def dof(self, lab1: str = "", lab2: str = "", lab3: str = "", lab4: str = "", lab5: str = "", lab6: str = "", lab7: str = "", lab8: str = "", lab9: str = "", lab10: str = "", **kwargs):
+    def dof(
+        self,
+        lab1: str = "",
+        lab2: str = "",
+        lab3: str = "",
+        lab4: str = "",
+        lab5: str = "",
+        lab6: str = "",
+        lab7: str = "",
+        lab8: str = "",
+        lab9: str = "",
+        lab10: str = "",
+        **kwargs,
+    ):
         r"""Adds degrees of freedom to the current DOF set.
 
         Mechanical APDL Command: `DOF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DOF.html>`_
@@ -98,11 +132,19 @@ class ElementType(CommandsBase):
         command = f"DOF,{lab1},{lab2},{lab3},{lab4},{lab5},{lab6},{lab7},{lab8},{lab9},{lab10}"
         return self.run(command, **kwargs)
 
-
-
-
-
-    def et(self, itype: str = "", ename: str = "", kop1: str = "", kop2: str = "", kop3: str = "", kop4: str = "", kop5: str = "", kop6: str = "", inopr: str = "", **kwargs):
+    def et(
+        self,
+        itype: str = "",
+        ename: str = "",
+        kop1: str = "",
+        kop2: str = "",
+        kop3: str = "",
+        kop4: str = "",
+        kop5: str = "",
+        kop6: str = "",
+        inopr: str = "",
+        **kwargs,
+    ):
         r"""Defines a local element type from the element library.
 
         Mechanical APDL Command: `ET <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ET.html>`_
@@ -199,7 +241,9 @@ class ElementType(CommandsBase):
         >>> etype_num
         2
         """
-        command = f'ET,{itype},{ename},{kop1},{kop2},{kop3},{kop4},{kop5},{kop6},{inopr}'
+        command = (
+            f"ET,{itype},{ename},{kop1},{kop2},{kop3},{kop4},{kop5},{kop6},{inopr}"
+        )
         return parse.parse_et(self.run(command, **kwargs))
 
     def etchg(self, cnv: str = "", **kwargs):
@@ -246,8 +290,6 @@ class ElementType(CommandsBase):
         command = f"ETCHG,{cnv}"
         return self.run(command, **kwargs)
 
-
-
     def etcontrol(self, eltech: str = "", eldegene: str = "", **kwargs):
         r"""Control the element technologies used in element formulation (for applicable elements).
 
@@ -293,8 +335,6 @@ class ElementType(CommandsBase):
         command = f"ETCONTROL,{eltech},{eldegene}"
         return self.run(command, **kwargs)
 
-
-
     def etdele(self, ityp1: str = "", ityp2: str = "", inc: str = "", **kwargs):
         r"""Deletes element types.
 
@@ -319,8 +359,6 @@ class ElementType(CommandsBase):
         """
         command = f"ETDELE,{ityp1},{ityp2},{inc}"
         return self.run(command, **kwargs)
-
-
 
     def etlist(self, ityp1: str = "", ityp2: str = "", inc: str = "", **kwargs):
         r"""Lists currently defined element types.
@@ -353,8 +391,6 @@ class ElementType(CommandsBase):
         """
         command = f"ETLIST,{ityp1},{ityp2},{inc}"
         return self.run(command, **kwargs)
-
-
 
     def keyopt(self, itype: str = "", knum: str = "", value: str = "", **kwargs):
         r"""Sets element key options.
@@ -419,8 +455,6 @@ class ElementType(CommandsBase):
         command = f"KEYOPT,{itype},{knum},{value}"
         return self.run(command, **kwargs)
 
-
-
     def nsvr(self, itype: str = "", nstv: str = "", **kwargs):
         r"""Defines the number of variables for user-programmable element options.
 
@@ -445,5 +479,3 @@ class ElementType(CommandsBase):
         """
         command = f"NSVR,{itype},{nstv}"
         return self.run(command, **kwargs)
-
-

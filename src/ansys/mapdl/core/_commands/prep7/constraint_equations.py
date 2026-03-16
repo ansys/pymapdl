@@ -1,8 +1,45 @@
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from ansys.mapdl.core._commands import CommandsBase
+
 
 class ConstraintEquations(CommandsBase):
 
-    def ce(self, neqn: str = "", const: str = "", node1: str = "", lab1: str = "", c1: str = "", node2: str = "", lab2: str = "", c2: str = "", node3: str = "", lab3: str = "", c3: str = "", **kwargs):
+    def ce(
+        self,
+        neqn: str = "",
+        const: str = "",
+        node1: str = "",
+        lab1: str = "",
+        c1: str = "",
+        node2: str = "",
+        lab2: str = "",
+        c2: str = "",
+        node3: str = "",
+        lab3: str = "",
+        c3: str = "",
+        **kwargs,
+    ):
         r"""Defines a constraint equation relating degrees of freedom.
 
         Mechanical APDL Command: `CE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CE.html>`_
@@ -100,9 +137,16 @@ class ConstraintEquations(CommandsBase):
         command = f"CE,{neqn},{const},{node1},{lab1},{c1},{node2},{lab2},{c2},{node3},{lab3},{c3}"
         return self.run(command, **kwargs)
 
-
-
-    def cecycms(self, cyclownod: str = "", cychighnod: str = "", kmap: str = "", toler: str = "", kprint: int | str = "", usrnmap: str = "", **kwargs):
+    def cecycms(
+        self,
+        cyclownod: str = "",
+        cychighnod: str = "",
+        kmap: str = "",
+        toler: str = "",
+        kprint: int | str = "",
+        usrnmap: str = "",
+        **kwargs,
+    ):
         r"""Generates the constraint equations for a `multistage cyclic symmetry analysis
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mstag/ans_mstag_introTheory.html>`_.
 
@@ -223,12 +267,14 @@ class ConstraintEquations(CommandsBase):
         `Example: Multiharmonic Linear Perturbation Modal Analysis of a Simplified Model with 3 Axial Stages
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mstag/ans_mstagExMultiHarmLP.html#>`_
         """
-        command = f"CECYCMS,{cyclownod},{cychighnod},,{kmap},{toler},,{kprint},{usrnmap}"
+        command = (
+            f"CECYCMS,{cyclownod},{cychighnod},,{kmap},{toler},,{kprint},{usrnmap}"
+        )
         return self.run(command, **kwargs)
 
-
-
-    def cedele(self, neqn1: str = "", neqn2: str = "", ninc: str = "", nsel: str = "", **kwargs):
+    def cedele(
+        self, neqn1: str = "", neqn2: str = "", ninc: str = "", nsel: str = "", **kwargs
+    ):
         r"""Deletes constraint equations.
 
         Mechanical APDL Command: `CEDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CEDELE.html>`_
@@ -261,9 +307,16 @@ class ConstraintEquations(CommandsBase):
         command = f"CEDELE,{neqn1},{neqn2},{ninc},{nsel}"
         return self.run(command, **kwargs)
 
-
-
-    def ceims(self, toler: str = "", sname1: str = "", sname2: str = "", kprint: str = "", intf1nod: str = "", intf2nod: str = "", **kwargs):
+    def ceims(
+        self,
+        toler: str = "",
+        sname1: str = "",
+        sname2: str = "",
+        kprint: str = "",
+        intf1nod: str = "",
+        intf2nod: str = "",
+        **kwargs,
+    ):
         r"""Generates constraint equations at the interstage boundary in a `multistage cyclic symmetry analysis
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mstag/ans_mstag_introTheory.html>`_.
 
@@ -363,9 +416,18 @@ class ConstraintEquations(CommandsBase):
         command = f"CEIMS,{toler},,{sname1},{sname2},{kprint},,,,,{intf1nod},{intf2nod}"
         return self.run(command, **kwargs)
 
-
-
-    def ceintf(self, toler: str = "", dof1: str = "", dof2: str = "", dof3: str = "", dof4: str = "", dof5: str = "", dof6: str = "", movetol: str = "", **kwargs):
+    def ceintf(
+        self,
+        toler: str = "",
+        dof1: str = "",
+        dof2: str = "",
+        dof3: str = "",
+        dof4: str = "",
+        dof5: str = "",
+        dof6: str = "",
+        movetol: str = "",
+        **kwargs,
+    ):
         r"""Generates constraint equations at an interface.
 
         Mechanical APDL Command: `CEINTF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CEINTF.html>`_
@@ -451,9 +513,14 @@ class ConstraintEquations(CommandsBase):
         command = f"CEINTF,{toler},{dof1},{dof2},{dof3},{dof4},{dof5},{dof6},{movetol}"
         return self.run(command, **kwargs)
 
-
-
-    def celist(self, neqn1: str = "", neqn2: str = "", ninc: str = "", option: str = "", **kwargs):
+    def celist(
+        self,
+        neqn1: str = "",
+        neqn2: str = "",
+        ninc: str = "",
+        option: str = "",
+        **kwargs,
+    ):
         r"""Lists the constraint equations.
 
         Mechanical APDL Command: `CELIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CELIST.html>`_
@@ -501,9 +568,17 @@ class ConstraintEquations(CommandsBase):
         command = f"CELIST,{neqn1},{neqn2},{ninc},{option}"
         return self.run(command, **kwargs)
 
-
-
-    def cerig(self, independ: str = "", depend: str = "", ldof: str = "", ldof2: str = "", ldof3: str = "", ldof4: str = "", ldof5: str = "", **kwargs):
+    def cerig(
+        self,
+        independ: str = "",
+        depend: str = "",
+        ldof: str = "",
+        ldof2: str = "",
+        ldof3: str = "",
+        ldof4: str = "",
+        ldof5: str = "",
+        **kwargs,
+    ):
         r"""Defines a rigid region.
 
         Mechanical APDL Command: `CERIG <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CERIG.html>`_
@@ -617,9 +692,9 @@ class ConstraintEquations(CommandsBase):
         command = f"CERIG,{independ},{depend},{ldof},{ldof2},{ldof3},{ldof4},{ldof5}"
         return self.run(command, **kwargs)
 
-
-
-    def cesel(self, type_: str = "", vmin: str = "", vmax: str = "", vinc: str = "", **kwargs):
+    def cesel(
+        self, type_: str = "", vmin: str = "", vmax: str = "", vinc: str = "", **kwargs
+    ):
         r"""Selects constraint equations via predefined reference numbers.
 
         Mechanical APDL Command: `CESEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CESEL.html>`_
@@ -686,9 +761,15 @@ class ConstraintEquations(CommandsBase):
         command = f"CESEL,{type_},,,{vmin},{vmax},{vinc}"
         return self.run(command, **kwargs)
 
-
-
-    def cesgen(self, itime: str = "", inc: str = "", nset1: str = "", nset2: str = "", ninc: str = "", **kwargs):
+    def cesgen(
+        self,
+        itime: str = "",
+        inc: str = "",
+        nset1: str = "",
+        nset2: str = "",
+        ninc: str = "",
+        **kwargs,
+    ):
         r"""Generates a set of constraint equations from existing sets.
 
         Mechanical APDL Command: `CESGEN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CESGEN.html>`_
@@ -732,9 +813,14 @@ class ConstraintEquations(CommandsBase):
         command = f"CESGEN,{itime},{inc},{nset1},{nset2},{ninc}"
         return self.run(command, **kwargs)
 
-
-
-    def rbe3(self, independ: str = "", dof: str = "", depend: str = "", wtfact: str = "", **kwargs):
+    def rbe3(
+        self,
+        independ: str = "",
+        dof: str = "",
+        depend: str = "",
+        wtfact: str = "",
+        **kwargs,
+    ):
         r"""Distributes the force/moment applied at an independent node to a set of dependent nodes.
 
         Mechanical APDL Command: `RBE3 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RBE3.html>`_
@@ -803,5 +889,3 @@ class ConstraintEquations(CommandsBase):
         """
         command = f"RBE3,{independ},{dof},{depend},{wtfact}"
         return self.run(command, **kwargs)
-
-

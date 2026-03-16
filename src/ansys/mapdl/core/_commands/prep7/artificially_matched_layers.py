@@ -1,8 +1,48 @@
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from ansys.mapdl.core._commands import CommandsBase
+
 
 class ArtificiallyMatchedLayers(CommandsBase):
 
-    def pmlopt(self, psys: str = "", lab: str = "", xminus: str = "", xplus: str = "", yminus: str = "", yplus: str = "", zminus: str = "", zplus: str = "", woptxm: str = "", woptxp: str = "", woptym: str = "", woptyp: str = "", woptzm: str = "", woptzp: str = "", **kwargs):
+    def pmlopt(
+        self,
+        psys: str = "",
+        lab: str = "",
+        xminus: str = "",
+        xplus: str = "",
+        yminus: str = "",
+        yplus: str = "",
+        zminus: str = "",
+        zplus: str = "",
+        woptxm: str = "",
+        woptxp: str = "",
+        woptym: str = "",
+        woptyp: str = "",
+        woptzm: str = "",
+        woptzp: str = "",
+        **kwargs,
+    ):
         r"""Defines perfectly matched layers (PMLs) or irregular perfectly matched layers (IPML).
 
         Mechanical APDL Command: `PMLOPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PMLOPT.html>`_
@@ -192,9 +232,17 @@ class ArtificiallyMatchedLayers(CommandsBase):
         command = f"PMLOPT,{psys},{lab},{xminus},{xplus},{yminus},{yplus},{zminus},{zplus},{woptxm},{woptxp},{woptym},{woptyp},{woptzm},{woptzp}"
         return self.run(command, **kwargs)
 
-
-
-    def pmlsize(self, freqb: str = "", freqe: str = "", dmin: str = "", dmax: str = "", thick: str = "", angle: str = "", wavespeed: str = "", **kwargs):
+    def pmlsize(
+        self,
+        freqb: str = "",
+        freqe: str = "",
+        dmin: str = "",
+        dmax: str = "",
+        thick: str = "",
+        angle: str = "",
+        wavespeed: str = "",
+        **kwargs,
+    ):
         r"""Determines number of PML or IPML layers.
 
         Mechanical APDL Command: `PMLSIZE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PMLSIZE.html>`_
@@ -237,8 +285,6 @@ class ArtificiallyMatchedLayers(CommandsBase):
         command = f"PMLSIZE,{freqb},{freqe},{dmin},{dmax},{thick},{angle},{wavespeed}"
         return self.run(command, **kwargs)
 
-
-
     def psys(self, kcn: int | str = "", **kwargs):
         r"""Sets the PML element coordinate system attribute pointer.
 
@@ -275,5 +321,3 @@ class ArtificiallyMatchedLayers(CommandsBase):
         """
         command = f"PSYS,{kcn}"
         return self.run(command, **kwargs)
-
-

@@ -1,8 +1,33 @@
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from ansys.mapdl.core._commands import CommandsBase
+
 
 class Morphing(CommandsBase):
 
-    def damorph(self, area: str = "", xline: str = "", rmshky: int | str = "", **kwargs):
+    def damorph(
+        self, area: str = "", xline: str = "", rmshky: int | str = "", **kwargs
+    ):
         r"""Move nodes in selected areas to conform to structural displacements.
 
         Mechanical APDL Command: `DAMORPH <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DAMORPH.html>`_
@@ -58,8 +83,6 @@ class Morphing(CommandsBase):
         command = f"DAMORPH,{area},{xline},{rmshky}"
         return self.run(command, **kwargs)
 
-
-
     def demorph(self, elem: str = "", dimn: str = "", rmshky: int | str = "", **kwargs):
         r"""Move nodes in selected elements to conform to structural displacements.
 
@@ -113,9 +136,9 @@ class Morphing(CommandsBase):
         command = f"DEMORPH,{elem},{dimn},{rmshky}"
         return self.run(command, **kwargs)
 
-
-
-    def dvmorph(self, volu: str = "", xarea: str = "", rmshky: int | str = "", **kwargs):
+    def dvmorph(
+        self, volu: str = "", xarea: str = "", rmshky: int | str = "", **kwargs
+    ):
         r"""Move nodes in selected volumes to conform to structural displacements.
 
         Mechanical APDL Command: `DVMORPH <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DVMORPH.html>`_
@@ -171,9 +194,19 @@ class Morphing(CommandsBase):
         command = f"DVMORPH,{volu},{xarea},{rmshky}"
         return self.run(command, **kwargs)
 
-
-
-    def morph(self, option: str = "", remeshopt: str = "", elemset: str = "", armax: str = "", voch: str = "", arch: str = "", step: str = "", time: str = "", stropt: str = "", **kwargs):
+    def morph(
+        self,
+        option: str = "",
+        remeshopt: str = "",
+        elemset: str = "",
+        armax: str = "",
+        voch: str = "",
+        arch: str = "",
+        step: str = "",
+        time: str = "",
+        stropt: str = "",
+        **kwargs,
+    ):
         r"""Specifies morphing and remeshing controls.
 
         Mechanical APDL Command: `MORPH <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MORPH.html>`_
@@ -286,5 +319,3 @@ class Morphing(CommandsBase):
         """
         command = f"MORPH,{option},,{remeshopt},{elemset},{armax},{voch},{arch},{step},{time},{stropt}"
         return self.run(command, **kwargs)
-
-

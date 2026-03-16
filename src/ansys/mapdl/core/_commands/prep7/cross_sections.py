@@ -1,4 +1,27 @@
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from ansys.mapdl.core._commands import CommandsBase
+
 
 class CrossSections(CommandsBase):
 
@@ -45,8 +68,6 @@ class CrossSections(CommandsBase):
         command = f"BSAX,{val1},{val2},{t}"
         return self.run(command, **kwargs)
 
-
-
     def bsm1(self, val1: str = "", val2: str = "", t: str = "", **kwargs):
         r"""Specifies the bending curvature and moment relationship in plane XZ for beam sections.
 
@@ -89,8 +110,6 @@ class CrossSections(CommandsBase):
         """
         command = f"BSM1,{val1},{val2},{t}"
         return self.run(command, **kwargs)
-
-
 
     def bsm2(self, val1: str = "", val2: str = "", t: str = "", **kwargs):
         r"""Specifies the bending curvature and moment relationship in plane XY for beam sections.
@@ -135,8 +154,6 @@ class CrossSections(CommandsBase):
         command = f"BSM2,{val1},{val2},{t}"
         return self.run(command, **kwargs)
 
-
-
     def bsmd(self, dens: str = "", t: str = "", **kwargs):
         r"""Specifies mass per unit length for a nonlinear general beam section.
 
@@ -165,8 +182,6 @@ class CrossSections(CommandsBase):
         """
         command = f"BSMD,{dens},{t}"
         return self.run(command, **kwargs)
-
-
 
     def bss1(self, val1: str = "", val2: str = "", t: str = "", **kwargs):
         r"""Specifies the transverse shear strain and force relationship in plane XZ for beam sections.
@@ -212,8 +227,6 @@ class CrossSections(CommandsBase):
         command = f"BSS1,{val1},{val2},{t}"
         return self.run(command, **kwargs)
 
-
-
     def bss2(self, val1: str = "", val2: str = "", t: str = "", **kwargs):
         r"""Specifies the transverse shear strain and force relationship in plane XY for beam sections.
 
@@ -258,8 +271,6 @@ class CrossSections(CommandsBase):
         command = f"BSS2,{val1},{val2},{t}"
         return self.run(command, **kwargs)
 
-
-
     def bste(self, alpha: str = "", t: str = "", **kwargs):
         r"""Specifies a thermal expansion coefficient for a nonlinear general beam section.
 
@@ -288,8 +299,6 @@ class CrossSections(CommandsBase):
         """
         command = f"BSTE,{alpha},{t}"
         return self.run(command, **kwargs)
-
-
 
     def bstq(self, val1: str = "", val2: str = "", t: str = "", **kwargs):
         r"""Specifies the cross section twist and torque relationship for beam sections.
@@ -334,9 +343,17 @@ class CrossSections(CommandsBase):
         command = f"BSTQ,{val1},{val2},{t}"
         return self.run(command, **kwargs)
 
-
-
-    def cbmd(self, row: str = "", c_r__r: str = "", c_r__rplus1: str = "", c_r__rplus2: str = "", c_r__rplus3: str = "", c_r__rplus4: str = "", c_r__rplus5: str = "", **kwargs):
+    def cbmd(
+        self,
+        row: str = "",
+        c_r__r: str = "",
+        c_r__rplus1: str = "",
+        c_r__rplus2: str = "",
+        c_r__rplus3: str = "",
+        c_r__rplus4: str = "",
+        c_r__rplus5: str = "",
+        **kwargs,
+    ):
         r"""Specifies preintegrated section mass matrix for composite-beam sections.
 
         Mechanical APDL Command: `CBMD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CBMD.html>`_
@@ -390,9 +407,18 @@ class CrossSections(CommandsBase):
         command = f"CBMD,{row},{c_r__r},{c_r__rplus1},{c_r__rplus2},{c_r__rplus3},{c_r__rplus4},{c_r__rplus5}"
         return self.run(command, **kwargs)
 
-
-
-    def cbmx(self, row: str = "", s_r__r: str = "", s_r__rplus1: str = "", s_r__rplus2: str = "", s_r__rplus3: str = "", s_r__rplus4: str = "", s_r__rplus5: str = "", s_r__rplus6: str = "", **kwargs):
+    def cbmx(
+        self,
+        row: str = "",
+        s_r__r: str = "",
+        s_r__rplus1: str = "",
+        s_r__rplus2: str = "",
+        s_r__rplus3: str = "",
+        s_r__rplus4: str = "",
+        s_r__rplus5: str = "",
+        s_r__rplus6: str = "",
+        **kwargs,
+    ):
         r"""Specifies preintegrated cross-section stiffness for composite beam sections.
 
         Mechanical APDL Command: `CBMX <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CBMX.html>`_
@@ -449,8 +475,6 @@ class CrossSections(CommandsBase):
         command = f"CBMX,{row},{s_r__r},{s_r__rplus1},{s_r__rplus2},{s_r__rplus3},{s_r__rplus4},{s_r__rplus5},{s_r__rplus6}"
         return self.run(command, **kwargs)
 
-
-
     def cbte(self, alpha: str = "", **kwargs):
         r"""Specifies a thermal expansion coefficient for a composite beam section.
 
@@ -479,9 +503,15 @@ class CrossSections(CommandsBase):
         command = f"CBTE,{alpha}"
         return self.run(command, **kwargs)
 
-
-
-    def sdelete(self, sfirst: str = "", slast: str = "", sinc: str = "", knoclean: int | str = "", lchk: str = "", **kwargs):
+    def sdelete(
+        self,
+        sfirst: str = "",
+        slast: str = "",
+        sinc: str = "",
+        knoclean: int | str = "",
+        lchk: str = "",
+        **kwargs,
+    ):
         r"""Deletes sections from the database.
 
         Mechanical APDL Command: `SDELETE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SDELETE.html>`_
@@ -526,9 +556,23 @@ class CrossSections(CommandsBase):
         command = f"SDELETE,{sfirst},{slast},{sinc},{knoclean},{lchk}"
         return self.run(command, **kwargs)
 
-
-
-    def seccontrol(self, val1: str = "", val2: str = "", val3: str = "", val4: str = "", val5: str = "", val6: str = "", val7: str = "", val8: str = "", val9: str = "", val10: str = "", val11: str = "", val12: str = "", val13: str = "", **kwargs):
+    def seccontrol(
+        self,
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        val5: str = "",
+        val6: str = "",
+        val7: str = "",
+        val8: str = "",
+        val9: str = "",
+        val10: str = "",
+        val11: str = "",
+        val12: str = "",
+        val13: str = "",
+        **kwargs,
+    ):
         r"""Supplements or overrides default section properties.
 
         Mechanical APDL Command: `SECCONTROL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECCONTROL.html>`_
@@ -769,9 +813,22 @@ class CrossSections(CommandsBase):
         command = f"SECCONTROL,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13}"
         return self.run(command, **kwargs)
 
-
-
-    def secdata(self, val1: str = "", val2: str = "", val3: str = "", val4: str = "", val5: str = "", val6: str = "", val7: str = "", val8: str = "", val9: str = "", val10: str = "", val11: str = "", val12: str = "", **kwargs):
+    def secdata(
+        self,
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        val5: str = "",
+        val6: str = "",
+        val7: str = "",
+        val8: str = "",
+        val9: str = "",
+        val10: str = "",
+        val11: str = "",
+        val12: str = "",
+        **kwargs,
+    ):
         r"""Describes the geometry of a section.
 
         Mechanical APDL Command: `SECDATA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECDATA.html>`_
@@ -1408,8 +1465,6 @@ class CrossSections(CommandsBase):
         command = f"SECDATA,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12}"
         return self.run(command, **kwargs)
 
-
-
     def secfunction(self, table: str = "", pattern: str = "", **kwargs):
         r"""Specifies shell section thickness as a tabular function.
 
@@ -1460,9 +1515,17 @@ class CrossSections(CommandsBase):
         command = f"SECFUNCTION,{table},{pattern}"
         return self.run(command, **kwargs)
 
-
-
-    def secjoint(self, kywrd: str = "", val1: str = "", val2: str = "", val3: str = "", val4: str = "", val5: str = "", val6: str = "", **kwargs):
+    def secjoint(
+        self,
+        kywrd: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        val5: str = "",
+        val6: str = "",
+        **kwargs,
+    ):
         r"""Defines local coordinate systems at joint element nodes and other data for joint elements.
 
         Mechanical APDL Command: `SECJOINT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECJOINT.html>`_
@@ -1751,8 +1814,6 @@ class CrossSections(CommandsBase):
         command = f"SECJOINT,{kywrd},{val1},{val2},{val3},{val4},{val5},{val6}"
         return self.run(command, **kwargs)
 
-
-
     def seclib(self, option: str = "", path: str = "", **kwargs):
         r"""Sets the default section library path for the :ref:`secread` command.
 
@@ -1787,9 +1848,20 @@ class CrossSections(CommandsBase):
         command = f"/SECLIB,{option},{path}"
         return self.run(command, **kwargs)
 
-
-
-    def seclock(self, dof0: str = "", minvalue0: str = "", maxvalue0: str = "", dof1: str = "", minvalue1: str = "", maxvalue1: str = "", dof2: str = "", minvalue2: str = "", maxvalue2: str = "", addional_command_arg: str = "", **kwargs):
+    def seclock(
+        self,
+        dof0: str = "",
+        minvalue0: str = "",
+        maxvalue0: str = "",
+        dof1: str = "",
+        minvalue1: str = "",
+        maxvalue1: str = "",
+        dof2: str = "",
+        minvalue2: str = "",
+        maxvalue2: str = "",
+        addional_command_arg: str = "",
+        **kwargs,
+    ):
         r"""Specifies locks on the components of relative motion in a joint element.
 
         Mechanical APDL Command: `SECLOCK <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECLOCK.html>`_
@@ -1867,9 +1939,9 @@ class CrossSections(CommandsBase):
         command = f"SECLOCK,{dof0},{minvalue0},{maxvalue0},{dof1},{minvalue1},{maxvalue1},{dof2},{minvalue2},{maxvalue2},{addional_command_arg}"
         return self.run(command, **kwargs)
 
-
-
-    def secmodif(self, secid: str = "", kywrd: str = "", addional_command_arg: str = "", **kwargs):
+    def secmodif(
+        self, secid: str = "", kywrd: str = "", addional_command_arg: str = "", **kwargs
+    ):
         r"""Modifies a pretension section
 
         Mechanical APDL Command: `SECMODIF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECMODIF.html>`_
@@ -1908,8 +1980,6 @@ class CrossSections(CommandsBase):
         command = f"SECMODIF,{secid},{kywrd},{addional_command_arg}"
         return self.run(command, **kwargs)
 
-
-
     def secnum(self, secid: str = "", **kwargs):
         r"""Sets the element section attribute pointer.
 
@@ -1924,9 +1994,17 @@ class CrossSections(CommandsBase):
         command = f"SECNUM,{secid}"
         return self.run(command, **kwargs)
 
-
-
-    def secoffset(self, location: str = "", offset1: str = "", offset2: str = "", cg_y: str = "", cg_z: str = "", sh_y: str = "", sh_z: str = "", **kwargs):
+    def secoffset(
+        self,
+        location: str = "",
+        offset1: str = "",
+        offset2: str = "",
+        cg_y: str = "",
+        cg_z: str = "",
+        sh_y: str = "",
+        sh_z: str = "",
+        **kwargs,
+    ):
         r"""Defines the section offset for cross sections.
 
         Mechanical APDL Command: `SECOFFSET <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECOFFSET.html>`_
@@ -2084,12 +2162,14 @@ class CrossSections(CommandsBase):
           The offset alters only the reference surface of the shell elements (that is, where the nodes are
           located).
         """
-        command = f"SECOFFSET,{location},{offset1},{offset2},{cg_y},{cg_z},{sh_y},{sh_z}"
+        command = (
+            f"SECOFFSET,{location},{offset1},{offset2},{cg_y},{cg_z},{sh_y},{sh_z}"
+        )
         return self.run(command, **kwargs)
 
-
-
-    def secplot(self, secid: str = "", val1: str = "", val2: str = "", val3: str = "", **kwargs):
+    def secplot(
+        self, secid: str = "", val1: str = "", val2: str = "", val3: str = "", **kwargs
+    ):
         r"""Plots the geometry of a beam, pipe, shell, or reinforcing section to scale.
 
         Mechanical APDL Command: `SECPLOT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECPLOT.html>`_
@@ -2207,8 +2287,6 @@ class CrossSections(CommandsBase):
         command = f"SECPLOT,{secid},{val1},{val2},{val3}"
         return self.run(command, **kwargs)
 
-
-
     def secread(self, fname: str = "", ext: str = "", option: str = "", **kwargs):
         r"""Reads a custom section library or a user-defined section mesh into Mechanical APDL.
 
@@ -2301,9 +2379,20 @@ class CrossSections(CommandsBase):
         command = f"SECREAD,{fname},{ext},,{option}"
         return self.run(command, **kwargs)
 
-
-
-    def secstop(self, dof0: str = "", minvalue0: str = "", maxvalue0: str = "", dof1: str = "", minvalue1: str = "", maxvalue1: str = "", dof2: str = "", minvalue2: str = "", maxvalue2: str = "", addional_command_arg: str = "", **kwargs):
+    def secstop(
+        self,
+        dof0: str = "",
+        minvalue0: str = "",
+        maxvalue0: str = "",
+        dof1: str = "",
+        minvalue1: str = "",
+        maxvalue1: str = "",
+        dof2: str = "",
+        minvalue2: str = "",
+        maxvalue2: str = "",
+        addional_command_arg: str = "",
+        **kwargs,
+    ):
         r"""Specifies stops on the components of relative motion in a joint element.
 
         Mechanical APDL Command: `SECSTOP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECSTOP.html>`_
@@ -2382,9 +2471,15 @@ class CrossSections(CommandsBase):
         command = f"SECSTOP,{dof0},{minvalue0},{maxvalue0},{dof1},{minvalue1},{maxvalue1},{dof2},{minvalue2},{maxvalue2},{addional_command_arg}"
         return self.run(command, **kwargs)
 
-
-
-    def sectype(self, secid: str = "", type_: str = "", subtype: str = "", name: str = "", refinekey: str = "", **kwargs):
+    def sectype(
+        self,
+        secid: str = "",
+        type_: str = "",
+        subtype: str = "",
+        name: str = "",
+        refinekey: str = "",
+        **kwargs,
+    ):
         r"""Associates section type information with a section ID number.
 
         Mechanical APDL Command: `SECTYPE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECTYPE.html>`_
@@ -2553,8 +2648,6 @@ class CrossSections(CommandsBase):
         command = f"SECTYPE,{secid},{type_},{subtype},{name},{refinekey}"
         return self.run(command, **kwargs)
 
-
-
     def secwrite(self, fname: str = "", ext: str = "", elem_type: str = "", **kwargs):
         r"""Creates an ASCII file containing user mesh section information.
 
@@ -2593,9 +2686,16 @@ class CrossSections(CommandsBase):
         command = f"SECWRITE,{fname},{ext},,{elem_type}"
         return self.run(command, **kwargs)
 
-
-
-    def sflex(self, ffax: str = "", ffby: str = "", ffbz: str = "", ffto: str = "", fftsy: str = "", fftsz: str = "", **kwargs):
+    def sflex(
+        self,
+        ffax: str = "",
+        ffby: str = "",
+        ffbz: str = "",
+        ffto: str = "",
+        fftsy: str = "",
+        fftsz: str = "",
+        **kwargs,
+    ):
         r"""Sets flexibility factors for the currently defined pipe element section.
 
         Mechanical APDL Command: `SFLEX <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SFLEX.html>`_
@@ -2648,9 +2748,15 @@ class CrossSections(CommandsBase):
         command = f"SFLEX,{ffax},{ffby},{ffbz},{ffto},{fftsy},{fftsz}"
         return self.run(command, **kwargs)
 
-
-
-    def slist(self, sfirst: str = "", slast: str = "", sinc: str = "", details: str = "", type_: str = "", **kwargs):
+    def slist(
+        self,
+        sfirst: str = "",
+        slast: str = "",
+        sinc: str = "",
+        details: str = "",
+        type_: str = "",
+        **kwargs,
+    ):
         r"""Summarizes the section properties for all defined sections in the current session.
 
         Mechanical APDL Command: `SLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SLIST.html>`_
@@ -2743,9 +2849,17 @@ class CrossSections(CommandsBase):
         command = f"SLIST,{sfirst},{slast},{sinc},{details},{type_}"
         return self.run(command, **kwargs)
 
-
-
-    def sload(self, secid: str = "", plnlab: str = "", kinit: str = "", kfd: str = "", fdvalue: str = "", lsload: str = "", lslock: str = "", **kwargs):
+    def sload(
+        self,
+        secid: str = "",
+        plnlab: str = "",
+        kinit: str = "",
+        kfd: str = "",
+        fdvalue: str = "",
+        lsload: str = "",
+        lslock: str = "",
+        **kwargs,
+    ):
         r"""Loads a pretension section.
 
         Mechanical APDL Command: `SLOAD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SLOAD.html>`_
@@ -2937,9 +3051,9 @@ class CrossSections(CommandsBase):
         command = f"SLOAD,{secid},{plnlab},{kinit},{kfd},{fdvalue},{lsload},{lslock}"
         return self.run(command, **kwargs)
 
-
-
-    def ssbt(self, bt11: str = "", bt22: str = "", bt12: str = "", t: str = "", **kwargs):
+    def ssbt(
+        self, bt11: str = "", bt22: str = "", bt12: str = "", t: str = "", **kwargs
+    ):
         r"""Specifies preintegrated bending thermal effects for shell sections.
 
         Mechanical APDL Command: `SSBT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SSBT.html>`_
@@ -2994,9 +3108,9 @@ class CrossSections(CommandsBase):
         command = f"SSBT,{bt11},{bt22},{bt12},{t}"
         return self.run(command, **kwargs)
 
-
-
-    def ssmt(self, mt11: str = "", mt22: str = "", mt12: str = "", t: str = "", **kwargs):
+    def ssmt(
+        self, mt11: str = "", mt22: str = "", mt12: str = "", t: str = "", **kwargs
+    ):
         r"""Specifies preintegrated membrane thermal effects for shell sections.
 
         Mechanical APDL Command: `SSMT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SSMT.html>`_
@@ -3048,9 +3162,17 @@ class CrossSections(CommandsBase):
         command = f"SSMT,{mt11},{mt22},{mt12},{t}"
         return self.run(command, **kwargs)
 
-
-
-    def sspa(self, a11: str = "", a21: str = "", a31: str = "", a22: str = "", a32: str = "", a33: str = "", t: str = "", **kwargs):
+    def sspa(
+        self,
+        a11: str = "",
+        a21: str = "",
+        a31: str = "",
+        a22: str = "",
+        a32: str = "",
+        a33: str = "",
+        t: str = "",
+        **kwargs,
+    ):
         r"""Specifies a preintegrated membrane stiffness for shell sections.
 
         Mechanical APDL Command: `SSPA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SSPA.html>`_
@@ -3106,9 +3228,20 @@ class CrossSections(CommandsBase):
         command = f"SSPA,{a11},{a21},{a31},{a22},{a32},{a33},{t}"
         return self.run(command, **kwargs)
 
-
-
-    def sspb(self, b11: str = "", b21: str = "", b31: str = "", b22: str = "", b32: str = "", b33: str = "", t: str = "", b12: str = "", b13: str = "", b23: str = "", **kwargs):
+    def sspb(
+        self,
+        b11: str = "",
+        b21: str = "",
+        b31: str = "",
+        b22: str = "",
+        b32: str = "",
+        b33: str = "",
+        t: str = "",
+        b12: str = "",
+        b13: str = "",
+        b23: str = "",
+        **kwargs,
+    ):
         r"""Specifies a preintegrated coupling stiffness for shell sections.
 
         Mechanical APDL Command: `SSPB <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SSPB.html>`_
@@ -3180,9 +3313,17 @@ class CrossSections(CommandsBase):
         command = f"SSPB,{b11},{b21},{b31},{b22},{b32},{b33},{t},{b12},{b13},{b23}"
         return self.run(command, **kwargs)
 
-
-
-    def sspd(self, d11: str = "", d21: str = "", d31: str = "", d22: str = "", d32: str = "", d33: str = "", t: str = "", **kwargs):
+    def sspd(
+        self,
+        d11: str = "",
+        d21: str = "",
+        d31: str = "",
+        d22: str = "",
+        d32: str = "",
+        d33: str = "",
+        t: str = "",
+        **kwargs,
+    ):
         r"""Specifies a preintegrated bending stiffness for shell sections.
 
         Mechanical APDL Command: `SSPD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SSPD.html>`_
@@ -3241,8 +3382,6 @@ class CrossSections(CommandsBase):
         command = f"SSPD,{d11},{d21},{d31},{d22},{d32},{d33},{t}"
         return self.run(command, **kwargs)
 
-
-
     def sspe(self, e11: str = "", e21: str = "", e22: str = "", t: str = "", **kwargs):
         r"""Specifies a preintegrated transverse shear stiffness for shell sections.
 
@@ -3294,8 +3433,6 @@ class CrossSections(CommandsBase):
         command = f"SSPE,{e11},{e21},{e22},{t}"
         return self.run(command, **kwargs)
 
-
-
     def sspm(self, dens: str = "", t: str = "", **kwargs):
         r"""Specifies mass density for a preintegrated shell section.
 
@@ -3323,5 +3460,3 @@ class CrossSections(CommandsBase):
         """
         command = f"SSPM,{dens},{t}"
         return self.run(command, **kwargs)
-
-

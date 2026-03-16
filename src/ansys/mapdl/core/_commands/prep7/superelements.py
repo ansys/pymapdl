@@ -1,4 +1,27 @@
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from ansys.mapdl.core._commands import CommandsBase
+
 
 class Superelements(CommandsBase):
 
@@ -44,8 +67,6 @@ class Superelements(CommandsBase):
         command = f"SE,{file},,,{toler},{nstartvn}"
         return self.run(command, **kwargs)
 
-
-
     def sedlist(self, sename: str = "", kopt: int | str = "", **kwargs):
         r"""Lists the DOF solution of a superelement after the use pass.
 
@@ -76,8 +97,6 @@ class Superelements(CommandsBase):
         """
         command = f"SEDLIST,{sename},{kopt}"
         return self.run(command, **kwargs)
-
-
 
     def selist(self, sename: str = "", kopt: int | str = "", kint: str = "", **kwargs):
         r"""Lists the contents of a superelement matrix file.
@@ -119,9 +138,15 @@ class Superelements(CommandsBase):
         command = f"SELIST,{sename},{kopt},{kint}"
         return self.run(command, **kwargs)
 
-
-
-    def sesymm(self, sename: str = "", ncomp: str = "", inc: str = "", file: str = "", ext: str = "", **kwargs):
+    def sesymm(
+        self,
+        sename: str = "",
+        ncomp: str = "",
+        inc: str = "",
+        file: str = "",
+        ext: str = "",
+        **kwargs,
+    ):
         r"""Performs a symmetry operation on a superelement within the use pass.
 
         Mechanical APDL Command: `SESYMM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SESYMM.html>`_
@@ -174,9 +199,19 @@ class Superelements(CommandsBase):
         command = f"SESYMM,{sename},{ncomp},{inc},{file},{ext}"
         return self.run(command, **kwargs)
 
-
-
-    def setran(self, sename: str = "", kcnto: str = "", inc: str = "", file: str = "", ext: str = "", dx: str = "", dy: str = "", dz: str = "", norot: int | str = "", **kwargs):
+    def setran(
+        self,
+        sename: str = "",
+        kcnto: str = "",
+        inc: str = "",
+        file: str = "",
+        ext: str = "",
+        dx: str = "",
+        dy: str = "",
+        dz: str = "",
+        norot: int | str = "",
+        **kwargs,
+    ):
         r"""Creates a superelement from an existing superelement.
 
         Mechanical APDL Command: `SETRAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SETRAN.html>`_
@@ -265,5 +300,3 @@ class Superelements(CommandsBase):
         """
         command = f"SETRAN,{sename},{kcnto},{inc},{file},{ext},,{dx},{dy},{dz},{norot}"
         return self.run(command, **kwargs)
-
-
