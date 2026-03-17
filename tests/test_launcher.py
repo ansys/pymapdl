@@ -2500,3 +2500,26 @@ def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
                 finally:
                     # Restore original _launch
                     mapdl._launch = original_launch
+
+
+@requires("local")
+@requires("linux")
+@requires("grpc")
+def test_launch_uds_transport(monkeypatch):
+    """Test that MAPDL defaults to UDS transport when launched locally on Linux.
+
+    UDS (Unix Domain Sockets) is the default gRPC transport for local Linux
+    connections. This test verifies that ``launch_mapdl`` produces an instance
+    whose ``transport_mode`` is ``"uds"`` when no explicit transport is requested
+    and no related environment variables override the default.
+    """
+    monkeypatch.delenv("PYMAPDL_GRPC_TRANSPORT", raising=False)
+    monkeypatch.delenv("ANSYS_MAPDL_GRPC_TRANSPORT", raising=False)
+
+    try:
+        mapdl_ = launch_mapdl(
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+        )
+        assert mapdl_.transport_mode == "uds"
+    finally:
+        mapdl_.exit(force=True)
