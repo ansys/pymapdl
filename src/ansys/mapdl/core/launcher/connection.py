@@ -109,7 +109,11 @@ def create_grpc_client(
         timeout=config.timeout,
         remove_temp_dir_on_exit=config.remove_temp_dir_on_exit,
         process=process_info.process if process_info else None,
-        # channel=config.grpc_channel,
+        channel=config.channel,
+        jobname=config.jobname,
+        jobid=(process_info.jobid if process_info else None) or config.jobid,
+        finish_job_on_exit=config.finish_job_on_exit,
+        run_location=config.run_location,
         # transport_mode=config.transport_mode,
         # uds_dir=config.uds_dir,
         # uds_id=config.uds_id,
@@ -188,15 +192,15 @@ def create_console_client(config: LaunchConfig) -> "MapdlConsole":
 def connect_to_existing(config: LaunchConfig) -> MapdlGrpc:
     """Connect to an existing MAPDL instance without starting a new one.
 
-    Establishes a connection to an already running MAPDL instance specified
-    by IP address and port. This is useful for connecting to MAPDL instances
-    running on remote machines or HPC clusters.
+    Establishes a connection to an already running MAPDL instance. When
+    ``config.channel`` is set the pre-built gRPC channel is reused directly;
+    otherwise the connection is made via ``config.ip`` and ``config.port``.
 
     Parameters
     ----------
     config : LaunchConfig
-        Configuration object with IP address and port of existing instance.
-        Must have start_instance=False
+        Configuration object with IP address and port of existing instance
+        (or a pre-built ``channel``). Must have ``start_instance=False``.
 
     Returns
     -------
@@ -222,20 +226,19 @@ def connect_to_existing(config: LaunchConfig) -> MapdlGrpc:
     ... )
     >>> mapdl = connect_to_existing(config)
 
-    Connect to MAPDL on localhost:
+    Connect using a pre-built gRPC channel:
 
-    >>> config = LaunchConfig(
-    ...     start_instance=False,
-    ...     ip="127.0.0.1",
-    ...     port=50052
-    ... )
+    >>> import grpc
+    >>> channel = grpc.insecure_channel("localhost:50052")
+    >>> config = LaunchConfig(start_instance=False, channel=channel, ...)
     >>> mapdl = connect_to_existing(config)
 
     Notes
     -----
     - The target MAPDL instance must be running and listening on the
       specified IP and port
-    - Ensure network connectivity and firewall rules allow connection
+    - When ``channel`` is provided, you should not use ``ip`` and ``port`` for
+      the actual connection
     - Default timeout from config will be used for connection attempts
     """
     LOG.info(f"Connecting to existing MAPDL instance at {config.ip}:{config.port}")

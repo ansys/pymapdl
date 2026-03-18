@@ -258,21 +258,13 @@ def _launch_mapdl_common(
     force_intel: bool,
     graphics_backend: Optional[str],
     start_timeout: Optional[int],
+    channel: Optional[Any] = None,
 ):
     """Common logic for launch_mapdl and launch_mapdl_process.
 
     Returns:
         Tuple of (config, process_info) where process_info is None if not launching a new instance
     """
-    # Merge environment variable dictionaries
-    env_vars_merged = None
-    if add_env_vars or replace_env_vars:
-        env_vars_merged = {}
-        if add_env_vars:
-            env_vars_merged.update(add_env_vars)
-        if replace_env_vars:
-            env_vars_merged.update(replace_env_vars)
-
     # Step 1: Resolve configuration from arguments, env vars, and defaults
     try:
         config = resolve_launch_config(
@@ -305,11 +297,13 @@ def _launch_mapdl_common(
             uds_dir=uds_dir,
             uds_id=uds_id,
             certs_dir=certs_dir,
-            env_vars=env_vars_merged,
+            add_env_vars=add_env_vars,
+            replace_env_vars=replace_env_vars,
             license_server_check=license_server_check,
             force_intel=force_intel,
             graphics_backend=graphics_backend,
             start_timeout=start_timeout,
+            channel=channel,
         )
     except ConfigurationError as e:
         LOG.error(f"Configuration error: {e}")
@@ -381,6 +375,7 @@ def launch_mapdl(
     nproc: Optional[int] = None,
     port: Optional[int] = None,
     ip: Optional[str] = None,
+    channel: Optional[Any] = None,
     mode: Optional[str] = None,
     version: Optional[int] = None,
     start_instance: Optional[bool] = None,
@@ -459,6 +454,9 @@ def launch_mapdl(
         IP address of MAPDL instance. Used only when ``start_instance=False``.
         Can also be set via environment variable :envvar:`PYMAPDL_IP`.
         Defaults to ``'127.0.0.1'`` (localhost).
+
+    channel : Optional[Any]
+        Communication channel to use. It cannot be used with `ip` and `port` arguments.
 
     mode : Optional[str]
         Launch mode. Must be one of:
@@ -768,13 +766,13 @@ def launch_mapdl(
     """
     import warnings
 
+    # Warn about any remaining unknown keyword arguments
     if kwargs:
         warnings.warn(
             f"Unknown arguments ignored: {list(kwargs.keys())}",
             stacklevel=3,
         )
 
-    # Use common launch logic
     config, process_info = _launch_mapdl_common(
         exec_file=exec_file,
         run_location=run_location,
@@ -811,6 +809,7 @@ def launch_mapdl(
         force_intel=force_intel,
         graphics_backend=graphics_backend,
         start_timeout=start_timeout,
+        channel=channel,
     )
 
     # Handle connection to existing instance

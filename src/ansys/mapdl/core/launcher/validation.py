@@ -31,6 +31,7 @@ import os
 import psutil
 
 from ansys.mapdl.core import LOG
+from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 
 from .environment import is_wsl
 from .models import LaunchConfig, LaunchMode, ValidationResult
@@ -142,6 +143,16 @@ def _validate_version_mode_compatibility(
     - gRPC requires version >= 211 (MAPDL 2021R1)
     """
     if config.mode == LaunchMode.GRPC and config.version:
+        # Check version is in the list of allowable versions
+        ALLOWABLE_VERSION_INT = tuple(SUPPORTED_ANSYS_VERSIONS.keys())
+        if config.version not in ALLOWABLE_VERSION_INT:
+            result.add_error(
+                f"MAPDL version must be one of the following: "
+                f"{list(ALLOWABLE_VERSION_INT)}. "
+                f"Current version: {config.version}."
+            )
+            return  # No need to check further
+
         if config.version < 211:
             result.add_error(
                 f"gRPC mode requires MAPDL version 211 (2021R1) or newer. "
@@ -343,7 +354,9 @@ def _validate_file_permissions(config: LaunchConfig, result: ValidationResult) -
     - Windows: Checks for .exe, .bat, .cmd, .com extensions
     - Checks parent directory if run_location doesn't exist yet
     """
-    if not config.start_instance:
+    if not config.start_instance or config.launch_on_hpc:
+        # For HPC launches the executable resides on the remote cluster, so local
+        # file-system checks are not applicable.
         return
 
     # Check exec_file exists and is executable

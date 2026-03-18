@@ -160,7 +160,7 @@ def prepare_environment(config: LaunchConfig) -> EnvironmentConfig:
     if config.env_vars:
         # User provided explicit env vars (replace mode)
         LOG.debug("Using user-provided environment variables")
-        return EnvironmentConfig(variables=config.env_vars, replace_all=True)
+        return EnvironmentConfig(variables=dict(config.env_vars), replace_all=True)
 
     # Start with system environment
     env = os.environ.copy()

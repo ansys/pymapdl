@@ -794,6 +794,9 @@ def mapdl(request, tmpdir_factory):
 #
 
 
+from ansys.mapdl.core.launcher.models import ValidationResult as _ValidationResult
+
+
 # Necessary patches to patch Mapdl launch
 def _returns(return_=None):
     return lambda *args, **kwargs: return_
@@ -827,6 +830,12 @@ _meth_patch_MAPDL_launch = [
                 "mapdlhostname",
             ]
         ),
+    ),
+    # Skip config validation so tests using fake executable paths or running
+    # HPC tests on Windows don't fail on local file-system / platform checks.
+    (
+        "ansys.mapdl.core.launcher.validate_config",
+        _returns(_ValidationResult(valid=True)),
     ),
 ]
 

@@ -76,11 +76,13 @@ def resolve_launch_config(
     uds_dir: Optional[str] = None,
     uds_id: Optional[str] = None,
     certs_dir: Optional[str] = None,
-    env_vars: Optional[Dict[str, str]] = None,
+    add_env_vars: Optional[Dict[str, str]] = None,
+    replace_env_vars: Optional[Dict[str, str]] = None,
     license_server_check: bool = False,
     force_intel: bool = False,
     graphics_backend: Optional[str] = None,
     start_timeout: Optional[int] = None,
+    channel: Optional[Any] = None,
     **kwargs: Any,
 ) -> LaunchConfig:
     """Resolve complete launch configuration.
@@ -269,16 +271,19 @@ def resolve_launch_config(
         Directory containing certificates for ``'mtls'`` transport.
         Defaults to :class:`None`.
 
-    env_vars : Optional[Dict[str, str]]
-        Environment variables for the MAPDL process. These replace all
-        system environment variables.
+    add_env_vars : Optional[Dict[str, str]]
+        Environment variables to add to the MAPDL process.
+        Extends system environment variables.
+        Defaults to :class:`None`.
+
+    replace_env_vars : Optional[Dict[str, str]]
+        Environment variables to replace system ones.
 
         .. warning:: Use with caution.
-           It replaces all system environment variables, including MPI and
-           license-related ones. You should manually inject them using this
-           argument if needed.
+           Replaces ALL system environment variables including MPI and
+           license-related ones. Manually inject them if needed.
 
-        Defaults to :class:`None`, using system environment variables.
+        Defaults to :class:`None` (uses system environment).
 
     license_server_check : bool
         Check if the license server is available if MAPDL fails to start.
@@ -353,17 +358,30 @@ def resolve_launch_config(
         if timeout is None:
             timeout = start_timeout
 
+    # Resolve scheduler_options (validates that nproc is set when scheduler_options given)
+    resolved_scheduler_options = resolve_scheduler_options(scheduler_options, nproc)
+
+    # Resolve channel (validates mutual exclusivity with port/ip)
+    resolved_channel = resolve_channel(channel, port, ip)
+
+    # When a channel is provided, force start_instance=False and skip
+    # exec_file auto-detection (no local process is needed).
+    if resolved_channel is not None:
+        start_instance = False
+
     # Resolve start_instance first (affects other resolution)
     resolved_start_instance = resolve_start_instance(start_instance, ip)
 
     # Resolve version early (needed for mode resolution)
-    resolved_exec_file = resolve_exec_file(exec_file, version, resolved_start_instance)
+    resolved_exec_file = resolve_exec_file(
+        exec_file, version, resolved_start_instance, launch_on_hpc=launch_on_hpc
+    )
     resolved_version = resolve_version(version, resolved_exec_file)
 
     # Resolve core parameters
     resolved_run_location = resolve_run_location(run_location)
     resolved_port = resolve_port(port)
-    resolved_ip = resolve_ip(ip, resolved_start_instance)
+    resolved_ip = resolve_ip(ip, resolved_start_instance, launch_on_hpc=launch_on_hpc)
     resolved_mode = resolve_mode(mode, resolved_version)
     resolved_nproc = resolve_nproc(nproc)
 
@@ -378,7 +396,12 @@ def resolve_launch_config(
     resolved_additional_switches = resolve_additional_switches(additional_switches)
 
     # Resolve environment variables
-    resolved_env_vars = env_vars if env_vars else {}
+    if replace_env_vars is not None:
+        resolved_env_vars = dict(replace_env_vars)
+    elif add_env_vars is not None:
+        resolved_env_vars = dict(add_env_vars)
+    else:
+        resolved_env_vars = {}
 
     return LaunchConfig(
         exec_file=resolved_exec_file,
@@ -401,7 +424,7 @@ def resolve_launch_config(
         license_type=license_type,
         launch_on_hpc=launch_on_hpc,
         running_on_hpc=running_on_hpc,
-        scheduler_options=scheduler_options,
+        scheduler_options=resolved_scheduler_options,
         loglevel=loglevel,
         log_apdl=log_apdl,
         print_com=print_com,
@@ -414,11 +437,88 @@ def resolve_launch_config(
         license_server_check=license_server_check,
         force_intel=force_intel,
         graphics_backend=graphics_backend,
+        channel=resolved_channel,
     )
 
 
+def resolve_scheduler_options(
+    scheduler_options: Optional[Dict[str, Any]],
+    nproc: Optional[int],
+) -> Optional[Dict[str, Any]]:
+    """Resolve and validate HPC scheduler options.
+
+    When ``scheduler_options`` is provided, ``nproc`` must also be explicitly
+    set because PyMAPDL does not infer the number of cores from the scheduler
+    options dict.
+
+    Parameters
+    ----------
+    scheduler_options : Optional[Dict[str, Any]]
+        HPC scheduler options passed by the caller.
+    nproc : Optional[int]
+        Explicit number of processors passed by the caller (before resolution).
+
+    Returns
+    -------
+    Optional[Dict[str, Any]]
+        The scheduler options unchanged.
+
+    Raises
+    ------
+    ConfigurationError
+        If ``scheduler_options`` is provided without ``nproc``.
+    """
+    if scheduler_options and nproc is None:
+        raise ConfigurationError(
+            "PyMAPDL does not read the number of cores from the 'scheduler_options'. "
+            "Hence you need to specify the number of cores you want to use using "
+            "the argument 'nproc' in 'launch_mapdl'."
+        )
+    return scheduler_options
+
+
+def resolve_channel(
+    channel: Optional[Any],
+    port: Optional[int],
+    ip: Optional[str],
+) -> Optional[Any]:
+    """Resolve and validate the optional gRPC channel argument.
+
+    A pre-built gRPC channel is mutually exclusive with ``port`` and ``ip``
+    because those parameters are used to *construct* a channel internally.
+    Providing both would be ambiguous.
+
+    Parameters
+    ----------
+    channel : Optional[Any]
+        Pre-built gRPC channel to reuse, or ``None``.
+    port : Optional[int]
+        Explicit port argument passed by the caller.
+    ip : Optional[str]
+        Explicit IP argument passed by the caller.
+
+    Returns
+    -------
+    Optional[Any]
+        The channel unchanged, or ``None`` if not provided.
+
+    Raises
+    ------
+    ConfigurationError
+        If ``channel`` is combined with ``port`` or ``ip``.
+    """
+    if channel is not None and (port is not None or ip is not None):
+        raise ConfigurationError(
+            "'channel' cannot be used together with 'port' or 'ip'."
+        )
+    return channel
+
+
 def resolve_exec_file(
-    exec_file: Optional[str], version: Optional[int], start_instance: bool
+    exec_file: Optional[str],
+    version: Optional[int],
+    start_instance: bool,
+    launch_on_hpc: bool = False,
 ) -> str:
     """Resolve MAPDL executable path.
 
@@ -439,13 +539,30 @@ def resolve_exec_file(
     Raises:
         ConfigurationError: If executable cannot be found or is invalid
     """
+    # Cannot specify both exec_file and version simultaneously
+    if exec_file and version:
+        raise ConfigurationError("Cannot specify both 'exec_file' and 'version'.")
+
     # If not starting instance, exec_file not needed
     if not start_instance:
-        return ""
+        return exec_file or ""
 
     # Priority 1: Explicit argument
     if exec_file:
         if not os.path.isfile(exec_file):
+            if launch_on_hpc:
+                # For HPC launches the executable lives on the remote cluster, not
+                # locally.  Emit a warning so the caller is aware, but do NOT raise.
+                import warnings as _warnings
+
+                _warnings.warn(
+                    f"PyMAPDL could not find the ANSYS executable at '{exec_file}'. "
+                    "This is acceptable for HPC launches where the executable resides "
+                    "on the remote cluster.",
+                    UserWarning,
+                    stacklevel=6,
+                )
+                return exec_file
             raise ConfigurationError(
                 f'Invalid MAPDL executable at "{exec_file}". File does not exist.'
             )
@@ -507,6 +624,13 @@ def resolve_port(port: Optional[int]) -> int:
     """
     # Priority 1: Explicit argument
     if port is not None:
+        if not isinstance(port, int):
+            try:
+                port = int(port)
+            except (TypeError, ValueError):
+                raise ConfigurationError(
+                    f"Invalid port: {port!r}. Port must be an integer between 1 and 65535."
+                )
         if not (1 <= port <= 65535):
             raise ConfigurationError(
                 f"Invalid port: {port}. Port must be between 1 and 65535."
@@ -535,7 +659,11 @@ def resolve_port(port: Optional[int]) -> int:
     return MAPDL_DEFAULT_PORT
 
 
-def resolve_ip(ip: Optional[str], start_instance: bool) -> str:
+def resolve_ip(
+    ip: Optional[str],
+    start_instance: bool,
+    launch_on_hpc: bool = False,
+) -> str:
     """Resolve IP address.
 
     Resolution order:
@@ -547,14 +675,22 @@ def resolve_ip(ip: Optional[str], start_instance: bool) -> str:
     Parameters:
         ip: Explicit IP address
         start_instance: Whether starting new instance
+        launch_on_hpc: Whether launching on an HPC cluster
 
     Returns:
         IP address
 
     Raises:
-        ConfigurationError: If IP is invalid or cannot be resolved
+        ConfigurationError: If IP is invalid, conflicts with HPC launch, or cannot be resolved
     """
     import socket
+
+    # Cannot specify a non-local IP when launching on HPC
+    if launch_on_hpc and ip and ip not in ("127.0.0.1", "localhost"):
+        raise ConfigurationError(
+            "PyMAPDL cannot ensure a specific IP will be used when launching "
+            "MAPDL on a cluster. Please remove the 'ip' argument."
+        )
 
     # Priority 1: Explicit argument
     if ip:
@@ -574,9 +710,15 @@ def resolve_ip(ip: Optional[str], start_instance: bool) -> str:
             LOG.debug(f"Using IP from PYMAPDL_IP env var: {resolved_ip}")
             return resolved_ip
         except socket.gaierror:
-            raise ConfigurationError(
-                f"Cannot resolve hostname or IP from PYMAPDL_IP: {env_ip}"
+            # Hostname cannot be resolved at configuration time (e.g. Docker
+            # service name before the container is fully registered in DNS).
+            # Return as-is so the gRPC layer can attempt DNS resolution when
+            # the connection is actually made.
+            LOG.warning(
+                f"Cannot resolve hostname from PYMAPDL_IP: '{env_ip}'. "
+                "Using it as-is; DNS resolution will be attempted at connection time."
             )
+            return env_ip
 
     # Priority 3: WSL host detection
     from .environment import get_windows_host_ip, is_wsl
@@ -828,9 +970,9 @@ def resolve_start_instance(start_instance: Optional[bool], ip: Optional[str]) ->
     """Resolve whether to start new instance.
 
     Resolution order:
-    1. Explicit start_instance argument
-    2. PYMAPDL_START_INSTANCE environment variable
-    3. Infer from ip (if ip specified, default to False)
+    1. Explicit start_instance argument (with UserWarning if env var also set and conflicting)
+    2. Infer from ip (if ip specified, default to False - takes priority over env var)
+    3. PYMAPDL_START_INSTANCE environment variable
     4. Default: True
 
     Parameters:
@@ -840,15 +982,47 @@ def resolve_start_instance(start_instance: Optional[bool], ip: Optional[str]) ->
     Returns:
         Whether to start new instance
     """
+    import warnings as _warnings
+
     # Priority 1: Explicit argument
     if start_instance is not None:
+        # Cannot start a local instance while also targeting a remote IP
+        if start_instance is True and ip:
+            raise ConfigurationError(
+                "When providing a value for the argument 'ip', the argument "
+                "'start_instance' must be False or None. "
+                "Cannot start a local MAPDL instance while also specifying a remote IP."
+            )
+        # Preserve original LOG.warning when both explicit start_instance and ip are provided
         if ip is not None:
             LOG.warning(
                 "Both start_instance and ip are specified. start_instance will take precedence."
             )
+        # Issue UserWarning when explicit start_instance=True and env var is also set
+        # (only when explicitly True, not when False, to avoid noise)
+        if start_instance is True:
+            env_start = os.getenv("PYMAPDL_START_INSTANCE", "").strip().lower()
+            if env_start:
+                _warnings.warn(
+                    f"Both 'start_instance=True' argument and "
+                    f"PYMAPDL_START_INSTANCE='{env_start}' environment variable are set. "
+                    "The explicit argument takes precedence.",
+                    UserWarning,
+                    stacklevel=5,
+                )
         return start_instance
 
-    # Priority 2: Environment variable
+    # Priority 2: Infer from ip argument or IP env var
+    # (IP inference takes priority over PYMAPDL_START_INSTANCE=True to avoid
+    # conflicting configurations where an IP is set but start_instance=True
+    # would attempt to launch a local instance)
+    env_ip = os.getenv("PYMAPDL_IP", "").strip()
+    if ip or env_ip:
+        # IP specified, likely connecting to existing instance
+        LOG.debug("IP specified, defaulting start_instance to False")
+        return False
+
+    # Priority 3: Environment variable
     env_start = os.getenv("PYMAPDL_START_INSTANCE", "").strip().lower()
     if env_start:
         if env_start in ("true", "1", "yes"):
@@ -857,13 +1031,6 @@ def resolve_start_instance(start_instance: Optional[bool], ip: Optional[str]) ->
         elif env_start in ("false", "0", "no"):
             LOG.debug("Using start_instance=False from PYMAPDL_START_INSTANCE env var")
             return False
-
-    # Priority 3: Infer from ip
-    env_ip = os.getenv("PYMAPDL_IP", "").strip()
-    if ip or env_ip:
-        # IP specified, likely connecting to existing instance
-        LOG.debug("IP specified, defaulting start_instance to False")
-        return False
 
     # Priority 4: Default to True
     LOG.debug("Defaulting start_instance to True")

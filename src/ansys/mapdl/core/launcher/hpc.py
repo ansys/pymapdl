@@ -93,11 +93,19 @@ def launch_on_hpc(config: LaunchConfig, env_vars: Dict[str, str]) -> ProcessInfo
     # Wrap in sbatch command
     sbatch_cmd = _generate_sbatch_command(mapdl_cmd, config.scheduler_options)
 
+    # Add SLURM-specific environment variables
+    env_vars["ANS_MULTIPLE_NODES"] = "1"
+    env_vars["HYDRA_BOOTSTRAP"] = "slurm"
+
     # Submit job
-    jobid = _submit_job(sbatch_cmd)
+    jobid = _submit_job(sbatch_cmd, env_vars=env_vars)
 
     # Wait for job to start and get host info
-    job_info = _wait_for_job_ready(jobid, config.timeout)
+    try:
+        job_info = _wait_for_job_ready(jobid, config.timeout)
+    except Exception:
+        _cancel_hpc_job(jobid)
+        raise
 
     LOG.info(
         f"MAPDL job {jobid} successfully started on HPC: "
@@ -340,7 +348,7 @@ def _generate_sbatch_command(
     return cmd
 
 
-def _submit_job(cmd: List[str]) -> int:
+def _submit_job(cmd: List[str], env_vars: Optional[Dict[str, str]] = None) -> int:
     """Submit job to SLURM scheduler and extract job ID.
 
     Runs sbatch command and parses the response to extract the job ID.
@@ -350,6 +358,9 @@ def _submit_job(cmd: List[str]) -> int:
     ----------
     cmd : List[str]
         sbatch command as list of strings
+    env_vars : Optional[Dict[str, str]], default: None
+        Environment variables to use when running the sbatch command.
+        If None, inherits the current process environment.
 
     Returns
     -------
@@ -385,6 +396,7 @@ def _submit_job(cmd: List[str]) -> int:
             text=True,
             shell=False,
             check=True,
+            env=env_vars if env_vars else None,
         )
 
         output = result.stdout.strip()
@@ -405,6 +417,30 @@ def _submit_job(cmd: List[str]) -> int:
         )
     except ValueError as e:
         raise MapdlDidNotStart(f"Could not parse job ID from sbatch output: {e}")
+
+
+def _cancel_hpc_job(jobid: int) -> None:
+    """Cancel an HPC job by calling scancel.
+
+    Parameters
+    ----------
+    jobid : int
+        SLURM job ID to cancel
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    - Internal utility function used by launch_on_hpc() on failure
+    - Logs a warning if cancellation fails but does not raise
+    """
+    try:
+        subprocess.run(["scancel", str(jobid)], check=False)  # nosec B603, B607
+        LOG.info(f"Cancelled HPC job {jobid}")
+    except Exception as e:
+        LOG.warning(f"Failed to cancel HPC job {jobid}: {e}")
 
 
 def _wait_for_job_ready(jobid: int, timeout: int, time_step: int = 1) -> HPCJobInfo:

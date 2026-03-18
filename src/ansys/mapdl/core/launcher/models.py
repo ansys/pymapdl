@@ -242,6 +242,9 @@ class LaunchConfig:
     license_server_check: bool = False
     force_intel: bool = False
     graphics_backend: Optional[str] = None
+    channel: Optional[Any] = None
+    jobid: Optional[int] = None
+    finish_job_on_exit: bool = True
 
     def __post_init__(self) -> None:
         """Wrap env_vars in MappingProxyType to enforce immutability."""
