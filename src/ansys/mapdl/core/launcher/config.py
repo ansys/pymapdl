@@ -34,6 +34,7 @@ ConfigurationError for invalid states.
 import os
 import tempfile
 from typing import Any, Dict, Optional
+import warnings
 
 from ansys.mapdl.core import _HAS_ATC, LOG
 
@@ -557,9 +558,7 @@ def resolve_exec_file(
             if launch_on_hpc:
                 # For HPC launches the executable lives on the remote cluster, not
                 # locally.  Emit a warning so the caller is aware, but do NOT raise.
-                import warnings as _warnings
-
-                _warnings.warn(
+                warnings.warn(
                     f"PyMAPDL could not find the ANSYS executable at '{exec_file}'. "
                     "This is acceptable for HPC launches where the executable resides "
                     "on the remote cluster.",
@@ -995,8 +994,6 @@ def resolve_start_instance(
     Returns:
         Whether to start new instance
     """
-    import warnings as _warnings
-
     # Priority 1: Explicit argument
     if start_instance is not None:
         # Cannot start a local instance while also targeting a remote IP —
@@ -1015,7 +1012,7 @@ def resolve_start_instance(
         if start_instance is True:
             env_start = os.getenv("PYMAPDL_START_INSTANCE", "").strip().lower()
             if env_start:
-                _warnings.warn(
+                warnings.warn(
                     f"Both 'start_instance=True' argument and "
                     f"PYMAPDL_START_INSTANCE='{env_start}' environment variable are set. "
                     "The explicit argument takes precedence.",

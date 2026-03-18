@@ -30,7 +30,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 import subprocess  # nosec B404
 import types
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+
+if TYPE_CHECKING:
+    import grpc
 
 
 class LaunchMode(Enum):
@@ -155,6 +158,13 @@ class LaunchConfig:
         Force use of Intel MPI
     graphics_backend : Optional[str]
         Graphics backend to use
+    channel : Optional[grpc.Channel]
+        Pre-built gRPC channel to reuse for the connection. Mutually exclusive
+        with ``ip`` and ``port``; forces ``start_instance=False``.
+    jobid : Optional[int]
+        HPC job ID (set after a successful ``launch_on_hpc`` submission).
+    finish_job_on_exit : bool, default: True
+        Cancel the HPC job when the MAPDL object is closed.
 
     Examples
     --------
@@ -249,7 +259,7 @@ class LaunchConfig:
     license_server_check: bool = False
     force_intel: bool = False
     graphics_backend: Optional[str] = None
-    channel: Optional[Any] = None
+    channel: Optional["grpc.Channel"] = None
     jobid: Optional[int] = None
     finish_job_on_exit: bool = True
 

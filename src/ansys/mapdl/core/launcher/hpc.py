@@ -103,7 +103,7 @@ def launch_on_hpc(config: LaunchConfig, env_vars: Dict[str, str]) -> ProcessInfo
     # Wait for job to start and get host info
     try:
         job_info = _wait_for_job_ready(jobid, config.timeout)
-    except Exception:
+    except BaseException:
         _cancel_hpc_job(jobid)
         raise
 
