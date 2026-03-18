@@ -370,7 +370,9 @@ def resolve_launch_config(
         start_instance = False
 
     # Resolve start_instance first (affects other resolution)
-    resolved_start_instance = resolve_start_instance(start_instance, ip)
+    resolved_start_instance = resolve_start_instance(
+        start_instance, ip, launch_on_hpc=launch_on_hpc
+    )
 
     # Resolve version early (needed for mode resolution)
     resolved_exec_file = resolve_exec_file(
@@ -968,18 +970,27 @@ def resolve_timeout(timeout: Optional[int], launch_on_hpc: bool) -> int:
     return DEFAULT_TIMEOUT
 
 
-def resolve_start_instance(start_instance: Optional[bool], ip: Optional[str]) -> bool:
+def resolve_start_instance(
+    start_instance: Optional[bool],
+    ip: Optional[str],
+    launch_on_hpc: bool = False,
+) -> bool:
     """Resolve whether to start new instance.
 
     Resolution order:
-    1. Explicit start_instance argument (with UserWarning if env var also set and conflicting)
-    2. Infer from ip (if ip specified, default to False - takes priority over env var)
-    3. PYMAPDL_START_INSTANCE environment variable
+    1. Explicit start_instance argument
+    2. PYMAPDL_START_INSTANCE environment variable
+    3. Infer from ip argument or PYMAPDL_IP environment variable (default False)
     4. Default: True
+
+    When ``launch_on_hpc=True`` the ``start_instance=True`` + ``ip`` combination
+    is permitted because the instance is launched on the remote cluster, not
+    locally.
 
     Parameters:
         start_instance: Explicit start instance flag
-        ip: IP address (affects default)
+        ip: IP address (affects inference when no explicit flag or env var)
+        launch_on_hpc: Whether launching via HPC scheduler
 
     Returns:
         Whether to start new instance
@@ -988,20 +999,19 @@ def resolve_start_instance(start_instance: Optional[bool], ip: Optional[str]) ->
 
     # Priority 1: Explicit argument
     if start_instance is not None:
-        # Cannot start a local instance while also targeting a remote IP
-        if start_instance is True and ip:
+        # Cannot start a local instance while also targeting a remote IP —
+        # unless we are launching on HPC where MAPDL starts on a cluster node.
+        if start_instance is True and ip and not launch_on_hpc:
             raise ConfigurationError(
                 "When providing a value for the argument 'ip', the argument "
                 "'start_instance' must be False or None. "
                 "Cannot start a local MAPDL instance while also specifying a remote IP."
             )
-        # Preserve original LOG.warning when both explicit start_instance and ip are provided
         if ip is not None:
             LOG.warning(
                 "Both start_instance and ip are specified. start_instance will take precedence."
             )
-        # Issue UserWarning when explicit start_instance=True and env var is also set
-        # (only when explicitly True, not when False, to avoid noise)
+        # Warn when explicit start_instance=True conflicts with the env var
         if start_instance is True:
             env_start = os.getenv("PYMAPDL_START_INSTANCE", "").strip().lower()
             if env_start:
@@ -1014,17 +1024,10 @@ def resolve_start_instance(start_instance: Optional[bool], ip: Optional[str]) ->
                 )
         return start_instance
 
-    # Priority 2: Infer from ip argument or IP env var
-    # (IP inference takes priority over PYMAPDL_START_INSTANCE=True to avoid
-    # conflicting configurations where an IP is set but start_instance=True
-    # would attempt to launch a local instance)
-    env_ip = os.getenv("PYMAPDL_IP", "").strip()
-    if ip or env_ip:
-        # IP specified, likely connecting to existing instance
-        LOG.debug("IP specified, defaulting start_instance to False")
-        return False
-
-    # Priority 3: Environment variable
+    # Priority 2: PYMAPDL_START_INSTANCE environment variable.
+    # This takes precedence over IP-based inference so that explicitly setting
+    # PYMAPDL_START_INSTANCE=True is not silently overridden when PYMAPDL_IP is
+    # also present in the environment.
     env_start = os.getenv("PYMAPDL_START_INSTANCE", "").strip().lower()
     if env_start:
         if env_start in ("true", "1", "yes"):
@@ -1033,6 +1036,12 @@ def resolve_start_instance(start_instance: Optional[bool], ip: Optional[str]) ->
         elif env_start in ("false", "0", "no"):
             LOG.debug("Using start_instance=False from PYMAPDL_START_INSTANCE env var")
             return False
+
+    # Priority 3: Infer from explicit ip argument or PYMAPDL_IP env var.
+    env_ip = os.getenv("PYMAPDL_IP", "").strip()
+    if ip or env_ip:
+        LOG.debug("IP specified, defaulting start_instance to False")
+        return False
 
     # Priority 4: Default to True
     LOG.debug("Defaulting start_instance to True")

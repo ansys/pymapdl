@@ -659,6 +659,13 @@ class TestResolveStartInstance:
         with pytest.raises(ConfigurationError, match="'start_instance' must be False"):
             resolve_start_instance(start_instance=True, ip="192.168.1.1")
 
+    def test_resolve_start_instance_true_with_ip_hpc_allowed(self):
+        """HPC mode must not raise when start_instance=True and ip are both given."""
+        result = resolve_start_instance(
+            start_instance=True, ip="192.168.1.100", launch_on_hpc=True
+        )
+        assert result is True
+
     def test_resolve_start_instance_from_env_true(self):
         """Test start_instance resolution from env var (true)."""
         with patch.dict(
@@ -666,6 +673,24 @@ class TestResolveStartInstance:
         ):
             result = resolve_start_instance(None, None)
             assert result is True
+
+    def test_resolve_start_instance_env_var_beats_pymapdl_ip(self):
+        """PYMAPDL_START_INSTANCE must take priority over PYMAPDL_IP inference."""
+        with patch.dict(
+            os.environ,
+            {"PYMAPDL_START_INSTANCE": "true", "PYMAPDL_IP": "192.168.1.50"},
+        ):
+            result = resolve_start_instance(None, ip=None)
+            assert result is True
+
+    def test_resolve_start_instance_env_var_false_beats_pymapdl_ip(self):
+        """PYMAPDL_START_INSTANCE=false must take priority and return False."""
+        with patch.dict(
+            os.environ,
+            {"PYMAPDL_START_INSTANCE": "false", "PYMAPDL_IP": "192.168.1.50"},
+        ):
+            result = resolve_start_instance(None, ip=None)
+            assert result is False
 
     def test_resolve_start_instance_from_env_false(self):
         """Test start_instance resolution from env var (false)."""
@@ -700,13 +725,16 @@ class TestResolveStartInstance:
             assert result is False
 
     def test_resolve_start_instance_infer_from_ip(self):
-        """Test that IP presence infers start_instance=False."""
-        result = resolve_start_instance(None, ip="192.168.1.1")
-        assert result is False
+        """Test that IP presence infers start_instance=False when env var is absent."""
+        with patch.dict(os.environ, {"PYMAPDL_START_INSTANCE": ""}):
+            result = resolve_start_instance(None, ip="192.168.1.1")
+            assert result is False
 
     def test_resolve_start_instance_infer_from_env_ip(self):
-        """Test that PYMAPDL_IP env var infers start_instance=False."""
-        with patch.dict(os.environ, {"PYMAPDL_IP": "192.168.1.1"}):
+        """Test that PYMAPDL_IP env var infers start_instance=False when env var is absent."""
+        with patch.dict(
+            os.environ, {"PYMAPDL_IP": "192.168.1.1", "PYMAPDL_START_INSTANCE": ""}
+        ):
             result = resolve_start_instance(None, ip=None)
             assert result is False
 
@@ -1304,12 +1332,19 @@ class TestExceptionHandling:
     def test_conflicting_parameters(self):
         """Test that conflicting parameters raise ConfigurationError.
 
-        When start_instance=True and ip are both specified, a ConfigurationError
-        is raised because a local instance cannot be started while targeting a
-        remote IP.
+        When start_instance=True and ip are both specified (non-HPC), a
+        ConfigurationError is raised because a local instance cannot be started
+        while targeting a remote IP.
         """
         with pytest.raises(ConfigurationError, match="'start_instance' must be False"):
             resolve_start_instance(start_instance=True, ip="192.168.1.1")
+
+    def test_conflicting_parameters_hpc_allowed(self):
+        """HPC mode must not raise for start_instance=True + ip combination."""
+        result = resolve_start_instance(
+            start_instance=True, ip="192.168.1.1", launch_on_hpc=True
+        )
+        assert result is True
 
     @pytest.mark.parametrize(
         "func,args,expected_error",
