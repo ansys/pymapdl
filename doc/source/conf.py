@@ -111,6 +111,7 @@ extensions = [
     "sphinx.ext.graphviz",
     "ansys_sphinx_theme.extension.linkcode",
     "sphinx.ext.mathjax",
+    "sphinxcontrib.rsvgconverter",
 ]
 
 # Intersphinx mapping
@@ -378,6 +379,7 @@ htmlhelp_basename = "pymapdldoc"
 # -- Options for LaTeX output ------------------------------------------------
 latex_elements: dict[Any, Any] = {}
 
+# Use XeLaTeX for better Unicode and font support
 latex_engine = "xelatex"
 
 # Grouping the document tree into LaTeX files. List of tuples

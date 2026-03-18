@@ -1,20 +1,24 @@
-.. _ref_solid_surface_loads_commands_api:
 
-*******************
-Solid surface loads
-*******************
+.. _ref_solid_surface_loads:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to define surface loads on the solid model.
+SolidSurfaceLoads
+=================
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.solid_surface_loads
+
+.. autoclass:: ansys.mapdl.core._commands.solution.solid_surface_loads.SolidSurfaceLoads
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.sfa
-   Mapdl.sfadele
-   Mapdl.sfalist
-   Mapdl.sfl
-   Mapdl.sfldele
-   Mapdl.sfllist
-   Mapdl.sftran
+
+   SolidSurfaceLoads.sfa
+   SolidSurfaceLoads.sfadele
+   SolidSurfaceLoads.sfalist
+   SolidSurfaceLoads.sfl
+   SolidSurfaceLoads.sfldele
+   SolidSurfaceLoads.sfllist
+   SolidSurfaceLoads.sftran
