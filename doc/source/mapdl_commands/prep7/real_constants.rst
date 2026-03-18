@@ -1,19 +1,23 @@
-.. _ref_real_constants_commands_api:
 
-**************
-Real constants
-**************
+.. _ref_real_constants:
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands define the model real constants.
+RealConstants
+=============
+
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.real_constants
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.real_constants.RealConstants
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.r
-   Mapdl.rdele
-   Mapdl.rlist
-   Mapdl.rmodif
-   Mapdl.rmore
-   Mapdl.setfgap
+
+   RealConstants.r
+   RealConstants.rdele
+   RealConstants.rlist
+   RealConstants.rmodif
+   RealConstants.rmore
+   RealConstants.setfgap
