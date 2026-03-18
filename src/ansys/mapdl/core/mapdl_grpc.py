@@ -303,11 +303,6 @@ class MapdlGrpc(MapdlBase):
         Directory to use for Unix Domain Sockets (UDS) transport mode.
         By default `None` and thus it will use the "~/.conn" folder.
 
-    uds_id : str | None
-        Optional ID to use for the UDS socket filename.
-        By default `None` and thus it will use "aposdas_socket.sock".
-        Otherwise, the socket filename will be "aposdas_socket-<uds_id>.sock".
-
     certs_dir : Path | str | None
         Directory to use for TLS certificates.
         By default `None` and thus search for the "ANSYS_GRPC_CERTIFICATES" environment variable.
@@ -367,7 +362,6 @@ class MapdlGrpc(MapdlBase):
         remote_instance: Optional["PIM_Instance"] = None,
         transport_mode: Optional[str] = None,
         uds_dir: Optional[Union[str, pathlib.Path]] = None,
-        uds_id: Optional[str] = None,
         certs_dir: Optional[Union[str, pathlib.Path]] = None,
         **start_parm: dict[str, Any],
     ):
@@ -383,7 +377,6 @@ class MapdlGrpc(MapdlBase):
 
         self.transport_mode = transport_mode
         self.uds_dir = uds_dir
-        self.uds_id = uds_id
         self.certs_dir = certs_dir
         self.grpc_options = start_parm.pop("grpc_options", DEFAULT_GRPC_OPTIONS)
         # Transport configuration will be finalized after base init
@@ -421,7 +414,7 @@ class MapdlGrpc(MapdlBase):
             **start_parm,
         )
         # Finalize transport specifics now that logging and port are set
-        self._configure_transport(ip=ip, port=port, uds_id=uds_id)
+        self._configure_transport(ip=ip, port=port)
         self._mode: Literal["grpc"] = "grpc"
 
         # gRPC request specific locks as these gRPC request are not thread safe
@@ -523,9 +516,7 @@ class MapdlGrpc(MapdlBase):
             f"Connected to MAPDL server running at {self._hostname} on {self.ip}:{self.port} on {self.platform} OS"
         )
 
-    def _configure_transport(
-        self, *, ip: str, port: int, uds_id: Optional[str]
-    ) -> None:
+    def _configure_transport(self, *, ip: str, port: int) -> None:
         """Configure transport-related defaults, validate mode, and resolve UDS conflicts.
 
         This centralizes duplicated logic from the constructor and can be
@@ -553,7 +544,7 @@ class MapdlGrpc(MapdlBase):
         if self.transport_mode == "uds":
             if os.name == "nt":
                 raise ValueError("UDS transport mode is not supported on Windows.")
-            self.configure_uds(port=port, uds_id=uds_id)
+            self.configure_uds(port=port)
 
         elif self.transport_mode == "wnua":
             if os.name != "nt":
@@ -613,41 +604,22 @@ class MapdlGrpc(MapdlBase):
                 "For remote connections, use 'mtls' or 'insecure' (discouraged)."
             )
 
-    def configure_uds(self, port: int, uds_id: Optional[str] = None) -> None:
-        """Configure UDS transport-specific settings."""
-        # Set defaults for UDS
+    def configure_uds(self, port: int) -> None:
+        """Configure UDS transport-specific settings.
+
+        MAPDL always names its socket ``mapdl-{PORT}.sock`` inside the
+        directory set via the ``ANSYS_MAPDL_UDS_PATH`` environment variable.
+        ``uds_dir`` is resolved here (defaulting to ``~/.conn``) and
+        ``uds_id`` is set to the stringified port so that
+        ``create_channel`` constructs the correct ``mapdl-{port}.sock``
+        path.
+        """
+        # Resolve socket directory, defaulting to ~/.conn
         if self.uds_dir is None:
             self.uds_dir = os.path.join(os.path.expanduser("~"), ".conn")
 
-        # Ensure uds_dir exists if possible
         os.makedirs(self.uds_dir, exist_ok=True)
-
-        if self.uds_id is None:
-            # Prefer resolved port if available
-            pid_port = getattr(self, "_port", port)
-            self.uds_id = f"mapdl-{pid_port}.sock"
-
-        socket_path = os.path.join(self.uds_dir, self.uds_id)
-        if os.path.exists(socket_path):
-            # Todo: to check logic here
-            if port is not None or uds_id is not None:  # explicitly specified
-                raise ValueError(
-                    f"UDS socket file {socket_path} already exists. Please specify a different port or uds_id."
-                )
-            else:
-                # Increment port and uds_id until an available socket file is found
-                original_port = getattr(self, "_port", port)
-                while os.path.exists(socket_path):
-                    # ensure _port exists
-                    if not hasattr(self, "_port"):
-                        self._port = int(port)
-                    self._port += 1
-                    self.uds_id = f"mapdl-{self._port}.sock"
-                    socket_path = os.path.join(self.uds_dir, self.uds_id)
-                if hasattr(self, "_log"):
-                    self._log.info(
-                        f"UDS socket file for port {original_port} exists, using port {self._port} instead."
-                    )
+        self.uds_id = str(port)
 
     def configure_insecure(self) -> None:
         """Configure insecure transport-specific settings."""
@@ -747,8 +719,9 @@ class MapdlGrpc(MapdlBase):
             transport_mode=self.transport_mode,
             host=ip,
             port=port,
-            uds_dir=self.uds_dir,
+            uds_service="mapdl",
             uds_id=self.uds_id,
+            uds_dir=self.uds_dir,
             certs_dir=self.certs_dir,
             grpc_options=self.grpc_options,
         )
@@ -1507,9 +1480,10 @@ class MapdlGrpc(MapdlBase):
         # Exiting MAPDL instance if we launched.
         self._exiting = True
 
-        # Remove UDS socket file if using UDS transport
+        # Remove UDS socket file if using UDS transport.
+        # The socket is always named 'mapdl-{PORT}.sock' (uds_id == str(port)).
         if self.transport_mode == "uds":
-            socket_path = os.path.join(self.uds_dir, self.uds_id)
+            socket_path = os.path.join(self.uds_dir, f"mapdl-{self.uds_id}.sock")
             if os.path.exists(socket_path):
                 try:
                     os.remove(socket_path)

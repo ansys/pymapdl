@@ -105,12 +105,10 @@ def test_wait_until_healthy_timeout(monkeypatch):
         MapdlGrpc.wait_until_healthy(m, timeout=0.01)
 
 
-def test_configure_uds_socket_conflict_and_increment(tmp_path, monkeypatch):
-    """Simulate the case where a UDS socket file already exists; ensure
-    MapdlGrpc increments the port and updates uds_id accordingly."""
+def test_configure_uds_sets_socket_dir_and_id(tmp_path, monkeypatch):
+    """configure_uds resolves uds_dir and sets uds_id to str(port) so that
+    ``create_channel`` constructs the correct ``mapdl-{PORT}.sock`` path."""
 
-    # On Windows CI we can fake a POSIX environment for this test by patching
-    # os.name and platform.system so that UDS logic is exercised.
     import platform
 
     monkeypatch.setattr(os, "name", "posix")
@@ -122,39 +120,23 @@ def test_configure_uds_socket_conflict_and_increment(tmp_path, monkeypatch):
 
     from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
-    # Prepare a fake uds directory and create an existing socket file for port 50052
     uds_dir = tmp_path / ".conn"
     uds_dir.mkdir()
-    existing_sock = uds_dir / "mapdl-50052.sock"
-    existing_sock.write_text("in use")
 
-    # Patch MapdlGrpc internals to avoid heavy init and channel creation
-    monkeypatch.setattr(MapdlGrpc, "_subscribe_to_channel", lambda self: None)
-    monkeypatch.setattr(
-        MapdlGrpc, "reconnect_to_mapdl", lambda self, timeout=None: None
-    )
-
-    # Create a bare MapdlGrpc-like object without calling __init__ so we can
-    # call `configure_uds` directly. Setting minimal attributes to satisfy
-    # `configure_uds` expectations.
     obj = object.__new__(MapdlGrpc)
     import logging
 
     obj._log = logging.getLogger("test")
-
     obj._port = 50052
     obj.transport_mode = "uds"
     obj.uds_dir = str(uds_dir)
     obj.uds_id = None
 
-    # Call the configure method without passing `port` so the function treats
-    # the port as unspecified and will auto-increment to avoid conflicts.
-    obj.configure_uds(port=None, uds_id=None)
+    obj.configure_uds(port=50052)
 
-    # After configuration, the uds_id should not conflict with the existing file
     assert obj.uds_dir == str(uds_dir)
-    assert obj.uds_id != "mapdl-50052.sock"
-    assert obj._port != 50052
+    # uds_id is set to the stringified port; create_channel builds 'mapdl-50052.sock'
+    assert obj.uds_id == "50052"
 
 
 def test_exit_removes_uds_socket(tmp_path, monkeypatch):
@@ -191,7 +173,7 @@ def test_exit_removes_uds_socket(tmp_path, monkeypatch):
     obj._log = logging.getLogger("test")
     obj.transport_mode = "uds"
     obj.uds_dir = str(uds_dir)
-    obj.uds_id = "mapdl-50052.sock"
+    obj.uds_id = "50052"  # internal value set by configure_uds (str(port))
     obj._start_instance = True
     obj._launched = True
     obj._exited = False
@@ -221,7 +203,6 @@ def test_generate_start_parameters_includes_transport_args():
     args = {
         "transport_mode": "insecure",
         "uds_dir": "/home/user/tmp/.conn",
-        "uds_id": "mapdl-50052.sock",
         "certs_dir": "/etc/ansys/certs",
         # Required fields used by generate_start_parameters
         "mode": "grpc",
@@ -239,11 +220,9 @@ def test_generate_start_parameters_includes_transport_args():
 
     start_parm = generate_start_parameters(args)
 
-    # The start parameters should include transport-related keys when allowed
     assert "transport_mode" in start_parm or "transport_mode" in args
     assert args["transport_mode"] == "insecure"
     assert args["uds_dir"] == "/home/user/tmp/.conn"
-    assert args["uds_id"] == "mapdl-50052.sock"
     assert args["certs_dir"] == "/etc/ansys/certs"
 
 

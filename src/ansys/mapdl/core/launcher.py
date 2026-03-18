@@ -155,7 +155,6 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     # Transport-related args
     "transport_mode",
     "uds_dir",
-    "uds_id",
     "certs_dir",
 ]
 
@@ -1177,7 +1176,6 @@ def launch_mapdl(
     # Transport-related parameters
     transport_mode: Optional[str] = None,
     uds_dir: Optional[str] = None,
-    uds_id: Optional[str] = None,
     certs_dir: Optional[str] = None,
     **kwargs: Dict[str, Any],
 ) -> "MapdlGrpc | MapdlConsole | list[Any]":
@@ -1439,10 +1437,6 @@ def launch_mapdl(
     uds_dir : str, optional
         Directory for Unix Domain Socket (UDS) files when using ``'uds'`` transport.
         Defaults to :class:`None`, which uses ``~/.conn``.
-
-    uds_id : str, optional
-        Identifier for UDS socket file when using ``'uds'`` transport.
-        Defaults to :class:`None`, which uses ``mapdl-{port}``.
 
     certs_dir : str, optional
         Directory containing certificates for ``'mtls'`` transport.
@@ -1736,6 +1730,19 @@ def launch_mapdl(
         )
 
         LOG.debug(f"Using additional switches {args['additional_switches']}.")
+
+        # For UDS transport (Linux default), tell MAPDL which directory to
+        # create its socket in via ANSYS_MAPDL_UDS_PATH.  MAPDL always names
+        # the socket "mapdl-{PORT}.sock" inside that directory.
+        _transport = args.get("transport_mode") or (
+            "uds" if __import__("platform").system() == "Linux" else None
+        )
+        if _transport == "uds":
+            uds_dir = args.get("uds_dir") or os.path.join(
+                os.path.expanduser("~"), ".conn"
+            )
+            env_vars.setdefault("ANSYS_MAPDL_UDS_PATH", str(uds_dir))
+            LOG.debug(f"UDS transport: setting ANSYS_MAPDL_UDS_PATH={uds_dir}")
 
         if args["running_on_hpc"] or args["launch_on_hpc"]:
             env_vars.setdefault("ANS_MULTIPLE_NODES", "1")

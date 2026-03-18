@@ -2505,21 +2505,26 @@ def test_open_gui_complete_flow_with_mocked_methods(mapdl, fake_local_mapdl):
 @requires("local")
 @requires("linux")
 @requires("grpc")
-def test_launch_uds_transport(monkeypatch):
+def test_launch_uds_transport(mapdl, monkeypatch):
     """Test that MAPDL defaults to UDS transport when launched locally on Linux.
 
     UDS (Unix Domain Sockets) is the default gRPC transport for local Linux
     connections. This test verifies that ``launch_mapdl`` produces an instance
-    whose ``transport_mode`` is ``"uds"`` when no explicit transport is requested
-    and no related environment variables override the default.
+    whose ``transport_mode`` is ``"uds"`` and that the expected socket file
+    (``mapdl-{PORT}.sock``) exists inside ``uds_dir`` after launch.
     """
     monkeypatch.delenv("PYMAPDL_GRPC_TRANSPORT", raising=False)
     monkeypatch.delenv("ANSYS_MAPDL_GRPC_TRANSPORT", raising=False)
 
+    mapdl_ = None
     try:
         mapdl_ = launch_mapdl(
             additional_switches=QUICK_LAUNCH_SWITCHES,
+            port=mapdl.port
+            + 1,  # Use a different port to avoid conflicts with other tests
         )
         assert mapdl_.transport_mode == "uds"
+        assert os.path.exists(os.path.join(mapdl_.uds_dir, f"mapdl_{mapdl_.port}.sock"))
     finally:
-        mapdl_.exit(force=True)
+        if mapdl_ is not None:
+            mapdl_.exit(force=True)
