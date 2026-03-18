@@ -1,17 +1,21 @@
-.. _ref_morphing_commands_api:
 
-********
+.. _ref_morphing:
+
+
 Morphing
-********
+========
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to adjust the finite element mesh in the non-structural regions to coincide with the deflections of the structural regions.
+.. currentmodule:: ansys.mapdl.core._commands.prep7.morphing
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.morphing.Morphing
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.morph
-   Mapdl.damorph
-   Mapdl.demorph
-   Mapdl.dvmorph
+
+   Morphing.damorph
+   Morphing.demorph
+   Morphing.dvmorph
+   Morphing.morph

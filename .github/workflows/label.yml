@@ -109,22 +109,24 @@ jobs:
     permissions:
       pull-requests: write  # Needed to create comments on pull requests
     steps:
+
     - name: Suggest to add labels
-      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 #v5.0.0
       # Execute only when no labels have been applied to the pull request
       if: toJSON(github.event.pull_request.labels.*.name) == '{}' # Empty labels
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        issue-number: ${{ github.event.pull_request.number }}
-        body: |
-          Please add one of the following labels to add this contribution to the Release Notes :point_down:
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        REPO: ${{ github.repository }}
+      run: |
+        gh pr comment "$PR_NUMBER" --repo "$REPO" --body \
+          "Please add one of the following labels to add this contribution to the Release Notes :point_down:
           - [bug](https://github.com/ansys/pymapdl/pulls?q=label%3Abug+)
-          - [new feature](https://github.com/ansys/pymapdl/pulls?q=label%3A"new%20feature"+)
+          - [new feature](https://github.com/ansys/pymapdl/pulls?q=label%3A\"new%20feature\"+)
           - [enhancement](https://github.com/ansys/pymapdl/pulls?q=label%3Aenhancement+)
           - [documentation](https://github.com/ansys/pymapdl/pulls?q=label%3Adocumentation+)
           - [examples](https://github.com/ansys/pymapdl/pulls?q=label%3Aexamples+)
           - [maintenance](https://github.com/ansys/pymapdl/pulls?q=label%3Amaintenance+)
-          - [CI/CD](https://github.com/ansys/pymapdl/pulls?q=label%3Aci%2Fcd+)
+          - [CI/CD](https://github.com/ansys/pymapdl/pulls?q=label%3Aci%2Fcd+)"
 
   changelog-fragment:
     name: "Create changelog fragment"
@@ -134,7 +136,7 @@ jobs:
       pull-requests: write  # Needed to comment on pull requests with changelog info
     runs-on: ubuntu-latest
     steps:
-    - uses: ansys/actions/doc-changelog@1f4f0896a8e49d3aec2f02ced215b04a32c85f28 #v10.2.7
+    - uses: ansys/actions/doc-changelog@22d03f365874cc55ffb84705f5f635f055b6f2b8 #v10.2.8
       with:
         bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
         bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}

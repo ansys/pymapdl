@@ -1,18 +1,22 @@
-.. _ref_load_step_operations_commands_api:
 
-********************
-Load step operations
-********************
+.. _ref_load_step_operations:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to write and solve multiple load steps.
+LoadStepOperations
+==================
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.load_step_operations
+
+.. autoclass:: ansys.mapdl.core._commands.solution.load_step_operations.LoadStepOperations
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.lsclear
-   Mapdl.lsdele
-   Mapdl.lsread
-   Mapdl.lssolve
-   Mapdl.lswrite
+
+   LoadStepOperations.lsclear
+   LoadStepOperations.lsdele
+   LoadStepOperations.lsread
+   LoadStepOperations.lssolve
+   LoadStepOperations.lswrite
