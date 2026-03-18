@@ -470,3 +470,97 @@ class TestPhase1EnvironmentVariableInjection:
             assert isinstance(result, EnvironmentConfig)
             assert "I_MPI_SHM_LMT" in result.variables
             assert result.variables["I_MPI_SHM_LMT"] == "shm"
+
+
+# ============================================================================
+# PHASE 2: add_env_vars (extend) vs env_vars (replace) semantics
+# ============================================================================
+
+
+class TestAddEnvVarsSemantics:
+    """Verify that add_env_vars extends system env while env_vars replaces it."""
+
+    def test_add_env_vars_extends_system_env(self):
+        """add_env_vars must keep system vars and overlay the user-provided ones."""
+        user_vars = {"MY_CUSTOM_VAR": "hello"}
+        config = _create_test_config(add_env_vars=user_vars)
+
+        with patch.dict(os.environ, {"SYSTEM_VAR": "system_value"}):
+            result = prepare_environment(config)
+
+        assert result.replace_all is False
+        # User var must be present
+        assert result.variables["MY_CUSTOM_VAR"] == "hello"
+        # System var must be preserved
+        assert result.variables["SYSTEM_VAR"] == "system_value"
+        # MAPDL-specific var must still be applied
+        assert result.variables["ANS_CMD_NODIAG"] == "TRUE"
+
+    def test_add_env_vars_overrides_same_key_in_system_env(self):
+        """User value for a key that already exists in system env must win."""
+        config = _create_test_config(add_env_vars={"EXISTING_VAR": "overridden"})
+
+        with patch.dict(os.environ, {"EXISTING_VAR": "original"}):
+            result = prepare_environment(config)
+
+        assert result.variables["EXISTING_VAR"] == "overridden"
+
+    def test_replace_env_vars_strips_system_env(self):
+        """env_vars (replace mode) must NOT inherit system variables."""
+        replace_vars = {"ONLY_THIS": "1"}
+        config = _create_test_config(env_vars=replace_vars)
+
+        with patch.dict(os.environ, {"SYSTEM_VAR": "should_not_appear"}):
+            result = prepare_environment(config)
+
+        assert result.replace_all is True
+        assert result.variables == replace_vars
+        assert "SYSTEM_VAR" not in result.variables
+        # ANS_CMD_NODIAG is NOT injected in replace mode (caller's responsibility)
+        assert "ANS_CMD_NODIAG" not in result.variables
+
+    def test_add_env_vars_does_not_set_replace_all(self):
+        """add_env_vars mode must return replace_all=False."""
+        config = _create_test_config(add_env_vars={"X": "1"})
+        result = prepare_environment(config)
+        assert result.replace_all is False
+
+    def test_no_env_vars_inherits_system_env(self):
+        """When neither env_vars nor add_env_vars is set, system env is inherited."""
+        config = _create_test_config()
+
+        with patch.dict(os.environ, {"INHERITED": "yes"}):
+            result = prepare_environment(config)
+
+        assert result.replace_all is False
+        assert result.variables["INHERITED"] == "yes"
+
+    def test_env_vars_takes_priority_over_add_env_vars(self):
+        """If LaunchConfig somehow has both fields set, env_vars (replace) wins."""
+        # Directly construct a config with both set to verify the priority
+        from types import MappingProxyType
+
+        config = _create_test_config()
+        # Use object.__setattr__ to bypass frozen + post_init for this edge-case test
+        object.__setattr__(
+            config, "env_vars", MappingProxyType({"REPLACE_VAR": "replace"})
+        )
+        object.__setattr__(config, "add_env_vars", MappingProxyType({"ADD_VAR": "add"}))
+
+        result = prepare_environment(config)
+
+        assert result.replace_all is True
+        assert "REPLACE_VAR" in result.variables
+        assert "ADD_VAR" not in result.variables
+
+    def test_add_env_vars_ubuntu_mpi_still_set(self):
+        """Ubuntu MPI settings must be applied even in add_env_vars mode."""
+        config = _create_test_config(add_env_vars={"MY_VAR": "value"})
+
+        with patch(
+            "ansys.mapdl.core.launcher.environment.is_ubuntu", return_value=True
+        ):
+            result = prepare_environment(config)
+
+        assert result.variables["I_MPI_SHM_LMT"] == "shm"
+        assert result.variables["MY_VAR"] == "value"

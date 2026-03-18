@@ -142,7 +142,13 @@ class LaunchConfig:
     certs_dir : Optional[str]
         Directory containing mTLS certificates
     env_vars : Dict[str, str]
-        Environment variables for MAPDL process
+        Environment variables that **replace** all system environment variables.
+        Use with caution: MPI and license variables must be re-injected manually.
+    add_env_vars : Dict[str, str]
+        Environment variables to **extend** the system environment.
+        These are merged on top of ``os.environ``; existing system variables
+        are preserved. Mutually exclusive with ``env_vars`` in practice — when
+        ``env_vars`` is non-empty it takes priority.
     license_server_check : bool, default: False
         Whether to check license server availability
     force_intel : bool, default: False
@@ -237,6 +243,7 @@ class LaunchConfig:
 
     # Environment
     env_vars: Dict[str, str] = field(default_factory=dict)
+    add_env_vars: Dict[str, str] = field(default_factory=dict)
 
     # Advanced/debug
     license_server_check: bool = False
@@ -247,8 +254,11 @@ class LaunchConfig:
     finish_job_on_exit: bool = True
 
     def __post_init__(self) -> None:
-        """Wrap env_vars in MappingProxyType to enforce immutability."""
+        """Wrap env_vars and add_env_vars in MappingProxyType to enforce immutability."""
         object.__setattr__(self, "env_vars", types.MappingProxyType(self.env_vars))
+        object.__setattr__(
+            self, "add_env_vars", types.MappingProxyType(self.add_env_vars)
+        )
 
 
 @dataclass(frozen=True)

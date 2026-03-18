@@ -154,15 +154,19 @@ def prepare_environment(config: LaunchConfig) -> EnvironmentConfig:
     -----
     - Ubuntu-specific MPI settings are applied automatically
     - The ANS_CMD_NODIAG variable is always set for MAPDL
-    - User-provided variables completely replace system environment
-    - System environment is preserved when user doesn't specify env_vars
+    - ``config.env_vars`` (from ``replace_env_vars``) completely replaces the
+      system environment; use with caution.
+    - ``config.add_env_vars`` (from ``add_env_vars``) extends the system
+      environment; user-provided keys override existing system values.
     """
     if config.env_vars:
-        # User provided explicit env vars (replace mode)
-        LOG.debug("Using user-provided environment variables")
+        # replace_env_vars mode: user takes full control of the environment.
+        # System env vars are NOT inherited — the caller must inject any
+        # required MPI, license, or PATH variables manually.
+        LOG.debug("Using replace-mode environment variables (replace_all=True)")
         return EnvironmentConfig(variables=dict(config.env_vars), replace_all=True)
 
-    # Start with system environment
+    # Start with system environment (covers both add_env_vars and default modes)
     env = os.environ.copy()
 
     # Apply platform-specific settings
@@ -173,8 +177,12 @@ def prepare_environment(config: LaunchConfig) -> EnvironmentConfig:
     # Apply MAPDL-specific settings
     env["ANS_CMD_NODIAG"] = "TRUE"
 
-    # Could add more configuration based on config parameters
-    # For example, license server, memory settings, etc.
+    if config.add_env_vars:
+        # add_env_vars mode: overlay user-provided variables on top of the
+        # system environment.  Existing keys are overwritten; everything else
+        # is preserved (MPI paths, license servers, PATH, etc.).
+        LOG.debug("Extending system environment with user-provided variables")
+        env.update(config.add_env_vars)
 
     return EnvironmentConfig(variables=env, replace_all=False)
 

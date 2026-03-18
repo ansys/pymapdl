@@ -395,13 +395,14 @@ def resolve_launch_config(
     # Resolve additional switches (explicit arg or PYMAPDL_ADDITIONAL_SWITCHES env var)
     resolved_additional_switches = resolve_additional_switches(additional_switches)
 
-    # Resolve environment variables
+    # Resolve environment variables — keep the two modes separate so
+    # prepare_environment can decide whether to extend or replace.
+    resolved_replace_env_vars: Dict[str, str] = {}
+    resolved_add_env_vars: Dict[str, str] = {}
     if replace_env_vars is not None:
-        resolved_env_vars = dict(replace_env_vars)
+        resolved_replace_env_vars = dict(replace_env_vars)
     elif add_env_vars is not None:
-        resolved_env_vars = dict(add_env_vars)
-    else:
-        resolved_env_vars = {}
+        resolved_add_env_vars = dict(add_env_vars)
 
     return LaunchConfig(
         exec_file=resolved_exec_file,
@@ -433,7 +434,8 @@ def resolve_launch_config(
         uds_dir=uds_dir,
         uds_id=uds_id,
         certs_dir=certs_dir,
-        env_vars=resolved_env_vars,
+        env_vars=resolved_replace_env_vars,
+        add_env_vars=resolved_add_env_vars,
         license_server_check=license_server_check,
         force_intel=force_intel,
         graphics_backend=graphics_backend,

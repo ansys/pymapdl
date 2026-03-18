@@ -1564,8 +1564,22 @@ class TestConfigurationIntegration:
             assert config.license_type == "research"
             assert config.additional_switches == "-aa_r -noinfo"
             assert config.loglevel == "DEBUG"
+            # add_env_vars must be stored in config.add_env_vars, NOT config.env_vars
+            assert config.add_env_vars == {"ANS_CMD": "NODIAG"}
+            assert config.env_vars == {}
 
-    def test_resolve_launch_config_hpc_integration(self):
+    def test_resolve_launch_config_replace_env_vars_stored_in_env_vars(self):
+        """replace_env_vars must land in config.env_vars, not config.add_env_vars."""
+        with patch("os.path.isfile", return_value=True):
+            config = resolve_launch_config(
+                exec_file="/path/to/mapdl",
+                start_instance=True,
+                replace_env_vars={"PATH": "/custom/bin", "ANS_LICENSE": "server"},
+            )
+
+        assert config.env_vars == {"PATH": "/custom/bin", "ANS_LICENSE": "server"}
+        assert config.add_env_vars == {}
+
         """Test resolve_launch_config with HPC parameters."""
         with patch("os.path.isfile", return_value=True):
             config = resolve_launch_config(
