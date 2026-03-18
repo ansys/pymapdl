@@ -14,6 +14,7 @@ from ansys.mapdl.core.launcher import ConfigurationError, LaunchMode
 from ansys.mapdl.core.launcher.config import (
     LOCALHOST,
     resolve_additional_switches,
+    resolve_channel,
     resolve_exec_file,
     resolve_ip,
     resolve_launch_config,
@@ -22,6 +23,7 @@ from ansys.mapdl.core.launcher.config import (
     resolve_port,
     resolve_ram,
     resolve_run_location,
+    resolve_scheduler_options,
     resolve_start_instance,
     resolve_timeout,
     resolve_transport_mode,
@@ -54,6 +56,120 @@ def patch_get_mapdl_path():
                 yield mock_get_mapdl
     else:
         yield None
+
+
+# ============================================================================
+# Config Resolution Tests
+# ============================================================================
+
+
+class TestResolveChannel:
+    """Tests for resolve_channel."""
+
+    def test_resolve_channel_none_returns_none(self):
+        """Test that passing no channel returns None."""
+        result = resolve_channel(None, port=None, ip=None)
+        assert result is None
+
+    def test_resolve_channel_returns_channel_unchanged(self):
+        """Test that a channel object is returned as-is."""
+        mock_channel = object()
+        result = resolve_channel(mock_channel, port=None, ip=None)
+        assert result is mock_channel
+
+    def test_resolve_channel_with_port_raises(self):
+        """Test that channel + port combination raises ConfigurationError."""
+        mock_channel = object()
+        with pytest.raises(
+            ConfigurationError, match="'channel' cannot be used together"
+        ):
+            resolve_channel(mock_channel, port=50052, ip=None)
+
+    def test_resolve_channel_with_ip_raises(self):
+        """Test that channel + ip combination raises ConfigurationError."""
+        mock_channel = object()
+        with pytest.raises(
+            ConfigurationError, match="'channel' cannot be used together"
+        ):
+            resolve_channel(mock_channel, port=None, ip="127.0.0.1")
+
+    def test_resolve_channel_with_port_and_ip_raises(self):
+        """Test that channel + port + ip combination raises ConfigurationError."""
+        mock_channel = object()
+        with pytest.raises(
+            ConfigurationError, match="'channel' cannot be used together"
+        ):
+            resolve_channel(mock_channel, port=50052, ip="127.0.0.1")
+
+    def test_resolve_launch_config_channel_sets_start_instance_false(self):
+        """Test that providing a channel forces start_instance=False."""
+        mock_channel = object()
+        config = resolve_launch_config(channel=mock_channel)
+        assert config.start_instance is False
+        assert config.channel is mock_channel
+
+    def test_resolve_launch_config_channel_with_port_raises(self):
+        """Test that resolve_launch_config raises when channel and port are combined."""
+        mock_channel = object()
+        with pytest.raises(
+            ConfigurationError, match="'channel' cannot be used together"
+        ):
+            resolve_launch_config(channel=mock_channel, port=50052)
+
+    def test_resolve_launch_config_channel_with_ip_raises(self):
+        """Test that resolve_launch_config raises when channel and ip are combined."""
+        mock_channel = object()
+        with pytest.raises(
+            ConfigurationError, match="'channel' cannot be used together"
+        ):
+            resolve_launch_config(channel=mock_channel, ip="192.168.1.1")
+
+
+class TestResolveSchedulerOptions:
+    """Tests for resolve_scheduler_options."""
+
+    def test_resolve_scheduler_options_none_returns_none(self):
+        """Test that None scheduler_options returns None."""
+        result = resolve_scheduler_options(None, nproc=None)
+        assert result is None
+
+    def test_resolve_scheduler_options_with_nproc(self):
+        """Test that scheduler_options with nproc specified returns unchanged."""
+        opts = {"nodes": "2", "ntasks-per-node": "8"}
+        result = resolve_scheduler_options(opts, nproc=16)
+        assert result is opts
+
+    def test_resolve_scheduler_options_without_nproc_raises(self):
+        """Test that scheduler_options without nproc raises ConfigurationError."""
+        opts = {"nodes": "2", "ntasks-per-node": "8"}
+        with pytest.raises(ConfigurationError, match="nproc"):
+            resolve_scheduler_options(opts, nproc=None)
+
+    def test_resolve_scheduler_options_empty_dict_with_none_nproc(self):
+        """Test that empty dict (falsy) with None nproc does not raise."""
+        result = resolve_scheduler_options({}, nproc=None)
+        assert result == {}
+
+    def test_resolve_launch_config_scheduler_without_nproc_raises(self):
+        """Test that resolve_launch_config raises when scheduler_options lacks nproc."""
+        with pytest.raises(ConfigurationError, match="nproc"):
+            resolve_launch_config(
+                scheduler_options={"nodes": "1"},
+                nproc=None,
+                start_instance=False,
+            )
+
+    def test_resolve_launch_config_scheduler_with_nproc_passes(self):
+        """Test that resolve_launch_config accepts scheduler_options when nproc is set."""
+        with patch("os.path.isfile", return_value=True):
+            config = resolve_launch_config(
+                exec_file="/path/to/mapdl",
+                launch_on_hpc=True,
+                nproc=16,
+                scheduler_options={"nodes": "2", "ntasks-per-node": "8"},
+            )
+        assert config.scheduler_options == {"nodes": "2", "ntasks-per-node": "8"}
+        assert config.nproc == 16
 
 
 # ============================================================================
@@ -103,6 +219,24 @@ class TestConfigResolveExecFile:
         with patch("os.path.isfile", return_value=True):
             result = resolve_exec_file(exec_file, None, start_instance=True)
             assert result is not None
+
+    def test_exec_file_and_version_raises(self):
+        """Test that providing both exec_file and version raises ConfigurationError."""
+        with pytest.raises(ConfigurationError, match="Cannot specify both"):
+            resolve_exec_file(
+                "/path/to/mapdl",
+                version=222,
+                start_instance=True,
+            )
+
+    def test_resolve_launch_config_exec_file_and_version_raises(self):
+        """Test that resolve_launch_config raises when both exec_file and version are given."""
+        with pytest.raises(ConfigurationError, match="Cannot specify both"):
+            resolve_launch_config(
+                exec_file="/path/to/mapdl",
+                version=222,
+                start_instance=True,
+            )
 
 
 class TestConfigPort:
@@ -223,16 +357,13 @@ class TestConfigResolution:
                 jobname="test",
                 nproc=8,
                 port=50100,
-                ip="192.168.1.1",
                 mode="grpc",
-                version=232,
                 start_instance=True,
                 ram=8192,
                 timeout=60,
             )
             assert config.nproc == 8
             assert config.port == 50100
-            assert config.version == 232
             assert config.ram == 8192
             assert config.timeout == 60
 
@@ -243,6 +374,7 @@ class TestConfigResolution:
                 exec_file="/path/to/mapdl",
                 launch_on_hpc=True,
                 running_on_hpc=True,
+                nproc=8,
                 scheduler_options={"nodes": "2", "ntasks-per-node": "4"},
             )
             assert config.launch_on_hpc is True
@@ -339,13 +471,21 @@ class TestResolveIpAddress:
                 assert ip == "192.168.1.100"
 
     def test_resolve_ip_invalid_from_env_var(self):
-        """Test IP resolution with invalid env var value."""
+        """Test that an unresolvable PYMAPDL_IP hostname is returned as-is with a warning.
+
+        Docker service names (e.g. ``PYMAPDL_IP=mapdl``) cannot be resolved
+        by ``socket.gethostbyname`` at configuration time because the container
+        may not be registered in DNS yet.  The hostname must therefore be
+        passed through so the gRPC layer can resolve it at connection time.
+        """
         import socket
 
         with patch.dict(os.environ, {"PYMAPDL_IP": "invalid-host"}):
             with patch("socket.gethostbyname", side_effect=socket.gaierror):
-                with pytest.raises(ConfigurationError):
-                    resolve_ip(None, start_instance=False)
+                with patch("ansys.mapdl.core.launcher.config.LOG") as mock_log:
+                    ip = resolve_ip(None, start_instance=False)
+                    assert ip == "invalid-host"
+                    mock_log.warning.assert_called_once()
 
     def test_resolve_ip_explicit_overrides_env_and_warning(self):
         """Test that explicit IP overrides env var."""
@@ -356,30 +496,56 @@ class TestResolveIpAddress:
 
     def test_resolve_ip_wsl_detection(self):
         """Test IP resolution on WSL."""
-        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=True):
+        with patch.dict(os.environ, {"PYMAPDL_IP": ""}):
             with patch(
-                "ansys.mapdl.core.launcher.environment.get_windows_host_ip",
-                return_value="172.20.0.1",
+                "ansys.mapdl.core.launcher.environment.is_wsl", return_value=True
             ):
-                ip = resolve_ip(None, start_instance=True)
-                assert ip == "172.20.0.1"
+                with patch(
+                    "ansys.mapdl.core.launcher.environment.get_windows_host_ip",
+                    return_value="172.20.0.1",
+                ):
+                    ip = resolve_ip(None, start_instance=True)
+                    assert ip == "172.20.0.1"
 
     def test_resolve_ip_wsl_no_host_ip(self):
         """Test IP resolution on WSL when host IP cannot be determined.
 
         Falls back to localhost with a warning when WSL host IP cannot be determined.
         """
-        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=True):
+        with patch.dict(os.environ, {"PYMAPDL_IP": ""}):
             with patch(
-                "ansys.mapdl.core.launcher.environment.get_windows_host_ip",
-                return_value=None,
+                "ansys.mapdl.core.launcher.environment.is_wsl", return_value=True
             ):
-                with patch("ansys.mapdl.core.launcher.config.LOG") as mock_log:
-                    ip = resolve_ip(None, start_instance=True)
-                    # Falls back to localhost, doesn't raise error
-                    assert ip == LOCALHOST
-                    # Verify warning was logged
-                    mock_log.warning.assert_called_once()
+                with patch(
+                    "ansys.mapdl.core.launcher.environment.get_windows_host_ip",
+                    return_value=None,
+                ):
+                    with patch("ansys.mapdl.core.launcher.config.LOG") as mock_log:
+                        ip = resolve_ip(None, start_instance=True)
+                        # Falls back to localhost, doesn't raise error
+                        assert ip == LOCALHOST
+                        # Verify warning was logged
+                        mock_log.warning.assert_called_once()
+
+    def test_resolve_ip_launch_on_hpc_with_remote_ip_raises(self):
+        """Test that a non-local IP combined with launch_on_hpc raises ConfigurationError."""
+        with pytest.raises(ConfigurationError, match="cannot ensure a specific IP"):
+            resolve_ip("10.0.0.50", start_instance=False, launch_on_hpc=True)
+
+    def test_resolve_ip_launch_on_hpc_with_localhost_allowed(self):
+        """Test that localhost IP with launch_on_hpc does not raise."""
+        with patch("socket.gethostbyname", return_value="127.0.0.1"):
+            ip = resolve_ip("127.0.0.1", start_instance=False, launch_on_hpc=True)
+            assert ip == "127.0.0.1"
+
+    def test_resolve_launch_config_launch_on_hpc_with_remote_ip_raises(self):
+        """Test that resolve_launch_config raises when launch_on_hpc and non-local ip are combined."""
+        with pytest.raises(ConfigurationError, match="cannot ensure a specific IP"):
+            resolve_launch_config(
+                launch_on_hpc=True,
+                ip="10.0.0.50",
+                start_instance=False,
+            )
 
 
 class TestResolveLaunchMode:
@@ -482,15 +648,22 @@ class TestResolveStartInstance:
         assert result is False
 
     def test_resolve_start_instance_explicit_overrides_ip_warning(self):
-        """Test that explicit start_instance takes precedence and warns."""
+        """Test that explicit start_instance=False with ip takes precedence (no error)."""
         with patch("ansys.mapdl.core.launcher.config.LOG") as mock_log:
-            result = resolve_start_instance(start_instance=True, ip="192.168.1.1")
-            assert result is True
+            result = resolve_start_instance(start_instance=False, ip="192.168.1.1")
+            assert result is False
             mock_log.warning.assert_called_once()
+
+    def test_resolve_start_instance_true_with_ip_raises(self):
+        """Test that start_instance=True combined with an ip raises ConfigurationError."""
+        with pytest.raises(ConfigurationError, match="'start_instance' must be False"):
+            resolve_start_instance(start_instance=True, ip="192.168.1.1")
 
     def test_resolve_start_instance_from_env_true(self):
         """Test start_instance resolution from env var (true)."""
-        with patch.dict(os.environ, {"PYMAPDL_START_INSTANCE": "true"}):
+        with patch.dict(
+            os.environ, {"PYMAPDL_START_INSTANCE": "true", "PYMAPDL_IP": ""}
+        ):
             result = resolve_start_instance(None, None)
             assert result is True
 
@@ -502,7 +675,7 @@ class TestResolveStartInstance:
 
     def test_resolve_start_instance_from_env_1(self):
         """Test start_instance resolution from env var (1)."""
-        with patch.dict(os.environ, {"PYMAPDL_START_INSTANCE": "1"}):
+        with patch.dict(os.environ, {"PYMAPDL_START_INSTANCE": "1", "PYMAPDL_IP": ""}):
             result = resolve_start_instance(None, None)
             assert result is True
 
@@ -514,7 +687,9 @@ class TestResolveStartInstance:
 
     def test_resolve_start_instance_from_env_yes(self):
         """Test start_instance resolution from env var (yes)."""
-        with patch.dict(os.environ, {"PYMAPDL_START_INSTANCE": "yes"}):
+        with patch.dict(
+            os.environ, {"PYMAPDL_START_INSTANCE": "yes", "PYMAPDL_IP": ""}
+        ):
             result = resolve_start_instance(None, None)
             assert result is True
 
@@ -1028,14 +1203,20 @@ class TestConfigParameterResolution:
         When start_instance=True, can default to localhost or WSL detection.
         """
         # start_instance=False, no IP specified -> defaults to localhost
-        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=False):
-            ip = resolve_ip(None, start_instance=False)
-            assert ip == "127.0.0.1"
+        with patch.dict(os.environ, {"PYMAPDL_IP": ""}):
+            with patch(
+                "ansys.mapdl.core.launcher.environment.is_wsl", return_value=False
+            ):
+                ip = resolve_ip(None, start_instance=False)
+                assert ip == "127.0.0.1"
 
         # start_instance=True, no IP specified -> defaults to localhost or WSL IP
-        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=False):
-            ip = resolve_ip(None, start_instance=True)
-            assert ip == "127.0.0.1"
+        with patch.dict(os.environ, {"PYMAPDL_IP": ""}):
+            with patch(
+                "ansys.mapdl.core.launcher.environment.is_wsl", return_value=False
+            ):
+                ip = resolve_ip(None, start_instance=True)
+                assert ip == "127.0.0.1"
 
     # ========== Run Location Tests ==========
     def test_resolve_run_location_creates_if_needed(self, tmp_path):
@@ -1121,15 +1302,14 @@ class TestExceptionHandling:
                 resolve_ip("not-a-valid-host-name", start_instance=False)
 
     def test_conflicting_parameters(self):
-        """Test that conflicting parameters are handled gracefully.
+        """Test that conflicting parameters raise ConfigurationError.
 
-        When start_instance and ip are both specified, start_instance takes
-        precedence with a warning.
+        When start_instance=True and ip are both specified, a ConfigurationError
+        is raised because a local instance cannot be started while targeting a
+        remote IP.
         """
-        with patch("ansys.mapdl.core.launcher.config.LOG"):
-            result = resolve_start_instance(start_instance=True, ip="192.168.1.1")
-            # start_instance takes precedence
-            assert result is True
+        with pytest.raises(ConfigurationError, match="'start_instance' must be False"):
+            resolve_start_instance(start_instance=True, ip="192.168.1.1")
 
     @pytest.mark.parametrize(
         "func,args,expected_error",
@@ -1282,12 +1462,15 @@ class TestIpResolutionEdgeCases:
         Both start_instance values should resolve IP the same way
         (the difference is whether MAPDL is started locally).
         """
-        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=False):
-            ip_start_true = resolve_ip(None, start_instance=True)
-            ip_start_false = resolve_ip(None, start_instance=False)
-            # Both default to localhost when no env vars or explicit IP
-            assert ip_start_true == "127.0.0.1"
-            assert ip_start_false == "127.0.0.1"
+        with patch.dict(os.environ, {"PYMAPDL_IP": ""}):
+            with patch(
+                "ansys.mapdl.core.launcher.environment.is_wsl", return_value=False
+            ):
+                ip_start_true = resolve_ip(None, start_instance=True)
+                ip_start_false = resolve_ip(None, start_instance=False)
+                # Both default to localhost when no env vars or explicit IP
+                assert ip_start_true == "127.0.0.1"
+                assert ip_start_false == "127.0.0.1"
 
     def test_resolve_ip_invalid_raises_error(self):
         """Test that invalid IP raises ConfigurationError."""
@@ -1312,18 +1495,24 @@ class TestIpResolutionEdgeCases:
         from ansys.mapdl.core.launcher.config import resolve_ip
 
         # start_instance=True triggers WSL detection
-        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=True):
+        with patch.dict(os.environ, {"PYMAPDL_IP": ""}):
             with patch(
-                "ansys.mapdl.core.launcher.environment.get_windows_host_ip",
-                return_value="172.20.0.1",
+                "ansys.mapdl.core.launcher.environment.is_wsl", return_value=True
             ):
-                ip = resolve_ip(None, start_instance=True)
-                assert ip == "172.20.0.1"
+                with patch(
+                    "ansys.mapdl.core.launcher.environment.get_windows_host_ip",
+                    return_value="172.20.0.1",
+                ):
+                    ip = resolve_ip(None, start_instance=True)
+                    assert ip == "172.20.0.1"
 
         # start_instance=False doesn't need WSL detection
-        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=False):
-            ip = resolve_ip(None, start_instance=False)
-            assert ip == "127.0.0.1"
+        with patch.dict(os.environ, {"PYMAPDL_IP": ""}):
+            with patch(
+                "ansys.mapdl.core.launcher.environment.is_wsl", return_value=False
+            ):
+                ip = resolve_ip(None, start_instance=False)
+                assert ip == "127.0.0.1"
 
 
 class TestConfigurationIntegration:
@@ -1341,9 +1530,7 @@ class TestConfigurationIntegration:
                 jobname="integration_test",
                 nproc=8,
                 port=50100,
-                ip="127.0.0.1",
                 mode="grpc",
-                version=222,
                 start_instance=True,
                 ram=4096,
                 timeout=60,
@@ -1365,7 +1552,7 @@ class TestConfigurationIntegration:
                 uds_dir=None,
                 uds_id=None,
                 certs_dir=None,
-                env_vars={"ANS_CMD": "NODIAG"},
+                add_env_vars={"ANS_CMD": "NODIAG"},
                 license_server_check=False,
                 force_intel=False,
                 graphics_backend=None,

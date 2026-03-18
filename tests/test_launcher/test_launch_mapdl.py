@@ -69,12 +69,8 @@ class TestLaunchMapdlOrchestration:
         """Test launch_mapdl with start_instance=False."""
         with (
             patch("os.path.isfile", return_value=True),
-            patch(
-                "ansys.mapdl.core.launcher.config.resolve_launch_config"
-            ) as mock_config,
-            patch(
-                "ansys.mapdl.core.launcher.validation.validate_config"
-            ) as mock_validate,
+            patch("ansys.mapdl.core.launcher.resolve_launch_config") as mock_config,
+            patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
             patch("ansys.mapdl.core.launcher.connect_to_existing") as mock_connect,
         ):
             mock_config.return_value = self._create_test_config(start_instance=False)
@@ -95,12 +91,8 @@ class TestLaunchMapdlOrchestration:
         """Test launch_mapdl with gRPC mode."""
         with (
             patch("os.path.isfile", return_value=True),
-            patch(
-                "ansys.mapdl.core.launcher.config.resolve_launch_config"
-            ) as mock_config,
-            patch(
-                "ansys.mapdl.core.launcher.validation.validate_config"
-            ) as mock_validate,
+            patch("ansys.mapdl.core.launcher.resolve_launch_config") as mock_config,
+            patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
             patch("ansys.mapdl.core.launcher.connect_to_existing") as mock_connect,
         ):
             mock_config.return_value = self._create_test_config(
@@ -190,9 +182,7 @@ class TestLaunchMapdlOrchestration:
 
     def test_launch_mapdl_config_error(self):
         """Test launch_mapdl handles configuration errors."""
-        with patch(
-            "ansys.mapdl.core.launcher.config.resolve_launch_config"
-        ) as mock_config:
+        with patch("ansys.mapdl.core.launcher.resolve_launch_config") as mock_config:
             mock_config.side_effect = ConfigurationError("Invalid config")
 
             with pytest.raises((LaunchError, ConfigurationError)):
@@ -202,12 +192,8 @@ class TestLaunchMapdlOrchestration:
         """Test launch_mapdl handles validation errors."""
         with (
             patch("os.path.isfile", return_value=True),
-            patch(
-                "ansys.mapdl.core.launcher.config.resolve_launch_config"
-            ) as mock_config,
-            patch(
-                "ansys.mapdl.core.launcher.validation.validate_config"
-            ) as mock_validate,
+            patch("ansys.mapdl.core.launcher.resolve_launch_config") as mock_config,
+            patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
         ):
             mock_config.return_value = self._create_test_config()
             mock_validate.return_value = ValidationResult(
@@ -223,21 +209,11 @@ class TestLaunchMapdlOrchestration:
         """Test launch_mapdl prepares environment."""
         with (
             patch("os.path.isfile", return_value=True),
-            patch(
-                "ansys.mapdl.core.launcher.config.resolve_launch_config"
-            ) as mock_config,
-            patch(
-                "ansys.mapdl.core.launcher.validation.validate_config"
-            ) as mock_validate,
-            patch(
-                "ansys.mapdl.core.launcher.environment.prepare_environment"
-            ) as mock_env,
-            patch(
-                "ansys.mapdl.core.launcher.process.launch_mapdl_process"
-            ) as mock_process,
-            patch(
-                "ansys.mapdl.core.launcher.connection.create_grpc_client"
-            ) as mock_grpc,
+            patch("ansys.mapdl.core.launcher.resolve_launch_config") as mock_config,
+            patch("ansys.mapdl.core.launcher.validate_config") as mock_validate,
+            patch("ansys.mapdl.core.launcher.prepare_environment") as mock_env,
+            patch("ansys.mapdl.core.launcher._launch_mapdl_process") as mock_process,
+            patch("ansys.mapdl.core.launcher.create_grpc_client") as mock_grpc,
         ):
             mock_config.return_value = self._create_test_config()
             mock_validate.return_value = ValidationResult(

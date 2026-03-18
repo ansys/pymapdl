@@ -357,12 +357,10 @@ class TestLaunchMapdlProcessOnly:
                 replace_env_vars={"REPLACE_VAR": "value2"},
             )
 
-            # Verify resolve_launch_config was called with merged env vars
+            # Verify resolve_launch_config was called with add_env_vars and replace_env_vars
             call_kwargs = mock_resolve_config.call_args[1]
-            env_vars = call_kwargs["env_vars"]
-            assert env_vars is not None
-            assert "MY_VAR" in env_vars
-            assert "REPLACE_VAR" in env_vars
+            assert call_kwargs.get("add_env_vars") == {"MY_VAR": "value1"}
+            assert call_kwargs.get("replace_env_vars") == {"REPLACE_VAR": "value2"}
 
             # Verify result
             assert result == ("127.0.0.1", 50052, 12345)

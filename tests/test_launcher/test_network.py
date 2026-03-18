@@ -5,6 +5,7 @@
 
 """Unit tests for launcher.network module."""
 
+import os
 from unittest.mock import MagicMock, patch
 
 import psutil
@@ -712,10 +713,17 @@ class TestPhase2NetworkIntegration:
         """
         from ansys.mapdl.core.launcher.config import resolve_launch_config
 
-        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=False):
-            config = resolve_launch_config(start_instance=True)
-            assert config.port == 50052
-            assert config.ip == "127.0.0.1"
+        with patch.dict(os.environ, {"PYMAPDL_IP": ""}):
+            with patch(
+                "ansys.mapdl.core.launcher.config.resolve_exec_file",
+                return_value="/fake/mapdl",
+            ):
+                with patch(
+                    "ansys.mapdl.core.launcher.environment.is_wsl", return_value=False
+                ):
+                    config = resolve_launch_config(start_instance=True)
+                    assert config.port == 50052
+                    assert config.ip == "127.0.0.1"
 
 
 # ============================================================================
