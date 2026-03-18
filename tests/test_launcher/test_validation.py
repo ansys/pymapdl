@@ -95,7 +95,7 @@ class TestVersionModeCompatibility:
 
     def test_validate_grpc_requires_v211_or_newer(self):
         """Test that gRPC mode requires version 211+."""
-        config = _create_test_config(mode=LaunchMode.GRPC, version=210)
+        config = _create_test_config(mode=LaunchMode.GRPC, version=202)
         result = validate_config(config)
         assert not result.valid
         assert any("gRPC" in error for error in result.errors)
