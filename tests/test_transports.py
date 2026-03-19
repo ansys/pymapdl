@@ -23,7 +23,6 @@
 
 import logging
 import os
-import platform
 import sys
 import types
 from unittest.mock import MagicMock
@@ -234,12 +233,10 @@ def test_env_transport_precedence(monkeypatch, transport_mode):
     monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", transport_mode)
 
     if transport_mode == "wnua" and os.name != "nt":
-        monkeypatch.setattr(os, "name", "nt")
-        monkeypatch.setattr(platform, "system", lambda: "Windows")
+        pytest.skip("WNUA transport is only supported on Windows")
 
     if transport_mode == "uds" and os.name == "nt":
-        monkeypatch.setattr(os, "name", "posix")
-        monkeypatch.setattr(platform, "system", lambda: "Linux")
+        pytest.skip("UDS transport is not supported on Windows")
 
     # Insert a fake cyberchannel module with verify_transport_mode
     fake_mod = types.ModuleType("ansys.tools.common.cyberchannel")
