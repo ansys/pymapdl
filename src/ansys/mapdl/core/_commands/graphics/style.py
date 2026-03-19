@@ -380,7 +380,7 @@ class Style(CommandsBase):
         .. _s-GLINE_notes:
 
         Determines the element outline style. Often used when node numbers are displayed to prevent element
-        lin  es from overwriting node numbers.
+        lin es from overwriting node numbers.
 
         Unless you are using an OpenGL or Starbase driver, the dashed element outline option ( :ref:`gline`,
         ``WN``,1) is not available in the following situations:

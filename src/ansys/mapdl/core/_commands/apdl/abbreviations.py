@@ -218,7 +218,7 @@ class Abbreviations(CommandsBase):
             with any Mechanical APDL command name or any user unknown-command macro name.
 
         srnum : str
-            User subroutine number (1 to 10) programmed for this command. For example, the command :ref:`ucmd`,MYCMD,3 will execute subroutine USER03 whenever the command **MYCMD** is entered. Use a blank command name to disassociate ``SRNUM`` from its command. For example, :ref:`ucmd` ,,3 removes **MYCMD** as a command.
+            User subroutine number (1 to 10) programmed for this command. For example, the command :ref:`ucmd`,MYCMD,3 will execute subroutine USER03 whenever the command **MYCMD** is entered. Use a blank command name to disassociate ``SRNUM`` from its command. For example, :ref:`ucmd`,,3 removes **MYCMD** as a command.
 
         Notes
         -----
@@ -259,7 +259,7 @@ class Abbreviations(CommandsBase):
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/installation/win_product_table.html>`_ or
         the `Ansys, Inc. Linux Installation Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/installation/lin_product_table.html>`_
-         for details specific to your platform or operating
+        for details specific to your platform or operating
         system.
 
         The USER01 routine is commented and should be listed from the distribution media (system dependent)
