@@ -2524,7 +2524,7 @@ def test_launch_uds_transport(mapdl, monkeypatch):
             + 1,  # Use a different port to avoid conflicts with other tests
         )
         assert mapdl_.transport_mode == "uds"
-        assert os.path.exists(os.path.join(mapdl_.uds_dir, f"mapdl_{mapdl_.port}.sock"))
+        assert os.path.exists(mapdl_.uds_dir / f"mapdl-{mapdl_.port}.sock")
     finally:
         if mapdl_ is not None:
             mapdl_.exit(force=True)
