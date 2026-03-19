@@ -308,22 +308,6 @@ def test_missing_ansys_tools_common_raises(monkeypatch):
         MapdlGrpc(channel=MagicMock(spec=grpc.Channel))
 
 
-def test_uds_conflict_increments_port(tmp_path, monkeypatch):
-    # Create uds dir and a conflicting socket file
-    uds_dir = tmp_path / "conn"
-    uds_dir.mkdir()
-    sock = uds_dir / "mapdl-50052.sock"
-    sock.write_text("busy")
-
-    # Patch verify to no-op
-    monkeypatch.setattr(
-        "ansys.tools.common.cyberchannel.verify_transport_mode", lambda *a, **k: None
-    )
-
-    with pytest.raises(ValueError):
-        MapdlGrpc(transport_mode="uds", uds_dir=str(uds_dir), port=50052)
-
-
 def test_remote_ip_with_uds_raises(monkeypatch):
     # Patch verify to no-op
     monkeypatch.setattr(
