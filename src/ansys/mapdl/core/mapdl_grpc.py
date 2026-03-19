@@ -376,7 +376,10 @@ class MapdlGrpc(MapdlBase):
         )
 
         self.transport_mode = transport_mode
-        self.uds_dir: Path | None = Path(uds_dir) if uds_dir is not None else None
+        if uds_dir is None:
+            uds_dir = Path("~/.conn").expanduser()
+
+        self.uds_dir: Path = Path(uds_dir)
         self.certs_dir: Path | None = Path(certs_dir) if certs_dir is not None else None
         self.grpc_options = start_parm.pop("grpc_options", DEFAULT_GRPC_OPTIONS)
         # Transport configuration will be finalized after base init
@@ -575,7 +578,7 @@ class MapdlGrpc(MapdlBase):
         if self.transport_mode == "wnua":
             msg = f"Using WNUA transport on {ip}:{self._port}"
         elif self.transport_mode == "uds":
-            msg = f"Using UDS transport with socket ID '{self.uds_id}' in directory '{self.uds_dir}'"
+            msg = f"Using UDS transport with socket ID '{self.port}' in directory '{self.uds_dir}'"
         elif self.transport_mode == "mtls":
             msg = f"Using mTLS transport with certificates in '{self.certs_dir}'"
         else:
