@@ -377,7 +377,7 @@ class MapdlGrpc(MapdlBase):
 
         self.transport_mode = transport_mode
         self.uds_dir: Path = (
-            Path(uds_dir) if uds_dir is not None else Path("~/.conn").expanduser()
+            Path(uds_dir) if uds_dir is not None else Path("~").expanduser() / ".conn"
         )
 
         self.certs_dir: Path | None = Path(certs_dir) if certs_dir is not None else None
