@@ -27,7 +27,7 @@ import glob
 import io
 import json
 import os
-import pathlib
+from pathlib import Path, PurePath
 import re
 import shutil
 
@@ -361,8 +361,8 @@ class MapdlGrpc(MapdlBase):
         channel: Optional[grpc.Channel] = None,
         remote_instance: Optional["PIM_Instance"] = None,
         transport_mode: Optional[str] = None,
-        uds_dir: Optional[Union[str, pathlib.Path]] = None,
-        certs_dir: Optional[Union[str, pathlib.Path]] = None,
+        uds_dir: Optional[Union[str, Path]] = None,
+        certs_dir: Optional[Union[str, Path]] = None,
         **start_parm: dict[str, Any],
     ):
         """Initialize connection to the mapdl server"""
@@ -376,8 +376,8 @@ class MapdlGrpc(MapdlBase):
         )
 
         self.transport_mode = transport_mode
-        self.uds_dir = uds_dir
-        self.certs_dir = certs_dir
+        self.uds_dir: Path | None = Path(uds_dir) if uds_dir is not None else None
+        self.certs_dir: Path | None = Path(certs_dir) if certs_dir is not None else None
         self.grpc_options = start_parm.pop("grpc_options", DEFAULT_GRPC_OPTIONS)
         # Transport configuration will be finalized after base init
 
@@ -609,17 +609,9 @@ class MapdlGrpc(MapdlBase):
 
         MAPDL always names its socket ``mapdl-{PORT}.sock`` inside the
         directory set via the ``ANSYS_MAPDL_UDS_PATH`` environment variable.
-        ``uds_dir`` is resolved here (defaulting to ``~/.conn``) and
-        ``uds_id`` is set to the stringified port so that
-        ``create_channel`` constructs the correct ``mapdl-{port}.sock``
-        path.
+        However, this is only applicable when launching new instances.
         """
-        # Resolve socket directory, defaulting to ~/.conn
-        if self.uds_dir is None:
-            self.uds_dir = os.path.join(os.path.expanduser("~"), ".conn")
-
-        os.makedirs(self.uds_dir, exist_ok=True)
-        self.uds_id = str(port)
+        pass
 
     def configure_insecure(self) -> None:
         """Configure insecure transport-specific settings."""
@@ -635,8 +627,10 @@ class MapdlGrpc(MapdlBase):
         """Configure mTLS transport-specific settings."""
         # Set defaults for certificates
         if self.certs_dir is None:
-            self.certs_dir = os.environ.get(
-                "ANSYS_GRPC_CERTIFICATES", os.path.join(os.getcwd(), "certs")
+            self.certs_dir = Path(
+                os.environ.get(
+                    "ANSYS_GRPC_CERTIFICATES", os.path.join(os.getcwd(), "certs")
+                )
             )
 
     def _after_run(self, command: str) -> None:
@@ -720,7 +714,7 @@ class MapdlGrpc(MapdlBase):
             host=ip,
             port=port,
             uds_service="mapdl",
-            uds_id=self.uds_id,
+            uds_id=port,
             uds_dir=self.uds_dir,
             certs_dir=self.certs_dir,
             grpc_options=self.grpc_options,
@@ -1483,7 +1477,7 @@ class MapdlGrpc(MapdlBase):
         # Remove UDS socket file if using UDS transport.
         # The socket is always named 'mapdl-{PORT}.sock' (uds_id == str(port)).
         if self.transport_mode == "uds":
-            socket_path = os.path.join(self.uds_dir, f"mapdl-{self.uds_id}.sock")
+            socket_path = os.path.join(self.uds_dir, f"mapdl-{self.port}.sock")
             if os.path.exists(socket_path):
                 try:
                     os.remove(socket_path)
@@ -1532,8 +1526,6 @@ class MapdlGrpc(MapdlBase):
         user temporary directory.
         """
         if self.remove_temp_dir_on_exit and self._local:
-            from pathlib import Path
-
             path = str(Path(path or self.directory))
             tmp_dir = tempfile.gettempdir()
             ans_temp_dir = str(Path(os.path.join(tmp_dir, "ansys_")))
@@ -1765,7 +1757,7 @@ class MapdlGrpc(MapdlBase):
 
     def download_result(
         self,
-        path: str | pathlib.Path | None = None,
+        path: str | Path | None = None,
         progress_bar: bool = False,
         preference: Literal["rst", "rth"] | None = None,
     ) -> str:
@@ -2655,7 +2647,7 @@ class MapdlGrpc(MapdlBase):
             else:
                 list_files = [files]
 
-        elif isinstance(files, pathlib.PurePath):
+        elif isinstance(files, PurePath):
             list_files = [str(files)]
 
         elif isinstance(files, (list, tuple)):

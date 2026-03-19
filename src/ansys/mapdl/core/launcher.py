@@ -1734,13 +1734,10 @@ def launch_mapdl(
         # For UDS transport (Linux default), tell MAPDL which directory to
         # create its socket in via ANSYS_MAPDL_UDS_PATH.  MAPDL always names
         # the socket "mapdl-{PORT}.sock" inside that directory.
-        _transport = args.get("transport_mode") or (
-            "uds" if __import__("platform").system() == "Linux" else None
-        )
-        if _transport == "uds":
-            uds_dir = args.get("uds_dir") or os.path.join(
-                os.path.expanduser("~"), ".conn"
-            )
+        if platform.system() == "Linux" and transport_mode == "uds" and uds_dir:
+            # Ensure the directory exists
+            os.makedirs(uds_dir, exist_ok=True)
+
             env_vars.setdefault("ANSYS_MAPDL_UDS_PATH", str(uds_dir))
             LOG.debug(f"UDS transport: setting ANSYS_MAPDL_UDS_PATH={uds_dir}")
 
