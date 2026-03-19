@@ -376,10 +376,10 @@ class MapdlGrpc(MapdlBase):
         )
 
         self.transport_mode = transport_mode
-        if uds_dir is None:
-            uds_dir = Path("~/.conn").expanduser()
+        self.uds_dir: Path = (
+            Path(uds_dir) if uds_dir is not None else Path("~/.conn").expanduser()
+        )
 
-        self.uds_dir: Path = Path(uds_dir)
         self.certs_dir: Path | None = Path(certs_dir) if certs_dir is not None else None
         self.grpc_options = start_parm.pop("grpc_options", DEFAULT_GRPC_OPTIONS)
         # Transport configuration will be finalized after base init
@@ -614,7 +614,9 @@ class MapdlGrpc(MapdlBase):
         directory set via the ``ANSYS_MAPDL_UDS_PATH`` environment variable.
         However, this is only applicable when launching new instances.
         """
-        pass
+        # Set uds_id to the stringified port so create_channel builds
+        # the correct 'mapdl-{PORT}.sock' path.
+        self.uds_id = str(port)
 
     def configure_insecure(self) -> None:
         """Configure insecure transport-specific settings."""
