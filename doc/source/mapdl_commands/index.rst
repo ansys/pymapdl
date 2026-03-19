@@ -187,20 +187,6 @@ These commands read in external CAD files into MAPDL.
    conn
 
 
-**********************
-Miscellaneous commands
-**********************
-
-Undocumented miscellaneous commands.
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Miscellaneous
-
-   misc
-
-
-
 *****************************
 Undocumented inquire commands
 *****************************
