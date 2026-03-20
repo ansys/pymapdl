@@ -541,7 +541,7 @@ def _wait_for_error_file(run_location: str, timeout: int) -> None:
     sleep_time = 0.1
     iterations = int(timeout / sleep_time)
 
-    for i in range(iterations):
+    for _ in range(iterations):
         try:
             files = os.listdir(run_location)
             has_err = any(".err" in filename for filename in files)

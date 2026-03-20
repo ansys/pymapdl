@@ -213,7 +213,7 @@ class TestPyPIMInstanceCreation:
         mock_instance = _create_mock_pypim_instance()
         mock_client.create_instance.return_value = mock_instance
 
-        instance = mock_client.create_instance(product_name="mapdl")
+        mock_client.create_instance(product_name="mapdl")
 
         mock_client.create_instance.assert_called_with(product_name="mapdl")
 

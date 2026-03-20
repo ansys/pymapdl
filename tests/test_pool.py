@@ -142,7 +142,10 @@ class TestMapdlPool:
         pool_creator.wait_for_ready()
         return pool_creator
 
-    def test_invalid_exec(self):
+    @requires("local")
+    def test_invalid_exec(self, monkeypatch):
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+
         with pytest.raises(VersionError):
             MapdlPool(
                 4,
