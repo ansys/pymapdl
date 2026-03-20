@@ -177,7 +177,7 @@ services:
     #
     profiles:
       - local-host
-    container_name: local-host
+    container_name: mapdl-local-host
     platform: linux/amd64
     build:
       context: .
