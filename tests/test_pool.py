@@ -142,7 +142,6 @@ class TestMapdlPool:
         pool_creator.wait_for_ready()
         return pool_creator
 
-    @skip_requires_194
     def test_invalid_exec(self):
         with pytest.raises(VersionError):
             MapdlPool(
