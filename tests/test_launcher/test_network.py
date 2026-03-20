@@ -713,7 +713,7 @@ class TestPhase2NetworkIntegration:
         """
         from ansys.mapdl.core.launcher.config import resolve_launch_config
 
-        with patch.dict(os.environ, {"PYMAPDL_IP": ""}):
+        with patch.dict(os.environ, {"PYMAPDL_IP": "", "PYMAPDL_PORT": ""}):
             with patch(
                 "ansys.mapdl.core.launcher.config.resolve_exec_file",
                 return_value="/fake/mapdl",
