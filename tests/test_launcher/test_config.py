@@ -881,8 +881,10 @@ class TestResolveExecFileEdgeCases:
             result = resolve_exec_file(None, 222, start_instance=True)
             assert result == "/path/to/mapdl/exec"
 
-    def test_resolve_exec_file_auto_detect_failure(self):
+    def test_resolve_exec_file_auto_detect_failure(self, monkeypatch):
         """Test exec file auto-detection failure."""
+        monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", raising=False)
+
         with patch("ansys.mapdl.core.launcher.config._HAS_ATC", True):
             with patch(
                 "ansys.tools.common.path.get_mapdl_path",
@@ -891,8 +893,10 @@ class TestResolveExecFileEdgeCases:
                 with pytest.raises(ConfigurationError):
                     resolve_exec_file(None, None, start_instance=True)
 
-    def test_resolve_exec_file_auto_detect_exception(self):
+    def test_resolve_exec_file_auto_detect_exception(self, monkeypatch):
         """Test exec file auto-detection exception handling."""
+        monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", raising=False)
+
         with patch("ansys.mapdl.core.launcher.config._HAS_ATC", True):
             with patch(
                 "ansys.tools.common.path.get_mapdl_path",
