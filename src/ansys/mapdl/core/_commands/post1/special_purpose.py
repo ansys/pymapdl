@@ -236,8 +236,8 @@ class SpecialPurpose(CommandsBase):
 
         .. warning::
 
-            Relaxing the TOLHGTor TOLTHKtolerances to allow submodel nodes to be “found” can produce poor
-            submodel results.
+            Relaxing the ``TOLHGT`` or ``TOLTHK`` tolerances to allow submodel nodes to be “found” can
+            produce poor submodel results.
         """
         command = f"CBDOF,{fname1},{ext1},,{fname2},{ext2},,{kpos},{clab},{kshs},{tolout},{tolhgt},{tolthk}"
         return self.run(command, **kwargs)
@@ -761,8 +761,8 @@ class SpecialPurpose(CommandsBase):
 
         .. warning::
 
-            The EXPAND command creates new nodes and elements; therefore, saving (or issuing the /EXIT, ALL
-            command) after issuing the EXPAND command can result in large databases.
+            The :ref:`expand` command creates new nodes and elements; therefore, saving (or issuing the
+            ``/EXIT``, ALL command) after issuing the :ref:`expand` command can result in large databases.
         """
         command = f"EXPAND,{nrepeat},{modal},{hindex},{icsys},{sctang},,{phase}"
         return self.run(command, **kwargs)
@@ -1168,7 +1168,14 @@ class SpecialPurpose(CommandsBase):
         command = f"HFSYM,{kcn},{xkey},{ykey},{zkey}"
         return self.run(command, **kwargs)
 
-    def macopt(self, **kwargs):
+    def macopt(
+        self,
+        option: str = "",
+        value1: str = "",
+        value2: str = "",
+        value3: str = "",
+        **kwargs,
+    ):
         r"""Specifies modal assurance criterion (MAC) or frequency response function (FRF) correlation criteria
         calculation options for :ref:`rstmac`.
 
@@ -1179,8 +1186,40 @@ class SpecialPurpose(CommandsBase):
         default in MAC calculations performed by :ref:`rstmac`. Unless otherwise specified, an absolute
         tolerance (ABSTOLN) value of 0.01 is used for the node matching.
 
+        Parameters
+        ----------
+        option : str
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MACOPT.html>`_ for
+            further information.
+
+        value1 : str
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MACOPT.html>`_ for
+            further information.
+
+        value2 : str
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MACOPT.html>`_ for
+            further information.
+
+        value3 : str
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MACOPT.html>`_ for
+            further information.
+
         Notes
         -----
+
+        .. warning::
+
+           This function contains specificities regarding the argument definitions.
+           Please refer to the `command documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MACOPT.html>`_
+           for further explanations.
 
         .. _MACOPT_notes:
 
@@ -1225,7 +1264,7 @@ class SpecialPurpose(CommandsBase):
         Two Models or From One Model and Experimental Data (RSTMAC)
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS5_4.html#>`_
         """
-        command = "MACOPT"
+        command = f"MACOPT,{option},{value1},{value2},{value3}"
         return self.run(command, **kwargs)
 
     def nforce(self, item: str = "", **kwargs):
@@ -3537,7 +3576,7 @@ class SpecialPurpose(CommandsBase):
         a node component called 'FLUN'. This component should include all nodes which are located at the
         fluid-structural interface. Mode shapes, element normal orientation, and a scaling factor are
         computed and stored in a file :file:`Jobname.EFL`. For damping parameter extraction, use the
-        :ref:`dmpext` command macro. See   for more information on thin film analyses.
+        :ref:`dmpext` command macro. See  for more information on thin film analyses.
 
         ``FLUID136`` and ``FLUID138`` are used to model the fluid interface. Both the structural and fluid
         element types must be active. The fluid interface nodes must be grouped into a component 'FLUN'. A
@@ -4031,6 +4070,7 @@ class SpecialPurpose(CommandsBase):
         * :ref:`slashexpand` does not change the database as does the :ref:`expand` command.
 
         * You cannot print results displayed via :ref:`slashexpand`.
+
         """
         command = f"/EXPAND,{nrepeat1},{type1},{method1},{dx1},{dy1},{dz1},{nrepeat2},{type2},{method2},{dx2},{dy2},{dz2},{nrepeat3},{type3},{method3},{dx3},{dy3},{dz3}"
         return self.run(command, **kwargs)

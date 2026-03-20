@@ -243,7 +243,7 @@ class MagneticsCalculations(CommandsBase):
         parameter PAVG.
 
         Conductor losses include solid conductors and surface conductors approximated by impedance or
-        shielding boundary conditions. The power-loss  density for solid conductors or dielectrics is
+        shielding boundary conditions. The power-loss density for solid conductors or dielectrics is
         stored in the element table with the label PLOSSD and may be listed ( :ref:`pretab` ) or displayed (
         :ref:`pletab` ). PLOSSD does not include surface losses.
 

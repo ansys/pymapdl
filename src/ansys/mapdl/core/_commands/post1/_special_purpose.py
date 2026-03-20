@@ -93,6 +93,7 @@ class SpecialPurpose(CommandsBase):
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"KCALC,{kplan},{mat},{kcsym},{klocpr}"
         return self.run(command, **kwargs)
@@ -149,6 +150,7 @@ class SpecialPurpose(CommandsBase):
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"PLCRACK,{loc},{num}"
         return self.run(command, **kwargs)

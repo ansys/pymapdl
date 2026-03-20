@@ -43,7 +43,6 @@ from ._commands import (
     hidden,
     inq_func,
     map,
-    misc,
     post1,
     post26,
     prep7,
@@ -421,10 +420,6 @@ class MapCommands(
     pass
 
 
-class MiscCommands(misc.misc.Misc):
-    pass
-
-
 class Post1Commands(
     post1._fatigue.Fatigue,
     post1._special_purpose.SpecialPurpose,
@@ -513,7 +508,6 @@ class Commands(
     DatabaseCommands,
     GraphicsCommands,
     MapCommands,
-    MiscCommands,
     Post1Commands,
     Post26Commands,
     Prep7Commands,
