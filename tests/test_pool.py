@@ -145,6 +145,7 @@ class TestMapdlPool:
     @requires("local")
     def test_invalid_exec(self, monkeypatch):
         monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", raising=False)
 
         with pytest.raises(VersionError):
             MapdlPool(
