@@ -38,6 +38,7 @@ Architecture:
 
 Public API:
     - launch_mapdl: Main entry point
+    - launch_mapdl_process: Launch MAPDL process only
     - LaunchConfig: Configuration model (for advanced use)
 """
 
