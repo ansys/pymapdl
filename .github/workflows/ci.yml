@@ -21,7 +21,7 @@ on:
 env:
   ON_CI: True
   PROJECT_NAME: 'PyMAPDL'
-  MAIN_PYTHON_VERSION: '3.12'
+  MAIN_PYTHON_VERSION: '3.13'
   PACKAGE_NAME: 'ansys-mapdl-core'
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
@@ -107,6 +107,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 20
+    continue-on-error: ${{ matrix.python-version == '3.14' }}
     permissions: {}
     strategy:
       fail-fast: false
