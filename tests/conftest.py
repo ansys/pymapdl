@@ -734,7 +734,7 @@ def mapdl(request, tmpdir_factory):
         run_location=run_path,
         cleanup_on_exit=cleanup,
         license_server_check=False,
-        start_timeout=50,
+        timeout=50,
         loglevel="DEBUG",  # Because Pytest captures all output
         # If the following file names are changed, update `ci.yml`.
         log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
@@ -794,6 +794,9 @@ def mapdl(request, tmpdir_factory):
 #
 
 
+from ansys.mapdl.core.launcher.models import ValidationResult as _ValidationResult
+
+
 # Necessary patches to patch Mapdl launch
 def _returns(return_=None):
     return lambda *args, **kwargs: return_
@@ -827,6 +830,12 @@ _meth_patch_MAPDL_launch = [
                 "mapdlhostname",
             ]
         ),
+    ),
+    # Skip config validation so tests using fake executable paths or running
+    # HPC tests on Windows don't fail on local file-system / platform checks.
+    (
+        "ansys.mapdl.core.launcher.validate_config",
+        _returns(_ValidationResult(valid=True)),
     ),
 ]
 

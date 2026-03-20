@@ -66,7 +66,7 @@ ENV ON_STUDENT=False
 # To work without a screen.
 ENV PYANSYS_OFF_SCREEN=True
 # Enable debugging for PyMAPDL
-ENV PYMAPDL_DEBUG_TESTING=True
+ENV PYMAPDL_DEBUG_TESTING=False
 # To connect to an already alive or remote MAPDL instance
 ENV PYMAPDL_START_INSTANCE=False
 # Set MAPDL port to connect to
@@ -169,7 +169,7 @@ ENV ON_STUDENT=False
 # To work without a screen.
 ENV PYANSYS_OFF_SCREEN=True
 # Enable debugging for PyMAPDL
-ENV PYMAPDL_DEBUG_TESTING=True
+ENV PYMAPDL_DEBUG_TESTING=False
 # Force launching an instance of MAPDL. This is needed to test the connection to a remote instance, which is what we want to do in this container.
 ENV PYMAPDL_START_INSTANCE=True
 # Set MAPDL port to connect to

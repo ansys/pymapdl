@@ -332,7 +332,7 @@ class MapdlPool:
         threads = [
             self._spawn_mapdl(
                 i,
-                ip=ip,
+                ip=None if start_instance else ip,
                 port=port,
                 pbar=pbar,
                 name=self._names(i),
@@ -904,7 +904,7 @@ class MapdlPool:
         for i in range(n):
             index = current_count + i
             port = new_ports[i]
-            ip = LOCALHOST
+            ip = None if self._start_instance else LOCALHOST
 
             thread = self._spawn_mapdl(
                 index,

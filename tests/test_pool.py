@@ -92,7 +92,7 @@ class TestMapdlPool:
                 license_server_check=False,
                 run_location=run_path,
                 port=port,
-                start_timeout=30,
+                timeout=30,
                 exec_file=EXEC_FILE,
                 additional_switches=QUICK_LAUNCH_SWITCHES,
                 nproc=NPROC,
@@ -142,8 +142,11 @@ class TestMapdlPool:
         pool_creator.wait_for_ready()
         return pool_creator
 
-    @skip_requires_194
-    def test_invalid_exec(self):
+    @requires("local")
+    def test_invalid_exec(self, monkeypatch):
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", raising=False)
+
         with pytest.raises(VersionError):
             MapdlPool(
                 4,
@@ -528,7 +531,7 @@ class TestMapdlPool:
                 None,
                 [50052, 50053],
                 2,
-                [LOCALHOST, LOCALHOST],
+                [None, None],
                 [50052, 50053],
                 NullContext(),
             ),
@@ -655,7 +658,7 @@ class TestMapdlPool:
                 None,
                 None,
                 2,
-                [LOCALHOST, LOCALHOST],
+                [None, None],
                 [MAPDL_DEFAULT_PORT, MAPDL_DEFAULT_PORT + 1],
                 NullContext(),
             ),
@@ -664,7 +667,7 @@ class TestMapdlPool:
                 None,
                 None,
                 3,
-                [LOCALHOST, LOCALHOST, LOCALHOST],
+                [None, None, None],
                 [MAPDL_DEFAULT_PORT, MAPDL_DEFAULT_PORT + 1, MAPDL_DEFAULT_PORT + 2],
                 NullContext(),
             ),
@@ -673,7 +676,7 @@ class TestMapdlPool:
                 None,
                 50053,
                 3,
-                [LOCALHOST, LOCALHOST, LOCALHOST],
+                [None, None, None],
                 [50053, 50053 + 1, 50053 + 2],
                 NullContext(),
             ),
@@ -694,7 +697,7 @@ class TestMapdlPool:
                 None,
                 [50052, 50053, 50054],
                 3,
-                [LOCALHOST, LOCALHOST, LOCALHOST],
+                [None, None, None],
                 [50052, 50053, 50054],
                 NullContext(),
             ),
