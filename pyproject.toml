@@ -16,6 +16,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 dependencies = [
@@ -43,7 +44,7 @@ license = { file = "LICENSE" }
 maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 name = "ansys-mapdl-core"
 readme = "README.md"
-requires-python = ">=3.10,<3.14" # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
+requires-python = ">=3.10,<3.15" # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
 version = "0.72.dev0"
 
 [project.optional-dependencies]
