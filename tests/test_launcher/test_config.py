@@ -5,6 +5,7 @@
 """Unit tests for launcher.config module."""
 
 import os
+import socket
 from typing import Optional
 from unittest.mock import patch
 
@@ -457,7 +458,6 @@ class TestResolveIpAddress:
 
     def test_resolve_ip_invalid_hostname_explicit(self):
         """Test IP resolution with invalid explicit hostname."""
-        import socket
 
         with patch("socket.gethostbyname", side_effect=socket.gaierror):
             with pytest.raises(ConfigurationError):
@@ -478,7 +478,6 @@ class TestResolveIpAddress:
         may not be registered in DNS yet.  The hostname must therefore be
         passed through so the gRPC layer can resolve it at connection time.
         """
-        import socket
 
         with patch.dict(os.environ, {"PYMAPDL_IP": "invalid-host"}):
             with patch("socket.gethostbyname", side_effect=socket.gaierror):
@@ -857,8 +856,6 @@ class TestResolveExecFileEdgeCases:
 
     def test_resolve_exec_file_env_var_not_exists(self):
         """Test exec file from env var that doesn't exist."""
-        from ansys.mapdl.core.launcher.config import resolve_exec_file
-
         with patch.dict(os.environ, {"PYMAPDL_MAPDL_EXEC": "/nonexistent/mapdl"}):
             with patch("os.path.isfile", return_value=False):
                 with pytest.raises(ConfigurationError):
@@ -866,8 +863,6 @@ class TestResolveExecFileEdgeCases:
 
     def test_resolve_exec_file_no_atc_and_no_explicit(self):
         """Test exec file resolution fails without ATC and no explicit path."""
-        from ansys.mapdl.core.launcher.config import resolve_exec_file
-
         with patch.dict(os.environ, {"PYMAPDL_MAPDL_EXEC": ""}, clear=True):
             with patch("ansys.mapdl.core.launcher.config._HAS_ATC", False):
                 with pytest.raises(ConfigurationError):
@@ -1218,7 +1213,6 @@ class TestConfigParameterResolution:
 
     def test_resolve_ip_invalid_format(self):
         """Test IP resolution with invalid format raises ConfigurationError."""
-        import socket
 
         with patch("socket.gethostbyname", side_effect=socket.gaierror):
             with pytest.raises(ConfigurationError):
@@ -1323,7 +1317,6 @@ class TestExceptionHandling:
 
     def test_invalid_ip(self):
         """Test that invalid IP raises ConfigurationError."""
-        import socket
 
         with patch("socket.gethostbyname", side_effect=socket.gaierror):
             with pytest.raises(ConfigurationError):
@@ -1481,7 +1474,6 @@ class TestIpResolutionEdgeCases:
 
     def test_resolve_ip_invalid_format(self):
         """Test IP validation for invalid format."""
-        import socket
 
         with patch(
             "socket.gethostbyname",
@@ -1509,9 +1501,6 @@ class TestIpResolutionEdgeCases:
 
     def test_resolve_ip_invalid_raises_error(self):
         """Test that invalid IP raises ConfigurationError."""
-        import socket
-
-        from ansys.mapdl.core.launcher.config import ConfigurationError, resolve_ip
 
         with patch(
             "socket.gethostbyname",
@@ -1527,7 +1516,6 @@ class TestIpResolutionEdgeCases:
         When start_instance=True, WSL host IP is used if available.
         When start_instance=False, no special WSL handling needed.
         """
-        from ansys.mapdl.core.launcher.config import resolve_ip
 
         # start_instance=True triggers WSL detection
         with patch.dict(os.environ, {"PYMAPDL_IP": ""}):
@@ -1615,6 +1603,7 @@ class TestConfigurationIntegration:
         assert config.env_vars == {"PATH": "/custom/bin", "ANS_LICENSE": "server"}
         assert config.add_env_vars == {}
 
+    def test_resolve_launch_config_hpc_parameters(self):
         """Test resolve_launch_config with HPC parameters."""
         with patch("os.path.isfile", return_value=True):
             config = resolve_launch_config(

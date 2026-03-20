@@ -489,7 +489,7 @@ def _wait_directory_ready(run_location: str, timeout: int) -> None:
     sleep_time = 0.1
     iterations = int(timeout / sleep_time)
 
-    for i in range(iterations):
+    for _ in range(iterations):
         if os.path.isdir(run_location):
             LOG.debug(f"Run location directory is ready: {run_location}")
             return

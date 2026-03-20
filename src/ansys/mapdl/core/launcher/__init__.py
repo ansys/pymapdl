@@ -41,7 +41,7 @@ Public API:
     - LaunchConfig: Configuration model (for advanced use)
 """
 
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from ansys.mapdl.core import LOG
 

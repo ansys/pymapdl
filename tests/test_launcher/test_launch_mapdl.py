@@ -230,9 +230,6 @@ class TestLaunchMapdlOrchestration:
             )
             mock_grpc.return_value = Mock()
 
-            try:
-                client = launch_mapdl(exec_file="/path/to/mapdl")
-                # Verify environment preparation was called
-                mock_env.assert_called_once()
-            except Exception:
-                pass
+            launch_mapdl(exec_file="/path/to/mapdl")
+            # Verify environment preparation was called
+            mock_env.assert_called_once()

@@ -713,10 +713,6 @@ class TestLaunchOnHpc:
         """Test successful HPC launch."""
         config = _create_test_hpc_config(scheduler_options={"nodes": "2"})
 
-        scontrol_output = """JobID=98765 JobName=test_job
-            JobState=RUNNING
-            BatchHost=node01.cluster"""
-
         with (
             patch(
                 "ansys.mapdl.core.launcher.hpc._generate_mapdl_command"

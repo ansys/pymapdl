@@ -32,6 +32,7 @@ ConfigurationError for invalid states.
 """
 
 import os
+import socket
 import tempfile
 from typing import Any, Dict, Optional
 import warnings
@@ -345,8 +346,6 @@ def resolve_launch_config(
     >>> config.launch_on_hpc
     True
     """
-    import warnings
-
     # Handle deprecated start_timeout parameter
     if start_timeout is not None:
         warnings.warn(
@@ -686,8 +685,6 @@ def resolve_ip(
     Raises:
         ConfigurationError: If IP is invalid, conflicts with HPC launch, or cannot be resolved
     """
-    import socket
-
     # Cannot specify a non-local IP when launching on HPC
     if launch_on_hpc and ip and ip not in ("127.0.0.1", "localhost"):
         raise ConfigurationError(

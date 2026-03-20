@@ -106,10 +106,7 @@ class TestNetworkEdgeCases:
             mock_instance.connect_ex.return_value = 1
 
             # Should handle invalid host gracefully
-            try:
-                result = check_port_status(50052, host="invalid.host.name")
-            except Exception:
-                pass  # May raise exception depending on implementation
+            check_port_status(50052, host="invalid.host.name")
 
 
 class TestCheckPortSocket:

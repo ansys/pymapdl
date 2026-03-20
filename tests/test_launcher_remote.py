@@ -154,7 +154,7 @@ class TestPyPIMConnectionEstablishment:
         assert client is mock_client
         mock_connect.assert_called_once()
 
-    def test_pypim_client_channel_parameter(self, monkeypatch):
+    def test_pypim_client_channel_parameter(self):
         """Test that pypim.Client accepts a channel parameter."""
         mock_channel = grpc.insecure_channel("localhost:12345")
         mock_client = pypim.Client(channel=mock_channel)
@@ -181,7 +181,7 @@ class TestPyPIMConnectionEstablishment:
 class TestPyPIMInstanceCreation:
     """Tests for creating MAPDL instances via PyPIM."""
 
-    def test_pypim_create_instance_basic(self, monkeypatch):
+    def test_pypim_create_instance_basic(self):
         """Test creating a basic MAPDL instance via PyPIM."""
         mock_client = _create_mock_pypim_client()
         mock_instance = _create_mock_pypim_instance()
@@ -192,7 +192,7 @@ class TestPyPIMInstanceCreation:
         assert instance is mock_instance
         mock_client.create_instance.assert_called_with(product_name="mapdl")
 
-    def test_pypim_create_instance_with_version(self, monkeypatch):
+    def test_pypim_create_instance_with_version(self):
         """Test creating MAPDL instance with specific version."""
         mock_client = _create_mock_pypim_client()
         mock_instance = _create_mock_pypim_instance()
@@ -207,7 +207,7 @@ class TestPyPIMInstanceCreation:
             product_name="mapdl", product_version="2022R2"
         )
 
-    def test_pypim_create_instance_default_version_none(self, monkeypatch):
+    def test_pypim_create_instance_default_version_none(self):
         """Test that product_version defaults to None if not specified."""
         mock_client = _create_mock_pypim_client()
         mock_instance = _create_mock_pypim_instance()
@@ -217,7 +217,7 @@ class TestPyPIMInstanceCreation:
 
         mock_client.create_instance.assert_called_with(product_name="mapdl")
 
-    def test_pypim_create_instance_failure(self, monkeypatch):
+    def test_pypim_create_instance_failure(self):
         """Test handling instance creation failure."""
         mock_client = _create_mock_pypim_client()
         mock_client.create_instance.side_effect = Exception("Creation failed")
@@ -234,33 +234,33 @@ class TestPyPIMInstanceCreation:
 class TestPyPIMInstanceReadiness:
     """Tests for waiting for PyPIM instances to become ready."""
 
-    def test_pypim_instance_wait_for_ready(self, monkeypatch):
+    def test_pypim_instance_wait_for_ready(self):
         """Test waiting for instance to become ready."""
         mock_instance = _create_mock_pypim_instance()
         mock_instance.wait_for_ready()
 
         mock_instance.wait_for_ready.assert_called_once()
 
-    def test_pypim_instance_wait_for_ready_with_timeout(self, monkeypatch):
+    def test_pypim_instance_wait_for_ready_with_timeout(self):
         """Test waiting with custom timeout."""
         mock_instance = _create_mock_pypim_instance()
         mock_instance.wait_for_ready(timeout=120)
 
         mock_instance.wait_for_ready.assert_called_once_with(timeout=120)
 
-    def test_pypim_instance_ready_property(self, monkeypatch):
+    def test_pypim_instance_ready_property(self):
         """Test checking ready property."""
         mock_instance = _create_mock_pypim_instance()
         assert mock_instance.ready is True
 
-    def test_pypim_instance_not_ready(self, monkeypatch):
+    def test_pypim_instance_not_ready(self):
         """Test instance that is not ready."""
         mock_instance = _create_mock_pypim_instance()
         mock_instance.ready = False
 
         assert mock_instance.ready is False
 
-    def test_pypim_instance_wait_timeout(self, monkeypatch):
+    def test_pypim_instance_wait_timeout(self):
         """Test timeout during wait_for_ready."""
         mock_instance = _create_mock_pypim_instance()
         mock_instance.wait_for_ready.side_effect = TimeoutError("Instance timed out")
@@ -277,7 +277,7 @@ class TestPyPIMInstanceReadiness:
 class TestPyPIMChannelCreation:
     """Tests for creating gRPC channels via PyPIM instances."""
 
-    def test_pypim_build_grpc_channel_basic(self, monkeypatch):
+    def test_pypim_build_grpc_channel_basic(self):
         """Test building gRPC channel from PyPIM instance."""
         mock_instance = _create_mock_pypim_instance()
         mock_channel = _create_mock_grpc_channel()
@@ -288,7 +288,7 @@ class TestPyPIMChannelCreation:
         assert channel is mock_channel
         mock_instance.build_grpc_channel.assert_called_once()
 
-    def test_pypim_build_grpc_channel_with_max_message_length(self, monkeypatch):
+    def test_pypim_build_grpc_channel_with_max_message_length(self):
         """Test building channel with gRPC options."""
         mock_instance = _create_mock_pypim_instance()
         mock_channel = _create_mock_grpc_channel()
@@ -307,7 +307,7 @@ class TestPyPIMChannelCreation:
             ]
         )
 
-    def test_pypim_build_grpc_channel_failure(self, monkeypatch):
+    def test_pypim_build_grpc_channel_failure(self):
         """Test handling channel creation failure."""
         mock_instance = _create_mock_pypim_instance()
         mock_instance.build_grpc_channel.side_effect = Exception(
@@ -317,7 +317,7 @@ class TestPyPIMChannelCreation:
         with pytest.raises(Exception, match="Channel creation failed"):
             mock_instance.build_grpc_channel()
 
-    def test_pypim_build_grpc_channel_with_mtls(self, monkeypatch):
+    def test_pypim_build_grpc_channel_with_mtls(self):
         """Test building channel with mTLS."""
         mock_instance = _create_mock_pypim_instance()
         mock_channel = _create_mock_grpc_channel()
@@ -338,14 +338,14 @@ class TestPyPIMChannelCreation:
 class TestPyPIMServiceURI:
     """Tests for extracting service URIs from PyPIM instances."""
 
-    def test_pypim_instance_services_grpc_uri(self, monkeypatch):
+    def test_pypim_instance_services_grpc_uri(self):
         """Test extracting gRPC URI from instance services."""
         mock_instance = _create_mock_pypim_instance(uri="remote.example.com:50052")
 
         uri = mock_instance.services["grpc"].uri
         assert uri == "remote.example.com:50052"
 
-    def test_pypim_instance_services_headers(self, monkeypatch):
+    def test_pypim_instance_services_headers(self):
         """Test extracting headers from instance services."""
         mock_instance = _create_mock_pypim_instance()
         mock_instance.services["grpc"].headers = {"Authorization": "Bearer token123"}
@@ -353,7 +353,7 @@ class TestPyPIMServiceURI:
         headers = mock_instance.services["grpc"].headers
         assert headers["Authorization"] == "Bearer token123"
 
-    def test_pypim_instance_multiple_services(self, monkeypatch):
+    def test_pypim_instance_multiple_services(self):
         """Test instance with multiple services."""
         mock_instance = _create_mock_pypim_instance()
         mock_instance.services["http"] = Mock(uri="http://remote.example.com:5000")
@@ -370,21 +370,21 @@ class TestPyPIMServiceURI:
 class TestPyPIMInstanceCleanup:
     """Tests for cleaning up PyPIM instances."""
 
-    def test_pypim_instance_delete(self, monkeypatch):
+    def test_pypim_instance_delete(self):
         """Test deleting a PyPIM instance."""
         mock_instance = _create_mock_pypim_instance()
         mock_instance.delete()
 
         mock_instance.delete.assert_called_once()
 
-    def test_pypim_instance_delete_with_timeout(self, monkeypatch):
+    def test_pypim_instance_delete_with_timeout(self):
         """Test deleting instance with timeout."""
         mock_instance = _create_mock_pypim_instance()
         mock_instance.delete(timeout=60)
 
         mock_instance.delete.assert_called_once_with(timeout=60)
 
-    def test_pypim_instance_delete_failure(self, monkeypatch):
+    def test_pypim_instance_delete_failure(self):
         """Test handling delete failure."""
         mock_instance = _create_mock_pypim_instance()
         mock_instance.delete.side_effect = Exception("Delete failed")
@@ -401,7 +401,7 @@ class TestPyPIMInstanceCleanup:
 class TestPyPIMToMapdlConnection:
     """Tests for connecting to MAPDL via PyPIM-created channel."""
 
-    def test_create_grpc_client_with_pypim_channel(self, monkeypatch):
+    def test_create_grpc_client_with_pypim_channel(self):
         """Test creating MapdlGrpc client using PyPIM channel."""
         config = _create_test_config()
 
@@ -411,7 +411,7 @@ class TestPyPIMToMapdlConnection:
 
             create_grpc_client(config, process_info=None)
 
-    def test_grpc_channel_carries_pypim_metadata(self, monkeypatch):
+    def test_grpc_channel_carries_pypim_metadata(self):
         """Test that gRPC channel includes PyPIM metadata."""
         mock_channel = _create_mock_grpc_channel()
         mock_channel.metadata = [("x-pim-instance", "instance-123")]
@@ -494,7 +494,7 @@ class TestPyPIMWorkflow:
         assert client is mock_client
 
         with pytest.raises(Exception, match="Creation failed"):
-            instance = client.create_instance(product_name="mapdl")
+            client.create_instance(product_name="mapdl")
 
 
 # ============================================================================
@@ -509,7 +509,7 @@ class TestPyPIMVersionHandling:
         "version",
         ["2021R1", "2022R2", "2023R1", "2024R1"],
     )
-    def test_pypim_create_instance_various_versions(self, monkeypatch, version):
+    def test_pypim_create_instance_various_versions(self, version):
         """Test creating instances with various MAPDL versions."""
         mock_client = _create_mock_pypim_client()
         mock_instance = _create_mock_pypim_instance()
@@ -524,7 +524,7 @@ class TestPyPIMVersionHandling:
             product_name="mapdl", product_version=version
         )
 
-    def test_pypim_create_instance_latest_version(self, monkeypatch):
+    def test_pypim_create_instance_latest_version(self):
         """Test creating instance with latest version."""
         mock_client = _create_mock_pypim_client()
         mock_instance = _create_mock_pypim_instance()
@@ -551,7 +551,7 @@ class TestPyPIMConfigurationScenarios:
         mock_connect = Mock(return_value=mock_client)
         monkeypatch.setattr(pypim, "connect", mock_connect)
 
-        client = pypim.connect(url="custom-pim.example.com:50000")
+        pypim.connect(url="custom-pim.example.com:50000")
 
         mock_connect.assert_called_once_with(url="custom-pim.example.com:50000")
 
@@ -561,7 +561,7 @@ class TestPyPIMConfigurationScenarios:
         mock_connect = Mock(return_value=mock_client)
         monkeypatch.setattr(pypim, "connect", mock_connect)
 
-        client = pypim.connect(
+        pypim.connect(
             url="pim.example.com:50000",
             username="user123",
             password="pass123",
@@ -575,7 +575,7 @@ class TestPyPIMConfigurationScenarios:
         mock_connect = Mock(return_value=mock_client)
         monkeypatch.setattr(pypim, "connect", mock_connect)
 
-        client = pypim.connect(url="pim.example.com:50000", insecure=False)
+        pypim.connect(url="pim.example.com:50000", insecure=False)
 
         mock_connect.assert_called_once()
 
@@ -588,14 +588,14 @@ class TestPyPIMConfigurationScenarios:
 class TestRemoteInstanceTracking:
     """Tests for tracking remote instances for cleanup."""
 
-    def test_remote_instance_metadata_extraction(self, monkeypatch):
+    def test_remote_instance_metadata_extraction(self):
         """Test extracting metadata from remote instance."""
         mock_instance = _create_mock_pypim_instance()
 
         assert mock_instance.name == "instances/mapdl-v222-abc123"
         assert mock_instance.ready is True
 
-    def test_remote_instance_state_transitions(self, monkeypatch):
+    def test_remote_instance_state_transitions(self):
         """Test tracking instance state transitions."""
         mock_instance = _create_mock_pypim_instance()
         assert mock_instance.ready is True
@@ -606,7 +606,7 @@ class TestRemoteInstanceTracking:
         mock_instance.ready = True
         assert mock_instance.ready is True
 
-    def test_remote_instance_holds_reference_for_deletion(self, monkeypatch):
+    def test_remote_instance_holds_reference_for_deletion(self):
         """Test that instance reference is maintained for cleanup."""
         mock_instance = _create_mock_pypim_instance()
         instance_ref = mock_instance
@@ -623,7 +623,7 @@ class TestRemoteInstanceTracking:
 class TestMultipleRemoteInstances:
     """Tests for managing multiple remote instances."""
 
-    def test_create_multiple_instances_sequentially(self, monkeypatch):
+    def test_create_multiple_instances_sequentially(self):
         """Test creating multiple instances in sequence."""
         mock_client = _create_mock_pypim_client()
         mock_instance1 = _create_mock_pypim_instance()
@@ -638,7 +638,7 @@ class TestMultipleRemoteInstances:
         assert instance2 is mock_instance2
         assert instance1 is not instance2
 
-    def test_cleanup_multiple_instances(self, monkeypatch):
+    def test_cleanup_multiple_instances(self):
         """Test cleaning up multiple instances."""
         instances = [
             _create_mock_pypim_instance(),
@@ -661,13 +661,13 @@ class TestMultipleRemoteInstances:
 class TestPyPIMEdgeCases:
     """Tests for edge cases and error scenarios."""
 
-    def test_pypim_instance_with_none_uri(self, monkeypatch):
+    def test_pypim_instance_with_none_uri(self):
         """Test instance with None URI."""
         mock_instance = _create_mock_pypim_instance(uri=None)
 
         assert mock_instance.services["grpc"].uri is None
 
-    def test_pypim_instance_with_empty_headers(self, monkeypatch):
+    def test_pypim_instance_with_empty_headers(self):
         """Test instance with empty headers."""
         mock_instance = _create_mock_pypim_instance()
         assert isinstance(mock_instance.services["grpc"].headers, dict)
@@ -680,7 +680,7 @@ class TestPyPIMEdgeCases:
         with pytest.raises(TimeoutError, match="Connection timed out"):
             pypim.connect()
 
-    def test_pypim_instance_with_network_error(self, monkeypatch):
+    def test_pypim_instance_with_network_error(self):
         """Test instance creation with network error."""
         mock_client = _create_mock_pypim_client()
         mock_client.create_instance.side_effect = OSError("Network unreachable")
@@ -688,7 +688,7 @@ class TestPyPIMEdgeCases:
         with pytest.raises(OSError, match="Network unreachable"):
             mock_client.create_instance(product_name="mapdl")
 
-    def test_pypim_channel_with_bad_credentials(self, monkeypatch):
+    def test_pypim_channel_with_bad_credentials(self):
         """Test channel creation with bad credentials."""
         mock_instance = _create_mock_pypim_instance()
         mock_instance.build_grpc_channel.side_effect = PermissionError(

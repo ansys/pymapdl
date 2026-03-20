@@ -3247,9 +3247,7 @@ def test_set_no_abort_method_execution(set_no_abort):
             "cleanup_on_exit": False,
         }
 
-        mapdl = MapdlGrpc(
-            set_no_abort=set_no_abort, disable_run_at_connect=True, **start_parm
-        )
+        MapdlGrpc(set_no_abort=set_no_abort, disable_run_at_connect=True, **start_parm)
 
     # Verify /NERR command was issued based on set_no_abort value
     if set_no_abort is None or set_no_abort:
