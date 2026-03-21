@@ -28,7 +28,7 @@ jobs:
     permissions:
       contents: write  # Needed to remove documentation from gh-pages branch
     steps:
-      - uses: ansys/actions/doc-deploy-pr@22d03f365874cc55ffb84705f5f635f055b6f2b8 # v10.2.8
+      - uses: ansys/actions/doc-deploy-pr@2a2b198b65c63adb69c0d032d180e4dc728d4809 # v10.2.9
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
