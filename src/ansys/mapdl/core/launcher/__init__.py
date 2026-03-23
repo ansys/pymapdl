@@ -47,7 +47,12 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 from ansys.mapdl.core import LOG
 
 from .config import resolve_launch_config
-from .connection import connect_to_existing, create_console_client, create_grpc_client
+from .connection import (
+    close_all_local_instances,
+    connect_to_existing,
+    create_console_client,
+    create_grpc_client,
+)
 from .environment import prepare_environment
 from .errors import ConfigurationError, LaunchError
 from .hpc import (

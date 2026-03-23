@@ -243,3 +243,31 @@ def connect_to_existing(config: LaunchConfig) -> MapdlGrpc:
     """
     LOG.info(f"Connecting to existing MAPDL instance at {config.ip}:{config.port}")
     return create_grpc_client(config, process_info=None)
+
+
+def close_all_local_instances(port_range: range | None = None) -> None:
+    """Close all MAPDL instances within a port_range.
+
+    This function can be used when cleaning up from a failed pool or
+    batch run.
+
+    Parameters
+    ----------
+    port_range : list, optional
+        Defaults to all ports. Expand this range if
+        there are many potential instances of MAPDL in gRPC mode.
+
+    Examples
+    --------
+    Close all instances on in the range of 50000 and 50199.
+
+    >>> import ansys.mapdl.core as pymapdl
+    >>> pymapdl.close_all_local_instances()
+    """
+    from ansys.mapdl.core.cli import stop
+
+    if port_range is None:
+        stop(port=None, pid=None, all=True)
+    else:
+        for port in port_range:
+            stop(port=port, pid=None, all=False)
