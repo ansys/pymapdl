@@ -393,7 +393,7 @@ jobs:
       - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.codecov-token }} # required
+          token: ${{ secrets.CODECOV_TOKEN }} # required
           root_dir: ${{ github.workspace }}
           name: ${{ env.file_name }}
           files: ${{ env.file_name }}.xml
@@ -464,7 +464,7 @@ jobs:
       - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.codecov-token }} # required
+          token: ${{ secrets.CODECOV_TOKEN }} # required
           root_dir: ${{ github.workspace }}
           name: ${{ env.file_name }}
           files: ${{ env.file_name }}.xml
