@@ -216,7 +216,8 @@ if has_dependency("pyvista"):
 
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
-from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+from ansys.mapdl.core.launcher import launch_mapdl
+from ansys.mapdl.core.launcher.config import resolve_start_instance
 from ansys.mapdl.core.mapdl_core import VALID_DEVICES
 from ansys.mapdl.core.plotting import GraphicsBackend
 
@@ -232,7 +233,7 @@ if has_dependency("ansys-tools-visualization_interface"):
 #
 
 # check if the user wants to permit pytest to start MAPDL
-START_INSTANCE = get_start_instance()
+START_INSTANCE = resolve_start_instance(None, None)
 
 ################
 if os.name == "nt":

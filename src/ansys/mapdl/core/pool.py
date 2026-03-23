@@ -32,14 +32,18 @@ import weakref
 
 from ansys.mapdl.core import _HAS_ATC, _HAS_TQDM, LOG, launch_mapdl
 from ansys.mapdl.core.errors import MapdlDidNotStart, MapdlRuntimeError, VersionError
-from ansys.mapdl.core.launcher import (
+from ansys.mapdl.core.launcher.config import (
     LOCALHOST,
     MAPDL_DEFAULT_PORT,
-    check_valid_ip,
-    get_start_instance,
-    port_in_use,
+    resolve_start_instance,
 )
-from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
+from ansys.mapdl.core.launcher.network import check_port_status
+from ansys.mapdl.core.misc import (
+    check_valid_ip,
+    create_temp_dir,
+    threaded,
+    threaded_daemon,
+)
 
 if _HAS_ATC:
     from ansys.tools.common.path import get_mapdl_path, version_from_path
@@ -59,7 +63,7 @@ def available_ports(n_ports: int, starting_port: int = MAPDL_DEFAULT_PORT) -> Li
     port = starting_port
     ports: List[int] = []
     while port < 65536 and len(ports) < n_ports:
-        if not port_in_use(port):
+        if not check_port_status(port).in_use:
             ports.append(port)
         port += 1
 
@@ -243,9 +247,9 @@ class MapdlPool:
         if (ip is not None) and (start_instance is None):
             # An IP has been supplied. By default, 'start_instance' is equal
             # false, unless it is set through the env vars.
-            start_instance = get_start_instance(start_instance=False)
+            start_instance = resolve_start_instance(False, None)
         else:
-            start_instance = get_start_instance(start_instance=start_instance)
+            start_instance = resolve_start_instance(start_instance, None)
 
         self._start_instance = start_instance
         LOG.debug(f"'start_instance' equals to '{start_instance}'")

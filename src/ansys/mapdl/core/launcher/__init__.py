@@ -46,7 +46,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from ansys.mapdl.core import LOG
 
-from .config import resolve_launch_config
+from .config import LOCALHOST, MAPDL_DEFAULT_PORT, resolve_launch_config
 from .connection import (
     close_all_local_instances,
     connect_to_existing,
@@ -76,7 +76,14 @@ __all__ = [
     "LaunchConfig",
     "ConfigurationError",
     "LaunchError",
+    "LOCALHOST",
+    "generate_start_parameters",
 ]
+
+
+def generate_start_parameters(kwargs: dict) -> dict:
+    """Generate start parameters dict (backward compatibility shim)."""
+    return {k: v for k, v in kwargs.items()}
 
 
 def _launch_mapdl_common(

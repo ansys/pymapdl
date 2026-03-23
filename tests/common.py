@@ -32,11 +32,9 @@ import psutil
 
 from ansys.mapdl.core import LOG, Mapdl
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlExitedError
-from ansys.mapdl.core.launcher import (
-    _is_ubuntu,
-    is_ansys_process,
-    launch_mapdl,
-)
+from ansys.mapdl.core.launcher import launch_mapdl
+from ansys.mapdl.core.launcher.environment import is_ubuntu as _is_ubuntu
+from ansys.mapdl.core.launcher.network import _is_mapdl_process as is_ansys_process
 
 PROCESS_OK_STATUS = [
     psutil.STATUS_RUNNING,  #
