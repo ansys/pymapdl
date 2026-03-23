@@ -388,7 +388,7 @@ jobs:
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           uv venv .venv
-          uv pip install --dependency-groups=tox
+          uv pip install --group=tox
           tox -e docker-remote
 
       - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
@@ -460,7 +460,7 @@ jobs:
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           uv venv .venv
-          uv pip install --dependency-groups=tox
+          uv pip install --group=tox
           tox -e docker-local
 
       - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
