@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.extopt
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.extopt

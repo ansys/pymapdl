@@ -1,0 +1,1133 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>cint &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=affbdea0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/prep7/_autosummary/ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cint';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="cycexpand" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cycexpand.html" />
+    <link rel="prev" title="aerocoeff" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.aerocoeff.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.72.dev0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/prep7/_autosummary/ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cint.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Session</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../session/index.html">Session</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Database</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../database/index.html">Database</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Graphics</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../graphics/index.html">Graphics</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">APDL</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/abbreviations.html">Abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/parameter_definition.html">ParameterDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/matrix_operations.html">MatrixOperations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/macro_files.html">MacroFiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/encryption_decryption.html">EncryptionDecryption</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/array_parameters.html">ArrayParameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/process_controls.html">ProcessControls</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Preprocessing</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Prep7</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../areas.html">Areas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../booleans.html">Booleans</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../meshing.html">Meshing</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../special_purpose.html">SpecialPurpose</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.adpci.html">adpci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.aerocoeff.html">aerocoeff</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">cint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cycexpand.html">cycexpand</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cycfreq.html">cycfreq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cyclic.html">cyclic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cycopt.html">cycopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.emsym.html">emsym</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.msopt.html">msopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.mstole.html">mstole</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.perbc2d.html">perbc2d</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.race.html">race</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.sstate.html">sstate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.xfcrkmesh.html">xfcrkmesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.xfdata.html">xfdata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.xfenrich.html">xfenrich</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.xflist.html">xflist</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../database.html">Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../elements.html">Elements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../piping.html">Piping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../primitives.html">Primitives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cross_sections.html">CrossSections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lines.html">Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data_tables.html">DataTables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constraint_equations.html">ConstraintEquations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constraint_equations_.html">ConstraintEquations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nodes.html">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../coupled_dof.html">CoupledDof</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../morphing.html">Morphing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../element_type.html">ElementType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../materials.html">Materials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../volumes.html">Volumes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../keypoints.html">Keypoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../hard_points.html">HardPoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../artificially_matched_layers.html">ArtificiallyMatchedLayers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../real_constants.html">RealConstants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../superelements.html">Superelements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../explicit_dynamics.html">ExplicitDynamics</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Solution</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../solution/index.html">Solution</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post1/index.html">Post1</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST26</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post26/index.html">Post26</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux2/index.html">Aux2</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux3/index.html">Aux3</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX12</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux12/index.html">Aux12</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX15</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux15/index.html">Aux15</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">MAP</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../map/index.html">Map</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Connection</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../conn.html">Connection commands</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../misc.html">Miscellaneous</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Undocumented</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../inqfun.html">Undocumented inquire commands</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="None" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">MAPDL commands</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../index.html" class="nav-link">Prep7</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../special_purpose.html" class="nav-link">SpecialPurpose</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">cint</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="cint">
+<h1>cint<a class="headerlink" href="#cint" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cint">
+<span class="sig-prename descclassname"><span class="pre">SpecialPurpose.</span></span><span class="sig-name descname"><span class="pre">cint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par4</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par5</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par6</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par7</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cint" title="Link to this definition">#</a></dt>
+<dd><p>Defines parameters associated with fracture-parameter calculations.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CINT.html">CINT</a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>action</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Specifies action for defining or manipulating initial crack data:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">NEW</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specification for Action= NEW</a> Initiate a new
+calculation and assign an ID.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CTNC</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= CTNC</a> Define the
+crack-tip node component.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SURF</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= SURF</a> Define the
+crack-surface node components.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CENC</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= CENC</a> Define the
+crack-extension node component, the crack-tip node, and the crack-extension direction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TYPE</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= TYPE</a> Define the type
+of calculation to perform.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DELE</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= DELE</a> Delete the
+<span class="xref std std-ref">cint</span> object associated with the specified ID.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NCON</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= NCON</a> Specify the
+number of contours to calculate in the contour-integral calculation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SYMM</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= SYMM</a> Indicate whether
+the crack is on a symmetrical line or plane.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NORM</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= NORM</a> Define the
+crack-plane normal.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UMM</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= UMM</a> Enable or
+disable the unstructured-mesh method (UMM).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EDIR</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= EDIR</a> Crack-assist
+extension direction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PLOT</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= PLOT</a> Plots the crack-
+front and crack-tip coordinate system.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LIST</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= LIST</a> List the <strong>CINT</strong> commands issued, or the elements used, in fracture-parameter calculations.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CXFE</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= CXFE</a> Define the
+crack-tip element or crack-front element set. Valid for <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_FRACXFEM.html#fracxfemreferences">XFEM-based crack-growth</a>
+analysis only.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RADIUS</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= RADIUS</a> Define the
+radius at which the given value is to be evaluated. Valid for XFEM-based crack-growth analysis only.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RSWEEP</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= RSWEEP</a> Define the
+minimum and maximum sweep angle from existing crack direction. Valid for XFEM-based crack-growth
+analysis only.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">INIT</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= INIT</a> SMART crack-
+initiation ID.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CSFL</span></code> - <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">Command Specifications for Action= CSFL</a> Convert initial-
+stress data to crack-surface traction loading.</p></li>
+</ul>
+</dd>
+<dt><strong>par1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CINT.html">command
+documentation</a> for further
+information.</p>
+</dd>
+<dt><strong>par2</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CINT.html">command
+documentation</a> for further
+information.</p>
+</dd>
+<dt><strong>par3</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CINT.html">command
+documentation</a> for further
+information.</p>
+</dd>
+<dt><strong>par4</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CINT.html">command
+documentation</a> for further
+information.</p>
+</dd>
+<dt><strong>par5</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CINT.html">command
+documentation</a> for further
+information.</p>
+</dd>
+<dt><strong>par6</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CINT.html">command
+documentation</a> for further
+information.</p>
+</dd>
+<dt><strong>par7</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CINT.html">command
+documentation</a> for further
+information.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p id="cint-notes">Initiate a new calculation via the <code class="docutils literal notranslate"><span class="pre">Action</span></code> = NEW parameter. Subsequent <span class="xref std std-ref">cint</span> commands (with
+parameters other than NEW) define the input required for the fracture-parameter calculations.</p>
+<p>The simplest method is to define crack information via <code class="docutils literal notranslate"><span class="pre">Action</span></code> = CTNC; however, this method
+limits you to only one node for a given location along the crack front. Use the CTNC option only
+when all nodes that define the crack front lie in a single plane.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Action</span></code> = SURF, <code class="docutils literal notranslate"><span class="pre">Par1</span></code> and <code class="docutils literal notranslate"><span class="pre">Par2</span></code> can be the top or bottom crack-face node component. No
+order is required, provided that if one value the top crach-face node component, the other must be
+the bottom, and vice-versa. This option is valid only with <span class="xref std std-ref">cgrow</span> for crack-growth simulation.</p>
+<p>To define crack information at multiple locations along the crack front, use <code class="docutils literal notranslate"><span class="pre">Action</span></code> = CENC. You
+can issue <span class="xref std std-ref">cint</span>,CENC, <code class="docutils literal notranslate"><span class="pre">Par1</span></code>, etc. multiple times to define the crack-extension node
+component, the crack tip, and the crack-extension directions at multiple locations along the crack
+front.</p>
+<p>Although you can vary the sequence of your definitions, all specified crack-tip nodes must be at the
+crack front, and no crack-tip node can be omitted.</p>
+<p>You can define the crack-extension direction directly by specifying either <code class="docutils literal notranslate"><span class="pre">Action</span></code> = CENC or
+<code class="docutils literal notranslate"><span class="pre">Action</span></code> = NORM.</p>
+<p>The crack-assist extension direction ( <code class="docutils literal notranslate"><span class="pre">Action</span></code> = EDIR) provides a generic extension direction
+when <code class="docutils literal notranslate"><span class="pre">Action</span></code> = CTNC. It helps to define crack-extension directions based on the connectivity of
+the crack-front elements. For a 2D case when the crack tangent cannot be calculated, the program
+uses the provided crack-assist extension direction directly.</p>
+<p>For an <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_FRACXFEM.html#fracxfemreferences">XFEM-based crack-growth</a>
+analysis:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Action</span></code> = CTNC, CENC, NCON, SYMM, UMM, or EDIR have no effect.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Action</span></code> = CXFE, RADIUS, or RSWEEP are XFEM-specific and invalid for any other type of crack-
+growth analysis.</p></li>
+<li><p>For <span class="xref std std-ref">cint</span>,TYPE, only <code class="docutils literal notranslate"><span class="pre">Par1</span></code> = PSMAX or STTMAX are valid. Other <code class="docutils literal notranslate"><span class="pre">Par1</span></code> values have no
+effect.</p></li>
+</ul>
+<p>The stress-intensity factors calculation ( <span class="xref std std-ref">cint</span>,TYPE,SIFS) applies only to isotropic linear
+elasticity. Use only one material type for the crack-tip elements that are used for the
+calculations.</p>
+<p>When calculating energy release rates ( <span class="xref std std-ref">cint</span>,TYPE,VCCT), do not restrict the results from
+being written to the database ( <span class="xref std std-ref">config</span>,NOELDB,1) after solution processing; otherwise,
+incorrect and potentially random results are possible.</p>
+<p>Fracture-parameter calculations based on domain integrations such as stress-intensity factors,
+J-integral, or material force are not supported when contact elements exist inside the domain. The
+calculations may become path-dependent unless the contact pressure is negligible.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Action</span></code> = UMM, the default value can be OFF or ON <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracumm.html#cintondefaulttab">depending on the element type</a>.
+The <span class="xref std std-ref">cint</span> command overrides the default setting for the given element.</p>
+<p>The <span class="xref std std-ref">cint</span> command supports only strain data for initial state (
+<span class="xref std std-ref">inistate</span>,SET,DTYP,EPEL). Other initial-state capabilities are not supported.</p>
+<p>For more information about using the <span class="xref std std-ref">cint</span> command, including supported element types and
+material behavior, see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracumm.html">Calculating Fracture Parameters</a></p>
+<section id="command-specifications">
+<h2>Command Specifications<a class="headerlink" href="#command-specifications" title="Link to this heading">#</a></h2>
+<p><strong>Command Specification for Action= NEW</strong></p>
+<ul class="simple" id="cint-new">
+<li><p><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - <span class="xref std std-ref">cint</span> ID number.</p></li>
+</ul>
+<p><strong>Command Specifications for Action= CTNC</strong></p>
+<ul class="simple" id="cint-ctncomp">
+<li><p><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - Crack-tip node component name (must be 32 characters or less).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par2</span></code> - Crack-extension direction calculation-assist node. Any node on the open side of the
+crack.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par3</span></code> - Crack front``s end-node crack-extension direction override flag:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> - Align the extension direction with the edges attached at the two end nodes of the crack
+front (default).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> - Align the extension direction to be perpendicular to the crack front.</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Command Specifications for Action= SURF</strong></p>
+<ul class="simple" id="cint-ctnsurf">
+<li><p><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - Crack-surface node component 1 (top or bottom crack face). (Component name must be 32
+characters or less.)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par2</span></code> - Crack-surface node component 2 (top or bottom crack face, but the opposite of <code class="docutils literal notranslate"><span class="pre">Par1</span></code>
+). (Component name must be 32 characters or less.)</p></li>
+</ul>
+<p><strong>Command Specifications for Action= CENC</strong></p>
+<ul class="simple" id="cint-cencomp">
+<li><p><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - Crack-extension node component name ( <span class="xref std std-ref">cm</span> ). (Must be 32 characters or less.)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par2</span></code> - Crack-tip node. The crack-tip node defaults to the first node of the crack-extension
+node component.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par3,</span> <span class="pre">Par4</span></code> - Coordinate system number ( <code class="docutils literal notranslate"><span class="pre">Par3</span></code> ) and the number of the axis that is
+coincident with the crack direction ( <code class="docutils literal notranslate"><span class="pre">Par4</span></code> ). When these parameters are defined, <code class="docutils literal notranslate"><span class="pre">Par5</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Par6</span></code> and <code class="docutils literal notranslate"><span class="pre">Par7</span></code> are ignored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par5,</span> <span class="pre">Par6,</span> <span class="pre">Par7</span></code> - Global x, y, and z components of the crack-extension direction vector. (
+<code class="docutils literal notranslate"><span class="pre">Par3</span></code> and <code class="docutils literal notranslate"><span class="pre">Par4</span></code> must be blank.)</p></li>
+</ul>
+<p><strong>Command Specifications for Action= TYPE</strong></p>
+<ul class="simple" id="cint-type">
+<li><p><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - Type of calculation to perform:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">JINT</span></code> - Calculate <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/frac_parmcalctypes.html#strjintcalcmethod">J-integral</a>
+(default).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SIFS</span></code> - Calculate <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/frac_parmcalctypes.html#strcalcSIFs">stress-intensity factors</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TSTRESS</span></code> - Calculate <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/frac_parmcalctypes.html#strtstrcalculating">T-stress</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MFOR</span></code> - Calculate <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/frac_parmcalctypes.html#strcalcmatforce">material forces</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CSTAR</span></code> - Calculate <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/frac_parmcalctypes.html#">C2-integral</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VCCT</span></code> - Calculate <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/frac_parmcalctypes.html#strcalcERRproc">energy-release rate</a>
+using the VCCT method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PSMAX</span></code> - Calculate circumferential stress at the location where <span class="math notranslate nohighlight">\(equation not available\)</span>
+when sweeping around the crack tip at the                                        given radius. Valid
+in an  <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_FRACXFEM.html#fracxfemreferences">XFEM- based crack-growth</a>
+analysis only.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">STTMAX</span></code> - Calculate maximum circumferential stress when sweeping around the crack tip at the
+given radius. Valid in an XFEM-based crack-growth analysis only.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par2</span></code> - Auxiliary stress fields and strategy for <strong>3D</strong>  <a href="#id10"><span class="problematic" id="id11">`</span></a>stress-intensity factors</p></li>
+</ul>
+<p>&lt;<a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/frac_parmcalctypes.html#strcalcSIFs">https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/frac_parmcalctypes.html#strcalcSIFs</a>&gt;`_
+( <code class="docutils literal notranslate"><span class="pre">Par1</span></code> = SIFS) calculations:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> - The plane-strain auxiliary fields are used at the interior nodes along the crack front.
+The stress- intensity factors at the end nodes of the crack front are set to copy the stress-
+intensity factors at the adjacent nodes. (Default.)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> - The plane-stress auxiliary fields are used over the entire crack front.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> - The plane-strain auxiliary fields are used over the entire crack front.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Command Specifications for Action= DELE</strong></p>
+<ul class="simple" id="cint-dele">
+<li><p><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - <span class="xref std std-ref">cint</span> ID (default = ALL).</p></li>
+</ul>
+<p><strong>Command Specifications for Action= NCON</strong></p>
+<ul class="simple" id="cint-ncontour">
+<li><p><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - Number of contours to be calculated.</p></li>
+</ul>
+<p><strong>Command Specifications for Action= SYMM</strong></p>
+<ul class="simple" id="cint-symmetric">
+<li><p><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - * <code class="docutils literal notranslate"><span class="pre">OFF,</span> <span class="pre">0,</span> <span class="pre">or</span> <span class="pre">NO</span></code> - No symmetry (default).</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">ON,</span> <span class="pre">1,</span> <span class="pre">or</span> <span class="pre">YES</span></code> - Symmetric about the crack line/plane.</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Command Specifications for Action= UMM</strong></p>
+<ul id="cint-umm">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - * <code class="docutils literal notranslate"><span class="pre">OFF,</span> <span class="pre">0,</span> <span class="pre">or</span> <span class="pre">NO</span></code> - Disable the <a href="#id12"><span class="problematic" id="id13">`</span></a>unstructured-mesh method (UMM)</dt><dd><p>&lt;<a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracumm.html#fracummassump">https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracumm.html#fracummassump</a>&gt;`_
+(default).</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ON,</span> <span class="pre">1,</span> <span class="pre">or</span> <span class="pre">YES</span></code> - Enable the UMM.</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Command Specifications for Action= NORM</strong></p>
+<ul class="simple" id="cint-normal">
+<li><p><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - Coordinate system number (default = 0, global Cartesian).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par2</span></code> - Axis of coordinate system (default = 2, global Cartesian Y-axis).</p></li>
+</ul>
+<p><strong>Command Specifications for Action= EDIR</strong></p>
+<ul id="cint-caextdir">
+<li><p><code class="docutils literal notranslate"><span class="pre">ITYPE</span></code> - Input type for the crack-assist extension direction. Valid values are CS (coordinate
+system number) or COMP (component x or y extension direction).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par2</span></code> - If <code class="docutils literal notranslate"><span class="pre">ITYPE</span></code> = CS, the coordinate system number.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">ITYPE</span></code> = COMP, the x component of the crack-assist extension direction.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par3</span></code> - If <code class="docutils literal notranslate"><span class="pre">ITYPE</span></code> is CS, the axis representing the crack-assist extension direction.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">ITYPE</span></code> = COMP, the y component of the crack-assist extension direction.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par4</span></code> - For <code class="docutils literal notranslate"><span class="pre">ITYPE</span></code> = CS, this value is not specified.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">ITYPE</span></code> = COMP, the z component of the crack-assist extension direction.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par5</span></code> - A reference node on the crack front attached to the crack-assist extension direction.
+To accurately calculate and flip the crack-extension directions, the crack-assist extension
+direction defined at this node is rotated as the tangent along the crack front rotates. This
+capability is useful when the crack-extension directions vary by more than 180 degrees along the
+crack front.</p></li>
+</ul>
+<p><strong>Command Specifications for Action= PLOT</strong></p>
+<ul id="cint-plot">
+<li><p><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - Crack ID.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par2</span></code> - 0 – Disable plotting of crack-tip coordinate system.</p>
+<p>1 – Enable plotting of crack-tip coordinate system (default).</p>
+<p>Color codes are white for the crack-extension direction, green for the crack normal, and red for the
+direction tangential to the crack front. To clear or delete the plots, issue <span class="xref std std-ref">annot</span>.</p>
+</li>
+</ul>
+<p><strong>Command Specifications for Action= LIST</strong></p>
+<ul id="cint-list">
+<li><p><code class="docutils literal notranslate"><span class="pre">CrackID</span></code> - Crack ID. Default = ALL.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par2</span></code> - No value – Lists the <span class="xref std std-ref">cint</span> commands issued for the crack. <code class="docutils literal notranslate"><span class="pre">Par3</span></code> and <code class="docutils literal notranslate"><span class="pre">Par4</span></code>
+are ignored.</p>
+<p>ELEM – Lists the elements used in the fracture-parameter calculation.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par3</span></code> - Node number on the crack front/tip. Default = ALL. Valid only when <code class="docutils literal notranslate"><span class="pre">Par2</span></code> =ELEM.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par4</span></code> - Contour number around the crack front/tip. Default = ALL. Valid only when <code class="docutils literal notranslate"><span class="pre">Par2</span></code>
+=ELEM.</p></li>
+</ul>
+<p><strong>Command Specifications for Action= CXFE</strong></p>
+<ul class="simple" id="cint-cxfe">
+<li><p><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - Crack-tip element number or crack-front component name. (Component name must be 32
+characters or less.)</p></li>
+</ul>
+<p><strong>Command Specifications for Action= RADIUS</strong></p>
+<ul class="simple" id="cint-radius">
+<li><p><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - Radius at which a value is evaluated (used with <span class="xref std std-ref">cint</span>,TYPE,PSMAX or
+<span class="xref std std-ref">cint</span>,TYPE,STTMAX only).</p></li>
+</ul>
+<p><strong>Command Specifications for Action= RSWEEP</strong></p>
+<ul class="simple" id="cint-rsweep">
+<li><p><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - Number of intervals for the sweep.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par2</span></code> - Minimum angle of the sweep.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Par3</span></code> - Maximum angle of the sweep</p></li>
+</ul>
+<p><strong>Command Specifications for Action= INIT</strong></p>
+<ul class="simple" id="cint-init">
+<li><p><code class="docutils literal notranslate"><span class="pre">Par1</span></code> - <span class="xref std std-ref">adpci</span> ID number. The data associated with the <span class="xref std std-ref">adpci</span> ID is connected to
+the <span class="xref std std-ref">cint</span> data set to define <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fractSMARTinit.html#SMARTcrackinitexamp">crack-initiation analysis</a>
+details (such as crack location and shape, initiation criteria, etc.).</p></li>
+</ul>
+<p><strong>Command Specifications for Action= CSFL</strong></p>
+<p id="cint-csfl"><a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_adv/Hlp_G_INSTWRITVAL.html">Initial-stress</a> data (
+mesh-independent ) are converted to a traction load acting on the crack-surfaces (specified via
+<span class="xref std std-ref">cint</span>,SURF). The traction is applied as a step load for all substeps.</p>
+<p>The initial-stress data points are specified at various spatial locations in the global Cartesian
+coordinate system ( <span class="xref std std-ref">csys</span> ). The data is required in the vicinity of the crack surfaces only.
+The program interpolates the initial stress at the centroid of each element face of the crack
+surfaces, then determines the equivalent traction at the element face based on its orientation.</p>
+<p>For more information, see and</p>
+</section>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.72.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.7.2. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.kscale
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.kscale

@@ -1,0 +1,6 @@
+﻿nrefine
+=======
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.meshing
+
+.. automethod:: Meshing.nrefine

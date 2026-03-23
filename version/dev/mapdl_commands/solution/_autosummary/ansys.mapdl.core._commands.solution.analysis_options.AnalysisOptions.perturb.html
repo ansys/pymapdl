@@ -1,0 +1,1174 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>perturb &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=affbdea0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/solution/_autosummary/ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.perturb';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="pivcheck" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.pivcheck.html" />
+    <link rel="prev" title="pcgopt" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.pcgopt.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.72.dev0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/solution/_autosummary/ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.perturb.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Session</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../session/index.html">Session</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Database</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../database/index.html">Database</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Graphics</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../graphics/index.html">Graphics</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">APDL</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/abbreviations.html">Abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/parameter_definition.html">ParameterDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/matrix_operations.html">MatrixOperations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/macro_files.html">MacroFiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/encryption_decryption.html">EncryptionDecryption</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/array_parameters.html">ArrayParameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/process_controls.html">ProcessControls</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Preprocessing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/index.html">Prep7</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Solution</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Solution</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../analysis_options.html">AnalysisOptions</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.abextract.html">abextract</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.accoption.html">accoption</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.adams.html">adams</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.antype.html">antype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.ascres.html">ascres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.asol.html">asol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.bcsoption.html">bcsoption</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.cjump.html">cjump</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.cload.html">cload</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.cmatrix.html">cmatrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.cmsopt.html">cmsopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.cnkmod.html">cnkmod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.cntr.html">cntr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.cutcontrol.html">cutcontrol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.ddoption.html">ddoption</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.dmpext.html">dmpext</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.dmpoption.html">dmpoption</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.dspoption.html">dspoption</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.ematwrite.html">ematwrite</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.eqslv.html">eqslv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.eresx.html">eresx</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.exbopt.html">exbopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.expass.html">expass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.gauge.html">gauge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.gmatrix.html">gmatrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.invopt.html">invopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.lanboption.html">lanboption</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.lumpm.html">lumpm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.moddir.html">moddir</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.monitor.html">monitor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.msave.html">msave</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.msolve.html">msolve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.opncontrol.html">opncontrol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.outaero.html">outaero</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.pcgopt.html">pcgopt</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">perturb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.pivcheck.html">pivcheck</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.prscontrol.html">prscontrol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.pscontrol.html">pscontrol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.psolve.html">psolve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.rate.html">rate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.resvec.html">resvec</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.rstoff.html">rstoff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.scopt.html">scopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.seexp.html">seexp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.seopt.html">seopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.snoption.html">snoption</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.solve.html">solve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.stabilize.html">stabilize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.thexpand.html">thexpand</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.thopt.html">thopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.toffst.html">toffst</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../inertia.html">Inertia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../spectrum_options.html">SpectrumOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dynamic_options.html">DynamicOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../additive_manufacturing.html">AdditiveManufacturing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../misc_loads.html">MiscLoads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nonlinear_options.html">NonlinearOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rezoning.html">Rezoning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../load_step_options.html">LoadStepOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../fe_body_loads.html">FeBodyLoads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../solid_body_loads.html">SolidBodyLoads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_nonlinear_options.html">NonlinearOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../fe_constraints.html">FeConstraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../solid_constraints.html">SolidConstraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../birth_and_death.html">BirthAndDeath</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../fe_forces.html">FeForces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../solid_forces.html">SolidForces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_gap_conditions.html">GapConditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../radiosity.html">Radiosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../load_step_operations.html">LoadStepOperations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../master_dof.html">MasterDof</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis_2d_to_3d.html">Analysis2DTo3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ocean.html">Ocean</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../fe_surface_loads.html">FeSurfaceLoads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../solid_surface_loads.html">SolidSurfaceLoads</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post1/index.html">Post1</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST26</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post26/index.html">Post26</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux2/index.html">Aux2</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux3/index.html">Aux3</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX12</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux12/index.html">Aux12</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX15</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux15/index.html">Aux15</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">MAP</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../map/index.html">Map</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Connection</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../conn.html">Connection commands</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../misc.html">Miscellaneous</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Undocumented</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../inqfun.html">Undocumented inquire commands</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="None" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">MAPDL commands</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../index.html" class="nav-link">Solution</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../analysis_options.html" class="nav-link">AnalysisOptions</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">perturb</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="perturb">
+<h1>perturb<a class="headerlink" href="#perturb" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.perturb">
+<span class="sig-prename descclassname"><span class="pre">AnalysisOptions.</span></span><span class="sig-name descname"><span class="pre">perturb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matkey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contkey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadcontrol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core._commands.solution.analysis_options.AnalysisOptions.perturb" title="Link to this definition">#</a></dt>
+<dd><p>Sets linear perturbation analysis options.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PERTURB.html">PERTURB</a></p>
+<p><strong>Command default:</strong></p>
+<p id="perturb-default">Linear perturbation analysis is disabled ( <code class="docutils literal notranslate"><span class="pre">Type</span></code> = OFF) by default. When the linear perturbation
+analysis is enabled, linear material property behavior is assumed for stress calculations; contact
+status for all contact pairs from the point of restart is used by default; and all loads and
+constraints from the restart step are deleted, except for displacement constraints and inertia
+loads, by default.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>type_</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Type of linear perturbation analysis to be performed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">STATIC</span></code> - Perform a linear perturbation static analysis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MODAL</span></code> - Perform a linear perturbation modal analysis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BUCKLE</span></code> - Perform a linear perturbation eigenvalue buckling analysis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HARMONIC</span></code> - Perform a linear perturbation full harmonic analysis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SUBSTR</span></code> - Perform a linear perturbation substructure generation pass.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OFF</span></code> - Do not perform a linear perturbation analysis (default).</p></li>
+</ul>
+</dd>
+<dt><strong>matkey</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Key for specifying how the linear perturbation analysis uses material properties, valid for all
+structural elements except contact elements. For more information, see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thylinpert.html#anplpdown">Linear Perturbation Analysis</a></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">AUTO</span></code> - The program selects the material properties for the linear perturbation analysis automatically
+(default). The materials are handled in the following way:</p>
+<ul class="simple">
+<li><p>For pure linear elastic materials used in the base analysis, the same properties are used in the
+linear perturbation analysis.</p></li>
+<li><p>For hyperelastic materials used in the base analysis, the material properties are assumed to be
+linear elastic in the linear perturbation analysis. The material property data (or material
+Jacobian) is obtained based on the tangent of the hyperelastic material’s constitutive law at the
+point where restart occurs.</p></li>
+<li><p>For hyperviscoelastic materials used in the base analysis, the program uses the harmonic material
+formulation in perturbed full harmonic solutions.</p></li>
+<li><p>For other nonlinear materials used in the base analysis, the material properties are assumed to be
+linear elastic in the linear perturbation analysis. The material data is the same as the linear
+portion of the nonlinear materials (that is, the parts defined via <span class="xref std std-ref">mp</span> commands).</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">COMBIN39</span></code>, the stiffness is that of the first segment of the force-deflection curve.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TANGENT</span></code> - Use the tangent (material Jacobian) on the material constitutive curve as the material property. The
+material property remains linear in the linear perturbation analysis and is obtained at the point of
+the base analysis where restart occurs. The materials are handled in the following way:</p>
+<ul class="simple">
+<li><p>For pure linear elastic materials used in the base analysis, the same properties are used in the
+linear perturbation analysis. Because the material constitutive curve is linear, the tangent is
+the same as the base analysis.</p></li>
+<li><p>For hyperelastic materials used in the base analysis, the program uses the same tangent as that
+used for <code class="docutils literal notranslate"><span class="pre">MatKey</span></code> = AUTO, and the results are therefore identical.</p></li>
+<li><p>For hyperviscoelastic materials used in the base analysis, the program uses the harmonic material
+formulation in perturbed full harmonic solutions.</p></li>
+<li><p>For other nonlinear materials used in the base analysis, the material properties are assumed to be
+linear elastic in the linear perturbation analysis. The material data is the same as the linear
+portion of the nonlinear materials (that is, the parts defined via <span class="xref std std-ref">mp</span> commands).</p></li>
+</ul>
+<dl class="simple">
+<dt>The materials and properties typically differ from <code class="docutils literal notranslate"><span class="pre">Matkey</span></code> = AUTO, but it is possible the results</dt><dd><p>could be identical or very similar if a.) the material is elastoplastic rate-independent and is
+unloading (or has neutral loading) at the restart point, or b.) the material is rate-dependent,
+depending on the material properties and loading conditions.</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p>For <code class="docutils literal notranslate"><span class="pre">COMBIN39</span></code>, the stiffness is equal to the tangent of the current segment of the force-
+deflection curve.</p></li>
+<li><p>In a modal restart solution that follows a linear perturbation modal analysis, the TANGENT option
+is overridden by the AUTO option and linear material properties are used for stress calculations
+in the modal restart. See the <span class="xref std std-ref">discussion in the Notes for more information.</span></p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SPOFF</span></code> - Provide the same values as AUTO, but set the spin softening matrix to zero (ignoring
+the spin softening effect).</p>
+<p>The spin softening effect is excluded in all the linear perturbation analysis types except for
+linear perturbation buckling. Note that although the spin softening effect is excluded in linear
+perturbation analysis, it is still included in the base static or full transient analysis if
+<span class="xref std std-ref">nlgeom</span>,ON is issued in the base analysis.</p>
+</li>
+</ul>
+</dd>
+<dt><strong>contkey</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Key that controls contact status for the linear perturbation analysis. This key controls all contact
+elements ( <code class="docutils literal notranslate"><span class="pre">TARGE169</span></code>, <code class="docutils literal notranslate"><span class="pre">TARGE170</span></code>, <code class="docutils literal notranslate"><span class="pre">CONTA172</span></code>, <code class="docutils literal notranslate"><span class="pre">CONTA174</span></code>, <code class="docutils literal notranslate"><span class="pre">CONTA175</span></code>, <code class="docutils literal notranslate"><span class="pre">CONTA177</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">CONTA178</span></code> ) globally for all contact pairs. Alternatively, contact status can be controlled
+locally per contact pair by using the <span class="xref std std-ref">cnkmod</span> command. Note that the contact status from the base analysis solution is always adjusted by the local contact controls specified by <span class="xref std std-ref">cnkmod</span> first and then modified by the global sticking or bonded control ( <code class="docutils literal notranslate"><span class="pre">ContKey</span></code> = STICKING or BONDED). The tables in the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_PERTURB.html#">Notes</a> Notes section show how the contact status is adjusted by <span class="xref std std-ref">cnkmod</span> and/or the <code class="docutils literal notranslate"><span class="pre">ContKey</span></code> setting.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CURRENT</span></code> - Use the current contact status from the restart snapshot (default). If the previous
+run is nonlinear, then the nonlinear contact status at the point of restart is frozen and used
+throughout the linear perturbation analysis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">STICKING</span></code> - For frictional contact pairs (MU &gt; 0), use sticking contact (for example, MU*KN for
+tangential contact stiffness) everywhere the contact state is closed (that is, status is sticking or
+sliding). This option only applies to contact pairs that are in contact and have a frictional
+coefficient MU greater than zero. Contact pairs without friction (MU = 0) and in a sliding state
+remain free to slide in the linear perturbation analysis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BONDED</span></code> - Any contact pairs that are in the closed (sticking or sliding) state are moved to
+bonded (for example, KN for both normal and tangential contact stiffness). Contact pairs that have a
+status of far-field or near-field remain open.</p></li>
+</ul>
+</dd>
+<dt><strong>loadcontrol</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Key that controls how the load vector of {F:sub:<cite>perturbed</cite> } is calculated. This control is provided for convenience of load generation for linear perturbation analysis. In general, a new set of loads is required for a linear perturbation analysis. This key controls all mechanical loads; it does not affect non-mechanical loads. Non-mechanical loads (including thermal loads) are always kept (that is, not deleted).</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ALLKEEP</span></code> - Keep all the boundary conditions (loads and constraints) from the end of the load
+step of the current restart point. This option is convenient for further load application and is
+useful for a linear perturbation analysis restarted from a previous linear analysis. For this
+option, {F:sub:<cite>end</cite> } is the total load vector at the end of the load step at the restart point.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">INERKEEP</span></code> - Delete all loads and constraints from the restart step, except for displacement
+constraints and inertia loads (default). All displacement constraints and inertia loads are kept for
+convenience when performing the linear perturbation analysis. Note that nonzero and tabular
+displacement constraints can be considered as external loads; however, they are not deleted when
+using this option.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PARKEEP</span></code> - Delete all loads and constraints from the restart step, except for displacement
+constraints. All displacement constraints are kept for convenience when performing the linear
+perturbation analysis. Note that nonzero and tabular displacement constraints can be considered as
+external loads; however, they are not deleted when using this option.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DZEROKEEP</span></code> - Behaves the same as the PARKEEP option, except that all nonzero displacement
+constraints are set to zero upon the onset of linear perturbation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NOKEEP</span></code> - Delete all the loads and constraints, including all displacement constraints. For
+this option, {F:sub:<cite>end</cite> } is zero unless non-mechanical loads (for example, thermal loads) are
+present.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p id="perturb-notes">This command controls options relating to <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/strlinpertother.html">linear perturbation analyses</a>. It must be
+issued in the first phase of a linear perturbation analysis.</p>
+<p>This command is also valid in PREP7.</p>
+<p>A linear perturbation analysis consists of two phases (two <span class="xref std std-ref">solve</span> commands). The first phase
+is a restart from a base analysis. This base analysis must be a linear or nonlinear static analysis
+or full transient analysis. The first phase starts with the <span class="xref std std-ref">antype</span>,,RESTART,,,PERTURB
+command and ends with the <span class="xref std std-ref">solve</span>,ELFORM command. The purpose of the first phase is to re-
+establish a snapshot of the stiffness matrices at the specified restart point. The second phase,
+ending with the second <span class="xref std std-ref">solve</span> command, is for the actual linear perturbation analysis.</p>
+<p>The total perturbed loads are calculated as follows:</p>
+<p>{F:sub:<cite>perturbed</cite> } = {F:sub:<cite>end</cite> } + {F:sub:<cite>add</cite> }</p>
+<p>where:</p>
+<ul class="simple">
+<li><p>{F <sub>end</sub> } = total loads at the end of the load step of the current restart point (load
+applications are read from the <code class="file docutils literal notranslate"><span class="pre">.LDHI</span></code> file). By default, all of the loads in {F <sub>end</sub>
+} are deleted except for displacement boundary conditions and inertia loads (see the description
+of <code class="docutils literal notranslate"><span class="pre">LoadControl</span></code> above).</p></li>
+<li><p>{F <sub>add</sub> } = Additional (new) loads prescribed by the user in the second phase of the linear
+perturbation analysis (after the first <span class="xref std std-ref">solve</span> command is invoked).</p></li>
+</ul>
+<p>In the first phase of a linear perturbation analysis, the <span class="xref std std-ref">antype</span>,,RESTART command resumes the
+<code class="file docutils literal notranslate"><span class="pre">Jobname.RDB</span></code> database and reads in the <code class="file docutils literal notranslate"><span class="pre">.LDHI</span></code> file to establish the {F:sub:<cite>end</cite> }
+load. New load application (adding to {F:sub:<cite>add</cite> }) or load removal (changing {F:sub:<cite>end</cite> }) can
+be done only in the second phase of the linear perturbation analysis (after the first <span class="xref std std-ref">solve</span>
+command), allowing flexibility in controlling the final {F:sub:<cite>perturbed</cite> } to be used.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Type</span></code> = STATIC, {F:sub:<cite>perturbed</cite> } is the actual external load for the static analysis.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Type</span></code> = MODAL, {F:sub:<cite>perturbed</cite> } is calculated and stored in the <code class="file docutils literal notranslate"><span class="pre">.FULL</span></code> and
+<code class="file docutils literal notranslate"><span class="pre">.MODE</span></code> files for a subsequent mode-superposition, PSD, or other type of modal-based linear
+dynamic analysis. Linear dynamic options such as multiple load generations ( <span class="xref std std-ref">modcont</span>,ON),
+enforced motion ( <span class="xref std std-ref">modcont</span>,,ON), and residual vector methods ( <span class="xref std std-ref">resvec</span>,ON) can be used
+in a linear perturbation analysis. For these methods, the <span class="xref std std-ref">modcont</span> or <span class="xref std std-ref">resvec</span> command
+must be invoked in the second phase (after the first <span class="xref std std-ref">solve</span> ) of the linear perturbation
+procedure. For the enforced motion method, the base identification number should be specified (
+<span class="xref std std-ref">d</span> command) in the second phase of the linear perturbation analysis. This base identification
+number is used later in the downstream mode-superposition or other mode-superposition based
+analysis.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Type</span></code> = BUCKLE, {F:sub:<cite>perturbed</cite> } is the actual linear buckling load which is used to
+generate the linear stress stiffening matrix for the buckling analysis.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Type</span></code> = HARMONIC, {F:sub:<cite>perturbed</cite> } is the actual external load for the full harmonic
+analysis. In this case, {F:sub:<cite>perturbed</cite> } can be frequency dependent and can use complex input.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Type</span></code> = SUBSTR, {F:sub:<cite>perturbed</cite> } is used to generate the first reduced external load
+vector of the substructure.</p>
+<p>In most cases involving linear perturbation analysis, <code class="docutils literal notranslate"><span class="pre">Matkey</span></code> = AUTO is the best option for
+controlling material behavior. <code class="docutils literal notranslate"><span class="pre">Matkey</span></code> = TANGENT is often the better option, however, in special
+cases such as the following:</p>
+<ul class="simple">
+<li><p>A linear perturbation buckling analysis, to introduce preferred buckling modes into a subsequent
+post-buckling nonlinear analysis.</p></li>
+<li><p>A linear perturbation modal analysis, to introduce preferred modes into a subsequent bifurcation
+analysis.</p></li>
+</ul>
+<p>If the TANGENT option is used in conjunction with a modal restart solution that follows a linear
+perturbation modal analysis, then the AUTO option is assumed and linear material properties are used
+for stress calculations in the modal restart solution. This occurs because the TANGENT material
+properties are not available during the modal restart phase due to a data architecture limitation.
+Furthermore, linear material properties are used for the stress calculation in any downstream
+analysis that uses the modal restart solution.</p>
+<p>For more information about the automatic and tangent options, see in the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html">Element Reference</a>.</p>
+<p>You can control the contact status for the linear perturbation analysis by using the <code class="docutils literal notranslate"><span class="pre">ContKey</span></code>
+field on this command and/or the <span class="xref std std-ref">cnkmod</span> command. The first table shows the effects of using
+only the <code class="docutils literal notranslate"><span class="pre">ContKey</span></code> setting on the <span class="xref std std-ref">perturb</span> command. The second table shows the effects of
+using both the <span class="xref std std-ref">cnkmod</span> command and the <code class="docutils literal notranslate"><span class="pre">ContKey</span></code> setting on <span class="xref std std-ref">perturb</span>.</p>
+<section id="adjusted-contact-status-when-perturb-command-is-issued">
+<h2>Adjusted Contact Status when PERTURB Command Is Issued<a class="headerlink" href="#adjusted-contact-status-when-perturb-command-is-issued" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<tbody>
+<tr class="row-odd"><td rowspan="2"><p> <strong>Contact Status from the Base Analysis Solution at the Restart Point</strong></p></td>
+<td colspan="2"><p><strong>ContKeySetting on PERTURB Command</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ContKey</span></code> Value</p></td>
+<td><p>Adjusted Contact Status</p></td>
+</tr>
+<tr class="row-odd"><td><p>0 - far-field</p></td>
+<td><p>any</p></td>
+<td><p>0 - far-field</p></td>
+</tr>
+<tr class="row-even"><td><p>1 - near-field</p></td>
+<td><p>any</p></td>
+<td><p>1 - near-field</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><p> 2 - sliding</p></td>
+<td><p>CURRENT or STICKING (mu=0)</p></td>
+<td><p>2 - sliding</p></td>
+</tr>
+<tr class="row-even"><td><p>STICKING (mu&gt;0) or BONDED</p></td>
+<td><p>3 - sticking</p></td>
+</tr>
+<tr class="row-odd"><td><p>3 - sticking</p></td>
+<td><p>any</p></td>
+<td><p>3 - sticking</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="adjusted-contact-status-when-both-cnkmod-and-perturb-are-issued">
+<h2>Adjusted Contact Status when Both CNKMOD and PERTURB Are Issued<a class="headerlink" href="#adjusted-contact-status-when-both-cnkmod-and-perturb-are-issued" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<tbody>
+<tr class="row-odd"><td rowspan="2"><p> <strong>Contact Status from the Base Analysis Solution at the Restart Point</strong></p></td>
+<td><p><em>*CNKMOD,*</em> <code class="docutils literal notranslate"><span class="pre">ITYPE</span></code> ,12, <code class="docutils literal notranslate"><span class="pre">Value</span></code></p></td>
+<td colspan="3"><p><strong>ContKeySetting on PERTURB Command</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>KEYOPT(12) Value</p></td>
+<td><p>Adjusted Contact Status</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ContKey</span></code> Value</p></td>
+<td><p>Final Adjusted Contact Status</p></td>
+</tr>
+<tr class="row-odd"><td><p>0 - far-field</p></td>
+<td><p>any</p></td>
+<td><p>0 - far-field</p></td>
+<td><p>any</p></td>
+<td><p>0 - far-field</p></td>
+</tr>
+<tr class="row-even"><td rowspan="6"><p> 1 - near-field</p></td>
+<td><p>0, 1, 2, 3, 6</p></td>
+<td><p>1 - near-field</p></td>
+<td><p>any</p></td>
+<td><p>1 - near-field</p></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><p> 4</p></td>
+<td><p>1 - near-field (if outside of the adjusted pinball region)</p></td>
+<td><p>any</p></td>
+<td><p>1 - near-field</p></td>
+</tr>
+<tr class="row-even"><td rowspan="2"><p> 2 - sliding (if inside of the adjusted pinball region)</p></td>
+<td><p>CURRENT or STICKING (mu=0)</p></td>
+<td><p>2 - sliding</p></td>
+</tr>
+<tr class="row-odd"><td><p>STICKING (mu&gt;0) or BONDED</p></td>
+<td><p>3 - sticking</p></td>
+</tr>
+<tr class="row-even"><td rowspan="2"><p> 5</p></td>
+<td><p>1 - near-field (if outside of the adjusted pinball region)</p></td>
+<td><p>any</p></td>
+<td><p>1 - near-field</p></td>
+</tr>
+<tr class="row-odd"><td><p>3 - sticking (if inside of the adjusted pinball region)</p></td>
+<td><p>any</p></td>
+<td><p>3 - sticking</p></td>
+</tr>
+<tr class="row-even"><td rowspan="3"><p> 2 - sliding</p></td>
+<td rowspan="2"><p> 0, 2, 4</p></td>
+<td rowspan="2"><p> 2 - sliding</p></td>
+<td><p>CURRENT or STICKING (mu=0)</p></td>
+<td><p>2 - sliding</p></td>
+</tr>
+<tr class="row-odd"><td><p>STICKING (mu&gt;0) or BONDED</p></td>
+<td><p>3 - sticking</p></td>
+</tr>
+<tr class="row-even"><td><p>1, 3, 5, 6</p></td>
+<td><p>3 - sticking</p></td>
+<td><p>any</p></td>
+<td><p>3 - sticking</p></td>
+</tr>
+<tr class="row-odd"><td><p>3 - sticking</p></td>
+<td><p>any</p></td>
+<td><p>3 - sticking</p></td>
+<td><p>any</p></td>
+<td><p>3 - sticking</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>When <code class="docutils literal notranslate"><span class="pre">ContKey</span></code> is set to CURRENT, all contact related parameters (such as normal stiffness and
+tangential stiffness) will remain unchanged throughout the linear perturbation analysis. However
+when <code class="docutils literal notranslate"><span class="pre">ContKey</span></code> is set to STICKING or BONDED, the program will re-evaluate the contact normal and
+tangential stiffness in order to perform the linear perturbation analysis based on the actual
+sticking behavior regardless of the friction coefficient value.</p>
+<p>Note that the <span class="xref std std-ref">cnkmod</span> command allows you to take points in the base analysis that are near
+contact (within the pinball region) and modify them to be treated as “in contact” in the linear
+perturbation analysis; see the “1 - near-field” row in the above table with KEYOPT(12) values set to
+4 or 5. <span class="xref std std-ref">cnkmod</span> also allows you to take points that are sliding in the base analysis and treat
+them as sticking in the linear perturbation analysis, irrespective of the MU value; see the “2 -
+sliding” row in the above table with KEYOPT(12) values set to 1,5, or 6.</p>
+<p>If an open gap exists at the restart point of the base static/transient solution and the contact
+status is adjusted as sliding or sticking due to a “bonded” or “no separation” contact behavior
+definition, then the program will treat it as near-field contact when executing the <span class="xref std std-ref">cnkmod</span>
+command in a downstream linear perturbation analysis.</p>
+</section>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.72.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.7.2. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

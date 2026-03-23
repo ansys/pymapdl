@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.bftran
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.bftran

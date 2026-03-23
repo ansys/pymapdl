@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.cpmerge
+==============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.cpmerge

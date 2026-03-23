@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.check
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.check

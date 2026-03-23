@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.nrefine
+==============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.nrefine

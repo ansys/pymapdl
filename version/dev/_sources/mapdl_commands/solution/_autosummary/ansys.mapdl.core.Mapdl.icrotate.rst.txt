@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.icrotate
+===============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.icrotate

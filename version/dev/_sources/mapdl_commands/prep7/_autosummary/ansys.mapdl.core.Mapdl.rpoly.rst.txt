@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.rpoly
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.rpoly

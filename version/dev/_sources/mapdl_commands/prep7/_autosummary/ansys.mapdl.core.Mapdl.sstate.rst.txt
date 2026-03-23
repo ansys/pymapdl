@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.sstate
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.sstate

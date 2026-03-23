@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.lrotat
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.lrotat

@@ -1,0 +1,6 @@
+﻿agen
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.areas
+
+.. automethod:: Areas.agen

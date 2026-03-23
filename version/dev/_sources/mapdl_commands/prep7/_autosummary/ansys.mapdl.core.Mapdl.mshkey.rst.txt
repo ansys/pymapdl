@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.mshkey
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.mshkey

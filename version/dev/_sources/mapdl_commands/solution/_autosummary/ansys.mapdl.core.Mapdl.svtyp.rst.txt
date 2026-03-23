@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.svtyp
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.svtyp

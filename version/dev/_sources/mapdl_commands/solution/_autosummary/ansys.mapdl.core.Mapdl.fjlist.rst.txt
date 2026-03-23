@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.fjlist
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.fjlist

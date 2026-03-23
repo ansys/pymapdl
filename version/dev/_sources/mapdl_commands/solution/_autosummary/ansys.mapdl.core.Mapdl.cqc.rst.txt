@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.cqc
+==========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.cqc

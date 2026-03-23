@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.voffst
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.voffst

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.emtgen
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.emtgen

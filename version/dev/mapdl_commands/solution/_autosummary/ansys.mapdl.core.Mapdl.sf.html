@@ -1,0 +1,856 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ansys.mapdl.core.Mapdl.sf &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=affbdea0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/solution/_autosummary/ansys.mapdl.core.Mapdl.sf';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.72.dev0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/solution/_autosummary/ansys.mapdl.core.Mapdl.sf.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="None" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ansys.mapdl.core.Mapdl.sf</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="ansys-mapdl-core-mapdl-sf">
+<h1>ansys.mapdl.core.Mapdl.sf<a class="headerlink" href="#ansys-mapdl-core-mapdl-sf" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core.Mapdl.sf">
+<span class="sig-prename descclassname"><span class="pre">Mapdl.</span></span><span class="sig-name descname"><span class="pre">sf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nlist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshflag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core.Mapdl.sf" title="Link to this definition">#</a></dt>
+<dd><p>Defines surface loads on nodes.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SF.html">SF</a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>nlist</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Nodes defining the surface upon which the load is to be applied. Use the label ALL or P, or a
+component name. If ALL, all selected nodes ( <span class="xref std std-ref">nsel</span> ) are used (default). If P, graphical
+picking is enabled and all remaining command fields are ignored (valid only in the GUI).</p>
+</dd>
+<dt><strong>lab</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Valid surface load label. Load labels are listed under <strong>Surface Loads</strong> in the input table for each element type.</p>
+<blockquote>
+<div><p>This command contains some tables and extra information which can be inspected in the original</p>
+</div></blockquote>
+<p>documentation pointed above… _sf1:</p>
+<p>Thermal labels CONV and HFLUX are mutually exclusive.</p>
+<p id="sf2">For an acoustic analysis, apply the fluid-structure interaction flag (Label = FSI) to only the
+<code class="docutils literal notranslate"><span class="pre">FLUID29</span></code>, <code class="docutils literal notranslate"><span class="pre">FLUID30</span></code>, <code class="docutils literal notranslate"><span class="pre">FLUID220</span></code>, and <code class="docutils literal notranslate"><span class="pre">FLUID221</span></code> elements.</p>
+</dd>
+<dt><strong>value</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Surface load value or table name reference for specifying tabular boundary conditions.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = PRES, <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is the real component of the pressure.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = CONV:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is typically the film coefficient and <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> (below) is typically the bulk
+temperature. If <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> = - <code class="docutils literal notranslate"><span class="pre">N</span></code>, the film coefficient may be a function of temperature and is
+determined from the HF property table for material <code class="docutils literal notranslate"><span class="pre">N</span></code> ( <span class="xref std std-ref">mp</span> ). (See the <span class="xref std std-ref">scopt</span>
+command for a way to override this option and use - <code class="docutils literal notranslate"><span class="pre">N</span></code> as the film coefficient.) The
+temperature used to evaluate the film coefficient is usually the average between the bulk and wall
+temperatures, but may be user-defined for some elements.</p></li>
+<li><p>If <span class="xref std std-ref">kbc</span>,0 has been issued for ramped loads, it affects only <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code>  <span class="xref std std-ref">the bulk
+temperature, and the film coefficient specification is unaffected.</span></p></li>
+<li><p>In a viscous-thermal acoustic analysis, if <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = CONV, <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is the real part of the heat
+flux and <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is the imaginary part of the heat flux.</p></li>
+</ul>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = RAD, <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is surface emissivity.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = PORT, <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is a port number representing a waveguide exterior port. The port
+number must be an integer between 1 and 50. For acoustic 2×2 transfer admittance matrix, the port
+number can be any positive integer. The smaller port number corresponds to the port 1 of the 2×2
+transfer admittance matrix and the greater number corresponds to the port 2. If one port of the
+transfer admittance matrix is connecting to the acoustic-structural interaction interface, the port
+number corresponds to the port 2 of the transfer admittance matrix. A pair of ports of the 2×2
+transfer admittance matrix must be defined in the same element. In an acoustic analysis, the
+positive port number defines a transparent port, through which the reflected sound pressure wave
+propagates to the infinity; the negative port number defines a vibro port that is the structural
+vibration surface.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = SHLD, <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is the surface normal velocity in a harmonic analysis or in a transient
+analysis solved with the velocity potential formulation; <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is the surface normal
+acceleration in a transient analysis solved with the pressure formulation.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = IMPD, <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is resistance in (N)(s)/m <sup>3</sup> if <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> &gt; 0 and is conductance
+in mho if <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> &lt; 0 for acoustic or harmonic response analyses. In acoustic transient analyses,
+<code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is not used.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = RDSF, <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is the emissivity value; the following conditions apply: If <code class="docutils literal notranslate"><span class="pre">VALUE</span></code>
+is between 0 and 1, apply a single value to the surface. If <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> = - <code class="docutils literal notranslate"><span class="pre">N</span></code>, the emissivity may
+be a function of the temperature, and is determined from the EMISS property table for material <code class="docutils literal notranslate"><span class="pre">N</span></code>
+( <span class="xref std std-ref">mp</span> ). The material <code class="docutils literal notranslate"><span class="pre">N</span></code> does not need to correlate with the underlying solid thermal
+elements.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = FSIN in a one-way structure-to-acoustic coupling, <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is the surface interface
+number.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = FSIN in a unidirectional Mechanical APDL to CFX analysis, <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is not used.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = ATTN, <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is the absorption coefficient of the surface.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = VIMP, <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is resistance of viscous impedance in (N)(s)/m <sup>3</sup>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = TIMP, <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is resistance of thermal impedance in (N)(s)/m <sup>3</sup>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = PERM, <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is permeability in m <sup>2</sup>.</p>
+</dd>
+<dt><strong>value2</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Second surface load value (if any).</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = PRES, this value is the imaginary pressure component, used by the following supported elements:</p>
+<ul class="simple">
+<li><p>Surface elements: <code class="docutils literal notranslate"><span class="pre">SURF153</span></code>, <code class="docutils literal notranslate"><span class="pre">SURF154</span></code> and <code class="docutils literal notranslate"><span class="pre">SURF159</span></code>.</p></li>
+<li><p>Solid and solid-shell elements: <code class="docutils literal notranslate"><span class="pre">PLANE182</span></code>, <code class="docutils literal notranslate"><span class="pre">PLANE183</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLID185</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLID186</span></code>,
+<code class="docutils literal notranslate"><span class="pre">SOLID187</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLSH190</span></code>, and <code class="docutils literal notranslate"><span class="pre">SOLID285</span></code>.</p></li>
+<li><p>Shell elements: <code class="docutils literal notranslate"><span class="pre">SHELL181</span></code>, <code class="docutils literal notranslate"><span class="pre">SHELL281</span></code>, <code class="docutils literal notranslate"><span class="pre">SHELL208</span></code>, and <code class="docutils literal notranslate"><span class="pre">SHELL209</span></code>.</p></li>
+<li><p>Coupled-field elements with structural degrees of freedom: <code class="docutils literal notranslate"><span class="pre">PLANE222</span></code>, <code class="docutils literal notranslate"><span class="pre">PLANE223</span></code>,
+<code class="docutils literal notranslate"><span class="pre">SOLID225</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLID226</span></code>, and <code class="docutils literal notranslate"><span class="pre">SOLID227</span></code>.</p></li>
+</ul>
+<p>Supported analysis types in this case are:</p>
+<ul class="simple">
+<li><p>Full harmonic ( <span class="xref std std-ref">hropt</span>,FULL)</p></li>
+<li><p>Mode-superposition harmonic ( <span class="xref std std-ref">hropt</span>,MSUP), if the mode-extraction method is Block Lanczos (
+<span class="xref std std-ref">modopt</span> ,LANB), PCG Lanczos ( <span class="xref std std-ref">modopt</span>,LANPCG), Supernode ( <span class="xref std std-ref">modopt</span>,SNODE),
+Subspace ( <span class="xref std std-ref">modopt</span>,SUBSP), or Unsymmetric ( <span class="xref std std-ref">modopt</span>,UNSYM)</p></li>
+</ul>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = CONV:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is the bulk temperature for thermal analyses.</p></li>
+<li><p>If <span class="xref std std-ref">kbc</span>,0 has been issued for ramped loads, the bulk temperature is ramped from the value
+defined by <span class="xref std std-ref">tunif</span> to the value specified by <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> for the first loadstep. If
+<span class="xref std std-ref">tabular boundary conditions are defined, the</span> <span class="xref std std-ref">kbc</span> command is ignored and
+tabular values are used.</p></li>
+<li><p>For viscous-thermal acoustics <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is the imaginary part of heat flux.</p></li>
+</ul>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = RAD, <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is the ambient temperature.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = SHLD, <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is the phase angle of the normal surface velocity (defaults to zero)
+for harmonic response analyses while <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is not used for transient analyses in acoustics.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = IMPD, <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is reactance in (N)(s)/m <sup>3</sup> if <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> &gt; 0 and is the product
+of susceptance and angular frequency if <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> &lt; 0 for acoustics.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = RDSF, <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is the enclosure number. Radiation will occur between surfaces flagged
+with the same enclosure numbers. If the enclosure is open, radiation will also occur to ambient. If
+<code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is negative radiation direction is reversed and will occur inside the element for the
+flagged radiation surfaces.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = FSIN in a unidirectional Mechanical APDL to CFX analysis, <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is the surface interface
+number (not available from within the GUI).</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = PORT, <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is not used.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = ATTN, <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is the transmission loss (dB) of the coupled wall in an energy
+diffusion solution for room acoustics.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = VIMP, <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is reactance of viscous impedance in (N)(s)/m <sup>3</sup>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = TIMP, <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is reactance of thermal impedance in (N)(s)/m <sup>3</sup>.</p>
+</dd>
+<dt><strong>meshflag</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Specifies how to apply normal pressure loading on the mesh. Valid in a <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/Hlp_G_ADVREZ.html">nonlinear adaptivity
+analysis</a>
+when <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = PRES and <code class="docutils literal notranslate"><span class="pre">Nlist</span></code> is a nodal component defined prior to any remeshing activity.</p>
+<p>0 - Pressure loading occurs on the current mesh (default).</p>
+<p>1 - Pressure loading occurs on the initial mesh for nonlinear adaptivity.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p id="sf-notes">Individual nodes cannot be entered for this command. The node list is to identify a surface and the
+<code class="docutils literal notranslate"><span class="pre">Nlist</span></code> field must contain a sufficient number of nodes to define an element surface. The loads
+are internally stored on element faces defined by the specified nodes. All nodes on an element face
+(including midside nodes, if any) must be specified for the face to be used, and the element must be
+selected.</p>
+<p>If all nodes defining a face are shared by an adjacent face of another selected element, the face is
+not free and will not have a load applied. If more than one element can share the same nodes (for
+example, a surface element attached to a solid element), select the desired element type before
+issuing the <span class="xref std std-ref">sf</span> command. The <span class="xref std std-ref">sf</span> command applies only to area and volume elements.</p>
+<p>For shell elements, if the specified nodes include face one (which is usually the bottom face) along
+with other faces (such as edges), only face one is used. Where faces cannot be uniquely determined
+from the nodes, or where the face does not fully describe the load application, issue <span class="xref std std-ref">sfe</span>
+instead of <span class="xref std std-ref">sf</span>. A load key of 1 (which is typically the first loading condition on the first
+face) is used if the face determination is not unique. A uniform load value is applied over the
+element face.</p>
+<p>You can use these related surface-load commands with <span class="xref std std-ref">sf</span> :</p>
+<ul class="simple">
+<li><p><span class="xref std std-ref">sfe</span> - Defines surface loads on elements. You can also use it to apply tapered loads on
+individual element faces.</p></li>
+<li><p><span class="xref std std-ref">sfbeam</span> - Applies surface loads to beam elements.</p></li>
+<li><p><span class="xref std std-ref">sfcontrol</span> - Applies general (normal, tangential, and other) surface loads to <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SFCONTROL.html#">supported
+structural elements</a>.</p></li>
+<li><p><span class="xref std std-ref">sfcum</span> - Accumulates (adds) surface loads applied via <span class="xref std std-ref">sf</span>.</p></li>
+<li><p><span class="xref std std-ref">sfdele</span> - Delete loads applied via <span class="xref std std-ref">sf</span>.</p></li>
+<li><p><span class="xref std std-ref">sffun</span> - Applies loads from a node-vs.-value function.</p></li>
+<li><p><span class="xref std std-ref">sfgrad</span> - Applies an alternate tapered load.</p></li>
+</ul>
+<p>Tabular boundary conditions Tabular boundary conditions ( <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> = <code class="docutils literal notranslate"><span class="pre">tabname</span></code> and/or <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code>
+= <code class="docutils literal notranslate"><span class="pre">tabname</span></code>) are available
+for the following surface load labels ( <code class="docutils literal notranslate"><span class="pre">Lab</span></code> ) only: PRES (real and/or imaginary components),
+CONV (film coefficient and/or bulk temperature; or heat flux for viscous-thermal acoustics), HFLUX,
+DFLUX (diffusion flux), RAD (surface emissivity and ambient temperature), IMPD (resistance and
+reactance), SHLD (normal velocity and phase or acceleration), ATTN ( absorption coefficient or
+transmission loss ), VIMP (viscous impedance), and TIMP (thermal impedance). Issue <span class="xref std std-ref">dim</span> to
+define a table.</p>
+<p>In a mode-superposition harmonic or transient analysis, you must apply the load in the modal portion
+of the analysis. Mechanical APDL calculates a load vector and writes it to the <code class="file docutils literal notranslate"><span class="pre">MODE</span></code> file,
+which you
+can apply via the <span class="xref std std-ref">lvscale</span> command.</p>
+<p>This command is also valid in the PREP7 and <span class="xref std std-ref">slashmap</span> processors.</p>
+<p id="sf-prodres">Ansys Mechanical Enterprise <span class="xref std std-ref">sf</span>,FSI and <span class="xref std std-ref">sf</span>,FSIN are available only in the Ansys
+Mechanical Enterprise family of products (Ansys Mechanical Enterprise,
+Ansys Mechanical Enterprise PrepPost, and Ansys Mechanical Enterprise Solver).</p>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.72.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.7.2. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

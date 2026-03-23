@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.midtol
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.midtol

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.timp
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.timp

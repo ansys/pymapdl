@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.dcgomg
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.dcgomg

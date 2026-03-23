@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.expsol
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.expsol

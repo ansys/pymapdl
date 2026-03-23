@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.pscontrol
+================================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.pscontrol

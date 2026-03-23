@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.emsym
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.emsym
