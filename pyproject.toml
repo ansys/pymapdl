@@ -62,8 +62,6 @@ all = [
   "matplotlib>=3.0.0",                                  # for colormaps for pyvista
 ]
 
-[dependency-groups]
-
 tests = [
   "ansys-dpf-core[graphics]==0.13.6",
   "ansys-mapdl-reader==0.55.2",
@@ -122,6 +120,8 @@ doc = [
   "sphinxemoji==0.3.2",
   "vtk==9.5.2",
 ]
+
+[dependency-groups]
 
 tox = ["tox==4.14.2"]
 
