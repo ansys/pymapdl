@@ -63,7 +63,7 @@ def available_ports(n_ports: int, starting_port: int = MAPDL_DEFAULT_PORT) -> Li
     port = starting_port
     ports: List[int] = []
     while port < 65536 and len(ports) < n_ports:
-        if not check_port_status(port).in_use:
+        if check_port_status(port).available:
             ports.append(port)
         port += 1
 

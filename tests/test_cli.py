@@ -106,7 +106,6 @@ def test_launch_mapdl_cli(monkeypatch, run_cli, start_instance):
         patch(
             "ansys.mapdl.core.launcher.launch_mapdl_process"
         ) as mock_launch_process_only,
-        patch("ansys.mapdl.core.launcher.submitter") as mock_submitter,
     ):  # test we are not calling Popen
 
         mock_launch_process_only.side_effect = lambda *args, **kwargs: (
@@ -528,8 +527,8 @@ def test_launch_mapdl_cli_config(run_cli, arg):
 
     with (
         patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch,
-        patch("ansys.mapdl.core.launcher.submitter") as mock_submitter,
-    ):  # test we are not calling Popen
+        patch("ansys.mapdl.core.launcher.process.subprocess.Popen") as mock_popen,
+    ):  # test we are not calling Popen directly
         mock_launch.side_effect = lambda *args, **kwargs: (
             "123.45.67.89",
             int(PORT1),
@@ -538,7 +537,7 @@ def test_launch_mapdl_cli_config(run_cli, arg):
 
         output = run_cli(cmd)
 
-        mock_submitter.assert_not_called()
+        mock_popen.assert_not_called()
         kwargs = mock_launch.call_args_list[0].kwargs
         assert str(kwargs["port"]) == str(PORT1)
 
