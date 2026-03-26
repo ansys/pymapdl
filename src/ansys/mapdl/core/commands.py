@@ -421,9 +421,7 @@ class MapCommands(
     pass
 
 
-class MiscCommands(
-    misc.misc.Misc,
-):
+class MiscCommands(misc.misc.Misc):
     pass
 
 
