@@ -1082,10 +1082,10 @@ class ParameterDefinition(CommandsBase):
              - Description
            * - MAT
              - ``Sect1``
-             - ``Item2`` = 0 or blank; ``IT2NUM`` = ``Sect2``. Material ID to be used for general contact between ``Sect1`` and ``Sect2`` . Alternative get function: SECTOMAT( ``Sect1``, ``Sect2`` ).
+             - ``Item2`` = 0 or blank; ``IT2NUM`` = ``Sect2``. Material ID to be used for general contact between ``Sect1`` and ``Sect2``. Alternative get function: SECTOMAT( ``Sect1``, ``Sect2`` ).
            * - REAL
              - ``Sect1``
-             - ``Item2`` = 0 or blank; ``IT2NUM`` = ``Sect2``. Real constant ID to be used for general contact between ``Sect1`` and ``Sect2`` . Alternative get function: SECTOREAL( ``Sect1``, ``Sect2`` ).
+             - ``Item2`` = 0 or blank; ``IT2NUM`` = ``Sect2``. Real constant ID to be used for general contact between ``Sect1`` and ``Sect2``. Alternative get function: SECTOREAL( ``Sect1``, ``Sect2`` ).
            * - DEF
              - ``Sect1``
              - ``Item2`` = 0 or blank; ``IT2NUM`` = ``Sect2``. Number indicating the type of contact for the general contact definition between ``Sect1`` and ``Sect2`` :   * = 0 - Excluded general contact between ``Sect1`` / ``Sect2`` * = 1 - Asymmetric general contact between ``Sect1`` (contact) / ``Sect2`` (target) * = 2 - Asymmetric general contact between ``Sect1`` (target) / ``Sect2`` (contact) * = 3 - Symmetric general contact between ``Sect1`` / ``Sect2``
