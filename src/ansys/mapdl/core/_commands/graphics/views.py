@@ -540,7 +540,7 @@ class Views(CommandsBase):
         fill the window.
 
         Auto resizing is disabled when you issue the :ref:`zoom` command. To restore auto resizing, issue
-        the :ref:`auto` command, or select FIT from the  `Pan, Zoom, Rotate
+        the :ref:`auto` command, or select FIT from the `Pan, Zoom, Rotate
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_wid/Hlp_UI_PanZoom.html#wpanzoomk>`_
         box.
 

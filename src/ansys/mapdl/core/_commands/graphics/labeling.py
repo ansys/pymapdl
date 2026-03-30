@@ -699,7 +699,7 @@ class Labeling(CommandsBase):
 
         The Multi-legend mode provides a number of legend data item priority and placement options. These
         options are accessed via the GUI at Utility Menu> PlotCtrls> Window Controls> Window Options. The
-        :ref:`udoc` command provides command line o  ptions for this capability.
+        :ref:`udoc` command provides command line o ptions for this capability.
 
         This command is valid in any processor.
 
