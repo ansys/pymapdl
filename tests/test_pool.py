@@ -41,6 +41,7 @@ else:
 from ansys.mapdl.core import Mapdl, MapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
 from ansys.mapdl.core.launcher import LOCALHOST, MAPDL_DEFAULT_PORT
+from ansys.mapdl.core.launcher.models import PortStatus
 from conftest import QUICK_LAUNCH_SWITCHES, VALID_PORTS, NullContext, requires
 
 # skip entire module unless HAS_GRPC
@@ -92,7 +93,7 @@ class TestMapdlPool:
                 license_server_check=False,
                 run_location=run_path,
                 port=port,
-                start_timeout=30,
+                timeout=30,
                 exec_file=EXEC_FILE,
                 additional_switches=QUICK_LAUNCH_SWITCHES,
                 nproc=NPROC,
@@ -142,8 +143,11 @@ class TestMapdlPool:
         pool_creator.wait_for_ready()
         return pool_creator
 
-    @skip_requires_194
-    def test_invalid_exec(self):
+    @requires("local")
+    def test_invalid_exec(self, monkeypatch):
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", raising=False)
+
         with pytest.raises(VersionError):
             MapdlPool(
                 4,
@@ -451,7 +455,12 @@ class TestMapdlPool:
 
     @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
     @patch("socket.gethostbyname", lambda *args, **kwargs: args[0])
-    @patch("ansys.mapdl.core.pool.port_in_use", lambda *args, **kwargs: False)
+    @patch(
+        "ansys.mapdl.core.pool.check_port_status",
+        lambda port, host="127.0.0.1": PortStatus(
+            port=port, available=True, used_by_mapdl=False
+        ),
+    )
     def test_multiple_ips(self, monkeypatch):
         ips = [
             "123.45.67.1",
@@ -484,7 +493,12 @@ class TestMapdlPool:
 
     @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
     @patch("socket.gethostbyname", lambda *args, **kwargs: args[0])
-    @patch("ansys.mapdl.core.pool.port_in_use", lambda *args, **kwargs: False)
+    @patch(
+        "ansys.mapdl.core.pool.check_port_status",
+        lambda port, host="127.0.0.1": PortStatus(
+            port=port, available=True, used_by_mapdl=False
+        ),
+    )
     @pytest.mark.parametrize(
         "n_instances,ip,port,exp_n_instances,exp_ip,exp_port,context",
         [
@@ -528,7 +542,7 @@ class TestMapdlPool:
                 None,
                 [50052, 50053],
                 2,
-                [LOCALHOST, LOCALHOST],
+                [None, None],
                 [50052, 50053],
                 NullContext(),
             ),
@@ -655,7 +669,7 @@ class TestMapdlPool:
                 None,
                 None,
                 2,
-                [LOCALHOST, LOCALHOST],
+                [None, None],
                 [MAPDL_DEFAULT_PORT, MAPDL_DEFAULT_PORT + 1],
                 NullContext(),
             ),
@@ -664,7 +678,7 @@ class TestMapdlPool:
                 None,
                 None,
                 3,
-                [LOCALHOST, LOCALHOST, LOCALHOST],
+                [None, None, None],
                 [MAPDL_DEFAULT_PORT, MAPDL_DEFAULT_PORT + 1, MAPDL_DEFAULT_PORT + 2],
                 NullContext(),
             ),
@@ -673,7 +687,7 @@ class TestMapdlPool:
                 None,
                 50053,
                 3,
-                [LOCALHOST, LOCALHOST, LOCALHOST],
+                [None, None, None],
                 [50053, 50053 + 1, 50053 + 2],
                 NullContext(),
             ),
@@ -694,7 +708,7 @@ class TestMapdlPool:
                 None,
                 [50052, 50053, 50054],
                 3,
-                [LOCALHOST, LOCALHOST, LOCALHOST],
+                [None, None, None],
                 [50052, 50053, 50054],
                 NullContext(),
             ),

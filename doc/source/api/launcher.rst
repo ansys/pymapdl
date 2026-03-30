@@ -15,6 +15,7 @@ library `ansys-tools-common.path <ansys_tools_common_>`_.
    get_default_ansys_path
    get_default_ansys_version
    launch_mapdl
+   launch_mapdl_process
    close_all_local_instances
 
 
