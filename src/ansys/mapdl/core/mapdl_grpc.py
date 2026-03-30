@@ -107,6 +107,32 @@ VOID_REQUEST = anskernel.EmptyRequest()
 # Default 256 MB message length
 MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024**2))
 
+
+def _drain_queue(queue) -> str:
+    """Drain all available items from a queue into a string.
+
+    Parameters
+    ----------
+    queue : Queue or None
+        A queue whose items are bytes or strings. If ``None``, returns an
+        empty string.
+
+    Returns
+    -------
+    str
+        All currently-available queue items joined into a single string.
+    """
+    if queue is None:
+        return ""
+    lines = []
+    while not queue.empty():
+        try:
+            lines.append(queue.get_nowait().decode(errors="replace"))
+        except Exception:
+            break
+    return "".join(lines)
+
+
 VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26)
 
 
@@ -912,18 +938,6 @@ class MapdlGrpc(MapdlBase):
         """Read the stdout and stderr from the subprocess."""
         if self._mapdl_process is None or not self._mapdl_process.stdout:
             return
-
-        def _drain_queue(queue):
-            """Drain all available items from a queue into a string."""
-            if queue is None:
-                return ""
-            lines = []
-            while not queue.empty():
-                try:
-                    lines.append(queue.get_nowait().decode(errors="replace"))
-                except Exception:
-                    break
-            return "".join(lines)
 
         self._log.debug("Reading stdout")
         self._stdout = _drain_queue(self._stdout_queue)
