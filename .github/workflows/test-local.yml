@@ -265,7 +265,6 @@ jobs:
           fi;
 
           echo "Version: $version"
-
           # If minimal is true, we need to set the executable path.
           if [[ "${ON_MINIMAL}" == "true" ]]; then
             echo "PYMAPDL_MAPDL_EXEC: $PYMAPDL_MAPDL_EXEC"
