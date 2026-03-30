@@ -69,7 +69,6 @@ Minimum **90% coverage**
    - `TESTING_MINIMAL=YES` - Used when testing console or minimal requirements
    - `PYMAPDL_PORT`, `PYMAPDL_IP` - Connection details
    - `ON_LOCAL`, `ON_CI` - Environment detection
-   - `PYMAPDL_DEBUG_TESTING=true` - Enable debug when testing
 5. Write comprehensive tests covering:
    - Happy path scenarios
    - Edge cases and boundary conditions

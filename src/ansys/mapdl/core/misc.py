@@ -168,10 +168,14 @@ def check_has_mapdl() -> bool:
         True when this local installation has ANSYS installed in a
         standard location.
     """
-    from ansys.mapdl.core.launcher import check_valid_ansys
+    from ansys.mapdl import _HAS_ATC
 
+    if not _HAS_ATC:
+        return False
     try:
-        return check_valid_ansys()
+        from ansys.tools.common.path import get_mapdl_path
+
+        return bool(get_mapdl_path())
     except Exception as err:
         LOG.error(
             f"An error was obtained when checking for a valid MAPDL installation:\n{str(err)}"

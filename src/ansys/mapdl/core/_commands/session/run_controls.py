@@ -385,9 +385,10 @@ class RunControls(CommandsBase):
 
         .. warning::
 
-            if you include the /MENU,ON command in your start.ans, it should be the lastcommand in the
-            file. Any commands after /MENU,ON may be ignored. (It is not necessary to include the /SHOW and
-            /MENU,ON commands in start.ansif you will be using the launcher to enter the Mechanical APDL program.)
+            if you include the :ref:`menu`,ON command in your :file:`start.ans`, it should be the last
+            command in the file. Any commands after :ref:`menu`,ON may be ignored. (It is not necessary to
+            include the :ref:`show` and :ref:`menu`,ON commands in :file:`start.ans` if you will be using
+            the launcher to enter the Mechanical APDL program.)
 
         This command is valid in any processor.
         """
@@ -591,7 +592,7 @@ class RunControls(CommandsBase):
         the application or issue a :ref:`pause` command via the command line.
 
         No other operation (other than :ref:`save` or ``/EXIT`` ) is possible in the current application
-         while use of the product license is paused.
+        while use of the product license is paused.
 
         When the second application has finished and releases the license, issue an :ref:`unpause` command
         via the command line to restore use of the license to the current application.
