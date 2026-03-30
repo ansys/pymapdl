@@ -1828,7 +1828,7 @@ class _MapdlCore(Commands):
 
         # specify a path for the temporary database if any.
         if inplace:
-            run_dir = self._start_parm["run_location"]
+            run_dir = self._start_parm.get("run_location") or str(self.directory)
 
         else:
             temp_dir = tempfile.gettempdir()

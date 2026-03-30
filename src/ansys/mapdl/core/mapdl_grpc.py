@@ -107,6 +107,32 @@ VOID_REQUEST = anskernel.EmptyRequest()
 # Default 256 MB message length
 MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024**2))
 
+
+def _drain_queue(queue) -> str:
+    """Drain all available items from a queue into a string.
+
+    Parameters
+    ----------
+    queue : Queue or None
+        A queue whose items are bytes or strings. If ``None``, returns an
+        empty string.
+
+    Returns
+    -------
+    str
+        All currently-available queue items joined into a single string.
+    """
+    if queue is None:
+        return ""
+    lines = []
+    while not queue.empty():
+        try:
+            lines.append(queue.get_nowait().decode(errors="replace"))
+        except Exception:
+            break
+    return "".join(lines)
+
+
 VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26)
 
 
@@ -139,11 +165,13 @@ DEFAULT_GRPC_OPTIONS = [
 ]
 
 
-def get_start_instance(*args, **kwargs) -> bool:  # numpydoc ignore=RT01
-    """Wraps get_start_instance to avoid circular imports."""
-    from ansys.mapdl.core.launcher import get_start_instance
+def get_start_instance(
+    start_instance=None, ip=None, **kwargs
+) -> bool:  # numpydoc ignore=RT01
+    """Wraps resolve_start_instance to avoid circular imports."""
+    from ansys.mapdl.core.launcher.config import resolve_start_instance
 
-    return get_start_instance(*args, **kwargs)
+    return resolve_start_instance(start_instance, ip)
 
 
 def chunk_raw(raw, save_as):
@@ -880,17 +908,15 @@ class MapdlGrpc(MapdlBase):
 
     def _read_stds(self):
         """Read the stdout and stderr from the subprocess."""
-        from ansys.mapdl.core.launcher import _get_std_output
-
         if self._mapdl_process is None or not self._mapdl_process.stdout:
             return
 
         self._log.debug("Reading stdout")
-        self._stdout = _get_std_output(self._stdout_queue)
+        self._stdout = _drain_queue(self._stdout_queue)
         self._log.debug(f"Read stdout: {self._stdout[:20]}")
 
         self._log.debug("Reading stderr")
-        self._stderr = _get_std_output(self._stderr_queue)
+        self._stderr = _drain_queue(self._stderr_queue)
         self._log.debug(f"Read stderr: {self._stderr[:20]}")
 
     def _check_stds(self, stdout=None, stderr=None):
@@ -1147,22 +1173,53 @@ class MapdlGrpc(MapdlBase):
             raise MapdlRuntimeError(
                 "Can only launch the GUI with a local instance of MAPDL"
             )
-        from ansys.mapdl.core.launcher import generate_mapdl_launch_command, launch_grpc
+        from ansys.mapdl.core.launcher.models import LaunchConfig, LaunchMode
+        from ansys.mapdl.core.launcher.process import (
+            _generate_launch_command,
+            _start_subprocess,
+        )
 
         self._exited = False  # reset exit state
 
         args = start_parm or self._start_parm
-        cmd = generate_mapdl_launch_command(
+        config = LaunchConfig(
             exec_file=args["exec_file"],
+            run_location=args["run_location"],
             jobname=args["jobname"],
             nproc=args["nproc"],
-            ram=args["ram"],
+            ram=args.get("ram"),
             port=args["port"],
-            additional_switches=args["additional_switches"],
+            ip=args.get("ip", "127.0.0.1"),
+            mode=LaunchMode.GRPC,
+            version=args.get("version"),
+            start_instance=True,
+            timeout=args.get("timeout", 60),
+            cleanup_on_exit=args.get("cleanup_on_exit", True),
+            clear_on_connect=args.get("clear_on_connect", True),
+            override=args.get("override", False),
+            remove_temp_dir_on_exit=args.get("remove_temp_dir_on_exit", False),
+            set_no_abort=args.get("set_no_abort", True),
+            additional_switches=args.get("additional_switches", ""),
+            license_type=args.get("license_type"),
+            launch_on_hpc=args.get("launch_on_hpc", False),
+            running_on_hpc=args.get("running_on_hpc", False),
+            scheduler_options=args.get("scheduler_options"),
+            loglevel=args.get("loglevel", "WARNING"),
+            log_apdl=args.get("log_apdl"),
+            print_com=args.get("print_com", False),
+            mapdl_output=args.get("mapdl_output"),
+            transport_mode=args.get("transport_mode"),
+            uds_dir=args.get("uds_dir"),
+            uds_id=args.get("uds_id"),
+            certs_dir=args.get("certs_dir"),
         )
+        cmd = _generate_launch_command(config)
 
-        process = launch_grpc(
-            cmd=cmd, run_location=args["run_location"], env_vars=self._env_vars or None
+        process = _start_subprocess(
+            cmd=cmd,
+            cwd=args["run_location"],
+            env=self._env_vars or {},
+            output_file=None,
         )
 
         self._connect()
