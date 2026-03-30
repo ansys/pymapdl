@@ -27,6 +27,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 from unittest.mock import patch
 
 import grpc
@@ -663,8 +664,6 @@ def test__check_stds_2(mapdl):
 @requires("nowindows")  # since we are using bash
 def test__post_mortem_checks(mapdl):
     """Test that the standard input is checked."""
-    from ansys.mapdl.core.launcher import _get_std_output
-
     bash_command = """
 counter=1; while true; do
   echo $counter;
@@ -691,15 +690,14 @@ done
         patch.object(mapdl, "_stdout_queue"),
         patch.object(mapdl, "_stdout_thread"),
         patch.object(mapdl, "_mapdl_process"),
-        patch(
-            "ansys.mapdl.core.launcher._get_std_output", autospec=True
-        ) as mock_get_std_output,
     ):
-
-        mock_get_std_output.side_effect = _get_std_output
 
         mapdl._mapdl_process = process
         mapdl._create_process_stds_queue(process)
+
+        # Wait long enough for the bash process to emit the error at counter=7
+        # (~0.7 s at 0.1 s per iteration).
+        time.sleep(1.0)
 
         with pytest.raises(
             MapdlConnectionError, match="Expected MapdlConnection error"
