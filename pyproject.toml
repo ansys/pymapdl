@@ -70,7 +70,7 @@ tests = [
   "matplotlib==3.10.8",
   "pandas==2.3.3",
   "pyansys-tools-report==0.9.0",
-  "pyfakefs==6.1.5",
+  "pyfakefs==6.1.6",
   "pyiges[full]==0.3.2",
   "pytest-cov==7.0.0",
   "pytest-profiling==1.8.1",
@@ -102,7 +102,7 @@ doc = [
   "pandas==2.3.3",
   "plotly==6.6.0",
   "pyiges[full]==0.3.2",
-  "pypandoc==1.16.2",
+  "pypandoc==1.17",
   "pytest-sphinx==0.7.1",
   "pythreejs==2.4.2",
   "sphinx-autobuild==2024.10.3",
@@ -120,6 +120,10 @@ doc = [
   "sphinxemoji==0.3.2",
   "vtk==9.5.2",
 ]
+
+[dependency-groups]
+
+tox = ["tox==4.14.2"]
 
 [tool.flit.module]
 name = "ansys.mapdl.core"

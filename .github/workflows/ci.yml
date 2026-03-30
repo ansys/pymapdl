@@ -64,7 +64,7 @@ jobs:
       contents: write  # Needed to update changelog files
       pull-requests: write  # Needed to create pull requests with changelog updates
     steps:
-      - uses: ansys/actions/doc-deploy-changelog@22d03f365874cc55ffb84705f5f635f055b6f2b8 #v10.2.8
+      - uses: ansys/actions/doc-deploy-changelog@2a2b198b65c63adb69c0d032d180e4dc728d4809 #v10.2.9
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
@@ -79,7 +79,7 @@ jobs:
       pull-requests: read  # Needed to read pull request details
     steps:
       - name: Check pull-request name
-        uses: ansys/actions/check-pr-title@22d03f365874cc55ffb84705f5f635f055b6f2b8 #v10.2.8
+        uses: ansys/actions/check-pr-title@2a2b198b65c63adb69c0d032d180e4dc728d4809 #v10.2.9
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -94,7 +94,7 @@ jobs:
         folder: ["doc", "examples"]
     steps:
       - name: "Ansys documentation style checks"
-        uses: ansys/actions/doc-style@22d03f365874cc55ffb84705f5f635f055b6f2b8 #v10.2.8
+        uses: ansys/actions/doc-style@2a2b198b65c63adb69c0d032d180e4dc728d4809 #v10.2.9
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ${{ matrix.folder }}
@@ -122,7 +122,7 @@ jobs:
     steps:
       - name: "Build wheelhouse and perform smoke test"
         id: build-wheelhouse
-        uses: ansys/actions/build-wheelhouse@22d03f365874cc55ffb84705f5f635f055b6f2b8 #v10.2.8
+        uses: ansys/actions/build-wheelhouse@2a2b198b65c63adb69c0d032d180e4dc728d4809 #v10.2.9
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
@@ -150,7 +150,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: ansys/actions/check-vulnerabilities@22d03f365874cc55ffb84705f5f635f055b6f2b8 #v10.2.8
+      - uses: ansys/actions/check-vulnerabilities@2a2b198b65c63adb69c0d032d180e4dc728d4809 #v10.2.9
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
@@ -161,7 +161,7 @@ jobs:
     name: "Check actions security"
     runs-on: ubuntu-latest
     steps:
-      - uses: ansys/actions/check-actions-security@22d03f365874cc55ffb84705f5f635f055b6f2b8 #v10.2.8
+      - uses: ansys/actions/check-actions-security@2a2b198b65c63adb69c0d032d180e4dc728d4809 #v10.2.9
         with:
           generate-summary: true
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -190,7 +190,7 @@ jobs:
       contents: write  # Needed to push documentation to gh-pages branch
       pull-requests: write  # Needed to comment on pull requests with documentation link
     steps:
-      - uses: ansys/actions/doc-deploy-pr@22d03f365874cc55ffb84705f5f635f055b6f2b8 #v10.2.8
+      - uses: ansys/actions/doc-deploy-pr@2a2b198b65c63adb69c0d032d180e4dc728d4809 #v10.2.9
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -381,21 +381,23 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Run docker compose tests (remote-host profile)"
-        working-directory: docker/testing
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
           FILE_NAME: ${{ env.file_name }}
         run: |
-          docker compose --profile remote-host up --build --abort-on-container-exit --exit-code-from pymapdl-host --no-attach mapdl-remote
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uvx tox -e docker-remote
 
       - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.codecov-token }} # required
+          token: ${{ secrets.CODECOV_TOKEN }} # required
           root_dir: ${{ github.workspace }}
-          name: ${{ env.file_name }}.xml
+          name: ${{ env.file_name }}
+          files: ${{ env.file_name }}.xml
           flags: local,ubuntu,${{ matrix.mapdl-version }},dmp,docker
+          verbose: true
 
       - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
@@ -449,21 +451,23 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Run docker compose tests (local-host profile)"
-        working-directory: docker/testing
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
           FILE_NAME: ${{ env.file_name }}
         run: |
-          docker compose --profile local-host up --build --abort-on-container-exit --exit-code-from mapdl-local-host
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uvx tox -e docker-local
 
       - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.codecov-token }} # required
+          token: ${{ secrets.CODECOV_TOKEN }} # required
           root_dir: ${{ github.workspace }}
-          name: ${{ env.file_name }}.xml
+          name: ${{ env.file_name }}
+          files: ${{ env.file_name }}.xml
           flags: local,ubuntu,${{ matrix.mapdl-version }},dmp,docker
+          verbose: true
 
       - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
@@ -494,7 +498,7 @@ jobs:
       contents: read  # Needed to read repository contents for packaging
     steps:
       - name: "Build library source and wheel artifacts"
-        uses: ansys/actions/build-library@22d03f365874cc55ffb84705f5f635f055b6f2b8 #v10.2.8
+        uses: ansys/actions/build-library@2a2b198b65c63adb69c0d032d180e4dc728d4809 #v10.2.9
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
@@ -512,7 +516,7 @@ jobs:
       contents: write  # Needed to create GitHub releases
     steps:
       - name: "Download the library artifacts from build-library step"
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: ${{ env.PACKAGE_NAME }}-artifacts
           path: ${{ env.PACKAGE_NAME }}-artifacts
@@ -529,7 +533,7 @@ jobs:
           skip-existing: false
 
       - name: "Release to GitHub"
-        uses: ansys/actions/release-github@22d03f365874cc55ffb84705f5f635f055b6f2b8 #v10.2.8
+        uses: ansys/actions/release-github@2a2b198b65c63adb69c0d032d180e4dc728d4809 #v10.2.9
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           additional-artifacts: "minimum_requirements.txt"
@@ -545,7 +549,7 @@ jobs:
     needs: [release]
     steps:
       - name: "Deploy the stable documentation"
-        uses: ansys/actions/doc-deploy-stable@22d03f365874cc55ffb84705f5f635f055b6f2b8 #v10.2.8
+        uses: ansys/actions/doc-deploy-stable@2a2b198b65c63adb69c0d032d180e4dc728d4809 #v10.2.9
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -563,7 +567,7 @@ jobs:
     needs: [docs-build]
     steps:
       - name: "Deploy the latest documentation"
-        uses: ansys/actions/doc-deploy-dev@22d03f365874cc55ffb84705f5f635f055b6f2b8 #v10.2.8
+        uses: ansys/actions/doc-deploy-dev@2a2b198b65c63adb69c0d032d180e4dc728d4809 #v10.2.9
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
