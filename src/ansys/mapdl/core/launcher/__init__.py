@@ -46,13 +46,13 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from ansys.mapdl.core import LOG
 
-from .config import LOCALHOST, MAPDL_DEFAULT_PORT, resolve_launch_config
+from .config import LOCALHOST, MAPDL_DEFAULT_PORT, resolve_launch_config  # noqa: F401
 from .connection import (
-    close_all_local_instances,
     connect_to_existing,
     create_console_client,
     create_grpc_client,
 )
+from .connection import close_all_local_instances  # noqa: F401
 from .environment import prepare_environment
 from .errors import ConfigurationError, LaunchError
 from .hpc import (

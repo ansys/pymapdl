@@ -645,9 +645,8 @@ class TestPhase4QueueMonitoringEdgeCases:
         queue = process._monitor_stdout(mock_stdout)
 
         assert queue is not None
-        from queue import Queue
 
-        assert isinstance(queue, Queue)
+        assert isinstance(queue, process.Queue)
 
     def test_monitor_stdout_returns_none_when_no_stdout(self):
         """Test that _monitor_stdout returns None when stdout is None."""
