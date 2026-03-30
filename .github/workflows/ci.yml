@@ -381,21 +381,23 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Run docker compose tests (remote-host profile)"
-        working-directory: docker/testing
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
           FILE_NAME: ${{ env.file_name }}
         run: |
-          docker compose --profile remote-host up --build --abort-on-container-exit --exit-code-from pymapdl-host --no-attach mapdl-remote
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uvx tox -e docker-remote
 
       - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.codecov-token }} # required
+          token: ${{ secrets.CODECOV_TOKEN }} # required
           root_dir: ${{ github.workspace }}
-          name: ${{ env.file_name }}.xml
+          name: ${{ env.file_name }}
+          files: ${{ env.file_name }}.xml
           flags: local,ubuntu,${{ matrix.mapdl-version }},dmp,docker
+          verbose: true
 
       - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
@@ -449,21 +451,23 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Run docker compose tests (local-host profile)"
-        working-directory: docker/testing
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
           FILE_NAME: ${{ env.file_name }}
         run: |
-          docker compose --profile local-host up --build --abort-on-container-exit --exit-code-from mapdl-local-host
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uvx tox -e docker-local
 
       - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.codecov-token }} # required
+          token: ${{ secrets.CODECOV_TOKEN }} # required
           root_dir: ${{ github.workspace }}
-          name: ${{ env.file_name }}.xml
+          name: ${{ env.file_name }}
+          files: ${{ env.file_name }}.xml
           flags: local,ubuntu,${{ matrix.mapdl-version }},dmp,docker
+          verbose: true
 
       - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
