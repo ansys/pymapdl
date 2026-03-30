@@ -296,10 +296,18 @@ def _validate_port_availability(config: LaunchConfig, result: ValidationResult) 
 
         if not status.available:
             if status.used_by_mapdl:
-                result.add_error(
-                    f"Port {config.port} is already in use by another MAPDL instance. "
-                    f"Please specify a different port or stop the existing instance."
-                )
+                if config.override:
+                    # override=True means the caller wants to stop the existing
+                    # MAPDL process and start a fresh one — this is expected.
+                    LOG.debug(
+                        f"Port {config.port} is in use by MAPDL but override=True; "
+                        f"the existing instance will be stopped before launch."
+                    )
+                else:
+                    result.add_error(
+                        f"Port {config.port} is already in use by another MAPDL instance. "
+                        f"Please specify a different port or stop the existing instance."
+                    )
             else:
                 result.add_error(
                     f"Port {config.port} is already in use by another process. "

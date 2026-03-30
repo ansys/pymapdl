@@ -32,7 +32,7 @@ import shlex
 import subprocess  # nosec B404
 import threading
 import time
-from typing import IO, Dict, List, Optional, Union
+from typing import IO, Dict, List, Optional, Tuple, Union
 
 from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import MapdlDidNotStart
@@ -624,3 +624,77 @@ def _check_grpc_server_ready(stdout_queue: Queue, timeout: int) -> None:
         f"MAPDL gRPC server did not start within {timeout} seconds. "
         f"Server message not found in stdout."
     )
+
+
+class QueueWithStorage(Queue):
+    """A queue that stores all items permanently.
+
+    This queue is used to read and retain MAPDL process stdout/stderr lines.
+    """
+
+    _storage: list = []
+
+    def get(
+        self: "QueueWithStorage", block: bool = True, timeout: Optional[float] = None
+    ):
+        """Get an item from the queue."""
+        item = super().get(block=block, timeout=timeout)
+        self._storage.append(item)
+        return item
+
+    @property
+    def storage(self) -> list:
+        """Get the storage of the queue."""
+        return self._storage
+
+    @property
+    def storage_text(self) -> str:
+        """Get the storage of the queue as a string."""
+        return "".join(
+            [
+                (
+                    item.decode(encoding="utf-8", errors="replace")
+                    if isinstance(item, bytes)
+                    else str(item)
+                )
+                for item in self.storage
+            ]
+        )
+
+
+def _create_queue_for_std(
+    std: Optional[IO[bytes]],
+) -> Tuple[Optional[QueueWithStorage], Optional[threading.Thread]]:
+    """Create a queue and thread to drain a process PIPE stream.
+
+    Parameters
+    ----------
+    std : IO[bytes] or None
+        A readable binary stream (e.g. ``process.stdout``). If ``None``,
+        returns ``(None, None)``.
+
+    Returns
+    -------
+    tuple[QueueWithStorage | None, threading.Thread | None]
+        The queue holding each line read and the daemon thread doing the
+        reading, or ``(None, None)`` when ``std`` is falsy.
+    """
+    if not std:
+        LOG.debug("No STDOUT. Not checking MAPDL this way.")
+        return None, None
+
+    def enqueue_output(out: IO[bytes], queue: QueueWithStorage) -> None:
+        try:
+            for line in iter(out.readline, b""):
+                queue.put(line)
+            out.close()
+        except ValueError:
+            # When killing main process, a ValueError may be raised:
+            # ValueError: PyMemoryView_FromBuffer(): info -> buf must not be NULL
+            pass
+
+    q: QueueWithStorage = QueueWithStorage()
+    t: threading.Thread = threading.Thread(target=enqueue_output, args=(std, q))
+    t.daemon = True
+    t.start()
+    return q, t

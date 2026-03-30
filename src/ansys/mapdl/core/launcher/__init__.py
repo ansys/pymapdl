@@ -63,6 +63,7 @@ from .hpc import (
 )
 from .hpc import launch_on_hpc as _launch_on_hpc_fn
 from .models import LaunchConfig, LaunchMode
+from .process import _create_queue_for_std
 from .process import launch_mapdl_process as _launch_mapdl_process
 from .validation import validate_config
 
@@ -78,6 +79,7 @@ __all__ = [
     "LaunchError",
     "LOCALHOST",
     "generate_start_parameters",
+    "_create_queue_for_std",
 ]
 
 
