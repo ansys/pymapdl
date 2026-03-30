@@ -1,11 +1,43 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import fs from 'fs';
+import path from 'path';
+
+function showLogFile(instanceName, showTail) {
+  const logFile = path.join(process.env.GITHUB_WORKSPACE || process.cwd(), `${instanceName}.log`);
+
+  core.startGroup(`MAPDL Log: ${instanceName}`);
+  try {
+    if (fs.existsSync(logFile)) {
+      console.log(fs.readFileSync(logFile, 'utf8'));
+    } else {
+      console.log(`Log file not found: ${logFile}`);
+    }
+  } catch (err) {
+    console.log(`Could not read log file: ${err.message}`);
+  }
+  core.endGroup();
+
+  if (showTail) {
+    try {
+      if (fs.existsSync(logFile)) {
+        const lines = fs.readFileSync(logFile, 'utf8').split('\n');
+        const tail = lines.slice(-50).join('\n');
+        console.log(`\n⚠️ Last 50 lines of ${instanceName}.log:`);
+        console.log(tail);
+      }
+    } catch (err) {
+      console.log(`Could not read log file tail: ${err.message}`);
+    }
+  }
+}
 
 async function cleanup() {
   try {
     // Get instance names - stored as JSON array in state
     const instanceNamesJson = core.getState('instance-names');
     const debug = JSON.parse(core.getState('debug') || 'false');
+    const mainCompleted = core.getState('main-completed') === 'true';
 
     if (!instanceNamesJson) {
       core.error('No instance names found in state, skipping cleanup');
@@ -23,6 +55,11 @@ async function cleanup() {
     if (!Array.isArray(instanceNames) || instanceNames.length === 0) {
       core.error('No instances to cleanup');
       return;
+    }
+
+    // Show log files before cleanup
+    for (const instanceName of instanceNames) {
+      showLogFile(instanceName, !mainCompleted);
     }
 
     core.startGroup('Cleanup MAPDL containers');

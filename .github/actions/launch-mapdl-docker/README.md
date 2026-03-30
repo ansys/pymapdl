@@ -498,7 +498,10 @@ This GitHub Action uses bundled JavaScript files to reduce dependencies and impr
 
 #### Build Process
 
-The action uses `@vercel/ncc` (Node.js Compiler Collection) to bundle all JavaScript code, dependencies, and assets into single executable files.
+The action uses [esbuild](https://esbuild.github.io/) to bundle all JavaScript code
+and dependencies into single executable files. The source files use ESM
+(`import`/`export`) syntax, while the bundled output is CommonJS (`--format=cjs`)
+for compatibility with the GitHub Actions `node20` runner.
 
 **To build:**
 
@@ -510,8 +513,8 @@ npm run build        # Compile source files into dist/ directories
 
 **Output:**
 
-- `dist/index.js` - Bundled main action code
-- `dist-post/index.js` - Bundled post-action cleanup code
+- `dist/index.js` - Bundled main action code (CJS)
+- `dist-post/index.js` - Bundled post-action cleanup code (CJS)
 - `.gitignore` - Should include `dist/`, `dist-post/`, and `node_modules/`
 
 #### After Making Changes

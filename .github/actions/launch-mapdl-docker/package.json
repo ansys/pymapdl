@@ -2,9 +2,10 @@
   "name": "launch-mapdl-docker-action",
   "version": "1.0.0",
   "description": "GitHub Action for launching MAPDL Docker instances",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "build": "ncc build index.js -o dist && ncc build post.js -o dist-post",
+    "build": "esbuild index.js --bundle --platform=node --target=node20 --format=cjs --outfile=dist/index.js && esbuild post.js --bundle --platform=node --target=node20 --format=cjs --outfile=dist-post/index.js",
     "prepare": "npm run build"
   },
   "keywords": [
@@ -19,6 +20,6 @@
     "@actions/exec": "^3.0.0"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.38.2"
+    "esbuild": "^0.27.0"
   }
 }

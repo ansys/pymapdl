@@ -1,6 +1,6 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const path = require('path');
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import { join } from 'path';
 
 async function run() {
   try {
@@ -168,7 +168,7 @@ async function run() {
 
     // Run the launch script (from parent directory when compiled to dist/)
     core.startGroup('Launch MAPDL Docker Container');
-    const scriptPath = path.join(__dirname, '..', 'start-mapdl.sh');
+    const scriptPath = join(__dirname, '..', 'start-mapdl.sh');
     await exec.exec('bash', [scriptPath]);
 
     // Get container ID
@@ -207,7 +207,7 @@ async function run() {
     // Wait for services if requested
     if (wait === 'true') {
       core.startGroup('Waiting for MAPDL services to be ready');
-      const waitScriptPath = path.join(__dirname, '..', 'wait-services.sh');
+      const waitScriptPath = join(__dirname, '..', 'wait-services.sh');
       await exec.exec('bash', [waitScriptPath], {silent: !DEBUG});
       core.endGroup();
       console.log('✅ MAPDL instance is ready!');
@@ -215,6 +215,8 @@ async function run() {
       console.log('⏭️  Skipping service readiness check (wait=false)');
       console.log('ℹ️  User is responsible for checking service availability');
     }
+
+    core.saveState('main-completed', 'true');
 
   } catch (error) {
     core.setFailed(error.message);
