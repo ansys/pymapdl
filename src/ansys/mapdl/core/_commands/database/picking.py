@@ -73,7 +73,7 @@ class Picking(CommandsBase):
 
         .. warning::
 
-            For a given entity type, a list containing an ITEMthat is larger than the maximum defined
+            For a given entity type, a list containing an ``ITEM`` that is larger than the maximum defined
             entity, could deplete the system memory and produce unpredictable results.
 
         This command is valid in any processor.

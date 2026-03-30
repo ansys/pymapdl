@@ -19,6 +19,7 @@ SetUp
    SetUp.desol
    SetUp.detab
    SetUp.dnsol
+   SetUp.file
    SetUp.hrcplx
    SetUp.rescombine
    SetUp.reset

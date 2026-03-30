@@ -235,8 +235,8 @@ class Controls(CommandsBase):
 
         .. warning::
 
-            If you specify /EFACET,1, PowerGraphics does not plot midside nodes. You must use /EFACET,2 to
-            make the nodes visible.
+            If you specify  :ref:`efacet`,1, PowerGraphics does not plot midside nodes. You must use
+            :ref:`efacet`,2 to make the nodes visible.
 
         This command is valid in any processor.
         """
