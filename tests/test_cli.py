@@ -1262,7 +1262,7 @@ class TestCliStartCommand:
 class TestCliRunCommand:
     """Tests for the ``pymapdl run`` CLI subcommand."""
 
-    MOCK_OUTPUT = "MAPDL output line 1\nMADPL output line 2"
+    MOCK_OUTPUT = "MAPDL output line 1\nMAPDL output line 2"
 
     @pytest.fixture
     def cli_runner(self):
