@@ -57,8 +57,6 @@ from .environment import prepare_environment
 from .errors import ConfigurationError, LaunchError
 from .hpc import (
     detect_slurm_environment,
-)
-from .hpc import (
     resolve_slurm_resources,
 )
 from .hpc import launch_on_hpc as _launch_on_hpc_fn
