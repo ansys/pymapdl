@@ -52,8 +52,6 @@ updates:
       semver-patch-days: 3
       include:
         - "*"  # Include all dependencies in cooldown
-      exclude:
-        - "ansys-tools-visualization-interface"
     exclude-paths:
       - "doc/source/examples/extended_examples/gui/**"
       - "doc/source/examples/extended_examples/hpc/**"
