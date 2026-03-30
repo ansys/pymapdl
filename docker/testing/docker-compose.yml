@@ -115,7 +115,7 @@ services:
       args:
         - USE_LOCAL_REPO=false
     environment:
-      - PYMAPDL_IP=mapdl # Use the MAPDL service name
+      - PYMAPDL_IP=mapdl-remote # Use the MAPDL service name
       # If empty, it will use the default 'main' branch
       - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-main}
       # Explicitly use copy mode to avoid hardlink failures across filesystems
@@ -143,7 +143,7 @@ services:
       args:
         - USE_LOCAL_REPO=true
     environment:
-      - PYMAPDL_IP=mapdl # Use the MAPDL service name
+      - PYMAPDL_IP=mapdl-remote # Use the MAPDL service name
       # If empty, it will use the default 'main' branch
       - PYMAPDL_BRANCH=${PYMAPDL_BRANCH:-}
       # Explicitly use copy mode to avoid hardlink failures across filesystems
