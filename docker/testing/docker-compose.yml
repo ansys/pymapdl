@@ -84,6 +84,7 @@ services:
       - default
     shm_size: '2gb'
     hostname: mapdl
+    restart: unless-stopped
     networks:
       - pymapdl-net
     environment:
