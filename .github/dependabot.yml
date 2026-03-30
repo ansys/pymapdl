@@ -55,7 +55,8 @@ updates:
       exclude:
         - "ansys-tools-visualization-interface"
     exclude-paths:
-      - "doc/source/examples/extended_examples/**"
+      - "doc/source/examples/extended_examples/gui/**"
+      - "doc/source/examples/extended_examples/hpc/**"
     groups:
        minimal:
           patterns:
