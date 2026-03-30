@@ -1273,8 +1273,9 @@ class TestCliRunCommand:
 
         runner = CliRunner()
 
-        def invoke(args_str, **kwargs):
-            args = args_str.split() if args_str else []
+        def invoke(args, **kwargs):
+            if isinstance(args, str):
+                args = args.split() if args else []
             return runner.invoke(main, args, **kwargs)
 
         return invoke
@@ -1290,32 +1291,45 @@ class TestCliRunCommand:
     # Happy-path tests                                                     #
     # ------------------------------------------------------------------ #
 
-    def test_run_inline_commands(self, cli_runner, mock_mapdl):
-        """Inline \\n-separated commands are sent to MAPDL."""
+    def test_run_single_command(self, cli_runner, mock_mapdl):
+        """A single -c command is sent to MAPDL."""
         with patch(
             "ansys.mapdl.core.launcher.connection.connect_to_existing",
             return_value=mock_mapdl,
         ):
-            result = cli_runner("run /prep7\\nBLOCK,0,1,0,1,0,1")
+            result = cli_runner(["run", "-c", "/prep7"])
 
         assert result.exit_code == 0
         assert self.MOCK_OUTPUT in result.output
-        mock_mapdl.input_strings.assert_called_once()
-        sent = mock_mapdl.input_strings.call_args[0][0]
-        assert "/prep7" in sent
-        assert "BLOCK,0,1,0,1,0,1" in sent
+        mock_mapdl.input_strings.assert_called_once_with("/prep7")
 
-    def test_run_inline_newline_unescaping(self, cli_runner, mock_mapdl):
-        """Literal ``\\n`` in the CLI argument is unescaped to a real newline."""
+    def test_run_multiple_commands(self, cli_runner, mock_mapdl):
+        """Multiple -c options are joined with newlines and sent as one block."""
         with patch(
             "ansys.mapdl.core.launcher.connection.connect_to_existing",
             return_value=mock_mapdl,
         ):
-            result = cli_runner("run /prep7\\nSAVE")
+            result = cli_runner(
+                ["run", "-c", "/prep7", "-c", "BLOCK,0,1,0,1,0,1", "-c", "SAVE"]
+            )
+
+        assert result.exit_code == 0
+        mock_mapdl.input_strings.assert_called_once()
+        sent = mock_mapdl.input_strings.call_args[0][0]
+        assert sent == "/prep7\nBLOCK,0,1,0,1,0,1\nSAVE"
+
+    def test_run_windows_path_not_mangled(self, cli_runner, mock_mapdl):
+        """Windows paths with backslash sequences (e.g. C:\\new\\file) are preserved."""
+        cmd = r"/FILNAME,'C:\new\file',1"
+        with patch(
+            "ansys.mapdl.core.launcher.connection.connect_to_existing",
+            return_value=mock_mapdl,
+        ):
+            result = cli_runner(["run", "-c", cmd])
 
         assert result.exit_code == 0
         sent = mock_mapdl.input_strings.call_args[0][0]
-        assert sent == "/prep7\nSAVE"
+        assert sent == cmd
 
     def test_run_file_option(self, cli_runner, mock_mapdl, tmp_path):
         """Commands are read from a file when ``--file`` is given."""
@@ -1326,7 +1340,7 @@ class TestCliRunCommand:
             "ansys.mapdl.core.launcher.connection.connect_to_existing",
             return_value=mock_mapdl,
         ):
-            result = cli_runner(f"run --file {script}")
+            result = cli_runner(["run", "--file", str(script)])
 
         assert result.exit_code == 0
         mock_mapdl.input_strings.assert_called_once()
@@ -1335,7 +1349,7 @@ class TestCliRunCommand:
         assert "BLOCK,0,1,0,1,0,1" in sent
 
     def test_run_stdin(self, mock_mapdl):
-        """Commands are read from stdin when ``-`` is the argument."""
+        """Commands are read from stdin when ``-`` is the positional argument."""
         from click.testing import CliRunner
 
         from ansys.mapdl.core.cli import main
@@ -1363,7 +1377,8 @@ class TestCliRunCommand:
             return_value=mock_mapdl,
         ) as mock_connect:
             result = runner.invoke(
-                main, ["run", "--ip", "192.168.1.10", "--port", "50055", "/PREP7"]
+                main,
+                ["run", "--ip", "192.168.1.10", "--port", "50055", "-c", "/PREP7"],
             )
 
         assert result.exit_code == 0
@@ -1383,7 +1398,7 @@ class TestCliRunCommand:
             "ansys.mapdl.core.launcher.connection.connect_to_existing",
             return_value=mock_mapdl,
         ) as mock_connect:
-            result = runner.invoke(main, ["run", "--clear-on-connect", "/PREP7"])
+            result = runner.invoke(main, ["run", "--clear-on-connect", "-c", "/PREP7"])
 
         assert result.exit_code == 0
         config: LaunchConfig = mock_connect.call_args[0][0]
@@ -1401,7 +1416,7 @@ class TestCliRunCommand:
             "ansys.mapdl.core.launcher.connection.connect_to_existing",
             return_value=mock_mapdl,
         ) as mock_connect:
-            result = runner.invoke(main, ["run", "/PREP7"])
+            result = runner.invoke(main, ["run", "-c", "/PREP7"])
 
         assert result.exit_code == 0
         config: LaunchConfig = mock_connect.call_args[0][0]
@@ -1416,7 +1431,7 @@ class TestCliRunCommand:
             "ansys.mapdl.core.launcher.connection.connect_to_existing",
             return_value=mock,
         ):
-            result = cli_runner("run /PREP7")
+            result = cli_runner(["run", "-c", "/PREP7"])
 
         assert result.exit_code == 0
         assert result.output == ""
@@ -1426,16 +1441,35 @@ class TestCliRunCommand:
     # ------------------------------------------------------------------ #
 
     def test_run_no_commands_error(self, cli_runner):
-        """Omitting both commands argument and ``--file`` exits with an error."""
+        """Omitting all input sources exits with an error."""
         result = cli_runner("run")
         assert result.exit_code != 0
 
-    def test_run_both_commands_and_file_error(self, cli_runner, tmp_path):
-        """Providing both inline commands and ``--file`` is rejected."""
+    def test_run_commands_and_file_mutually_exclusive(self, cli_runner, tmp_path):
+        """Providing both -c and ``--file`` is rejected."""
         script = tmp_path / "script.inp"
         script.write_text("/PREP7\n")
 
-        result = cli_runner(f"run /PREP7 --file {script}")
+        result = cli_runner(["run", "-c", "/PREP7", "--file", str(script)])
+        assert result.exit_code != 0
+
+    def test_run_commands_and_stdin_mutually_exclusive(self, mock_mapdl):
+        """Providing both -c and stdin ``-`` is rejected."""
+        from click.testing import CliRunner
+
+        from ansys.mapdl.core.cli import main
+
+        runner = CliRunner()
+        with patch(
+            "ansys.mapdl.core.launcher.connection.connect_to_existing",
+            return_value=mock_mapdl,
+        ):
+            result = runner.invoke(main, ["run", "-c", "/PREP7", "-"], input="/prep7\n")
+        assert result.exit_code != 0
+
+    def test_run_unknown_positional_error(self, cli_runner):
+        """An unexpected positional argument that isn't ``-`` is rejected."""
+        result = cli_runner(["run", "some_command"])
         assert result.exit_code != 0
 
     def test_run_connection_error_exits_nonzero(self, cli_runner):
@@ -1444,7 +1478,7 @@ class TestCliRunCommand:
             "ansys.mapdl.core.launcher.connection.connect_to_existing",
             side_effect=ConnectionError("refused"),
         ):
-            result = cli_runner("run /PREP7")
+            result = cli_runner(["run", "-c", "/PREP7"])
 
         assert result.exit_code == 1
 
@@ -1457,16 +1491,9 @@ class TestCliRunCommand:
             "ansys.mapdl.core.launcher.connection.connect_to_existing",
             return_value=mock,
         ):
-            result = cli_runner("run /PREP7")
+            result = cli_runner(["run", "-c", "/PREP7"])
 
         assert result.exit_code == 1
-
-    def test_run_empty_commands_error(self, cli_runner):
-        """A whitespace-only command string is rejected."""
-        with patch("ansys.mapdl.core.launcher.connection.connect_to_existing"):
-            result = cli_runner("run '   '")
-
-        assert result.exit_code != 0
 
     def test_run_start_instance_false(self, mock_mapdl):
         """LaunchConfig always has ``start_instance=False`` (never launches a new MAPDL)."""
@@ -1480,7 +1507,7 @@ class TestCliRunCommand:
             "ansys.mapdl.core.launcher.connection.connect_to_existing",
             return_value=mock_mapdl,
         ) as mock_connect:
-            result = runner.invoke(main, ["run", "/PREP7"])
+            result = runner.invoke(main, ["run", "-c", "/PREP7"])
 
         assert result.exit_code == 0
         config: LaunchConfig = mock_connect.call_args[0][0]

@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import sys
-from typing import Optional
+from typing import Optional, Tuple
 
 import click
 
@@ -33,18 +33,26 @@ import click
 Commands can be supplied in three mutually exclusive ways:
 
 \b
-  1. Inline argument — pass a string with commands separated by literal \\\\n:
-       pymapdl run "/prep7\\\\nBLOCK,0,1,0,1,0,1\\\\nSAVE"
+  1. Repeated --command / -c options (recommended for scripting and LLM use):
+       pymapdl run -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
   2. File — read commands from an APDL script file:
        pymapdl run --file my_script.inp
-  3. Stdin — pass ``-`` as the argument and pipe commands in:
+  3. Stdin — pass ``-`` as the positional argument and pipe commands in:
        echo "/prep7" | pymapdl run -
 
 The instance is targeted by ``--ip`` and ``--port`` (defaults: 127.0.0.1:50052).
 MAPDL output is written to stdout so it can be consumed by scripts or LLM agents.
 """,
 )
-@click.argument("commands", default=None, required=False)
+@click.argument("stdin_marker", metavar="[-]", default=None, required=False)
+@click.option(
+    "--command",
+    "-c",
+    "commands",
+    multiple=True,
+    help="An APDL command to send.  May be repeated to build a multi-command block: "
+    '-c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE',
+)
 @click.option(
     "--file",
     "-f",
@@ -82,7 +90,8 @@ MAPDL output is written to stdout so it can be consumed by scripts or LLM agents
     help="Seconds to wait when establishing the gRPC connection to the running instance.",
 )
 def run(
-    commands: Optional[str],
+    stdin_marker: Optional[str],
+    commands: Tuple[str, ...],
     script_file: Optional[str],
     port: int,
     ip: str,
@@ -93,11 +102,15 @@ def run(
 
     Parameters
     ----------
-    commands : str, optional
-        MAPDL commands to execute. Use ``\\n`` as a separator between
-        commands, or pass ``-`` to read from stdin.
+    stdin_marker : str, optional
+        Pass ``-`` to read commands from stdin.
+    commands : tuple of str
+        APDL commands supplied via repeated ``-c`` / ``--command`` options.
+        Each value is one APDL command; they are joined with newlines before
+        being sent as a single block.
     script_file : str, optional
-        Path to an APDL script file.  Mutually exclusive with *commands*.
+        Path to an APDL script file.  Mutually exclusive with *commands* and
+        stdin.
     port : int
         gRPC port of the running MAPDL instance.
     ip : str
@@ -113,25 +126,30 @@ def run(
     # Resolve the command source                                           #
     # ------------------------------------------------------------------ #
 
-    n_sources = sum([commands is not None, script_file is not None])
+    use_stdin = stdin_marker == "-"
+    n_sources = sum([bool(commands), script_file is not None, use_stdin])
+
+    if stdin_marker is not None and stdin_marker != "-":
+        raise click.UsageError(
+            f"Unexpected positional argument {stdin_marker!r}.  "
+            "Use '-' to read from stdin, or supply commands via -c / --file."
+        )
     if n_sources == 0:
         raise click.UsageError(
-            "Provide commands as an argument, via '--file', or pipe them via stdin ('-')."
+            "Provide commands via '-c CMD', '--file PATH', or pipe them via stdin ('-')."
         )
     if n_sources > 1:
         raise click.UsageError(
-            "Only one of 'commands' argument and '--file' may be used at a time."
+            "Only one input source may be used at a time: '-c', '--file', or stdin ('-')."
         )
 
     if script_file is not None:
         with open(script_file, "r") as fh:
             cmd_block = fh.read()
-    elif commands == "-":
+    elif use_stdin:
         cmd_block = sys.stdin.read()
     else:
-        assert commands is not None  # nosec B101 - guaranteed by n_sources check above
-        # Unescape literal \n sequences written by shell users
-        cmd_block = commands.replace("\\n", "\n")
+        cmd_block = "\n".join(commands)
 
     if not cmd_block.strip():
         raise click.UsageError("No commands to run (input is empty).")
