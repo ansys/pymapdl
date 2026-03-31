@@ -111,9 +111,9 @@ def run(
     script_file : str, optional
         Path to an APDL script file.  Mutually exclusive with *commands* and
         stdin.
-    port : int
+    port : Optional[int]
         gRPC port of the running MAPDL instance. Defaults to 50052, unless overridden by the PYMAPDL_PORT environment variable.
-    ip : str
+    ip : Optional[str]
         IP address of the running MAPDL instance. Defaults to 127.0.0.1, unless overridden by the PYMAPDL_IP environment variable.
     clear_on_connect : bool
         When :class:`True`, clear the MAPDL database upon connecting.
