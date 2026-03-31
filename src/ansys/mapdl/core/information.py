@@ -22,7 +22,7 @@
 
 from functools import wraps
 import re
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 import weakref
 
 from ansys.mapdl import core as pymapdl
@@ -788,3 +788,131 @@ class Information:
         init_ = "L O A D   S T E P   O P T I O N S"
         end_string = None
         return self._get_between(init_, end_string)
+
+
+def get_mapdl_info(mapdl: "Mapdl") -> dict[str, Any]:
+    """Return diagnostic information from a connected MAPDL instance.
+
+    Collects connection details, version/product information, model geometry,
+    mesh statistics, and post-processing state from a live MAPDL instance and
+    returns them as a nested dictionary.  Each top-level section is collected
+    independently so a failure in one section never blocks the others.
+
+    This is the canonical implementation shared by the ``pymapdl check`` CLI
+    command and external consumers such as the ``pymapdl-mcp`` package.
+
+    Parameters
+    ----------
+    mapdl : Mapdl
+        A connected MAPDL gRPC instance.
+
+    Returns
+    -------
+    dict[str, Any]
+        Nested dictionary with the following top-level keys:
+
+        ``"connection"``
+            Basic connection details: ``name``, ``ip``, ``port``,
+            ``version``, ``directory``, ``status``, ``is_local``,
+            ``jobname``, ``platform``.
+        ``"information"``
+            Product and version info extracted from ``mapdl.info``:
+            ``product``, ``mapdl_version``, ``mapdl_version_build``,
+            ``mapdl_version_update``, ``pymapdl_version``, ``title``,
+            ``units``.
+        ``"geometry"``
+            Current model geometry entity counts: ``n_keypoint``,
+            ``n_line``, ``n_area``, ``n_volu``.
+        ``"mesh"``
+            Current mesh statistics: ``n_node``, ``n_elem``.
+        ``"post_processing"``
+            Post-processing state: ``available``, ``nsets``.
+
+        If a section cannot be retrieved, it will contain an ``"error"``
+        key with the exception message instead of the normal fields.
+
+    Examples
+    --------
+    >>> from ansys.mapdl.core import get_mapdl_info, launch_mapdl
+    >>> mapdl = launch_mapdl()
+    >>> info = get_mapdl_info(mapdl)
+    >>> info["connection"]["status"]
+    'Running'
+    >>> info["information"]["product"]
+    'Ansys Mechanical Enterprise'
+    >>> info["geometry"]["n_node"]
+    0
+    """
+    info: dict[str, Any] = {}
+
+    # ------------------------------------------------------------------ #
+    # Connection                                                          #
+    # ------------------------------------------------------------------ #
+    connection: dict[str, Any] = {}
+    try:
+        connection["name"] = mapdl.name
+        connection["ip"] = mapdl.ip
+        connection["port"] = mapdl.port
+        connection["version"] = mapdl.version
+        connection["directory"] = str(mapdl.directory)
+        connection["status"] = mapdl.check_status.value.title()
+        connection["is_local"] = mapdl.is_local
+        connection["jobname"] = mapdl.jobname
+        connection["platform"] = mapdl.platform
+    except Exception as e:
+        connection["error"] = str(e)
+    info["connection"] = connection
+
+    # ------------------------------------------------------------------ #
+    # Information (product / version)                                     #
+    # ------------------------------------------------------------------ #
+    information: dict[str, Any] = {}
+    try:
+        information["product"] = mapdl.info.product
+        information["mapdl_version"] = mapdl.info.mapdl_version_release
+        information["mapdl_version_build"] = mapdl.info.mapdl_version_build
+        information["mapdl_version_update"] = mapdl.info.mapdl_version_update
+        information["pymapdl_version"] = mapdl.info.pymapdl_version
+        information["title"] = mapdl.info.title or ""
+        information["units"] = dict(mapdl.info.units)
+    except Exception as e:
+        information["error"] = str(e)
+    info["information"] = information
+
+    # ------------------------------------------------------------------ #
+    # Geometry                                                            #
+    # ------------------------------------------------------------------ #
+    geometry: dict[str, Any] = {}
+    try:
+        geometry["n_keypoint"] = mapdl.geometry.n_keypoint
+        geometry["n_line"] = mapdl.geometry.n_line
+        geometry["n_area"] = mapdl.geometry.n_area
+        geometry["n_volu"] = mapdl.geometry.n_volu
+    except Exception as e:
+        geometry["error"] = str(e)
+    info["geometry"] = geometry
+
+    # ------------------------------------------------------------------ #
+    # Mesh                                                                #
+    # ------------------------------------------------------------------ #
+    mesh: dict[str, Any] = {}
+    try:
+        mesh["n_node"] = mapdl.mesh.n_node
+        mesh["n_elem"] = mapdl.mesh.n_elem
+    except Exception as e:
+        mesh["error"] = str(e)
+    info["mesh"] = mesh
+
+    # ------------------------------------------------------------------ #
+    # Post-processing                                                     #
+    # ------------------------------------------------------------------ #
+    post_processing: dict[str, Any] = {}
+    try:
+        post_processing["available"] = hasattr(mapdl, "post_processing")
+        if post_processing["available"]:
+            post_processing["nsets"] = mapdl.post_processing.nsets
+    except Exception as e:
+        post_processing["error"] = str(e)
+    info["post_processing"] = post_processing
+
+    return info
