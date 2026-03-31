@@ -1193,10 +1193,17 @@ class TestCliStartCommand:
             # Verify the command failed with non-zero exit code
             assert result.exit_code != 0
 
-    def test_start_command_removes_pymapdl_start_instance_env_var(
+    def test_start_command_works_when_start_instance_env_var_is_set(
         self, cli_runner, monkeypatch
     ):
-        """Test that PYMAPDL_START_INSTANCE env var is removed when using CLI."""
+        """Test that CLI start works when PYMAPDL_START_INSTANCE is set.
+
+        The CLI should always start a new instance via ``start_instance=True``
+        passed explicitly to ``launch_mapdl_process``, without removing
+        ``PYMAPDL_START_INSTANCE`` from ``os.environ``.  Mutating the
+        environment would break subsequent tests that rely on it being set to
+        ``False`` when running under ``CliRunner`` (same-process execution).
+        """
         monkeypatch.setenv("PYMAPDL_START_INSTANCE", "True")
 
         with patch("ansys.mapdl.core.launcher.launch_mapdl_process") as mock_launch:
@@ -1207,9 +1214,10 @@ class TestCliStartCommand:
             # Verify the command succeeded
             assert result.exit_code == 0
 
-            # The env var should be removed (this is verified in the CLI code)
-            # but we can't easily verify this in the test, so we just ensure it runs
             assert "Success" in result.output
+
+            # The env var must NOT have been removed from the process environment
+            assert "PYMAPDL_START_INSTANCE" in os.environ
 
     def test_start_command_output_format(self, cli_runner):
         """Test that start command output format is correct."""
