@@ -259,10 +259,13 @@ def test_launch_uds_transport(monkeypatch):
     monkeypatch.delenv("PYMAPDL_GRPC_TRANSPORT", raising=False)
     monkeypatch.delenv("ANSYS_MAPDL_GRPC_TRANSPORT", raising=False)
 
+    mapdl_ = None
     try:
         mapdl_ = launch_mapdl(
             additional_switches=QUICK_LAUNCH_SWITCHES,
         )
         assert mapdl_.transport_mode == "uds"
+
     finally:
-        mapdl_.exit(force=True)
+        if mapdl_ is not None:
+            mapdl_.exit(force=True)
