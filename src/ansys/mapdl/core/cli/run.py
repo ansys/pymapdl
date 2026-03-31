@@ -114,7 +114,7 @@ def run(
     port : Optional[int]
         gRPC port of the running MAPDL instance. Defaults to 50052, unless overridden by the PYMAPDL_PORT environment variable.
     ip : Optional[str]
-        IP address of the running MAPDL instance. Defaults to 127.0.0.1, unless overridden by the PYMAPDL_IP environment variable.
+        IP address of the running MAPDL instance. Defaults to localhost (127.0.0.1), unless overridden by the PYMAPDL_IP environment variable.
     clear_on_connect : bool
         When :class:`True`, clear the MAPDL database upon connecting.
     timeout : int
