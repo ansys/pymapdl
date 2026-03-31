@@ -4,6 +4,7 @@
 
 """Unit tests for launch_mapdl function in launcher.__init__ module."""
 
+import os
 from unittest.mock import Mock, patch
 
 import pytest
@@ -263,6 +264,7 @@ def test_launch_uds_transport(monkeypatch):
     try:
         mapdl_ = launch_mapdl(
             additional_switches=QUICK_LAUNCH_SWITCHES,
+            port=int(os.getenv("PYMAPDL_TEST_PORT", "50052")) + 20,
         )
         assert mapdl_.transport_mode == "uds"
 
