@@ -317,6 +317,7 @@ class SetUp(CommandsBase):
            * - RATE
              -
              - Diffusion flow rate
+
         """
         command = f"DESOL,{elem},{node},{item},{comp},{v1},{v2},{v3},{v4},{v5},{v6}"
         return self.run(command, **kwargs)

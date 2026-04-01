@@ -259,7 +259,7 @@ class Abbreviations(CommandsBase):
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/installation/win_product_table.html>`_ or
         the `Ansys, Inc. Linux Installation Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/installation/lin_product_table.html>`_
-         for details specific to your platform or operating
+        for details specific to your platform or operating
         system.
 
         The USER01 routine is commented and should be listed from the distribution media (system dependent)

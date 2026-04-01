@@ -56,10 +56,13 @@ If you want to specify an argument, for instance the port, then you need to call
             Success: Launched an MAPDL instance (PID=18238) at 127.0.0.1:50054
 
 
-This ``pymapdl start`` command aims to replicate the function
-:func:`ansys.mapdl.core.launcher.launch_mapdl`. Hence, you can use
-some of the arguments which this function allows.
-For instance, you could specify the working directory:
+This ``pymapdl start`` command uses the
+:func:`ansys.mapdl.core.launcher.launch_mapdl_process` function internally
+to start MAPDL without creating a client connection. The command returns the
+connection information (IP, port, and PID) that you can use to connect later.
+
+Some of the arguments that :func:`ansys.mapdl.core.launcher.launch_mapdl` allows
+are also available in the CLI. For instance, you could specify the working directory:
 
 .. tab-set::
 
@@ -80,7 +83,8 @@ For instance, you could specify the working directory:
             Success: Launched an MAPDL instance (PID=32612) at 127.0.0.1:50052
 
 
-For more information, see :func:`ansys.mapdl.core.launcher.launch_mapdl`.
+For more information about the underlying function, see
+:func:`ansys.mapdl.core.launcher.launch_mapdl_process`.
 
 
 Stop MAPDL instances

@@ -172,6 +172,8 @@ class SurfaceOperations(CommandsBase):
         percent to check for inclusion. Excluding facets under such a small tolerance may yield unacceptable
         (aesthetically) results. Increasing the tolerance by a larger amount (0.1 or 10%) will sometimes
         yield smother edges along the surface you create.
+
+
         """
         command = f"SUCR,{surfname},{surftype},{nrefine},{radius},,,{tolout}"
         return self.run(command, **kwargs)
@@ -263,7 +265,7 @@ class SurfaceOperations(CommandsBase):
         For ``Geom`` = OFF (or 0 or NO), only results information is written to this parameter.
 
         For ``Geom`` = ON (or 1 or YES), both geometry data and results information are written to this
-        parameter. Geometry data includes 7 data items: (GCX, GCY, GCZ, NORMX, NORMY, NORMZ,  and DA).
+        parameter. Geometry data includes 7 data items: (GCX, GCY, GCZ, NORMX, NORMY, NORMZ, and DA).
         Results information is then written to the 8th column of the parameter. SetNames of GCX, GCY, GCZ,
         NORMX, NORMY, NORMZ, and DA are predefined and computed when :ref:`sucr` is issued.
         """

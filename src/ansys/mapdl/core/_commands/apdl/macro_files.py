@@ -456,7 +456,7 @@ class MacroFiles(CommandsBase):
 
         This command forces the contents of a macro or other input file to be written to
         :file:`Jobname.LOG`. It is valid only within a macro or input file, and should be placed at the top
-        of the file. :ref:`pmacro`   should be included in any macro or input file that calls GUI
+        of the file. :ref:`pmacro`  should be included in any macro or input file that calls GUI
         functions.
         """
         command = "/PMACRO"

@@ -1082,10 +1082,10 @@ class ParameterDefinition(CommandsBase):
              - Description
            * - MAT
              - ``Sect1``
-             - ``Item2`` = 0 or blank; ``IT2NUM`` = ``Sect2``. Material ID to be used for general contact between ``Sect1`` and ``Sect2`` . Alternative get function: SECTOMAT( ``Sect1``, ``Sect2`` ).
+             - ``Item2`` = 0 or blank; ``IT2NUM`` = ``Sect2``. Material ID to be used for general contact between ``Sect1`` and ``Sect2``. Alternative get function: SECTOMAT( ``Sect1``, ``Sect2`` ).
            * - REAL
              - ``Sect1``
-             - ``Item2`` = 0 or blank; ``IT2NUM`` = ``Sect2``. Real constant ID to be used for general contact between ``Sect1`` and ``Sect2`` . Alternative get function: SECTOREAL( ``Sect1``, ``Sect2`` ).
+             - ``Item2`` = 0 or blank; ``IT2NUM`` = ``Sect2``. Real constant ID to be used for general contact between ``Sect1`` and ``Sect2``. Alternative get function: SECTOREAL( ``Sect1``, ``Sect2`` ).
            * - DEF
              - ``Sect1``
              - ``Item2`` = 0 or blank; ``IT2NUM`` = ``Sect2``. Number indicating the type of contact for the general contact definition between ``Sect1`` and ``Sect2`` :   * = 0 - Excluded general contact between ``Sect1`` / ``Sect2`` * = 1 - Asymmetric general contact between ``Sect1`` (contact) / ``Sect2`` (target) * = 2 - Asymmetric general contact between ``Sect1`` (target) / ``Sect2`` (contact) * = 3 - Symmetric general contact between ``Sect1`` / ``Sect2``
@@ -1786,7 +1786,7 @@ class ParameterDefinition(CommandsBase):
         \*GET Preprocessing Items, Entity = TBLAB
         *****************************************
 
-        .. flat-table:: ``Entity`` = TBLAB, ``ENTNUM`` = ``N``..( ``TBlab`` = data table label from the :ref:`tb` command; ``N`` = material number.)
+        .. flat-table:: ``Entity`` = TBLAB, ``ENTNUM`` = ``N`` ..( ``TBlab`` = data table label from the :ref:`tb` command; ``N`` = material number.)
            :header-rows: 2
 
            * - :ref:`get`, ``Par``, ``TBlab``, ``N``, ``Item1``, ``IT1NUM``, ``Item2``, ``IT2NUM``, ``TBOPT``
@@ -2563,7 +2563,7 @@ class ParameterDefinition(CommandsBase):
         \*GET Postprocessing Items, Entity = PLNSOL
         *******************************************
 
-        .. flat-table:: ``Entity`` = :ref:`plnsol`  You must issue the :ref:`show` command before commands that produce a graphical output when running in batch mode to produce/export graphic files. For more details, see `External Graphics Options <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS16_1.html#basexunijla61499>`_, ``ENTNUM`` = 0 (or blank)
+        .. flat-table:: ``Entity`` = :ref:`plnsol`  You must issue the :ref:`show` command before commands that produce a graphical output when running in batch mode to produce/export graphic files. For more details, see `External Graphics Options <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS16_1.html#basexunijla61499>`_  , ``ENTNUM`` = 0 (or blank)
            :header-rows: 2
 
            * - :ref:`get`, ``Par``, PLNSOL, 0, ``Item1``, ``IT1NUM``, ``Item2``, ``IT2NUM``
@@ -2946,6 +2946,7 @@ class ParameterDefinition(CommandsBase):
            * - STAT
              - ``Element Number``
              - Status of the element: 0 = uncracked, 1 = cracked
+
         """
         command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}"
         return self.run(command, **kwargs)
@@ -4767,6 +4768,7 @@ class ParameterDefinition(CommandsBase):
            * - EMF
              -
              - Electromotive force drop
+
         """
         command = (
             f"*VGET,{parr},{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
