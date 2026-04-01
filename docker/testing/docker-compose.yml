@@ -94,8 +94,8 @@ services:
       - OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
     image: ${DOCKER_IMAGE}
     platform: linux/amd64
-    # entrypoint: /bin/bash
-    # command: ["-c", "exec ansys -grpc -smp -np 2 -transport insecure -allowremote true"]
+    entrypoint: /bin/bash
+    command: ["-c", "exec ansys -grpc -smp -np 2 -transport insecure -allowremote true"]
     working_dir: /jobs
     user: root
 
