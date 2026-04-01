@@ -66,7 +66,7 @@ ENV ON_STUDENT=False
 # To work without a screen.
 ENV PYANSYS_OFF_SCREEN=True
 # Enable debugging for PyMAPDL
-ENV PYMAPDL_DEBUG_TESTING=False
+ENV PYMAPDL_DEBUG_TESTING=True
 # To connect to an already alive or remote MAPDL instance
 ENV PYMAPDL_START_INSTANCE=False
 # Set MAPDL port to connect to
