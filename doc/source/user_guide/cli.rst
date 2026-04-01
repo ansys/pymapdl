@@ -6,7 +6,7 @@ PyMAPDL command line interface
 ==============================
 
 For your convenience, PyMAPDL package includes a command line interface
-which allows you to launch, stop and list local MAPDL instances.
+which allows you to launch, stop, list, and execute commands on local MAPDL instances.
 
 
 Launch MAPDL instances
@@ -277,6 +277,140 @@ The converter module has its own command line interface to convert
 MAPDL files to PyMAPDL. For more information, see
 :ref:`ref_cli_converter`.
 
+
+.. _ref_cli_exec:
+
+Execute MAPDL commands
+======================
+
+Use ``pymapdl exec`` to send APDL commands to a running MAPDL instance and
+print the output to stdout.  The command always connects to an existing
+instance — it never starts a new one.  Use ``pymapdl start`` first if needed.
+
+There are three mutually exclusive ways to supply commands.  The recommended
+approach is to use the ``-c`` / ``--command`` option, which can be repeated.
+Each ``-c`` value is one APDL command; all commands are sent as a single block:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
+
+
+You can also read commands from an APDL script file using ``--file`` / ``-f``:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec --file my_script.inp
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl exec --file my_script.inp
+
+
+To pipe commands from another program, pass ``-`` as a positional argument to
+read from stdin:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> Get-Content my_script.inp | pymapdl exec -
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ cat my_script.inp | pymapdl exec -
+
+
+By default, ``pymapdl exec`` connects without clearing the MAPDL database, so
+successive calls share the same model state.  Use the ``--clear-on-connect``
+flag to clear the database before sending commands:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec --clear-on-connect -c /prep7
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl exec --clear-on-connect -c /prep7
+
+
+A common workflow is to start MAPDL once, send one or more command blocks, and
+then stop the instance:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl start
+            Success: Launched an MAPDL instance (PID=23644) at 127.0.0.1:50052
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1"
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec -c SAVE
+            (.venv) PS C:\Users\user\pymapdl> pymapdl stop
+            Success: Ansys instances running on port 50052 have been stopped.
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl start
+            Success: Launched an MAPDL instance (PID=23644) at 127.0.0.1:50052
+            (.venv) user@machine:~$ pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1"
+            (.venv) user@machine:~$ pymapdl exec -c SAVE
+            (.venv) user@machine:~$ pymapdl stop
+            Success: Ansys instances running on port 50052 have been stopped.
+
+
+.. note::
+
+   ``pymapdl exec`` writes command output to stdout and errors to stderr,
+   making it suitable for use in shell scripts and pipelines.  The process
+   exits with code ``0`` on success and ``1`` on failure.
+
+To convert an existing APDL script to Python instead of executing it, see
+:ref:`ref_cli_converter`.
 
 
 .. _ref_cli_converter:
