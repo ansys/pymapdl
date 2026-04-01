@@ -1302,6 +1302,7 @@ class Test_contact_solve(TestClass):
             vinc=vinc,
         )
         assert mapdl.post_processing.plot_nodal_displacement() is None
+        mapdl.nsel("all")
 
     @staticmethod
     def test_time_frequency_values(mapdl, resume):
