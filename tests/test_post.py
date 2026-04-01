@@ -1271,6 +1271,7 @@ class Test_contact_solve(TestClass):
             vinc=vinc,
         )
         assert mapdl.post_processing.plot_element_displacement() is None
+        mapdl.allsel("all")
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
