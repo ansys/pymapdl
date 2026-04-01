@@ -406,7 +406,7 @@ then stop the instance:
 .. note::
 
    ``pymapdl exec`` writes command output to stdout and errors to stderr,
-   making it suitable for use in shell scripts and pipelines.  The process
+   making it suitable for use in shell scripts and pipelines. The process
    exits with code ``0`` on success and ``1`` on failure.
 
 To convert an existing APDL script to Python instead of executing it, see
