@@ -33,7 +33,7 @@ from ansys.mapdl.core.component import (
     ComponentManager,
 )
 from ansys.mapdl.core.errors import ComponentNoData
-from conftest import TestClass
+from conftest import TestClass, clear
 
 
 def test_str_rep(mapdl, cleared):
@@ -110,6 +110,7 @@ class Test_components(TestClass):
     @staticmethod
     @pytest.fixture(scope="class")
     def setup(mapdl):
+        clear(mapdl)
         # setup the full file
         mapdl.block(0, 1, 0, 1, 0, 1)
         mapdl.et(1, 186)
