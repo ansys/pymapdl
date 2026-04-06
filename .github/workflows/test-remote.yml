@@ -93,7 +93,7 @@ jobs:
       PYANSYS_OFF_SCREEN: True
       PYMAPDL_DB_PORT: 21002  # default won't work on GitHub runners
       PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
-      PYMAPDL_DEBUG_TESTING: true
+      PYMAPDL_DEBUG_TESTING: false
       PYMAPDL_GRPC_TRANSPORT: 'insecure'
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
@@ -312,24 +312,6 @@ jobs:
           name: PyMAPDL-packages-${{ inputs.mapdl-version }}
           path: dist/
           retention-days: 7
-
-      - name: "Print logs"
-        if: always()
-        run: |
-          # Avoid exiting on the first error, as we want to print all logs
-          set +e
-          cd /home/runner/work/pymapdl/pymapdl/.github/actions/launch-mapdl-docker
-
-          ls .
-          cat MAPDL_0.log || echo "No log files found in the action directory"
-
-          cat MAPDL_1.log || echo "No log files found in the action directory"
-
-          echo "MAPDL_0 logs:"
-          docker logs "${{ steps.mapdl_0.outputs.container-name }}" || echo "No logs found for MAPDL_0"
-
-          echo "MAPDL_1 logs:"
-          docker logs "${{ steps.mapdl_1.outputs.container-name }}" || echo "No logs found for MAPDL_1"
 
       - name: "Collect logs"
         if: always()
