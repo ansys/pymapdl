@@ -943,7 +943,8 @@ def solved_box(mapdl, cleared):
 
 
 @pytest.fixture(scope="function")
-def make_block(mapdl, cleared):
+def make_block(mapdl):
+    clear(mapdl)
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.et(1, 186)
     mapdl.esize(0.25)
