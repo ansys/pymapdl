@@ -1,0 +1,8 @@
+{
+  "expectations": [
+    {"text": "Uses pymapdl exec (not pymapdl run or other command)", "passed": true, "evidence": "Line 6: 'pymapdl exec --file thermal_model.inp --port 50060'"},
+    {"text": "Includes --file flag with the script name", "passed": true, "evidence": "Line 6: '--file thermal_model.inp'"},
+    {"text": "Includes --port 50060 to target the correct instance", "passed": true, "evidence": "Line 6: '--port 50060'"},
+    {"text": "Explains that exec connects to an already-running instance", "passed": true, "evidence": "Line 13: 'pymapdl exec connects to an already running instance — it never starts a new one.'"}
+  ]
+}

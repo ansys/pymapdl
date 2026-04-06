@@ -27,18 +27,18 @@ import click
 
 
 @click.command(
-    short_help="Run MAPDL commands on a running instance.",
+    short_help="Execute MAPDL commands on a running instance.",
     help="""Send MAPDL commands to a running MAPDL instance and print the output.
 
 Commands can be supplied in three mutually exclusive ways:
 
 \b
   1. Repeated --command / -c options (recommended for scripting and LLM use):
-       pymapdl run -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
+       pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
   2. File — read commands from an APDL script file:
-       pymapdl run --file my_script.inp
+       pymapdl exec --file my_script.inp
   3. Stdin — pass ``-`` as the positional argument and pipe commands in:
-       echo "/prep7" | pymapdl run -
+       echo "/prep7" | pymapdl exec -
 
 The instance is targeted by ``--ip`` and ``--port`` (defaults: 127.0.0.1:50052).
 MAPDL output is written to stdout so it can be consumed by scripts or LLM agents.
@@ -80,7 +80,7 @@ MAPDL output is written to stdout so it can be consumed by scripts or LLM agents
     is_flag=True,
     default=False,
     help="Clear the MAPDL database upon connecting.  Off by default so that "
-    "successive ``pymapdl run`` calls share the same model state.",
+    "successive ``pymapdl exec`` calls share the same model state.",
 )
 @click.option(
     "--timeout",
@@ -89,7 +89,7 @@ MAPDL output is written to stdout so it can be consumed by scripts or LLM agents
     show_default=True,
     help="Seconds to wait when establishing the gRPC connection to the running instance.",
 )
-def run(
+def exec_cmd(
     stdin_marker: Optional[str],
     commands: Tuple[str, ...],
     script_file: Optional[str],
@@ -98,7 +98,7 @@ def run(
     clear_on_connect: bool,
     timeout: int,
 ) -> None:
-    """Run MAPDL commands on an already-running instance.
+    """Execute MAPDL commands on an already-running instance.
 
     Parameters
     ----------

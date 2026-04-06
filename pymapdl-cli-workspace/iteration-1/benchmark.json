@@ -1,0 +1,32 @@
+{
+  "skill_name": "pymapdl-cli",
+  "iteration": 1,
+  "configurations": [
+    {
+      "name": "with_skill",
+      "evals": [
+        {"eval_name": "exec-file-on-port", "pass_rate": 1.0, "passed": 4, "total": 4},
+        {"eval_name": "full-workflow", "pass_rate": 1.0, "passed": 6, "total": 6},
+        {"eval_name": "list-instances", "pass_rate": 1.0, "passed": 3, "total": 3}
+      ],
+      "overall_pass_rate": 1.0,
+      "total_passed": 13,
+      "total_assertions": 13
+    },
+    {
+      "name": "without_skill",
+      "evals": [
+        {"eval_name": "exec-file-on-port", "pass_rate": 0.0, "passed": 0, "total": 4},
+        {"eval_name": "full-workflow", "pass_rate": 0.5, "passed": 3, "total": 6},
+        {"eval_name": "list-instances", "pass_rate": 1.0, "passed": 3, "total": 3}
+      ],
+      "overall_pass_rate": 0.46,
+      "total_passed": 6,
+      "total_assertions": 13
+    }
+  ],
+  "delta": {
+    "pass_rate_improvement": 0.54,
+    "summary": "Skill improves pass rate from 46% to 100% (+54pp). The skill is critical for eval 0 (exec command completely unknown without it) and eval 1 (without skill, model incorrectly states pymapdl CLI cannot execute APDL commands). Eval 2 (list instances) is already well-known without the skill."
+  }
+}
