@@ -28,7 +28,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from conftest import clear, has_dependency, requires
+from conftest import has_dependency, requires
 
 if not has_dependency("pyvista"):
     pytest.skip(
@@ -837,14 +837,8 @@ def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
     "selection",
     ["S", "R", "A", "U"],
 )
-def test_pick_areas(mapdl, selection):
+def test_pick_areas(mapdl, make_block, selection):
     # Cleaning the model a bit
-    clear(mapdl)
-    mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.et(1, 186)
-    mapdl.esize(0.25)
-    mapdl.vmesh("ALL")
-
     mapdl.modmsh("detach")  # detaching geom and fem
     mapdl.edele("all")
     mapdl.asel("s", "area", "", 1)
