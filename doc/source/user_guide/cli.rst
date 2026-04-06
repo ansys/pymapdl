@@ -6,7 +6,7 @@ PyMAPDL command line interface
 ==============================
 
 For your convenience, PyMAPDL package includes a command line interface
-which allows you to launch, stop, list, and execute commands on local MAPDL instances.
+which allows you to launch, stop, list, and execute commands on MAPDL instances.
 
 
 Launch MAPDL instances
@@ -284,10 +284,10 @@ Execute MAPDL commands
 ======================
 
 Use ``pymapdl exec`` to send APDL commands to a running MAPDL instance and
-print the output to stdout.  The command always connects to an existing
-instance — it never starts a new one.  Use ``pymapdl start`` first if needed.
+print the output to stdout. The command always connects to an existing
+instance, it never starts a new one. Use ``pymapdl start`` first if needed.
 
-There are three mutually exclusive ways to supply commands.  The recommended
+There are three mutually exclusive ways to supply commands. The recommended
 approach is to use the ``-c`` / ``--command`` option, which can be repeated.
 Each ``-c`` value is one APDL command; all commands are sent as a single block:
 
@@ -351,7 +351,7 @@ read from stdin:
 
 
 By default, ``pymapdl exec`` connects without clearing the MAPDL database, so
-successive calls share the same model state.  Use the ``--clear-on-connect``
+successive calls share the same model state. Use the ``--clear-on-connect``
 flag to clear the database before sending commands:
 
 
@@ -406,7 +406,7 @@ then stop the instance:
 .. note::
 
    ``pymapdl exec`` writes command output to stdout and errors to stderr,
-   making it suitable for use in shell scripts and pipelines.  The process
+   making it suitable for use in shell scripts and pipelines. The process
    exits with code ``0`` on success and ``1`` on failure.
 
 To convert an existing APDL script to Python instead of executing it, see

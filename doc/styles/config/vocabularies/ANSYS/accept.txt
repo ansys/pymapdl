@@ -173,6 +173,9 @@ spotweld
 squeue
 srun
 stationarity
+stderr
+stdin
+stdout
 struc
 subselected
 substep
