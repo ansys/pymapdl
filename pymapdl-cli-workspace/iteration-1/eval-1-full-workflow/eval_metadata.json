@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "full-workflow",
+  "prompt": "I need to start MAPDL, create a simple block element, mesh it, apply constraints and loads, solve, and then shut everything down. All from the command line, no Python scripting. Walk me through the exact commands.",
+  "assertions": [
+    {"text": "Starts with pymapdl start", "type": "contains", "value": "pymapdl start"},
+    {"text": "Uses pymapdl exec with -c flags for APDL commands", "type": "contains_all", "values": ["pymapdl exec", "-c"]},
+    {"text": "Includes /prep7 preprocessor entry", "type": "contains_any", "values": ["/prep7", "/PREP7"]},
+    {"text": "Includes a SOLVE command", "type": "contains_any", "values": ["SOLVE", "solve"]},
+    {"text": "Ends with pymapdl stop", "type": "contains", "value": "pymapdl stop"},
+    {"text": "Commands are in correct order: start before exec before stop", "type": "order", "values": ["pymapdl start", "pymapdl exec", "pymapdl stop"]}
+  ]
+}
