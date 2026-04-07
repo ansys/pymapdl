@@ -28,7 +28,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from conftest import clear, has_dependency, requires
+from conftest import has_dependency, requires
 
 if not has_dependency("pyvista"):
     pytest.skip(
