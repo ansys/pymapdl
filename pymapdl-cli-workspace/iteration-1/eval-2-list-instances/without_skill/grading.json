@@ -1,0 +1,7 @@
+{
+  "expectations": [
+    {"text": "Uses pymapdl list command", "passed": true, "evidence": "Line 5: 'pymapdl list -i'"},
+    {"text": "Includes -i or --instances flag to filter to main instances", "passed": true, "evidence": "Line 5: '-i' flag used"},
+    {"text": "Explains that -i filters out child processes", "passed": true, "evidence": "Line 17: 'Only main instances (>=2 child processes)' and line 23 explanation"}
+  ]
+}

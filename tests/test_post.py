@@ -68,7 +68,7 @@ class Test_static_solve(TestClass):
     @pytest.fixture(scope="class")
     def static_solve(mapdl):
         with mapdl.muted:
-            mapdl.clear("NOSTART")
+            clear(mapdl)
             mapdl.prep7()
 
             # cylinder and mesh parameters
@@ -1304,7 +1304,7 @@ class Test_contact_solve(TestClass):
             vinc=vinc,
         )
         assert mapdl.post_processing.plot_nodal_displacement() is None
-        mapdl.nsel("all")
+        mapdl.allsel("all")
 
     @staticmethod
     def test_time_frequency_values(mapdl, resume):
