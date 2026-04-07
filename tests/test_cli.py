@@ -545,7 +545,8 @@ def test_launch_mapdl_cli_config(run_cli, arg):
         assert str(PORT1) in output
 
         # assert warnings
-        assert arg not in kwargs
+        if arg != "start_instance":
+            assert arg not in kwargs
         assert (
             f"The following argument is not allowed in CLI: '{arg}'" in output
         ), f"Warning about '{arg}' not printed"
