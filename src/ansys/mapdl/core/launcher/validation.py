@@ -95,6 +95,7 @@ def validate_config(config: LaunchConfig) -> ValidationResult:
     _validate_version_mode_compatibility(config, result)
     _validate_resource_availability(config, result)
     _validate_port_availability(config, result)
+    _validate_lock_file(config, result)
     _validate_file_permissions(config, result)
     _validate_conflicting_options(config, result)
     _validate_platform_compatibility(config, result)
@@ -319,6 +320,71 @@ def _validate_port_availability(config: LaunchConfig, result: ValidationResult) 
             f"Could not verify port {config.port} availability. "
             f"Launch may fail if port is in use."
         )
+
+
+def _validate_lock_file(config: LaunchConfig, result: ValidationResult) -> None:
+    """Validate that no stale lock file blocks a new MAPDL launch.
+
+    A ``.lock`` file is left behind when MAPDL exits prematurely. If one is
+    found at launch time it must be removed before starting a new instance.
+    When ``override=True`` the file will be deleted automatically just before
+    the subprocess is spawned; when ``override=False`` the launch must not
+    proceed and an error is added to *result*.
+
+    Parameters
+    ----------
+    config : LaunchConfig
+        Launch configuration with run_location, jobname, and override
+    result : ValidationResult
+        Result object to update with errors/warnings
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    None
+        Errors/warnings added to result
+
+    Examples
+    --------
+    Validation is internal, called by validate_config():
+
+    >>> from ansys.mapdl.core.launcher.validation import validate_config
+    >>> config = LaunchConfig(run_location="/tmp/ansys_job", jobname="file", ...)
+    >>> result = validate_config(config)
+
+    Notes
+    -----
+    - Skipped if ``start_instance`` is :class:`False`
+    - Skipped if ``run_location`` is not set
+    - When ``override=True`` a warning is issued; the file is removed in
+      :func:`~ansys.mapdl.core.launcher.process.launch_mapdl_process`
+    """
+    if not config.start_instance:
+        return
+
+    if not config.run_location:
+        return
+
+    lockfile = os.path.join(config.run_location, config.jobname + ".lock")
+    if os.path.isfile(lockfile):
+        if config.override:
+            LOG.debug(
+                f"Lock file '{lockfile}' found but override=True; "
+                f"it will be removed before launch."
+            )
+            result.add_warning(
+                f"A lock file exists at '{lockfile}'. "
+                f"It will be deleted before launching MAPDL because override=True."
+            )
+        else:
+            result.add_error(
+                f"A lock file exists at '{lockfile}'. "
+                f"This usually means a previous MAPDL session exited prematurely. "
+                f"Set override=True to remove it automatically, or delete it manually."
+            )
 
 
 def _validate_file_permissions(config: LaunchConfig, result: ValidationResult) -> None:

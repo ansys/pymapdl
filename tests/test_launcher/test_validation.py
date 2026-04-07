@@ -354,3 +354,88 @@ class TestValidationEdgeCases:
         result = validate_config(config)
         assert not result.valid
         assert len(result.errors) >= 2  # Should have multiple errors
+
+
+# ============================================================================
+# Lock File Validation Tests
+# ============================================================================
+
+
+class TestValidateLockFile:
+    """Tests for _validate_lock_file."""
+
+    def test_no_lock_file_no_errors(self):
+        """No lock file → validation passes without errors or warnings."""
+        config = _create_test_config(run_location="/tmp/ansys_test", override=False)
+        with patch("os.path.isfile", return_value=False):
+            from ansys.mapdl.core.launcher.models import ValidationResult
+            from ansys.mapdl.core.launcher.validation import _validate_lock_file
+
+            result = ValidationResult(valid=True)
+            _validate_lock_file(config, result)
+
+        assert result.valid
+        assert not result.errors
+        assert not result.warnings
+
+    def test_lock_file_exists_override_false_adds_error(self):
+        """Lock file present + override=False → error added."""
+        config = _create_test_config(run_location="/tmp/ansys_test", override=False)
+
+        from ansys.mapdl.core.launcher.models import ValidationResult
+        from ansys.mapdl.core.launcher.validation import _validate_lock_file
+
+        result = ValidationResult(valid=True)
+        with patch("os.path.isfile", return_value=True):
+            _validate_lock_file(config, result)
+
+        assert not result.valid
+        assert len(result.errors) == 1
+        assert "override=True" in result.errors[0]
+
+    def test_lock_file_exists_override_true_adds_warning_not_error(self):
+        """Lock file present + override=True → warning only, no error."""
+        config = _create_test_config(run_location="/tmp/ansys_test", override=True)
+
+        from ansys.mapdl.core.launcher.models import ValidationResult
+        from ansys.mapdl.core.launcher.validation import _validate_lock_file
+
+        result = ValidationResult(valid=True)
+        with patch("os.path.isfile", return_value=True):
+            _validate_lock_file(config, result)
+
+        assert result.valid
+        assert not result.errors
+        assert len(result.warnings) == 1
+
+    def test_skipped_when_not_starting_instance(self):
+        """Validation is skipped when start_instance=False."""
+        config = _create_test_config(
+            run_location="/tmp/ansys_test",
+            override=False,
+            start_instance=False,
+        )
+
+        from ansys.mapdl.core.launcher.models import ValidationResult
+        from ansys.mapdl.core.launcher.validation import _validate_lock_file
+
+        result = ValidationResult(valid=True)
+        with patch("os.path.isfile", return_value=True):
+            _validate_lock_file(config, result)
+
+        assert result.valid
+        assert not result.errors
+
+    def test_skipped_when_run_location_is_none(self):
+        """Validation is skipped when run_location is None."""
+        config = _create_test_config(run_location=None, override=False)
+
+        from ansys.mapdl.core.launcher.models import ValidationResult
+        from ansys.mapdl.core.launcher.validation import _validate_lock_file
+
+        result = ValidationResult(valid=True)
+        with patch("os.path.isfile", return_value=True):
+            _validate_lock_file(config, result)
+
+        assert result.valid
+        assert not result.errors

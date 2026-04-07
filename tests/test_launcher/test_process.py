@@ -15,7 +15,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from ansys.mapdl.core.errors import MapdlDidNotStart
+from ansys.mapdl.core.errors import LockFileException, MapdlDidNotStart
 from ansys.mapdl.core.launcher import process
 from ansys.mapdl.core.launcher.models import (
     LaunchConfig,
@@ -719,3 +719,86 @@ class TestPhase4QueueMonitoringEdgeCases:
                     process._wait_for_error_file("/tmp/run", timeout=1)
 
                 assert ".err" in str(exc_info.value)
+
+
+# ============================================================================
+# Lock File Handling Tests
+# ============================================================================
+
+
+class TestHandleLockFile:
+    """Tests for _handle_lock_file helper function."""
+
+    def test_no_lock_file_is_noop(self, tmp_path):
+        """When no lock file exists, _handle_lock_file does nothing."""
+        config = create_launch_config(
+            run_location=str(tmp_path),
+            jobname="file",
+            override=False,
+        )
+        # Must not raise and the directory must remain unchanged
+        process._handle_lock_file(config)
+        assert not (tmp_path / "file.lock").exists()
+
+    def test_lock_file_override_false_raises(self, tmp_path):
+        """Lock file present + override=False → LockFileException raised."""
+        lockfile = tmp_path / "file.lock"
+        lockfile.write_text("locked")
+
+        config = create_launch_config(
+            run_location=str(tmp_path),
+            jobname="file",
+            override=False,
+        )
+        with pytest.raises(LockFileException):
+            process._handle_lock_file(config)
+
+        # Lock file must still exist (was not deleted)
+        assert lockfile.exists()
+
+    def test_lock_file_override_true_deletes_file(self, tmp_path):
+        """Lock file present + override=True → file is deleted."""
+        lockfile = tmp_path / "file.lock"
+        lockfile.write_text("locked")
+
+        config = create_launch_config(
+            run_location=str(tmp_path),
+            jobname="file",
+            override=True,
+        )
+        process._handle_lock_file(config)
+
+        assert not lockfile.exists()
+
+    def test_lock_file_override_true_permission_error_raises(self, tmp_path):
+        """Override=True but cannot delete → LockFileException raised."""
+        lockfile = tmp_path / "file.lock"
+        lockfile.write_text("locked")
+
+        config = create_launch_config(
+            run_location=str(tmp_path),
+            jobname="file",
+            override=True,
+        )
+        with patch("os.remove", side_effect=PermissionError("denied")):
+            with pytest.raises(LockFileException):
+                process._handle_lock_file(config)
+
+    def test_skipped_when_run_location_is_none(self):
+        """No run_location → _handle_lock_file is a no-op."""
+        config = create_launch_config(run_location=None, override=False)
+        # Must not raise
+        process._handle_lock_file(config)
+
+    def test_jobname_used_for_lock_filename(self, tmp_path):
+        """Lock file name is derived from jobname, not always 'file.lock'."""
+        lockfile = tmp_path / "myjob.lock"
+        lockfile.write_text("locked")
+
+        config = create_launch_config(
+            run_location=str(tmp_path),
+            jobname="myjob",
+            override=True,
+        )
+        process._handle_lock_file(config)
+        assert not lockfile.exists()
