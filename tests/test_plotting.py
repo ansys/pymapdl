@@ -837,14 +837,7 @@ def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
     "selection",
     ["S", "R", "A", "U"],
 )
-def test_pick_areas(mapdl, selection):
-    # Cleaning the model a bit
-    clear(mapdl)
-    mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.et(1, 186)
-    mapdl.esize(0.25)
-    mapdl.vmesh("ALL")
-
+def test_pick_areas(mapdl, make_block, selection):
     mapdl.modmsh("detach")  # detaching geom and fem
     mapdl.edele("all")
     mapdl.asel("s", "area", "", 1)
