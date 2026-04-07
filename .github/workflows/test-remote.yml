@@ -117,7 +117,7 @@ jobs:
           persist-credentials: false
 
       - name: "Login in Github container registry"
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 #v3.7.0
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 #v4.0.0
         with:
           registry: ghcr.io
           username: ${{ secrets.username }}
@@ -208,7 +208,7 @@ jobs:
           docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y -p ${DPF_PORT}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${DPF_PORT}." > log_dpf.log &
 
       - name: "Getting files change filters"
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 #v3.0.2
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d #v4.0.1
         id: changes
         with:
           filters: |

@@ -80,7 +80,6 @@ fi
 
 export PYTEST_ARGUMENTS=" --ignore_image_cache --image_cache_dir=/tmp/empty_dir ${PYTEST_ARGUMENTS}"
 
-echo "Using pytest arguments: ${PYTEST_ARGUMENTS}"
 
 if [ "${ON_CI}" = "true" ] || [ "${ON_CI}" = "TRUE" ]; then
   # On CI, always add the extra pytest arguments for reporting and coverage.
@@ -96,6 +95,8 @@ if [ "${ON_CI}" = "true" ] || [ "${ON_CI}" = "TRUE" ]; then
 else
   : # Running on local machine, only add the extra pytest arguments if PYTEST_ARGUMENTS is already set.
 fi
+
+echo "Using pytest arguments: ${PYTEST_ARGUMENTS}"
 
 # Add timing information for debugging startup delays
 echo "Starting pytest at: $(date +%H:%M:%S)"

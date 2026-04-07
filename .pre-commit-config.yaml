@@ -19,14 +19,14 @@ repos:
       args: [ "-x"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: a66e98df7b4aeeb3724184b332785976d062b92e  # frozen: v1.19.1
+  rev: 8e5c80792e2ec0c87804d8ef915bf35e2caea6da  # frozen: v1.20.0
   hooks:
     - id: mypy
       args: [ --follow-imports=silent, --config-file=pyproject.toml]
       exclude: ^(doc/|examples/)
 
 - repo: https://github.com/ansys/pre-commit-hooks
-  rev: fd1d6b0b4baeb08e32d4de0909999576695c0433  # frozen: v0.5.2
+  rev: 680b297da7584a07eb7c92b6b4e9baf88ece3e0e  # frozen: v0.6.0
   hooks:
   - id: add-license-headers
     args:
@@ -57,7 +57,7 @@ repos:
     additional_dependencies: [black==25.12.0]
 
 - repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 044edd3b57c805fa7a0165b7936d44f6e56ecfd8  # frozen: 26.3.0
+  rev: fa505ab9c3e0fedafe1709fd7ac2b5f8996c670d  # frozen: 26.3.1
   hooks:
   - id: black
     args:
@@ -97,7 +97,7 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 8db279a37c552206d2df62269ff6f9d31125815a  # frozen: 0.37.0
+  rev: ed81924a8b1cecdaa570b072528fa80c9c4d6ccd  # frozen: 0.37.1
   hooks:
     - id: check-github-workflows
 

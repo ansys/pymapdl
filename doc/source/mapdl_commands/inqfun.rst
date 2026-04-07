@@ -1,8 +1,9 @@
+
 .. _ref_inqfun_api:
 
-*****************************
+
 Undocumented inquire commands
-*****************************
+=============================
 
 .. currentmodule:: ansys.mapdl.core
 
@@ -10,9 +11,8 @@ Undocumented inquire commands
             Hence its support is limited and it use is not encouraged.
             **Please use it with caution.**
 
-Undocumented inquire commands.
-
 .. autosummary::
+   :template: base.rst
    :toctree: _autosummary/
 
    Mapdl.ndinqr

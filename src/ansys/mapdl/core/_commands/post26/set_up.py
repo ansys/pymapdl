@@ -319,6 +319,7 @@ class SetUp(CommandsBase):
              - The ``n`` th state variable.
            * - FLDUF0 ``n``
              - The ``n`` th user-defined field variable.
+
         """
         command = (
             f"ANSOL,{nvar},{node},{item},{comp},{name},{mat},{real},{ename},{datakey}"
@@ -1005,6 +1006,7 @@ class SetUp(CommandsBase):
              - The ``n`` th state variable.
            * - FLDUF0 ``n``
              - The ``n`` th user-defined field variable.
+
         """
         command = f"ESOL,{nvar},{elem},{node},{item},{comp},{name}"
         return self.run(command, **kwargs)
@@ -1053,7 +1055,7 @@ class SetUp(CommandsBase):
         This command stores the results (new position of the ending plane after deformation) for generalized
         plane strain. All outputs are in the global Cartesian coordinate system. For more information about
         the generalized plane strain feature, see Generalized Plane Strain Option of Current-Technology
-        Solid Elements in the  `Element Reference
+        Solid Elements in the `Element Reference
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_.
         """
         command = f"GSSOL,{nvar},{item},{comp},{name}"
@@ -1136,6 +1138,7 @@ class SetUp(CommandsBase):
            * - RM
              - X, Y, Z
              - Relative reaction moments in the local x, y, or z direction.
+
         """
         command = f"JSOL,{nvar},{elem},{item},{comp},{name}"
         return self.run(command, **kwargs)

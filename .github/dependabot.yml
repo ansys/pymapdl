@@ -52,10 +52,6 @@ updates:
       semver-patch-days: 3
       include:
         - "*"  # Include all dependencies in cooldown
-      exclude:
-        - "ansys-tools-visualization-interface"
-    exclude-paths:
-      - "doc/source/examples/extended_examples/**"
     groups:
        minimal:
           patterns:
@@ -112,3 +108,25 @@ updates:
        jupyter:
           patterns:
             - "ipywidgets"
+
+  - directory: "doc/source/examples/extended_examples/gui"
+    package-ecosystem: "pip"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0
+    cooldown:
+      default-days: 10
+      semver-patch-days: 3
+      include:
+        - "*"  # Include all dependencies in cooldown
+
+  - directory: "doc/source/examples/extended_examples/hpc"
+    package-ecosystem: "pip"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0
+    cooldown:
+      default-days: 10
+      semver-patch-days: 3
+      include:
+        - "*"  # Include all dependencies in cooldown

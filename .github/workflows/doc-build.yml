@@ -99,7 +99,7 @@ jobs:
           persist-credentials: false
 
       - name: "Login in Github container registry"
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 #v3.7.0
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 #v4.0.0
         with:
           registry: ghcr.io
           username: ${{ secrets.username }}
@@ -127,7 +127,7 @@ jobs:
           $(docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y --env ANSYSLMD_LICENSE_FILE="1055@${LICENSE_SERVER}" -p ${DPF_PORT}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${DPF_PORT}.") &
 
       - name: "Getting files change filters"
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 #v3.0.2
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d #v4.0.1
         id: changes
         with:
           filters: |
@@ -158,7 +158,7 @@ jobs:
       - name: "Install OS packages"
         shell: bash
         run: |
-          sudo apt update && sudo apt install zip pandoc libgl1 libglx-mesa0 xvfb texlive-latex-extra latexmk graphviz texlive-xetex texlive-fonts-extra qpdf xindy
+          sudo apt update && sudo apt install zip pandoc libgl1 libglx-mesa0 xvfb texlive-latex-extra latexmk graphviz texlive-xetex texlive-fonts-extra qpdf xindy librsvg2-bin
 
       - name: "Test virtual framebuffer"
         shell: bash
@@ -180,7 +180,7 @@ jobs:
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
 
       - name: "Cache examples"
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 #v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 #v5.0.4
         if: ${{ inputs.use_cache_examples && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/source/examples
@@ -189,7 +189,7 @@ jobs:
             Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Cache docs build directory"
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 #v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 #v5.0.4
         if: ${{ inputs.use_cache_doc_build && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/_build
@@ -198,7 +198,7 @@ jobs:
             doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Cache autosummary"
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 #v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 #v5.0.4
         if: ${{ inputs.use_cache_autosummary && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/source/**/_autosummary/*.rst

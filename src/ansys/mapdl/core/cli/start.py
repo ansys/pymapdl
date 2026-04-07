@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import os
-from typing import Dict, Union
+from typing import Dict, Optional
 
 import click
 
@@ -97,7 +97,7 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
 )
 @click.option(
     "--cleanup_on_exit",
-    default=False,
+    default=None,
     type=bool,
     help="Argument not allowed in CLI. It will be ignored.",
 )
@@ -115,7 +115,7 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
 )
 @click.option(
     "--clear_on_connect",
-    default=False,
+    default=None,
     type=bool,
     help="Argument not allowed in CLI. It will be ignored",
 )
@@ -127,13 +127,13 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
 )
 @click.option(
     "--remove_temp_dir_on_exit",
-    default=False,
+    default=None,
     type=bool,
     help="Argument not allowed in CLI. It will be ignored.",
 )
 @click.option(
     "--license_server_check",
-    default=False,
+    default=None,
     type=bool,
     help="Argument not allowed in CLI. It will be ignored.",
 )
@@ -145,7 +145,7 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
 )
 @click.option(
     "--print_com",
-    default=False,
+    default=None,
     type=bool,
     help="Argument not allowed in CLI. It will be ignored.",
 )
@@ -168,126 +168,137 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
     help="Version of MAPDL to launch. If ``None``, the latest version is used. Versions can be provided as integers (i.e. ``version=222``) or floats (i.e. ``version=22.2``). To retrieve the available installed versions, use the function :meth:`ansys.tools.common.path.get_available_ansys_installations`.",
 )
 def start(
-    exec_file: str,
-    run_location: str,
+    exec_file: Optional[str],
+    run_location: Optional[str],
     jobname: str,
-    nproc: Union[int, str],
-    ram: Union[int, str],
-    mode: str,  # ignored
+    nproc: int,
+    ram: Optional[int],
+    mode: Optional[str],  # ignored
     override: bool,
-    loglevel: str,  # ignored
+    loglevel: str,
     additional_switches: str,
-    start_timeout: Union[int, str],
-    port: Union[int, str],
-    cleanup_on_exit: bool,  # ignored
-    start_instance: bool,  # ignored
-    ip: str,
-    clear_on_connect: bool,  # ignored
-    log_apdl: bool,  # ignored
-    remove_temp_dir_on_exit: bool,  # ignored
-    license_server_check: bool,  # ignored
-    license_type: str,
-    print_com: bool,  # ignored
-    add_env_vars: Dict[str, str],  # ignored
-    replace_env_vars: Dict[str, str],  # ignored
-    version: Union[int, str],
+    start_timeout: int,
+    port: Optional[int],
+    cleanup_on_exit: Optional[bool],  # ignored
+    start_instance: Optional[bool],  # ignored
+    ip: Optional[str],  # ignored
+    clear_on_connect: Optional[bool],  # ignored
+    log_apdl: Optional[str],  # ignored
+    remove_temp_dir_on_exit: Optional[bool],  # ignored
+    license_server_check: Optional[bool],  # ignored
+    license_type: Optional[str],
+    print_com: Optional[bool],  # ignored
+    add_env_vars: Optional[Dict[str, str]],  # ignored
+    replace_env_vars: Optional[Dict[str, str]],  # ignored
+    version: Optional[str],
 ) -> None:
-    from ansys.mapdl.core.launcher import launch_mapdl
+    import logging
 
-    if mode:
+    from ansys.mapdl.core.launcher import launch_mapdl_process
+
+    if mode is not None:
         click.echo(
             click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'mode'.\nIgnoring argument."
+            + " The following argument is not allowed in CLI: 'mode'. Ignoring argument."
         )
 
-    if loglevel:
+    if cleanup_on_exit is not None:
         click.echo(
             click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'loglevel'.\nIgnoring argument."
+            + " The following argument is not allowed in CLI: 'cleanup_on_exit'. Ignoring argument."
         )
 
-    if cleanup_on_exit:
+    if start_instance is not None:
         click.echo(
             click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'cleanup_on_exit'.\nIgnoring argument."
+            + " The following argument is not allowed in CLI: 'start_instance'. Ignoring argument."
         )
 
-    if start_instance:
+    if ip is not None:
         click.echo(
             click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'start_instance'.\nIgnoring argument."
+            + " The following argument is not allowed in CLI: 'ip'. Ignoring argument."
         )
 
-    if ip:
+    if clear_on_connect is not None:
         click.echo(
             click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'ip'.\nIgnoring argument."
+            + " The following argument is not allowed in CLI: 'clear_on_connect'. Ignoring argument."
         )
 
-    if clear_on_connect:
+    if log_apdl is not None:
         click.echo(
             click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'clear_on_connect'.\nIgnoring argument."
+            + " The following argument is not allowed in CLI: 'log_apdl'. Ignoring argument."
         )
 
-    if log_apdl:
+    if remove_temp_dir_on_exit is not None:
         click.echo(
             click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'log_apdl'.\nIgnoring argument."
+            + " The following argument is not allowed in CLI: 'remove_temp_dir_on_exit'. Ignoring argument."
         )
 
-    if remove_temp_dir_on_exit:
+    if print_com is not None:
         click.echo(
             click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'remove_temp_dir_on_exit'.\nIgnoring argument."
+            + " The following argument is not allowed in CLI: 'print_com'. Ignoring argument."
         )
 
-    if print_com:
+    if add_env_vars is not None:
         click.echo(
             click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'print_com'.\nIgnoring argument."
+            + " The following argument is not allowed in CLI: 'add_env_vars'. Ignoring argument."
         )
 
-    if add_env_vars:
+    if replace_env_vars is not None:
         click.echo(
             click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'add_env_vars'.\nIgnoring argument."
+            + " The following argument is not allowed in CLI: 'replace_env_vars'. Ignoring argument."
         )
 
-    if replace_env_vars:
+    if license_server_check is not None:
         click.echo(
             click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'replace_env_vars'.\nIgnoring argument."
-        )
-
-    if license_server_check:
-        click.echo(
-            click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'license_server_check'.\nIgnoring argument."
+            + " The following argument is not allowed in CLI: 'license_server_check'. Ignoring argument."
         )
 
     # Ignoring env var if using CLI
     if "PYMAPDL_START_INSTANCE" in os.environ:
         os.environ.pop("PYMAPDL_START_INSTANCE")
 
-    out = launch_mapdl(
-        exec_file=exec_file,
-        just_launch=True,
-        run_location=run_location,
-        jobname=jobname,
-        nproc=nproc,
-        ram=ram,
-        override=override,
-        additional_switches=additional_switches,
-        start_timeout=start_timeout,
-        port=port,
-        license_type=license_type,
-        version=version,
-    )
+    # Suppress all logging to stdout when using CLI
+    from ansys.mapdl.core import LOG
 
-    if len(out) == 3:
-        header = f"Launched an MAPDL instance (PID={out[2]}) at "
+    if not loglevel:
+        LOG.setLevel(
+            logging.CRITICAL + 1
+        )  # Set to a level higher than CRITICAL to suppress all logs
+        if LOG.std_out_handler:
+            LOG.std_out_handler.setLevel(logging.CRITICAL + 1)
+
+    try:
+        ip_addr, port_num, pid = launch_mapdl_process(
+            exec_file=exec_file,
+            run_location=run_location,
+            jobname=jobname,
+            nproc=nproc,
+            ram=ram,
+            override=override,
+            additional_switches=additional_switches,
+            start_timeout=start_timeout,
+            port=port,
+            license_type=license_type,
+            version=version,
+            loglevel=loglevel,  # Set to highest level to suppress all logging
+        )
+
+    except Exception as e:
+        click.echo(click.style("ERROR:", fg="red") + f" {e}")
+        exit(1)
+
+    if pid is not None:
+        header = f"Launched an MAPDL instance (PID={pid}) at "
     else:
         header = "Launched an MAPDL instance at "
 
-    click.echo(click.style("Success: ", fg="green") + header + f"{out[0]}:{out[1]}")
+    click.echo(click.style("Success: ", fg="green") + header + f"{ip_addr}:{port_num}")

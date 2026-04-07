@@ -1,14 +1,16 @@
+
 .. _ref_connection_commands_api:
 
-*******************
+
 Connection commands
-*******************
+===================
 
 .. currentmodule:: ansys.mapdl.core
 
 These commands read in external CAD files into MAPDL.
 
 .. autosummary::
+   :template: base.rst
    :toctree: _autosummary/
 
    Mapdl.cat5in

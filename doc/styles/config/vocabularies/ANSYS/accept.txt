@@ -6,6 +6,7 @@
 [Cc]ommand [Pp]rompt
 [Dd]ocker
 [Ee]igensolver
+[Ee]mail
 [Hh]yperelasticity
 [Kk]eypoints
 [Mm]atplotlib
@@ -45,6 +46,7 @@ argparse
 Arruda-Boyce
 askin
 BCs
+bellow
 Block Lanzos
 Boyce
 breakpoint
@@ -159,6 +161,7 @@ Rao
 righ
 RNNN
 Roark
+run_location
 sbatch
 singl
 Slurm
@@ -170,6 +173,9 @@ spotweld
 squeue
 srun
 stationarity
+stderr
+stdin
+stdout
 struc
 subselected
 substep

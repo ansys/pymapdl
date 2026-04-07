@@ -124,10 +124,18 @@ class ResultsFiles(CommandsBase):
         command = f"FILEAUX3,{fname},{ext}"
         return self.run(command, **kwargs)
 
-    def list(self, **kwargs):
+    def list(self, level: str = "", **kwargs):
         r"""Lists out the sets in the results file.
 
         Mechanical APDL Command: `LIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LIST.html>`_
+
+        Parameters
+        ----------
+        level : str
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LIST.html>`_ for further
+            information.
 
         Notes
         -----
@@ -146,7 +154,7 @@ class ResultsFiles(CommandsBase):
         The :ref:`list` command is valid only in the results file editing processor (auxiliary processor
         AUX3).
         """
-        command = "LIST"
+        command = f"LIST,{level}"
         return self.run(command, **kwargs)
 
     def modify(

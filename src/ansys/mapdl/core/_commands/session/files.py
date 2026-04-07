@@ -447,11 +447,12 @@ class Files(CommandsBase):
 
         .. warning::
 
-            Because /FCLEAN deletes all local files, it should only be issued if you are sure that none of
-            those files are needed in any downstream analyses. Deleting files that are necessary for
+            Because :ref:`fclean` deletes all local files, it should only be issued if you are sure that
+            none of those files are needed in any downstream analyses. Deleting files that are necessary for
             subsequent substeps, load steps, commands, or analyses will prevent continuation of the run. For
-            example, since the local files are combined into global files when you issue FINISH in the
-            solution processor, issuing /FCLEAN before FINISH in /SOLU will result in a program crash.
+            example, since the local files are combined into global files when you issue :ref:`finish` in
+            the solution processor, issuing :ref:`fclean` before :ref:`finish` in :ref:`slashsolu` will
+            result in a program crash.
         """
         command = "/FCLEAN"
         return self.run(command, **kwargs)
