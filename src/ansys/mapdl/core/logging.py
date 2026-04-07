@@ -658,7 +658,7 @@ def addfile_handler(
         logger.file_handler = file_handler  # type: ignore[attr-defined]
         logger.addHandler(file_handler)
 
-    if write_headers:
+    if write_headers and file_handler.stream is not None:
         file_handler.stream.write(NEW_SESSION_HEADER)
         file_handler.stream.write(DEFAULT_FILE_HEADER)
 
