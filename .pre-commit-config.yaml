@@ -19,7 +19,7 @@ repos:
       args: [ "-x"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: a66e98df7b4aeeb3724184b332785976d062b92e  # frozen: v1.19.1
+  rev: 8e5c80792e2ec0c87804d8ef915bf35e2caea6da  # frozen: v1.20.0
   hooks:
     - id: mypy
       args: [ --follow-imports=silent, --config-file=pyproject.toml]
