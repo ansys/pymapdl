@@ -341,7 +341,9 @@ def test_screenshot_path_filters_by_jobname(tmp_path):
     mapdl.list_files = fake_list_files
     mapdl._download = fake_download
 
-    with patch("ansys.mapdl.core.mapdl_grpc.tempfile.gettempdir", return_value=str(tmp_path)):
+    with patch(
+        "ansys.mapdl.core.mapdl_grpc.tempfile.gettempdir", return_value=str(tmp_path)
+    ):
         screenshot_path = mapdl._screenshot_path()
 
     assert downloaded["filename"] == "a_job000.png"
