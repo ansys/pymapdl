@@ -389,7 +389,7 @@ jobs:
           curl -LsSf https://astral.sh/uv/install.sh | sh
           uvx tox -e docker-remote
 
-      - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
+      - uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 #v6.0.0
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
@@ -459,7 +459,7 @@ jobs:
           curl -LsSf https://astral.sh/uv/install.sh | sh
           uvx tox -e docker-local
 
-      - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de #v5.5.2
+      - uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 #v6.0.0
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
@@ -525,7 +525,7 @@ jobs:
         run: ls -Rla
 
       - name: "Release to PyPI using trusted publisher"
-        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
         with:
           repository-url: "https://upload.pypi.org/legacy/"
           print-hash: true

@@ -1261,6 +1261,7 @@ class Test_contact_solve(TestClass):
         ],
     )
     def test_plot_incomplete_element_selection(mapdl, resume, vmin, vmax, vinc):
+        mapdl.allsel("all")
         n_elem = mapdl.mesh.n_elem
         mapdl.esel(
             "S",
