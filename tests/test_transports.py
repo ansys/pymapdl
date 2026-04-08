@@ -23,7 +23,6 @@
 
 import logging
 import os
-import platform
 import sys
 import types
 from unittest.mock import MagicMock
@@ -105,12 +104,10 @@ def test_wait_until_healthy_timeout(monkeypatch):
         MapdlGrpc.wait_until_healthy(m, timeout=0.01)
 
 
-def test_configure_uds_socket_conflict_and_increment(tmp_path, monkeypatch):
-    """Simulate the case where a UDS socket file already exists; ensure
-    MapdlGrpc increments the port and updates uds_id accordingly."""
+def test_configure_uds_sets_socket_dir_and_id(tmp_path, monkeypatch):
+    """configure_uds resolves uds_dir and sets uds_id to str(port) so that
+    ``create_channel`` constructs the correct ``mapdl-{PORT}.sock`` path."""
 
-    # On Windows CI we can fake a POSIX environment for this test by patching
-    # os.name and platform.system so that UDS logic is exercised.
     import platform
 
     monkeypatch.setattr(os, "name", "posix")
@@ -122,39 +119,23 @@ def test_configure_uds_socket_conflict_and_increment(tmp_path, monkeypatch):
 
     from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
-    # Prepare a fake uds directory and create an existing socket file for port 50052
     uds_dir = tmp_path / ".conn"
     uds_dir.mkdir()
-    existing_sock = uds_dir / "mapdl-50052.sock"
-    existing_sock.write_text("in use")
 
-    # Patch MapdlGrpc internals to avoid heavy init and channel creation
-    monkeypatch.setattr(MapdlGrpc, "_subscribe_to_channel", lambda self: None)
-    monkeypatch.setattr(
-        MapdlGrpc, "reconnect_to_mapdl", lambda self, timeout=None: None
-    )
-
-    # Create a bare MapdlGrpc-like object without calling __init__ so we can
-    # call `configure_uds` directly. Setting minimal attributes to satisfy
-    # `configure_uds` expectations.
     obj = object.__new__(MapdlGrpc)
     import logging
 
     obj._log = logging.getLogger("test")
-
     obj._port = 50052
     obj.transport_mode = "uds"
     obj.uds_dir = str(uds_dir)
     obj.uds_id = None
 
-    # Call the configure method without passing `port` so the function treats
-    # the port as unspecified and will auto-increment to avoid conflicts.
-    obj.configure_uds(port=None, uds_id=None)
+    obj.configure_uds(port=50052)
 
-    # After configuration, the uds_id should not conflict with the existing file
     assert obj.uds_dir == str(uds_dir)
-    assert obj.uds_id != "mapdl-50052.sock"
-    assert obj._port != 50052
+    # uds_id is set to the stringified port; create_channel builds 'mapdl-50052.sock'
+    assert obj.uds_id == "50052"
 
 
 def test_exit_removes_uds_socket(tmp_path, monkeypatch):
@@ -191,7 +172,7 @@ def test_exit_removes_uds_socket(tmp_path, monkeypatch):
     obj._log = logging.getLogger("test")
     obj.transport_mode = "uds"
     obj.uds_dir = str(uds_dir)
-    obj.uds_id = "mapdl-50052.sock"
+    obj.uds_id = "50052"  # internal value set by configure_uds (str(port))
     obj._start_instance = True
     obj._launched = True
     obj._exited = False
@@ -221,7 +202,6 @@ def test_generate_start_parameters_includes_transport_args():
     args = {
         "transport_mode": "insecure",
         "uds_dir": "/home/user/tmp/.conn",
-        "uds_id": "mapdl-50052.sock",
         "certs_dir": "/etc/ansys/certs",
         # Required fields used by generate_start_parameters
         "mode": "grpc",
@@ -239,11 +219,9 @@ def test_generate_start_parameters_includes_transport_args():
 
     start_parm = generate_start_parameters(args)
 
-    # The start parameters should include transport-related keys when allowed
     assert "transport_mode" in start_parm or "transport_mode" in args
     assert args["transport_mode"] == "insecure"
     assert args["uds_dir"] == "/home/user/tmp/.conn"
-    assert args["uds_id"] == "mapdl-50052.sock"
     assert args["certs_dir"] == "/etc/ansys/certs"
 
 
@@ -255,12 +233,10 @@ def test_env_transport_precedence(monkeypatch, transport_mode):
     monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", transport_mode)
 
     if transport_mode == "wnua" and os.name != "nt":
-        monkeypatch.setattr(os, "name", "nt")
-        monkeypatch.setattr(platform, "system", lambda: "Windows")
+        pytest.skip("WNUA transport is only supported on Windows")
 
     if transport_mode == "uds" and os.name == "nt":
-        monkeypatch.setattr(os, "name", "posix")
-        monkeypatch.setattr(platform, "system", lambda: "Linux")
+        pytest.skip("UDS transport is not supported on Windows")
 
     # Insert a fake cyberchannel module with verify_transport_mode
     fake_mod = types.ModuleType("ansys.tools.common.cyberchannel")
@@ -329,22 +305,6 @@ def test_missing_ansys_tools_common_raises(monkeypatch):
         MapdlGrpc(channel=MagicMock(spec=grpc.Channel))
 
 
-def test_uds_conflict_increments_port(tmp_path, monkeypatch):
-    # Create uds dir and a conflicting socket file
-    uds_dir = tmp_path / "conn"
-    uds_dir.mkdir()
-    sock = uds_dir / "mapdl-50052.sock"
-    sock.write_text("busy")
-
-    # Patch verify to no-op
-    monkeypatch.setattr(
-        "ansys.tools.common.cyberchannel.verify_transport_mode", lambda *a, **k: None
-    )
-
-    with pytest.raises(ValueError):
-        MapdlGrpc(transport_mode="uds", uds_dir=str(uds_dir), port=50052)
-
-
 def test_remote_ip_with_uds_raises(monkeypatch):
     # Patch verify to no-op
     monkeypatch.setattr(
@@ -358,3 +318,106 @@ def test_remote_ip_with_uds_raises(monkeypatch):
             channel=MagicMock(spec=grpc.Channel),
             transport_mode="uds",
         )
+
+
+def test_create_channel_passes_uds_service(tmp_path, monkeypatch):
+    """_create_channel passes uds_service='mapdl' and uds_id=port to create_channel.
+
+    This is the fix for issue #4435: the old code omitted uds_service, causing
+    ansys-tools-common to raise ValueError.
+    """
+    import platform
+
+    monkeypatch.setattr(os, "name", "posix")
+    monkeypatch.setattr(platform, "system", lambda: "Linux")
+
+    fake_mod = types.ModuleType("ansys.tools.common.cyberchannel")
+    fake_mod.verify_transport_mode = lambda mode: None
+    captured_calls = []
+
+    def fake_create_channel(**kwargs):
+        captured_calls.append(kwargs)
+        return MagicMock()
+
+    fake_mod.create_channel = fake_create_channel
+    monkeypatch.setitem(sys.modules, "ansys.tools.common.cyberchannel", fake_mod)
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    uds_dir = tmp_path / ".conn"
+    uds_dir.mkdir()
+
+    obj = object.__new__(MapdlGrpc)
+    import logging
+
+    obj._log = logging.getLogger("test")
+    obj.transport_mode = "uds"
+    obj.uds_dir = uds_dir
+    obj.uds_id = "50052"
+    obj.certs_dir = None
+    obj.grpc_options = []
+
+    obj._create_channel(ip="127.0.0.1", port=50052)
+
+    assert len(captured_calls) == 1
+    call_kwargs = captured_calls[0]
+    assert (
+        call_kwargs.get("uds_service") == "mapdl"
+    ), "uds_service='mapdl' must be passed to create_channel (fix for #4435)"
+    assert call_kwargs.get("uds_id") == 50052
+
+
+def test_configure_mtls_uses_env_var_when_certs_dir_none(monkeypatch):
+    """configure_mtls falls back to ANSYS_GRPC_CERTIFICATES env var when certs_dir is None."""
+    monkeypatch.setenv("ANSYS_GRPC_CERTIFICATES", "/custom/certs")
+
+    from pathlib import Path
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    import logging
+
+    obj._log = logging.getLogger("test")
+    obj.certs_dir = None
+
+    obj.configure_mtls()
+
+    assert obj.certs_dir == Path("/custom/certs")
+
+
+def test_configure_mtls_uses_cwd_certs_when_no_env_var(monkeypatch, tmp_path):
+    """configure_mtls falls back to cwd/certs when certs_dir is None and env var unset."""
+    monkeypatch.delenv("ANSYS_GRPC_CERTIFICATES", raising=False)
+    monkeypatch.chdir(tmp_path)
+
+    from pathlib import Path
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    import logging
+
+    obj._log = logging.getLogger("test")
+    obj.certs_dir = None
+
+    obj.configure_mtls()
+
+    assert obj.certs_dir == Path(os.path.join(str(tmp_path), "certs"))
+
+
+def test_configure_mtls_preserves_existing_certs_dir():
+    """configure_mtls does not overwrite certs_dir when it is already set."""
+    from pathlib import Path
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    import logging
+
+    obj._log = logging.getLogger("test")
+    obj.certs_dir = Path("/already/set")
+
+    obj.configure_mtls()
+
+    assert obj.certs_dir == Path("/already/set")

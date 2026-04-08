@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os
 from typing import Dict, Optional
 
 import click
@@ -262,10 +261,6 @@ def start(
             + " The following argument is not allowed in CLI: 'license_server_check'. Ignoring argument."
         )
 
-    # Ignoring env var if using CLI
-    if "PYMAPDL_START_INSTANCE" in os.environ:
-        os.environ.pop("PYMAPDL_START_INSTANCE")
-
     # Suppress all logging to stdout when using CLI
     from ansys.mapdl.core import LOG
 
@@ -290,6 +285,7 @@ def start(
             license_type=license_type,
             version=version,
             loglevel=loglevel,  # Set to highest level to suppress all logging
+            start_instance=True,
         )
 
     except Exception as e:
