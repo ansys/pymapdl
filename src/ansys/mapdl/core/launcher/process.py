@@ -175,6 +175,11 @@ def _handle_lock_file(config: LaunchConfig) -> None:
                 f"Unable to remove lock file '{lockfile}'. "
                 f"Another MAPDL instance may still be running at '{config.run_location}'."
             ) from exc
+        except FileNotFoundError:
+            # The file disappear between the isfile check and the remove call, which means
+            # another process may have just started and removed it.
+            # In this case, we can ignore the error.
+            LOG.debug(f"Lock file '{lockfile}' disappeared before it could be removed.")
     else:
         raise LockFileException(
             f'\nLock file exists for jobname "{config.jobname}" '
