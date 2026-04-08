@@ -358,11 +358,13 @@ def _validate_lock_file(config: LaunchConfig, result: ValidationResult) -> None:
     Notes
     -----
     - Skipped if ``start_instance`` is :class:`False`
+    - Skipped if ``launch_on_hpc`` is :class:`True` (lock file resides on the
+      remote cluster, not the local file system)
     - Skipped if ``run_location`` is not set
     - When ``override=True`` a warning is issued; the file is removed in
       :func:`~ansys.mapdl.core.launcher.process.launch_mapdl_process`
     """
-    if not config.start_instance:
+    if not config.start_instance or config.launch_on_hpc:
         return
 
     if not config.run_location:

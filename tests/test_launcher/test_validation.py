@@ -439,3 +439,22 @@ class TestValidateLockFile:
 
         assert result.valid
         assert not result.errors
+
+    def test_skipped_when_launch_on_hpc(self):
+        """Validation is skipped for HPC launches (lock file is on remote cluster)."""
+        config = _create_test_config(
+            run_location="/tmp/ansys_test",
+            override=False,
+            launch_on_hpc=True,
+        )
+
+        from ansys.mapdl.core.launcher.models import ValidationResult
+        from ansys.mapdl.core.launcher.validation import _validate_lock_file
+
+        result = ValidationResult(valid=True)
+        with patch("os.path.isfile", return_value=True):
+            _validate_lock_file(config, result)
+
+        assert result.valid
+        assert not result.errors
+        assert not result.warnings
