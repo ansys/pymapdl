@@ -318,3 +318,106 @@ def test_remote_ip_with_uds_raises(monkeypatch):
             channel=MagicMock(spec=grpc.Channel),
             transport_mode="uds",
         )
+
+
+def test_create_channel_passes_uds_service(tmp_path, monkeypatch):
+    """_create_channel passes uds_service='mapdl' and uds_id=port to create_channel.
+
+    This is the fix for issue #4435: the old code omitted uds_service, causing
+    ansys-tools-common to raise ValueError.
+    """
+    import platform
+
+    monkeypatch.setattr(os, "name", "posix")
+    monkeypatch.setattr(platform, "system", lambda: "Linux")
+
+    fake_mod = types.ModuleType("ansys.tools.common.cyberchannel")
+    fake_mod.verify_transport_mode = lambda mode: None
+    captured_calls = []
+
+    def fake_create_channel(**kwargs):
+        captured_calls.append(kwargs)
+        return MagicMock()
+
+    fake_mod.create_channel = fake_create_channel
+    monkeypatch.setitem(sys.modules, "ansys.tools.common.cyberchannel", fake_mod)
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    uds_dir = tmp_path / ".conn"
+    uds_dir.mkdir()
+
+    obj = object.__new__(MapdlGrpc)
+    import logging
+
+    obj._log = logging.getLogger("test")
+    obj.transport_mode = "uds"
+    obj.uds_dir = uds_dir
+    obj.uds_id = "50052"
+    obj.certs_dir = None
+    obj.grpc_options = []
+
+    obj._create_channel(ip="127.0.0.1", port=50052)
+
+    assert len(captured_calls) == 1
+    call_kwargs = captured_calls[0]
+    assert (
+        call_kwargs.get("uds_service") == "mapdl"
+    ), "uds_service='mapdl' must be passed to create_channel (fix for #4435)"
+    assert call_kwargs.get("uds_id") == 50052
+
+
+def test_configure_mtls_uses_env_var_when_certs_dir_none(monkeypatch):
+    """configure_mtls falls back to ANSYS_GRPC_CERTIFICATES env var when certs_dir is None."""
+    monkeypatch.setenv("ANSYS_GRPC_CERTIFICATES", "/custom/certs")
+
+    from pathlib import Path
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    import logging
+
+    obj._log = logging.getLogger("test")
+    obj.certs_dir = None
+
+    obj.configure_mtls()
+
+    assert obj.certs_dir == Path("/custom/certs")
+
+
+def test_configure_mtls_uses_cwd_certs_when_no_env_var(monkeypatch, tmp_path):
+    """configure_mtls falls back to cwd/certs when certs_dir is None and env var unset."""
+    monkeypatch.delenv("ANSYS_GRPC_CERTIFICATES", raising=False)
+    monkeypatch.chdir(tmp_path)
+
+    from pathlib import Path
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    import logging
+
+    obj._log = logging.getLogger("test")
+    obj.certs_dir = None
+
+    obj.configure_mtls()
+
+    assert obj.certs_dir == Path(os.path.join(str(tmp_path), "certs"))
+
+
+def test_configure_mtls_preserves_existing_certs_dir():
+    """configure_mtls does not overwrite certs_dir when it is already set."""
+    from pathlib import Path
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    import logging
+
+    obj._log = logging.getLogger("test")
+    obj.certs_dir = Path("/already/set")
+
+    obj.configure_mtls()
+
+    assert obj.certs_dir == Path("/already/set")
