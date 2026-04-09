@@ -25,6 +25,7 @@ from typing import Optional
 import click
 
 from ansys.mapdl.core.cli.helpers import can_access_process
+from ansys.mapdl.core.launcher.network import _get_process_at_port
 
 
 @click.command(
@@ -95,32 +96,33 @@ def stop(port: Optional[int], pid: Optional[int], all: bool) -> None:
 
     if port or all:
         killed_ = False
-        for proc in psutil.process_iter():
-            try:
-                # First check if we can access the process
-                if not can_access_process(proc):
-                    continue
+        if all:
+            for proc in psutil.process_iter():
+                try:
+                    # First check if we can access the process
+                    if not can_access_process(proc):
+                        continue
 
-                if _is_valid_ansys_process(PROCESS_OK_STATUS, proc):
-                    # Killing "all"
-                    if all:
+                    if _is_valid_ansys_process(PROCESS_OK_STATUS, proc):
+                        # Killing "all"
                         try:
                             _kill_process(proc)
                             killed_ = True
                         except psutil.NoSuchProcess:
                             pass
 
-                    else:
-                        # Killing by ports
-                        try:
-                            if str(port) in proc.cmdline():
-                                _kill_process(proc)
-                                killed_ = True
-                        except (psutil.NoSuchProcess, psutil.AccessDenied):
-                            pass
-
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                continue
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+        else:
+            # Killing by ports
+            proc = _get_process_at_port(port)
+            if proc:
+                try:
+                    if _is_valid_ansys_process(PROCESS_OK_STATUS, proc):
+                        _kill_process(proc)
+                        killed_ = True
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
 
         if all:
             str_ = ""
