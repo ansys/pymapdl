@@ -2982,8 +2982,11 @@ class MapdlGrpc(MapdlBase):
         if self._local:
             return super()._screenshot_path()
 
+        jobname = self.jobname
         filenames = [
-            filename for filename in self.list_files() if filename.endswith(".png")
+            filename
+            for filename in self.list_files()
+            if filename.endswith(".png") and filename.startswith(jobname)
         ]
         filenames.sort()
         filename = os.path.basename(filenames[-1])
