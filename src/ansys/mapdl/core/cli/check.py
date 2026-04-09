@@ -116,7 +116,6 @@ def check(ip: str, port: int, timeout: int, as_json: bool) -> None:
     if as_json:
         click.echo(json.dumps(data, indent=2))
     else:
-        conn = data.get("connection", {})
         _print_info_human_readable(data)
 
 
@@ -137,61 +136,10 @@ def _print_info_human_readable(data: dict) -> None:
         click.echo("")
         click.echo(click.style(title, bold=True))
 
-    conn = data.get("connection", {})
-    section("Connection")
-    if "error" in conn:
-        row("Error", conn["error"])
-    else:
-        row("Name:", conn.get("name", ""))
-        row("IP:", conn.get("ip", ""))
-        row("Port:", conn.get("port", ""))
-        row("Status:", conn.get("status", ""))
-        row("Version:", conn.get("version", ""))
-        row("Platform:", conn.get("platform", ""))
-        row("Directory:", conn.get("directory", ""))
-        row("Jobname:", conn.get("jobname", ""))
-        row("Is local:", conn.get("is_local", ""))
-
-    inf = data.get("information", {})
-    section("Information")
-    if "error" in inf:
-        row("Error", inf["error"])
-    else:
-        row("Product:", inf.get("product", ""))
-        row("MAPDL version:", inf.get("mapdl_version", ""))
-        row("  Build:", inf.get("mapdl_version_build", ""))
-        row("  Update:", inf.get("mapdl_version_update", ""))
-        row("PyMAPDL version:", inf.get("pymapdl_version", ""))
-        row("Title:", inf.get("title", ""))
-        units = inf.get("units", {})
-        if isinstance(units, dict) and units:
-            row("Units:", next(iter(units.values()), "").upper() or "")
+    for each_section in data:
+        section(each_section.capitalize())
+        if "error" in data[each_section]:
+            row("Error", data[each_section]["error"])
         else:
-            row("Units:", "")
-
-    geo = data.get("geometry", {})
-    section("Geometry")
-    if "error" in geo:
-        row("Error", geo["error"])
-    else:
-        row("Keypoints:", geo.get("n_keypoint", 0))
-        row("Lines:", geo.get("n_line", 0))
-        row("Areas:", geo.get("n_area", 0))
-        row("Volumes:", geo.get("n_volu", 0))
-
-    mesh = data.get("mesh", {})
-    section("Mesh")
-    if "error" in mesh:
-        row("Error", mesh["error"])
-    else:
-        row("Nodes:", mesh.get("n_node", 0))
-        row("Elements:", mesh.get("n_elem", 0))
-
-    post = data.get("post_processing", {})
-    section("Post Processing")
-    if "error" in post:
-        row("Error", post["error"])
-    else:
-        row("Available:", post.get("available", False))
-        if post.get("available"):
-            row("Result sets:", post.get("nsets", 0))
+            for key, value in data[each_section].items():
+                row(f"{key.replace('_', ' ').capitalize()}:", value)
