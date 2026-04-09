@@ -41,6 +41,39 @@ from .environment import is_wsl
 from .models import LaunchConfig, ProcessInfo
 
 
+def check_process_is_alive(
+    process: subprocess.Popen[bytes], run_location: str = ""
+) -> None:
+    """Check that a subprocess is still running, raising if it has exited.
+
+    Parameters
+    ----------
+    process : subprocess.Popen[bytes]
+        The subprocess handle to check.
+    run_location : str, optional
+        Working directory for the process (used in error context only).
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    MapdlDidNotStart
+        If ``process.poll()`` returns a non-``None`` value, indicating the
+        process has already terminated.
+
+    Examples
+    --------
+    Verify a running process is still alive:
+
+    >>> from ansys.mapdl.core.launcher.process import check_process_is_alive
+    >>> check_process_is_alive(my_process)  # raises MapdlDidNotStart if dead
+    """
+    if process.poll() is not None:
+        raise MapdlDidNotStart("MAPDL process died.")
+
+
 def launch_mapdl_process(config: LaunchConfig, env_vars: Dict[str, str]) -> ProcessInfo:
     """Launch MAPDL process locally and wait for it to be ready.
 
@@ -174,8 +207,7 @@ def wait_for_process_ready(
     stdout_queue = _monitor_stdout(process.stdout)
 
     # Check process alive
-    if process.poll() is not None:
-        raise MapdlDidNotStart("MAPDL process died immediately after launch")
+    check_process_is_alive(process, run_location)
 
     # Wait for the directory to be ready (handles potential delays in file system availability)
     _wait_directory_ready(run_location, timeout)

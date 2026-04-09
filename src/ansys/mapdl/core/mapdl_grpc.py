@@ -72,6 +72,7 @@ from ansys.mapdl.core.common_grpc import (
 )
 from ansys.mapdl.core.errors import (
     MapdlConnectionError,
+    MapdlDidNotStart,
     MapdlError,
     MapdlExitedError,
     MapdlRuntimeError,
@@ -853,61 +854,330 @@ class MapdlGrpc(MapdlBase):
     def _multi_connect(self, n_attempts=5, timeout=15):
         """Try to connect over a series of attempts to the channel.
 
+        A background monitoring thread runs in parallel with connection
+        attempts and checks whether the local MAPDL process is still alive
+        every 0.5 s.  When process death is detected the thread sets
+        ``monitor_stop_event``, which causes the in-progress ``_connect()``
+        call to abort within 10 ms, so the worst-case wait is reduced from
+        the full ``attempt_timeout`` to ~0.5 s.
+
         Parameters
         ----------
         n_attempts : int, optional
             Number of connection attempts.
         timeout : float, optional
-            Total timeout.
+            Total timeout in seconds.
         """
-        # This prevents a single failed connection from blocking other attempts
         connected = False
         attempt_timeout = int(timeout / n_attempts)
 
-        max_time = time.time() + timeout
-        i = 1
-        while time.time() < max_time and i <= n_attempts:
-            self._log.debug("Connection attempt %d", i)
-            connected = self._connect(timeout=attempt_timeout)
-            i += 1
-            if connected:
-                self._log.debug("Connected")
-                break
-        else:
-            # Check if mapdl process is alive
-            msg = (
-                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}.\n"
-                f"Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s)."
-            )
+        # Shared state between the main thread and the monitor thread.
+        monitor_stop_event = threading.Event()
+        monitor_exception: dict = {"error": None}
 
-            if self._mapdl_process is not None and psutil.pid_exists(
-                self._mapdl_process.pid
-            ):
-                # Process is alive
-                raise MapdlConnectionError(
-                    msg
-                    + f" The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
+        def monitor_mapdl_alive() -> None:
+            """Background thread: poll MAPDL process liveness every 0.5 s.
+
+            Only active for local launches where both ``_mapdl_process`` and
+            ``_path`` are set.  Uses direct process-status checks rather than
+            PID existence to avoid PID-reuse false-positives on Windows.
+            Supports both ``subprocess.Popen`` and ``psutil.Process`` handles.
+            """
+            try:
+                while not monitor_stop_event.is_set():
+                    if self._local and self._mapdl_process and self._path:
+                        try:
+                            process_alive = self._check_process_handle(
+                                self._mapdl_process
+                            )
+
+                            if not process_alive:
+                                # On Windows a terminal process can spawn MAPDL
+                                # and then exit; try to discover the real
+                                # MAPDL process before declaring death.
+                                procs = self._find_live_mapdl_processes()
+                                if not procs:
+                                    raise MapdlDidNotStart("MAPDL process has died.")
+                                # Cache discovered PIDs without overwriting the
+                                # original process handle (it may be a terminal).
+                                self._pids = [int(p.pid) for p in procs]
+
+                        except Exception as exc:
+                            monitor_exception["error"] = exc
+                            monitor_stop_event.set()
+                            break
+
+                    monitor_stop_event.wait(0.5)
+
+            except Exception as exc:
+                self._log.debug("Monitor thread encountered error: %s", exc)
+                monitor_exception["error"] = exc
+
+        # Only start monitoring for local instances with a process handle and path.
+        monitor_thread = None
+        if self._local and self._mapdl_process and self._path:
+            monitor_thread = threading.Thread(target=monitor_mapdl_alive, daemon=True)
+            monitor_thread.start()
+            self._log.debug("Started MAPDL monitoring thread")
+
+        try:
+            max_time = time.time() + timeout
+            i = 1
+            while time.time() < max_time and i <= n_attempts:
+                # Propagate any exception raised by the monitor thread.
+                if monitor_exception["error"] is not None:
+                    self._log.debug(
+                        "Monitor detected MAPDL process issue, "
+                        "stopping connection attempts"
+                    )
+                    raise monitor_exception["error"]
+
+                self._log.debug("Connection attempt %d", i)
+                connected = self._connect(
+                    timeout=attempt_timeout, stop_event=monitor_stop_event
                 )
+                i += 1
+                if connected:
+                    self._log.debug("Connected")
+                    break
+
             else:
-                pid_msg = (
-                    f" PID: {self._mapdl_process.pid}"
-                    if self._mapdl_process is not None
-                    else ""
+                # Exhausted attempts / timeout — build an informative message.
+                msg = (
+                    f"Unable to connect to MAPDL gRPC instance at "
+                    f"{self._channel_str}.\nReached either maximum amount of "
+                    f"connection attempts ({n_attempts}) or timeout ({timeout} s)."
                 )
-                raise MapdlConnectionError(
-                    msg + f" The MAPDL process has died{pid_msg}."
-                )
+
+                alive = self._is_alive_subprocess()
+                if alive:
+                    pid = getattr(self._mapdl_process, "pid", "'Not found'")
+                    raise MapdlConnectionError(
+                        msg + f" The MAPDL process seems to be alive (PID: {pid})"
+                        " but PyMAPDL cannot connect to it."
+                    )
+
+                # Double-check using cached _pids.
+                cached_proc = self._find_processes_from_cached_pids()
+                cached_pid = cached_proc[0].pid if cached_proc else None
+
+                if cached_pid is not None:
+                    raise MapdlConnectionError(
+                        msg
+                        + f" The MAPDL process seems to be alive (PID: {cached_pid})"
+                        " but PyMAPDL cannot connect to it."
+                    )
+                else:
+                    pid_msg = (
+                        f" PID: {getattr(self._mapdl_process, 'pid', "'Not found'")}"
+                        if self._mapdl_process is not None
+                        else ""
+                    )
+                    raise MapdlConnectionError(
+                        msg + f" The MAPDL process has died{pid_msg}."
+                    )
+
+            # Raise any deferred monitor exception (e.g. when the loop broke
+            # early because check_process_is_alive failed inline).
+            if monitor_exception["error"] is not None:
+                raise monitor_exception["error"]
+
+        finally:
+            monitor_stop_event.set()
+            if monitor_thread is not None:
+                monitor_thread.join(timeout=1.0)
+                self._log.debug("Stopped MAPDL monitoring thread")
 
         self._exited = False
 
-    def _is_alive_subprocess(self):  # numpydoc ignore=RT01
-        """Returns:
-        * True if the PID is alive.
-        * False if it is not.
-        * None if there was no process
+    @staticmethod
+    def _check_process_handle(proc) -> bool:
+        """Return whether *proc* is alive, normalising psutil/Popen handles.
+
+        Parameters
+        ----------
+        proc : psutil.Process | subprocess.Popen
+            A process handle with either an ``is_running()`` method
+            (psutil-style) or a ``poll()`` method (Popen-style).
+
+        Returns
+        -------
+        bool
+            ``True`` if the process is alive, ``False`` otherwise.
         """
-        if self._mapdl_process:
-            return psutil.pid_exists(self._mapdl_process.pid)
+        try:
+            if hasattr(proc, "is_running"):
+                return bool(proc.is_running())
+            if hasattr(proc, "poll"):
+                return proc.poll() is None
+        except psutil.NoSuchProcess:
+            pass
+        return False
+
+    def _is_alive_subprocess(self) -> bool | None:
+        """Check whether the MAPDL subprocess is still running.
+
+        Returns
+        -------
+        bool or None
+            * ``True`` if the process is alive.
+            * ``False`` if the process has exited.
+            * ``None`` if no process handle is stored.
+
+        Notes
+        -----
+        Checks liveness in priority order to avoid PID-reuse false-positives
+        on Windows:
+
+        1. ``is_running()`` / ``poll()`` on the stored process handle.
+        2. ``psutil.pid_exists()`` on ``_mapdl_process.pid`` as a last resort.
+        """
+        if not self._mapdl_process:
+            return None
+
+        proc_status = self._check_process_handle(self._mapdl_process)
+        if proc_status is not None:
+            return proc_status
+
+        # Unknown handle type — fall back to PID existence check.
+        pid = getattr(self._mapdl_process, "pid", None)
+        if pid is None:
+            return None
+        return psutil.pid_exists(int(pid))
+
+    def _find_live_mapdl_processes(self) -> "list[psutil.Process]":
+        """Discover live MAPDL processes when the stored process handle has exited.
+
+        On Windows the launcher typically starts a terminal process that spawns
+        MAPDL and then exits immediately.  When ``_mapdl_process`` (the
+        terminal) reports not-alive this method tries to find the actual MAPDL
+        server process via the following priority chain:
+
+        1. Port check — asks the OS which process is listening on
+           ``self._port``.  Fastest and most accurate.
+        2. Live ``_mapdl_process`` — returned as-is if it is still running.
+        3. Cached ``_pids`` — any PID in ``self._pids`` that psutil confirms
+           is still alive.
+        4. Heuristic system scan — iterates ``psutil.process_iter()`` matching
+           by CWD (``self._path``), job name in the command line, or the ANSYS/
+           MAPDL process name pattern.
+
+        Returns
+        -------
+        list[psutil.Process]
+            Live ``psutil.Process`` objects that correspond to MAPDL.  Empty
+            list if none are found.
+        """
+        try:
+            if found := self._find_process_at_port():
+                return found
+            if found := self._find_process_from_handle():
+                return found
+            if found := self._find_processes_from_cached_pids():
+                return found
+            return self._find_processes_by_heuristic()
+        except Exception:
+            return []
+
+    def _find_process_at_port(self) -> "list[psutil.Process]":
+        """Return the process listening on ``self._port``, if any.
+
+        Returns
+        -------
+        list[psutil.Process]
+            A one-element list with the running process, or ``[]``.
+        """
+        if not getattr(self, "_port", None):
+            return []
+        from ansys.mapdl.core.launcher.network import get_process_at_port
+
+        proc = get_process_at_port(self._port)
+        if proc and proc.is_running():
+            return [proc]
+        return []
+
+    def _find_process_from_handle(self) -> "list[psutil.Process]":
+        """Return the stored ``_mapdl_process`` handle if it is still alive.
+
+        Returns
+        -------
+        list[psutil.Process]
+            A one-element list wrapping the live process, or ``[]``.
+        """
+        if not self._mapdl_process or not self._check_process_handle(
+            self._mapdl_process
+        ):
+            return []
+        pid = getattr(self._mapdl_process, "pid", None)
+        try:
+            return [psutil.Process(pid)] if pid is not None else [self._mapdl_process]
+        except psutil.NoSuchProcess:
+            return []
+
+    def _find_processes_from_cached_pids(self) -> "list[psutil.Process]":
+        """Return live processes from the cached ``self._pids`` list.
+
+        Returns
+        -------
+        list[psutil.Process]
+            All cached PIDs that are still alive as ``psutil.Process`` objects.
+        """
+        found: list[psutil.Process] = []
+        for pid in [p for p in (self._pids or []) if p]:
+            try:
+                proc = psutil.Process(pid)
+                if proc.is_running():
+                    found.append(proc)
+            except psutil.NoSuchProcess:
+                continue
+        return found
+
+    def _find_processes_by_heuristic(self) -> "list[psutil.Process]":
+        """Scan running processes for MAPDL candidates using heuristics.
+
+        Matches by CWD (``self._path``), jobname in the command line, or the
+        ANSYS/MAPDL process-name pattern (via
+        :func:`~ansys.mapdl.core.launcher.network._is_mapdl_process`).
+
+        Returns
+        -------
+        list[psutil.Process]
+            All matching live processes, or ``[]`` if none found.
+        """
+        from ansys.mapdl.core.launcher.network import _is_mapdl_process
+
+        cwd_to_match = os.path.abspath(str(self._path)) if self._path else None
+        jobname = getattr(self, "_jobname", None) or self.jobname
+
+        if not cwd_to_match and not jobname:
+            return []
+
+        found: list[psutil.Process] = []
+        for p in psutil.process_iter(["pid", "name", "cmdline", "cwd"]):
+            try:
+                info = p.info
+                # Match by working directory.
+                if cwd_to_match and info.get("cwd"):
+                    if os.path.abspath(str(info["cwd"])).startswith(cwd_to_match):
+                        if p.is_running():
+                            found.append(p)
+                            continue
+
+                # Match by jobname in command line.
+                cmdline = info.get("cmdline") or []
+                if jobname and any(jobname in str(x) for x in cmdline):
+                    if p.is_running():
+                        found.append(p)
+                        continue
+
+                # Fallback: ANSYS/MAPDL process name heuristic.
+                if _is_mapdl_process(p) and p.is_running():
+                    found.append(p)
+
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
+
+        return found
 
     @property
     def process_is_alive(self):
@@ -1106,13 +1376,19 @@ class MapdlGrpc(MapdlBase):
         info = super().__repr__()
         return info
 
-    def _connect(self, timeout: int = 5) -> bool:
+    def _connect(
+        self, timeout: int = 5, stop_event: Optional[threading.Event] = None
+    ) -> bool:
         """Establish a gRPC channel to a remote or local MAPDL instance.
 
         Parameters
         ----------
         timeout : float
             Time in seconds to wait until the connection has been established.
+        stop_event : threading.Event, optional
+            When provided, the connection attempt will abort immediately if the
+            event becomes set (e.g. signalled by a monitor thread that detected
+            MAPDL process death).  Returns ``False`` in that case.
 
         Returns
         -------
@@ -1125,6 +1401,8 @@ class MapdlGrpc(MapdlBase):
         # verify connection
         tstart = time.time()
         while ((time.time() - tstart) < timeout) and not self._state._matured:
+            if stop_event is not None and stop_event.is_set():
+                return False  # Monitor signalled process death — bail immediately
             time.sleep(0.01)
 
         if not self._state._matured:  # pragma: no cover
