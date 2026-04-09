@@ -20,8 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os
-from typing import Dict, Union
+from typing import Dict, Optional
 
 import click
 
@@ -97,7 +96,7 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
 )
 @click.option(
     "--cleanup_on_exit",
-    default=False,
+    default=None,
     type=bool,
     help="Argument not allowed in CLI. It will be ignored.",
 )
@@ -115,7 +114,7 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
 )
 @click.option(
     "--clear_on_connect",
-    default=False,
+    default=None,
     type=bool,
     help="Argument not allowed in CLI. It will be ignored",
 )
@@ -127,13 +126,13 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
 )
 @click.option(
     "--remove_temp_dir_on_exit",
-    default=False,
+    default=None,
     type=bool,
     help="Argument not allowed in CLI. It will be ignored.",
 )
 @click.option(
     "--license_server_check",
-    default=False,
+    default=None,
     type=bool,
     help="Argument not allowed in CLI. It will be ignored.",
 )
@@ -145,7 +144,7 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
 )
 @click.option(
     "--print_com",
-    default=False,
+    default=None,
     type=bool,
     help="Argument not allowed in CLI. It will be ignored.",
 )
@@ -168,29 +167,29 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
     help="Version of MAPDL to launch. If ``None``, the latest version is used. Versions can be provided as integers (i.e. ``version=222``) or floats (i.e. ``version=22.2``). To retrieve the available installed versions, use the function :meth:`ansys.tools.common.path.get_available_ansys_installations`.",
 )
 def start(
-    exec_file: str,
-    run_location: str,
+    exec_file: Optional[str],
+    run_location: Optional[str],
     jobname: str,
-    nproc: Union[int, str],
-    ram: Union[int, str],
-    mode: str,  # ignored
+    nproc: int,
+    ram: Optional[int],
+    mode: Optional[str],  # ignored
     override: bool,
-    loglevel: str,  # ignored
+    loglevel: str,
     additional_switches: str,
-    start_timeout: Union[int, str],
-    port: Union[int, str],
-    cleanup_on_exit: bool,  # ignored
-    start_instance: bool,  # ignored
-    ip: str,
-    clear_on_connect: bool,  # ignored
-    log_apdl: bool,  # ignored
-    remove_temp_dir_on_exit: bool,  # ignored
-    license_server_check: bool,  # ignored
-    license_type: str,
-    print_com: bool,  # ignored
-    add_env_vars: Dict[str, str],  # ignored
-    replace_env_vars: Dict[str, str],  # ignored
-    version: Union[int, str],
+    start_timeout: int,
+    port: Optional[int],
+    cleanup_on_exit: Optional[bool],  # ignored
+    start_instance: Optional[bool],  # ignored
+    ip: Optional[str],  # ignored
+    clear_on_connect: Optional[bool],  # ignored
+    log_apdl: Optional[str],  # ignored
+    remove_temp_dir_on_exit: Optional[bool],  # ignored
+    license_server_check: Optional[bool],  # ignored
+    license_type: Optional[str],
+    print_com: Optional[bool],  # ignored
+    add_env_vars: Optional[Dict[str, str]],  # ignored
+    replace_env_vars: Optional[Dict[str, str]],  # ignored
+    version: Optional[str],
 ) -> None:
     import logging
 
@@ -262,10 +261,6 @@ def start(
             + " The following argument is not allowed in CLI: 'license_server_check'. Ignoring argument."
         )
 
-    # Ignoring env var if using CLI
-    if "PYMAPDL_START_INSTANCE" in os.environ:
-        os.environ.pop("PYMAPDL_START_INSTANCE")
-
     # Suppress all logging to stdout when using CLI
     from ansys.mapdl.core import LOG
 
@@ -290,6 +285,7 @@ def start(
             license_type=license_type,
             version=version,
             loglevel=loglevel,  # Set to highest level to suppress all logging
+            start_instance=True,
         )
 
     except Exception as e:

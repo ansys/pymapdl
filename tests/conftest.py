@@ -292,6 +292,10 @@ def pytest_report_header(config, start_path, startdir):
         "DPF_PORT",
         "DPF_START_SERVER",
         "IGNORE_POOL",
+        "ANSYS_MAPDL_UDS_PATH",
+        "ANSYS_MAPDL_CERTS_PATH",
+        "PYMAPDL_GRPC_TRANSPORT",
+        "ANSYS_MAPDL_GRPC_TRANSPORT",
     ]:
         env_var_value = os.environ.get(env_var)
         if env_var_value is not None:
@@ -939,7 +943,8 @@ def solved_box(mapdl, cleared):
 
 
 @pytest.fixture(scope="function")
-def make_block(mapdl, cleared):
+def make_block(mapdl):
+    clear(mapdl)
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.et(1, 186)
     mapdl.esize(0.25)
