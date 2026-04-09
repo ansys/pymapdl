@@ -128,6 +128,9 @@ tox = ["tox==4.50.3"]
 [tool.flit.module]
 name = "ansys.mapdl.core"
 
+[tool.flit.sdist]
+include = ["src/ansys/mapdl/core/skills/**"]
+
 [project.urls]
 Documentation = "https://mapdl.docs.pyansys.com"
 Issues = "https://github.com/ansys/pymapdl/issues"
