@@ -317,6 +317,41 @@ def test__download(mapdl, cleared, tmpdir):
     assert out_file.exists()
 
 
+def test_screenshot_path_filters_by_jobname(tmp_path):
+    """Ensure remote screenshot lookup does not mix PNGs from other jobnames."""
+    mapdl = MapdlGrpc.__new__(MapdlGrpc)
+    mapdl._local = False
+    mapdl._jobname = "a_job"
+
+    downloaded = {}
+
+    def fake_list_files():
+        return [
+            "z_job000.png",
+            "z_job001.png",
+            "a_job000.png",
+        ]
+
+    def fake_download(filename, out_file_name):
+        downloaded["filename"] = filename
+        downloaded["out_file_name"] = out_file_name
+        with open(out_file_name, "wb") as stream:
+            stream.write(b"png")
+
+    mapdl.list_files = fake_list_files
+    mapdl._download = fake_download
+
+    with patch(
+        "ansys.mapdl.core.mapdl_grpc.tempfile.gettempdir", return_value=str(tmp_path)
+    ):
+        screenshot_path = mapdl._screenshot_path()
+
+    assert downloaded["filename"] == "a_job000.png"
+    assert screenshot_path == str(tmp_path / "tmp.png")
+    assert os.path.exists(screenshot_path)
+    os.remove(screenshot_path)
+
+
 @pytest.mark.parametrize(
     "files_to_download,expected_output",
     [
