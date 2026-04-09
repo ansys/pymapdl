@@ -25,7 +25,7 @@ import click
 
 @click.command(
     short_help="List MAPDL running instances.",
-    help="""This command list MAPDL instances""",
+    help="""This command lists MAPDL instances.""",
 )
 @click.option(
     "--instances",
