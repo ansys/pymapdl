@@ -840,7 +840,7 @@ def get_mapdl_info(mapdl: "Mapdl") -> dict[str, Any]:
     'Running'
     >>> info["information"]["product"]
     'Ansys Mechanical Enterprise'
-    >>> info["geometry"]["n_node"]
+    >>> info["mesh"]["n_node"]
     0
     """
     info: dict[str, Any] = {}
