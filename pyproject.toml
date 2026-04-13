@@ -89,7 +89,7 @@ doc = [
   "ansys-mapdl-reader==0.55.2",
   "ansys-sphinx-theme==1.7.2",
   "ansys-tools-visualization-interface==0.12.1",
-  "grpcio==1.78.0",
+  "grpcio==1.80.0",
   "imageio-ffmpeg==0.6.0",
   "imageio==2.37.3",
   "jupyter==1.1.1",
@@ -123,7 +123,7 @@ doc = [
 
 [dependency-groups]
 
-tox = ["tox==4.50.3"]
+tox = ["tox==4.52.0"]
 
 [tool.flit.module]
 name = "ansys.mapdl.core"
@@ -141,13 +141,14 @@ pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_
 [tool.pytest.ini_options]
 addopts = [
   "--color=yes",
-  "--cov-report=html",
+  # "--cov-report=html",       # SLOW: generates HTML report at teardown (use --cov-report=term for local runs)
   "--cov=ansys.mapdl.core",
   "--durations=30",
-  "--log-file-level=DEBUG",
-  "--log-file=pytest.log",
-  "--maxfail=20",
-  "--profile",
+  # "--log-file-level=DEBUG",  # SLOW: writes debug logs through Docker volume mount
+  # "--log-file=pytest.log",   # SLOW: writes log file through Docker volume mount
+  "--maxfail=2",
+  # "--profile",               # SLOW: pytest-profiling adds overhead at session end
+  # "--profile-svg",           # SLOW: generates SVG call graph at shutdown (10-30 s+)
   "--random-order",
   "--random-order-bucket=class",
   "--report-log-exclude-logs-on-passed-tests",
