@@ -1679,7 +1679,7 @@ class TestCliCheckCommand:
             result = cli_runner(["check"])
 
         assert result.exit_code != 0
-        assert "ERROR" in result.output or "ERROR" in (result.exception or "")
+        assert "ERROR" in result.output or "ERROR" in str(result.exception or "")
 
     # ------------------------------------------------------------------ #
     # get_mapdl_info unit tests                                           #
