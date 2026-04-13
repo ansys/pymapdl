@@ -35,7 +35,7 @@ import time
 from typing import IO, Dict, List, Optional, Tuple, Union
 
 from ansys.mapdl.core import LOG
-from ansys.mapdl.core.errors import MapdlDidNotStart
+from ansys.mapdl.core.errors import LockFileException, MapdlDidNotStart
 
 from .environment import is_wsl
 from .models import LaunchConfig, ProcessInfo
@@ -120,6 +120,9 @@ def launch_mapdl_process(config: LaunchConfig, env_vars: Dict[str, str]) -> Proc
     - Uses background thread to monitor stdout without blocking
     - On Windows, MAPDL runs in batch mode with temporary input/output files
     """
+    # Handle stale lock file before launching
+    _handle_lock_file(config)
+
     # Generate command
     cmd = _generate_launch_command(config)
 
@@ -149,6 +152,73 @@ def launch_mapdl_process(config: LaunchConfig, env_vars: Dict[str, str]) -> Proc
         ip=config.ip,
         pid=process.pid if process else None,
     )
+
+
+def _handle_lock_file(config: LaunchConfig) -> None:
+    """Check for and handle a stale MAPDL lock file before launch.
+
+    MAPDL creates a ``<jobname>.lock`` file in the run directory while it is
+    running.  If MAPDL exits abnormally the file is left on disk and blocks a
+    subsequent launch on the same ``run_location`` / ``jobname`` combination.
+
+    When ``config.override`` is :class:`True` the lock file is removed so the
+    new launch can proceed.  When ``config.override`` is :class:`False` a
+    :class:`~ansys.mapdl.core.errors.LockFileException` is raised.
+
+    Parameters
+    ----------
+    config : LaunchConfig
+        Launch configuration providing ``run_location``, ``jobname``, and
+        ``override``.
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    LockFileException
+        If the lock file exists and ``override=False``, or if ``override=True``
+        but the file cannot be removed (e.g. due to a permission error).
+
+    Examples
+    --------
+    >>> config = LaunchConfig(run_location="/tmp/ansys", jobname="file",
+    ...                       override=True, ...)
+    >>> _handle_lock_file(config)   # removes /tmp/ansys/file.lock if present
+
+    Notes
+    -----
+    - No-op when ``run_location`` is not set
+    - No-op when the lock file does not exist
+    """
+    if not config.run_location:
+        return
+
+    lockfile = os.path.join(config.run_location, config.jobname + ".lock")
+    if not os.path.isfile(lockfile):
+        return
+
+    if config.override:
+        try:
+            os.remove(lockfile)
+            LOG.debug(f"Removed lock file '{lockfile}'.")
+        except PermissionError as exc:
+            raise LockFileException(
+                f"Unable to remove lock file '{lockfile}'. "
+                f"Another MAPDL instance may still be running at '{config.run_location}'."
+            ) from exc
+        except FileNotFoundError:
+            # The file disappear between the isfile check and the remove call, which means
+            # another process may have just started and removed it.
+            # In this case, we can ignore the error.
+            LOG.debug(f"Lock file '{lockfile}' disappeared before it could be removed.")
+    else:
+        raise LockFileException(
+            f'\nLock file exists for jobname "{config.jobname}" '
+            f'at\n"{lockfile}"\n\n'
+            f"Set override=True to remove it automatically, or delete it manually."
+        )
 
 
 def wait_for_process_ready(

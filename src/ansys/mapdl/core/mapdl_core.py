@@ -247,7 +247,6 @@ _ALLOWED_START_PARM = [
     # Transport-related parameters
     "transport_mode",
     "uds_dir",
-    "uds_id",
     "certs_dir",
 ]
 

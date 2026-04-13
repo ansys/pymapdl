@@ -42,6 +42,8 @@ Public API:
     - LaunchConfig: Configuration model (for advanced use)
 """
 
+import os
+import platform
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from ansys.mapdl.core import LOG
@@ -62,7 +64,7 @@ from .hpc import (
     resolve_slurm_resources,
 )
 from .hpc import launch_on_hpc as _launch_on_hpc_fn
-from .models import LaunchConfig, LaunchMode
+from .models import LaunchConfig, LaunchMode, TransportMode
 from .network import get_process_at_port  # noqa: F401
 from .process import _create_queue_for_std
 from .process import check_process_is_alive  # noqa: F401
@@ -213,6 +215,18 @@ def _launch_mapdl_common(
     except Exception as e:
         LOG.error(f"Environment preparation failed: {e}")
         raise LaunchError(f"Failed to prepare environment: {e}") from e
+
+    # For UDS transport (Linux default), tell MAPDL which directory to
+    # create its socket in via ANSYS_MAPDL_UDS_PATH.  MAPDL always names
+    # the socket "mapdl-{PORT}.sock" inside that directory.
+    if (
+        platform.system() == "Linux"
+        and config.transport_mode == TransportMode.UDS
+        and config.uds_dir
+    ):
+        os.makedirs(config.uds_dir, exist_ok=True)
+        process_env.setdefault("ANSYS_MAPDL_UDS_PATH", str(config.uds_dir))
+        LOG.debug(f"UDS transport: setting ANSYS_MAPDL_UDS_PATH={config.uds_dir}")
 
     # Step 5: Launch MAPDL process (local or HPC)
     process_info = None
