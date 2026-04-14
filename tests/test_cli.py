@@ -774,18 +774,11 @@ def test_get_ansys_process_from_port_no_grpc():
 
 
 def test_get_ansys_process_from_port_not_listening():
-    """Test get_ansys_process_from_port with ANSYS process not listening on port."""
-    import socket
-
-    mock_conn = MagicMock()
-    mock_conn.status = "LISTEN"
-    mock_conn.family = socket.AF_INET
-    mock_conn.laddr = ("127.0.0.1", 50053)  # wrong port
+    """Test get_ansys_process_from_port with ANSYS process with different port in cmdline."""
     mock_proc = make_mock_process_for_port_test(
         1,
         "ansys",
-        cmdline=["ansys", "-grpc", "-port", "50052"],
-        connections=[mock_conn],
+        cmdline=["ansys", "-grpc", "-port", "50053"],  # wrong port
     )
     with (
         patch("psutil.process_iter", return_value=[mock_proc]),
@@ -797,18 +790,11 @@ def test_get_ansys_process_from_port_not_listening():
 
 
 def test_get_ansys_process_from_port_not_listen_status():
-    """Test get_ansys_process_from_port with connection not LISTEN."""
-    import socket
-
-    mock_conn = MagicMock()
-    mock_conn.status = "ESTABLISHED"
-    mock_conn.family = socket.AF_INET
-    mock_conn.laddr = ("127.0.0.1", 50052)
+    """Test get_ansys_process_from_port with ANSYS process cmdline missing -port flag."""
     mock_proc = make_mock_process_for_port_test(
         1,
         "ansys",
-        cmdline=["ansys", "-grpc", "-port", "50052"],
-        connections=[mock_conn],
+        cmdline=["ansys", "-grpc"],  # no -port argument
     )
     with (
         patch("psutil.process_iter", return_value=[mock_proc]),
@@ -820,18 +806,11 @@ def test_get_ansys_process_from_port_not_listen_status():
 
 
 def test_get_ansys_process_from_port_wrong_family():
-    """Test get_ansys_process_from_port with wrong family."""
-    import socket
-
-    mock_conn = MagicMock()
-    mock_conn.status = "LISTEN"
-    mock_conn.family = socket.AF_INET6  # wrong family
-    mock_conn.laddr = ("127.0.0.1", 50052)
+    """Test get_ansys_process_from_port with non-integer port value in cmdline."""
     mock_proc = make_mock_process_for_port_test(
         1,
         "ansys",
-        cmdline=["ansys", "-grpc", "-port", "50052"],
-        connections=[mock_conn],
+        cmdline=["ansys", "-grpc", "-port", "not_a_number"],
     )
     with (
         patch("psutil.process_iter", return_value=[mock_proc]),
@@ -896,12 +875,11 @@ def test_get_ansys_process_from_port_exception_cmdline():
 
 
 def test_get_ansys_process_from_port_exception_connections():
-    """Test get_ansys_process_from_port handles exception in connections."""
+    """Test get_ansys_process_from_port with -port flag at end of cmdline (IndexError)."""
     mock_proc = make_mock_process_for_port_test(
         1,
         "ansys",
-        cmdline=["ansys", "-grpc", "-port", "50052"],
-        raise_exception="connections",
+        cmdline=["ansys", "-grpc", "-port"],  # -port at end, no value
     )
     with (
         patch("psutil.process_iter", return_value=[mock_proc]),
@@ -1721,3 +1699,268 @@ class TestCliCheckCommand:
         data = get_mapdl_info(mock_mapdl)
         assert "information" in data
         assert "product" in data["information"]
+
+
+# ===========================================================================
+# Coverage tests for get_mapdl_instances (helpers.py)
+# ===========================================================================
+
+
+def test_get_mapdl_instances_not_alive():
+    """Test get_mapdl_instances skips processes with non-alive status (line 97)."""
+    from ansys.mapdl.core.cli.helpers import get_mapdl_instances
+
+    proc = MagicMock(spec=psutil.Process)
+    proc.pid = 100
+    proc.info = {"name": "ansys251"}
+    proc.status.return_value = psutil.STATUS_DEAD
+
+    with patch("psutil.process_iter", return_value=[proc]):
+        result = get_mapdl_instances()
+    assert result == []
+
+
+def test_get_mapdl_instances_no_grpc():
+    """Test get_mapdl_instances skips processes without -grpc flag (line 112)."""
+    from ansys.mapdl.core.cli.helpers import get_mapdl_instances
+
+    proc = MagicMock(spec=psutil.Process)
+    proc.pid = 100
+    proc.info = {"name": "ansys251"}
+    proc.status.return_value = psutil.STATUS_RUNNING
+    proc.cmdline.return_value = ["ansys251", "-port", "50052"]  # no -grpc
+
+    with patch("psutil.process_iter", return_value=[proc]):
+        result = get_mapdl_instances()
+    assert result == []
+
+
+@pytest.mark.parametrize(
+    "cmdline",
+    [
+        ["ansys251", "-grpc", "-port", "not_a_number"],  # ValueError
+        ["ansys251", "-grpc", "-port"],  # IndexError
+    ],
+)
+def test_get_mapdl_instances_bad_port(cmdline):
+    """Test get_mapdl_instances skips processes with unparsable port (lines 118-119)."""
+    from ansys.mapdl.core.cli.helpers import get_mapdl_instances
+
+    proc = MagicMock(spec=psutil.Process)
+    proc.pid = 100
+    proc.info = {"name": "ansys251"}
+    proc.status.return_value = psutil.STATUS_RUNNING
+    proc.cmdline.return_value = cmdline
+
+    with patch("psutil.process_iter", return_value=[proc]):
+        result = get_mapdl_instances()
+    assert result == []
+
+
+def test_get_mapdl_instances_children_access_denied():
+    """Test get_mapdl_instances sets is_instance=False when children() raises (lines 125-126)."""
+    from ansys.mapdl.core.cli.helpers import get_mapdl_instances
+
+    proc = MagicMock(spec=psutil.Process)
+    proc.pid = 100
+    proc.info = {"name": "ansys251"}
+    proc.status.return_value = psutil.STATUS_RUNNING
+    proc.cmdline.return_value = ["ansys251", "-grpc", "-port", "50052"]
+    proc.children.side_effect = psutil.AccessDenied(100)
+    proc.cwd.return_value = "/some/cwd"
+
+    with patch("psutil.process_iter", return_value=[proc]):
+        result = get_mapdl_instances()
+    assert len(result) == 1
+    assert result[0]["is_instance"] is False
+
+
+def test_get_mapdl_instances_cwd_access_denied():
+    """Test get_mapdl_instances sets cwd=\'\' when cwd() raises (lines 131-132)."""
+    from ansys.mapdl.core.cli.helpers import get_mapdl_instances
+
+    proc = MagicMock(spec=psutil.Process)
+    proc.pid = 100
+    proc.info = {"name": "ansys251"}
+    proc.status.return_value = psutil.STATUS_RUNNING
+    proc.cmdline.return_value = ["ansys251", "-grpc", "-port", "50052"]
+    proc.children.return_value = []
+    proc.cwd.side_effect = psutil.AccessDenied(100)
+
+    with patch("psutil.process_iter", return_value=[proc]):
+        result = get_mapdl_instances()
+    assert len(result) == 1
+    assert result[0]["cwd"] == ""
+
+
+def test_get_mapdl_instances_no_such_process():
+    """Test get_mapdl_instances skips process that disappears (NoSuchProcess) (lines 146-148)."""
+    from ansys.mapdl.core.cli.helpers import get_mapdl_instances
+
+    proc = MagicMock(spec=psutil.Process)
+    proc.pid = 100
+    proc.info = {"name": "ansys251"}
+    proc.status.side_effect = psutil.NoSuchProcess(100)
+
+    with patch("psutil.process_iter", return_value=[proc]):
+        result = get_mapdl_instances()
+    assert result == []
+
+
+def test_get_mapdl_instances_access_denied_on_status():
+    """Test get_mapdl_instances skips process with AccessDenied on status (lines 150-152)."""
+    from ansys.mapdl.core.cli.helpers import get_mapdl_instances
+
+    proc = MagicMock(spec=psutil.Process)
+    proc.pid = 100
+    proc.info = {"name": "ansys251"}
+    proc.status.side_effect = psutil.AccessDenied(100)
+
+    with patch("psutil.process_iter", return_value=[proc]):
+        result = get_mapdl_instances()
+    assert result == []
+
+
+# ===========================================================================
+# Coverage tests for stop.py
+# ===========================================================================
+
+
+@requires("click")
+def test_stop_all_kill_raises_no_such_process(run_cli):
+    """Test stop --all handles NoSuchProcess when killing a valid process (lines 110-111)."""
+    import getpass
+
+    proc = MagicMock(spec=psutil.Process)
+    proc.pid = 12345
+    proc.name.return_value = "ansys251"
+    proc.username.return_value = getpass.getuser()
+    proc.status.return_value = psutil.STATUS_RUNNING
+    proc.cmdline.return_value = ["ansys251", "-grpc", "-port", "50052"]
+
+    with (
+        patch("psutil.process_iter", return_value=[proc]),
+        patch("psutil.pid_exists", return_value=True),
+        patch(
+            "ansys.mapdl.core.cli.stop._kill_process",
+            side_effect=psutil.NoSuchProcess(12345),
+        ),
+    ):
+        output = run_cli("stop --all")
+    assert "error: no ansys instances have been found." in output.lower()
+
+
+@requires("click")
+def test_stop_all_process_raises_during_iteration(run_cli):
+    """Test stop --all handles AccessDenied raised from _is_valid_ansys_process (lines 113-114)."""
+    import getpass
+
+    proc = MagicMock(spec=psutil.Process)
+    proc.pid = 12345
+    proc.name.return_value = "ansys251"
+    proc.username.return_value = getpass.getuser()
+    # Raises when _is_valid_ansys_process calls proc.status()
+    proc.status.side_effect = psutil.AccessDenied(12345)
+
+    with (
+        patch("psutil.process_iter", return_value=[proc]),
+        patch("psutil.pid_exists", return_value=True),
+        patch("ansys.mapdl.core.cli.stop._kill_process"),
+    ):
+        output = run_cli("stop --all")
+    assert "error: no ansys instances have been found." in output.lower()
+
+
+@requires("click")
+def test_stop_port_kill_raises(run_cli):
+    """Test stop --port handles exception when killing a found process (lines 122-123)."""
+    fake_proc = make_fake_process(
+        pid=12345, name="ansys251", port=str(PORT1), ansys_process=True
+    )
+
+    with (
+        patch("psutil.process_iter", return_value=[fake_proc]),
+        patch("psutil.pid_exists", return_value=True),
+        patch(
+            "ansys.mapdl.core.cli.stop._kill_process",
+            side_effect=psutil.NoSuchProcess(12345),
+        ),
+    ):
+        output = run_cli(f"stop --port {PORT1}")
+    assert "error: no ansys instances running on port" in output.lower()
+
+
+@requires("click")
+def test_stop_pid_invalid():
+    """Test stop callback with non-integer PID hits the ValueError branch (lines 149-150)."""
+    import click
+    from click.testing import CliRunner
+
+    from ansys.mapdl.core.cli.stop import stop as stop_cmd
+
+    mock_proc = MagicMock(spec=psutil.Process)
+    mock_proc.children.return_value = []
+
+    @click.command()
+    def invoke_with_invalid_pid():
+        """Wrapper that calls stop callback with a non-integer pid string."""
+        stop_cmd.callback(port=None, pid="not-an-int", all=False)
+
+    runner = CliRunner()
+    with (
+        patch("psutil.Process", return_value=mock_proc),
+        patch("ansys.mapdl.core.cli.stop._kill_process"),
+    ):
+        result = runner.invoke(invoke_with_invalid_pid, [])
+    assert "pid provided could not be converted to int" in result.output.lower()
+
+
+@requires("click")
+def test_stop_pid_kills_children(run_cli):
+    """Test stop --pid kills child processes before the parent (line 157)."""
+    pid = 12345
+    child_mock = MagicMock(spec=psutil.Process)
+    child_mock.pid = 12346
+    main_mock = MagicMock(spec=psutil.Process)
+    main_mock.children.return_value = [child_mock]
+
+    killed_pids = []
+
+    def track_kill(proc):
+        killed_pids.append(proc.pid)
+
+    with (
+        patch("psutil.Process", return_value=main_mock),
+        patch("ansys.mapdl.core.cli.stop._kill_process", side_effect=track_kill),
+    ):
+        output = run_cli(f"stop --pid {pid}")
+
+    assert child_mock.pid in killed_pids
+    assert main_mock.pid in killed_pids
+    assert "the process with pid" in output.lower()
+
+
+@requires("click")
+def test_stop_pid_kill_failed(run_cli):
+    """Test stop --pid reports error when p.status == \'running\' after kill (line 162)."""
+    pid = 12345
+    mock_proc = MagicMock(spec=psutil.Process)
+    mock_proc.children.return_value = []
+    # Simulate kill failure: p.status attribute equals the string "running"
+    mock_proc.status = "running"
+
+    with (
+        patch("psutil.Process", return_value=mock_proc),
+        patch("ansys.mapdl.core.cli.stop._kill_process"),
+    ):
+        output = run_cli(f"stop --pid {pid}")
+    assert "could not be killed" in output.lower()
+
+
+def test_kill_process():
+    """Test _kill_process calls proc.kill() (line 175)."""
+    from ansys.mapdl.core.cli.stop import _kill_process
+
+    mock_proc = MagicMock()
+    _kill_process(mock_proc)
+    mock_proc.kill.assert_called_once()
