@@ -145,12 +145,13 @@ def list_skills():
 @skills.command(name="show", short_help="Print a skill's SKILL.md to stdout.")
 @click.argument("skill_name")
 def show_skill(skill_name: str) -> None:
-    """Print the full content of SKILL_NAME's SKILL.md to stdout.
+    """Print the full content of a skill's SKILL.md to stdout.
 
-    Parameters
-    ----------
-    skill_name : str
-        Name of the skill to display (e.g. ``pymapdl-cli``).
+    SKILL_NAME is the skill identifier as shown by ``pymapdl skills list``
+    (e.g. ``pymapdl-cli``).  Redirect stdout to capture the file locally:
+
+    \b
+      pymapdl skills show pymapdl-cli > SKILL.md
     """
     skills_dir = _find_skills_dir()
     skill_md = skills_dir / skill_name / "SKILL.md"
@@ -230,31 +231,45 @@ def _append_if_missing(file_path: pathlib.Path, line: str) -> bool:
     "--env",
     required=True,
     type=click.Choice(_SUPPORTED_ENVS),
-    help="Target AI environment.",
+    help=(
+        "AI coding environment to install the skill into.  "
+        "Each environment receives a copy of the skill files (excluding "
+        "``evals/``) and a reference is added to its main configuration file."
+    ),
 )
-@click.option("--local", "scope", flag_value="local", default=True)
-@click.option("--global", "scope", flag_value="global")
+@click.option(
+    "--local",
+    "scope",
+    flag_value="local",
+    default=True,
+    help="Install into the current working directory (default).",
+)
+@click.option(
+    "--global",
+    "scope",
+    flag_value="global",
+    help="Install into the user's home directory instead of the CWD.",
+)
 @click.option(
     "--yes",
     "-y",
     is_flag=True,
     default=False,
-    help="Skip confirmation prompt.",
+    help="Skip the confirmation prompt and proceed immediately.",
 )
 def install_skill(skill_name: str, env: str, scope: str, yes: bool) -> None:
-    """Install SKILL_NAME into the specified AI environment.
+    """Install a skill's files into an AI coding environment.
 
-    Parameters
-    ----------
-    skill_name : str
-        Name of the skill to install (e.g. ``pymapdl-cli``).
-    env : str
-        Target AI environment.  One of ``claude``, ``copilot``,
-        ``github-repo``, ``codex``, ``cursor``.
-    scope : str
-        Either ``'local'`` (default, uses CWD) or ``'global'`` (uses home dir).
-    yes : bool
-        When :class:`True`, skip the confirmation prompt.
+    SKILL_NAME is the skill identifier as shown by ``pymapdl skills list``
+    (e.g. ``pymapdl-cli``).
+
+    All files in the skill directory (except ``evals/``) are copied to
+    the target location.  A reference line is also appended to the
+    environment's main configuration file so the AI tool can discover
+    the skill automatically.  Running twice is safe — existing references
+    are not duplicated.
+
+    Omit ``--yes`` to preview the planned actions before committing.
     """
     skills_dir = _find_skills_dir()
     skill_dir = skills_dir / skill_name
