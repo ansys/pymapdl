@@ -453,8 +453,6 @@ class TestGetProcessAtPort:
         """A port with no listeners should return None."""
         from ansys.mapdl.core.launcher.network import get_process_at_port
 
-        # Use a very unlikely port; if it happens to be in use the test is
-        # skipped rather than failing.
         port = 19999
         result = get_process_at_port(port)
         # Accept either None or a psutil.Process (if port happened to be in use)

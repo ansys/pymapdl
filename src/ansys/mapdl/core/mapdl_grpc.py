@@ -884,6 +884,7 @@ class MapdlGrpc(MapdlBase):
             except Exception as exc:
                 self._log.debug("Monitor thread encountered error: %s", exc)
                 monitor_exception["error"] = exc
+                monitor_stop_event.set()
 
         # Only start monitoring for local instances with a process handle and path.
         monitor_thread = None
@@ -940,11 +941,10 @@ class MapdlGrpc(MapdlBase):
                         " but PyMAPDL cannot connect to it."
                     )
                 else:
-                    pid_msg = (
-                        f" PID: {getattr(self._mapdl_process, 'pid', "'Not found'")}"
-                        if self._mapdl_process is not None
-                        else ""
-                    )
+                    pid_msg = ""
+                    if self._mapdl_process is not None:
+                        pid = getattr(self._mapdl_process, "pid", "'Not found'")
+                        pid_msg = f" PID: {pid}"
                     raise MapdlConnectionError(
                         msg + f" The MAPDL process has died{pid_msg}."
                     )

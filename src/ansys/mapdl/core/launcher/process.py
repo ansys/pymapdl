@@ -71,7 +71,10 @@ def check_process_is_alive(
     >>> check_process_is_alive(my_process)  # raises MapdlDidNotStart if dead
     """
     if process.poll() is not None:
-        raise MapdlDidNotStart("MAPDL process died.")
+        message = "MAPDL process died."
+        if run_location:
+            message += f" Run location: {run_location}"
+        raise MapdlDidNotStart(message)
 
 
 def launch_mapdl_process(config: LaunchConfig, env_vars: Dict[str, str]) -> ProcessInfo:
