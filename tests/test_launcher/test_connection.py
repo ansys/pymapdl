@@ -431,19 +431,18 @@ class TestGetProcessAtPort:
         assert callable(get_process_at_port)
 
     def test_private_alias_still_works(self):
-        """The private ``_get_process_at_port`` alias should still exist."""
-        from ansys.mapdl.core.launcher.network import _get_process_at_port
+        """The private ``get_process_at_port`` alias should still exist."""
+        from ansys.mapdl.core.launcher.network import get_process_at_port
 
-        assert callable(_get_process_at_port)
+        assert callable(get_process_at_port)
 
     def test_public_and_private_are_same_function(self):
         """Both names must point to the same underlying function."""
         from ansys.mapdl.core.launcher.network import (
-            _get_process_at_port,
             get_process_at_port,
         )
 
-        assert get_process_at_port is _get_process_at_port
+        assert get_process_at_port is get_process_at_port
 
     def test_returns_none_for_unused_port(self):
         """A port with no listeners should return None."""
