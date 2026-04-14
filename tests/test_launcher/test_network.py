@@ -14,10 +14,10 @@ import pytest
 from ansys.mapdl.core.launcher.models import PortStatus
 from ansys.mapdl.core.launcher.network import (
     _check_port_socket,
-    _get_process_at_port,
     _is_mapdl_process,
     check_port_status,
     find_available_port,
+    get_process_at_port,
 )
 
 
@@ -146,7 +146,7 @@ class TestCheckPortSocket:
 
 
 class TestGetProcessAtPort:
-    """Tests for _get_process_at_port function."""
+    """Tests for get_process_at_port function."""
 
     def test_get_process_at_port_found(self):
         """Test finding a process at a port."""
@@ -159,7 +159,7 @@ class TestGetProcessAtPort:
         with patch("psutil.process_iter") as mock_iter:
             mock_iter.return_value = [mock_proc]
 
-            result = _get_process_at_port(50052)
+            result = get_process_at_port(50052)
             assert result == mock_proc
 
     def test_get_process_at_port_not_found(self):
@@ -173,7 +173,7 @@ class TestGetProcessAtPort:
         with patch("psutil.process_iter") as mock_iter:
             mock_iter.return_value = [mock_proc]
 
-            result = _get_process_at_port(50052)
+            result = get_process_at_port(50052)
             assert result is None
 
     def test_get_process_at_port_access_denied(self):
@@ -184,7 +184,7 @@ class TestGetProcessAtPort:
         with patch("psutil.process_iter") as mock_iter:
             mock_iter.return_value = [mock_proc]
 
-            result = _get_process_at_port(50052)
+            result = get_process_at_port(50052)
             assert result is None
 
     def test_get_process_at_port_no_such_process(self):
@@ -195,7 +195,7 @@ class TestGetProcessAtPort:
         with patch("psutil.process_iter") as mock_iter:
             mock_iter.return_value = [mock_proc]
 
-            result = _get_process_at_port(50052)
+            result = get_process_at_port(50052)
             assert result is None
 
     def test_get_process_at_port_multiple_connections(self):
@@ -211,7 +211,7 @@ class TestGetProcessAtPort:
         with patch("psutil.process_iter") as mock_iter:
             mock_iter.return_value = [mock_proc]
 
-            result = _get_process_at_port(50052)
+            result = get_process_at_port(50052)
             assert result == mock_proc
 
     def test_get_process_at_port_empty_process_list(self):
@@ -219,7 +219,7 @@ class TestGetProcessAtPort:
         with patch("psutil.process_iter") as mock_iter:
             mock_iter.return_value = []
 
-            result = _get_process_at_port(50052)
+            result = get_process_at_port(50052)
             assert result is None
 
 
@@ -310,7 +310,7 @@ class TestCheckPortStatusAdvanced:
             "ansys.mapdl.core.launcher.network._check_port_socket"
         ) as mock_socket:
             with patch(
-                "ansys.mapdl.core.launcher.network._get_process_at_port"
+                "ansys.mapdl.core.launcher.network.get_process_at_port"
             ) as mock_get:
                 with patch(
                     "ansys.mapdl.core.launcher.network._is_mapdl_process"
@@ -333,7 +333,7 @@ class TestCheckPortStatusAdvanced:
             "ansys.mapdl.core.launcher.network._check_port_socket"
         ) as mock_socket:
             with patch(
-                "ansys.mapdl.core.launcher.network._get_process_at_port"
+                "ansys.mapdl.core.launcher.network.get_process_at_port"
             ) as mock_get:
                 with patch(
                     "ansys.mapdl.core.launcher.network._is_mapdl_process"
@@ -354,7 +354,7 @@ class TestCheckPortStatusAdvanced:
             "ansys.mapdl.core.launcher.network._check_port_socket"
         ) as mock_socket:
             with patch(
-                "ansys.mapdl.core.launcher.network._get_process_at_port"
+                "ansys.mapdl.core.launcher.network.get_process_at_port"
             ) as mock_get:
                 mock_socket.return_value = True
                 mock_get.return_value = None
@@ -532,7 +532,7 @@ class TestPhase1PortBusyDetection:
             "ansys.mapdl.core.launcher.network._check_port_socket"
         ) as mock_socket:
             with patch(
-                "ansys.mapdl.core.launcher.network._get_process_at_port"
+                "ansys.mapdl.core.launcher.network.get_process_at_port"
             ) as mock_get:
                 mock_socket.return_value = False
                 mock_get.return_value = mock_proc
@@ -694,7 +694,7 @@ class TestPhase2NetworkIntegration:
             "ansys.mapdl.core.launcher.network._check_port_socket"
         ) as mock_socket:
             with patch(
-                "ansys.mapdl.core.launcher.network._get_process_at_port"
+                "ansys.mapdl.core.launcher.network.get_process_at_port"
             ) as mock_get:
                 mock_socket.return_value = True  # Port is available
                 mock_get.return_value = None  # No process at port

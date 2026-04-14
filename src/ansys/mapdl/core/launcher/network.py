@@ -89,7 +89,7 @@ def check_port_status(port: int, host: str = "127.0.0.1") -> PortStatus:
     socket_available = _check_port_socket(port, host)
 
     # Check via psutil
-    process = _get_process_at_port(port)
+    process = get_process_at_port(port)
 
     if process:
         is_mapdl = _is_mapdl_process(process)
@@ -209,7 +209,7 @@ def _check_port_socket(port: int, host: str) -> bool:
             return False
 
 
-def _get_process_at_port(port: int) -> Optional[psutil.Process]:
+def get_process_at_port(port: int) -> Optional[psutil.Process]:
     """Get the process listening on a specific port.
 
     Iterates through all running processes to find one that has a network
@@ -236,14 +236,13 @@ def _get_process_at_port(port: int) -> Optional[psutil.Process]:
     --------
     Find process using a port:
 
-    >>> from ansys.mapdl.core.launcher.network import _get_process_at_port
-    >>> proc = _get_process_at_port(50052)
+    >>> from ansys.mapdl.core.launcher.network import get_process_at_port
+    >>> proc = get_process_at_port(50052)
     >>> if proc:
     ...     print(f"Process {proc.name()} is using port 50052")
 
     Notes
     -----
-    - Internal utility function
     - May be slow on systems with many processes
     - Requires appropriate system permissions for process information
     - Returns None if any process cannot be accessed (e.g., system processes)

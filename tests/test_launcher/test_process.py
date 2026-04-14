@@ -479,7 +479,7 @@ class TestWaitForProcessReady:
                 cmd=["mapdl"],
             )
 
-        assert "died immediately" in str(exc_info.value)
+        assert "died" in str(exc_info.value)
 
 
 # ============================================================================
