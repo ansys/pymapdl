@@ -155,6 +155,6 @@ def _print_info_human_readable(data: dict) -> None:
                     subsection(key)
                     for subkey, subvalue in value.items():
                         subkey = subkey.replace("_", " ").capitalize()
-                        subrow(subkey,  subvalue)
+                        subrow(subkey, subvalue)
                 else:
                     row(key, value)
