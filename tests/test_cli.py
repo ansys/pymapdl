@@ -1503,6 +1503,204 @@ class TestCliExecCommand:
         assert config.start_instance is False
 
 
+@requires("click")
+class TestCliCheckCommand:
+    """Tests for the ``pymapdl check`` CLI subcommand."""
+
+    @pytest.fixture
+    def cli_runner(self):
+        """Provide a Click CliRunner bound to the ``main`` group."""
+        from click.testing import CliRunner
+
+        from ansys.mapdl.core.cli import main
+
+        runner = CliRunner()
+
+        def invoke(args, **kwargs):
+            if isinstance(args, str):
+                args = args.split() if args else []
+            return runner.invoke(main, args, **kwargs)
+
+        return invoke
+
+    @pytest.fixture
+    def mock_mapdl(self):
+        """Return a mock MAPDL object with info attributes pre-configured."""
+        mock = MagicMock()
+
+        # connection-level attrs
+        mock.name = "GRPC_127.0.0.1:50052"
+        mock.ip = "127.0.0.1"
+        mock.port = 50052
+        mock.version = 24.1
+        mock.directory = "/tmp/mapdl"
+        mock.check_status.value = "running"
+        mock.is_local = True
+        mock.jobname = "file"
+        mock.platform = "LNX64"
+
+        # mapdl.info attrs
+        mock.info.product = "Ansys Mechanical Enterprise"
+        mock.info.mapdl_version_release = "2021 R2"
+        mock.info.mapdl_version_build = "21.2"
+        mock.info.mapdl_version_update = "20210601"
+        mock.info.pymapdl_version = "0.68.0"
+        mock.info.title = "Test Title"
+        mock.info.units = {"LENGTH": "meter", "MASS": "kilogram"}
+
+        # geometry
+        mock.geometry.n_keypoint = 4
+        mock.geometry.n_line = 3
+        mock.geometry.n_area = 2
+        mock.geometry.n_volu = 1
+
+        # mesh
+        mock.mesh.n_node = 100
+        mock.mesh.n_elem = 50
+
+        # post_processing
+        mock.post_processing.nsets = 5
+
+        return mock
+
+    # ------------------------------------------------------------------ #
+    # Happy-path tests                                                     #
+    # ------------------------------------------------------------------ #
+
+    def test_check_human_readable(self, cli_runner, mock_mapdl):
+        """Human-readable output contains all sections with expected values."""
+        with patch(
+            "ansys.mapdl.core.launcher.connection.connect_to_existing",
+            return_value=mock_mapdl,
+        ):
+            result = cli_runner(["check"])
+
+        assert result.exit_code == 0
+        out = result.output
+        assert "127.0.0.1:50052" in out
+        # Connection section
+        assert "Connection" in out
+        assert "LNX64" in out
+        # Information section
+        assert "Information" in out
+        assert "Ansys Mechanical Enterprise" in out
+        assert "2021 R2" in out
+        assert "21.2" in out
+        assert "20210601" in out
+        assert "0.68.0" in out
+        # Geometry section
+        assert "Geometry" in out
+        assert "4" in out  # n_keypoint
+        # Mesh section
+        assert "Mesh" in out
+        assert "100" in out  # n_node
+        # Post-processing section
+        assert "Post processing" in out
+
+    def test_check_json_output(self, cli_runner, mock_mapdl):
+        """With ``--json``, output is valid JSON with the nested structure."""
+        import json
+
+        with patch(
+            "ansys.mapdl.core.launcher.connection.connect_to_existing",
+            return_value=mock_mapdl,
+        ):
+            result = cli_runner(["check", "--json"])
+
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+
+        # Top-level sections
+        assert set(data.keys()) == {
+            "connection",
+            "information",
+            "geometry",
+            "mesh",
+            "post_processing",
+        }
+
+        conn = data["connection"]
+        assert conn["ip"] == "127.0.0.1"
+        assert conn["port"] == 50052
+        assert conn["is_local"] is True
+        assert conn["jobname"] == "file"
+
+        info = data["information"]
+        assert info["product"] == "Ansys Mechanical Enterprise"
+        assert info["mapdl_version"] == "2021 R2"
+        assert info["mapdl_version_build"] == "21.2"
+        assert info["mapdl_version_update"] == "20210601"
+        assert info["pymapdl_version"] == "0.68.0"
+
+        geo = data["geometry"]
+        assert geo["n_keypoint"] == 4
+        assert geo["n_line"] == 3
+        assert geo["n_area"] == 2
+        assert geo["n_volu"] == 1
+
+        assert data["mesh"]["n_node"] == 100
+        assert data["mesh"]["n_elem"] == 50
+
+        assert data["post_processing"]["available"] is True
+        assert data["post_processing"]["nsets"] == 5
+
+    # ------------------------------------------------------------------ #
+    # Error-path tests                                                     #
+    # ------------------------------------------------------------------ #
+
+    def test_check_connection_error(self, cli_runner):
+        """A connection failure exits with a non-zero code and prints an error."""
+        with patch(
+            "ansys.mapdl.core.launcher.connection.connect_to_existing",
+            side_effect=ConnectionError("refused"),
+        ):
+            result = cli_runner(["check"])
+
+        assert result.exit_code != 0
+        assert "ERROR" in result.output or "ERROR" in str(result.exception or "")
+
+    # ------------------------------------------------------------------ #
+    # get_mapdl_info unit tests                                           #
+    # ------------------------------------------------------------------ #
+
+    def test_get_mapdl_info_returns_dict(self, mock_mapdl):
+        """``get_mapdl_info`` returns a nested dict with all expected sections."""
+        from ansys.mapdl.core.information import get_mapdl_info
+
+        data = get_mapdl_info(mock_mapdl)
+
+        assert isinstance(data, dict)
+        assert set(data.keys()) == {
+            "connection",
+            "information",
+            "geometry",
+            "mesh",
+            "post_processing",
+        }
+
+        conn = data["connection"]
+        assert conn["ip"] == "127.0.0.1"
+        assert conn["port"] == 50052
+        assert conn["is_local"] is True
+
+        info = data["information"]
+        assert info["product"] == "Ansys Mechanical Enterprise"
+        assert info["mapdl_version"] == "2021 R2"
+        assert info["pymapdl_version"] == "0.68.0"
+
+        assert data["geometry"]["n_keypoint"] == 4
+        assert data["mesh"]["n_node"] == 100
+        assert data["post_processing"]["nsets"] == 5
+
+    def test_get_mapdl_info_exported_from_package(self, mock_mapdl):
+        """``get_mapdl_info`` is importable directly from ``ansys.mapdl.core``."""
+        from ansys.mapdl.core import get_mapdl_info
+
+        data = get_mapdl_info(mock_mapdl)
+        assert "information" in data
+        assert "product" in data["information"]
+
+
 # ===========================================================================
 # Coverage tests for get_mapdl_instances (helpers.py)
 # ===========================================================================
