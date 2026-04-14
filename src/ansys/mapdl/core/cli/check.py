@@ -136,10 +136,25 @@ def _print_info_human_readable(data: dict) -> None:
         click.echo("")
         click.echo(click.style(title, bold=True))
 
+    def subsection(title: str) -> None:
+        click.echo("")
+        click.echo(click.style(f"  {title}", bold=True))
+
+    def subrow(key: str, value) -> None:
+        click.echo(f"    {key.ljust(W)}{value}")
+
     for each_section in data:
-        section(each_section.capitalize())
+        section(each_section.replace("_", " ").capitalize())
+
         if "error" in data[each_section]:
             row("Error", data[each_section]["error"])
         else:
             for key, value in data[each_section].items():
-                row(f"{key.replace('_', ' ').capitalize()}:", value)
+                key = key.replace("_", " ").capitalize()
+                if isinstance(value, dict):
+                    subsection(key)
+                    for subkey, subvalue in value.items():
+                        subkey = subkey.replace("_", " ").capitalize()
+                        subrow(subkey,  subvalue)
+                else:
+                    row(key, value)

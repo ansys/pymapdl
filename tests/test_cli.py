@@ -1617,7 +1617,7 @@ class TestCliCheckCommand:
         assert "Mesh" in out
         assert "100" in out  # n_node
         # Post-processing section
-        assert "Post Processing" in out
+        assert "Post processing" in out
 
     def test_check_json_output(self, cli_runner, mock_mapdl):
         """With ``--json``, output is valid JSON with the nested structure."""
