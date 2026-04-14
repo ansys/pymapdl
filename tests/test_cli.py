@@ -1743,7 +1743,7 @@ def test_get_mapdl_instances_no_grpc():
     ],
 )
 def test_get_mapdl_instances_bad_port(cmdline):
-    """Test get_mapdl_instances skips processes with unparseable port (lines 118-119)."""
+    """Test get_mapdl_instances skips processes with unparsable port (lines 118-119)."""
     from ansys.mapdl.core.cli.helpers import get_mapdl_instances
 
     proc = MagicMock(spec=psutil.Process)
