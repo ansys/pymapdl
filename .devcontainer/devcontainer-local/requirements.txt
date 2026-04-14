@@ -27,7 +27,7 @@ pytest-reportlog==0.4.0
 pytest-rerunfailures==15.0
 pytest-sphinx==0.6.3
 pytest-timeout==2.3.1
-pytest==8.3.5
+pytest==9.0.3
 pythreejs==2.4.2
 scipy==1.15.2
 sphinx-autobuild==2024.10.3
