@@ -9,6 +9,7 @@ import time
 from typing import Any
 from unittest.mock import Mock, patch
 
+import psutil
 import pytest
 
 from ansys.mapdl.core.errors import MapdlDidNotStart
@@ -53,14 +54,18 @@ def make_mock_mapdl(
     # If caller supplied a bare Mock() process, ensure it behaves like a live
     # subprocess so that liveness checks don't accidentally trigger failures.
     if process is not None and isinstance(process, Mock):
-        # subprocess.Popen-like: poll() → None means still running
-        if not hasattr(process, "_mock_return_value") or process.poll() is not None:
+        # subprocess.Popen-like: poll() → None means still running.
+        # If poll has already been explicitly set to an integer exit code, the
+        # caller wants a *dead* process — respect that and mark is_running False
+        # too (since _check_process_handle prefers is_running when present).
+        if isinstance(process.poll(), int):
+            process.is_running.return_value = False
+        else:
             process.poll.return_value = None
+            process.is_running.return_value = True
         # Give it an integer pid so int(p.pid) works in _find_live_mapdl_processes
         if not isinstance(process.pid, int):
             process.pid = 12345
-        # psutil.Process-like: is_running() → True
-        process.is_running.return_value = True
 
     m._mapdl_process = process
 
@@ -68,7 +73,7 @@ def make_mock_mapdl(
     m._multi_connect = MapdlGrpc._multi_connect.__get__(m)
     m._is_alive_subprocess = MapdlGrpc._is_alive_subprocess.__get__(m)
     m._find_live_mapdl_processes = MapdlGrpc._find_live_mapdl_processes.__get__(m)
-    m._check_process_handle = MapdlGrpc._check_process_handle.__get__(m)
+    m._check_process_handle = MapdlGrpc._check_process_handle
     m._find_process_at_port = MapdlGrpc._find_process_at_port.__get__(m)
     m._find_process_from_handle = MapdlGrpc._find_process_from_handle.__get__(m)
     m._find_processes_from_cached_pids = (
@@ -453,8 +458,6 @@ class TestGetProcessAtPort:
         port = 19999
         result = get_process_at_port(port)
         # Accept either None or a psutil.Process (if port happened to be in use)
-        import psutil
-
         assert result is None or isinstance(result, psutil.Process)
 
 
@@ -513,15 +516,14 @@ class TestMultiConnectMonitoring:
         mock_process.poll.return_value = 1  # already dead
         m = make_mock_mapdl(local=True, process=mock_process, path="/some/path")
 
-        with patch(
-            "ansys.mapdl.core.launcher.process.check_process_is_alive",
-            side_effect=MapdlDidNotStart("MAPDL process died."),
+        with (
+            patch.object(m, "_find_live_mapdl_processes", return_value=[]),
+            patch.object(m, "_connect", return_value=False),
         ):
-            with patch.object(m, "_connect", return_value=False):
-                start = time.time()
-                with pytest.raises(MapdlDidNotStart, match="died"):
-                    m._multi_connect(n_attempts=5, timeout=10)
-                elapsed = time.time() - start
+            start = time.time()
+            with pytest.raises(MapdlDidNotStart, match="died"):
+                m._multi_connect(n_attempts=5, timeout=10)
+            elapsed = time.time() - start
 
         assert elapsed < 4, f"Expected fast failure, took {elapsed:.1f}s"
 
@@ -592,7 +594,6 @@ class TestCheckProcessHandle:
 
     def test_is_running_no_such_process(self):
         """Returns ``False`` when ``is_running()`` raises ``NoSuchProcess``."""
-        import psutil
 
         proc = Mock()
         proc.is_running.side_effect = psutil.NoSuchProcess(pid=0)
@@ -609,6 +610,11 @@ class TestCheckProcessHandle:
         proc = Mock(spec=["poll"])
         proc.poll.return_value = 1
         assert MapdlGrpc._check_process_handle(proc) is False
+
+    def test_unknown_handle_type_returns_none(self):
+        """Returns ``None`` when handle has neither ``is_running`` nor ``poll``."""
+        proc = Mock(spec=["pid"])  # no is_running, no poll
+        assert MapdlGrpc._check_process_handle(proc) is None
 
 
 # _is_alive_subprocess
@@ -714,7 +720,6 @@ class TestFindProcessAtPort:
 
     def test_returns_process_when_found_and_alive(self):
         """Returns the process when it is listening and running."""
-        import psutil
 
         mock_proc = Mock(spec=psutil.Process)
         mock_proc.is_running.return_value = True
@@ -727,7 +732,6 @@ class TestFindProcessAtPort:
 
     def test_returns_empty_when_found_but_not_running(self):
         """Returns ``[]`` when the port-owning process has already exited."""
-        import psutil
 
         mock_proc = Mock(spec=psutil.Process)
         mock_proc.is_running.return_value = False
@@ -762,7 +766,6 @@ class TestFindProcessFromHandle:
 
     def test_returns_psutil_process_when_alive(self):
         """Returns a ``psutil.Process`` wrapping the PID when alive."""
-        import psutil
 
         mock_proc = Mock()
         mock_proc.is_running.return_value = True
@@ -774,14 +777,15 @@ class TestFindProcessFromHandle:
         mp.assert_called_once_with(42)
         assert len(result) == 1
 
-    def test_falls_back_to_handle_when_pid_raises(self):
-        """Returns the raw handle when ``psutil.Process(pid)`` raises."""
+    def test_returns_empty_when_pid_raises_no_such_process(self):
+        """Returns ``[]`` when ``psutil.Process(pid)`` raises ``NoSuchProcess``."""
+
         mock_proc = Mock()
         mock_proc.is_running.return_value = True
         mock_proc.pid = 42
         m = make_mock_mapdl(process=None)
         m._mapdl_process = mock_proc
-        with patch("psutil.Process", side_effect=Exception("no such process")):
+        with patch("psutil.Process", side_effect=psutil.NoSuchProcess(pid=42)):
             result = m._find_process_from_handle()
         assert result == []
 
@@ -801,7 +805,6 @@ class TestFindProcessesFromCachedPids:
 
     def test_returns_alive_processes(self):
         """Returns running processes for valid cached PIDs."""
-        import psutil
 
         mock_proc = Mock(spec=psutil.Process)
         mock_proc.is_running.return_value = True
@@ -813,7 +816,6 @@ class TestFindProcessesFromCachedPids:
 
     def test_skips_dead_pids(self):
         """Skips PIDs that raise ``NoSuchProcess``."""
-        import psutil
 
         m = make_mock_mapdl(process=None, pids=[9999])
         with patch("psutil.Process", side_effect=psutil.NoSuchProcess(pid=9999)):
@@ -822,7 +824,6 @@ class TestFindProcessesFromCachedPids:
 
     def test_skips_none_pids(self):
         """``None`` entries in ``_pids`` are silently ignored."""
-        import psutil
 
         mock_proc = Mock(spec=psutil.Process)
         mock_proc.is_running.return_value = True
@@ -849,7 +850,6 @@ class TestFindProcessesByHeuristic:
 
     def test_matches_by_cwd(self):
         """A process whose CWD starts with ``_path`` is included."""
-        import psutil
 
         mock_proc = Mock(spec=psutil.Process)
         mock_proc.is_running.return_value = True
@@ -861,7 +861,6 @@ class TestFindProcessesByHeuristic:
 
     def test_matches_by_jobname_in_cmdline(self):
         """A process whose cmdline contains ``_jobname`` is included."""
-        import psutil
 
         mock_proc = Mock(spec=psutil.Process)
         mock_proc.is_running.return_value = True
@@ -878,7 +877,6 @@ class TestFindProcessesByHeuristic:
 
     def test_matches_by_mapdl_process_name(self):
         """A process recognised by ``_is_mapdl_process`` is included."""
-        import psutil
 
         mock_proc = Mock(spec=psutil.Process)
         mock_proc.is_running.return_value = True
@@ -896,10 +894,11 @@ class TestFindProcessesByHeuristic:
 
     def test_skips_inaccessible_processes(self):
         """Processes raising ``AccessDenied`` or ``NoSuchProcess`` are skipped."""
-        import psutil
+        from unittest.mock import PropertyMock
 
         mock_proc = Mock(spec=psutil.Process)
-        mock_proc.info = Mock(side_effect=psutil.AccessDenied(pid=0))
+        # Simulate a process whose .info raises AccessDenied on attribute access.
+        type(mock_proc).info = PropertyMock(side_effect=psutil.AccessDenied(pid=0))
         m = make_mock_mapdl(process=None, path="/my/path")
         with patch("psutil.process_iter", return_value=iter([mock_proc])):
             assert m._find_processes_by_heuristic() == []
@@ -926,7 +925,6 @@ class TestFindLiveMapdlProcesses:
 
     def test_port_lookup_takes_priority(self):
         """A process found via port lookup is returned immediately."""
-        import psutil
 
         mock_proc = Mock(spec=psutil.Process)
         mock_proc.is_running.return_value = True
@@ -943,7 +941,6 @@ class TestFindLiveMapdlProcesses:
 
     def test_cached_pids_fallback(self):
         """Cached PIDs are checked when port lookup returns nothing."""
-        import psutil
 
         mock_proc = Mock(spec=psutil.Process)
         mock_proc.is_running.return_value = True
@@ -962,14 +959,20 @@ class TestFindLiveMapdlProcesses:
 
     def test_live_process_returned_directly(self):
         """If ``_mapdl_process`` is alive, it is returned without scanning."""
+
         mock_proc = Mock()
         mock_proc.is_running.return_value = True
+        mock_proc.pid = 42
 
         m = make_mock_mapdl(process=mock_proc, pids=[], port=None)
-        with patch(
-            "ansys.mapdl.core.launcher.network.get_process_at_port",
-            return_value=None,
+        with (
+            patch(
+                "ansys.mapdl.core.launcher.network.get_process_at_port",
+                return_value=None,
+            ),
+            patch("psutil.Process", return_value=mock_proc) as mock_psutil,
         ):
             result = m._find_live_mapdl_processes()
 
+        mock_psutil.assert_called_once_with(42)
         assert result == [mock_proc]

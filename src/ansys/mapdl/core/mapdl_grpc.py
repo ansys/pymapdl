@@ -963,7 +963,7 @@ class MapdlGrpc(MapdlBase):
         self._exited = False
 
     @staticmethod
-    def _check_process_handle(proc) -> bool:
+    def _check_process_handle(proc) -> bool | None:
         """Return whether *proc* is alive, normalising psutil/Popen handles.
 
         Parameters
@@ -974,8 +974,10 @@ class MapdlGrpc(MapdlBase):
 
         Returns
         -------
-        bool
-            ``True`` if the process is alive, ``False`` otherwise.
+        bool or None
+            ``True`` if the process is alive, ``False`` if it has exited or
+            if ``is_running()`` raised ``NoSuchProcess``, ``None`` if *proc*
+            has neither ``is_running`` nor ``poll`` (unknown handle type).
         """
         try:
             if hasattr(proc, "is_running"):
@@ -983,8 +985,8 @@ class MapdlGrpc(MapdlBase):
             if hasattr(proc, "poll"):
                 return proc.poll() is None
         except psutil.NoSuchProcess:
-            pass
-        return False
+            return False
+        return None
 
     def _is_alive_subprocess(self) -> bool | None:
         """Check whether the MAPDL subprocess is still running.
@@ -994,7 +996,9 @@ class MapdlGrpc(MapdlBase):
         bool or None
             * ``True`` if the process is alive.
             * ``False`` if the process has exited.
-            * ``None`` if no process handle is stored.
+            * ``None`` if no process handle is stored, or if the handle has
+              an unknown type (no ``is_running`` / ``poll``) and no ``pid``
+              attribute to fall back on.
 
         Notes
         -----
