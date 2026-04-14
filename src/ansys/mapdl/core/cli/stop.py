@@ -24,8 +24,7 @@ from typing import Optional
 
 import click
 
-from ansys.mapdl.core.cli.helpers import can_access_process
-from ansys.mapdl.core.launcher.network import _get_process_at_port
+from ansys.mapdl.core.cli.helpers import can_access_process, get_ansys_process_from_port
 
 
 @click.command(
@@ -115,12 +114,11 @@ def stop(port: Optional[int], pid: Optional[int], all: bool) -> None:
                     continue
         else:
             # Killing by ports
-            proc = _get_process_at_port(port)
+            proc = get_ansys_process_from_port(port)
             if proc:
                 try:
-                    if _is_valid_ansys_process(PROCESS_OK_STATUS, proc):
-                        _kill_process(proc)
-                        killed_ = True
+                    _kill_process(proc)
+                    killed_ = True
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     pass
 

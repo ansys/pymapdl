@@ -774,18 +774,11 @@ def test_get_ansys_process_from_port_no_grpc():
 
 
 def test_get_ansys_process_from_port_not_listening():
-    """Test get_ansys_process_from_port with ANSYS process not listening on port."""
-    import socket
-
-    mock_conn = MagicMock()
-    mock_conn.status = "LISTEN"
-    mock_conn.family = socket.AF_INET
-    mock_conn.laddr = ("127.0.0.1", 50053)  # wrong port
+    """Test get_ansys_process_from_port with ANSYS process with different port in cmdline."""
     mock_proc = make_mock_process_for_port_test(
         1,
         "ansys",
-        cmdline=["ansys", "-grpc", "-port", "50052"],
-        connections=[mock_conn],
+        cmdline=["ansys", "-grpc", "-port", "50053"],  # wrong port
     )
     with (
         patch("psutil.process_iter", return_value=[mock_proc]),
@@ -797,18 +790,11 @@ def test_get_ansys_process_from_port_not_listening():
 
 
 def test_get_ansys_process_from_port_not_listen_status():
-    """Test get_ansys_process_from_port with connection not LISTEN."""
-    import socket
-
-    mock_conn = MagicMock()
-    mock_conn.status = "ESTABLISHED"
-    mock_conn.family = socket.AF_INET
-    mock_conn.laddr = ("127.0.0.1", 50052)
+    """Test get_ansys_process_from_port with ANSYS process cmdline missing -port flag."""
     mock_proc = make_mock_process_for_port_test(
         1,
         "ansys",
-        cmdline=["ansys", "-grpc", "-port", "50052"],
-        connections=[mock_conn],
+        cmdline=["ansys", "-grpc"],  # no -port argument
     )
     with (
         patch("psutil.process_iter", return_value=[mock_proc]),
@@ -820,18 +806,11 @@ def test_get_ansys_process_from_port_not_listen_status():
 
 
 def test_get_ansys_process_from_port_wrong_family():
-    """Test get_ansys_process_from_port with wrong family."""
-    import socket
-
-    mock_conn = MagicMock()
-    mock_conn.status = "LISTEN"
-    mock_conn.family = socket.AF_INET6  # wrong family
-    mock_conn.laddr = ("127.0.0.1", 50052)
+    """Test get_ansys_process_from_port with non-integer port value in cmdline."""
     mock_proc = make_mock_process_for_port_test(
         1,
         "ansys",
-        cmdline=["ansys", "-grpc", "-port", "50052"],
-        connections=[mock_conn],
+        cmdline=["ansys", "-grpc", "-port", "not_a_number"],
     )
     with (
         patch("psutil.process_iter", return_value=[mock_proc]),
@@ -896,12 +875,11 @@ def test_get_ansys_process_from_port_exception_cmdline():
 
 
 def test_get_ansys_process_from_port_exception_connections():
-    """Test get_ansys_process_from_port handles exception in connections."""
+    """Test get_ansys_process_from_port with -port flag at end of cmdline (IndexError)."""
     mock_proc = make_mock_process_for_port_test(
         1,
         "ansys",
-        cmdline=["ansys", "-grpc", "-port", "50052"],
-        raise_exception="connections",
+        cmdline=["ansys", "-grpc", "-port"],  # -port at end, no value
     )
     with (
         patch("psutil.process_iter", return_value=[mock_proc]),
