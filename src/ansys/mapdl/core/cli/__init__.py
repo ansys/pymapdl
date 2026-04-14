@@ -36,6 +36,7 @@ if _HAS_CLICK:
     def main(ctx: click.Context):
         pass
 
+    from ansys.mapdl.core.cli.check import check as check_cmd
     from ansys.mapdl.core.cli.convert import convert as convert_cmd
     from ansys.mapdl.core.cli.exec import exec_cmd
     from ansys.mapdl.core.cli.list_instances import list_instances
@@ -43,6 +44,7 @@ if _HAS_CLICK:
     from ansys.mapdl.core.cli.start import start as start_cmd
     from ansys.mapdl.core.cli.stop import stop as stop_cmd
 
+    main.add_command(check_cmd, name="check")
     main.add_command(convert_cmd, name="convert")
     main.add_command(exec_cmd, name="exec")
     main.add_command(list_instances, name="list")
