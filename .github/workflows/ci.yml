@@ -387,7 +387,7 @@ jobs:
           FILE_NAME: ${{ env.file_name }}
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
-          uvx tox -e docker-remote
+          uvx tox -e docker-test-remote
 
       - uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 #v6.0.0
         name: "Upload coverage to Codecov"
@@ -457,7 +457,7 @@ jobs:
           FILE_NAME: ${{ env.file_name }}
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
-          uvx tox -e docker-local
+          uvx tox -e docker-test-local
 
       - uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 #v6.0.0
         name: "Upload coverage to Codecov"
