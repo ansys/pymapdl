@@ -109,3 +109,5 @@ doc/webserver.pid
 
 # Profiling
 prof
+docker/run/.env
+docker/testing/.env
