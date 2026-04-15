@@ -31,7 +31,26 @@ if _HAS_CLICK:
     ###################################
     # PyMAPDL CLI
 
-    @click.group(invoke_without_command=True)
+    class _AliasedGroup(click.Group):
+        """Click Group that resolves command aliases without showing them in help.
+
+        Aliases are silently mapped to their canonical name so users can type
+        either form, but ``pymapdl --help`` only lists the canonical name once.
+        """
+
+        _ALIASES: dict[str, str] = {
+            "skill": "skills",
+        }
+
+        def get_command(self, ctx: click.Context, cmd_name: str):
+            return super().get_command(ctx, self._ALIASES.get(cmd_name, cmd_name))
+
+        def resolve_command(self, ctx: click.Context, args: list):
+            if args:
+                args[0] = self._ALIASES.get(args[0], args[0])
+            return super().resolve_command(ctx, args)
+
+    @click.group(cls=_AliasedGroup, invoke_without_command=True)
     @click.pass_context
     def main(ctx: click.Context):
         pass
