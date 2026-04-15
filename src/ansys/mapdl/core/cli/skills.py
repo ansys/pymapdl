@@ -241,7 +241,7 @@ def _append_if_missing(file_path: pathlib.Path, line: str) -> bool:
     "--local",
     "scope",
     flag_value="local",
-    default=True,
+    default="local",
     help="Install into the current working directory (default).",
 )
 @click.option(
