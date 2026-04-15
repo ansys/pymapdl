@@ -62,7 +62,7 @@ pymapdl start [OPTIONS]
 
 ```
 pymapdl start --port 50055 --nproc 4
-# Success: Launched an MAPDL instance (PID=12345) at 127.0.0.1:50055
+# Success: Launched a MAPDL instance (PID=12345) at 127.0.0.1:50055
 ```
 
 ---
