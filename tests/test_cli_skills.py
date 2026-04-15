@@ -195,43 +195,12 @@ def test_skills_install_copilot_local(tmp_path):
                 ["install", "pymapdl-cli", "--env", "copilot", "--yes"],
             )
         assert result.exit_code == 0, result.output + (result.stderr or "")
-        instructions = iso / ".github" / "instructions" / "pymapdl-cli.instructions.md"
-        assert instructions.exists(), ".instructions.md should be created"
-        copilot_instructions = iso / ".github" / "copilot-instructions.md"
-        assert (
-            copilot_instructions.exists()
-        ), "copilot-instructions.md should be created"
-        assert (
-            "@.github/instructions/pymapdl-cli.instructions.md"
-            in copilot_instructions.read_text()
-        )
-
-
-# ---------------------------------------------------------------------------
-# pymapdl skills install — github-repo
-# ---------------------------------------------------------------------------
-
-
-def test_skills_install_github_repo(tmp_path):
-    mock_dir = _make_mock_skills_dir(tmp_path)
-    runner = CliRunner()
-    with runner.isolated_filesystem() as iso_dir:
-        iso = pathlib.Path(iso_dir)
-        with patch(
-            "ansys.mapdl.core.cli.skills._find_skills_dir", return_value=mock_dir
-        ):
-            result = runner.invoke(
-                skills,
-                ["install", "pymapdl-cli", "--env", "github-repo", "--yes"],
-            )
-        assert result.exit_code == 0, result.output + (result.stderr or "")
-        instructions = iso / ".github" / "instructions" / "pymapdl-cli.instructions.md"
-        assert instructions.exists(), ".instructions.md should be created"
-        # No copilot-instructions.md for github-repo env
+        skill_md = iso / ".github" / "skills" / "pymapdl-cli" / "SKILL.md"
+        assert skill_md.exists(), "SKILL.md should be written to .github/skills/"
         copilot_instructions = iso / ".github" / "copilot-instructions.md"
         assert (
             not copilot_instructions.exists()
-        ), "copilot-instructions.md should NOT be created for github-repo"
+        ), "copilot-instructions.md should not be created"
 
 
 # ---------------------------------------------------------------------------

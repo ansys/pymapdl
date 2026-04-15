@@ -133,8 +133,17 @@ def list_skills():
     if not entries:
         click.echo("No skills are bundled with this PyMAPDL installation.")
         return
+    click.echo("")
+    click.echo(click.style("Available skills:", bold=True))
     for name, description, _ in entries:
-        click.echo(f"{name}  —  {description}")
+        click.echo(f"- {name}")
+
+    click.echo("")
+    for name, description, _ in entries:
+        click.echo(f"{name}")
+        click.echo("-" * len(name))
+        if description:
+            click.echo(description)
 
 
 # ---------------------------------------------------------------------------
@@ -172,8 +181,8 @@ def show_skill(skill_name: str) -> None:
 # pymapdl skills install
 # ---------------------------------------------------------------------------
 
-_SUPPORTED_ENVS = ("claude", "copilot", "github-repo", "codex", "cursor")
-_GLOBAL_UNSUPPORTED = ("copilot", "github-repo")
+_SUPPORTED_ENVS = ("claude", "copilot", "codex", "cursor")
+_GLOBAL_UNSUPPORTED = ("copilot",)
 
 
 def _copy_skill_files(src_dir: pathlib.Path, dst_dir: pathlib.Path) -> None:
@@ -200,28 +209,36 @@ def _copy_skill_files(src_dir: pathlib.Path, dst_dir: pathlib.Path) -> None:
         shutil.copy2(src_file, dst_file)
 
 
-def _append_if_missing(file_path: pathlib.Path, line: str) -> bool:
-    """Append *line* to *file_path* if it is not already present.
+def _append_if_missing(
+    file_path: pathlib.Path, line: str, text: str | None = None
+) -> bool:
+    """Append *text* to *file_path* if *line* is not already present.
 
     Parameters
     ----------
     file_path : pathlib.Path
         File to check and potentially update.
     line : str
-        Line to append (without trailing newline).
+        Sentinel string used to detect whether the content has already been
+        added.  The check is a simple substring search on the file contents.
+    text : str, optional
+        The full text block to append.  When omitted, *line* itself is
+        appended.  Use this to attach a descriptive comment together with the
+        reference line while still deduplicating on the reference alone.
 
     Returns
     -------
     bool
-        ``True`` if the line was appended, ``False`` if it was already present.
+        ``True`` if the text was appended, ``False`` if it was already present.
     """
     existing = file_path.read_text(encoding="utf-8") if file_path.exists() else ""
     if line in existing:
         return False
+    payload = text if text is not None else line
     with open(file_path, "a", encoding="utf-8") as fh:
         if existing and not existing.endswith("\n"):
             fh.write("\n")
-        fh.write(line + "\n")
+        fh.write(payload + "\n")
     return True
 
 
@@ -241,7 +258,7 @@ def _append_if_missing(file_path: pathlib.Path, line: str) -> bool:
     "--local",
     "scope",
     flag_value="local",
-    default="local",
+    default=True,
     help="Install into the current working directory (default).",
 )
 @click.option(
@@ -308,23 +325,19 @@ def install_skill(skill_name: str, env: str, scope: str, yes: bool) -> None:
             dest_dir = home / ".claude" / "skills" / skill_name
             config_file = home / ".claude" / "CLAUDE.md"
         config_line = f"@.claude/skills/{skill_name}/SKILL.md"
+        config_text = (
+            f"<!-- You can find the {skill_name} instructions and usage in"
+            f" .claude/skills/{skill_name}/SKILL.md -->\n"
+            f"{config_line}"
+        )
         action_desc = (
             f"  Copy skill files to: {dest_dir}\n"
             f"  Update config file:  {config_file}\n"
             f"  Add reference:       {config_line}"
         )
     elif env == "copilot":
-        dest_file = cwd / ".github" / "instructions" / f"{skill_name}.instructions.md"
-        config_file = cwd / ".github" / "copilot-instructions.md"
-        config_line = f"@.github/instructions/{skill_name}.instructions.md"
-        action_desc = (
-            f"  Write skill file to: {dest_file}\n"
-            f"  Update config file:  {config_file}\n"
-            f"  Add reference:       {config_line}"
-        )
-    elif env == "github-repo":
-        dest_file = cwd / ".github" / "instructions" / f"{skill_name}.instructions.md"
-        action_desc = f"  Write skill file to: {dest_file}"
+        dest_file = cwd / ".github" / "skills" / skill_name / "SKILL.md"
+        action_desc = f"  Write skill file to: {dest_file}\n"
     elif env == "codex":
         if scope == "local":
             dest_dir = cwd / ".codex" / "skills" / skill_name
@@ -355,7 +368,7 @@ def install_skill(skill_name: str, env: str, scope: str, yes: bool) -> None:
     if env == "claude":
         _copy_skill_files(skill_dir, dest_dir)
         config_file.parent.mkdir(parents=True, exist_ok=True)
-        added = _append_if_missing(config_file, config_line)
+        added = _append_if_missing(config_file, config_line, config_text)
         if not added:
             click.echo(
                 f"  notice: reference already present in {config_file}, skipping."
@@ -365,20 +378,6 @@ def install_skill(skill_name: str, env: str, scope: str, yes: bool) -> None:
         click.echo(click.style("Done.", fg="green"))
 
     elif env == "copilot":
-        dest_file.parent.mkdir(parents=True, exist_ok=True)
-        dest_file.write_text(skill_md_text, encoding="utf-8")
-        click.echo(f"  wrote {dest_file}")
-        config_file.parent.mkdir(parents=True, exist_ok=True)
-        added = _append_if_missing(config_file, config_line)
-        if not added:
-            click.echo(
-                f"  notice: reference already present in {config_file}, skipping."
-            )
-        else:
-            click.echo(f"  updated {config_file}")
-        click.echo(click.style("Done.", fg="green"))
-
-    elif env == "github-repo":
         dest_file.parent.mkdir(parents=True, exist_ok=True)
         dest_file.write_text(skill_md_text, encoding="utf-8")
         click.echo(f"  wrote {dest_file}")
