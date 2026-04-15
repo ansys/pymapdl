@@ -26,6 +26,7 @@ import pathlib
 from unittest.mock import patch
 
 from click.testing import CliRunner
+import pytest
 
 from ansys.mapdl.core.cli.skills import _parse_frontmatter, skills
 
@@ -403,3 +404,61 @@ def test_skills_install_global_unsupported_env(tmp_path):
     assert result.exit_code != 0
     assert "ERROR" in result.stderr
     assert "not supported" in result.stderr
+
+
+# ---------------------------------------------------------------------------
+# `pymapdl skill` / `pymapdl skills` alias parity
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "sub_args",
+    [
+        ["list"],
+        ["show", "pymapdl-cli"],
+        ["install", "pymapdl-cli", "--env", "claude", "--yes"],
+    ],
+    ids=["list", "show", "install"],
+)
+def test_skill_and_skills_alias_produce_identical_output(sub_args, tmp_path):
+    """``pymapdl skill <sub>`` and ``pymapdl skills <sub>`` must behave identically.
+
+    Both spellings route through ``_AliasedGroup`` in ``cli/__init__.py``.
+    This test invokes the top-level ``main`` group with each spelling and
+    asserts that exit codes and normalized stdout are the same.  Absolute
+    paths printed by sub-commands (e.g. ``install``) are replaced with a
+    ``<CWD>`` placeholder before comparison so that differing temp directories
+    do not cause spurious failures.
+    """
+    import re
+
+    from ansys.mapdl.core.cli import main
+
+    runner = CliRunner()
+
+    singular_mock = _make_mock_skills_dir(tmp_path / "singular")
+    plural_mock = _make_mock_skills_dir(tmp_path / "plural")
+
+    def _run(args, mock_dir):
+        with runner.isolated_filesystem() as iso:
+            with patch(
+                "ansys.mapdl.core.cli.skills._find_skills_dir",
+                return_value=mock_dir,
+            ):
+                result = runner.invoke(main, args)
+            # Normalise the CWD path so outputs are comparable
+            normalized = re.sub(re.escape(iso), "<CWD>", result.output)
+        return result.exit_code, normalized
+
+    singular_code, singular_out = _run(["skill"] + sub_args, singular_mock)
+    plural_code, plural_out = _run(["skills"] + sub_args, plural_mock)
+
+    assert singular_code == plural_code, (
+        f"Exit codes differ: 'skill' exited {singular_code}, "
+        f"'skills' exited {plural_code}"
+    )
+    assert singular_out == plural_out, (
+        "'pymapdl skill' and 'pymapdl skills' produced different output:\n"
+        f"  skill:  {singular_out!r}\n"
+        f"  skills: {plural_out!r}"
+    )
