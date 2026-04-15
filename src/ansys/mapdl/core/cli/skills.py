@@ -191,7 +191,7 @@ def _copy_skill_files(src_dir: pathlib.Path, dst_dir: pathlib.Path) -> None:
         if src_file.is_dir():
             continue
         rel = src_file.relative_to(src_dir)
-        if any(part == "evals" for part in rel.parts):
+        if any(part in ("evals", "workspace") for part in rel.parts):
             continue
         dst_file = dst_dir / rel
         dst_file.parent.mkdir(parents=True, exist_ok=True)
