@@ -122,11 +122,24 @@ def skills():
 # ---------------------------------------------------------------------------
 
 
-@skills.command(name="list", short_help="List all bundled skills.")
+@skills.command(
+    name="list",
+    short_help="List all bundled skills.",
+    help="""List all skills bundled with this PyMAPDL installation.
+
+    Prints each skill's name and a one-line description to stdout.""",
+)
 def list_skills():
     """List all skills bundled with this PyMAPDL installation.
 
     Prints each skill's name and a one-line description to stdout.
+
+    Examples
+    --------
+    List all bundled skills:
+
+        pymapdl skills list
+
     """
     skills_dir = _find_skills_dir()
     entries = _list_skills(skills_dir)
@@ -151,7 +164,19 @@ def list_skills():
 # ---------------------------------------------------------------------------
 
 
-@skills.command(name="show", short_help="Print a skill's SKILL.md to stdout.")
+@skills.command(
+    name="show",
+    short_help="Print a skill's SKILL.md to stdout.",
+    help="""Print the full content of a skill's SKILL.md to stdout.
+
+SKILL_NAME is the skill identifier as shown by ``pymapdl skills list``
+(e.g. ``pymapdl-cli``).  Redirect stdout to capture the file locally:
+
+\b
+Example:
+    pymapdl skills show pymapdl-cli > SKILL.md
+    """,
+)
 @click.argument("skill_name")
 def show_skill(skill_name: str) -> None:
     """Print the full content of a skill's SKILL.md to stdout.
@@ -159,8 +184,22 @@ def show_skill(skill_name: str) -> None:
     SKILL_NAME is the skill identifier as shown by ``pymapdl skills list``
     (e.g. ``pymapdl-cli``).  Redirect stdout to capture the file locally:
 
-    \b
-      pymapdl skills show pymapdl-cli > SKILL.md
+    Parameters
+    ----------
+    skill_name : str
+        Identifier of the skill to show, as shown by ``pymapdl skills list``
+        (e.g. ``pymapdl-cli``).
+
+    Examples
+    --------
+    Print the SKILL.md for the 'pymapdl-cli' skill to the console:
+
+        pymapdl skills show pymapdl-cli
+
+    Save the SKILL.md for the 'pymapdl-cli' skill to a local file:
+
+        pymapdl skills show pymapdl-cli > SKILL.md
+
     """
     skills_dir = _find_skills_dir()
     skill_md = skills_dir / skill_name / "SKILL.md"
@@ -195,6 +234,8 @@ def _copy_skill_files(src_dir: pathlib.Path, dst_dir: pathlib.Path) -> None:
     dst_dir : pathlib.Path
         Destination directory (will be created if it does not exist).
     """
+    import shutil
+
     dst_dir.mkdir(parents=True, exist_ok=True)
     for src_file in src_dir.rglob("*"):
         if src_file.is_dir():
@@ -204,8 +245,6 @@ def _copy_skill_files(src_dir: pathlib.Path, dst_dir: pathlib.Path) -> None:
             continue
         dst_file = dst_dir / rel
         dst_file.parent.mkdir(parents=True, exist_ok=True)
-        import shutil
-
         shutil.copy2(src_file, dst_file)
 
 
@@ -242,7 +281,36 @@ def _append_if_missing(
     return True
 
 
-@skills.command(name="install", short_help="Install a skill into an AI environment.")
+@skills.command(
+    name="install",
+    short_help="Install a skill into an AI environment.",
+    help="""Install a skill's files into an AI coding environment.
+
+SKILL_NAME is the skill identifier as shown by ``pymapdl skills list``
+(e.g. ``pymapdl-cli``).
+
+All files in the skill directory (except ``evals/``) are copied to
+the target location.  A reference line is also appended to the
+environment's main configuration file so the AI tool can discover
+the skill automatically.  Running twice is safe — existing references
+are not duplicated.
+
+Omit ``--yes`` to preview the planned actions before committing.
+
+\b
+Examples:
+
+Install the 'pymapdl-cli' skill into the current directory for use with
+Copilot:
+
+    pymapdl skills install pymapdl-cli --env copilot
+
+Install the 'pymapdl-cli' skill globally for use with Claude:
+
+    pymapdl skills install pymapdl-cli --env claude --global
+
+    """,
+)
 @click.argument("skill_name")
 @click.option(
     "--env",
@@ -286,7 +354,38 @@ def install_skill(skill_name: str, env: str, scope: str, yes: bool) -> None:
     the skill automatically.  Running twice is safe — existing references
     are not duplicated.
 
-    Omit ``--yes`` to preview the planned actions before committing.
+    Parameters
+    ----------
+    skill_name : str
+        Identifier of the skill to install, as shown by ``pymapdl skills list`
+        (e.g. ``pymapdl-cli``).
+    env : str
+        AI coding environment to install the skill into. The available
+        environments are: "claude", "copilot", "codex" and "cursor".
+        Each environment receives a copy of the skill files
+        (excluding ``evals/``) and a reference is added to its main
+        configuration file.
+    scope : str
+        Installation scope.  Use ``--local`` to install into the current working
+        directory, or ``--global`` to install into the user's home
+        directory instead.  Note that some environments do not support global
+        installation. Default is ``--local``.
+    yes : bool
+        When ``False``, show a preview of the planned file operations and ask for
+        confirmation before proceeding.  When ``True``, skip the confirmation
+        prompt and proceed immediately. Default is ``False``.
+
+    Examples
+    --------
+    Install the 'pymapdl-cli' skill into the current directory for use with
+    Copilot:
+
+      pymapdl skills install pymapdl-cli --env copilot
+
+    Install the 'pymapdl-cli' skill globally for use with Claude:
+
+      pymapdl skills install pymapdl-cli --env claude --global
+
     """
     skills_dir = _find_skills_dir()
     skill_dir = skills_dir / skill_name
