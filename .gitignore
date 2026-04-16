@@ -109,5 +109,6 @@ doc/webserver.pid
 
 # Profiling
 prof
+.github/skills/pymapdl-cli
 docker/run/.env
 docker/testing/.env

@@ -31,7 +31,26 @@ if _HAS_CLICK:
     ###################################
     # PyMAPDL CLI
 
-    @click.group(invoke_without_command=True)
+    class _AliasedGroup(click.Group):
+        """Click Group that resolves command aliases without showing them in help.
+
+        Aliases are silently mapped to their canonical name so users can type
+        either form, but ``pymapdl --help`` only lists the canonical name once.
+        """
+
+        _ALIASES: dict[str, str] = {
+            "skill": "skills",
+        }
+
+        def get_command(self, ctx: click.Context, cmd_name: str):
+            return super().get_command(ctx, self._ALIASES.get(cmd_name, cmd_name))
+
+        def resolve_command(self, ctx: click.Context, args: list):
+            if args:
+                args[0] = self._ALIASES.get(args[0], args[0])
+            return super().resolve_command(ctx, args)
+
+    @click.group(cls=_AliasedGroup, invoke_without_command=True)
     @click.pass_context
     def main(ctx: click.Context):
         pass
@@ -40,6 +59,7 @@ if _HAS_CLICK:
     from ansys.mapdl.core.cli.convert import convert as convert_cmd
     from ansys.mapdl.core.cli.exec import exec_cmd
     from ansys.mapdl.core.cli.list_instances import list_instances
+    from ansys.mapdl.core.cli.skills import skills as skills_cmd
     from ansys.mapdl.core.cli.start import start as start_cmd
     from ansys.mapdl.core.cli.stop import stop as stop_cmd
 
@@ -47,6 +67,7 @@ if _HAS_CLICK:
     main.add_command(convert_cmd, name="convert")
     main.add_command(exec_cmd, name="exec")
     main.add_command(list_instances, name="list")
+    main.add_command(skills_cmd, name="skills")
     main.add_command(start_cmd, name="start")
     main.add_command(stop_cmd, name="stop")
 
