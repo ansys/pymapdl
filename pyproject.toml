@@ -8,7 +8,6 @@ authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: MacOS",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX",
@@ -17,7 +16,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
-  "Topic :: Scientific/Engineering :: Information Analysis",
+  "Topic :: Scientific/Engineering :: Information Analysis"
 ]
 dependencies = [
   "ansys-api-mapdl==0.6.0",                    # supports at least 2020R2 - 2022R1
@@ -37,10 +36,11 @@ dependencies = [
   "scipy>=1.3.0",                              # for sparse (consider optional?)
   "tabulate>=0.8.0",                           # for cli plotting
   "tqdm>=4.45.0",
-  "vtk>=9,<10",
+  "vtk>=9,<10"
 ]
 description = "A Python client library for Ansys MAPDL."
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 name = "ansys-mapdl-core"
 readme = "README.md"
@@ -81,7 +81,7 @@ tests = [
   "pytest-timeout==2.4.0",
   "pytest==9.0.2",
   "scipy==1.15.3",
-  "vtk==9.5.2",
+  "vtk==9.5.2"
 ]
 
 doc = [
@@ -118,7 +118,7 @@ doc = [
   "sphinxcontrib-svg2pdfconverter==2.1.0",
   "sphinxcontrib-websupport==2.0.0",
   "sphinxemoji==0.3.2",
-  "vtk==9.5.2",
+  "vtk==9.5.2"
 ]
 
 [dependency-groups]
@@ -160,7 +160,7 @@ addopts = [
   "--strict-markers",
   "--timeout=180",
   "-ra",
-  "-vvv",
+  "-vvv"
 ]
 
 filterwarnings = [
@@ -171,7 +171,7 @@ filterwarnings = [
   # bogus numpy ABI warning (see numpy/#432)
   "ignore:.*numpy.dtype size changed.*:RuntimeWarning",
   "ignore:.*numpy.ufunc size changed.*:RuntimeWarning",
-  "ignore::UserWarning",
+  "ignore::UserWarning"
 ]
 junit_family = "legacy"
 markers = [
@@ -179,7 +179,7 @@ markers = [
   "gui: run gui test",
   "krylov_tests: run tests that use Krylov module",
   "requires_gui: run tests that require to launch the GUI interface",
-  "skip_grpc: skip tests using grpc",
+  "skip_grpc: skip tests using grpc"
 ]
 
 image_cache_dir = "tests/.image_cache"
@@ -201,7 +201,7 @@ omit = [
   "ansys/mapdl/core/jupyter.py",
   "ansys/mapdl/core/mapdl_console.py",
   # ignore non exposed interfaces
-  "ansys/mapdl/core/mapdl_inprocess.py",
+  "ansys/mapdl/core/mapdl_inprocess.py"
 ]
 source = ["ansys/pymapdl"]
 
@@ -271,13 +271,13 @@ checks = [
   "SA03", # "Description should be capitalized for See Also "
   # '"{reference_name}" reference',
   "SA04", # 'Missing description for See Also "{reference_name}" reference',
-  # "EX01", # "No examples section found",
+  # "EX01", # "No examples section found"
 ]
 
 override_SS05 = [ # override SS05 to allow docstrings starting with these words
   # '^Process ',
   # '^Assess ',
-  # '^Access ',
+  # '^Access '
 ]
 
 [tool.mypy]
@@ -285,7 +285,7 @@ disable_error_code = [
   "import-not-found",
   "import-untyped",
   "return",
-  "return-value",
+  "return-value"
 ]
 exclude = [
   "^\\.ci/",
@@ -294,7 +294,7 @@ exclude = [
   "^doc/",
   "^examples/",
   "^htmlcov/",
-  "^tests/",
+  "^tests/"
 ]
 explicit_package_bases = true
 namespace_packages = true
