@@ -8,7 +8,6 @@ authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: MacOS",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX",
@@ -40,7 +39,8 @@ dependencies = [
   "vtk>=9,<10",
 ]
 description = "A Python client library for Ansys MAPDL."
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 name = "ansys-mapdl-core"
 readme = "README.md"
@@ -271,13 +271,13 @@ checks = [
   "SA03", # "Description should be capitalized for See Also "
   # '"{reference_name}" reference',
   "SA04", # 'Missing description for See Also "{reference_name}" reference',
-  # "EX01", # "No examples section found",
+  # "EX01", # "No examples section found"
 ]
 
 override_SS05 = [ # override SS05 to allow docstrings starting with these words
   # '^Process ',
   # '^Assess ',
-  # '^Access ',
+  # '^Access '
 ]
 
 [tool.mypy]
