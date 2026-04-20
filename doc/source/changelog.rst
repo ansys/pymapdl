@@ -12,6 +12,37 @@ This document contains the release notes for the project.
 
 .. _v0.73.0:
 
+`0.73.0 <https://github.com/ansys/pymapdl/releases/tag/v0.73.0>`_ - April 20, 2026
+=================================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Dependencies
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Bump the testing group with 2 updates
+          - `#4555 <https://github.com/ansys/pymapdl/pull/4555>`_
+
+        * - Bump tox from 4.52.0 to 4.52.1
+          - `#4556 <https://github.com/ansys/pymapdl/pull/4556>`_
+
+
+  .. tab-item:: Maintenance
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Bump docker/login-action from 4.0.0 to 4.1.0 in the actions group
+          - `#4558 <https://github.com/ansys/pymapdl/pull/4558>`_
+
+
+.. _v0.73.0:
+
 `0.73.0 <https://github.com/ansys/pymapdl/releases/tag/v0.73.0>`_ - April 16, 2026
 =================================================================================================
 
