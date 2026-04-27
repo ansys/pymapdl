@@ -1964,3 +1964,93 @@ def test_kill_process():
     mock_proc = MagicMock()
     _kill_process(mock_proc)
     mock_proc.kill.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# Tests for `pymapdl help` subcommand
+# ---------------------------------------------------------------------------
+
+
+@requires("click")
+def test_build_command_map_non_empty():
+    """_build_command_map returns a non-empty dict with uppercase keys."""
+    from ansys.mapdl.core.cli.help import _build_command_map
+
+    cmd_map = _build_command_map()
+    assert isinstance(cmd_map, dict)
+    assert len(cmd_map) > 0
+    # All keys must be uppercase strings
+    for key in cmd_map:
+        assert key == key.upper(), f"Key {key!r} is not uppercase"
+    # All values must be non-empty strings (method names on Mapdl)
+    for method_name in cmd_map.values():
+        assert isinstance(method_name, str)
+        assert method_name  # non-empty
+
+
+@requires("click")
+def test_build_command_map_known_commands():
+    """_build_command_map contains entries for well-known commands."""
+    from ansys.mapdl.core.cli.help import _build_command_map
+
+    cmd_map = _build_command_map()
+    assert "PREP7" in cmd_map, "PREP7 should be in the command map"
+    assert "K" in cmd_map, "K should be in the command map"
+    assert "ABBR" in cmd_map, "ABBR should be in the command map"
+
+
+@requires("click")
+def test_help_prep7(run_cli):
+    """pymapdl help PREP7 prints a non-empty docstring."""
+    output = run_cli("help PREP7")
+    assert output.strip()
+
+
+@requires("click")
+def test_help_prep7_with_slash(run_cli):
+    """pymapdl help /PREP7 produces the same output as pymapdl help PREP7."""
+    out_plain = run_cli("help PREP7")
+    out_slash = run_cli("help /PREP7")
+    assert out_plain.strip() == out_slash.strip()
+    assert out_plain.strip()
+
+
+@requires("click")
+def test_help_abbr_with_asterisk(run_cli):
+    """pymapdl help *ABBR produces the same output as pymapdl help ABBR."""
+    out_plain = run_cli("help ABBR")
+    out_star = run_cli("help *ABBR")
+    assert out_plain.strip() == out_star.strip()
+    assert out_plain.strip()
+
+
+@requires("click")
+def test_help_k_command(run_cli):
+    """pymapdl help K prints a non-empty docstring."""
+    output = run_cli("help K")
+    assert output.strip()
+
+
+@requires("click")
+def test_help_unknown_command_exits_with_error(run_cli):
+    """pymapdl help UNKNOWNCMD999 exits with code 1 and prints an error."""
+    from click.testing import CliRunner
+
+    from ansys.mapdl.core.cli import main
+
+    runner = CliRunner()
+    result = runner.invoke(main, ["help", "UNKNOWNCMD999"])
+    assert result.exit_code == 1
+    # Error message should appear on stderr (mixed into output by CliRunner by default)
+    combined = (result.output or "") + (
+        result.stderr if hasattr(result, "stderr") else ""
+    )
+    assert "ERROR" in combined or "error" in combined.lower()
+
+
+@requires("click")
+def test_help_normalise_backslash_star(run_cli):
+    r"""pymapdl help \*ABBR is treated the same as ABBR."""
+    out_plain = run_cli("help ABBR")
+    out_backslash = run_cli(r"help \*ABBR")
+    assert out_plain.strip() == out_backslash.strip()

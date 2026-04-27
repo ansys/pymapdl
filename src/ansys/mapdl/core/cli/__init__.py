@@ -58,6 +58,7 @@ if _HAS_CLICK:
     from ansys.mapdl.core.cli.check import check as check_cmd
     from ansys.mapdl.core.cli.convert import convert as convert_cmd
     from ansys.mapdl.core.cli.exec import exec_cmd
+    from ansys.mapdl.core.cli.help import help_cmd
     from ansys.mapdl.core.cli.list_instances import list_instances
     from ansys.mapdl.core.cli.skills import skills as skills_cmd
     from ansys.mapdl.core.cli.start import start as start_cmd
@@ -66,6 +67,7 @@ if _HAS_CLICK:
     main.add_command(check_cmd, name="check")
     main.add_command(convert_cmd, name="convert")
     main.add_command(exec_cmd, name="exec")
+    main.add_command(help_cmd, name="help")
     main.add_command(list_instances, name="list")
     main.add_command(skills_cmd, name="skills")
     main.add_command(start_cmd, name="start")
