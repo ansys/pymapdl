@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.race
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.race

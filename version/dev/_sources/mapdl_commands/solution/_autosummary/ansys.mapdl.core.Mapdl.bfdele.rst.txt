@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.bfdele
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.bfdele

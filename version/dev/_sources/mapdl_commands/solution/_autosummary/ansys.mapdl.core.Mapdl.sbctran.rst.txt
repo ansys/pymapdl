@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.sbctran
+==============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.sbctran

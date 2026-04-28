@@ -1,0 +1,1364 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ansys.mapdl.core.Mapdl.secdata &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=affbdea0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/prep7/_autosummary/ansys.mapdl.core.Mapdl.secdata';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.72.dev0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/prep7/_autosummary/ansys.mapdl.core.Mapdl.secdata.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="None" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ansys.mapdl.core.Mapdl.secdata</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="ansys-mapdl-core-mapdl-secdata">
+<h1>ansys.mapdl.core.Mapdl.secdata<a class="headerlink" href="#ansys-mapdl-core-mapdl-secdata" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core.Mapdl.secdata">
+<span class="sig-prename descclassname"><span class="pre">Mapdl.</span></span><span class="sig-name descname"><span class="pre">secdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val4</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val5</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val6</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val7</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val8</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val9</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val10</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val11</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val12</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core.Mapdl.secdata" title="Link to this definition">#</a></dt>
+<dd><p>Describes the geometry of a section.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECDATA.html">SECDATA</a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>val1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Values, such as thickness or the length of a side or the numbers of cells along the width, that
+describe the geometry of a section. The terms <code class="docutils literal notranslate"><span class="pre">VAL1</span></code>, <code class="docutils literal notranslate"><span class="pre">VAL2</span></code>, etc. are specialized for each
+type of cross-section.</p>
+</dd>
+<dt><strong>val2</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Values, such as thickness or the length of a side or the numbers of cells along the width, that
+describe the geometry of a section. The terms <code class="docutils literal notranslate"><span class="pre">VAL1</span></code>, <code class="docutils literal notranslate"><span class="pre">VAL2</span></code>, etc. are specialized for each
+type of cross-section.</p>
+</dd>
+<dt><strong>val3</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Values, such as thickness or the length of a side or the numbers of cells along the width, that
+describe the geometry of a section. The terms <code class="docutils literal notranslate"><span class="pre">VAL1</span></code>, <code class="docutils literal notranslate"><span class="pre">VAL2</span></code>, etc. are specialized for each
+type of cross-section.</p>
+</dd>
+<dt><strong>val4</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Values, such as thickness or the length of a side or the numbers of cells along the width, that
+describe the geometry of a section. The terms <code class="docutils literal notranslate"><span class="pre">VAL1</span></code>, <code class="docutils literal notranslate"><span class="pre">VAL2</span></code>, etc. are specialized for each
+type of cross-section.</p>
+</dd>
+<dt><strong>val5</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Values, such as thickness or the length of a side or the numbers of cells along the width, that
+describe the geometry of a section. The terms <code class="docutils literal notranslate"><span class="pre">VAL1</span></code>, <code class="docutils literal notranslate"><span class="pre">VAL2</span></code>, etc. are specialized for each
+type of cross-section.</p>
+</dd>
+<dt><strong>val6</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Values, such as thickness or the length of a side or the numbers of cells along the width, that
+describe the geometry of a section. The terms <code class="docutils literal notranslate"><span class="pre">VAL1</span></code>, <code class="docutils literal notranslate"><span class="pre">VAL2</span></code>, etc. are specialized for each
+type of cross-section.</p>
+</dd>
+<dt><strong>val7</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Values, such as thickness or the length of a side or the numbers of cells along the width, that
+describe the geometry of a section. The terms <code class="docutils literal notranslate"><span class="pre">VAL1</span></code>, <code class="docutils literal notranslate"><span class="pre">VAL2</span></code>, etc. are specialized for each
+type of cross-section.</p>
+</dd>
+<dt><strong>val8</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Values, such as thickness or the length of a side or the numbers of cells along the width, that
+describe the geometry of a section. The terms <code class="docutils literal notranslate"><span class="pre">VAL1</span></code>, <code class="docutils literal notranslate"><span class="pre">VAL2</span></code>, etc. are specialized for each
+type of cross-section.</p>
+</dd>
+<dt><strong>val9</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Values, such as thickness or the length of a side or the numbers of cells along the width, that
+describe the geometry of a section. The terms <code class="docutils literal notranslate"><span class="pre">VAL1</span></code>, <code class="docutils literal notranslate"><span class="pre">VAL2</span></code>, etc. are specialized for each
+type of cross-section.</p>
+</dd>
+<dt><strong>val10</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Values, such as thickness or the length of a side or the numbers of cells along the width, that
+describe the geometry of a section. The terms <code class="docutils literal notranslate"><span class="pre">VAL1</span></code>, <code class="docutils literal notranslate"><span class="pre">VAL2</span></code>, etc. are specialized for each
+type of cross-section.</p>
+</dd>
+<dt><strong>val11</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Values, such as thickness or the length of a side or the numbers of cells along the width, that
+describe the geometry of a section. The terms <code class="docutils literal notranslate"><span class="pre">VAL1</span></code>, <code class="docutils literal notranslate"><span class="pre">VAL2</span></code>, etc. are specialized for each
+type of cross-section.</p>
+</dd>
+<dt><strong>val12</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Values, such as thickness or the length of a side or the numbers of cells along the width, that
+describe the geometry of a section. The terms <code class="docutils literal notranslate"><span class="pre">VAL1</span></code>, <code class="docutils literal notranslate"><span class="pre">VAL2</span></code>, etc. are specialized for each
+type of cross-section.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p id="secdata-notes">The <span class="xref std std-ref">secdata</span> command defines the data describing the geometry of a section. The command is
+divided into these section types: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SECDATA.html#SECDATA.fig.11">Beams</a>
+Beams, <a class="reference internal" href="#secdata-contact"><span class="std std-ref">Contact,</span></a> <a class="reference internal" href="#secdata-axisy"><span class="std std-ref">General Axisymmetric,</span></a> <a class="reference internal" href="#secdata-joints"><span class="std std-ref">Joints,</span></a> <a class="reference internal" href="#secdata-links"><span class="std std-ref">Links,</span></a> <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SECDATA.html#eq148b7566-f562-4fe0-8ce3-f61c6b455f70">Pipes</a>
+Pipes, <a class="reference internal" href="#secdata-pretension"><span class="std std-ref">Pretension,</span></a> <a class="reference internal" href="#secdata-reinforcement"><span class="std std-ref">Reinforcing,</span></a>
+<a class="reference internal" href="#secdata-shells"><span class="std std-ref">Shells,</span></a> <a class="reference internal" href="#secdata-supports"><span class="std std-ref">Supports, and</span></a> <a class="reference internal" href="#secdata-taper"><span class="std std-ref">Taper.</span></a></p>
+<p>The data input on the <span class="xref std std-ref">secdata</span> command is interpreted based on the most recently issued
+<span class="xref std std-ref">sectype</span> command. The data required is determined by the section type and subtype, and is
+different for each one.</p>
+<section id="type-beam">
+<span id="secdata-beams"></span><h2>Type: BEAM<a class="headerlink" href="#type-beam" title="Link to this heading">#</a></h2>
+<p>Beam sections are referenced by <code class="docutils literal notranslate"><span class="pre">BEAM188</span></code> and <code class="docutils literal notranslate"><span class="pre">BEAM189</span></code> elements. Not all <span class="xref std std-ref">secoffset</span>
+location values are valid for each subtype.</p>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+</section>
+<section id="type-contact">
+<span id="secdata-contact"></span><h2>Type: CONTACT<a class="headerlink" href="#type-contact" title="Link to this heading">#</a></h2>
+<p>Geometry Correction Contact sections for geometry correction ( <code class="docutils literal notranslate"><span class="pre">Subtype</span></code> = CIRCLE, SPHERE, or
+CYLINDER) are referenced
+by the following elements: <code class="docutils literal notranslate"><span class="pre">TARGE169</span></code>, <code class="docutils literal notranslate"><span class="pre">TARGE170</span></code>, <code class="docutils literal notranslate"><span class="pre">CONTA172</span></code>, and <code class="docutils literal notranslate"><span class="pre">CONTA174</span></code>. This geometry
+correction applies to cases where the original meshes of contact elements or target elements are
+located on a portion of a circular, spherical, or revolute surface.</p>
+<p><strong>Type: CONTACT, Subtype: CIRCLE</strong></p>
+<ul class="simple">
+<li><p>Data to provide in the value fields for <code class="docutils literal notranslate"><span class="pre">Subtype</span></code> = CIRCLE:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">X0</span></code>, <code class="docutils literal notranslate"><span class="pre">Y0</span></code> (circle center location in Global Cartesian coordinates - XY plane)</p></li>
+</ul>
+<p><strong>Type: CONTACT, Subtype: SPHERE</strong></p>
+<ul class="simple">
+<li><p>Data to provide in the value fields for <code class="docutils literal notranslate"><span class="pre">Subtype</span></code> = SPHERE:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">X0</span></code>, <code class="docutils literal notranslate"><span class="pre">Y0</span></code>, <code class="docutils literal notranslate"><span class="pre">Z0</span></code> (sphere center location in Global Cartesian coordinates)</p></li>
+</ul>
+<p><strong>Type: CONTACT, Subtype: CYLINDER</strong></p>
+<ul class="simple">
+<li><p>Data to provide in the value fields for <code class="docutils literal notranslate"><span class="pre">Subtype</span></code> = CYLINDER:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">X1</span></code>, <code class="docutils literal notranslate"><span class="pre">Y1</span></code>, <code class="docutils literal notranslate"><span class="pre">Z1</span></code>, <code class="docutils literal notranslate"><span class="pre">X2</span></code>, <code class="docutils literal notranslate"><span class="pre">Y2</span></code>, <code class="docutils literal notranslate"><span class="pre">Z2</span></code> (two ends of cylindrical axis in Global Cartesian
+coordinates)</p></li>
+</ul>
+<p>User-Defined Contact Surface Normal The contact section for a user-defined contact surface normal (
+<code class="docutils literal notranslate"><span class="pre">Subtype</span></code> = NORMAL) is referenced
+by the following elements: <code class="docutils literal notranslate"><span class="pre">CONTA172</span></code>, <code class="docutils literal notranslate"><span class="pre">CONTA174</span></code>, and <code class="docutils literal notranslate"><span class="pre">CONTA175</span></code>. This geometry correction is
+used to define a <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/ctecgeomcor.html#">shift direction for interference fit</a> solutions.</p>
+<p><strong>Type: CONTACT, Subtype: NORMAL</strong></p>
+<ul class="simple">
+<li><p>Data to provide in the value fields for <code class="docutils literal notranslate"><span class="pre">Subtype</span></code> = NORMAL:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CSYS</span></code>, <code class="docutils literal notranslate"><span class="pre">NX</span></code>, <code class="docutils literal notranslate"><span class="pre">NY</span></code>, <code class="docutils literal notranslate"><span class="pre">NZ</span></code></p></li>
+<li><p>where:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CSYS</span></code> = Local coordinate system number (defaults to global Cartesian).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NX</span></code>, <code class="docutils literal notranslate"><span class="pre">NY</span></code>, <code class="docutils literal notranslate"><span class="pre">NZ</span></code> = Direction cosines with respect to <code class="docutils literal notranslate"><span class="pre">CSYS.</span></code></p></li>
+</ul>
+<p>Radius values associated with contact or target elements The radius contact section ( <code class="docutils literal notranslate"><span class="pre">Subtype</span></code> =
+RADIUS) is referenced by contact or target elements in a general contact definition under the
+following circumstances:</p>
+<ul class="simple">
+<li><p><strong>Equivalent 3D contact radius for beam-to-beam contact</strong> - The contact section for a user-defined
+equivalent contact radius ( <code class="docutils literal notranslate"><span class="pre">Subtype</span></code> = RADIUS) is referenced by the element type <code class="docutils literal notranslate"><span class="pre">CONTA177</span></code>
+within a general contact definition. 3D beam-to-beam contact (or edge-to-edge contact) modeled by
+this line contact element assumes that its surface is a cylindrical surface.</p></li>
+<li><p><strong>Radius (or radii) of rigid target segments</strong> - The contact section for rigid target segment
+radii is referenced by target elements <code class="docutils literal notranslate"><span class="pre">TARGE169</span></code> (circle segment type) and <code class="docutils literal notranslate"><span class="pre">TARGE170</span></code> (line,
+parabola, cylinder, sphere, or cone segment type) in a general contact definition.</p></li>
+</ul>
+<p><strong>Type: CONTACT, Subtype: RADIUS</strong></p>
+<ul class="simple">
+<li><p>Data to provide in the value fields for <code class="docutils literal notranslate"><span class="pre">Subtype</span></code> = RADIUS if the section is used as an
+equivalent contact radius for 3D beam-to-beam contact:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VAL1</span></code> = Equivalent radius - outer radius</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VAL2</span></code> = Equivalent radius - inner radius (internal beam-to-beam contact)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VAL3</span></code> : Set to 1 for internal beam-to-beam contact. Defaults to external beam-to-beam contact.</p></li>
+<li><p>Data to provide in the value fields for <code class="docutils literal notranslate"><span class="pre">Subtype</span></code> = RADIUS if the section is used for 2D or 3D
+rigid target segments:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VAL1</span></code> = First radius of the target segment (used for circle, line, parabola, cylinder, sphere,
+and cone segment types)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VAL2</span></code> = Second radius of the target segment (used only for the cone segment type)</p></li>
+</ul>
+<p>Simplified Bolt Thread Modeling The contact section for bolt-thread modeling ( <code class="docutils literal notranslate"><span class="pre">Subtype</span></code> = BOLT)
+is referenced by the following
+elements: <code class="docutils literal notranslate"><span class="pre">CONTA172</span></code>, <code class="docutils literal notranslate"><span class="pre">CONTA174</span></code>, and <code class="docutils literal notranslate"><span class="pre">CONTA175</span></code>. It applies to cases where the original
+meshes of contact elements are located on a portion of a bolt-thread surface. This feature allows
+you to include the behavior of bolt threads without having to add the geometric detail of the
+threads. Calculations are performed internally to approximate the behavior of the bolt-thread
+connections.</p>
+<p><strong>Type: CONTACT, Subtype: BOLT</strong></p>
+<ul class="simple">
+<li><p>Data to provide in the value fields for <code class="docutils literal notranslate"><span class="pre">Subtype</span></code> = BOLT:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">D</span></code> m, <code class="docutils literal notranslate"><span class="pre">P</span></code>, <code class="docutils literal notranslate"><span class="pre">ALPHA</span></code>, <code class="docutils literal notranslate"><span class="pre">N</span></code>, <code class="docutils literal notranslate"><span class="pre">X1</span></code>, <code class="docutils literal notranslate"><span class="pre">Y1</span></code>, <code class="docutils literal notranslate"><span class="pre">Z1</span></code>, <code class="docutils literal notranslate"><span class="pre">X2</span></code>, <code class="docutils literal notranslate"><span class="pre">Y2</span></code>, <code class="docutils literal notranslate"><span class="pre">Z2</span></code></p></li>
+<li><p>where:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">D</span></code> m = Pitch diameter, d <sub>m</sub>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">P</span></code> = Pitch distance, p.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ALPHA</span></code> = Half-thread angle, α (defaults to 30 degrees).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">N</span></code> = Number of starts (defaults to 1).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">X1</span></code>, <code class="docutils literal notranslate"><span class="pre">Y1</span></code>, <code class="docutils literal notranslate"><span class="pre">Z1</span></code>, <code class="docutils literal notranslate"><span class="pre">X2</span></code>, <code class="docutils literal notranslate"><span class="pre">Y2</span></code>, <code class="docutils literal notranslate"><span class="pre">Z2</span></code> = Two end points of the bolt axis in global
+Cartesian coordinates.</p></li>
+</ul>
+</section>
+<section id="type-axis">
+<span id="secdata-axisy"></span><h2>Type: AXIS<a class="headerlink" href="#type-axis" title="Link to this heading">#</a></h2>
+<p>General axisymmetric sections are referenced by the <code class="docutils literal notranslate"><span class="pre">SURF159</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLID272</span></code>, and <code class="docutils literal notranslate"><span class="pre">SOLID273</span></code>
+elements. Use this command to locate the axisymmetric axis.</p>
+<ul class="simple">
+<li><p>Data to provide in the value fields:</p></li>
+<li><p><strong>Pattern 1 (two points):</strong></p></li>
+<li><p>1, <code class="docutils literal notranslate"><span class="pre">X1</span></code>, <code class="docutils literal notranslate"><span class="pre">Y1</span></code>, <code class="docutils literal notranslate"><span class="pre">Z1</span></code>, <code class="docutils literal notranslate"><span class="pre">X2</span></code>, <code class="docutils literal notranslate"><span class="pre">Y2</span></code>, <code class="docutils literal notranslate"><span class="pre">Z2</span></code></p></li>
+<li><p>where <code class="docutils literal notranslate"><span class="pre">X1</span></code>, <code class="docutils literal notranslate"><span class="pre">Y1</span></code>, <code class="docutils literal notranslate"><span class="pre">Z1</span></code>, <code class="docutils literal notranslate"><span class="pre">X2</span></code>, <code class="docutils literal notranslate"><span class="pre">Y2</span></code>, <code class="docutils literal notranslate"><span class="pre">Z2</span></code> are global Cartesian coordinates.</p></li>
+<li><p><strong>Pattern 2 (coordinate system number plus axis [1 = x, 2 = y, 3 = z] ):</strong></p></li>
+<li><p>2, <code class="docutils literal notranslate"><span class="pre">csys</span></code>, <code class="docutils literal notranslate"><span class="pre">axis</span></code></p></li>
+<li><p>where <code class="docutils literal notranslate"><span class="pre">csys</span></code> is a Cartesian coordinate system.</p></li>
+<li><p><strong>Pattern 3 (origin plus direction):</strong></p></li>
+<li><p>3, <code class="docutils literal notranslate"><span class="pre">XO</span></code>, <code class="docutils literal notranslate"><span class="pre">YO</span></code>, <code class="docutils literal notranslate"><span class="pre">ZO</span></code>, <code class="docutils literal notranslate"><span class="pre">xdir</span></code>, <code class="docutils literal notranslate"><span class="pre">ydir</span></code>, <code class="docutils literal notranslate"><span class="pre">zdir</span></code></p></li>
+<li><p>where <code class="docutils literal notranslate"><span class="pre">XO</span></code>, <code class="docutils literal notranslate"><span class="pre">YO</span></code>, <code class="docutils literal notranslate"><span class="pre">ZO</span></code>  <code class="docutils literal notranslate"><span class="pre">are</span> <span class="pre">global</span> <span class="pre">Cartesian</span> <span class="pre">coordinates</span> <span class="pre">and</span> <span class="pre">xdir</span></code>, <code class="docutils literal notranslate"><span class="pre">ydir</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">zdir</span></code> are direction cosines.</p></li>
+</ul>
+</section>
+<section id="type-joint">
+<span id="secdata-joints"></span><h2>Type: JOINT<a class="headerlink" href="#type-joint" title="Link to this heading">#</a></h2>
+<p>Joint sections are referenced by <code class="docutils literal notranslate"><span class="pre">MPC184</span></code> joint elements.</p>
+<ul class="simple">
+<li><p>Data to provide in the value fields:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">length1</span></code>, <code class="docutils literal notranslate"><span class="pre">length2</span></code>, <code class="docutils literal notranslate"><span class="pre">length3</span></code>, <code class="docutils literal notranslate"><span class="pre">angle1</span></code>, <code class="docutils literal notranslate"><span class="pre">angle2</span></code>, <code class="docutils literal notranslate"><span class="pre">angle3</span></code></p></li>
+<li><p>where:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">length1-3</span></code> = Reference lengths used in the constitutive calculations.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">angle1-3</span></code> = Reference angles used in the constitutive calculations.</p></li>
+</ul>
+<p>The following table shows the lengths and angles to be specified for different kinds of joints.</p>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<p>The reference length and angle specifications correspond to the free relative degrees of freedom in
+a joint element for which constitutive calculations are performed. These values are used when
+stiffness and/or damping are specified for the joint elements.</p>
+<p>If the reference lengths and angles are not specified, they are calculated from the default or
+starting configuration for the element.</p>
+<p>See <code class="docutils literal notranslate"><span class="pre">MPC184</span></code> or the individual joint element descriptions for more information on joint element
+constitutive calculations.</p>
+</section>
+<section id="type-link">
+<span id="secdata-links"></span><h2>Type: LINK<a class="headerlink" href="#type-link" title="Link to this heading">#</a></h2>
+<p>Link sections are referenced by the <code class="docutils literal notranslate"><span class="pre">LINK33</span></code>, <code class="docutils literal notranslate"><span class="pre">LINK180</span></code> and <code class="docutils literal notranslate"><span class="pre">CABLE280</span></code> elements.</p>
+<ul class="simple">
+<li><p>Data to provide in the value fields:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VAL1</span></code> = Area</p></li>
+</ul>
+</section>
+<section id="type-pipe">
+<span id="secdata-pipes"></span><h2>Type: PIPE<a class="headerlink" href="#type-pipe" title="Link to this heading">#</a></h2>
+<p>Pipe sections are referenced by the <code class="docutils literal notranslate"><span class="pre">PIPE288</span></code>, <code class="docutils literal notranslate"><span class="pre">PIPE289</span></code>, and <code class="docutils literal notranslate"><span class="pre">ELBOW290</span></code> elements.</p>
+<ul class="simple">
+<li><p>Data to provide in the value fields:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">D</span></code>  <sub>o</sub>, <code class="docutils literal notranslate"><span class="pre">T</span></code>  <sub>w</sub>, <code class="docutils literal notranslate"><span class="pre">N</span></code>  <sub>c</sub>, <code class="docutils literal notranslate"><span class="pre">S</span></code>  <sub>s</sub>, <code class="docutils literal notranslate"><span class="pre">N</span></code>  <sub>t</sub>, <code class="docutils literal notranslate"><span class="pre">M</span></code>
+<sub>int</sub>, <code class="docutils literal notranslate"><span class="pre">M</span></code>  <sub>ins</sub>, <code class="docutils literal notranslate"><span class="pre">T</span></code>  <sub>ins</sub></p></li>
+<li><p>where:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">D</span></code>  <sub>o</sub> = Outside diameter of pipe. Use a constant value for a circular pipe and an array
+for a noncircular pipe. (Noncircular pipe sections are referenced by the <code class="docutils literal notranslate"><span class="pre">ELBOW290</span></code> element
+only. See <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_STR15_4.html#eq250dbbf7-3095-46cc-b4f3-1beb47c75a9c">Defining a Noncircular Pipe</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">T</span></code>  <sub>w</sub> = Wall thickness. Default = <code class="docutils literal notranslate"><span class="pre">D</span></code> o / 2, or “solid” pipe. (“Solid” pipe is not
+applicable to <code class="docutils literal notranslate"><span class="pre">ELBOW290</span></code> ; for that element, a thickness less than <code class="docutils literal notranslate"><span class="pre">D</span></code> o / 4 is recommended.)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">N</span></code>  <sub>c</sub> = Number of cells around the circumference (8 <span class="math notranslate nohighlight">\(equation not available\)</span>
+<code class="docutils literal notranslate"><span class="pre">N</span></code>  <sub>c</sub>  <span class="math notranslate nohighlight">\(equation not available\)</span>  120, where a greater value improves accuracy
+slightly; default =      8).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">S</span></code>  <sub>s</sub> = Section number of the shell representing the pipe wall. Valid with <code class="docutils literal notranslate"><span class="pre">ELBOW290</span></code>
+only. (Total thickness of the section is scaled to <code class="docutils literal notranslate"><span class="pre">T</span></code>  <sub>w</sub>. The program considers the
+innermost layer inside of the pipe to be the first layer.)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">N</span></code>  <sub>t</sub> = Number of cells through the pipe wall. Valid values are 1 (default), 3, 5, 7,
+and 9. Cells are graded such that they are thinner on the inner and outer surfaces. Valid with
+<code class="docutils literal notranslate"><span class="pre">PIPE288</span></code> and <code class="docutils literal notranslate"><span class="pre">PIPE289</span></code> only.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code>  <sub>int</sub> = Material number of fluid inside of the pipe. The default value is 0 (no
+fluid). This value is used to input the density of the internal fluid. The fluid inside the pipe
+element is ignored unless the free surface in a global X-Y plane is added as face 3 ( <span class="xref std std-ref">sfe</span> )
+and is high enough to include at least one end node of the element.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code>  <sub>ins</sub> = Material number of material external to the pipe (such as insulation or
+armoring). The default value is 0 (no external material). This value is used to input the density
+of the external material. (External material adds mass and increases hydraulic diameter, but does
+not add to stiffness.)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">T</span></code>  <sub>ins</sub> = Thickness of material external to the pipe, such as insulation. The default
+value is 0 (no external material).</p></li>
+</ul>
+<p>The accuracy of the ovalization value (OVAL) output by <code class="docutils literal notranslate"><span class="pre">ELBOW290</span></code> ( <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_ELBOW290.html#elem290coordsys">Structural Elbow</a>
+form only) improves as the specified number of cells around the circumference ( <code class="docutils literal notranslate"><span class="pre">N</span></code> <sub>c</sub> ) is
+increased.</p>
+<p>External material ( <code class="docutils literal notranslate"><span class="pre">M</span></code> <sub>ins</sub> ) adds mass and increases hydraulic diameter, but does not add
+to stiffness.</p>
+<figure class="align-default">
+<img alt="../../../_images/gSECD_pipe.svg" src="../../../_images/gSECD_pipe.svg" />
+</figure>
+</section>
+<section id="type-pretension">
+<span id="secdata-pretension"></span><h2>Type: PRETENSION<a class="headerlink" href="#type-pretension" title="Link to this heading">#</a></h2>
+<p>Pretension sections are referenced by the <code class="docutils literal notranslate"><span class="pre">PRETS179</span></code> element.</p>
+<ul class="simple">
+<li><p>Data to provide in the value fields:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">node</span></code>, <code class="docutils literal notranslate"><span class="pre">nx</span></code>, <code class="docutils literal notranslate"><span class="pre">ny</span></code>, <code class="docutils literal notranslate"><span class="pre">nz</span></code></p></li>
+<li><p>where:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">node</span></code> = Pretension node number.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nx</span></code> = Orientation in global Cartesian x direction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ny</span></code> = Orientation in global Cartesian y direction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nz</span></code> = Orientation in global Cartesian z direction.</p></li>
+</ul>
+<p>The following usage is typical:</p>
+<ul class="simple">
+<li><p>SECTYPE, 1, PRETENSION</p></li>
+<li><p>SECDATA, 13184, 0.000, 0.000, 1.000</p></li>
+<li><p>SECMODIF, 1, NAME, example</p></li>
+<li><p>SLOAD, 1, PL01, TINY, FORC, 100.00, 1, 2</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">PRETENSION</span></code> section options of <span class="xref std std-ref">sectype</span> and <span class="xref std std-ref">secdata</span> are documented mainly to aid
+in the understanding of data written by <span class="xref std std-ref">cdwrite</span>. Ansys, Inc. recommends that you
+generate pretension sections using <span class="xref std std-ref">psmesh</span>.</p>
+</section>
+<section id="type-reinf">
+<span id="secdata-reinforcement"></span><h2>Type: REINF<a class="headerlink" href="#type-reinf" title="Link to this heading">#</a></h2>
+<p>Each <span class="xref std std-ref">secdata</span> command defines the material, geometry, and orientation (if Subtype = SMEAR) of
+one reinforcing member (discrete fiber or smeared surface) in the section. The reinforcing section
+can be referenced by reinforcing elements ( <code class="docutils literal notranslate"><span class="pre">REINF263</span></code>, <code class="docutils literal notranslate"><span class="pre">REINF264</span></code>, and <code class="docutils literal notranslate"><span class="pre">REINF265</span></code> ), or
+<code class="docutils literal notranslate"><span class="pre">MESH200</span></code> elements when used for temporarily representing reinforcing members. Only one
+<span class="xref std std-ref">secdata</span> command is allowed per section when referenced by <code class="docutils literal notranslate"><span class="pre">MESH200</span></code> elements. For more
+information, see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/str_compreinfdirectemb.html">Element Embedding</a></p>
+<ul class="simple">
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Type: REINF, Subtype: DISCRETE</strong></p>
+<p>Defines discrete reinforcing fibers with arbitrary orientations. For the MESH input pattern,
+reinforcing section data is referenced by <code class="docutils literal notranslate"><span class="pre">MESH200</span></code> elements. For other patterns, issue separate
+<span class="xref std std-ref">secdata</span> commands to define each reinforcing fiber.</p>
+<ul class="simple">
+<li><p>Data to provide in the value fields:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAT,</span> <span class="pre">A,</span> <span class="pre">PATT,</span> <span class="pre">V1,</span> <span class="pre">V2,</span> <span class="pre">V3,</span> <span class="pre">V4,</span> <span class="pre">V5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAT</span></code> = Material ID for the fiber. (See <code class="docutils literal notranslate"><span class="pre">REINF264</span></code> for valid material models.) When the
+reinforcing section is referenced by a <code class="docutils literal notranslate"><span class="pre">MESH200</span></code> element, the default is the <code class="docutils literal notranslate"><span class="pre">MESH200</span></code> element
+material ID ( <span class="xref std std-ref">mat</span> ). When the section is referenced by reinforcing elements, the material
+ID is required for all fibers, and no default for this value is available.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">A</span></code> = Cross-section area of the reinforcing fiber.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PATT</span></code> = Input pattern code (described below) indicating how the location of this fiber is
+defined. Available input patterns are MESH (when the section is referenced by a <code class="docutils literal notranslate"><span class="pre">MESH200</span></code>
+element), and LAYN, EDGO, and BEAM (when the section is referenced by a reinforcing element).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">V1,</span> <span class="pre">V2,</span> <span class="pre">V3,</span> <span class="pre">V4,</span> <span class="pre">V5</span></code> = Values to define the location of the reinforcing fiber (depending on the
+<code class="docutils literal notranslate"><span class="pre">PATT</span></code> pattern code used), as shown:</p></li>
+</ul>
+<p><strong>PATT: MESH</strong></p>
+<p><strong>Description:</strong> The locations of reinforcing fibers are defined directly via <code class="docutils literal notranslate"><span class="pre">MESH200</span></code> element
+connectivity.</p>
+<p><a href="#id1"><span class="problematic" id="id2">**</span></a>Required input:<a href="#id3"><span class="problematic" id="id4">**</span></a>None.</p>
+<p><strong>PATT: LAYN</strong></p>
+<p><strong>Description:</strong> The discrete reinforcing fiber is placed in the middle of a layer in a layered base
+element. The
+orientation of the fiber within the layer is adjustable via offsets with respect to a specified
+element edge.</p>
+<p><strong>Required input:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">V1</span></code> (or <code class="docutils literal notranslate"><span class="pre">N</span></code> ) – The number of the layer in the base element on which to apply the
+reinforcing fiber. The default value is 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">V2</span></code> (or <code class="docutils literal notranslate"><span class="pre">e</span></code> ) – The number to indicate the element edge to which the offsets are measured.
+The default value is 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">V3</span></code> and <code class="docutils literal notranslate"><span class="pre">V4</span></code> (or <code class="docutils literal notranslate"><span class="pre">Y1</span></code> and <code class="docutils literal notranslate"><span class="pre">Y2</span></code> ) – The normalized distances from the fiber to the two
+ends of the specified element edge. Valid values for <code class="docutils literal notranslate"><span class="pre">Y1</span></code> and <code class="docutils literal notranslate"><span class="pre">Y2</span></code> are 0.0 through 1.0. The
+default value of <code class="docutils literal notranslate"><span class="pre">Y1</span></code> is 0.5. The default value of <code class="docutils literal notranslate"><span class="pre">Y2</span></code> is <code class="docutils literal notranslate"><span class="pre">Y1</span></code>.</p></li>
+</ul>
+<p>When applied to 8-node or 20-node layered solid elements:</p>
+<figure class="align-default">
+<img alt="../../../_images/gSECD18.svg" src="../../../_images/gSECD18.svg" />
+</figure>
+<figure class="align-default">
+<img alt="../../../_images/gSECD19.svg" src="../../../_images/gSECD19.svg" />
+</figure>
+<p>When applied to 4-node or 8-node layered shell elements:</p>
+<figure class="align-default">
+<img alt="../../../_images/gSECD20.svg" src="../../../_images/gSECD20.svg" />
+</figure>
+<figure class="align-default">
+<img alt="../../../_images/gSECD21.svg" src="../../../_images/gSECD21.svg" />
+</figure>
+<p><strong>PATT: EDGO</strong></p>
+<p><strong>Description:</strong> The orientation of the discrete reinforcing fiber is similar to one of the
+specified element edges.
+The fiber orientation can be further adjusted via offsets with respect to the specified element
+edge.</p>
+<p><strong>Required input:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">V1</span></code> (or <code class="docutils literal notranslate"><span class="pre">O</span></code> ) – The number to indicate the element edge to which the offsets are measured.
+The default value is 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">V2</span></code> and <code class="docutils literal notranslate"><span class="pre">V3</span></code> (or <code class="docutils literal notranslate"><span class="pre">Y1</span></code> and <code class="docutils literal notranslate"><span class="pre">Z1</span></code> ) – The normalized distances from the fiber to the first
+end of the specified element edge. Valid values for <code class="docutils literal notranslate"><span class="pre">Y1</span></code> and <code class="docutils literal notranslate"><span class="pre">Z1</span></code> are 0.0 through 1.0. The
+default value for <code class="docutils literal notranslate"><span class="pre">Y1</span></code> and <code class="docutils literal notranslate"><span class="pre">Z1</span></code> is 0.5.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">V4</span></code> and <code class="docutils literal notranslate"><span class="pre">V5</span></code> (or <code class="docutils literal notranslate"><span class="pre">Y2</span></code> and <code class="docutils literal notranslate"><span class="pre">Z2</span></code> ) - The normalized distances from the fiber to the second
+end of the specified element edge. Value values for <code class="docutils literal notranslate"><span class="pre">Y2</span></code> and <code class="docutils literal notranslate"><span class="pre">Z2</span></code> are 0.0 through 1.0. The
+default value for <code class="docutils literal notranslate"><span class="pre">Y2</span></code> is <code class="docutils literal notranslate"><span class="pre">Y1</span></code>, and the default value for <code class="docutils literal notranslate"><span class="pre">Z2</span></code> is <code class="docutils literal notranslate"><span class="pre">Z1</span></code>.</p></li>
+</ul>
+<p>If the base element is a beam or link, the program ignores values <code class="docutils literal notranslate"><span class="pre">V2</span></code> through <code class="docutils literal notranslate"><span class="pre">V5</span></code> and instead
+places the reinforcing in the center of the beam or link.</p>
+<p>When applied to 8-node or 20-node solid elements:</p>
+<figure class="align-default">
+<img alt="../../../_images/gSECD22.svg" src="../../../_images/gSECD22.svg" />
+</figure>
+<figure class="align-default">
+<img alt="../../../_images/gSECD22b.svg" src="../../../_images/gSECD22b.svg" />
+</figure>
+<figure class="align-default">
+<img alt="../../../_images/gSECD22c.svg" src="../../../_images/gSECD22c.svg" />
+</figure>
+<p>When applied to tetrahedral elements:</p>
+<blockquote>
+<div><p>This command contains some tables and extra information which can be inspected in the original</p>
+</div></blockquote>
+<p>documentation pointed above.</p>
+<p>When applied to 3D shell elements:</p>
+<figure class="align-default">
+<img alt="../../../_images/gSECD28.svg" src="../../../_images/gSECD28.svg" />
+</figure>
+<figure class="align-default">
+<img alt="../../../_images/gSECD29.svg" src="../../../_images/gSECD29.svg" />
+</figure>
+<p>When applied to beam or link elements:</p>
+<figure class="align-default">
+<img alt="../../../_images/gSECD30.svg" src="../../../_images/gSECD30.svg" />
+</figure>
+<p><strong>PATT: BEAM</strong></p>
+<p><strong>Description:</strong> Use this specialized input pattern for defining reinforcing in regular constant and
+tapered beams.</p>
+<p><strong>Required input:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">V1</span></code> and <code class="docutils literal notranslate"><span class="pre">V2</span></code> (or <code class="docutils literal notranslate"><span class="pre">Y1</span></code> and <code class="docutils literal notranslate"><span class="pre">Z1</span></code> ) – Y and Z offsets with respect to the section origin in
+the first beam section referenced by the base beam element. The default value for Y1 and Z1 is
+0.0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">V3</span></code> and <code class="docutils literal notranslate"><span class="pre">V4</span></code> (or <code class="docutils literal notranslate"><span class="pre">Y2</span></code> and <code class="docutils literal notranslate"><span class="pre">Z2</span></code> ) – Y and Z offsets with respect to the section origin in
+the second beam section referenced by the base beam element. The default value for <code class="docutils literal notranslate"><span class="pre">Y2</span></code> is
+<code class="docutils literal notranslate"><span class="pre">Y1</span></code>, and the default value for <code class="docutils literal notranslate"><span class="pre">Z2</span></code> is <code class="docutils literal notranslate"><span class="pre">Z1</span></code>. (Because <code class="docutils literal notranslate"><span class="pre">V3</span></code> and <code class="docutils literal notranslate"><span class="pre">V4</span></code> values apply only
+to tapered beams, the program ignores them if the base beam has a constant section.)</p></li>
+</ul>
+<figure class="align-default">
+<img alt="../../../_images/gSECD31.svg" src="../../../_images/gSECD31.svg" />
+</figure>
+<ul class="simple">
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li><ul>
+<li></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Type: REINF, Subtype: SMEAR</strong></p>
+<p>Suitable for layers of reinforcing fibers with uniform cross-section area and spacing. Each
+<span class="xref std std-ref">secdata</span> command defines the one reinforcing layer in the section. When referenced by a
+<code class="docutils literal notranslate"><span class="pre">MESH200</span></code> element, only one <span class="xref std std-ref">secdata</span> command per section is allowed. When referenced by
+reinforcing elements ( <code class="docutils literal notranslate"><span class="pre">REINF263</span></code> and <code class="docutils literal notranslate"><span class="pre">REINF265</span></code> ), this limitation does not apply.</p>
+<ul class="simple">
+<li><p>Data to provide in the value fields:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAT,</span> <span class="pre">A,</span> <span class="pre">S,</span> <span class="pre">KCN,</span> <span class="pre">THETA,</span> <span class="pre">PATT,</span> <span class="pre">V1,</span> <span class="pre">V2,</span> <span class="pre">V3,</span> <span class="pre">V4,</span> <span class="pre">V5</span></code></p></li>
+<li><p>where:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAT</span></code> = Material ID for layer. (See <code class="docutils literal notranslate"><span class="pre">REINF263</span></code> or <code class="docutils literal notranslate"><span class="pre">REINF265</span></code> for available material models.)
+When the section is referenced by a <code class="docutils literal notranslate"><span class="pre">MESH200</span></code> element, the default is the <code class="docutils literal notranslate"><span class="pre">MESH200</span></code> element
+material ID ( <span class="xref std std-ref">mat</span> ). When the section is referenced by reinforcing elements, the material
+ID is required for all fibers, and no default for this value is available.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">A</span></code> = Cross-section area of a single reinforcing fiber ( or the thickness of the reinforcing
+layer for homogeneous reinforcing membranes).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">S</span></code> = Distance between two adjacent reinforcing fibers (ignored for homogeneous reinforcing
+membranes).</p></li>
+<li><p><strong>Note:</strong> If the section is used to model the reinforcing layers with a uniaxial stress state (
+<span class="xref std std-ref">seccontrol</span>,,,0), the equivalent thickness h of the reinforcing layer is determined by h =
+<code class="docutils literal notranslate"><span class="pre">A</span></code> / <code class="docutils literal notranslate"><span class="pre">S</span></code>, where <code class="docutils literal notranslate"><span class="pre">A</span></code> is the cross-section area of a single fiber and <code class="docutils literal notranslate"><span class="pre">S</span></code> is the distance
+between two adjacent fibers. If the section is used to model homogeneous reinforcing membranes (
+<span class="xref std std-ref">seccontrol</span>,,,1), the cross-section area input <code class="docutils literal notranslate"><span class="pre">A</span></code> is the thickness of the reinforcing
+layer and the distance input <code class="docutils literal notranslate"><span class="pre">S</span></code> is ignored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">KCN</span></code> = Local coordinate system reference number for this layer. (See <span class="xref std std-ref">local</span> for more
+information.) When the section is referenced by a <code class="docutils literal notranslate"><span class="pre">MESH200</span></code> element, the default <code class="docutils literal notranslate"><span class="pre">KCN</span></code> value
+is the <code class="docutils literal notranslate"><span class="pre">MESH200</span></code> element coordinate system ID ( <span class="xref std std-ref">esys</span> ). For the 2D smeared reinforcing
+element <code class="docutils literal notranslate"><span class="pre">REINF263</span></code>, <code class="docutils literal notranslate"><span class="pre">KCN</span></code> input is not required. When <code class="docutils literal notranslate"><span class="pre">KCN</span></code> is not specified, the program
+uses a default layer coordinate system (described in <code class="docutils literal notranslate"><span class="pre">REINF263</span></code> and <code class="docutils literal notranslate"><span class="pre">REINF265</span></code> ).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">THETA</span></code> = Angle (in degrees) of the final layer coordinate system with respect to the default
+layer system or the layer system specified in the <code class="docutils literal notranslate"><span class="pre">KCN</span></code> field. This value is ignored for
+<code class="docutils literal notranslate"><span class="pre">REINF263</span></code> when that element is embedded in 2D plane strain or plane stress base elements.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PATT</span></code> = Input pattern code (described below) indicating how the location of this fiber is
+defined. Available input patterns are MESH (when the section is referenced by a <code class="docutils literal notranslate"><span class="pre">MESH200</span></code>
+element), and LAYN, EDGO, and BEAM (when the section is referenced by a reinforcing element).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">V1,</span> <span class="pre">V2,</span> <span class="pre">V3,</span> <span class="pre">V4,</span> <span class="pre">V5</span></code> = Values to define the location of the reinforcing layer, as shown:</p></li>
+</ul>
+<p><strong>PATT: MESH</strong></p>
+<p><strong>Description:</strong> The locations of reinforcing fibers are defined directly via <code class="docutils literal notranslate"><span class="pre">MESH200</span></code> element
+connectivity.</p>
+<p><a href="#id5"><span class="problematic" id="id6">**</span></a>Required input:<a href="#id7"><span class="problematic" id="id8">**</span></a>None.</p>
+<p><strong>PATT: LAYN</strong></p>
+<p><strong>Description:</strong> The smeared reinforcing layer is placed in the middle of a layer in a layered base
+element.</p>
+<p><a href="#id9"><span class="problematic" id="id10">**</span></a>Required input:<a href="#id11"><span class="problematic" id="id12">**</span></a><code class="docutils literal notranslate"><span class="pre">V1</span></code> (or <code class="docutils literal notranslate"><span class="pre">n</span></code> ) – The number of the layer in the base element on which to apply the reinforcing layer. The default value is 1.</p>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<p><strong>PATT: EDGO</strong></p>
+<p><strong>Description:</strong> This pattern applies only to 2D smeared reinforcing element <code class="docutils literal notranslate"><span class="pre">REINF263</span></code>. The
+smeared reinforcing layer is represented by a line in 2D. The orientation of the 2D smeared
+reinforcing layer is similar to one of the specified element edges. The fiber orientation can be
+further adjusted via offsets with respect to the specified element edge.</p>
+<p><strong>Required input:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">V1</span></code> (or <code class="docutils literal notranslate"><span class="pre">O</span></code> ) – The number to indicate the element edge to which the offsets are measured.
+The default value is 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">V2</span></code> (or <code class="docutils literal notranslate"><span class="pre">Y1</span></code> ) – The normalized distances from the reinforcing layer to the first end of the
+specified element edge. Valid values for Y1 are 0.0 through 1.0. The default value for <code class="docutils literal notranslate"><span class="pre">Y1</span></code> is
+0.5. <code class="docutils literal notranslate"><span class="pre">V3</span></code> (or <code class="docutils literal notranslate"><span class="pre">Z1</span></code> ) input is ignored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">V4</span></code> (or <code class="docutils literal notranslate"><span class="pre">Y2</span></code> ) – The normalized distances from the reinforcing layer to the second end of
+the specified element edge. Valid value values for <code class="docutils literal notranslate"><span class="pre">Y2</span></code> are 0.0 through 1.0. The default value
+for <code class="docutils literal notranslate"><span class="pre">Y2</span></code> is <code class="docutils literal notranslate"><span class="pre">Y1</span></code>. <code class="docutils literal notranslate"><span class="pre">V4</span></code> (or <code class="docutils literal notranslate"><span class="pre">Y2</span></code> ) is ignored for axisymmetric shell elements. <code class="docutils literal notranslate"><span class="pre">V5</span></code> (or
+<code class="docutils literal notranslate"><span class="pre">Z2`</span></code> ) input is ignored.</p></li>
+</ul>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<p><strong>PATT: ELEF</strong></p>
+<p><strong>Description:</strong> The smeared reinforcing layer is oriented parallel to one of three adjacent element
+faces. (This
+pattern does not apply to 2D smeared reinforcing element <code class="docutils literal notranslate"><span class="pre">REINF263</span></code>.)</p>
+<p><strong>Required input:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">V1</span></code> (or <code class="docutils literal notranslate"><span class="pre">F</span></code> ) – The number to indicate the base element face. The default value is 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">V2</span></code> (or <code class="docutils literal notranslate"><span class="pre">d1</span></code> ) – The normalized distance from the layer to the specified base element face.
+Valid values for <code class="docutils literal notranslate"><span class="pre">d1</span></code> are 0.0 through 1.0. The default value is 0.5.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">V3</span></code> (or <code class="docutils literal notranslate"><span class="pre">d2</span></code> ) – The normalized distance from corners JJ and KK of the layer to the
+specified base element face (applicable to 8-node or 20-node solid elements only). Valid values
+for <code class="docutils literal notranslate"><span class="pre">d2</span></code> are 0.0 through 1.0. The default value is <code class="docutils literal notranslate"><span class="pre">d1</span></code>.</p></li>
+</ul>
+<p>When applied to 8-node or 20-node solid elements:</p>
+<blockquote>
+<div><p>This command contains some tables and extra information which can be inspected in the original</p>
+</div></blockquote>
+<p>documentation pointed above.</p>
+<p>When applied to tetrahedral elements:</p>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<p>When applied to 3D shell elements:</p>
+<figure class="align-default">
+<img alt="../../../_images/gSECD16.svg" src="../../../_images/gSECD16.svg" />
+</figure>
+</section>
+<section id="type-shell">
+<span id="secdata-shells"></span><h2>Type: SHELL<a class="headerlink" href="#type-shell" title="Link to this heading">#</a></h2>
+<p>Shell sections are referenced by the <code class="docutils literal notranslate"><span class="pre">SHELL131</span></code>, <code class="docutils literal notranslate"><span class="pre">SHELL132</span></code>, <code class="docutils literal notranslate"><span class="pre">SHELL181</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLID185</span></code> Layered
+Solid, <code class="docutils literal notranslate"><span class="pre">SOLID186</span></code> Layered Solid, <code class="docutils literal notranslate"><span class="pre">SOLSH190</span></code>, <code class="docutils literal notranslate"><span class="pre">SHELL208</span></code>, <code class="docutils literal notranslate"><span class="pre">SHELL209</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLID278</span></code> Layered
+Solid, <code class="docutils literal notranslate"><span class="pre">SOLID279</span></code> Layered Solid, and <code class="docutils literal notranslate"><span class="pre">SHELL281</span></code> elements.</p>
+<ul class="simple">
+<li><p>Data to provide in the value fields:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TK</span></code>, <code class="docutils literal notranslate"><span class="pre">MAT</span></code>, <code class="docutils literal notranslate"><span class="pre">THETA</span></code>, <code class="docutils literal notranslate"><span class="pre">NUMPT</span></code>, <code class="docutils literal notranslate"><span class="pre">LayerName</span></code></p></li>
+<li><p>where:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TK</span></code> = Thickness of shell layer. Zero thickness (not valid for <code class="docutils literal notranslate"><span class="pre">SHELL131</span></code> and <code class="docutils literal notranslate"><span class="pre">SHELL132</span></code> )
+indicates a dropped layer. The sum of all layer thicknesses must be greater than zero. The total
+thickness can be tapered via the <span class="xref std std-ref">secfunction</span> command.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAT</span></code> = Material ID for layer (any current-technology material model is available for
+<code class="docutils literal notranslate"><span class="pre">SHELL181</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLID185</span></code> Layered Solid, <code class="docutils literal notranslate"><span class="pre">SOLID186</span></code> Layered Solid, <code class="docutils literal notranslate"><span class="pre">SOLSH190</span></code>, <code class="docutils literal notranslate"><span class="pre">SHELL208</span></code>,
+<code class="docutils literal notranslate"><span class="pre">SHELL209</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLID278</span></code> Layered Solid and <code class="docutils literal notranslate"><span class="pre">SOLID279</span></code> Layered Solid [including <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_prog/Z7K4r1e5lcd.html#">UserMat</a> ], and
+<code class="docutils literal notranslate"><span class="pre">SHELL281</span></code> ). <code class="docutils literal notranslate"><span class="pre">MAT</span></code> is required for a composite (multi-layered) laminate. For a homogeneous
+(single-layered) shell, the default is the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD7_2.html#ad77wq1a7lcd">element material attribute</a>.
+You can also address multiple reference temperatures ( <span class="xref std std-ref">tref</span> and/or <span class="xref std std-ref">mp</span>,REFT).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">THETA</span></code> = Angle (in degrees) of layer element coordinate system with respect to element
+coordinate system (ESYS).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NUMPT</span></code> = Number of integration points in layer. The user interface offers 1, 3 (default), 5, 7,
+or 9 points; however, you can specify a higher number on the <span class="xref std std-ref">secdata</span> command. The
+integration rule used is Simpson’s Rule. ( <code class="docutils literal notranslate"><span class="pre">NUMPT</span></code> is not used by <code class="docutils literal notranslate"><span class="pre">SHELL131</span></code> and
+<code class="docutils literal notranslate"><span class="pre">SHELL132</span></code>.)</p></li>
+</ul>
+</section>
+<section id="type-support">
+<span id="secdata-supports"></span><h2>Type: SUPPORT<a class="headerlink" href="#type-support" title="Link to this heading">#</a></h2>
+<p>Support sections are referenced by <code class="docutils literal notranslate"><span class="pre">SOLID185</span></code> and <code class="docutils literal notranslate"><span class="pre">SOLID186</span></code> elements.</p>
+<p><strong>Type: SUPPORT, Subtype: BLOCK</strong></p>
+<ul class="simple">
+<li><p>Data to provide in the value fields for <code class="docutils literal notranslate"><span class="pre">Subtype</span></code> = BLOCK:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">T</span></code>, <code class="docutils literal notranslate"><span class="pre">L</span></code></p></li>
+<li><p>where:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">T</span></code> = Thickness of the block wall.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">L</span></code> = Spacing distance of the block walls.</p></li>
+</ul>
+<p><strong>Type: SUPPORT, Subtype: ASEC</strong></p>
+<ul class="simple">
+<li><p>Data to provide in the value fields for <code class="docutils literal notranslate"><span class="pre">Subtype</span></code> = ASEC:</p></li>
+</ul>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<ul class="simple">
+<li><p>The multiplication factors are homogenization factors, and in each direction reflect the ratio of
+the support area projected onto the area of a fully solid support.</p></li>
+<li><p>Values default to 1.0.</p></li>
+<li><p>Y and Z values default to X values.</p></li>
+<li><p>GXY value defaults to EX value, GYZ to EY, and GXZ to EZ.</p></li>
+</ul>
+</section>
+<section id="type-taper">
+<span id="secdata-taper"></span><h2>Type: TAPER<a class="headerlink" href="#type-taper" title="Link to this heading">#</a></h2>
+<p>Tapered sections are referenced by <code class="docutils literal notranslate"><span class="pre">BEAM188</span></code>, <code class="docutils literal notranslate"><span class="pre">BEAM189</span></code> and <code class="docutils literal notranslate"><span class="pre">ELBOW290</span></code> elements. After
+specifying the tapered section type ( <span class="xref std std-ref">sectype</span>,,TAPER), issue separate <span class="xref std std-ref">secdata</span> commands
+to define each end of the tapered beam or pipe.</p>
+<ul class="simple">
+<li><p>Data to provide in the value fields:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Sec_IDn</span></code>, <code class="docutils literal notranslate"><span class="pre">XLOC</span></code>, <code class="docutils literal notranslate"><span class="pre">YLOC</span></code>, <code class="docutils literal notranslate"><span class="pre">ZLOC</span></code></p></li>
+<li><p>where:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Sec_IDn</span></code> = Previously defined beam or pipe section at ends 1 and 2.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">XLOC</span></code>, <code class="docutils literal notranslate"><span class="pre">YLOC</span></code>, <code class="docutils literal notranslate"><span class="pre">ZLOC</span></code> = The location of Sec_ID n in the global Cartesian coordinate system.</p></li>
+</ul>
+<p>For more information about tapered beams and pipes, including assumptions and example command input,
+see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_STR15_4.html#">Defining a Tapered Beam or Pipe</a></p>
+</section>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.72.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.7.2. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

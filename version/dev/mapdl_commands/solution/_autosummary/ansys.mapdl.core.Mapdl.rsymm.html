@@ -1,0 +1,840 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ansys.mapdl.core.Mapdl.rsymm &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=affbdea0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/solution/_autosummary/ansys.mapdl.core.Mapdl.rsymm';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.72.dev0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/solution/_autosummary/ansys.mapdl.core.Mapdl.rsymm.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="None" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ansys.mapdl.core.Mapdl.rsymm</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="ansys-mapdl-core-mapdl-rsymm">
+<h1>ansys.mapdl.core.Mapdl.rsymm<a class="headerlink" href="#ansys-mapdl-core-mapdl-rsymm" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core.Mapdl.rsymm">
+<span class="sig-prename descclassname"><span class="pre">Mapdl.</span></span><span class="sig-name descname"><span class="pre">rsymm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core.Mapdl.rsymm" title="Link to this definition">#</a></dt>
+<dd><p>Defines symmetry, rotation, or extrusion parameters for the radiosity method.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RSYMM.html">RSYMM</a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>option</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Command options:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">CLEAR</span></code> - Deletes all symmetry/extrusion definitions. Other command options are ignored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DEFINE</span></code> - Defines the symmetry/extrusion definition (default).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">STAT</span></code> - Shows the status/listing. Other command options are ignored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">COND</span></code> - Activates or deactivates condensation for all defined radiation symmetries/extrusions,
+which reduces the size of the radiosity equation system (see <span class="xref std std-ref">cmd_rsymm_fig1</span> ). Default is
+off.</p>
+<p>Condensation via <span class="xref std std-ref">rsymm</span>,COND is not recommended as the most efficient solution for symmetric
+models. To best leverage model symmetry to improve efficiency, use view factor condensation via the
+<span class="xref std std-ref">vfco</span> command, which condenses the view factor matrix in addition to simplifying the radiosity
+equations (see <a class="reference internal" href="#rsymm-vfco-notes"><span class="std std-ref">Considerations for View Factor Condensation</span></a> for details).</p>
+</li>
+</ul>
+</dd>
+<dt><strong>cs</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Local coordinate system ( <span class="math notranslate nohighlight">\(equation not available\)</span> 11) as defined using the  <span class="xref std std-ref">local</span>
+or <span class="xref std std-ref">cs</span> commands or the global coordinate system (0). For planar reflection, the coordinate
+system origin must be on the plane of symmetry (POS) and one of its axes must be normal to the
+POS. For cyclic reflection, the coordinate system origin must be coincident with the center of
+rotation (COR). Only Cartesian systems are valid.</p>
+</dd>
+<dt><strong>axis</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Axis label of the coordinate system ( <code class="docutils literal notranslate"><span class="pre">CS</span></code> ) that is normal to the POS for planar reflection, or
+label to indicate the type of extrusion. For cyclic reflection, this field must be blank, and it is
+assumed that the Z axis is aligned with the axis of rotation.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">X,</span> <span class="pre">Y,</span> <span class="pre">or</span> <span class="pre">Z</span></code> - Planar reflection. For 2D model planar reflections, valid labels are X or Y. For
+3D model planar reflections, valid labels are X, Y, or Z.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ZEXT</span></code> - Linear extrusion of a line element in the X-Y plane, in the Z direction, to create
+4-noded <code class="docutils literal notranslate"><span class="pre">SURF252</span></code> elements. <code class="docutils literal notranslate"><span class="pre">NSECT</span></code> indicates how many elements will be created. <code class="docutils literal notranslate"><span class="pre">SVAL</span></code> is the
+starting Z value, and <code class="docutils literal notranslate"><span class="pre">EVAL</span></code> is the ending Z value. <code class="docutils literal notranslate"><span class="pre">CS</span></code> must be 0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CEXT</span></code> - Circumferential extrusion (theta direction) around the global Y-axis. A 2-noded line
+element in the X-Y plane is extruded to create 4-noded <code class="docutils literal notranslate"><span class="pre">SURF252</span></code> elements. <code class="docutils literal notranslate"><span class="pre">NSECT</span></code> indicates how
+many elements will be created. <code class="docutils literal notranslate"><span class="pre">SVAL</span></code> is the starting angle, and EVAL is the ending angle (in
+degrees). The angles are with respect to the global X-axis. <code class="docutils literal notranslate"><span class="pre">CS</span></code> must be 0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">(blank)</span></code> - Cyclic reflection.</p></li>
+</ul>
+</dd>
+<dt><strong>nsect</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Number of cyclic reflections to be done, or number of elements in the extrusion direction.</p>
+<p>For planar reflection, this field must be 0 or blank.</p>
+<p>For cyclic reflection, this field must be ≥ 1 or ≤ -1. Use a positive value if you want the
+sector angle to be computed automatically. Use a negative value if you want the sector angle to
+be computed manually. See <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_RSYMM.html#cmd_rsymm_fig1">Notes</a>
+Notes for details.</p>
+</dd>
+<dt><strong>condvalue</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Condensation key. Valid only when <code class="docutils literal notranslate"><span class="pre">Option</span></code> = COND.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ON</span></code> - Activates condensation in the radiosity solver for all defined radiation
+symmetries/extrusions.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OFF</span></code> - Deactivates condensation in the radiosity solver for all defined radiation
+symmetries/extrusions (default).</p></li>
+</ul>
+</dd>
+<dt><strong>sval</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Starting and ending Z values (if <code class="docutils literal notranslate"><span class="pre">Axis</span></code> = ZEXT) or angle values (if <code class="docutils literal notranslate"><span class="pre">Axis</span></code> = CEXT) used for
+the extrusion. Not used for planar or cyclic reflection.</p>
+</dd>
+<dt><strong>eval_</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Starting and ending Z values (if <code class="docutils literal notranslate"><span class="pre">Axis</span></code> = ZEXT) or angle values (if <code class="docutils literal notranslate"><span class="pre">Axis</span></code> = CEXT) used for
+the extrusion. Not used for planar or cyclic reflection.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p id="rsymm-notes">The <span class="xref std std-ref">rsymm</span> command is used to define the plane of symmetry (POS) for planar reflection or the
+center of rotation (COR) for cyclic reflection. It can also be used to set parameters for a linear
+or circumferential extrusion. The input provided on this command is used to generate radiosity
+surface elements ( <code class="docutils literal notranslate"><span class="pre">SURF251</span></code> / <code class="docutils literal notranslate"><span class="pre">SURF252</span></code> ) when the <span class="xref std std-ref">rsurf</span> command is issued.</p>
+<p>The <span class="xref std std-ref">rsymm</span> command must be issued before <span class="xref std std-ref">rsurf</span>, and it may be issued multiple times to
+have more than one planar/cyclic reflection or extrusion. The <span class="xref std std-ref">rsurf</span> command processes
+<span class="xref std std-ref">rsymm</span> commands in the order they are issued.</p>
+<p>For planar reflection, you must define a local coordinate system ( <span class="math notranslate nohighlight">\(equation not available\)</span>
+11) with its origin on the POS. One of its axes must be aligned so that it is   normal to the plane.
+If possible, use the existing global coordinate system (0).</p>
+<p>For cyclic reflection, you must define a local coordinate system ( <span class="math notranslate nohighlight">\(equation not available\)</span>
+11) with its origin coincident with the COR. Reflections occur about the local   Z-axis in the
+counterclockwise direction. You must align the Z-axis properly. If possible, use   the existing
+global coordinate system (0).</p>
+<p>For cyclic reflection, <code class="docutils literal notranslate"><span class="pre">NSECT</span></code> is used as follows:</p>
+<p><span class="math notranslate nohighlight">\(equation not available\)</span></p>
+<p><span class="math notranslate nohighlight">\(equation not available\)</span></p>
+<p>where θ:sub:<cite>max</cite> and θ:sub:<cite>min</cite> are computed internally based on location of the
+RDSF (surface-to-surface radiation) flagged surfaces.</p>
+<p>See <span class="xref std std-ref">cmd_rsymm_fig2</span> for an example of <code class="docutils literal notranslate"><span class="pre">NSECT</span></code> usage.</p>
+<p>For linear or circumferential extrusion ( <code class="docutils literal notranslate"><span class="pre">Axis</span></code> = ZEXT or CEXT), you must ensure that the
+extruded area matches the area of the underlying element; otherwise, the results may not be correct.
+For example, in the case of <code class="docutils literal notranslate"><span class="pre">PLANE55</span></code> elements with a planar depth = 10, use <code class="docutils literal notranslate"><span class="pre">Axis</span></code> = ZEXT and
+set <code class="docutils literal notranslate"><span class="pre">SVAL</span></code> and <code class="docutils literal notranslate"><span class="pre">EVAL</span></code> such that <code class="docutils literal notranslate"><span class="pre">EVAL</span></code> - <code class="docutils literal notranslate"><span class="pre">SVAL</span></code> = 10. Likewise, for axisymmetric <code class="docutils literal notranslate"><span class="pre">PLANE55</span></code>
+elements, use <code class="docutils literal notranslate"><span class="pre">Axis</span></code> = CEXT and set <code class="docutils literal notranslate"><span class="pre">SVAL</span></code> and <code class="docutils literal notranslate"><span class="pre">EVAL</span></code> such that <code class="docutils literal notranslate"><span class="pre">EVAL</span></code> - <code class="docutils literal notranslate"><span class="pre">SVAL</span></code> = 360. You
+must also issue <span class="xref std std-ref">v2dopt</span>,1 for the axisymmetric case. See <span class="xref std std-ref">cmd_rsymm_fig3</span> for extrusion
+examples.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Axis</span></code> = ZEXT and CEXT options are not valid for <code class="docutils literal notranslate"><span class="pre">SHELL131</span></code> and <code class="docutils literal notranslate"><span class="pre">SHELL132</span></code> elements.</p>
+<p>New surface elements generated by the <span class="xref std std-ref">rsymm</span> command inherit the properties of the original
+elements.</p>
+<p>For 2D axisymmetric models, <span class="xref std std-ref">rsymm</span> can be used only for symmetrization in the YR plane. It
+cannot be used for the theta direction. Use <span class="xref std std-ref">v2dopt</span> in that case.</p>
+<p>For 2D axisymmetric YR models, the newly-generated nodes can have only positive X coordinates.</p>
+<p>Usage Example: Positive and Negative <code class="docutils literal notranslate"><span class="pre">NSECT</span></code> Values
+This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<figure class="align-default" id="id4">
+<img alt="../../../_images/gcmdrsymm3.png" src="../../../_images/gcmdrsymm3.png" />
+<figcaption>
+<p><span class="caption-text">Usage Example: Extrusions with Axis= ZEXT and CEXT</span><a class="headerlink" href="#id4" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<section id="considerations-for-view-factor-condensation">
+<span id="rsymm-vfco-notes"></span><h2>Considerations for View Factor Condensation<a class="headerlink" href="#considerations-for-view-factor-condensation" title="Link to this heading">#</a></h2>
+<p>View Factor Condensation via the <span class="xref std std-ref">vfco</span> command is the recommended method to improve solution
+efficiency for models with symmetry, which are defined with the <span class="xref std std-ref">rsymm</span> command.</p>
+<p>When the <span class="xref std std-ref">rsymm</span> command is used, it implies that some radiation facets ( <code class="docutils literal notranslate"><span class="pre">SURF251</span></code> or
+<code class="docutils literal notranslate"><span class="pre">SURF252</span></code> ) created by the <span class="xref std std-ref">rsurf</span> command will be a reflection of others. By definition,
+radiation facets with an underlying solid element are independent facets. Dependent facets are
+copies of the independent facets having the same dimensions but at different locations. The
+following figures illustrate solid elements (grey) and independent (blue) and dependent (red) facets
+for models with different types of symmetry. View factor condensation improves efficiency by
+condensing the view factor matrix to calculate view factors only for independent facets ( ) and
+simplifying the radiosity equations to solve only for the independent radiosity flux ( <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_heat5.html#eqd7803bd4-5251-4d80-bd90-e01d7fdcb8bb">Radiosity
+Equations Simplified for Models with Symmetry</a>
+<a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_the/the_example_rad_condensedVF.html#">Example of a 3D Open Enclosure with Symmetry: Radiation Analysis with Condensed View Factor
+Calculation</a></p>
+<p>Independent and Dependent Facets in a Model with Planar Symmetry Employing View Factor Condensation</p>
+<p>Independent and Dependent Facets in a Model with Cyclic Symmetry Employing View Factor Condensation</p>
+<p>Independent and Dependent Facets for a Model Built by Extrusions Employing View Factor Condensation
+Although it is not the recommended method, the following figure illustrates condensation via
+<span class="xref std std-ref">rsymm</span>,COND. The efficiency gains by condensation via <span class="xref std std-ref">rsymm</span>,COND are less than those
+obtained with view factor condensation via the <span class="xref std std-ref">vfco</span> command, which reduces the view factor
+matrix in addition to simplifying the radiosity equations, as described in and <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_heat5.html#eqd7803bd4-5251-4d80-bd90-e01d7fdcb8bb">Radiosity Equations
+Simplified for Models with Symmetry</a></p>
+<figure class="align-default" id="id5">
+<img alt="../../../_images/gcmdrsymm1.png" src="../../../_images/gcmdrsymm1.png" />
+<figcaption>
+<p><span class="caption-text">Usage Example: Option= COND</span><a class="headerlink" href="#id5" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p><strong>Example Usage</strong></p>
+<p id="rsymm-example">2D Radiation Analysis Using the Radiosity Method with Decimation and Symmetry</p>
+<p><a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_the/the_example_rad_condensedVF.html#">3D Open Enclosure with Symmetry: Radiation Analysis with Condensed View Factor Calculation</a></p>
+</section>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.72.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.7.2. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

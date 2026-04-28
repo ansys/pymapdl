@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.couple
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.couple

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.bfadele
+==============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.bfadele

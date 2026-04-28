@@ -1,0 +1,1010 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ansys.mapdl.core.Mapdl.cncheck &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=affbdea0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/solution/_autosummary/ansys.mapdl.core.Mapdl.cncheck';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.72.dev0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/solution/_autosummary/ansys.mapdl.core.Mapdl.cncheck.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="None" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ansys.mapdl.core.Mapdl.cncheck</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="ansys-mapdl-core-mapdl-cncheck">
+<h1>ansys.mapdl.core.Mapdl.cncheck<a class="headerlink" href="#ansys-mapdl-core-mapdl-cncheck" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core.Mapdl.cncheck">
+<span class="sig-prename descclassname"><span class="pre">Mapdl.</span></span><span class="sig-name descname"><span class="pre">cncheck</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rid1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rid2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rinc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intertype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core.Mapdl.cncheck" title="Link to this definition">#</a></dt>
+<dd><p>Provides and/or adjusts the initial status of contact pairs.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CNCHECK.html">CNCHECK</a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>option</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Option to be performed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DETAIL</span></code> - List all contact pair properties (default).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SUMMARY</span></code> - List only the open/closed status for each contact pair.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">POST</span></code> - Execute a partial solution to write the initial contact configuration to the
+<code class="file docutils literal notranslate"><span class="pre">jobname.rcn</span></code> file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ADJUST</span></code> - Physically move contact nodes to the target in order to close a gap or reduce
+penetration. The initial adjustment is converted to structural displacement values (UX, UY, UZ) and
+stored in the <code class="file docutils literal notranslate"><span class="pre">jobname.rcn</span></code> file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MORPH</span></code> - Physically move contact nodes to the target in order to close a gap or reduce
+penetration, and also morph the underlying solid mesh. The initial adjustment of contact nodes and
+repositioning of solid element nodes due to mesh morphing are converted to structural displacement
+values (UX, UY, UZ) and stored in the <code class="file docutils literal notranslate"><span class="pre">jobname.rcn</span></code> file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TADJUST</span></code> - Physically move target body to the contact surface in order to close a gap or reduce
+penetration. The initial adjustment is converted to structural displacement values (UX, UY, UZ) and
+stored in the <code class="file docutils literal notranslate"><span class="pre">jobname.rcn</span></code> file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RESET</span></code> - Reset target element and contact element key options and real constants to their
+default values. This option is not valid for general contact.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AUTO</span></code> - Automatically sets certain real constants and key options to recommended values or
+settings in order to achieve better convergence based on overall contact pair behaviors. This option
+is not valid for general contact.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TRIM</span></code> - Trim contact pair (remove certain contact and target elements).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UNSE</span></code> - Unselect certain contact and target elements.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SPLIT</span></code> - Split base (original) contact pairs into smaller sub-pairs at the preprocessing (
+<span class="xref std std-ref">prep7</span> ) level. The main intent of this option is to achieve better scalability in a
+distributed-memory parallel (DMP) run. The splitting operation may create additional overlapping
+contact elements at the split boundaries. Contact pairs can only be split once; repeated use of this
+option results in no further splitting for those contact pairs already split.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DMP</span></code> - This option is similar to the SPLIT, but it is more automatic and contact pair splitting
+is done at the solution level ( <span class="xref std std-ref">solve</span> ) of the first load step, not at the preprocessing
+level. This option is activated only in a distributed-memory parallel (DMP) run. For this option,
+<code class="docutils literal notranslate"><span class="pre">TRlevel</span></code> and <code class="docutils literal notranslate"><span class="pre">InterType</span></code> are valid; all other arguments are ignored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MERGE</span></code> - Merge all contact sub-pairs that were previously split (by prior <code class="docutils literal notranslate"><span class="pre">Option</span></code> = SPLIT or
+DMP operations) back to their original pairs. Any contact and target elements deleted due to the
+trim logic of the splitting operation cannot be recovered by the MERGE operation. All other
+arguments are ignored.</p></li>
+</ul>
+</dd>
+<dt><strong>rid1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The meanings of <code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, and <code class="docutils literal notranslate"><span class="pre">RINC</span></code> vary depending on the contact type or the
+<code class="docutils literal notranslate"><span class="pre">Option</span></code> specified, as described below. <code class="docutils literal notranslate"><span class="pre">RID1</span></code> accepts tabular input for some <code class="docutils literal notranslate"><span class="pre">Option</span></code> values.
+<code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, <code class="docutils literal notranslate"><span class="pre">RINC</span></code> are ignored when <code class="docutils literal notranslate"><span class="pre">Option</span></code> = DMP.</p>
+<p>Pair-Based Contact For pair-based contact, the range of real constant pair IDs for which <code class="docutils literal notranslate"><span class="pre">Option</span></code> will be performed.
+If <code class="docutils literal notranslate"><span class="pre">RID2</span></code> is not specified, it defaults to <code class="docutils literal notranslate"><span class="pre">RID1</span></code>. If no value is specified, all contact pairs
+in the selected set of elements are considered.</p>
+<p>General Contact For general contact ( <code class="docutils literal notranslate"><span class="pre">InterType</span></code> = GCN), <code class="docutils literal notranslate"><span class="pre">RID1</span></code> and <code class="docutils literal notranslate"><span class="pre">RID2</span></code> are section IDs associated with
+general contact surfaces instead of real constant IDs. If <code class="docutils literal notranslate"><span class="pre">RINC</span></code> = 0, the <code class="docutils literal notranslate"><span class="pre">Option</span></code> is performed
+between the two sections, <code class="docutils literal notranslate"><span class="pre">RID1</span></code> and <code class="docutils literal notranslate"><span class="pre">RID2</span></code>. If <code class="docutils literal notranslate"><span class="pre">RINC</span> <span class="pre">&gt;</span></code> 0, the <code class="docutils literal notranslate"><span class="pre">Option</span></code> is performed among
+all specified sections ( <code class="docutils literal notranslate"><span class="pre">RID1</span></code> to <code class="docutils literal notranslate"><span class="pre">RID2</span></code> with increment of <code class="docutils literal notranslate"><span class="pre">RINC</span></code> ).</p>
+<p>Contact Splitting For contact splitting at the preprocessing level ( <code class="docutils literal notranslate"><span class="pre">Option</span></code> = SPLIT only), <code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, and <code class="docutils literal notranslate"><span class="pre">RINC</span></code> are used as follows:</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, and <code class="docutils literal notranslate"><span class="pre">RINC</span></code> are non-zero and positive, split the contact pairs from real
+constant pair ID number <code class="docutils literal notranslate"><span class="pre">RID1</span></code> to <code class="docutils literal notranslate"><span class="pre">RID2</span></code> in increments of <code class="docutils literal notranslate"><span class="pre">RINC</span></code>. In this case, if
+<code class="docutils literal notranslate"><span class="pre">TRlevel</span></code> is non-zero, it will only be applied to these specified pairs.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">RID1</span></code> is zero or blank, <code class="docutils literal notranslate"><span class="pre">TRlevel</span></code> will take affect for all contact pairs in the model from
+largest to smallest.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, <code class="docutils literal notranslate"><span class="pre">RINC</span></code>, and <code class="docutils literal notranslate"><span class="pre">TRlevel</span></code> are not defined, the program automatically
+determines the number of sub-pairs for splitting each contact pair.</p></li>
+</ul>
+<p>Tabular Input for <code class="docutils literal notranslate"><span class="pre">RID1</span></code>  <code class="docutils literal notranslate"><span class="pre">RID1</span></code> accepts tabular input in the form of a 2D array when <code class="docutils literal notranslate"><span class="pre">Option</span></code> = ADJUST, MORPH or TADJUST.
+In this case, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, <code class="docutils literal notranslate"><span class="pre">RINC</span></code>, <code class="docutils literal notranslate"><span class="pre">Val1</span></code>, <code class="docutils literal notranslate"><span class="pre">Val2</span></code>, and <code class="docutils literal notranslate"><span class="pre">Val3</span></code> are ignored. For more
+information, see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_realkey.html#ctec_adjlrggap">Physically Moving Contact Nodes Toward the Target Surface</a></p>
+</dd>
+<dt><strong>rid2</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The meanings of <code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, and <code class="docutils literal notranslate"><span class="pre">RINC</span></code> vary depending on the contact type or the
+<code class="docutils literal notranslate"><span class="pre">Option</span></code> specified, as described below. <code class="docutils literal notranslate"><span class="pre">RID1</span></code> accepts tabular input for some <code class="docutils literal notranslate"><span class="pre">Option</span></code> values.
+<code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, <code class="docutils literal notranslate"><span class="pre">RINC</span></code> are ignored when <code class="docutils literal notranslate"><span class="pre">Option</span></code> = DMP.</p>
+<p>Pair-Based Contact For pair-based contact, the range of real constant pair IDs for which <code class="docutils literal notranslate"><span class="pre">Option</span></code> will be performed.
+If <code class="docutils literal notranslate"><span class="pre">RID2</span></code> is not specified, it defaults to <code class="docutils literal notranslate"><span class="pre">RID1</span></code>. If no value is specified, all contact pairs
+in the selected set of elements are considered.</p>
+<p>General Contact For general contact ( <code class="docutils literal notranslate"><span class="pre">InterType</span></code> = GCN), <code class="docutils literal notranslate"><span class="pre">RID1</span></code> and <code class="docutils literal notranslate"><span class="pre">RID2</span></code> are section IDs associated with
+general contact surfaces instead of real constant IDs. If <code class="docutils literal notranslate"><span class="pre">RINC</span></code> = 0, the <code class="docutils literal notranslate"><span class="pre">Option</span></code> is performed
+between the two sections, <code class="docutils literal notranslate"><span class="pre">RID1</span></code> and <code class="docutils literal notranslate"><span class="pre">RID2</span></code>. If <code class="docutils literal notranslate"><span class="pre">RINC</span> <span class="pre">&gt;</span></code> 0, the <code class="docutils literal notranslate"><span class="pre">Option</span></code> is performed among
+all specified sections ( <code class="docutils literal notranslate"><span class="pre">RID1</span></code> to <code class="docutils literal notranslate"><span class="pre">RID2</span></code> with increment of <code class="docutils literal notranslate"><span class="pre">RINC</span></code> ).</p>
+<p>Contact Splitting For contact splitting at the preprocessing level ( <code class="docutils literal notranslate"><span class="pre">Option</span></code> = SPLIT only), <code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, and <code class="docutils literal notranslate"><span class="pre">RINC</span></code> are used as follows:</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, and <code class="docutils literal notranslate"><span class="pre">RINC</span></code> are non-zero and positive, split the contact pairs from real
+constant pair ID number <code class="docutils literal notranslate"><span class="pre">RID1</span></code> to <code class="docutils literal notranslate"><span class="pre">RID2</span></code> in increments of <code class="docutils literal notranslate"><span class="pre">RINC</span></code>. In this case, if
+<code class="docutils literal notranslate"><span class="pre">TRlevel</span></code> is non-zero, it will only be applied to these specified pairs.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">RID1</span></code> is zero or blank, <code class="docutils literal notranslate"><span class="pre">TRlevel</span></code> will take affect for all contact pairs in the model from
+largest to smallest.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, <code class="docutils literal notranslate"><span class="pre">RINC</span></code>, and <code class="docutils literal notranslate"><span class="pre">TRlevel</span></code> are not defined, the program automatically
+determines the number of sub-pairs for splitting each contact pair.</p></li>
+</ul>
+<p>Tabular Input for <code class="docutils literal notranslate"><span class="pre">RID1</span></code>  <code class="docutils literal notranslate"><span class="pre">RID1</span></code> accepts tabular input in the form of a 2D array when <code class="docutils literal notranslate"><span class="pre">Option</span></code> = ADJUST, MORPH or TADJUST.
+In this case, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, <code class="docutils literal notranslate"><span class="pre">RINC</span></code>, <code class="docutils literal notranslate"><span class="pre">Val1</span></code>, <code class="docutils literal notranslate"><span class="pre">Val2</span></code>, and <code class="docutils literal notranslate"><span class="pre">Val3</span></code> are ignored. For more
+information, see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_realkey.html#ctec_adjlrggap">Physically Moving Contact Nodes Toward the Target Surface</a></p>
+</dd>
+<dt><strong>rinc</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The meanings of <code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, and <code class="docutils literal notranslate"><span class="pre">RINC</span></code> vary depending on the contact type or the
+<code class="docutils literal notranslate"><span class="pre">Option</span></code> specified, as described below. <code class="docutils literal notranslate"><span class="pre">RID1</span></code> accepts tabular input for some <code class="docutils literal notranslate"><span class="pre">Option</span></code> values.
+<code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, <code class="docutils literal notranslate"><span class="pre">RINC</span></code> are ignored when <code class="docutils literal notranslate"><span class="pre">Option</span></code> = DMP.</p>
+<p>Pair-Based Contact For pair-based contact, the range of real constant pair IDs for which <code class="docutils literal notranslate"><span class="pre">Option</span></code> will be performed.
+If <code class="docutils literal notranslate"><span class="pre">RID2</span></code> is not specified, it defaults to <code class="docutils literal notranslate"><span class="pre">RID1</span></code>. If no value is specified, all contact pairs
+in the selected set of elements are considered.</p>
+<p>General Contact For general contact ( <code class="docutils literal notranslate"><span class="pre">InterType</span></code> = GCN), <code class="docutils literal notranslate"><span class="pre">RID1</span></code> and <code class="docutils literal notranslate"><span class="pre">RID2</span></code> are section IDs associated with
+general contact surfaces instead of real constant IDs. If <code class="docutils literal notranslate"><span class="pre">RINC</span></code> = 0, the <code class="docutils literal notranslate"><span class="pre">Option</span></code> is performed
+between the two sections, <code class="docutils literal notranslate"><span class="pre">RID1</span></code> and <code class="docutils literal notranslate"><span class="pre">RID2</span></code>. If <code class="docutils literal notranslate"><span class="pre">RINC</span> <span class="pre">&gt;</span></code> 0, the <code class="docutils literal notranslate"><span class="pre">Option</span></code> is performed among
+all specified sections ( <code class="docutils literal notranslate"><span class="pre">RID1</span></code> to <code class="docutils literal notranslate"><span class="pre">RID2</span></code> with increment of <code class="docutils literal notranslate"><span class="pre">RINC</span></code> ).</p>
+<p>Contact Splitting For contact splitting at the preprocessing level ( <code class="docutils literal notranslate"><span class="pre">Option</span></code> = SPLIT only), <code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, and <code class="docutils literal notranslate"><span class="pre">RINC</span></code> are used as follows:</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, and <code class="docutils literal notranslate"><span class="pre">RINC</span></code> are non-zero and positive, split the contact pairs from real
+constant pair ID number <code class="docutils literal notranslate"><span class="pre">RID1</span></code> to <code class="docutils literal notranslate"><span class="pre">RID2</span></code> in increments of <code class="docutils literal notranslate"><span class="pre">RINC</span></code>. In this case, if
+<code class="docutils literal notranslate"><span class="pre">TRlevel</span></code> is non-zero, it will only be applied to these specified pairs.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">RID1</span></code> is zero or blank, <code class="docutils literal notranslate"><span class="pre">TRlevel</span></code> will take affect for all contact pairs in the model from
+largest to smallest.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, <code class="docutils literal notranslate"><span class="pre">RINC</span></code>, and <code class="docutils literal notranslate"><span class="pre">TRlevel</span></code> are not defined, the program automatically
+determines the number of sub-pairs for splitting each contact pair.</p></li>
+</ul>
+<p>Tabular Input for <code class="docutils literal notranslate"><span class="pre">RID1</span></code>  <code class="docutils literal notranslate"><span class="pre">RID1</span></code> accepts tabular input in the form of a 2D array when <code class="docutils literal notranslate"><span class="pre">Option</span></code> = ADJUST, MORPH or TADJUST.
+In this case, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, <code class="docutils literal notranslate"><span class="pre">RINC</span></code>, <code class="docutils literal notranslate"><span class="pre">Val1</span></code>, <code class="docutils literal notranslate"><span class="pre">Val2</span></code>, and <code class="docutils literal notranslate"><span class="pre">Val3</span></code> are ignored. For more
+information, see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_realkey.html#ctec_adjlrggap">Physically Moving Contact Nodes Toward the Target Surface</a></p>
+</dd>
+<dt><strong>intertype</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The type of contact interface ( <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/ctec_comppairgen.html#gcfeatnotsup">pair-based versus general contact</a>
+) to be considered; or the type of contact pair to be trimmed/unselected/auto-set.</p>
+<p>The following labels specify the type of contact interface:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">(blank)</span></code> - Include all contact definitions (pair-based and general contact).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GCN</span></code> - Include general contact definitions only (not valid when <code class="docutils literal notranslate"><span class="pre">Option</span></code> = RESET or AUTO).</p></li>
+</ul>
+<p>The following labels specify the type of contact pairs to be trimmed/unselected/auto-set (used only
+when <code class="docutils literal notranslate"><span class="pre">Option</span></code> = TRIM, UNSE, or AUTO, and only for pair-based contact definitions):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ANY</span></code> - All types (default).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MPC</span></code> - MPC-based contact pairs (KEYOPT(2) = 2).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BOND</span></code> - Bonded contact pairs (KEYOPT(12) = 3, 5, 6).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NOSP</span></code> - No separation contact pairs (KEYOPT(12) = 2, 4).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SMAL</span></code> - Small sliding contact pairs (KEYOPT(18) = 1).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SELF</span></code> - Self contact pairs (target surface completely overlaps contact surface).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">INAC</span></code> - Inactive contact pairs (symmetric contact pairs for MPC contact or KEYOPT(8) = 2).</p></li>
+</ul>
+<p>The following labels specify the type of contact pairs to be trimmed only when <code class="docutils literal notranslate"><span class="pre">Option</span></code> = SPLIT or DMP, and only for pair-based contact definitions:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">(blank)</span></code> - The program automatically deletes inactive contact pairs defined by auto-asymmetric
+selection (KEYOPT(8) = 2). If <code class="docutils literal notranslate"><span class="pre">Option</span></code> = DMP, the program also trims split contact pairs that are
+associated with bonded contact (KEYOPT(12) = 5 or 6) or small sliding contact (KEYOPT(18) = 1).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TRIM</span></code> - The program automatically deletes inactive contact pairs defined by auto-asymmetric
+selection (KEYOPT(8) = 2), and also trims all split contact pairs.</p></li>
+</ul>
+</dd>
+<dt><strong>trlevel</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>This argument is either the trimming level for trimming contact pairs or the number of sub-pairs for
+contact splitting.</p>
+<p>Trimming level (used only when <code class="docutils literal notranslate"><span class="pre">Option</span></code> = TRIM, UNSE, or MORPH):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">(blank)</span></code> - Normal trimming (default): remove/unselect contact and target elements which are in
+far-field.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AGGRE</span></code> - Aggressive trimming: remove/unselect contact and target elements which are in far-
+field, and certain elements in near-field.</p></li>
+</ul>
+<p>Number of sub-pairs used for contact splitting (used only when <code class="docutils literal notranslate"><span class="pre">Option</span></code> = SPLIT or DMP):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">(blank)</span></code> - The program automatically chooses the number of sub-pairs for splitting in order to
+achieve better scalability in a DMP run.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">N</span></code> - Input a non-zero positive number to indicate the maximum number of sub-pairs for splitting
+the largest contact pair in the model. All other smaller contact pairs will be split following this
+number proportionally. The number you input may not always be honored; splitting may results in a
+fewer number of sub-pairs basing on many factors</p></li>
+</ul>
+</dd>
+<dt><strong>val1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CNCHECK.html">command
+documentation</a> for
+further information.</p>
+</dd>
+<dt><strong>val2</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CNCHECK.html">command
+documentation</a> for
+further information.</p>
+</dd>
+<dt><strong>val3</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CNCHECK.html">command
+documentation</a> for
+further information.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This function contains specificities regarding the argument definitions.
+Please refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CNCHECK.html">command documentation</a>
+for further explanations.</p>
+</div>
+<p id="cncheck-notes">The <span class="xref std std-ref">cncheck</span> command provides information for surface-to-surface, node-to-surface, and line-
+to-line contact pairs (element types <code class="docutils literal notranslate"><span class="pre">TARGE169</span></code>, <code class="docutils literal notranslate"><span class="pre">TARGE170</span></code>, <code class="docutils literal notranslate"><span class="pre">CONTA172</span></code>, <code class="docutils literal notranslate"><span class="pre">CONTA174</span></code>,
+<code class="docutils literal notranslate"><span class="pre">CONTA175</span></code>, <code class="docutils literal notranslate"><span class="pre">CONTA177</span></code> ). All contact and target elements of interest, along with the solid
+elements and nodes attached to them, must be selected for the command to function properly. For
+performance reasons, the program uses a subset of nodes and elements based on the specified contact
+regions ( <code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, <code class="docutils literal notranslate"><span class="pre">RINC</span></code> ) when executing the <span class="xref std std-ref">cncheck</span> command.</p>
+<p><span class="xref std std-ref">cncheck</span> is available in both the PREP7 and SOLUTION processors, but only before the first
+solve operation (that is, only before the first load step or the first substep).</p>
+<p>If the contact and target elements were generated through mesh commands ( <span class="xref std std-ref">amesh</span>,
+<span class="xref std std-ref">lmesh</span>, etc.) instead of the <span class="xref std std-ref">esurf</span> command, you must issue <span class="xref std std-ref">modmsh</span>,DETACH before
+<span class="xref std std-ref">cncheck</span>. Otherwise, <span class="xref std std-ref">cncheck</span> will not work correctly.</p>
+<p>The following additional notes are available:</p>
+<p>The command <span class="xref std std-ref">cncheck</span>,POST solves the initial contact configuration in one substep. After
+issuing this command, you can postprocess the contact result items as you would for any other
+converged load step; however, only the contact status, contact penetration or gap, and contact
+pressure will have meaningful values. Other contact quantities (friction stress, sliding distance,
+chattering) will be available but are not useful.</p>
+<p>In order to report the real geometric penetration and gap, the program internally sets KEYOPT(9) = 0
+during the execution of <span class="xref std std-ref">cncheck</span>,POST.</p>
+<p>Because <code class="docutils literal notranslate"><span class="pre">Option</span></code> = POST forces a solve operation, the PrepPost (PP) license does not work with
+<span class="xref std std-ref">cncheck</span>,POST.</p>
+<p>If <span class="xref std std-ref">cncheck</span>,POST is issued within the solution processor, the <span class="xref std std-ref">solve</span> command that solves
+the first load step of your analysis should appear in a different step, as shown in the following
+example:</p>
+<div class="highlight-apdl notranslate"><div class="highlight"><pre><span></span><span class="k">/SOLU</span>
+<span class="k">CNCHECK</span><span class="p">,</span><span class="nv">POST</span>
+<span class="k">FINISH</span>
+<span class="p">...</span>
+
+<span class="k">/SOLU</span>
+<span class="k">SOLVE</span>
+<span class="k">FINISH</span>
+<span class="p">...</span>
+</pre></div>
+</div>
+<p><span class="xref std std-ref">cncheck</span>,POST writes initial contact results to a file named <code class="file docutils literal notranslate"><span class="pre">jobname.rcn</span></code>. When
+postprocessing the initial contact state, you need to explicitly read results from this file using
+the <span class="xref std std-ref">file</span> and <a class="reference external" href="https://docs.python.org/3/reference/expressions.html#set" title="(in Python v3.14)"><span>Set displays</span></a>,FIRST commands in POST1 to properly read the corresponding contact
+data. Otherwise, the results may be read improperly. The following example shows a valid command
+sequence for plotting the initial contact gap:</p>
+<div class="highlight-apdl notranslate"><div class="highlight"><pre><span></span><span class="k">/SOLU</span>
+<span class="k">CNCHECK</span><span class="p">,</span><span class="nv">POST</span>
+<span class="k">FINISH</span>
+<span class="k">/POST1</span>
+<span class="k">FILE</span><span class="p">,</span><span class="nv">Jobname</span><span class="p">,</span><span class="nv">RCN</span>
+<span class="k">SET</span><span class="p">,</span><span class="nv">FIRST</span>
+<span class="k">PLNSOL</span><span class="p">,</span><span class="nv">CONT</span><span class="p">,</span><span class="nv">GAP</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span>
+<span class="k">FINISH</span>
+<span class="p">...</span>
+</pre></div>
+</div>
+<p>You can issue <span class="xref std std-ref">cncheck</span>,ADJUST to physically move contact nodes to the target surface.
+Alternatively, you can issue <span class="xref std std-ref">cncheck</span>,MORPH to physically move contact nodes to the target
+surface and then morph the underlying mesh to improve the mesh quality. See <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_realkey.html#ctec_adjlrggap">Physically Moving
+Contact Nodes Toward the Target Surface</a>
+<span class="xref std std-ref">cncheck</span>,ADJUST or <span class="xref std std-ref">cncheck</span>,MORPH is issued within the solution processor, the
+<span class="xref std std-ref">solve</span> command that solves the first load step of your analysis should appear in a different
+step:</p>
+<div class="highlight-apdl notranslate"><div class="highlight"><pre><span></span><span class="k">/SOLU</span>
+<span class="k">CNCHECK</span><span class="p">,</span><span class="nv">ADJUST</span>
+<span class="k">FINISH</span>
+<span class="p">...</span>
+
+<span class="k">/SOLU</span>
+<span class="k">SOLVE</span>
+<span class="k">FINISH</span>
+<span class="p">...</span>
+</pre></div>
+</div>
+<p>After issuing the <span class="xref std std-ref">cncheck</span>,ADJUST command, the initial adjustment is converted to structural
+displacement values (UX, UY, UZ) and stored in a file named <code class="file docutils literal notranslate"><span class="pre">jobname.rcn</span></code>. Similarly, the
+<span class="xref std std-ref">cncheck</span>,MORPH command converts the initial adjustment of contact nodes as well as the
+morphing adjustment of solid element nodes to structural displacement values (UX, UY, UZ) and stores
+them in the <code class="file docutils literal notranslate"><span class="pre">jobname.rcn</span></code> file. You can use this file to plot or list nodal adjustment vectors
+or create a contour plot of the adjustment magnitudes via the displacements. When postprocessing the
+nodal adjustment values, you need to explicitly read results from this file using the <span class="xref std std-ref">file</span>
+and <a class="reference external" href="https://docs.python.org/3/reference/expressions.html#set" title="(in Python v3.14)"><span>Set displays</span></a>,FIRST commands in POST1 to properly read the corresponding contact data. Otherwise,
+the results may be read improperly.</p>
+<p>The <code class="file docutils literal notranslate"><span class="pre">jobname.rcn</span></code> file contains information generated from the <span class="xref std std-ref">cncheck</span>,POST,
+<span class="xref std std-ref">cncheck</span>,ADJUST, <span class="xref std std-ref">cncheck</span>,MORPH, or <span class="xref std std-ref">cncheck</span>, TADJUST command. If multiple
+commands are issued in the same analysis, the file is overwritten by the last <span class="xref std std-ref">cncheck</span>
+command.</p>
+<p>You can issue <span class="xref std std-ref">cncheck</span>,TADJUST to physically move the target body to the contact surface. This
+command tries to establish initial contact with penetration in a range specified by <code class="docutils literal notranslate"><span class="pre">PMAX</span></code> and
+<code class="docutils literal notranslate"><span class="pre">PMIN</span></code>. Similar to the ADJUST and MORPH options, the initial adjustment is converted to structural
+displacement values (UX, UY, UZ) and stored in the <code class="file docutils literal notranslate"><span class="pre">jobname.rcn</span></code> file. This option accepts
+tabular input in the <code class="docutils literal notranslate"><span class="pre">RID1</span></code> field.</p>
+<p>You can specify either a positive or negative value for <code class="docutils literal notranslate"><span class="pre">PMIN</span></code> and <code class="docutils literal notranslate"><span class="pre">PMAX</span></code>. The program
+interprets a positive value as a scaling factor and interprets a negative value as the absolute
+value.</p>
+<p>For more information, see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_realkey.html#">Physically Moving the Target Body Toward the Contact Surface</a></p>
+<p>The command <span class="xref std std-ref">cncheck</span>,RESET allows you to reset all but a few key options and real constants
+associated with the specified contact pairs ( <code class="docutils literal notranslate"><span class="pre">RID1</span></code>, <code class="docutils literal notranslate"><span class="pre">RID2</span></code>, <code class="docutils literal notranslate"><span class="pre">RINC</span></code> ) to their default
+values. This option is only valid for pair-based contact definitions.</p>
+<p>The following key options and real constants remain unchanged when this command is issued:</p>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<p>The command <span class="xref std std-ref">cncheck</span>,AUTO automatically changes certain default or undefined key options and
+real constants to optimized settings or values. The changes are based on overall contact pair
+behaviors. In general, this command improves convergence for nonlinear contact analysis. This option
+is only valid for pair-based contact definitions.</p>
+<p>The tables below list typical KEYOPT and real constant settings implemented by <span class="xref std std-ref">cncheck</span>,AUTO.
+The actual settings implemented for your specific model may vary from what is described here. You
+should always verify the modified settings by issuing <span class="xref std std-ref">cncheck</span>,DETAIL to list current contact
+pair properties.</p>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<p id="auto-keyopts-ft-1">Set to 0 if KEYOPT(2) &gt; 1 for debonding.</p>
+<p id="auto-keyopts-ft-2">Set to 1 if underlying elements are superelements, or if KEYOPT(9) = 2 was previously specified.</p>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<p id="auto-real-ft-1">PINB default depends on contact behavior (rigid vs. flexible target), <span class="xref std std-ref">nlgeom</span>,ON or OFF,
+KEYOPT(9) setting, KEYOPT(12) setting, and the value of real constant CNOF (see ).</p>
+<p><span class="xref std std-ref">cncheck</span>,AUTO also sets <span class="xref std std-ref">pred</span>,OFF for the case of a <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_surfcon.html#strbeamso1703">force-distributed constraint</a>
+defined via <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_restmpc.html">MPC contact</a>.</p>
+<p>You can issue <span class="xref std std-ref">cncheck</span>,TRIM or <span class="xref std std-ref">cncheck</span>,UNSEL to remove or unselect contact and target
+elements which are in far-field (that is, open and not near contact), or even in near-field if
+aggressive trimming logic is used ( <code class="docutils literal notranslate"><span class="pre">TRlevel</span></code> = AGGRE).</p>
+<p>The SPLIT, DMP, and MERGE options are intended for use in a distributed-memory parallel (DMP) run.
+Use the command <span class="xref std std-ref">cncheck</span>,SPLIT or <span class="xref std std-ref">cncheck</span>,DMP to split large contact pairs into
+smaller sub-pairs so that the smaller contact pairs can be distributed into different cores, thereby
+improving performance. This functionality is not the same as manually splitting contact pairs during
+the modeling process. The program splitting logic performs the necessary exchange of data on the
+boundaries between the split contact pairs to ensure that the results with and without splitting are
+essentially identical.</p>
+<p>The command <span class="xref std std-ref">cncheck</span>,MERGE can be used to merge the sub-pairs together again, which is useful
+for postprocessing the contact results based on the original contact pair geometry. However, caution
+must be taken when a downstream analysis is performed since the MERGE operation may alter the
+database.</p>
+<p>For more information, see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/ctecsplitting.html#ctecsplitlimit">Solving Large Contact Models in a Distributed-Memory Parallel Environment</a></p>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.72.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.7.2. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

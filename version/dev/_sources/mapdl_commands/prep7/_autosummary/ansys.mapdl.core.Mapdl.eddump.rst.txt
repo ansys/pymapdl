@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.eddump
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.eddump

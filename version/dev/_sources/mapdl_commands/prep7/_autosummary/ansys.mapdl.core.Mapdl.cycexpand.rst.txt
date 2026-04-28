@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.cycexpand
+================================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.cycexpand

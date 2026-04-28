@@ -1,0 +1,1065 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>cycopt &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=affbdea0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/prep7/_autosummary/ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cycopt';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="emsym" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.emsym.html" />
+    <link rel="prev" title="cyclic" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cyclic.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.72.dev0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/prep7/_autosummary/ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cycopt.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Session</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../session/index.html">Session</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Database</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../database/index.html">Database</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Graphics</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../graphics/index.html">Graphics</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">APDL</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/abbreviations.html">Abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/parameter_definition.html">ParameterDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/matrix_operations.html">MatrixOperations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/macro_files.html">MacroFiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/encryption_decryption.html">EncryptionDecryption</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/array_parameters.html">ArrayParameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/process_controls.html">ProcessControls</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Preprocessing</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Prep7</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../areas.html">Areas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../booleans.html">Booleans</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../meshing.html">Meshing</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../special_purpose.html">SpecialPurpose</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.adpci.html">adpci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.aerocoeff.html">aerocoeff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cint.html">cint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cycexpand.html">cycexpand</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cycfreq.html">cycfreq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cyclic.html">cyclic</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">cycopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.emsym.html">emsym</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.msopt.html">msopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.mstole.html">mstole</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.perbc2d.html">perbc2d</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.race.html">race</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.sstate.html">sstate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.xfcrkmesh.html">xfcrkmesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.xfdata.html">xfdata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.xfenrich.html">xfenrich</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.xflist.html">xflist</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../database.html">Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../elements.html">Elements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../piping.html">Piping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../primitives.html">Primitives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cross_sections.html">CrossSections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lines.html">Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data_tables.html">DataTables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constraint_equations.html">ConstraintEquations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constraint_equations_.html">ConstraintEquations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nodes.html">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../coupled_dof.html">CoupledDof</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../morphing.html">Morphing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../element_type.html">ElementType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../materials.html">Materials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../volumes.html">Volumes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../keypoints.html">Keypoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../hard_points.html">HardPoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../artificially_matched_layers.html">ArtificiallyMatchedLayers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../real_constants.html">RealConstants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../superelements.html">Superelements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../explicit_dynamics.html">ExplicitDynamics</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Solution</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../solution/index.html">Solution</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post1/index.html">Post1</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST26</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post26/index.html">Post26</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux2/index.html">Aux2</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux3/index.html">Aux3</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX12</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux12/index.html">Aux12</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX15</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux15/index.html">Aux15</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">MAP</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../map/index.html">Map</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Connection</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../conn.html">Connection commands</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Undocumented</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../inqfun.html">Undocumented inquire commands</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="None" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">MAPDL commands</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../index.html" class="nav-link">Prep7</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../special_purpose.html" class="nav-link">SpecialPurpose</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">cycopt</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="cycopt">
+<h1>cycopt<a class="headerlink" href="#cycopt" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cycopt">
+<span class="sig-prename descclassname"><span class="pre">SpecialPurpose.</span></span><span class="sig-name descname"><span class="pre">cycopt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value4</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value5</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value6</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value7</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core._commands.prep7.special_purpose.SpecialPurpose.cycopt" title="Link to this definition">#</a></dt>
+<dd><p>Specifies solution options for a cyclic symmetry analysis.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCOPT.html">CYCOPT</a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>option</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Cyclic symmetry analysis option. There is no default. You must choose o ne of the following options:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">BCMULT</span></code> - Controls whether cyclic sector array parameter names are reused or created new for multiple
+entities.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - The flag value.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">(OFF</span> <span class="pre">or</span> <span class="pre">NO)</span></code> - Create new array parameter names (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1(ON</span> <span class="pre">or</span> <span class="pre">YES)</span></code> - Reuse array parameter names</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">COMBINE</span></code> - For linear <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycstaticans.html#cycsym_postproc_stat">static cyclic symmetry analysis</a>
+with <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycsolarch.html#">non-cyclically symmetric loading</a> only,
+expands and combines all harmonic index solutions and writes them to the results file during the
+solution phase of the analysis.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - The flag value.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">(OFF</span> <span class="pre">or</span> <span class="pre">NO)</span></code> - Disable combining of harmonic index solutions (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">(ON</span> <span class="pre">or</span> <span class="pre">YES)</span></code> - Enable combining of harmonic index solutions</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DEFAULT</span></code> - Set the default cyclic solution settings.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DOF</span></code> - The degrees of freedom to couple from the nodes on the low sector boundary to nodes on the high
+boundary:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - The component pair ID number.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value2,</span> <span class="pre">Value3,</span> <span class="pre">Value4,</span> <span class="pre">...,</span> <span class="pre">Value7</span></code> - The constraint-equation/-coupling degree of
+freedom (DOF) for this pair. Repeat the command to add other DOFs. The default is constraint-
+equation/-coupling all applicable DOFs.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FACETOL</span></code> - Tolerance for inclusion of surface nodes into your base sector. Autodetect defaults to 15°,
+accommodating most sections. Specify a new <code class="docutils literal notranslate"><span class="pre">Value1</span></code> only when extreme cut angles or complex model
+geometry cause surface nodes to be excluded. See Notes (below) for more information.</p>
+<p>Ansys, Inc. recommends that successful auto-detection depends more on the value of ANGTOL
+than the value of FACETOL. Please refer to <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycedgecomp.html#gadvcycopttol7">CYCOPTAuto Detection Tolerance Adjustments for Difficult
+Cases</a>
+<span class="xref std std-ref">cycopt</span> command.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - The face tolerance applies only to auto detection from node/element models (already
+meshed and no solid model), and it defaults to 15°.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HINDEX</span></code> - The <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycmodalans.html#harmindex">harmonic index</a>
+ranges to be solved. Applies to static and harmonic analyses only if <span class="xref std std-ref">CYCOPT_HINDEXValue5</span>
+<code class="docutils literal notranslate"><span class="pre">Value5</span></code> = STATIC.</p>
+<p>By default, the <span class="xref std std-ref">solve</span> command loops through all available harmonic indices. <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycstaticans.html#cycsym_postproc_stat">Static</a>
+and <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycmodalans.html#harmindex">harmonic</a>
+analyses only solve harmonic indices required for the applied loads. All other analyses solve them
+all.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">EVEN</span> <span class="pre">/</span> <span class="pre">ODD</span></code> - For low-frequency electromagnetic analysis only, EVEN specifies a symmetric
+solution and ODD specifies an antisymmetric solution.</p>
+<p>The value you specify is based on the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycmodalans.html#harmindex">harmonic index</a>
+: EVEN (default) indicates harmonic index = 0, and ODD indicates harmonic index = <code class="docutils literal notranslate"><span class="pre">N</span></code> / 2 (where
+<code class="docutils literal notranslate"><span class="pre">N</span></code> is an integer representing the number of sectors in 360°). A value of ODD applies only when
+<code class="docutils literal notranslate"><span class="pre">N</span></code> is an even number.</p>
+<p>The <span class="xref std std-ref">cycopt</span> command with this HINDEX option is cumulative. To remove an option (for example,
+EVEN), issue this command: <span class="xref std std-ref">cycopt</span>,HINDEX,EVEN,,,-1</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ALL</span></code> - Solve all applicable harmonic indices. <code class="docutils literal notranslate"><span class="pre">Value2</span></code> must be blank.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1,</span> <span class="pre">Value2,</span> <span class="pre">Value3</span></code> - Solve harmonic indices in range <code class="docutils literal notranslate"><span class="pre">Value1</span></code> through <code class="docutils literal notranslate"><span class="pre">Value2</span></code> in
+steps of <code class="docutils literal notranslate"><span class="pre">Value3</span></code>. Repeat the command to add other ranges. The default solves all applicable
+harmonic indices.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value4</span></code> - The only valid value is -1. If specified, it removes <code class="docutils literal notranslate"><span class="pre">Value1</span></code> through <code class="docutils literal notranslate"><span class="pre">Value2</span></code> in
+steps of <code class="docutils literal notranslate"><span class="pre">Value3</span></code> from the set to solve. By default, if <code class="docutils literal notranslate"><span class="pre">Value4</span></code> = -1 then <code class="docutils literal notranslate"><span class="pre">Value1</span></code> = 0,
+<code class="docutils literal notranslate"><span class="pre">Value2</span></code> = 0, and <code class="docutils literal notranslate"><span class="pre">Value3</span></code> = 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value5</span></code> - For <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycstaticans.html#cycsym_postproc_stat">static</a>
+and <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycmodalans.html#harmindex">harmonic</a>
+analyses, enter either a number or STATIC:</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Value5</span></code> = &lt;number&gt;  the number entered sets the tolerance for determining if the Fourier
+contribution of a load is significant (default = 1.0E-5). In this case, the harmonic index selection
+is disabled.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Value5</span></code> = STATIC the harmonic index selection is enabled, and no verification is done on the
+significance of unselected harmonic indicies. Improper selection of the harmonic index range may
+produce incomplete (incorrect) results.</p>
+</li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LDSECT</span></code> - Restricts subsequently defined force loads and surface loads to a specified sector. The restriction
+remains in effect until you change or reset it. This option is not available for harmonic analyses
+based on mode-superposition ( <span class="xref std std-ref">cycopt</span>,MSUP,1)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - The sector number. A value other than 0 (default) is valid for a cyclic symmetry
+analysis with <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycsolarch.html#">non- cyclically symmetric loading</a> only. A
+value of 0 (or ALL) resets the default behavior for cyclic loading (where the loads are identical on
+all sectors).</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MOVE</span></code> - Specifies if the program should move high- or low-edge component nodes paired within the specified
+tolerance (TOLER) to create precisely matching pairs.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - The flag value.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> - Do not move edge component nodes (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">or</span> <span class="pre">HIGH</span></code> - Move the high-edge component nodes to precisely match the low-edge component nodes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-1</span> <span class="pre">or</span> <span class="pre">LOW</span></code> - Move the low-edge component nodes to precisely match the high-edge component nodes</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MSUP</span></code> - This flag is used to limit the results written to the <code class="file docutils literal notranslate"><span class="pre">Jobname.MODE</span></code> and <code class="file docutils literal notranslate"><span class="pre">Jobname.RST</span></code>
+files in a modal cyclic symmetry analysis. In a linear perturbation analysis, the modal analysis and
+the first load step of the preceding base analysis must be set to the same value.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - The flag value.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">(OFF</span> <span class="pre">or</span> <span class="pre">NO)</span></code> - Write results for the base and duplicate sectors to the <code class="file docutils literal notranslate"><span class="pre">Jobname.MODE</span></code>
+and <code class="file docutils literal notranslate"><span class="pre">Jobname.RST</span></code> files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">(ON</span> <span class="pre">or</span> <span class="pre">YES)</span></code> - Write only the base sector results to the <code class="file docutils literal notranslate"><span class="pre">Jobname.MODE</span></code> and
+<code class="file docutils literal notranslate"><span class="pre">Jobname.RST</span></code> files for use in a subsequent mode-superposition-based analysis. Default, except
+for cyclic unsymmetric modal, LANPCG, and SNODE solutions, which use <code class="docutils literal notranslate"><span class="pre">Value1</span></code> = 0 as the default.
+This option is not valid for cyclic unsymmetric modal, LANPCG, and SNODE solutions.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">STATUS</span></code> - List the solution option settings active for the cyclic model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TOLER</span></code> - The tolerance used to determine whether a node on the low edge is paired with a node on the high
+edge.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - The tolerance value.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Greater</span> <span class="pre">than</span> <span class="pre">0</span></code> - The absolute distance tolerance for automatic sector-boundary detection and
+low-/high-edge component node pairing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Less</span> <span class="pre">than</span> <span class="pre">0</span></code> - The relative tolerance for automatic sector-boundary detection and low-/high-edge component node
+pairing. In this case, the tolerance is <code class="docutils literal notranslate"><span class="pre">Value1</span></code> * <code class="docutils literal notranslate"><span class="pre">Length</span></code>, where <code class="docutils literal notranslate"><span class="pre">Length</span></code> is the length of the diagonal of an imaginary box enclosing the model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> - Tolerance is set to -1.0 x 10 <sup>-4</sup> (default)</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value2</span></code> - <code class="docutils literal notranslate"><span class="pre">ANGTOL</span></code> = Maximum allowable angle tolerance. (default = 0.01°)</p>
+<p>The valid range for <code class="docutils literal notranslate"><span class="pre">ANGTOL</span></code> is model dependent.</p>
+<p>If you input both the number of sectors and a sector angle, the angle must match 360/(number of
+sectors) within <code class="docutils literal notranslate"><span class="pre">ANGTOL</span></code>.</p>
+<p>If you input only a sector angle, it must divide evenly into 360° within <code class="docutils literal notranslate"><span class="pre">ANGTOL</span></code>.</p>
+<p>If you input a sector angle, the final cyclic sector must span that angle within <code class="docutils literal notranslate"><span class="pre">ANGTOL</span></code>.</p>
+<p>For auto detected sector angle, the final cyclic sector must span 360/(number of sectors) within
+<code class="docutils literal notranslate"><span class="pre">ANGTOL</span></code>, everywhere along the LOW/HIGH boundaries.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">ANGTOL</span></code> is too small, your CAD or FEA model may not be accurate enough to allow auto detection
+or verification.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">ANGTOL</span></code> is too large, you may get an unexpected or incorrect boundary definition, or in other
+cases fail to detect the boundaries.</p>
+<p>For some difficult cases from FEA models (not solid models), you may need to change the value of
+<code class="docutils literal notranslate"><span class="pre">FACETOL</span></code> to achieve auto detection. Please refer to <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycedgecomp.html#gadvcycopttol7">CYCOPTAuto Detection Tolerance Adjustments
+for Difficult Cases</a>
+<span class="xref std std-ref">cycopt</span> command.</p>
+</li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">USRROT</span></code> - Flag specifying whether the program should override automatic nodal rotations to edge components and
+allow you to apply nodal rotations manually.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - The flag value.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">(OFF</span> <span class="pre">or</span> <span class="pre">NO)</span></code> - Allow automatic node rotation (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">(ON</span> <span class="pre">or</span> <span class="pre">YES)</span></code> - Suppress automatic node rotation. If you select this option, you must apply
+appropriate nodal rotations to all edge component nodes; otherwise, your analysis will yield
+incorrect solution results.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LOW</span></code> - Suppresses automatic rotation of low-edge component nodes only, allowing you to apply
+them manually. Automatic rotation of high-edge component nodes occurs to produce the matching edge
+nodes required for a valid cyclic solution.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HIGH</span></code> - Suppresses automatic rotation of high-edge component nodes only, allowing you to apply
+them manually. Automatic rotation of low-edge component nodes occurs to produce the matching edge
+nodes required for a valid cyclic solution.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><strong>value1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCOPT.html">command
+documentation</a> for
+further information.</p>
+</dd>
+<dt><strong>value2</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCOPT.html">command
+documentation</a> for
+further information.</p>
+</dd>
+<dt><strong>value3</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCOPT.html">command
+documentation</a> for
+further information.</p>
+</dd>
+<dt><strong>value4</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCOPT.html">command
+documentation</a> for
+further information.</p>
+</dd>
+<dt><strong>value5</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCOPT.html">command
+documentation</a> for
+further information.</p>
+</dd>
+<dt><strong>value6</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCOPT.html">command
+documentation</a> for
+further information.</p>
+</dd>
+<dt><strong>value7</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCOPT.html">command
+documentation</a> for
+further information.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p id="cycopt-notes">The program solves a cyclically symmetric model (set up via the <span class="xref std std-ref">cyclic</span> command during
+preprocessing) at the harmonic indices specified via the <span class="xref std std-ref">cycopt</span> command.</p>
+<p>The <span class="xref std std-ref">cycopt</span>,COMBINE option is an alternative to the <span class="xref std std-ref">cycexpand</span> command and is especially
+useful for testing purposes. However, Ansys, Inc. recommends specifying COMBINE only when
+the number of sectors is relatively small. (The option expands nodes and elements into the full 360°
+and can slow postprocessing significantly.</p>
+<p>If you issue a <span class="xref std std-ref">cycopt</span>,TOLER command to set a tolerance for <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycedgecomp.html#">edge-component</a> pairing
+before issuing the <span class="xref std std-ref">cyclic</span> command, the <span class="xref std std-ref">cyclic</span> command uses the specified tolerance
+when performing automatic edge-component detection.</p>
+<p>In cases involving <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycsolarch.html#">non-cyclically symmetric loading</a> (that is,
+when LDSECT &gt; 0), the underlying command operations create or modify the required SECTOR tabular
+boundary condition (BC) data to apply on the appropriate sector. Therefore, it is not necessary to
+manipulate tables for situations where the applied BC is not a function of other tabular BC
+variables such as TIME, X, Y, Z, and so on.</p>
+<p>To delete a previously applied load on a specified sector, issue an <span class="xref std std-ref">fdele</span> command.</p>
+<p>Because edge nodes are rotated into the cyclic coordinate system during solution, any applied
+displacements or forces on sector edges will be in the cyclic coordinate system.</p>
+<p>The <span class="xref std std-ref">cycopt</span> command is valid in the preprocessing and solution stages of an analysis.</p>
+<p>To learn more about analyzing a cyclically symmetric structure, see the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/cycsym_example.html">Cyclic Symmetry Analysis
+Guide</a>.</p>
+<p>Distributed-Memory Parallel (DMP) Restriction The COMBINE option is not supported in a DMP solution.</p>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.72.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.7.2. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

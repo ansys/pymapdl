@@ -1,0 +1,6 @@
+﻿cplist
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.coupled_dof
+
+.. automethod:: CoupledDof.cplist

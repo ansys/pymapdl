@@ -1,0 +1,6 @@
+﻿bfvlist
+=======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.solid_body_loads
+
+.. automethod:: SolidBodyLoads.bfvlist

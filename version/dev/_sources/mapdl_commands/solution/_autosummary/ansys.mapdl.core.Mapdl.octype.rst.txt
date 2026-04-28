@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.octype
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.octype

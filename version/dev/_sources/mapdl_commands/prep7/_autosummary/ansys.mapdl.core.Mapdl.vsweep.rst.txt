@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.vsweep
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.vsweep

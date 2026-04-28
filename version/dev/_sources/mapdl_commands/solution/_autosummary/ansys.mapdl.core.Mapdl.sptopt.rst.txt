@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.sptopt
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.sptopt

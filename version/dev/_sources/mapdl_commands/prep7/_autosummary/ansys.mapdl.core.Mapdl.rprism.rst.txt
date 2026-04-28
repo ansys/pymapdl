@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.rprism
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.rprism

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.bfcum
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.bfcum

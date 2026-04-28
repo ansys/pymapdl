@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.layplot
+==============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.layplot

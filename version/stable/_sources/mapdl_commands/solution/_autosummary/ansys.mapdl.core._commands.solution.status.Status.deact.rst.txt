@@ -1,0 +1,6 @@
+﻿deact
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.status
+
+.. automethod:: Status.deact

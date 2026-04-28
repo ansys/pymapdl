@@ -1,0 +1,6 @@
+﻿mplist
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.materials
+
+.. automethod:: Materials.mplist

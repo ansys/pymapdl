@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.wrfull
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.wrfull

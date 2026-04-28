@@ -1,0 +1,1568 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>tbft &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=7e8d73f4"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/prep7/_autosummary/ansys.mapdl.core._commands.prep7.materials.Materials.tbft';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.73';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="uimp" href="ansys.mapdl.core._commands.prep7.materials.Materials.uimp.html" />
+    <link rel="prev" title="tbfplot" href="ansys.mapdl.core._commands.prep7.materials.Materials.tbfplot.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.73.0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/prep7/_autosummary/ansys.mapdl.core._commands.prep7.materials.Materials.tbft.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Session</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../session/index.html">Session</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Database</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../database/index.html">Database</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Graphics</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../graphics/index.html">Graphics</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">APDL</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/abbreviations.html">Abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/parameter_definition.html">ParameterDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/matrix_operations.html">MatrixOperations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/macro_files.html">MacroFiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/encryption_decryption.html">EncryptionDecryption</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/array_parameters.html">ArrayParameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/process_controls.html">ProcessControls</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Preprocessing</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Prep7</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../areas.html">Areas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../booleans.html">Booleans</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../meshing.html">Meshing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../special_purpose.html">SpecialPurpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../database.html">Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../elements.html">Elements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../piping.html">Piping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../primitives.html">Primitives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cross_sections.html">CrossSections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lines.html">Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data_tables.html">DataTables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constraint_equations.html">ConstraintEquations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constraint_equations_.html">ConstraintEquations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nodes.html">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../coupled_dof.html">CoupledDof</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../morphing.html">Morphing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../element_type.html">ElementType</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../materials.html">Materials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.emunit.html">emunit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.fc.html">fc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.fccheck.html">fccheck</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.fcdele.html">fcdele</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.fclist.html">fclist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mp.html">mp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mpamod.html">mpamod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mpchg.html">mpchg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mpcopy.html">mpcopy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mpdata.html">mpdata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mpdele.html">mpdele</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mpdres.html">mpdres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mplib.html">mplib</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mplist.html">mplist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mpplot.html">mpplot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mpread.html">mpread</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mptemp.html">mptemp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mptgen.html">mptgen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mptres.html">mptres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.mpwrite.html">mpwrite</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.tbfplot.html">tbfplot</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">tbft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.materials.Materials.uimp.html">uimp</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../volumes.html">Volumes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../keypoints.html">Keypoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../hard_points.html">HardPoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../artificially_matched_layers.html">ArtificiallyMatchedLayers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../real_constants.html">RealConstants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../superelements.html">Superelements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../explicit_dynamics.html">ExplicitDynamics</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Solution</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../solution/index.html">Solution</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post1/index.html">Post1</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST26</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post26/index.html">Post26</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux2/index.html">Aux2</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux3/index.html">Aux3</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX12</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux12/index.html">Aux12</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX15</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux15/index.html">Aux15</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">MAP</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../map/index.html">Map</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Connection</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../conn.html">Connection commands</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Undocumented</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../inqfun.html">Undocumented inquire commands</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="None" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">MAPDL commands</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../index.html" class="nav-link">Prep7</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../materials.html" class="nav-link">Materials</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">tbft</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="tbft">
+<h1>tbft<a class="headerlink" href="#tbft" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core._commands.prep7.materials.Materials.tbft">
+<span class="sig-prename descclassname"><span class="pre">Materials.</span></span><span class="sig-name descname"><span class="pre">tbft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option4</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option5</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option6</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option7</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option10</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core._commands.prep7.materials.Materials.tbft" title="Link to this definition">#</a></dt>
+<dd><p>Performs <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/Hlp_AM_GMCF.html">material curve-fitting</a> operations.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TBFT.html">TBFT</a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>oper</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The operation to perform:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Operation</span> <span class="pre">Set</span> <span class="pre">1</span> <span class="pre">(Curve-Fitting)</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FADD</span></code> - Define a constitutive model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FDEL</span></code> - Delete a constitutive model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FSET</span></code> - Write data related to a constitutive model to the database (same as <span class="xref std std-ref">tb</span> command).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SET</span></code> - Initialize coefficients of a constitutive model for nonlinear curve-fitting procedure.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CDEL</span></code> - Deletes coefficients at current reference temperature. Applicable only for temperature-
+dependent coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AINI</span></code> - Automatically initialize coefficients based on elastic properties and experimental
+data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SOLVE</span></code> - Solve for coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PSOLVE</span></code> - Custom multistep solve for coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FIX</span></code> - Fix (hold constant) the coefficient you specify in <code class="docutils literal notranslate"><span class="pre">Option4</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Operation</span> <span class="pre">Set</span> <span class="pre">2</span> <span class="pre">(Experimental</span> <span class="pre">Data)</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EADD</span></code> - Add experimental data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EDEL</span></code> - Delete experimental data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Other</span> <span class="pre">Operations</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LIST</span></code> - List all data associated with the material model represented by the material ID number
+( <code class="docutils literal notranslate"><span class="pre">MATID</span></code> ).</p></li>
+</ul>
+</dd>
+<dt><strong>matid</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Material reference identification number. (Same as <span class="xref std std-ref">tb</span>, <code class="docutils literal notranslate"><span class="pre">MATID</span></code>.) Valid value is any
+number <code class="docutils literal notranslate"><span class="pre">n</span></code>, where 0 &lt; <code class="docutils literal notranslate"><span class="pre">n</span></code> &lt; 100,000. Default = 1.</p>
+</dd>
+<dt><strong>option1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>AML - For curve-fitting function operations ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = Operation Set 1), this value specifies
+the category.</p>
+<p>UNIA - For adding or deleting your experiment (Operation Set 2), this value specifies the
+experimental data type.</p>
+</dd>
+<dt><strong>option2</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>For curve-fitting function operations ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = Operation Set 1), this value specifies the
+constitutive model type. The only valid value is GENR (generic).</p>
+<p>To obtain experimental data ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD in Operation Set 2) from a file, specify any valid
+file name. (You can either specify the entire <code class="docutils literal notranslate"><span class="pre">path</span></code> <code class="docutils literal notranslate"><span class="pre">filename</span></code> . <code class="docutils literal notranslate"><span class="pre">extension</span></code> string
+here and leave <code class="docutils literal notranslate"><span class="pre">Option3</span></code> and <code class="docutils literal notranslate"><span class="pre">Option4</span></code> blank, or specify <code class="docutils literal notranslate"><span class="pre">filename</span></code> here, <code class="docutils literal notranslate"><span class="pre">extension</span></code> in
+<code class="docutils literal notranslate"><span class="pre">Option3</span></code>, and <code class="docutils literal notranslate"><span class="pre">path</span></code> in <code class="docutils literal notranslate"><span class="pre">Option4</span></code>.)</p>
+</dd>
+<dt><strong>option3</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>For curve-fitting function operations ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = Operation Set 1), specify a unique name for
+your curve-fitting model.</p>
+<p>For obtaining experimental data ( Oper = EADD in Operation Set 2) from a file specified in
+Option2, specify the file extension.</p>
+</dd>
+<dt><strong>option4</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>When fixing a specific coefficient to a desired value ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FIX), this value specifies
+the index of that coefficient. Valid values vary from 1 to <code class="docutils literal notranslate"><span class="pre">n</span></code>, where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the total
+number of coefficients. Default = 1.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SET, see <span class="xref std std-ref">tmftableoperset</span>.</p>
+<p>You can also specify <code class="docutils literal notranslate"><span class="pre">TREF</span></code> to indicate the reference temperature, or <code class="docutils literal notranslate"><span class="pre">COMP</span></code> for a
+partial/complete solution (only for bulk, only for shear, or all coefficients).</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, this value specifies the curve-fitting procedure. Valid values are 0 for
+non- normalized least squares curve-fitting procedure, and 1 for normalized least squares curve-
+fitting procedure.</p>
+<p>For obtaining experimental data ( Oper = EADD) from a file specified in Option2, specify the
+path in which the file resides.</p>
+</dd>
+<dt><strong>option5</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SET, refer to the following table:</p>
+<div class="pst-scrollable-table-container"><table class="table" id="tmftableoperset">
+<thead>
+<tr class="row-odd"><th class="head"><p>Purpose</p></th>
+<th class="head"><p>Option4</p></th>
+<th class="head"><p>Option5</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Set the value of the coefficient</p></td>
+<td><p>Index of coefficient</p></td>
+<td><p>Value of coefficient</p></td>
+</tr>
+<tr class="row-odd"><td><p>Set temperature dependency ON/OFF</p></td>
+<td><p>TDEP</p></td>
+<td><p>1 – ON   0 – OFF</p></td>
+</tr>
+<tr class="row-even"><td><p>Set reference temperature</p></td>
+<td><p>TREF</p></td>
+<td><p>Temperature value</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, use this value to specify the number of iterations to be used in the
+calculation of the coefficients. Valid value is any positive integer. Default = 1000.</p>
+<p>If you are specifying a coefficient to be held constant ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FIX):</p>
+<ul class="simple">
+<li><p>1 - Fix the specified coefficient.</p></li>
+<li><p>0 - Allow the specified coefficient to vary (disable fixing).</p></li>
+</ul>
+</dd>
+<dt><strong>option6</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, specify the allowed tolerance in residual change to stop an iteration.
+Valid value is 0.0 to 1.0. Default = 0.0.</p>
+</dd>
+<dt><strong>option7</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, specify the allowed tolerance in coefficient change to stop an iteration.
+Valid value is 0 to 1. Default = 0.</p>
+</dd>
+<dt><strong>option10</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, enables parameter scaling when set to 1. Default = 0. Used for creep
+material curve-fitting.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This function contains specificities regarding the argument definitions.
+Please refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TBFT.html">command documentation</a>
+for further explanations.</p>
+</div>
+<p><em>*TBFT Specifications for Hyperelastic Models*</em></p>
+<p id="tbfthypspec"><span class="xref std std-ref">tbft</span>, <code class="docutils literal notranslate"><span class="pre">Oper</span></code>, <code class="docutils literal notranslate"><span class="pre">MATID</span></code>, <code class="docutils literal notranslate"><span class="pre">Option1</span></code>, <code class="docutils literal notranslate"><span class="pre">Option2</span></code>, <code class="docutils literal notranslate"><span class="pre">Option3</span></code>, <code class="docutils literal notranslate"><span class="pre">Option4</span></code>, <code class="docutils literal notranslate"><span class="pre">Option5</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Option6</span></code>, <code class="docutils literal notranslate"><span class="pre">Option7</span></code></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Oper</span></code> - The operation to perform:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Operation</span> <span class="pre">Set</span> <span class="pre">1</span> <span class="pre">(Curve-Fitting)</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FADD</span></code> - Define a constitutive model for parameter fitting and import all parameters (defined
+previously via <span class="xref std std-ref">tb</span> and <span class="xref std std-ref">tbdata</span> ).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FDEL</span></code> - Delete a constitutive model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FSET</span></code> - Write data related to a constitutive model to the database (same as <span class="xref std std-ref">tb</span> command).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SET</span></code> - Initialize coefficients of a constitutive model for nonlinear curve-fitting procedure.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CDEL</span></code> - Deletes coefficients at current reference temperature. Applicable only for temperature
+dependent coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SOLVE</span></code> - Solve for coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FIX</span></code> - Fix (hold constant) the coefficient you specify in <code class="docutils literal notranslate"><span class="pre">Option4</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Operation</span> <span class="pre">Set</span> <span class="pre">2</span> <span class="pre">(Experimental</span> <span class="pre">Data)</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EADD</span></code> - Add experimental data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EDEL</span></code> - Delete experimental data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Other</span> <span class="pre">Operations</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LIST</span></code> - List all data associated with the material model represented by the material ID number
+( <code class="docutils literal notranslate"><span class="pre">MATID</span></code> )</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MATID</span></code> - Material reference identification number (same as <code class="docutils literal notranslate"><span class="pre">MAT</span></code> argument used in the
+<span class="xref std std-ref">tb</span> command). Valid value is any number <code class="docutils literal notranslate"><span class="pre">n</span></code>, where 0 &lt; <code class="docutils literal notranslate"><span class="pre">n</span></code> &lt; 100,000. Default = 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option1</span></code> - For curve-fit function operations ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FADD, FDEL, FSET, SET, CDEL, SOLVE or</p></li>
+</ul>
+<dl>
+<dt>FIX) this value</dt><dd><p>specifies the category (AML).</p>
+<p>For adding or deleting your experiment ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD or EDEL), this value specifies the experimental data type. <strong>Valid options:</strong> UNIA (default), BIAX, SHEA, SSHE,and VOLU.</p>
+</dd>
+</dl>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option2</span></code> - For curve-fit function operations ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FADD, FDEL, FSET, SET, CDEL, SOLVE,
+or FIX), set this value to GENR.</p>
+<p>When you need to specify a file name from which to get experimental data ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD), place
+that string here. Valid value is any file name string. You can enter the entire
+<code class="file docutils literal notranslate"><span class="pre">pathfilename.extension</span></code> string and leave the next two values ( <code class="docutils literal notranslate"><span class="pre">Option3</span></code> and <code class="docutils literal notranslate"><span class="pre">Option4</span></code> )
+blank, or you can specify the name here, the extension in the next value, and the path following.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option3</span></code> - For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FADD, FDEL, FSET, CDEL, SET, SOLVE or FIX, set this value to a user-
+defined name (to be used consistently in the curve-fitting process).</p>
+<p>If a file name for experimental data is being specified in <code class="docutils literal notranslate"><span class="pre">Option2</span></code> ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD), this
+value will contain the file extension.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option4</span></code> - When you are working on a specific coefficient ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FIX), this value
+specifies the index of that coefficient. Valid values vary from 1 to <code class="docutils literal notranslate"><span class="pre">n</span></code>, where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the total
+number of coefficients. Default = 1.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SET, see <span class="xref std std-ref">tbfthypsetvals</span>, below.</p>
+<p>If a file name for experimental data is being specified in <code class="docutils literal notranslate"><span class="pre">Option2</span></code> ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD), this
+value will contain the directory/path specification.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, this value specifies the curve-fitting procedure. Valid values are 0 for non-
+normalized least squares curve-fitting procedure, and 1 for normalized least squares curve-fitting
+procedure.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option5</span></code> - When you are working on a specific coefficient ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FIX), this value</p></li>
+</ul>
+<dl>
+<dt>specifies the index of</dt><dd><p>that coefficient. Valid values vary from 1 to N, where N is the total number of coefficients.
+Default = 1.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SET, see <span class="xref std std-ref">tbfthypsetvals</span>, below.</p>
+<div class="pst-scrollable-table-container"><table class="table" id="tbfthypsetvals">
+<thead>
+<tr class="row-odd"><th class="head"><p>Purpose</p></th>
+<th class="head"><p>Option4</p></th>
+<th class="head"><p>Option5</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Set the value of the coefficient.</p></td>
+<td><p>Index of coefficient</p></td>
+<td><p>Value of that coefficient</p></td>
+</tr>
+<tr class="row-odd"><td><p>Set temperature dependency ON/OFF Specify temperature data in the same specified via <span class="xref std std-ref">tref</span>.</p></td>
+<td><p>TDEP</p></td>
+<td><p>1 – ON   0 – OFF</p></td>
+</tr>
+<tr class="row-even"><td><p>Set reference temperature</p></td>
+<td><p>TREF</p></td>
+<td><p>Temperature value</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, use this value to specify the number of iterations to be used in the
+calculation of the coefficients. Valid value is any positive integer. Default = 1000.</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Option6</span></code> - If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, specifies the allowed tolerance in residual change to stop an
+iteration. Valid value is 0.0 to 1.0. Default = 0.0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option7</span></code> - If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, specifies the allowed tolerance in coefficient change to stop
+an iteration. Valid value is 0 to 1. Default = 0.</p></li>
+</ul>
+<p>For the supported list of material models, see.</p>
+<p>This table summarizes the format for hyperelastic curve-fitting operations via <span class="xref std std-ref">tbft</span> :</p>
+<section id="hyperelastic-model-command-summary">
+<h2>Hyperelastic Model Command Summary<a class="headerlink" href="#hyperelastic-model-command-summary" title="Link to this heading">#</a></h2>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<p><em>*TBFT Specifications for Viscoelastic Models*</em></p>
+<p id="tbftviscspec"><span class="xref std std-ref">tbft</span>, <code class="docutils literal notranslate"><span class="pre">Oper</span></code>, <code class="docutils literal notranslate"><span class="pre">MATID</span></code>, <code class="docutils literal notranslate"><span class="pre">Option1</span></code>, <code class="docutils literal notranslate"><span class="pre">Option2</span></code>, <code class="docutils literal notranslate"><span class="pre">Option3</span></code>, <code class="docutils literal notranslate"><span class="pre">Option4</span></code>, <code class="docutils literal notranslate"><span class="pre">Option5</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Option6</span></code>, <code class="docutils literal notranslate"><span class="pre">Option7</span></code></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Oper</span></code> - The operation to perform:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Operation</span> <span class="pre">Set</span> <span class="pre">1</span> <span class="pre">(Curve-Fitting)</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FADD</span></code> - Define a constitutive model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FDEL</span></code> - Delete a constitutive model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FSET</span></code> - Write data related to a constitutive model to the database (same as <span class="xref std std-ref">tb</span> command).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SET</span></code> - Initialize coefficients of a constitutive model for nonlinear curve-fitting procedure.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CDEL</span></code> - Deletes coefficients at current reference temperature. Applicable only for temperature
+dependent coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SOLVE</span></code> - Solve for coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FIX</span></code> - Fix (hold constant) the coefficient you specify in <code class="docutils literal notranslate"><span class="pre">Option4</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Operation</span> <span class="pre">Set</span> <span class="pre">2</span> <span class="pre">(Experimental</span> <span class="pre">Data)</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EADD</span></code> - Add experimental data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EDEL</span></code> - Delete experimental data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Other</span> <span class="pre">Operations</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LIST</span></code> - List all data associated with the material model represented by the material ID number
+( <code class="docutils literal notranslate"><span class="pre">MATID</span></code> )</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MATID</span></code> - Material reference identification number (same as <code class="docutils literal notranslate"><span class="pre">MAT</span></code> argument used in the
+<span class="xref std std-ref">tb</span> command). Valid value is any number <code class="docutils literal notranslate"><span class="pre">n</span></code>, where 0 &lt; <code class="docutils literal notranslate"><span class="pre">n</span></code> &lt; 100,000. Default = 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option1</span></code> - For curve-fitting function operations ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FADD, FDEL, FSET, SET, CDEL,</p></li>
+</ul>
+<dl>
+<dt>SOLVE, or FIX), this</dt><dd><p>value is set to AML.</p>
+<p>For adding or deleting your experiment ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD or EDEL), this value specifies the experiment type. <strong>Valid options:</strong> SDEC (Shear Modulus vs. Time/Freq) or BDEC (Bulk Modulus vs. Time/Freq).</p>
+</dd>
+</dl>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option2</span></code> - For curve-fitting function operations ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FADD, FDEL, FSET, SET, CDEL,
+SOLVE, or FIX), this value is set to GENR.</p>
+<p>When you need to specify a file name from which to get experimental data ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD), place
+that string here. Valid value is any file name string. You can enter the entire
+<code class="file docutils literal notranslate"><span class="pre">pathfilename.extension</span></code> string and leave the next two values ( <code class="docutils literal notranslate"><span class="pre">Option3</span></code> and <code class="docutils literal notranslate"><span class="pre">Option4</span></code> )
+blank, or you can specify the name here, the extension in the next value, and the path following.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option3</span></code> - For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FADD, FDEL, FSET, CDEL, SET, SOLVE, or FIX, set this value to any
+user-defined name (to be used consistently during the curve-fitting process).</p>
+<p>If a file name for experimental data is being specified in <code class="docutils literal notranslate"><span class="pre">Option2</span></code> ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD), this
+value will contain the file extension.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option4</span></code> - When you are working on a specific coefficient ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FIX), this value
+specifies the index of that coefficient. Valid values vary from 1 to <code class="docutils literal notranslate"><span class="pre">n</span></code>, where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the total
+number of coefficients. Default = 1.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SET, see <span class="xref std std-ref">tbftvscsetvals</span> below.</p>
+<p>You can also specify <code class="docutils literal notranslate"><span class="pre">TREF</span></code> to indicate the reference temperature.</p>
+<p>If a file name for experimental data is being specified in <code class="docutils literal notranslate"><span class="pre">Option2</span></code> ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD), this
+value will contain the directory/path specification.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, this value specifies the curve-fitting procedure. Valid values are 0 for non-
+normalized least squares curve-fitting procedure, and 1 for normalized least squares curve-fitting
+procedure.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option5</span></code> - For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SET, see <span class="xref std std-ref">tbftvscsetvals</span> below.</p>
+<div class="pst-scrollable-table-container"><table class="table" id="tbftvscsetvals">
+<thead>
+<tr class="row-odd"><th class="head"><p>Purpose</p></th>
+<th class="head"><p>Option4</p></th>
+<th class="head"><p>Option5</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Set the value of the coefficient</p></td>
+<td><p>Index of coefficient</p></td>
+<td><p>Value of coefficient</p></td>
+</tr>
+<tr class="row-odd"><td><p>Set temperature dependency ON/OFF</p></td>
+<td><p>TDEP</p></td>
+<td><p>1 for ON and 0 for OFF</p></td>
+</tr>
+<tr class="row-even"><td><p>Set reference temperature</p></td>
+<td><p>TREF</p></td>
+<td><p>Temperature value</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, use this value to specify the number of iterations to be used in the
+calculation of the coefficients. Valid value is any positive integer. Default = 1000.</p>
+<p>If you are specifying a coefficient to be held constant ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FIX):</p>
+<ul class="simple">
+<li><p>1 - Fix the specified coefficient.</p></li>
+<li><p>0 - Allow the specified coefficient to vary (disable fixing).</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option6</span></code> - If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, specifies the allowed tolerance in residual change to stop an
+iteration. Valid value is 0.0 to 1.0. Default = 0.0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option7</span></code> - If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, specifies the allowed tolerance in coefficient change to stop
+an iteration. Valid value is 0 to 1. Default = 0.</p></li>
+</ul>
+<p>This table summarizes the format for viscoelastic curve-fitting operations via <span class="xref std std-ref">tbft</span> :</p>
+</section>
+<section id="viscoelastic-model-command-summary">
+<h2>Viscoelastic Model Command Summary<a class="headerlink" href="#viscoelastic-model-command-summary" title="Link to this heading">#</a></h2>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<p><em>*TBFT Specifications for Chaboche Kinematic Hardening Plasticity Models*</em></p>
+<p id="tbftchabspec"><span class="xref std std-ref">tbft</span>, <code class="docutils literal notranslate"><span class="pre">Oper</span></code>, <code class="docutils literal notranslate"><span class="pre">MATID</span></code>, <code class="docutils literal notranslate"><span class="pre">Option1</span></code>, <code class="docutils literal notranslate"><span class="pre">Option2</span></code>, <code class="docutils literal notranslate"><span class="pre">Option3</span></code>, <code class="docutils literal notranslate"><span class="pre">Option4</span></code>, <code class="docutils literal notranslate"><span class="pre">Option5</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Option6</span></code>, <code class="docutils literal notranslate"><span class="pre">Option7</span></code>, -, -, <code class="docutils literal notranslate"><span class="pre">Option10</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Oper</span></code> - The operation to perform:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Operation</span> <span class="pre">Set</span> <span class="pre">1</span> <span class="pre">(Curve-Fitting)</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FCASE</span></code> - Define a case/constitutive model for plasticity.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FADD</span></code> - Define a constitutive model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FDEL</span></code> - Delete a constitutive model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FSET</span></code> - Write data related to a constitutive model to the database (same as <span class="xref std std-ref">tb</span> command).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SET</span></code> - Initialize coefficients of a constitutive model for nonlinear curve-fitting procedure.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CDEL</span></code> - Deletes coefficients at current reference temperature. Applicable only for temperature-
+dependent coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SOLVE</span></code> - Solve for coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FIX</span></code> - Fix (hold constant) the coefficient you specify in <code class="docutils literal notranslate"><span class="pre">Option4</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Operation</span> <span class="pre">Set</span> <span class="pre">2</span> <span class="pre">(Experimental</span> <span class="pre">Data)</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EADD</span></code> - Add experimental data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EDEL</span></code> - Delete experimental data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Other</span> <span class="pre">Operations</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LIST</span></code> - List all data associated with the material model represented by the material ID number
+( <code class="docutils literal notranslate"><span class="pre">MATID</span></code> ).</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MATID</span></code> - Material reference identification number (same as <code class="docutils literal notranslate"><span class="pre">MAT</span></code> argument used in the
+<span class="xref std std-ref">tb</span> command). Valid value is any number greater than zero (default = 1) but less than 100,000.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option1</span></code> - For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FCASE, set to either NEW or FINI. The command <span class="xref std std-ref">tbft</span>,FCASE,
+<code class="docutils literal notranslate"><span class="pre">MATID</span></code>,NEW initializes a new curve-fitting case. (The <span class="xref std std-ref">tbft</span>,FADD commands described next
+are always issued between <span class="xref std std-ref">tbft</span>,FCASE, <code class="docutils literal notranslate"><span class="pre">MATID</span></code>,NEW and <span class="xref std std-ref">tbft</span>,FCASE, <code class="docutils literal notranslate"><span class="pre">MATID</span></code>,FINI
+commands.) After issuing <span class="xref std std-ref">tbft</span>,FCASE, <code class="docutils literal notranslate"><span class="pre">MATID</span></code>,FINI, the Chaboche model is created and is
+ready to be used to perform other curve-fitting operations. For more information, see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/Hlp_AM_GMCF.html">Material
+Curve-Fitting</a></p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FADD, set to PLAS to add options/parameters for the new case being created (via
+<span class="xref std std-ref">tbft</span>,FCASE, <code class="docutils literal notranslate"><span class="pre">MATID</span></code>,NEW, which must be issued before the <span class="xref std std-ref">tbft</span>,FADD command). This
+operation specifies the order of the Chaboche kinematic model.</p>
+<p>For other curve-fitting function operations ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FDEL, FSET, SET, CDEL, SOLVE or FIX), set
+to CASE.</p>
+<p>For adding or deleting your experiment ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD or EDEL), this option specifies the
+experiment type. The only valid option is UNIA (plastic strain vs. true stress).</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option2</span></code> - For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FCASE (defining your Chaboche case), set to CPLA.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FDEL, FSET, SET, CDEL, SOLVE, or FIX (curve-fitting function operations), this value
+specifies the case name being operated on.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FADD (specifying options for the plasticity model), valid options are:</p>
+<ul class="simple">
+<li><p>CHAB – Chaboche kinematic hardening (required for any defined curve-fitting case)</p></li>
+<li><p>BISO – Bilinear isotropic hardening (optional)</p></li>
+<li><p>MISO – Multilinear isotropic hardening (optional)</p></li>
+<li><p>VOCE – Nonlinear isotropic hardening, Voce model (optional)</p></li>
+<li><p>The <span class="xref std std-ref">tbft</span>,FADD command can be issued twice, once to specify the order of the Chaboche model,
+and again to specify the isotropic hardening option. (Only one of the options BISO, MISO or VOCE
+can be used in a single curve-fitting case, and none of those options are required.)</p></li>
+</ul>
+<p>For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD (specifying a file name from which to get experimental data), place that string
+here. A valid entry is any file name string. You can either:</p>
+<ul class="simple">
+<li><p>Enter the entire <code class="file docutils literal notranslate"><span class="pre">pathfilename.extension</span></code> string and leave the next two values (
+<code class="docutils literal notranslate"><span class="pre">Option3</span></code> and <code class="docutils literal notranslate"><span class="pre">Option4</span></code> ) blank, or</p></li>
+<li><p>Specify the name here, the extension in the next value, and the path in the following value.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option3</span></code> - For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FCASE, this value specifies the case name.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FADD, this value specifies either:</p>
+<ul class="simple">
+<li><p>The order of the Chaboche kinematic hardening model ( <code class="docutils literal notranslate"><span class="pre">Option2</span></code> = CHAB), or</p></li>
+<li><p>The number of terms in the MISO model ( <code class="docutils literal notranslate"><span class="pre">Option2</span></code> = MISO).</p></li>
+</ul>
+<p>If a file name for experimental data is being specified in <code class="docutils literal notranslate"><span class="pre">Option2</span></code> ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD), this
+value contains the file extension.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option4</span></code> - When fixing a specific coefficient to a desired value ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FIX), this value
+specifies the index of that coefficient. Valid values vary from 1 to <code class="docutils literal notranslate"><span class="pre">n</span></code>, where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the total
+number of coefficients. Default = 1.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SET, see <span class="xref std std-ref">tbftvscsetvals</span>.</p>
+<p>You can also specify <code class="docutils literal notranslate"><span class="pre">TREF</span></code> to indicate the reference temperature, or <code class="docutils literal notranslate"><span class="pre">COMP</span></code> for a
+partial/complete solution (only for bulk, only for shear, or all coefficients).</p>
+<p>If a file name for experimental data is being specified in <code class="docutils literal notranslate"><span class="pre">Option2</span></code> ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD), this
+value contains the directory/path specification.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, this value specifies the normalized/non-normalized option. This option is not
+available for Chaboche curve-fitting.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option5</span></code> - For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SET, refer to the following table.</p>
+<div class="pst-scrollable-table-container"><table class="table" id="tbftchabsetvals">
+<thead>
+<tr class="row-odd"><th class="head"><p>Purpose</p></th>
+<th class="head"><p>Option4</p></th>
+<th class="head"><p>Option5</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Set the value of the coefficient</p></td>
+<td><p>Index of coefficient</p></td>
+<td><p>Value of coefficient</p></td>
+</tr>
+<tr class="row-odd"><td><p>Set temperature dependency ON/OFF</p></td>
+<td><p>TDEP</p></td>
+<td><p>1 for ON and 0 for OFF</p></td>
+</tr>
+<tr class="row-even"><td><p>Set reference temperature</p></td>
+<td><p>TREF</p></td>
+<td><p>Temperature value</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, use this value to specify the number of iterations to be used in the
+calculation of the coefficients. Valid value is any positive integer. Default = 1000.</p>
+<p>If you are specifying a coefficient to be held constant ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FIX):</p>
+<ul class="simple">
+<li><p>1 - Fix the specified coefficient.</p></li>
+<li><p>0 - Allow the specified coefficient to vary (disable fixing).</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option6</span></code> - If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, specifies the allowed tolerance in residual change to stop an
+iteration. Valid value is 0.0 to 1.0. Default = 0.0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option7</span></code> - If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, specifies the allowed tolerance in coefficient change to stop
+an iteration. Valid value is 0 to 1. Default = 0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-</span></code> - Reserved for future use.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-</span></code> - Reserved for future use.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option10</span></code> - If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, enables parameter scaling when set to 1. Default = 0. Used for
+Chaboche material curve-fitting.</p></li>
+</ul>
+<p>This table summarizes the format for Chaboche curve-fitting operations via <span class="xref std std-ref">tbft</span> :</p>
+</section>
+<section id="chaboche-model-command-summary">
+<h2>Chaboche Model Command Summary<a class="headerlink" href="#chaboche-model-command-summary" title="Link to this heading">#</a></h2>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<p><em>*TBFT Specifications for Creep Models*</em></p>
+<p id="tbftcreepspec"><span class="xref std std-ref">tbft</span>, <code class="docutils literal notranslate"><span class="pre">Oper</span></code>, <code class="docutils literal notranslate"><span class="pre">MATID</span></code>, <code class="docutils literal notranslate"><span class="pre">Option1</span></code>, <code class="docutils literal notranslate"><span class="pre">Option2</span></code>, <code class="docutils literal notranslate"><span class="pre">Option3</span></code>, <code class="docutils literal notranslate"><span class="pre">Option4</span></code>, <code class="docutils literal notranslate"><span class="pre">Option5</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Option6</span></code>, <code class="docutils literal notranslate"><span class="pre">Option7</span></code>, -, -, <code class="docutils literal notranslate"><span class="pre">Option10</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Oper</span></code> - The operation to perform:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Operation</span> <span class="pre">Set</span> <span class="pre">1</span> <span class="pre">(Curve-Fitting)</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FADD</span></code> - Define a constitutive model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FDEL</span></code> - Delete a constitutive model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FSET</span></code> - Write data related to a constitutive model to the database (same as <span class="xref std std-ref">tb</span> command).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SET</span></code> - Initialize coefficients of a constitutive model for nonlinear curve-fitting procedure.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CDEL</span></code> - Deletes coefficients at current reference temperature. Applicable only for temperature
+dependent coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SOLVE</span></code> - Solve for coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FIX</span></code> - Fix (hold constant) the coefficient you specify in <code class="docutils literal notranslate"><span class="pre">Option4</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Operation</span> <span class="pre">Set</span> <span class="pre">2</span> <span class="pre">(Experimental</span> <span class="pre">Data)</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EADD</span></code> - Add experimental data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EDEL</span></code> - Delete experimental data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Other</span> <span class="pre">Operations</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LIST</span></code> - List all data associated with the material model represented by the material ID number
+( <code class="docutils literal notranslate"><span class="pre">MATID</span></code> )</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MATID</span></code> - Material reference identification number (same as <code class="docutils literal notranslate"><span class="pre">MAT</span></code> argument used in the
+<span class="xref std std-ref">tb</span> command). Valid value is any number <code class="docutils literal notranslate"><span class="pre">n</span></code>, where 0 &lt; <code class="docutils literal notranslate"><span class="pre">n</span></code> &lt; 100,000. Default = 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option1</span></code> - For curve-fit function operations ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FADD, FDEL, FSET, SET, CDEL, SOLVE or
+FIX) this value specifies the category (CREEP).</p>
+<p>For adding or deleting your experiment ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD or EDEL), this value specifies the
+experimental data type (CREEP).</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option2</span></code> - For curve-fit function operations ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FADD, FDEL, FSET, SET, CDEL, SOLVE,
+or FIX), this value specifies constitutive model type. The valid values are listed in
+<a class="reference internal" href="#tbftcreepoption"><span class="std std-ref">Creep Options</span></a> below.</p>
+<p>When you need to specify a file name from which to get experimental data ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD), place
+that string here. Valid value is any file name string. You can enter the entire
+<code class="file docutils literal notranslate"><span class="pre">pathfilename.extension</span></code> string and leave the next two values ( <code class="docutils literal notranslate"><span class="pre">Option3</span></code> and <code class="docutils literal notranslate"><span class="pre">Option4</span></code> )
+blank, or you can specify the name here, the extension in the next value, and the path following.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option3</span></code> - If a file name for experimental data is being specified in <code class="docutils literal notranslate"><span class="pre">Option2</span></code> ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> =
+EADD), this value will contain the file extension.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option4</span></code> - When you are working on a specific coefficient ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FIX), this value,
+specifies the index of that coefficient. Valid values vary from 1 to <code class="docutils literal notranslate"><span class="pre">n</span></code>, where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the total
+number of coefficients. Default = 1.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SET, see <span class="xref std std-ref">tbftcrpsetvals</span>, below.</p>
+<p>If a file name for experimental data is being specified in <code class="docutils literal notranslate"><span class="pre">Option2</span></code> ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD), this
+value will contain the directory/path specification.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, this value specifies the curve-fitting procedure. Valid values are 0 for non-
+normalized least squares curve-fitting procedure, and 1 for normalized least squares curve-fitting
+procedure.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option5</span></code> - If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, use this value to specify the number of iterations to be used</p></li>
+</ul>
+<dl>
+<dt>in the</dt><dd><p>calculation of the coefficients. Valid value is any positive integer. Default = 1000.</p>
+<p>If you are specifying a coefficient to be held constant ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FIX):</p>
+<ul class="simple">
+<li><p>1 - Fix the specified coefficient.</p></li>
+<li><p>0 - Allow the specified coefficient to vary (disable fixing).</p></li>
+</ul>
+<p>For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SET, see <span class="xref std std-ref">tbftcrpsetvals</span>, below.</p>
+<div class="pst-scrollable-table-container"><table class="table" id="tbftcrpsetvals">
+<thead>
+<tr class="row-odd"><th class="head"><p>Purpose</p></th>
+<th class="head"><p>Option4</p></th>
+<th class="head"><p>Option5</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Set the value of the coefficient</p></td>
+<td><p>Index of coefficient</p></td>
+<td><p>Value of coefficient</p></td>
+</tr>
+<tr class="row-odd"><td><p>Set temperature dependency ON When TDEP is OFF, the Arrhenius term (C4) in the strain-hardening creep equation is calculated. Because <span class="xref std std-ref">tbtemp</span> is not included in the curve-fitting, the experimental data (in absolute temperature) must be provided via <code class="docutils literal notranslate"><span class="pre">/TEMP</span></code>.   /OFF When TDEP is ON, the Arrhenius term is set to 0 and the constants are calculated separately for each temperature. The curve-fitting process uses <span class="xref std std-ref">tbtemp</span>. You must provide the experimental data using the same units as specified via <span class="xref std std-ref">tref</span>.</p></td>
+<td><p>TDEP</p></td>
+<td><p>1 – ON   0 – OFF</p></td>
+</tr>
+<tr class="row-even"><td><p>Set reference temperature</p></td>
+<td><p>TREF</p></td>
+<td><p>Temperature value</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Option6</span></code> - If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, specifies the allowed tolerance in residual change to stop an
+iteration. Valid value is 0.0 to 1.0. Default = 0.0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option7</span></code> - If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, specifies the allowed tolerance in coefficient change to stop
+an iteration. Valid value is 0 to 1. Default = 0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-</span></code> - Reserved for future use.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-</span></code> - Reserved for future use.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option10</span></code> - If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, enables parameter scaling when set to 1. Default = 0. Used for
+creep material curve-fitting.</p></li>
+</ul>
+<section id="creep-options">
+<span id="tbftcreepoption"></span><h3>Creep Options<a class="headerlink" href="#creep-options" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Category</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CREEP</p></td>
+<td><p>SHAR</p></td>
+<td><p>NA</p></td>
+</tr>
+<tr class="row-odd"><td><p>CREEP</p></td>
+<td><p>THAR</p></td>
+<td><p>NA</p></td>
+</tr>
+<tr class="row-even"><td><p>CREEP</p></td>
+<td><p>GEXP</p></td>
+<td><p>NA</p></td>
+</tr>
+<tr class="row-odd"><td><p>CREEP</p></td>
+<td><p>GGRA</p></td>
+<td><p>NA</p></td>
+</tr>
+<tr class="row-even"><td><p>CREEP</p></td>
+<td><p>GBLA</p></td>
+<td><p>NA</p></td>
+</tr>
+<tr class="row-odd"><td><p>CREEP</p></td>
+<td><p>MTHA</p></td>
+<td><p>NA</p></td>
+</tr>
+<tr class="row-even"><td><p>CREEP</p></td>
+<td><p>MSHA</p></td>
+<td><p>NA</p></td>
+</tr>
+<tr class="row-odd"><td><p>CREEP</p></td>
+<td><p>GGAR</p></td>
+<td><p>NA</p></td>
+</tr>
+<tr class="row-even"><td><p>CREEP</p></td>
+<td><p>EXPO</p></td>
+<td><p>NA</p></td>
+</tr>
+<tr class="row-odd"><td><p>CREEP</p></td>
+<td><p>NORT</p></td>
+<td><p>NA</p></td>
+</tr>
+<tr class="row-even"><td><p>CREEP</p></td>
+<td><p>PSTH</p></td>
+<td><p>NA</p></td>
+</tr>
+<tr class="row-odd"><td><p>CREEP</p></td>
+<td><p>PSRP</p></td>
+<td><p>NA</p></td>
+</tr>
+<tr class="row-even"><td><p>CREEP</p></td>
+<td><p>GTHA</p></td>
+<td><p>NA</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>This table summarizes the format for creep curve-fitting operations via <span class="xref std std-ref">tbft</span> :</p>
+</section>
+</section>
+<section id="creep-model-command-summary">
+<h2>Creep Model Command Summary<a class="headerlink" href="#creep-model-command-summary" title="Link to this heading">#</a></h2>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<p><em>*TBFT Specifications for Thermomechanical Fatigue (TMF)and Plasticity Model Combinations*</em></p>
+<p id="tbfttmfspec"><span class="xref std std-ref">tbft</span>, <code class="docutils literal notranslate"><span class="pre">Oper</span></code>, <code class="docutils literal notranslate"><span class="pre">MATID</span></code>, <code class="docutils literal notranslate"><span class="pre">Option1</span></code>, <code class="docutils literal notranslate"><span class="pre">Option2</span></code>, <code class="docutils literal notranslate"><span class="pre">Option3</span></code>, <code class="docutils literal notranslate"><span class="pre">Option4</span></code>, <code class="docutils literal notranslate"><span class="pre">Option5</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Option6</span></code>, <code class="docutils literal notranslate"><span class="pre">Option7</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Oper</span></code> - The operation to perform:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Operation</span> <span class="pre">Set</span> <span class="pre">1</span> <span class="pre">(Curve-Fitting)</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FADD</span></code> - Define a constitutive model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FDEL</span></code> - Delete a constitutive model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FSET</span></code> - Write data related to a constitutive model to the database (same as <span class="xref std std-ref">tb</span> command).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SET</span></code> - Initialize coefficients of a constitutive model for nonlinear curve-fitting procedure.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CDEL</span></code> - Deletes coefficients at current reference temperature. Applicable only for temperature-
+dependent coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AINI</span></code> - Automatically initialize coefficients based on elastic properties and experimental
+data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SOLVE</span></code> - Solve for coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PSOLVE</span></code> - Custom multistep solve for coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FIX</span></code> - Fix (hold constant) the coefficient you specify in <code class="docutils literal notranslate"><span class="pre">Option4</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Operation</span> <span class="pre">Set</span> <span class="pre">2</span> <span class="pre">(Experimental</span> <span class="pre">Data)</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EADD</span></code> - Add experimental data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EDEL</span></code> - Delete experimental data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Other</span> <span class="pre">Operations</span></code> - - - - - - - - - - - - - - - - - - - - -</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LIST</span></code> - List all data associated with the material model represented by the material ID number
+( <code class="docutils literal notranslate"><span class="pre">MATID</span></code> ).</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MATID</span></code> - Material reference identification number. (Same as <span class="xref std std-ref">tb</span>, <code class="docutils literal notranslate"><span class="pre">MATID</span></code>.) Valid value
+is any number <code class="docutils literal notranslate"><span class="pre">n</span></code>, where 0 &lt; <code class="docutils literal notranslate"><span class="pre">n</span></code> &lt; 100,000. Default = 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option1</span></code> - AML - For curve-fitting function operations ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = Operation Set 1), this
+value specifies the category.</p>
+<p>UNIA - For adding or deleting your experiment (Operation Set 2), this value specifies the
+experimental data type.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option2</span></code> - For curve-fitting function operations ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = Operation Set 1), this value
+specifies the constitutive model type. The only valid value is GENR (generic).</p>
+<p>To obtain experimental data ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = EADD in Operation Set 2) from a file, specify any valid
+file name. (You can either specify the entire <code class="docutils literal notranslate"><span class="pre">path</span></code> <code class="docutils literal notranslate"><span class="pre">filename</span></code> . <code class="docutils literal notranslate"><span class="pre">extension</span></code> string here
+and leave <code class="docutils literal notranslate"><span class="pre">Option3</span></code> and <code class="docutils literal notranslate"><span class="pre">Option4</span></code> blank, or specify <code class="docutils literal notranslate"><span class="pre">filename</span></code> here, <code class="docutils literal notranslate"><span class="pre">extension</span></code> in
+<code class="docutils literal notranslate"><span class="pre">Option3</span></code>, and <code class="docutils literal notranslate"><span class="pre">path</span></code> in <code class="docutils literal notranslate"><span class="pre">Option4</span></code>.)</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option3</span></code> - For curve-fitting function operations ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = Operation Set 1), specify a
+unique name for your curve-fitting model.</p>
+<p>For obtaining experimental data ( Oper = EADD in Operation Set 2) from a file specified in Option2,
+specify the file extension.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option4</span></code> - When fixing a specific coefficient to a desired value ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FIX), this value
+specifies the index of that coefficient. Valid values vary from 1 to <code class="docutils literal notranslate"><span class="pre">n</span></code>, where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the total
+number of coefficients. Default = 1.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SET, see <span class="xref std std-ref">tmftableoperset</span>.</p>
+<p>You can also specify <code class="docutils literal notranslate"><span class="pre">TREF</span></code> to indicate the reference temperature, or <code class="docutils literal notranslate"><span class="pre">COMP</span></code> for a
+partial/complete solution (only for bulk, only for shear, or all coefficients).</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, this value specifies the curve-fitting procedure. Valid values are 0 for non-
+normalized least squares curve-fitting procedure, and 1 for normalized least squares curve-fitting
+procedure.</p>
+<p>For obtaining experimental data ( Oper = EADD) from a file specified in Option2, specify the path in
+which the file resides.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option5</span></code> - For <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SET, refer to the following table:</p>
+<div class="pst-scrollable-table-container"><table class="table" id="id3">
+<thead>
+<tr class="row-odd"><th class="head"><p>Purpose</p></th>
+<th class="head"><p>Option4</p></th>
+<th class="head"><p>Option5</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Set the value of the coefficient</p></td>
+<td><p>Index of coefficient</p></td>
+<td><p>Value of coefficient</p></td>
+</tr>
+<tr class="row-odd"><td><p>Set temperature dependency ON/OFF</p></td>
+<td><p>TDEP</p></td>
+<td><p>1 – ON   0 – OFF</p></td>
+</tr>
+<tr class="row-even"><td><p>Set reference temperature</p></td>
+<td><p>TREF</p></td>
+<td><p>Temperature value</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, use this value to specify the number of iterations to be used in the
+calculation of the coefficients. Valid value is any positive integer. Default = 1000.</p>
+<p>If you are specifying a coefficient to be held constant ( <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = FIX):</p>
+<ul class="simple">
+<li><p>1 - Fix the specified coefficient.</p></li>
+<li><p>0 - Allow the specified coefficient to vary (disable fixing).</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option6</span></code> - If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, specify the allowed tolerance in residual change to stop an
+iteration. Valid value is 0.0 to 1.0. Default = 0.0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Option7</span></code> - If <code class="docutils literal notranslate"><span class="pre">Oper</span></code> = SOLVE, specify the allowed tolerance in coefficient change to stop an
+iteration. Valid value is 0 to 1. Default = 0.</p></li>
+</ul>
+</section>
+<section id="supported-material-models">
+<h2>Supported Material Models<a class="headerlink" href="#supported-material-models" title="Link to this heading">#</a></h2>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<p id="tbft-notes">The <span class="xref std std-ref">tbft</span> command provides tools for comparing experimental material data to the program-
+provided calculated data for various nonlinear material options. Based on curve-fitting comparisons
+and error norms, choose the model to use during the solution phase of the analysis according to the
+best fit. All of the capabilities of the <span class="xref std std-ref">tbft</span> command are accessible interactively via the
+standard material GUI. For more information, see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/Hlp_AM_GMCF.html">Material Curve-Fitting</a></p>
+<p>Display material model data associated with both the <span class="xref std std-ref">tb</span> command and the <span class="xref std std-ref">tbft</span>,FSET
+command via <span class="xref std std-ref">tblist</span>,ALL,ALL.</p>
+<p>Material model data associated with the most recent  <span class="xref std std-ref">tb</span> or <span class="xref std std-ref">tbft</span>,FSET command
+overwrites previous data.</p>
+<p>Display material model data associated with both the <span class="xref std std-ref">tb</span> command and the <span class="xref std std-ref">tbft</span>,FSET
+command via <span class="xref std std-ref">tblist</span>,ALL,ALL.</p>
+<p>The capability to fix coefficients ( <code class="docutils literal notranslate"><span class="pre">Option4</span></code> = FIX) applies only to nonlinear curve fitting (as
+listed in.</p>
+<p>The uniaxial, biaxial, and shear experimental data use engineering stress. The volumetric data uses
+true stress. See the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/nonguimatprops.html">Material Reference</a> for details
+about experimental data for creep and viscoelasticity.</p>
+<p>The hyperelastic option AML,GENR is a generalized framework where the parameters (defined prior to
+issuing <span class="xref std std-ref">tbft</span> ) are imported directly from <span class="xref std std-ref">tb</span> and <span class="xref std std-ref">tbdata</span>. Parameter-fitting uses
+this framework for the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/Hlp_AM_TMFMCF.html#advtmvcfexamples">thermomechanical fatigue</a>,
+<a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/Hlp_AM_GMCF.html#gmcfexamps">geomechanical</a>, and
+<a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/aQw8sq22dldm.html#mathypertnmrefs">TNM</a>
+material models.</p>
+<p><span class="xref std std-ref">tbft</span> does not support saving to ( <span class="xref std std-ref">save</span> ) and resuming from ( <span class="xref std std-ref">resume</span> ) the
+database file. You must therefore rerun the curve-fitting analysis and then replot ( <span class="xref std std-ref">tbfplot</span>
+).</p>
+</section>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.73.0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.7.2. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

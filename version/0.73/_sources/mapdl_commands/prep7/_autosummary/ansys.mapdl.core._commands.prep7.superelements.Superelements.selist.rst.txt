@@ -1,0 +1,6 @@
+﻿selist
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.superelements
+
+.. automethod:: Superelements.selist

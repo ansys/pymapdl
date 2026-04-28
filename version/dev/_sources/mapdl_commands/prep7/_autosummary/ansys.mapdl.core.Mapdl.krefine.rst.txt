@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.krefine
+==============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.krefine

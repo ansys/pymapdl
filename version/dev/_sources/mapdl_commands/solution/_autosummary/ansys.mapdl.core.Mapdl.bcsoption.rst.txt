@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.bcsoption
+================================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.bcsoption

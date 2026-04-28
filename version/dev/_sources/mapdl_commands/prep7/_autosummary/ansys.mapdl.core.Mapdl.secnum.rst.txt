@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.secnum
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.secnum

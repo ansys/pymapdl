@@ -1,0 +1,6 @@
+﻿bfedele
+=======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.fe_body_loads
+
+.. automethod:: FeBodyLoads.bfedele

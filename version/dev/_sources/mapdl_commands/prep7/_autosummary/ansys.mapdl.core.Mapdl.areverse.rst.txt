@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.areverse
+===============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.areverse

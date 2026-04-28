@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.nwrite
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.nwrite
