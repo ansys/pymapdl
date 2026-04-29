@@ -2054,3 +2054,316 @@ def test_help_normalise_backslash_star(run_cli):
     out_plain = run_cli("help ABBR")
     out_backslash = run_cli(r"help \*ABBR")
     assert out_plain.strip() == out_backslash.strip()
+
+
+# ---------------------------------------------------------------------------
+# Unit tests for RST-to-terminal formatter helpers
+# ---------------------------------------------------------------------------
+
+_ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*m")
+_OSC8_ESCAPE = re.compile(r"\x1b\]8;;.*?\x1b\\")
+
+
+def _strip_ansi(text: str) -> str:
+    """Remove ANSI SGR and OSC 8 hyperlink escape sequences from *text*."""
+    text = _ANSI_ESCAPE.sub("", text)
+    text = _OSC8_ESCAPE.sub("", text)
+    return text
+
+
+# ---------------------------------------------------------------------------
+# _apply_inline_transforms
+# ---------------------------------------------------------------------------
+
+
+@requires("click")
+def test_apply_inline_transforms_sub():
+    """:sub:`M` is replaced by _M."""
+    from ansys.mapdl.core.cli.help import _apply_inline_transforms
+
+    assert _apply_inline_transforms(":sub:`M`") == "_M"
+
+
+@requires("click")
+def test_apply_inline_transforms_sup():
+    """:sup:`7` is replaced by ^7."""
+    from ansys.mapdl.core.cli.help import _apply_inline_transforms
+
+    assert _apply_inline_transforms(":sup:`7`") == "^7"
+
+
+@requires("click")
+def test_apply_inline_transforms_generic_role():
+    """:ref:`csys` is replaced by csys."""
+    from ansys.mapdl.core.cli.help import _apply_inline_transforms
+
+    assert _apply_inline_transforms(":ref:`csys`") == "csys"
+
+
+@requires("click")
+def test_apply_inline_transforms_explicit_title_role():
+    """:ref:`Solution control options <solconop>` → 'Solution control options'."""
+    from ansys.mapdl.core.cli.help import _apply_inline_transforms
+
+    result = _apply_inline_transforms(":ref:`Solution control options <solconop>`")
+    assert result.strip() == "Solution control options"
+
+
+@requires("click")
+def test_apply_inline_transforms_rst_hyperlink():
+    """`K <https://example.com>`_ → OSC 8 hyperlink with display text 'K' and the URL."""
+    from ansys.mapdl.core.cli.help import _apply_inline_transforms
+
+    result = _apply_inline_transforms("`K <https://example.com>`_")
+    assert "K" in _strip_ansi(result)
+    assert "https://example.com" in result
+
+
+@requires("click")
+def test_apply_inline_transforms_double_backtick():
+    """``code`` is replaced by bold `code`."""
+    from ansys.mapdl.core.cli.help import _apply_inline_transforms
+
+    result = _apply_inline_transforms("``code``")
+    assert _strip_ansi(result) == "`code`"
+    assert "\x1b[1m" in result  # bold escape present
+
+
+@requires("click")
+def test_apply_inline_transforms_bold_contains_text():
+    """**bold text** is rendered with the text present (ANSI may wrap it)."""
+    from ansys.mapdl.core.cli.help import _apply_inline_transforms
+
+    result = _apply_inline_transforms("**bold text**")
+    assert "bold text" in _strip_ansi(result)
+
+
+@requires("click")
+def test_apply_inline_transforms_multiple_on_same_line():
+    """Multiple inline transforms on one line are all applied."""
+    from ansys.mapdl.core.cli.help import _apply_inline_transforms
+
+    line = "Use :ref:`csys` or :sub:`n` or ``code``"
+    result = _apply_inline_transforms(line)
+    assert ":ref:" not in result
+    assert ":sub:" not in result
+    assert "``" not in result
+    assert "csys" in result
+    assert "_n" in result
+    assert "`code`" in result
+
+
+@requires("click")
+def test_apply_inline_transforms_bullet():
+    """'* item' is converted to '• item'; indentation is preserved."""
+    from ansys.mapdl.core.cli.help import _apply_inline_transforms
+
+    assert _apply_inline_transforms("* foo") == "• foo"
+    assert _apply_inline_transforms("    * foo") == "    • foo"
+    # A line that starts with ** (bold) is not treated as a bullet
+    result = _strip_ansi(_apply_inline_transforms("**bold**"))
+    assert result == "bold"
+    assert "•" not in result
+
+
+@requires("click")
+def test_apply_inline_transforms_plain_line_unchanged():
+    """A line with no RST markup is returned unchanged."""
+    from ansys.mapdl.core.cli.help import _apply_inline_transforms
+
+    plain = "Just a regular line with no markup."
+    assert _apply_inline_transforms(plain) == plain
+
+
+# ---------------------------------------------------------------------------
+# _format_rst_for_terminal
+# ---------------------------------------------------------------------------
+
+
+@requires("click")
+def test_format_rst_section_header_present_without_underline():
+    """Section header is present in output; the underline row is removed."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
+
+    text = "Parameters\n----------\nsome content"
+    result = _strip_ansi(_format_rst_for_terminal(text))
+    assert "Parameters" in result
+    # The underline row itself must not appear as a standalone line
+    assert "----------" not in result
+
+
+@requires("click")
+def test_format_rst_anchor_removed():
+    """RST label anchors (.. _name:) do not appear in the output."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
+
+    text = ".. _myanchor:\nsome content"
+    result = _strip_ansi(_format_rst_for_terminal(text))
+    assert ".. _myanchor:" not in result
+    assert "_myanchor" not in result
+    assert "some content" in result
+
+
+@requires("click")
+def test_format_rst_note_directive():
+    """.. note:: is rendered as [NOTE]."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
+
+    text = ".. note::\n\n    This is a note."
+    result = _strip_ansi(_format_rst_for_terminal(text))
+    assert "[NOTE]" in result
+
+
+@requires("click")
+def test_format_rst_warning_directive():
+    """.. warning:: is rendered as [WARNING]."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
+
+    text = ".. warning:: Be careful."
+    result = _strip_ansi(_format_rst_for_terminal(text))
+    assert "[WARNING]" in result
+
+
+@requires("click")
+def test_format_rst_rubric():
+    """.. rubric:: Title renders the title text (bold markers stripped)."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
+
+    text = ".. rubric:: **My Section**"
+    result = _strip_ansi(_format_rst_for_terminal(text))
+    assert "My Section" in result
+    # The directive keyword must not appear verbatim
+    assert "rubric" not in result
+
+
+@requires("click")
+def test_format_rst_mechanical_apdl_command_line():
+    """'Mechanical APDL Command:' label is bolded and the link is an OSC 8 hyperlink."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
+
+    text = "Mechanical APDL Command: `K <https://ansyshelp.example.com/K.html>`_"
+    result = _format_rst_for_terminal(text)
+    assert "Mechanical APDL Command:" in _strip_ansi(result)
+    assert "K" in _strip_ansi(result)
+    # URL is preserved inside the OSC 8 hyperlink sequence
+    assert "https://ansyshelp.example.com/K.html" in result
+    # Raw RST link syntax is gone from the visible text
+    assert "`_" not in _strip_ansi(result)
+
+
+@requires("click")
+def test_format_rst_inline_transforms_applied_to_regular_lines():
+    """Inline transforms (e.g. ``code``) are applied to regular content lines."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
+
+    text = "Use ``mycode`` here."
+    result = _strip_ansi(_format_rst_for_terminal(text))
+    assert "`mycode`" in result
+    assert "``mycode``" not in result
+
+
+@requires("click")
+def test_format_rst_real_docstring_k():
+    """_format_rst_for_terminal on Mapdl.k contains expected sections."""
+    import inspect
+
+    from ansys.mapdl.core import Mapdl
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
+
+    doc = inspect.getdoc(Mapdl.k)
+    assert doc, "Mapdl.k must have a docstring"
+    result = _strip_ansi(_format_rst_for_terminal(doc))
+    assert "Defines a keypoint" in result
+    assert "Parameters" in result
+    assert "Returns" in result
+    assert "Examples" in result
+
+
+@requires("click")
+def test_format_rst_real_docstring_asel_note():
+    """_format_rst_for_terminal on Mapdl.asel renders [NOTE] for the note directive."""
+    import inspect
+
+    from ansys.mapdl.core import Mapdl
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
+
+    doc = inspect.getdoc(Mapdl.asel)
+    assert doc, "Mapdl.asel must have a docstring"
+    result = _strip_ansi(_format_rst_for_terminal(doc))
+    assert "[NOTE]" in result
+
+
+# ---------------------------------------------------------------------------
+# _echo_doc
+# ---------------------------------------------------------------------------
+
+
+@requires("click")
+def test_echo_doc_non_tty_uses_click_echo():
+    """When stdout is not a TTY, click.echo is called with the content."""
+    from ansys.mapdl.core.cli.help import _echo_doc
+
+    content = "some formatted text"
+    with patch("sys.stdout") as mock_stdout:
+        mock_stdout.isatty.return_value = False
+        with patch("click.echo") as mock_echo:
+            _echo_doc(content)
+            mock_echo.assert_called_once_with(content)
+
+
+@requires("click")
+def test_echo_doc_tty_short_content_uses_click_echo():
+    """On a TTY, content shorter than terminal height goes through click.echo."""
+    from ansys.mapdl.core.cli.help import _echo_doc
+
+    # Build content with fewer lines than the faked terminal height
+    terminal_height = 40
+    short_content = "\n".join(["line"] * (terminal_height - 5))
+
+    with patch("sys.stdout") as mock_stdout:
+        mock_stdout.isatty.return_value = True
+        with patch(
+            "shutil.get_terminal_size", return_value=MagicMock(lines=terminal_height)
+        ):
+            with patch("click.echo") as mock_echo:
+                with patch("click.echo_via_pager") as mock_pager:
+                    _echo_doc(short_content)
+                    mock_echo.assert_called_once_with(short_content)
+                    mock_pager.assert_not_called()
+
+
+@requires("click")
+def test_echo_doc_tty_long_content_uses_pager():
+    """On a TTY, content exceeding terminal height is sent through click.echo_via_pager."""
+    from ansys.mapdl.core.cli.help import _echo_doc
+
+    # Build content with more lines than the faked terminal height
+    terminal_height = 10
+    long_content = "\n".join(["line"] * (terminal_height + 5))
+
+    with patch("sys.stdout") as mock_stdout:
+        mock_stdout.isatty.return_value = True
+        with patch(
+            "shutil.get_terminal_size", return_value=MagicMock(lines=terminal_height)
+        ):
+            with patch("click.echo") as mock_echo:
+                with patch("click.echo_via_pager") as mock_pager:
+                    _echo_doc(long_content)
+                    mock_pager.assert_called_once_with(long_content)
+                    mock_echo.assert_not_called()
+
+
+@requires("click")
+def test_format_rst_multiline_link_collapsed():
+    """RST links whose URL wraps to the next line become OSC 8 hyperlinks."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
+
+    rst = (
+        "controlled with the `\\*VLEN\n"
+        "        <https://ansyshelp.ansys.com/Hlp_C_VLEN.html>`_\n"
+        "command."
+    )
+    out = _format_rst_for_terminal(rst)
+    assert "ansyshelp.ansys.com" in out  # URL preserved in OSC 8 sequence
+    assert "VLEN" in _strip_ansi(out)  # display text visible after stripping
+    assert "`_" not in _strip_ansi(out)  # raw RST syntax gone

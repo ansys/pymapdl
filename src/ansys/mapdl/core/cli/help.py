@@ -22,11 +22,170 @@
 
 import inspect
 import re
+import shutil
 import sys
 
 import click
 
 _MAPDL_CMD_RE = re.compile(r"Mechanical APDL Command: `([^\s<`]+)")
+
+# ---------------------------------------------------------------------------
+# RST → terminal formatter
+# ---------------------------------------------------------------------------
+
+_RST_SECTION_UNDERLINE = re.compile(r"^[-=~^\"'`#+*]+\s*$")
+_RST_ANCHOR = re.compile(r"^\s*\.\.\s+_[\w-]+:\s*$")
+_RST_DIRECTIVE = re.compile(
+    r"^(\s*)\.\.\s+(note|warning|caution|danger|tip|important)::\s*(.*)$",
+    re.IGNORECASE,
+)
+_RST_RUBRIC = re.compile(r"^\s*\.\.\s+rubric::\s*(.+)$")
+_MAPDL_CMD_LINE = re.compile(r"^(Mechanical APDL Command:)\s+(.+)$")
+
+_DIRECTIVE_COLORS: dict[str, str] = {
+    "note": "blue",
+    "tip": "green",
+    "important": "green",
+    "warning": "yellow",
+    "caution": "yellow",
+    "danger": "red",
+}
+
+
+def _hyperlink(url: str, text: str) -> str:
+    """Wrap *text* in an OSC 8 terminal hyperlink pointing to *url*.
+
+    Terminals that support OSC 8 (iTerm2, GNOME Terminal, Windows Terminal,
+    Konsole, …) render this as a clickable link.  Terminals that do not
+    support OSC 8 silently ignore the escape sequences and display *text*
+    as plain text.
+    """
+    return f"\x1b]8;;{url}\x1b\\{text}\x1b]8;;\x1b\\"
+
+
+def _apply_inline_transforms(line: str) -> str:
+    """Apply inline RST → terminal substitutions to a single line.
+
+    Transformations are applied in specificity order so that more specialised
+    patterns take precedence over generic ones.
+    """
+    line = re.sub(r":sub:`([^`]+)`", r"_\1", line)
+    line = re.sub(r":sup:`([^`]+)`", r"^\1", line)
+    # Explicit-title role: :role:`label <target>` → label
+    line = re.sub(r":\w[\w.:-]*:`([^`<>]+)\s*<[^>]*>`", r"\1", line)
+    # Generic role: :role:`text` → text
+    line = re.sub(r":\w[\w.:-]*:`([^`]+)`", r"\1", line)
+    # RST hyperlink: `text <url>`_ → OSC 8 clickable link
+    line = re.sub(
+        r"`([^`<]+?)\s*<([^>]+)>`_+",
+        lambda m: _hyperlink(m.group(2).strip(), m.group(1).strip()),
+        line,
+    )
+    # Double backtick code span: ``x`` → bold `x`
+    line = re.sub(
+        r"``([^`]+)``", lambda m: click.style(f"`{m.group(1)}`", bold=True), line
+    )
+    # RST bold: **text** → ANSI bold
+    line = re.sub(r"\*\*(.+?)\*\*", lambda m: click.style(m.group(1), bold=True), line)
+    # RST bullet list item: "* text" → "• text"
+    line = re.sub(r"^(\s*)\* ", r"\1• ", line)
+    return line
+
+
+def _format_rst_for_terminal(text: str) -> str:
+    """Lightly format a numpydoc RST docstring for terminal output.
+
+    This is a best-effort formatter that handles the patterns commonly found in
+    PyMAPDL command docstrings.  It does **not** require any additional
+    dependencies beyond *click*.
+
+    Parameters
+    ----------
+    text : str
+        Raw numpydoc RST docstring (as returned by :func:`inspect.getdoc`).
+
+    Returns
+    -------
+    str
+        The formatted string with ANSI escape sequences suitable for a colour
+        terminal.  When colour is unavailable (e.g. piped output), click strips
+        the escape codes automatically.
+    """
+    # Collapse multi-line RST hyperlinks so the single-line regex in
+    # _apply_inline_transforms can handle them.  The pattern matches a
+    # backtick-delimited link whose URL is on the following (possibly
+    # indented) line:  `display text\n    <url>`_
+    text = re.sub(
+        r"`([^`<\n]+?)\s*\n\s*<([^>]+)>`(_+)",
+        r"`\1 <\2>`\3",
+        text,
+    )
+
+    lines = text.splitlines()
+    result: list[str] = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        next_line = lines[i + 1] if i + 1 < len(lines) else ""
+
+        # Section header: non-empty line followed by an RST underline row of
+        # sufficient length.
+        if (
+            line.strip()
+            and _RST_SECTION_UNDERLINE.match(next_line)
+            and len(next_line.strip()) >= max(len(line.strip()) - 2, 1)
+        ):
+            result.append(click.style(line, bold=True, fg="cyan"))
+            i += 2  # consume the underline row
+            continue
+
+        # RST label anchor (.. _name:) – not meaningful in a terminal
+        if _RST_ANCHOR.match(line):
+            i += 1
+            continue
+
+        # Admonition directives: .. note::, .. warning::, etc.
+        m = _RST_DIRECTIVE.match(line)
+        if m:
+            indent, dtype, rest = m.groups()
+            color = _DIRECTIVE_COLORS.get(dtype.lower(), "blue")
+            label = click.style(f"[{dtype.upper()}]", bold=True, fg=color)
+            rest = _apply_inline_transforms(rest)
+            result.append(indent + label + (" " + rest if rest else ""))
+            i += 1
+            continue
+
+        # .. rubric:: title – treat as a sub-section header
+        m = _RST_RUBRIC.match(line)
+        if m:
+            title = _apply_inline_transforms(m.group(1))
+            result.append(click.style(title, bold=True, fg="cyan"))
+            i += 1
+            continue
+
+        # "Mechanical APDL Command: `CMD <url>`_" – bold the label
+        m = _MAPDL_CMD_LINE.match(line)
+        if m:
+            lbl, rest = m.groups()
+            rest = _apply_inline_transforms(rest)
+            result.append(click.style(lbl, bold=True) + " " + rest)
+            i += 1
+            continue
+
+        result.append(_apply_inline_transforms(line))
+        i += 1
+
+    return "\n".join(result)
+
+
+def _echo_doc(formatted: str) -> None:
+    """Output *formatted* to stdout, using a pager for long content on a TTY."""
+    if sys.stdout.isatty():
+        terminal_height = shutil.get_terminal_size(fallback=(80, 24)).lines
+        if formatted.count("\n") + 1 > terminal_height - 2:
+            click.echo_via_pager(formatted)
+            return
+    click.echo(formatted)
 
 
 def _build_command_map() -> dict[str, str]:
@@ -54,13 +213,13 @@ def _build_command_map() -> dict[str, str]:
     'prep7'
 
     """
-    from ansys.mapdl.core import Mapdl
+    from ansys.mapdl.core.commands import Commands
 
     mapping: dict[str, str] = {}
-    for attr_name in dir(Mapdl):
+    for attr_name in dir(Commands):
         if attr_name.startswith("_"):
             continue
-        attr = getattr(Mapdl, attr_name, None)
+        attr = getattr(Commands, attr_name, None)
         if not callable(attr):
             continue
         doc = getattr(attr, "__doc__", None) or ""
@@ -174,4 +333,4 @@ def help_cmd(command: str) -> None:
         )
         sys.exit(1)
 
-    click.echo(doc)
+    _echo_doc(_format_rst_for_terminal(doc))
