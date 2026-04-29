@@ -180,7 +180,7 @@ jobs:
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
 
       - name: "Cache examples"
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 #v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
         if: ${{ inputs.use_cache_examples && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/source/examples
@@ -189,7 +189,7 @@ jobs:
             Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Cache docs build directory"
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 #v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
         if: ${{ inputs.use_cache_doc_build && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/_build
@@ -198,7 +198,7 @@ jobs:
             doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Cache autosummary"
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 #v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
         if: ${{ inputs.use_cache_autosummary && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/source/**/_autosummary/*.rst
@@ -252,7 +252,7 @@ jobs:
           .ci/substitute_defective_gif.sh
 
       - name: "Upload HTML Documentation"
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
           name: documentation-html
           path: doc/_build/html
@@ -272,7 +272,7 @@ jobs:
 
       - name: "Upload PDF documentation"
         if: ${{ inputs.build_pdf }}
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
           name: documentation-pdf
           path: doc/_build/latex/pymapdl*.pdf
@@ -280,7 +280,7 @@ jobs:
 
       - name: "Upload minimal requirements file"
         # To include it in the release
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
           name: minimum_requirements.txt
           path: ./minimum_requirements.txt
