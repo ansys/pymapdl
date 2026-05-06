@@ -19,21 +19,21 @@ repos:
       args: [ "-x"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: 0f369d245750787ce34997d464ed9605391a5283  # frozen: v1.20.1
+  rev: fc0f09a29bb495f4a91f00266155d6282d52485d  # frozen: v1.20.2
   hooks:
     - id: mypy
       args: [ --follow-imports=silent, --config-file=pyproject.toml]
       exclude: ^(doc/|examples/)
 
 - repo: https://github.com/ansys/pre-commit-hooks
-  rev: 680b297da7584a07eb7c92b6b4e9baf88ece3e0e  # frozen: v0.6.0
+  rev: 4c4d32dbb88444eac57f3fad6e3b1a2d52978f64  # frozen: v0.7.1
   hooks:
   - id: add-license-headers
     args:
     - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
-  rev: a333737ed43df02b18e6c95477ea1b285b3de15a  # frozen: 8.0.1
+  rev: dac090ce4d9ee313d086e2e89ab1acb8c2664fa1  # frozen: 9.0.0a3
   hooks:
   - id: isort
 
