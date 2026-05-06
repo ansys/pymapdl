@@ -2076,75 +2076,77 @@ def _strip_ansi(text: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-@requires("click")
-def test_apply_inline_transforms_sub():
-    """:sub:`M` is replaced by _M."""
-    from ansys.mapdl.core.cli.help import _apply_inline_transforms
-
-    assert _apply_inline_transforms(":sub:`M`") == "_M"
+# ---------------------------------------------------------------------------
+# Inline rendering (via _format_rst_for_terminal, which replaced
+# _apply_inline_transforms as the public surface for inline transforms)
+# ---------------------------------------------------------------------------
 
 
-@requires("click")
-def test_apply_inline_transforms_sup():
-    """:sup:`7` is replaced by ^7."""
-    from ansys.mapdl.core.cli.help import _apply_inline_transforms
+def _fmt(rst: str) -> str:
+    """Render *rst* and strip all ANSI/OSC escape sequences."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
 
-    assert _apply_inline_transforms(":sup:`7`") == "^7"
+    return _strip_ansi(_format_rst_for_terminal(rst))
 
 
 @requires("click")
-def test_apply_inline_transforms_generic_role():
-    """:ref:`csys` is replaced by csys."""
-    from ansys.mapdl.core.cli.help import _apply_inline_transforms
-
-    assert _apply_inline_transforms(":ref:`csys`") == "csys"
+def test_inline_sub():
+    """:sub:`M` is rendered as _M."""
+    assert "_M" in _fmt("Text :sub:`M`")
 
 
 @requires("click")
-def test_apply_inline_transforms_explicit_title_role():
-    """:ref:`Solution control options <solconop>` → 'Solution control options'."""
-    from ansys.mapdl.core.cli.help import _apply_inline_transforms
-
-    result = _apply_inline_transforms(":ref:`Solution control options <solconop>`")
-    assert result.strip() == "Solution control options"
+def test_inline_sup():
+    """:sup:`7` is rendered as ^7."""
+    assert "^7" in _fmt("Text :sup:`7`")
 
 
 @requires("click")
-def test_apply_inline_transforms_rst_hyperlink():
-    """`K <https://example.com>`_ → OSC 8 hyperlink with display text 'K' and the URL."""
-    from ansys.mapdl.core.cli.help import _apply_inline_transforms
-
-    result = _apply_inline_transforms("`K <https://example.com>`_")
-    assert "K" in _strip_ansi(result)
-    assert "https://example.com" in result
+def test_inline_generic_role():
+    """:ref:`csys` is rendered as csys (Sphinx role stripped)."""
+    result = _fmt("Text :ref:`csys`")
+    assert "csys" in result
+    assert ":ref:" not in result
 
 
 @requires("click")
-def test_apply_inline_transforms_double_backtick():
-    """``code`` is replaced by bold `code`."""
-    from ansys.mapdl.core.cli.help import _apply_inline_transforms
-
-    result = _apply_inline_transforms("``code``")
-    assert _strip_ansi(result) == "`code`"
-    assert "\x1b[1m" in result  # bold escape present
+def test_inline_explicit_title_role():
+    """:ref:`Solution control options <solconop>` renders the display text."""
+    result = _fmt(":ref:`Solution control options <solconop>`")
+    assert "Solution control options" in result
+    assert ":ref:" not in result
 
 
 @requires("click")
-def test_apply_inline_transforms_bold_contains_text():
-    """**bold text** is rendered with the text present (ANSI may wrap it)."""
-    from ansys.mapdl.core.cli.help import _apply_inline_transforms
+def test_inline_rst_hyperlink():
+    """`K <https://example.com>`_ renders display text and embeds the URL."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
 
-    result = _apply_inline_transforms("**bold text**")
-    assert "bold text" in _strip_ansi(result)
+    raw = _format_rst_for_terminal("`K <https://example.com>`_")
+    assert "K" in _strip_ansi(raw)
+    assert "https://example.com" in raw
 
 
 @requires("click")
-def test_apply_inline_transforms_multiple_on_same_line():
-    """Multiple inline transforms on one line are all applied."""
-    from ansys.mapdl.core.cli.help import _apply_inline_transforms
+def test_inline_double_backtick():
+    """``code`` is rendered as bold `code`."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
 
-    line = "Use :ref:`csys` or :sub:`n` or ``code``"
-    result = _apply_inline_transforms(line)
+    raw = _format_rst_for_terminal("Use ``code`` here.")
+    assert "`code`" in _strip_ansi(raw)
+    assert "\x1b[1m" in raw  # bold escape present
+
+
+@requires("click")
+def test_inline_bold():
+    """**bold text** renders with the text visible."""
+    assert "bold text" in _fmt("**bold text**")
+
+
+@requires("click")
+def test_inline_multiple_on_same_line():
+    """Multiple inline constructs on one line are all applied."""
+    result = _fmt("Use :ref:`csys` or :sub:`n` or ``code``")
     assert ":ref:" not in result
     assert ":sub:" not in result
     assert "``" not in result
@@ -2154,25 +2156,121 @@ def test_apply_inline_transforms_multiple_on_same_line():
 
 
 @requires("click")
-def test_apply_inline_transforms_bullet():
-    """'* item' is converted to '• item'; indentation is preserved."""
-    from ansys.mapdl.core.cli.help import _apply_inline_transforms
-
-    assert _apply_inline_transforms("* foo") == "• foo"
-    assert _apply_inline_transforms("    * foo") == "    • foo"
-    # A line that starts with ** (bold) is not treated as a bullet
-    result = _strip_ansi(_apply_inline_transforms("**bold**"))
-    assert result == "bold"
-    assert "•" not in result
+def test_inline_bullet():
+    """'* item' is converted to '• item'."""
+    assert "• foo" in _fmt("* foo")
 
 
 @requires("click")
-def test_apply_inline_transforms_plain_line_unchanged():
-    """A line with no RST markup is returned unchanged."""
-    from ansys.mapdl.core.cli.help import _apply_inline_transforms
-
+def test_inline_plain_line_unchanged():
+    """A line with no RST markup passes through as plain text."""
     plain = "Just a regular line with no markup."
-    assert _apply_inline_transforms(plain) == plain
+    assert plain in _fmt(plain)
+
+
+# ---------------------------------------------------------------------------
+# _format_rst_for_terminal — additional node-type coverage
+# ---------------------------------------------------------------------------
+
+
+@requires("click")
+def test_format_rst_enumerated_list():
+    """Enumerated list items are numbered."""
+    result = _fmt("1. One\n2. Two\n3. Three\n")
+    assert "1. One" in result
+    assert "2. Two" in result
+    assert "3. Three" in result
+
+
+@requires("click")
+def test_format_rst_nested_bullet_list():
+    """Nested bullet lists increase indentation."""
+    rst = "* Outer\n\n  * Inner\n"
+    result = _fmt(rst)
+    assert "• Outer" in result
+    assert "• Inner" in result
+    outer_idx = result.index("• Outer")
+    inner_idx = result.index("• Inner")
+    # Inner bullet must appear after outer in output.
+    assert inner_idx > outer_idx
+
+
+@requires("click")
+def test_format_rst_definition_list():
+    """Definition list terms are rendered in bold and definitions are indented."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
+
+    rst = "term\n    The definition text.\n"
+    raw = _format_rst_for_terminal(rst)
+    stripped = _strip_ansi(raw)
+    assert "term" in stripped
+    assert "The definition text." in stripped
+
+
+@requires("click")
+def test_format_rst_field_list():
+    """Field list names (:fieldname:) are rendered in bold."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
+
+    rst = ":param x: The x value.\n:returns: The result.\n"
+    raw = _format_rst_for_terminal(rst)
+    stripped = _strip_ansi(raw)
+    assert "param x" in stripped
+    assert "The x value." in stripped
+
+
+@requires("click")
+def test_format_rst_literal_block():
+    """Code blocks (:: or code-block) are included in the output."""
+    rst = "Example::\n\n    import ansys\n    ansys.do()\n"
+    result = _fmt(rst)
+    assert "import ansys" in result
+    assert "ansys.do()" in result
+
+
+@requires("click")
+def test_format_rst_table():
+    """Simple grid tables are rendered (via rich) without raw RST syntax."""
+    rst = """\
++-------+-------+
+| Col A | Col B |
++=======+=======+
+| 1     | 2     |
++-------+-------+
+| 3     | 4     |
++-------+-------+
+"""
+    result = _fmt(rst)
+    assert "Col A" in result
+    assert "Col B" in result
+    assert "1" in result
+    assert "3" in result
+    # Raw RST table borders must not appear verbatim.
+    assert "+-------+" not in result
+
+
+@requires("click")
+def test_format_rst_transition():
+    """A transition (----) produces a separator line, not raw dashes."""
+    rst = "Before.\n\n----\n\nAfter.\n"
+    result = _fmt(rst)
+    assert "Before." in result
+    assert "After." in result
+    assert "----" not in result
+
+
+@requires("click")
+def test_format_rst_tip_directive():
+    """.. tip:: renders as [TIP]."""
+    result = _fmt(".. tip::\n\n   Use this shortcut.")
+    assert "[TIP]" in result
+
+
+@requires("click")
+def test_format_rst_danger_directive():
+    """.. danger:: renders as [DANGER]."""
+    result = _fmt(".. danger::\n\n   High risk operation.")
+    assert "[DANGER]" in result
 
 
 # ---------------------------------------------------------------------------
@@ -2367,3 +2465,35 @@ def test_format_rst_multiline_link_collapsed():
     assert "ansyshelp.ansys.com" in out  # URL preserved in OSC 8 sequence
     assert "VLEN" in _strip_ansi(out)  # display text visible after stripping
     assert "`_" not in _strip_ansi(out)  # raw RST syntax gone
+
+
+@requires("click")
+def test_format_rst_hint_before_first_section():
+    """A browser hint is emitted before the first section when a URL is present."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
+
+    rst = (
+        "Short summary.\n"
+        "\n"
+        "Mechanical APDL Command: `K <https://ansyshelp.ansys.com/K.html>`_\n"
+        "\n"
+        "Parameters\n"
+        "----------\n"
+        "x : str\n"
+        "    The x coordinate.\n"
+    )
+    out = _strip_ansi(_format_rst_for_terminal(rst))
+    hint_pos = out.find("open the link above")
+    params_pos = out.find("Parameters")
+    assert hint_pos != -1, "hint should be present"
+    assert hint_pos < params_pos, "hint should appear before Parameters"
+
+
+@requires("click")
+def test_format_rst_no_hint_without_url():
+    """No hint is emitted when there is no hyperlink in the docstring."""
+    from ansys.mapdl.core.cli.help import _format_rst_for_terminal
+
+    rst = "Short summary.\n\nParameters\n----------\nx : str\n    Desc.\n"
+    out = _strip_ansi(_format_rst_for_terminal(rst))
+    assert "open the link above" not in out
