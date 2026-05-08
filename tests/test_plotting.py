@@ -47,7 +47,7 @@ ALL_LABELS.extend(DISPL_LABELS)
 
 
 def _get_picking_right_clicking_observer(pl):
-    """Return the right-clicking observer, compatible with pyvista < and >= 0.48."""
+    """Return the right-clicking observer, compatible with PyVista <0.48 and >=0.48."""
     if hasattr(pl, "_picking_right_clicking_observer"):
         return pl._picking_right_clicking_observer
     if hasattr(pl, "picking") and hasattr(
