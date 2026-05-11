@@ -319,7 +319,7 @@ This is the most compact form when writing commands inline:
 
 **Stdin (recommended when composing commands dynamically)**
 
-Pass ``-`` as a positional argument and pipe the commands in.  This is
+Pass ``-`` as a positional argument and pipe the commands in. This is
 equally concise and integrates naturally with shell pipelines:
 
 
