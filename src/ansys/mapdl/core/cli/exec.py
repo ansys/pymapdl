@@ -56,7 +56,10 @@ MAPDL output is written to stdout so it can be consumed by scripts or LLM agents
     "commands",
     multiple=True,
     help="An APDL command to send.  May be repeated to build a multi-command block: "
-    '-c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE',
+    '-c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE.  '
+    "Alternatively, embed multiple commands in a single value by separating them "
+    r"with newlines: -c $'/prep7\nBLOCK,0,1,0,1,0,1' (Bash) or "
+    r'"/prep7`nBLOCK,0,1,0,1,0,1" (PowerShell).',
 )
 @click.option(
     "--file",
@@ -113,9 +116,13 @@ def exec_cmd(
         ``echo "/prep7" | pymapdl exec`` works without the ``-``.  Passing
         ``-`` when running interactively is still supported for clarity.
     commands : tuple of str
-        APDL commands supplied via repeated ``-c`` / ``--command`` options.
-        Each value is one APDL command; they are joined with newlines before
-        being sent as a single block.
+        APDL commands supplied via ``-c`` / ``--command`` options.
+        Each value may be a single APDL command **or** multiple commands
+        separated by newline characters (e.g.
+        ``-c $'/prep7\\nBLOCK,0,1,0,1,0,1'`` in Bash or
+        ``-c "/prep7`nBLOCK,0,1,0,1,0,1"`` in PowerShell).
+        All values are joined with newlines and sent as a single block.
+        Mutually exclusive with *script_file* and stdin.
     script_file : str, optional
         Path to an APDL script file.  Mutually exclusive with *commands* and
         stdin.
