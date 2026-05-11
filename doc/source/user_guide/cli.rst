@@ -287,65 +287,12 @@ Use ``pymapdl exec`` to send APDL commands to a running MAPDL instance and
 print the output to stdout. The command always connects to an existing
 instance, it never starts a new one. Use ``pymapdl start`` first if needed.
 
-There are four mutually exclusive ways to supply commands:
+There are three mutually exclusive sources for commands:
 
-**1. Inline string (positional argument)**
+**1.** ``-c`` / ``--command`` **options**
 
-Pass one or more commands directly as the first argument. The string is used
-exactly as received from the shell (no escape sequences are interpreted).
-For a single command this is straightforward:
-
-
-.. tab-set::
-
-    .. tab-item:: Windows
-        :sync: key1
-
-        .. code:: pwsh-session
-
-            (.venv) PS C:\Users\user\pymapdl> pymapdl exec "/prep7"
-
-    .. tab-item:: Linux
-        :sync: key1
-
-        .. code:: console
-
-            (.venv) user@machine:~$ pymapdl exec "/prep7"
-
-
-To send multiple commands inline, use your shell's quoting syntax to embed
-real newlines in the string:
-
-
-.. tab-set::
-
-    .. tab-item:: Windows (PowerShell)
-        :sync: key1
-
-        .. code:: pwsh-session
-
-            (.venv) PS C:\Users\user\pymapdl> pymapdl exec "/prep7`nBLOCK,0,1,0,1,0,1`nSAVE"
-
-    .. tab-item:: Linux (bash/zsh)
-        :sync: key1
-
-        .. code:: console
-
-            (.venv) user@machine:~$ pymapdl exec $'/prep7\nBLOCK,0,1,0,1,0,1\nSAVE'
-
-
-.. note::
-
-   Because the inline string is passed through unchanged, Windows paths such
-   as ``C:\new\file`` are always safe — the shell does not interpret the
-   backslash sequences inside a double-quoted string.  For multi-command
-   blocks the ``-c`` option (below) is often more readable.
-
-
-**2. Repeated** ``-c`` / ``--command`` **options**
-
-Each ``-c`` value is one APDL command; all commands are sent as a single
-block. This is the recommended form for scripting and LLM use:
+Each ``-c`` value is one APDL command; all commands are joined and sent as a
+single block. You can pass multiple ``-c`` flags:
 
 
 .. tab-set::
@@ -365,7 +312,28 @@ block. This is the recommended form for scripting and LLM use:
             (.venv) user@machine:~$ pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
 
 
-**3. Script file**
+Or embed multiple commands in a single ``-c`` value using your shell's quoting
+to produce real newlines:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows (PowerShell)
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec -c "/prep7`nBLOCK,0,1,0,1,0,1`nSAVE"
+
+    .. tab-item:: Linux (bash/zsh)
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl exec -c $'/prep7\nBLOCK,0,1,0,1,0,1\nSAVE'
+
+
+**2. Script file**
 
 Read commands from an APDL script file using ``--file`` / ``-f``:
 
@@ -387,10 +355,10 @@ Read commands from an APDL script file using ``--file`` / ``-f``:
             (.venv) user@machine:~$ pymapdl exec --file my_script.inp
 
 
-**4. Stdin**
+**3. Stdin**
 
-Pipe commands from another program by passing ``-`` as the positional
-argument:
+Pipe commands in from another program. The ``-`` marker is optional — when
+stdin is a pipe ``pymapdl exec`` detects it automatically:
 
 
 .. tab-set::
@@ -400,6 +368,7 @@ argument:
 
         .. code:: pwsh-session
 
+            (.venv) PS C:\Users\user\pymapdl> Get-Content my_script.inp | pymapdl exec
             (.venv) PS C:\Users\user\pymapdl> Get-Content my_script.inp | pymapdl exec -
 
     .. tab-item:: Linux
@@ -407,7 +376,15 @@ argument:
 
         .. code:: console
 
-            (.venv) user@machine:~$ cat my_script.inp | pymapdl exec -
+            (.venv) user@machine:~$ cat my_script.inp | pymapdl exec
+            (.venv) user@machine:~$ echo "/prep7" | pymapdl exec
+
+
+.. note::
+
+   ``pymapdl exec`` auto-reads stdin only when it detects a pipe (i.e. stdin
+   is not a terminal).  Running ``pymapdl exec`` interactively with no
+   arguments still produces an error rather than hanging.
 
 
 By default, ``pymapdl exec`` connects without clearing the MAPDL database, so
