@@ -1467,19 +1467,20 @@ class TestCliExecCommand:
         assert result.exit_code == 0
         mock_mapdl.input_strings.assert_called_once_with("/prep7")
 
-    def test_exec_inline_multiline_commands(self, cli_runner, mock_mapdl):
-        r"""``\n`` in the inline argument is unescaped into real newlines."""
+    def test_exec_inline_preserves_backslash_sequences(self, cli_runner, mock_mapdl):
+        r"""Backslash sequences like ``\n`` in inline commands are preserved as-is."""
+        cmd = r"/FILNAME,'C:\new\file',1"
         with patch(
             "ansys.mapdl.core.launcher.connection.connect_to_existing",
             return_value=mock_mapdl,
         ):
-            result = cli_runner(["exec", r"/prep7\nBLOCK,0,1,0,1,0,1\nSAVE"])
+            result = cli_runner(["exec", cmd])
 
         assert result.exit_code == 0
         sent = mock_mapdl.input_strings.call_args[0][0]
-        assert sent == "/prep7\nBLOCK,0,1,0,1,0,1\nSAVE"
+        assert sent == cmd
 
-    def test_exec_inline_and_c_mutually_exclusive(self, cli_runner, tmp_path):
+    def test_exec_inline_and_c_mutually_exclusive(self, cli_runner):
         """Providing both an inline positional argument and ``-c`` is rejected."""
         result = cli_runner(["exec", "/prep7", "-c", "SAVE"])
         assert result.exit_code != 0

@@ -291,8 +291,7 @@ There are four mutually exclusive ways to supply commands:
 
 **1. Inline string (positional argument)**
 
-Pass one or more commands directly as the first argument. Use ``\n`` as a
-line separator to send a multi-command block in a single call:
+Pass a single command directly as the first argument:
 
 
 .. tab-set::
@@ -303,7 +302,6 @@ line separator to send a multi-command block in a single call:
         .. code:: pwsh-session
 
             (.venv) PS C:\Users\user\pymapdl> pymapdl exec "/prep7"
-            (.venv) PS C:\Users\user\pymapdl> pymapdl exec "/prep7\nBLOCK,0,1,0,1,0,1\nSAVE"
 
     .. tab-item:: Linux
         :sync: key1
@@ -311,7 +309,14 @@ line separator to send a multi-command block in a single call:
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl exec "/prep7"
-            (.venv) user@machine:~$ pymapdl exec "/prep7\nBLOCK,0,1,0,1,0,1\nSAVE"
+
+
+.. note::
+
+   The inline string is passed to MAPDL exactly as written — backslash
+   sequences such as ``\n`` are **not** interpreted.  This keeps Windows
+   paths (e.g. ``C:\new\file``) safe.  For multi-command blocks, use
+   repeated ``-c`` flags (option 2 below) or ``--file`` (option 3).
 
 
 **2. Repeated** ``-c`` / ``--command`` **options**
