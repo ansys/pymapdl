@@ -1,0 +1,6 @@
+﻿secmodif
+========
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.cross_sections
+
+.. automethod:: CrossSections.secmodif

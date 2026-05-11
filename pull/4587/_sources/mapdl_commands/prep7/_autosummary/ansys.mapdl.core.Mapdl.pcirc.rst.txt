@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.pcirc
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.pcirc

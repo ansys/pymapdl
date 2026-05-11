@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.trnopt
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.trnopt

@@ -1,0 +1,6 @@
+﻿rescombine
+==========
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.set_up
+
+.. automethod:: SetUp.rescombine

@@ -1,0 +1,6 @@
+reduce
+======
+
+.. currentmodule:: ansys.mapdl.core.pool
+
+.. automethod:: MapdlPool.reduce

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.mfbucket
+===============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.mfbucket

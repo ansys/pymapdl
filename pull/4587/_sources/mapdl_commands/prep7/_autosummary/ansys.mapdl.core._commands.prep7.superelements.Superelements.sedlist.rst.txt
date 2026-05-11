@@ -1,0 +1,6 @@
+﻿sedlist
+=======
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.superelements
+
+.. automethod:: Superelements.sedlist

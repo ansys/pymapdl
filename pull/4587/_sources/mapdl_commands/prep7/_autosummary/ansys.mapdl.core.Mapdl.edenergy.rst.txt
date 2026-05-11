@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.edenergy
+===============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.edenergy

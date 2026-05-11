@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.vimp
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.vimp

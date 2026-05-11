@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.lumpm
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.lumpm
