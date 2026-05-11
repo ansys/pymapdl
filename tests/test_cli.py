@@ -1485,6 +1485,18 @@ class TestCliExecCommand:
         result = cli_runner(["exec", "/prep7", "-c", "SAVE"])
         assert result.exit_code != 0
 
+    def test_exec_inline_multiline(self, cli_runner, mock_mapdl):
+        """Real newlines in the inline argument are passed through as a multi-command block."""
+        with patch(
+            "ansys.mapdl.core.launcher.connection.connect_to_existing",
+            return_value=mock_mapdl,
+        ):
+            result = cli_runner(["exec", "/prep7\nBLOCK,0,1,0,1,0,1\nSAVE"])
+
+        assert result.exit_code == 0
+        sent = mock_mapdl.input_strings.call_args[0][0]
+        assert sent == "/prep7\nBLOCK,0,1,0,1,0,1\nSAVE"
+
     def test_exec_inline_and_file_mutually_exclusive(self, cli_runner, tmp_path):
         """Providing both an inline positional argument and ``--file`` is rejected."""
         script = tmp_path / "script.inp"

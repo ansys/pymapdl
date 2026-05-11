@@ -291,7 +291,9 @@ There are four mutually exclusive ways to supply commands:
 
 **1. Inline string (positional argument)**
 
-Pass a single command directly as the first argument:
+Pass one or more commands directly as the first argument. The string is used
+exactly as received from the shell — no escape sequences are interpreted.
+For a single command this is straightforward:
 
 
 .. tab-set::
@@ -311,12 +313,33 @@ Pass a single command directly as the first argument:
             (.venv) user@machine:~$ pymapdl exec "/prep7"
 
 
+To send multiple commands inline, use your shell's quoting syntax to embed
+real newlines in the string:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows (PowerShell)
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec "/prep7`nBLOCK,0,1,0,1,0,1`nSAVE"
+
+    .. tab-item:: Linux (bash/zsh)
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl exec $'/prep7\nBLOCK,0,1,0,1,0,1\nSAVE'
+
+
 .. note::
 
-   The inline string is passed to MAPDL exactly as written — backslash
-   sequences such as ``\n`` are **not** interpreted.  This keeps Windows
-   paths (e.g. ``C:\new\file``) safe.  For multi-command blocks, use
-   repeated ``-c`` flags (option 2 below) or ``--file`` (option 3).
+   Because the inline string is passed through unchanged, Windows paths such
+   as ``C:\new\file`` are always safe — the shell does not interpret the
+   backslash sequences inside a double-quoted string.  For multi-command
+   blocks the ``-c`` option (below) is often more readable.
 
 
 **2. Repeated** ``-c`` / ``--command`` **options**

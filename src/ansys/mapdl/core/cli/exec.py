@@ -33,9 +33,11 @@ import click
 Commands can be supplied in four mutually exclusive ways:
 
 \b
-  1. Inline string — pass a single command directly as the first positional argument:
+  1. Inline string — pass one or more commands as the first positional argument.
+     The string is used as-is, so embed real newlines using your shell's quoting:
        pymapdl exec "/prep7"
-     For multi-command blocks, use repeated ``-c`` flags or ``--file``.
+       bash/zsh:   pymapdl exec $'/prep7\\nBLOCK,0,1,0,1,0,1\\nSAVE'
+       PowerShell: pymapdl exec "/prep7`nBLOCK,0,1,0,1,0,1`nSAVE"
   2. Repeated --command / -c options (recommended for scripting and LLM use):
        pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
   3. File — read commands from an APDL script file:
@@ -106,11 +108,16 @@ def exec_cmd(
     Parameters
     ----------
     input_arg : str, optional
-        Inline APDL command as a single string, or ``-`` to read from stdin.
-        The string is passed to MAPDL as-is; backslash sequences such as
-        ``\\n`` are **not** unescaped, so Windows paths like
-        ``C:\\new\\file`` are safe.  For multi-command blocks use repeated
-        ``-c`` flags or ``--file``.
+        One or more inline APDL commands, or ``-`` to read from stdin.
+        The string is passed to MAPDL exactly as received from the shell —
+        no escape sequences are interpreted.  To embed multiple commands,
+        use your shell's quoting to produce real newlines:
+
+        - bash/zsh: ``$'/prep7\\nBLOCK,0,1,0,1,0,1'``
+        - PowerShell: ``"/prep7`nBLOCK,0,1,0,1,0,1"``
+
+        Windows paths (e.g. ``C:\\new\\file``) are safe because the shell
+        passes the backslash characters through unchanged.
     commands : tuple of str
         APDL commands supplied via repeated ``-c`` / ``--command`` options.
         Each value is one APDL command; they are joined with newlines before
