@@ -287,9 +287,64 @@ Use ``pymapdl exec`` to send APDL commands to a running MAPDL instance and
 print the output to stdout. The command always connects to an existing
 instance, it never starts a new one. Use ``pymapdl start`` first if needed.
 
-There are three mutually exclusive ways to supply commands. The recommended
-approach is to use the ``-c`` / ``--command`` option, which can be repeated.
-Each ``-c`` value is one APDL command; all commands are sent as a single block:
+There are four ways to supply commands.
+
+**Newline-separated commands in a single** ``-c`` **argument (recommended for brevity)**
+
+Pass all commands as a single string separated by newline characters.
+This is the most compact form when writing commands inline:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec -c "/prep7`nBLOCK,0,1,0,1,0,1`nSAVE"
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl exec -c $'/prep7\nBLOCK,0,1,0,1,0,1\nSAVE'
+
+.. note::
+
+    In PowerShell, use a backtick followed by ``n`` (`` `n ``) to embed a newline inside
+    a double-quoted string. In Bash, use the ``$'...'`` quoting form so that ``\n`` is
+    interpreted as a real newline character.
+
+**Stdin (recommended when composing commands dynamically)**
+
+Pass ``-`` as a positional argument and pipe the commands in. This is
+equally concise and integrates naturally with shell pipelines:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> "/prep7`nBLOCK,0,1,0,1,0,1`nSAVE" | pymapdl exec -
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ printf '/prep7\nBLOCK,0,1,0,1,0,1\nSAVE\n' | pymapdl exec -
+
+
+**Repeated** ``-c`` **options**
+
+The ``-c`` / ``--command`` option can be repeated; each value is one APDL command
+and all commands are sent as a single block.  This is more verbose but can be
+clearer when each command is long or when building arguments in a script:
 
 
 .. tab-set::
@@ -308,6 +363,8 @@ Each ``-c`` value is one APDL command; all commands are sent as a single block:
 
             (.venv) user@machine:~$ pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
 
+
+**Script file**
 
 You can also read commands from an APDL script file using ``--file`` / ``-f``:
 
@@ -329,8 +386,7 @@ You can also read commands from an APDL script file using ``--file`` / ``-f``:
             (.venv) user@machine:~$ pymapdl exec --file my_script.inp
 
 
-To pipe commands from another program, pass ``-`` as a positional argument to
-read from stdin:
+To pipe the contents of an existing script file via stdin:
 
 
 .. tab-set::
