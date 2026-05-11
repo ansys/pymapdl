@@ -292,7 +292,7 @@ There are four mutually exclusive ways to supply commands:
 **1. Inline string (positional argument)**
 
 Pass one or more commands directly as the first argument. The string is used
-exactly as received from the shell — no escape sequences are interpreted.
+exactly as received from the shell (no escape sequences are interpreted).
 For a single command this is straightforward:
 
 
