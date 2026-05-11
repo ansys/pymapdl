@@ -52,6 +52,9 @@ updates:
       semver-patch-days: 3
       include:
         - "*"  # Include all dependencies in cooldown
+    exclude-paths:
+      - "doc/source/examples/extended_examples/gui/**"
+      - "doc/source/examples/extended_examples/hpc/**"
     groups:
        minimal:
           patterns:
@@ -111,6 +114,9 @@ updates:
 
   - directory: "doc/source/examples/extended_examples/gui"
     package-ecosystem: "pip"
+    exclude-paths:
+      - "doc/source/examples/extended_examples/gui/**"
+      - "doc/source/examples/extended_examples/hpc/**"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 0
@@ -122,6 +128,9 @@ updates:
 
   - directory: "doc/source/examples/extended_examples/hpc"
     package-ecosystem: "pip"
+    exclude-paths:
+      - "doc/source/examples/extended_examples/gui/**"
+      - "doc/source/examples/extended_examples/hpc/**"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 0

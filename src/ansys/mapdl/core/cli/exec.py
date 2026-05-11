@@ -115,6 +115,16 @@ def exec_cmd(
         pipe (i.e. not a TTY), stdin is read automatically — so
         ``echo "/prep7" | pymapdl exec`` works without the ``-``.  Passing
         ``-`` when running interactively is still supported for clarity.
+        One or more inline APDL commands, or ``-`` to read from stdin.
+        The string is passed to MAPDL exactly as received from the shell —
+        no escape sequences are interpreted.  To embed multiple commands,
+        use your shell's quoting to produce real newlines:
+
+        - bash/zsh: ``$'/prep7\\nBLOCK,0,1,0,1,0,1'``
+        - PowerShell: ``"/prep7`nBLOCK,0,1,0,1,0,1"``
+
+        Windows paths (e.g. ``C:\\new\\file``) are safe because the shell
+        passes the backslash characters through unchanged.
     commands : tuple of str
         APDL commands supplied via ``-c`` / ``--command`` options.
         Each value may be a single APDL command **or** multiple commands
