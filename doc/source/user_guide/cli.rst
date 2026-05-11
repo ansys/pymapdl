@@ -357,7 +357,7 @@ Read commands from an APDL script file using ``--file`` / ``-f``:
 
 **3. Stdin**
 
-Pipe commands in from another program. The ``-`` marker is optional — when
+Pipe commands in from another program. The ``-`` marker is optional, when
 stdin is a pipe ``pymapdl exec`` detects it automatically:
 
 
@@ -382,7 +382,7 @@ stdin is a pipe ``pymapdl exec`` detects it automatically:
 
 .. note::
 
-   ``pymapdl exec`` auto-reads stdin only when it detects a pipe (i.e. stdin
+   ``pymapdl exec`` auto-reads stdin only when it detects a pipe (that is stdin
    is not a terminal).  Running ``pymapdl exec`` interactively with no
    arguments still produces an error rather than hanging.
 
