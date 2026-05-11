@@ -314,7 +314,7 @@ This is the most compact form when writing commands inline:
 .. note::
 
     In PowerShell, use a backtick followed by ``n`` (`` `n ``) to embed a newline inside
-    a double-quoted string.  In Bash, use the ``$'...'`` quoting form so that ``\n`` is
+    a double-quoted string. In Bash, use the ``$'...'`` quoting form so that ``\n`` is
     interpreted as a real newline character.
 
 **Stdin (recommended when composing commands dynamically)**
