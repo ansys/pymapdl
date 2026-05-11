@@ -30,15 +30,19 @@ import click
     short_help="Execute MAPDL commands on a running instance.",
     help="""Send MAPDL commands to a running MAPDL instance and print the output.
 
-Commands can be supplied in three mutually exclusive ways:
+Commands can be supplied via three mutually exclusive sources:
 
 \b
-  1. Repeated --command / -c options (recommended for scripting and LLM use):
-       pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
-  2. File — read commands from an APDL script file:
+  1. --command / -c  — one or more APDL commands (may be repeated):
+       a. Single -c with embedded newlines (most compact):
+            pymapdl exec -c $'/prep7\\nBLOCK,0,1,0,1,0,1\\nSAVE'  # Bash
+            pymapdl exec -c "/prep7`nBLOCK,0,1,0,1,0,1`nSAVE"     # PowerShell
+       b. Repeated -c, one command per flag:
+            pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
+  2. --file / -f  — read commands from an APDL script file:
        pymapdl exec --file my_script.inp
-  3. Stdin — pass ``-`` as the positional argument and pipe commands in:
-       echo "/prep7" | pymapdl exec -
+  3. Stdin  — pass ``-`` and pipe commands in:
+       printf '/prep7\\nBLOCK,0,1,0,1,0,1\\n' | pymapdl exec -
 
 The instance is targeted by ``--ip`` and ``--port`` (defaults: 127.0.0.1:50052).
 MAPDL output is written to stdout so it can be consumed by scripts or LLM agents.
@@ -51,7 +55,10 @@ MAPDL output is written to stdout so it can be consumed by scripts or LLM agents
     "commands",
     multiple=True,
     help="An APDL command to send.  May be repeated to build a multi-command block: "
-    '-c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE',
+    '-c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE.  '
+    "Alternatively, embed multiple commands in a single value by separating them "
+    r"with newlines: -c $'/prep7\nBLOCK,0,1,0,1,0,1' (Bash) or "
+    r'"/prep7`nBLOCK,0,1,0,1,0,1" (PowerShell).',
 )
 @click.option(
     "--file",
@@ -105,9 +112,13 @@ def exec_cmd(
     stdin_marker : str, optional
         Pass ``-`` to read commands from stdin.
     commands : tuple of str
-        APDL commands supplied via repeated ``-c`` / ``--command`` options.
-        Each value is one APDL command; they are joined with newlines before
-        being sent as a single block.
+        APDL commands supplied via ``-c`` / ``--command`` options.
+        Each value may be a single APDL command **or** multiple commands
+        separated by newline characters (e.g.
+        ``-c $'/prep7\\nBLOCK,0,1,0,1,0,1'`` in Bash or
+        ``-c "/prep7`nBLOCK,0,1,0,1,0,1"`` in PowerShell).
+        All values are joined with newlines and sent as a single block.
+        Mutually exclusive with *script_file* and stdin.
     script_file : str, optional
         Path to an APDL script file.  Mutually exclusive with *commands* and
         stdin.
