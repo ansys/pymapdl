@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.vrotat
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.vrotat

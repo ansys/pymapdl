@@ -1,0 +1,1020 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mopt &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=7e8d73f4"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/prep7/_autosummary/ansys.mapdl.core._commands.prep7.meshing.Meshing.mopt';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.73';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="mshape" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.mshape.html" />
+    <link rel="prev" title="modmsh" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.modmsh.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.73.0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/prep7/_autosummary/ansys.mapdl.core._commands.prep7.meshing.Meshing.mopt.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Session</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../session/index.html">Session</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Database</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../database/index.html">Database</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Graphics</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../graphics/index.html">Graphics</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">APDL</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/abbreviations.html">Abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/parameter_definition.html">ParameterDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/matrix_operations.html">MatrixOperations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/macro_files.html">MacroFiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/encryption_decryption.html">EncryptionDecryption</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/array_parameters.html">ArrayParameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/process_controls.html">ProcessControls</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Preprocessing</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Prep7</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../areas.html">Areas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../booleans.html">Booleans</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../meshing.html">Meshing</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.aatt.html">aatt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.accat.html">accat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.aclear.html">aclear</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.aesize.html">aesize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.amap.html">amap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.amesh.html">amesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.arefine.html">arefine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.chkmsh.html">chkmsh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.clrmshln.html">clrmshln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.cpcyc.html">cpcyc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.czdel.html">czdel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.czmesh.html">czmesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.desize.html">desize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.eorient.html">eorient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.erefine.html">erefine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.esize.html">esize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.esys.html">esys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.fvmesh.html">fvmesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.gsgdata.html">gsgdata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.imesh.html">imesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.katt.html">katt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.kclear.html">kclear</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.kesize.html">kesize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.kmesh.html">kmesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.krefine.html">krefine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.kscon.html">kscon</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.latt.html">latt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.lccat.html">lccat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.lclear.html">lclear</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.lesize.html">lesize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.lmesh.html">lmesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.lrefine.html">lrefine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.mat.html">mat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.mcheck.html">mcheck</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.modmsh.html">modmsh</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">mopt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.mshape.html">mshape</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.mshcopy.html">mshcopy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.mshkey.html">mshkey</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.mshmid.html">mshmid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.mshpattern.html">mshpattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.nrefine.html">nrefine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.psmesh.html">psmesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.real.html">real</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.rsmesh.html">rsmesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.shpp.html">shpp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.smrtsize.html">smrtsize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.tchg.html">tchg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.timp.html">timp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.type.html">type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.vatt.html">vatt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.vclear.html">vclear</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.veorient.html">veorient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.vimp.html">vimp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.vmesh.html">vmesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.meshing.Meshing.vsweep.html">vsweep</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../special_purpose.html">SpecialPurpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../database.html">Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../elements.html">Elements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../piping.html">Piping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../primitives.html">Primitives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cross_sections.html">CrossSections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lines.html">Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data_tables.html">DataTables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constraint_equations.html">ConstraintEquations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constraint_equations_.html">ConstraintEquations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nodes.html">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../coupled_dof.html">CoupledDof</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../morphing.html">Morphing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../element_type.html">ElementType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../materials.html">Materials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../volumes.html">Volumes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../keypoints.html">Keypoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../hard_points.html">HardPoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../artificially_matched_layers.html">ArtificiallyMatchedLayers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../real_constants.html">RealConstants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../superelements.html">Superelements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../explicit_dynamics.html">ExplicitDynamics</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Solution</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../solution/index.html">Solution</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post1/index.html">Post1</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST26</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post26/index.html">Post26</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux2/index.html">Aux2</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux3/index.html">Aux3</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX12</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux12/index.html">Aux12</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX15</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux15/index.html">Aux15</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">MAP</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../map/index.html">Map</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Connection</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../conn.html">Connection commands</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Undocumented</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../inqfun.html">Undocumented inquire commands</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="None" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">MAPDL commands</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../index.html" class="nav-link">Prep7</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../meshing.html" class="nav-link">Meshing</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mopt</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="mopt">
+<h1>mopt<a class="headerlink" href="#mopt" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core._commands.prep7.meshing.Meshing.mopt">
+<span class="sig-prename descclassname"><span class="pre">Meshing.</span></span><span class="sig-name descname"><span class="pre">mopt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core._commands.prep7.meshing.Meshing.mopt" title="Link to this definition">#</a></dt>
+<dd><p>Specifies meshing options.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MOPT.html">MOPT</a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>lab</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Meshing option to be specified (determines the meaning of <code class="docutils literal notranslate"><span class="pre">Value</span></code> ):</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">AORDER</span></code> - Mesh by ascending area size order. Set <code class="docutils literal notranslate"><span class="pre">Value</span></code> to ON to mesh smaller areas first.
+Using this results in finer meshes in critical areas for volume meshes; this can be used for cases
+where <span class="xref std std-ref">smrtsize</span> does not mesh as needed. Default is OFF.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EXPND</span></code> - Area mesh expansion (or contraction) option. (This option is the same as
+<span class="xref std std-ref">smrtsize</span>,,,EXPND.) This option is used to size internal elements in an area based on the size
+of the elements on the area’s boundaries.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Value</span></code> is the expansion (or contraction) factor. For example, issuing <span class="xref std std-ref">mopt</span>,EXPND,2 before
+meshing an area will allow a mesh with elements that are approximately twice as large in the
+interior of an area as they are on the boundary. If <code class="docutils literal notranslate"><span class="pre">Value</span></code> is less than 1, a mesh with smaller
+elements on the interior of the area will be allowed. <code class="docutils literal notranslate"><span class="pre">Value</span></code> for this option should be greater
+than 0.5 but less than 4.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Value</span></code> defaults to 1, which does not allow expansion or contraction of internal element sizes
+(except when using <span class="xref std std-ref">aesize</span> sizing). If <code class="docutils literal notranslate"><span class="pre">Value</span></code> = 0, the default value of 1 will be used. The
+actual size of the internal elements will also depend on the TRANS option (or upon <span class="xref std std-ref">aesize</span> or
+<span class="xref std std-ref">esize</span> sizing, if used).</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TETEXPND</span></code> - Tet-mesh expansion (or contraction) option. This option is used to size internal
+elements in a volume based on the size of the elements on the volume’s boundaries.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Value</span></code> is the expansion (or contraction) factor. For example, issuing <span class="xref std std-ref">mopt</span>,TETEXPND,2
+before meshing a volume will allow a mesh with elements that are approximately twice as large in the
+interior of the volume as they are on the boundary. If <code class="docutils literal notranslate"><span class="pre">Value</span></code> is less than 1, a mesh with smaller
+elements on the interior of the volume will be allowed. <code class="docutils literal notranslate"><span class="pre">Value</span></code> for this option should be greater
+than 0.1 but less than 3.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Value</span></code> defaults to 1, which does not allow expansion or contraction of internal element sizes. If
+<code class="docutils literal notranslate"><span class="pre">Value</span></code> = 0, the default value of 1 will be used. If <code class="docutils literal notranslate"><span class="pre">Value</span></code> is greater than 2, mesher
+robustness may be affected.</p>
+<p>The TETEXPND option is supported for both the <span class="xref std std-ref">vmesh</span> and <span class="xref std std-ref">fvmesh</span> commands. Tet-mesh
+expansion is the only mesh control supported by <span class="xref std std-ref">fvmesh</span>.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TRANS</span></code> - Mesh-transition option. Controls how rapidly elements are permitted to change in size
+from the boundary to the interior of an area. (This option performs the same operation as
+<span class="xref std std-ref">smrtsize</span>,,,,TRANS.)</p>
+<p><code class="docutils literal notranslate"><span class="pre">Value</span></code> is the transitioning factor. <code class="docutils literal notranslate"><span class="pre">Value</span></code> defaults to 2.0, which permits elements to
+approximately double in size as they approach the interior of the area. (If <code class="docutils literal notranslate"><span class="pre">Value</span></code> = 0, the
+default value of 2 will be used.) <code class="docutils literal notranslate"><span class="pre">Value</span></code> must be greater than 1 and, for best results, should be
+less than 4. The actual size of the internal elements will also depend on the EXPND option (or upon
+<span class="xref std std-ref">aesize</span> or <span class="xref std std-ref">esize</span> sizing, if used).</p>
+<p>For a quad mesh with any element size, this option has no effect, as the program strictly respects
+any face size to ensure the most uniform quad mesh possible. To obtain a graded mesh using this
+option, apply <span class="xref std std-ref">lesize</span> to the lines of the desired face.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AMESH</span></code> - Triangle surface-meshing option. Valid inputs for <code class="docutils literal notranslate"><span class="pre">Value</span></code> are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DEFAULT</span></code> - Allows the program to choose which triangle mesher to use. In most cases, the
+program chooses the main triangle mesher, which is the Riemann space mesher. If the chosen mesher
+fails for any reason, the program invokes the alternate mesher and retries the meshing operation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAIN</span></code> - The program uses the main triangle mesher (Riemann space mesher), and it does not
+invoke an alternate mesher if the main mesher fails. The Riemann space mesher is well suited for
+most surfaces.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ALTERNATE</span></code> - The program uses the first alternate triangle mesher (3D tri-mesher), and it does
+not invoke another mesher if this mesher fails. This option is not recommended due to speed
+considerations. However, for surfaces with degeneracies in parametric space, this mesher often
+provides the best results.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ALT2</span></code> - The program uses the second alternate triangle mesher (2D parametric space mesher), and
+it does not invoke another mesher if this mesher fails. This option is not recommended for use on
+surfaces with degeneracies (spheres, cones, etc.) or poorly parameterized surfaces because poor
+meshes may result.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">QMESH</span></code> - Quadrilateral surface meshing option. (Quadrilateral surface meshes will differ based on which
+triangle surface mesher is selected. This is true because all free quadrilateral meshing algorithms
+use a triangle mesh as a starting point.) Valid inputs for <code class="docutils literal notranslate"><span class="pre">Value</span></code> are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DEFAULT</span></code> - Let the program choose which quadrilateral mesher to use. In most cases, the program
+will choose the main quadrilateral mesher, which is the Q-Morph (quad-morphing) mesher. For very
+coarse meshes, the program may choose the alternate quadrilateral mesher instead. In most cases, the
+Q-Morph mesher results in higher quality elements. If either mesher fails for any reason, the
+program invokes the other mesher and retries the meshing operation. (Default.)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAIN</span></code> - The program uses the main quadrilateral mesher (Q-Morph mesher), and it does not invoke
+the alternate mesher if the main mesher fails.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ALTERNATE</span></code> - The program uses the alternate quadrilateral mesher, and it does not invoke the
+Q-Morph mesher if the alternate mesher fails. To use the alternate quadrilateral mesher, you must
+also select <span class="xref std std-ref">mopt</span>,AMESH,ALTERNATE or <span class="xref std std-ref">mopt</span>,AMESH,ALT2.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VMESH</span></code> - Tetrahedral element meshing option. Valid inputs for <code class="docutils literal notranslate"><span class="pre">Value</span></code> are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DEFAULT</span></code> - Let the program choose which tetrahedra mesher to use.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAIN</span></code> - Use the main tetrahedra mesher (Delaunay technique mesher). (GHS3D meshing technology
+by P. L. George, INRIA, France.) For most models, this mesher is significantly faster than the
+alternate mesher.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ALTERNATE</span></code> - Use the alternate tetrahedra mesher (advancing front mesher). This mesher does not
+support the generation of a tetrahedral volume mesh from facets ( <span class="xref std std-ref">fvmesh</span> ). If this mesher is
+selected and you issue the <span class="xref std std-ref">fvmesh</span> command, the program uses the main tetrahedra mesher to
+create the mesh from facets and issues a warning message to notify you.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SPLIT</span></code> - Quad splitting option for non-mapped meshing. If <code class="docutils literal notranslate"><span class="pre">Value</span></code> = 1, ON, or ERR,
+quadrilateral elements in violation of shape error limits are split into triangles (default). If
+<code class="docutils literal notranslate"><span class="pre">Value</span></code> = 2 or WARN, quadrilateral elements in violation of either shape error or warning limits
+are split into triangles. If <code class="docutils literal notranslate"><span class="pre">Value</span></code> = OFF, splitting does not occur, regardless of element
+quality.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LSMO</span></code> - Line smoothing option. <code class="docutils literal notranslate"><span class="pre">Value</span></code> can be ON or OFF. If <code class="docutils literal notranslate"><span class="pre">Value</span></code> = ON, smoothing of
+nodes on area boundaries is performed during smoothing step of meshing. During smoothing, node
+locations are adjusted to achieve a better mesh. If <code class="docutils literal notranslate"><span class="pre">Value</span></code> = OFF (default), no smoothing takes
+place at area boundaries.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CLEAR</span></code> - This option affects the element and node numbering after clearing a mesh. If <code class="docutils literal notranslate"><span class="pre">Value</span></code>
+= ON (default), the starting node and element numbers will be the lowest available number after the
+nodes and elements are cleared. If <code class="docutils literal notranslate"><span class="pre">Value</span></code> = OFF, the starting node and element numbers are not
+reset after the clear operation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PYRA</span></code> - Transitional pyramid elements option. <code class="docutils literal notranslate"><span class="pre">Value</span></code> can be ON or OFF. If <code class="docutils literal notranslate"><span class="pre">Value</span></code> = ON
+(default), the program automatically creates transitional pyramid elements, when possible. Pyramids
+may be created at the interface of tetrahedral and hexahedral elements, or directly from
+quadrilateral elements. For pyramids to be created, you must also issue the command
+<span class="xref std std-ref">mshape</span>,1,3D (degenerate 3D elements). If <code class="docutils literal notranslate"><span class="pre">Value</span></code> = OFF, the program does not create
+transitional pyramid elements.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TIMP</span></code> - Identifies the level of tetrahedra improvement to be performed when the next free volume meshing
+operation is initiated ( <span class="xref std std-ref">vmesh</span>, <span class="xref std std-ref">fvmesh</span> ). (For levels 2-5, improvement occurs primarily through the use of face swapping and node smoothing techniques.) Valid inputs for <code class="docutils literal notranslate"><span class="pre">Value</span></code> are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> - Turn off tetrahedra improvement. Although this value can lead to faster tetrahedral mesh
+creation, it is not recommended because it often leads to poorly shaped elements and mesh failures.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> - Do the minimal amount of tetrahedra improvement. (Default.) This option is supported by
+the main tetrahedra mesher only ( <span class="xref std std-ref">mopt</span>,VMESH,MAIN). If the alternate tetrahedra mesher (
+<span class="xref std std-ref">mopt</span>,VMESH,ALTERNATE) is invoked with this setting, the program automatically performs
+tetrahedra improvement at level 3 instead ( <span class="xref std std-ref">mopt</span>,TIMP,3).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> - Perform the least amount of swapping/smoothing. No improvement occurs if all tetrahedral
+elements are within acceptable limits.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">3</span></code> - Perform an intermediate amount of swapping/smoothing. Some improvement is always done.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">4</span></code> - Perform the greatest amount of swapping/smoothing. Meshing takes longer with this level of
+improvement, but usually results in a better mesh.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">5</span></code> - Perform the greatest amount of swapping/smoothing, plus additional improvement techniques.
+This level of improvement usually produces results that are similar to those at level 4, except for
+very poor meshes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">6</span></code> - For linear tetrahedral meshes, this value provides the same level of improvement as
+<span class="xref std std-ref">mopt</span>,TIMP,5. For quadratic tetrahedral meshes, this value provides an additional pass of
+cleanup. This value is supported for both the main ( <span class="xref std std-ref">mopt</span>,VMESH,MAIN) and alternate (
+<span class="xref std std-ref">mopt</span>,VMESH,ALTERNATE) tetrahedra meshers.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">STAT</span></code> - Display status of <span class="xref std std-ref">mopt</span> settings. <code class="docutils literal notranslate"><span class="pre">Value</span></code> is ignored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DEFA</span></code> - Set all <span class="xref std std-ref">mopt</span> options to default values. <code class="docutils literal notranslate"><span class="pre">Value</span></code> is ignored.</p></li>
+</ul>
+</dd>
+<dt><strong>value</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Value, as described for each different <code class="docutils literal notranslate"><span class="pre">Lab</span></code> above.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p id="mopt-notes">See the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html">Modeling and Meshing Guide</a> for more
+information on the <span class="xref std std-ref">mopt</span> command and its options.</p>
+<p>This command is also valid for <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/Hlp_G_ADVRZSMP.html">rezoning</a>.</p>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.73.0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.7.2. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

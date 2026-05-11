@@ -1,0 +1,6 @@
+﻿dtran
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.solid_constraints
+
+.. automethod:: SolidConstraints.dtran

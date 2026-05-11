@@ -1,0 +1,6 @@
+﻿gapf
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.post26._set_up
+
+.. automethod:: SetUp.gapf

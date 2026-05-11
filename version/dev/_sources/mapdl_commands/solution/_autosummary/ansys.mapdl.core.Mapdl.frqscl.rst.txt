@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.frqscl
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.frqscl

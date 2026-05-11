@@ -1,0 +1,848 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ansys.mapdl.core.Mapdl.cycfreq &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=affbdea0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/prep7/_autosummary/ansys.mapdl.core.Mapdl.cycfreq';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.72.dev0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/prep7/_autosummary/ansys.mapdl.core.Mapdl.cycfreq.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="None" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ansys.mapdl.core.Mapdl.cycfreq</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="ansys-mapdl-core-mapdl-cycfreq">
+<h1>ansys.mapdl.core.Mapdl.cycfreq<a class="headerlink" href="#ansys-mapdl-core-mapdl-cycfreq" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core.Mapdl.cycfreq">
+<span class="sig-prename descclassname"><span class="pre">Mapdl.</span></span><span class="sig-name descname"><span class="pre">cycfreq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value4</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value5</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core.Mapdl.cycfreq" title="Link to this definition">#</a></dt>
+<dd><p>Specifies solution options for a cyclic symmetry mode-superposition harmonic analysis.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCFREQ.html">CYCFREQ</a></p>
+<p><strong>Command default:</strong></p>
+<p id="cycfreq-default">No defaults are available for the <span class="xref std std-ref">cycfreq</span> command. You must specify an <code class="docutils literal notranslate"><span class="pre">Option</span></code> label when
+issuing this command. Other values which may be necessary depend upon which <code class="docutils literal notranslate"><span class="pre">Option</span></code> label you
+specify.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>option</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>One of the following options:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">AERO</span></code> - Specify the array containing the aerodynamic damping coefficients.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - The name of the array containing the aerodynamic stiffness damping coefficients.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BLADE</span></code> - Blade information required for a mistuning or aerodamping analysis.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - The name of the nodal component containing the blade boundary nodes at the blade-to-
+disk interface. Also include boundary nodes at any shroud interfaces.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value2</span></code> - The name of the element component containing the blade elements.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value3</span></code> - The number of blade modes to include in the CMS reduction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value4</span></code> - The lower bound of the frequency range of interest. This value is optional.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value5</span></code> - The upper bound of the frequency range of interest. This value is optional.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DEFAULT</span></code> - Set the default cyclic harmonic solution settings.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EO</span></code> - Excitation engine order.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - An integer value indicating the the excitation order. The loadings on the other
+sectors will be related to the loading on the base sector based on the engine order phase shift.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value2</span></code> - The name of the Mechanical APDL array containing the modal forces corresponding to the modes
+kept in the mode-superpostion analysis.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MIST</span></code> - Mistuning parameters.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - The type of mistuning:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">K</span></code> - Stiffness (frequency) mistuning</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value2</span></code> - The name of the array containing the stiffness mistuning parameters.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MODAL</span></code> - Specifies if a damped modal analysis should be performed on the reduced system.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - On/Off key.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">(OFF</span> <span class="pre">or</span> <span class="pre">NO)</span></code> - No modal solution. Perform the harmonic solution.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">(ON</span> <span class="pre">or</span> <span class="pre">YES)</span></code> - Perform a damped modal analysis of the reduced system in order to obtain the
+complex frequencies. The harmonic solution is not performed.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value2</span></code> - Number of modes for the damped modal analysis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value3</span></code> - The beginning, or lower end, of the frequency range of interest (in Hz).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value4</span></code> - The ending, or upper end, of the frequency range of interest (in Hz).</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RESTART</span></code> - Defines the point at which to restart the harmonic analysis.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1</span></code> - The restart point:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">OFF</span></code> - No restart (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SWEEP</span></code> - Restart for a new frequency sweep range ( <span class="xref std std-ref">harfrq</span> )</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MIST</span></code> - Restart for new mistuning parameters (new mistuning arrays)</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">USER</span></code> - Causes the program to call for a user-defined solution.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Value1-5</span></code> - Values passed down to the user-defined solution.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">STATUS</span></code> - List the harmonic solution option settings active for the cyclic model.</p></li>
+</ul>
+</dd>
+<dt><strong>value1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCFREQ.html">command
+documentation</a> for
+further information.</p>
+</dd>
+<dt><strong>value2</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCFREQ.html">command
+documentation</a> for
+further information.</p>
+</dd>
+<dt><strong>value3</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCFREQ.html">command
+documentation</a> for
+further information.</p>
+</dd>
+<dt><strong>value4</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCFREQ.html">command
+documentation</a> for
+further information.</p>
+</dd>
+<dt><strong>value5</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The description of the argument is missing in the Python function. Please, refer to the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CYCFREQ.html">command
+documentation</a> for
+further information.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p id="cycfreq-notes">The program solves a cyclically symmetric model (set up via the <span class="xref std std-ref">cyclic</span> command during
+preprocessing) at the harmonic indices specified via the <span class="xref std std-ref">cycopt</span> command.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">Option</span></code> = AERO, the aerodynamic coefficients are specified in a 5×(N×r) array ( <span class="xref std std-ref">dim</span>
+), where N is the number of blades and r can be any positive integer. Each column has the structure:</p>
+<div class="math notranslate nohighlight">
+\[equation not available\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(equation not available\)</span>  = the i <sup>th</sup> interblade phase angle (IBPA)</p></li>
+<li><p><span class="math notranslate nohighlight">\(equation not available\)</span>  = the m <sup>th</sup> vibrating blade mode</p></li>
+<li><p><span class="math notranslate nohighlight">\(equation not available\)</span>  = the n <sup>th</sup> blade mode generating the pressure oscillations</p></li>
+<li><p><span class="math notranslate nohighlight">\(equation not available\)</span>  and  <span class="math notranslate nohighlight">\(equation not available\)</span>  = the real and imaginary
+coefficients.</p></li>
+</ul>
+<p>One aerodynamic damping coefficient must be specified for each IBPA (equal to the number of blades)
+while keeping m and n constant.</p>
+<p>The following table shows how the IBPA index ( <span class="math notranslate nohighlight">\(equation not available\)</span> ) relates to other
+quantities for a system with 22 blades:</p>
+<p>This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<p>The <span class="xref std std-ref">cycfreq</span>,AERO command is only valid if <span class="xref std std-ref">cycfreq</span>,BLADE is also specified. The blade
+mode numbers, m and n, are relative to the values kept in the <span class="xref std std-ref">cycfreq</span>,BLADE command.</p>
+<p>For constant (frequency-independent) mistuning, the stiffness parameters are specified in an N×1
+array ( <span class="xref std std-ref">dim</span> ) where N is the number of blades.</p>
+<p>For stiffness mistuning, each row entry represents the deviation of Young``s modulus from nominal,
+<span class="math notranslate nohighlight">\(equation not available\)</span>  (or equivalently, the ratio of the frequency deviationsquared). Each
+frequency can also be independently mistuned, in whichcase the array is NtimesM, where M is the
+number of blade frequencies( <code class="docutils literal notranslate"><span class="pre">Value3</span></code> of <span class="xref std std-ref">cycfreq</span>,BLADE). The entries in each row therefore
+correspond to the ratio of the mistuned frequency to the tuned frequency squared minus one:</p>
+<div class="math notranslate nohighlight">
+\[equation not available\]</div>
+<p>The USER option activates the solution macro <code class="file docutils literal notranslate"><span class="pre">CYCMSUPUSERSOLVE.MAC</span></code>. The normal solution is
+skipped. You may implement your own mistuning solution using APDL and APDL Math operations, or call
+your own program for the solution.</p>
+<p>The <span class="xref std std-ref">cycfreq</span> command is valid in the preprocessing and solution stages of an analysis.</p>
+<p>The <span class="xref std std-ref">cycfreq</span>,MODAL,ON command writes modal frequencies to the output file. No other
+postprocessing is available for this modal solve.</p>
+<p>When using <span class="xref std std-ref">cycfreq</span>,RESTART, only mistuning parameters or frequency range may be changed. All
+other changes in parameters are ignored. This type of restart can only be performed by exiting the
+current mistuning solution using <span class="xref std std-ref">finish</span> and re-entering the solution phase using
+<span class="xref std std-ref">slashsolu</span> and then calling the desired <span class="xref std std-ref">cycfreq</span>,RESTART command.</p>
+<p>To learn more about analyzing a cyclically symmetric structure, see the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/cycsym_example.html">Cyclic Symmetry Analysis
+Guide</a>.</p>
+<p><strong>Example Usage</strong></p>
+<p id="cycfreq-exusage"><a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_tec/tecmistuninganalysis.html#tecmistuning_nonlinmsup_mistuned">Analysis and Solution Controls section of the Technology Showcase Example Problem: Forced-response
+analysis of a mistuned bladed disk with aerodamping</a>.</p>
+<p>For an example demonstrating how to apply modal loads directly in the cyclic harmonic analysis step
+of a mode-superposition harmonic cyclic symmetry analysis, see.</p>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.72.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.7.2. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

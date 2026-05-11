@@ -1,0 +1,1034 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>inistate &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=7e8d73f4"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/prep7/_autosummary/ansys.mapdl.core._commands.prep7.data_tables.DataTables.inistate';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.73';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="tb" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.tb.html" />
+    <link rel="prev" title="cgrow" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.cgrow.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.73.0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/prep7/_autosummary/ansys.mapdl.core._commands.prep7.data_tables.DataTables.inistate.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Session</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../session/index.html">Session</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Database</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../database/index.html">Database</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Graphics</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../graphics/index.html">Graphics</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">APDL</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/abbreviations.html">Abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/parameter_definition.html">ParameterDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/matrix_operations.html">MatrixOperations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/macro_files.html">MacroFiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/encryption_decryption.html">EncryptionDecryption</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/array_parameters.html">ArrayParameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/process_controls.html">ProcessControls</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Preprocessing</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Prep7</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../areas.html">Areas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../booleans.html">Booleans</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../meshing.html">Meshing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../special_purpose.html">SpecialPurpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../database.html">Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../elements.html">Elements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../piping.html">Piping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../primitives.html">Primitives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cross_sections.html">CrossSections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lines.html">Lines</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../data_tables.html">DataTables</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.cbtmp.html">cbtmp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.cgrow.html">cgrow</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">inistate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.tb.html">tb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.tbcopy.html">tbcopy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.tbdata.html">tbdata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.tbdele.html">tbdele</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.tbeo.html">tbeo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.tbfield.html">tbfield</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.tbin.html">tbin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.tblist.html">tblist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.tbmodif.html">tbmodif</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.tbplot.html">tbplot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.tbpt.html">tbpt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.prep7.data_tables.DataTables.tbtemp.html">tbtemp</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../constraint_equations.html">ConstraintEquations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constraint_equations_.html">ConstraintEquations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nodes.html">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../coupled_dof.html">CoupledDof</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../morphing.html">Morphing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../element_type.html">ElementType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../materials.html">Materials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../volumes.html">Volumes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../keypoints.html">Keypoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../hard_points.html">HardPoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../artificially_matched_layers.html">ArtificiallyMatchedLayers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../real_constants.html">RealConstants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../superelements.html">Superelements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../explicit_dynamics.html">ExplicitDynamics</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Solution</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../solution/index.html">Solution</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post1/index.html">Post1</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST26</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post26/index.html">Post26</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux2/index.html">Aux2</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux3/index.html">Aux3</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX12</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux12/index.html">Aux12</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX15</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux15/index.html">Aux15</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">MAP</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../map/index.html">Map</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Connection</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../conn.html">Connection commands</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Undocumented</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../inqfun.html">Undocumented inquire commands</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="None" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">MAPDL commands</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../index.html" class="nav-link">Prep7</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../data_tables.html" class="nav-link">DataTables</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">inistate</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="inistate">
+<h1>inistate<a class="headerlink" href="#inistate" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core._commands.prep7.data_tables.DataTables.inistate">
+<span class="sig-prename descclassname"><span class="pre">DataTables.</span></span><span class="sig-name descname"><span class="pre">inistate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val4</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val5</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val6</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val7</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val8</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val9</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core._commands.prep7.data_tables.DataTables.inistate" title="Link to this definition">#</a></dt>
+<dd><p>Defines initial-state data and parameters.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_INISTATE.html">INISTATE</a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>action</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Specifies action for defining or manipulating <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_adv/Hlp_G_INSTWRITVAL.html">initial-state</a> data:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">SET</span></code> - Use <code class="docutils literal notranslate"><span class="pre">Action</span></code> = SET to designate initial-state coordinate system, data type, and
+material type parameters. See <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_INISTATE.html#">Command Specification for Action= SET</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DEFINE</span></code> - Use <code class="docutils literal notranslate"><span class="pre">Action</span></code> = DEFINE to specify the actual state values, and the corresponding
+element, integration point, or layer information. See <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_INISTATE.html#">Command Specifications for Action= DEFINE</a>.</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">Action</span></code> = DEFINE for <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_adv/Hlp_G_INSTAPPL.html#">function-based</a> initial
+state. See <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_INISTATE.html#">Command Specifications for Action= DEFINE (Function-Based Option)</a>.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">WRITE</span></code> - Use <code class="docutils literal notranslate"><span class="pre">Action</span></code> = WRITE to write the initial-state values to a file when the
+<span class="xref std std-ref">solve</span> command is issued. See <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_INISTATE.html#">Command Specifications for Action= WRITE</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">READ</span></code> - Use <code class="docutils literal notranslate"><span class="pre">Action</span></code> = READ to read the initial-state values from a file. See <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_INISTATE.html#">Command
+Specifications for Action= READ</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LIST</span></code> - Use <code class="docutils literal notranslate"><span class="pre">Action</span></code> = LIST to read out the initial-state data. See <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_INISTATE.html#">Command Specifications
+for Action= LIST</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DELETE</span></code> - Use <code class="docutils literal notranslate"><span class="pre">Action</span></code> = DELE to delete initial-state data from a selected set of elements.
+See <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_INISTATE.html#">Command Specifications for Action= DELETE</a></p></li>
+</ul>
+</dd>
+<dt><strong>val1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Input values based on the <code class="docutils literal notranslate"><span class="pre">Action</span></code> type.</p>
+</dd>
+<dt><strong>val2</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Input values based on the <code class="docutils literal notranslate"><span class="pre">Action</span></code> type.</p>
+</dd>
+<dt><strong>val3</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Input values based on the <code class="docutils literal notranslate"><span class="pre">Action</span></code> type.</p>
+</dd>
+<dt><strong>val4</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Input values based on the <code class="docutils literal notranslate"><span class="pre">Action</span></code> type.</p>
+</dd>
+<dt><strong>val5</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Input values based on the <code class="docutils literal notranslate"><span class="pre">Action</span></code> type.</p>
+</dd>
+<dt><strong>val6</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Input values based on the <code class="docutils literal notranslate"><span class="pre">Action</span></code> type.</p>
+</dd>
+<dt><strong>val7</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Input values based on the <code class="docutils literal notranslate"><span class="pre">Action</span></code> type.</p>
+</dd>
+<dt><strong>val8</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Input values based on the <code class="docutils literal notranslate"><span class="pre">Action</span></code> type.</p>
+</dd>
+<dt><strong>val9</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Input values based on the <code class="docutils literal notranslate"><span class="pre">Action</span></code> type.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p><span class="xref std std-ref">inistate</span> is available for <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/EL2oldnewtable.html#EL2curtechelembenefits">current-technology elements</a>.</p>
+<p>The command can also be used with <code class="docutils literal notranslate"><span class="pre">MESH200</span></code> (via the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/strreinfworkflow.html#strinistmesh200">mesh-independent method</a>
+for defining <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/str_compreinfdirectemb.html">reinforcing</a> ) to
+apply an initial state to all generated reinforcing elements automatically. For more information,
+see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/strreinfworkflow.html#strinistmesh200">Applying an Initial State to Reinforcing Elements</a></p>
+<p>Initial-state support for a given element is indicated in the documentation for the element under
+<strong>Special Features</strong>.</p>
+<p>Initial-strain input ( <span class="xref std std-ref">inistate</span>,SET,DTYPE,EPEL) enables the nonlinear solver option
+automatically even if no nonlinear materials are involved.</p>
+<p>The command does not support kinematic hardening material properties (such as <span class="xref std std-ref">tb</span>
+,PLAS,,,,BKIN) or the shape memory alloy material model ( <span class="xref std std-ref">tb</span>,SMA).</p>
+<p><span class="xref std std-ref">inistate</span> with elastic strain alone is not supported for gasket materials ( <span class="xref std std-ref">tb</span>,GASK)
+and hyperelastic materials ( <span class="xref std std-ref">tb</span> ,HYPER, <span class="xref std std-ref">tb</span> ,BB, <span class="xref std std-ref">tb</span>,AHYPER, <span class="xref std std-ref">tb</span>,CDM,
+<span class="xref std std-ref">tb</span>,EXPE).</p>
+<p><span class="xref std std-ref">inistate</span> with initial stress alone is not supported for gasket materials ( <span class="xref std std-ref">tb</span>,GASK).</p>
+<p><span class="xref std std-ref">inistate</span> with plastic strain (which must include initial strain or stress, plastic strain,
+and accumulated plastic strain) does not support gasket materials ( <span class="xref std std-ref">tb</span>,GASK), rate-dependent
+plasticity ( <span class="xref std std-ref">tb</span>,RATE), and viscoelasticity ( <span class="xref std std-ref">tb</span>,PRONY, <span class="xref std std-ref">tb</span>,SHIFT).</p>
+<p>For more information about using the initial-state capability, see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_adv/Hlp_G_INSTWRITVAL.html">Initial State</a></p>
+<section id="command-specifications">
+<h2>Command Specifications<a class="headerlink" href="#command-specifications" title="Link to this heading">#</a></h2>
+<p><strong>Command Specification for Action= SET</strong></p>
+<p id="inistate-set">This command contains some tables and extra information which can be inspected in the original
+documentation pointed above.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Action</span></code> = SET specifies and modifies the environment into which you will define the initial-state
+data (via a subsequent <span class="xref std std-ref">inistate</span>,DEFINE command). Otherwise, subsequent
+<span class="xref std std-ref">inistate</span>,DEFINE data is input as initial stress data in the global Cartesian coordinate
+system.</p>
+<p><strong>Command Specifications for Action= DEFINE</strong></p>
+<ul id="inistate-define">
+<li><p><code class="docutils literal notranslate"><span class="pre">ELID</span></code> - Element ID number when using element-based initial state. Defaults to current element
+selection.</p>
+<p>Node number when using node-based initial state. Defaults to current node selection.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EINT</span></code> - Gauss integration point. Default = ALL or -1.</p>
+<p>For node-based initial state ( <code class="docutils literal notranslate"><span class="pre">Val2</span></code> = NODE), element ID number (if specified). The
+<span class="xref std std-ref">inistate</span> command is applied only to the specified element (unlike the default behavior, where
+the command is applied to all selected elements containing the specified node).</p>
+<p>Not valid for material-based initial-state data ( <code class="docutils literal notranslate"><span class="pre">Val1</span></code> = MAT) or node-based initial state (
+<code class="docutils literal notranslate"><span class="pre">Val2</span></code> = NODE).</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">KLAYER</span></code> - Layer number (for layered solid/shell elements) or cell number for beam/pipe
+elements. Blank for other supported element types and material-based initial-state data. Default =
+ALL or -1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ParmInt</span></code> - Section integration point within a layer, or cell-integration point for beams
+(typically four integration points). Default = ALL or -1. Not valid for material-based initial-state
+data ( <code class="docutils literal notranslate"><span class="pre">Val1</span></code> = MAT) or node-based initial state ( <code class="docutils literal notranslate"><span class="pre">Val2</span></code> = NODE).</p>
+<p>Not valid for material-based initial-state data ( <code class="docutils literal notranslate"><span class="pre">Val1</span></code> = MAT).</p>
+<p>Not used for node-based initial state with elements that do not have a beam/pipe/shell section
+defined.</p>
+<p>For node-based initial state with beams/pipes, values 1 through 4 can be used to specify the values
+at corner nodes within a cell.</p>
+<p>For node-based initial state with layered sections, values can be specified at TOP, BOT, and MID, or
+left blank (ALL or -1).</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Cxx,</span> <span class="pre">Cyy,</span> <span class="pre">Czz,</span> <span class="pre">Cxy,</span> <span class="pre">Cyz,</span> <span class="pre">Cxz</span></code> - Stress (S), strain (EPEL), or plastic strain (EPPL) values.</p></li>
+</ul>
+<p>You can issue the <span class="xref std std-ref">inistate</span> command repeatedly to define multiple sets of initial-state
+values. initial-state data can be specified according to elements, layers or integration points.</p>
+<p>When the initial-state parameters are being defined based on the material, (
+<span class="xref std std-ref">inistate</span>,SET,MAT, <code class="docutils literal notranslate"><span class="pre">MATID</span></code> ), <code class="docutils literal notranslate"><span class="pre">ELID</span></code> designates the element ID number and all subsequent
+values are ignored.</p>
+<p>For coupled-field elements, the stresses to input must be Biot``s effective stresses.</p>
+<p><strong>Command Specifications for Action= DEFINE (Function-Based Option)</strong></p>
+<ul id="inistate-deffuncbased">
+<li><p><code class="docutils literal notranslate"><span class="pre">ELID</span></code> - Element ID number when using element-based initial state. Defaults to current element
+selection.</p>
+<p>Node number when using node-based initial state. Defaults to current node selection.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EINT</span></code> - Gauss integration point (defaults to ALL). Not valid for material-based initial-state
+data ( <code class="docutils literal notranslate"><span class="pre">Val1</span></code> = MAT) or node-based initial state ( <code class="docutils literal notranslate"><span class="pre">Val2</span></code> = NODE).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">(Blank)</span></code> - Reserved for future use.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">(Blank)</span></code> - Reserved for future use.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FuncName</span></code> - LINX | LINY | LINZ. Apply initial-state data as a linear function of location based
+on the X axis (LINX), Y axis (LINY), or Z axis (LINZ) in the coordinate system specified via the
+<span class="xref std std-ref">inistate</span>,SET,CSYS command. Default coordinate system: CSYS,0 (global Cartesian).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">C1,</span> <span class="pre">C2,...,</span> <span class="pre">C12</span></code> - For <code class="docutils literal notranslate"><span class="pre">FuncName</span></code> with tensors, each component uses two values. SXX = <code class="docutils literal notranslate"><span class="pre">C1</span></code></p></li>
+</ul>
+<ul class="simple">
+<li><p>X* <code class="docutils literal notranslate"><span class="pre">C2</span></code>, SYY = <code class="docutils literal notranslate"><span class="pre">C3</span></code> + X* <code class="docutils literal notranslate"><span class="pre">C4</span></code>, and so on. Specify 12 values (for the six tensor</p></li>
+</ul>
+<p>components).</p>
+<blockquote>
+<div><p>For <code class="docutils literal notranslate"><span class="pre">FuncName</span></code> with scalars, only two values <code class="docutils literal notranslate"><span class="pre">C1</span></code> and <code class="docutils literal notranslate"><span class="pre">C2</span></code> ( <code class="docutils literal notranslate"><span class="pre">VALUE</span></code> = <code class="docutils literal notranslate"><span class="pre">C1</span></code> + X* <code class="docutils literal notranslate"><span class="pre">C2</span></code> ) are necessary to apply the initial state.</p>
+</div></blockquote>
+<p>You can issue <span class="xref std std-ref">inistate</span> repeatedly with the function-based option to define multiple sets of
+initial-state values. Initial-state data can be specified according to elements or integration
+points.</p>
+<p>For coupled-field elements, the stresses to input must be Biot’s effective stresses.</p>
+<p><strong>Command Specifications for Action= WRITE</strong></p>
+<ul class="simple" id="inistate-write">
+<li><p><code class="docutils literal notranslate"><span class="pre">FLAG</span></code> - Set this value to 1 to generate the initial-state file, or 0 to disable initial-state
+file generation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CSID</span></code> - Determines the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_adv/Hlp_G_INSTCSYS.html#eq4c704b69-e237-458d-8c30-b7c4107fed8c">coordinate system</a>
+for the initial state:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">(default)</span></code> - Write in global Cartesian coordinate system for solid elements.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-1</span> <span class="pre">(or</span> <span class="pre">MAT)</span></code> - Write in material coordinate system</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-2</span> <span class="pre">(or</span> <span class="pre">ELEM)</span></code> - Write in element coordinate system for link, beam, and layered elements.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Dtype</span></code> - Sets the data type to be written in the <code class="file docutils literal notranslate"><span class="pre">.IST</span></code> file:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">S</span></code> - Output stresses.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EPEL</span></code> - Output elastic strain.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EPPL</span></code> - Output plastic strain.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PLEQ</span></code> - Output equivalent plastic strain.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PLWK</span></code> - Output plastic strain energy density.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EPCR</span></code> - Output creep strain.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PPRE</span></code> - Initial pore pressure.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VOID</span></code> - Initial void ratio.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SVAR</span></code> - State variables.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Default is 0 for solid elements and -2 for link, beam, and shell elements.</p>
+<p>State variables are always written to the <code class="file docutils literal notranslate"><span class="pre">.ist</span></code> file in the material coordinate system.</p>
+<p>Only the three in-plane stresses for the top and bottom surfaces are written.</p>
+<p>For coupled-field elements, the stresses written out are Biot``s effective stress values.</p>
+<p>Initial pore pressure and void ratio are available for the coupled pore-pressure elements (CPT
+<code class="docutils literal notranslate"><span class="pre">nnn</span></code> ) only: <code class="docutils literal notranslate"><span class="pre">CPT212</span></code>, <code class="docutils literal notranslate"><span class="pre">CPT213</span></code>, <code class="docutils literal notranslate"><span class="pre">CPT215</span></code>, <code class="docutils literal notranslate"><span class="pre">CPT216</span></code>, and <code class="docutils literal notranslate"><span class="pre">CPT217</span></code>.</p>
+<p><strong>Command Specifications for Action= READ</strong></p>
+<p id="inistate-read">Reads initial-state data from a standalone <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_adv/Hlp_G_INSTFORMAT.html#meshindepIST">initial-state (.ist) file</a>
+of the specified name ( <code class="docutils literal notranslate"><span class="pre">Fname</span></code> ) and filename extension ( <code class="docutils literal notranslate"><span class="pre">Ext</span></code> ), located in the specified
+path ( <code class="docutils literal notranslate"><span class="pre">Path</span></code> ). The initial-state file must be in a comma-delimited ASCII file format, consisting
+of individual rows for each stress/strain item, with each row consisting of columns separated by
+commas.</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">Action</span></code> = READ to apply complex sets of initial-state data to various elements, cells,
+layers, sections, and integration points. This option is available for element-integration-point-
+based initial-state data and node-based initial-state data.</p>
+<p>Mapping to nodes may offer better performance when many substeps are involved; however, only
+location support is available. Mapping to element-integration points supports additional field
+variables TIME, FREQ and TEMP and generally uses less memory.</p>
+<p>For other non-user-defined field variables (such as initial stress or strain), initial state is
+evaluated only at the first substep in the first load step.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">MeshIndMethod</span></code> - Mesh-Independent method <code class="file docutils literal notranslate"><span class="pre">.ist</span></code> read options:</p>
+<ul>
+<li><p>0 or DEFA – <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_adv/Hlp_G_INSTFORMAT.html#sect2_zrk_jlr_dw">Standard</a>
+(mesh-dependent) initial state <code class="file docutils literal notranslate"><span class="pre">.ist</span></code> file (default).</p></li>
+<li><p>MAPN – Map to nodes internally when applying the initial state.</p></li>
+<li><p>MAPI – Map to element-integration points.</p></li>
+<li><p>DOBJ – Do not use <code class="file docutils literal notranslate"><span class="pre">.ist</span></code> data in the finite element solution. (Use this option if
+<a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CINT.html#">converting initial-stress data to a traction load</a>.)</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Command Specifications for Action= LIST</strong></p>
+<p id="inistate-list">If using the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_adv/Hlp_G_INSTAPPL.html#initfuncbased">standard method</a>
+for applying initial-state data,specify <code class="docutils literal notranslate"><span class="pre">ELID</span></code> = element ID number to list initial-state data for
+elements. If <code class="docutils literal notranslate"><span class="pre">ELID</span></code> is unspecified, all initial-state data for all selected elements are listed.</p>
+<p>If using the mesh-independent method, specify <code class="docutils literal notranslate"><span class="pre">ELID</span></code> = MIND to list initial-state data.</p>
+<p><strong>Command Specifications for Action= DELETE</strong></p>
+<p id="inistate-delete">If using the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_adv/Hlp_G_INSTAPPL.html#initfuncbased">standard method</a>,
+specify <code class="docutils literal notranslate"><span class="pre">ELID</span></code> = element ID number to delete initial-state data for elements. If <code class="docutils literal notranslate"><span class="pre">ELID</span></code> is
+unspecified, all initial-state data for all selected elements are deleted.</p>
+<p>If using the mesh-independent method, specify <code class="docutils literal notranslate"><span class="pre">ELID</span></code> = MIND to delete initial-state data.</p>
+</section>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.73.0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.7.2. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

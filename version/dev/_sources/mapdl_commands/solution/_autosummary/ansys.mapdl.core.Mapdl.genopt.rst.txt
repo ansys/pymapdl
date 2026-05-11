@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.genopt
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.genopt

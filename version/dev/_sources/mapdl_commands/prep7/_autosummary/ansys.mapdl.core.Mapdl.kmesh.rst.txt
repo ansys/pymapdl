@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.kmesh
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.kmesh

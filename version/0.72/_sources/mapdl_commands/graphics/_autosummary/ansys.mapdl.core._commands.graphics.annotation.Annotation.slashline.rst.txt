@@ -1,0 +1,6 @@
+﻿slashline
+=========
+
+.. currentmodule:: ansys.mapdl.core._commands.graphics.annotation
+
+.. automethod:: Annotation.slashline

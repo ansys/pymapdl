@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.pstres
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.pstres

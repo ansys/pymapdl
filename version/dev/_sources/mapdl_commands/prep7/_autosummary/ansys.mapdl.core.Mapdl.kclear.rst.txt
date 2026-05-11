@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.kclear
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.kclear

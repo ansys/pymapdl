@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.freq
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.freq

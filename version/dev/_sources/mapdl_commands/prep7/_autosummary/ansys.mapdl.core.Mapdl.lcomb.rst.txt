@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.lcomb
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.lcomb

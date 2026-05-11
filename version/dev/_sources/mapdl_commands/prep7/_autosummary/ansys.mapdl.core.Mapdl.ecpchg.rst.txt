@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.ecpchg
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.ecpchg

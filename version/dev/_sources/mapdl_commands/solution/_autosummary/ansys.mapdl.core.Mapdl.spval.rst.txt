@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.spval
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.spval

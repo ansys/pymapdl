@@ -1,0 +1,6 @@
+﻿anharm
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.animation
+
+.. automethod:: Animation.anharm

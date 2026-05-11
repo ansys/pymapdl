@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.sfelist
+==============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.sfelist

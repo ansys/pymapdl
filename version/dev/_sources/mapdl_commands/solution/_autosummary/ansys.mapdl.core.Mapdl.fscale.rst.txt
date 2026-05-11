@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.fscale
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.fscale

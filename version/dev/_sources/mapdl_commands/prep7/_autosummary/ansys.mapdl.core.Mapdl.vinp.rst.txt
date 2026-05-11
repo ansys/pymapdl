@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.vinp
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.vinp
