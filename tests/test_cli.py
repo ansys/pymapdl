@@ -1456,9 +1456,40 @@ class TestCliExecCommand:
             )
         assert result.exit_code != 0
 
-    def test_exec_unknown_positional_error(self, cli_runner):
-        """An unexpected positional argument that isn't ``-`` is rejected."""
-        result = cli_runner(["exec", "some_command"])
+    def test_exec_inline_commands(self, cli_runner, mock_mapdl):
+        """A single APDL command passed as the positional argument is executed."""
+        with patch(
+            "ansys.mapdl.core.launcher.connection.connect_to_existing",
+            return_value=mock_mapdl,
+        ):
+            result = cli_runner(["exec", "/prep7"])
+
+        assert result.exit_code == 0
+        mock_mapdl.input_strings.assert_called_once_with("/prep7")
+
+    def test_exec_inline_multiline_commands(self, cli_runner, mock_mapdl):
+        r"""``\n`` in the inline argument is unescaped into real newlines."""
+        with patch(
+            "ansys.mapdl.core.launcher.connection.connect_to_existing",
+            return_value=mock_mapdl,
+        ):
+            result = cli_runner(["exec", r"/prep7\nBLOCK,0,1,0,1,0,1\nSAVE"])
+
+        assert result.exit_code == 0
+        sent = mock_mapdl.input_strings.call_args[0][0]
+        assert sent == "/prep7\nBLOCK,0,1,0,1,0,1\nSAVE"
+
+    def test_exec_inline_and_c_mutually_exclusive(self, cli_runner, tmp_path):
+        """Providing both an inline positional argument and ``-c`` is rejected."""
+        result = cli_runner(["exec", "/prep7", "-c", "SAVE"])
+        assert result.exit_code != 0
+
+    def test_exec_inline_and_file_mutually_exclusive(self, cli_runner, tmp_path):
+        """Providing both an inline positional argument and ``--file`` is rejected."""
+        script = tmp_path / "script.inp"
+        script.write_text("/PREP7\n")
+
+        result = cli_runner(["exec", "/prep7", "--file", str(script)])
         assert result.exit_code != 0
 
     def test_exec_connection_error_exits_nonzero(self, cli_runner):

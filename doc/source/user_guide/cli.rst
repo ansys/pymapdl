@@ -287,9 +287,37 @@ Use ``pymapdl exec`` to send APDL commands to a running MAPDL instance and
 print the output to stdout. The command always connects to an existing
 instance, it never starts a new one. Use ``pymapdl start`` first if needed.
 
-There are three mutually exclusive ways to supply commands. The recommended
-approach is to use the ``-c`` / ``--command`` option, which can be repeated.
-Each ``-c`` value is one APDL command; all commands are sent as a single block:
+There are four mutually exclusive ways to supply commands:
+
+**1. Inline string (positional argument)**
+
+Pass one or more commands directly as the first argument. Use ``\n`` as a
+line separator to send a multi-command block in a single call:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec "/prep7"
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec "/prep7\nBLOCK,0,1,0,1,0,1\nSAVE"
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl exec "/prep7"
+            (.venv) user@machine:~$ pymapdl exec "/prep7\nBLOCK,0,1,0,1,0,1\nSAVE"
+
+
+**2. Repeated** ``-c`` / ``--command`` **options**
+
+Each ``-c`` value is one APDL command; all commands are sent as a single
+block. This is the recommended form for scripting and LLM use:
 
 
 .. tab-set::
@@ -309,7 +337,9 @@ Each ``-c`` value is one APDL command; all commands are sent as a single block:
             (.venv) user@machine:~$ pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
 
 
-You can also read commands from an APDL script file using ``--file`` / ``-f``:
+**3. Script file**
+
+Read commands from an APDL script file using ``--file`` / ``-f``:
 
 
 .. tab-set::
@@ -329,8 +359,10 @@ You can also read commands from an APDL script file using ``--file`` / ``-f``:
             (.venv) user@machine:~$ pymapdl exec --file my_script.inp
 
 
-To pipe commands from another program, pass ``-`` as a positional argument to
-read from stdin:
+**4. Stdin**
+
+Pipe commands from another program by passing ``-`` as the positional
+argument:
 
 
 .. tab-set::

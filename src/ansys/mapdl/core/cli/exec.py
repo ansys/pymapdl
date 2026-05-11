@@ -30,21 +30,25 @@ import click
     short_help="Execute MAPDL commands on a running instance.",
     help="""Send MAPDL commands to a running MAPDL instance and print the output.
 
-Commands can be supplied in three mutually exclusive ways:
+Commands can be supplied in four mutually exclusive ways:
 
 \b
-  1. Repeated --command / -c options (recommended for scripting and LLM use):
+  1. Inline string — pass commands directly as the first positional argument.
+     Use ``\\n`` as a line separator for multi-command blocks:
+       pymapdl exec "/prep7"
+       pymapdl exec "/prep7\\nBLOCK,0,1,0,1,0,1\\nSAVE"
+  2. Repeated --command / -c options (recommended for scripting and LLM use):
        pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
-  2. File — read commands from an APDL script file:
+  3. File — read commands from an APDL script file:
        pymapdl exec --file my_script.inp
-  3. Stdin — pass ``-`` as the positional argument and pipe commands in:
+  4. Stdin — pass ``-`` as the positional argument and pipe commands in:
        echo "/prep7" | pymapdl exec -
 
 The instance is targeted by ``--ip`` and ``--port`` (defaults: 127.0.0.1:50052).
 MAPDL output is written to stdout so it can be consumed by scripts or LLM agents.
 """,
 )
-@click.argument("stdin_marker", metavar="[-]", default=None, required=False)
+@click.argument("input_arg", metavar="[COMMANDS|-]", default=None, required=False)
 @click.option(
     "--command",
     "-c",
@@ -90,7 +94,7 @@ MAPDL output is written to stdout so it can be consumed by scripts or LLM agents
     help="Seconds to wait when establishing the gRPC connection to the running instance.",
 )
 def exec_cmd(
-    stdin_marker: Optional[str],
+    input_arg: Optional[str],
     commands: Tuple[str, ...],
     script_file: Optional[str],
     port: int,
@@ -102,8 +106,10 @@ def exec_cmd(
 
     Parameters
     ----------
-    stdin_marker : str, optional
-        Pass ``-`` to read commands from stdin.
+    input_arg : str, optional
+        Inline APDL commands as a single string, or ``-`` to read from stdin.
+        Use ``\\n`` as a line separator for multi-command blocks:
+        ``"/prep7\\nBLOCK,0,1,0,1,0,1\\nSAVE"``.
     commands : tuple of str
         APDL commands supplied via repeated ``-c`` / ``--command`` options.
         Each value is one APDL command; they are joined with newlines before
@@ -126,21 +132,19 @@ def exec_cmd(
     # Resolve the command source                                           #
     # ------------------------------------------------------------------ #
 
-    use_stdin = stdin_marker == "-"
-    n_sources = sum([bool(commands), script_file is not None, use_stdin])
+    use_stdin = input_arg == "-"
+    use_inline = input_arg is not None and not use_stdin
+    n_sources = sum([bool(commands), script_file is not None, use_stdin, use_inline])
 
-    if stdin_marker is not None and stdin_marker != "-":
-        raise click.UsageError(
-            f"Unexpected positional argument {stdin_marker!r}.  "
-            "Use '-' to read from stdin, or supply commands via -c / --file."
-        )
     if n_sources == 0:
         raise click.UsageError(
-            "Provide commands via '-c CMD', '--file PATH', or pipe them via stdin ('-')."
+            "Provide commands as a positional argument, via '-c CMD', '--file PATH', "
+            "or pipe them via stdin ('-')."
         )
     if n_sources > 1:
         raise click.UsageError(
-            "Only one input source may be used at a time: '-c', '--file', or stdin ('-')."
+            "Only one input source may be used at a time: "
+            "positional COMMANDS, '-c', '--file', or stdin ('-')."
         )
 
     if script_file is not None:
@@ -148,6 +152,8 @@ def exec_cmd(
             cmd_block = fh.read()
     elif use_stdin:
         cmd_block = sys.stdin.read()
+    elif use_inline:
+        cmd_block = (input_arg or "").replace("\\n", "\n")
     else:
         cmd_block = "\n".join(commands)
 
