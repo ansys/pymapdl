@@ -30,19 +30,19 @@ import click
     short_help="Execute MAPDL commands on a running instance.",
     help="""Send MAPDL commands to a running MAPDL instance and print the output.
 
-Commands can be supplied in four mutually exclusive ways:
+Commands can be supplied via three mutually exclusive sources:
 
 \b
-  1. Inline string — pass one or more commands as the first positional argument.
-     The string is used as-is, so embed real newlines using your shell's quoting:
-       pymapdl exec "/prep7"
-       bash/zsh:   pymapdl exec $'/prep7\\nBLOCK,0,1,0,1,0,1\\nSAVE'
-       PowerShell: pymapdl exec "/prep7`nBLOCK,0,1,0,1,0,1`nSAVE"
-  2. Repeated --command / -c options (recommended for scripting and LLM use):
-       pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
-  3. File — read commands from an APDL script file:
+  1. --command / -c  — one or more APDL commands (may be repeated):
+       a. Single -c with embedded newlines (most compact):
+            bash/zsh:   pymapdl exec -c $'/prep7\\nBLOCK,0,1,0,1,0,1\\nSAVE'
+            PowerShell: pymapdl exec -c "/prep7`nBLOCK,0,1,0,1,0,1`nSAVE"
+       b. Repeated -c, one command per flag:
+            pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
+  2. --file / -f  — read commands from an APDL script file:
        pymapdl exec --file my_script.inp
-  4. Stdin — pass ``-`` as the positional argument and pipe commands in:
+  3. Stdin  — pipe commands in (pass ``-`` explicitly, or omit when piping):
+       echo "/prep7" | pymapdl exec
        echo "/prep7" | pymapdl exec -
 
 The instance is targeted by ``--ip`` and ``--port`` (defaults: 127.0.0.1:50052).
@@ -108,16 +108,10 @@ def exec_cmd(
     Parameters
     ----------
     input_arg : str, optional
-        One or more inline APDL commands, or ``-`` to read from stdin.
-        The string is passed to MAPDL exactly as received from the shell —
-        no escape sequences are interpreted.  To embed multiple commands,
-        use your shell's quoting to produce real newlines:
-
-        - bash/zsh: ``$'/prep7\\nBLOCK,0,1,0,1,0,1'``
-        - PowerShell: ``"/prep7`nBLOCK,0,1,0,1,0,1"``
-
-        Windows paths (e.g. ``C:\\new\\file``) are safe because the shell
-        passes the backslash characters through unchanged.
+        Pass ``-`` to read from stdin explicitly.  When omitted and stdin is a
+        pipe (i.e. not a TTY), stdin is read automatically — so
+        ``echo "/prep7" | pymapdl exec`` works without the ``-``.  Passing
+        ``-`` when running interactively is still supported for clarity.
     commands : tuple of str
         APDL commands supplied via repeated ``-c`` / ``--command`` options.
         Each value is one APDL command; they are joined with newlines before
@@ -140,14 +134,18 @@ def exec_cmd(
     # Resolve the command source                                           #
     # ------------------------------------------------------------------ #
 
-    use_stdin = input_arg == "-"
-    use_inline = input_arg is not None and not use_stdin
+    use_stdin = input_arg == "-" or (
+        input_arg is None
+        and not commands
+        and script_file is None
+        and not sys.stdin.isatty()
+    )
+    use_inline = input_arg is not None and input_arg != "-"
     n_sources = sum([bool(commands), script_file is not None, use_stdin, use_inline])
 
     if n_sources == 0:
         raise click.UsageError(
-            "Provide commands as a positional argument, via '-c CMD', '--file PATH', "
-            "or pipe them via stdin ('-')."
+            "Provide commands via '-c CMD', '--file PATH', or pipe them via stdin."
         )
     if n_sources > 1:
         raise click.UsageError(

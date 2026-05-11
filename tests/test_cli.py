@@ -1351,6 +1351,24 @@ class TestCliExecCommand:
         assert result.exit_code == 0
         mock_mapdl.input_strings.assert_called_once()
 
+    def test_exec_stdin_auto_detect(self, mock_mapdl):
+        """Commands are read from stdin automatically when stdin is a pipe (no ``-`` needed)."""
+        from click.testing import CliRunner
+
+        from ansys.mapdl.core.cli import main
+
+        runner = CliRunner()
+        with patch(
+            "ansys.mapdl.core.launcher.connection.connect_to_existing",
+            return_value=mock_mapdl,
+        ):
+            # CliRunner sets stdin to a BytesIO/StringIO, which is not a TTY,
+            # so isatty() returns False — matching real pipe behaviour.
+            result = runner.invoke(main, ["exec"], input="/prep7\nSAVE\n")
+
+        assert result.exit_code == 0
+        mock_mapdl.input_strings.assert_called_once()
+
     def test_exec_custom_port_and_ip(self, mock_mapdl):
         """``--port`` and ``--ip`` are forwarded to ``connect_to_existing``."""
         from click.testing import CliRunner
