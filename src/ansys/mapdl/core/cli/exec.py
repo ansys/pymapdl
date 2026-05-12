@@ -20,10 +20,48 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import select
 import sys
 from typing import Optional, Tuple
 
 import click
+
+
+def _stdin_has_data() -> bool:
+    """Return ``True`` only when stdin is non-interactive *and* data is ready.
+
+    Uses a zero-timeout ``select`` call so the function never blocks.  Three
+    cases are handled:
+
+    * **Normal TTY** – user is typing interactively → ``False``.
+    * **In-memory stream** (e.g. Click's ``CliRunner`` in tests) – ``fileno()``
+      raises ``io.UnsupportedOperation``.  The stream is fully in-memory so
+      data is always available → ``True``.
+    * **Real OS pipe/redirect on Unix** – ``select.select`` with a 0-second
+      timeout reports whether data is ready → result of the poll.
+    * **Windows pipe** – ``select.select`` does not support non-socket file
+      handles and raises ``OSError``.  We cannot check data availability, so
+      we return ``True`` and let stdin be read normally (may block if nothing
+      is piped).
+    """
+    if sys.stdin.isatty():
+        return False
+
+    try:
+        fd = sys.stdin.fileno()
+    except Exception:
+        # In-memory stream (StringIO / BytesIO) used by CliRunner or other
+        # programmatic callers – always readable, never blocking.
+        return True
+
+    try:
+        readable, _, _ = select.select([fd], [], [], 0)
+        return bool(readable)
+    except OSError:
+        # Windows: select() only supports sockets.  Cannot check data
+        # availability, so fall through to stdin — may block if nothing is
+        # piped, but that is the expected behaviour on Windows.
+        return True
 
 
 @click.command(
@@ -111,6 +149,10 @@ def exec_cmd(
     Parameters
     ----------
     input_arg : str, optional
+        Pass ``-`` to read from stdin explicitly.  When omitted and stdin is a
+        pipe (i.e. not a TTY), stdin is read automatically — so
+        ``echo "/prep7" | pymapdl exec`` works without the ``-``.  Passing
+        ``-`` when running interactively is still supported for clarity.
         One or more inline APDL commands, or ``-`` to read from stdin.
         The string is passed to MAPDL exactly as received from the shell —
         no escape sequences are interpreted.  To embed multiple commands,
@@ -147,14 +189,15 @@ def exec_cmd(
     # Resolve the command source                                           #
     # ------------------------------------------------------------------ #
 
-    use_stdin = input_arg == "-"
-    use_inline = input_arg is not None and not use_stdin
+    use_stdin = input_arg == "-" or (
+        input_arg is None and not commands and script_file is None and _stdin_has_data()
+    )
+    use_inline = input_arg is not None and input_arg != "-"
     n_sources = sum([bool(commands), script_file is not None, use_stdin, use_inline])
 
     if n_sources == 0:
         raise click.UsageError(
-            "Provide commands as a positional argument, via '-c CMD', '--file PATH', "
-            "or pipe them via stdin ('-')."
+            "Provide commands via positional COMMANDS, '-c CMD', '--file PATH', or stdin ('-')."
         )
     if n_sources > 1:
         raise click.UsageError(
