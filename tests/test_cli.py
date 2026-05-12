@@ -27,6 +27,7 @@ import re
 import subprocess
 from typing import Callable
 from unittest.mock import MagicMock, patch
+from urllib.parse import urlparse
 
 import numpy as np
 import psutil
@@ -2517,7 +2518,10 @@ def test_format_rst_multiline_link_collapsed():
         "command."
     )
     out = _format_rst_for_terminal(rst)
-    assert "ansyshelp.ansys.com" in out  # URL preserved in OSC 8 sequence
+    urls = re.findall(r"https?://[^\s\033]+", out)
+    assert any(
+        urlparse(url).hostname == "ansyshelp.ansys.com" for url in urls
+    ), "Expected hyperlink host was not preserved in OSC 8 sequence"
     assert "VLEN" in _strip_ansi(out)  # display text visible after stripping
     assert "`_" not in _strip_ansi(out)  # raw RST syntax gone
 
