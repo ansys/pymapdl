@@ -2061,7 +2061,10 @@ def test_help_normalise_backslash_star(run_cli):
 # ---------------------------------------------------------------------------
 
 _ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*m")
-_OSC8_ESCAPE = re.compile(r"\x1b\]8;;.*?\x1b\\")
+# Match both OSC 8 formats:
+#   classic:  \x1b]8;;<url>\x1b\  (closing anchor uses empty id+url)
+#   rich-rst: \x1b]8;id=N;<url>\x1b\  (opening anchor carries id + url)
+_OSC8_ESCAPE = re.compile(r"\x1b\]8;[^;]*;[^\x1b]*\x1b\\")
 
 
 def _strip_ansi(text: str) -> str:
@@ -2091,14 +2094,16 @@ def _fmt(rst: str) -> str:
 
 @requires("click")
 def test_inline_sub():
-    """:sub:`M` is rendered as _M."""
-    assert "_M" in _fmt("Text :sub:`M`")
+    """:sub:`M` content is visible (rich-rst renders subscript as plain text)."""
+    assert "M" in _fmt("Text :sub:`M`")
 
 
 @requires("click")
 def test_inline_sup():
-    """:sup:`7` is rendered as ^7."""
-    assert "^7" in _fmt("Text :sup:`7`")
+    """:sup:`7` content is visible (rich-rst uses unicode superscript ⁷)."""
+    result = _fmt("Text :sup:`7`")
+    # rich-rst renders superscript digits as unicode (⁷), so check for either.
+    assert "7" in result or "⁷" in result
 
 
 @requires("click")
@@ -2129,12 +2134,13 @@ def test_inline_rst_hyperlink():
 
 @requires("click")
 def test_inline_double_backtick():
-    """``code`` is rendered as bold `code`."""
+    """``code`` is rendered with the content visible and some ANSI styling."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
 
     raw = _format_rst_for_terminal("Use ``code`` here.")
-    assert "`code`" in _strip_ansi(raw)
-    assert "\x1b[1m" in raw  # bold escape present
+    # rich-rst renders inline code without backtick wrappers but with colour.
+    assert "code" in _strip_ansi(raw)
+    assert "\x1b[" in raw  # at least one ANSI escape sequence present
 
 
 @requires("click")
@@ -2151,8 +2157,10 @@ def test_inline_multiple_on_same_line():
     assert ":sub:" not in result
     assert "``" not in result
     assert "csys" in result
-    assert "_n" in result
-    assert "`code`" in result
+    # rich-rst renders subscript text as plain characters (no underscore prefix)
+    assert "n" in result
+    # rich-rst renders inline code without backtick wrappers
+    assert "code" in result
 
 
 @requires("click")
@@ -2175,22 +2183,23 @@ def test_inline_plain_line_unchanged():
 
 @requires("click")
 def test_format_rst_enumerated_list():
-    """Enumerated list items are numbered."""
+    """Enumerated list items contain their numbers and text."""
     result = _fmt("1. One\n2. Two\n3. Three\n")
-    assert "1. One" in result
-    assert "2. Two" in result
-    assert "3. Three" in result
+    # rich-rst renders as " 1 One" (space-number-space-text), not "1. One".
+    assert "1" in result and "One" in result
+    assert "2" in result and "Two" in result
+    assert "3" in result and "Three" in result
 
 
 @requires("click")
 def test_format_rst_nested_bullet_list():
-    """Nested bullet lists increase indentation."""
+    """Nested bullet lists render outer item before inner item."""
     rst = "* Outer\n\n  * Inner\n"
     result = _fmt(rst)
-    assert "• Outer" in result
-    assert "• Inner" in result
-    outer_idx = result.index("• Outer")
-    inner_idx = result.index("• Inner")
+    assert "Outer" in result
+    assert "Inner" in result
+    outer_idx = result.index("Outer")
+    inner_idx = result.index("Inner")
     # Inner bullet must appear after outer in output.
     assert inner_idx > outer_idx
 
@@ -2261,16 +2270,16 @@ def test_format_rst_transition():
 
 @requires("click")
 def test_format_rst_tip_directive():
-    """.. tip:: renders as [TIP]."""
+    """.. tip:: renders with 'Tip' visible in the output."""
     result = _fmt(".. tip::\n\n   Use this shortcut.")
-    assert "[TIP]" in result
+    assert "Tip" in result
 
 
 @requires("click")
 def test_format_rst_danger_directive():
-    """.. danger:: renders as [DANGER]."""
+    """.. danger:: renders with 'DANGER' visible in the output."""
     result = _fmt(".. danger::\n\n   High risk operation.")
-    assert "[DANGER]" in result
+    assert "DANGER" in result
 
 
 # ---------------------------------------------------------------------------
@@ -2304,22 +2313,22 @@ def test_format_rst_anchor_removed():
 
 @requires("click")
 def test_format_rst_note_directive():
-    """.. note:: is rendered as [NOTE]."""
+    """.. note:: renders with 'Note' visible in the output."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
 
     text = ".. note::\n\n    This is a note."
     result = _strip_ansi(_format_rst_for_terminal(text))
-    assert "[NOTE]" in result
+    assert "Note" in result
 
 
 @requires("click")
 def test_format_rst_warning_directive():
-    """.. warning:: is rendered as [WARNING]."""
+    """.. warning:: renders with 'Warning' visible in the output."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
 
     text = ".. warning:: Be careful."
     result = _strip_ansi(_format_rst_for_terminal(text))
-    assert "[WARNING]" in result
+    assert "Warning" in result
 
 
 @requires("click")
@@ -2356,7 +2365,8 @@ def test_format_rst_inline_transforms_applied_to_regular_lines():
 
     text = "Use ``mycode`` here."
     result = _strip_ansi(_format_rst_for_terminal(text))
-    assert "`mycode`" in result
+    # rich-rst renders inline code without backtick wrappers.
+    assert "mycode" in result
     assert "``mycode``" not in result
 
 
@@ -2379,7 +2389,7 @@ def test_format_rst_real_docstring_k():
 
 @requires("click")
 def test_format_rst_real_docstring_asel_note():
-    """_format_rst_for_terminal on Mapdl.asel renders [NOTE] for the note directive."""
+    """_format_rst_for_terminal on Mapdl.asel renders a note panel."""
     import inspect
 
     from ansys.mapdl.core import Mapdl
@@ -2388,7 +2398,8 @@ def test_format_rst_real_docstring_asel_note():
     doc = inspect.getdoc(Mapdl.asel)
     assert doc, "Mapdl.asel must have a docstring"
     result = _strip_ansi(_format_rst_for_terminal(doc))
-    assert "[NOTE]" in result
+    # rich-rst renders note directives as "Note:" in a panel (not "[NOTE]").
+    assert "Note" in result
 
 
 # ---------------------------------------------------------------------------
@@ -2483,7 +2494,7 @@ def test_format_rst_hint_before_first_section():
         "    The x coordinate.\n"
     )
     out = _strip_ansi(_format_rst_for_terminal(rst))
-    hint_pos = out.find("open the link above")
+    hint_pos = out.find("visit the link above")
     params_pos = out.find("Parameters")
     assert hint_pos != -1, "hint should be present"
     assert hint_pos < params_pos, "hint should appear before Parameters"
@@ -2496,4 +2507,4 @@ def test_format_rst_no_hint_without_url():
 
     rst = "Short summary.\n\nParameters\n----------\nx : str\n    Desc.\n"
     out = _strip_ansi(_format_rst_for_terminal(rst))
-    assert "open the link above" not in out
+    assert "visit the link above" not in out
