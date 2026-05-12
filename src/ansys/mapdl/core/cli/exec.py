@@ -162,7 +162,7 @@ def exec_cmd(
 
     if n_sources == 0:
         raise click.UsageError(
-            "Provide commands via '-c CMD', '--file PATH', or pipe them via stdin."
+            "Provide commands via positional COMMANDS, '-c CMD', '--file PATH', or stdin ('-')."
         )
     if n_sources > 1:
         raise click.UsageError(
