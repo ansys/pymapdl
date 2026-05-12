@@ -45,7 +45,12 @@ import click
 # Regex patterns
 # ---------------------------------------------------------------------------
 
-_MAPDL_CMD_RE = re.compile(r"Mechanical APDL Command: `([^\s<`]+)")
+# Matches the MAPDL command name in a docstring line such as:
+#   Mechanical APDL Command: `\*VGET <url>`_
+#   Mechanical APDL Command: `/PREP7 <url>`_
+#   Mechanical APDL Command: `K <url>`_
+# The leading ``\`` is the RST escape for ``*``; the capture group includes it.
+_MAPDL_CMD_RE = re.compile(r"Mechanical APDL Command: `(\\?\*?/?[^\s<`]+)")
 
 # Detects an ansyshelp.ansys.com URL anywhere in the docstring.
 _ANSYS_HELP_URL_RE = re.compile(r"ansyshelp\.ansys\.com")
@@ -181,16 +186,46 @@ def _echo_doc(formatted: str) -> None:
 # ---------------------------------------------------------------------------
 
 
+def _cmd_to_key(raw_cmd: str) -> str:
+    """Convert a raw MAPDL command name (as found in a docstring) to a lookup key.
+
+    The docstring convention uses ``\\*`` (RST-escaped asterisk) for
+    ``*``-prefixed commands and a literal ``/`` for slash-prefixed ones.
+    This function strips the RST escape backslash, then replaces ``*`` with
+    the word ``STAR`` and ``/`` with the word ``SLASH`` so that ``*VGET`` and
+    ``VGET`` produce distinct keys (``STARVGET`` vs ``VGET``).
+
+    Parameters
+    ----------
+    raw_cmd : str
+        Command string as captured by :data:`_MAPDL_CMD_RE`, e.g. ``\\*VGET``,
+        ``/PREP7``, or ``K``.
+
+    Returns
+    -------
+    str
+        Uppercase lookup key, e.g. ``STARVGET``, ``SLASHPREP7``, or ``K``.
+    """
+    cmd = raw_cmd.lstrip("\\")  # drop RST escape backslash
+    if cmd.startswith("*"):
+        return "STAR" + cmd[1:].upper()
+    if cmd.startswith("/"):
+        return "SLASH" + cmd[1:].upper()
+    return cmd.upper()
+
+
 def _build_command_map() -> dict[str, str]:
     """Build a mapping from normalised MAPDL command names to Python method names.
 
-    Iterates over all non-private callables on the :class:`Mapdl` class and
+    Iterates over all non-private callables on the :class:`Commands` class and
     extracts the MAPDL command name from each docstring via the pattern::
 
         Mechanical APDL Command: `<name> <url>`_
 
-    The extracted key is normalised by stripping any leading ``\\``, ``/``, or
-    ``*`` characters and converting to uppercase.
+    The extracted key is normalised via :func:`_cmd_to_key`: ``*``-prefixed
+    commands become ``STAR<CMD>`` and ``/``-prefixed commands become
+    ``SLASH<CMD>``, preserving the distinction between e.g. ``*VGET`` and
+    the plain ``VGET`` command.
 
     Returns
     -------
@@ -199,11 +234,13 @@ def _build_command_map() -> dict[str, str]:
 
     Examples
     --------
-    Build the map and look up the method for the ``PREP7`` command:
+    Build the map and look up methods for a slash and a star command:
 
     >>> cmd_map = _build_command_map()
-    >>> cmd_map["PREP7"]
+    >>> cmd_map["SLASHPREP7"]
     'prep7'
+    >>> cmd_map["STARVGET"]
+    'starvget'
 
     """
     from ansys.mapdl.core.commands import Commands
@@ -219,24 +256,23 @@ def _build_command_map() -> dict[str, str]:
         m = _MAPDL_CMD_RE.search(doc)
         if not m:
             continue
-        raw_cmd = m.group(1)
-        # Strip leading backslash, slash, or asterisk then uppercase
-        normalised = raw_cmd.lstrip("\\/*").upper()
-        if normalised:
-            mapping[normalised] = attr_name
+        key = _cmd_to_key(m.group(1))
+        if key:
+            mapping[key] = attr_name
     return mapping
 
 
 def _normalise_user_input(command: str) -> str:
     """Normalise a user-supplied MAPDL command name for lookup.
 
-    Strips any leading ``/``, ``*``, or ``\\*`` characters and converts the
-    result to uppercase.
+    Mirrors the key convention used by :func:`_build_command_map`: ``*`` (or
+    ``\\*``) prefixes become the word ``STAR`` and ``/`` prefixes become the
+    word ``SLASH``, so that ``*VGET`` and ``VGET`` remain distinct keys.
 
     Parameters
     ----------
     command : str
-        Raw command name as typed by the user (e.g. ``/PREP7``, ``*ABBR``,
+        Raw command name as typed by the user (e.g. ``/PREP7``, ``*VGET``,
         ``K``).
 
     Returns
@@ -248,14 +284,14 @@ def _normalise_user_input(command: str) -> str:
     Examples
     --------
     >>> _normalise_user_input("/PREP7")
-    'PREP7'
-    >>> _normalise_user_input("*ABBR")
-    'ABBR'
+    'SLASHPREP7'
+    >>> _normalise_user_input("*VGET")
+    'STARVGET'
     >>> _normalise_user_input("k")
     'K'
 
     """
-    return command.lstrip("\\/*").upper()
+    return _cmd_to_key(command)
 
 
 # ---------------------------------------------------------------------------
@@ -268,17 +304,16 @@ def _normalise_user_input(command: str) -> str:
     short_help="Print the docstring for a MAPDL command.",
     help="""Print the Python docstring for a MAPDL command.
 
-COMMAND is the MAPDL command name.  Leading ``/``, ``*``, or ``\\*``
-prefixes are accepted and silently stripped before the lookup, so all
-of the following are equivalent:
+COMMAND is the MAPDL command name, including any leading prefix.  ``*``
+(or ``\\*``) prefixes are looked up as ``STAR<CMD>`` and ``/`` prefixes
+as ``SLASH<CMD>``, so the prefix is significant:
 
 \b
 Examples:
-  pymapdl help PREP7
   pymapdl help /PREP7
   pymapdl help K
-  pymapdl help *ABBR
-  pymapdl help ABBR
+  pymapdl help "*VGET"
+  pymapdl help "*ABBR"
 """,
 )
 @click.argument("command")
@@ -288,8 +323,9 @@ def help_cmd(command: str) -> None:
     Parameters
     ----------
     command : str
-        MAPDL command name to look up.  Leading ``/``, ``*``, or ``\\*``
-        prefixes are stripped automatically before the lookup.
+        MAPDL command name to look up, including any leading ``/`` or ``*``
+        prefix.  ``*`` (and ``\\*``) maps to the ``STAR<CMD>`` key and ``/``
+        maps to ``SLASH<CMD>``.
 
     Examples
     --------
@@ -297,9 +333,9 @@ def help_cmd(command: str) -> None:
 
         pymapdl help /PREP7
 
-    Print the docstring for the ``*ABBR`` command:
+    Print the docstring for the ``*VGET`` command:
 
-        pymapdl help *ABBR
+        pymapdl help "*VGET"
 
     Print the docstring for the ``K`` command:
 

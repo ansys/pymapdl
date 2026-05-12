@@ -2038,34 +2038,54 @@ def test_build_command_map_known_commands():
     from ansys.mapdl.core.cli.help import _build_command_map
 
     cmd_map = _build_command_map()
-    assert "PREP7" in cmd_map, "PREP7 should be in the command map"
+    assert "SLASHPREP7" in cmd_map, "SLASHPREP7 should be in the command map"
     assert "K" in cmd_map, "K should be in the command map"
-    assert "ABBR" in cmd_map, "ABBR should be in the command map"
+    assert "STARABBR" in cmd_map, "STARABBR should be in the command map"
+    assert "STARVGET" in cmd_map, "STARVGET should be in the command map"
+    # Ensure *VGET and VGET map to different methods
+    assert cmd_map.get("STARVGET") != cmd_map.get("VGET")
 
 
 @requires("click")
 def test_help_prep7(run_cli):
-    """pymapdl help PREP7 prints a non-empty docstring."""
-    output = run_cli("help PREP7")
+    """pymapdl help /PREP7 prints a non-empty docstring."""
+    output = run_cli("help /PREP7")
     assert output.strip()
 
 
 @requires("click")
 def test_help_prep7_with_slash(run_cli):
-    """pymapdl help /PREP7 produces the same output as pymapdl help PREP7."""
-    out_plain = run_cli("help PREP7")
+    """pymapdl help /PREP7 and pymapdl help PREP7 are NOT equivalent: prefix matters."""
+    from click.testing import CliRunner
+
+    from ansys.mapdl.core.cli import main
+
     out_slash = run_cli("help /PREP7")
-    assert out_plain.strip() == out_slash.strip()
-    assert out_plain.strip()
+    assert out_slash.strip(), "/PREP7 should return a non-empty docstring"
+
+    # Without the slash, PREP7 is not a registered command name
+    runner = CliRunner()
+    result = runner.invoke(main, ["help", "PREP7"])
+    assert result.exit_code == 1
 
 
 @requires("click")
 def test_help_abbr_with_asterisk(run_cli):
-    """pymapdl help *ABBR produces the same output as pymapdl help ABBR."""
-    out_plain = run_cli("help ABBR")
+    """pymapdl help *ABBR returns the *ABBR docstring (not bare ABBR)."""
     out_star = run_cli("help *ABBR")
-    assert out_plain.strip() == out_star.strip()
-    assert out_plain.strip()
+    assert out_star.strip()
+
+
+@requires("click")
+def test_help_star_abbr_differs_from_bare(run_cli):
+    """*ABBR and ABBR (no prefix) are distinct: bare ABBR should not be found."""
+    from click.testing import CliRunner
+
+    from ansys.mapdl.core.cli import main
+
+    runner = CliRunner()
+    result = runner.invoke(main, ["help", "ABBR"])
+    assert result.exit_code == 1
 
 
 @requires("click")
@@ -2094,10 +2114,10 @@ def test_help_unknown_command_exits_with_error(run_cli):
 
 @requires("click")
 def test_help_normalise_backslash_star(run_cli):
-    r"""pymapdl help \*ABBR is treated the same as ABBR."""
-    out_plain = run_cli("help ABBR")
+    r"""pymapdl help \*ABBR is treated the same as *ABBR."""
+    out_star = run_cli("help *ABBR")
     out_backslash = run_cli(r"help \*ABBR")
-    assert out_plain.strip() == out_backslash.strip()
+    assert out_star.strip() == out_backslash.strip()
 
 
 # ---------------------------------------------------------------------------
