@@ -46,6 +46,17 @@ ALL_LABELS = FORCE_LABELS.copy()
 ALL_LABELS.extend(DISPL_LABELS)
 
 
+def _get_picking_right_clicking_observer(pl):
+    """Return the right-clicking observer, compatible with PyVista <0.48 and >=0.48."""
+    if hasattr(pl, "_picking_right_clicking_observer"):
+        return pl._picking_right_clicking_observer
+    if hasattr(pl, "picking") and hasattr(
+        pl.picking, "_picking_right_clicking_observer"
+    ):
+        return pl.picking._picking_right_clicking_observer
+    return None
+
+
 @pytest.fixture
 def boundary_conditions_example(mapdl, cleared):
     mapdl.et("", 189)
@@ -566,7 +577,7 @@ def test_pick_nodes(mapdl, make_block, selection, verify_image_cache):
         pl.show(auto_close=False)
         pl.window_size = (100, 100)
         width, height = pl.window_size
-        if pl._picking_right_clicking_observer is None:
+        if _get_picking_right_clicking_observer(pl) is None:
             pl.iren._mouse_left_button_press(
                 int(width * point[0]), int(height * point[1])
             )
@@ -639,7 +650,7 @@ def test_pick_kp(mapdl, make_block, selection):
         pl.show(auto_close=False)
         pl.window_size = (100, 100)
         width, height = pl.window_size
-        if pl._picking_right_clicking_observer is None:
+        if _get_picking_right_clicking_observer(pl) is None:
             pl.iren._mouse_left_button_press(
                 int(width * point[0]), int(height * point[1])
             )
@@ -848,7 +859,7 @@ def test_pick_areas(mapdl, make_block, selection):
         pl.show(auto_close=False)
         pl.window_size = (100, 100)
         width, height = pl.window_size
-        if pl._picking_right_clicking_observer is None:
+        if _get_picking_right_clicking_observer(pl) is None:
             pl.iren._mouse_left_button_press(
                 int(width * point[0]), int(height * point[1])
             )

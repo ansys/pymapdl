@@ -111,7 +111,7 @@ doc = [
   "sphinx-autodoc-typehints==3.1.0; python_version >= '3.11'",
   "sphinx-copybutton==0.5.2",
   "sphinx-design==0.6.1",
-  "sphinx-gallery==0.20.0",
+  "sphinx-gallery==0.21.0",
   "sphinx-jinja==2.0.2",
   "sphinx-notfound-page==1.1.0",
   "sphinx==8.1.3; python_version < '3.11'",
@@ -314,13 +314,13 @@ title_format = "\n.. _v{version}:\n\n`{version} <https://github.com/ansys/pymapd
 issue_format = "`#{issue} <https://github.com/ansys/pymapdl/pull/{issue}>`_"
 
 [[tool.towncrier.type]]
-directory = "added"
-name = "Added"
+directory = "breaking"
+name = "Breaking"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "changed"
-name = "Changed"
+directory = "added"
+name = "Added"
 showcontent = true
 
 [[tool.towncrier.type]]
@@ -329,18 +329,13 @@ name = "Fixed"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "dependencies"
-name = "Dependencies"
-showcontent = true
-
-[[tool.towncrier.type]]
 directory = "documentation"
 name = "Documentation"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "miscellaneous"
-name = "Miscellaneous"
+directory = "dependencies"
+name = "Dependencies"
 showcontent = true
 
 [[tool.towncrier.type]]
@@ -349,6 +344,16 @@ name = "Maintenance"
 showcontent = true
 
 [[tool.towncrier.type]]
+directory = "miscellaneous"
+name = "Miscellaneous"
+showcontent = true
+
+[[tool.towncrier.type]]
 directory = "test"
 name = "Test"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "changed"
+name = "Changed"
 showcontent = true

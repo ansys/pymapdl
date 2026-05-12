@@ -21,7 +21,12 @@
 # SOFTWARE.
 
 import pyvista as pv
-from pyvista.core import _vtk_core as _vtk
+
+try:
+    from pyvista.core import _vtk_core as _vtk
+except ImportError:
+    from pyvista import _vtk  # pyvista >= 0.48
+
 from pyvista.core.utilities import translate
 from pyvista.core.utilities.helpers import wrap
 from pyvista.core.utilities.misc import _NoNewAttrMixin

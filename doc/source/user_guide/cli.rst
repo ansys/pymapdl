@@ -287,9 +287,12 @@ Use ``pymapdl exec`` to send APDL commands to a running MAPDL instance and
 print the output to stdout. The command always connects to an existing
 instance, it never starts a new one. Use ``pymapdl start`` first if needed.
 
-There are three mutually exclusive ways to supply commands. The recommended
-approach is to use the ``-c`` / ``--command`` option, which can be repeated.
-Each ``-c`` value is one APDL command; all commands are sent as a single block:
+There are three mutually exclusive sources for commands:
+
+**1.** ``-c`` / ``--command`` **options**
+
+Each ``-c`` value is one APDL command; all commands are joined and sent as a
+single block. You can pass multiple ``-c`` flags:
 
 
 .. tab-set::
@@ -309,7 +312,30 @@ Each ``-c`` value is one APDL command; all commands are sent as a single block:
             (.venv) user@machine:~$ pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
 
 
-You can also read commands from an APDL script file using ``--file`` / ``-f``:
+Or embed multiple commands in a single ``-c`` value using your shell's quoting
+to produce real newlines:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows (PowerShell)
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec -c "/prep7`nBLOCK,0,1,0,1,0,1`nSAVE"
+
+    .. tab-item:: Linux (bash/zsh)
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl exec -c $'/prep7\nBLOCK,0,1,0,1,0,1\nSAVE'
+
+
+**2. Script file**
+
+Read commands from an APDL script file using ``--file`` / ``-f``:
 
 
 .. tab-set::
@@ -329,8 +355,10 @@ You can also read commands from an APDL script file using ``--file`` / ``-f``:
             (.venv) user@machine:~$ pymapdl exec --file my_script.inp
 
 
-To pipe commands from another program, pass ``-`` as a positional argument to
-read from stdin:
+**3. Stdin**
+
+Pipe commands in from another program. The ``-`` marker is optional, when
+stdin is a pipe ``pymapdl exec`` detects it automatically:
 
 
 .. tab-set::
@@ -340,6 +368,7 @@ read from stdin:
 
         .. code:: pwsh-session
 
+            (.venv) PS C:\Users\user\pymapdl> Get-Content my_script.inp | pymapdl exec
             (.venv) PS C:\Users\user\pymapdl> Get-Content my_script.inp | pymapdl exec -
 
     .. tab-item:: Linux
@@ -347,7 +376,15 @@ read from stdin:
 
         .. code:: console
 
-            (.venv) user@machine:~$ cat my_script.inp | pymapdl exec -
+            (.venv) user@machine:~$ cat my_script.inp | pymapdl exec
+            (.venv) user@machine:~$ echo "/prep7" | pymapdl exec
+
+
+.. note::
+
+   ``pymapdl exec`` auto-reads stdin only when it detects a pipe (that is stdin
+   is not a terminal).  Running ``pymapdl exec`` interactively with no
+   arguments still produces an error rather than hanging.
 
 
 By default, ``pymapdl exec`` connects without clearing the MAPDL database, so
