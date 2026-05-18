@@ -1,0 +1,60 @@
+cff-version: 1.2.0
+title: PyMAPDL
+message: >-
+  If you use this software, please cite it using the metadata
+  from this file.
+type: software
+authors:
+  - given-names: German
+    family-names: Ayuso
+    alias: germa89
+    affiliation: Ansys Inc.
+  - given-names: Alex
+    family-names: Kaszynski
+    alias: akaszynski
+  - given-names: Camille
+    family-names: Latapie
+    alias: clatapie
+    affiliation: Ansys Inc.
+  - given-names: James
+    family-names: Derrick
+    alias: jgd10
+  - given-names: Roberto
+    family-names: Pastor Muela
+    alias: RobPasMue
+    affiliation: Ansys Inc.
+  - given-names: Jamil
+    family-names: Hajjar
+    alias: Gryfenfer97
+    affiliation: Ansys Inc.
+  - given-names: Revathy
+    family-names: Venugopal
+    alias: Revathyvenugopal162
+    affiliation: Ansys Inc.
+  - given-names: Jorge
+    family-names: Martínez
+    alias: jorgepiloto
+    affiliation: Ansys Inc.
+  - given-names: Kathy
+    family-names: Pippert
+    alias: PipKat
+    affiliation: Ansys Inc.
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.5726008
+    description: The Zenodo DOI for PyMAPDL
+repository-code: 'https://github.com/ansys/pymapdl'
+url: 'https://mapdl.docs.pyansys.com'
+abstract: >-
+  PyMAPDL is a Python client library for Ansys MAPDL (Mechanical APDL).
+  It enables Pythonic access to MAPDL, supporting remote connections via
+  gRPC, direct access to MAPDL arrays and meshes as Python objects, and
+  a SciPy-like interface to the APDL math solver.
+keywords:
+  - ansys
+  - mapdl
+  - finite-element-analysis
+  - simulation
+  - python
+  - pyansys
+license: MIT
