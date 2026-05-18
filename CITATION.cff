@@ -65,6 +65,7 @@ authors:
   - given-names: Sébastien
     family-names: Morais
     alias: SMoraisAnsys
+    affiliation: Ansys Inc.
 identifiers:
   - type: doi
     value: 10.5281/zenodo.5726008
