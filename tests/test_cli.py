@@ -1246,6 +1246,58 @@ class TestCliStartCommand:
 
 
 @requires("click")
+class TestStdinHasData:
+    """Unit tests for the ``_stdin_has_data`` helper in ``exec.py``."""
+
+    def test_returns_false_for_tty(self):
+        """Returns ``False`` immediately when stdin is a real TTY."""
+        from ansys.mapdl.core.cli.exec import _stdin_has_data
+
+        with patch("sys.stdin") as mock_stdin:
+            mock_stdin.isatty.return_value = True
+            assert _stdin_has_data() is False
+
+    def test_returns_true_for_in_memory_stream(self):
+        """Returns ``True`` for an in-memory stream (no ``fileno()``)."""
+        import io
+
+        from ansys.mapdl.core.cli.exec import _stdin_has_data
+
+        with patch("sys.stdin", new=io.StringIO("/prep7\n")):
+            assert _stdin_has_data() is True
+
+    def test_returns_true_when_select_reports_readable(self):
+        """Returns ``True`` when ``select.select`` says data is ready."""
+        from ansys.mapdl.core.cli.exec import _stdin_has_data
+
+        with patch("sys.stdin") as mock_stdin:
+            mock_stdin.isatty.return_value = False
+            mock_stdin.fileno.return_value = 0
+            with patch("select.select", return_value=([0], [], [])):
+                assert _stdin_has_data() is True
+
+    def test_returns_false_when_select_reports_not_readable(self):
+        """Returns ``False`` when ``select.select`` says no data is ready."""
+        from ansys.mapdl.core.cli.exec import _stdin_has_data
+
+        with patch("sys.stdin") as mock_stdin:
+            mock_stdin.isatty.return_value = False
+            mock_stdin.fileno.return_value = 0
+            with patch("select.select", return_value=([], [], [])):
+                assert _stdin_has_data() is False
+
+    def test_returns_true_on_oserror_from_select(self):
+        """Returns ``True`` when ``select.select`` raises ``OSError`` (Windows):
+        fall through to stdin so the OS can decide whether to block."""
+        from ansys.mapdl.core.cli.exec import _stdin_has_data
+
+        with patch("sys.stdin") as mock_stdin:
+            mock_stdin.isatty.return_value = False
+            mock_stdin.fileno.return_value = 0
+            with patch("select.select", side_effect=OSError("not supported")):
+                assert _stdin_has_data() is True
+
+
 class TestCliExecCommand:
     """Tests for the ``pymapdl exec`` CLI subcommand."""
 
@@ -1350,6 +1402,44 @@ class TestCliExecCommand:
 
         assert result.exit_code == 0
         mock_mapdl.input_strings.assert_called_once()
+
+    def test_exec_stdin_auto_detect(self, mock_mapdl):
+        """Commands are read from stdin automatically when stdin is a pipe (no ``-`` needed)."""
+        from click.testing import CliRunner
+
+        from ansys.mapdl.core.cli import main
+
+        runner = CliRunner()
+        with patch(
+            "ansys.mapdl.core.launcher.connection.connect_to_existing",
+            return_value=mock_mapdl,
+        ):
+            # CliRunner sets stdin to a BytesIO/StringIO, which is not a TTY,
+            # so isatty() returns False — matching real pipe behaviour.
+            result = runner.invoke(main, ["exec"], input="/prep7\nSAVE\n")
+
+        assert result.exit_code == 0
+        mock_mapdl.input_strings.assert_called_once()
+
+    def test_exec_no_hang_when_pipe_has_no_data(self):
+        """``pymapdl exec`` raises UsageError instead of hanging when stdin is
+        a non-TTY pipe that carries no data (e.g. CI runner with redirected
+        stdin but nothing piped in)."""
+        from click.testing import CliRunner
+
+        from ansys.mapdl.core.cli import main
+
+        runner = CliRunner()
+        # Patch _stdin_has_data to simulate a non-TTY environment where no
+        # data is available (e.g. an empty pipe on a CI runner).
+        with patch(
+            "ansys.mapdl.core.cli.exec._stdin_has_data",
+            return_value=False,
+        ):
+            result = runner.invoke(main, ["exec"])
+
+        assert result.exit_code != 0
+        assert "Provide commands" in result.output
 
     def test_exec_custom_port_and_ip(self, mock_mapdl):
         """``--port`` and ``--ip`` are forwarded to ``connect_to_existing``."""
@@ -1456,9 +1546,53 @@ class TestCliExecCommand:
             )
         assert result.exit_code != 0
 
-    def test_exec_unknown_positional_error(self, cli_runner):
-        """An unexpected positional argument that isn't ``-`` is rejected."""
-        result = cli_runner(["exec", "some_command"])
+    def test_exec_inline_commands(self, cli_runner, mock_mapdl):
+        """A single APDL command passed as the positional argument is executed."""
+        with patch(
+            "ansys.mapdl.core.launcher.connection.connect_to_existing",
+            return_value=mock_mapdl,
+        ):
+            result = cli_runner(["exec", "/prep7"])
+
+        assert result.exit_code == 0
+        mock_mapdl.input_strings.assert_called_once_with("/prep7")
+
+    def test_exec_inline_preserves_backslash_sequences(self, cli_runner, mock_mapdl):
+        r"""Backslash sequences like ``\n`` in inline commands are preserved as-is."""
+        cmd = r"/FILNAME,'C:\new\file',1"
+        with patch(
+            "ansys.mapdl.core.launcher.connection.connect_to_existing",
+            return_value=mock_mapdl,
+        ):
+            result = cli_runner(["exec", cmd])
+
+        assert result.exit_code == 0
+        sent = mock_mapdl.input_strings.call_args[0][0]
+        assert sent == cmd
+
+    def test_exec_inline_and_c_mutually_exclusive(self, cli_runner):
+        """Providing both an inline positional argument and ``-c`` is rejected."""
+        result = cli_runner(["exec", "/prep7", "-c", "SAVE"])
+        assert result.exit_code != 0
+
+    def test_exec_inline_multiline(self, cli_runner, mock_mapdl):
+        """Real newlines in the inline argument are passed through as a multi-command block."""
+        with patch(
+            "ansys.mapdl.core.launcher.connection.connect_to_existing",
+            return_value=mock_mapdl,
+        ):
+            result = cli_runner(["exec", "/prep7\nBLOCK,0,1,0,1,0,1\nSAVE"])
+
+        assert result.exit_code == 0
+        sent = mock_mapdl.input_strings.call_args[0][0]
+        assert sent == "/prep7\nBLOCK,0,1,0,1,0,1\nSAVE"
+
+    def test_exec_inline_and_file_mutually_exclusive(self, cli_runner, tmp_path):
+        """Providing both an inline positional argument and ``--file`` is rejected."""
+        script = tmp_path / "script.inp"
+        script.write_text("/PREP7\n")
+
+        result = cli_runner(["exec", "/prep7", "--file", str(script)])
         assert result.exit_code != 0
 
     def test_exec_connection_error_exits_nonzero(self, cli_runner):
