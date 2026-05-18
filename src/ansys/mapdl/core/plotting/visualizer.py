@@ -215,14 +215,15 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
             Additional keyword arguments passed to
             :meth:`pyvista.Plotter.add_points`.
         """
-        return self.scene.add_points(
-            np.array(points), color=color, point_size=size, **kwargs
-        )
+        # Use setdefault so a caller-supplied ``point_size`` in kwargs takes
+        # precedence and avoids a duplicate-keyword TypeError.
+        kwargs.setdefault("point_size", size)
+        return self.scene.add_points(np.array(points), color=color, **kwargs)
 
     def add_text(
         self,
         text: str,
-        position: Union[tuple, str],
+        position: Union[tuple, str] = "upper_left",
         font_size: int = 12,
         color: str = "white",
         **kwargs,
@@ -233,10 +234,10 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
         ----------
         text : str
             Text string to display.
-        position : tuple or str
+        position : tuple or str, optional
             Position for the text. Can be 2D ``(x, y)`` for screen coordinates,
             3D ``(x, y, z)`` for world coordinates, or a string such as
-            ``'upper_left'``.
+            ``'upper_left'``. The default is ``'upper_left'``.
         font_size : int, optional
             Font size for the text. The default is ``12``.
         color : str, optional
