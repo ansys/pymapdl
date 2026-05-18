@@ -44,6 +44,7 @@ authors:
   - given-names: Kevin
     family-names: Koshy
     alias: kmkoshy
+    affiliation: Ansys Inc.
   - given-names: Roman
     family-names: Ilchenko
     alias: RomanIlchenko1308
@@ -51,7 +52,7 @@ authors:
   - given-names: Mohamed
     family-names: Koubaa
     alias: koubaa
-    affiliation: Synopsys
+    affiliation: Ansys Inc.
   - given-names: Alex
     family-names: Fernandez
     alias: AlejandroFernandezLuces
