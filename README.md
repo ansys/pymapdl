@@ -11,7 +11,7 @@
 [![PyPIact](https://img.shields.io/pypi/dm/ansys-mapdl-core.svg?label=PyPI%20downloads)](https://pypi.org/project/ansys-mapdl-core/)
 [![codecov](https://codecov.io/gh/ansys/pymapdl/branch/main/graph/badge.svg)](https://codecov.io/gh/ansys/pymapdl)
 [![GH-CI](https://github.com/ansys/pymapdl/actions/workflows/ci.yml/badge.svg)](https://github.com/ansys/pymapdl/actions/workflows/ci.yml)
-[![zenodo](https://zenodo.org/badge/70696039.svg)](https://zenodo.org/badge/latestdoi/70696039)
+[![zenodo](https://zenodo.org/badge/DOI/10.5281/zenodo.5726008.svg)](https://doi.org/10.5281/zenodo.5726008)
 [![MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat)](https://github.com/psf/black)
 [![pre-commit](https://results.pre-commit.ci/badge/github/ansys/pymapdl/main.svg)](https://results.pre-commit.ci/latest/github/ansys/pymapdl/main)
@@ -113,7 +113,7 @@ For more information on each project, visit their GitHub pages.
 
 If you use [PyMAPDL](https://mapdl.docs.pyansys.com/version/stable/) for
 research and would like to cite the module and source, you can visit
-[pyansys Zenodo](https://zenodo.org/badge/latestdoi/70696039) and generate the
+[Zenodo](https://zenodo.org/records/5726008) and generate the
 correct citation.  For example, the BibTex citation is:
 
 ```bibtex
@@ -126,6 +126,28 @@ correct citation.  For example, the BibTex citation is:
   version      = {0.60.3},
   doi          = {10.5281/zenodo.4009466},
   url          = {https://doi.org/10.5281/zenodo.4009466}
+@software{alex_kaszynski_2021_5726008,
+  author       = {Alex Kaszynski and
+                  James Derrick and
+                  German and
+                  natter1 and
+                  FredAns and
+                  jleonatti and
+                  simonmarwitz and
+                  1081 and
+                  Daniel Correia and
+                  Doug Addy and
+                  JackGuyver and
+                  jazztekk and
+                  jkbgbr and
+                  spectereye},
+  title        = {pyansys/pymapdl: v0.60.3},
+  month        = nov,
+  year         = 2021,
+  publisher    = {Zenodo},
+  version      = {v0.60.3},
+  doi          = {10.5281/zenodo.5726008},
+  url          = {https://doi.org/10.5281/zenodo.5726008},
 }
 ```
 
