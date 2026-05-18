@@ -209,3 +209,4 @@ Windows Subsystem for Linux
 wsl
 WSL
 Zhu
+Synopsys
