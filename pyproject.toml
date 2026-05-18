@@ -51,12 +51,12 @@ version = "0.72.dev0"
 jupyter = ["ipywidgets", "jupyterlab>=3"]
 
 graphics = [
-  "ansys-tools-visualization-interface>=0.9.0,<0.13.0",
+  "ansys-tools-visualization-interface>=0.9.0,<0.14.0",
   "matplotlib>=3.0.0",                                  # for colormaps for pyvista
 ]
 
 all = [
-  "ansys-tools-visualization-interface>=0.9.0,<0.13.0",
+  "ansys-tools-visualization-interface>=0.9.0,<0.14.0",
   "ipywidgets",
   "jupyterlab>=3",
   "matplotlib>=3.0.0",                                  # for colormaps for pyvista
@@ -65,7 +65,7 @@ all = [
 tests = [
   "ansys-dpf-core[graphics]==0.13.6",
   "ansys-mapdl-reader==0.55.2",
-  "ansys-tools-visualization-interface==0.12.1",
+  "ansys-tools-visualization-interface==0.13.1",
   "autopep8==2.3.2",
   "matplotlib==3.10.9",
   "pandas==2.3.3",
@@ -88,7 +88,7 @@ doc = [
   "ansys-dpf-core[graphics]==0.13.6",
   "ansys-mapdl-reader==0.55.2",
   "ansys-sphinx-theme==1.7.2",
-  "ansys-tools-visualization-interface==0.12.1",
+  "ansys-tools-visualization-interface==0.13.1",
   "grpcio==1.80.0",
   "imageio-ffmpeg==0.6.0",
   "imageio==2.37.3",
