@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "flit_core.buildapi"
-requires = ["flit_core >=3.2,<3.11"]
+requires = ["flit_core >=3.11,<4"]
 
 [project]
 # Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
@@ -8,7 +8,6 @@ authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: MacOS",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX",
@@ -41,7 +40,8 @@ dependencies = [
   "vtk>=9,<10",
 ]
 description = "A Python client library for Ansys MAPDL."
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 name = "ansys-mapdl-core"
 readme = "README.md"
@@ -72,7 +72,7 @@ tests = [
   "pandas==2.3.3",
   "pyansys-tools-report==0.9.0",
   "pyfakefs==6.2.0",
-  "pyiges[full]==0.3.3",
+  "pyiges[full]==0.3.4",
   "pytest-cov==7.1.0",
   "pytest-profiling==1.8.1",
   "pytest-pyvista==0.3.3",
@@ -96,13 +96,13 @@ doc = [
   "jupyter==1.1.1",
   "jupyter_sphinx==0.5.3",
   "jupyterlab>=3.2.8",
-  "linuxdoc==20240924",
+  "linuxdoc==20260504",
   "matplotlib==3.10.9",
   "nbformat==5.10.4",
   "numpydoc==1.10.0",
   "pandas==2.3.3",
   "plotly==6.7.0",
-  "pyiges[full]==0.3.3",
+  "pyiges[full]==0.3.4",
   "pypandoc==1.17",
   "pytest-sphinx==0.7.1",
   "pythreejs==2.4.2",
@@ -124,7 +124,7 @@ doc = [
 
 [dependency-groups]
 
-tox = ["tox==4.53.0"]
+tox = ["tox==4.53.1"]
 
 [tool.flit.module]
 name = "ansys.mapdl.core"
@@ -272,13 +272,13 @@ checks = [
   "SA03", # "Description should be capitalized for See Also "
   # '"{reference_name}" reference',
   "SA04", # 'Missing description for See Also "{reference_name}" reference',
-  # "EX01", # "No examples section found",
+  # "EX01", # "No examples section found"
 ]
 
 override_SS05 = [ # override SS05 to allow docstrings starting with these words
   # '^Process ',
   # '^Assess ',
-  # '^Access ',
+  # '^Access '
 ]
 
 [tool.mypy]
