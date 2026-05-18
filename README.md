@@ -126,6 +126,28 @@ correct citation.  For example, the BibTex citation is:
   version      = {0.60.3},
   doi          = {10.5281/zenodo.4009466},
   url          = {https://doi.org/10.5281/zenodo.4009466}
+@software{alex_kaszynski_2021_5726008,
+  author       = {Alex Kaszynski and
+                  James Derrick and
+                  German and
+                  natter1 and
+                  FredAns and
+                  jleonatti and
+                  simonmarwitz and
+                  1081 and
+                  Daniel Correia and
+                  Doug Addy and
+                  JackGuyver and
+                  jazztekk and
+                  jkbgbr and
+                  spectereye},
+  title        = {pyansys/pymapdl: v0.60.3},
+  month        = nov,
+  year         = 2021,
+  publisher    = {Zenodo},
+  version      = {v0.60.3},
+  doi          = {10.5281/zenodo.5726008},
+  url          = {https://doi.org/10.5281/zenodo.5726008},
 }
 ```
 
