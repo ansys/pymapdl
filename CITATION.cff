@@ -57,7 +57,10 @@ authors:
     family-names: Fernandez
     alias: AlejandroFernandezLuces
     affiliation: Ansys Inc.
-  - alias: FredAns
+  - given-names: Frederic
+    family-names: Thevenon
+    alias: FredAns
+    affiliation: Ansys Inc.
     affiliation: Ansys Inc.
   - given-names: Sébastien
     family-names: Morais
