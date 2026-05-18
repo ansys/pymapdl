@@ -79,18 +79,31 @@ class Plain_Report:
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
         if self.kwargs.get("gpu", False) and _HAS_PYVISTA:
-
+            GPUInfo = None
             try:
                 from pyvista.report import GPUInfo
             except ImportError:
-                from pyvista.utilities.errors import (
-                    GPUInfo,  # deprecated in pyvista 0.40.0
-                )
+                try:
+                    from pyvista.utilities.errors import (
+                        GPUInfo,  # deprecated in pyvista 0.40.0
+                    )
+                except ImportError:
+                    # pyvista is installed but cannot be imported (e.g. VTK
+                    # wheels are not yet available for this Python version).
+                    pass
 
-            try:
-                self.kwargs["extra_meta"] = [(t[1], t[0]) for t in GPUInfo().get_info()]
-            except RuntimeError as e:  # pragma: no cover
-                self.kwargs["extra_meta"] = ("GPU Details", f"Error: {str(e)}")
+            if GPUInfo is not None:
+                try:
+                    self.kwargs["extra_meta"] = [
+                        (t[1], t[0]) for t in GPUInfo().get_info()
+                    ]
+                except RuntimeError as e:  # pragma: no cover
+                    self.kwargs["extra_meta"] = ("GPU Details", f"Error: {str(e)}")
+            else:
+                self.kwargs["extra_meta"] = (
+                    "GPU Details",
+                    "Not available (pyvista import error)",
+                )
         else:
             self.kwargs["extra_meta"] = ("GPU Details", "None")
 
