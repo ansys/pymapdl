@@ -43,7 +43,7 @@ jobs:
 
     # Label based on modified files
     - name: Label based on changed files
-      uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b #v6.0.1
+      uses: actions/labeler@f27b608878404679385c85cfa523b85ccb86e213 #v6.1.0
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
         sync-labels: true
@@ -136,7 +136,7 @@ jobs:
       pull-requests: write  # Needed to comment on pull requests with changelog info
     runs-on: ubuntu-latest
     steps:
-    - uses: ansys/actions/doc-changelog@73fa84c704bb6691f254cfe4d4b928c338b0d4da #v10.3.0
+    - uses: ansys/actions/doc-changelog@12ca08fd7f0caa52076cca15c5621482646f8560 #v10.3.1
       with:
         bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
         bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
