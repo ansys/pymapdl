@@ -20,19 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""``pymapdl help <COMMAND>`` sub-command implementation.
-
-RST-to-terminal rendering is delegated to :class:`rich_rst.RestructuredText`,
-which uses a ``rich.console.Console`` to produce ANSI-styled output.
-
-Sphinx roles (e.g. ``:ref:``, ``:class:``) that *docutils* cannot parse
-natively are stripped in a lightweight pre-processing step so they never
-produce noisy "System Message: Problematic Element" panels.
-
-A one-time monkey-patch is applied to fix a ``rich-rst`` bug (≤ 1.3.2) where
-a field list that is the *very first* element in a document causes an
-``IndexError`` because ``self.renderables`` is empty.
-"""
+"""``pymapdl help <COMMAND>`` sub-command implementation."""
 
 import inspect
 import re

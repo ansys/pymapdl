@@ -2248,12 +2248,14 @@ def _fmt(rst: str) -> str:
 
 
 @requires("click")
+@requires("rich-rst")
 def test_inline_sub():
     """:sub:`M` content is visible (rich-rst renders subscript as plain text)."""
     assert "M" in _fmt("Text :sub:`M`")
 
 
 @requires("click")
+@requires("rich-rst")
 def test_inline_sup():
     """:sup:`7` content is visible (rich-rst uses unicode superscript ⁷)."""
     result = _fmt("Text :sup:`7`")
@@ -2262,6 +2264,7 @@ def test_inline_sup():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_inline_generic_role():
     """:ref:`csys` is rendered as csys (Sphinx role stripped)."""
     result = _fmt("Text :ref:`csys`")
@@ -2270,6 +2273,7 @@ def test_inline_generic_role():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_inline_explicit_title_role():
     """:ref:`Solution control options <solconop>` renders the display text."""
     result = _fmt(":ref:`Solution control options <solconop>`")
@@ -2278,6 +2282,7 @@ def test_inline_explicit_title_role():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_inline_rst_hyperlink():
     """`K <https://example.com>`_ renders display text and embeds the URL."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
@@ -2288,6 +2293,7 @@ def test_inline_rst_hyperlink():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_inline_double_backtick():
     """``code`` is rendered with the content visible and some ANSI styling."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
@@ -2299,12 +2305,14 @@ def test_inline_double_backtick():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_inline_bold():
     """**bold text** renders with the text visible."""
     assert "bold text" in _fmt("**bold text**")
 
 
 @requires("click")
+@requires("rich-rst")
 def test_inline_multiple_on_same_line():
     """Multiple inline constructs on one line are all applied."""
     result = _fmt("Use :ref:`csys` or :sub:`n` or ``code``")
@@ -2319,12 +2327,14 @@ def test_inline_multiple_on_same_line():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_inline_bullet():
     """'* item' is converted to '• item'."""
     assert "• foo" in _fmt("* foo")
 
 
 @requires("click")
+@requires("rich-rst")
 def test_inline_plain_line_unchanged():
     """A line with no RST markup passes through as plain text."""
     plain = "Just a regular line with no markup."
@@ -2337,6 +2347,7 @@ def test_inline_plain_line_unchanged():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_enumerated_list():
     """Enumerated list items contain their numbers and text."""
     result = _fmt("1. One\n2. Two\n3. Three\n")
@@ -2347,6 +2358,7 @@ def test_format_rst_enumerated_list():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_nested_bullet_list():
     """Nested bullet lists render outer item before inner item."""
     rst = "* Outer\n\n  * Inner\n"
@@ -2360,6 +2372,7 @@ def test_format_rst_nested_bullet_list():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_definition_list():
     """Definition list terms are rendered in bold and definitions are indented."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
@@ -2372,6 +2385,7 @@ def test_format_rst_definition_list():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_field_list():
     """Field list names (:fieldname:) are rendered in bold."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
@@ -2384,6 +2398,7 @@ def test_format_rst_field_list():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_literal_block():
     """Code blocks (:: or code-block) are included in the output."""
     rst = "Example::\n\n    import ansys\n    ansys.do()\n"
@@ -2393,6 +2408,7 @@ def test_format_rst_literal_block():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_table():
     """Simple grid tables are rendered (via rich) without raw RST syntax."""
     rst = """\
@@ -2414,6 +2430,7 @@ def test_format_rst_table():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_transition():
     """A transition (----) produces a separator line, not raw dashes."""
     rst = "Before.\n\n----\n\nAfter.\n"
@@ -2424,6 +2441,7 @@ def test_format_rst_transition():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_tip_directive():
     """.. tip:: renders with 'Tip' visible in the output."""
     result = _fmt(".. tip::\n\n   Use this shortcut.")
@@ -2431,6 +2449,7 @@ def test_format_rst_tip_directive():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_danger_directive():
     """.. danger:: renders with 'DANGER' visible in the output."""
     result = _fmt(".. danger::\n\n   High risk operation.")
@@ -2443,6 +2462,7 @@ def test_format_rst_danger_directive():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_section_header_present_without_underline():
     """Section header is present in output; the underline row is removed."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
@@ -2455,6 +2475,7 @@ def test_format_rst_section_header_present_without_underline():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_anchor_removed():
     """RST label anchors (.. _name:) do not appear in the output."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
@@ -2467,6 +2488,7 @@ def test_format_rst_anchor_removed():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_note_directive():
     """.. note:: renders with 'Note' visible in the output."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
@@ -2477,6 +2499,7 @@ def test_format_rst_note_directive():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_warning_directive():
     """.. warning:: renders with 'Warning' visible in the output."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
@@ -2487,6 +2510,7 @@ def test_format_rst_warning_directive():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_rubric():
     """.. rubric:: Title renders the title text (bold markers stripped)."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
@@ -2499,6 +2523,7 @@ def test_format_rst_rubric():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_mechanical_apdl_command_line():
     """'Mechanical APDL Command:' label is bolded and the link is an OSC 8 hyperlink."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
@@ -2514,6 +2539,7 @@ def test_format_rst_mechanical_apdl_command_line():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_inline_transforms_applied_to_regular_lines():
     """Inline transforms (e.g. ``code``) are applied to regular content lines."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
@@ -2526,6 +2552,7 @@ def test_format_rst_inline_transforms_applied_to_regular_lines():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_real_docstring_k():
     """_format_rst_for_terminal on Mapdl.k contains expected sections."""
     import inspect
@@ -2543,6 +2570,7 @@ def test_format_rst_real_docstring_k():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_real_docstring_asel_note():
     """_format_rst_for_terminal on Mapdl.asel renders a note panel."""
     import inspect
@@ -2618,6 +2646,7 @@ def test_echo_doc_tty_long_content_uses_pager():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_multiline_link_collapsed():
     """RST links whose URL wraps to the next line become OSC 8 hyperlinks."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
@@ -2637,6 +2666,7 @@ def test_format_rst_multiline_link_collapsed():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_hint_before_first_section():
     """A browser hint is emitted before the first section when a URL is present."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
@@ -2659,6 +2689,7 @@ def test_format_rst_hint_before_first_section():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_format_rst_no_hint_without_url():
     """No hint is emitted when there is no hyperlink in the docstring."""
     from ansys.mapdl.core.cli.help import _format_rst_for_terminal
