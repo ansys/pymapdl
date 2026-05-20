@@ -2138,6 +2138,7 @@ def test_build_command_map_known_commands():
 
 
 @requires("click")
+@requires("rich-rst")
 def test_help_prep7(run_cli):
     """pymapdl help /PREP7 prints a non-empty docstring."""
     output = run_cli("help /PREP7")
@@ -2145,6 +2146,7 @@ def test_help_prep7(run_cli):
 
 
 @requires("click")
+@requires("rich-rst")
 def test_help_prep7_with_slash(run_cli):
     """pymapdl help /PREP7 and pymapdl help PREP7 are NOT equivalent: prefix matters."""
     from click.testing import CliRunner
@@ -2161,6 +2163,7 @@ def test_help_prep7_with_slash(run_cli):
 
 
 @requires("click")
+@requires("rich-rst")
 def test_help_abbr_with_asterisk(run_cli):
     """pymapdl help *ABBR returns the *ABBR docstring (not bare ABBR)."""
     out_star = run_cli("help *ABBR")
@@ -2168,6 +2171,7 @@ def test_help_abbr_with_asterisk(run_cli):
 
 
 @requires("click")
+@requires("rich-rst")
 def test_help_star_abbr_differs_from_bare(run_cli):
     """*ABBR and ABBR (no prefix) are distinct: bare ABBR should not be found."""
     from click.testing import CliRunner
@@ -2180,6 +2184,7 @@ def test_help_star_abbr_differs_from_bare(run_cli):
 
 
 @requires("click")
+@requires("rich-rst")
 def test_help_k_command(run_cli):
     """pymapdl help K prints a non-empty docstring."""
     output = run_cli("help K")
@@ -2187,6 +2192,7 @@ def test_help_k_command(run_cli):
 
 
 @requires("click")
+@requires("rich-rst")
 def test_help_unknown_command_exits_with_error(run_cli):
     """pymapdl help UNKNOWNCMD999 exits with code 1 and prints an error."""
     from click.testing import CliRunner
@@ -2204,6 +2210,7 @@ def test_help_unknown_command_exits_with_error(run_cli):
 
 
 @requires("click")
+@requires("rich-rst")
 def test_help_normalise_backslash_star(run_cli):
     r"""pymapdl help \*ABBR is treated the same as *ABBR."""
     out_star = run_cli("help *ABBR")
