@@ -19,7 +19,7 @@ repos:
       args: [ "-x"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: a9d9ff50af0432cbb950856daf08082fa51cbfa2  # frozen: v2.0.0
+  rev: d2823d321df3af8f878f7ee3414dc94d037145b9  # frozen: v2.1.0
   hooks:
     - id: mypy
       args: [ --follow-imports=silent, --config-file=pyproject.toml]
@@ -57,7 +57,7 @@ repos:
     additional_dependencies: [black==25.12.0]
 
 - repo: https://github.com/psf/black-pre-commit-mirror
-  rev: fa505ab9c3e0fedafe1709fd7ac2b5f8996c670d  # frozen: 26.3.1
+  rev: 30528d9894a7da387a9f8e236b65d90d0d6b54b5  # frozen: 26.5.0
   hooks:
   - id: black
     args:
@@ -109,7 +109,7 @@ repos:
       args: [--option, "reorder_arrays=true", --option, "reorder_keys=true"]
 
 - repo: https://github.com/zizmorcore/zizmor-pre-commit
-  rev: a4727cbbcd26d7098e96b9cb738169b59711ae51  # frozen: v1.24.1
+  rev: 9257c6050c0261b8c57e712f632dc4a8010109a9  # frozen: v1.25.2
   hooks:
     - id: zizmor
       args: ["--pedantic"]
