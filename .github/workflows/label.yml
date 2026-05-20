@@ -42,6 +42,7 @@ jobs:
     env:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }}
     steps:
 
     # Label based on modified files
