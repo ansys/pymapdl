@@ -58,12 +58,12 @@ jobs:
         startsWith(github.event.pull_request.title, 'bug') ||
         startsWith(github.event.pull_request.title, 'patch')
       run: |
-        gh pr edit "${PR_NUMBER}" --add-label "bug"
+        gh pr edit "${PR_NUMBER}" --repo "${REPO}" --add-label "bug"
 
     - if: |
         startsWith(github.event.pull_request.title, 'feat')
       run: |
-        gh pr edit "${PR_NUMBER}" --add-label "new feature"
+        gh pr edit "${PR_NUMBER}" --repo "${REPO}" --add-label "new feature"
 
     - if: |
         startsWith(github.event.pull_request.title, 'style') ||
@@ -72,27 +72,27 @@ jobs:
         startsWith(github.event.pull_request.title, 'test') ||
         startsWith(github.event.pull_request.title, 'chore')
       run: |
-        gh pr edit "${PR_NUMBER}" --add-label "enhancement"
+        gh pr edit "${PR_NUMBER}" --repo "${REPO}" --add-label "enhancement"
 
     - if: |
         startsWith(github.event.pull_request.title, 'build') ||
         startsWith(github.event.pull_request.title, 'revert') ||
         startsWith(github.event.pull_request.title, 'maint')
       run: |
-        gh pr edit "${PR_NUMBER}" --add-label "maintenance"
+        gh pr edit "${PR_NUMBER}" --repo "${REPO}" --add-label "maintenance"
 
     - if: |
         startsWith(github.event.pull_request.title, 'doc') ||
         startsWith(github.event.pull_request.title, 'docs')
       run: |
-        gh pr edit "${PR_NUMBER}" --add-label "documentation"
+        gh pr edit "${PR_NUMBER}" --repo "${REPO}" --add-label "documentation"
 
     - if: |
         startsWith(github.event.pull_request.title, 'docker') ||
         startsWith(github.event.pull_request.title, 'no-ci') ||
         startsWith(github.event.pull_request.title, 'ci')
       run: |
-        gh pr edit "${PR_NUMBER}" --add-label "CI/CD"
+        gh pr edit "${PR_NUMBER}" --repo "${REPO}" --add-label "CI/CD"
 
   commenter:
     name: Comment to suggest adding labels if none have been added
