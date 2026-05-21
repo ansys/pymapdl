@@ -38,7 +38,7 @@ import ansys.mapdl.core.cli.helpers as helpers_module
 core_module = helpers_module
 from ansys.mapdl.core.cli.helpers import get_ansys_process_from_port
 from ansys.mapdl.core.plotting import GraphicsBackend
-from conftest import VALID_PORTS, requires
+from conftest import TESTING_MINIMAL, VALID_PORTS, requires
 
 if VALID_PORTS:
     PORT1 = max(VALID_PORTS) + 1
@@ -2704,3 +2704,23 @@ def test_format_rst_no_hint_without_url():
     rst = "Short summary.\n\nParameters\n----------\nx : str\n    Desc.\n"
     out = _strip_ansi(_format_rst_for_terminal(rst))
     assert "visit the link above" not in out
+
+
+@pytest.mark.skipif(
+    not TESTING_MINIMAL,
+    reason="Run only with minimal package set (env var TESTING_MINIMAL=YES/TRUE)",
+)
+def test_pymapdl_help_shows_import_error_for_rich_rst():
+    """When running with minimal packages, `pymapdl help` should error
+    because the `rich-rst` package is not available.
+    """
+    from click.testing import CliRunner
+
+    from ansys.mapdl.core.cli import main
+
+    runner = CliRunner()
+    result = runner.invoke(main, ["help", "K"])  # use a simple command name
+
+    # The CLI should exit with an error and mention rich-rst as missing.
+    assert result.exit_code != 0
+    assert "rich-rst" in result.output.lower()
