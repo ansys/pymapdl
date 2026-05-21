@@ -459,7 +459,7 @@ To convert an existing APDL script to Python instead of executing it, see
 Get help
 ========
 
-The CLI provides a generic help command that lists available MAPDL keywords and
+The command-line tool provides a generic help command that lists available MAPDL keywords and
 functions. The output can be filtered using standard shell tools. For example,
 filter for GET-related entries containing NODE and LOC with grep:
 
