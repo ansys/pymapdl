@@ -332,6 +332,18 @@ def help_cmd(command: str) -> None:
     """
     from ansys.mapdl.core import Mapdl
 
+    try:
+        import rich_rst  # type: ignore # noqa: F401
+
+    except ModuleNotFoundError:
+        click.echo(
+            click.style("ERROR:", fg="red")
+            + " The 'rich-rst' package is required to use the 'help' command.\n"
+            "Install it via 'pip install rich-rst' and try again.",
+            err=True,
+        )
+        sys.exit(1)
+
     key = _normalise_user_input(command)
     cmd_map = _build_command_map()
 
