@@ -525,6 +525,8 @@ if has_dependency("pytest-pyvista"):
         verify_image_cache.var_error_value = 1000.0
         verify_image_cache.var_warning_value = 1000.0
 
+        verify_image_cache.allow_useless_fixture = True
+
         return verify_image_cache
 
 

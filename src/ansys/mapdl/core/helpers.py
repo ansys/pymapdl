@@ -30,9 +30,8 @@ from warnings import warn
 from ansys.mapdl.core import LOG
 
 
-def is_installed(package_name: str) -> bool:
+def _is_installed(package_name: str) -> bool:
     """Check if a package is installed"""
-    package_name = package_name.replace("-", ".")
     try:
         package_spec = importlib.util.find_spec(package_name)
         if package_spec is None:  # pragma: no cover
@@ -42,6 +41,18 @@ def is_installed(package_name: str) -> bool:
         LOG.debug(f"The module '{package_name}' is not installed.")
         return False
     return True
+
+
+def is_installed(package_name: str) -> bool:
+    """Check if a package is installed, and log the result."""
+    if _is_installed(package_name):
+        return True
+    elif _is_installed(package_name.replace("-", "_")):
+        return True
+    elif _is_installed(package_name.replace("-", ".")):
+        return True
+    else:
+        return False
 
 
 def get_python_version():  # type: ignore[misc]

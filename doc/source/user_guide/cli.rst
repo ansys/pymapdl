@@ -8,6 +8,10 @@ PyMAPDL command line interface
 For your convenience, PyMAPDL package includes a command line interface
 which allows you to launch, stop, list, and execute commands on MAPDL instances.
 
+The list of available commands can be obtained by typing ``pymapdl --help`` in your
+terminal after activating the virtual environment.
+For more information about the installation, see :ref:`installation`.
+
 
 Launch MAPDL instances
 ======================
@@ -448,6 +452,58 @@ then stop the instance:
 
 To convert an existing APDL script to Python instead of executing it, see
 :ref:`ref_cli_converter`.
+
+
+.. _ref_cli_help:
+
+Get help
+========
+
+The command-line tool provides a generic help command that lists available MAPDL keywords and
+functions. The output can be filtered using standard shell tools. For example,
+filter for GET-related entries containing NODE and LOC with grep:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl help "*GET" | Select-String -Context 3,3 "NODE" | Select-String -Context 3,3 "LOC"
+                ┣━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+                ┃ Item1 ┃ IT1NUM   ┃ Description                                                                                       ┃
+                ┡━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+                │ LOC   │ X, Y, Z  │ X, Y, Z location in the active coordinate system. Alternative get functions: NX( N ), NY( N ),    │
+                │       │          │ NZ( N ). Inverse get function. NODE( x,y,z ) returns the number of the selected node nearest the  │
+                │       │          │ x,y,z location (in the active coordinate system, lowest number for coincident nodes).             │
+                ├───────┼──────────┼───────────────────────────────────────────────────────────────────────────────────────────────────┤
+
+
+        .. note:: The `-Context` argument controls the number of lines to print before and after the match (`-Context <n>`)
+            which can be helpful to understand the context of the matched keyword.
+            You can also control them separately with `-Context <before>,<after>`.
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl help "*GET" | grep -C 3 NODE | grep -C 3 LOC
+                ┣━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+                ┃ Item1 ┃ IT1NUM   ┃ Description                                                                                       ┃
+                ┡━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+                │ LOC   │ X, Y, Z  │ X, Y, Z location in the active coordinate system. Alternative get functions: NX( N ), NY( N ),    │
+                │       │          │ NZ( N ). Inverse get function. NODE( x,y,z ) returns the number of the selected node nearest the  │
+                │       │          │ x,y,z location (in the active coordinate system, lowest number for coincident nodes).             │
+                ├───────┼──────────┼───────────────────────────────────────────────────────────────────────────────────────────────────┤
+
+
+        .. note:: The `-C` / `--context` option of grep shows lines before and after the matched line,
+            which can be helpful to understand the context of the matched keyword.
+
+This shows a matched table excerpt; adjust the grep pattern to match the keywords you need.
 
 
 .. _ref_cli_converter:
