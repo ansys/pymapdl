@@ -8,8 +8,11 @@ MAPDL plugins extend the solver with additional commands at runtime. The
 ``mapdl.plugins``, lets you load, inspect, and unload plugins from a
 running MAPDL session without leaving Python.
 
-.. note::
+.. warning::
    Plugin support requires MAPDL 25.2 or later.
+
+.. note::
+   To create your own plugins, visit MAPDL documentation or contact ANSYS support.
 
 Accessing the plugin manager
 -----------------------------
@@ -56,8 +59,8 @@ all currently loaded plugins:
 .. note::
    Plugin tracking is session-scoped. :meth:`list()
    <ansys.mapdl.core.plugin.ansPlugin.list>` first tries ``*PLUG,LIST`` on
-   the MAPDL server. When the server returns no output — for example, after
-   reconnecting to an already-running MAPDL instance — it falls back to the
+   the MAPDL server. When the server returns no output, for example, after
+   reconnecting to an already-running MAPDL instance, it falls back to the
    internal state that was built up during the current Python session.
 
 Inspecting plugin commands
