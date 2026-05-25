@@ -285,10 +285,17 @@ class ansPlugin:
             raise PluginUnloadError(f"Failed to unload plugin '{plugin_name}'.")
 
         self._log.info(f"Plugin '{plugin_name}' unloaded successfully.")
-        self._plugins.pop(plugin_name, None)
 
-        commands = self._parse_commands(response)
-        self._deleter_commands(commands, plugin_name=plugin_name)
+        # Use the internally tracked command list for cleanup — the unload
+        # response uses a different pattern ("command [...] removed") than the
+        # load response ("New command [...] registered"), so _parse_commands
+        # would not find anything here.
+        if plugin_name in self._plugins:
+            tracked = list(self._plugins[plugin_name].commands)
+            self._plugins.pop(plugin_name, None)
+            self._deleter_commands(tracked, plugin_name=plugin_name)
+        else:
+            self._plugins.pop(plugin_name, None)
 
         return response
 
@@ -325,10 +332,10 @@ class ansPlugin:
             line = line.strip()
             if not line:
                 continue
-            if (
-                re.match(r"^[-=*]+$", line)
-                or "plugin" in line.lower()
-                or "loaded" in line.lower()
+            # Skip separator lines and MAPDL informational lines
+            # (e.g. "*PLUG command : Open The lib..." or " : continuation...")
+            if re.match(r"^[-=*]+$", line) or re.match(
+                r"(\*PLUG\s+command|\s*:|\s*>>)", line, re.IGNORECASE
             ):
                 continue
             match = re.match(r"^(\S+)", line)

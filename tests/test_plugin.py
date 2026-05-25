@@ -64,9 +64,8 @@ class TestPluginIntegration:
         response = plugins.load(TEST_PLUGIN)
         assert response is not None and response != ""
 
-    @pytest.mark.xfail(reason="*PLUG,LIST output not yet captured by PyMAPDL")
     def test_list_after_load(self, plugins):
-        """Loaded plugin appears in list()."""
+        """Loaded plugin appears in list() (via internal state fallback)."""
         plugins.load(TEST_PLUGIN)
         try:
             assert TEST_PLUGIN in plugins.list()
@@ -75,20 +74,19 @@ class TestPluginIntegration:
 
     def test_full_cycle(self, plugins):
         """Full cycle: load → commands injected → list → unload → commands removed."""
-        response = plugins.load(TEST_PLUGIN)
+        plugins.load(TEST_PLUGIN)
 
-        # Commands parsed from load response are injected on the MAPDL instance
-        commands = plugins._parse_commands(response)
-        assert isinstance(commands, list)
-        assert len(commands) > 0, "At least one command should be injected on load"
-        assert all(hasattr(plugins._mapdl, cmd) for cmd in commands)
+        # Injected command attribute names are tracked internally
+        injected = plugins.commands(TEST_PLUGIN)
+        assert len(injected) > 0, "At least one command should be injected on load"
+        assert all(hasattr(plugins._mapdl, cmd) for cmd in injected)
 
         # Plugin appears in list() via internal tracking
         assert TEST_PLUGIN in plugins.list()
 
-        # After unload, injected commands are removed and plugin no longer listed
+        # After unload, injected attributes are removed and plugin no longer listed
         plugins.unload(TEST_PLUGIN)
-        assert all(not hasattr(plugins._mapdl, cmd) for cmd in commands)
+        assert all(not hasattr(plugins._mapdl, cmd) for cmd in injected)
         assert TEST_PLUGIN not in plugins.list()
 
     def test_unload_already_unloaded(self, plugins):
@@ -232,10 +230,10 @@ def test_list_prefers_server_response(mock_plugins, mock_mapdl):
     from ansys.mapdl.core.plugin import _PluginInfo
 
     mock_plugins._plugins["PluginDPF"] = _PluginInfo(feature="")
-    # Server returns a parseable line that differs from internal state
-    mock_mapdl.run.return_value = "ServerPlugin   some description"
+    # A response that looks like a real *PLUG,LIST table line (no filtered keywords)
+    mock_mapdl.run.return_value = "DPFServer   active"
     result = mock_plugins.list()
-    assert "ServerPlugin" in result
+    assert "DPFServer" in result
     assert "PluginDPF" not in result
 
 
