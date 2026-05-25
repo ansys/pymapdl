@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Contains the ansPlugin class."""
+
 import re
 from warnings import warn
 import weakref
