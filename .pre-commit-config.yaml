@@ -57,7 +57,7 @@ repos:
     additional_dependencies: [black==25.12.0]
 
 - repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 30528d9894a7da387a9f8e236b65d90d0d6b54b5  # frozen: 26.5.0
+  rev: 4160603246a6b365d4a2af661c6d71b0a0f50478  # frozen: 26.5.1
   hooks:
   - id: black
     args:
