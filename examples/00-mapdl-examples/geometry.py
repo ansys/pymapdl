@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -36,6 +36,7 @@ This example also demonstrates some of the more advanced features of
 PyMAPDL including direct mesh access through VTK.
 
 """
+
 # sphinx_gallery_thumbnail_number = 3
 
 import numpy as np

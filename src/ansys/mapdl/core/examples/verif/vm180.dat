@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -65,7 +65,7 @@ DK,3,UY,,,1          ! IN GLOBAL CYLINDRICAL COORDINATE SYSTEM
 FK,2,FY,100
 FK,4,FY,-100
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 /POST1

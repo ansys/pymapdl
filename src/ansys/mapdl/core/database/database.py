@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -19,8 +19,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """Contains the MapdlDb classes, allowing the access to MAPDL DB from Python."""
+
 from enum import Enum
 from functools import wraps
 import os
@@ -30,7 +30,7 @@ from warnings import warn
 import weakref
 
 from ansys.api.mapdl.v0 import mapdl_db_pb2_grpc
-from ansys.tools.versioning import server_meets_version
+from ansys.tools.common.versioning import server_meets_version
 import grpc
 
 from ansys.mapdl.core.errors import MapdlConnectionError
@@ -116,7 +116,6 @@ class MapdlDb:
     >>> sel, coord = nodes.coord(22)
     >>> coord
     (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
-
     """
 
     def __init__(self, mapdl):
@@ -152,7 +151,6 @@ class MapdlDb:
         -------
         int
             Port of the database server.
-
         """
         # database server must be run from the "BEGIN" level
         self._mapdl._log.debug("Starting MAPDL server")
@@ -250,11 +248,13 @@ class MapdlDb:
 
         # permit overriding db_port via env var for CI
         if not port:
+            env_port = os.environ.get("PYMAPDL_DB_PORT")
             if (
                 "PYMAPDL_DB_PORT" in os.environ
-                and os.environ.get("PYMAPDL_DB_PORT").isdigit()
+                and env_port is not None
+                and env_port.isdigit()
             ):
-                db_port_str = int(os.environ.get("PYMAPDL_DB_PORT"))
+                db_port_str = int(env_port)
                 self._mapdl._log.debug(
                     f"Setting DB port from 'PYMAPDL_DB_PORT' env var: {db_port_str}"
                 )
@@ -321,7 +321,7 @@ class MapdlDb:
 
     def _status(self):
         """
-        Return the status of the MADPL DB Server.
+        Return the status of the MAPDL DB Server.
 
         Examples
         --------
@@ -449,7 +449,6 @@ class MapdlDb:
                [0., 0., 0.],
                [0., 0., 0.],
                [0., 0., 0.]])
-
         """
         if self._nodes is None:
             from .nodes import DbNodes  # here to avoid circular import
@@ -494,7 +493,6 @@ class MapdlDb:
 
         >>> elem_info.elmdat
         [1, 1, 1, 1, 0, 0, 14, 0, 0, 0]
-
         """
         if self._elems is None:
             from .elems import DbElems  # here to avoid circular import

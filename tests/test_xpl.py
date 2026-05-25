@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,9 +21,10 @@
 # SOFTWARE.
 
 """Test xpl functionality"""
+
 import re
 
-from ansys.tools.versioning.utils import SemanticVersion
+from ansys.tools.common.versioning import SemanticVersion
 import numpy as np
 import pytest
 

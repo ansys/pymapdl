@@ -11,11 +11,11 @@ with Ansys Twin Builder.
 The general data structure for the ROM building is shown in the following figure.
 
 .. figure:: images/static_ROM_file_structure.png
-    
+
     **Organization of files and directories for static ROM creation.**
 
 Here are the specific files outputted by the example::
-    
+
     ansys_pymadl_Static_ROM
     │
     ├───displacement
@@ -93,9 +93,9 @@ file.
 Export ROM data for a specific variation
 ----------------------------------------
 The :func:`export_static_ROM_variation` function exports ROM snapshot data for a specific
-parametric variation. The function exports a snapshot for ``displacement`` and for ``stress`` to 
+parametric variation. The function exports a snapshot for ``displacement`` and for ``stress`` to
 correspondingly named folders and records the snapshot name and parameter data to the ``doe.csv``
-file in that folder. 
+file in that folder.
 
 The results are sorted by the scoping IDs to ensure consistent ordering of results and points.
 
@@ -174,7 +174,7 @@ Script assumptions and modification ideas
 
 Local execution
 ---------------
-The scripts assume that both the MAPDL solving and DPF export are performed locally on the same 
+The scripts assume that both the MAPDL solving and DPF export are performed locally on the same
 machine as the Python script execution.
 
 For potential modification options, see :ref:`ref_dpf_basic_example`.
@@ -226,7 +226,7 @@ Here is an example for displacement:
     "unitDimension": {"length": 1.0}
 
 Here is an example for stress:
-    
+
 .. code-block:: python
 
     "unitDimension": {"mass": 1.0, "length": -1.0, "time": -2.0}

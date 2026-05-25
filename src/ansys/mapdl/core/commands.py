@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -46,7 +46,7 @@ from ._commands import (
     misc,
     post1,
     post26,
-    preproc,
+    prep7,
     session,
     solution,
 )
@@ -169,7 +169,6 @@ str
     obtain a lower precision than using :class:`Mesh <ansys.mapdl.core.mesh_grpc.MeshGrpc>` methods.
     |bl|
     For more information visit :ref:`user_guide_postprocessing`.
-
 """
 
 XSEL_DOCSTRING_INJECTION: str = r"""
@@ -180,7 +179,6 @@ np.ndarray
     Numpy array with the ids of the selected entities.
 
     For more information visit :ref:`user_guide_postprocessing`.
-
 """
 
 
@@ -325,32 +323,34 @@ def check_valid_output(func: Callable[..., Any]) -> Callable[..., Any]:
     return func_wrapper
 
 
-class PreprocessorCommands(
-    preproc.database.Database,
-    preproc.explicit_dynamics.ExplicitDynamics,
-    preproc.lines.Lines,
-    preproc.areas.Areas,
-    preproc.nodes.Nodes,
-    preproc.keypoints.KeyPoints,
-    preproc.artificially_matched_layers.ArtificiallyMatchedLayers,
-    preproc.booleans.Booleans,
-    preproc.constraint_equations.ConstraintEquations,
-    preproc.coupled_dof.CoupledDOF,
-    preproc.real_constants.RealConstants,
-    preproc.digitizing.Digitizing,
-    preproc.element_type.ElementType,
-    preproc.elements.Elements,
-    preproc.hard_points.HardPoints,
-    preproc.material_data_tables.MaterialDataTables,
-    preproc.meshing.Meshing,
-    preproc.morphing.Morphing,
-    preproc.materials.Materials,
-    preproc.primitives.Primitives,
-    preproc.sections.Sections,
-    preproc.special_purpose.SpecialPurpose,
-    preproc.status.Status,
-    preproc.superelements.Superelements,
-    preproc.volumes.Volumes,
+class Prep7Commands(
+    prep7._status.Status,
+    prep7.areas.Areas,
+    prep7.artificially_matched_layers.ArtificiallyMatchedLayers,
+    prep7.booleans.Booleans,
+    prep7.constraint_equations_.ConstraintEquations,
+    prep7.constraint_equations.ConstraintEquations,
+    prep7.coupled_dof.CoupledDof,
+    prep7.cross_sections.CrossSections,
+    prep7.data_tables.DataTables,
+    prep7.database.Database,
+    prep7.element_type.ElementType,
+    prep7.elements.Elements,
+    prep7.explicit_dynamics.ExplicitDynamics,
+    prep7.hard_points.HardPoints,
+    prep7.keypoints.Keypoints,
+    prep7.lines.Lines,
+    prep7.materials.Materials,
+    prep7.meshing.Meshing,
+    prep7.morphing.Morphing,
+    prep7.nodes.Nodes,
+    prep7.piping.Piping,
+    prep7.primitives.Primitives,
+    prep7.real_constants.RealConstants,
+    prep7.special_purpose.SpecialPurpose,
+    prep7.status.Status,
+    prep7.superelements.Superelements,
+    prep7.volumes.Volumes,
 ):
     pass
 
@@ -469,6 +469,11 @@ class SessionCommands(
 
 
 class SolutionCommands(
+    solution._gap_conditions.GapConditions,
+    solution._nonlinear_options.NonlinearOptions,
+    solution._status.Status,
+    solution.additive_manufacturing.AdditiveManufacturing,
+    solution.analysis_2d_to_3d.Analysis2DTo3D,
     solution.analysis_options.AnalysisOptions,
     solution.birth_and_death.BirthAndDeath,
     solution.dynamic_options.DynamicOptions,
@@ -476,19 +481,12 @@ class SolutionCommands(
     solution.fe_constraints.FeConstraints,
     solution.fe_forces.FeForces,
     solution.fe_surface_loads.FeSurfaceLoads,
-    solution.gap_conditions.GapConditions,
     solution.inertia.Inertia,
     solution.load_step_operations.LoadStepOperations,
     solution.load_step_options.LoadStepOptions,
-    solution.master_dof.MasterDOF,
-    solution.miscellaneous_loads.MiscellaneousLoads,
-    solution.multi_field_solver_convergence_controls.MultiFieldConvergenceControls,
-    solution.multi_field_solver_definition_commands.MultiFieldSolverDefinitionCommands,
-    solution.multi_field_solver_global_controls.MultiFieldSolverGlobalControls,
-    solution.multi_field_solver_interface_mapping.MultiFieldSolverInterfaceMapping,
-    solution.multi_field_solver_load_transfer.MultiFieldSolverLoadTransfer,
-    solution.multi_field_solver_time_controls.MultiFieldSolverTimeControls,
-    solution.nonlinear_options.NonLinearOptions,
+    solution.master_dof.MasterDof,
+    solution.misc_loads.MiscLoads,
+    solution.nonlinear_options.NonlinearOptions,
     solution.ocean.Ocean,
     solution.radiosity.Radiosity,
     solution.rezoning.Rezoning,
@@ -496,9 +494,8 @@ class SolutionCommands(
     solution.solid_constraints.SolidConstraints,
     solution.solid_forces.SolidForces,
     solution.solid_surface_loads.SolidSurfaceLoads,
-    solution.solution_status.SolutionStatus,
     solution.spectrum_options.SpectrumOptions,
-    solution.twod_to_3d_analysis.TwoDTo3DAnalysis,
+    solution.status.Status,
 ):
     pass
 
@@ -519,7 +516,7 @@ class Commands(
     MiscCommands,
     Post1Commands,
     Post26Commands,
-    PreprocessorCommands,
+    Prep7Commands,
     SessionCommands,
     SolutionCommands,
     conn.Conn,
@@ -539,7 +536,6 @@ class CommandOutput(str):
 
     * :attr:`cmd() <ansys.mapdl.core.commands.CommandOutput.cmd>`
     * :attr:`command() <ansys.mapdl.core.commands.CommandOutput.command>`
-
     """
 
     ## References:
@@ -569,7 +565,7 @@ class CommandOutput(str):
         return self._cmd
 
     @command.setter
-    def command(self):
+    def command(self, value):
         """Not allowed to change the value of ``command``."""
         pass
 
@@ -588,7 +584,6 @@ class CommandListingOutput(CommandOutput):
     * :func:`to_list() <ansys.mapdl.core.commands.CommandListingOutput.to_list>`
     * :func:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>`
     * :func:`to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput.to_dataframe>`
-
     """
 
     _magicwords: list[str] | None
@@ -727,7 +722,6 @@ class CommandListingOutput(CommandOutput):
         Returns
         -------
         List of strings
-
         """
         if self._columns_names:
             return self._columns_names
@@ -746,7 +740,6 @@ class CommandListingOutput(CommandOutput):
         -------
         numpy.ndarray
             Parsed tabular data from command output.
-
         """
         parsed_lines: list[list[str]] = []
         for line in self.splitlines():
@@ -842,7 +835,6 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
 
     * :func:`to_list() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput.to_list>`
     * :func:`to_dataframe() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput.to_dataframe>`
-
     """
 
     def bc_colnames(self) -> Optional[List[str]]:
@@ -903,7 +895,6 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
         Returns
         -------
         List of strings
-
         """
         if self._columns_names:
             return self._columns_names
@@ -973,7 +964,6 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
         * ``'LABEL'``: str
         * ``'REAL'``: float
         * ``'IMAG'``: float
-
         """
         df = super().to_dataframe(data=self.to_list())
 

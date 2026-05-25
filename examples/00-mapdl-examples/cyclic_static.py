@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -31,6 +31,7 @@ system at 1000 RPM.
 
 
 """
+
 from ansys.mapdl.reader import examples
 
 from ansys.mapdl.core import launch_mapdl

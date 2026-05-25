@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,7 @@ D,1,ALL
 F,5,FY,-4000
 DSYM,SYMM,Z
 FINISH
-/SOLU   
+/SOLU
 NLGEOM,ON               ! ACTIVATE LARGE DEFLECTIONS
 CNVTOL,F,,1E-4
 CNVTOL,M,,1E-4

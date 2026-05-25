@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -24,6 +24,7 @@
 
 Used when launching Mapdl via pexpect on Linux when <= 17.0
 """
+
 import os
 import re
 import time
@@ -291,7 +292,6 @@ class MapdlConsole(MapdlBase):
         Access the geometry as a VTK object
 
         >>> mapdl.mesh.grid
-
         """
         return self._mesh
 
@@ -301,7 +301,8 @@ class MapdlConsole(MapdlBase):
 
     def _exit(self):
         """Minimal exit command. No logging or cleanup so it does not raise
-        exceptions"""
+        exceptions.
+        """
         if self._process is not None:
             try:
                 self._process.sendline("FINISH")

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Controls:
+
+class Controls(CommandsBase):
 
     def avprin(self, key: int | str = "", effnu: str = "", **kwargs):
         r"""Specifies how principal and vector sums are to be calculated.
@@ -233,8 +235,8 @@ class Controls:
 
         .. warning::
 
-            If you specify /EFACET,1, PowerGraphics does not plot midside nodes. You must use /EFACET,2 to
-            make the nodes visible.
+            If you specify  :ref:`efacet`,1, PowerGraphics does not plot midside nodes. You must use
+            :ref:`efacet`,2 to make the nodes visible.
 
         This command is valid in any processor.
         """

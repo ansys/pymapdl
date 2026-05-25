@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,14 +22,17 @@
 
 from functools import wraps
 import re
-from typing import Callable, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 import weakref
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlExitedError
 
+if TYPE_CHECKING:
+    from ansys.mapdl.core import Mapdl
 
-def update_information_first(update: bool = False) -> Callable:
+
+def update_information_first(update: bool = False) -> Callable[[Callable], Callable]:
     """
     Decorator to wrap :class:`Information <ansys.mapdl.core.misc.Information>`
     methods to force update the fields when accessed.
@@ -39,6 +42,11 @@ def update_information_first(update: bool = False) -> Callable:
     update : bool, optional
         If ``True``, the class information is updated by calling ``/STATUS``
         before accessing the methods. By default ``False``
+
+    Returns
+    -------
+    Callable
+        The decorator function.
     """
 
     def decorator(function):
@@ -53,12 +61,131 @@ def update_information_first(update: bool = False) -> Callable:
     return decorator
 
 
+class UnitsDict(dict):
+    """
+    A dictionary-like class for storing unit information with case-insensitive access.
+
+    This class stores unit mappings and supports access by both full names (e.g., "LENGTH")
+    and short names (e.g., "l"). It also provides pretty printing via __repr__ and __str__
+    that returns the original formatted string.
+
+    Parameters
+    ----------
+    units_string : str
+        The raw units string from MAPDL output.
+
+    Examples
+    --------
+    >>> units = UnitsDict(units_string)
+    >>> units['CHARGE']
+    'coulomb'
+    >>> units['Q']
+    'coulomb'
+    >>> units['length']
+    'meter'
+    >>> print(units)
+    MKS UNITS SPECIFIED FOR INTERNAL
+      LENGTH        (l)  = METER (M)
+      ...
+    """
+
+    def __init__(self, units_string: str):
+        super().__init__()
+        self._original_string = units_string
+        self._parse_units(units_string)
+
+    def _parse_units(self, units_string: str):
+        """Parse the units string and populate the dictionary."""
+        lines = units_string.splitlines()
+
+        for line in lines:
+            line = line.strip()
+            if not line or "UNITS SPECIFIED" in line:
+                continue
+
+            # Match lines like "LENGTH        (l)  = METER (M)"
+            # or "TOFFSET            = 273.0"
+            # Pattern explanation:
+            # - [A-Z](?:[A-Z\s]*)? matches one uppercase letter, optionally followed by
+            #   zero or more uppercase letters or spaces
+            # - (?:\(([a-zA-Z])\))? optionally matches the short name in parentheses
+            # - \s*=\s* matches equals sign with optional whitespace
+            # - (.+) matches the value
+            match = re.match(
+                r"^([A-Z](?:[A-Z\s]*)?)\s*(?:\(([a-zA-Z])\))?\s*=\s*(.+)$", line
+            )
+
+            if match:
+                full_name = match.group(1).strip()
+                short_name = match.group(2)
+                value = match.group(3).strip()
+
+                # Extract the first word before parentheses as the base unit value
+                # For "METER (M)", extract "METER"
+                # For numeric values like "273.0", keep them as-is
+                unit_match = re.match(r"^([A-Z]+)", value)
+                if unit_match:
+                    base_value = unit_match.group(1).lower()
+                else:
+                    # For numeric values or other formats
+                    base_value = (
+                        value.split()[0].lower() if value.split() else value.lower()
+                    )
+
+                # Store with full name (case-insensitive key)
+                full_name_key = full_name.lower()
+                self[full_name_key] = base_value
+
+                # Store with short name if available (only if not already set)
+                # Use super().__contains__() to check the actual dict without case conversion
+                if short_name:
+                    short_name_key = short_name.lower()
+                    if not super().__contains__(short_name_key):
+                        self[short_name_key] = base_value
+
+    def __getitem__(self, key):
+        """Get item with case-insensitive key."""
+        if not isinstance(key, str):
+            raise TypeError(f"Key must be a string, not {type(key).__name__}")
+        return super().__getitem__(key.lower())
+
+    def __contains__(self, key):
+        """Check if key exists (case-insensitive)."""
+        if not isinstance(key, str):
+            return False
+        return super().__contains__(key.lower())
+
+    def get(self, key, default=None):
+        """Get item with case-insensitive key and default value."""
+        if not isinstance(key, str):
+            return default
+        return super().get(key.lower(), default)
+
+    def __repr__(self):
+        """Return the original formatted string."""
+        return self._original_string
+
+    def __str__(self):
+        """Return the original formatted string."""
+        return self._original_string
+
+
 class Information:
     """
     This class provide some MAPDL information from ``/STATUS`` MAPDL command.
 
     It is also the object that is called when you issue ``print(mapdl)``,
     which means ``print`` calls ``mapdl.info.__str__()``.
+
+    Parameters
+    ----------
+    mapdl : Mapdl
+        An instance of the MAPDL class.
+
+    Returns
+    -------
+    Mapdl
+        An MAPDL instance.
 
     Notes
     -----
@@ -84,11 +211,26 @@ class Information:
     >>> info = mapdl.info
     >>> info.mapdl_version
     'RELEASE  2021 R2           BUILD 21.2      UPDATE 20210601'
-
     """
 
     def __init__(self, mapdl: "Mapdl") -> None:
-        """Class Initializer"""
+        """Class Initializer
+
+        Parameters
+        ----------
+        mapdl : Mapdl
+            An instance of the MAPDL class.
+
+        Returns
+        -------
+        Mapdl
+            An MAPDL instance.
+
+        Raises
+        ------
+        TypeError
+            If the provided `mapdl` object is not an instance of `MapdlBase`.
+        """
         from ansys.mapdl.core.mapdl import MapdlBase  # lazy import to avoid circular
 
         if not isinstance(mapdl, MapdlBase):  # pragma: no cover
@@ -104,12 +246,19 @@ class Information:
 
     @property
     def _mapdl(self) -> "Mapdl":
-        """Return the weakly referenced MAPDL instance."""
+        """Return the weakly referenced MAPDL instance.
+
+        Returns
+        -------
+        Mapdl
+            A reference to the MAPDL instance.
+        """
         return self._mapdl_weakref()
 
     def _update(self) -> None:
         """We might need to do more calls if we implement properties
-        that change over the MAPDL session."""
+        that change over the MAPDL session.
+        """
         try:
             if self._mapdl._exited:  # pragma: no cover
                 raise MapdlExitedError("Information class: MAPDL exited")
@@ -119,8 +268,7 @@ class Information:
             self._stats = None
             raise MapdlExitedError("Information class: MAPDL exited")
 
-        stats = stats.replace("\n ", "\n")  # Bit of formatting
-        self._stats = stats
+        self._stats = stats.replace(r"\n ", r"\n")
         self._mapdl._log.debug("Information class: Updated")
 
     def __repr__(self) -> str:
@@ -140,82 +288,160 @@ class Information:
     @property
     @update_information_first(False)
     def product(self) -> str:
-        """Retrieve the product from the MAPDL instance."""
+        """Retrieve the product from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The product name from the MAPDL instance.
+        """
         return self._get_product()
 
     @property
     @update_information_first(False)
     def mapdl_version(self) -> str:
-        """Retrieve the MAPDL version from the MAPDL instance."""
+        """Retrieve the MAPDL version from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The MAPDL version from the MAPDL instance.
+        """
         return self._get_mapdl_version()
 
     @property
     @update_information_first(False)
     def mapdl_version_release(self) -> str:
-        """Retrieve the MAPDL version release from the MAPDL instance."""
+        """Retrieve the MAPDL version release from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The MAPDL version release.
+        """
         st = self._get_mapdl_version()
         return self._get_between("RELEASE", "BUILD", st).strip()
 
     @property
     @update_information_first(False)
     def mapdl_version_build(self) -> str:
-        """Retrieve the MAPDL version build from the MAPDL instance."""
+        """Retrieve the MAPDL version build from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The MAPDL version build.
+        """
         st = self._get_mapdl_version()
         return self._get_between("BUILD", "UPDATE", st).strip()
 
     @property
     @update_information_first(False)
     def mapdl_version_update(self) -> str:
-        """Retrieve the MAPDL version update from the MAPDL instance."""
+        """Retrieve the MAPDL version update from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The MAPDL version update.
+        """
         st = self._get_mapdl_version()
         return self._get_between("UPDATE", "", st).strip()
 
     @property
     @update_information_first(False)
     def pymapdl_version(self) -> str:
-        """Retrieve the PyMAPDL version from the MAPDL instance."""
+        """Retrieve the PyMAPDL version from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            Returns the PyMAPDL version.
+        """
         return self._get_pymapdl_version()
 
     @property
     @update_information_first(False)
     def products(self) -> str:
-        """Retrieve the products from the MAPDL instance."""
+        """Retrieve the products from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The products from the MAPDL instance.
+        """
         return self._get_products()
 
     @property
     @update_information_first(False)
     def preprocessing_capabilities(self) -> str:
-        """Retrieve the preprocessing capabilities from the MAPDL instance."""
+        """Retrieve the preprocessing capabilities from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The preprocessing capabilities from the MAPDL instance.
+        """
         return self._get_preprocessing_capabilities()
 
     @property
     @update_information_first(False)
     def aux_capabilities(self) -> str:
-        """Retrieve the aux capabilities from the MAPDL instance."""
+        """Retrieve the aux capabilities from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The aux capabilities from the MAPDL instance.
+        """
         return self._get_aux_capabilities()
 
     @property
     @update_information_first(True)
     def solution_options(self) -> str:
-        """Retrieve the solution options from the MAPDL instance."""
+        """Retrieve the solution options from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The solution options from the MAPDL instance.
+        """
         return self._get_solution_options()
 
     @property
     @update_information_first(False)
     def post_capabilities(self) -> str:
-        """Retrieve the post capabilities from the MAPDL instance."""
+        """Retrieve the post capabilities from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The post capabilities from the MAPDL instance.
+        """
         return self._get_post_capabilities()
 
     @property
     @update_information_first(True)
     def titles(self) -> str:
-        """Retrieve the titles from the MAPDL instance."""
+        """Retrieve the titles from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The titles from the MAPDL instance.
+        """
         return self._get_titles()
 
     @property
     @update_information_first(True)
     def title(self) -> str:
-        """Retrieve and set the title from the MAPDL instance."""
+        """Retrieve and set the title from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The title from the MAPDL instance.
+        """
         return self._mapdl.inquire("", "title")
 
     @title.setter
@@ -224,9 +450,23 @@ class Information:
 
     @property
     @update_information_first(True)
-    def stitles(self, i: int = None) -> str:
+    def stitles(self, i: int | None = None) -> str:
         """Retrieve or set the value for the MAPDL stitle (subtitles).
 
+        Parameters
+        ----------
+        i
+            The index of the stitle to retrieve or set. If not provided,
+            all stitles are returned. If provided, it should be between 0 and 3
+            (Python indexing).
+
+        Returns
+        -------
+        str
+            The stitle(s) from the MAPDL instance.
+
+        Notes
+        -----
         If 'stitle' includes newline characters (`\\n`), then each line
         is assigned to one STITLE.
 
@@ -242,7 +482,7 @@ class Information:
             return self._get_stitles()[i]
 
     @stitles.setter
-    def stitles(self, stitle: str, i: int = None) -> None:
+    def stitles(self, stitle: str | list[str] | None, i: int | None = None) -> None:
         if stitle is None:
             # Case to empty
             stitle = ["", "", "", ""]
@@ -265,72 +505,155 @@ class Information:
             for each_index, each_stitle in zip(range(1, 5), stitle):
                 self._mapdl.stitle(each_index, each_stitle)
         else:
-            self._mapdl.stitle(i, stitle)
+            self._mapdl.stitle(str(i), str(stitle))
 
     @property
     @update_information_first(True)
-    def units(self) -> str:
-        """Retrieve the units from the MAPDL instance."""
-        return self._get_units()
+    def units(self) -> UnitsDict:
+        """Retrieve the units from the MAPDL instance.
+
+        Returns
+        -------
+        UnitsDict
+            A dictionary-like object containing the units from the MAPDL instance.
+            Supports both full names (e.g., 'LENGTH') and short names (e.g., 'l')
+            with case-insensitive access. Printing the object returns the original
+            formatted string.
+
+        Examples
+        --------
+        >>> mapdl.info.units['CHARGE']
+        'coulomb'
+        >>> mapdl.info.units['Q']
+        'coulomb'
+        >>> mapdl.info.units['length']
+        'meter'
+        >>> print(mapdl.info.units)
+        MKS UNITS SPECIFIED FOR INTERNAL
+          LENGTH        (l)  = METER (M)
+          MASS          (M)  = KILOGRAM (KG)
+          ...
+        """
+        return UnitsDict(self._get_units())
 
     @property
     @update_information_first(True)
     def scratch_memory_status(self) -> str:
-        """Retrieve the scratch memory status from the MAPDL instance."""
+        """Retrieve the scratch memory status from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The scratch memory status from the MAPDL instance.
+        """
         return self._get_scratch_memory_status()
 
     @property
     @update_information_first(True)
     def database_status(self) -> str:
-        """Retrieve the database status from the MAPDL instance."""
+        """Retrieve the database status from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The database status from the MAPDL instance.
+        """
         return self._get_database_status()
 
     @property
     @update_information_first(True)
     def config_values(self) -> str:
-        """Retrieve the config values from the MAPDL instance."""
+        """Retrieve the config values from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The config values from the MAPDL instance.
+        """
         return self._get_config_values()
 
     @property
     @update_information_first(True)
     def global_status(self) -> str:
-        """Retrieve the global status from the MAPDL instance."""
+        """Retrieve the global status from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The global status from the MAPDL instance.
+        """
         return self._get_global_status()
 
     @property
     @update_information_first(True)
     def job_information(self) -> str:
-        """Retrieve the job information from the MAPDL instance."""
+        """Retrieve the job information from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The job information from the MAPDL instance.
+        """
         return self._get_job_information()
 
     @property
     @update_information_first(True)
     def model_information(self) -> str:
-        """Retrieve the model information from the MAPDL instance."""
+        """Retrieve the model information from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The model information from the MAPDL instance.
+        """
         return self._get_model_information()
 
     @property
     @update_information_first(True)
     def boundary_condition_information(self) -> str:
-        """Retrieve the boundary condition information from the MAPDL instance."""
+        """Retrieve the boundary condition information from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The boundary condition information from the MAPDL instance.
+        """
         return self._get_boundary_condition_information()
 
     @property
     @update_information_first(True)
     def routine_information(self) -> str:
-        """Retrieve the routine information from the MAPDL instance."""
+        """Retrieve the routine information from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The routine information from the MAPDL instance.
+        """
         return self._get_routine_information()
 
     @property
     @update_information_first(True)
     def solution_options_configuration(self) -> str:
-        """Retrieve the solution options configuration from the MAPDL instance."""
+        """Retrieve the solution options configuration from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The solution options configuration from the MAPDL instance.
+        """
         return self._get_solution_options_configuration()
 
     @property
     @update_information_first(True)
     def load_step_options(self) -> str:
-        """Retrieve the load step options from the MAPDL instance."""
+        """Retrieve the load step options from the MAPDL instance.
+
+        Returns
+        -------
+        str
+            The load step options from the MAPDL instance.
+        """
         return self._get_load_step_options()
 
     def _get_between(
@@ -341,15 +664,12 @@ class Information:
     ) -> str:
         if not string:
             self._update()
-            string = self._stats
+            string = self._stats or ""
 
-        st = string.find(init_string) + len(init_string)
+        st: int = string.find(init_string) + len(init_string)
+        en: int | None = string.find(end_string) if end_string else None
 
-        if not end_string:
-            en = None
-        else:
-            en = string.find(end_string)
-        return "\n".join(string[st:en].splitlines()).strip()
+        return "\n".join(str(string[st:en]).splitlines()).strip()
 
     def _get_product(self) -> str:
         return self._get_products().splitlines()[0]
@@ -366,19 +686,23 @@ class Information:
     def _get_title(self) -> str:
         match = re.match(r"TITLE=(.*)$", self._get_titles())
         if match:
-            return match.groups(1)[0].strip()
+            return str(match.groups(1)[0].strip())  # type: ignore
 
-    def _get_stitles(self) -> List[str]:
-        return [
-            (
-                re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
-                .groups(1)[0]
-                .strip()
-                if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
-                else ""
+    def _get_stitles(self) -> list[str]:
+        titles: str = self._get_titles()
+
+        stitles: list[str] = []
+        for i in range(1, 5):
+            match = re.search(f"SUBTITLE  {i}=(.*)", titles)
+            if not match or not match.groups(1):
+                # If the subtitle is not found, return an empty string
+                continue
+
+            stitles.append(
+                str(re.search(f"SUBTITLE  {i}=(.*)", titles).groups(1)[0]).strip()  # type: ignore
             )
-            for i in range(1, 5)
-        ]
+
+        return stitles
 
     def _get_products(self) -> str:
         init_ = "*** Products ***"
@@ -464,3 +788,131 @@ class Information:
         init_ = "L O A D   S T E P   O P T I O N S"
         end_string = None
         return self._get_between(init_, end_string)
+
+
+def get_mapdl_info(mapdl: "Mapdl") -> dict[str, Any]:
+    """Return diagnostic information from a connected MAPDL instance.
+
+    Collects connection details, version/product information, model geometry,
+    mesh statistics, and post-processing state from a live MAPDL instance and
+    returns them as a nested dictionary.  Each top-level section is collected
+    independently so a failure in one section never blocks the others.
+
+    This is the canonical implementation shared by the ``pymapdl check`` CLI
+    command and external consumers such as the ``pymapdl-mcp`` package.
+
+    Parameters
+    ----------
+    mapdl : Mapdl
+        A connected MAPDL gRPC instance.
+
+    Returns
+    -------
+    dict[str, Any]
+        Nested dictionary with the following top-level keys:
+
+        ``"connection"``
+            Basic connection details: ``name``, ``ip``, ``port``,
+            ``version``, ``directory``, ``status``, ``is_local``,
+            ``jobname``, ``platform``.
+        ``"information"``
+            Product and version info extracted from ``mapdl.info``:
+            ``product``, ``mapdl_version``, ``mapdl_version_build``,
+            ``mapdl_version_update``, ``pymapdl_version``, ``title``,
+            ``units``.
+        ``"geometry"``
+            Current model geometry entity counts: ``n_keypoint``,
+            ``n_line``, ``n_area``, ``n_volu``.
+        ``"mesh"``
+            Current mesh statistics: ``n_node``, ``n_elem``.
+        ``"post_processing"``
+            Post-processing state: ``available``, ``nsets``.
+
+        If a section cannot be retrieved, it will contain an ``"error"``
+        key with the exception message instead of the normal fields.
+
+    Examples
+    --------
+    >>> from ansys.mapdl.core import get_mapdl_info, launch_mapdl
+    >>> mapdl = launch_mapdl()
+    >>> info = get_mapdl_info(mapdl)
+    >>> info["connection"]["status"]
+    'Running'
+    >>> info["information"]["product"]
+    'Ansys Mechanical Enterprise'
+    >>> info["mesh"]["n_node"]
+    0
+    """
+    info: dict[str, Any] = {}
+
+    # ------------------------------------------------------------------ #
+    # Connection                                                          #
+    # ------------------------------------------------------------------ #
+    connection: dict[str, Any] = {}
+    try:
+        connection["name"] = mapdl.name
+        connection["ip"] = mapdl.ip
+        connection["port"] = mapdl.port
+        connection["version"] = mapdl.version
+        connection["directory"] = str(mapdl.directory)
+        connection["status"] = mapdl.check_status.value.title()
+        connection["is_local"] = mapdl.is_local
+        connection["jobname"] = mapdl.jobname
+        connection["platform"] = mapdl.platform
+    except Exception as e:
+        connection["error"] = str(e)
+    info["connection"] = connection
+
+    # ------------------------------------------------------------------ #
+    # Information (product / version)                                     #
+    # ------------------------------------------------------------------ #
+    information: dict[str, Any] = {}
+    try:
+        information["product"] = mapdl.info.product
+        information["mapdl_version"] = mapdl.info.mapdl_version_release
+        information["mapdl_version_build"] = mapdl.info.mapdl_version_build
+        information["mapdl_version_update"] = mapdl.info.mapdl_version_update
+        information["pymapdl_version"] = mapdl.info.pymapdl_version
+        information["title"] = mapdl.info.title or ""
+        information["units"] = dict(mapdl.info.units)
+    except Exception as e:
+        information["error"] = str(e)
+    info["information"] = information
+
+    # ------------------------------------------------------------------ #
+    # Geometry                                                            #
+    # ------------------------------------------------------------------ #
+    geometry: dict[str, Any] = {}
+    try:
+        geometry["n_keypoint"] = mapdl.geometry.n_keypoint
+        geometry["n_line"] = mapdl.geometry.n_line
+        geometry["n_area"] = mapdl.geometry.n_area
+        geometry["n_volu"] = mapdl.geometry.n_volu
+    except Exception as e:
+        geometry["error"] = str(e)
+    info["geometry"] = geometry
+
+    # ------------------------------------------------------------------ #
+    # Mesh                                                                #
+    # ------------------------------------------------------------------ #
+    mesh: dict[str, Any] = {}
+    try:
+        mesh["n_node"] = mapdl.mesh.n_node
+        mesh["n_elem"] = mapdl.mesh.n_elem
+    except Exception as e:
+        mesh["error"] = str(e)
+    info["mesh"] = mesh
+
+    # ------------------------------------------------------------------ #
+    # Post-processing                                                     #
+    # ------------------------------------------------------------------ #
+    post_processing: dict[str, Any] = {}
+    try:
+        post_processing["available"] = hasattr(mapdl, "post_processing")
+        if post_processing["available"]:
+            post_processing["nsets"] = mapdl.post_processing.nsets
+    except Exception as e:
+        post_processing["error"] = str(e)
+    info["post_processing"] = post_processing
+
+    return info

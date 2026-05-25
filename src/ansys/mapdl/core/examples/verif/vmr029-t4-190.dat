@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ JPGPRF,500,100,1
 
 _GEOMGEN = 0                        ! SET THIS KEY=1 TO REGENERATE THE GEOMETRY
 _EXIT = 0                           ! SET THIS KEY=1 TO EXIT WITHOUT SOLVING
-                        
+
 *IF,_GEOMGEN,EQ,1,THEN
 
 /PREP7
@@ -85,7 +85,7 @@ FINISH
 /OUT,SCRATCH
 /SOLU
 ANTYPE,STATIC
-RESCONTROL,LINEAR,ALL,1             ! RESTART FILES FOR SUBSEQUENT LINEAR PERTURBATION 
+RESCONTROL,LINEAR,ALL,1             ! RESTART FILES FOR SUBSEQUENT LINEAR PERTURBATION
 EQSLV,SPARSE
 SOLVE
 FINISH
@@ -93,8 +93,8 @@ FINISH
 
 /SOLU
 ANTYPE,STATIC,RESTART,,,PERTURB ! PERFORM A PERTURBATION ANALYSIS
-PERTURB,BUCKLE,,,ALLKEEP        ! PERTURBED BUCKLING SOLVE 
-SOLVE,ELFORM  
+PERTURB,BUCKLE,,,ALLKEEP        ! PERTURBED BUCKLING SOLVE
+SOLVE,ELFORM
 
 OUTRES,ALL,ALL
 BUCOPT,LANB,4,

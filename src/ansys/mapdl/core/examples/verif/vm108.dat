@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ MODE,1,1                ! ANTISYMMETRIC MODE (ISYM=1)
 D,5,TEMP,80,,10,5       ! DEFINE PEAK TEMPERATURE
 FINISH
 /SOLU
-/OUT,vm108_SCRATCH    
+/OUT,vm108_SCRATCH
 SOLVE
 /OUT
 FINISH
@@ -50,7 +50,7 @@ FINISH
 *GET,TN4,NODE,4,TEMP
 *DIM,VALUE,,4,3
 *DIM,LABEL,CHAR,4,2
-*VFILL,VALUE(1,1),DATA,0,20,40,60 
+*VFILL,VALUE(1,1),DATA,0,20,40,60
 *VFILL,VALUE(1,2),DATA,TN1,TN2,TN3,TN4
 *VFILL,VALUE(1,3),DATA,0,ABS(TN2/20),ABS(TN3/40),ABS(TN4/60)
 LABEL(1,1) = 'NODE 1 T','NODE 2 T','NODE 3 T','NODE 4 T'
@@ -67,4 +67,3 @@ LABEL(1,2) = ', F     ',', F     ',', F     ',', F     '
 /OUT
 FINISH
 *LIST,vm108,vrt
-

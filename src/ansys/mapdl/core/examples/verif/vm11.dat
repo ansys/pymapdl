@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,11 @@
 C***           MECHANICS OF SOLIDS, CRANDALL AND DAHL, 1959, PAGE 234, PROB 5.31
 ANTYPE,STATIC
 ET,1,LINK180
-SECTYPE,1,LINK   
+SECTYPE,1,LINK
 SECDATA,1
 MP,EX,1,30E6
 TB,PLAS,1,,,BKIN                  ! TABLE FOR BILINEAR KINEMATIC HARDENING
-TBTEMP,100                        
+TBTEMP,100
 TBDATA,1,30000                    ! YIELD STRESS
 C*** DEFINE MODEL GEOMETRY USING PARAMETRIC EXPRESSIONS
 L=100
@@ -50,7 +50,7 @@ OUTPR,,1
 D,1,ALL,,,3
 F,4,FY,-51961.5                   ! APPLY LOAD F1
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 /POST1
@@ -59,7 +59,7 @@ BOT_NODE = NODE (0,-100,0)
 FINISH
 /SOLU
 AUTOTS,ON                         ! TURN ON AUTOMATIC LOAD STEPPING
-NSUBST,10                
+NSUBST,10
 OUTPR,,10
 F,4,FY,-81961.5                   ! APPLY LOAD F2
 SOLVE
@@ -91,8 +91,3 @@ LABEL(1,2) = '1 (in)  ','(psi)   '
 /OUT
 FINISH
 *LIST,vm11,vrt
-
-
-
-
-

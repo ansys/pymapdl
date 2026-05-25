@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,20 +22,32 @@
 
 """Module to control interaction with MAPDL through Python"""
 
+from enum import Enum
 from functools import wraps
 import glob
 import logging
 import os
 import pathlib
 import re
-from shutil import copy, copyfile, rmtree
+from shutil import copyfile, rmtree
 
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
 from subprocess import DEVNULL, call  # nosec B404
 import tempfile
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    TextIO,
+    Tuple,
+    TypeAlias,
+    Union,
+)
 from uuid import uuid4
 from warnings import warn
 import weakref
@@ -99,12 +111,14 @@ SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
+# Graphics device options - single source of truth
 VALID_DEVICES = ["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
-VALID_DEVICES_LITERAL = Literal[tuple(["PNG", "TIFF", "VRML", "TERM", "CLOSE"])]
+VALID_DEVICES_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
 
+# Plot file types (devices minus CLOSE) - derived from VALID_DEVICES
 VALID_FILE_TYPE_FOR_PLOT = VALID_DEVICES.copy()
 VALID_FILE_TYPE_FOR_PLOT.remove("CLOSE")
-VALID_FILE_TYPE_FOR_PLOT_LITERAL = Literal[tuple(VALID_FILE_TYPE_FOR_PLOT)]
+VALID_FILE_TYPE_FOR_PLOT_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM"]
 
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
@@ -144,7 +158,6 @@ For example, in the *VWRITE case:
 with self.non_interactive:
     self.vwrite('%s(1)' % parm_name)
     self.run('(F20.12)')
-
 """
 
 ## Invalid commands in interactive mode.
@@ -192,6 +205,7 @@ PLOT_COMMANDS = [
     "NPLO",
     "PLES",
     "PLNS",
+    "PLVA",
     "PSDG",
     "SECP",
     "SPGR",
@@ -230,7 +244,17 @@ _ALLOWED_START_PARM = [
     "start_timeout",
     "timeout",
     "use_reader_backend",
+    # Transport-related parameters
+    "transport_mode",
+    "uds_dir",
+    "certs_dir",
 ]
+
+
+class STATUS(str, Enum):
+    EXITED = "exited"
+    EXITING = "exiting"
+    RUNNING = "running"
 
 
 def parse_to_short_cmd(command):
@@ -290,21 +314,25 @@ class _MapdlCore(Commands):
         self._query = None
         self._exited: bool = False
         self._ignore_errors: bool = False
-        self._apdl_log = None
+        self._apdl_log: Optional[TextIO] = None
         self._store_commands: bool = False
-        self._stored_commands = []
+        self._stored_commands: list[str] = []
         self._response = None
         self._mode = start_parm.get("mode", None)
         self._mapdl_process = None
-        self._launched: bool = start_parm.get("launched", False)
+        self._launched: bool = start_parm.get("launched", False)  # type: ignore[assignment]
         self._stderr = None
+        self._archive_cache = None  # type: ignore[var-annotated]
+        self._remove_tmp: bool = False
         self._stdout = None
         self._file_type_for_plots = file_type_for_plots
-        self._default_file_type_for_plots = file_type_for_plots
+        self._default_file_type_for_plots: VALID_FILE_TYPE_FOR_PLOT_LITERAL = (
+            file_type_for_plots
+        )
         self._version = None  # cached version
         self._mute = False
         self._save_selection_obj = None
-        self._use_reader_backend: bool = start_parm.pop("use_reader_backend", True)
+        self._use_reader_backend: bool = start_parm.pop("use_reader_backend", True)  # type: ignore[assignment]
 
         if _HAS_VISUALIZER:
             if graphics_backend is not None:  # pragma: no cover
@@ -334,13 +362,13 @@ class _MapdlCore(Commands):
         # Start_parameters
         _sanitize_start_parm(start_parm)
         self._start_parm: Dict[str, Any] = start_parm
-        self._jobname: str = start_parm.get("jobname", "file")
+        self._jobname: str = start_parm.get("jobname", "file")  # type: ignore[assignment]
         self._path: str | pathlib.PurePath | None = (
             None  # start_parm.get("run_location", None)
         )
         self._check_parameter_names: bool = start_parm.get(
             "check_parameter_names", True
-        )
+        )  # type: ignore[assignment]
 
         # Setting up loggers
         self._log: logger = logger.add_instance_logger(
@@ -417,7 +445,6 @@ class _MapdlCore(Commands):
         *** WARNING *** CP = 0.372 TIME= 21:39:58
         K is not a recognized POST1 command, abbreviation, or macro.
         This command will be ignored.
-
         """
         warn(
             "'allow_ignore' is being deprecated and will be removed in a future release. "
@@ -465,7 +492,6 @@ class _MapdlCore(Commands):
         >>> with mapdl.chain_commands:
             mapdl.prep7()
             mapdl.k(1, 1, 2, 3)
-
         """
         if self._distributed:
             raise MapdlRuntimeError(
@@ -474,18 +500,18 @@ class _MapdlCore(Commands):
         return self._chain_commands(self)
 
     @property
-    def check_status(self):
+    def check_status(self) -> STATUS:
         """Return MAPDL status.
         * 'exited' if MAPDL is exited
         * 'exiting' if MAPDL is exiting
-        * Otherwise returns 'OK'.
+        * Otherwise returns 'running'.
         """
         if self.exited:
-            return "exited"
+            return STATUS.EXITED
         elif self.exiting:
-            return "exiting"
+            return STATUS.EXITING
         else:
-            return "OK"
+            return STATUS.RUNNING
 
     @property
     def components(self) -> "ComponentManager":
@@ -514,33 +540,35 @@ class _MapdlCore(Commands):
     def default_file_type_for_plots(self):
         """Default file type for plots.
 
-        Use when device is not properly set, for instance when the device is closed."""
+        Use when device is not properly set, for instance when the device is closed.
+        """
         return self._default_file_type_for_plots
 
     @default_file_type_for_plots.setter
     def default_file_type_for_plots(self, value: VALID_FILE_TYPE_FOR_PLOT_LITERAL):
         """Set default file type for plots.
 
-        Used when device is not properly set, for instance when the device is closed."""
+        Used when device is not properly set, for instance when the device is closed.
+        """
         if not isinstance(value, str) or value.upper() not in VALID_FILE_TYPE_FOR_PLOT:
             raise ValueError(f"'{value}' is not allowed as file output for plots.")
-        return self._default_file_type_for_plots
+        self._default_file_type_for_plots = value.upper()  # type: ignore[assignment]
 
-    def _wrap_directory(self, path: str) -> pathlib.PurePath:
-        if self._platform is None:
+    def _wrap_directory(self, path: Union[str, pathlib.Path]) -> pathlib.PurePath:
+        if self.platform is None:
             # MAPDL is not initialized yet so returning the path as is.
             return pathlib.PurePath(path)
 
-        if self._platform == "windows":
+        if self.platform == "windows":
             # Windows path
             return pathlib.PureWindowsPath(path)
-        elif self._platform == "linux":
+        elif self.platform == "linux":
             # Linux path
             return pathlib.PurePosixPath(path)
         else:
             # Other OS path
             warn(
-                f"MAPDL is running on an unknown OS '{self._platform}'. "
+                f"MAPDL is running on an unknown OS '{self.platform}'. "
                 "Using PurePosixPath as default.",
                 UserWarning,
             )
@@ -625,7 +653,7 @@ class _MapdlCore(Commands):
             self._run(
                 f"/show, {value.upper()}"
             )  # To avoid recursion we need to use _run.
-            self._file_type_for_plots = value.upper()
+            self._file_type_for_plots = value.upper()  # type: ignore[assignment]
         else:
             raise ValueError(f"'{value}' is not allowed as file output for plots.")
 
@@ -635,7 +663,6 @@ class _MapdlCore(Commands):
         and activating text output (``/GOPR``)
 
         You can still do changes to those inside this context.
-
         """
         return self._force_output(self)
 
@@ -677,7 +704,6 @@ class _MapdlCore(Commands):
         Reselect from the existing selection of lines.
 
         >>> mapdl.geometry.line_select([3, 4, 5], sel_type='R')
-
         """
         if self._geometry is None:
             self._geometry = self._create_geometry()
@@ -711,7 +737,6 @@ class _MapdlCore(Commands):
         *** WARNING *** CP = 0.372 TIME= 21:39:58
         K is not a recognized POST1 command, abbreviation, or macro.
         This command will be ignored.
-
         """
         return self._ignore_errors
 
@@ -844,7 +869,6 @@ class _MapdlCore(Commands):
         Access the geometry as a VTK object
 
         >>> mapdl.mesh.grid
-
         """
         return self._mesh
 
@@ -887,7 +911,6 @@ class _MapdlCore(Commands):
         ...    mapdl.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
         ...    mapdl.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
         >>> mapdl.last_response
-
         """
         return self._non_interactive(self)
 
@@ -902,7 +925,6 @@ class _MapdlCore(Commands):
         --------
         >>> with mapdl.muted:
         ...    mapdl.run("/SOLU") # This call is muted
-
         """
         return self._muted(self)
 
@@ -935,7 +957,6 @@ class _MapdlCore(Commands):
 
         >>> mapdl.parameters['ARR']
         array([1., 2., 3.])
-
         """
         return self._parameters
 
@@ -981,7 +1002,8 @@ class _MapdlCore(Commands):
     @property
     def print_com(self):
         """Whether to print or not to the console the
-        :meth:`mapdl.com ("/COM") <ansys.mapdl.core.Mapdl.com>` calls."""
+        :meth:`mapdl.com ("/COM") <ansys.mapdl.core.Mapdl.com>` calls.
+        """
         return self._print_com
 
     @print_com.setter
@@ -1061,8 +1083,6 @@ class _MapdlCore(Commands):
         >>> q = mapdl.queries
         >>> q.nx(1), q.ny(1), q.nz(1)
         0.0 20.0 0.0
-
-
         """
         if self._query is None:
             self._query = Query(self)
@@ -1075,7 +1095,6 @@ class _MapdlCore(Commands):
         Save the current selection (nodes, elements, keypoints, lines, areas,
         volumes and components) before entering in the context manager, and
         when exit returns to that selection.
-
         """
         if self._save_selection_obj is None:
             self._save_selection_obj = self._save_selection(self)
@@ -1088,6 +1107,8 @@ class _MapdlCore(Commands):
         Returns
         -------
         :class:`ansys.mapdl.core.solution.Solution`
+            The solution object contains methods to check the convergence of the
+            solution, the number of iterations, and the current time step.
 
         Examples
         --------
@@ -1276,7 +1297,8 @@ class _MapdlCore(Commands):
     @supress_logging
     def _mesh(self) -> "Archive":
         """Write entire archive to ASCII and read it in as an
-        ``ansys.mapdl.core.Archive``"""
+        ``ansys.mapdl.core.Archive``
+        """
         from ansys.mapdl.reader import Archive
 
         if self._archive_cache is None:
@@ -1296,12 +1318,14 @@ class _MapdlCore(Commands):
             self.cmsel("S", "__ELEM__", "ELEM", mute=True)
 
             self._archive_cache = Archive(arch_filename, parse_vtk=False, name="Mesh")
+            if self._archive_cache is None:
+                raise MapdlRuntimeError("Failed to create the mesh archive.")
             grid = self._archive_cache._parse_vtk(additional_checking=True)
             self._archive_cache._grid = grid
 
             # rare bug
             if grid is not None:
-                if grid.n_points != self._archive_cache.n_node:
+                if grid.n_node != self._archive_cache.n_node:
                     self._archive_cache = Archive(
                         arch_filename, parse_vtk=True, name="Mesh"
                     )
@@ -1657,7 +1681,6 @@ class _MapdlCore(Commands):
         ...     mapdl.numvar(200)
         >>> mapdl.parameters.routine
         'PREP7'
-
         """
         return self._RetainRoutine(self, routine)
 
@@ -1710,7 +1733,9 @@ class _MapdlCore(Commands):
                 " creation ('w', 'a', or 'x')."
             )
 
-        self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
+        self._apdl_log = open(filename, mode=mode, buffering=1)  # type: ignore[misc,no-redef]  # line buffered
+        if self._apdl_log is None:
+            raise MapdlRuntimeError("Failed to open APDL log file.")
         self._apdl_log.write(
             f"! APDL log script generated using PyMAPDL (ansys.mapdl.core {pymapdl.__version__})\n"
         )
@@ -1723,7 +1748,12 @@ class _MapdlCore(Commands):
         self.igesout(filename, att=1, mute=True)
         return filename
 
-    def open_gui(self, include_result=None, inplace=None):  # pragma: no cover
+    def open_gui(
+        self,
+        include_result: bool | None = None,
+        inplace: bool | None = None,
+        exec_file: str | None = None,
+    ):  # pragma: no cover
         """Save the existing database and open it up in the MAPDL GUI.
 
         Parameters
@@ -1735,8 +1765,14 @@ class _MapdlCore(Commands):
         inplace : bool, optional
             Open the GUI on the current MAPDL working directory, instead of
             creating a new temporary directory and coping the results files
-            over there.  If ``True``, ignores ``include_result`` parameter.  By
+            over there.  If ``True``, ignores ``include_result`` parameter. By
             default, this ``False``.
+
+        exec_file: str, optional
+            Path to the MAPDL executable. If not provided, it will try to obtain
+            it using the `ansys.tools.common` package. If this package is not
+            available, it will use the same executable as the current MAPDL
+            instance.
 
         Examples
         --------
@@ -1767,7 +1803,7 @@ class _MapdlCore(Commands):
         >>> mapdl.eplot()
         """
         # lazy load here to avoid circular import
-        from ansys.mapdl.core.launcher import get_mapdl_path
+        from ansys.mapdl.core import _HAS_ATC
 
         if not self._local:
             raise MapdlRuntimeError(
@@ -1792,7 +1828,7 @@ class _MapdlCore(Commands):
 
         # specify a path for the temporary database if any.
         if inplace:
-            run_dir = self._start_parm["run_location"]
+            run_dir = self._start_parm.get("run_location") or str(self.directory)
 
         else:
             temp_dir = tempfile.gettempdir()
@@ -1844,7 +1880,24 @@ class _MapdlCore(Commands):
         # issue system command to run ansys in GUI mode
         cwd = os.getcwd()
         os.chdir(run_dir)
-        exec_file = self._start_parm.get("exec_file", get_mapdl_path(allow_input=False))
+
+        if not exec_file:
+            if _HAS_ATC:
+                from ansys.mapdl.core import get_mapdl_path
+
+                exec_file_ = get_mapdl_path(allow_input=False)
+            else:
+                exec_file_ = None
+
+            exec_file = self._start_parm.get("exec_file", exec_file_)
+
+        if not exec_file:
+            raise MapdlRuntimeError(
+                "The path to the MAPDL executable was not found. "
+                "Please set it using the 'exec_file' parameter when "
+                "launching MAPDL."
+            )
+
         nproc = self._start_parm.get("nproc", 2)
         add_sw = self._start_parm.get("additional_switches", "")
 
@@ -1946,33 +1999,42 @@ class _MapdlCore(Commands):
 
         @requires_graphics
         def __enter__(self) -> None:
-            self._parent()._log.debug("Entering in 'WithInterativePlotting' mode")
+            parent = self._parent()
+            if parent is None:
+                raise MapdlRuntimeError("Parent reference is None")
 
-            if not self._parent()._store_commands:
-                if not self._parent()._png_mode:
-                    self._parent().show("PNG", mute=True)
-                    self._parent().gfile(self._pixel_res, mute=True)
+            parent._log.debug("Entering in 'WithInterativePlotting' mode")
 
-                self.previous_device = self._parent().file_type_for_plots
+            if not parent._store_commands:
+                if not parent._png_mode:
+                    parent.show("PNG", mute=True)
+                    parent.gfile(self._pixel_res, mute=True)
 
-                if self._parent().file_type_for_plots not in [
+                self.previous_device = parent.file_type_for_plots
+
+                if parent.file_type_for_plots not in [
                     "PNG",
                     "TIFF",
                     "PNG",
                     "VRML",
                 ]:
-                    self._parent().show(self._parent().default_file_type_for_plots)
+                    parent.show(parent.default_file_type_for_plots)
 
+        @requires_graphics
         def __exit__(self, *args) -> None:
-            self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
-            self._parent().show("close", mute=True)
+            parent = self._parent()
+            if parent is None:
+                raise MapdlRuntimeError("Parent reference is None")
 
-            if not self._parent()._store_commands:
-                if not self._parent()._png_mode:
-                    self._parent().show("PNG", mute=True)
-                    self._parent().gfile(self._pixel_res, mute=True)
+            parent._log.debug("Exiting in 'WithInterativePlotting' mode")
+            parent.show("close", mute=True)
 
-                self._parent().file_type_for_plots = self.previous_device
+            if not parent._store_commands:
+                if not parent._png_mode:
+                    parent.show("PNG", mute=True)
+                    parent.gfile(self._pixel_res, mute=True)
+
+                parent.file_type_for_plots = self.previous_device
 
     def set_log_level(self, loglevel: DEBUG_LEVELS) -> None:
         """Sets log level
@@ -2001,7 +2063,7 @@ class _MapdlCore(Commands):
         >>> mapdl.set_log_level('ERROR')
         """
         if isinstance(loglevel, str):
-            loglevel = loglevel.upper()
+            loglevel = loglevel.upper()  # type: ignore[assignment]
         setup_logger(loglevel=loglevel)
 
     def _list(self, command):
@@ -2040,7 +2102,6 @@ class _MapdlCore(Commands):
         Start writing the log to a new file named "mapdl.log"
 
         >>> mapdl.add_file_handler('mapdl.log')
-
         """
         if append:
             mode = "a"
@@ -2069,7 +2130,6 @@ class _MapdlCore(Commands):
         Used with ``non_interactive``.
 
         Overridden by gRPC.
-
         """
         if not self._stored_commands:
             self._log.debug("There is no commands to be flushed.")
@@ -2175,7 +2235,6 @@ class _MapdlCore(Commands):
          KEYOPT( 7-12)=        0      0      0        0      0      0
          KEYOPT(13-18)=        0      0      0        0      0      0
         output continues...
-
         """
 
         warn(
@@ -2229,7 +2288,6 @@ class _MapdlCore(Commands):
          KEYOPT( 1- 6)=        0      0      0        0      0      0
          KEYOPT( 7-12)=        0      0      0        0      0      0
          KEYOPT(13-18)=        0      0      0        0      0      0
-
         """
         if isinstance(commands, str):
             commands = commands.splitlines()
@@ -2305,7 +2363,6 @@ class _MapdlCore(Commands):
         Equivalent Pythonic method:
 
         >>> mapdl.prep7()
-
         """
         if self.exited:
             raise MapdlExitedError(
@@ -2323,7 +2380,7 @@ class _MapdlCore(Commands):
 
         # Check kwargs
         verbose = kwargs.pop("verbose", False)
-        save_fig = kwargs.pop("savefig", False)
+        savefig = kwargs.pop("savefig", False)
 
         # Check if you want to avoid the current non-interactive context.
         avoid_non_interactive = kwargs.pop("avoid_non_interactive", False)
@@ -2371,7 +2428,7 @@ class _MapdlCore(Commands):
 
         # Tracking output device
         if command[:4].upper() == "/SHO" and "," in command:
-            self._file_type_for_plots = command.split(",")[1].upper()
+            self._file_type_for_plots = command.split(",")[1].upper()  # type: ignore[assignment]
 
         # Invalid commands silently ignored.
         cmd_ = command.split(",")[0].upper()
@@ -2419,14 +2476,6 @@ class _MapdlCore(Commands):
         self._log.debug(f"Running (verbose: {verbose}, mute={mute}): '{command}'")
         text = self._run(command, verbose=verbose, mute=mute)
 
-        if (
-            "Display device has not yet been specified with the /SHOW command" in text
-            and short_cmd in PLOT_COMMANDS
-        ):
-            # Reissuing the command to make sure we get output.
-            self.show(self.default_file_type_for_plots)
-            text = self._run(command, verbose=verbose, mute=mute)
-
         self._after_run(command)
 
         if mute:
@@ -2435,6 +2484,8 @@ class _MapdlCore(Commands):
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
             self._response = StringWithLiteralRepr(text.strip())
+            if self._response is None:
+                raise MapdlRuntimeError("MAPDL did not return any response.")
             response_ = "\n".join(self._response.splitlines()[:20])
             self._log.info(response_)
         else:
@@ -2447,16 +2498,7 @@ class _MapdlCore(Commands):
         # special returns for certain geometry commands
         if short_cmd in PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
-            plot_path = self._get_plot_name(text)
-
-            if save_fig:
-                return self._download_plot(plot_path, save_fig)
-            elif self._has_matplotlib:
-                return self._display_plot(plot_path)
-            else:
-                self._log.debug(
-                    "Since matplolib is not installed, images are not shown."
-                )
+            return self.screenshot(savefig=savefig, default_name="plot")
 
         return self._response
 
@@ -2514,7 +2556,7 @@ class _MapdlCore(Commands):
             if os.path.isfile(filename):
                 return filename
             else:  # pragma: no cover
-                raise MapdlRuntimeError("Unable to find screenshot at %s", filename)
+                raise MapdlRuntimeError(f"Unable to find screenshot at {filename}")
         else:
             raise MapdlRuntimeError(
                 "Unable to find plotted file in MAPDL command output. "
@@ -2554,22 +2596,30 @@ class _MapdlCore(Commands):
 
             display(plt.gcf())
 
-    def _download_plot(self, filename: str, plot_name: str) -> None:
+    def _download_plot(
+        self, filename: str, plot_name: str, default_name: str = "plot"
+    ) -> str:
         """Copy the temporary download plot to the working directory."""
         if isinstance(plot_name, str):
             provided = True
             path_ = pathlib.Path(plot_name)
-            plot_name = path_.name
-            plot_stem = path_.stem
-            plot_ext = path_.suffix
-            plot_path = str(path_.parent)
-            if not plot_path or plot_path == ".":
-                plot_path = os.getcwd()
+            if path_.is_dir() or path_.suffix == "":
+                plot_name = f"{default_name}.png"
+                plot_stem = default_name
+                plot_ext = ".png"
+                plot_path = str(path_)
+            else:
+                plot_name = path_.name
+                plot_stem = path_.stem
+                plot_ext = path_.suffix
+                plot_path = str(path_.parent)
+                if not plot_path or plot_path == ".":
+                    plot_path = os.getcwd()
 
         elif isinstance(plot_name, bool):
             provided = False
-            plot_name = "plot.png"
-            plot_stem = "plot"
+            plot_name = f"{default_name}.png"
+            plot_stem = default_name
             plot_ext = ".png"
             plot_path = os.getcwd()
         else:  # pragma: no cover
@@ -2586,6 +2636,10 @@ class _MapdlCore(Commands):
         self._log.debug(
             f"Copy plot file from temp directory to working directory as: {plot_path}"
         )
+        if provided:
+            return plot_path_
+        else:
+            return os.path.basename(plot_path_)
 
     def _screenshot_path(self):
         """Return last filename based on the current jobname"""
@@ -3066,12 +3120,14 @@ class _MapdlCore(Commands):
         self.slashdelete("__outputcmd__.txt")  # cleaning
         return sys_output == "true"
 
-    def _decompose_fname(self, fname: str) -> Tuple[str, str, str]:
+    def _decompose_fname(
+        self, fname: Union[str, pathlib.Path]
+    ) -> Tuple[str, str, pathlib.Path]:
         """Decompose a file name (with or without path) into filename and extension.
 
         Parameters
         ----------
-        fname : str
+        fname : str or pathlib.Path
             File name with or without path.
 
         Returns
@@ -3082,11 +3138,11 @@ class _MapdlCore(Commands):
         str
             File extension (without dot)
 
-        str
+        pathlib.Path
             File path
         """
-        fname = pathlib.Path(fname)
-        return (fname.stem, fname.suffix.replace(".", ""), fname.parent)
+        fname_path = pathlib.Path(fname)
+        return (fname_path.stem, fname_path.suffix.replace(".", ""), fname_path.parent)
 
     class _force_output:
         """Allows user to enter commands that need to run with forced text output."""
@@ -3287,7 +3343,9 @@ class _MapdlCore(Commands):
             warn("No files listed")
         return files
 
-    def screenshot(self, savefig: Optional[str] = None):
+    def screenshot(
+        self, savefig: Optional[str] = None, default_name: str = "mapdl_screenshot"
+    ) -> str | None:
         """Take an MAPDL screenshot and show it in a popup window.
 
         Parameters
@@ -3298,8 +3356,8 @@ class _MapdlCore(Commands):
 
         Returns
         -------
-        str
-            File name.
+        str | None
+            Returns the file name if ``savefig`` is provided. Otherwise, it returns None.
 
         Raises
         ------
@@ -3314,47 +3372,12 @@ class _MapdlCore(Commands):
         self.show(previous_device)  # previous device
         file_name = self._get_plot_name(out_)
 
-        def get_file_name(path):
-            """Get a new filename so as not to overwrite an existing one."""
-            target_dir = os.path.join(path, "mapdl_screenshot_0.png")
-            i = 0
-            while os.path.exists(target_dir):
-                # Ensuring file is not overwritten.
-                i += 1
-                target_dir = os.path.join(path, f"mapdl_screenshot_{i}.png")
-            return target_dir
-
-        if savefig is None or savefig is False:
+        if savefig:
+            return self._download_plot(file_name, savefig, default_name=default_name)
+        elif self._has_matplotlib:
             self._display_plot(file_name)
-
         else:
-            if savefig is True:
-                # Copying to working directory
-                target_dir = get_file_name(os.getcwd())
-
-            elif isinstance(savefig, str):
-                if not os.path.dirname(savefig):
-                    # File name given only
-                    target_dir = os.path.join(os.getcwd(), savefig)
-
-                elif os.path.isdir(savefig):
-                    # Given directory path only, but not file name.
-                    target_dir = get_file_name(savefig)
-
-                elif os.path.exists(os.path.dirname(savefig)):
-                    # Only directory is given. Checking if directory exists.
-                    target_dir = savefig
-
-                else:
-                    raise FileNotFoundError("The filename or path is not valid.")
-
-            else:
-                raise ValueError(
-                    "Only strings or Booleans are valid inputs for the 'savefig' parameter."
-                )
-
-            copy(file_name, target_dir)
-            return os.path.basename(target_dir)
+            self._log.debug("Since matplolib is not installed, images are not shown.")
 
     def _create_session(self):
         """Generate a session ID."""
@@ -3386,7 +3409,7 @@ class _MapdlCore(Commands):
 
         if pymapdl_session_id is None or self._mapdl_session_id is None:
             return
-        elif pymapdl.RUNNING_TESTS or self._strict_session_id_check:
+        elif self._strict_session_id_check:
             if pymapdl_session_id != self._mapdl_session_id:
                 self._log.error("The session ids do not match")
 

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,7 @@ SF,ALL,CONV,50,1000                 ! APPLY CONVECTION TO TOP SURFACE
 NSEL,ALL
 TUNIF,0                             ! DEFINE INITIAL TEMPERATURES, T(0)
 FINISH
-/SOLU    
+/SOLU
 KBC,1                               ! STEP BOUNDARY CONDITIONS
 DELTIM,10                           ! MINIMUM TIME STEP
 TIME,2000.0                         ! TIME AT END OF TRANSIENT
@@ -90,4 +90,3 @@ LABEL(1,2) = ' NODE 11',' NODE 9 ',' NODE 7 ',' NODE 5 '
 /OUT
 FINISH
 *LIST,vm28,vrt
-

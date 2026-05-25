@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -29,5 +29,4 @@ class MapdlBase(_MapdlExtended):
     .. warning:: This class should NOT be imported by itself.
        You should always import a subclass of it like
        :class:`MapdlGrpc <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>`
-
     """

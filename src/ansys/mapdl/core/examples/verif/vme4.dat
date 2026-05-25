@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -23,10 +23,10 @@
 /COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
 /VERIFY,vme4
 /TITLE,VME4, Undamped Vibration Absorber
-! Elements of Vibration Analysis, Meirovitch, pp. 131-134  
+! Elements of Vibration Analysis, Meirovitch, pp. 131-134
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
-   
+
 PI=3.1415927
 M1=5             !The main mass is 5 kg
 K1=10            !The main system spring constant is 10 N/m

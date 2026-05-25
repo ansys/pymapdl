@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ E,1,2                       ! DEFINE ELEMENT
 D,2,UY                      ! BOUNDARY CONDITIONS AND LOADS
 F,1,FY,-628.31853
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 /POST1

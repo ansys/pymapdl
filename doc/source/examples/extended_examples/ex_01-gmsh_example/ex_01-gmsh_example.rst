@@ -12,15 +12,15 @@ open source Python meshing library. For more information, visit the Gmsh website
 Description
 -----------
 Gmsh is used to import an external geometry file in STL format. The `PyMAPDL Reader <legacy_reader_docs_>`_
-library is then used to import the geometry into PyMAPDL. 
+library is then used to import the geometry into PyMAPDL.
 
-This example makes use of these files: 
+This example makes use of these files:
 
-* ``gmsh_converter.py``: Loads a STEP file, meshes it, and saves it as a Gmsh file. 
-* ``mesh_converter``: Converts the MSH file into an Ansys CDB database format file (archive file). 
+* ``gmsh_converter.py``: Loads a STEP file, meshes it, and saves it as a Gmsh file.
+* ``mesh_converter``: Converts the MSH file into an Ansys CDB database format file (archive file).
 * ``modal_analysis.py``: Imports the CDB database, sets up the modal analysis, and runs
   it. It also shows an animation of the first mode and saves it
-  to a GIF file named ``animation.gif``. 
+  to a GIF file named ``animation.gif``.
 
 
 Requirements
@@ -64,4 +64,4 @@ Notes
 -----
 
 You should copy all the files in a separate directory to make running
-the example easier. 
+the example easier.

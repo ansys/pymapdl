@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -21,11 +21,11 @@
 ! SOFTWARE.
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
-/VERIFY,VM244         
+/VERIFY,VM244
 /TITLE,VM244, MODAL ANALYSIS OF CYCLIC SYMMETRIC ANNULAR PLATES
 C*** ROBERT D BLEVINS,"FORMULAS FOR NATURAL FREQUENCY AND MODE
 C*** SHAPE", NEW YORK, NY, VAN NOSTRAND REINHOLD PUBLISHING INC
-C*** 1979, PP. 246-247, 286-287  
+C*** 1979, PP. 246-247, 286-287
 _THETA1 = 0	        ! DEGREE, STARTING ANGLE FOR SECTION
 _THETA2 = 30		! DEGREE, ENDING ANGLE FOR SECTION
 _FLOWER = 23.381	! HZ, LOWER FREQUENCY LIMIT PER BLEVINS
@@ -70,7 +70,7 @@ FINISH
 *ELSE
 C*** CYCSYM MODEL, SIMPLE SUPPORT OUTER EDGE, FREE INNER EDGE
 C*** SOLID ELEMENTS
-/PREP7  
+/PREP7
 MP,EX,1,_E
 MP,NUXY,1,_V
 MP,DENS,1,_D
@@ -133,4 +133,4 @@ PARRES,
 /COM,----------------------------------------------------------
 /OUT
 FINISH
-*LIST,vm244,vrt                                                               
+*LIST,vm244,vrt

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -28,6 +28,7 @@ if not has_dependency("pyvista"):
     pytest.skip(
         allow_module_level=True, reason="Skipping because 'pyvista' is not installed"
     )
+
 
 import matplotlib
 import numpy as np

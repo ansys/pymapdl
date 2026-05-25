@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,9 +21,10 @@
 # SOFTWARE.
 
 """Tests comparing results of krylov pymadl function with apdl macro"""
+
 import os
 
-from ansys.tools.versioning.utils import server_meets_version
+from ansys.tools.common.versioning import server_meets_version
 import numpy as np
 import pytest
 
@@ -114,6 +115,7 @@ def solu_krylov(mapdl, frq):
     mapdl.finish()
 
 
+@pytest.mark.krylov_tests
 def test_krylov_with_point_load(mapdl, cleared):
     if not server_meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL 2022 R2 or later.")
@@ -142,6 +144,7 @@ def test_krylov_with_point_load(mapdl, cleared):
     assert np.allclose(Xii_macro_pt_load, Xii_py, rtol, atol)
 
 
+@pytest.mark.krylov_tests
 @pytest.mark.parametrize(
     "residual_algorithm", ["L-inf", "Linf", "L-1", "L1", "L-2", "L2"]
 )

@@ -1,0 +1,10 @@
+{
+  "expectations": [
+    {"text": "Starts with pymapdl start", "passed": true, "evidence": "Step 1: 'pymapdl start'"},
+    {"text": "Uses pymapdl exec with -c flags for APDL commands", "passed": true, "evidence": "Steps 2-8 all use 'pymapdl exec -c ...'"},
+    {"text": "Includes /prep7 preprocessor entry", "passed": true, "evidence": "Step 2: 'pymapdl exec -c /prep7 -c \"ET,1,186\"'"},
+    {"text": "Includes a SOLVE command", "passed": true, "evidence": "Step 8: 'pymapdl exec -c /solu -c SOLVE -c FINISH'"},
+    {"text": "Ends with pymapdl stop", "passed": true, "evidence": "Step 9: 'pymapdl stop'"},
+    {"text": "Commands are in correct order: start before exec before stop", "passed": true, "evidence": "Step 1 is start, Steps 2-8 are exec, Step 9 is stop"}
+  ]
+}

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@
 /com, 	     NUREG/CR--1677-Vol.1
 /com,		     P.Bezier, M.Hartzman, M.Reich
 /com,            August 1980
-/com, 
+/com,
 /com,  Elements used: Pipe16, Pipe18 and Mass21
 /com,
 /com, Results comparsion:
@@ -52,13 +52,13 @@ keyopt,3,3,2					! 3-D Mass without Rotary Inertia
 /com, Real Constants
 /com,****************
 
-r,1,7.288,0.241,0.0,0.0,0.0,0.0		
-r,2,7.288,0.241,36.30,0.0,0.0,0.0		
+r,1,7.288,0.241,0.0,0.0,0.0,0.0
+r,2,7.288,0.241,36.30,0.0,0.0,0.0
 
 /com, Nodes
 /com,*******
 
-n,1,0.0,0.0,0.0					
+n,1,0.0,0.0,0.0
 n,2,0.0,54.45,0.0
 n,3,0.0,108.9,0.0
 n,4,10.632,134.568,0.0
@@ -73,10 +73,10 @@ n,11,108.3,145.2,77.3
 /com, Straight Pipe (Tangent Elements)
 /com,**********************************
 
-type,1						
-mat,1							
-real,1						
-en,1,1,2						
+type,1
+mat,1
+real,1
+en,1,1,2
 en,2,2,3
 en,5,5,6
 en,6,6,7
@@ -86,21 +86,21 @@ en,10,10,11
 /com, Bend Pipe Elements
 /com,**********************************
 
-type,2						
-mat,1							
-real,2						
-en,3,3,4,2						 
+type,2
+mat,1
+real,2
+en,3,3,4,2
 en,4,4,5,6
 en,7,7,8,6
 en,8,8,9,10
 
-mp,ex,1,24e6					
-mp,nuxy,1,0.3					
+mp,ex,1,24e6
+mp,nuxy,1,0.3
 
 /com, Real constants for mass element
 /com, *******************************
 
-r,12,0.03988					 
+r,12,0.03988
 r,13,0.05032
 r,14,0.02088
 r,15,0.01698
@@ -113,10 +113,10 @@ r,20,0.01501
 /com, Mass Elements
 /com,***************
 
-type,3						
-real,12						
+type,3
+real,12
 e,2
-							
+
 real,13
 e,3
 
@@ -158,11 +158,11 @@ finish
 /com,
 
 /solution
-antype,modal					
-modopt,lanb,5					! LANB mode extraction method				
-mxpand,,,,yes					
-solve							
-save							
+antype,modal
+modopt,lanb,5					! LANB mode extraction method
+mxpand,,,,yes
+solve
+save
 
 /com,===========================
 /com, Compare Modal Frequencies
@@ -190,7 +190,7 @@ save
 
 *status,freq_err
 save,table_1
-finish						
+finish
 
 /com,----------------------------------------------------------------------------
 
@@ -235,7 +235,7 @@ fini
 /com,----------------------------------------------------------------------------
 
 /post1
-/input,,mcom			
+/input,,mcom
 
 /com, *Labels*
 *dim,label2,char,1,6
@@ -594,9 +594,9 @@ resume,table_1
 /gopr
 
 /out,vm-nr1677-1-1a-a,vrt
-/com, 
+/com,
 /com, =============================================
-/com,		  COMPARISON OF MODAL FREQUENCY 
+/com,		  COMPARISON OF MODAL FREQUENCY
 /com,			WITH EXPECTED RESULTS
 /com, =============================================
 /com,
@@ -658,7 +658,7 @@ resume,table_3
 /com,------------------------------------------------
 /com,	Note: Element Forces and Moments along Y & Z
 /com,		directions are flipped between Mechanical APDL
-/com,		and NRC results 
+/com,		and NRC results
 /com,------------------------------------------------
 
 /com,				Result | Expected | Mechanical APDL |  Ratio

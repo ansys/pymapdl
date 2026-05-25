@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@
 ! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ! SOFTWARE.
 
-/VERIFY,VM246         
+/VERIFY,VM246
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /TITLE,VM246, CYCLIC ANALYSIS OF AN END-LOADED HOLLOW CYLINDRICAL CANTILEVER BEAM
 /COM,*************************************************************
@@ -89,31 +89,31 @@ LABEL(3)='SOLID187'
 /COM,*                                                          *
 /COM,************************************************************
 
-/PREP7  
+/PREP7
         MP,EX,1,_E
 	MP,NUXY,1,_V
 	CSYS,1
-	CYL4,0,0,_A,_THETA1,_B,_THETA2,_L 
+	CYL4,0,0,_A,_THETA1,_B,_THETA2,_L
         ET,1,LABEL(I)
         TYPE,1
-     
+
 *IF,LABEL(I),EQ,'SOLID185',THEN
 	KEYOPT,1,2,2	                     !ENHANCED STRAIN FORMULATION
-      
-        
+
+
 *ELSEIF,LABEL(I),EQ,'SOLID186',THEN
 	KEYOPT,1,2,1                         !FULL INTERGRATION
-    
 
-*ELSE,LABEL(I),EQ,'SOLID187',THEN           
-	KEYOPT,1,6,0	                     !USE PURE DISPLACEMENT FORMULATION  
-*ENDIF    
+
+*ELSE,LABEL(I),EQ,'SOLID187',THEN
+	KEYOPT,1,6,0	                     !USE PURE DISPLACEMENT FORMULATION
+*ENDIF
 
         VMESH,ALL
 
         CYCLIC
         /CYCEXP,,ON
-        
+
 ASEL,S,AREA,,1
 DA,ALL,ALL
 ALLSEL
@@ -135,13 +135,13 @@ FINISH						!EXIT SOLUTION
 /CYCEXPAND,,ON
 SET,FIRST
 PLNSOL,U,SUM
-*GET,F%I%,PLNSOL,0,MAX                    
+*GET,F%I%,PLNSOL,0,MAX
 
 /OUT
 /COM,
 /COM,*********************************************************************
-/COM,                                                                   
-/COM,                        COMPARE RESULTS:                           
+/COM,
+/COM,                        COMPARE RESULTS:
 /COM,             DISPLACEMENT COMPARE FOR ELEMENT %LABEL(I)%
 /COM,*********************************************************************
 /COM,
@@ -154,7 +154,7 @@ PLNSOL,U,SUM
            /COM,*                                                        *
            /COM,**********************************************************
            /COM,
-	/OUT,SCRATCH   
+	/OUT,SCRATCH
         *ELSE
         /OUT
            /COM,**********************************************************
@@ -162,9 +162,9 @@ PLNSOL,U,SUM
            /COM,*  FAILURE: DISPLACEMENT OUT OF ACCAPTABLE LIMITS!!!     *
            /COM,*                                                        *
            /COM,**********************************************************
-        FINISH                          !EXIT PREP7     
+        FINISH                          !EXIT PREP7
         /EXIT,NOSAVE                    !EXIT DUE TO FAILURE
-        *ENDIF                          !CLOSE IF LOOP     
+        *ENDIF                          !CLOSE IF LOOP
 
 FINISH
 PARSAV,ALL
@@ -197,9 +197,3 @@ FINISH                                    !FINISH
 *LIST,vm246,vrt
 QAEND,23
 /EXIT,NOSAVE                              !EXIT
-
-
-
-
-
-

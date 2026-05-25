@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -52,7 +52,7 @@ _GEOMGEN=0
   MSHKEY,0
   SMRT,4
   AMES,ALL
-  
+
   LSEL,S,,,1,4
   LSEL,A,,,13,16
   SFL,ALL,RDSF,1, ,1,		!SET ALL FACING SURFACES TO EMISSIVITY 1
@@ -181,7 +181,7 @@ _GEOMGEN=0
   RDEC,,0.5
   RSURF
 FINI
-  
+
 /AUX12
 STFCONST=0.119E-10
 HEMIOPT,,,,,,,,,,,,,,,,,,,0

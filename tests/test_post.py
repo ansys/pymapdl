@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,13 +21,14 @@
 # SOFTWARE.
 
 """Test post-processing module for ansys.mapdl.core"""
+
 import inspect
 import re
 
 import numpy as np
 import pytest
 
-from conftest import NullContext, TestClass, has_dependency, requires
+from conftest import NullContext, TestClass, clear, has_dependency, requires
 
 if has_dependency("ansys-tools-visualization_interface"):
     from pyvista.plotting.renderer import CameraPosition
@@ -67,6 +68,9 @@ class Test_static_solve(TestClass):
     @pytest.fixture(scope="class")
     def static_solve(mapdl):
         with mapdl.muted:
+            clear(mapdl)
+            mapdl.prep7()
+
             # cylinder and mesh parameters
             # torque = 100
             radius = 2
@@ -139,7 +143,7 @@ class Test_static_solve(TestClass):
     def resume(self, mapdl, static_solve):
         self.mapdl = mapdl
 
-        mapdl.prep7()
+        clear(mapdl)
         mapdl.resume("static_solve")
 
         # necessary for any prnsol printouts
@@ -403,6 +407,9 @@ class Test_static_solve(TestClass):
     @staticmethod
     @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
     def test_nodal_principal_stress(mapdl, resume, comp):
+        # Restoring graphics (necessary for precision)
+        mapdl.graphics("full")
+
         from_grpc = mapdl.post_processing.nodal_principal_stress(comp)
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
@@ -783,6 +790,7 @@ class Test_plastic_solve(TestClass):
     @staticmethod
     @pytest.fixture(scope="class")
     def plastic_solve(mapdl):
+        clear(mapdl)
         with mapdl.muted:
             mapdl.input(examples.verif_files.vmfiles["vm273"])
 
@@ -791,7 +799,7 @@ class Test_plastic_solve(TestClass):
     @staticmethod
     @pytest.fixture(scope="function")
     def resume(mapdl, plastic_solve):
-        mapdl.prep7()
+        clear(mapdl)
         mapdl.resume("plastic_solve")
 
         mapdl.allsel()
@@ -894,6 +902,8 @@ class Test_contact_solve(TestClass):
     @staticmethod
     @pytest.fixture(scope="class")
     def contact_solve(mapdl):
+        clear(mapdl)
+
         # Based on tech demo 28.
         # ***** Problem parameters ********
         l = 76.2e-03 / 3  # Length of each plate,m
@@ -1192,7 +1202,7 @@ class Test_contact_solve(TestClass):
     @staticmethod
     @pytest.fixture(scope="function")
     def resume(mapdl, contact_solve):
-        mapdl.prep7()
+        clear(mapdl)
         mapdl.resume("contact_solve")
         mapdl.post1()
         mapdl.allsel()
@@ -1251,6 +1261,7 @@ class Test_contact_solve(TestClass):
         ],
     )
     def test_plot_incomplete_element_selection(mapdl, resume, vmin, vmax, vinc):
+        mapdl.allsel("all")
         n_elem = mapdl.mesh.n_elem
         mapdl.esel(
             "S",
@@ -1261,6 +1272,7 @@ class Test_contact_solve(TestClass):
             vinc=vinc,
         )
         assert mapdl.post_processing.plot_element_displacement() is None
+        mapdl.allsel("all")
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
@@ -1292,6 +1304,7 @@ class Test_contact_solve(TestClass):
             vinc=vinc,
         )
         assert mapdl.post_processing.plot_nodal_displacement() is None
+        mapdl.allsel("all")
 
     @staticmethod
     def test_time_frequency_values(mapdl, resume):
@@ -1382,7 +1395,7 @@ def test_exited(mapdl, cleared):
 ###############################################################################
 
 
-class Test_thermal_solve:
+class Test_thermal_solve(TestClass):
 
     @staticmethod
     @pytest.fixture(scope="class")
@@ -1450,7 +1463,7 @@ class Test_thermal_solve:
     @staticmethod
     @pytest.fixture()
     def resume(mapdl, thermal_solve):
-        mapdl.solution()
+        clear(mapdl)
         mapdl.resume("thermal_solve")
 
         mapdl.post1()

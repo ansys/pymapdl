@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ D,10,TEMP,0,,20,10           ! OUTER WALL TEMPERATURE
 BFE,ALL,HGEN,,1E6            ! APPLY HEAT GENERATION RATES
 FINISH
 /SOLU
-/OUT,vm105_SCRATCH    
+/OUT,vm105_SCRATCH
 SOLVE
 /OUT
 FINISH
@@ -59,7 +59,7 @@ PPATH,2,10
 PDEF,TEMP,TEMP
 PLPATH,TEMP
 *DIM,VALUE,,8,3
-*VFILL,VALUE(1,1),DATA,23.3,35.9,42.2,44,42.2,37,28.6,16.5 
+*VFILL,VALUE(1,1),DATA,23.3,35.9,42.2,44,42.2,37,28.6,16.5
 *DO,I,2,9,1
 *GET,TN,NODE,I,TEMP
 *VFILL,VALUE(I-1,2),DATA,TN
@@ -82,5 +82,3 @@ LABEL(7,2) = 'NODE 8) ','NODE 9) '
 /OUT
 FINISH
 *LIST,vm105,vrt
-
-

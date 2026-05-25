@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Operations:
+
+class Operations(CommandsBase):
 
     def abs(
         self, ir: str = "", ia: str = "", name: str = "", facta: str = "", **kwargs
@@ -65,7 +67,7 @@ class Operations:
 
         See `POST26 - Data Operations
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_post10.html#eqbe42048a-448b-4de9-91a9-1c8007937622>`_
-         in the `Mechanical APDL Theory Reference
+        in the `Mechanical APDL Theory Reference
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_biblio.html>`_ for details.
         """
         command = f"ABS,{ir},{ia},,,{name},,,{facta}"
@@ -176,7 +178,7 @@ class Operations:
         factor will change the results quadrant by π. The magnitude of a complex number is still obtained
         through the :ref:`abs` command. See `POST26 - Data Operations
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_post10.html#eqbe42048a-448b-4de9-91a9-1c8007937622>`_
-         in the `Mechanical APDL Theory Reference
+        in the `Mechanical APDL Theory Reference
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_biblio.html>`_ for details.
         """
         command = f"ATAN,{ir},{ia},,,{name},,,{facta}"

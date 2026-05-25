@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -43,8 +43,8 @@ A=1                            ! INNER RADIUS
 B=3                            ! OUTER RADIUS
 N,1,A,TH                       ! DEFINE KEYPOINTS
 N,16,B,TH
-FILL,1,16,14,2,1,,,5 
-NGEN,2,16,1,16,1,,,H 
+FILL,1,16,14,2,1,,,5
+NGEN,2,16,1,16,1,,,H
 NGEN,2,32,1,32,1,,-(TH*2)
 E,1,2,18,17,33,34,50,49
 EGEN,15,1,-1
@@ -183,4 +183,3 @@ LABEL(1,2) = '(PSI)   ','(PSI)   '
 /OUT
 FINISH
 *LIST,vm33,vrt
-

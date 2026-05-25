@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 /VERIFY,VM116
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
-/PREP7 
+/PREP7
 /TITLE, VM116, HEAT CONDUCTING PLATE WITH SUDDEN COOLING
 C***    PRINCIPLES OF HEAT TRANSFER, KREITH, 2ND. PRINTING, PAGE 161, EX. 4-11
 ANTYPE,TRANS
@@ -44,10 +44,10 @@ TYPE,2             ! ELEMENTS 2 THROUGH 9 ARE CONDUCTION BARS
 E,2,3
 EGEN,8,1,-1
 FINISH
-/SOLU    
+/SOLU
 D,2,TEMP,500       ! INITIAL SURFACE TEMPERATURES
 D,10,TEMP,100
-OUTPR,,LAST 
+OUTPR,,LAST
 OUTRES,,ALL
 TIMINT,OFF         ! TURN OFF TIME INTEGRATION FOR
 TIME,0.001         !  INITIAL STEADY-STATE CONDITION
@@ -99,4 +99,3 @@ LABEL(1,2) = '=0.0 in)'
 /OUT
 FINISH
 *LIST,vm116,vrt
-

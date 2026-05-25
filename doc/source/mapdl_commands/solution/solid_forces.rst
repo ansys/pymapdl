@@ -1,17 +1,21 @@
-.. _ref_solid_forces_commands_api:
 
-************
-Solid forces
-************
+.. _ref_solid_forces:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to define forces on the solid model.
+SolidForces
+===========
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.solid_forces
+
+.. autoclass:: ansys.mapdl.core._commands.solution.solid_forces.SolidForces
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.fk
-   Mapdl.fkdele
-   Mapdl.fklist
-   Mapdl.ftran
+
+   SolidForces.fk
+   SolidForces.fkdele
+   SolidForces.fklist
+   SolidForces.ftran

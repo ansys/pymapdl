@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -28,21 +28,21 @@ JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /COM, NAFEMS Fundamental Tests of Creep Behavior, Becker and Hyde
 /NOPR
 /COM,
-/COM, 2D CREEP TESTS WITH BIAXIAL CONSTANT LOAD, 
-/COM, REFERENCE: TEST 10(A) FROM NAFEMS R0027. 
+/COM, 2D CREEP TESTS WITH BIAXIAL CONSTANT LOAD,
+/COM, REFERENCE: TEST 10(A) FROM NAFEMS R0027.
 /COM,
 /COM, EXPECTED RESULTS:
-/COM,       TIME | EPCRX  | EPCRY                    
-/COM,   ----------------------------           
-/COM,        0.0 | 0.0    | -0.0    
-/COM,        0.1 | 0.0427 | -0.0427 
-/COM,        1.0 | 0.135  | -0.135  
-/COM,        5.0 | 0.3019 | -0.3019 
-/COM,       10.0 | 0.4269 | -0.4269 
-/COM,       50.0 | 0.9546 | -0.9546 
-/COM,      100.0 | 1.35   | -1.35   
-/COM,      500.0 | 3.019  | -3.019  
-/COM,     1000.0 | 4.2691 | -4.2691 
+/COM,       TIME | EPCRX  | EPCRY
+/COM,   ----------------------------
+/COM,        0.0 | 0.0    | -0.0
+/COM,        0.1 | 0.0427 | -0.0427
+/COM,        1.0 | 0.135  | -0.135
+/COM,        5.0 | 0.3019 | -0.3019
+/COM,       10.0 | 0.4269 | -0.4269
+/COM,       50.0 | 0.9546 | -0.9546
+/COM,      100.0 | 1.35   | -1.35
+/COM,      500.0 | 3.019  | -3.019
+/COM,     1000.0 | 4.2691 | -4.2691
 /COM,
 /PREP7
 C*** PARAMETRIC INPUT FOR CREEP CONSTANTS (PRIMARY CREEP)!***
@@ -59,7 +59,7 @@ TUNIF,HOT				!ASSIGN TEMP TO NODES
 TOFF,OFFS				!SPECIFY TEMP RELATIVE TO ABSOLUTE VALUES
 TB,CREEP,1,,,6				!ACTIVATE DATA TABLE
 TBDATA,1,C1,C2,C3,C4			!DEFINE DATA FOR TABLE
-SAVE					!SAVE 
+SAVE					!SAVE
 /PREP7
 N,1,0,0,0
 N,2,100,0
@@ -96,7 +96,7 @@ TIME, 1.0E-8
 /OUT,SCRATCH
 OUTRES,ESOL,ALL
 SOLVE
-/OUT 
+/OUT
 RATE, ON
 DELT,1E-5,1E-5,100
 TIME,1000
@@ -145,7 +145,7 @@ DELT,1.0E-8,1.0E-9,1.0E-8
 TIME, 1.0E-8
 /OUT,SCRATCH
 SOLVE
-/OUT 
+/OUT
 RATE, ON
 DELT,1E-5,1E-5,100
 TIME,1000
@@ -196,6 +196,3 @@ LABEL2(1) = ' ECRXX ',' ECRYY '
 
 FINISH
 *LIST,vm224,vrt
-
-
-

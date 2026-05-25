@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -34,6 +34,7 @@ notches in a finite width thin plate.
 
 First, start MAPDL as a service and disable all but error messages.
 """
+
 from matplotlib import pyplot as plt
 
 # sphinx_gallery_thumbnail_number = 3

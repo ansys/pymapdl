@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -68,7 +68,7 @@ Bracket model
 ~~~~~~~~~~~~~
 
 The dimensions of the corner bracket are shown in the following figure.
-The bracket is made of A36 steel with a Young's modulus of :math:`3\cdot 10^7` psi
+The bracket is made of A36 steel with a Young's modulus of :math:`3\\cdot 10^7` psi
 and Poisson's ratio of :math:`0.27`.
 
 .. figure:: ../../../images/bracket_dimensions.png

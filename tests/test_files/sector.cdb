@@ -7,7 +7,7 @@ NUMOFF,NODE,      678
 NUMOFF,ELEM,      328
 NUMOFF,TYPE,        2
 *ENDIF
-*SET,_BUTTON ,  1.000000000000    
+*SET,_BUTTON ,  1.000000000000
 *SET,_GUI_CLR_BG,' #D4D0C8                        '
 *SET,_GUI_CLR_FG,' #000000                        '
 *SET,_GUI_CLR_INFOBG,' #FFFFDC                        '
@@ -16,20 +16,20 @@ NUMOFF,TYPE,        2
 *SET,_GUI_CLR_SELFG,' #FFFFFF                        '
 *SET,_GUI_CLR_WIN,' #FFFFFF                        '
 *SET,_GUI_FNT_FMLY,'helvetica                       '
-*SET,_GUI_FNT_PXLS,  10.00000000000    
+*SET,_GUI_FNT_PXLS,  10.00000000000
 *SET,_GUI_FNT_SLNT,'r                               '
 *SET,_GUI_FNT_WEGT,'medium                          '
-*SET,_NREAL  ,  0.000000000000    
-*SET,_QUALKEY,  0.000000000000    
-*SET,_RETURN ,  0.000000000000    
-*SET,_SAV1   ,  20.00000000000    
-*SET,_SAV2   ,  10000.00000000    
-*SET,_SAV3   ,  0.000000000000    
-*SET,_SAV4   ,  5.000000000000    
-*SET,_STATUS ,  1.000000000000    
-*SET,_UIQR   ,  1.000000000000    
-*SET,_Z1     ,  0.000000000000    
-*SET,_ZRD    ,  2.000000000000    
+*SET,_NREAL  ,  0.000000000000
+*SET,_QUALKEY,  0.000000000000
+*SET,_RETURN ,  0.000000000000
+*SET,_SAV1   ,  20.00000000000
+*SET,_SAV2   ,  10000.00000000
+*SET,_SAV3   ,  0.000000000000
+*SET,_SAV4   ,  5.000000000000
+*SET,_STATUS ,  1.000000000000
+*SET,_UIQR   ,  1.000000000000
+*SET,_Z1     ,  0.000000000000
+*SET,_ZRD    ,  2.000000000000
 DOF,DELETE
 ET,        1,200
 KEYOP,        1, 1,        7
@@ -804,7 +804,7 @@ CMBLOCK,REFINE  ,NODE,       7  ! users node component definition
 (8i10)
        384       395      -396       438      -446       503      -515
 EXTOPT,ATTR,      0,      0,      0
-EXTOPT,ESIZE,  0,  0.0000    
+EXTOPT,ESIZE,  0,  0.0000
 EXTOPT,ACLEAR,      0
 TREF,  0.00000000
 IRLF,  0

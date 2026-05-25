@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Views:
+
+class Views(CommandsBase):
 
     def angle(
         self,
@@ -538,7 +540,7 @@ class Views:
         fill the window.
 
         Auto resizing is disabled when you issue the :ref:`zoom` command. To restore auto resizing, issue
-        the :ref:`auto` command, or select FIT from the  `Pan, Zoom, Rotate
+        the :ref:`auto` command, or select FIT from the `Pan, Zoom, Rotate
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_wid/Hlp_UI_PanZoom.html#wpanzoomk>`_
         box.
 

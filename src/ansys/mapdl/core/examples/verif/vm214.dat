@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@
 /com,  A conducting rod of length L and radius R is rotating in a uniform
 /com,  magnetic field Bz with angular velocity OMEGAZ. Determine the EMF
 /com,  induced in the rod.
-/com,  
+/com,
 /com,  Reference: Any basic electromagnetic text book
 /com,
 
@@ -101,7 +101,7 @@ V_END_TAR=0.5*OMG_ROD*BZ_EXT*L_ROD**2   ! V=B*OMEGA*L^2/2
 
 *DIM,LABEL,CHAR,2,2
 *DIM,VALUE,,1,3
-LABEL(1,1) = 'VOLTAGE', 
+LABEL(1,1) = 'VOLTAGE',
 LABEL(1,2) = '  (V)     '
 *VFILL,VALUE(1,1),DATA,v_end_tar,
 *VFILL,VALUE(1,2),DATA,v_end,

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ SMRT,OFF
 /COM,         C., IEEE TRANS. SONICS AND ULTRASONICS, VOL. SU-28,
 /COM,         NO. 5, SEPTEMBER 1981., PG. 318-330
 /COM,
-ET,1,SOLID5,3                      ! 3-D COUPLED-FIELD SOLID, PIEZO OPTION 
+ET,1,SOLID5,3                      ! 3-D COUPLED-FIELD SOLID, PIEZO OPTION
 MP,DENS,3,7500                     ! DENSITY
 MP,PERX,3,804.6                    ! PERMITTIVITY (X AND Y DIRECTION)
 MP,PERZ,3,659.7                    ! PERMITTIVITY (Z DIRECTION)
@@ -62,8 +62,8 @@ KGEN,2,1,4,1,,,H
 L,1,5
 LESIZE,1,,,4
 ESIZE,,2
-MSHK,1                    ! MAPPED VOLUME MESH 
-MSHA,0,3D                 ! USING HEX 
+MSHK,1                    ! MAPPED VOLUME MESH
+MSHA,0,3D                 ! USING HEX
 V,1,2,3,4,5,6,7,8
 MAT,3
 VMESH,1
@@ -74,7 +74,7 @@ DSYM,SYMM,Y
 NSEL,ALL
 FINISH
 /out,scratch
-/SOLU    
+/SOLU
 ANTYP,MODAL
 MODOPT,LANB,10,50000,150000        ! BLOCK LANCZOS, EXTRACT 10 MODES
 MXPAND,10                          ! EXPAND ALL MODES
@@ -93,13 +93,13 @@ FINISH
 /VIEW,1,1,1,1
 /VUP,,Z
 /TYPE,,4
-*DO,I,1,10                       
+*DO,I,1,10
 SET,LS,I
 PLDISP,1                           ! DISPLAY ANTI-RESONANCE MODE SHAPES
 *ENDDO
 FINISH
 /out,scratch
-/SOLU    
+/SOLU
 ANTYPE,MODAL
 MODOPT,LANB,10,50000,150000        ! BLOCK LANCZOS, EXTRACT 10 MODES
 MXPAND,10
@@ -154,7 +154,7 @@ JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /PREP7
 SMRT,OFF
 /TITLE, VM175, NATURAL FREQUENCY OF A PIEZOELECTRIC TRANSDUCER
-ET,1,SOLID226,1001                 ! 3-D 20-NODE COUPLED-FIELD SOLID, PIEZO OPTION 
+ET,1,SOLID226,1001                 ! 3-D 20-NODE COUPLED-FIELD SOLID, PIEZO OPTION
 MP,DENS,3,7500                     ! DENSITY
 MP,PERX,3,804.6                    ! PERMITTIVITY (X AND Y DIRECTION)
 MP,PERZ,3,659.7                    ! PERMITTIVITY (Z DIRECTION)
@@ -183,8 +183,8 @@ KGEN,2,1,4,1,,,H
 L,1,5
 LESIZE,1,,,4
 ESIZE,,2
-MSHK,1                    ! MAPPED VOLUME MESH 
-MSHA,0,3D                 ! USING HEX   
+MSHK,1                    ! MAPPED VOLUME MESH
+MSHA,0,3D                 ! USING HEX
 V,1,2,3,4,5,6,7,8
 MAT,3
 VMESH,1
@@ -195,7 +195,7 @@ DSYM,SYMM,Y
 NSEL,ALL
 FINISH
 /out,scratch
-/SOLU    
+/SOLU
 ANTYP,MODAL
 MODOPT,LANB,10,50000,150000        ! BLOCK LANCZOS, EXTRACT 10 MODES
 MXPAND,10                          ! EXPAND ALL MODES
@@ -214,13 +214,13 @@ FINISH
 /VIEW,1,1,1,1
 /VUP,,Z
 /TYPE,,4
-*DO,I,1,10                       
+*DO,I,1,10
 SET,LS,I
 PLDISP,1                           ! DISPLAY ANTI-RESONANCE MODE SHAPES
 *ENDDO
 FINISH
 /out,scratch
-/SOLU    
+/SOLU
 ANTYPE,MODAL
 MODOPT,LANB,10,50000,150000        ! BLOCK LANCZOS, EXTRACT 10 MODES
 MXPAND,10
@@ -248,7 +248,7 @@ LABEL(1,2) = 'Hz','Hz'
 *VFILL,VALUE(1,2),DATA,F1,F2
 *VFILL,VALUE(1,3),DATA,ABS(F1/66560),ABS(F2/88010)
 /COM
-/OUT,vm175,vrt,,APPEND 
+/OUT,vm175,vrt,,APPEND
 /COM, SOLID226
 /COM,
 /COM, SHORT CIRCUIT
@@ -266,4 +266,3 @@ LABEL(1,2) = 'Hz','Hz'
 /OUT
 FINISH
 *LIST,vm175,vrt
-

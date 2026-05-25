@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class MacroFiles:
+
+class MacroFiles(CommandsBase):
 
     def cfclos(self, **kwargs):
         r"""Closes the "command" file.
@@ -454,7 +456,7 @@ class MacroFiles:
 
         This command forces the contents of a macro or other input file to be written to
         :file:`Jobname.LOG`. It is valid only within a macro or input file, and should be placed at the top
-        of the file. :ref:`pmacro`   should be included in any macro or input file that calls GUI
+        of the file. :ref:`pmacro`  should be included in any macro or input file that calls GUI
         functions.
         """
         command = "/PMACRO"

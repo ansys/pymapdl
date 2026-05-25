@@ -1,26 +1,30 @@
-.. _ref_solid_body_loads_commands_api:
 
-****************
-Solid body loads
-****************
+.. _ref_solid_body_loads:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to define body loads on the solid model.
+SolidBodyLoads
+==============
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.solid_body_loads
+
+.. autoclass:: ansys.mapdl.core._commands.solution.solid_body_loads.SolidBodyLoads
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.bfa
-   Mapdl.bfadele
-   Mapdl.bfalist
-   Mapdl.bfk
-   Mapdl.bfkdele
-   Mapdl.bfklist
-   Mapdl.bfl
-   Mapdl.bfldele
-   Mapdl.bfllist
-   Mapdl.bftran
-   Mapdl.bfv
-   Mapdl.bfvdele
-   Mapdl.bfvlist
+
+   SolidBodyLoads.bfa
+   SolidBodyLoads.bfadele
+   SolidBodyLoads.bfalist
+   SolidBodyLoads.bfk
+   SolidBodyLoads.bfkdele
+   SolidBodyLoads.bfklist
+   SolidBodyLoads.bfl
+   SolidBodyLoads.bfldele
+   SolidBodyLoads.bfllist
+   SolidBodyLoads.bftran
+   SolidBodyLoads.bfv
+   SolidBodyLoads.bfvdele
+   SolidBodyLoads.bfvlist

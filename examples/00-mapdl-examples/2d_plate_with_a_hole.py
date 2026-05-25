@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -32,6 +32,7 @@ elements and then verify this using 3D elements.
 
 First, start MAPDL as a service.
 """
+
 # sphinx_gallery_thumbnail_number = 3
 
 import numpy as np

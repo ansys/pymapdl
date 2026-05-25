@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ N,1                      ! DEFINE NODES AND ELEMENT
 N,2
 E,2,1
 FINISH
-/SOLU    
+/SOLU
 ANTYPE,TRANS             ! NONLINEAR TRANSIENT DYNAMIC ANALYSIS
 OUTRES,ALL,ALL
 TIME,1E-6
@@ -91,7 +91,7 @@ ACEL,,386               ! CREATING LOAD VECTOR
 SOLVE
 FINISH
 
-/SOLU    
+/SOLU
 ANTYPE,TRANS             ! TRANSIENT DYNAMIC ANALYSIS
 TRNOPT,MSUP,1,,,,,YES    ! MODE SUPERPOSITION TRANSIENT ANALYSIS, VAOUT=YES
 DELTIM,1E-3
@@ -103,7 +103,7 @@ SOLVE
 
 TIME,.110
 KBC,1                    ! STEPPED BOUNDARY CONDITIONS
-LVSCALE,1.0              ! SCALING THE LOAD VECTOR 
+LVSCALE,1.0              ! SCALING THE LOAD VECTOR
 SOLVE
 FINISH
 

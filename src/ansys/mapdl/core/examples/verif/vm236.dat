@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -68,7 +68,7 @@ EPS0=8.854E-6
 EMUNIT,EPZRO,EPS0
 
 ET,1,182,3,,2
-ET,2,223,1001,1,,1   ! force coupling 
+ET,2,223,1001,1,,1   ! force coupling
 ET,3,178,,1
 
 MP,EX,1,169E3
@@ -100,7 +100,7 @@ MSHAPE,0,2D
 MSHKEY,2
 AMESH,ALL
 
-ASEL,S,MAT,,2         ! "ELASTIC AIR" 
+ASEL,S,MAT,,2         ! "ELASTIC AIR"
 MSHA,0,2D
 MSHMID,2              ! MESH WITHOUT MIDSIDE NODES
 LSEL,S,,,9,10
@@ -135,7 +135,7 @@ CM,BNODE,NODE
 
 NSLE,S
 NSEL,R,LOC,Y,0
-D,ALL,VOLT,0			! GROUND 
+D,ALL,VOLT,0			! GROUND
 
 ALLSEL,ALL
 NSEL,S,LOC,X,0     		!  FIX LEFT END
@@ -189,7 +189,7 @@ FINISH
 
 !---------------------------- POSTPROCESSING ------------------
 /POST26
-NSEL,S,,,2 		
+NSEL,S,,,2
 NSOL,2,2,U,Y,UY  		! Displacement at the tip
 NSOL,3,2,VOLT,,VOLT		! Voltage at the tip
 /OUT,
@@ -209,8 +209,8 @@ FINISH
 /SOLU
 ANTYPE
 ICDELE
-IC,ALL,ALL,0.0			
-CMSEL,S,BNODE			
+IC,ALL,ALL,0.0
+CMSEL,S,BNODE
 DDELE,ALL,VOLT
 ALLSEL,ALL
 
@@ -271,7 +271,7 @@ D,ALL,ALL
 ALLSEL,ALL
 
 CMSEL,S,BNODE			! APPLY PULL-IN VOLTAGE
-IC,ALL,VOLT,VLTG	
+IC,ALL,VOLT,VLTG
 D,ALL,VOLT,VLTG
 ALLSEL,ALL
 
@@ -291,22 +291,22 @@ SOLVE
 
 !------------------- UNLOADING (from 18V to 11V) -------------
 
-CMSEL,S,BNODE			
+CMSEL,S,BNODE
 D,ALL,VOLT,VLTG2		! APPLY 14.5v
 ALLSEL,ALL
-SOLVE 
+SOLVE
 
-CMSEL,S,BNODE			
+CMSEL,S,BNODE
 D,ALL,VOLT,VLTG1		! APPLY 11.0v
 ALLSEL,ALL
-SOLVE 
+SOLVE
 
 FINI
 
 !---------------------------- Postprocessing ------------------
 /POST26
 ALLS
-NSEL,S,,,2 		
+NSEL,S,,,2
 NSOL,2,2,U,Y,uy  		! DISPLACEMENT AT THE TIP
 NSOL,3,2,VOLT,,volt		! VOLTAGE AT THE TIP
 /OUT,

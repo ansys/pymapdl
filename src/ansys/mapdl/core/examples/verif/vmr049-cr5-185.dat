@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -41,7 +41,7 @@ MP,EX,1,10
 MP,NUXY,1,0.3
 TOFF,1.0E-10
 TB,CREEP,1,,,2
-TBDATA,1,C1,C2,C3,C4,       
+TBDATA,1,C1,C2,C3,C4,
 BLOCK,0,1,0,1,0,0.2
 ESIZE,0.125
 VMESH,ALL
@@ -212,14 +212,14 @@ R7=SYZ(7)/0.01427
 TARGET(1)='0.05000','0.04322','0.03751','0.03081','0.02499','0.01877','0.01427'
 LABEL(1)='-4','-3','-2','-1','0','1','2'
 *VFILL,RATIO,DATA,R1,R2,R3,R4,R5,R6,R7
-/COM         
+/COM
 /COM,--------- vmr049-cr5-185 RESULTS COMPARISON-----------
 /COM,
 /COM, vmr049-cr5-185.jpeg RESULTS SHOULD MATCH R0049 NAFEMS MANUAL
-/COM, GRAPH RESULTS ON PAGE 109, FIGURE 3.16(A).  THE RESULTS 
+/COM, GRAPH RESULTS ON PAGE 109, FIGURE 3.16(A).  THE RESULTS
 /COM, DISPLAYED ARE INCREMENTED FOR THIS PURPOSE.
 /COM,
-/COM,|  LOG(TIME) |  TARGET  |  Mechanical APDL  |  RATIO 
+/COM,|  LOG(TIME) |  TARGET  |  Mechanical APDL  |  RATIO
 /COM,
 *VWRITE,LABEL(1),TARGET(1),SYZ(1,1),RATIO(1,1)
 (1X,A12,'   ',1X,A8,'   ',F14.6,'   ',1F12.3)

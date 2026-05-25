@@ -20,9 +20,24 @@ updates:
           patterns:
             - "*"
 
+  - directory: ".github/actions/launch-mapdl-docker"
+    package-ecosystem: "npm"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "00:00"
+    labels:
+      - "maintenance"
+      - "dependencies"
+    commit-message:
+      prefix: "build"
+    cooldown:
+      default-days: 7
+      include:
+        - "*"  # Include all dependencies in cooldown
+
   - directory: "/" # Location of package manifests
     package-ecosystem: "pip" # See documentation for possible values
-    insecure-external-code-execution: allow
     schedule:
       interval: "weekly"
       day: "friday"
@@ -37,8 +52,9 @@ updates:
       semver-patch-days: 3
       include:
         - "*"  # Include all dependencies in cooldown
-      exclude:
-        - "ansys-tools-visualization-interface"
+    exclude-paths:
+      - "doc/source/examples/extended_examples/gui/**"
+      - "doc/source/examples/extended_examples/hpc/**"
     groups:
        minimal:
           patterns:
@@ -46,7 +62,6 @@ updates:
             - "numpy"
             - "platformdirs"
             - "psutil"
-            - "pyansys-tools-versioning"
 
        grpc-deps:
           patterns:
@@ -71,7 +86,6 @@ updates:
             - "ansys-api-mapdl"
             - "ansys-dpf-core"
             - "pyansys-tools-report"
-            - "pyansys-tools-versioning"
 
        documentation:
           patterns:
@@ -97,3 +111,31 @@ updates:
        jupyter:
           patterns:
             - "ipywidgets"
+
+  - directory: "doc/source/examples/extended_examples/gui"
+    package-ecosystem: "pip"
+    exclude-paths:
+      - "doc/source/examples/extended_examples/gui/**"
+      - "doc/source/examples/extended_examples/hpc/**"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0
+    cooldown:
+      default-days: 10
+      semver-patch-days: 3
+      include:
+        - "*"  # Include all dependencies in cooldown
+
+  - directory: "doc/source/examples/extended_examples/hpc"
+    package-ecosystem: "pip"
+    exclude-paths:
+      - "doc/source/examples/extended_examples/gui/**"
+      - "doc/source/examples/extended_examples/hpc/**"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0
+    cooldown:
+      default-days: 10
+      semver-patch-days: 3
+      include:
+        - "*"  # Include all dependencies in cooldown

@@ -23,7 +23,7 @@ _old/
 # Pip generated folders #
 #########################
 *.egg-info/
-build/
+./build/
 dist/
 
 # MISC
@@ -42,21 +42,21 @@ doc/source/images/auto-generated/*
 
 
 # Testing
-factory/
-Testing/
-UnitTesting/
-TODO
-test.sh
-.pytest_cache/
-tests/.coverage
-tests/htmlcov
-tests/cyclic/htmlcov
-.coverage
-*,cover
+./Testing/
 .benchmarks/
-test-output.xml
-coverage.xml
+.coverage
+.pytest_cache/
 .tox/
+*,cover
+coverage.xml
+factory/
+test-output.xml
+test.sh
+tests/.coverage
+tests/cyclic/htmlcov
+tests/htmlcov
+TODO
+UnitTesting/
 
 \#*
 .\#*
@@ -67,7 +67,10 @@ coverage.xml
 wheelhouse/
 
 # jupyterlab
-node_modules
+# Node modules (but allow compiled GitHub Action dist/)
+node_modules/
+!.github/actions/**/dist/
+!.github/actions/**/dist-post/
 yarn.lock
 jupyterlab/docker/*.tar.gz
 examples/.local
@@ -94,6 +97,9 @@ venv*
 .idea/
 /.vs
 
+# Docker testing secrets - never commit real credentials
+docker/testing/.env
+
 # Extra
 doc/source/errors.txt
 doc/source/sg_execution_times.rst
@@ -103,3 +109,6 @@ doc/webserver.pid
 
 # Profiling
 prof
+.github/skills/pymapdl-cli
+docker/run/.env
+docker/testing/.env

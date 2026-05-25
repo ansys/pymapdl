@@ -1,15 +1,20 @@
-.. _ref_artificially_matched_layers_commands_api:
 
-***************************
-Artificially matched layers
-***************************
+.. _ref_artificially_matched_layers:
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to create artificially matched layers (PMLs or AMLs) designed to absorb high frequency waves.
+ArtificiallyMatchedLayers
+=========================
+
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.artificially_matched_layers
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.artificially_matched_layers.ArtificiallyMatchedLayers
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.pmlopt
-   Mapdl.pmlsize
+
+   ArtificiallyMatchedLayers.pmlopt
+   ArtificiallyMatchedLayers.pmlsize
+   ArtificiallyMatchedLayers.psys

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -445,8 +445,10 @@ for i in range(1, 100):
     dam_op.inputs.time_scoping([i])
     cohesive_damage = dam_op.outputs.fields_container()[0]
     # Update coordinates and scalars
-    plotter.update_coordinates(disp_result.data, mesh=mesh_beam, render=False)
-    plotter.update_coordinates(disp_cohesive.data, mesh=mesh_contact, render=False)
+
+    mesh_beam.points = disp_result.data
+    mesh_contact.points = disp_cohesive.data
+
     plotter.update_scalars(cohesive_damage.data, mesh=mesh_contact, render=False)
     plotter.write_frame()
 

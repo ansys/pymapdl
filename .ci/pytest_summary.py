@@ -79,15 +79,15 @@ def compute_statistics(
     test_stats: dict[str, TEST_STATS_TYPE] = {}
 
     for test in tests:
-        test_id: str = test["id"]
+        test_id = test["id"]  # type: ignore[assignment]
         if test_id not in test_stats:
-            test_stats[test_id] = {
+            test_stats[test_id] = {  # type: ignore[index]
                 "durations": [],
                 "n_tests": 0,
             }
 
-        test_stats[test_id]["durations"].append(test["duration"])
-        test_stats[test_id]["n_tests"] += 1
+        test_stats[test_id]["durations"].append(test["duration"])  # type: ignore[arg-type,index]
+        test_stats[test_id]["n_tests"] += 1  # type: ignore[index]
 
     summary: list[dict[str, Any]] = []
 
@@ -170,10 +170,10 @@ def print_table(
         for i, each_key in enumerate(keys):
 
             if i == 0:
-                id_: str = test[each_key]
+                id_ = test[each_key]  # type: ignore[assignment]
 
                 id_ = (
-                    id_.replace("(", r"(")
+                    id_.replace("(", r"(")  # type: ignore[union-attr]
                     .replace(")", r")")
                     .replace("[", r"[")
                     .replace("]", r"]")
@@ -197,8 +197,8 @@ def print_table(
 
 def print_summary(summary: list[dict[str, str | float]], num: int = 10):
     """Print the top N longest tests and the top N most variable tests."""
-    longest_tests = sorted(summary, key=lambda x: -x["average_duration"])[:num]
-    most_variable_tests = sorted(summary, key=lambda x: -x["std_dev"])[:num]
+    longest_tests = sorted(summary, key=lambda x: -x["average_duration"])[:num]  # type: ignore[operator]
+    most_variable_tests = sorted(summary, key=lambda x: -x["std_dev"])[:num]  # type: ignore[operator]
 
     print(f"\n## Top {num} Longest Running Tests\n")
     print_table(

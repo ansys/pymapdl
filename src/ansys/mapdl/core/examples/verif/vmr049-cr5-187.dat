@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -86,25 +86,25 @@ NSEL,ALL
 
 /SOLU
 NSEL,S,LOC,Z,0.1
-*GET,_NMIN,NODE,,NUM,MIN       
+*GET,_NMIN,NODE,,NUM,MIN
 *GET,_NNUM,NODE,,COUNT
 
 *DO,I,1,_NNUM
    D,_NMIN,UX,-A(_NMIN)*0.001*SIN(B(_NMIN))
    D,_NMIN,UY,A(_NMIN)*0.001*COS(B(_NMIN))
    NSEL,U,,,_NMIN
-   *GET,_NMIN,NODE,,NUM,MIN       
+   *GET,_NMIN,NODE,,NUM,MIN
 *ENDDO
 
 NSEL,S,LOC,Z,0.2
-*GET,_NMIN,NODE,,NUM,MIN       
+*GET,_NMIN,NODE,,NUM,MIN
 *GET,_NNUM,NODE,,COUNT
 
 *DO,I,1,_NNUM
    D,_NMIN,UX,-A(_NMIN)*0.002*SIN(B(_NMIN))
    D,_NMIN,UY,A(_NMIN)*0.002*COS(B(_NMIN))
    NSEL,U,,,_NMIN
-   *GET,_NMIN,NODE,,NUM,MIN       
+   *GET,_NMIN,NODE,,NUM,MIN
 *ENDDO
 NSEL,ALL
 FINISH

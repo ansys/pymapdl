@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@
 *DIM,ISYM,TABLE,24
 *DIM,THETA,TABLE,121
 *DIM,CURVEI,TABLE,121                  ! CURVE INPUT TO PROGRAM
-*DIM,CURVEO,TABLE,121                  ! CURVE WHICH WILL BE DEVELOPED 
+*DIM,CURVEO,TABLE,121                  ! CURVE WHICH WILL BE DEVELOPED
 !                                        FROM GENERATED COEFFICIENTS
 *VFILL,MODE(2),RAMP,1,2                ! ODD MODE NUMBERS
 *VFILL,ISYM(2),RAMP,-1,0               ! ISYM = -1 (SINE)
@@ -47,10 +47,10 @@
 *VWRITE,  MODE(1),COEFF(1),ISYM(1)
 (T10,F10.4,T20,F10.4,T30,F10.4,T40,F10.4)
 
-*VWRITE                                                      
-(///T14,'THETA',T23,'CURVE IN',T34,'CURVE OUT',/)               
-*VWRITE, THETA(1),CURVEI(1),CURVEO(1)                        
-(T10,F10.4,T20,F10.4,T30,F10.4)                              
+*VWRITE
+(///T14,'THETA',T23,'CURVE IN',T34,'CURVE OUT',/)
+*VWRITE, THETA(1),CURVEI(1),CURVEO(1)
+(T10,F10.4,T20,F10.4,T30,F10.4)
 /SHOW,JPEG
 /GFILE,500
 JPEG,QUAL,100
@@ -92,4 +92,3 @@ LABEL(1,2) = 'COEF','COEF','COEF','COEF'
 /OUT
 FINISH
 *LIST,vm130,vrt
-

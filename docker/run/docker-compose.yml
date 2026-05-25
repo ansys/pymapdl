@@ -1,0 +1,117 @@
+# Docker Compose configuration for running Ansys MAPDL and DPF containers
+#
+# This file provides services for running MAPDL with an external license server.
+# Connect to MAPDL through ports 50052 (gRPC) and 50055 (database feature).
+# DPF server is available on port 50056.
+#
+# REQUIREMENTS
+# ============
+# - Docker and Docker Compose
+# - MAPDL Docker image
+# - Access to an Ansys license server
+# - (Optional) DPF Docker image
+#
+# REQUIRED ENVIRONMENT VARIABLES
+# ==============================
+# - ANSYSLMD_LICENSE_FILE: License server address (e.g., 1055@mylicenseserver)
+# - DOCKER_IMAGE: Path to MAPDL Docker image
+# - DPF_DOCKER_IMAGE: Path to DPF Docker image (optional, only if using DPF)
+#
+# OPTIONAL ENVIRONMENT VARIABLES
+# ==============================
+# - AWP_ROOT: MAPDL version environment variable name (default: AWP_ROOT251)
+# - AWP_ROOT_VALUE: MAPDL installation path in container (default: /ansys_inc)
+# - DOCKER_USER: Username inside container (default: mapdl)
+#
+# USAGE
+# =====
+# 1. Set environment variables:
+#    export ANSYSLMD_LICENSE_FILE=1055@mylicenseserver
+#    export DOCKER_IMAGE=myregistry.com/myimage:mytag
+#    export DPF_DOCKER_IMAGE=myregistry.com/mydpfimage:mytag  # optional
+#
+# 2. Start services:
+#    docker-compose up -d mapdl              # MAPDL only
+#    docker-compose up -d mapdl dpf          # MAPDL with DPF
+#    docker-compose --profile mapdl-dpf up -d  # Using profile
+#
+# AVAILABLE SERVICES
+# ==================
+# - mapdl: MAPDL instance with gRPC server (ports 50052, 50055)
+# - dpf: Data Processing Framework server (port 50056)
+# - mapdl-local: MAPDL development container with PyMAPDL workspace mounted
+#
+# PROFILES
+# ========
+# - mapdl: Start MAPDL service
+# - mapdl-dpf: Start MAPDL and DPF services
+# - local: Start MAPDL in development mode
+# - local-dpf: Start MAPDL in development mode with DPF
+# - dpf: Start DPF service only
+#
+
+name: pymapdl
+
+services:
+  mapdl:
+    profiles:
+      - mapdl
+      - mapdl-dpf
+    restart: always
+    shm_size: '8gb'
+    container_name: mapdl
+    mem_reservation: 8g
+    environment:
+      - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
+      - ANSYS_LOCK=OFF
+    ports:
+      - '50052:50052'
+      - '50055:50055'
+    image: ${DOCKER_IMAGE}
+    platform: linux/amd64
+
+  dpf:
+    profiles:
+      - dpf
+      - mapdl-dpf
+      - local-dpf
+    image: ${DPF_DOCKER_IMAGE}
+    platform: linux/amd64
+    ports:
+      - '50056:50052'
+    restart: always
+    environment:
+      - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
+
+  mapdl-local:
+    profiles:
+      - local
+      - local-dpf
+    restart: always
+    shm_size: '8gb'
+    container_name: mapdl-local
+    mem_reservation: 8g
+    environment:
+      - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
+      - ANSYS_LOCK=OFF
+      - ${AWP_ROOT:-AWP_ROOT251}=${AWP_ROOT_VALUE:-/ansys_inc}
+    # If also running the `mapdl` service, you need to set different ports
+    # to avoid conflicts.
+    ports:
+      - '50052:50052'
+      - '50055:50055'
+    platform: linux/amd64
+    image: ${DOCKER_IMAGE}
+    # Mount the current directory to /home/${DOCKER_USER:-mapdl}/pymapdl
+    # This allows you to run the container and have access to the current directory
+    # from inside the container.
+    # This is useful for development purposes.
+    volumes:
+      - ../../:/home/${DOCKER_USER:-mapdl}/pymapdl:cached
+    working_dir: /home/${DOCKER_USER:-mapdl}/pymapdl
+    entrypoint: /bin/sh -c "echo 'Container is ready. You can now attach to it.'; while sleep 1000; do :; done"
+
+
+networks:
+  default:
+    driver: bridge

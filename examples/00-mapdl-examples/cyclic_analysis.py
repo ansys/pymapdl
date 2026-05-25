@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -38,6 +38,7 @@ Our first task is to create a simple cyclic model with 7 sectors.
 First, start MAPDL as a service.
 
 """
+
 # sphinx_gallery_thumbnail_number = 3
 
 import numpy as np

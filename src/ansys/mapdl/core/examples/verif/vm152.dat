@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -47,14 +47,14 @@ D,ALL,UZ
 TREF,0                  ! REFERENCE (STRESS-FREE) TEMPERATURE
 BFUNIF,TEMP,-(20/3)     ! COOL MEMBRANE TO INVOKE PRESOLESS
 FINISH
-/SOLU    
+/SOLU
 ANTYPE,STATIC
 PSTRES,ON               ! STATIC PRESTRESS ANALYSIS
 OUTPR,BASIC,ALL
 /OUT,SCRATCH
 SOLVE
 FINISH
-/SOLU    
+/SOLU
 ANTYPE,MODAL
 PSTRES,ON               ! PRESTRESSED MODAL ANALYSIS
 MXPAND,3
@@ -71,12 +71,12 @@ PLDISP,1
 *GET,F11,MODE,0,FREQ
 /WINDOW,1,OFF
 /WINDOW,4,RBOT
-SET,1,2                 ! FOR 4TH WINDOW 
+SET,1,2                 ! FOR 4TH WINDOW
 PLDISP,1
 *GET,F12,MODE,2,FREQ
 /WINDOW,4,OFF
 FINISH
-/SOLU    
+/SOLU
 MODE,1                  ! FIRST HARMONIC MODE
 /OUT,SCRATCH
 SOLVE
@@ -89,7 +89,7 @@ PLDISP,1
 *GET,F21,MODE,0,FREQ
 /WINDOW,2,OFF
 FINISH
-/SOLU    
+/SOLU
 MODE,2                  ! SECOND HARMONIC MODE
 /OUT,SCRATCH
 SOLVE

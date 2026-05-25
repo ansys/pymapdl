@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -19,13 +19,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """
 Contains the Node implementation of the MapdlDb class.
 
 This allows access to the Nodes in the MAPDL DB from Python.
-
 """
+
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
@@ -95,7 +94,6 @@ class DbNodes:
            [0., 0., 0.],
            [0., 0., 0.],
            [0., 0., 0.]])
-
     """
 
     def __init__(self, db):
@@ -149,7 +147,6 @@ class DbNodes:
 
         >>> nodes.first(inod=10)
         11
-
         """
         self._itnod = inod
         return self.next()
@@ -177,7 +174,6 @@ class DbNodes:
 
         >>> nodes.next()
         2
-
         """
         if self._itnod == -1:
             raise MapdlRuntimeError(
@@ -289,7 +285,6 @@ class DbNodes:
         >>> nodes = mapdl.db.nodes
         >>> nodes.info(1, DBDef.DB_SELECTED)
         1
-
         """
         if isinstance(ikey, DBDef):
             ikey = ikey.value
@@ -320,7 +315,6 @@ class DbNodes:
         >>> nodes = mapdl.db.nodes
         >>> nodes.num(selected=True)
         425
-
         """
         if selected:
             return self.info(0, DBDef.DB_NUMSELECTED.value)
@@ -339,7 +333,6 @@ class DbNodes:
         >>> nodes = mapdl.db.nodes
         >>> nodes.max_num
         425
-
         """
         return self.info(0, DBDef.DB_MAXDEFINED.value)
 
@@ -373,7 +366,6 @@ class DbNodes:
         >>> sel, coord = nodes.coord(22)
         >>> coord
         (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
-
         """
         request = mapdl_db_pb2.getnodRequest(node=inod)
         node = self._db._stub.getNod(request)
@@ -422,7 +414,6 @@ class DbNodes:
                [0., 0., 0.],
                [0., 0., 0.],
                [0., 0., 0.]])
-
         """
         chunk_size = DEFAULT_CHUNKSIZE
         metadata = [("chunk_size", str(chunk_size))]
@@ -508,7 +499,6 @@ class DbNodes:
         >>> sel, coord = nodes.coord(1)
         >>> coord
         (10.0, 20.0, 30.0, 0.0, 0.0, 0.0)
-
         """
         request = mapdl_db_pb2.putnodRequest()
         request.node = inod

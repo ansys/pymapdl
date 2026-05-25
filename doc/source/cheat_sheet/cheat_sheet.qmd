@@ -90,7 +90,7 @@ pymapdl stop --all
 # PyMAPDL commands
 
 PyMAPDL commands are Python statements that act as a
-wrapper for APDL commands. For example: ``ESEL,s,type,1`` 
+wrapper for APDL commands. For example: ``ESEL,s,type,1``
 is translated as
 ```{python}
 #| echo: false
@@ -132,7 +132,7 @@ mapdl.parameters['my_np_param'] = np_array
 saved_np_array = mapdl.parameters['my_np_param']
 ```
 
-Access to specific model entity values with ``get_array`` and 
+Access to specific model entity values with ``get_array`` and
 `` get_value``.
 ```{python}
 # List the current selected node numbers
@@ -155,7 +155,7 @@ pymapdl.convert_script(
 
 # Mesh and geometry of a model
 
-Store the finite element mesh as a 
+Store the finite element mesh as a
 [VTK UnstructuredGrid data](https://vtk.org/doc/nightly/html/classvtkUnstructuredGrid.html)
 object:
 
@@ -230,7 +230,7 @@ mapdl.post_processing.plot_nodal_temperature()
 nodal_temp= mapdl.post_processing.nodal_temperature()
 ```
 
-You can store the command output following the 
+You can store the command output following the
 [Postprocessing object methods](https://mapdl.docs.pyansys.com/version/stable/user_guide/post.html#postprocessing-object-methods):
 ```{python}
 cmd = mapdl.prnsol("TEMP")

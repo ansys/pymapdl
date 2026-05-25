@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM151
-/PREP7  
+/PREP7
 MP,PRXY,,0.3
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
@@ -45,7 +45,7 @@ D,ALL,UX,,,,,UY
 NSEL,ALL
 D,ALL,UZ           ! CONSTRAIN TORSIONAL DOF'S
 FINISH
-/SOLU    
+/SOLU
 ANTYPE,MODAL       ! MODE FREQUENCY ANALYSIS
 MXPAND,3           ! EXPAND FIRST 3 MODE SHAPES
 MODOPT,LANB,9
@@ -63,7 +63,7 @@ PLDISP,1
 /WINDOW,1,OFF
 *GET,F1,MODE,0,FREQ
 FINISH
-/SOLU    
+/SOLU
 MODE,1             ! FIRST HARMONIC MODE
 /OUT,SCRATCH
 SOLVE
@@ -76,7 +76,7 @@ PLDISP,1
 /WINDOW,2,OFF
 *GET,F2,MODE,1,FREQ
 FINISH
-/SOLU    
+/SOLU
 MODE,2             ! SECOND HARMONIC MODE
 /OUT,SCRATCH
 SOLVE

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class SurfaceOperations:
+
+class SurfaceOperations(CommandsBase):
 
     def sucalc(
         self,
@@ -263,7 +265,7 @@ class SurfaceOperations:
         For ``Geom`` = OFF (or 0 or NO), only results information is written to this parameter.
 
         For ``Geom`` = ON (or 1 or YES), both geometry data and results information are written to this
-        parameter. Geometry data includes 7 data items: (GCX, GCY, GCZ, NORMX, NORMY, NORMZ,  and DA).
+        parameter. Geometry data includes 7 data items: (GCX, GCY, GCZ, NORMX, NORMY, NORMZ, and DA).
         Results information is then written to the 8th column of the parameter. SetNames of GCX, GCY, GCZ,
         NORMX, NORMY, NORMZ, and DA are predefined and computed when :ref:`sucr` is issued.
         """

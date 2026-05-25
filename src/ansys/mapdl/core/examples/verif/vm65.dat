@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -22,14 +22,14 @@
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM65
-/PREP7                 
+/PREP7
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /TITLE, VM65, TRANSIENT RESPONSE OF A BALL IMPACTING A FLEXIBLE SURFACE
 C***        VIBRATION THEORY AND APPLICATIONS, THOMSON, 2ND. PRINTING, PAGE 110,
 C***        EX. 4.6-1, USING NON-LINEAR TRANSIENT DYNAMIC ANALYSIS
 C***
-/PREP7                 
+/PREP7
 ANTYPE,TRANS           ! NONLINEAR TRANSIENT DYNAMIC ANALYSIS
 ET,1,MASS21, , ,4      ! 2-D MASS WITHOUT ROTARY INERTIA
 ET,2,CONTA175,,1       ! 2-D NODE-TO-SURFACE CONTACT ELEMENT
@@ -41,7 +41,7 @@ N,1,0,1
 TYPE,1
 REAL,1
 E,1                    ! MASS ELEMENT
-TYPE,2     
+TYPE,2
 REAL,2
 E,1                    ! CONTACT ELEMENT
 N,2,-1
@@ -52,7 +52,7 @@ TSHAP,LINE
 E,3,2                  ! TARGET ELEMENT
 ALLSEL,ALL
 FINISH
-/SOLU    
+/SOLU
 NSUBST,10,10,1
 ACEL,,386
 KBC,1                  ! STEP ACCELERATION CHANGE

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -28,13 +28,13 @@ JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /TITLE, VM25, STRESSES IN A LONG CYLINDER
 C*** STR. OF MATLS., TIMOSHENKO, PART 2, 3RD ED., PAGE 213, PROB. 1
-C***  INTERNAL PRESSURE 
+C***  INTERNAL PRESSURE
 ANTYPE,STATIC        ! STATIC ANALYSIS
 ET,1,PLANE183,,,1,   ! AXISYMM
 MP,EX,1,30E6         ! MATERIAL PROPERTIES
 MP,DENS,1,.00073
 MP,NUXY,1,0.3        ! DEFINE KEYPOINTS, LINES, AND AREAS
-N,1,4 
+N,1,4
 N,2,4+4/14
 N,3,4+4/14,0.5
 N,4,4,0.5
@@ -43,14 +43,14 @@ N,6,4+4/14,0.25
 N,7,4+4/28,0.5
 N,8,4,0.25
 E,1,2,3,4,5,6,7,8
-EGEN,14,8,1,,,,,,,,4/14  
+EGEN,14,8,1,,,,,,,,4/14
 NUMMRG,NODE
 EGEN,2,111,1,14,,,,,,,,0.5
 NUMMRG,NODE
 SAVE,MODEL           ! SAVE MODEL FOR SECOND LOAD CASE
 NSEL,S,LOC,Y,0       ! SET UP LONG CYLINDER EFFECT
 D,ALL,UY
-NSEL,S,LOC,Y,1   
+NSEL,S,LOC,Y,1
 CP,1,UY,ALL          ! COUPLE AXIAL DISPLACEMENTS AT UNCONSTRAINED Y EDGE
 NSEL,ALL
 FINISH
@@ -150,4 +150,3 @@ RESUME,TABLE_2
 /OUT
 FINISH
 *LIST,vm25,vrt
-

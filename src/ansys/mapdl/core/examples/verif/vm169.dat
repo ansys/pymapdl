@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -23,9 +23,9 @@
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM169
 /OUT,SCRATCH
-_GEOMGEN_1=0                    ! SET THIS TO 1 TO UPDATE CDB FILE 
+_GEOMGEN_1=0                    ! SET THIS TO 1 TO UPDATE CDB FILE
 _EXIT1=0                       ! SET THIS TO 1 TO EXIT WITHOUT SOLVING
-*IF,_GEOMGEN_1,EQ,1,THEN 
+*IF,_GEOMGEN_1,EQ,1,THEN
 /PREP7
 smrt,off
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
@@ -65,12 +65,12 @@ VSEL,S,,,2,3
 VSEL,A,,,4,5
 VATT,2
 VSEL,S,,,1,5
-ESIZE,,1 
+ESIZE,,1
 MSHK,0                    ! FREE VOLUME MESH
-MSHA,1,3D                 ! USING TETS 
+MSHA,1,3D                 ! USING TETS
 VMESH,ALL
 VSEL,ALL
-VMESH,6                     ! MESH AIR GAP 
+VMESH,6                     ! MESH AIR GAP
 NSEL,,LOC,X,0
 D,ALL,MAG,0                 ! SET FLUX-NORMAL BOUNDARY CONDITION
 NSEL,ALL
@@ -85,7 +85,7 @@ FINISH
 CDREAD,db,vm169,cdb
 *ENDIF
 FINISH
-/SOLU    
+/SOLU
 /OUT
 MAGSOLV,2                   ! RSP METHOD
 /OUT,SCRATCH

@@ -8,21 +8,22 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: write
-  packages: write
+permissions: {}
 
 jobs:
   cleanup:
     name: Cleaning unnecessary packages
     runs-on: ubuntu-latest
+    permissions:
+      contents: read  # Needed to read repository contents
+      packages: write  # Needed to delete untagged Docker images
     env:
       PACKAGE_DELETION_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
 
     - name: "Perform versions cleanup - except certain tags"
-      uses: ansys/actions/hk-package-clean-untagged@v10.0.14
+      uses: ansys/actions/hk-package-clean-untagged@d946b24b9a765f4169bcc94afdb27bd1a0533741 #v10.3.2
       with:
         package-name: 'mapdl'
         token: ${{ secrets.GITHUB_TOKEN }}

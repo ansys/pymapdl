@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 /PREP7
 /TITLE, VM146, BENDING OF A REINFORCED CONCRETE BEAM
 C***   STR. OF MATL., TIMOSHENKO, PART 1, 3RD ED., PAGE 221
- 
+
 ANTYPE,STATIC
 ET,1,SOLID65,,,,,2           ! REINFORCED CONCRETE SOLID ELEMENT
 ET,2,LINK180                 ! STEEL RODS
@@ -33,8 +33,8 @@ ET,3,PIPE288		     ! DUMMY ELEMENTS FOR CONSTRAINT EQUATIONS
 KEYOPT,3,3,3       	     ! CUBIC SHAPE FUNCTION
 KEYOPT,3,4,2		     ! THICK PIPE THEORY
 R,1
-SECTYPE,2,LINK   
-SECDATA,0.15		     	     ! HALF AREA OF ROD             
+SECTYPE,2,LINK
+SECDATA,0.15		     	     ! HALF AREA OF ROD
 SECTYPE,3,PIPE
 SECDATA,1,0.5,8
 MP,EX,1,2E6                  ! CONCRETE PROPERTIES
@@ -74,7 +74,7 @@ NSEL,ALL
 D,ALL,ROTY                              ! CONSTRAIN UNNEEDED PIPE ROTATIONS
 F,6,MZ,300,,16,10                       ! APPLY BENDING MOMENT
 FINISH
-/SOLU    
+/SOLU
 AUTOTS,ON
 NSUBST,5
 OUTPR,,LAST
@@ -123,6 +123,3 @@ RESUME,TABLE_1
 /OUT
 FINISH
 *LIST,vm146,vrt
-
-
-

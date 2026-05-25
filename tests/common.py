@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Shared testing module"""
+
 from collections import namedtuple
 import os
 import subprocess
@@ -31,11 +32,9 @@ import psutil
 
 from ansys.mapdl.core import LOG, Mapdl
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlExitedError
-from ansys.mapdl.core.launcher import (
-    _is_ubuntu,
-    is_ansys_process,
-    launch_mapdl,
-)
+from ansys.mapdl.core.launcher import launch_mapdl
+from ansys.mapdl.core.launcher.environment import is_ubuntu as _is_ubuntu
+from ansys.mapdl.core.launcher.network import _is_mapdl_process as is_ansys_process
 
 PROCESS_OK_STATUS = [
     psutil.STATUS_RUNNING,  #
@@ -74,7 +73,7 @@ def is_on_local():
             os.environ.get("PYMAPDL_START_INSTANCE").lower() != "false"
         )  # default is false
 
-    from ansys.tools.path import find_mapdl
+    from ansys.tools.common.path import find_mapdl
 
     _, rver = find_mapdl()
 
@@ -109,7 +108,7 @@ def has_grpc():
         return True
 
     try:
-        from ansys.tools.path import find_mapdl
+        from ansys.tools.common.path import find_mapdl
     except ModuleNotFoundError:
         return True
 
@@ -146,10 +145,6 @@ def support_plotting():
 
     except ModuleNotFoundError:
         return False
-
-
-def is_running_on_student():
-    return os.environ.get("ON_STUDENT", "NO").upper().strip() in ["YES", "TRUE"]
 
 
 def testing_minimal():
@@ -295,7 +290,7 @@ def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
                 run_location=mapdl._path,
                 cleanup_on_exit=mapdl._cleanup,
                 license_server_check=False,
-                start_timeout=10,
+                timeout=10,
             )
             LOG.info("MAPDL died during testing, relaunched.")
 

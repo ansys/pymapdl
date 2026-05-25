@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -33,7 +33,7 @@ from ansys.mapdl.core.component import (
     ComponentManager,
 )
 from ansys.mapdl.core.errors import ComponentNoData
-from conftest import TestClass
+from conftest import TestClass, clear
 
 
 def test_str_rep(mapdl, cleared):
@@ -88,10 +88,12 @@ def test_logger(mapdl, cleared):
 def test_parsing_too_many_components(mapdl, cleared):
     mapdl.prep7()
 
-    for i in range(1, 100):
-        mapdl.nsel("NONE")
-        mapdl.n(i, i, 0, 0)
-        mapdl.cm(f"node_{i:03.0f}", "NODE")
+    with mapdl.non_interactive:
+        mapdl.run("*do,i,1,99")
+        mapdl.run("nsel,none")
+        mapdl.run("n,i,i,0,0")
+        mapdl.run("cm,NODE_%i%, node")
+        mapdl.run("*enddo")
 
     s = mapdl.components.__str__()
     assert len(mapdl.components._comp) == 99
@@ -100,7 +102,7 @@ def test_parsing_too_many_components(mapdl, cleared):
     assert "***" not in s
     assert "*****MAPDL" not in s
     for i in range(1, 100):
-        assert re.search(f"NODE_{i:03.0f}" + r"\s+: NODE", s)
+        assert re.search(f"NODE_{i}" + r"\s+: NODE", s)
 
 
 class Test_components(TestClass):
@@ -108,6 +110,7 @@ class Test_components(TestClass):
     @staticmethod
     @pytest.fixture(scope="class")
     def setup(mapdl):
+        clear(mapdl)
         # setup the full file
         mapdl.block(0, 1, 0, 1, 0, 1)
         mapdl.et(1, 186)
@@ -392,3 +395,21 @@ class Test_components(TestClass):
         mapdl.nsel("s", vmin=1)
         mapdl.cm("asdf", "node")
         assert len(mapdl.components) == 4
+
+
+def test_big_component(mapdl, cleared):
+    mapdl.prep7()
+
+    with mapdl.non_interactive:
+        mapdl.run("*do,i,1,999")
+        mapdl.run("n,i,i,0,0")
+        mapdl.run("*enddo")
+
+    mapdl.allsel()
+    mapdl.cm("many_nodes", "NODE")
+
+    print(mapdl.mesh)  # This will trigger COMP parsing
+
+    assert "MANY_NODES" in str(mapdl.components)
+    assert len(mapdl.components["many_nodes"]) == 999
+    assert all(isinstance(item, int) for item in mapdl.components["many_nodes"])

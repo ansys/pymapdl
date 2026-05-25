@@ -1,0 +1,81 @@
+{
+  "skill_name": "pymapdl-cli",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I have an APDL script called thermal_model.inp and a MAPDL instance already running on port 50060. How do I send that script to the running instance from my terminal?",
+      "expected_output": "A command using pymapdl exec --file thermal_model.inp --port 50060, with explanation that exec connects to an existing instance",
+      "files": [],
+      "assertions": [
+        {
+          "description": "Uses pymapdl exec (not pymapdl run or other command)",
+          "check": "contains 'pymapdl exec'"
+        },
+        {
+          "description": "Includes --file flag with the script name",
+          "check": "contains '--file' and 'thermal_model.inp'"
+        },
+        {
+          "description": "Includes --port 50060 to target the correct instance",
+          "check": "contains '--port' and '50060'"
+        },
+        {
+          "description": "Explains that exec connects to an already-running instance",
+          "check": "mentions connecting to existing/running instance"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "I need to start MAPDL, create a simple block element, mesh it, apply constraints and loads, solve, and then shut everything down. All from the command line, no Python scripting. Walk me through the exact commands.",
+      "expected_output": "A step-by-step sequence: pymapdl start, then multiple pymapdl exec -c calls for /prep7, ET, BLOCK, VMESH, boundary conditions, /solu, SOLVE, and finally pymapdl stop",
+      "files": [],
+      "assertions": [
+        {
+          "description": "Starts with pymapdl start",
+          "check": "contains 'pymapdl start'"
+        },
+        {
+          "description": "Uses pymapdl exec with -c flags for APDL commands",
+          "check": "contains 'pymapdl exec' and '-c'"
+        },
+        {
+          "description": "Includes /prep7 preprocessor entry",
+          "check": "contains '/prep7' or '/PREP7'"
+        },
+        {
+          "description": "Includes a SOLVE command",
+          "check": "contains 'SOLVE' or 'solve'"
+        },
+        {
+          "description": "Ends with pymapdl stop",
+          "check": "contains 'pymapdl stop'"
+        },
+        {
+          "description": "Commands are in correct order: start before exec before stop",
+          "check": "start appears before exec which appears before stop"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "What MAPDL instances are running on my machine right now? I want to see the PID and port for each one, but only the main instances, not child processes.",
+      "expected_output": "The pymapdl list -i command, with explanation of the -i flag filtering to instances only and showing PID/port columns",
+      "files": [],
+      "assertions": [
+        {
+          "description": "Uses pymapdl list command",
+          "check": "contains 'pymapdl list'"
+        },
+        {
+          "description": "Includes -i or --instances flag to filter to main instances",
+          "check": "contains '-i' or '--instances'"
+        },
+        {
+          "description": "Explains that -i filters out child processes",
+          "check": "mentions filtering child processes or showing only instances"
+        }
+      ]
+    }
+  ]
+}

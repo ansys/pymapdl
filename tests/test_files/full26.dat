@@ -57,7 +57,7 @@ nsel,s,loc,x,0
 CM,BASEF,NODE
 CMSEL,S,BASEF,NODE
 f,all,fx,10
-alls 
+alls
 
 kbc,1
 solve

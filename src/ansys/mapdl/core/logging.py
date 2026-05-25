@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -128,8 +128,8 @@ Other loggers
 You can create your own loggers using python ``logging`` library as
 you would do in any other script.  There shall no be conflicts between
 these loggers.
-
 """
+
 from copy import copy
 from datetime import datetime
 import logging
@@ -212,18 +212,17 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
     def __init__(self, logger: logging.Logger, extra: Optional["MapdlBase"] = None):
         self.logger = logger
         if extra is not None:
-            self.extra = weakref.proxy(extra)
+            self.extra = weakref.proxy(extra)  # type: ignore[assignment]
         else:
             self.extra = None
-        self.file_handler = logger.file_handler
-        self.std_out_handler = logger.std_out_handler
+        self.file_handler = logger.file_handler  # type: ignore[attr-defined]
+        self.std_out_handler = logger.std_out_handler  # type: ignore[attr-defined]
 
     def process(self, msg: str, kwargs: MutableMapping[str, Dict[str, str]]):
         kwargs["extra"] = {}
         # This are the extra parameters sent to log
-        kwargs["extra"][
-            "instance_name"
-        ] = self.extra.name  # here self.extra is the argument pass to the log records.
+        if self.extra is not None:
+            kwargs["extra"]["instance_name"] = self.extra.name  # type: ignore[union-attr,attr-defined]
         return msg, kwargs
 
     def log_to_file(
@@ -357,7 +356,6 @@ class Logger:
     >>> from ansys.mapdl.core import LOG
     >>> file_path = os.path.join(os.getcwd(), 'pymapdl.log')
     >>> LOG.log_to_file(file_path)
-
     """
 
     file_handler: Optional[logging.FileHandler] = None
@@ -438,7 +436,6 @@ class Logger:
         >>> import os
         >>> file_path = os.path.join(os.getcwd(), 'pymapdl.log')
         >>> LOG.log_to_file(file_path)
-
         """
 
         addfile_handler(self, filename=filename, level=level, write_headers=True)
@@ -472,16 +469,16 @@ class Logger:
         logger and the new one.
         """
         logger = logging.getLogger(logger_name)
-        logger.std_out_handler = None
-        logger.file_handler = None
+        logger.std_out_handler = None  # type: ignore[attr-defined]
+        logger.file_handler = None  # type: ignore[attr-defined]
 
         if self.logger.hasHandlers():
             for each_handler in self.logger.handlers:
                 new_handler = copy(each_handler)
                 if each_handler == self.file_handler:
-                    logger.file_handler = new_handler
+                    logger.file_handler = new_handler  # type: ignore[attr-defined]
                 elif each_handler == self.std_out_handler:
-                    logger.std_out_handler = new_handler
+                    logger.std_out_handler = new_handler  # type: ignore[attr-defined]
 
                 if level:
                     # The logger handlers are copied and changed the loglevel is
@@ -587,7 +584,6 @@ class Logger:
         ------
         Exception
             You can only input strings as ``name`` to this method.
-
         """
         count_ = 0
         new_name = name
@@ -659,10 +655,10 @@ def addfile_handler(
         logger.logger.addHandler(file_handler)
 
     elif isinstance(logger, logging.Logger):
-        logger.file_handler = file_handler
+        logger.file_handler = file_handler  # type: ignore[attr-defined]
         logger.addHandler(file_handler)
 
-    if write_headers:
+    if write_headers and file_handler.stream is not None:
         file_handler.stream.write(NEW_SESSION_HEADER)
         file_handler.stream.write(DEFAULT_FILE_HEADER)
 

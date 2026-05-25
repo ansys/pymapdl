@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -68,7 +68,7 @@ FINISH
 /OUT,
 PRNSOL,DOF
 PRRSOL
-NSORT,ROT,X 
+NSORT,ROT,X
 *GET,ROTX1,SORT, ,MAX		!GET VERIFIED RESULT FOR PART 1
 PRES,SMISC,27
 ETABLE,ROTX,ROT,X
@@ -124,7 +124,7 @@ OUTRES,ALL,ALL
  F,L,MX,MLOAD4
 *ENDDO
 F,1,MX,MLOAD1
-F,2,MX,MLOAD1 
+F,2,MX,MLOAD1
 FLIST
 /OUT,SCRATCH
 SOLVE
@@ -132,7 +132,7 @@ FINISH
 /POST1
 /OUT,
 PRNSOL,DOF
-NSORT,ROT,X 
+NSORT,ROT,X
 *GET,ROTX2,SORT, ,MAX		!GET VERIFIED RESULTS FOR PART 2
 PRRSOL,MX
 PRRSOL,BMOM

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Module for the MapdlPlotter class."""
+
 from collections import OrderedDict
 from typing import Any, Callable, Dict, Iterable, Optional, Union
 
@@ -84,12 +85,174 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
         )
 
     def plot_iter(
-        self, plottable_object: Any, name_filter: str = None, **plotting_options
+        self,
+        plottable_object: Any,
+        name_filter: Optional[str] = None,
+        **plotting_options,
     ):
         pass
 
-    def plot(self, plottable_object: Any, name_filter: str = None, **plotting_options):
+    def plot(
+        self,
+        plottable_object: Any,
+        name_filter: Optional[str] = None,
+        **plotting_options,
+    ):
         pass
+
+    def add_labels(
+        self,
+        points: Union[list, Any],
+        labels: list,
+        font_size: int = 12,
+        point_size: float = 5.0,
+        **kwargs,
+    ) -> Any:
+        """Add labels at 3D point locations.
+
+        Parameters
+        ----------
+        points : list or Any
+            Points where labels should be placed.
+        labels : list
+            List of label strings to display at each point.
+        font_size : int, optional
+            Font size for the labels. The default is ``12``.
+        point_size : float, optional
+            Size of the point markers shown with labels. The default is ``5.0``.
+        **kwargs : dict
+            Additional keyword arguments passed to
+            :meth:`pyvista.Plotter.add_point_labels`.
+        """
+        return self.scene.add_point_labels(
+            points, labels, font_size=font_size, point_size=point_size, **kwargs
+        )
+
+    def add_lines(
+        self,
+        points: Union[list, Any],
+        connections: Optional[Union[list, Any]] = None,
+        color: str = "white",
+        width: float = 1.0,
+        **kwargs,
+    ) -> Any:
+        """Add line segments to the scene.
+
+        Parameters
+        ----------
+        points : list or Any
+            Points defining the lines.
+        connections : list or Any, optional
+            Line connectivity as ``[[start_idx, end_idx], ...]``. If ``None``,
+            points are connected sequentially. The default is ``None``.
+        color : str, optional
+            Color of the lines. The default is ``"white"``.
+        width : float, optional
+            Width of the lines. The default is ``1.0``.
+        **kwargs : dict
+            Additional keyword arguments passed to the underlying PyVista method.
+        """
+        pts = np.array(points)
+        if connections is None:
+            return self.scene.add_lines(
+                pts, color=color, width=width, connected=True, **kwargs
+            )
+        conns = np.array(connections)
+        n_lines = len(conns)
+        cells = np.hstack([np.full((n_lines, 1), 2, dtype=int), conns]).flatten()
+        mesh = pv.PolyData()
+        mesh.points = pts
+        mesh.lines = cells
+        return self.scene.add_mesh(mesh, color=color, line_width=width, **kwargs)
+
+    def add_planes(
+        self,
+        center: tuple = (0.0, 0.0, 0.0),
+        normal: tuple = (0.0, 0.0, 1.0),
+        i_size: float = 1.0,
+        j_size: float = 1.0,
+        **kwargs,
+    ) -> Any:
+        """Add a plane to the scene.
+
+        Parameters
+        ----------
+        center : tuple, optional
+            Center point of the plane ``(x, y, z)``. The default is
+            ``(0.0, 0.0, 0.0)``.
+        normal : tuple, optional
+            Normal vector of the plane ``(x, y, z)``. The default is
+            ``(0.0, 0.0, 1.0)``.
+        i_size : float, optional
+            Size of the plane in the i direction. The default is ``1.0``.
+        j_size : float, optional
+            Size of the plane in the j direction. The default is ``1.0``.
+        **kwargs : dict
+            Additional keyword arguments passed to
+            :meth:`pyvista.Plotter.add_mesh`.
+        """
+        plane = pv.Plane(center=center, direction=normal, i_size=i_size, j_size=j_size)
+        return self.scene.add_mesh(plane, **kwargs)
+
+    def add_points(
+        self,
+        points: Union[list, Any],
+        color: str = "red",
+        size: float = 10.0,
+        **kwargs,
+    ) -> Any:
+        """Add point markers to the scene.
+
+        Parameters
+        ----------
+        points : list or Any
+            Points to add.
+        color : str, optional
+            Color of the points. The default is ``"red"``.
+        size : float, optional
+            Size of the point markers. The default is ``10.0``.
+        **kwargs : dict
+            Additional keyword arguments passed to
+            :meth:`pyvista.Plotter.add_points`.
+        """
+        # Use setdefault so a caller-supplied ``point_size`` in kwargs takes
+        # precedence and avoids a duplicate-keyword TypeError.
+        kwargs.setdefault("point_size", size)
+        return self.scene.add_points(np.array(points), color=color, **kwargs)
+
+    def add_text(
+        self,
+        text: str,
+        position: Union[tuple, str] = "upper_left",
+        font_size: int = 12,
+        color: str = "white",
+        **kwargs,
+    ) -> Any:
+        """Add text to the scene.
+
+        Parameters
+        ----------
+        text : str
+            Text string to display.
+        position : tuple or str, optional
+            Position for the text. Can be 2D ``(x, y)`` for screen coordinates,
+            3D ``(x, y, z)`` for world coordinates, or a string such as
+            ``'upper_left'``. The default is ``'upper_left'``.
+        font_size : int, optional
+            Font size for the text. The default is ``12``.
+        color : str, optional
+            Color of the text. The default is ``"white"``.
+        **kwargs : dict
+            Additional keyword arguments passed to
+            :meth:`pyvista.Plotter.add_text`.
+        """
+        return self.scene.add_text(
+            text, position=position, font_size=font_size, color=color, **kwargs
+        )
+
+    def clear(self) -> None:
+        """Clear all actors from the scene."""
+        self.scene.clear()
 
     @property
     def scene(self):
@@ -131,8 +294,8 @@ class MapdlPlotter(Plotter):
         self._theme = theme
         if theme is None:
             self._theme = MapdlTheme()
-        self._off_screen = None
-        self._notebook = None
+        self._off_screen: Optional[bool] = None
+        self._notebook: Optional[bool] = None
         self._savefig = None
         self._title = None
         self._bc_settings = None
@@ -285,7 +448,7 @@ class MapdlPlotter(Plotter):
     def plot_iter(
         self,
         plotting_list: Iterable[Any],
-        name_filter: str = None,
+        name_filter: Optional[str] = None,
         **plotting_options,
     ) -> None:
         """Add a list of objects to the plotter.
@@ -413,6 +576,7 @@ class MapdlPlotter(Plotter):
 
                 if (
                     "scalars" in mesh
+                    and scalars is not None
                     and scalars.ndim == 2
                     and (scalars.shape[1] == 3 or scalars.shape[1] == 4)
                 ):

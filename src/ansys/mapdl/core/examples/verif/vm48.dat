@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -43,9 +43,9 @@ OUTPR,BASIC,1
 D,ALL,ALL              ! CONSTRAIN ALL DOF'S
 DDELE,2,ROTX           ! RELEASE TORSIONAL DOF AT NODE 2
 FINISH
-/SOLU 
-ANTYPE,MODAL  
-MODOPT,LANB,1,,, 
+/SOLU
+ANTYPE,MODAL
+MODOPT,LANB,1,,,
 SOLVE
 *GET,FREQ,MODE,1,FREQ
 *DIM,LABEL,CHAR,1,2
@@ -68,4 +68,3 @@ LABEL(1,2) = ' (Hz)  '
 /OUT
 FINISH
 *LIST,vm48,vrt
-

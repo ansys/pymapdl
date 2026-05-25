@@ -1,0 +1,10 @@
+{
+  "eval_id": 2,
+  "eval_name": "list-instances",
+  "prompt": "What MAPDL instances are running on my machine right now? I want to see the PID and port for each one, but only the main instances, not child processes.",
+  "assertions": [
+    {"text": "Uses pymapdl list command", "type": "contains", "value": "pymapdl list"},
+    {"text": "Includes -i or --instances flag to filter to main instances", "type": "contains_any", "values": ["-i", "--instances"]},
+    {"text": "Explains that -i filters out child processes", "type": "semantic", "value": "explains filtering child processes or showing only main instances"}
+  ]
+}

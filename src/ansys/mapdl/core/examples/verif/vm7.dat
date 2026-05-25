@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -50,10 +50,10 @@ TBTEMP,0
 TBDATA,1,55000,0
 N,1                                  ! GENERATE NODES AND ELEMENTS FOR PIPE288
 N,2,,,10
-MAT,1  
+MAT,1
 SECNUM,3                             ! STEEL (INSIDE) TUBE
 E,1,2
-MAT,2  
+MAT,2
 SECNUM,4                             ! ALUMINUM (OUTSIDE) TUBE
 E,1,2
 CSYS,1
@@ -103,7 +103,7 @@ NSEL,R,LOC,Z,0                       ! SELECT ONLY NODES AT Z = 0
 D,ALL,UZ,0                           ! CONSTRAIN BOTTOM NODES IN Z DIRECTION
 NSEL,ALL
 FINISH
-/SOLU    
+/SOLU
 OUTPR,BASIC,LAST                     ! PRINT BASIC SOLUTION AT END OF LOAD STEP
 C*** APPLY DISPLACEMENT LOADS TO ALL MODELS
 *CREATE,DISP

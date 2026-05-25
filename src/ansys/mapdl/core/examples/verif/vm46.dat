@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM46
 /TITLE, VM46, TWO DIMENSIONAL END NOTCHED FLEXURE PROBLEM
-/COM, REFERENCE:" J.F.MANDELL, ET AL., PREDICTION OF DELAMINATION IN 
+/COM, REFERENCE:" J.F.MANDELL, ET AL., PREDICTION OF DELAMINATION IN
 /COM,             WIND TURBINE BLADE STRUCTURAL DETAILS
 /COM,             JOURNAL OF SOLAR ENERGY ENGINEERING, VOL. 25, 2003, PG: 522-530
 /COM,
@@ -77,7 +77,7 @@ A,21,22,2,11,12
 A,3,23,4,9,10
 A,4,5,8,9
 
-AESIZE,1,BB/10*NN   
+AESIZE,1,BB/10*NN
 AESIZE,2,BB/10*NN
 ALLSEL
 AMESH,1,2
@@ -86,12 +86,12 @@ AESIZE,ALL,BB/2*NN
 AMESH,ALL
 ALLSEL
 
-R,3 
-REAL,3  
+R,3
+REAL,3
 ET,2,TARGE169
 ET,3,CONTA172
 R,3,,,1.0,0.1,0,
-RMORE,,,1.0E20,0.0,1.0, 
+RMORE,,,1.0E20,0.0,1.0,
 RMORE,0.0,0,1.0,,1.0,0.5
 RMORE,0,1.0,1.0,0.0,,1.0
 KEYOPT,3,3,0
@@ -100,26 +100,26 @@ KEYOPT,3,5,0
 KEYOPT,3,7,0
 KEYOPT,3,8,0
 KEYOPT,3,9,0
-KEYOPT,3,10,0   
-KEYOPT,3,11,0   
-KEYOPT,3,12,0   
+KEYOPT,3,10,0
+KEYOPT,3,11,0
+KEYOPT,3,12,0
 KEYOPT,3,2,0
 
-LSEL,S,,,5,23,18                   ! Generate the target surface   
-CM,_TARGET,LINE 
-TYPE,2  
+LSEL,S,,,5,23,18                   ! Generate the target surface
+CM,_TARGET,LINE
+TYPE,2
 NSLL,S,0
 ESLN,S,0
-ESURF   
+ESURF
 ALLSEL
 
-LSEL,S,,,9,15,6                    ! Generate the contact surface  
+LSEL,S,,,9,15,6                    ! Generate the contact surface
 CM,_CONTACT,LINE
-TYPE,3  
+TYPE,3
 NSLL,S,0
 ESLN,S,0
-ESURF   
-ALLSEL  
+ESURF
+ALLSEL
 
 KSEL,S,KP,,21
 NSLK,S
@@ -150,7 +150,7 @@ cdwrite,all,vm46,cdb
 *else
 
 /out,scratch
-/PREP7 
+/PREP7
    cdread,db,vm46,cdb
 *endif
 
@@ -160,8 +160,8 @@ FINISH
 TIME,1
 
 CINT,NEW,1                    ! DEFINE CRACK ID
-CINT,TYPE,VCCT 
-CINT,CTNC,TIPP                ! DEFINE CRACK TIP NODE COMPONENT         
+CINT,TYPE,VCCT
+CINT,CTNC,TIPP                ! DEFINE CRACK TIP NODE COMPONENT
 CINT,SYMM,OFF                 ! SYMMETRY OFF
 CINT,NORMAL                   ! DEFINE CRACK PLANE NORMAL
 CINT,LIST

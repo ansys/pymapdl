@@ -27,4 +27,4 @@ sphinx-notfound-page==1.1.0
 sphinx==8.2.3
 sphinxcontrib-websupport==2.0.0
 sphinxemoji==0.3.1
-vtk==9.4.2
+vtk==9.5.2

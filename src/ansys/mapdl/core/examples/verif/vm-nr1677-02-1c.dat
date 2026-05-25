@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@
 /com, Reference: Piping benchmark problems,Dynamic analysis independant support
 /com,            motion response spectrum method, P. Bezler, M. Subudhi and
 /com,            M.Hartzman, August 1985.
-/com, 
+/com,
 /com, Elements used: Pipe289, Elbow290 and Combin14
 /com,
 /com, Results :
@@ -55,14 +55,14 @@ WTick=0.216                                     ! Wall Thickness
 OD=3.5                                          ! Outer Diameter
 
 RADCUR=48.003                                   ! Radius curvature
-temp=60                                         ! Temperature                                             
+temp=60                                         ! Temperature
 maxm=15                                         ! Number of modes to extract
 
 et,1,pipe289,,,,2                                 ! Straight pipe elements
 et,2,elbow290,,6                                ! Curved pipe elements
 
 et,3,combin14	                              ! Spring-damper elements
-keyopt,3,2,1                                    ! UX Degree Of Freedom      
+keyopt,3,2,1                                    ! UX Degree Of Freedom
 et,4,combin14,                                  ! Spring-damper elements
 keyopt,4,2,2                                    ! UY Degree Of Freedom
 et,5,combin14	                              ! Spring-damper elements
@@ -92,22 +92,22 @@ r,7,0.2e+5                                      ! Stiffness
 /com, Material Properties
 /com,*********************
 
-mp,ex,1,YoungModulus1					
-mp,nuxy,1,Nu						
-mp,gxy,1,ShearModulus1					
-mp,dens,1,WMass						
+mp,ex,1,YoungModulus1
+mp,nuxy,1,Nu
+mp,gxy,1,ShearModulus1
+mp,dens,1,WMass
 
-mp,ex,2,YoungModulus1					
-mp,nuxy,2,Nu						
-mp,gxy,2,ShearModulus1					
-mp,dens,2,WMass						
+mp,ex,2,YoungModulus1
+mp,nuxy,2,Nu
+mp,gxy,2,ShearModulus1
+mp,dens,2,WMass
 
 /com,----------------------------------------------------------------------------
 
 /com, Keypoints
 /com,***********
 
-k,1,0,0,0							
+k,1,0,0,0
 k,2,0,12,0
 k,3,35.687,60,32.110
 k,4,55,60,49.5
@@ -145,7 +145,7 @@ k,35,331,-535,75
 k,36,383,-535,75
 
 /com,
-/com, Elastic support Keypoints 
+/com, Elastic support Keypoints
 /com,***************************
 
 k,37,10,0,0
@@ -172,7 +172,7 @@ k,53,383,-535,85
 /com, Modeling of Straight Pipe (Tangent)
 /com,************************************
 
-l, 1, 2							
+l, 1, 2
 l, 3, 4
 l, 4, 5
 l, 6, 7
@@ -350,7 +350,7 @@ n2 = 284
 n3 = 10
 ics = 11
 wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)
-cswplane,ics,0 
+cswplane,ics,0
 nrotat,n1
 nrotat,n2
 csys,0
@@ -360,7 +360,7 @@ n2 = 285
 n3 = 290
 ics = ics + 1
 wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)
-cswplane,ics,0 
+cswplane,ics,0
 nrotat,n1
 nrotat,n2
 nrotat,n3
@@ -371,7 +371,7 @@ n2 = 295
 n3 = 297
 ics = ics + 1
 wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)
-cswplane,ics,0 
+cswplane,ics,0
 nrotat,n1
 nrotat,n2
 nrotat,n3
@@ -382,7 +382,7 @@ n2 = 296
 n3 = 298
 ics = ics + 1
 wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)
-cswplane,ics,0 
+cswplane,ics,0
 nrotat,n1
 nrotat,n2
 nrotat,n3
@@ -393,7 +393,7 @@ n2 = 286
 n3 = 291
 ics = ics + 1
 wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)
-cswplane,ics,0 
+cswplane,ics,0
 nrotat,n1
 nrotat,n2
 nrotat,n3
@@ -404,7 +404,7 @@ n2 = 287
 n3 = 292
 ics = ics + 1
 wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)
-cswplane,ics,0 
+cswplane,ics,0
 nrotat,n1
 nrotat,n2
 nrotat,n3
@@ -437,10 +437,10 @@ finish
 
 /solution
 antype,modal							! Perform Modal Analysis
-modopt,lanb,maxm							
+modopt,lanb,maxm
 lumpm,on								! Use Lumped Mass Approximation
 mxpand,maxm,,,yes							! Expand solution with Element Calculations ON
-solve									
+solve
 finish
 
 /post1
@@ -493,7 +493,7 @@ spval,2,,  0.667 ,  0.667,  0.584
 
 spunit,3,accg,gval
 spfrq,3, 3.0  , 4.0  ,  7.0,  12.5,   14.1,  15.87,  21.74
-spval,3,,  1.4  , 1.4  , 0.75, 0.875,    0.7,    0.7,   0.8    
+spval,3,,  1.4  , 1.4  , 0.75, 0.875,    0.7,    0.7,   0.8
 spfrq,3,  23.25,  27.03,  31.25, 34.48
 spval,3,,    0.75,   0.75,    0.7,  0.6
 
@@ -505,7 +505,7 @@ spunit,4,accg,gval
 spfrq,4, 3.0  , 4.0  ,  7.0,  12.5,   14.1,  15.87,  21.74
 spval,4,,  0.934, 0.934, 0.5 , 0.584,  0.467, 0.467,  0.534
 spfrq,4,  23.25,  27.03,  31.25, 34.48
-spval,4,,    0.5,     0.5,  0.467,  0.4 
+spval,4,,    0.5,     0.5,  0.467,  0.4
 
 /com,
 /com, node components for excitation points
@@ -621,7 +621,7 @@ pretab,pxi_120,vyi_120,vzi_120,txi_120,myi_120,mzi_120
 /com,  Node J
 /com,==========
 
-/com, Element #120 (Pipe289 element)  
+/com, Element #120 (Pipe289 element)
 /com,************************
 
 esel,s,elem,,120

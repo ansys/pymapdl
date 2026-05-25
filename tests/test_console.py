@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -25,6 +25,7 @@
 This has been copied from test_mapdl.py
 
 """
+
 import os
 import time
 from unittest.mock import patch
@@ -211,7 +212,7 @@ def test_bsplin(cleared, mapdl_console):
     assert l0 == 1
 
 
-def test_a(cleared, mapdl_console):
+def test_a_bsplin(cleared, mapdl_console):
     k0 = mapdl_console.k("", 0, 0, 0)
     k1 = mapdl_console.k("", 1, 0, 0)
     k2 = mapdl_console.k("", 1, 1, 0)
@@ -609,7 +610,7 @@ def test_partial_mesh_n_cells(mapdl_console, make_block):
     assert mapdl_console.mesh._grid.n_cells == 11
 
 
-def test_cyclic_solve(mapdl_console, cleared):
+def test_cyclic_solve_partial_mesh(mapdl_console, cleared):
     # build the cyclic model
     mapdl_console.prep7()
     mapdl_console.shpp("off")

@@ -1,39 +1,44 @@
-.. _ref_lines_commands_api:
 
-*****
+.. _ref_lines:
+
+
 Lines
-*****
+=====
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to create, modify, list, etc., lines.
+.. currentmodule:: ansys.mapdl.core._commands.prep7.lines
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.lines.Lines
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.bsplin
-   Mapdl.circle
-   Mapdl.l
-   Mapdl.l2ang
-   Mapdl.l2tan
-   Mapdl.lang
-   Mapdl.larc
-   Mapdl.larea
-   Mapdl.lcomb
-   Mapdl.ldele
-   Mapdl.ldiv
-   Mapdl.ldrag
-   Mapdl.lextnd
-   Mapdl.lfillt
-   Mapdl.lgen
-   Mapdl.llist
-   Mapdl.lreverse
-   Mapdl.lrotat
-   Mapdl.lsscale
-   Mapdl.lstr
-   Mapdl.lsum
-   Mapdl.lsymm
-   Mapdl.ltan
-   Mapdl.ltran
-   Mapdl.spline
-   Mapdl.ssln
+
+   Lines.bsplin
+   Lines.circle
+   Lines.l
+   Lines.l2ang
+   Lines.l2tan
+   Lines.lang
+   Lines.larc
+   Lines.larea
+   Lines.lcomb
+   Lines.ldele
+   Lines.ldiv
+   Lines.ldrag
+   Lines.lextnd
+   Lines.lfillt
+   Lines.lgen
+   Lines.llist
+   Lines.lplot
+   Lines.lreverse
+   Lines.lrotat
+   Lines.lsscale
+   Lines.lstr
+   Lines.lsum
+   Lines.lsymm
+   Lines.ltan
+   Lines.ltran
+   Lines.spline
+   Lines.ssln

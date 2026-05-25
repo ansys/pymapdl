@@ -34,7 +34,7 @@ Build the documentation
 
 PyMAPDL documentation is mainly written in reStructuredText
 format, saved as RST files in the ``doc/source`` directory.
-The tool used to  build the documentation from these reStructuredText files 
+The tool used to  build the documentation from these reStructuredText files
 is `Sphinx <sphinx_>`_.
 
 Sphinx also build API documentation from source code as well as manages the
@@ -58,11 +58,11 @@ To build the documentation as HTML files, you only need to run a single command.
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ make -C doc html
-    
+
 
 The HTML files for the documentation are written to the ``doc/_build/html`` directory.
 
@@ -80,7 +80,7 @@ a LaTeX distribution like `MikTeX <miktex_>`_. You can then run this command:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ make -C doc pdf
@@ -89,7 +89,7 @@ Running the command to build either HTML files or a PDF file runs the Python fil
 The result of running these examples is cached so that the only the changed files
 are re-run the next time.
 
-The Sphinx configuration is in the file 
+The Sphinx configuration is in the file
 `conf.py <https://github.com/ansys/pymapdl/blob/main/doc/source/conf.py>`_ in :file:`doc/source`.
 
 
@@ -98,7 +98,7 @@ Write documentation
 
 Writing good documentation for a GitHub repository is crucial to ensure that
 users and contributors can understand, use, and contribute to PyMAPDL
-effectively. 
+effectively.
 
 Here's a short summary of how to write good documentation:
 
@@ -153,7 +153,7 @@ Installation
 #. **Verify installation**: To confirm that Vale is installed correctly, run this command:
 
    .. code:: console
-    
+
       vale --version
 
    You should see the installed Vale version displayed in the terminal.
@@ -219,8 +219,8 @@ In the PyMAPDL repository, they are in the `examples <pymapdl_examples_>`_ direc
 
 One dynamic example is the `MAPDL 2D Plane Stress Concentration Analysis <pymapdl_2d_plate_with_a_hole_>`_.
 example.
-The source code can be found in this GitHub `2d_plate_with_a_hole.py <pymapdl_2d_plate_with_a_hole_>`_. 
-This code is then rendered on the 
+The source code can be found in this GitHub `2d_plate_with_a_hole.py <pymapdl_2d_plate_with_a_hole_>`_.
+This code is then rendered on the
 `MAPDL 2D Plane Stress Concentration Analysis <pymapdl_doc_2d_plate_with_a_hole_>`_ page.
 .. vale on
 
@@ -237,7 +237,7 @@ Static examples are based on reStructuredText files and do not have to
 be executed or run using Python.
 In the PyMAPDL repository, they are in the `doc\source <pymapdl_doc_source_>`_ directory.
 
-One static example is the `Harmonic analysis using the frequency-sweep Krylov method <pymapdl_doc_krylov_example_>`_ example. 
+One static example is the `Harmonic analysis using the frequency-sweep Krylov method <pymapdl_doc_krylov_example_>`_ example.
 This example shows how to do an harmonic analysis using the Krylov method.
 The source code can be found in the GitHub `krylov_example.rst <pymapdl_doc_krylov_example_rst_>`_, and it
 is rendered as HTML on the `Harmonic analysis using the frequency-sweep Krylov method <pymapdl_doc_krylov_example_>`_ page.
@@ -263,5 +263,3 @@ In this example, you can interactively explore some of the plots.
 
 The source code can be found in this GitHub `ex_28-tecfricstir.rst <pymapdl_techdemo_28_rst_>`_, which
 is then rendered on the `Friction Stir Welding (FSW) Simulation <pymapdl_techdemo_28_>`_ page.
-
-

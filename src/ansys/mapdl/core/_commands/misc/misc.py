@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,10 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
+
 """Miscellaneous methods not covered in the documentation."""
 
 
-class Misc:
+class Misc(CommandsBase):
     def verify(self, case="", level="", **kwargs):
         """Enter the verification run mode.
 
@@ -52,6 +54,5 @@ class Misc:
         >>> mapdl.finish()
         >>> mapdl.verify('VM1')
         '*** VERIFICATION RUN - CASE VM1                              ***  OPTION=  4'
-
         """
         return self.run(f"/VERIFY,{case},{level}", **kwargs)

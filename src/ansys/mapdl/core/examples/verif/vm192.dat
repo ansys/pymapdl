@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ ET,2,SURF152,,,,1,1     ! 3-D THERMAL SURFACE EFFECT ELEMENTS
 KEYOPT,2,9,1            ! RADIATION OPTION
 R,2,1,0.1712E-8         ! FORM FACTOR = 1, STEFAN-BOLTZMANN CONSTANT
 MP,KXX,1,10000          ! ARBITRARY CONDUCTIVITY
-MP,C,1,0.11            
+MP,C,1,0.11
 MP,DENS,1,487.5
 MP,EMIS,2,1             ! BLACK BODY EMISSIVITY
 BLOCK,,2,,2,,4
@@ -49,7 +49,7 @@ FINISH
 ANTYPE,TRANS            ! TRANSIENT ANALYSIS
 D,100,TEMP,530          ! SPECIFY SURROUNDING ABSOLUTE TEMPERATURE
 TUNIF,2000              ! INITIAL BILLET ABSOLUTE TEMPERATURE
-AUTOTS,ON               
+AUTOTS,ON
 KBC,1                   ! STEP SURROUNDING TEMPERATURE IN FIRST TIME STEP
 DELTIM,0.005,0.005,0.005! INITIAL (MINIMUM) INTEGRATION TIME STEP
 OUTRES,,ALL
@@ -63,7 +63,7 @@ FINISH
 
 /POST26
 /OUT,
-NSOL,2,1,TEMP,,TEMP     
+NSOL,2,1,TEMP,,TEMP
 PRVAR,2                 ! PRINT TEMPERATURE HISTORY OF BILLET
 *GET,T,VARI,2,RTIME,3.7
 *DIM,VALUE,,1,3

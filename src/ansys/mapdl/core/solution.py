@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -343,7 +343,6 @@ class Solution:
         Examples
         --------
         >>> mapdl.solution.pressure_conv
-
         """
         return self._mapdl.get_value("ACTIVE", 0, "SOLU", "PRCV")
 
@@ -354,7 +353,6 @@ class Solution:
         Examples
         --------
         >>> mapdl.solution.velocity_conv
-
         """
         return self._mapdl.get_value("ACTIVE", 0, "SOLU", "VECV")
 

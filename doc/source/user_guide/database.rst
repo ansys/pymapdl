@@ -34,7 +34,7 @@ Get the ``elems`` and ``nodes`` objects.
 Obtain the first element.
 
 .. code:: pycon
-    
+
     >>> elems = mapdl.db.elems
     >>> elems.first()
     1
@@ -104,7 +104,3 @@ To use the ``DB`` feature, you must meet these requirements:
 * Ansys MAPDL version should be 2021 R1 or later.
 
 .. warning:: This feature does not work in the Ansys 2023 R1.
-
-
-
-

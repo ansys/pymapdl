@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,13 +20,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Annotation:
 
-    def an3d(self, **kwargs):
+class Annotation(CommandsBase):
+
+    def an3d(self, kywrd: str = "", key: str = "", **kwargs):
         r"""Specifies 3D annotation functions
 
         Mechanical APDL Command: `/AN3D <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AN3D.html>`_
+
+        Parameters
+        ----------
+        kywrd : str
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AN3D.html>`_ for further
+            information.
+
+        key : str
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AN3D.html>`_ for further
+            information.
 
         Notes
         -----
@@ -64,7 +80,7 @@ class Annotation:
         (although the command can be included in an input file for batch input or for use with the
         :ref:`input` command).
         """
-        command = "/AN3D"
+        command = f"/AN3D,{kywrd},{key}"
         return self.run(command, **kwargs)
 
     def annot(self, lab: str = "", val1: str = "", val2: str = "", **kwargs):

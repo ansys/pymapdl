@@ -1,80 +1,56 @@
-.. _ref_explicit_dynamics_commands_api:
 
-*****************
-Explicit dynamics
-*****************
-
-.. currentmodule:: ansys.mapdl.core
-
-These PREP7 commands are used for an explicit dynamic analysis.
-
-.. autosummary::
-   :toctree: _autosummary/
-
-   Mapdl.edasmp
-   Mapdl.edbound
-   Mapdl.edbx
-   Mapdl.edcgen
-   Mapdl.edclist
-   Mapdl.edcmore
-   Mapdl.edcnstr
-   Mapdl.edcontact
-   Mapdl.edcrb
-   Mapdl.edcurve
-   Mapdl.eddbl
-   Mapdl.eddc
-   Mapdl.edipart
-   Mapdl.edlcs
-   Mapdl.edmp
-   Mapdl.ednb
-   Mapdl.edndtsd
-   Mapdl.ednrot
-   Mapdl.edpart
-   Mapdl.edpc
-   Mapdl.edsp
-   Mapdl.edweld
+.. _ref_explicit_dynamics:
 
 
-   .. currentmodule:: ansys.mapdl.core
+ExplicitDynamics
+================
 
-These SOLUTION commands are used for an explicit dynamic analysis.
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.explicit_dynamics
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.explicit_dynamics.ExplicitDynamics
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.edadapt
-   Mapdl.edale
-   Mapdl.edbvis
-   Mapdl.edcadapt
-   Mapdl.edcpu
-   Mapdl.edcsc
-   Mapdl.edcts
-   Mapdl.eddamp
-   Mapdl.eddrelax
-   Mapdl.eddump
-   Mapdl.edenergy
-   Mapdl.edfplot
-   Mapdl.edgcale
-   Mapdl.edhgls
-   Mapdl.edhist
-   Mapdl.edhtime
-   Mapdl.edint
-   Mapdl.edis
-   Mapdl.edload
-   Mapdl.edopt
-   Mapdl.edout
-   Mapdl.edpl
-   Mapdl.edpvel
-   Mapdl.edrc
-   Mapdl.edrd
-   Mapdl.edri
-   Mapdl.edrst
-   Mapdl.edrun
-   Mapdl.edshell
-   Mapdl.edsolv
-   Mapdl.edstart
-   Mapdl.edterm
-   Mapdl.edtp
-   Mapdl.edvel
-   Mapdl.edwrite
-   Mapdl.rexport
+
+   ExplicitDynamics.edadapt
+   ExplicitDynamics.edbvis
+   ExplicitDynamics.edclist
+   ExplicitDynamics.edcmore
+   ExplicitDynamics.edcnstr
+   ExplicitDynamics.edcpu
+   ExplicitDynamics.edcrb
+   ExplicitDynamics.edcsc
+   ExplicitDynamics.edcts
+   ExplicitDynamics.edcurve
+   ExplicitDynamics.eddamp
+   ExplicitDynamics.eddbl
+   ExplicitDynamics.eddc
+   ExplicitDynamics.eddump
+   ExplicitDynamics.edenergy
+   ExplicitDynamics.edfplot
+   ExplicitDynamics.edgcale
+   ExplicitDynamics.edhgls
+   ExplicitDynamics.edhist
+   ExplicitDynamics.edhtime
+   ExplicitDynamics.edint
+   ExplicitDynamics.edis
+   ExplicitDynamics.ednb
+   ExplicitDynamics.edopt
+   ExplicitDynamics.edout
+   ExplicitDynamics.edpart
+   ExplicitDynamics.edpc
+   ExplicitDynamics.edpl
+   ExplicitDynamics.edrc
+   ExplicitDynamics.edrd
+   ExplicitDynamics.edrst
+   ExplicitDynamics.edrun
+   ExplicitDynamics.edshell
+   ExplicitDynamics.edsolv
+   ExplicitDynamics.edsp
+   ExplicitDynamics.edstart
+   ExplicitDynamics.edterm
+   ExplicitDynamics.edwrite
+   ExplicitDynamics.rexport

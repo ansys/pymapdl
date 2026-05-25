@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -139,12 +139,12 @@ EPLOT
 /SHOW,CLOSE
 FINI
 SAVE
-/COM, 
+/COM,
 /COM, **********************************************
 /COM, ***        NONLINEAR STATIC ANALYSIS       ***
 /COM, **********************************************
 /COM,
-/SOLU 
+/SOLU
 D,NLOAD,VOLT,VPI
 
 ALLSE
@@ -160,7 +160,7 @@ SOLVE
 FINISH
 
 /POST26
-NSOL,3,NLOAD,VOLT,,VOLT    
+NSOL,3,NLOAD,VOLT,,VOLT
 NSOL,4,NLOAD,U,X,'UX VS VOLT'
 PRVAR,3,4
 /SHOW,PNG
@@ -184,7 +184,7 @@ RATIO=0
 RATIO=RATIO/NS
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, **********************************************
 /COM, ***           LP STATIC ANALYSIS           ***
 /COM, ***             (VOLTAGE LOAD)             ***
@@ -226,7 +226,7 @@ SET,LAST
 DU=-UX(NLOAD)
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, **********************************************
 /COM, ***            LP STATIC ANALYSIS          ***
 /COM, ***            (DISPLACEMENT LOAD)         ***
@@ -251,7 +251,7 @@ SET,LAST
 *GET,DV,NODE,NLOAD,VOLT
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, **********************************************
 /COM, ***            LP MODAL ANALYSIS           ***
 /COM, ***               (RESONANCE)              ***
@@ -265,7 +265,7 @@ SOLVE,ELFORM
 PARRES
 D,NLOAD,VOLT,0
 
-MODOPT,LANB,1        
+MODOPT,LANB,1
 SOLVE
 FINI
 
@@ -275,7 +275,7 @@ SET,LAST
 *GET,FRQ1,MODE,1,FREQ
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, **********************************************
 /COM, ***            LP MODAL ANALYSIS           ***
 /COM, ***            (ANTI-RESONANCE)            ***
@@ -289,7 +289,7 @@ SOLVE,ELFORM
 PARRES
 DDELE,NLOAD,VOLT
 
-MODOPT,LANB,1  
+MODOPT,LANB,1
 SOLVE
 FINI
 
@@ -299,7 +299,7 @@ SET,LAST
 *GET,FRQ2,MODE,1,FREQ
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, ******************************************
 /COM, ***        LP HARMONIC ANALYSIS        ***
 /COM, ***          (ACTUATOR MODE)           ***
@@ -325,7 +325,7 @@ SET,LAST
 UHR=-UX(NLOAD)
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, ******************************************
 /COM, ***        LP HARMONIC ANALYSIS        ***
 /COM, ***           (SENSOR MODE)            ***
@@ -353,8 +353,8 @@ VHR=VOLT(NLOAD)
 FINISH
 
 ! ANALYTICAL SOLUTION
-LG=LOG((B-U)/A)                                            
-C_TAR=2*PI*L*PER/LG                       ! EQUATION (6)  
+LG=LOG((B-U)/A)
+C_TAR=2*PI*L*PER/LG                       ! EQUATION (6)
 F_TAR=PI*L*PER*V**2/((B-U)*LG**2)         ! EQUATION (8)
 KR=K-(1+2/LG)*F_TAR/(B-U)                 ! EQUATION (17)
 DU_TAR=(2*F_TAR*VLP/V)/KR                 ! EQUATION (16)

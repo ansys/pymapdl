@@ -15,6 +15,7 @@ SetUp
    :toctree: _autosummary
 
 
+   SetUp.clear
    SetUp.resume
    SetUp.save
    SetUp.smbc

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -19,14 +19,13 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
+
 from functools import wraps
 import os
 import re
 import threading
 import time
-from typing import Dict
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
@@ -343,7 +342,6 @@ class MeshGrpc:
         - FIELD 8 : element number
         - FIELD 9 : base element number (applicable to reinforcing elements only)
         - FIELDS 10 - 30 : The nodes belonging to the element in ANSYS numbering.
-
         """
         if self._cached_elements is None:
             self._cached_elements = np.split(self._elem, self._elem_off[1:-1])
@@ -388,7 +386,6 @@ class MeshGrpc:
 
         Array containing element type numbers in the first column and
         the element types (like SURF154) in the second column.
-
         """
         return self._ekey
 
@@ -667,7 +664,6 @@ class MeshGrpc:
 
         offset : np.ndarray
             Array of indices indicating the start of each element.
-
         """
         if not chunk_size:
             chunk_size = self._chunk_size or DEFAULT_CHUNKSIZE
@@ -761,7 +757,6 @@ class MeshGrpc:
 
         >>> import pyvista
         >>> pyvista.read('grid.vtk')
-
         """
         return self._grid
 
@@ -858,7 +853,7 @@ class MeshGrpc:
                 additional_checking,
             )
 
-    def _parse_rlist(self) -> Dict[int, float]:
+    def _parse_rlist(self) -> dict[int, list[int | float]]:
         # mapdl.rmore(*list)
         with self._mapdl.force_output:
             rlist = self._mapdl.rlist()
@@ -874,18 +869,23 @@ class MeshGrpc:
             r"REAL CONSTANT SET.*?\n\n", rlist + "\n\n", flags=re.DOTALL
         )
 
-        const_ = {}
+        const_: dict[int, list[int | float]] = {}
         for each in constants_:
             values = [0 for i in range(18)]
-            set_ = int(re.match(r"REAL CONSTANT SET\s+(\d+)\s+", each).groups()[0])
+            set_match = re.match(r"REAL CONSTANT SET\s+(\d+)\s+", each)
+            set_ = int(set_match.groups()[0]) if set_match else 0
+
+            items_match = re.match(r".*ITEMS\s+(\d+)\s+", each)
+            to_match = re.match(r".*TO\s+(\d+)\s*", each)
+
             limits = (
-                int(re.match(r".*ITEMS\s+(\d+)\s+", each).groups()[0]),
-                int(re.match(r".*TO\s+(\d+)\s*", each).groups()[0]),
+                int(items_match.groups()[0]) if items_match else 0,
+                int(to_match.groups()[0]) if to_match else 0,
             )
             values_ = [float(i) for i in each.strip().splitlines()[1].split()]
 
             if not set_ in const_:
-                const_[set_] = values
+                const_[set_] = values  # type: ignore
 
             for i, jlimit in enumerate(range(limits[0] - 1, limits[1])):
                 const_[set_][jlimit] = values_[i]

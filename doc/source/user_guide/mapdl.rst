@@ -36,7 +36,7 @@ compatible format. For example, ``ESEL`` is now the
             # is between 1 and 2.
             # returns an array of selected elements ids
             mapdl.esel("S", "CENT", "X", 1, 2)
-    
+
 
 Additionally, MAPDL commands
 containing a ``/`` or ``*`` have had those characters removed, unless
@@ -66,9 +66,9 @@ start with ``star (*)``.
 
             mapdl.startstatus()
             mapdl.slashsolu()
-    
 
-MAPDL commands that can accept an empty space as argument, such as 
+
+MAPDL commands that can accept an empty space as argument, such as
 ``ESEL,S,TYPE,,1``, should include an empty string when called by Python,
 or, these commands can be called using keyword arguments:
 
@@ -88,7 +88,7 @@ or, these commands can be called using keyword arguments:
 
             mapdl.esel("s", "type", "", 1)
             mapdl.esel("s", "type", vmin=1)
-    
+
 
 None of these restrictions apply to commands run with the :func:`Mapdl.run()
 <ansys.mapdl.core.Mapdl.run>` method. It might be easier to run some of
@@ -198,7 +198,7 @@ The preceding code generates this input for MAPDL:
 
 .. code:: apdl
 
-    NSEL,ALL   
+    NSEL,ALL
     NSEL,R,LOC,Z,10
 
 This MAPDL input is executed with a :meth:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` method call.
@@ -504,19 +504,30 @@ attribute or implemented Pythonically.
 
 Warnings and errors
 -------------------
-Errors are handled Pythonically. For example:
+
+PyMAPDL provides comprehensive error handling that converts MAPDL warnings and errors
+into Python exceptions. This approach enables Pythonic error handling and makes it easier
+to debug issues in your scripts.
+
+Error handling behavior
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Errors are handled Pythonically using try-except blocks:
 
 .. code:: python
 
     try:
         mapdl.solve()
-    except:
-        # do something else with MAPDL
-        pass
+    except MapdlRuntimeError as e:
+        # Handle MAPDL runtime errors
+        print(f"MAPDL error occurred: {e}")
+    except Exception as e:
+        # Handle other errors
+        print(f"Unexpected error: {e}")
 
-Commands that are ignored within MAPDL are flagged as errors. This is
+Commands that are ignored within MAPDL are flagged as errors by default. This is
 different than MAPDL's default behavior where commands that are
-ignored are treated as warnings. For example, in ``ansys-mapdl-core``
+ignored are treated as warnings. For example, in PyMAPDL
 running a command in the wrong session raises an error:
 
 .. code:: pycon
@@ -524,22 +535,69 @@ running a command in the wrong session raises an error:
     >>> mapdl.finish()
     >>> mapdl.k()
 
-    Exception: 
-    K, , , , 
+    Exception:
+    K, , , ,
 
      *** WARNING ***                         CP =       0.307   TIME= 11:05:01
-     K is not a recognized BEGIN command, abbreviation, or macro.  This      
+     K is not a recognized BEGIN command, abbreviation, or macro.  This
      command will be ignored.
 
 You can change this behavior so ignored commands can be logged as
 warnings and not raised as exceptions by using the
-:func:`Mapdl.ignore_errors() <ansys.mapdl.core.Mapdl.ignore_errors>` function. For
-example:
+:attr:`Mapdl.ignore_errors <ansys.mapdl.core.Mapdl.ignore_errors>` attribute:
 
 .. code:: pycon
 
    >>> mapdl.ignore_errors = True
    >>> mapdl.k()  # warning silently ignored
+
+Exception hierarchy
+~~~~~~~~~~~~~~~~~~~
+
+PyMAPDL defines a comprehensive hierarchy of exceptions to help you handle different
+types of errors appropriately. All PyMAPDL exceptions inherit from :class:`MapdlException <ansys.mapdl.core.errors.MapdlException>`:
+
+**Main exception classes:**
+
+* :class:`MapdlRuntimeError <ansys.mapdl.core.errors.MapdlRuntimeError>` - General MAPDL runtime errors
+* :class:`MapdlValueError <ansys.mapdl.core.errors.MapdlValueError>` - Invalid values or parameters
+* :class:`MapdlFileNotFoundError <ansys.mapdl.core.errors.MapdlFileNotFoundError>` - File not found errors
+
+**Specific runtime errors:**
+
+* :class:`MapdlInvalidRoutineError <ansys.mapdl.core.errors.MapdlInvalidRoutineError>` - Command run in wrong routine
+* :class:`MapdlCommandIgnoredError <ansys.mapdl.core.errors.MapdlCommandIgnoredError>` - Commands ignored by MAPDL
+* :class:`MapdlExitedError <ansys.mapdl.core.errors.MapdlExitedError>` - MAPDL process has exited
+* :class:`MapdlConnectionError <ansys.mapdl.core.errors.MapdlConnectionError>` - Connection issues
+* :class:`LockFileException <ansys.mapdl.core.errors.LockFileException>` - Lock file conflicts
+
+**Startup and connection errors:**
+
+* :class:`MapdlDidNotStart <ansys.mapdl.core.errors.MapdlDidNotStart>` - MAPDL failed to start
+* :class:`PortAlreadyInUse <ansys.mapdl.core.errors.PortAlreadyInUse>` - Port conflicts
+* :class:`LicenseServerConnectionError <ansys.mapdl.core.errors.LicenseServerConnectionError>` - License server issues
+
+Example of specific exception handling:
+
+.. code:: python
+
+    from ansys.mapdl.core.errors import (
+        MapdlRuntimeError,
+        MapdlCommandIgnoredError,
+        MapdlExitedError,
+    )
+
+    try:
+        mapdl.k(1, 0, 0, 0)  # This might fail if in wrong routine
+    except MapdlCommandIgnoredError:
+        print("Command was ignored by MAPDL")
+        mapdl.prep7()  # Switch to correct routine
+        mapdl.k(1, 0, 0, 0)  # Retry the command
+    except MapdlExitedError:
+        print("MAPDL has exited unexpectedly")
+        # Handle cleanup or restart MAPDL
+    except MapdlRuntimeError as e:
+        print(f"General MAPDL error: {e}")
 
 
 Prompts
@@ -559,7 +617,7 @@ is automatically enabled with the ``log_apdl='apdl.log'`` parameter.
 Enabling this parameter causes the
 :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class to write each
 command run into a log file named ``"apdl.log"`` in the active
-:attr:`Mapdl.directory <ansys.mapdl.core.Mapdl.directory>`. 
+:attr:`Mapdl.directory <ansys.mapdl.core.Mapdl.directory>`.
 For example:
 
 .. code:: pycon
@@ -828,7 +886,7 @@ the chained commands with the
 
 .. note::
    Command chaining is not supported in distributed MAPDL.  To improve
-   performances, use the ``mute=True`` or 
+   performances, use the ``mute=True`` or
    :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
    context manager.
 
@@ -887,7 +945,7 @@ function. For example, the following code lists the remote files and downloads o
 
    This feature is only available in MAPDL 2021 R1 and later.
 
-Alternatively, you can download several files at once using the glob pattern 
+Alternatively, you can download several files at once using the glob pattern
 or a list of file names in the :func:`Mapdl.download() <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download>`
 method:
 
@@ -957,6 +1015,9 @@ Here are some examples:
 - The ``*IF`` command can be replaced with a Python ``if`` statement.
 - The ``*CREATE`` and ``*USE`` commands can be replaced with calls to another Python function or module.
 
+The User Programmable Features (UPF) are not compatible with MAPDL running through PyMAPDL, hence
+the related command such as ``/UPF`` are not supported.
+
 Other commands do not make sense in a non-GUI session. For example, the ``/ERASE``
 and ``ERASE`` commands that clear the graphics screen are not needed in a non-GUI session.
 
@@ -972,14 +1033,13 @@ which returns the following warning:
     is ignored.
 
 
-
 Table-1_ Comprehensive information on commands that are unavailable
 
 .. _Table-1:
 
 **Table 1. Non-available commands.**
 
-.. table:: 
+.. table::
   :class: longtable
 
   +---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1030,9 +1090,9 @@ Table-1_ Comprehensive information on commands that are unavailable
 
 
 .. note::
-    * **Interactive** means there is a method in MAPDL, such as the
+    * **Interactive** means there is a method, such as the
       :func:`Mapdl.prep7() <ansys.mapdl.core.Mapdl.prep7>` method.
-    * **Non-interactive** means it is run inside a 
+    * **Non-interactive** means it is run inside a
       :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>` context block,
       the :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` method, or
       the :func:`Mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>` method.
@@ -1043,7 +1103,7 @@ Table-1_ Comprehensive information on commands that are unavailable
           with mapdl.non_interactive:
               mapdl.prep7()
 
-    * **Direct run** means that the :func:`mapdl.run() <ansys.mapdl.core.Mapdl.run>` 
+    * **Direct run** means that the :func:`mapdl.run() <ansys.mapdl.core.Mapdl.run>`
       method is used to run the MAPDL command.
       An example is the :func:`mapdl.run("/PREP7") <ansys.mapdl.core.Mapdl.run>` method.
 
@@ -1105,7 +1165,7 @@ priority over the arguments given in the corresponding functions.
 Consider this command:
 
 .. code-block:: console
-    
+
     user@machine:~$ export PYMAPDL_PORT=50052
     user@machine:~$ python -c "from ansys.mapdl.core import launch_mapdl; mapdl=launch_mapdl(port=60053)"
 

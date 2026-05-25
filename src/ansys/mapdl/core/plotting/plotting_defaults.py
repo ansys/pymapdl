@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,10 +21,15 @@
 # SOFTWARE.
 
 import pyvista as pv
-from pyvista.core import _vtk_core as _vtk
+
+try:
+    from pyvista.core import _vtk_core as _vtk
+except ImportError:
+    from pyvista import _vtk  # pyvista >= 0.48
+
 from pyvista.core.utilities import translate
 from pyvista.core.utilities.helpers import wrap
-from pyvista.core.utilities.misc import no_new_attr
+from pyvista.core.utilities.misc import _NoNewAttrMixin
 
 # I dont want to have to fix a very recent lower bound for pyvista.
 # Hence I'm copying what I need from there.
@@ -32,8 +37,7 @@ from pyvista.core.utilities.misc import no_new_attr
 # https://github.com/pyvista/pyvista/blob/35396c2e7645a6b57ad30d25ac1893f2141aab95/pyvista/core/utilities/geometric_sources.py#L2254
 
 
-@no_new_attr
-class ArrowSource(_vtk.vtkArrowSource):
+class ArrowSource(_vtk.vtkArrowSource, _NoNewAttrMixin):
     def __init__(
         self,
         tip_length=0.25,
@@ -72,7 +76,7 @@ class DefaultSymbol:
         self._configured = False
 
     def __call__(self, name):
-        if True:  # not self._configured: # Temporal patch pending on #3568
+        if not self._configured:
             self._set_configuration()
             self._configured = True
 

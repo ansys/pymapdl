@@ -50,8 +50,8 @@ variable, you can press the **Tab** key to use autocomplete:
 .. code-block:: console
 
     user@machine:~$ which python3[TAB]
-    python3             python3-intel64     python3.10-config   python3.11          python3.12          python3.8           python3.8-intel64   python3.9-config  
-    python3-config      python3.10          python3.10-intel64  python3.11-config   python3.12-config   python3.8-config    python3.9 
+    python3             python3-intel64     python3.10-config   python3.11          python3.12          python3.8           python3.8-intel64   python3.9-config
+    python3-config      python3.10          python3.10-intel64  python3.11-config   python3.12-config   python3.8-config    python3.9
     $ which python3.10
     /usr/bin/python3.10
 
@@ -59,7 +59,7 @@ You should use a Python version that is compatible with PyMAPDL.
 For more information, see :ref:`ref_pymapdl_installation`.
 
 .. warning::
-    
+
     Contact your cluster administrator if you cannot find a Python version
     compatible with PyMAPDL.
 
@@ -115,7 +115,7 @@ run this ``test.sh`` bash script:
     source /home/user/.venv/bin/activate
     python -c "from ansys.mapdl import core;print(f'PyMAPDL version {core.__version__} was successfully imported.')"
 
-then you can run that script using: 
+then you can run that script using:
 
 .. code-block:: console
 

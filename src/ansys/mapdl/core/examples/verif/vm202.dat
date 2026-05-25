@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -33,9 +33,9 @@ SECTYPE,1,SHELL
 SECDATA,0.1             ! DEFINE THICKNESS OF SHELL
 MP,EX,  1,200E9
 MP,NUXY,1,0.27
-MP,DENS,1,7860.0 
+MP,DENS,1,7860.0
 
-N,1                     ! DEFINE NODES  
+N,1                     ! DEFINE NODES
 N,5,5
 N,2,10
 N,6,10,5
@@ -60,11 +60,11 @@ D,ALL,UY,0
 NSEL,ALL
 
 NSEL,S,LOC,Z,1.8750
-CP,1,UX,ALL             ! COUPLE NODES IN X AND Y DOF 
+CP,1,UX,ALL             ! COUPLE NODES IN X AND Y DOF
 CP,2,UY,ALL
 
-NSEL,S,LOC,Z,3.75       
-CP,3,UX,ALL             
+NSEL,S,LOC,Z,3.75
+CP,3,UX,ALL
 CP,4,UY,ALL
 
 NSEL,S,LOC,Z,5.625

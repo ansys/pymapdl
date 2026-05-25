@@ -111,6 +111,7 @@ extensions = [
     "sphinx.ext.graphviz",
     "ansys_sphinx_theme.extension.linkcode",
     "sphinx.ext.mathjax",
+    "sphinxcontrib.rsvgconverter",
 ]
 
 # Intersphinx mapping
@@ -125,7 +126,7 @@ intersphinx_mapping = {
     "pypim": ("https://pypim.docs.pyansys.com/version/dev/", None),
     "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
     "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
-    "ansys-tools-path": ("https://path.tools.docs.pyansys.com/version/stable/", None),
+    "ansys-tools-common": ("https://tools.docs.pyansys.com/version/stable/", None),
     "pytwin": ("https://twin.docs.pyansys.com/version/stable/", None),
 }
 
@@ -364,6 +365,7 @@ html_context = {
     "github_version": BRANCH,
     "doc_path": str(DOC_PATH),
     "source_path": "src",
+    "pyansys_tags": ["Structures"],
 }
 html_show_sourcelink = False
 
@@ -377,6 +379,7 @@ htmlhelp_basename = "pymapdldoc"
 # -- Options for LaTeX output ------------------------------------------------
 latex_elements: dict[Any, Any] = {}
 
+# Use XeLaTeX for better Unicode and font support
 latex_engine = "xelatex"
 
 # Grouping the document tree into LaTeX files. List of tuples

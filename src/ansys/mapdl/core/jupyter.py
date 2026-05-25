@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,6 +21,11 @@
 # SOFTWARE.
 
 """Contains methods used only when running on ANSYS's jupyterhub cluster"""
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ansys.mapdl.core.mapdl import MapdlBase as Mapdl
 
 try:
     from ansys.jupyterhub import manager
@@ -98,7 +103,6 @@ def launch_mapdl_on_cluster(
     Launch MAPDL and guarantee 16 GB minimum RAM and 8 CPUs.
 
     >>> mapdl = launch_mapdl(memory=16, nproc=8)
-
     """
     # attempt to connect to the remote scheduler
     check_manager()

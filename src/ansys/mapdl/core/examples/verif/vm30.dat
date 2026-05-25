@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -42,15 +42,15 @@ AFILLT,1,3,1                       ! CREATE AREA FILLET WITH CONSTANT RADIUS=1
 /FACET,WIRE
 /VIEW,1,1,2,3
 /PNUM,AREA,1                       ! TURN ON AREA NUMBERING
-APLOT                              ! PLOT AREAS                             
-ACCAT,ALL                          ! CONCATENATE AREAS 
+APLOT                              ! PLOT AREAS
+ACCAT,ALL                          ! CONCATENATE AREAS
 LSEL,S,LINE,,5                     ! SELECT LINES TO CONCATENATE
 LSEL,A,LINE,,21,24,3
 LCCAT,ALL                          ! CONCATENATE LINES
 LSEL,S,LINE,,20,23,3               ! SELECT LINES TO CONCATENATE
 LSEL,A,LINE,,7
 LCCAT,ALL                          ! CONCATENATE LINES
-MSHK,1                             ! MAPPED AREA MESH 
+MSHK,1                             ! MAPPED AREA MESH
 MSHA,0,2D                          ! USING QUADS
 AMESH,1                            ! MESH USING DEFAULT ELEMENT SIZE
 EPLOT                              ! PLOT ELEMENTS
@@ -64,7 +64,7 @@ NSEL,S,LOC,X,-.1,.1
 *DIM,VALUE,,2,3
 LABEL(1,1) = 'MAX LOCA','MIN LOCA'
 LABEL(1,2) = 'TION    ','TION    '
-*VFILL,VALUE(1,1),DATA,0,0 
+*VFILL,VALUE(1,1),DATA,0,0
 *VFILL,VALUE(1,2),DATA,NXMAX,NXMIN
 *VFILL,VALUE(1,3),DATA,0,0
 /COM
@@ -82,4 +82,3 @@ LABEL(1,2) = 'TION    ','TION    '
 /OUT
 FINISH
 *LIST,vm30,vrt
-

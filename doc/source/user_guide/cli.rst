@@ -6,7 +6,11 @@ PyMAPDL command line interface
 ==============================
 
 For your convenience, PyMAPDL package includes a command line interface
-which allows you to launch, stop and list local MAPDL instances.
+which allows you to launch, stop, list, and execute commands on MAPDL instances.
+
+The list of available commands can be obtained by typing ``pymapdl --help`` in your
+terminal after activating the virtual environment.
+For more information about the installation, see :ref:`installation`.
 
 
 Launch MAPDL instances
@@ -27,7 +31,7 @@ To start MAPDL, just type on your activated virtual environment:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl start
@@ -49,17 +53,20 @@ If you want to specify an argument, for instance the port, then you need to call
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl start --port 50054
             Success: Launched an MAPDL instance (PID=18238) at 127.0.0.1:50054
 
 
-This ``pymapdl start`` command aims to replicate the function
-:func:`ansys.mapdl.core.launcher.launch_mapdl`. Hence, you can use
-some of the arguments which this function allows.
-For instance, you could specify the working directory:
+This ``pymapdl start`` command uses the
+:func:`ansys.mapdl.core.launcher.launch_mapdl_process` function internally
+to start MAPDL without creating a client connection. The command returns the
+connection information (IP, port, and PID) that you can use to connect later.
+
+Some of the arguments that :func:`ansys.mapdl.core.launcher.launch_mapdl` allows
+are also available in the CLI. For instance, you could specify the working directory:
 
 .. tab-set::
 
@@ -68,19 +75,20 @@ For instance, you could specify the working directory:
 
         .. code:: pwsh-session
 
-            (.venv) PS C:\Users\user\pymapdl> pymapdl start --run_location C:\Users\user\temp\    
+            (.venv) PS C:\Users\user\pymapdl> pymapdl start --run_location C:\Users\user\temp\
             Success: Launched an MAPDL instance (PID=32612) at 127.0.0.1:50052
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
-            (.venv) user@machine:~$ pymapdl start --run_location /home/user/tmp    
+            (.venv) user@machine:~$ pymapdl start --run_location /home/user/tmp
             Success: Launched an MAPDL instance (PID=32612) at 127.0.0.1:50052
 
 
-For more information, see :func:`ansys.mapdl.core.launcher.launch_mapdl`.
+For more information about the underlying function, see
+:func:`ansys.mapdl.core.launcher.launch_mapdl_process`.
 
 
 Stop MAPDL instances
@@ -100,7 +108,7 @@ You can use the ``pymapdl stop`` command to stop MAPDL instances like this:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl stop
@@ -124,7 +132,7 @@ You can specify the instance running on a different port using `--port` argument
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl stop --port 50053
@@ -146,7 +154,7 @@ Or an instance with a given process id (PID):
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl stop --pid 40952
@@ -163,15 +171,15 @@ Alternatively, you can stop all the running instances by using:
 
         .. code:: pwsh-session
 
-            (.venv) PS C:\Users\user\pymapdl> pymapdl stop --all      
+            (.venv) PS C:\Users\user\pymapdl> pymapdl stop --all
             Success: Ansys instances have been stopped.
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
-            (.venv) user@machine:~$ pymapdl stop --all      
+            (.venv) user@machine:~$ pymapdl stop --all
             Success: Ansys instances have been stopped.
 
 
@@ -198,7 +206,7 @@ If you want to list MAPDL process, just use the following command:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl list
@@ -227,7 +235,7 @@ processes), just type:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl list -i
@@ -258,7 +266,7 @@ argument `--long` or `-l`:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl list -l
@@ -270,9 +278,232 @@ argument `--long` or `-l`:
 
 
 The converter module has its own command line interface to convert
-MAPDL files to PyMAPDL. For more information, see 
+MAPDL files to PyMAPDL. For more information, see
 :ref:`ref_cli_converter`.
 
+
+.. _ref_cli_exec:
+
+Execute MAPDL commands
+======================
+
+Use ``pymapdl exec`` to send APDL commands to a running MAPDL instance and
+print the output to stdout. The command always connects to an existing
+instance, it never starts a new one. Use ``pymapdl start`` first if needed.
+
+There are three mutually exclusive sources for commands:
+
+**1.** ``-c`` / ``--command`` **options**
+
+Each ``-c`` value is one APDL command; all commands are joined and sent as a
+single block. You can pass multiple ``-c`` flags:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1" -c SAVE
+
+
+Or embed multiple commands in a single ``-c`` value using your shell's quoting
+to produce real newlines:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows (PowerShell)
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec -c "/prep7`nBLOCK,0,1,0,1,0,1`nSAVE"
+
+    .. tab-item:: Linux (bash/zsh)
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl exec -c $'/prep7\nBLOCK,0,1,0,1,0,1\nSAVE'
+
+
+**2. Script file**
+
+Read commands from an APDL script file using ``--file`` / ``-f``:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec --file my_script.inp
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl exec --file my_script.inp
+
+
+**3. Stdin**
+
+Pipe commands in from another program. The ``-`` marker is optional, when
+stdin is a pipe ``pymapdl exec`` detects it automatically:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> Get-Content my_script.inp | pymapdl exec
+            (.venv) PS C:\Users\user\pymapdl> Get-Content my_script.inp | pymapdl exec -
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ cat my_script.inp | pymapdl exec
+            (.venv) user@machine:~$ echo "/prep7" | pymapdl exec
+
+
+.. note::
+
+   ``pymapdl exec`` auto-reads stdin only when it detects a pipe (that is stdin
+   is not a terminal).  Running ``pymapdl exec`` interactively with no
+   arguments still produces an error rather than hanging.
+
+
+By default, ``pymapdl exec`` connects without clearing the MAPDL database, so
+successive calls share the same model state. Use the ``--clear-on-connect``
+flag to clear the database before sending commands:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec --clear-on-connect -c /prep7
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl exec --clear-on-connect -c /prep7
+
+
+A common workflow is to start MAPDL once, send one or more command blocks, and
+then stop the instance:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl start
+            Success: Launched an MAPDL instance (PID=23644) at 127.0.0.1:50052
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1"
+            (.venv) PS C:\Users\user\pymapdl> pymapdl exec -c SAVE
+            (.venv) PS C:\Users\user\pymapdl> pymapdl stop
+            Success: Ansys instances running on port 50052 have been stopped.
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl start
+            Success: Launched an MAPDL instance (PID=23644) at 127.0.0.1:50052
+            (.venv) user@machine:~$ pymapdl exec -c /prep7 -c "BLOCK,0,1,0,1,0,1"
+            (.venv) user@machine:~$ pymapdl exec -c SAVE
+            (.venv) user@machine:~$ pymapdl stop
+            Success: Ansys instances running on port 50052 have been stopped.
+
+
+.. note::
+
+   ``pymapdl exec`` writes command output to stdout and errors to stderr,
+   making it suitable for use in shell scripts and pipelines. The process
+   exits with code ``0`` on success and ``1`` on failure.
+
+To convert an existing APDL script to Python instead of executing it, see
+:ref:`ref_cli_converter`.
+
+
+.. _ref_cli_help:
+
+Get help
+========
+
+The command-line tool provides a generic help command that lists available MAPDL keywords and
+functions. The output can be filtered using standard shell tools. For example,
+filter for GET-related entries containing NODE and LOC with grep:
+
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> pymapdl help "*GET" | Select-String -Context 3,3 "NODE" | Select-String -Context 3,3 "LOC"
+                ┣━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+                ┃ Item1 ┃ IT1NUM   ┃ Description                                                                                       ┃
+                ┡━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+                │ LOC   │ X, Y, Z  │ X, Y, Z location in the active coordinate system. Alternative get functions: NX( N ), NY( N ),    │
+                │       │          │ NZ( N ). Inverse get function. NODE( x,y,z ) returns the number of the selected node nearest the  │
+                │       │          │ x,y,z location (in the active coordinate system, lowest number for coincident nodes).             │
+                ├───────┼──────────┼───────────────────────────────────────────────────────────────────────────────────────────────────┤
+
+
+        .. note:: The `-Context` argument controls the number of lines to print before and after the match (`-Context <n>`)
+            which can be helpful to understand the context of the matched keyword.
+            You can also control them separately with `-Context <before>,<after>`.
+
+    .. tab-item:: Linux
+        :sync: key1
+
+        .. code:: console
+
+            (.venv) user@machine:~$ pymapdl help "*GET" | grep -C 3 NODE | grep -C 3 LOC
+                ┣━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+                ┃ Item1 ┃ IT1NUM   ┃ Description                                                                                       ┃
+                ┡━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+                │ LOC   │ X, Y, Z  │ X, Y, Z location in the active coordinate system. Alternative get functions: NX( N ), NY( N ),    │
+                │       │          │ NZ( N ). Inverse get function. NODE( x,y,z ) returns the number of the selected node nearest the  │
+                │       │          │ x,y,z location (in the active coordinate system, lowest number for coincident nodes).             │
+                ├───────┼──────────┼───────────────────────────────────────────────────────────────────────────────────────────────────┤
+
+
+        .. note:: The `-C` / `--context` option of grep shows lines before and after the matched line,
+            which can be helpful to understand the context of the matched keyword.
+
+This shows a matched table excerpt; adjust the grep pattern to match the keywords you need.
 
 
 .. _ref_cli_converter:
@@ -293,17 +524,17 @@ Here is how you use the ``pymapdl convert`` command:
         .. code:: pwsh-session
 
             (.venv) PS C:\Users\user\pymapdl> pymapdl convert mapdl.dat -o python.py
-            
+
             The ``mapdl.dat`` file is successfully converted to the ``python.py`` file.
 
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl convert mapdl.dat -o python.py
-            
+
             File mapdl.dat successfully converted to python.py.
 
 To obtain help on converter usage, options, and examples, type this command:
@@ -317,8 +548,8 @@ To obtain help on converter usage, options, and examples, type this command:
         .. code:: pwsh-session
 
             (.venv) PS C:\Users\user\pymapdl> pymapdl convert --help
-            
-            
+
+
             Usage: pymapdl convert [OPTIONS] FILENAME_IN
 
             PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.
@@ -330,11 +561,11 @@ To obtain help on converter usage, options, and examples, type this command:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl convert --help
-            
+
             Usage: pymapdl convert [OPTIONS] FILENAME_IN
 
             PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,7 @@ OUTPR,,1
 D,1,UZ
 D,2,ALL
 FINISH
-/SOLU    
+/SOLU
 MODOPT,LANB,1
 MXPAND,1
 SOLVE

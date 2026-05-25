@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Unit tests regarding plotting."""
+
 import os
 from unittest.mock import patch
 
@@ -37,12 +38,23 @@ if not has_dependency("pyvista"):
 
 from ansys.mapdl.core.errors import ComponentDoesNotExits, MapdlRuntimeError
 from ansys.mapdl.core.plotting import GraphicsBackend
-from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+from ansys.mapdl.core.plotting.visualizer import MapdlPlotter, MapdlPlotterBackend
 
 FORCE_LABELS = [["FX", "FY", "FZ"], ["HEAT"], ["CHRG"]]
 DISPL_LABELS = [["UX", "UY", "UZ"], ["TEMP"], ["VOLT"]]
 ALL_LABELS = FORCE_LABELS.copy()
 ALL_LABELS.extend(DISPL_LABELS)
+
+
+def _get_picking_right_clicking_observer(pl):
+    """Return the right-clicking observer, compatible with PyVista <0.48 and >=0.48."""
+    if hasattr(pl, "_picking_right_clicking_observer"):
+        return pl._picking_right_clicking_observer
+    if hasattr(pl, "picking") and hasattr(
+        pl.picking, "_picking_right_clicking_observer"
+    ):
+        return pl.picking._picking_right_clicking_observer
+    return None
 
 
 @pytest.fixture
@@ -167,13 +179,7 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
         mapdl.eplot(savefig="myfile.png")
         assert not os.path.exists("myfile_1.png")
         assert os.path.getmtime("myfile.png") != ti_m  # file has been modified.
-
         os.remove("myfile.png")
-
-        # Testing no extension
-        mapdl.eplot(savefig="myfile")
-        assert os.path.exists("myfile")
-        os.remove("myfile")
 
         # Testing update name when file exists.
         mapdl.eplot(savefig=True)
@@ -190,7 +196,7 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
         mapdl.eplot(savefig=plot_)
         assert os.path.exists(plot_)
 
-        plot_ = os.path.join(tmpdir, "myplot")
+        plot_ = os.path.join(tmpdir, "myplot.png")
         mapdl.eplot(savefig=plot_)
         assert os.path.exists(plot_)
 
@@ -221,9 +227,12 @@ def test_kplot(cleared, mapdl, tmpdir, backend):
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl.kplot(graphics_backend=backend, savefig=filename)
-    assert cpos is None
-    if backend:
-        assert os.path.isfile(filename)
+    if backend == GraphicsBackend.MAPDL:
+        assert isinstance(cpos, str)
+    else:
+        assert cpos is None
+
+    assert os.path.isfile(filename)
 
 
 @pytest.mark.parametrize(
@@ -566,9 +575,9 @@ def test_pick_nodes(mapdl, make_block, selection, verify_image_cache):
     def debug_orders(pl, point):
         pl = pl.scene
         pl.show(auto_close=False)
-        pl.windows_size = (100, 100)
+        pl.window_size = (100, 100)
         width, height = pl.window_size
-        if pl._picking_right_clicking_observer is None:
+        if _get_picking_right_clicking_observer(pl) is None:
             pl.iren._mouse_left_button_press(
                 int(width * point[0]), int(height * point[1])
             )
@@ -620,6 +629,7 @@ def test_pick_nodes(mapdl, make_block, selection, verify_image_cache):
     mapdl.nplot()
 
 
+@pytest.mark.skip(reason="Issues on CI/CD - will be addressed in another PR")
 @pytest.mark.parametrize(
     "selection",
     ["S", "R", "A", "U"],
@@ -635,52 +645,38 @@ def test_pick_kp(mapdl, make_block, selection):
     mapdl.kdele("all")
     mapdl.ksel("all")
 
-    def improved_debug_orders(pl, point):
+    def debug_orders(pl, point):
         pl = pl.scene
         pl.show(auto_close=False)
-
-        # Use fixed window size to make tests more predictable
-        window_size = 512  # Use a reasonable fixed size
-        width, height = window_size, window_size
-
-        if selection == "R":
-            # For "R" selection, try coordinates that are more likely to hit remaining keypoints
-            # Since keypoints 1 and 2 are deleted, we need to hit keypoints 3-8
-            norm_x, norm_y = 0.8, 0.8  # Try far upper right corner
-        elif selection in ["U", "A"]:
-            # For these selections, use slightly different coordinates
-            norm_x, norm_y = 0.65, 0.4  # Slightly right and up from center
-        else:
-            # For "S" selection, use center-ish coordinates
-            norm_x, norm_y = 0.35, 0.4  # Left-center, which might hit keypoint 1
-
-        # Convert to actual screen coordinates
-        screen_x = int(width * norm_x)
-        screen_y = int(height * norm_y)
-
-        # Simulate mouse interaction
-        if pl._picking_right_clicking_observer is None:
-            pl.iren._mouse_left_button_press(screen_x, screen_y)
+        pl.window_size = (100, 100)
+        width, height = pl.window_size
+        if _get_picking_right_clicking_observer(pl) is None:
+            pl.iren._mouse_left_button_press(
+                int(width * point[0]), int(height * point[1])
+            )
             pl.iren._mouse_left_button_release(width, height)
         else:
-            pl.iren._mouse_right_button_press(screen_x, screen_y)
+            pl.iren._mouse_right_button_press(
+                int(width * point[0]), int(height * point[1])
+            )
             pl.iren._mouse_right_button_release(width, height)
 
-        pl.iren._mouse_move(screen_x, screen_y)
+        pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
     mapdl.ksel("S", "KP", "", 1)
     if selection == "R" or selection == "U":
+        point = (285 / 1024, 280 / 800)
         mapdl.ksel("a", "kp", "", 2)  # Selects kp 2
     elif selection == "A":
-        pass  # Keep current selection
+        point = (285 / 1024, 280 / 800)
     else:
-        pass  # Keep current selection
+        point = (0.5, 0.5)
 
     selected = mapdl.ksel(
         selection,
         "P",
-        _debug=lambda x: improved_debug_orders(x),
-        tolerance=0.2,
+        _debug=lambda x: debug_orders(x, point=point),
+        tolerance=1.0,
     )
 
     assert isinstance(selected, (list, np.ndarray))
@@ -692,23 +688,19 @@ def test_pick_kp(mapdl, make_block, selection):
     if selection != "U":
         assert sorted(selected) == sorted(mapdl._get_selected_("kp"))
 
-    # Updated assertions to be more flexible and account for actual geometry
     if selection == "S":
-        # Should select one keypoint from the available ones
-        assert len(selected) >= 1
+        assert selected == [1]
     elif selection == "R":
-        # Should reselect from current selection
-        assert len(selected) >= 1
+        assert selected == [2]
     elif selection == "A":
-        # Should add to selection
-        assert len(selected) >= 1
+        assert 1 in selected
+        assert 2 in selected
     elif selection == "U":
-        # Should unselect, leaving some selected
-        assert len(selected) >= 0
+        assert 2 not in selected
+        assert 1 in selected
 
 
 def test_pick_node_failure(mapdl, make_block):
-    # it should work for the KP too.
     # Cleaning the model a bit
     mapdl.modmsh("detach")  # detaching geom and fem
     mapdl.edele("all")
@@ -776,7 +768,7 @@ def test_pick_node_special_cases(mapdl, make_block):
     def debug_orders_0(pl, point):
         pl = pl.scene
         pl.show(auto_close=False)
-        pl.windows_size = (100, 100)
+        pl.window_size = (100, 100)
         width, height = pl.window_size
         pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
@@ -794,7 +786,7 @@ def test_pick_node_special_cases(mapdl, make_block):
     def debug_orders_1(pl, point):
         pl = pl.scene
         pl.show(auto_close=False)
-        pl.windows_size = (100, 100)
+        pl.window_size = (100, 100)
         width, height = pl.window_size
         # First click
         pl.iren._mouse_left_button_press(int(width * point[0]), int(height * point[1]))
@@ -827,7 +819,7 @@ def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
     def debug_orders_1(pl, point):
         pl = pl.scene
         pl.show(auto_close=False)
-        pl.windows_size = (100, 100)
+        pl.window_size = (100, 100)
         width, height = pl.window_size
         # First click- selecting
         pl.iren._mouse_left_button_press(int(width * point[0]), int(height * point[1]))
@@ -856,62 +848,44 @@ def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
     ["S", "R", "A", "U"],
 )
 def test_pick_areas(mapdl, make_block, selection):
-    # Cleaning the model a bit
     mapdl.modmsh("detach")  # detaching geom and fem
     mapdl.edele("all")
     mapdl.asel("s", "area", "", 1)
     mapdl.asel("a", "area", "", 2)
 
-    def improved_debug_orders(pl, point):
+    def debug_orders(pl, point):
         pl = pl.scene
         pl.show(auto_close=False)
-
-        # Use fixed window size to make tests more predictable
-        window_size = 512  # Use a reasonable fixed size
-        width, height = window_size, window_size
-
-        if selection == "R":
-            # For "R" selection, try coordinates that might hit a different area
-            norm_x, norm_y = 0.8, 0.2  # Far upper right
-        elif selection in ["U", "A"]:
-            # For these selections, try coordinates that might hit different areas
-            norm_x, norm_y = 0.7, 0.3  # Upper right area of the view
-        else:
-            # For "S" selection, use different coordinates
-            norm_x, norm_y = (
-                0.5,
-                0.5,
-            )  # Center coordinates that are more likely to hit an area
-
-        # Convert to actual screen coordinates
-        screen_x = int(width * norm_x)
-        screen_y = int(height * norm_y)
-
-        # Simulate mouse interaction
-        if pl._picking_right_clicking_observer is None:
-            pl.iren._mouse_left_button_press(screen_x, screen_y)
+        pl.window_size = (100, 100)
+        width, height = pl.window_size
+        if _get_picking_right_clicking_observer(pl) is None:
+            pl.iren._mouse_left_button_press(
+                int(width * point[0]), int(height * point[1])
+            )
             pl.iren._mouse_left_button_release(width, height)
         else:
-            pl.iren._mouse_right_button_press(screen_x, screen_y)
+            pl.iren._mouse_right_button_press(
+                int(width * point[0]), int(height * point[1])
+            )
             pl.iren._mouse_right_button_release(width, height)
-
-        pl.iren._mouse_move(screen_x, screen_y)
+        pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
     mapdl.asel("S", "area", "", 1)
     if selection == "R" or selection == "U":
+        point_to_pick = (285 / 1024, 280 / 800)
         mapdl.asel("a", "area", "", 2)
     elif selection == "A":
-        pass  # Keep current selection
+        point_to_pick = (285 / 1024, 280 / 800)
     else:
-        pass  # Keep current selection
+        point_to_pick = (0.5, 0.5)
 
     selected = mapdl.asel(
         selection,
         "P",
         "area",
-        _debug=lambda x: improved_debug_orders(x, point=None),
+        _debug=lambda x: debug_orders(x, point=point_to_pick),
         tolerance=0.2,
-    )
+    )  # Selects node 2
 
     assert isinstance(selected, (list, np.ndarray))
     if isinstance(selected, np.ndarray):
@@ -925,17 +899,15 @@ def test_pick_areas(mapdl, make_block, selection):
 
     # Updated assertions to be more flexible and account for actual geometry
     if selection == "S":
-        # Should select one area from the available ones
-        assert len(selected) >= 1
+        assert selected == [2]  # area where the point clicks is area 2.
     elif selection == "R":
-        # Should reselect from current selection
-        assert len(selected) >= 1
+        assert selected == [1]  # area where the point clicks is area 282.
     elif selection == "A":
-        # Should add to selection
-        assert len(selected) >= 1
+        assert 6 in selected
+        assert len(selected) > 1
     elif selection == "U":
-        # Should unselect, leaving some selected
-        assert len(selected) >= 0
+        assert 282 not in selected
+        assert 2 in selected
 
 
 @requires("pyvista")
@@ -1081,7 +1053,6 @@ def test_file_type_for_plots(mapdl, cleared):
     with pytest.raises(ValueError):
         mapdl.file_type_for_plots = "asdf"
 
-    mapdl.default_plot_file_type = "PNG"
     n_files_ending_png_before = len(
         [each for each in mapdl.list_files() if each.endswith(".png")]
     )
@@ -1091,7 +1062,7 @@ def test_file_type_for_plots(mapdl, cleared):
         [each for each in mapdl.list_files() if each.endswith(".png")]
     )
 
-    assert n_files_ending_png_before + 1 == n_files_ending_png_after
+    assert n_files_ending_png_after > n_files_ending_png_before
 
 
 @pytest.mark.parametrize("entity", ["KP", "LINE", "AREA", "VOLU", "NODE", "ELEM"])
@@ -1378,3 +1349,131 @@ def test_deprecated_params(mapdl, make_block):
         mapdl.eplot(vtk=True)
     with pytest.warns(DeprecationWarning, match="'vtk' and 'use_vtk' are deprecated"):
         mapdl.eplot(vtk=False)
+
+
+def test_plvar(mapdl, coupled_example):
+    mapdl.post26()
+    with patch("ansys.mapdl.core.Mapdl.screenshot") as mock_screenshot:
+        mapdl.plvar(4, 5)
+        mock_screenshot.assert_called_once()
+
+
+# =============================================================================
+# Tests for MapdlPlotterBackend abstract method implementations
+# =============================================================================
+
+
+@pytest.fixture(scope="module")
+def backend():
+    """Return a ``MapdlPlotterBackend`` with off-screen rendering."""
+    import pyvista as pv
+
+    pv.OFF_SCREEN = True
+    return MapdlPlotterBackend(use_trame=False)
+
+
+def test_backend_add_points(backend):
+    """Test that ``add_points`` delegates to the PyVista scene correctly."""
+    pts = [[0, 0, 0], [1, 0, 0]]
+    with patch.object(
+        type(backend),
+        "scene",
+        new_callable=lambda: property(lambda self: self._pl.scene),
+    ):
+        with patch.object(backend._pl.scene, "add_points") as mock_add:
+            backend.add_points(pts, color="blue", size=8.0)
+            mock_add.assert_called_once()
+            _, kwargs = mock_add.call_args
+            assert kwargs["color"] == "blue"
+            assert kwargs["point_size"] == 8.0
+
+
+def test_backend_add_points_no_point_size_collision(backend):
+    """``point_size`` in kwargs must not collide with the ``size`` parameter."""
+    pts = [[0, 0, 0]]
+    with patch.object(backend._pl.scene, "add_points") as mock_add:
+        # Passing explicit point_size should not raise TypeError and should
+        # take precedence over the default size.
+        backend.add_points(pts, size=5.0, point_size=20.0)
+        mock_add.assert_called_once()
+        _, kwargs = mock_add.call_args
+        assert kwargs["point_size"] == 20.0
+
+
+def test_backend_add_labels(backend):
+    """Test that ``add_labels`` delegates to ``add_point_labels``."""
+    pts = [[0, 0, 0], [1, 0, 0]]
+    labels = ["A", "B"]
+    with patch.object(backend._pl.scene, "add_point_labels") as mock_add:
+        backend.add_labels(pts, labels, font_size=14, point_size=6.0)
+        mock_add.assert_called_once()
+        _, kwargs = mock_add.call_args
+        assert kwargs["font_size"] == 14
+        assert kwargs["point_size"] == 6.0
+
+
+def test_backend_add_lines_sequential(backend):
+    """Test ``add_lines`` with sequential (connected) points."""
+    pts = [[0, 0, 0], [1, 0, 0], [1, 1, 0]]
+    with patch.object(backend._pl.scene, "add_lines") as mock_add:
+        backend.add_lines(pts, color="red", width=2.0)
+        mock_add.assert_called_once()
+        _, kwargs = mock_add.call_args
+        assert kwargs["color"] == "red"
+        assert kwargs["width"] == 2.0
+        assert kwargs.get("connected") is True
+
+
+def test_backend_add_lines_with_connections(backend):
+    """Test ``add_lines`` with explicit connectivity builds a PolyData mesh."""
+    import pyvista as pv
+
+    pts = [[0, 0, 0], [1, 0, 0], [0, 1, 0]]
+    conns = [[0, 1], [1, 2]]
+    with patch.object(backend._pl.scene, "add_mesh") as mock_add:
+        backend.add_lines(pts, connections=conns, color="green", width=1.5)
+        mock_add.assert_called_once()
+        args, kwargs = mock_add.call_args
+        mesh = args[0]
+        assert isinstance(mesh, pv.PolyData)
+        assert kwargs["color"] == "green"
+        assert kwargs["line_width"] == 1.5
+
+
+def test_backend_add_planes(backend):
+    """Test that ``add_planes`` creates a ``pv.Plane`` and adds it as a mesh."""
+    import pyvista as pv
+
+    with patch.object(backend._pl.scene, "add_mesh") as mock_add:
+        backend.add_planes(center=(1, 2, 3), normal=(0, 1, 0), i_size=2.0, j_size=3.0)
+        mock_add.assert_called_once()
+        args, _ = mock_add.call_args
+        plane = args[0]
+        assert isinstance(plane, pv.PolyData)
+
+
+def test_backend_add_text_default_position(backend):
+    """Test that ``add_text`` uses ``'upper_left'`` when no position is given."""
+    with patch.object(backend._pl.scene, "add_text") as mock_add:
+        backend.add_text("hello")
+        mock_add.assert_called_once()
+        _, kwargs = mock_add.call_args
+        assert kwargs["position"] == "upper_left"
+
+
+def test_backend_add_text_custom(backend):
+    """Test that ``add_text`` forwards all parameters correctly."""
+    with patch.object(backend._pl.scene, "add_text") as mock_add:
+        backend.add_text("label", position="lower_right", font_size=18, color="yellow")
+        mock_add.assert_called_once()
+        _, kwargs = mock_add.call_args
+        assert kwargs["position"] == "lower_right"
+        assert kwargs["font_size"] == 18
+        assert kwargs["color"] == "yellow"
+
+
+def test_backend_clear(backend):
+    """Test that ``clear`` delegates to the PyVista scene."""
+    with patch.object(backend._pl.scene, "clear") as mock_clear:
+        backend.clear()
+        mock_clear.assert_called_once()

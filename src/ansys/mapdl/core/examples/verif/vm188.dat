@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,9 @@
 /COM,
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
-_GEOMGEN_1=0                    ! SET THIS TO 1 TO UPDATE CDB FILE 
+_GEOMGEN_1=0                    ! SET THIS TO 1 TO UPDATE CDB FILE
 _EXIT1=0                       ! SET THIS TO 1 TO EXIT WITHOUT SOLVING
-*IF,_GEOMGEN_1,EQ,1,THEN 
+*IF,_GEOMGEN_1,EQ,1,THEN
 /PREP7
 SMRT,OFF
 ET,1,PLANE233                      ! 8-NODE QUADRILATERAL EMAG ELEMENT
@@ -120,12 +120,12 @@ SOLVE
 FINISH
 
 /POST1
-ESEL,S,MAT,,2   
+ESEL,S,MAT,,2
 NSLE
 ESLN
 EMFT                               ! SUM UP MAXWELL FORCES ACTING ON THE CONDUCTOR
-FMXW=_FXSUM*2 
-ALLS   
+FMXW=_FXSUM*2
+ALLS
 FINISH
 
 /PREP7
@@ -151,7 +151,7 @@ PPATH,2,,.012,.012,0
 PPATH,3,,0,.012,0
 PPATH,4,,0,0,0
 /PBC,PATH,1                        ! ACTIVATE PATH B.C. FOR DISPLAY
-PLF2D            
+PLF2D
 
 *DIM,LABEL,CHAR,2,2
 *DIM,VALUE,,2,3

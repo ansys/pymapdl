@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,7 @@ DK,1,TEMP,32       ! SURFACE TEMPERATURE APPLIED TO KEYPOINT 1
 BFK,ALL,HGEN,4E4   ! HEAT GENERATION SPECIFIED AT KEYPOINTS 1 & 2
 FINISH
 /OUT,SCRATCH
-/SOLU    
+/SOLU
 SOLVE
 FINI
 /OUT
@@ -77,4 +77,3 @@ LABEL(1,2) = 'E 1)    ','E 3)    ','E 4)    ','E 5)    ','E 6)    ','E 2)    '
 /OUT
 FINISH
 *LIST,vm115,vrt
-

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -63,7 +63,7 @@ KBC,1
 FINISH
 /OUT,vm179_SCRATCH          ! SEND SUBSEQUENT OUTPUT TO SCRATCH FILE
 /SOLU
-DMPOPT,RNNN,YES    
+DMPOPT,RNNN,YES
 SOLCONT,ON
 PRED,ON
 CNVTOL,M
@@ -108,10 +108,10 @@ FINISH
 
 PARSAV
 /CLEAR,NOSTART                ! CLEAR THE DATABASE (TO SIMULATE RESTART)
-/COM,    
+/COM,
 /COM,        -----     RESTART  ANALYSIS    -----
 
-/SOLU    
+/SOLU
 ANTYPE,,REST         ! USE RESTART ANALYSIS TO DEFINE MORE LOADSTEPS
 F,1,MZ,0             ! REMOVE M1, ALLOW ROTZ MOTION TO STABILIZE
 TIME,2.05
@@ -147,11 +147,11 @@ LABEL(10,2) = 'RAD','RAD'
 *VFILL,VALUE(1,2),DATA,DX1,DY1,RZ1,DX2,DY2,RZ2,DX3,DY3,DZ3
 *VFILL,VALUE(10,2),DATA,RX3,RZ3
 V1 = ABS(DX1/.5858)
-V2 = (DY1/1.4142) 
-V3 = (RZ1/.7854) 
-V4 = ABS(DX2/2) 
-V5 = (DY2/2) 
-V6 = (RZ2/1.5708) 
+V2 = (DY1/1.4142)
+V3 = (RZ1/.7854)
+V4 = ABS(DX2/2)
+V5 = (DY2/2)
+V6 = (RZ2/1.5708)
 V7 = ABS(DX3/2)
 V8 = (DY3/1.9962)
 *VFILL,VALUE(1,3),DATA,V1,V2,V3,V4,V5,V6,V7,V8

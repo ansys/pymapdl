@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +29,8 @@
 
 /OUT,vm312_scratch
 
-_GEOMGEN=0 ! SET THIS TO 1 TO UPDATE CDB FILE 
-*IF,_GEOMGEN,EQ,1,THEN 
+_GEOMGEN=0 ! SET THIS TO 1 TO UPDATE CDB FILE
+*IF,_GEOMGEN,EQ,1,THEN
 
 PI=ACOS(-1)
 
@@ -63,19 +63,19 @@ NS2=19             ! SUBSTEP TO RESTART FROM IN LP ANALYSIS
 /PREP7
 ET,1,226,1001
 KEYOP,1,4,1
-SPHERE,A,B,0,90 
-SPHERE,A,B,90,180   
-SPHERE,A,B,180,270  
+SPHERE,A,B,0,90
+SPHERE,A,B,90,180
+SPHERE,A,B,180,270
 SPHERE,A,B,270,360
-NUMMRG,KP   
-VSBW,ALL,,DELETE 
-CSYS,2  
+NUMMRG,KP
+VSBW,ALL,,DELETE
+CSYS,2
 LSEL,S,LOC,X,A+(B-A)/2
-LESIZE,ALL,,,NDIV1  
+LESIZE,ALL,,,NDIV1
 LSEL,INVE
 LESIZE,ALL,,,NDIV2
 ALLS
-MSHAPE,0 
+MSHAPE,0
 ESIZE,0.5
 VMESH,ALL
 
@@ -147,12 +147,12 @@ CDWRITE,db,vm312,cdb
 *ELSE
 CDREAD,db,vm312,cdb
 *ENDIF
-/COM, 
+/COM,
 /COM, **********************************************
 /COM, ***        NONLINEAR STATIC ANALYSIS       ***
 /COM, **********************************************
 /COM,
-/SOLU 
+/SOLU
 D,NLOAD,VOLT,VDC
 
 ALLSE
@@ -166,7 +166,7 @@ SOLVE
 FINISH
 
 /POST26
-NSOL,3,NLOAD,VOLT,,VOLT    
+NSOL,3,NLOAD,VOLT,,VOLT
 NSOL,4,NLOAD,U,X,'UX VS VOLT'
 PRVAR,3,4
 /SHOW,PNG
@@ -191,7 +191,7 @@ RATIO=RATIO/NS
 FINISH
 PARSAV
 SAVE
-/COM, 
+/COM,
 /COM, **********************************************
 /COM, ***           LP STATIC ANALYSIS           ***
 /COM, ***             (VOLTAGE LOAD)             ***
@@ -225,7 +225,7 @@ SET,LAST
 DU=-UX(NLOAD)
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, **********************************************
 /COM, ***            LP STATIC ANALYSIS          ***
 /COM, ***            (DISPLACEMENT LOAD)         ***
@@ -250,7 +250,7 @@ SET,LAST
 *GET,DV,NODE,NLOAD,VOLT
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, **********************************************
 /COM, ***            LP MODAL ANALYSIS           ***
 /COM, ***               (RESONANCE)              ***
@@ -264,7 +264,7 @@ SOLVE,ELFORM
 PARRES
 D,NLOAD,VOLT,0
 
-MODOPT,LANB,1        
+MODOPT,LANB,1
 SOLVE
 FINI
 
@@ -274,7 +274,7 @@ SET,LAST
 *GET,FRQ1,MODE,1,FREQ
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, **********************************************
 /COM, ***            LP MODAL ANALYSIS           ***
 /COM, ***            (ANTI-RESONANCE)            ***
@@ -288,7 +288,7 @@ SOLVE,ELFORM
 PARRES
 DDELE,NLOAD,VOLT
 
-MODOPT,LANB,1  
+MODOPT,LANB,1
 SOLVE
 FINI
 
@@ -298,7 +298,7 @@ SET,LAST
 *GET,FRQ2,MODE,1,FREQ
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, ******************************************
 /COM, ***        LP HARMONIC ANALYSIS        ***
 /COM, ***          (ACTUATOR MODE)           ***
@@ -325,7 +325,7 @@ SET,LAST
 UHR=-UX(NLOAD)
 FINISH
 PARSAV
-/COM, 
+/COM,
 /COM, ******************************************
 /COM, ***        LP HARMONIC ANALYSIS        ***
 /COM, ***           (SENSOR MODE)            ***
@@ -353,8 +353,8 @@ SET,LAST
 VHR=VOLT(NLOAD)
 FINISH
 
-! ANALYTICAL SOLUTION                                         
-C_TAR=4*PI*PER/(1/A-1/(B-U))              ! EQUATION (6)  
+! ANALYTICAL SOLUTION
+C_TAR=4*PI*PER/(1/A-1/(B-U))              ! EQUATION (6)
 F_TAR=2*PI*PER*V**2/((B-U)/A-1)**2        ! EQUATION (8)
 KR=K-2*F_TAR/(B-A-U)                      ! EQUATION (18)
 DU_TAR=(2*F_TAR*VLP/V)/KR                 ! EQUATION (17)

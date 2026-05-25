@@ -9,4 +9,3 @@ Solution
    :toctree: _autosummary
 
    solution.Solution
-

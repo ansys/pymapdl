@@ -17,7 +17,7 @@ Install the latest release from `PyPi <pymapdl_pypi_>`_ with this command:
 
    pip install ansys-mapdl-core
 
-Alternatively, install the latest from 
+Alternatively, install the latest from
 `PyMAPDL GitHub <pymapdl_issues_>`_ with this command:
 
 .. code:: console
@@ -40,7 +40,7 @@ locally and have the changes reflected in your setup after restarting the Python
 Offline installation
 ~~~~~~~~~~~~~~~~~~~~
 If you lack an internet connection on your installation machine, the recommended way
-of installing PyMAPDL is downloading the wheelhouse archive from the 
+of installing PyMAPDL is downloading the wheelhouse archive from the
 `Releases <pymapdl_releases_>`_ page for your corresponding
 machine architecture.
 
