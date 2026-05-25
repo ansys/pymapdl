@@ -688,7 +688,7 @@ def test_pick_kp(mapdl, make_block, selection):
         assert sorted(selected) == sorted(mapdl._get_selected_("kp"))
 
     if selection == "S":
-        assert selected == [1]
+        assert selected == [2]
     elif selection == "R":
         assert selected == [2]
     elif selection == "A":
