@@ -69,7 +69,7 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
         :link-type: ref
         :img-top: ../images/examples_main_page/developer.png
 
-        Informative and insightful blog articles published in the `Developer Portal <developer_portal_>`_. 
+        Informative and insightful blog articles published in the `Developer Portal <developer_portal_>`_.
 
     .. grid-item-card:: Verification manual examples
         :link: https://examples.mapdl.docs.pyansys.com/verif-manual/index.html
@@ -84,7 +84,7 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
 
         Examples coming from the APDL Technology Showcase Manual.
 
-        
+
 
 .. === DOWNLOAD EXAMPLES ===
 

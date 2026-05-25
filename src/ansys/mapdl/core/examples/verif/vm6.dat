@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -24,17 +24,17 @@
 /VERIFY,VM6
 /PREP7
 /TITLE, VM6, PINCHED CYLINDER
-/COM,  REF: COOK, CONCEPTS AND APPL. OF FEA 2ND ED., 1981, PP. 284-287. 
+/COM,  REF: COOK, CONCEPTS AND APPL. OF FEA 2ND ED., 1981, PP. 284-287.
 C***         USING SHELL181 ELEMENTS
 /PREP7
-ANTYPE,STATIC             
+ANTYPE,STATIC
 ET,1,SHELL181, , ,2
 SECTYPE,1,SHELL
 SECDATA,0.094,1,0,5
 MP,EX,,10.5E6
 MP,NUXY,,.3125
 CSYS,1
-N,1,4.953                 ! DEFINE FE MODEL 
+N,1,4.953                 ! DEFINE FE MODEL
 N,9,4.953,,5.175
 FILL
 NGEN,9,10,1,9,1,,90/8
@@ -53,7 +53,7 @@ NSEL,ALL
 TOP_NODE = NODE (4.953,90,0)
 F,TOP_NODE,FY,-25
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 /POST1
@@ -74,7 +74,7 @@ FINISH
 /TITLE, VM6, PINCHED CYLINDER
 C***         USING SHELL281 ELEMENTS
 /PREP7
-RESUME            
+RESUME
 ET,1,SHELL281
 EMID,ADD
 CSYS,0
@@ -88,7 +88,7 @@ NSEL,ALL
 TOP_NODE = NODE (4.953,90,0)
 F,TOP_NODE,FY,-25
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 /POST1

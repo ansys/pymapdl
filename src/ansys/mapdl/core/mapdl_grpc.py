@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -27,7 +27,7 @@ import glob
 import io
 import json
 import os
-import pathlib
+from pathlib import Path, PurePath
 import re
 import shutil
 
@@ -41,7 +41,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Uni
 from warnings import warn
 import weakref
 
-from ansys.tools.versioning.utils import version_string_as_tuple
+from ansys.tools.common.versioning import version_string_as_tuple
 import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
@@ -72,6 +72,7 @@ from ansys.mapdl.core.common_grpc import (
 )
 from ansys.mapdl.core.errors import (
     MapdlConnectionError,
+    MapdlDidNotStart,
     MapdlError,
     MapdlExitedError,
     MapdlRuntimeError,
@@ -107,6 +108,32 @@ VOID_REQUEST = anskernel.EmptyRequest()
 # Default 256 MB message length
 MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024**2))
 
+
+def _drain_queue(queue) -> str:
+    """Drain all available items from a queue into a string.
+
+    Parameters
+    ----------
+    queue : Queue or None
+        A queue whose items are bytes or strings. If ``None``, returns an
+        empty string.
+
+    Returns
+    -------
+    str
+        All currently-available queue items joined into a single string.
+    """
+    if queue is None:
+        return ""
+    lines = []
+    while not queue.empty():
+        try:
+            lines.append(queue.get_nowait().decode(errors="replace"))
+        except Exception:
+            break
+    return "".join(lines)
+
+
 VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26)
 
 
@@ -133,12 +160,19 @@ SERVICE_DEFAULT_CONFIG = {
     ]
 }
 
+DEFAULT_GRPC_OPTIONS = [
+    ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+    ("grpc.service_config", json.dumps(SERVICE_DEFAULT_CONFIG)),
+]
 
-def get_start_instance(*args, **kwargs) -> bool:  # numpydoc ignore=RT01
-    """Wraps get_start_instance to avoid circular imports."""
-    from ansys.mapdl.core.launcher import get_start_instance
 
-    return get_start_instance(*args, **kwargs)
+def get_start_instance(
+    start_instance=None, ip=None, **kwargs
+) -> bool:  # numpydoc ignore=RT01
+    """Wraps resolve_start_instance to avoid circular imports."""
+    from ansys.mapdl.core.launcher.config import resolve_start_instance
+
+    return resolve_start_instance(start_instance, ip)
 
 
 def chunk_raw(raw, save_as):
@@ -290,9 +324,19 @@ class MapdlGrpc(MapdlBase):
         PyPIM. This instance will be deleted when calling
         :func:`Mapdl.exit <ansys.mapdl.core.Mapdl.exit>`.
 
-    file_type_for_plots: ["PNG", "TIFF", "PNG", "VRML", "TERM"], Optional
-        Change the default file type for plots using ``/SHOW``, by
-        default it is ``PNG``.
+    transport_mode : str | None
+        Transport mode selected, by default `None` and thus it will be selected
+        for you based on the connection criteria. Options are: "insecure", "uds", "wnua", "mtls"
+
+    uds_dir : Path | str | None
+        Directory to use for Unix Domain Sockets (UDS) transport mode.
+        By default `None` and thus it will use the "~/.conn" folder.
+
+    certs_dir : Path | str | None
+        Directory to use for TLS certificates.
+        By default `None` and thus search for the "ANSYS_GRPC_CERTIFICATES" environment variable.
+        If not found, it will use the "certs" folder assuming it is in the current working
+        directory.
 
 
     Examples
@@ -326,13 +370,14 @@ class MapdlGrpc(MapdlBase):
     """
 
     # Required by `_name` method to be defined before __init__ be
-    _ip = None
-    _port = None
+    _ip: Optional[str] = None
+    _port: Optional[int] = None
 
     def __init__(
         self,
         ip: Optional[str] = None,
         port: Optional[MapdlInt] = None,
+        *,
         timeout: int = 15,
         loglevel: str = "WARNING",
         log_file: bool = False,
@@ -344,6 +389,9 @@ class MapdlGrpc(MapdlBase):
         disable_run_at_connect: bool = False,
         channel: Optional[grpc.Channel] = None,
         remote_instance: Optional["PIM_Instance"] = None,
+        transport_mode: Optional[str] = None,
+        uds_dir: Optional[Union[str, Path]] = None,
+        certs_dir: Optional[Union[str, Path]] = None,
         **start_parm: dict[str, Any],
     ):
         """Initialize connection to the mapdl server"""
@@ -356,20 +404,29 @@ class MapdlGrpc(MapdlBase):
             False  # bool to force to check the session id matches in client and server
         )
 
+        self.transport_mode = transport_mode
+        self.uds_dir: Path = (
+            Path(uds_dir) if uds_dir is not None else Path("~").expanduser() / ".conn"
+        )
+
+        self.certs_dir: Path | None = Path(certs_dir) if certs_dir is not None else None
+        self.grpc_options = start_parm.pop("grpc_options", DEFAULT_GRPC_OPTIONS)
+        # Transport configuration will be finalized after base init
+
         if channel is not None:
             if ip is not None or port is not None:
                 raise ValueError(
                     "If `channel` is specified, neither `port` nor `ip` can be specified."
                 )
         if ip is None:
-            ip = start_parm.pop("ip", None) or "127.0.0.1"
+            ip = start_parm.pop("ip", None) or "127.0.0.1"  # type: ignore[assignment]
 
         # setting hostname and ip
         ip, hostname = get_ip_hostname(ip)
         self._hostname: str = hostname
 
         check_valid_ip(ip)
-        self._ip: str = ip
+        self._ip = ip  # type: ignore[misc]
 
         # port and ip are needed to setup the log
         if port is None:
@@ -378,7 +435,7 @@ class MapdlGrpc(MapdlBase):
             port = MAPDL_DEFAULT_PORT
 
         self._port: int = int(port)
-        start_parm["port"] = self._port  # store for `open_gui`
+        start_parm["port"] = self._port  # type: ignore[assignment]  # store for `open_gui`
 
         super().__init__(
             loglevel=loglevel,
@@ -388,6 +445,8 @@ class MapdlGrpc(MapdlBase):
             mode="grpc",
             **start_parm,
         )
+        # Finalize transport specifics now that logging and port are set
+        self._configure_transport(ip=ip, port=port)
         self._mode: Literal["grpc"] = "grpc"
 
         # gRPC request specific locks as these gRPC request are not thread safe
@@ -399,16 +458,17 @@ class MapdlGrpc(MapdlBase):
         self._stub: Optional[mapdl_grpc.MapdlServiceStub] = None
         self._cleanup: bool = cleanup_on_exit
         self.remove_temp_dir_on_exit: bool = remove_temp_dir_on_exit
-        self._jobname: str = start_parm.get("jobname", "file")
+        self._jobname: str = start_parm.get("jobname", "file")  # type: ignore[assignment]
         self._path: Optional[str] = (
             None  # self._wrap_directory(start_parm.get("run_location"))
         )
         self._start_instance: Optional[str] = (
-            start_parm.get("start_instance") or get_start_instance()
+            start_parm.get("start_instance") or get_start_instance()  # type: ignore[assignment]
         )
         self._busy: bool = False  # used to check if running a command on the server
-        self._local: bool = start_parm.get("local", True)
-        self._launched: bool = start_parm.get("launched", False)
+        self._local: bool = start_parm.get("local", True)  # type: ignore[assignment]
+        self._xpl = None  # ansXpl instance, initialized on first access
+        self._launched: bool = start_parm.get("launched", False)  # type: ignore[assignment]
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
         self._exited: Optional[bool] = None
@@ -425,24 +485,24 @@ class MapdlGrpc(MapdlBase):
 
         if channel is None:
             self._log.debug("Creating channel to %s:%s", ip, port)
-            self._channel: grpc.Channel = self._create_channel(ip, port)
+            self._channel = self._create_channel(ip, port)  # type: ignore[misc]
         else:
             self._log.debug("Using provided channel")
-            self._channel: grpc.Channel = channel
+            self._channel = channel  # type: ignore[misc]
 
         # Subscribe to channel for channel state updates
         self._subscribe_to_channel()
 
         # connect and validate to the channel
-        self._mapdl_process: subprocess.Popen = start_parm.pop("process", None)
+        self._mapdl_process: Optional[subprocess.Popen] = start_parm.pop("process", None)  # type: ignore[assignment]
 
         # saving for later use (for example open_gui)
         self._start_parm: Dict[str, Any] = start_parm
 
         # Storing HPC related stuff
-        self._jobid: int = start_parm.get("jobid")
+        self._jobid: int = start_parm.get("jobid")  # type: ignore[assignment]
         self._mapdl_on_hpc: bool = bool(self._jobid)
-        self.finish_job_on_exit: bool = start_parm.get("finish_job_on_exit", True)
+        self.finish_job_on_exit: bool = start_parm.get("finish_job_on_exit", True)  # type: ignore[assignment]
 
         # Queueing the stds
         if not self._mapdl_on_hpc and self._mapdl_process:
@@ -488,6 +548,125 @@ class MapdlGrpc(MapdlBase):
             f"Connected to MAPDL server running at {self._hostname} on {self.ip}:{self.port} on {self.platform} OS"
         )
 
+    def _configure_transport(self, *, ip: str, port: int) -> None:
+        """Configure transport-related defaults, validate mode, and resolve UDS conflicts.
+
+        This centralizes duplicated logic from the constructor and can be
+        safely called before or after `super().__init__()`; it expects that
+        when called after `super().__init__()` the attributes `self._port`
+        and `self._log` are available.
+        """
+        # Determine transport mode if not provided
+        if self.transport_mode is None:
+            self.transport_mode = os.environ.get(
+                "PYMAPDL_GRPC_TRANSPORT"
+            ) or os.environ.get("ANSYS_MAPDL_GRPC_TRANSPORT")
+            if self.transport_mode is None:
+                import platform
+
+                if platform.system() == "Linux":
+                    self.transport_mode = "uds"
+                elif platform.system() == "Windows":
+                    self.transport_mode = "wnua"
+                else:
+                    warn("Unknown platform, defaulting to 'insecure' transport mode.")
+                    self.transport_mode = "insecure"
+
+        # Configure transport-specific settings
+        if self.transport_mode == "uds":
+            if os.name == "nt":
+                raise ValueError("UDS transport mode is not supported on Windows.")
+            self.configure_uds(port=port)
+
+        elif self.transport_mode == "wnua":
+            if os.name != "nt":
+                raise ValueError("WNUA transport mode is only supported on Windows.")
+            self.configure_wnua()
+
+        elif self.transport_mode == "insecure":
+            self.configure_insecure()
+
+        elif self.transport_mode == "mtls":
+            self.configure_mtls()
+
+        # Validate transport mode compatibility using external helper
+        try:
+            from ansys.tools.common.cyberchannel import verify_transport_mode
+
+            verify_transport_mode(self.transport_mode)
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "ansys.tools.common is required for transport verification. "
+                "Install ansys-tools-common or set transport_mode to 'insecure'."
+            )
+
+        # Transport compatibility checks for remote IPs. Allow loopback/local
+        # addresses (e.g., 127.0.0.1) to use local-only transports.
+        self._check_remote(ip)
+
+        if self.transport_mode == "wnua":
+            msg = f"Using WNUA transport on {ip}:{self._port}"
+        elif self.transport_mode == "uds":
+            msg = f"Using UDS transport with socket ID '{self.port}' in directory '{self.uds_dir}'"
+        elif self.transport_mode == "mtls":
+            msg = f"Using mTLS transport with certificates in '{self.certs_dir}'"
+        else:
+            msg = f"Using insecure transport on {ip}:{self._port}"
+
+        if hasattr(self, "_log"):
+            self._log.info(msg)
+
+    def _check_remote(self, ip: Optional[str]) -> None:
+        """Check if the connection is remote and validate transport mode compatibility."""
+        is_remote = True
+        if ip is None:
+            is_remote = False
+        else:
+            try:
+                import ipaddress
+
+                is_remote = not ipaddress.ip_address(str(ip)).is_loopback
+            except Exception:
+                # If ip cannot be parsed, conservatively treat as not remote
+                is_remote = False
+
+        if is_remote and self.transport_mode in ["wnua", "uds"]:
+            raise ValueError(
+                f"Transport mode '{self.transport_mode}' does not support remote connections. "
+                "For remote connections, use 'mtls' or 'insecure' (discouraged)."
+            )
+
+    def configure_uds(self, port: int) -> None:
+        """Configure UDS transport-specific settings.
+
+        MAPDL always names its socket ``mapdl-{PORT}.sock`` inside the
+        directory set via the ``ANSYS_MAPDL_UDS_PATH`` environment variable.
+        However, this is only applicable when launching new instances.
+        """
+        # Set uds_id to the stringified port so create_channel builds
+        # the correct 'mapdl-{PORT}.sock' path.
+        self.uds_id = str(port)
+
+    def configure_insecure(self) -> None:
+        """Configure insecure transport-specific settings."""
+        # No specific configuration needed for insecure transport
+        pass
+
+    def configure_wnua(self) -> None:
+        """Configure WNUA transport-specific settings."""
+        # No specific configuration needed for WNUA transport
+        pass
+
+    def configure_mtls(self) -> None:
+        """Configure mTLS transport-specific settings."""
+        # Set defaults for certificates
+        if self.certs_dir is None:
+            self.certs_dir = Path(
+                os.environ.get(
+                    "ANSYS_GRPC_CERTIFICATES", os.path.join(os.getcwd(), "certs")
+                )
+            )
+
     def _after_run(self, command: str) -> None:
         if command[:4].upper() == "/CLE":
             # We have reset the database, so we need to create a new session id
@@ -510,12 +689,11 @@ class MapdlGrpc(MapdlBase):
                 "The error wasn't caught by the post-mortem checks.\nThe stdout is printed now:"
             )
             self._log.debug(self._stdout)
-
             raise err  # Raise original error if we couldn't catch it in post-mortem analysis
         else:
             self._log.debug("Connection established")
 
-    def reconnect_to_mapdl(self, timeout: int = None):
+    def reconnect_to_mapdl(self, timeout: Optional[int] = None):
         """Reconnect to an already instantiated MAPDL instance.
 
         Re-establish an stopped or crashed gRPC connection with an already alive
@@ -545,7 +723,7 @@ class MapdlGrpc(MapdlBase):
         self._stderr_queue, self._stderr_thread = _create_queue_for_std(process.stderr)
 
     def _create_channel(self, ip: str, port: int) -> grpc.Channel:
-        """Create an insecured grpc channel.
+        """Create a gRPC channel using the specified transport mode.
 
         Parameters
         ----------
@@ -560,15 +738,20 @@ class MapdlGrpc(MapdlBase):
         grpc.Channel
             The created gRPC channel.
         """
+        from ansys.tools.common.cyberchannel import create_channel
+
         # open the channel
         channel_str = f"{ip}:{port}"
-        self._log.debug("Opening insecure channel at %s", channel_str)
-        return grpc.insecure_channel(
-            channel_str,
-            options=[
-                ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
-                ("grpc.service_config", json.dumps(SERVICE_DEFAULT_CONFIG)),
-            ],
+        self._log.debug(f"Opening channel at {channel_str}")
+        return create_channel(
+            transport_mode=self.transport_mode,
+            host=ip,
+            port=port,
+            uds_service="mapdl",
+            uds_id=port,
+            uds_dir=self.uds_dir,
+            certs_dir=self.certs_dir,
+            grpc_options=self.grpc_options,
         )
 
     def _subscribe_to_channel(self):
@@ -603,64 +786,374 @@ class MapdlGrpc(MapdlBase):
         """
         return self._channel_state.name
 
+    def wait_until_healthy(self, timeout: float = 30.0) -> None:
+        """Wait for the gRPC channel to become healthy.
+
+        This method waits for the channel to reach the 'READY' state,
+        indicating that the connection is healthy and ready for use.
+        It supports configurable timeout and handles different transport modes.
+
+        Parameters
+        ----------
+        timeout : float, optional
+            Maximum time in seconds to wait for the channel to become healthy.
+            Default is 30.0 seconds.
+
+        Raises
+        ------
+        MapdlConnectionError
+            If the channel does not become healthy within the specified timeout.
+
+        Examples
+        --------
+        >>> mapdl.wait_until_healthy(timeout=10.0)
+        """
+        import concurrent.futures
+
+        # Use the public API to wait for channel readiness.
+        state_future = grpc.channel_ready_future(self._channel)
+        try:
+            state_future.result(timeout=timeout)
+        except concurrent.futures.TimeoutError:
+            current_state = self.channel_state
+            raise MapdlConnectionError(
+                f"Channel did not become healthy within {timeout} seconds. "
+                f"Current state: {current_state}"
+            )
+
+        self._log.debug("Channel is healthy and ready for use.")
+
     def _multi_connect(self, n_attempts=5, timeout=15):
         """Try to connect over a series of attempts to the channel.
+
+        A background monitoring thread runs in parallel with connection
+        attempts and checks whether the local MAPDL process is still alive
+        every 0.5 s.  When process death is detected the thread sets
+        ``monitor_stop_event``, which causes the in-progress ``_connect()``
+        call to abort within 10 ms, so the worst-case wait is reduced from
+        the full ``attempt_timeout`` to ~0.5 s.
 
         Parameters
         ----------
         n_attempts : int, optional
             Number of connection attempts.
         timeout : float, optional
-            Total timeout.
+            Total timeout in seconds.
         """
-        # This prevents a single failed connection from blocking other attempts
         connected = False
         attempt_timeout = int(timeout / n_attempts)
 
-        max_time = time.time() + timeout
-        i = 1
-        while time.time() < max_time and i <= n_attempts:
-            self._log.debug("Connection attempt %d", i)
-            connected = self._connect(timeout=attempt_timeout)
-            i += 1
-            if connected:
-                self._log.debug("Connected")
-                break
-        else:
-            # Check if mapdl process is alive
-            msg = (
-                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}.\n"
-                f"Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s)."
-            )
+        # Shared state between the main thread and the monitor thread.
+        monitor_stop_event = threading.Event()
+        monitor_exception: dict = {"error": None}
 
-            if self._mapdl_process is not None and psutil.pid_exists(
-                self._mapdl_process.pid
-            ):
-                # Process is alive
-                raise MapdlConnectionError(
-                    msg
-                    + f" The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
+        def monitor_mapdl_alive() -> None:
+            """Background thread: poll MAPDL process liveness every 0.5 s.
+
+            Only active for local launches where both ``_mapdl_process`` and
+            ``_path`` are set.  Uses direct process-status checks rather than
+            PID existence to avoid PID-reuse false-positives on Windows.
+            Supports both ``subprocess.Popen`` and ``psutil.Process`` handles.
+            """
+            try:
+                while not monitor_stop_event.is_set():
+                    if self._local and self._mapdl_process and self._path:
+                        try:
+                            process_alive = self._check_process_handle(
+                                self._mapdl_process
+                            )
+
+                            if not process_alive:
+                                # On Windows a terminal process can spawn MAPDL
+                                # and then exit; try to discover the real
+                                # MAPDL process before declaring death.
+                                procs = self._find_live_mapdl_processes()
+                                if not procs:
+                                    raise MapdlDidNotStart("MAPDL process has died.")
+                                # Cache discovered PIDs without overwriting the
+                                # original process handle (it may be a terminal).
+                                self._pids = [int(p.pid) for p in procs]
+
+                        except Exception as exc:
+                            monitor_exception["error"] = exc
+                            monitor_stop_event.set()
+                            break
+
+                    monitor_stop_event.wait(0.5)
+
+            except Exception as exc:
+                self._log.debug("Monitor thread encountered error: %s", exc)
+                monitor_exception["error"] = exc
+                monitor_stop_event.set()
+
+        # Only start monitoring for local instances with a process handle and path.
+        monitor_thread = None
+        if self._local and self._mapdl_process and self._path:
+            monitor_thread = threading.Thread(target=monitor_mapdl_alive, daemon=True)
+            monitor_thread.start()
+            self._log.debug("Started MAPDL monitoring thread")
+
+        try:
+            max_time = time.time() + timeout
+            i = 1
+            while time.time() < max_time and i <= n_attempts:
+                # Propagate any exception raised by the monitor thread.
+                if monitor_exception["error"] is not None:
+                    self._log.debug(
+                        "Monitor detected MAPDL process issue, "
+                        "stopping connection attempts"
+                    )
+                    raise monitor_exception["error"]
+
+                self._log.debug("Connection attempt %d", i)
+                connected = self._connect(
+                    timeout=attempt_timeout, stop_event=monitor_stop_event
                 )
+                i += 1
+                if connected:
+                    self._log.debug("Connected")
+                    break
+
             else:
-                pid_msg = (
-                    f" PID: {self._mapdl_process.pid}"
-                    if self._mapdl_process is not None
-                    else ""
+                # Exhausted attempts / timeout — build an informative message.
+                msg = (
+                    f"Unable to connect to MAPDL gRPC instance at "
+                    f"{self._channel_str}.\nReached either maximum amount of "
+                    f"connection attempts ({n_attempts}) or timeout ({timeout} s)."
                 )
-                raise MapdlConnectionError(
-                    msg + f" The MAPDL process has died{pid_msg}."
-                )
+
+                alive = self._is_alive_subprocess()
+                if alive:
+                    pid = getattr(self._mapdl_process, "pid", "'Not found'")
+                    raise MapdlConnectionError(
+                        msg + f" The MAPDL process seems to be alive (PID: {pid})"
+                        " but PyMAPDL cannot connect to it."
+                    )
+
+                # Double-check using cached _pids.
+                cached_proc = self._find_processes_from_cached_pids()
+                cached_pid = cached_proc[0].pid if cached_proc else None
+
+                if cached_pid is not None:
+                    raise MapdlConnectionError(
+                        msg
+                        + f" The MAPDL process seems to be alive (PID: {cached_pid})"
+                        " but PyMAPDL cannot connect to it."
+                    )
+                else:
+                    pid_msg = ""
+                    if self._mapdl_process is not None:
+                        pid = getattr(self._mapdl_process, "pid", "'Not found'")
+                        pid_msg = f" PID: {pid}"
+                    raise MapdlConnectionError(
+                        msg + f" The MAPDL process has died{pid_msg}."
+                    )
+
+            # Raise any deferred monitor exception (e.g. when the loop broke
+            # early because check_process_is_alive failed inline).
+            if monitor_exception["error"] is not None:
+                raise monitor_exception["error"]
+
+        finally:
+            monitor_stop_event.set()
+            if monitor_thread is not None:
+                monitor_thread.join(timeout=1.0)
+                self._log.debug("Stopped MAPDL monitoring thread")
 
         self._exited = False
 
-    def _is_alive_subprocess(self):  # numpydoc ignore=RT01
-        """Returns:
-        * True if the PID is alive.
-        * False if it is not.
-        * None if there was no process
+    @staticmethod
+    def _check_process_handle(proc) -> bool | None:
+        """Return whether *proc* is alive, normalising psutil/Popen handles.
+
+        Parameters
+        ----------
+        proc : psutil.Process | subprocess.Popen
+            A process handle with either an ``is_running()`` method
+            (psutil-style) or a ``poll()`` method (Popen-style).
+
+        Returns
+        -------
+        bool or None
+            ``True`` if the process is alive, ``False`` if it has exited or
+            if ``is_running()`` raised ``NoSuchProcess``, ``None`` if *proc*
+            has neither ``is_running`` nor ``poll`` (unknown handle type).
         """
-        if self._mapdl_process:
-            return psutil.pid_exists(self._mapdl_process.pid)
+        try:
+            if hasattr(proc, "is_running"):
+                return bool(proc.is_running())
+            if hasattr(proc, "poll"):
+                return proc.poll() is None
+        except psutil.NoSuchProcess:
+            return False
+        return None
+
+    def _is_alive_subprocess(self) -> bool | None:
+        """Check whether the MAPDL subprocess is still running.
+
+        Returns
+        -------
+        bool or None
+            * ``True`` if the process is alive.
+            * ``False`` if the process has exited.
+            * ``None`` if no process handle is stored, or if the handle has
+              an unknown type (no ``is_running`` / ``poll``) and no ``pid``
+              attribute to fall back on.
+
+        Notes
+        -----
+        Checks liveness in priority order to avoid PID-reuse false-positives
+        on Windows:
+
+        1. ``is_running()`` / ``poll()`` on the stored process handle.
+        2. ``psutil.pid_exists()`` on ``_mapdl_process.pid`` as a last resort.
+        """
+        if not self._mapdl_process:
+            return None
+
+        proc_status = self._check_process_handle(self._mapdl_process)
+        if proc_status is not None:
+            return proc_status
+
+        # Unknown handle type — fall back to PID existence check.
+        pid = getattr(self._mapdl_process, "pid", None)
+        if pid is None:
+            return None
+        return psutil.pid_exists(int(pid))
+
+    def _find_live_mapdl_processes(self) -> "list[psutil.Process]":
+        """Discover live MAPDL processes when the stored process handle has exited.
+
+        On Windows the launcher typically starts a terminal process that spawns
+        MAPDL and then exits immediately.  When ``_mapdl_process`` (the
+        terminal) reports not-alive this method tries to find the actual MAPDL
+        server process via the following priority chain:
+
+        1. Port check — asks the OS which process is listening on
+           ``self._port``.  Fastest and most accurate.
+        2. Live ``_mapdl_process`` — returned as-is if it is still running.
+        3. Cached ``_pids`` — any PID in ``self._pids`` that psutil confirms
+           is still alive.
+        4. Heuristic system scan — iterates ``psutil.process_iter()`` matching
+           by CWD (``self._path``), job name in the command line, or the ANSYS/
+           MAPDL process name pattern.
+
+        Returns
+        -------
+        list[psutil.Process]
+            Live ``psutil.Process`` objects that correspond to MAPDL.  Empty
+            list if none are found.
+        """
+        try:
+            if found := self._find_process_at_port():
+                return found
+            if found := self._find_process_from_handle():
+                return found
+            if found := self._find_processes_from_cached_pids():
+                return found
+            return self._find_processes_by_heuristic()
+        except Exception:
+            return []
+
+    def _find_process_at_port(self) -> "list[psutil.Process]":
+        """Return the process listening on ``self._port``, if any.
+
+        Returns
+        -------
+        list[psutil.Process]
+            A one-element list with the running process, or ``[]``.
+        """
+        if not getattr(self, "_port", None):
+            return []
+        from ansys.mapdl.core.launcher.network import get_process_at_port
+
+        proc = get_process_at_port(self._port)
+        if proc and proc.is_running():
+            return [proc]
+        return []
+
+    def _find_process_from_handle(self) -> "list[psutil.Process]":
+        """Return the stored ``_mapdl_process`` handle if it is still alive.
+
+        Returns
+        -------
+        list[psutil.Process]
+            A one-element list wrapping the live process, or ``[]``.
+        """
+        if not self._mapdl_process or not self._check_process_handle(
+            self._mapdl_process
+        ):
+            return []
+        pid = getattr(self._mapdl_process, "pid", None)
+        try:
+            return [psutil.Process(pid)] if pid is not None else [self._mapdl_process]
+        except psutil.NoSuchProcess:
+            return []
+
+    def _find_processes_from_cached_pids(self) -> "list[psutil.Process]":
+        """Return live processes from the cached ``self._pids`` list.
+
+        Returns
+        -------
+        list[psutil.Process]
+            All cached PIDs that are still alive as ``psutil.Process`` objects.
+        """
+        found: list[psutil.Process] = []
+        for pid in [p for p in (self._pids or []) if p]:
+            try:
+                proc = psutil.Process(pid)
+                if proc.is_running():
+                    found.append(proc)
+            except psutil.NoSuchProcess:
+                continue
+        return found
+
+    def _find_processes_by_heuristic(self) -> "list[psutil.Process]":
+        """Scan running processes for MAPDL candidates using heuristics.
+
+        Matches by CWD (``self._path``), jobname in the command line, or the
+        ANSYS/MAPDL process-name pattern (via
+        :func:`~ansys.mapdl.core.launcher.network._is_mapdl_process`).
+
+        Returns
+        -------
+        list[psutil.Process]
+            All matching live processes, or ``[]`` if none found.
+        """
+        from ansys.mapdl.core.launcher.network import _is_mapdl_process
+
+        cwd_to_match = os.path.abspath(str(self._path)) if self._path else None
+        jobname = getattr(self, "_jobname", None) or self.jobname
+
+        if not cwd_to_match and not jobname:
+            return []
+
+        found: list[psutil.Process] = []
+        for p in psutil.process_iter(["pid", "name", "cmdline", "cwd"]):
+            try:
+                info = p.info
+                # Match by working directory.
+                if cwd_to_match and info.get("cwd"):
+                    if os.path.abspath(str(info["cwd"])).startswith(cwd_to_match):
+                        if p.is_running():
+                            found.append(p)
+                            continue
+
+                # Match by jobname in command line.
+                cmdline = info.get("cmdline") or []
+                if jobname and any(jobname in str(x) for x in cmdline):
+                    if p.is_running():
+                        found.append(p)
+                        continue
+
+                # Fallback: ANSYS/MAPDL process name heuristic.
+                if _is_mapdl_process(p) and p.is_running():
+                    found.append(p)
+
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
+
+        return found
 
     @property
     def process_is_alive(self):
@@ -689,17 +1182,15 @@ class MapdlGrpc(MapdlBase):
 
     def _read_stds(self):
         """Read the stdout and stderr from the subprocess."""
-        from ansys.mapdl.core.launcher import _get_std_output
-
         if self._mapdl_process is None or not self._mapdl_process.stdout:
             return
 
         self._log.debug("Reading stdout")
-        self._stdout = _get_std_output(self._stdout_queue)
+        self._stdout = _drain_queue(self._stdout_queue)
         self._log.debug(f"Read stdout: {self._stdout[:20]}")
 
         self._log.debug("Reading stderr")
-        self._stderr = _get_std_output(self._stderr_queue)
+        self._stderr = _drain_queue(self._stderr_queue)
         self._log.debug(f"Read stderr: {self._stderr[:20]}")
 
     def _check_stds(self, stdout=None, stderr=None):
@@ -861,13 +1352,19 @@ class MapdlGrpc(MapdlBase):
         info = super().__repr__()
         return info
 
-    def _connect(self, timeout: int = 5) -> bool:
+    def _connect(
+        self, timeout: int = 5, stop_event: Optional[threading.Event] = None
+    ) -> bool:
         """Establish a gRPC channel to a remote or local MAPDL instance.
 
         Parameters
         ----------
         timeout : float
             Time in seconds to wait until the connection has been established.
+        stop_event : threading.Event, optional
+            When provided, the connection attempt will abort immediately if the
+            event becomes set (e.g. signalled by a monitor thread that detected
+            MAPDL process death).  Returns ``False`` in that case.
 
         Returns
         -------
@@ -880,6 +1377,8 @@ class MapdlGrpc(MapdlBase):
         # verify connection
         tstart = time.time()
         while ((time.time() - tstart) < timeout) and not self._state._matured:
+            if stop_event is not None and stop_event.is_set():
+                return False  # Monitor signalled process death — bail immediately
             time.sleep(0.01)
 
         if not self._state._matured:  # pragma: no cover
@@ -919,7 +1418,7 @@ class MapdlGrpc(MapdlBase):
         """
         # check cache
         if self.__server_version is None:
-            self.__server_version = self._get_server_version()
+            self.__server_version = self._get_server_version()  # type: ignore[assignment]
         return self.__server_version
 
     def _get_server_version(self) -> tuple[int, int, int]:
@@ -945,7 +1444,9 @@ class MapdlGrpc(MapdlBase):
             sver = version_string_as_tuple(verstr)
         return sver
 
-    def _launch(self, start_parm, timeout=10):
+    def _launch(
+        self, start_parm: dict[str, Any] | None = None, timeout: int | None = 10
+    ):
         """Launch a local session of MAPDL in gRPC mode.
 
         This should only need to be used for legacy ``open_gui``
@@ -954,28 +1455,60 @@ class MapdlGrpc(MapdlBase):
             raise MapdlRuntimeError(
                 "Can only launch the GUI with a local instance of MAPDL"
             )
-        from ansys.mapdl.core.launcher import generate_mapdl_launch_command, launch_grpc
+        from ansys.mapdl.core.launcher.models import LaunchConfig, LaunchMode
+        from ansys.mapdl.core.launcher.process import (
+            _generate_launch_command,
+            _start_subprocess,
+        )
 
         self._exited = False  # reset exit state
 
-        args = self._start_parm
-        cmd = generate_mapdl_launch_command(
+        args = start_parm or self._start_parm
+        config = LaunchConfig(
             exec_file=args["exec_file"],
+            run_location=args["run_location"],
             jobname=args["jobname"],
             nproc=args["nproc"],
-            ram=args["ram"],
+            ram=args.get("ram"),
             port=args["port"],
-            additional_switches=args["additional_switches"],
+            ip=args.get("ip", "127.0.0.1"),
+            mode=LaunchMode.GRPC,
+            version=args.get("version"),
+            start_instance=True,
+            timeout=args.get("timeout", 60),
+            cleanup_on_exit=args.get("cleanup_on_exit", True),
+            clear_on_connect=args.get("clear_on_connect", True),
+            override=args.get("override", False),
+            remove_temp_dir_on_exit=args.get("remove_temp_dir_on_exit", False),
+            set_no_abort=args.get("set_no_abort", True),
+            additional_switches=args.get("additional_switches", ""),
+            license_type=args.get("license_type"),
+            launch_on_hpc=args.get("launch_on_hpc", False),
+            running_on_hpc=args.get("running_on_hpc", False),
+            scheduler_options=args.get("scheduler_options"),
+            loglevel=args.get("loglevel", "WARNING"),
+            log_apdl=args.get("log_apdl"),
+            print_com=args.get("print_com", False),
+            mapdl_output=args.get("mapdl_output"),
+            transport_mode=args.get("transport_mode"),
+            uds_dir=args.get("uds_dir"),
+            uds_id=args.get("uds_id"),
+            certs_dir=args.get("certs_dir"),
+        )
+        cmd = _generate_launch_command(config)
+
+        process = _start_subprocess(
+            cmd=cmd,
+            cwd=args["run_location"],
+            env=self._env_vars or {},
+            output_file=None,
         )
 
-        process = launch_grpc(
-            cmd=cmd, run_location=args["run_location"], env_vars=self._env_vars or None
-        )
-
-        self._connect(args["port"])
+        self._connect()
 
         # may need to wait for viable connection in open_gui case
-        tmax = time.time() + timeout
+        timeout_value = timeout if timeout is not None else 10
+        tmax = time.time() + timeout_value
         success = False
         while time.time() < tmax:
             try:
@@ -1177,12 +1710,14 @@ class MapdlGrpc(MapdlBase):
 
         request = pb_types.CmdRequest(command=cmd, opt=opt)
         # TODO: Capture keyboard exception and place this in a thread
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
         grpc_response = self._stub.SendCommand(request)
 
         resp = grpc_response.response
         if resp is not None:
             return resp.strip()
-        return None
+        return ""
 
     @protect_grpc
     def _send_command_stream(self, cmd, verbose=False) -> str:  # numpydoc ignore=RT01
@@ -1190,6 +1725,8 @@ class MapdlGrpc(MapdlBase):
         request = pb_types.CmdRequest(command=cmd)
         time_step = self._get_time_step_stream()
         metadata = [("time_step_stream", str(time_step))]
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
         stream = self._stub.SendCommandS(request, metadata=metadata)
         response = []
         for item in stream:
@@ -1280,6 +1817,18 @@ class MapdlGrpc(MapdlBase):
 
         # Exiting MAPDL instance if we launched.
         self._exiting = True
+
+        # Remove UDS socket file if using UDS transport.
+        # The socket is always named 'mapdl-{PORT}.sock' (uds_id == str(port)).
+        if self.transport_mode == "uds":
+            socket_path = os.path.join(self.uds_dir, f"mapdl-{self.port}.sock")
+            if os.path.exists(socket_path):
+                try:
+                    os.remove(socket_path)
+                    self._log.debug(f"Removed UDS socket file {socket_path}")
+                except OSError:  # pragma: no cover
+                    self._log.warning(f"Failed to remove UDS socket file {socket_path}")
+
         self._exit_mapdl(path=mapdl_path)
         self._exited = True
 
@@ -1300,7 +1849,7 @@ class MapdlGrpc(MapdlBase):
         if self._local and self._port in pymapdl._LOCAL_PORTS:
             pymapdl._LOCAL_PORTS.remove(self._port)
 
-    def _exit_mapdl(self, path: str = None) -> None:
+    def _exit_mapdl(self, path: Optional[str] = None) -> None:
         """Exit MAPDL and remove the lock file in `path`"""
         # This cannot/should not be faked
         if self._local:
@@ -1321,8 +1870,6 @@ class MapdlGrpc(MapdlBase):
         user temporary directory.
         """
         if self.remove_temp_dir_on_exit and self._local:
-            from pathlib import Path
-
             path = str(Path(path or self.directory))
             tmp_dir = tempfile.gettempdir()
             ans_temp_dir = str(Path(os.path.join(tmp_dir, "ansys_")))
@@ -1366,9 +1913,19 @@ class MapdlGrpc(MapdlBase):
         if self._mapdl_process is not None:
             self._log.debug("Killing process using subprocess.Popen.terminate")
             process = self._mapdl_process
-            if process.poll() is not None:
+            if process.poll() is None:
                 # process hasn't terminated
-                process.kill()
+                process.terminate()
+
+            # Close any open file handle for stdout redirect
+            fh = getattr(process, "_stdout_file_handle", None)
+            if fh and not getattr(fh, "closed", False):
+                try:
+                    fh.close()
+                    self._log.debug("Closed stdout file handle")
+                    setattr(process, "_stdout_file_handle", None)
+                except OSError as e:
+                    self._log.debug(f"Error closing stdout file handle: {e}")
 
     def _kill_child_processes(self, timeout=2):
         pids = self._pids.copy()
@@ -1470,7 +2027,10 @@ class MapdlGrpc(MapdlBase):
         self._log.debug(f"Recaching PIDs: {self._pids}")
 
     def _remove_lock_file(
-        self, mapdl_path: str = None, jobname: str = None, use_cached: bool = False
+        self,
+        mapdl_path: Optional[str] = None,
+        jobname: Optional[str] = None,
+        use_cached: bool = False,
     ):
         """Removes the lock file.
 
@@ -1541,7 +2101,7 @@ class MapdlGrpc(MapdlBase):
 
     def download_result(
         self,
-        path: str | pathlib.Path | None = None,
+        path: str | Path | None = None,
         progress_bar: bool = False,
         preference: Literal["rst", "rth"] | None = None,
     ) -> str:
@@ -1684,6 +2244,9 @@ class MapdlGrpc(MapdlBase):
         """
         self._log.debug(f'Issuing CtrlRequest "{cmd}" with option "{opt1}".')
         request = anskernel.CtrlRequest(ctrl=str(cmd), opt1=str(opt1))
+
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
 
         # handle socket closing upon exit
         if cmd.lower() == "exit":
@@ -2111,7 +2674,7 @@ class MapdlGrpc(MapdlBase):
                 raise ValueError("``time_step`` argument must be greater than 0``")
 
         self.logger.debug(f"The time_step argument is set to: {time_step}")
-        self._time_step_stream = time_step
+        self._time_step_stream = time_step  # type: ignore[assignment]
         return time_step
 
     def _flush_stored(self):
@@ -2218,6 +2781,8 @@ class MapdlGrpc(MapdlBase):
 
         self._get_lock = True
         try:
+            if self._stub is None:
+                raise MapdlRuntimeError("MAPDL stub not initialized")
             response = self._stub.Get(pb_types.GetRequest(getcmd=cmd))
         finally:
             self._get_lock = False
@@ -2426,7 +2991,7 @@ class MapdlGrpc(MapdlBase):
             else:
                 list_files = [files]
 
-        elif isinstance(files, pathlib.PurePath):
+        elif isinstance(files, PurePath):
             list_files = [str(files)]
 
         elif isinstance(files, (list, tuple)):
@@ -2446,7 +3011,7 @@ class MapdlGrpc(MapdlBase):
                 "Only strings, tuple of strings or list of strings are allowed."
             )
 
-        return_list_files = []
+        return_list_files: list[str] = []
         for file in list_files:
             # file is a complete path
             basename = os.path.basename(file)
@@ -2483,8 +3048,8 @@ class MapdlGrpc(MapdlBase):
         files: Union[str, List[str], Tuple[str, ...]],
         target_dir: str,
         extension: Optional[str] = None,
-        chunk_size: Optional[str] = None,
-        progress_bar: Optional[str] = None,
+        chunk_size: Optional[int] = None,
+        progress_bar: Optional[bool] = None,
     ) -> List[str]:
         """Download files when we are connected to a remote session."""
 
@@ -2598,6 +3163,8 @@ class MapdlGrpc(MapdlBase):
             ("time_step_stream", "200"),
             ("chunk_size", str(chunk_size)),
         ]
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
         chunks = self._stub.DownloadFile(request, metadata=metadata)
         file_size = save_chunks_to_file(
             chunks,
@@ -2640,6 +3207,8 @@ class MapdlGrpc(MapdlBase):
         self._log.debug(f"Uploading file '{file_name}' to the MAPDL instance.")
 
         chunks_generator = get_file_chunks(file_name, progress_bar=progress_bar)
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
         response = self._stub.UploadFile(chunks_generator)
 
         if not response.length:
@@ -2695,8 +3264,11 @@ class MapdlGrpc(MapdlBase):
         if self._local:
             return super()._screenshot_path()
 
+        jobname = self.jobname
         filenames = [
-            filename for filename in self.list_files() if filename.endswith(".png")
+            filename
+            for filename in self.list_files()
+            if filename.endswith(".png") and filename.startswith(jobname)
         ]
         filenames.sort()
         filename = os.path.basename(filenames[-1])
@@ -2712,6 +3284,8 @@ class MapdlGrpc(MapdlBase):
         string without saving it to disk.
         """
         request = pb_types.DownloadFileRequest(name=target_name)
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
         chunks = self._stub.DownloadFile(request)
         return b"".join([chunk.payload for chunk in chunks])
 
@@ -2807,6 +3381,8 @@ class MapdlGrpc(MapdlBase):
             parameter does not exist.
         """
         request = pb_types.ParameterRequest(name=pname, array=False)
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
         presponse = self._stub.GetParameter(request)
         if presponse.val:
             return float(presponse.val[0])
@@ -3220,7 +3796,7 @@ class MapdlGrpc(MapdlBase):
     ):
         """Wraps NSOL to return the variable as an array."""
         super().nsol(
-            nvar=nvar,
+            nvar=nvar,  # type: ignore[arg-type]
             node=node,
             item=item,
             comp=comp,
@@ -3228,7 +3804,7 @@ class MapdlGrpc(MapdlBase):
             sector=sector,
             **kwargs,
         )
-        return self.vget("_temp", nvar)
+        return self.vget("_temp", nvar)  # type: ignore[arg-type]
 
     @wraps(MapdlBase.esol)
     def esol(  # numpydoc ignore=RT01
@@ -3243,7 +3819,7 @@ class MapdlGrpc(MapdlBase):
     ) -> NDArray[np.float64]:
         """Wraps ESOL to return the variable as an array."""
         super().esol(
-            nvar=nvar,
+            nvar=nvar,  # type: ignore[arg-type]
             elem=elem,
             node=node,
             item=item,
@@ -3251,7 +3827,7 @@ class MapdlGrpc(MapdlBase):
             name=name,
             **kwargs,
         )
-        return self.vget("_temp", nvar)
+        return self.vget("_temp", nvar)  # type: ignore[arg-type]
 
     @wraps(MapdlBase.rpsd)
     def rpsd(  # numpydoc ignore=RT01
@@ -3276,7 +3852,7 @@ class MapdlGrpc(MapdlBase):
             signif=signif,
             **kwargs,
         )
-        return self.vget("_temp", ir)
+        return self.vget("_temp", ir)  # type: ignore[arg-type]
 
     def get_nsol(
         self,
@@ -3337,7 +3913,7 @@ class MapdlGrpc(MapdlBase):
         labels TBOT, TE2, TE3, . . ., TTOP instead of TEMP.
         """
         return self.nsol(
-            VAR_IR,
+            VAR_IR,  # type: ignore[arg-type]
             node=node,
             item=item,
             comp=comp,
@@ -3443,7 +4019,7 @@ class MapdlGrpc(MapdlBase):
         Technology Guide.
         """
         self.esol(
-            VAR_IR,
+            VAR_IR,  # type: ignore[arg-type]
             elem=elem,
             node=node,
             item=item,
@@ -3476,7 +4052,7 @@ class MapdlGrpc(MapdlBase):
         if self._exited:
             return
 
-        if not self._start_instance:
+        if hasattr(self, "_start_instance") and not self._start_instance:
             # Early skip if start_instance is False
             return
 

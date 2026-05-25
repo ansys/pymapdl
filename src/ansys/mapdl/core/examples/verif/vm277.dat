@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ JPGPRF,500,100,1
 A=3E-3				! HALF PLATE LENGTH, M
 B=3E-3				! HALF PLATE HEIGHT, M
 C=0.4E-3			! PLATE WIDTH, M
-! *** MATERIAL PROPERTIES FOR N-TYPE INDIUM ARSENIDE 
+! *** MATERIAL PROPERTIES FOR N-TYPE INDIUM ARSENIDE
 RH=-0.0001			! HALL COEFFICIENT, M^3/C
 RHO=1.6e-3			! RESISTIVITY, OHM*M
 MU=1				! RELATIVE MAGNETIC PERMEABILITY

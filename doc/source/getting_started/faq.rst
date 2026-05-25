@@ -70,7 +70,7 @@ unable to call multiple products at either a granular or high level or
 use packages such as `NumPy <https://numpy.org/>`_, `SciPy <https://scipy.org/>`_,
 `PyTorch <https://pytorch.org/>`_, and `TensorFlow <https://www.tensorflow.org/>`_.
 PyMAPDL ties this in with MAPDL, allowing you to have a fully parametric workflow
-that leverages these machine learning tools. It also allows you to generate 
+that leverages these machine learning tools. It also allows you to generate
 advanced plots using `PyVista <pyvista_docs_>`_ or `Matplotlib <matplotlib_main_>`_.
 
 
@@ -88,7 +88,7 @@ data such as the mesh, you can use this code:
     sys.modules[__name__].__dict__.clear()
 
 
-However, a more efficient way is to clear MAPDL using the 
+However, a more efficient way is to clear MAPDL using the
 :meth:`clear() <ansys.mapdl.core.Mapdl.clear>`
 method. You can also exit and restart MAPDL.
 
@@ -117,7 +117,7 @@ You can change the graphics configuration in PyMAPDL using this command:
 
     mapdl.graphics("POWER")
 
-Or, you can change the graphics configuration in the MAPDL GUI using the 
+Or, you can change the graphics configuration in the MAPDL GUI using the
 ``POWRGRPH`` button or this command:
 
 .. code:: text
@@ -126,13 +126,13 @@ Or, you can change the graphics configuration in the MAPDL GUI using the
 
 How the results are averaged on the nodes can also affect the
 results. By default, MAPDL averages the results on the nodes except where
-material type discontinuities exists. 
+material type discontinuities exists.
 For more information, see :meth:`avres() <ansys.mapdl.core.Mapdl.avres>`.
 Additionally, the command :meth:`efacet() <ansys.mapdl.core.Mapdl.efacet>`
 can affect how the results are shown.
 
 You should make sure that the values of the commands
-:meth:`avres() <ansys.mapdl.core.Mapdl.avres>` and 
+:meth:`avres() <ansys.mapdl.core.Mapdl.avres>` and
 :meth:`efacet() <ansys.mapdl.core.Mapdl.efacet>` are the same in both
 the MAPDL GUI and PyMAPDL.
 

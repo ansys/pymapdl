@@ -4,7 +4,7 @@
 Setting and retrieving parameters
 =================================
 
-MAPDL parameters can be retrieved from an instance of 
+MAPDL parameters can be retrieved from an instance of
 :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`
 using the :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>`.
 For example, if you want to use MAPDL's
@@ -30,7 +30,7 @@ For example, if you want to retrieve the value of a parameter directly,
 you can use:
 
 .. code:: pycon
-   
+
    >>> mapdl.get_value("NODE", 2, "U", "Y")
    1.0
 
@@ -109,7 +109,7 @@ attribute to avoid PyMAPDL parameter name checks:
 By default, this type of parameter cannot be seen when issuing the
 :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>` attribute.
 However, you can change this by setting the
-:attr:`Mapdl.parameters.show_leading_underscore_parameters 
+:attr:`Mapdl.parameters.show_leading_underscore_parameters
 <ansys.mapdl.core.Mapdl.parameters.show_leading_underscore_parameters>`
 to ``True``:
 
@@ -132,7 +132,7 @@ Parameters ending with an underscore are recommended for user routines
 and macros. You can set this type of parameter in PyMAPDL, but by default,
 they cannot be seen in the
 :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>` attribute unless
-the :attr:`Mapdl.parameters.show_trailing_underscore_parameters 
+the :attr:`Mapdl.parameters.show_trailing_underscore_parameters
 <ansys.mapdl.core.Mapdl.parameters.show_trailing_underscore_parameters>` attribute
 is set to ``True``:
 
@@ -169,4 +169,3 @@ for retrieving parameters. However, you must know the parameter name:
    ----------------
    >>> print(mapdl.parameters["_param_"])
    1.0
-

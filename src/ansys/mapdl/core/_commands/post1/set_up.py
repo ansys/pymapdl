@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class SetUp:
+
+class SetUp(CommandsBase):
 
     def append(
         self,
@@ -315,6 +317,7 @@ class SetUp:
            * - RATE
              -
              - Diffusion flow rate
+
         """
         command = f"DESOL,{elem},{node},{item},{comp},{v1},{v2},{v3},{v4},{v5},{v6}"
         return self.run(command, **kwargs)

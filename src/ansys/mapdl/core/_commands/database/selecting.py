@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Selecting:
+
+class Selecting(CommandsBase):
 
     def allsel(self, labt: str = "", entity: str = "", **kwargs):
         r"""Selects all entities with a single command.
@@ -240,6 +242,7 @@ class Selecting:
            * - ACCA
              -
              - Concatenated areas (selects only areas that were created by area concatenation ( :ref:`accat` )).
+
         """
         command = f"ASEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kswp}"
         return self.run(command, **kwargs)
@@ -651,6 +654,7 @@ class Selecting:
            * - ETAB
              - ``Lab``
              - Any user-defined element table label ( :ref:`etable` ).
+
         """
         command = f"ESEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kabs}"
         return self.run(command, **kwargs)
@@ -760,7 +764,7 @@ class Selecting:
 
         .. _ESLN_notes:
 
-        :ref:`esln` selects elements which have any (or all ``EKEY`` )  ``NodeType`` nodes in the
+        :ref:`esln` selects elements which have any (or all ``EKEY`` ) ``NodeType`` nodes in the
         currently-selected set of nodes. Only elements having nodes in the currently-selected set can be
         selected.
 
@@ -933,6 +937,7 @@ class Selecting:
            * - ESYS
              -
              - Element coordinate system associated with the keypoint.
+
         """
         command = f"KSEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kabs}"
         return self.run(command, **kwargs)
@@ -1090,7 +1095,7 @@ class Selecting:
 
         :ref:`lsel` is valid in any processor.
 
-        For selections  based on non-integer numbers (coordinates, results, etc.), items that are
+        For selections based on non-integer numbers (coordinates, results, etc.), items that are
         within the range ``VMIN`` - ``Toler`` and ``VMAX`` + ``Toler`` are selected. The default tolerance
         ``Toler`` is based on the relative values of ``VMIN`` and ``VMAX`` as follows:
 
@@ -1163,6 +1168,7 @@ class Selecting:
            * - LCCA
              -
              - Concatenated lines (selects only lines that were created by concatenation ( :ref:`lccat` )).
+
         """
         command = f"LSEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kswp}"
         return self.run(command, **kwargs)
@@ -1742,7 +1748,7 @@ class Selecting:
             * ``FACE`` - Select nodes on face Num.
 
         num : str
-            Position or face number for NodeType  = POS or FACE.
+            Position or face number for NodeType = POS or FACE.
 
         Notes
         -----
@@ -1906,7 +1912,7 @@ class Selecting:
         * If VMAX ≠ VMIN, ``Toler`` = 1.0E-8 x (VMAX-VMIN).
 
         This command is typically used when VMAX-VMIN is very large so that the computed default tolerance
-        is therefore large and the xSEL  commands selects more than what is desired.
+        is therefore large and the xSEL commands selects more than what is desired.
 
         ``Toler`` remains active until respecified by a subsequent :ref:`seltol` command. A :ref:`seltol` <
         blank > resets back to the default ``Toler`` logic.
@@ -2052,6 +2058,7 @@ class Selecting:
            * - ESYS
              -
              - Element coordinate system associated with the volume.
+
         """
         command = f"VSEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kswp}"
         return self.run(command, **kwargs)

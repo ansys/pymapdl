@@ -1,38 +1,45 @@
-.. _ref_dynamic_options_commands_api:
 
-***************
-Dynamic options
-***************
+.. _ref_dynamic_options:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to define options for dynamic analyses.
+DynamicOptions
+==============
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.dynamic_options
+
+.. autoclass:: ansys.mapdl.core._commands.solution.dynamic_options.DynamicOptions
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.alphad
-   Mapdl.betad
-   Mapdl.dmprat
-   Mapdl.dmpstr
-   Mapdl.frqscl
-   Mapdl.harfrq
-   Mapdl.hrexp
-   Mapdl.hrocean
-   Mapdl.hropt
-   Mapdl.hrout
-   Mapdl.lvscale
-   Mapdl.mascale
-   Mapdl.mdamp
-   Mapdl.mdplot
-   Mapdl.midtol
-   Mapdl.modcont
-   Mapdl.modseloption
-   Mapdl.modopt
-   Mapdl.mxpand
-   Mapdl.qrdopt
-   Mapdl.rigid
-   Mapdl.subopt
-   Mapdl.timint
-   Mapdl.tintp
-   Mapdl.trnopt
+
+   DynamicOptions.alphad
+   DynamicOptions.betad
+   DynamicOptions.dampopt
+   DynamicOptions.dmprat
+   DynamicOptions.dmpstr
+   DynamicOptions.frqscl
+   DynamicOptions.harfrq
+   DynamicOptions.hrexp
+   DynamicOptions.hrocean
+   DynamicOptions.hropt
+   DynamicOptions.hrout
+   DynamicOptions.kryopt
+   DynamicOptions.lvscale
+   DynamicOptions.mascale
+   DynamicOptions.mcfopt
+   DynamicOptions.mdamp
+   DynamicOptions.mdplot
+   DynamicOptions.midtol
+   DynamicOptions.modcont
+   DynamicOptions.modopt
+   DynamicOptions.modseloption
+   DynamicOptions.mxpand
+   DynamicOptions.qrdopt
+   DynamicOptions.rigid
+   DynamicOptions.subopt
+   DynamicOptions.timint
+   DynamicOptions.tintp
+   DynamicOptions.trnopt

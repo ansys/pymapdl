@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ WT=0.01
 !-------------------
 K,1,0,0,0
 K,2,LENGDE,0,0
-L,1,2				! GEOMETRY OF THE BEAM 
+L,1,2				! GEOMETRY OF THE BEAM
 !*** MATERIAL PROPERTIES FOR STEEL IN NEWTONS AND METERS ***
 !----------------------------------------------------------------
 MP,EX,1,2E11			! YOUNG'S MODULUS
@@ -69,7 +69,7 @@ LESIZE,1,,,10,BIAS_FACT		! SET LINE MESHING CHARACTERISTICS
 LMESH,ALL			! CREATE PIPE ELEMENTS
 ! CONTACT/TARGET
 TYPE, 2				! CONTACT TYPE
-REAL, 2	
+REAL, 2
 MAT, 2
 ESURF				! PLACE CONTACT ON PIPE ELEMENTS
 ! FIND THE HIGHEST NODE NUMBER DEFINED
@@ -87,7 +87,7 @@ E, TARGET_NODE1,TARGET_NODE2,TARGET_NODE3,TARGET_NODE4
 ALLSEL,ALL
 FINISH
 /SOLU
-! *** BOUNDARY CONDITIONS *** 
+! *** BOUNDARY CONDITIONS ***
 ! ---------------------------
 KSEL,S,KP,,1			! SELECT KEYPOINT AT LEFT SIDE OF BEAM
 NSLK,S,				! SELECT IT'S CORRESPONDING NODE
@@ -143,4 +143,3 @@ FINISH
 /OUT
 FINISH
 *LIST,vm278,vrt
-

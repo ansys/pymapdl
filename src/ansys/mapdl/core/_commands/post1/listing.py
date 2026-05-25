@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Listing:
+
+class Listing(CommandsBase):
 
     def format(
         self,
@@ -304,6 +306,7 @@ class Listing:
           consist of one material).
 
         * Anisotropic materials ( :ref:`tb`,ANEL) are not considered.
+
         """
         command = "PRERR"
         return self.run(command, **kwargs)

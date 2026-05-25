@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class MagneticsCalculations:
+
+class MagneticsCalculations(CommandsBase):
 
     def curr2d(self, **kwargs):
         r"""Calculates current flow in a 2D conductor.
@@ -241,7 +243,7 @@ class MagneticsCalculations:
         parameter PAVG.
 
         Conductor losses include solid conductors and surface conductors approximated by impedance or
-        shielding boundary conditions. The power-loss  density for solid conductors or dielectrics is
+        shielding boundary conditions. The power-loss density for solid conductors or dielectrics is
         stored in the element table with the label PLOSSD and may be listed ( :ref:`pretab` ) or displayed (
         :ref:`pletab` ). PLOSSD does not include surface losses.
 

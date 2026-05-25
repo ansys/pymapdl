@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Abbreviations:
+
+class Abbreviations(CommandsBase):
 
     def abbr(self, abbr: str = "", string: str = "", **kwargs):
         r"""Defines an abbreviation.
@@ -257,7 +259,7 @@ class Abbreviations:
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/installation/win_product_table.html>`_ or
         the `Ansys, Inc. Linux Installation Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/installation/lin_product_table.html>`_
-         for details specific to your platform or operating
+        for details specific to your platform or operating
         system.
 
         The USER01 routine is commented and should be listed from the distribution media (system dependent)

@@ -1,20 +1,24 @@
-.. _ref_ocean_commands_api:
 
-*****
+.. _ref_ocean:
+
+
 Ocean
-*****
+=====
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands define ocean load data.
+.. currentmodule:: ansys.mapdl.core._commands.solution.ocean
+
+.. autoclass:: ansys.mapdl.core._commands.solution.ocean.Ocean
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.ocdata
-   Mapdl.ocdelete
-   Mapdl.oclist
-   Mapdl.ocread
-   Mapdl.octable
-   Mapdl.octype
-   Mapdl.oczone
+
+   Ocean.ocdata
+   Ocean.ocdelete
+   Ocean.oclist
+   Ocean.ocread
+   Ocean.octable
+   Ocean.octype
+   Ocean.oczone

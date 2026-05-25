@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -23,7 +23,7 @@
 import os
 import re
 
-from ansys.tools.versioning import server_meets_version
+from ansys.tools.common.versioning import server_meets_version
 import numpy as np
 import pytest
 

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -125,12 +125,12 @@ NSET = 0
    SPL1(nset)= 20*log10((p/SQRT(2))/p0)
 *ENDDO
 R1 = 114.161/SPL1(1)
-R2 = 118.845/SPL1(2)    
-R3 = 120.778/SPL1(3)    
-R4 = 121.727/SPL1(4)    
-R5 = 122.247/SPL1(5)   
+R2 = 118.845/SPL1(2)
+R3 = 120.778/SPL1(3)
+R4 = 121.727/SPL1(4)
+R5 = 122.247/SPL1(5)
 *VFILL,SPLR,DATA,114.161,118.845,120.778,121.727,122.247
-*VFILL,RATIO1,DATA,R1,R2,R3,R4,R5     
+*VFILL,RATIO1,DATA,R1,R2,R3,R4,R5
 SAVE,TABLE_1
 FINISH
 
@@ -149,7 +149,7 @@ NSET = 0
    *GET,frq,ACTIVE,0,SET,FREQ
    Freq2(NSET)=frq
    PRFAR,PRES,SPLC,0,0,0,0,0,0,15           ! FAR FIELD PRESSURE
-   *GET,SPL2(NSET),ACUS,0,SPL   
+   *GET,SPL2(NSET),ACUS,0,SPL
    k = 2*PI*Freq2(NSET)/c0
    p = rho*c0*vn*R**2/(1+(k**2)*(R**2))*CXABS(R*k**2/15,-k/15)*CXABS(COS(14*k),SIN(14*k))
    p0 = 2e-5
@@ -225,7 +225,7 @@ NSET = 0
    *GET,frq,ACTIVE,0,SET,FREQ
    Freq4(NSET)=frq
    PRFAR,PRES,SPLC,0,0,0,0,0,0,15           ! FAR FIELD PRESSURES
-   *GET,SPL5(NSET),ACUS,0,SPL   
+   *GET,SPL5(NSET),ACUS,0,SPL
    k = 2*PI*Freq4(NSET)/c0
    p = rho*c0*vn*R**2/(1+(k**2)*(R**2))*CXABS(R*k**2/15,-k/15)*CXABS(COS(14*k),SIN(14*k))
    p0 = 2e-5
@@ -235,8 +235,8 @@ R41 = SPL5(1)/SPL6(1)
 R42 = SPL5(2)/SPL6(2)
 R43 = SPL5(3)/SPL6(3)
 R44 = SPL5(4)/SPL6(4)
-*VFILL,RATIO4,DATA,R41,R42,R43,R44  
-SAVE,TABLE_4 
+*VFILL,RATIO4,DATA,R41,R42,R43,R44
+SAVE,TABLE_4
 FINISH
 /OUT,vmr083-ca1-221,vrt
 /COM,

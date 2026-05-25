@@ -6,6 +6,7 @@
 [Cc]ommand [Pp]rompt
 [Dd]ocker
 [Ee]igensolver
+[Ee]mail
 [Hh]yperelasticity
 [Kk]eypoints
 [Mm]atplotlib
@@ -45,6 +46,7 @@ argparse
 Arruda-Boyce
 askin
 BCs
+bellow
 Block Lanzos
 Boyce
 breakpoint
@@ -63,6 +65,8 @@ devcontainer
 DevContainer
 Dimitris
 discretisation
+DMP
+docstrings
 dof
 ect
 eigenfrequency
@@ -157,16 +161,21 @@ Rao
 righ
 RNNN
 Roark
+run_location
 sbatch
 singl
 Slurm
 SLURM
 smal
+SMP
 sord
 spotweld
 squeue
 srun
 stationarity
+stderr
+stdin
+stdout
 struc
 subselected
 substep
@@ -200,3 +209,4 @@ Windows Subsystem for Linux
 wsl
 WSL
 Zhu
+Synopsys

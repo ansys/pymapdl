@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ F,11,FY,-1                      ! UNIT LOAD AT FREE END
 SOLVE
 FINISH
 
-/SOLU 
+/SOLU
 ANTYPE,BUCKLE                   ! BUCKLING ANALYSIS
 BUCOPT,LANB,1                   ! USE BLOCK LANCZOS EIGENVALUE EXTRACTION METHOD
 MXPAND,1,,,YES
@@ -75,16 +75,16 @@ FINISH
 RESUME,,DB                      ! RESUME THE DATABASE
 FINISH
 
-/SOLU    
+/SOLU
 ANTYPE,STATIC                   ! STATIC ANALYSIS
-RESCONTROL,LINEAR,ALL,1         ! RESTART FILES FOR SUBSEQUENT LINEAR PERTURBATION 
+RESCONTROL,LINEAR,ALL,1         ! RESTART FILES FOR SUBSEQUENT LINEAR PERTURBATION
 D,1,ALL                         ! FIX SYMMETRY END
 F,11,FY,-1                      ! UNIT LOAD AT FREE END
 SOLVE
 FINISH
-/SOLU 
+/SOLU
 ANTYPE,STATIC,RESTART,,,PERTURB ! PERFORM A PERTURBATION ANALYSIS
-PERTURB,BUCKLE,,,ALLKEEP        ! PERTURBED BUCKLING SOLVE 
+PERTURB,BUCKLE,,,ALLKEEP        ! PERTURBED BUCKLING SOLVE
 SOLVE,ELFORM                    ! REFORM ELEMENT MATRICES
 BUCOPT,LANB,1,,,RANGE           ! USE BLOCK LANCZOS EIGENVALUE EXTRACTION METHOD, EXTRACT 1 MODE
 MXPAND,1,,,YES                  ! EXPAND 1 MODE SHAPE

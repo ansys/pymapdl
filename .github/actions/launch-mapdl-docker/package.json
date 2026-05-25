@@ -1,0 +1,24 @@
+{
+  "name": "launch-mapdl-docker-action",
+  "version": "1.0.0",
+  "description": "GitHub Action for launching MAPDL Docker instances",
+  "main": "index.js",
+  "scripts": {
+    "build": "ncc build index.js -o dist && ncc build post.js -o dist-post",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "actions",
+    "mapdl",
+    "docker"
+  ],
+  "author": "Ansys",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^3.0.1",
+    "@actions/exec": "^3.0.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.2"
+  }
+}

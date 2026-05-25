@@ -1,0 +1,10 @@
+{
+  "expectations": [
+    {"text": "Starts with pymapdl start", "passed": true, "evidence": "Step 1: 'pymapdl start'"},
+    {"text": "Uses pymapdl exec with -c flags for APDL commands", "passed": false, "evidence": "Explicitly states 'The pymapdl CLI cannot execute APDL modeling commands directly'. Falls back to batch MAPDL (ansys251 -b -i) or Python one-liners."},
+    {"text": "Includes /prep7 preprocessor entry", "passed": true, "evidence": "Included in the .inp file and Python one-liner, but NOT via pymapdl exec."},
+    {"text": "Includes a SOLVE command", "passed": true, "evidence": "SOLVE is present in both options, but not via pymapdl exec."},
+    {"text": "Ends with pymapdl stop", "passed": true, "evidence": "Step 3: 'pymapdl stop'"},
+    {"text": "Commands are in correct order: start before exec before stop", "passed": false, "evidence": "Does not use pymapdl exec at all. Uses native MAPDL batch or Python instead."}
+  ]
+}

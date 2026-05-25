@@ -1,28 +1,33 @@
-.. _ref_volumes_commands_api:
 
-*******
+.. _ref_volumes:
+
+
 Volumes
-*******
+=======
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to create, modify, list, etc., volumes.
+.. currentmodule:: ansys.mapdl.core._commands.prep7.volumes
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.volumes.Volumes
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.extopt
-   Mapdl.v
-   Mapdl.va
-   Mapdl.vdele
-   Mapdl.vdgl
-   Mapdl.vdrag
-   Mapdl.vext
-   Mapdl.vgen
-   Mapdl.vlist
-   Mapdl.vlscale
-   Mapdl.voffst
-   Mapdl.vrotat
-   Mapdl.vsum
-   Mapdl.vsymm
-   Mapdl.vtran
+
+   Volumes.extopt
+   Volumes.v
+   Volumes.va
+   Volumes.vdele
+   Volumes.vdgl
+   Volumes.vdrag
+   Volumes.vext
+   Volumes.vgen
+   Volumes.vlist
+   Volumes.vlscale
+   Volumes.voffst
+   Volumes.vplot
+   Volumes.vrotat
+   Volumes.vsum
+   Volumes.vsymm
+   Volumes.vtran

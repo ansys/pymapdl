@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -717,7 +717,7 @@ esel,all
 /com,  Node J
 /com,==========
 
-/com, Element #28 (Pipe289 elements)  
+/com, Element #28 (Pipe289 elements)
 /com,************************
 
 esel,s,elem,,28

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -27,9 +27,11 @@
 import logging
 import os
 from typing import Dict, List, Tuple
-from warnings import warn
 
 from platformdirs import user_data_dir
+
+# Apply NumPy compatibility patches for dependencies
+from ansys.mapdl.core import _numpy_compat  # noqa: F401
 
 ###############################################################################
 # Logging
@@ -58,13 +60,13 @@ VERSION_MAP: Dict[Tuple[int, int, int], str] = {
 }
 
 BUILDING_GALLERY: bool = False
-RUNNING_TESTS: bool = False
 
 DEPRECATING_MINIMUM_PYTHON_VERSION: bool = False
 MINIMUM_PYTHON_VERSION: Tuple[int, int] = (3, 10)
 
 # Import related globals
-_HAS_ATP: bool = is_installed("ansys.tools.path")
+_HAS_ATC: bool = is_installed("ansys.tools.common")
+_HAS_ATP: bool = _HAS_ATC  # Backward compatibility alias
 _HAS_CLICK: bool = is_installed("click")
 _HAS_DPF: bool = is_installed("ansys.dpf.core")
 _HAS_MATPLOTLIB: bool = is_installed("matplotlib")
@@ -117,7 +119,7 @@ if "ANSJUPHUB_VER" in os.environ:  # pragma: no cover
 else:
     from ansys.mapdl.core.launcher import launch_mapdl
 
-from ansys.mapdl.core.information import Information
+from ansys.mapdl.core.information import Information, get_mapdl_info
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as Mapdl
 from ansys.mapdl.core.misc import check_has_mapdl
 from ansys.mapdl.core.pool import MapdlPool
@@ -128,8 +130,8 @@ from ansys.mapdl.core.report import Report
 # ==================
 #
 # For compatibility with other versions or for convenience
-if _HAS_ATP:
-    from ansys.tools.path.path import (
+if _HAS_ATC:
+    from ansys.tools.common.path import (
         change_default_ansys_path,
         find_mapdl,
         get_available_ansys_installations,

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ HARFRQ,,3.1831      ! HARMONIC FREQUENCY RANGE
 D,1,UZ
 F,2,FZ,10
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 /POST26

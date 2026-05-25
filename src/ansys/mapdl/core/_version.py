@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -28,6 +28,7 @@ For example:
 # major, minor, patch
 version_info = 0, 58, 'dev0'
 """
+
 import importlib.metadata as importlib_metadata
 from typing import Dict
 
@@ -37,6 +38,7 @@ __version__: str = importlib_metadata.version("ansys-mapdl-core")
 
 # In descending order
 SUPPORTED_ANSYS_VERSIONS: Dict[int, str] = {
+    271: "2027R1",
     261: "2026R1",
     252: "2025R2",
     251: "2025R1",

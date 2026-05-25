@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,7 @@ F,1,FLOW,75.53/32.2 ! INLET MASS FLOW
 OUTPR,BASIC,1
 OUTPR,NLOAD,1
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 /POST1
@@ -68,4 +68,3 @@ LABEL(1,2) = 'lb/ft/ft '
 /OUT
 FINISH
 *LIST,vm123,vrt
-

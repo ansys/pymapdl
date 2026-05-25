@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -39,8 +39,8 @@ KBC,1                              ! STEP BOUNDARY CONDITIONS
 D,1,TEMP,100,,11,10
 D,6,TEMP,,,16,10
 FINISH
-/SOLU 
-/OUT,vm102_SCRATCH   
+/SOLU
+/OUT,vm102_SCRATCH
 SOLVE
 /OUT
 FINISH
@@ -66,7 +66,7 @@ FINISH
 MP,KXX,1,50,0.5                    ! TEMPERATURE-DEPENDENT CONDUCTIVITY
 FINISH
 /SOLU
-/OUT,vm102_SCRATCH,,,APPEND  
+/OUT,vm102_SCRATCH,,,APPEND
 SOLVE
 /OUT
 FINISH

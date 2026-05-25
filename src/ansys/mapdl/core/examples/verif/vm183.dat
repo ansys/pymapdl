@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -22,13 +22,13 @@
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM183
-/PREP7  
+/PREP7
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /TITLE, VM183,  HARMONIC RESPONSE OF A SPRING-MASS SYSTEM
 C***  R.K. VIERCK, "VIBRATION ANALYSIS", 2ND EDITION, SECTION 4-2
 ANTYPE,MODAL         ! MODE - FREQUENCY ANALYSIS
-MODOPT,LANB,2,,,     
+MODOPT,LANB,2,,,
 ET,1,COMBIN40,,,2    ! UY DOF
 R,1,6,,2             ! K1=6 N/M     M1=2 KG
 R,2,16,,2            ! K2=16 N/M    M2=2 KG
@@ -42,10 +42,10 @@ E,2,3
 OUTPR,,ALL
 D,3,ALL
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
-/SOLU    
+/SOLU
 ANTYPE,HARMIC        ! HARMONIC ANALYSIS
 HROPT,MSUP,2         ! MODE SUPERPOSITION USING TWO MODES
 HARFRQ,0.1,1.0       ! RANGE OF FREQUENCIES FROM 0.1 TO 1.0 HZ

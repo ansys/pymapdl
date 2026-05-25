@@ -19,7 +19,7 @@ Python. Its primary package, ``ansys-mapdl-core``, provides:
   solution matrices, and results).
 
 Thanks to an API that looks familiar to APDL and Python users alike, PyMAPDL
-makes it is easier than ever to integrate the simulation capabilities 
+makes it is easier than ever to integrate the simulation capabilities
 of the Ansys MAPDL multi-physics solver directly into novel applications.
 The package presents a Python-friendly interface to drive the software
 that manages the submission of low-level APDL commands, while exchanging
@@ -27,7 +27,7 @@ data through high-performance gRPC interfaces.
 
 Accelerate the preparation of your simulations using PyMAPDL. Combine the
 expressiveness of general-purpose Python code to control the flow in your
-input decks with methods that drive the solver. Explore proof of concept 
+input decks with methods that drive the solver. Explore proof of concept
 studies or capture knowledge using interactive Jupyter notebooks. Tap
 the solver as the physics engine in your next AI app. PyMAPDL is now open source,
 so enjoy it. Contributions are welcome.
@@ -40,13 +40,13 @@ improvement over its predecessor based on CORBA. These technologies
 allow the MAPDL solver to function as a server, ready to respond to
 connecting clients.
 
-Google remote procedure calls, or gRPC, are used to establish secure 
-connections so that a client app can directly call methods on 
-a potentially remote MAPDL instance as if it were a local object. The 
-use of HTTP/2 makes it friendly to modern internet infrastructures. 
+Google remote procedure calls, or gRPC, are used to establish secure
+connections so that a client app can directly call methods on
+a potentially remote MAPDL instance as if it were a local object. The
+use of HTTP/2 makes it friendly to modern internet infrastructures.
 This, along with the use of binary transmission formats, favors higher
-performance. Using gRPC, PyMAPDL can convert Python statements into APDL 
-commands that can then be transmitted to an MAPDL instance running anywhere, 
+performance. Using gRPC, PyMAPDL can convert Python statements into APDL
+commands that can then be transmitted to an MAPDL instance running anywhere,
 while producing network footprints that are compact and efficient.
 
 The following diagram presents a simplified architecture of PyMAPDL.
@@ -176,12 +176,12 @@ development version or previously released versions.
 
 You can also download the
 :download:`PyMAPDL cheat sheet <https://github.com/ansys/pymapdl/blob/gh-pages/version/{{ version }}/_static/cheat_sheet.pdf>`.
-This one-page reference provides syntax rules and commands for using PyMAPDL. 
+This one-page reference provides syntax rules and commands for using PyMAPDL.
 
 On the `PyMAPDL Issues <https://github.com/ansys/pymapdl/issues>`_ page,
 you can create issues to report bugs and request new features. On the `PyMAPDL Discussions
 <https://github.com/ansys/pymapdl/discussions>`_ page or the `Discussions <https://discuss.ansys.com/>`_
-page on the Ansys Developer portal, you can post questions, share ideas, and get community feedback. 
+page on the Ansys Developer portal, you can post questions, share ideas, and get community feedback.
 
 To reach the PyAnsys project support team, email `PyAnsys Core team <pyansys.core@ansys.com>`_.
 Unfortunately no specific library questions or issues are answered through this email.

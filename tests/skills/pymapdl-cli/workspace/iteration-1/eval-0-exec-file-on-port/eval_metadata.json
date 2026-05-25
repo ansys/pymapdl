@@ -1,0 +1,11 @@
+{
+  "eval_id": 0,
+  "eval_name": "exec-file-on-port",
+  "prompt": "I have an APDL script called thermal_model.inp and a MAPDL instance already running on port 50060. How do I send that script to the running instance from my terminal?",
+  "assertions": [
+    {"text": "Uses pymapdl exec (not pymapdl run or other command)", "type": "contains", "value": "pymapdl exec"},
+    {"text": "Includes --file flag with the script name", "type": "contains_all", "values": ["--file", "thermal_model.inp"]},
+    {"text": "Includes --port 50060 to target the correct instance", "type": "contains_all", "values": ["--port", "50060"]},
+    {"text": "Explains that exec connects to an already-running instance", "type": "semantic", "value": "explains connecting to existing running instance"}
+  ]
+}

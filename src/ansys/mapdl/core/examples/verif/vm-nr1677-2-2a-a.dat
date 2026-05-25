@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -28,9 +28,9 @@
 /com, Reference: Piping benchmark problems,Dynamic analysis independant support
 /com,            motion response spectrum method, P. Bezler, M. Subudhi and
 /com,            M.Hartzman, NUREG/CR--1677-Vol.2, August 1985.
-/com, 
-/com, 
-/com, Elements used: Pipe16, Pipe18, Combin14 and Mass21 
+/com,
+/com,
+/com, Elements used: Pipe16, Pipe18, Combin14 and Mass21
 /com,
 /com, Results comparsion:
 /com, The following results are compared against NRC piping benchmark values
@@ -50,7 +50,7 @@ Nu = 0.3						! Minor Poisson's Ratio
 ShearModulus1 = YoungModulus1/(2*(1+Nu))	! Shear Modulus
 WMass=0.001056893					! Density
 WTick=0.241						! Wall Thickness
-k=0.71e-5						
+k=0.71e-5
 OD=7.288						! Outer Diameter
 RADCUR=36.30					! Radius of Curvature
 temp=80						! Temperature
@@ -72,7 +72,7 @@ keyopt,6,3,2					! 3D mass without inertia
 /com, Real Constants
 /com,****************
 
-r,		1,		OD,		WTick				
+r,		1,		OD,		WTick
 r,		2,		OD,		WTick,	RADCUR
 r,		3,		0.1e+5
 r,		4,		0.1e+9
@@ -84,16 +84,16 @@ r,		6,		1.518
 /com, Material Properties
 /com,*********************
 
-mp,ex,  1, YoungModulus1			
-mp,nuxy,1, Nu					
-mp,gxy ,1, ShearModulus1			
-mp,dens,1, WMass					
+mp,ex,  1, YoungModulus1
+mp,nuxy,1, Nu
+mp,gxy ,1, ShearModulus1
+mp,dens,1, WMass
 mp,kxx,1, k
 
-mp,ex,  2, YoungModulus1			
-mp,nuxy,2, Nu					
-mp,gxy ,2, ShearModulus1			
-mp,dens,2, WMass					
+mp,ex,  2, YoungModulus1
+mp,nuxy,2, Nu
+mp,gxy ,2, ShearModulus1
+mp,dens,2, WMass
 mp,kxx,2, K
 
 /com,------------------------------------------------------------------------------------
@@ -101,7 +101,7 @@ mp,kxx,2, K
 /com, Nodes
 /com,*******
 
-n,1,0,0,0						
+n,1,0,0,0
 n,2,0,54.45,0
 n,3,0,108.9,0
 n,4,10.632,134.568,0
@@ -152,7 +152,7 @@ mat,1							! Material ID 1
 type,1						! Element Type 1
 real,1						! Real Constant Set 1
 
-en, 1, 1, 2						
+en, 1, 1, 2
 en, 2, 2, 3
 en, 5, 5, 6
 en, 6, 6, 7
@@ -194,7 +194,7 @@ nrotat,29
 csys,0
 
 real,3 				! 0.1e+5
-type,4 				! local y 
+type,4 				! local y
 e,11,27
 e,13,28
 
@@ -212,12 +212,12 @@ e,1,22
 e,17,30
 e,21,33
 
-type,4 				! local y 
+type,4 				! local y
 e,1,23
 e,17,31
 e,21,34
 
-type,5 				! local z 
+type,5 				! local z
 e,1,24
 e,17,32
 e,21,35
@@ -265,7 +265,7 @@ finish
 
 /solution
 antype,modal				! Perform Modal Analysis
-modopt,lanb,maxm				
+modopt,lanb,maxm
 lumpm,on					! Use Lumped Mass Matrix Approximation
 mxpand,maxm,,,yes				! Expand Solutions with Element Calculations ON
 solve
@@ -786,7 +786,7 @@ save,table_4
 
 /com,
 /com, ----------------------vm-nr1677-2-2a-a Results Verification---------------------------
-/com, 
+/com,
 
 /nopr
 resume,table_1
@@ -796,7 +796,7 @@ resume,table_1
 
 /com,
 /com, ===========================================
-/com,  COMPARISON OF MODAL FREQUENCY 
+/com,  COMPARISON OF MODAL FREQUENCY
 /com,      WITH EXPECTED RESULTS
 /com, ===========================================
 /com,
@@ -851,7 +851,7 @@ resume,table_4
 
 /com,
 /com, ===========================================
-/com,  COMPARISON OF REACTION FORCES 
+/com,  COMPARISON OF REACTION FORCES
 /com,      WITH EXPECTED RESULTS
 /com, ===========================================
 /com,
@@ -881,7 +881,7 @@ resume,table_3
 /com,------------------------------------------------------
 /com,	Note: Element Forces and Moments for some elements
 /com,       along Y & Z directions are flipped between Mechanical APDL
-/com,		and NRC results 
+/com,		and NRC results
 /com,--------------------------------------------------------
 
 /com,		Result | Expected | Mechanical APDL |  Ratio

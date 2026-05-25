@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -27,8 +27,8 @@
 /DEVICE,VECTOR,ON
 OKEY=1
 /TITLE, VMC8, ALUMINUM BAR IMPACTING A RIGID BOUNDARY
-/COM 
-/COM   REF: WILKINS M.L AND GUINAN M.W., "IMPACT OF CYLINDERS ON A RIGID 
+/COM
+/COM   REF: WILKINS M.L AND GUINAN M.W., "IMPACT OF CYLINDERS ON A RIGID
 /COM        BOUNDARY", J. APPL. PHYS., VOL. 44, NO. 3, 1973.
 /COM
 /UNITS,SI                       ! (KG, NE, M , SEC)
@@ -36,8 +36,8 @@ OKEY=1
 *DIM,LFA,,2,2
 *DO,I,1,2
   *IF,I,EQ,1,THEN
-    ATYPE=2 
-    ETYP=182 
+    ATYPE=2
+    ETYP=182
     /TITLE, VMC8, ALUMINUM BAR IMPACTING A RIGID BOUNDARY - PLANE182
   *ELSEIF,I,EQ,2,THEN
     ATYPE=2
@@ -51,18 +51,18 @@ OKEY=1
   DI = 0.0001                     ! INTERFACE BETWEEN THE BAR AND THE WALL
   VEL = 478                       ! INITIAL VELOCITY [M/SEC]
   CVEL= (70E9/2700)**0.5          ! ELASTIC WAVE PROPAGATION SPEED
-  TEL=(RAD/4)/CVEL                ! TIME STEP INCREMENT (4 ELEMENTS ALONG RADIUS) 
+  TEL=(RAD/4)/CVEL                ! TIME STEP INCREMENT (4 ELEMENTS ALONG RADIUS)
   NLS=NINT(1.1*(4.5E-5/TEL))      ! MINIMUM NUMBER OF SUBSTEPS FOT TIME=4.5E-5
   ET,1,ETYP                       ! ELEMENT TYPE
   *IF,ETYP,EQ,182,THEN
     KEYOPT,1,1,1			! REDUCED INTEGRATION FOR 182
   *ENDIF
   MP,EX,1,70E9                    ! ELASTIC MODULUS [PA]
-  MP,NUXY,1,0.3 
+  MP,NUXY,1,0.3
   MP,DENS,1,2700                  ! DENSITY (KG/M^3)
   TB,BISO,1                       ! BILINEAR ISOTROPIC HARDENING
-  TBDAT,1,420E6,100E6             ! YEILD STRESS [PA], TANGENT MODULUS [PA] 
-  K,1,0,DI                        ! SOLID MODEL 
+  TBDAT,1,420E6,100E6             ! YEILD STRESS [PA], TANGENT MODULUS [PA]
+  K,1,0,DI                        ! SOLID MODEL
   K,2,RAD,DI
   K,3,RAD,(DI+L)
   K,4,0,(DI+L)
@@ -75,13 +75,13 @@ OKEY=1
   A,1,2,3,4
   AMESH,1
   EPLOT
-  NSEL,S,LOC,X,0 
-  D,ALL,UX                          
-  NSEL,S,LOC,X,0                 
+  NSEL,S,LOC,X,0
+  D,ALL,UX
+  NSEL,S,LOC,X,0
   NSEL,R,LOC,Y,L+DI
-  *GET,NTOP,NODE,,NUM,MIN   
+  *GET,NTOP,NODE,,NUM,MIN
   NSEL,ALL
-  NBOT=NODE(0,0,0) 
+  NBOT=NODE(0,0,0)
   NSEL,S,,,NBOT
   ESLN,S
   *GET,EBOT,ELEM,,NUM,MIN
@@ -96,20 +96,20 @@ OKEY=1
   NLGEOM,ON
   NROPT,FULL
   AUTOTS,ON
-  TIMINT,OFF                      ! STATIC LOAD STEP - DEFINE INITIAL VELOCITY    
-  T1=DI/VEL                       ! TIME INCREMENT 
+  TIMINT,OFF                      ! STATIC LOAD STEP - DEFINE INITIAL VELOCITY
+  T1=DI/VEL                       ! TIME INCREMENT
   TIME,T1
-  DELTIM,T1                      
+  DELTIM,T1
   NSEL,S,LOC,Y,DI
   D,ALL,UY,-DI
-  NSEL,ALL 
+  NSEL,ALL
 
   NCNV,2
   CNVTOL,U,1,0.001
-  OUTPR,ALL,NONE 
-  OUTRES,ALL,10 
+  OUTPR,ALL,NONE
+  OUTRES,ALL,10
   SOLVE                           ! LOAD STEP 1 - STATIC
-  TIMINT,ON                     
+  TIMINT,ON
   NEQIT,40
   CNVTOL,U
   CNVTOL,F,0.01,0.001
@@ -141,12 +141,12 @@ OKEY=1
   /AXLAB,X,TIME [SEC]
   /AXLAB,Y,FREE END DISPLACEMENT [M]
   PLVAR,2                         ! PLOT DISPLACEMENT VS. TIME
-  /AXLAB,Y,EPPL-EQV AT NODE 1       
+  /AXLAB,Y,EPPL-EQV AT NODE 1
   PLVAR,3                         ! PLOT PLASTIC STRAIN
   FINISH
 
   PARSAV,ALL
-  /CLEAR, NOSTART 
+  /CLEAR, NOSTART
   PARRES
 
 *ENDDO
@@ -157,7 +157,7 @@ FINISH
 /COM
 /COM,------------------- VMC8 RESULTS LISTING ------------------------------------
 /COM,
-/COM,         
+/COM,
 /COM,ETYP  |   182   |   183   |
 /COM,
 *VWRITE,LFA(1,1),LFA(1,2)

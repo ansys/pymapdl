@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -28,8 +28,8 @@
 /com, Reference: Piping benchmark problems,Dynamic analysis independant support
 /com,            motion response spectrum method, P. Bezler, M. Subudhi and
 /com,            M.Hartzman, NUREG/CR--1677-Vol.2, August 1985.
-/com, 
-/com, 
+/com,
+/com,
 /com, Element used: Pipe16, Pipe18, Combin14 and Mass21
 /com,
 /com, Results comparsion:
@@ -186,7 +186,7 @@ et,46,mass21
 keyopt,46,3,2
 et,47,mass21
 keyopt,47,3,2
-	    
+
 et,48,combin14,,1						! Spring Elements Types and Real constants
 keyopt,48,2,1						! X Degree of Freedom
 et,49,combin14,,2
@@ -266,7 +266,7 @@ keyopt,83,2,3						! Z Degree of Freedom
 /com, Real Constants
 /com,****************
 
-r, 1,OD_1,WTick_1						
+r, 1,OD_1,WTick_1
 r, 2,OD_2,WTick_2
 r, 3,OD_3,WTick_3
 r, 4,OD_4,WTick_4
@@ -351,19 +351,19 @@ r,79, 0.5000e+6
 r,80, 0.5000e+6
 r,81, 0.1000e+9
 r,82, 0.1000e+9
-r,83, 0.1000e+9 
+r,83, 0.1000e+9
 
 /com,------------------------------------------------------------------------------------
 
 /com, Material Properties
 /com,*********************
 
-MP,EX,  1, YoungModulus					
+MP,EX,  1, YoungModulus
 MP,NUXY,1, Nu
 MP,GXY ,1, ShearModulus
 MP,ALPX,1, K
 
-MP,EX,  2, YoungModulus					
+MP,EX,  2, YoungModulus
 MP,NUXY,2, Nu
 MP,GXY ,2, ShearModulus
 MP,ALPX,2, K
@@ -720,7 +720,7 @@ e,32,34
 
 type,5
 real,5
-e,14,15 
+e,14,15
 e,32,33
 e,77,78
 
@@ -1177,8 +1177,8 @@ nrotat,43
 nrotat,44
 csys,0
 
-real,54  
-type,54  
+real,54
+type,54
 e,43,44
 
 wplane,,nx(51),ny(51),nz(51),nx(52),ny(52),nz(52),nx(49),ny(49),nz(49)
@@ -1187,8 +1187,8 @@ nrotat,51
 nrotat,52
 csys,0
 
-real,56  
-type,56  
+real,56
+type,56
 e,51,52
 
 wplane,,nx(56),ny(56),nz(56),nx(57),ny(57),nz(57),nx(55),ny(55),nz(55)
@@ -1197,8 +1197,8 @@ nrotat,56
 nrotat,57
 csys,0
 
-real,57  
-type,57  
+real,57
+type,57
 e,56,57
 
 wplane,,nx(67),ny(67),nz(67),nx(68),ny(68),nz(68),nx(66),ny(66),nz(66)
@@ -1207,8 +1207,8 @@ nrotat,67
 nrotat,68
 csys,0
 
-real,59 
-type,59  
+real,59
+type,59
 e,67,68
 
 wplane,,nx(74),ny(74),nz(74),nx(75),ny(75),nz(75),nx(72),ny(72),nz(72)
@@ -1217,8 +1217,8 @@ nrotat,74
 nrotat,75
 csys,0
 
-real,61  
-type,61  
+real,61
+type,61
 e,74,75
 
 wplane,,nx(117),ny(117),nz(117),nx(118),ny(118),nz(118),nx(116),ny(116),nz(116)
@@ -1227,8 +1227,8 @@ nrotat,117
 nrotat,118
 csys,0
 
-real,69  
-type,69  
+real,69
+type,69
 e,117,118
 
 wplane,,nx(127),ny(127),nz(127),nx(128),ny(128),nz(128),nx(126),ny(126),nz(126)
@@ -1237,8 +1237,8 @@ nrotat,127
 nrotat,128
 csys,0
 
-real,71  
-type,71  
+real,71
+type,71
 e,127,128
 
 wplane,,nx(135),ny(135),nz(135),nx(136),ny(136),nz(136),nx(133),ny(133),nz(133)
@@ -1247,8 +1247,8 @@ nrotat,135
 nrotat,136
 csys,0
 
-real,73  
-type,73  
+real,73
+type,73
 e,135,136
 
 wplane,,nx(141),ny(141),nz(141),nx(142),ny(142),nz(142),nx(140),ny(140),nz(140)
@@ -1257,8 +1257,8 @@ nrotat,141
 nrotat,142
 csys,0
 
-real,74  
-type,74  
+real,74
+type,74
 e,141,142
 
 wplane,,nx(165),ny(165),nz(165),nx(166),ny(166),nz(166),nx(164),ny(164),nz(164)
@@ -1267,8 +1267,8 @@ nrotat,165
 nrotat,166
 csys,0
 
-real,78  
-type,78  
+real,78
+type,78
 e,165,166
 
 /com,------------------------------------------------------------------------------------
@@ -1326,7 +1326,7 @@ finish
 
 /solution
 antype,modal					! Perform Modal Analysis
-modopt,lanb,maxm					
+modopt,lanb,maxm
 lumpm,on						! Use Lumped Mass Matrix Approximation
 mxpand,maxm,,,yes					! Expand solutions with Element Calculations turned ON
 solve
@@ -1382,7 +1382,7 @@ SRSS,0.0							! Combine modes using SRSS mode combination
 
 svtyp, 2, 386.20
 
-freq,0.2,0.5,0.5263,0.578,0.7752,1.7241,2.0,2.1978,2.2472,                                  
+freq,0.2,0.5,0.5263,0.578,0.7752,1.7241,2.0,2.1978,2.2472,
 SV,,0.16,0.16,0.16,0.23,0.339,0.55,0.555,0.555,0.65,
 
 freq,2.9851,3.125,4.1667,5.0,5.7143,7.6923,9.0909,9.5238,10.4167
@@ -1395,7 +1395,7 @@ sed,1,0,0
 solve
 
 /com,
-/com, spectrum 2 (Y - Direction) 
+/com, spectrum 2 (Y - Direction)
 /com,****************************
 
 svtyp, 2, 386.20
@@ -1404,7 +1404,7 @@ freq,,
 FREQ,0.2,0.6061,0.667,1.9231,2.439,3.7037,4.0,5.3476,5.5866,
 SV,,0.085,0.115,0.125,0.36,0.40,0.525,0.54,0.54,0.506,
 
-FREQ,8.333,10.989,12.5,14.7059,20.0,21.2766,22.2222,27.7778,28.5714,   
+FREQ,8.333,10.989,12.5,14.7059,20.0,21.2766,22.2222,27.7778,28.5714,
 SV,,2.6,2.6,0.9,0.875,0.875,0.76,0.85,0.85,0.522,
 
 FREQ,30.303,33.3333,50.0,100.0
@@ -1414,16 +1414,16 @@ sed,0,1,0
 solve
 
 /com,
-/com, spectrum 3 (Z - Direction) 
+/com, spectrum 3 (Z - Direction)
 /com,***************************
 
 svtyp, 2, 386.20
 freq,,,
 
-FREQ,0.2,0.5,0.5814,1.7544,2.1739,2.8571,3.0303,4.1667,5.0,    
+FREQ,0.2,0.5,0.5814,1.7544,2.1739,2.8571,3.0303,4.1667,5.0,
 SV,,0.16,0.16,0.23,0.56,0.56,0.80,1.5,1.5,1.15,
 
-FREQ,5.2632,5.7143,5.8824,6.2893,6.5789,7.4074,9.6154,10.4167,14.0845,            
+FREQ,5.2632,5.7143,5.8824,6.2893,6.5789,7.4074,9.6154,10.4167,14.0845,
 SV,,0.64,0.64,0.7,0.7,0.875,1.05,1.05,1.31,1.31,
 
 FREQ,15.873,17.2414,25.0,27.027,32.2581,50.0,100.0
@@ -1825,7 +1825,7 @@ resume,table_1
 
 /com,
 /com, ===========================================
-/com,  COMPARISON OF MODAL FREQUENCY 
+/com,  COMPARISON OF MODAL FREQUENCY
 /com,      WITH EXPECTED RESULTS
 /com, ===========================================
 /com,
@@ -1877,7 +1877,7 @@ resume,table_4
 
 /com,
 /com, ===========================================
-/com,  COMPARISON OF REACTION FORCES 
+/com,  COMPARISON OF REACTION FORCES
 /com,      WITH EXPECTED RESULTS
 /com, ===========================================
 /com,
@@ -1907,7 +1907,7 @@ resume,table_3
 /com,--------------------------------------------------------
 /com,	Note: Element Forces and Moments for some elements
 /com,       along Y & Z directions are flipped between Mechanical APDL
-/com,		and NRC results 
+/com,		and NRC results
 /com,--------------------------------------------------------
 
 
@@ -1938,4 +1938,3 @@ resume,table_3
 *list,vm-nr1677-2-4a-a,vrt
 finish
 /exit,nosave
-

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Results:
+
+class Results(CommandsBase):
 
     def lcsum(self, lab: str = "", **kwargs):
         r"""Specifies whether to process non-summable items in load case operations.
@@ -1151,6 +1153,7 @@ class Results:
              - The ``n`` th state variable.
            * - FLDUF0 ``n``
              - The ``n`` th user-defined field variable.
+
         """
         command = f"PLESOL,{item},{comp},{kund},{fact},{avg}"
         return self.run(command, **kwargs)
@@ -1757,6 +1760,7 @@ class Results:
              - The ``n`` th state variable.
            * - FLDUF0 ``n``
              - The ``n`` th user-defined field variable.
+
         """
         command = f"PLNSOL,{item},{comp},{kund},{fact},{fileid},{avg},{datakey}"
         return self.run(command, **kwargs)
@@ -2732,6 +2736,7 @@ class Results:
              - The ``n`` th state variable.
            * - FLDUF0 ``n``
              - The ``n`` th user-defined field variable.
+
         """
         command = f"PRESOL,{item},{comp}"
         return self.run(command, **kwargs)
@@ -3391,6 +3396,7 @@ class Results:
              - The ``n`` th state variable.
            * - FLDUF0 ``n``
              - The ``n`` th user-defined field variable.
+
         """
         command = f"PRNSOL,{item},{comp},,,,{avg},{datakey}"
         return self.run(command, **kwargs)
@@ -3699,6 +3705,7 @@ class Results:
            * - SNDI
              -
              - Sound intensity vector sum and direction cosines.
+
         """
         command = f"PRVECT,{item},{lab2},{lab3},{labp}"
         return self.run(command, **kwargs)
@@ -3728,7 +3735,7 @@ class Results:
         Issue :ref:`sumtype`,PRIN when you want to have a load case operation ( :ref:`lcoper` ) act on the
         principal / equivalent stresses instead of the component stresses. Also issue :ref:`sumtype`,PRIN
         when you want to read in load cases ( :ref:`lcase` ). Note that the :ref:`sumtype` setting is not
-        maintained between /POS  T1 sessions.
+        maintained between /POS T1 sessions.
 
         :ref:`sumtype`,PRIN also causes principal nodal values to be the average of the contributing
         principal element nodal values (see :ref:`avprin`,1).

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 /VERIFY,VM21
 /PREP7
 MP,PRXY,,0.3
-/TITLE, VM21, TIE ROD WITH LATERAL LOADING, NO STREES STIFFENING 
+/TITLE, VM21, TIE ROD WITH LATERAL LOADING, NO STREES STIFFENING
 C***   STR. OF MATLS., TIMOSHENKO, PART 2, 3RD ED., PAGE 42, ART. 6
 ANTYPE,STATIC
 ET,1,BEAM188
@@ -41,15 +41,15 @@ D,ALL,UY,,,,,ROTX,ROTZ           ! BOUNDARY CONDITIONS AND LOADINGS
 D,1,UZ
 NSEL,S,,,5
 DSYM,SYMM,X                      ! DEFINE SYMMETRY BOUNDARY
-NSEL,ALL         
+NSEL,ALL
 F,1,FX,-21972.6                  ! APPLY LOADS
-SFBEAM,ALL,1,PRES,1.79253        
+SFBEAM,ALL,1,PRES,1.79253
 FINISH
 /SOLU
-/OUT,SCRATCH                            
-SOLVE                          
+/OUT,SCRATCH
+SOLVE
 FINISH
-/POST1 
+/POST1
 /OUT,
 NSEL,S,,,1,5,4
 PRNSOL,U,Z
@@ -64,19 +64,19 @@ FINISH
 /POST26
 RFORCE,2,RGHT_END,M,Y
 STORE
-*GET,M_MX_C2,VARI,2,EXTREM,VMAX 
+*GET,M_MX_C2,VARI,2,EXTREM,VMAX
 FINISH
 /PREP7
 /TITLE, VM21, TIE ROD WITH LATERAL LOADING, STRESS STIFFENING PRESENT
-NSUBST,5                         
+NSUBST,5
 AUTOTS,ON                        ! AUTO TIME STEPPING ACTIVATED
 FINISH
-/SOLU    
+/SOLU
 NLGEOM,ON
 CNVTOL,F,,.0001,,1               ! SMALLER CONVERGENCE TOLERANCE
 /OUT,SCRATCH
-SOLVE                           
-FINISH 
+SOLVE
+FINISH
 /POST1
 /OUT,
 NSEL,S,,,1,5,4
@@ -89,7 +89,7 @@ FINISH
 /POST26
 RFORCE,2,RGHT_END,M,Y
 STORE
-*GET,M_MX_C1,VARI,2,EXTREM,VMAX 
+*GET,M_MX_C1,VARI,2,EXTREM,VMAX
 *DIM,LABEL,CHAR,3,2
 *DIM,VALUE_C1,,3,3
 *DIM,VALUE_C2,,3,3
@@ -120,7 +120,3 @@ LABEL(1,2) = '(in)    ','(rad)   ','AX in-lb'
 /OUT
 FINISH
 *LIST,vm21,vrt
-
-
-
-

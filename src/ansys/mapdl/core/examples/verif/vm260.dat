@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ E=1000						! YOUNG'S MODULUS
 A=4						! REFINEMENT COEFFICIENT
 R=100						! LOADING
 ET,1,CPT212					! 2D 4 NODE COUPLED PORE PRESSURE ELEMENT
-KEYOPT,1,12,1 			         
+KEYOPT,1,12,1
 KEYOPT,1,3,2					! PLANE STRAIN CONDISTIONS
 RECT,0,6*W,0,-9*W				! AREA 6*W BY 9*W
 LESIZE,3,,,12*A/W				! 12*A ELEMENTS ON HORIZONTAL EDGES
@@ -51,7 +51,7 @@ FPX = 0.267E-8					! SOLID PERMEABILITY
 ONE = 1.0
 TB,PM,1,,,PERM
 TBDATA,1,FPX,FPX,FPX				! PERMEABILITY COEFFICIENTS
-TB,PM,1,,,BIOT				
+TB,PM,1,,,BIOT
 TBDATA,1,ONE					! BIOT COEFFICIENT
 
 NSEL,S,LOC,Y,-9*W
@@ -98,7 +98,7 @@ FINI
 
 LABEL1(1,1) = 'CPT212  ','','','','','',''
 LABEL1(8,1) = '','',''
-LABEL1(1,2) = 'P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y='  
+LABEL1(1,2) = 'P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y='
 LABEL1(8,2) = 'P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y='
 LABEL1(1,3) = '0.0','0.5','1.0','1.5','2.0','2.5','3.0'
 LABEL1(8,3) = '3.5','4.0','4.5','5.0',
@@ -106,7 +106,7 @@ LABEL1(8,3) = '3.5','4.0','4.5','5.0',
 LABEL2(1,1) = 'CPT212  ','','','','','',''
 LABEL2(8,1) = '','','','','','',''
 LABEL2(15,1) = ''
-LABEL2(1,2) = 'P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y='  
+LABEL2(1,2) = 'P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y='
 LABEL2(8,2) = 'P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y='
 LABEL2(15,2) = 'P/R at Y='
 LABEL2(1,3) = '0.01','0.02','0.03','0.05','0.09','0.1','0.2'
@@ -187,7 +187,7 @@ E=1000							! YOUNG'S MODULUS
 A=4							! REFINEMENT COEFFICIENT
 R=100							! LOADING
 ET,1,CPT213						! 2D 8 NODE COUPLED PORE PRESSURE ELEMENT
-KEYOPT,1,12,1 			         
+KEYOPT,1,12,1
 KEYOPT,1,3,2						! PLANE STRAIN CONDISTIONS
 RECT,0,6*W,0,-9*W					! AREA 6*W BY 9*W
 LESIZE,3,,,6*A/W					! 6*A ELEMENTS ON HORIZONTAL EDGES
@@ -201,13 +201,13 @@ FPX = 0.267E-8						! SOLID PERMEABILITY
 ONE = 1.0
 TB,PM,1,,,PERM
 TBDATA,1,FPX,FPX,FPX					! PERMEABILITY COEFFICIENTS
-TB,PM,1,,,BIOT				
+TB,PM,1,,,BIOT
 TBDATA,1,ONE						! BIOT COEFFICIENT
 
 NSEL,S,LOC,Y,-9*W
 D,ALL,UX,0
 D,ALL,UY,0						! BOTTOM SURFACE FIXED
-ALLSEL,ALL					     
+ALLSEL,ALL
 NSEL,S,LOC,X,0
 D,ALL,UX,0						! SYMMETRY BOUNDARY CONDITION
 ALLSEL,ALL
@@ -248,7 +248,7 @@ FINI
 
 LABEL1(1,1) = 'CPT213  ','','','','','',''
 LABEL1(8,1) = '','',''
-LABEL1(1,2) = 'P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y='  
+LABEL1(1,2) = 'P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y='
 LABEL1(8,2) = 'P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y='
 LABEL1(1,3) = '0.0','0.5','1.0','1.5','2.0','2.5','3.0'
 LABEL1(8,3) = '3.5','4.0','4.5','5.0',
@@ -256,7 +256,7 @@ LABEL1(8,3) = '3.5','4.0','4.5','5.0',
 LABEL2(1,1) = 'CPT213  ','','','','','',''
 LABEL2(8,1) = '','','','','','',''
 LABEL2(15,1) = ''
-LABEL2(1,2) = 'P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y='  
+LABEL2(1,2) = 'P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y='
 LABEL2(8,2) = 'P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y=','P/R at Y='
 LABEL2(15,2) = 'P/R at Y='
 LABEL2(1,3) = '0.01','0.02','0.03','0.05','0.09','0.1','0.2'
@@ -333,7 +333,7 @@ RESUME,INF1
 /COM,R=EXTERNAL LOADING
 /COM,
 /COM,               	               |   TARGET   |   Mechanical APDL   |   RATIO
-/COM,		
+/COM,
 *VWRITE,LABEL1(1,1),LABEL1(1,2),LABEL1(1,3),VALUE1(1,1),VALUE1(1,2),VALUE1(1,3)
 (1X,A8,A11,A11,'  ',F10.4,'  ',F14.4,'   ',F15.3)
 /COM,
@@ -365,4 +365,3 @@ RESUME,INF2
 FINISH
 /DELETE,INF1
 /DELETE,INF2
-

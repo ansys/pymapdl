@@ -22,6 +22,7 @@ Getting started
 
    learning
    faq
+   troubleshoot
    versioning
 
 
@@ -31,6 +32,7 @@ Getting started
    :caption: Contribute
 
    contribution
+   ai_agents
    devcontainer
    make_container
    docker
@@ -39,6 +41,7 @@ Getting started
    using_julia
 
 
+For information on using AI agents for development, see :ref:`ai_agents`.
 
 To use PyMAPDL you must follow the next three steps:
 

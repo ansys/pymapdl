@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 /SHOW,JPEG
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /VERIFY,VM100
-/PREP7      
+/PREP7
 /TITLE, VM100, HEAT CONDUCTION ACROSS A CHIMNEY SECTION
 C***       PRINCIPLES OF HEAT TRANSFER, KREITH, 2ND. PRINTING, PAGE 102, EX. 3-4
 ANTYPE,STATIC                ! THERMAL ANALYSIS
@@ -49,7 +49,7 @@ SF,ALL,CONV,3,0              ! OUTER CONVECTION SURFACE
 NSEL,ALL
 FINISH
 /SOLU
-/OUT,vm100_SCRATCH    
+/OUT,vm100_SCRATCH
 SOLVE
 /OUT
 FINISH
@@ -68,7 +68,7 @@ PLNSOL,TEMP                  ! DISPLAY TEMPERATURE CONTOURS
 *VFILL,VALUE(10,1),DATA,29.6,11.7,4.7,775.2
 *DO,I,1,9,1
 *GET,TN,NODE,I,TEMP
-*VFILL,VALUE(I,2),DATA,TN 
+*VFILL,VALUE(I,2),DATA,TN
 *VFILL,VALUE(I,3),DATA,ABS(VALUE(I,2)/VALUE(I,1))
 *ENDDO
 *VFILL,VALUE(13,2),DATA,HEAT
@@ -82,7 +82,7 @@ PLNSOL,TEMP                  ! DISPLAY TEMPERATURE CONTOURS
 LABEL(1,1) = 'T,F (AT ','T,F (AT ','T,F (AT ','T,F (AT ','T,F (AT ','T,F (AT ','T,F (AT '
 LABEL(8,1) = 'T,F (AT ','T,F (AT ','T,F (AT ','T,F (AT ','T,F (AT ','q,   BTU'
 LABEL(1,2) = 'NODE 1) ','NODE 2) ','NODE 3) ','NODE 4) ','NODE 5) ','NODE 6) ','NODE 7) '
-LABEL(8,2) = 'NODE 8) ','NODE 9) ','NODE 11)','NODE 12)','NODE 15)','/hr     '  
+LABEL(8,2) = 'NODE 8) ','NODE 9) ','NODE 11)','NODE 12)','NODE 15)','/hr     '
 /COM
 /OUT,vm100,vrt
 /COM,------------------- VM100 RESULTS COMPARISON --------------
@@ -95,4 +95,3 @@ LABEL(8,2) = 'NODE 8) ','NODE 9) ','NODE 11)','NODE 12)','NODE 15)','/hr     '
 /OUT
 FINISH
 *LIST,vm100,vrt
-

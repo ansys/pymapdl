@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -35,8 +35,8 @@ ET,2,PLANE13,4,,1                   ! PLANE13, AZ,UX,UY DOF, AXISYMMETRIC OPTION
 MP,EX,2,10.76E10                    ! SOLENOID MODULUS OF ELASTICITY
 MP,NUXY,2,.35                       ! SOLENOID POISSON RATIO
 EMUNIT,MKS                          ! MKS UNITS
-MP,MURX,1,1                         ! RELATIVE PERMEABILITY=1.0 
-MP,MURX,2,1                         
+MP,MURX,1,1                         ! RELATIVE PERMEABILITY=1.0
+MP,MURX,2,1
 K,1
 K,2,1E-2
 K,3,2E-2
@@ -52,7 +52,7 @@ AATT,2,,2
 ASEL,ALL
 ESIZE,,1
 MSHK,2                    ! MAPPED AREA MESH IF POSSIBLE
-MSHA,0,2D                 ! USING QUADS 
+MSHA,0,2D                 ! USING QUADS
 AMESH,ALL
 ESEL,S,MAT,,2
 NSLE,S
@@ -77,7 +77,7 @@ SOLVE
 FINISH
 /POST1
 SET,1
-ESEL,S,MAT,,2                       ! SELECT SOLENOID NODES AND ELEMENTS 
+ESEL,S,MAT,,2                       ! SELECT SOLENOID NODES AND ELEMENTS
 NSLE
 /AXLAB,X,DISTANCE
 /AXLAB,Y,STRESS - 2-D MODEL
@@ -86,7 +86,7 @@ NSLE
 PATH,COIL1,2,,48                     ! DEFINE PATH WITH NAME = "COIL1"
 PPATH,1,2                           ! DEFINE PATH POINTS BY NODE
 PPATH,2,13
-PDEF,SZ,S,Z     
+PDEF,SZ,S,Z
 PDEF,BY,B,Y
 !/YRANGE,500,1500
 PLPATH,SZ                           ! DISPLAY CIRCUM STRESS THRU SOLENOID
@@ -137,4 +137,3 @@ RESUME,TABLE_1
 FINISH
 *LIST,vm172,vrt
 /DELETE,TABLE_1
-

@@ -68,7 +68,7 @@ If you are not changing these examples or the documentation general format, you 
 without building the gallery of examples using the following command:
 
 .. code:: console
-    
+
     (.venv) mapdl@machine:~/pymapdl$ cd doc
     (.venv) mapdl@machine:~/pymapdl/doc$ make html
     On codespaces. Using xvfb.
@@ -120,12 +120,12 @@ On the `PyMAPDL Issues <https://github.com/ansys/pymapdl/issues>`_ page,
 you can create issues to report bugs and request new features.
 On the `PyMAPDL Discussions <https://github.com/ansys/pymapdl/discussions>`_ page or
 the `Discussions <https://discuss.ansys.com/>`_ page on the Ansys Developer portal,
-you can post questions, share ideas, and get community feedback. 
+you can post questions, share ideas, and get community feedback.
 
 😊 Finally
 ==========
 
-We hope you enjoy this Codespace. 
+We hope you enjoy this Codespace.
 
 
 **Happy coding! 💻**

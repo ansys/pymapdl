@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class SpecialPurpose:
+
+class SpecialPurpose(CommandsBase):
 
     def kcalc(
         self,
@@ -91,6 +93,7 @@ class SpecialPurpose:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"KCALC,{kplan},{mat},{kcsym},{klocpr}"
         return self.run(command, **kwargs)
@@ -147,6 +150,7 @@ class SpecialPurpose:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"PLCRACK,{loc},{num}"
         return self.run(command, **kwargs)

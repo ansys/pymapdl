@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
 C***    STR. OF MATL., TIMOSHENKO, PART 2, 3RD ED., PAGE 531
 ANTYPE,STATIC
 ET,1,LINK180             ! SPAR ELEMENT
-SECTYPE,1,LINK   
+SECTYPE,1,LINK
 SECDATA,1
 MP,EX,1,30E6
 TB,CREEP,1,1,1,1         ! IMPLICIT CREEP WITH STRAIN HARDENING
@@ -35,14 +35,14 @@ TBDATA,1,4.8E-30,7       ! CREEP PROPERTIES
 N,1
 N,2,10
 E,1,2
-INIS,SET,DTYP,EPEL       ! APPLY INITIAL STRAIN 
+INIS,SET,DTYP,EPEL       ! APPLY INITIAL STRAIN
 INIS,DEFI,1,ALL,ALL,ALL,1/30000
 BFUNIF,TEMP,900        ! UNIFORM TEMPERATURE
 TIME,1000
 KBC,1
 D,ALL,ALL              ! FIX ALL DOFS
 FINISH
-/SOLU    
+/SOLU
 NSUBST,100,100,100
 RATE,ON
 OUTPR,BASIC,10         ! PRINT BASIC SOLUTION FOR EVERY 10TH SUBSTEP
@@ -69,11 +69,11 @@ LABEL(1,1) = 'SIG @ ','SIG @ ','SIG @ ','SIG @ ','SIG @ '
 LABEL(1,2) = '190 hr','420 hr','690 hr','880 hr','950 hr'
 *VFILL,VALUE(1,1),DATA,975,950,925,910,905
 *VFILL,VALUE(1,2),DATA,T190,T420,T690,T880,T950
-V1 = ABS(T190/975) 
-V2 = ABS(T420/950) 
+V1 = ABS(T190/975)
+V2 = ABS(T420/950)
 V3 = ABS(T690/925)
-V4 = ABS(T880/910) 
-V5 = ABS(T950/905) 
+V4 = ABS(T880/910)
+V5 = ABS(T950/905)
 *VFILL,VALUE(1,3),DATA,V1,V2,V3,V4,V5
 /COM
 /OUT,vm132,vrt
@@ -87,4 +87,3 @@ V5 = ABS(T950/905)
 /OUT
 FINISH
 *LIST,vm132,vrt
-

@@ -1,21 +1,27 @@
-.. _ref_constraint_equations_commands_api:
 
-********************
-Constraint equations
-********************
+.. _ref_constraint_equations:
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to define, modify, list, etc., constraint equations.
+ConstraintEquations
+===================
+
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.constraint_equations
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.constraint_equations.ConstraintEquations
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.ce
-   Mapdl.cecyc
-   Mapdl.cedele
-   Mapdl.ceintf
-   Mapdl.celist
-   Mapdl.cerig
-   Mapdl.cesgen
-   Mapdl.rbe3
+
+   ConstraintEquations.ce
+   ConstraintEquations.cecycms
+   ConstraintEquations.cedele
+   ConstraintEquations.ceims
+   ConstraintEquations.ceintf
+   ConstraintEquations.celist
+   ConstraintEquations.cerig
+   ConstraintEquations.cesel
+   ConstraintEquations.cesgen
+   ConstraintEquations.rbe3

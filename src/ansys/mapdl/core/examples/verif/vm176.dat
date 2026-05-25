@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -89,8 +89,8 @@ V,15,7,8,16,13,5,6,14            ! CREATE ALUMINUM VOLUME
 VSEL,S,VOLU,,3
 VATT,2                           ! ASSIGN MATERIAL ATTRIBUTES
 VSEL,ALL
-MSHK,1                           ! MAPPED VOLUME MESH 
-MSHA,0,3D                        ! USING HEX  
+MSHK,1                           ! MAPPED VOLUME MESH
+MSHA,0,3D                        ! USING HEX
 ESIZE,,RDIV
 SHPP,OFF                         ! TURN OFF SHAPE CHECKING TO ALLOW
 !                                  FOR WEDGE SHAPE MESH OF SOLIDS
@@ -115,12 +115,12 @@ NSEL,ALL
 FINISH
 /out,scratch
 /SOLU
-EQSLV,SPARSE			 ! USING SPARSE MATRIX SOLVER    
+EQSLV,SPARSE			 ! USING SPARSE MATRIX SOLVER
 ANTYPE,HARMIC                    ! PERFORM HARMONIC ANALYSIS
 OUTRES,ALL,ALL                   ! STORE EVERY SUBSTEP
 HARFRQ,5000,35000                ! SOLVE FOR FREQ=20KHZ AND 35KHZ
 NSUBST,2
-KBC,1                            ! STEP BOUNDARY CONDITIONS  
+KBC,1                            ! STEP BOUNDARY CONDITIONS
 EQSLV,ICCG                       ! ICCG SOLVER
 SOLVE
 HARFRQ,39000,45000               ! SOLVE FOR FREQ=42KHZ AND 45KHZ
@@ -224,8 +224,8 @@ V,15,7,8,16,13,5,6,14            ! CREATE ALUMINUM VOLUME
 VSEL,S,VOLU,,3
 VATT,2,,1                        ! ASSIGN MATERIAL ATTRIBUTES
 VSEL,ALL
-MSHK,1                           ! MAPPED VOLUME MESH 
-MSHA,0,3D                        ! USING HEX  
+MSHK,1                           ! MAPPED VOLUME MESH
+MSHA,0,3D                        ! USING HEX
 ESIZE,,RDIV
 SHPP,OFF                         ! TURN OFF SHAPE CHECKING TO ALLOW
 !                                  FOR WEDGE SHAPE MESH OF SOLIDS
@@ -255,7 +255,7 @@ ANTYPE,HARMIC                    ! PERFORM HARMONIC ANALYSIS
 OUTRES,ALL,ALL                   ! STORE EVERY SUBSTEP
 HARFRQ,5000,35000                ! SOLVE FOR FREQ=20KHZ AND 35KHZ
 NSUBST,2
-KBC,1                            ! STEP BOUNDARY CONDITIONS  
+KBC,1                            ! STEP BOUNDARY CONDITIONS
 SOLVE
 HARFRQ,39000,45000               ! SOLVE FOR FREQ=42KHZ AND 45KHZ
 SOLVE
@@ -293,4 +293,3 @@ LABEL(1,2) = '@20 kHz','@35 kHz','@42 kHz','@45 kHz','@50 kHz','@54 kHz'
 
 FINISH
 *LIST,vm176,vrt
-

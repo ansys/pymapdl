@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -50,8 +50,8 @@ NSEL,S,LOC,X,22.5
 DSYM,SYMM,X,0       ! SYMMETRY B.C.'S AT CENTERLINE
 NSEL,ALL
 FINISH
-/SOLU    
-SFE,ALL,2,PRES,0,10 
+/SOLU
+SFE,ALL,2,PRES,0,10
 OUTPR,BASIC,LAST
 /OUT,SCRATCH
 SOLVE                    ! ANALYSIS 1 : SMALL DEFLECTION SOLUTION
@@ -65,7 +65,7 @@ PRNSOL,S,COMP
 PRNSOL,S,PRIN
 NSEL,ALL
 FINISH
-/SOLU    
+/SOLU
 NLGEOM,ON                ! LARGE DEFLECTION OPTION
 SOLVE                    ! ANALYSIS 2 : LARGE DEFLECTION SOLUTION
 FINISH
@@ -128,7 +128,7 @@ FINISH
 /SOLU
 NSEL,S,LOC,Z,-0.375
 ESLN,S
-SFE,ALL,6,PRES,0,10 
+SFE,ALL,6,PRES,0,10
 ALLSEL,ALL
 /OUT,SCRATCH
 SOLVE                    ! ANALYSIS 1 : SMALL DEFLECTION SOLUTION
@@ -141,7 +141,7 @@ NSEL,R,LOC,X,22.5
 *GET,ND1,NODE,0,NUM,MAX  ! NODE AT SHELL-MID   X = 0.0, Y = 0.0, Z = -0.375/2
 NSEL,S,LOC,Z,-0.375
 NSEL,R,LOC,Y,0
-NSEL,R,LOC,X,22.5        
+NSEL,R,LOC,X,22.5
 *GET,ND2,NODE,0,NUM,MAX  ! NODE AT SHELL-BOT   X = 22.5, Y = 0.0, Z = -0.375
 NSEL,S,LOC,Z,-0.375      ! BOTTOM STRESSES ALONG LENGTH
 NSEL,R,LOC,Y,0
@@ -150,7 +150,7 @@ PRNSOL,S,COMP
 PRNSOL,S,PRIN
 NSEL,ALL
 FINISH
-/SOLU    
+/SOLU
 NLGEOM,ON                ! LARGE DEFLECTION OPTION
 SOLVE                    ! ANALYSIS 2 : LARGE DEFLECTION SOLUTION
 FINISH

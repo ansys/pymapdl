@@ -74,7 +74,7 @@ On the `PyMAPDL Issues <https://github.com/ansys/pymapdl/issues>`_ page,
 you can create issues to report bugs and request new features.
 On the `PyMAPDL Discussions <https://github.com/ansys/pymapdl/discussions>`_ page or
 the `Discussions <https://discuss.ansys.com/>`_ page on the Ansys Developer portal,
-you can post questions, share ideas, and get community feedback. 
+you can post questions, share ideas, and get community feedback.
 
 
 😊 Finally

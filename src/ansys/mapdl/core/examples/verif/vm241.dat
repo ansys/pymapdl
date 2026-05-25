@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@
 ! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ! SOFTWARE.
 
-/VERIFY,VM241 
+/VERIFY,VM241
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /TITLE, VM241, TEAM20: 3-D STATIC FORCE PROBLEM
 C*** USING SOLID237
@@ -29,7 +29,7 @@ JPGPRF,500,100,1
 /COM
 /COM
 /COM REFERENCE:
-/COM  N.TAKAHASHI,T.NAKATA,H.MORISHIGE,"SUMMARY OF RESULTS FOR 
+/COM  N.TAKAHASHI,T.NAKATA,H.MORISHIGE,"SUMMARY OF RESULTS FOR
 /COM, PROBLEM 20 (3-D STATIC FORCE PROBLEM)", COMPEL, VOL.14,1995,PG:57-75
 /NOPR
 SMT=10					     ! SMART SIZING MESHING PARAMETER
@@ -238,7 +238,7 @@ ND=0
 *ENDDO
                                  ! ALTERNATIVELY, ISSUE THE EMFT COMMAND
 
-FMAGZ=_FZSUM                      
+FMAGZ=_FZSUM
 FZ=4*FMAGZ                       ! SCALE FORCE FOR SYMMETRY
 
 ESEL,S,MAT,,2,3
@@ -476,7 +476,7 @@ ND=0
                                  ! ALTERNATIVELY, ISSUE THE EMFT COMMAND
 !EMFT                            ! MACRO TO SUM UP MAGNETIC FORCES
 
-FMAGZ=_FZSUM                      
+FMAGZ=_FZSUM
 FZ=4*FMAGZ                       ! SCALE FORCE FOR SYMMETRY
 
 ESEL,S,MAT,,2,3

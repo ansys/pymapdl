@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -149,7 +149,7 @@ FINISH
 /TITLE, VM200, VISCOELASTIC SANDWICH SEAL ANALYSIS
 /COM,    ----- 3-D ANALYSIS -----
 ET,1,SOLID186
-KEYOPT,1,2,1                        
+KEYOPT,1,2,1
 KEYOPT,1,6,1     !U-P formulation; 1= mixed, 0=U only
 *USE,MAC1                      ! EXECUTE MACRO FOR MATERIAL PROPERTIES
 /COM,   CREATE FINITE ELEMENT MODEL

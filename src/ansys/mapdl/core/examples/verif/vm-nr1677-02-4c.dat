@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +29,8 @@
 /com,            M.Hartzman, NUREG/CR--1677-Vol.2, August 1985.
 /com,
 /com, Elements used: PIPE289, ELBOW290, COMBIN14 and MASS21
-/com, 
-/com, 
+/com,
+/com,
 /com, Results :
 /com, The following results are outputted
 /com, 1. Frequencies obtained from modal solution.
@@ -200,7 +200,7 @@ keyopt,46,3,2
 
 et,47,mass21
 keyopt,47,3,2
-	    
+
 et,48,combin14,,1						! Spring Elements Types and Real constants
 keyopt,48,2,1						! X Degree of Freedom
 
@@ -316,8 +316,8 @@ keyopt,83,2,3						! Z Degree of Freedom
 /com,****************
 
 sectype,1,pipe
-secdata,OD_1,WTick_1,	
-					
+secdata,OD_1,WTick_1,
+
 sectype,2,pipe
 secdata,OD_2,WTick_2,
 
@@ -442,14 +442,14 @@ r,79, 0.5000e+6
 r,80, 0.5000e+6
 r,81, 0.1000e+9
 r,82, 0.1000e+9
-r,83, 0.1000e+9 
+r,83, 0.1000e+9
 
 /com,------------------------------------------------------------------------------------
 
 /com, Material Properties
 /com,*********************
 
-MP,EX,  1, YoungModulus					
+MP,EX,  1, YoungModulus
 MP,NUXY,1, Nu
 MP,GXY ,1, ShearModulus
 MP,ALPX,1, K
@@ -1154,7 +1154,7 @@ mat,1
 type,14
 secnum,3
 larc,7,302,301,           ! 128
-larc,302,304,303,         
+larc,302,304,303,
 larc,304,8,305,
 larc,9,312,311,
 larc,312,314,313,
@@ -1720,8 +1720,8 @@ nrotat,69
 nrotat,44000
 csys,0
 
-real,54  
-type,54  
+real,54
+type,54
 e,69,44000
 
 wplane,,nx(80),ny(80),nz(80),nx(52000),ny(52000),nz(52000),nx(78),ny(78),nz(78)
@@ -1730,8 +1730,8 @@ nrotat,80
 nrotat,52000
 csys,0
 
-real,56  
-type,56  
+real,56
+type,56
 e,80,52000
 
 wplane,,nx(87),ny(87),nz(87),nx(57000),ny(57000),nz(57000),nx(86),ny(86),nz(86)
@@ -1740,8 +1740,8 @@ nrotat,87
 nrotat,57000
 csys,0
 
-real,57  
-type,57  
+real,57
+type,57
 e,87,57000
 
 wplane,,nx(103),ny(103),nz(103),nx(68000),ny(68000),nz(68000),nx(101),ny(101),nz(101)
@@ -1750,8 +1750,8 @@ nrotat,103
 nrotat,68000
 csys,0
 
-real,59 
-type,59  
+real,59
+type,59
 e,103,68000
 
 wplane,,nx(112),ny(112),nz(112),nx(75000),ny(75000),nz(75000),nx(110),ny(110),nz(110)
@@ -1760,8 +1760,8 @@ nrotat,112
 nrotat,75000
 csys,0
 
-real,61  
-type,61  
+real,61
+type,61
 e,112,75000
 
 wplane,,nx(172),ny(172),nz(172),nx(118000),ny(118000),nz(118000),nx(171),ny(171),nz(171)
@@ -1770,8 +1770,8 @@ nrotat,172
 nrotat,118000
 csys,0
 
-real,69  
-type,69  
+real,69
+type,69
 e,172,118000
 
 wplane,,nx(186),ny(186),nz(186),nx(128000),ny(128000),nz(128000),nx(185),ny(185),nz(185)
@@ -1780,8 +1780,8 @@ nrotat,186
 nrotat,128000
 csys,0
 
-real,71  
-type,71  
+real,71
+type,71
 e,186,128000
 
 wplane,,nx(197),ny(197),nz(197),nx(136000),ny(136000),nz(136000),nx(195),ny(195),nz(195)
@@ -1790,8 +1790,8 @@ nrotat,197
 nrotat,136000
 csys,0
 
-real,73  
-type,73  
+real,73
+type,73
 e,197,136000
 
 wplane,,nx(206),ny(206),nz(206),nx(142000),ny(142000),nz(142000),nx(205),ny(205),nz(205)
@@ -1800,8 +1800,8 @@ nrotat,206
 nrotat,142000
 csys,0
 
-real,74  
-type,74  
+real,74
+type,74
 e,206,142000
 
 wplane,,nx(243),ny(243),nz(243),nx(166000),ny(166000),nz(166000),nx(234),ny(234),nz(234)
@@ -1810,8 +1810,8 @@ nrotat,243
 nrotat,166000
 csys,0
 
-real,78  
-type,78  
+real,78
+type,78
 e,243,166000
 
 /com,------------------------------------------------------------------------------------
@@ -1895,7 +1895,7 @@ finish
 
 /solution
 antype,modal					! Perform Modal Analysis
-modopt,lanb,maxm					
+modopt,lanb,maxm
 lumpm,on						! Use Lumped Mass Matrix Approximation
 mxpand,maxm,,,yes					! Expand solutions with Element Calculations turned ON
 solve
@@ -1923,8 +1923,8 @@ spopt,mprs,maxm					! Multi Point Response Spectrum
 
 gval = 386.0
 
-/com, 
-/com, Support Group 1, Spectrum 1X 
+/com,
+/com, Support Group 1, Spectrum 1X
 /com,******************************
 
 id = 1
@@ -1992,7 +1992,7 @@ spval,id,,  0.225,0.225
 /com,-----------------------------------------------------------------------------------
 
 /com,
-/com, Support Group 2, Spectrum 2X 
+/com, Support Group 2, Spectrum 2X
 /com,******************************
 
 id = 4
@@ -2042,7 +2042,7 @@ spval,id,,  0.3,0.3,0.25,0.09,0.09
 /com,-----------------------------------------------------------------------------------
 
 /com,
-/com, Support Group 3, Spectrum 3X 
+/com, Support Group 3, Spectrum 3X
 /com,******************************
 
 id = 7
@@ -2092,7 +2092,7 @@ spval,id,,  0.27,0.27,0.12,0.11
 /com,-----------------------------------------------------------------------------------
 
 /com,
-/com, Support Group 4, Spectrum 4X 
+/com, Support Group 4, Spectrum 4X
 /com,******************************
 
 id = 10
@@ -2194,34 +2194,34 @@ allsel,all,all
 /com,-----------------------------------------------------------------------------------
 
 ! -- Support Group 1 - spectrum 1 (Along X - Direction)
-sed,1,,,group1 
+sed,1,,,group1
 pfact,1
-sed,0,,,group1 
+sed,0,,,group1
 
 ! -- Support Group 1 - spectrum 2 (Along Y - Direction)
-sed,,1,,group1 
+sed,,1,,group1
 pfact,2
-sed,,0,,group1 
+sed,,0,,group1
 
 ! -- Support Group 1 - spectrum 3 (Along Z - Direction)
-sed,,,1,group1 
+sed,,,1,group1
 pfact,3
-sed,,,0,group1 
+sed,,,0,group1
 
 ! -- Support Group 2 - spectrum 4 (Along X - Direction)
-sed,1,,,group2 
+sed,1,,,group2
 pfact,4
-sed,0,,,group2 
+sed,0,,,group2
 
 ! -- Support Group 2 - spectrum 5 (Along Y - Direction)
-sed,,1,,group2 
+sed,,1,,group2
 pfact,5
-sed,,0,,group2 
+sed,,0,,group2
 
 ! -- Support Group 2 - spectrum 6 (Along Z - Direction)
-sed,,,1,group2 
+sed,,,1,group2
 pfact,6
-sed,,,0,group2 
+sed,,,0,group2
 
 ! -- Support Group 3 - spectrum 7 (Along X - Direction)
 sed,1,,,group3
@@ -2324,7 +2324,7 @@ pretab,pxi_1,vyi_1,vzi_1,txi_1,myi_1,mzi_1
 /com,  Node J
 /com,==========
 
-/com, Element #1 (Pipe289 element)  
+/com, Element #1 (Pipe289 element)
 /com,************************
 
 esel,s,elem,,1
@@ -2412,5 +2412,3 @@ prrsol
 
 finish
 /exit,nosave
-
-

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM90
-/PREP7                    
+/PREP7
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /TITLE, VM90, HARMONIC RESPONSE OF A TWO-MASS-SPRING SYSTEM
@@ -59,13 +59,13 @@ D,1,UX,,,4,3
 F,2,FX,200
 FINISH
 /OUT,SCRATCH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 /OUT
 /POST26
 FILE,,rst
-NSOL,2,2,U,X,2UX          ! STORE UX DISPLACEMENTS 
+NSOL,2,2,U,X,2UX          ! STORE UX DISPLACEMENTS
 NSOL,3,3,U,X,3UX
 PRVAR,2,3
 *GET,X1,VARI,2,RTIME,1.5

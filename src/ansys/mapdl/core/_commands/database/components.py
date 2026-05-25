@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Components:
+
+class Components(CommandsBase):
 
     def cm(self, cname: str = "", entity: str = "", kopt: str = "", **kwargs):
         r"""Groups geometry items into a component.
@@ -309,7 +311,7 @@ class Components:
           entity ID's.
         * :ref:`cmlist`, ``Name`` - List the specified component.
         * :ref:`cmlist`, ``Name``,EXPA - List specified component along with all underlying entity ID's.
-        * :ref:`cmlist`, EXPA,  ``Entity`` - List all selected components of specified entity type.
+        * :ref:`cmlist`, EXPA, ``Entity`` - List all selected components of specified entity type.
           For each component also list the underlying entity ID's.
         """
         command = f"CMLIST,{name},{key},{entity}"
@@ -511,6 +513,7 @@ class Components:
             * ``BLOCKED`` - Blocked format. This format allows faster reading of the file.
 
             * ``UNBLOCKED`` - Unblocked format.
+
         """
         command = f"CMWRITE,{fname},{ext},,,{fmat}"
         return self.run(command, **kwargs)

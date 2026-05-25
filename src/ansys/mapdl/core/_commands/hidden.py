@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,12 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
+
 """These commands may be run by PyMAPDL, but are not supported from a
 user-context.
 """
 
 
-class _Hidden:
+class _Hidden(CommandsBase):
     def _batch(self, lab="", **kwargs):
         """APDL Command: /BATCH
 

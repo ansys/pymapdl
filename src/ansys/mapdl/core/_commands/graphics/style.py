@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,8 +22,10 @@
 
 import warnings
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Style:
+
+class Style(CommandsBase):
 
     def cplane(self, key: int | str = "", **kwargs):
         r"""Specifies the cutting plane for section and capped displays.
@@ -378,7 +380,7 @@ class Style:
         .. _s-GLINE_notes:
 
         Determines the element outline style. Often used when node numbers are displayed to prevent element
-        lin  es from overwriting node numbers.
+        lin es from overwriting node numbers.
 
         Unless you are using an OpenGL or Starbase driver, the dashed element outline option ( :ref:`gline`,
         ``WN``,1) is not available in the following situations:

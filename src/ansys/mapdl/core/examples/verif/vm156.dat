@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,7 @@ IC,2,UY,-1                   ! INITIAL DISPLACEMENT AND VELOCITY
 KBC,1                        ! STEP LOADING
 SAVE
 FINISH
-/SOLU    
+/SOLU
 TRNOPT, , , , , ,HHT
 CNVTOL,F,1,1E-4              ! FORCE CONVERGENCE CRITERIA
 OUTRES,NSOL,1
@@ -66,7 +66,7 @@ LSSOLVE,1,2,1                ! READ IN 2 LOAD STEPS AND SOLVE
 FINISH
 /POST26
 TIMERANGE,.003,.18
-NSOL,2,2,U,Y,2UY   
+NSOL,2,2,U,Y,2UY
 /OUT,
 PRVAR,2		             ! PRINT DISPLACEMENTS
 *GET,PER,VARI,2,EXTREM,TMIN
@@ -93,7 +93,7 @@ RESUME,TABLE_1
 (1X,A8,A8,'   ',F10.4,'  ',F13.4,'   ',1F15.3)
 /COM,-----------------------------------------------------------
 /OUT
-/COM, 
+/COM,
 FINISH
 /DELETE,TABLE_1
 FINISH

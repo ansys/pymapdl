@@ -1,28 +1,31 @@
-.. _ref_database_commands_api:
 
-********
+.. _ref_database:
+
+
 Database
-********
+========
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to read model data into the database,
-list out the database, and control the numbering of entities in the
-database.
+.. currentmodule:: ansys.mapdl.core._commands.prep7.database
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.database.Database
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.aflist
-   Mapdl.cdread
-   Mapdl.cdwrite
-   Mapdl.cdopt
-   Mapdl.cecheck
-   Mapdl.check
-   Mapdl.igesout
-   Mapdl.mfimport
-   Mapdl.nooffset
-   Mapdl.numcmp
-   Mapdl.nummrg
-   Mapdl.numoff
-   Mapdl.numstr
+
+   Database.aflist
+   Database.cdopt
+   Database.cdread
+   Database.cdwrite
+   Database.cecheck
+   Database.check
+   Database.cncheck
+   Database.escheck
+   Database.igesout
+   Database.nooffset
+   Database.numcmp
+   Database.nummrg
+   Database.numoff
+   Database.numstr

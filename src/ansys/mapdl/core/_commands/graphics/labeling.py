@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Labeling:
+
+class Labeling(CommandsBase):
 
     def cformat(self, nfirst: str = "", nlast: str = "", **kwargs):
         r"""Controls the graphical display of alphanumeric character strings for parameters, components,
@@ -697,7 +699,7 @@ class Labeling:
 
         The Multi-legend mode provides a number of legend data item priority and placement options. These
         options are accessed via the GUI at Utility Menu> PlotCtrls> Window Controls> Window Options. The
-        :ref:`udoc` command provides command line o  ptions for this capability.
+        :ref:`udoc` command provides command line o ptions for this capability.
 
         This command is valid in any processor.
 

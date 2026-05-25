@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@
 /com, Reference: Piping benchmark problems,Dynamic analysis independant support
 /com,            motion response spectrum method, P. Bezler, M. Subudhi and
 /com,            M.Hartzman, NUREG/CR--1677-Vol.2, August 1985.
-/com, 
+/com,
 /com, Elements used: PIPE289, ELBOW290, COMBIN14 and MASS21
 /com,
 /com, Results :
@@ -50,7 +50,7 @@ ShearModulus1 = YoungModulus1/(2*(1+Nu))	! Shear Modulus
 WMass = 0.001056893				! Density
 WTick = 0.241					! Wall Thickness
 K = 0.71e-5
-						
+
 OD = 7.288						! Outer Diameter
 RADCUR = 36.30					! Radius of Curvature
 
@@ -87,16 +87,16 @@ r,6,1.518
 /com, Material Properties
 /com,*********************
 
-mp,ex,  1, YoungModulus1			
-mp,nuxy,1, Nu					
-mp,gxy ,1, ShearModulus1			
-mp,dens,1, WMass					
+mp,ex,  1, YoungModulus1
+mp,nuxy,1, Nu
+mp,gxy ,1, ShearModulus1
+mp,dens,1, WMass
 mp,kxx,1, K
 
-mp,ex,  2, YoungModulus1			
-mp,nuxy,2, Nu					
-mp,gxy ,2, ShearModulus1			
-mp,dens,2, WMass					
+mp,ex,  2, YoungModulus1
+mp,nuxy,2, Nu
+mp,gxy ,2, ShearModulus1
+mp,dens,2, WMass
 mp,kxx,2, K
 
 /com,------------------------------------------------------------------------------------
@@ -104,7 +104,7 @@ mp,kxx,2, K
 /com, Keypoints
 /com,**********
 
-k,1,0,0,0						
+k,1,0,0,0
 k,2,0,54.45,0
 k,3,0,108.9,0
 k,4,10.632,134.568,0
@@ -148,10 +148,10 @@ k,35,224.6,145.2,21
 /com,------------------------------------------------------------------------------------
 
 /com,
-/com, Modeling for Straight Pipe 
+/com, Modeling for Straight Pipe
 /com,**********************************
 
-l, 1, 2						
+l, 1, 2
 l, 2, 3
 l, 5, 6
 l, 6, 7
@@ -167,7 +167,7 @@ l,18,19
 l,20,21
 
 /com,
-/com, Modeling for Pipe Bend 
+/com, Modeling for Pipe Bend
 /com,************************
 
 larc, 3, 4, 2, RADCUR
@@ -339,7 +339,7 @@ finish
 
 /solution
 antype,modal				! Perform Modal Analysis
-modopt,lanb,maxm				
+modopt,lanb,maxm
 lumpm,on					! Use Lumped Mass Matrix Approximation
 mxpand,maxm,,,yes				! Expand Solutions with Element Calculations ON
 solve
@@ -407,7 +407,7 @@ spval,2,,0.205,0.205,0.19,0.19
 spunit,3,accg, gval
 
 spfrq,3,0.4,0.599880024,1.124985938,1.374948439,1.539882969,2.200220022,2.5
-spval,3,, 0.17,0.17,1.6,1.6,0.78,0.3,0.3  
+spval,3,, 0.17,0.17,1.6,1.6,0.78,0.3,0.3
 
 spfrq,3,3.599712023,4.500450045,5.500550055,8.051529791,14.30615165,21.97802198,25.97402597
 spval,3,,0.51,0.63,0.63,0.47,0.24,0.2,0.17
@@ -485,7 +485,7 @@ spval,8,,1.32,1.32,0.73,0.42,0.25,0.23,0.23
 spunit,9,accg, gval
 
 spfrq,9,0.4,0.603136309,0.736919676,0.934579439,1.099989,1.374948439,1.425110446
-spval,9,,0.224,0.535,0.535,0.498,0.25,0.195,0.125   
+spval,9,,0.224,0.535,0.535,0.498,0.25,0.195,0.125
 
 spfrq,9,1.619957881,2.66028199,3.599712023,5.399568035,6.600660066,8.802816901,14.02524544
 spval,9,,0.17,0.214,0.33,0.55,0.55,0.346,0.18
@@ -527,7 +527,7 @@ spval,11,,0.21
 spunit,12,accg, gval
 
 spfrq,12,0.4,0.765110941,0.934579439,1.374948439,1.665001665,2.035002035,4.319654428
-spval,12,,0.34,1.2,1.2,0.85,0.68,0.68,0.85  
+spval,12,,0.34,1.2,1.2,0.85,0.68,0.68,0.85
 
 spfrq,12,5.399568035,6.600660066,8.250825083,9.68054211,14.85884101,18.48428835,28.01120448
 spval,12,,1.02,1.02,0.73,0.42,0.36,0.26,0.21
@@ -709,7 +709,7 @@ pretab,pxi_1,vyi_1,vzi_1,txi_1,myi_1,mzi_1
 /com,  Node J
 /com,==========
 
-/com, Element #1 (Pipe289 element)  
+/com, Element #1 (Pipe289 element)
 /com,************************
 
 esel,s,elem,,1

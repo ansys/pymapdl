@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@ AMESH,1
 TIME,(3/3600)
 NSUBST,40
 AUTOTS,ON                  ! USE AUTOMATIC TIME STEPPING
-OUTPR,,LAST                
+OUTPR,,LAST
 BFUNIF,TEMP,500
 KBC,1                      ! STEP BOUNDARY CONDITIONS
 NSEL,S,LOC,X,(2/12)
@@ -55,7 +55,7 @@ NSEL,A,LOC,Y,(1/12)
 SF,ALL,CONV,240,100        ! CONVECTION SURFACE
 NSEL,ALL
 FINISH
-/SOLU    
+/SOLU
 EQSLV,JCG                  ! USE JACOBI CONJUGATE GRADIENT SOLVER
 /OUT,SCRATCH
 SOLVE
@@ -79,7 +79,7 @@ label(1,2) = 'e  1)   ','e  7)   ','e 13)   ','e  2)   '
 *vfill,value(1,3),data,abs(tn1/459),abs(tn7/151),abs(tn13/279),abs(tn2/202)
 /com
 
-/OUT,vm113,vrt 
+/OUT,vm113,vrt
 /com,-------------------(VM113)RESULTS COMPARISON---------------
 /com,
 /com,                 |   TARGET   |   Mechanical APDL   |   RATIO
@@ -87,8 +87,6 @@ label(1,2) = 'e  1)   ','e  7)   ','e 13)   ','e  2)   '
 *vwrite,label(1,1),label(1,2),value(1,1),value(1,2),value(1,3)
 (1x,a8,a8,'   ',f10.0,'  ',f12.0,'   ',1f15.2)
 /com,----------------------------------------------------------
-/OUT 
+/OUT
 FINISH
 *LIST,vm113,vrt
-
-

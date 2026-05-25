@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -36,6 +36,7 @@ reduce this effect using a simple geometry.
 
 First, start MAPDL as a service.
 """
+
 # sphinx_gallery_thumbnail_number = 3
 
 from ansys.mapdl.core import launch_mapdl

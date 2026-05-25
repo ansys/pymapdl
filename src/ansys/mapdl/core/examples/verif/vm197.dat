@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -159,7 +159,7 @@ PRCAMP,OFF,,RPM,,,,YES,YES              ! PLOT CAMPBELL DIAGRAM
 *GET,FREQU(4,2),CAMP,5,FREQ,42
 
 PRCAMP,ON,0,RPM,,,1,YES,YES
-                      
+
 *get,STABV1,CAMP,1,VSTA					! STABILITY THRESHOLD
 *get,STABV2,CAMP,2,VSTA					! STABILITY THRESHOLD
 

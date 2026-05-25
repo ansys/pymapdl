@@ -16,7 +16,7 @@ arguments. Here is an example that converts the ``mapdl.dat``
 file to a Python file named ``python.py``:
 
 .. code:: console
-    
+
     $ echo -ne "/prep7" > mapdl.dat
     $ pymapdl convert --file mapdl.dat --output python.py
 
@@ -65,7 +65,7 @@ the argument ``--only-code`` (``-oc``):
 
 For more information about possible options, use the help
 command (``pymapdl convert --help``) or the
-:func:`convert_script() <ansys.mapdl.core.convert_script>` 
+:func:`convert_script() <ansys.mapdl.core.convert_script>`
 function documentation.
 
 
@@ -74,7 +74,7 @@ Caveats
 
 These examples only show an automatic translation of a verification:
 file and not optimized code. Should it be necessary to pull
-parameters or arrays from ansys, use the 
+parameters or arrays from ansys, use the
 :func:`Mapdl.get_value() <ansys.mapdl.core.Mapdl.get_value>` function,
 which is quite similar to the MAPDL
 :func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` command shown here:
@@ -167,7 +167,7 @@ This example translates the verification example ``"vm1.dat"``,
 which can be done with:
 
 .. code:: pycon
-    
+
     >>> from ansys.mapdl import core as pymapdl
     >>> pymapdl.convert_script(examples.vmfiles["vm1"], "vm1.py")
 
@@ -179,7 +179,7 @@ which can be done with:
         Here is the MAPDL code:
 
         .. code:: apdl
-          
+
             /COM, 'ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150'
             /VERIFY, VM1
             /PREP7
@@ -234,7 +234,7 @@ which can be done with:
 
 
     .. tab-item:: PyMAPDL
-        
+
 
         .. code:: python
 
@@ -347,7 +347,7 @@ Convert the verification file with:
         Here is the input file from VM7:
 
         .. code:: apdl
-          
+
             /COM,'ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150'
             /VERIFY,VM7
             /PREP7
@@ -378,10 +378,10 @@ Convert the verification file with:
             TBDATA,1,55000,0
             N,1                                  ! GENERATE NODES AND ELEMENTS FOR PIPE288
             N,2,,,10
-            MAT,1  
+            MAT,1
             SECNUM,3                             ! STEEL (INSIDE) TUBE
             E,1,2
-            MAT,2  
+            MAT,2
             SECNUM,4                             ! ALUMINUM (OUTSIDE) TUBE
             E,1,2
             CSYS,1
@@ -431,7 +431,7 @@ Convert the verification file with:
             D,ALL,UZ,0                           ! CONSTRAIN BOTTOM NODES IN Z DIRECTION
             NSEL,ALL
             FINISH
-            /SOLU    
+            /SOLU
             OUTPR,BASIC,LAST                     ! PRINT BASIC SOLUTION AT END OF LOAD STEP
             /COM,' APPLY DISPLACEMENT LOADS TO ALL MODELS'
             *CREATE,DISP

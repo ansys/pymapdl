@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class Fatigue:
+
+class Fatigue(CommandsBase):
 
     def fe(
         self, nev: str = "", cycle: str = "", fact: str = "", title: str = "", **kwargs
@@ -59,6 +61,7 @@ class Fatigue:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"FE,{nev},{cycle},{fact},{title}"
         return self.run(command, **kwargs)
@@ -95,6 +98,7 @@ class Fatigue:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"FELIST,{nev1},{nev2},{ninc}"
         return self.run(command, **kwargs)
@@ -163,6 +167,7 @@ class Fatigue:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"FL,{nloc},{node},{scfx},{scfy},{scfz},{title}"
         return self.run(command, **kwargs)
@@ -199,6 +204,7 @@ class Fatigue:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"FLLIST,{nloc1},{nloc2},{ninc}"
         return self.run(command, **kwargs)
@@ -275,6 +281,7 @@ class Fatigue:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"FP,{stitm},{c1},{c2},{c3},{c4},{c5},{c6}"
         return self.run(command, **kwargs)
@@ -291,6 +298,7 @@ class Fatigue:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = "FPLIST"
         return self.run(command, **kwargs)
@@ -381,6 +389,7 @@ class Fatigue:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"FS,{node},{nev},{nlod},{stitm},{c1},{c2},{c3},{c4},{c5},{c6}"
         return self.run(command, **kwargs)
@@ -413,6 +422,7 @@ class Fatigue:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"FSDELE,{nloc},{nev},{nlod}"
         return self.run(command, **kwargs)
@@ -464,6 +474,7 @@ class Fatigue:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"FSLIST,{nloc1},{nloc2},{ninc},{nev},{nlod}"
         return self.run(command, **kwargs)
@@ -502,6 +513,7 @@ class Fatigue:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"FSNODE,{node},{nev},{nlod}"
         return self.run(command, **kwargs)
@@ -541,6 +553,7 @@ class Fatigue:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"FSPLOT,{nloc},{nev},{item}"
         return self.run(command, **kwargs)
@@ -568,6 +581,7 @@ class Fatigue:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"FTCALC,{nloc},{node}"
         return self.run(command, **kwargs)
@@ -602,6 +616,7 @@ class Fatigue:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"FTSIZE,{mxloc},{mxev},{mxlod}"
         return self.run(command, **kwargs)
@@ -633,6 +648,7 @@ class Fatigue:
         .. warning::
 
             This command is archived in the latest version of the software.
+
         """
         command = f"FTWRITE,{fname},{ext}"
         return self.run(command, **kwargs)

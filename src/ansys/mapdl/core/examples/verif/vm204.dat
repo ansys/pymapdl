@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -25,17 +25,17 @@
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /UNITS,BIN
-/PREP7 
-/TITLE, VM204, SOLID MODEL OF AN AXIAL BEARING 
+/PREP7
+/TITLE, VM204, SOLID MODEL OF AN AXIAL BEARING
 /COM    ANY BASIC GEOMETRY TEXT
 BASEWD=8.0                                      ! BASE WIDTH
-BASEDP=4.0                                      ! BASE DEPTH                   
+BASEDP=4.0                                      ! BASE DEPTH
 BASEHT=1.0                                      ! BASE HEIGHT
 BRNGWD=4.0                                      ! BEARING HOUSING WIDTH
 BRNGDP=3.0                                      ! BEARING HOUSING DEPTH
 BRNGHT=2.0                                      ! BEARING HOUSING HEIGHT
-GRVDIA=3.5                                      ! GROOVE DIAMETER 
-BRCKWD=2.0                                      ! BRACKET WIDTH   
+GRVDIA=3.5                                      ! GROOVE DIAMETER
+BRCKWD=2.0                                      ! BRACKET WIDTH
 BRCKDP=0.5                                      ! BRACKET DEPTH
 SPRTHT=BRNGHT/2                                 ! SUPPORT HOLE HEIGHT
 SPRTRAD=0.5                                     ! SUPPORT HOLE RADIUS
@@ -50,8 +50,8 @@ CYLIND,0,GRVDIA/2,0,BRNGWD
 VSBV,2,5                                        ! GROOVE
 LOCAL,11,1,BRNGWD/2+(BASEWD-BRNGWD)/4,SPRTHT    ! LOCAL COORD SYSTEM
 WPCSYS,1,11                                     ! MOVE WP TO LOCAL CS
-CYLIND,0,SPRTRAD,0,1                                        
-VSBV,3,2                                        ! SUPPORT HOLE    
+CYLIND,0,SPRTRAD,0,1
+VSBV,3,2                                        ! SUPPORT HOLE
 LOCAL,12,1,-BRNGWD/2-(BASEWD-BRNGWD)/4,SPRTHT
 WPCSYS,1,12
 CYLIND,0,SPRTRAD,0,1
@@ -69,8 +69,8 @@ K,100,(BASEWD-BRNGWD)/4,0,0
 K,101,(BASEWD-BRNGWD)/4,90,0
 K,102,(BASEWD-BRNGWD)/4,90,1
 K,103,(BASEWD-BRNGWD)/4,0,1
-A,100,101,102,103                               ! CUTTING AREA 
-VSBA,5,3,SEPO                                   ! ROUND  
+A,100,101,102,103                               ! CUTTING AREA
+VSBA,5,3,SEPO                                   ! ROUND
 VDELE,1,,,1
 CSYS,12
 K,105,(BASEWD-BRNGWD)/4,180,0
@@ -84,7 +84,7 @@ VGLUE,ALL                                       ! GLUE VOLUMES - CONTINUITY
 /TYPE,1,4
 /VIEW,1,1,2,3                                   ! VIEWING ANGLE
 /AUTO,1
-/TRIAD,OFF 
+/TRIAD,OFF
 VPLOT                                           ! DISPLAY VOLUMES
 /OUT,SCRATCH
 VSUM                                            ! CALCULATE TOTAL VOLUME

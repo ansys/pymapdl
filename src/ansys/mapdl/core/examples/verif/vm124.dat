@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ DENS = 1.94
 MP,DENS,1,DENS
 MP,MU,1,.025
 MP,VISC,1,2.36E-5
-TB,FCON              ! NON-LINEAR FRICTION FACTOR TABLE   
+TB,FCON              ! NON-LINEAR FRICTION FACTOR TABLE
 TBPT,,1e5,0.028
 TBPT,,3e5,0.028
 TBPT,,5e5,0.028
@@ -61,12 +61,12 @@ E,1,2
 EGEN,4,1,-1,,,,,1    ! INCREMENT REAL CONSTANTS
 ACEL,,ACELY          ! GRAVITY LOAD
 D,1,PRES,,,5,4       ! WATER SURFACE AND PIPE OUTLET AT ZERO PRESSURE
-CNVTOL,FLOW,1,.0001  ! SET CONVERGENCE VALUE FOR FLUID FLOW WITH 
+CNVTOL,FLOW,1,.0001  ! SET CONVERGENCE VALUE FOR FLUID FLOW WITH
                      !  TOLERANCE LIMIT
 OUTPR,,1             ! PRINT BASIC SOLUTION QUANTITIES OF SUBSTEP 1
 FINISH
 /SOLU
-/OUT,vm124_SCRATCH    
+/OUT,vm124_SCRATCH
 SOLVE
 /OUT
 FINISH
@@ -97,4 +97,3 @@ LABEL(1,2) = 'lb/sec '
 /OUT
 FINISH
 *LIST,vm124,vrt
-

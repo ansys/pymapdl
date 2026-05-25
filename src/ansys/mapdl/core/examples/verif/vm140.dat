@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,7 @@ D,2,UZ,,,25                ! CENTERLINE CONSTRAINTS AGAINST TORSION
 F,75,FY,100                ! APPLY AXIAL FORCE
 F,75,FZ,400                ! APPLY TORSION
 FINISH
-/SOLU         
+/SOLU
 OUTPR,BASIC,LAST           ! PRINTOUT SOLUTION
 /OUT,SCRATCH
 SOLVE
@@ -84,4 +84,3 @@ LABEL(1,2) = ' psi',' psi',' psi'
 /OUT
 FINISH
 *LIST,vm140,vrt
-

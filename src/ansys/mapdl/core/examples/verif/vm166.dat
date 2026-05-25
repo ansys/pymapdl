@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -53,25 +53,25 @@ L,8,11
 CSYS,0
 A,1,2,3,4                       ! DEFINE AREAS
 CSYS,1
-A,2,5,6,3 
+A,2,5,6,3
 *REPEAT,3,3,3,3,3
-A,3,6,7,4 
+A,3,6,7,4
 *REPEAT,3,3,3,3,3
-ASEL,S,AREA,,3,6,3 
-AATT,2 
+ASEL,S,AREA,,3,6,3
+AATT,2
 ASEL,ALL
-LESIZE,1,,,4,.5                 ! DEFINE LINE SEGMENTS AND DIVISIONS        
+LESIZE,1,,,4,.5                 ! DEFINE LINE SEGMENTS AND DIVISIONS
 *REPEAT,3,1
 LESIZE,4,,,5
 *REPEAT,3,1
 LESIZE,7,,,9,25
 *REPEAT,3,1
 MSHK,1                    ! MAPPED AREA MESH
-MSHA,0,2D                 ! USING QUADS 
-ESIZE,,6     
+MSHA,0,2D                 ! USING QUADS
+ESIZE,,6
 AMESH,ALL
 PI=3.141592654
-DTH=(7.5*PI)/180.               ! THETA INCREMENT 
+DTH=(7.5*PI)/180.               ! THETA INCREMENT
 *DO,THP,0,90,3.75               ! IMPOSE EXTERIOR NODAL POTENTIALS
   NSEL,S,LOC,X,.83,.85          ! SELECT NODES AT OUTERMOST RADIUS
   NSEL,R,LOC,Y,(THP-1.),(THP+1.)
@@ -86,7 +86,7 @@ D,ALL,AZ,0                      ! IMPOSE DIRICHLET BOUNDARY CONDITION
 NSEL,ALL
 HARFRQ,60                       ! SET FREQUENCY = 60 HZ
 FINI
-/SOLU    
+/SOLU
 SOLVE
 FINI
 /POST1
@@ -148,25 +148,25 @@ L,8,11
 CSYS,0
 A,1,2,3,4                       ! DEFINE AREAS
 CSYS,1
-A,2,5,6,3 
+A,2,5,6,3
 *REPEAT,3,3,3,3,3
-A,3,6,7,4 
+A,3,6,7,4
 *REPEAT,3,3,3,3,3
-ASEL,S,AREA,,3,6,3 
-AATT,2 
+ASEL,S,AREA,,3,6,3
+AATT,2
 ASEL,ALL
-LESIZE,1,,,4,.5                 ! DEFINE LINE SEGMENTS AND DIVISIONS        
+LESIZE,1,,,4,.5                 ! DEFINE LINE SEGMENTS AND DIVISIONS
 *REPEAT,3,1
 LESIZE,4,,,5
 *REPEAT,3,1
 LESIZE,7,,,9,25
 *REPEAT,3,1
 MSHK,1                          ! MAPPED AREA MESH
-MSHA,0,2D                       ! USING QUADS 
-ESIZE,,6     
+MSHA,0,2D                       ! USING QUADS
+ESIZE,,6
 AMESH,ALL
 PI=3.141592654
-DTH=(7.5*PI)/180.               ! THETA INCREMENT 
+DTH=(7.5*PI)/180.               ! THETA INCREMENT
 *DO,THP,0,90,3.75               ! IMPOSE EXTERIOR NODAL POTENTIALS
   NSEL,S,LOC,X,.83,.85          ! SELECT NODES AT OUTERMOST RADIUS
   NSEL,R,LOC,Y,(THP-1.),(THP+1.)
@@ -181,10 +181,10 @@ D,ALL,AZ,0                      ! IMPOSE DIRICHLET BOUNDARY CONDITION
 NSEL,ALL
 FINI
 
-/SOLU    
+/SOLU
 ANTYPE,HARMIC                   ! FULL HARMONIC ANALYSIS
 HARFRQ,60                       ! SET FREQUENCY = 60 HZ
-D,ALL,VOLT,0                    
+D,ALL,VOLT,0
 SOLVE
 FINI
 

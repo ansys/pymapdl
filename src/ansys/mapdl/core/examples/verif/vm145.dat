@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -59,7 +59,7 @@ F,2,FX,25,,16,2
 F,5,FY,50,,8
 F,13,FY,50,,16
 FINISH
-/SOLU    
+/SOLU
 /OUT,SCRATCH
 SOLVE
 /POST1

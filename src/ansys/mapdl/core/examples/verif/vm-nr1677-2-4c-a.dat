@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +29,8 @@
 /com,            motion response spectrum method, P. Bezler, M. Subudhi and
 /com,            M.Hartzman, NUREG/CR--1677-Vol.2, August 1985.
 /com,
-/com, 
-/com, 
+/com,
+/com,
 /com, Element used: Pipe16, Pipe18, Combin14 and Mass21
 /com,
 /com, Results comparsion:
@@ -188,7 +188,7 @@ et,46,mass21
 keyopt,46,3,2
 et,47,mass21
 keyopt,47,3,2
-	    
+
 et,48,combin14,,1						! Spring Elements Types and Real constants
 keyopt,48,2,1						! X Degree of Freedom
 et,49,combin14,,2
@@ -269,7 +269,7 @@ keyopt,83,2,3						! Z Degree of Freedom
 /com, Real Constants
 /com,****************
 
-r, 1,OD_1,WTick_1						
+r, 1,OD_1,WTick_1
 r, 2,OD_2,WTick_2
 r, 3,OD_3,WTick_3
 r, 4,OD_4,WTick_4
@@ -354,19 +354,19 @@ r,79, 0.5000e+6
 r,80, 0.5000e+6
 r,81, 0.1000e+9
 r,82, 0.1000e+9
-r,83, 0.1000e+9 
+r,83, 0.1000e+9
 
 /com,------------------------------------------------------------------------------------
 
 /com, Material Properties
 /com,*********************
 
-MP,EX,  1, YoungModulus					
+MP,EX,  1, YoungModulus
 MP,NUXY,1, Nu
 MP,GXY ,1, ShearModulus
 MP,ALPX,1, K
 
-MP,EX,  2, YoungModulus					
+MP,EX,  2, YoungModulus
 MP,NUXY,2, Nu
 MP,GXY ,2, ShearModulus
 MP,ALPX,2, K
@@ -723,7 +723,7 @@ e,32,34
 
 type,5
 real,5
-e,14,15 
+e,14,15
 e,32,33
 e,77,78
 
@@ -1180,8 +1180,8 @@ nrotat,43
 nrotat,44
 csys,0
 
-real,54  
-type,54  
+real,54
+type,54
 e,43,44
 
 wplane,,nx(51),ny(51),nz(51),nx(52),ny(52),nz(52),nx(49),ny(49),nz(49)
@@ -1190,8 +1190,8 @@ nrotat,51
 nrotat,52
 csys,0
 
-real,56  
-type,56  
+real,56
+type,56
 e,51,52
 
 wplane,,nx(56),ny(56),nz(56),nx(57),ny(57),nz(57),nx(55),ny(55),nz(55)
@@ -1200,8 +1200,8 @@ nrotat,56
 nrotat,57
 csys,0
 
-real,57  
-type,57  
+real,57
+type,57
 e,56,57
 
 wplane,,nx(67),ny(67),nz(67),nx(68),ny(68),nz(68),nx(66),ny(66),nz(66)
@@ -1210,8 +1210,8 @@ nrotat,67
 nrotat,68
 csys,0
 
-real,59 
-type,59  
+real,59
+type,59
 e,67,68
 
 wplane,,nx(74),ny(74),nz(74),nx(75),ny(75),nz(75),nx(72),ny(72),nz(72)
@@ -1220,8 +1220,8 @@ nrotat,74
 nrotat,75
 csys,0
 
-real,61  
-type,61  
+real,61
+type,61
 e,74,75
 
 wplane,,nx(117),ny(117),nz(117),nx(118),ny(118),nz(118),nx(116),ny(116),nz(116)
@@ -1230,8 +1230,8 @@ nrotat,117
 nrotat,118
 csys,0
 
-real,69  
-type,69  
+real,69
+type,69
 e,117,118
 
 wplane,,nx(127),ny(127),nz(127),nx(128),ny(128),nz(128),nx(126),ny(126),nz(126)
@@ -1240,8 +1240,8 @@ nrotat,127
 nrotat,128
 csys,0
 
-real,71  
-type,71  
+real,71
+type,71
 e,127,128
 
 wplane,,nx(135),ny(135),nz(135),nx(136),ny(136),nz(136),nx(133),ny(133),nz(133)
@@ -1250,8 +1250,8 @@ nrotat,135
 nrotat,136
 csys,0
 
-real,73  
-type,73  
+real,73
+type,73
 e,135,136
 
 wplane,,nx(141),ny(141),nz(141),nx(142),ny(142),nz(142),nx(140),ny(140),nz(140)
@@ -1260,8 +1260,8 @@ nrotat,141
 nrotat,142
 csys,0
 
-real,74  
-type,74  
+real,74
+type,74
 e,141,142
 
 wplane,,nx(165),ny(165),nz(165),nx(166),ny(166),nz(166),nx(164),ny(164),nz(164)
@@ -1270,8 +1270,8 @@ nrotat,165
 nrotat,166
 csys,0
 
-real,78  
-type,78  
+real,78
+type,78
 e,165,166
 
 /com,------------------------------------------------------------------------------------
@@ -1329,7 +1329,7 @@ finish
 
 /solution
 antype,modal					! Perform Modal Analysis
-modopt,lanb,maxm					
+modopt,lanb,maxm
 lumpm,on						! Use Lumped Mass Matrix Approximation
 mxpand,maxm,,,yes					! Expand solutions with Element Calculations turned ON
 solve
@@ -1377,8 +1377,8 @@ spopt,mprs,maxm					! Multi Point Response Spectrum
 
 gval = 386.0
 
-/com, 
-/com, Support Group 1, Spectrum 1X 
+/com,
+/com, Support Group 1, Spectrum 1X
 /com,******************************
 
 id = 1
@@ -1446,7 +1446,7 @@ spval,id,,  0.225,0.225
 /com,-----------------------------------------------------------------------------------
 
 /com,
-/com, Support Group 2, Spectrum 2X 
+/com, Support Group 2, Spectrum 2X
 /com,******************************
 
 id = 4
@@ -1496,7 +1496,7 @@ spval,id,,  0.3,0.3,0.25,0.09,0.09
 /com,-----------------------------------------------------------------------------------
 
 /com,
-/com, Support Group 3, Spectrum 3X 
+/com, Support Group 3, Spectrum 3X
 /com,******************************
 
 id = 7
@@ -1546,7 +1546,7 @@ spval,id,,  0.27,0.27,0.12,0.11
 /com,-----------------------------------------------------------------------------------
 
 /com,
-/com, Support Group 4, Spectrum 4X 
+/com, Support Group 4, Spectrum 4X
 /com,******************************
 
 id = 10
@@ -1649,34 +1649,34 @@ allsel,all,all
 /com,-----------------------------------------------------------------------------------
 
 ! -- Support Group 1 - spectrum 1 (Along X - Direction)
-sed,1,,,group1 
+sed,1,,,group1
 pfact,1
-sed,0,,,group1 
+sed,0,,,group1
 
 ! -- Support Group 1 - spectrum 2 (Along Y - Direction)
-sed,,1,,group1 
+sed,,1,,group1
 pfact,2
-sed,,0,,group1 
+sed,,0,,group1
 
 ! -- Support Group 1 - spectrum 3 (Along Z - Direction)
-sed,,,1,group1 
+sed,,,1,group1
 pfact,3
-sed,,,0,group1 
+sed,,,0,group1
 
 ! -- Support Group 2 - spectrum 4 (Along X - Direction)
-sed,1,,,group2 
+sed,1,,,group2
 pfact,4
-sed,0,,,group2 
+sed,0,,,group2
 
 ! -- Support Group 2 - spectrum 5 (Along Y - Direction)
-sed,,1,,group2 
+sed,,1,,group2
 pfact,5
-sed,,0,,group2 
+sed,,0,,group2
 
 ! -- Support Group 2 - spectrum 6 (Along Z - Direction)
-sed,,,1,group2 
+sed,,,1,group2
 pfact,6
-sed,,,0,group2 
+sed,,,0,group2
 
 ! -- Support Group 3 - spectrum 7 (Along X - Direction)
 sed,1,,,group3
@@ -2098,7 +2098,7 @@ resume,table_1
 
 /com,
 /com, ===========================================
-/com,  COMPARISON OF MODAL FREQUENCY 
+/com,  COMPARISON OF MODAL FREQUENCY
 /com,      WITH EXPECTED RESULTS
 /com, ===========================================
 /com,
@@ -2181,7 +2181,7 @@ resume,table_3
 /com,--------------------------------------------------------
 /com,	Note: Element Forces and Moments for some elements
 /com,       along Y & Z directions are flipped between Mechanical APDL
-/com,		and NRC results 
+/com,		and NRC results
 /com,--------------------------------------------------------
 
 /com,		Result | Expected | Mechanical APDL |  Ratio

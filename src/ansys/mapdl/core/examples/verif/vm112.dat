@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -42,10 +42,10 @@ E,2,22,1,1
 E,3,23,22,2
 E,4,24,23,3,14
 CP,1,TEMP,2,22                  ! COUPLING TO ENSURE CIRCUMFERENTIAL SYMMETRY
-CPSGEN,2,1,1             
+CPSGEN,2,1,1
 CP,3,TEMP,4,14,24
 AUTOTS,ON                       ! USE AUTOMATIC TIME STEPPING
-OUTPR,BASIC,LAST                
+OUTPR,BASIC,LAST
 TIME,6
 DELTIM,0.15
 BFUNIF,TEMP,65
@@ -54,7 +54,7 @@ NSEL,S,LOC,X,(1/6)
 SF,ALL,CONV,2,25                ! CONVECTION ON ELEMENT SURFACE
 NSEL,ALL
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 FINISH
 /POST1
@@ -79,4 +79,3 @@ LABEL(1,2) = ', F     '
 /OUT
 FINISH
 *LIST,vm112,vrt
-

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class SetUp:
+
+class SetUp(CommandsBase):
 
     def ansol(
         self,
@@ -317,6 +319,7 @@ class SetUp:
              - The ``n`` th state variable.
            * - FLDUF0 ``n``
              - The ``n`` th user-defined field variable.
+
         """
         command = (
             f"ANSOL,{nvar},{node},{item},{comp},{name},{mat},{real},{ename},{datakey}"
@@ -1003,6 +1006,7 @@ class SetUp:
              - The ``n`` th state variable.
            * - FLDUF0 ``n``
              - The ``n`` th user-defined field variable.
+
         """
         command = f"ESOL,{nvar},{elem},{node},{item},{comp},{name}"
         return self.run(command, **kwargs)
@@ -1051,7 +1055,7 @@ class SetUp:
         This command stores the results (new position of the ending plane after deformation) for generalized
         plane strain. All outputs are in the global Cartesian coordinate system. For more information about
         the generalized plane strain feature, see Generalized Plane Strain Option of Current-Technology
-        Solid Elements in the  `Element Reference
+        Solid Elements in the `Element Reference
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_.
         """
         command = f"GSSOL,{nvar},{item},{comp},{name}"
@@ -1134,6 +1138,7 @@ class SetUp:
            * - RM
              - X, Y, Z
              - Relative reaction moments in the local x, y, or z direction.
+
         """
         command = f"JSOL,{nvar},{elem},{item},{comp},{name}"
         return self.run(command, **kwargs)

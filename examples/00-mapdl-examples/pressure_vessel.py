@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -35,6 +35,7 @@ Also shown here:
 - Notes regarding FULL vs. POWER graphics when using PRNSOL.
 
 """
+
 import numpy as np
 
 from ansys.mapdl.core import launch_mapdl

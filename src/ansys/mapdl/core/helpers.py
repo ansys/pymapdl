@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,7 +22,6 @@
 
 """Module for helper functions"""
 
-from functools import namedtuple
 import importlib.util
 import os
 import sys
@@ -31,9 +30,8 @@ from warnings import warn
 from ansys.mapdl.core import LOG
 
 
-def is_installed(package_name: str) -> bool:
+def _is_installed(package_name: str) -> bool:
     """Check if a package is installed"""
-    package_name = package_name.replace("-", ".")
     try:
         package_spec = importlib.util.find_spec(package_name)
         if package_spec is None:  # pragma: no cover
@@ -45,7 +43,19 @@ def is_installed(package_name: str) -> bool:
     return True
 
 
-def get_python_version() -> namedtuple:
+def is_installed(package_name: str) -> bool:
+    """Check if a package is installed, and log the result."""
+    if _is_installed(package_name):
+        return True
+    elif _is_installed(package_name.replace("-", "_")):
+        return True
+    elif _is_installed(package_name.replace("-", ".")):
+        return True
+    else:
+        return False
+
+
+def get_python_version():  # type: ignore[misc]
     return sys.version_info
 
 
@@ -95,8 +105,4 @@ def run_first_time() -> None:
 
 def run_every_import() -> None:
     # Run every time we import PyMAPDL
-    from ansys.mapdl.core import RUNNING_TESTS
-
-    # In case we want to do something specific for testing.
-    if RUNNING_TESTS:  # pragma: no cover
-        LOG.debug("Running tests on Pytest")
+    pass

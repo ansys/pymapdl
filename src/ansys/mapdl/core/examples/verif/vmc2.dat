@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -112,22 +112,22 @@
 
 
   !TO SUPPLY THE TITLES TO THE IMAGES
-  
+
 	*IF,I,LE,3,THEN
-		/TITLE,VMC2 - TRIANGLE MESH: (N1 = %ARG1%, N2 = %ARG2%)	
+		/TITLE,VMC2 - TRIANGLE MESH: (N1 = %ARG1%, N2 = %ARG2%)
 	*ELSEIF,I,GT,3,AND,I,LE,6,THEN
 		/TITLE,VMC2 - QUADRILATERAL MESH: (N1 = %ARG1%, N2 = %ARG2%)
 	*ELSEIF,I,GT,6,AND,I,LE,9,THEN
 		/TITLE,VMC2 - TRIANGLE MESH: (N1 = %ARG1%, N2 = %ARG2%)
 	*ELSEIF,I,GT,9,THEN
 		/TITLE,VMC2 - QUADRILATERAL MESH: (N1 = %ARG1%, N2 = %ARG2%)
-	*ENDIF	
-  
-  
-  
-  
-  
-  
+	*ENDIF
+
+
+
+
+
+
 
 
     ET,1,ETYP,,,3                  ! DEFINE ELEMENT TYPE (PARAMETRICALLY)

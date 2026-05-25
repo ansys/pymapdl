@@ -7,14 +7,14 @@
 	<rect x="261" y="359" fill="#FFFFFF" width="90" height="75"/>
 	<rect x="279.6" y="367.5" fill="#BAAFAB" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="27" height="27.6"/>
 	<rect x="306" y="367.5" fill="#BAAFAB" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="27" height="27.6"/>
-	<polygon fill="#BAAFAB" stroke="#000000" stroke-width="2" stroke-miterlimit="10" points="279.6,394.4 270.6,423.8 297,423.8 
+	<polygon fill="#BAAFAB" stroke="#000000" stroke-width="2" stroke-miterlimit="10" points="279.6,394.4 270.6,423.8 297,423.8
 		306,394.4 	"/>
-	<polygon fill="#BAAFAB" stroke="#000000" stroke-width="2" stroke-miterlimit="10" points="332.3,394.4 341.9,421.4 315.6,421.4 
+	<polygon fill="#BAAFAB" stroke="#000000" stroke-width="2" stroke-miterlimit="10" points="332.3,394.4 341.9,421.4 315.6,421.4
 		306,394.4 	"/>
 	<polygon fill="#363639" stroke="#000000" stroke-miterlimit="10" points="288,407.3 288,409.1 294.4,409.1 294.4,407.3 	"/>
 	<polygon fill="#363639" stroke="#000000" stroke-miterlimit="10" points="299.5,407.3 299.5,409.1 306,409.1 306,407.3 	"/>
 	<polygon fill="#363639" stroke="#000000" stroke-miterlimit="10" points="310.5,407.3 310.5,409.1 316.9,409.1 316.9,407.3 	"/>
-	<polygon fill="#ED1C24" stroke="#000000" stroke-width="2" stroke-miterlimit="10" points="322,407.3 322,409.1 324.6,409.1 
+	<polygon fill="#ED1C24" stroke="#000000" stroke-width="2" stroke-miterlimit="10" points="322,407.3 322,409.1 324.6,409.1
 		324.6,407.3 	"/>
 	<path fill="#F05429" stroke="#E6572F" stroke-width="2" stroke-miterlimit="10" d="M293,408.5L293,408.5c0,2.3-2,4.2-4.4,4.2
 		s-4.4-1.9-4.4-4.2s2-4.2,4.4-4.2S293,406.2,293,408.5L293,408.5z"/>

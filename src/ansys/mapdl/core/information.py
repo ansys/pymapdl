@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,7 +22,7 @@
 
 from functools import wraps
 import re
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 import weakref
 
 from ansys.mapdl import core as pymapdl
@@ -59,6 +59,115 @@ def update_information_first(update: bool = False) -> Callable[[Callable], Calla
         return wrapper
 
     return decorator
+
+
+class UnitsDict(dict):
+    """
+    A dictionary-like class for storing unit information with case-insensitive access.
+
+    This class stores unit mappings and supports access by both full names (e.g., "LENGTH")
+    and short names (e.g., "l"). It also provides pretty printing via __repr__ and __str__
+    that returns the original formatted string.
+
+    Parameters
+    ----------
+    units_string : str
+        The raw units string from MAPDL output.
+
+    Examples
+    --------
+    >>> units = UnitsDict(units_string)
+    >>> units['CHARGE']
+    'coulomb'
+    >>> units['Q']
+    'coulomb'
+    >>> units['length']
+    'meter'
+    >>> print(units)
+    MKS UNITS SPECIFIED FOR INTERNAL
+      LENGTH        (l)  = METER (M)
+      ...
+    """
+
+    def __init__(self, units_string: str):
+        super().__init__()
+        self._original_string = units_string
+        self._parse_units(units_string)
+
+    def _parse_units(self, units_string: str):
+        """Parse the units string and populate the dictionary."""
+        lines = units_string.splitlines()
+
+        for line in lines:
+            line = line.strip()
+            if not line or "UNITS SPECIFIED" in line:
+                continue
+
+            # Match lines like "LENGTH        (l)  = METER (M)"
+            # or "TOFFSET            = 273.0"
+            # Pattern explanation:
+            # - [A-Z](?:[A-Z\s]*)? matches one uppercase letter, optionally followed by
+            #   zero or more uppercase letters or spaces
+            # - (?:\(([a-zA-Z])\))? optionally matches the short name in parentheses
+            # - \s*=\s* matches equals sign with optional whitespace
+            # - (.+) matches the value
+            match = re.match(
+                r"^([A-Z](?:[A-Z\s]*)?)\s*(?:\(([a-zA-Z])\))?\s*=\s*(.+)$", line
+            )
+
+            if match:
+                full_name = match.group(1).strip()
+                short_name = match.group(2)
+                value = match.group(3).strip()
+
+                # Extract the first word before parentheses as the base unit value
+                # For "METER (M)", extract "METER"
+                # For numeric values like "273.0", keep them as-is
+                unit_match = re.match(r"^([A-Z]+)", value)
+                if unit_match:
+                    base_value = unit_match.group(1).lower()
+                else:
+                    # For numeric values or other formats
+                    base_value = (
+                        value.split()[0].lower() if value.split() else value.lower()
+                    )
+
+                # Store with full name (case-insensitive key)
+                full_name_key = full_name.lower()
+                self[full_name_key] = base_value
+
+                # Store with short name if available (only if not already set)
+                # Use super().__contains__() to check the actual dict without case conversion
+                if short_name:
+                    short_name_key = short_name.lower()
+                    if not super().__contains__(short_name_key):
+                        self[short_name_key] = base_value
+
+    def __getitem__(self, key):
+        """Get item with case-insensitive key."""
+        if not isinstance(key, str):
+            raise TypeError(f"Key must be a string, not {type(key).__name__}")
+        return super().__getitem__(key.lower())
+
+    def __contains__(self, key):
+        """Check if key exists (case-insensitive)."""
+        if not isinstance(key, str):
+            return False
+        return super().__contains__(key.lower())
+
+    def get(self, key, default=None):
+        """Get item with case-insensitive key and default value."""
+        if not isinstance(key, str):
+            return default
+        return super().get(key.lower(), default)
+
+    def __repr__(self):
+        """Return the original formatted string."""
+        return self._original_string
+
+    def __str__(self):
+        """Return the original formatted string."""
+        return self._original_string
 
 
 class Information:
@@ -400,15 +509,32 @@ class Information:
 
     @property
     @update_information_first(True)
-    def units(self) -> str:
+    def units(self) -> UnitsDict:
         """Retrieve the units from the MAPDL instance.
 
         Returns
         -------
-        str
-            The units from the MAPDL instance.
+        UnitsDict
+            A dictionary-like object containing the units from the MAPDL instance.
+            Supports both full names (e.g., 'LENGTH') and short names (e.g., 'l')
+            with case-insensitive access. Printing the object returns the original
+            formatted string.
+
+        Examples
+        --------
+        >>> mapdl.info.units['CHARGE']
+        'coulomb'
+        >>> mapdl.info.units['Q']
+        'coulomb'
+        >>> mapdl.info.units['length']
+        'meter'
+        >>> print(mapdl.info.units)
+        MKS UNITS SPECIFIED FOR INTERNAL
+          LENGTH        (l)  = METER (M)
+          MASS          (M)  = KILOGRAM (KG)
+          ...
         """
-        return self._get_units()
+        return UnitsDict(self._get_units())
 
     @property
     @update_information_first(True)
@@ -662,3 +788,131 @@ class Information:
         init_ = "L O A D   S T E P   O P T I O N S"
         end_string = None
         return self._get_between(init_, end_string)
+
+
+def get_mapdl_info(mapdl: "Mapdl") -> dict[str, Any]:
+    """Return diagnostic information from a connected MAPDL instance.
+
+    Collects connection details, version/product information, model geometry,
+    mesh statistics, and post-processing state from a live MAPDL instance and
+    returns them as a nested dictionary.  Each top-level section is collected
+    independently so a failure in one section never blocks the others.
+
+    This is the canonical implementation shared by the ``pymapdl check`` CLI
+    command and external consumers such as the ``pymapdl-mcp`` package.
+
+    Parameters
+    ----------
+    mapdl : Mapdl
+        A connected MAPDL gRPC instance.
+
+    Returns
+    -------
+    dict[str, Any]
+        Nested dictionary with the following top-level keys:
+
+        ``"connection"``
+            Basic connection details: ``name``, ``ip``, ``port``,
+            ``version``, ``directory``, ``status``, ``is_local``,
+            ``jobname``, ``platform``.
+        ``"information"``
+            Product and version info extracted from ``mapdl.info``:
+            ``product``, ``mapdl_version``, ``mapdl_version_build``,
+            ``mapdl_version_update``, ``pymapdl_version``, ``title``,
+            ``units``.
+        ``"geometry"``
+            Current model geometry entity counts: ``n_keypoint``,
+            ``n_line``, ``n_area``, ``n_volu``.
+        ``"mesh"``
+            Current mesh statistics: ``n_node``, ``n_elem``.
+        ``"post_processing"``
+            Post-processing state: ``available``, ``nsets``.
+
+        If a section cannot be retrieved, it will contain an ``"error"``
+        key with the exception message instead of the normal fields.
+
+    Examples
+    --------
+    >>> from ansys.mapdl.core import get_mapdl_info, launch_mapdl
+    >>> mapdl = launch_mapdl()
+    >>> info = get_mapdl_info(mapdl)
+    >>> info["connection"]["status"]
+    'Running'
+    >>> info["information"]["product"]
+    'Ansys Mechanical Enterprise'
+    >>> info["mesh"]["n_node"]
+    0
+    """
+    info: dict[str, Any] = {}
+
+    # ------------------------------------------------------------------ #
+    # Connection                                                          #
+    # ------------------------------------------------------------------ #
+    connection: dict[str, Any] = {}
+    try:
+        connection["name"] = mapdl.name
+        connection["ip"] = mapdl.ip
+        connection["port"] = mapdl.port
+        connection["version"] = mapdl.version
+        connection["directory"] = str(mapdl.directory)
+        connection["status"] = mapdl.check_status.value.title()
+        connection["is_local"] = mapdl.is_local
+        connection["jobname"] = mapdl.jobname
+        connection["platform"] = mapdl.platform
+    except Exception as e:
+        connection["error"] = str(e)
+    info["connection"] = connection
+
+    # ------------------------------------------------------------------ #
+    # Information (product / version)                                     #
+    # ------------------------------------------------------------------ #
+    information: dict[str, Any] = {}
+    try:
+        information["product"] = mapdl.info.product
+        information["mapdl_version"] = mapdl.info.mapdl_version_release
+        information["mapdl_version_build"] = mapdl.info.mapdl_version_build
+        information["mapdl_version_update"] = mapdl.info.mapdl_version_update
+        information["pymapdl_version"] = mapdl.info.pymapdl_version
+        information["title"] = mapdl.info.title or ""
+        information["units"] = dict(mapdl.info.units)
+    except Exception as e:
+        information["error"] = str(e)
+    info["information"] = information
+
+    # ------------------------------------------------------------------ #
+    # Geometry                                                            #
+    # ------------------------------------------------------------------ #
+    geometry: dict[str, Any] = {}
+    try:
+        geometry["n_keypoint"] = mapdl.geometry.n_keypoint
+        geometry["n_line"] = mapdl.geometry.n_line
+        geometry["n_area"] = mapdl.geometry.n_area
+        geometry["n_volu"] = mapdl.geometry.n_volu
+    except Exception as e:
+        geometry["error"] = str(e)
+    info["geometry"] = geometry
+
+    # ------------------------------------------------------------------ #
+    # Mesh                                                                #
+    # ------------------------------------------------------------------ #
+    mesh: dict[str, Any] = {}
+    try:
+        mesh["n_node"] = mapdl.mesh.n_node
+        mesh["n_elem"] = mapdl.mesh.n_elem
+    except Exception as e:
+        mesh["error"] = str(e)
+    info["mesh"] = mesh
+
+    # ------------------------------------------------------------------ #
+    # Post-processing                                                     #
+    # ------------------------------------------------------------------ #
+    post_processing: dict[str, Any] = {}
+    try:
+        post_processing["available"] = hasattr(mapdl, "post_processing")
+        if post_processing["available"]:
+            post_processing["nsets"] = mapdl.post_processing.nsets
+    except Exception as e:
+        post_processing["error"] = str(e)
+    info["post_processing"] = post_processing
+
+    return info

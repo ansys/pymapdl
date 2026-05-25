@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class PathOperations:
+
+class PathOperations(CommandsBase):
 
     def fssect(
         self,
@@ -329,7 +331,7 @@ class PathOperations:
         Parameters
         ----------
         oper : str
-            Type of operation to be performed. See :ref:`PCALC_notes` below for specific descriptions of each operation:
+            Type of operation to be performed. See `Notes <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_PCALC.html#eqb7ec3fe5-6192-4739-ab47-6047369573ed>`_ below for specific descriptions of each operation:
 
             * ``ADD`` - Adds two existing path items.
 
@@ -452,6 +454,7 @@ class PathOperations:
         ``LabR`` = FACT2 x ``cos`` -1(FACT1 x Lab1) + CONST
 
         ``LabR`` = FACT2 x ``log(FACT1 x Lab1) + CONST``
+
         """
         command = f"PCALC,{oper},{labr},{lab1},{lab2},{fact1},{fact2},{const}"
         return self.run(command, **kwargs)
@@ -994,6 +997,7 @@ class PathOperations:
            * - "
              - INT, EQV
              - Stress intensity or equivalent stress.
+
         """
         command = f"PLSECT,{item},{comp},{rho},{kbr},{kbr3d}"
         return self.run(command, **kwargs)

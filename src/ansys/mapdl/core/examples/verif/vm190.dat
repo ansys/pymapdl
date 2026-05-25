@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -47,18 +47,18 @@ N,1,.125,0,0                  ! CREATE NODES TO LOCATE COIL
 N,2,.235,0,0
 N,3,.235,.235,0
 TYPE,3
-E,2,3,1                       ! DEFINE COIL 
+E,2,3,1                       ! DEFINE COIL
 BLOCK,.05,.20,0,.05,0,.45     ! CREATE SOLID MODEL OF IRON
-BLOCK,.20,.50,0,.05,.30,.45   
+BLOCK,.20,.50,0,.05,.30,.45
 BLOCK,.50,.60,0,.05,0,.45
-VGLUE,ALL   
+VGLUE,ALL
 BLOCK,0,.65,0,.10,0,.50       ! CREATE SOLID MODEL OF AIR
 VOVLAP,ALL                    ! OVERLAP AIR AND IRON
-ASEL,S,AREA,,8,10   
-ASEL,A,AREA,,4  
-MSHK,0                        ! FREE MESH 
-MSHA,1,3D                     ! USING TETS 
-MSHA,1,2D                     ! USING TRIS 
+ASEL,S,AREA,,8,10
+ASEL,A,AREA,,4
+MSHK,0                        ! FREE MESH
+MSHA,1,3D                     ! USING TETS
+MSHA,1,2D                     ! USING TRIS
 ESIZE,.10
 TYPE,2
 AMESH,ALL                     ! MESH EXTERIOR BOUNDARY WITH INFIN47
@@ -85,7 +85,7 @@ FINISH
 /out,scratch
 /POST1
 PATH,IRON,7,,48               ! DEFINE PATH WITH NAME = "IRON"
-PPATH,1,,-.2,0,0             ! DEFINE PATHS POINTS BY 
+PPATH,1,,-.2,0,0             ! DEFINE PATHS POINTS BY
 PPATH,2,,-.2,0,.20
 PPATH,3,,-.2,0,.375
 PPATH,4,,.025,0,.375
@@ -118,7 +118,7 @@ NSLE,S                          ! SELECT NODES ATTACHED TO IRON
 /LSYMBOL,-.282,.511,269,4,1.0 ! ANNOTATION SYMBOL DEFINITION - ARROW
 /LINE,-.282,.511,-.279,.915     ! ANNOTATION LINE DEFINITION
 /ANUM,2,4,-.21690,.91150
-/LINE,-.282,.911,-.151,.911     
+/LINE,-.282,.911,-.151,.911
 /ANUM,3,1.14734,.93021
 /TLABEL,-.133,.930,CONTOUR PATH FOR  ! ANNOTATION LOCATION AND TEXT
 /ANUM,4,1,.91097E-01,.87406

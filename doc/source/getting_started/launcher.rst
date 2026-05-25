@@ -32,7 +32,7 @@ function to start MAPDL and automatically connect to it:
     ansys.mapdl Version: 0.68.0
 
 
-While this is the easiest and fastest way to get PyMAPDL up and running. 
+While this is the easiest and fastest way to get PyMAPDL up and running.
 you must be able to launch MAPDL locally.
 
 If PyMAPDL cannot find your local installation, see
@@ -42,13 +42,50 @@ For more information on controlling how MAPDL launches locally, see the
 description of the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function.
 
 
+Launch MAPDL process without creating a client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sometimes you may want to launch a MAPDL process without immediately creating a
+client connection. This is useful for:
+
+* Starting MAPDL from the command-line interface
+* Managing multiple MAPDL instances programmatically
+* Launching MAPDL in a separate process for later connection
+
+For these scenarios, you can use the :func:`launch_mapdl_process() <ansys.mapdl.core.launcher.launch_mapdl_process>`
+function, which starts MAPDL and returns connection information without creating a client:
+
+.. code:: pycon
+
+    >>> from ansys.mapdl.core.launcher import launch_mapdl_process
+    >>> ip, port, pid = launch_mapdl_process(nproc=4, port=50052)
+    >>> print(f"MAPDL is running at {ip}:{port} (PID: {pid})")
+    MAPDL is running at 127.0.0.1:50052 (PID: 12345)
+
+You can later connect to this instance using the :class:`Mapdl <ansys.mapdl.core.Mapdl>` class:
+
+.. code:: pycon
+
+    >>> from ansys.mapdl.core import Mapdl
+    >>> mapdl = Mapdl(ip=ip, port=port)
+
+This approach gives you more control over the MAPDL process lifecycle and allows
+you to manage the process independently from the client connection.
+
+.. note::
+   The :func:`launch_mapdl_process() <ansys.mapdl.core.launcher.launch_mapdl_process>`
+   function always starts a new MAPDL instance. It cannot be used to connect to
+   an existing instance. Use :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
+   with ``start_instance=False`` for that purpose.
+
+
 Connect PyMAPDL to a local MAPDL instance
 -----------------------------------------
 
 Connect to a local MAPDL instance requires two steps: launching a
 local MAPDL session and connect to it.
 
-.. _launch_grpc_madpl_session:
+.. _launch_grpc_mapdl_session:
 
 Launch a local gRPC MAPDL session
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,7 +105,7 @@ To launch MAPDL, use this command:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ /usr/ansys_inc/v241/ansys/bin/ansys241 -grpc
@@ -91,7 +128,7 @@ This starts MAPDL in gRPC mode. MAPDL should display this output:
      Server listening on : 0.0.0.0:50052
 
 You can configure the port that MAPDL starts on with the ``-port`` argument.
-For example, you can start the server to listen for connections at 
+For example, you can start the server to listen for connections at
 port 50005 with this command:
 
 .. tab-set::
@@ -105,7 +142,7 @@ port 50005 with this command:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: console
 
             (.venv) user@machine:~$ /usr/ansys_inc/v241/ansys/bin/ansys241 -port 50005  -grpc
@@ -115,7 +152,7 @@ From version v0.68, you can use a command line interface to launch, stop, and li
 local MAPDL instances.
 For more information, see :ref:`ref_cli`.
 
-.. _connect_grpc_madpl_session:
+.. _connect_grpc_mapdl_session:
 
 Connect to the local MAPDL instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -128,7 +165,7 @@ this code:
     >>> from ansys.mapdl.core import Mapdl
     >>> mapdl = Mapdl()
 
-The preceding code assumes that your MAPDL service is running locally on the default IP address 
+The preceding code assumes that your MAPDL service is running locally on the default IP address
 (``127.0.0.1``) and on the default port (``50052``).
 
 You can also use the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` method to connect to an already launched MAPDL instance by setting the ``start_instance`` argument to ``False``:
@@ -143,12 +180,12 @@ Just make sure that you specify the mapped port instead of the internal MAPDL po
 For more information, see :ref:`pymapdl_docker`.
 
 
-.. _connect_grpc_remote_madpl_session:
+.. _connect_grpc_remote_mapdl_session:
 
 Connect PyMAPDL to a remote MAPDL instance
 ------------------------------------------
 
-If you want to connect to a **remote** MAPDL instance, you must know the IP 
+If you want to connect to a **remote** MAPDL instance, you must know the IP
 address of that instance.
 For example, if on your local network at IP address ``192.168.0.1`` there is a
 computer running MAPDL on the port ``50052``, you can connect to it with this code:
@@ -170,7 +207,7 @@ the referenced IP address and hostname for this to work because PyMAPDL cannot l
 Setting the MAPDL location in PyMAPDL
 -------------------------------------
 
-To run, PyMAPDL must know the location of the MAPDL binary. 
+To run, PyMAPDL must know the location of the MAPDL binary.
 Most of the time this can be automatically determined, but
 the location of MAPDL must be provided for non-standard installations.
 When running for the first time, PyMAPDL requests the
@@ -225,7 +262,7 @@ to enter the path again. If you must change the default Ansys path
 
 For more information, see the :func:`change_default_ansys_path() <ansys.mapdl.core.change_default_ansys_path>` method and the :func:`find_mapdl() <ansys.mapdl.core.find_mapdl>` method.
 
-Additionally, it is possible to specify the executable in each PyMAPDL script using the ``exec_file`` keyword argument. 
+Additionally, it is possible to specify the executable in each PyMAPDL script using the ``exec_file`` keyword argument.
 
 
 .. tab-set::
@@ -243,7 +280,7 @@ Additionally, it is possible to specify the executable in each PyMAPDL script us
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: python
 
             from ansys.mapdl.core import launch_mapdl
@@ -271,7 +308,7 @@ keyword argument:
 
     .. tab-item:: Linux
         :sync: key1
-                
+
         .. code:: python
 
             from ansys.mapdl.core import launch_mapdl
@@ -279,4 +316,3 @@ keyword argument:
             custom_exec = "/usr/ansys_inc/v241/ansys/bin/ansys241t"
             add_switch = f" -custom {custom_exec}"
             mapdl = launch_mapdl(additional_switches=add_switch)
-

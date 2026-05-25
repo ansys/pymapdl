@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -40,8 +40,8 @@ TYPE,2
 REAL,2
 E,1,2
 FINISH
-/SOLU    
-OUTRES,,ALL  
+/SOLU
+OUTRES,,ALL
 AUTOTS,ON
 OUTPR,BASIC,LAST
 DELTIM,0.00125
@@ -83,4 +83,3 @@ LABEL(1,2) = '.0125 hr','.0325 hr','.05   hr'
 /OUT
 FINISH
 *LIST,vm109,vrt
-

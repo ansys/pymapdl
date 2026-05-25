@@ -13,6 +13,3 @@ or automating other tasks.
 
    convert_apdl_block
    convert_script
-
-
-

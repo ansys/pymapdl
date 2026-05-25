@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ TYPE,2
 REAL,2
 E,13								! MASS ELEMENT
 FINISH
-/SOLU    
+/SOLU
 ANTYPE,MODAL						! MODE-FREQUENCY ANALYSIS
 MODOPT,LANB,2						! EXTRACT FIRST TWO MODES
 D,1,UX,,,13,,UY,UZ,ROTX,ROTY
@@ -86,7 +86,7 @@ TYPE,2
 REAL,2
 E,13								! MASS ELEMENT
 FINISH
-/SOLU    
+/SOLU
 ANTYPE,MODAL						! MODE-FREQUENCY ANALYSIS
 MODOPT,LANB,2						! EXTRACT FIRST TWO MODES
 D,1,UX,,,13,,UY,UZ,ROTX,ROTY
@@ -131,7 +131,7 @@ TYPE,2
 REAL,2
 E,2								! MASS ELEMENT
 FINISH
-/SOLU    
+/SOLU
 ANTYPE,MODAL						! MODE-FREQUENCY ANALYSIS
 MODOPT,LANB,2						! EXTRACT FIRST TWO MODES
 D,ALL,ALL,0

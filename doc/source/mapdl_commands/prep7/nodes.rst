@@ -1,36 +1,42 @@
-.. _ref_nodes_commands_api:
 
-*****
+.. _ref_nodes:
+
+
 Nodes
-*****
+=====
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to create, modify, list, etc., nodes.
+.. currentmodule:: ansys.mapdl.core._commands.prep7.nodes
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.nodes.Nodes
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.center
-   Mapdl.fill
-   Mapdl.move
-   Mapdl.n
-   Mapdl.naxis
-   Mapdl.nang
-   Mapdl.ndele
-   Mapdl.ndist
-   Mapdl.ngen
-   Mapdl.nkpt
-   Mapdl.nlist
-   Mapdl.nmodif
-   Mapdl.nora
-   Mapdl.norl
-   Mapdl.nread
-   Mapdl.nrotat
-   Mapdl.nrrang
-   Mapdl.nscale
-   Mapdl.nsmooth
-   Mapdl.nsym
-   Mapdl.nwrite
-   Mapdl.quad
-   Mapdl.transfer
+
+   Nodes.center
+   Nodes.eextrude
+   Nodes.fill
+   Nodes.move
+   Nodes.n
+   Nodes.nang
+   Nodes.naxis
+   Nodes.ndele
+   Nodes.ndist
+   Nodes.ngen
+   Nodes.nkpt
+   Nodes.nlist
+   Nodes.nmodif
+   Nodes.nora
+   Nodes.norl
+   Nodes.nplot
+   Nodes.nread
+   Nodes.nrotat
+   Nodes.nrrang
+   Nodes.nscale
+   Nodes.nsmooth
+   Nodes.nsym
+   Nodes.nwrite
+   Nodes.quad
+   Nodes.transfer

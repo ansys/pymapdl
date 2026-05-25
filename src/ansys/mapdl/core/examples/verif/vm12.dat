@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ D,1,ALL
 F,2,MZ,9000
 F,2,FX,-250
 FINISH
-/SOLU    
+/SOLU
 OUTPR,BASIC,1
 /OUT,SCRATCH
 SOLVE
@@ -63,7 +63,7 @@ FINI
 
 /PREP7
 /SHOW,JPEG
-C***     USING PIPE288       
+C***     USING PIPE288
 ANTYPE,STATIC
 ET,1,PIPE288,,,,2
 SECTYPE,1,PIPE
@@ -78,7 +78,7 @@ D,1,ALL
 F,2,MZ,9000
 F,2,FX,-250
 FINISH
-/SOLU    
+/SOLU
 OUTPR,BASIC,1
 /OUT,SCRATCH
 SOLVE
@@ -129,4 +129,3 @@ RESUME,TABLE_2
 /OUT
 FINISH
 *LIST,vm12,vrt
-

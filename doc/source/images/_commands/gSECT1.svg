@@ -11,18 +11,18 @@
 	L227.5,46.3z"/>
 <path fill="#FFFFFF" d="M231.1,46.8c0-13.3,10.6-23.9,23.9-23.9s23.9,10.6,23.9,23.9S268.3,70.7,255,70.7
 	C241.7,70.8,231.1,60.1,231.1,46.8L231.1,46.8z"/>
-<polygon fill="#00BDF2" stroke="#00BDF2" stroke-linecap="square" points="363.2,74 315.3,74 315.3,0.5 371.4,0.5 371.4,8.7 
+<polygon fill="#00BDF2" stroke="#00BDF2" stroke-linecap="square" points="363.2,74 315.3,74 315.3,0.5 371.4,0.5 371.4,8.7
 	321.9,8.7 321.9,66.2 363.2,66.2 "/>
-<polygon fill="#00BDF2" stroke="#00BDF2" stroke-linecap="square" points="469.9,74 469.9,67.6 434.4,67.6 434.4,10.7 466,10.7 
+<polygon fill="#00BDF2" stroke="#00BDF2" stroke-linecap="square" points="469.9,74 469.9,67.6 434.4,67.6 434.4,10.7 466,10.7
 	466,4.3 396.5,4.3 396.5,10.7 428,10.7 428,67.6 397.7,67.6 397.7,74 468.9,74 "/>
-<polygon fill="#00BDF2" stroke="#00BDF2" stroke-width="0.9" stroke-linecap="square" stroke-miterlimit="10" points="173.9,200.6 
+<polygon fill="#00BDF2" stroke="#00BDF2" stroke-width="0.9" stroke-linecap="square" stroke-miterlimit="10" points="173.9,200.6
 	173.9,134.2 168.7,134.2 168.7,190.1 143.3,190.1 143.3,200.3 204.5,200.3 204.5,190.1 173.9,190.1 "/>
-<polygon fill="#00BDF2" stroke="#00BDF2" stroke-width="0.45" stroke-linecap="square" points="68.4,200.6 68.4,194.1 34.7,194.1 
+<polygon fill="#00BDF2" stroke="#00BDF2" stroke-width="0.45" stroke-linecap="square" points="68.4,200.6 68.4,194.1 34.7,194.1
 	34.7,128.8 0.2,128.8 0.2,134.3 31.9,134.3 31.9,200.6 "/>
 <polygon fill="#00BDF2" stroke="#00BDF2" points="84.5,136.4 89.6,136.4 89.6,190.9 126.6,190.9 126.6,198.6 84.5,198.6 "/>
-<polygon fill="#00BDF2" stroke="#00BDF2" stroke-width="0.9" stroke-linecap="square" points="241.9,200.6 212,200.6 212,191.9 
+<polygon fill="#00BDF2" stroke="#00BDF2" stroke-width="0.9" stroke-linecap="square" points="241.9,200.6 212,200.6 212,191.9
 	238.5,191.9 238.5,128.6 291.3,128.6 291.3,194.8 315.3,194.8 315.3,200.3 287.7,200.6 287.7,133.5 241.9,133.5 "/>
-<polygon fill="#00BDF2" stroke="#00BDF2" stroke-width="0.5" stroke-linecap="square" points="406,198.6 406,143.1 330.1,143.1 
+<polygon fill="#00BDF2" stroke="#00BDF2" stroke-width="0.5" stroke-linecap="square" points="406,198.6 406,143.1 330.1,143.1
 	330.1,198.6 "/>
 <g>
 	<g>
@@ -144,6 +144,6 @@
 		</g>
 	</g>
 </g>
-<polygon fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.5" stroke-linecap="square" points="400.6,193.2 400.6,147.7 335.5,147.7 
+<polygon fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.5" stroke-linecap="square" points="400.6,193.2 400.6,147.7 335.5,147.7
 	335.5,193.2 "/>
 </svg>

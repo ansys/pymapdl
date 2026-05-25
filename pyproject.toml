@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "flit_core.buildapi"
-requires = ["flit_core >=3.2,<3.11"]
+requires = ["flit_core >=3.11,<4"]
 
 [project]
 # Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
@@ -8,7 +8,6 @@ authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: MacOS",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX",
@@ -16,14 +15,15 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 dependencies = [
-  "ansys-api-mapdl==0.5.2",                    # supports at least 2020R2 - 2022R1
+  "ansys-api-mapdl==0.6.0",                    # supports at least 2020R2 - 2022R1
   "ansys-mapdl-reader>=0.51.7",
   "ansys-math-core>=0.1.2",
   "ansys-platform-instancemanagement~=1.0",
-  "ansys-tools-path>=0.3.1",
+  "ansys-tools-common>=0.3.0",
   "click>=8.1.3",                              # for CLI interface
   "grpcio>=1.30.0",                            # tested up to grpcio==1.35
   "numpy>=1.14.0,<3.0.0",
@@ -31,32 +31,33 @@ dependencies = [
   "platformdirs>=3.6.0",
   "protobuf>=3.12.2",                          # minimum required based on latest ansys-grpc-mapdl
   "psutil>=5.9.4",
-  "pyansys-tools-versioning>=0.3.3",
   "pyiges[full]>=0.3.1",                       # Since v0.3.0, the 'full' flag is needed in order to install 'geomdl'
-  "pyvista<=0.46.3",
+  "pyvista>=0.38.1",
+  "rich-rst>=2.0.1",                           # For printing docstrings to the terminal
   "scipy>=1.3.0",                              # for sparse (consider optional?)
   "tabulate>=0.8.0",                           # for cli plotting
   "tqdm>=4.45.0",
-  "vtk>=9.0.0,<9.5.0",
+  "vtk>=9,<10",
 ]
 description = "A Python client library for Ansys MAPDL."
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 name = "ansys-mapdl-core"
 readme = "README.md"
-requires-python = ">=3.10,<3.14" # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
-version = "0.70.dev0"
+requires-python = ">=3.10,<3.15" # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
+version = "0.72.dev0"
 
 [project.optional-dependencies]
 jupyter = ["ipywidgets", "jupyterlab>=3"]
 
 graphics = [
-  "ansys-tools-visualization-interface>=0.9.0,<0.13.0",
+  "ansys-tools-visualization-interface>=0.9.0,<0.14.0",
   "matplotlib>=3.0.0",                                  # for colormaps for pyvista
 ]
 
 all = [
-  "ansys-tools-visualization-interface>=0.9.0,<0.12.0",
+  "ansys-tools-visualization-interface>=0.9.0,<0.14.0",
   "ipywidgets",
   "jupyterlab>=3",
   "matplotlib>=3.0.0",                                  # for colormaps for pyvista
@@ -64,61 +65,72 @@ all = [
 
 tests = [
   "ansys-dpf-core[graphics]==0.13.6",
-  "ansys-tools-visualization-interface==0.12.1",
+  "ansys-mapdl-reader==0.55.2",
+  "ansys-tools-visualization-interface==0.13.1",
   "autopep8==2.3.2",
-  "matplotlib==3.10.6",
+  "matplotlib==3.10.9",
   "pandas==2.3.3",
-  "pyansys-tools-report==0.8.3",
-  "pyfakefs==5.9.3",
-  "pyiges[full]==0.3.2",
-  "pytest-cov==7.0.0",
+  "pyansys-tools-report==0.9.0",
+  "pyfakefs==6.2.0",
+  "pyiges[full]==0.3.4",
+  "pytest-cov==7.1.0",
   "pytest-profiling==1.8.1",
-  "pytest-pyvista==0.2.0",
+  "pytest-pyvista==0.3.3",
   "pytest-random-order==1.2.0",
-  "pytest-reportlog==0.4.0",
-  "pytest-rerunfailures==16.0.1",
+  "pytest-reportlog==1.0.0",
+  "pytest-rerunfailures==16.1",
   "pytest-timeout==2.4.0",
-  "pytest==8.4.2",
+  "pytest==9.0.3",
   "scipy==1.15.3",
-  "vtk==9.4.2",
+  "vtk==9.5.2",
 ]
 
 doc = [
   "ansys-dpf-core[graphics]==0.13.6",
-  "ansys-mapdl-reader==0.55.1",
-  "ansys-sphinx-theme==1.6.1",
-  "ansys-tools-visualization-interface==0.12.1",
-  "grpcio==1.75.1",
+  "ansys-mapdl-reader==0.55.2",
+  "ansys-sphinx-theme==1.7.2",
+  "ansys-tools-visualization-interface==0.13.1",
+  "grpcio==1.80.0",
   "imageio-ffmpeg==0.6.0",
-  "imageio==2.37.0",
+  "imageio==2.37.3",
   "jupyter==1.1.1",
   "jupyter_sphinx==0.5.3",
   "jupyterlab>=3.2.8",
-  "linuxdoc==20240924",
-  "matplotlib==3.10.6",
+  "linuxdoc==20260504",
+  "matplotlib==3.10.9",
   "nbformat==5.10.4",
-  "numpydoc==1.9.0",
+  "numpydoc==1.10.0",
   "pandas==2.3.3",
-  "plotly==6.3.1",
-  "pyiges[full]==0.3.2",
-  "pypandoc==1.15",
-  "pytest-sphinx==0.6.3",
+  "plotly==6.7.0",
+  "pyiges[full]==0.3.4",
+  "pypandoc==1.17",
+  "pytest-sphinx==0.7.1",
   "pythreejs==2.4.2",
   "sphinx-autobuild==2024.10.3",
-  "sphinx-autodoc-typehints==3.1.0",
+  "sphinx-autodoc-typehints==3.0.1; python_version < '3.11'",
+  "sphinx-autodoc-typehints==3.1.0; python_version >= '3.11'",
   "sphinx-copybutton==0.5.2",
   "sphinx-design==0.6.1",
-  "sphinx-gallery==0.19.0",
+  "sphinx-gallery==0.21.0",
   "sphinx-jinja==2.0.2",
   "sphinx-notfound-page==1.1.0",
-  "sphinx==8.2.3",
+  "sphinx==8.1.3; python_version < '3.11'",
+  "sphinx==8.2.3; python_version >= '3.11'",
+  "sphinxcontrib-svg2pdfconverter==2.1.0",
   "sphinxcontrib-websupport==2.0.0",
-  "sphinxemoji==0.3.1",
-  "vtk==9.4.2",
+  "sphinxemoji==0.3.2",
+  "vtk==9.5.2",
 ]
+
+[dependency-groups]
+
+tox = ["tox==4.53.1"]
 
 [tool.flit.module]
 name = "ansys.mapdl.core"
+
+[tool.flit.sdist]
+include = ["src/ansys/mapdl/core/skills/**"]
 
 [project.urls]
 Documentation = "https://mapdl.docs.pyansys.com"
@@ -131,7 +143,27 @@ pymapdl = "ansys.mapdl.core.cli:main"
 pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_point"
 
 [tool.pytest.ini_options]
-addopts = "-ra -vvv --maxfail=10 --strict-markers --random-order-bucket=class --random-order --durations=10  --timeout=180"
+addopts = [
+  "--color=yes",
+  # "--cov-report=html",       # SLOW: generates HTML report at teardown (use --cov-report=term for local runs)
+  "--cov=ansys.mapdl.core",
+  "--durations=30",
+  # "--log-file-level=DEBUG",  # SLOW: writes debug logs through Docker volume mount
+  # "--log-file=pytest.log",   # SLOW: writes log file through Docker volume mount
+  "--maxfail=2",
+  # "--profile",               # SLOW: pytest-profiling adds overhead at session end
+  # "--profile-svg",           # SLOW: generates SVG call graph at shutdown (10-30 s+)
+  "--random-order",
+  "--random-order-bucket=class",
+  "--report-log-exclude-logs-on-passed-tests",
+  "--reruns-delay=4",
+  "--reruns=1",
+  "--strict-markers",
+  "--timeout=180",
+  "-ra",
+  "-vvv",
+]
+
 filterwarnings = [
   "ignore::DeprecationWarning",
   "ignore::FutureWarning",
@@ -146,6 +178,7 @@ junit_family = "legacy"
 markers = [
   "console: run console test based",
   "gui: run gui test",
+  "krylov_tests: run tests that use Krylov module",
   "requires_gui: run tests that require to launch the GUI interface",
   "skip_grpc: skip tests using grpc",
 ]
@@ -239,13 +272,13 @@ checks = [
   "SA03", # "Description should be capitalized for See Also "
   # '"{reference_name}" reference',
   "SA04", # 'Missing description for See Also "{reference_name}" reference',
-  # "EX01", # "No examples section found",
+  # "EX01", # "No examples section found"
 ]
 
 override_SS05 = [ # override SS05 to allow docstrings starting with these words
   # '^Process ',
   # '^Assess ',
-  # '^Access ',
+  # '^Access '
 ]
 
 [tool.mypy]
@@ -255,6 +288,20 @@ disable_error_code = [
   "return",
   "return-value",
 ]
+exclude = [
+  "^\\.ci/",
+  "^build/",
+  "^dist/",
+  "^doc/",
+  "^examples/",
+  "^htmlcov/",
+  "^tests/",
+]
+explicit_package_bases = true
+namespace_packages = true
+
+[tool.bandit]
+exclude_dirs = ["examples", "tests"]
 
 [tool.towncrier]
 directory = "doc/changelog.d"
@@ -267,13 +314,13 @@ title_format = "\n.. _v{version}:\n\n`{version} <https://github.com/ansys/pymapd
 issue_format = "`#{issue} <https://github.com/ansys/pymapdl/pull/{issue}>`_"
 
 [[tool.towncrier.type]]
-directory = "added"
-name = "Added"
+directory = "breaking"
+name = "Breaking"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "changed"
-name = "Changed"
+directory = "added"
+name = "Added"
 showcontent = true
 
 [[tool.towncrier.type]]
@@ -282,18 +329,13 @@ name = "Fixed"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "dependencies"
-name = "Dependencies"
-showcontent = true
-
-[[tool.towncrier.type]]
 directory = "documentation"
 name = "Documentation"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "miscellaneous"
-name = "Miscellaneous"
+directory = "dependencies"
+name = "Dependencies"
 showcontent = true
 
 [[tool.towncrier.type]]
@@ -302,6 +344,16 @@ name = "Maintenance"
 showcontent = true
 
 [[tool.towncrier.type]]
+directory = "miscellaneous"
+name = "Miscellaneous"
+showcontent = true
+
+[[tool.towncrier.type]]
 directory = "test"
 name = "Test"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "changed"
+name = "Changed"
 showcontent = true

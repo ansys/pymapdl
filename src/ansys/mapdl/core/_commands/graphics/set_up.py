@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core._commands import CommandsBase
 
-class SetUp:
+
+class SetUp(CommandsBase):
 
     def cmap(
         self, fname: str = "", ext: str = "", kywrd: str = "", ncntr: str = "", **kwargs
@@ -1000,6 +1002,7 @@ class SetUp:
 
             * ``1,0`` - If ``Kywrd`` = TMOD, the values 1 and 0 determine whether bitmap (1) or stroke text (0)
               fonts will be used
+
         """
         command = f"JPEG,{kywrd},{opt}"
         return self.run(command, **kwargs)
@@ -1191,6 +1194,7 @@ class SetUp:
 
             * ``1-9`` - Use this value to specify a specific compression level. 1 is the lowest compression
               level (fastest) and 9 is the highest compression level (slowest).
+
         """
         command = f"PNGR,{kywrd},{opt},{val}"
         return self.run(command, **kwargs)
@@ -1492,6 +1496,7 @@ class SetUp:
 
             * ``1, 0`` - If ``Kywrd`` = TMOD, the values 1 and 0 determine whether bitmap (1) or stroke text (0)
               fonts will be used
+
         """
         command = f"TIFF,{kywrd},{opt}"
         return self.run(command, **kwargs)

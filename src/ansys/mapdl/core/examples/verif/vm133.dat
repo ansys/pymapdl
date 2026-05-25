@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -40,13 +40,13 @@ D,1,ALL                ! FIX ONE END
 F,2,FX,0.25            ! FORCE INDUCING CONSTANT STRESS
 FINISH
 /SOLU
-RATE,OFF    
+RATE,OFF
 BFE,1,TEMP,1,1000,1000,1000,1000 ! APPLY CONSTANT TEMPERATURE
 TIME,1E-8              ! NEAR ZERO TIME FOR FIRST LOAD STEP
-OUTPR,BASIC,1          ! PRINT BASIC ELEMENT SOLUTION 
+OUTPR,BASIC,1          ! PRINT BASIC ELEMENT SOLUTION
 OUTRES,EPCR,1          ! STORE CREEP STRAIN RESULTS FOR EVERY SUBSTEP
 CNVTOL,F,,,,1E-6       ! NEAR ZERO VALUE FOR MINREF FIELD
-CNVTOL,M,-1            ! CONVERGENCE CRITERION BASED UPON MOMENTS IS 
+CNVTOL,M,-1            ! CONVERGENCE CRITERION BASED UPON MOMENTS IS
                        !  REMOVED AS IT IS NOT NEEDED FOR THIS TEST
 /OUT,SCRATCH
 SOLVE                  ! LOAD STEP 1
@@ -84,8 +84,3 @@ LABEL(1,2) = '0 hr','.5 hr','1 hr','5 hr'
 /OUT
 FINISH
 *LIST,vm133,vrt
-
-
-
-
-

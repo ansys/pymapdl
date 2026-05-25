@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -42,14 +42,14 @@ A=1                    ! CRACK LENGTH
 W=2*A                  ! WIDTH
 L=4*W                  ! LENGTH
 L2=L/2                 ! HALF OF LENGTH
-E=1E5                  ! YOUNG'S MODULUS 
+E=1E5                  ! YOUNG'S MODULUS
 NU=0.3                 ! POISSONS RATIO
 T0=10                  ! TEMPERATURES AT THE RIGHT SIDE
-ALPHA=1e-4             ! SECANT COEFFICIENTS OF THERMAL EXPANSION 
+ALPHA=1e-4             ! SECANT COEFFICIENTS OF THERMAL EXPANSION
 
 MP,EX,1,E
 MP,NUXY,1,NU
-MP,ALPX,1,ALPHA        ! THERMAL MATERIAL PROPERTIES 
+MP,ALPX,1,ALPHA        ! THERMAL MATERIAL PROPERTIES
 MP,REFT,1,0            ! REFERENCE TEMPERATURE FOR ELEMENTs
 
 K,1,
@@ -106,9 +106,9 @@ ALLSEL
 *ENDDO
 ALLSEL
 
-CINT,NEW,1            
-CINT,NAME,CRACK1        !CRACK ID   
-CINT,NCON,6             !NUMBER OF COUNTOURS  
+CINT,NEW,1
+CINT,NAME,CRACK1        !CRACK ID
+CINT,NCON,6             !NUMBER OF COUNTOURS
 CINT,SYMM,ON            !SYMMETRICAL CONDITION
 CINT,NORM,,
 CINT,LIST
@@ -126,7 +126,7 @@ PRCINT,1
 *GET,J4,CINT,1,CTIP,1,,4
 *GET,J5,CINT,1,CTIP,1,,5
 *GET,J6,CINT,1,CTIP,1,,6
-JC1=ABS(J2+J3+J4+J5+J6)/5      
+JC1=ABS(J2+J3+J4+J5+J6)/5
 K1=SQRT(JC1*E/(1-NU*NU))
 /COM, Mechanical APDL RESULTS
 *STAT,K1

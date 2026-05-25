@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -42,8 +42,8 @@ EGEN,10,1,1               ! TEN BAR ELEMENTS ACROSS WALL THICKNESS
 TYPE,2
 E,11,12                   ! ONE CONVECTION LINK AT GAS END
 FINISH
-/SOLU    
-OUTRES,,ALL  
+/SOLU
+OUTRES,,ALL
 TIME,14.5                 ! TIME AT END OF LOAD STEP
 NSUBST,80
 BFUNIF,TEMP,100
@@ -89,4 +89,3 @@ LABEL(1,2) = 'DE 1 )  ','DE 3 )  ','DE 5 )  ','DE 7 )  ','DE 9 )  ','DE 11)  ','
 /OUT
 FINISH
 *LIST,vm110,vrt
-

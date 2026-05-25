@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -33,10 +33,11 @@ from ansys.mapdl.core.misc import threaded
 from conftest import ON_LOCAL as IS_LOCAL
 from conftest import QUICK_LAUNCH_SWITCHES, requires
 
+LIC_INSTALLED: bool = False
 try:
     LIC_INSTALLED = os.path.isfile(licensing.get_ansys_license_utility_path())
 except:
-    LIC_INSTALLED = None
+    pass
 
 skip_no_lic_bin = pytest.mark.skipif(
     not (LIC_INSTALLED and IS_LOCAL),
@@ -182,7 +183,7 @@ def test_license_checker(tmpdir, license_checker):
 
 @requires("local")
 @skip_no_lic_bin
-def test_check_license_file(mapdl, cleared, tmpdir):
+def test_check_license_file(cleared, tmpdir):
     timeout = 15
     checker = licensing.LicenseChecker(timeout=timeout)
     # start the license check in the background
@@ -191,9 +192,8 @@ def test_check_license_file(mapdl, cleared, tmpdir):
     try:
         mapdl_ = launch_mapdl(
             license_server_check=False,
-            start_timeout=timeout,
+            timeout=timeout,
             additional_switches=QUICK_LAUNCH_SWITCHES,
-            port=mapdl.port + 1,
         )
         assert mapdl_._local
         mapdl_.exit()
@@ -261,7 +261,7 @@ def test_check_license_file_exception(license_checker):
         license_checker._check_license_file(0.01)
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 def test_license_wait():
     license_checker = licensing.LicenseChecker()
     assert not license_checker._lic_file_thread
@@ -296,7 +296,7 @@ def test_license_check():
         license_checker.check()
 
 
-@requires("ansys-tools-path")
+@requires("ansys-tools-common")
 def test_stop_license_checker():
     license_checker = licensing.LicenseChecker()
 

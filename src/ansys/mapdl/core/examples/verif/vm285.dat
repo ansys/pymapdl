@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 /TITLE,VM285, C* INTEGRAL CALCULATION FOR A SINGLE-EDGED CRACKED PLATE
 /COM
 /COM   REFERENCE: MELVIN F.KANNINEN, CARL H.POPELAR, ADVANCED
-/COM              FREACTURE MECHANICS,OXFORD UNIVERSITY PRESS,PG.550 
+/COM              FREACTURE MECHANICS,OXFORD UNIVERSITY PRESS,PG.550
 JPGPRF,500,100,1
 
 /COM, PARAMETER FOR CREATING THE CDB FILES TO STORE GEOMETRY AND MESH DATA
@@ -45,12 +45,12 @@ C4=0
 HOUR=1000
 /COM, ELASTIC CONSTANT
 MP,EX,1,200E3               ! YOUNG'S MODULUS
-MP,NUXY,1,0.3               
+MP,NUXY,1,0.3
 TB,CREEP,1,,,1              ! CREEP MATERIAL MODEL
 TBDATA,1,C1,C2,C3,C4
 
 ET,1,PLANE182               ! PLANE 182 ELEMENT
-KEYOPT,1,3,2		        ! PLANE STRAIN 
+KEYOPT,1,3,2		        ! PLANE STRAIN
 
 W = 20			            ! WIDTH OF THE PLATE
 A = w*1/8	                ! CRACK LENGTH
@@ -164,5 +164,3 @@ FINISH
 *LIST,vm285,vrt
 /OUT,SCRATCH
 /DEL,SCRATCH
-
-

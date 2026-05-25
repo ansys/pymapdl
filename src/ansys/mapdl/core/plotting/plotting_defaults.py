@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,7 +21,12 @@
 # SOFTWARE.
 
 import pyvista as pv
-from pyvista.core import _vtk_core as _vtk
+
+try:
+    from pyvista.core import _vtk_core as _vtk
+except ImportError:
+    from pyvista import _vtk  # pyvista >= 0.48
+
 from pyvista.core.utilities import translate
 from pyvista.core.utilities.helpers import wrap
 from pyvista.core.utilities.misc import _NoNewAttrMixin
@@ -71,7 +76,7 @@ class DefaultSymbol:
         self._configured = False
 
     def __call__(self, name):
-        if True:  # not self._configured: # Temporal patch pending on #3568
+        if not self._configured:
             self._set_configuration()
             self._configured = True
 

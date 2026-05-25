@@ -1,0 +1,8 @@
+{
+  "expectations": [
+    {"text": "Uses pymapdl exec (not pymapdl run or other command)", "passed": false, "evidence": "Does not mention 'pymapdl exec' at all. Uses Python one-liner with Mapdl(port=50060) instead."},
+    {"text": "Includes --file flag with the script name", "passed": false, "evidence": "Uses mapdl.input('thermal_model.inp') Python API, not --file CLI flag."},
+    {"text": "Includes --port 50060 to target the correct instance", "passed": false, "evidence": "Uses Python Mapdl(port=50060), not --port CLI flag."},
+    {"text": "Explains that exec connects to an already-running instance", "passed": false, "evidence": "Does not mention pymapdl exec command at all."}
+  ]
+}

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -614,6 +614,7 @@ class Test_MAPDL_commands(TestClass):
         "mpwrite",
         "mwrite",
         "nplot",
+        "run",
         "sys",
         "vplot",
         "vwrite",
@@ -728,3 +729,16 @@ class Test_output_listing(TestClass):
         if has_dependency("pandas"):
             out_df = out.to_dataframe()
             assert isinstance(out_df, pd.DataFrame) and not out_df.empty
+
+
+def test_aflist_multiple_calls(mapdl, cleared):
+    """Test that aflist can be called multiple times without error.
+
+    This test verifies the fix for the issue where aflist.tmp file
+    remained locked after the first call, causing subsequent calls to fail.
+    """
+    mapdl.prep7()
+
+    # Call aflist multiple times - should not raise an error
+    for _ in range(3):
+        mapdl.aflist()

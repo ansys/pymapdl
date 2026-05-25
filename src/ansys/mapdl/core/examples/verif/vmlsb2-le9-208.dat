@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 /VERIFY,vmlsb2-le9-208
 /TITLE,vmlsb2-le9-208,AXISYMMETRIC BRANCHED SHELL WITH PRESSURE LOADING
 /COM, REFERENCE: NAFEMS BENCHMARKS,REPORT: LSB2,1989-01-01/1
-/COM, ORIGINAL TEST NUMBER: LE9 
+/COM, ORIGINAL TEST NUMBER: LE9
 /PREP7
 ET,1,SHELL208
 KEYOPT,1,3,2			! INCLUDE EXTRA INTERNAL NODE
@@ -100,16 +100,10 @@ LABEL(1,1) = 'AXIAL-STRESS'
 /COM,
 /COM,           |  TARGET  |   Mechanical APDL  |  RATIO
 /COM,
-/COM, 
+/COM,
 *VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
 (1X,A8,'   ',F10.4,'  ',F14.4,'   ',F15.3)
 /COM,----------------------------------------------------------------------
 /OUT,
 FINISH
 *LIST,vmlsb2-le9-208,vrt
-
-
-
-
-
-

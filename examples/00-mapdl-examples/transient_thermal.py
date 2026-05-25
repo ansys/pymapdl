@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -37,6 +37,7 @@ https://www.simutechgroup.com/tips-and-tricks/fea-articles/97-fea-tips-tricks-th
 Thanks SimuTech!
 
 """
+
 # sphinx_gallery_thumbnail_number = 4
 
 import matplotlib.pyplot as plt

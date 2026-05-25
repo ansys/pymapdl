@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 /VERIFY,VM289
 /TITLE,VM289,SPHERICAL CAVITY IN AN INFINITE MEDIUM
 /COM,
-/COM, REFERENCE: 
+/COM, REFERENCE:
 /COM, SOIL DYNAMICS, ARNOLD VERRUJIT, DELFT UNIVERSITY
 /COM, OF TECHNOLOGY, PP 138-139
 
@@ -33,7 +33,7 @@ P=750                       ! INTERNAL PRESSURE IN PA
 PI=ACOS(-1)
 
 R=1                         ! RADIUS IN M
-H=4                                   
+H=4
 D=0.5*PI*R/5                ! ELEMENT SIZE
 DPML=H+4*D                  ! PML ELEMENT THICKNESS
 
@@ -89,7 +89,7 @@ CMSEL,S,VOL1
 ESIZE,D
 TYPE,1
 MAT,1
-VMESH,ALL                   ! SPHERICAL CAVITY     
+VMESH,ALL                   ! SPHERICAL CAVITY
 ALLSEL
 
 CMSEL,U,VOL1
@@ -111,7 +111,7 @@ NSEL,A,LOC,Z,A(3)
 D,ALL,ALL
 ALLSEL
 NSEL,S,LOC,Z,0
-DSYM,SYMM,Z                 ! SYMMETRIC BOUNDARY CONTION NORMAL TO Z 
+DSYM,SYMM,Z                 ! SYMMETRIC BOUNDARY CONTION NORMAL TO Z
 ALLSEL
 NSEL,S,LOC,Y,0
 DSYM,SYMM,Y                 ! SYMMETRIC BOUNDARY CONDITION NORMAL TO Y
@@ -134,7 +134,7 @@ CSYS,2
 SET,LAST
 NSEL,S,LOC,Z,0
 NSEL,R,LOC,Y,0
-NSEL,R,LOC,X,R,H            ! POST PROCESSING DISPLACEMENT,STRESS FROM X=1M-4M        
+NSEL,R,LOC,X,R,H            ! POST PROCESSING DISPLACEMENT,STRESS FROM X=1M-4M
 NLIST
 NSORT,LOC,X,1
 NSORT,U,X,0
@@ -195,7 +195,7 @@ RATIO3(I,1)=TAN_S2(I,1)/TAN_S1(I,1)
 (F7.4,1XF10.3,4XF10.3,5XF10.3)
 /COM,
 /COM, TANGENTIAL STRESS
-/COM, 
+/COM,
 *VWRITE,LOC(1,1),TAN_S1(1,1),TAN_S2(1,1),RATIO3(1,1)
 (F7.4,1XF10.3,4XF10.3,5XF10.3)
 /COM, ---------------------------------------------------

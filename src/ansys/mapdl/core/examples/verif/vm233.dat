@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@
 /COM,		     PG 18-20,1997.
 /COM,		     IEEE TRANS. ON MAG, VOL. 34. NO. 5. PG 2481-84,1998
 /COM,		     IEEE TRANS. ON MAG, VOL. 35. NO. 3. PG 1406-84,1998
-/COM,		     ANALYSIS SOLUTIONS, VOL.1. ISSUE 2,WINTER 1997-98,PG 10-11. 
+/COM,		     ANALYSIS SOLUTIONS, VOL.1. ISSUE 2,WINTER 1997-98,PG 10-11.
 /COM
 /PREP7
 /NOPR
@@ -103,16 +103,16 @@ VOVLAP,ALL
 NUMCMP,ALL
 
 VSEL,S,VOLU,,1
-VATT,3,1,1              
+VATT,3,1,1
 VSEL,S,VOLU,,3,5
-VATT,2,1,1              
-VSEL,S,VOLU,,6  
+VATT,2,1,1
+VSEL,S,VOLU,,6
 VATT,4,2,1              			! COIL +Y
 VSEL,S,VOLU,,7
 VATT,4,4,1              			! COIL -X
 VSEL,S,VOLU,,8
 ESYS,11
-VATT,4,3,1              			! COIL +Y THETA 
+VATT,4,3,1              			! COIL +Y THETA
 
 ALLSEL,ALL
 SMRT,10
@@ -130,7 +130,7 @@ CDWRITE,ALL,VM233,CDB,,VM233,IGES
 *ELSE
 CDREAD,ALL,VM233,CDB,,VM233,IGES
 *ENDIF
-FINISH  
+FINISH
 
 /PREP7
 ESEL,S,MAT,,3      				! ARMATURE
@@ -194,5 +194,5 @@ LABEL(1) = 'FVW(Z) ','POLE(BZ) ','ARM(BZ) '
 (1X,A8,'    ',F7.3,'     ',F14.3,'       ',1F15.3)
 /COM,----------------------------------------------------------------
 /OUT
-FINISH   
+FINISH
 *LIST,vm233,vrt

@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -60,7 +60,7 @@ CSYS,1
 K,1
 K,2,.3,-2.5            ! INNER RADIUS OF RING
 K,3,.45,-2.5           ! OUTER RADIUS OF RING
-K,4,.75,-2.5           
+K,4,.75,-2.5
 k,5,1.50,-2.5          ! OUTER RADIUS OF SURROUNDING AIR
 KPSCALE,ALL,,,SF,,,,,1 ! MOVE ORIGINAL KEYPOINTS TO NEW POSITION
 CSYS,0
@@ -95,7 +95,7 @@ NSEL,ALL
 CSYS,0
 FINISH
 /SOLU                  ! ENTER SOLVER
-BFA,2,JS,,,438559      ! APPLY CURRENT DENSITY JS(Z)	
+BFA,2,JS,,,438559      ! APPLY CURRENT DENSITY JS(Z)
 SOLVE
 FINISH
 

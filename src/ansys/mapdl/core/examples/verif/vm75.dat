@@ -1,6 +1,6 @@
 ! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
 ! SPDX-License-Identifier: MIT
-! 
+!
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM75
 /out,scratch
-/PREP7                    
+/PREP7
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /TITLE, VM75, TRANSIENT RESPONSE TO A STEP EXCITATION
@@ -49,7 +49,7 @@ FINISH
 
 /SOLU
 ANTYPE,TRANSIENT
-TRNOPT,MSUP,2             ! PERFORM MODE SUPERPOSITION TRANSIENT SOLVE 
+TRNOPT,MSUP,2             ! PERFORM MODE SUPERPOSITION TRANSIENT SOLVE
 DELTIM,25E-4              ! INTEGRATION TIME STEP SIZE
 KBC,1                     ! STEP BOUNDARY CONDITIONS
 OUTPR,BASIC,1
@@ -78,7 +78,7 @@ PLVAR,2,3                 ! DISPLAY VARIABLES 2 AND 3
 *DIM,VALUE_1,,1,3
 LABEL_1(1,1) = 'UMAX,   '
 LABEL_1(1,2) = 'in      '
-*VFILL,VALUE_1(1,1),DATA,2 
+*VFILL,VALUE_1(1,1),DATA,2
 *VFILL,VALUE_1(1,2),DATA,UMAX
 *VFILL,VALUE_1(1,3),DATA,ABS(UMAX/2)
 *DIM,LABEL_2,CHAR,2,2
