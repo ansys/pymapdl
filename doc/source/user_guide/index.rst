@@ -42,6 +42,7 @@ This section provides a general overview of PyMAPDL and how you use it.
    :hidden:
    :caption: Advanced
 
+   plugins
    xpl
    krylov
 

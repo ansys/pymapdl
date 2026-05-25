@@ -84,16 +84,46 @@ def _make_command(mapdl_instance: Mapdl, plugin_name: str, command_name: str):
 
 
 class ansPlugin:
-    """
-    ANSYS MAPDL Plugin Manager.
+    """MAPDL plugin manager.
+
+    Provides an interface for loading, inspecting, and unloading MAPDL
+    plugins at runtime. Access it through the ``plugins`` property on a
+    :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` instance.
+
+    .. note::
+       Plugin support requires MAPDL 25.2 or later. Plugin tracking is
+       session-scoped: if the Python process reconnects to an
+       already-running MAPDL instance, ``list()`` returns an empty list
+       until the server-side ``*PLUG,LIST`` response is available.
 
     Examples
     --------
+    Create a MAPDL instance and access the plugin manager.
+
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
     >>> plugins = mapdl.plugins
 
-    Load a plugin in the MAPDL Session
+    Load a plugin and inspect the commands it registers.
+
+    >>> plugins.load("my_plugin", feature="advanced")
+    >>> plugins.list()
+    ['my_plugin']
+    >>> plugins.commands("my_plugin")
+    ['my_command', 'another_command']
+
+    Print a summary table of all loaded plugins.
+
+    >>> print(plugins)
+    MAPDL Plugins
+    ----------------
+    my_plugin                    : advanced  [2 commands]
+
+    Unload the plugin and confirm it is no longer listed.
+
+    >>> plugins.unload("my_plugin")
+    >>> plugins.list()
+    []
     """
 
     def __init__(self, mapdl: Mapdl):
