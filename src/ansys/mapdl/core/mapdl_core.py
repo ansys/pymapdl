@@ -1142,10 +1142,10 @@ class _MapdlCore(Commands):
         Examples
         --------
 
-        >>> from ansys import Mapdl
-        >>> mapdl = Mapdl()
-        >>> plugin = mapdl.plugin
-        >>> plugin.load('PluginDPF')
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> plugins = mapdl.plugins
+        >>> plugins.load('PluginDPF')
         """
         if self._plugin is None:
             from ansys.mapdl.core.plugin import ansPlugin
