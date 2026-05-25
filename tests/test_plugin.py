@@ -29,7 +29,11 @@ import weakref
 import pytest
 
 from ansys.mapdl.core import Mapdl
-from ansys.mapdl.core.errors import PluginError, PluginLoadError, PluginUnloadError
+from ansys.mapdl.core.errors import (
+    PluginError,
+    PluginLoadError,
+    PluginUnloadError,
+)
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from ansys.mapdl.core.plugin import ansPlugin
 from conftest import requires
@@ -79,9 +83,13 @@ class TestPluginIntegration:
         assert len(commands) > 0, "At least one command should be injected on load"
         assert all(hasattr(plugins._mapdl, cmd) for cmd in commands)
 
-        # After unload, injected commands are removed
+        # Plugin appears in list() via internal tracking
+        assert TEST_PLUGIN in plugins.list()
+
+        # After unload, injected commands are removed and plugin no longer listed
         plugins.unload(TEST_PLUGIN)
         assert all(not hasattr(plugins._mapdl, cmd) for cmd in commands)
+        assert TEST_PLUGIN not in plugins.list()
 
     def test_unload_already_unloaded(self, plugins):
         """Unloading a plugin that is not loaded returns an empty string."""
@@ -203,3 +211,81 @@ def test_list_raises_on_error(mock_plugins, mock_mapdl):
 def test_str_representation(mock_plugins):
     """__str__ includes the 'MAPDL Plugins' header."""
     assert "MAPDL Plugins" in str(mock_plugins)
+
+
+# ============================================================
+# Unit tests — internal tracking
+# ============================================================
+
+
+def test_list_fallback_to_internal_state(mock_plugins, mock_mapdl):
+    """list() returns internally tracked names when server returns nothing."""
+    from ansys.mapdl.core.plugin import _PluginInfo
+
+    mock_plugins._plugins["PluginDPF"] = _PluginInfo(feature="")
+    mock_mapdl.run.return_value = ""
+    assert mock_plugins.list() == ["PluginDPF"]
+
+
+def test_list_prefers_server_response(mock_plugins, mock_mapdl):
+    """list() uses server response when it contains parseable plugin names."""
+    from ansys.mapdl.core.plugin import _PluginInfo
+
+    mock_plugins._plugins["PluginDPF"] = _PluginInfo(feature="")
+    # Server returns a parseable line that differs from internal state
+    mock_mapdl.run.return_value = "ServerPlugin   some description"
+    result = mock_plugins.list()
+    assert "ServerPlugin" in result
+    assert "PluginDPF" not in result
+
+
+def test_commands_returns_registered_commands(mock_plugins, mock_mapdl):
+    """commands() returns the list of attribute names injected by the plugin."""
+    mock_plugins._set_commands(["CMD1", "CMD2"], plugin_name="TestPlugin")
+    # _set_commands only records when plugin_name is already in _plugins
+    from ansys.mapdl.core.plugin import _PluginInfo
+
+    mock_plugins._plugins["TestPlugin"] = _PluginInfo(
+        feature="", commands=["CMD1", "CMD2"]
+    )
+    assert mock_plugins.commands("TestPlugin") == ["CMD1", "CMD2"]
+
+
+def test_commands_raises_for_unknown_plugin(mock_plugins):
+    """commands() raises KeyError for a plugin that is not loaded."""
+    with pytest.raises(KeyError, match="Unknown"):
+        mock_plugins.commands("Unknown")
+
+
+def test_commands_updated_after_load(mock_plugins, mock_mapdl):
+    """After load(), _plugins records the injected command names."""
+    from ansys.mapdl.core.plugin import _PluginInfo
+
+    response = "New command [MYCMD] registered"
+    mock_mapdl.run.return_value = response
+    # Seed _plugins so _set_commands can append to it
+    mock_plugins._plugins["TestPlugin"] = _PluginInfo(feature="")
+    mock_plugins._load_commands(response, plugin_name="TestPlugin")
+    assert "MYCMD" in mock_plugins.commands("TestPlugin")
+
+
+def test_commands_cleared_after_deleter(mock_plugins, mock_mapdl):
+    """After _deleter_commands, removed commands no longer appear in commands()."""
+    from ansys.mapdl.core.plugin import _PluginInfo
+
+    mock_plugins._plugins["TestPlugin"] = _PluginInfo(feature="", commands=["CMD1"])
+    mock_mapdl.CMD1 = "something"  # make hasattr return True
+    mock_plugins._deleter_commands(["CMD1"], plugin_name="TestPlugin")
+    assert mock_plugins.commands("TestPlugin") == []
+
+
+def test_str_shows_command_count(mock_plugins):
+    """__str__ shows the number of commands for each loaded plugin."""
+    from ansys.mapdl.core.plugin import _PluginInfo
+
+    mock_plugins._plugins["PluginDPF"] = _PluginInfo(
+        feature="", commands=["CMD1", "CMD2"]
+    )
+    output = str(mock_plugins)
+    assert "2 commands" in output
+    assert "PluginDPF" in output

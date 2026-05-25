@@ -22,13 +22,34 @@
 
 """Contains the ansPlugin class."""
 
+from __future__ import annotations
+
+from dataclasses import dataclass, field
 import re
+from typing import List
 from warnings import warn
 import weakref
 
 from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import PluginError, PluginLoadError, PluginUnloadError
 from ansys.mapdl.core.logging import Logger
+
+
+@dataclass
+class _PluginInfo:
+    """Internal record for a loaded plugin.
+
+    Parameters
+    ----------
+    feature : str
+        Feature string passed to ``*PLUG,LOAD``.
+    commands : list[str]
+        Transformed attribute names (``*`` → ``star``, ``/`` → ``slash``)
+        that were injected on the MAPDL instance when the plugin was loaded.
+    """
+
+    feature: str
+    commands: list[str] = field(default_factory=list)
 
 
 def _make_command(mapdl_instance: Mapdl, plugin_name: str, command_name: str):
@@ -85,7 +106,7 @@ class ansPlugin:
         self._mapdl_weakref = weakref.ref(mapdl)
         self._filename = None
         self._open = False
-        self._plugins: dict[str, str] = {}
+        self._plugins: dict[str, _PluginInfo] = {}
 
     @property
     def _mapdl(self) -> Mapdl:
@@ -103,8 +124,12 @@ class ansPlugin:
         if not self._plugins:
             lines.append("  (no plugins loaded)")
         else:
-            for name, feature in self._plugins.items():
-                lines.append(f"{name:<28} : {feature}")
+            for name, info in self._plugins.items():
+                n_cmds = len(info.commands)
+                cmd_label = f"{n_cmds} command{'s' if n_cmds != 1 else ''}"
+                lines.append(
+                    f"{name:<28} : {info.feature or '(default)'}  [{cmd_label}]"
+                )
         return "\n".join(lines)
 
     def __repr__(self) -> str:
@@ -151,6 +176,8 @@ class ansPlugin:
             setattr(
                 mapdl, each_command, _make_command(mapdl, plugin_name, each_command)
             )
+            if plugin_name in self._plugins:
+                self._plugins[plugin_name].commands.append(each_command)
             self._log.info(
                 f"Command '{each_command}' from plugin '{plugin_name}' set successfully."
             )
@@ -175,6 +202,12 @@ class ansPlugin:
             each_command = each_command.replace("*", "star").replace("/", "slash")
             if hasattr(mapdl, each_command):
                 delattr(mapdl, each_command)
+                if plugin_name in self._plugins:
+                    self._plugins[plugin_name].commands = [
+                        c
+                        for c in self._plugins[plugin_name].commands
+                        if c != each_command
+                    ]
                 self._log.info(
                     f"Command '{each_command}' from '{plugin_name}' deleted successfully."
                 )
@@ -223,7 +256,7 @@ class ansPlugin:
         self._log.info(
             f"Plugin '{plugin_name}' with feature '{feature}' loaded successfully."
         )
-        self._plugins[plugin_name] = feature
+        self._plugins[plugin_name] = _PluginInfo(feature=feature)
         self._load_commands(response, plugin_name=plugin_name)
         return response
 
@@ -260,31 +293,38 @@ class ansPlugin:
         return response
 
     def list(self) -> list[str]:
-        """
-        Lists all currently loaded plugins in MAPDL.
+        """List all currently loaded plugins.
+
+        Attempts to query MAPDL via ``*PLUG,LIST``. Falls back to the
+        internal tracking state when the server returns no output (which is
+        the case for MAPDL releases prior to the server-side fix).
+
+        .. note::
+           Internal tracking is session-scoped. If the Python process
+           reconnects to an already-running MAPDL instance that has plugins
+           loaded, this method will return an empty list until
+           server-side ``*PLUG,LIST`` parsing is available.
 
         Returns
         -------
-        list
-            A list of loaded plugin names.
+        list[str]
+            Names of the loaded plugins.
 
         Raises
         ------
-        RuntimeError
-            If the plugin list cannot be retrieved.
+        PluginError
+            If MAPDL explicitly reports an error retrieving the plugin list.
         """
-
-        command = "*PLUG,LIST"
-        response = self._mapdl.run(command) or ""
+        response = self._mapdl.run("*PLUG,LIST") or ""
         if response and "error" in response.lower():
             raise PluginError("Failed to retrieve the list of loaded plugins.")
 
-        plugin_names = []
+        # Try to extract names from the server response
+        server_names = []
         for line in response.strip().splitlines():
             line = line.strip()
             if not line:
                 continue
-            # Skip separator/header lines and informational messages
             if (
                 re.match(r"^[-=*]+$", line)
                 or "plugin" in line.lower()
@@ -293,5 +333,39 @@ class ansPlugin:
                 continue
             match = re.match(r"^(\S+)", line)
             if match:
-                plugin_names.append(match.group(1))
-        return plugin_names
+                server_names.append(match.group(1))
+
+        if server_names:
+            return server_names
+
+        # Fall back to internal state when server returns nothing
+        return list(self._plugins.keys())
+
+    def commands(self, plugin_name: str) -> List[str]:
+        """Return the attribute names registered by a plugin.
+
+        These are the command names (after ``*`` → ``star`` / ``/`` →
+        ``slash`` transformation) that were injected as attributes on the
+        MAPDL instance when *plugin_name* was loaded.
+
+        Parameters
+        ----------
+        plugin_name : str
+            Name of the plugin whose commands are requested.
+
+        Returns
+        -------
+        list[str]
+            Attribute names registered by the plugin.
+
+        Raises
+        ------
+        KeyError
+            If *plugin_name* is not currently tracked as loaded.
+        """
+        if plugin_name not in self._plugins:
+            raise KeyError(
+                f"Plugin '{plugin_name}' is not loaded. "
+                f"Loaded plugins: {list(self._plugins.keys())}"
+            )
+        return list(self._plugins[plugin_name].commands)
