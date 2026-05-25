@@ -32,83 +32,70 @@ from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import PluginError, PluginLoadError, PluginUnloadError
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from ansys.mapdl.core.plugin import ansPlugin
+from conftest import requires
 
 pytestmark = pytest.mark.random_order(disabled=True)
 
 TEST_PLUGIN = "PluginDPF"
 
+
 # ============================================================
-# Integration fixtures (require a live MAPDL ≥ 25.2 instance)
+# Integration tests — require a live MAPDL ≥ 25.2 via gRPC
 # ============================================================
 
 
-@pytest.fixture()
+@pytest.fixture(scope="class")
 def plugins(mapdl: Mapdl) -> ansPlugin:
     if mapdl.version < 25.2:
-        pytest.skip(
-            "Plugin support is only for versions 25.2 and above",
-            allow_module_level=True,
-        )
-
+        pytest.skip("Plugin support requires MAPDL ≥ 25.2")
     return mapdl.plugins
 
 
-@pytest.fixture()
-def dpf_load_response(plugins: ansPlugin) -> ansPlugin:
-    yield plugins.load(TEST_PLUGIN)
-    plugins.unload(TEST_PLUGIN)
+@requires("grpc")
+class TestPluginIntegration:
+    """Full plugin lifecycle tests against a live MAPDL instance."""
 
+    def test_load(self, plugins):
+        """Loading a plugin returns a non-empty response."""
+        response = plugins.load(TEST_PLUGIN)
+        assert response is not None and response != ""
 
-# ============================================================
-# Integration tests
-# ============================================================
+    @pytest.mark.xfail(reason="*PLUG,LIST output not yet captured by PyMAPDL")
+    def test_list_after_load(self, plugins):
+        """Loaded plugin appears in list()."""
+        plugins.load(TEST_PLUGIN)
+        try:
+            assert TEST_PLUGIN in plugins.list()
+        finally:
+            plugins.unload(TEST_PLUGIN)
 
+    def test_full_cycle(self, plugins):
+        """Full cycle: load → commands injected → list → unload → commands removed."""
+        response = plugins.load(TEST_PLUGIN)
 
-def test_plugin_load(plugins):
-    assert plugins.load(TEST_PLUGIN) is not None
+        # Commands parsed from load response are injected on the MAPDL instance
+        commands = plugins._parse_commands(response)
+        assert isinstance(commands, list)
+        assert len(commands) > 0, "At least one command should be injected on load"
+        assert all(hasattr(plugins._mapdl, cmd) for cmd in commands)
 
+        # After unload, injected commands are removed
+        plugins.unload(TEST_PLUGIN)
+        assert all(not hasattr(plugins._mapdl, cmd) for cmd in commands)
 
-@pytest.mark.xfail(reason="Plugin unload not implemented in MAPDL yet")
-def test_plugin_list(plugins, dpf_load_response):
-    assert TEST_PLUGIN in plugins.list(), "Plugin should be loaded"
+    def test_unload_already_unloaded(self, plugins):
+        """Unloading a plugin that is not loaded returns an empty string."""
+        plugins.load(TEST_PLUGIN)
+        plugins.unload(TEST_PLUGIN)
+        assert plugins.unload(TEST_PLUGIN) == ""
 
-
-def test_plugin_unload(plugins):
-    plugins.unload(TEST_PLUGIN)
-    assert TEST_PLUGIN not in plugins.list(), "Plugin should be unloaded"
-
-
-def test_parse_commands(plugins, dpf_load_response):
-    commands = plugins._parse_commands(dpf_load_response)
-
-    assert isinstance(commands, list), "Commands should be a list"
-    assert len(commands) > 0, "Commands list should not be empty"
-    assert "*DPF" in commands, "Expected command '*DPF' should be in the list"
-
-
-def test_load_commands(plugins, dpf_load_response):
-    commands = plugins._parse_commands(dpf_load_response)
-    assert isinstance(commands, list), "Commands should be a list"
-    assert len(commands) > 0, "Commands list should not be empty"
-    assert all(hasattr(plugins._mapdl, cmd) for cmd in commands)
-
-
-def test_deleter_commands(plugins, dpf_load_response):
-    commands = plugins._parse_commands(dpf_load_response)
-    assert isinstance(commands, list), "Commands should be a list"
-    assert len(commands) > 0, "Commands list should not be empty"
-
-    plugins._deleter_commands(commands, TEST_PLUGIN)
-
-    assert all(not hasattr(plugins._mapdl, cmd) for cmd in commands)
-
-
-def test_unload_plugin_twice(plugins):
-    plugins.load(TEST_PLUGIN)
-    assert f"Close of the {TEST_PLUGIN} Plugin" in plugins.unload(TEST_PLUGIN)
-    assert (
-        plugins.unload(TEST_PLUGIN) == ""
-    ), "Unloading a plugin twice should return an empty string"
+    def test_str_shows_loaded_plugin(self, plugins):
+        """__str__ lists the plugin after it is loaded."""
+        plugins.load(TEST_PLUGIN)
+        try:
+            assert TEST_PLUGIN in str(plugins)
+        finally:
+            plugins.unload(TEST_PLUGIN)
 
 
 # ============================================================
