@@ -1260,3 +1260,61 @@ environment variable. The following table describes all arguments.
 |                                       |                                                                                  |
 |                                       | Only for developing purposes.                                                    |
 +---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`PYMAPDL_GRPC_TRANSPORT`      | gRPC transport mode used by PyMAPDL.                                             |
+|                                       | Accepted values: ``insecure``, ``uds``,                                          |
+|                                       | ``wnua``, ``mtls``.                                                              |
+|                                       | Takes precedence over                                                            |
+|                                       | :envvar:`ANSYS_MAPDL_GRPC_TRANSPORT`.                                            |
+|                                       | See :ref:`ref_tls_guide`.                                                        |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export PYMAPDL_GRPC_TRANSPORT=mtls                            |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`ANSYS_MAPDL_GRPC_TRANSPORT`  | Alias for :envvar:`PYMAPDL_GRPC_TRANSPORT`.                                      |
+|                                       | Used when the transport mode should be                                           |
+|                                       | set at the Ansys product level rather                                            |
+|                                       | than per PyMAPDL installation.                                                   |
+|                                       | See :ref:`ref_tls_guide`.                                                        |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export ANSYS_MAPDL_GRPC_TRANSPORT=mtls                        |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`ANSYS_GRPC_CERTIFICATES`     | Path to the directory containing the                                             |
+|                                       | client-side mTLS certificates                                                    |
+|                                       | (``ca.crt``, ``client.crt``,                                                     |
+|                                       | ``client.key``) used by PyMAPDL when                                             |
+|                                       | ``transport_mode`` is ``mtls``.                                                  |
+|                                       | Falls back to a ``certs/`` subdirectory                                          |
+|                                       | of the current working directory if                                              |
+|                                       | not set.                                                                         |
+|                                       | See :ref:`ref_tls_guide`.                                                        |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export ANSYS_GRPC_CERTIFICATES=/path/to/certs                 |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`ANSYS_MAPDL_CERTS_PATH`      | Path to the directory containing the                                             |
+|                                       | server-side mTLS certificates                                                    |
+|                                       | (``ca.crt``, ``server.crt``,                                                     |
+|                                       | ``server.key``) read by the MAPDL                                                |
+|                                       | process itself.                                                                  |
+|                                       | See :ref:`ref_tls_guide`.                                                        |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export ANSYS_MAPDL_CERTS_PATH=/path/to/certs                  |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
