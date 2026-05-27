@@ -114,6 +114,7 @@ def create_grpc_client(
         jobid=(process_info.jobid if process_info else None) or config.jobid,
         finish_job_on_exit=config.finish_job_on_exit,
         run_location=config.run_location,
+        launched=process_info is not None,
         # transport_mode=config.transport_mode,
         # uds_dir=config.uds_dir,
         # uds_id=config.uds_id,
