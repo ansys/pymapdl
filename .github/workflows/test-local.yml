@@ -337,7 +337,7 @@ jobs:
           path: ./logs-${{ inputs.file-name }}.tgz.enc
           retention-days: 3
 
-      - uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 #v6.0.0
+      - uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 #v6.0.1
         name: "Upload coverage to Codecov"
         if: inputs.codecov-report == true
         with:
