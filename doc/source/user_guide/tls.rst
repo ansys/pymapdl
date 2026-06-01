@@ -19,7 +19,7 @@ Certificate files
 =================
 
 An mTLS setup requires three pairs of files — one for the CA, one for the server,
-and one for the client.  All files use PEM encoding.
+and one for the client. All files use PEM encoding.
 
 .. list-table::
    :header-rows: 1
@@ -30,16 +30,16 @@ and one for the client.  All files use PEM encoding.
      - Purpose
    * - Certificate Authority
      - ``ca.key``, ``ca.crt``
-     - Root of trust.  The CA signs both the server and client certificates.
+     - Root of trust. The CA signs both the server and client certificates.
        ``ca.key`` must be kept secret; ``ca.crt`` is distributed to all parties.
    * - Server (MAPDL)
      - ``server.key``, ``server.crt``
-     - Presented by MAPDL to prove its identity.  The certificate carries
+     - Presented by MAPDL to prove its identity. The certificate carries
        ``SERVER_AUTH`` extended key usage and Subject Alternative Names (SANs)
        matching the hostname or IP address that clients use to connect.
    * - Client (PyMAPDL)
      - ``client.key``, ``client.crt``
-     - Presented by PyMAPDL to prove its identity.  The certificate carries
+     - Presented by PyMAPDL to prove its identity. The certificate carries
        ``CLIENT_AUTH`` extended key usage.
 
 .. note::
@@ -52,7 +52,7 @@ Generating certificates
 =======================
 
 The following Python script generates a complete set of self-signed certificates
-using the ``cryptography`` package (RSA 4096-bit keys, SHA-256 signing).  It
+using the ``cryptography`` package (RSA 4096-bit keys, SHA-256 signing). It
 produces the full CA → server → client chain and writes all files to a ``certs/``
 output directory.
 
@@ -79,7 +79,7 @@ needed:
     from cryptography.x509.oid import ExtendedKeyUsageOID, NameOID
 
     # ── Configuration ────────────────────────────────────────────────────────────
-    # Each entry is (primary_hostname, [extra_SANs]).  For a remote server add its
+    # Each entry is (primary_hostname, [extra_SANs]). For a remote server add its
     # hostname and IP, e.g. ("my-mapdl-host", ["192.168.1.10"]).
     # For HPC deployments add one entry per compute node.
     SERVER_HOSTS = [("localhost", ["127.0.0.1"])]
@@ -281,7 +281,7 @@ For multiple servers (HPC), each node gets its own ``<hostname>.key`` /
 .. warning::
 
    Self-signed certificates are suitable for testing and private deployments but
-   should not be used in production without a proper PKI review.  Keep all
+   should not be used in production without a proper PKI review. Keep all
    ``.key`` files private and never commit them to a repository.
 
 
@@ -289,20 +289,20 @@ Launching MAPDL with mTLS
 ==========================
 
 MAPDL reads its server certificate and key from the directory pointed to by the
-``ANSYS_MAPDL_CERTS_PATH`` environment variable.  The directory must contain
+``ANSYS_MAPDL_CERTS_PATH`` environment variable. The directory must contain
 ``server.crt``, ``server.key``, and ``ca.crt``.
 
 Set this variable before starting MAPDL, or pass it through ``add_env_vars`` when
 using :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`.
 
-**Option 1 — Shell environment (manual MAPDL launch):**
+**Option 1: Shell environment (manual MAPDL launch):**
 
 .. code-block:: console
 
     export ANSYS_MAPDL_CERTS_PATH=/path/to/certs
     /ansys_inc/v252/ansys/bin/mapdl -grpc -port 50052 -transport mtls
 
-**Option 2 — Pass via PyMAPDL** (let PyMAPDL start the MAPDL process):
+**Option 2: Pass via PyMAPDL** (let PyMAPDL start the MAPDL process):
 
 .. code-block:: python
 
@@ -364,8 +364,8 @@ The relevant environment variables are summarised below.
    * - Environment variable
      - Description
    * - ``PYMAPDL_GRPC_TRANSPORT`` or ``ANSYS_MAPDL_GRPC_TRANSPORT``
-     - Sets the gRPC transport mode for PyMAPDL.  Set to ``mtls`` to enable
-       mutual TLS.  ``PYMAPDL_GRPC_TRANSPORT`` takes precedence if both are
+     - Sets the gRPC transport mode for PyMAPDL. Set to ``mtls`` to enable
+       mutual TLS. ``PYMAPDL_GRPC_TRANSPORT`` takes precedence if both are
        set.
    * - ``ANSYS_GRPC_CERTIFICATES``
      - Path to the directory containing the **client** certificates
@@ -383,7 +383,7 @@ The following example shows a complete workflow on a single machine.
 **Step 1: Generate certificates**
 
 Run the script from the `Generating certificates`_ section with the default
-``SERVER_HOSTS = [("localhost", ["127.0.0.1"])]`` setting.  This creates the
+``SERVER_HOSTS = [("localhost", ["127.0.0.1"])]`` setting. This creates the
 ``certs/`` directory in the current working directory.
 
 **Step 2: Launch MAPDL with mTLS**

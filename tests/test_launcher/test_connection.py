@@ -152,6 +152,41 @@ class TestConnectionCreation:
             mock_grpc.return_value = Mock()
             create_grpc_client(config, process_info)
 
+    def test_create_grpc_client_sets_launched_true_with_process_info(self):
+        """Test that launched=True is passed when process_info is provided.
+
+        Regression test for https://github.com/ansys/pymapdl/issues/4596:
+        mapdl.exit() was being silently skipped because _launched was always
+        False when MAPDL was started via launch_mapdl.
+        """
+        config = _create_test_config()
+        process_info = ProcessInfo(
+            process=None,
+            port=50052,
+            ip="127.0.0.1",
+            pid=12345,
+        )
+
+        with patch("ansys.mapdl.core.launcher.connection.MapdlGrpc") as mock_grpc:
+            mock_grpc.return_value = Mock()
+            create_grpc_client(config, process_info)
+            _, kwargs = mock_grpc.call_args
+            assert kwargs.get("launched") is True
+
+    def test_create_grpc_client_sets_launched_false_without_process_info(self):
+        """Test that launched=False is passed when no process_info is provided.
+
+        When connecting to an existing instance (not launched by PyMAPDL),
+        launched must be False so exit() does not attempt to kill the process.
+        """
+        config = _create_test_config()
+
+        with patch("ansys.mapdl.core.launcher.connection.MapdlGrpc") as mock_grpc:
+            mock_grpc.return_value = Mock()
+            create_grpc_client(config, process_info=None)
+            _, kwargs = mock_grpc.call_args
+            assert kwargs.get("launched") is False
+
     def test_create_grpc_client_with_custom_port(self):
         """Test gRPC client creation with custom port."""
         config = _create_test_config(port=50100)

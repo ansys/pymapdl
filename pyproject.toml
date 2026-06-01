@@ -66,7 +66,7 @@ all = [
 tests = [
   "ansys-dpf-core[graphics]==0.13.6",
   "ansys-mapdl-reader==0.55.2",
-  "ansys-tools-visualization-interface==0.13.1",
+  "ansys-tools-visualization-interface==0.13.3",
   "autopep8==2.3.2",
   "matplotlib==3.10.9",
   "pandas==2.3.3",
@@ -78,7 +78,7 @@ tests = [
   "pytest-pyvista==0.3.3",
   "pytest-random-order==1.2.0",
   "pytest-reportlog==1.0.0",
-  "pytest-rerunfailures==16.1",
+  "pytest-rerunfailures==16.2",
   "pytest-timeout==2.4.0",
   "pytest==9.0.3",
   "scipy==1.15.3",
@@ -89,7 +89,7 @@ doc = [
   "ansys-dpf-core[graphics]==0.13.6",
   "ansys-mapdl-reader==0.55.2",
   "ansys-sphinx-theme==1.7.2",
-  "ansys-tools-visualization-interface==0.13.1",
+  "ansys-tools-visualization-interface==0.13.3",
   "grpcio==1.80.0",
   "imageio-ffmpeg==0.6.0",
   "imageio==2.37.3",
@@ -124,7 +124,7 @@ doc = [
 
 [dependency-groups]
 
-tox = ["tox==4.53.1"]
+tox = ["tox==4.54.0"]
 
 [tool.flit.module]
 name = "ansys.mapdl.core"

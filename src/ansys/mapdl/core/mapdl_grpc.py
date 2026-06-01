@@ -538,7 +538,7 @@ class MapdlGrpc(MapdlBase):
             self._verify_local()
 
         # only cache process IDs if launched locally
-        if self._local and "exec_file" in start_parm:
+        if self._local and self._launched:
             self._cache_pids()
 
         self._create_session()
