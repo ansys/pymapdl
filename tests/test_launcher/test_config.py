@@ -300,9 +300,7 @@ class TestAutoPortSelection:
                 "ansys.mapdl.core.launcher.config.resolve_exec_file",
                 return_value="/fake/mapdl",
             ),
-            patch(
-                "ansys.mapdl.core.launcher.config.resolve_version", return_value=252
-            ),
+            patch("ansys.mapdl.core.launcher.config.resolve_version", return_value=252),
             patch(
                 "ansys.mapdl.core.launcher.network.check_port_status",
                 side_effect=[busy_status, busy_status, free_status],
@@ -332,9 +330,7 @@ class TestAutoPortSelection:
                 "ansys.mapdl.core.launcher.config.resolve_exec_file",
                 return_value="/fake/mapdl",
             ),
-            patch(
-                "ansys.mapdl.core.launcher.config.resolve_version", return_value=252
-            ),
+            patch("ansys.mapdl.core.launcher.config.resolve_version", return_value=252),
             patch(
                 "ansys.mapdl.core.launcher.network.check_port_status",
                 return_value=busy_status,
@@ -364,9 +360,7 @@ class TestAutoPortSelection:
                 "ansys.mapdl.core.launcher.config.resolve_exec_file",
                 return_value="/fake/mapdl",
             ),
-            patch(
-                "ansys.mapdl.core.launcher.config.resolve_version", return_value=252
-            ),
+            patch("ansys.mapdl.core.launcher.config.resolve_version", return_value=252),
             patch(
                 "ansys.mapdl.core.launcher.network.check_port_status",
                 return_value=busy_status,
