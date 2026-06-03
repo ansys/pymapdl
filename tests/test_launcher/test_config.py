@@ -281,6 +281,105 @@ class TestConfigPort:
             assert port is not None and port > 0
 
 
+class TestAutoPortSelection:
+    """Tests for automatic port selection when default port is in use."""
+
+    def test_auto_selects_next_port_when_default_in_use(self):
+        """When no port is given and the default is busy, the next free port is used."""
+        from ansys.mapdl.core.launcher.models import PortStatus
+
+        busy_status = PortStatus(available=False, used_by_mapdl=True, port=50052)
+        free_status = PortStatus(available=True, used_by_mapdl=False, port=50053)
+
+        with (
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_start_instance",
+                return_value=True,
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_exec_file",
+                return_value="/fake/mapdl",
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_version", return_value=252
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.network.check_port_status",
+                side_effect=[busy_status, busy_status, free_status],
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.validation.validate_config",
+                return_value=None,
+            ),
+        ):
+            config = resolve_launch_config(port=None, start_instance=True)
+            # Port must have been bumped away from the busy 50052
+            assert config.port != 50052
+            assert config.port > 50052
+
+    def test_does_not_auto_select_when_port_is_explicit(self):
+        """When a port is explicitly provided, it is used as-is (no auto-selection)."""
+        from ansys.mapdl.core.launcher.models import PortStatus
+
+        busy_status = PortStatus(available=False, used_by_mapdl=True, port=50100)
+
+        with (
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_start_instance",
+                return_value=True,
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_exec_file",
+                return_value="/fake/mapdl",
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_version", return_value=252
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.network.check_port_status",
+                return_value=busy_status,
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.validation.validate_config",
+                return_value=None,
+            ),
+        ):
+            # Explicit port — should stay at 50100 even though it is "busy"
+            config = resolve_launch_config(port=50100, start_instance=True)
+            assert config.port == 50100
+
+    def test_does_not_auto_select_when_pymapdl_port_env_set(self):
+        """When PYMAPDL_PORT env var is set, auto-selection is not triggered."""
+        from ansys.mapdl.core.launcher.models import PortStatus
+
+        busy_status = PortStatus(available=False, used_by_mapdl=True, port=50200)
+
+        with (
+            patch.dict(os.environ, {"PYMAPDL_PORT": "50200"}),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_start_instance",
+                return_value=True,
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_exec_file",
+                return_value="/fake/mapdl",
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_version", return_value=252
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.network.check_port_status",
+                return_value=busy_status,
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.validation.validate_config",
+                return_value=None,
+            ),
+        ):
+            config = resolve_launch_config(port=None, start_instance=True)
+            assert config.port == 50200
+
+
 class TestConfigNproc:
     """Tests for nproc resolution."""
 
