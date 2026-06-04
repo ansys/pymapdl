@@ -27,8 +27,14 @@ This module contains pure functions that resolve configuration from:
 2. Environment variables
 3. System defaults
 
-All functions are pure (same input → same output) and raise
+Most helper functions are pure (same input -> same output) and raise
 ConfigurationError for invalid states.
+
+Note
+----
+``resolve_launch_config`` may perform runtime port availability probing when
+starting a local instance without an explicitly requested port. In that case,
+the resolved port can depend on host runtime state.
 """
 
 import os
@@ -93,6 +99,13 @@ def resolve_launch_config(
     1. Explicit argument (if not None)
     2. Environment variable (if set)
     3. Default value
+
+    Note
+    ----
+    When launching a new local instance and no port is explicitly requested
+    (via ``port`` argument or ``PYMAPDL_PORT`` presence), this function can probe
+    port availability and auto-select the next free port if the default is busy.
+    Therefore, the final resolved ``port`` may depend on runtime host state.
 
     This function combines user-provided arguments, environment variable
     overrides, and system defaults to produce a complete ``LaunchConfig``

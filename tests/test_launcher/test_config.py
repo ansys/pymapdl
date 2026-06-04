@@ -317,10 +317,6 @@ class TestAutoPortSelection:
 
     def test_does_not_auto_select_when_port_is_explicit(self):
         """When a port is explicitly provided, it is used as-is (no auto-selection)."""
-        from ansys.mapdl.core.launcher.models import PortStatus
-
-        busy_status = PortStatus(available=False, used_by_mapdl=True, port=50100)
-
         with (
             patch(
                 "ansys.mapdl.core.launcher.config.resolve_start_instance",
@@ -333,22 +329,19 @@ class TestAutoPortSelection:
             patch("ansys.mapdl.core.launcher.config.resolve_version", return_value=252),
             patch(
                 "ansys.mapdl.core.launcher.network.check_port_status",
-                return_value=busy_status,
-            ),
+            ) as mock_check_port_status,
             patch(
                 "ansys.mapdl.core.launcher.validation.validate_config",
-            ) as mock_check_port_status,
+                return_value=None,
+            ),
         ):
             # Explicit port — should stay at 50100 even though it is "busy"
             config = resolve_launch_config(port=50100, start_instance=True)
             assert config.port == 50100
+            mock_check_port_status.assert_not_called()
 
     def test_does_not_auto_select_when_pymapdl_port_env_set(self):
         """When PYMAPDL_PORT env var is set, auto-selection is not triggered."""
-            mock_check_port_status.assert_not_called()
-        from ansys.mapdl.core.launcher.models import PortStatus
-        busy_status = PortStatus(available=False, used_by_mapdl=True, port=50200)
-
         with (
             patch.dict(os.environ, {"PYMAPDL_PORT": "50200"}),
             patch(
@@ -362,8 +355,7 @@ class TestAutoPortSelection:
             patch("ansys.mapdl.core.launcher.config.resolve_version", return_value=252),
             patch(
                 "ansys.mapdl.core.launcher.network.check_port_status",
-                return_value=busy_status,
-            ),
+            ) as mock_check_port_status,
             patch(
                 "ansys.mapdl.core.launcher.validation.validate_config",
                 return_value=None,
@@ -371,6 +363,7 @@ class TestAutoPortSelection:
         ):
             config = resolve_launch_config(port=None, start_instance=True)
             assert config.port == 50200
+            mock_check_port_status.assert_not_called()
 
 
 class TestConfigNproc:
