@@ -292,6 +292,7 @@ class TestAutoPortSelection:
         free_status = PortStatus(available=True, used_by_mapdl=False, port=50053)
 
         with (
+            patch.dict(os.environ, {"PYMAPDL_PORT": ""}),
             patch(
                 "ansys.mapdl.core.launcher.config.resolve_start_instance",
                 return_value=True,
