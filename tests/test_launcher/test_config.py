@@ -366,6 +366,30 @@ class TestAutoPortSelection:
             assert config.port == 50200
             mock_check_port_status.assert_not_called()
 
+    def test_keeps_default_port_when_auto_selection_probe_fails(self):
+        """When auto-selection probing fails, keep the resolved default port."""
+        with (
+            patch.dict(os.environ, {"PYMAPDL_PORT": ""}),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_start_instance",
+                return_value=True,
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_exec_file",
+                return_value="/fake/mapdl",
+            ),
+            patch("ansys.mapdl.core.launcher.config.resolve_version", return_value=252),
+            patch(
+                "ansys.mapdl.core.launcher.network.check_port_status",
+                side_effect=RuntimeError("error cause"),
+            ),
+            patch("ansys.mapdl.core.launcher.config.LOG.debug") as mock_debug,
+        ):
+            config = resolve_launch_config(port=None, start_instance=True)
+
+            assert config.port == 50052
+            mock_debug.assert_any_call("Could not auto-select available port: error cause")
+
 
 class TestConfigNproc:
     """Tests for nproc resolution."""
