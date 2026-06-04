@@ -388,7 +388,7 @@ def resolve_launch_config(
     # specific port (neither via the argument nor PYMAPDL_PORT env var),
     # automatically find the next available port if the default is already
     # occupied.
-    _port_explicitly_set = port is not None or os.getenv("PYMAPDL_PORT") is not None
+    _port_explicitly_set = port is not None or bool(os.getenv("PYMAPDL_PORT"))
     if resolved_start_instance and not _port_explicitly_set:
         try:
             from .network import check_port_status, find_available_port

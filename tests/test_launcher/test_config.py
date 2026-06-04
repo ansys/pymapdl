@@ -337,8 +337,7 @@ class TestAutoPortSelection:
             ),
             patch(
                 "ansys.mapdl.core.launcher.validation.validate_config",
-                return_value=None,
-            ),
+            ) as mock_check_port_status,
         ):
             # Explicit port — should stay at 50100 even though it is "busy"
             config = resolve_launch_config(port=50100, start_instance=True)
@@ -346,8 +345,8 @@ class TestAutoPortSelection:
 
     def test_does_not_auto_select_when_pymapdl_port_env_set(self):
         """When PYMAPDL_PORT env var is set, auto-selection is not triggered."""
+            mock_check_port_status.assert_not_called()
         from ansys.mapdl.core.launcher.models import PortStatus
-
         busy_status = PortStatus(available=False, used_by_mapdl=True, port=50200)
 
         with (
