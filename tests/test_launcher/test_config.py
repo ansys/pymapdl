@@ -388,7 +388,9 @@ class TestAutoPortSelection:
             config = resolve_launch_config(port=None, start_instance=True)
 
             assert config.port == 50052
-            mock_debug.assert_any_call("Could not auto-select available port: error cause")
+            mock_debug.assert_any_call(
+                "Could not auto-select available port: error cause"
+            )
 
 
 class TestConfigNproc:
