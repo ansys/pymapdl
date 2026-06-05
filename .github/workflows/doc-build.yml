@@ -179,14 +179,14 @@ jobs:
           echo "PYMAPDL_VERSION=$(python -c 'from ansys.mapdl.core import __version__; print(__version__)')" >> $GITHUB_OUTPUT
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
 
-      - name: "Cache examples"
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
-        if: ${{ inputs.use_cache_examples && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
-        with:
-          path: doc/source/examples
-          key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
-          restore-keys: |
-            Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+      # - name: "Cache examples"
+      #   uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
+      #   if: ${{ inputs.use_cache_examples && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
+      #   with:
+      #     path: doc/source/examples
+      #     key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+      #     restore-keys: |
+      #       Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Cache docs build directory"
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
