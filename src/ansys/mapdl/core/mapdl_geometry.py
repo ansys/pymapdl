@@ -870,7 +870,27 @@ class Geometry:
                 entity_num = int(line.d["entity_subs_num"])
                 if entity_num not in entity_nums and entity_num in selected_lnum:
                     entity_nums.append(entity_num)
-                    line = line.to_vtk(resolution=1)
+                    entity = line
+                    try:
+                        line = entity.to_vtk(resolution=1)
+                    except pv.core.errors.DeprecationError as err:
+                        # Compatibility with pyiges releases where CircularArc.to_vtk
+                        # still calls ``transform`` without explicit ``inplace``.
+                        if (
+                            entity.__class__.__name__ != "CircularArc"
+                            or "PolyData.transform" not in str(err)
+                        ):
+                            raise
+
+                        line = pv.CircularArc(
+                            center=[entity.x, entity.y, 0],
+                            pointa=[entity.x1, entity.y1, 0],
+                            pointb=[entity.x2, entity.y2, 0],
+                            resolution=1,
+                        )
+                        line.points += [0, 0, entity.z]
+                        if entity.transform is not None:
+                            line.transform(entity.transform._to_vtk(), inplace=True)
                     line.cell_data["entity_num"] = entity_num
                     lines.append(line)
 
