@@ -10,6 +10,40 @@ This document contains the release notes for the project.
 .. towncrier release notes start
 
 
+.. _v0.73.1:
+
+`0.73.1 <https://github.com/ansys/pymapdl/releases/tag/v0.73.1>`_ - June 08, 2026
+================================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Fixed
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Update pyvista compatibility for picking observer in plotting functions
+          - `#4584 <https://github.com/ansys/pymapdl/pull/4584>`_
+
+        * - Automatic port assignment
+          - `#4622 <https://github.com/ansys/pymapdl/pull/4622>`_
+
+        * - Doc build
+          - `#4626 <https://github.com/ansys/pymapdl/pull/4626>`_
+
+
+  .. tab-item:: Maintenance
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Bump version from 0.72.dev0 to 0.74.dev0
+          - `#4628 <https://github.com/ansys/pymapdl/pull/4628>`_
+
+
 .. _v0.73.0:
 
 `0.73.0 <https://github.com/ansys/pymapdl/releases/tag/v0.73.0>`_ - April 20, 2026
