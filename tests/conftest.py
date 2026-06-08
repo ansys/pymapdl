@@ -26,6 +26,7 @@ import os
 from pathlib import Path
 from shutil import get_terminal_size
 from sys import platform
+import threading
 from typing import Any
 from unittest.mock import patch
 
@@ -1363,3 +1364,38 @@ def psd_analysis(mapdl, cleared):
     from ansys.mapdl.core.examples import vmfiles
 
     mapdl.input(vmfiles["vm203"])
+
+
+@pytest.fixture(autouse=True, scope="module")
+def _check_no_leaked_mapdl_threads():
+    """Warn when MAPDL-owned daemon threads leak between test modules.
+
+    Catches regressions where threads started for a ``MapdlPool`` or
+    ``MapdlGrpc`` instance are not properly cleaned up, which can cause
+    segfaults or ``ValueError`` crashes in unrelated subsequent tests.
+    """
+    yield
+    import gc
+    import warnings
+
+    gc.collect()
+
+    _LEAKED_THREAD_NAMES = ("enqueue_output", "reader", "_poll_connectivity")
+
+    leaked = [
+        t
+        for t in threading.enumerate()
+        if t.daemon and any(name in (t.name or "") for name in _LEAKED_THREAD_NAMES)
+    ]
+    if leaked:
+        warnings.warn(
+            f"Leaked MAPDL daemon threads detected after module teardown: "
+            f"{[t.name for t in leaked]}. "
+            f"This may cause segfaults in subsequent test modules.",
+            stacklevel=2,
+        )
+        raise RuntimeError(
+            f"Leaked MAPDL daemon threads detected after module teardown: "
+            f"{[t.name for t in leaked]}. "
+            f"This may cause segfaults in subsequent test modules."
+        )

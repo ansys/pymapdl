@@ -816,7 +816,9 @@ class MapdlPool:
         Parameters
         ----------
         block : bool, optional
-            When ``True``, wait until all processes are closed.
+            When ``True`` (default), wait until all processes are closed
+            before returning.  Set to ``False`` for a fire-and-forget
+            shutdown.
 
         Examples
         --------

@@ -8,6 +8,7 @@
 import os
 from queue import Queue
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -183,10 +184,10 @@ class TestStartSubprocess:
     """Tests for subprocess start function."""
 
     def test_start_subprocess_with_output_file(self):
-        """Test starting subprocess with output file."""
+        """Test starting subprocess with output file stores _stdout_file_handle."""
         with tempfile.TemporaryDirectory() as tmpdir:
             output_file = os.path.join(tmpdir, "output.txt")
-            cmd = ["python", "-c", "print('test')"]
+            cmd = [sys.executable, "-c", "print('test')"]
 
             proc = process._start_subprocess(
                 cmd=cmd,
@@ -197,13 +198,17 @@ class TestStartSubprocess:
 
             assert proc is not None
             assert isinstance(proc, subprocess.Popen)
+            # The file handle must be stored so _kill_process can close it
+            assert proc._stdout_file_handle is not None
+            assert not proc._stdout_file_handle.closed
             proc.wait(timeout=10)
+            proc._stdout_file_handle.close()
             assert proc.poll() is not None
 
     def test_start_subprocess_without_output_file(self):
-        """Test starting subprocess without output file."""
+        """Test starting subprocess without output file has no file handle."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            cmd = ["python", "-c", "print('test')"]
+            cmd = [sys.executable, "-c", "print('test')"]
 
             proc = process._start_subprocess(
                 cmd=cmd,
@@ -214,6 +219,10 @@ class TestStartSubprocess:
 
             assert proc is not None
             assert isinstance(proc, subprocess.Popen)
+            # No file redirect — handle should be None, pipes should be open
+            assert proc._stdout_file_handle is None
+            assert proc.stdout is not None
+            assert proc.stderr is not None
             proc.wait(timeout=10)
 
 
@@ -226,34 +235,47 @@ class TestMonitorStdout:
     """Tests for stdout monitoring."""
 
     def test_monitor_stdout_with_pipe(self):
-        """Test monitoring stdout with pipe."""
+        """Test monitoring stdout with pipe returns (queue, thread)."""
         mock_pipe = Mock()
         mock_pipe.readline.side_effect = [b"line1\n", b"line2\n", b""]
 
-        queue = process._monitor_stdout(mock_pipe)
+        queue, thread = process._monitor_stdout(mock_pipe)
 
         assert queue is not None
         assert isinstance(queue, Queue)
+        assert thread is not None
+        assert isinstance(thread, threading.Thread)
 
         time.sleep(0.3)
 
         assert not queue.empty()
 
     def test_monitor_stdout_without_pipe(self):
-        """Test monitoring stdout returns None without pipe."""
+        """Test monitoring stdout returns (None, None) without pipe."""
         result = process._monitor_stdout(None)
-        assert result is None
+        assert result == (None, None)
 
     def test_monitor_stdout_with_error(self):
-        """Test monitoring stdout handles errors."""
+        """Test monitoring stdout handles errors gracefully."""
         mock_pipe = Mock()
         mock_pipe.readline.side_effect = ValueError("Pipe closed")
 
-        queue = process._monitor_stdout(mock_pipe)
+        queue, thread = process._monitor_stdout(mock_pipe)
 
         time.sleep(0.3)
 
         assert queue is not None
+        assert thread is not None
+
+    def test_monitor_stdout_thread_is_daemon(self):
+        """Test that the reader thread is a daemon thread."""
+        mock_pipe = Mock()
+        mock_pipe.readline.side_effect = [b""]
+
+        _, thread = process._monitor_stdout(mock_pipe)
+
+        assert thread is not None
+        assert thread.daemon is True
 
 
 # ============================================================================
@@ -638,21 +660,22 @@ class TestPhase4QueueMonitoringEdgeCases:
     """
 
     def test_monitor_stdout_creates_queue(self):
-        """Test that _monitor_stdout creates queue when stdout available."""
+        """Test that _monitor_stdout creates (queue, thread) when stdout available."""
         mock_stdout = Mock()
         mock_stdout.readline = Mock(side_effect=[b"line1\n", b"line2\n", b""])
 
-        queue = process._monitor_stdout(mock_stdout)
+        queue, thread = process._monitor_stdout(mock_stdout)
 
         assert queue is not None
-
         assert isinstance(queue, process.Queue)
+        assert thread is not None
+        assert isinstance(thread, threading.Thread)
 
     def test_monitor_stdout_returns_none_when_no_stdout(self):
-        """Test that _monitor_stdout returns None when stdout is None."""
-        queue = process._monitor_stdout(None)
+        """Test that _monitor_stdout returns (None, None) when stdout is None."""
+        result = process._monitor_stdout(None)
 
-        assert queue is None
+        assert result == (None, None)
 
     def test_check_grpc_server_ready_success(self):
         """Test gRPC server ready detection with both patterns."""
