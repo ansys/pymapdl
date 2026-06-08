@@ -421,12 +421,15 @@ plotter.add_mesh(
 
 # Add the contact mesh to the scene
 mesh_contact = result_mesh.grid
+damage_scalars_name = "Cohesive Damage"
+mesh_contact.cell_data[damage_scalars_name] = np.zeros(mesh_contact.n_cells)
+mesh_contact.set_active_scalars(damage_scalars_name, preference="cell")
 plotter.add_mesh(
     mesh_contact,
     opacity=0.9,
     scalar_bar_args={"title": "Cohesive Damage"},
     clim=[0, 1],
-    scalars=np.zeros((mesh_contact.n_cells)),
+    scalars=damage_scalars_name,
 )
 for i in range(1, 100):
     # Get displacements
@@ -448,8 +451,7 @@ for i in range(1, 100):
 
     mesh_beam.points = disp_result.data
     mesh_contact.points = disp_cohesive.data
-
-    plotter.update_scalars(cohesive_damage.data, mesh=mesh_contact, render=False)
+    mesh_contact.cell_data[damage_scalars_name][:] = cohesive_damage.data
     plotter.write_frame()
 
 plotter.close()
