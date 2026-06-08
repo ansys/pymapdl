@@ -414,3 +414,33 @@ class TestCloseGrpcChannel:
 
         mock._log.debug.assert_called()
         assert mock._channel is None
+
+
+class TestSendCommandExitedGuard:
+    """Tests that _send_command raises MapdlExitedError when the instance has exited."""
+
+    def test_raises_mapdle_exited_error_when_exited(self):
+        """_send_command raises MapdlExitedError when _exited is True."""
+        from ansys.mapdl.core.errors import MapdlExitedError
+
+        mock = _make_mock_mapdl()
+        mock._exited = True
+
+        with pytest.raises(MapdlExitedError):
+            MapdlGrpc._send_command(mock, "/PREP7")
+
+    def test_does_not_raise_when_not_exited(self):
+        """_send_command proceeds normally when _exited is False."""
+        from unittest.mock import MagicMock
+
+        mock = _make_mock_mapdl()
+        mock._exited = False
+        mock._stub = MagicMock()
+        resp = MagicMock()
+        resp.response = "OK"
+        mock._stub.SendCommand.return_value = resp
+
+        result = MapdlGrpc._send_command(mock, "/PREP7")
+
+        assert result == "OK"
+        mock._stub.SendCommand.assert_called_once()

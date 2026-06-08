@@ -1380,13 +1380,16 @@ def _check_no_leaked_mapdl_threads():
 
     gc.collect()
 
-    _LEAKED_THREAD_NAMES = ("enqueue_output", "reader", "_poll_connectivity")
+    _LEAKED_TARGET_NAMES = ("enqueue_output", "reader", "_poll_connectivity")
 
-    leaked = [
-        t
-        for t in threading.enumerate()
-        if t.daemon and any(name in (t.name or "") for name in _LEAKED_THREAD_NAMES)
-    ]
+    def _is_mapdl_drainer(t: threading.Thread) -> bool:
+        target = getattr(t, "_target", None)
+        if target is not None and target.__name__ in _LEAKED_TARGET_NAMES:
+            return True
+        # gRPC poll threads embed the function name in the thread name
+        return any(name in (t.name or "") for name in _LEAKED_TARGET_NAMES)
+
+    leaked = [t for t in threading.enumerate() if t.daemon and _is_mapdl_drainer(t)]
     if leaked:
         warnings.warn(
             f"Leaked MAPDL daemon threads detected after module teardown: "

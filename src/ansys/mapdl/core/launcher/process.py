@@ -442,15 +442,20 @@ def _start_subprocess(
     )
 
     # Launch process
-    process = subprocess.Popen(
-        cmd,
-        shell=False,  # Security: avoid shell injection  # nosec B603
-        cwd=cwd,
-        stdin=subprocess.DEVNULL,
-        stdout=stdout_arg,
-        stderr=stderr_arg,
-        env=env,
-    )
+    try:
+        process = subprocess.Popen(
+            cmd,
+            shell=False,  # Security: avoid shell injection  # nosec B603
+            cwd=cwd,
+            stdin=subprocess.DEVNULL,
+            stdout=stdout_arg,
+            stderr=stderr_arg,
+            env=env,
+        )
+    except Exception:
+        if stdout_file_handle is not None:
+            stdout_file_handle.close()
+        raise
 
     # Keep a reference to the output file so _kill_process can close it
     # explicitly.  When stdout=PIPE, process.stdout is the pipe; when

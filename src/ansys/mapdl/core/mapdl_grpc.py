@@ -452,7 +452,7 @@ class MapdlGrpc(MapdlBase):
         # gRPC request specific locks as these gRPC request are not thread safe
         self._vget_lock: bool = False
         self._get_lock: bool = False
-        self._process_close_lock: threading.Lock = threading.Lock()
+        self._process_close_lock = threading.Lock()
 
         self._prioritize_thermal: bool = False
         self._locked: bool = False  # being used within MapdlPool
@@ -1714,6 +1714,11 @@ class MapdlGrpc(MapdlBase):
         self, cmd: str, mute: bool = False
     ) -> Optional[str]:  # numpydoc ignore=RT01
         """Send a MAPDL command and return the response as a string"""
+        if self._exited:
+            raise MapdlExitedError(
+                f"The MAPDL instance has been exited before running the command: {cmd}"
+            )
+
         opt = ""
         if mute:
             opt = "MUTE"  # suppress any output
