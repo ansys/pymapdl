@@ -22,6 +22,8 @@
 
 """Test geometry commands"""
 
+from unittest.mock import MagicMock, PropertyMock, patch
+
 import numpy as np
 import pytest
 
@@ -648,3 +650,66 @@ def test_build_legacy_geometry(mapdl, contact_geom_and_mesh):
 
     assert leg_geo.areas(merge=True) == mapdl.geometry.get_areas()
     assert isinstance(leg_geo.areas(merge=True), pv.PolyData)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Tests for _load_lines CircularArc DeprecationError fallback
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.fixture()
+def circular_arc_geom(mapdl, cleared):
+    """Create a simple circular arc in MAPDL and return the line number."""
+    mapdl.prep7(mute=True)
+    k0 = mapdl.k("", 0, 0, 0)  # center
+    k1 = mapdl.k("", 0, 0, 1)  # normal axis direction
+    line_nums = mapdl.circle(k0, 1, k1, arc=90)
+    return line_nums[0]
+
+
+@requires("pyvista")
+@requires("pyiges")
+def test_load_lines_circular_arc_success(mapdl, circular_arc_geom):
+    """Normal path: _load_lines returns a PolyData for a circular arc."""
+    lines = mapdl.geometry._load_lines()
+    assert isinstance(lines, list)
+    assert len(lines) >= 1
+    assert all(isinstance(ln, pv.PolyData) for ln in lines)
+
+
+@requires("pyvista")
+@requires("pyiges")
+def test_load_lines_circular_arc_deprecation_fallback(mapdl, circular_arc_geom):
+    """Fallback path: when CircularArc.to_vtk raises the known DeprecationError,
+    _load_lines constructs the arc via pv.CircularArc instead and still returns
+    a valid PolyData list.
+    """
+    import pyiges.geometry
+
+    err = pv.core.errors.DeprecationError("Use PolyData.transform with inplace=True")
+
+    with patch.object(pyiges.geometry.CircularArc, "to_vtk", side_effect=err):
+        lines = mapdl.geometry._load_lines()
+
+    assert isinstance(lines, list)
+    assert len(lines) >= 1
+    assert all(isinstance(ln, pv.PolyData) for ln in lines)
+
+
+@requires("pyvista")
+@requires("pyiges")
+def test_load_lines_circular_arc_unrelated_deprecation_reraises(
+    mapdl, circular_arc_geom
+):
+    """If CircularArc.to_vtk raises a DeprecationError whose message does not
+    contain 'PolyData.transform', the exception must propagate unchanged.
+    """
+    import pyiges.geometry
+
+    err = pv.core.errors.DeprecationError("Some unrelated deprecation")
+
+    with (
+        patch.object(pyiges.geometry.CircularArc, "to_vtk", side_effect=err),
+        pytest.raises(pv.core.errors.DeprecationError, match="Some unrelated deprecation"),
+    ):
+        mapdl.geometry._load_lines()
