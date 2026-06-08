@@ -441,7 +441,7 @@ class TestWaitForProcessReady:
         mock_process.poll.return_value = None
         mock_process.stdout = None
 
-        mock_monitor.return_value = None
+        mock_monitor.return_value = (None, None)
 
         process.wait_for_process_ready(
             process=mock_process,
@@ -474,7 +474,7 @@ class TestWaitForProcessReady:
         mock_process.stdout = mock_stdout
 
         mock_queue = Mock(spec=Queue)
-        mock_monitor.return_value = mock_queue
+        mock_monitor.return_value = (mock_queue, Mock())
 
         process.wait_for_process_ready(
             process=mock_process,

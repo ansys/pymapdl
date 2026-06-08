@@ -444,3 +444,13 @@ class TestSendCommandExitedGuard:
 
         assert result == "OK"
         mock._stub.SendCommand.assert_called_once()
+
+    def test_send_command_stream_raises_when_exited(self):
+        """_send_command_stream raises MapdlExitedError when _exited is True."""
+        from ansys.mapdl.core.errors import MapdlExitedError
+
+        mock = _make_mock_mapdl()
+        mock._exited = True
+
+        with pytest.raises(MapdlExitedError):
+            MapdlGrpc._send_command_stream(mock, "/PREP7")

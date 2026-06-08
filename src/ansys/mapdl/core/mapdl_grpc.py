@@ -1737,6 +1737,10 @@ class MapdlGrpc(MapdlBase):
     @protect_grpc
     def _send_command_stream(self, cmd, verbose=False) -> str:  # numpydoc ignore=RT01
         """Send a command and expect a streaming response"""
+        if self._exited:
+            raise MapdlExitedError(
+                f"The MAPDL instance has been exited before running the command: {cmd}"
+            )
         request = pb_types.CmdRequest(command=cmd)
         time_step = self._get_time_step_stream()
         metadata = [("time_step_stream", str(time_step))]
