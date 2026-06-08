@@ -22,7 +22,7 @@
 
 """Test geometry commands"""
 
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import patch
 
 import numpy as np
 import pytest
