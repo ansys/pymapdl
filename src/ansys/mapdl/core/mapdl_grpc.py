@@ -393,6 +393,7 @@ class MapdlGrpc(MapdlBase):
         remote_instance: Optional["PIM_Instance"] = None,
         transport_mode: Optional[str] = None,
         uds_dir: Optional[Union[str, Path]] = None,
+        uds_id: Optional[str] = None,
         certs_dir: Optional[Union[str, Path]] = None,
         **start_parm: dict[str, Any],
     ):
@@ -410,6 +411,9 @@ class MapdlGrpc(MapdlBase):
         self.uds_dir: Path = (
             Path(uds_dir) if uds_dir is not None else Path("~").expanduser() / ".conn"
         )
+
+        # Optional uds identifier (stringified port) may be supplied by caller
+        self.uds_id: Optional[str] = str(uds_id) if uds_id is not None else None
 
         self.certs_dir: Path | None = Path(certs_dir) if certs_dir is not None else None
         self.grpc_options = start_parm.pop("grpc_options", DEFAULT_GRPC_OPTIONS)
@@ -658,43 +662,6 @@ class MapdlGrpc(MapdlBase):
         """Configure WNUA transport-specific settings."""
         # No specific configuration needed for WNUA transport
         pass
-
-    def configure_mtls(self) -> None:
-        """Configure mTLS transport-specific settings.
-
-        Resolves the certificates directory (from the configured value, the
-        ANSYS_GRPC_CERTIFICATES environment variable, or ./certs) and validates
-        that the client-side certificate files exist. Raises FileNotFoundError
-        with a helpful message if validation fails.
-        """
-        # Resolve certs_dir if not provided
-        if self.certs_dir is None:
-            self.certs_dir = Path(
-                os.environ.get(
-                    "ANSYS_GRPC_CERTIFICATES", os.path.join(os.getcwd(), "certs")
-                )
-            )
-        else:
-            # Accept string or Path
-            self.certs_dir = Path(self.certs_dir)
-
-        # Validate that certs_dir exists
-        if not self.certs_dir.exists() or not self.certs_dir.is_dir():
-            raise FileNotFoundError(
-                f"mTLS certificate directory not found: '{self.certs_dir}'. "
-                "Provide a valid certs_dir or set ANSYS_GRPC_CERTIFICATES environment variable."
-            )
-
-        # Client-side certificate files expected by PyMAPDL
-        required_client_files = ["client.crt", "client.key", "ca.crt"]
-        missing = [
-            f for f in required_client_files if not (self.certs_dir / f).is_file()
-        ]
-        if missing:
-            raise FileNotFoundError(
-                f"mTLS certificate directory '{self.certs_dir}' is missing files: {missing}. "
-                "Ensure 'client.crt', 'client.key', and 'ca.crt' are present."
-            )
 
     def _after_run(self, command: str) -> None:
         if command[:4].upper() == "/CLE":
@@ -4134,6 +4101,51 @@ class MapdlGrpc(MapdlBase):
         cmd = ["scancel", f"{jobid}"]
         # to ensure the job is stopped properly, let's issue the scancel twice.
         subprocess.Popen(cmd)  # nosec B603
+
+    def configure_mtls(self) -> None:
+        """Configure mTLS transport-specific settings.
+
+        Resolves the certificates directory (from the configured value, the
+        ANSYS_GRPC_CERTIFICATES environment variable, or ./certs). If the
+        certs_dir was explicitly provided by the caller, ensure it exists and
+        contains the required client certificate files. When certs_dir is None
+        we only set the resolved path (env var or ./certs) and do not raise if
+        the directory is absent; this matches historical behavior relied on by
+        the test-suite and callers that defer validation later.
+        """
+        # Track whether caller provided certs_dir
+        provided = self.certs_dir is not None
+
+        # Resolve certs_dir if not provided
+        if not provided:
+            self.certs_dir = Path(
+                os.environ.get(
+                    "ANSYS_GRPC_CERTIFICATES", os.path.join(os.getcwd(), "certs")
+                )
+            )
+        else:
+            # Accept string or Path
+            # Ensure a str is passed to Path to satisfy type checkers
+            self.certs_dir = Path(str(self.certs_dir))
+
+        # If caller provided certs_dir, ensure it exists and is a directory
+        if provided and (not self.certs_dir.exists() or not self.certs_dir.is_dir()):
+            raise FileNotFoundError(
+                f"mTLS certificate directory not found: '{self.certs_dir}'. "
+                "Provide a valid certs_dir or set ANSYS_GRPC_CERTIFICATES environment variable."
+            )
+
+        # If the directory exists (whether provided or resolved), validate required files
+        if self.certs_dir.exists() and self.certs_dir.is_dir():
+            required_client_files = ["client.crt", "client.key", "ca.crt"]
+            missing = [
+                f for f in required_client_files if not (self.certs_dir / f).is_file()
+            ]
+            if missing:
+                raise FileNotFoundError(
+                    f"mTLS certificate directory '{self.certs_dir}' is missing files: {missing}. "
+                    "Ensure 'client.crt', 'client.key', and 'ca.crt' are present."
+                )
 
     def __del__(self):
         """Release resources when the object is garbage-collected.

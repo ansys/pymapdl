@@ -404,7 +404,7 @@ def test_configure_mtls_uses_cwd_certs_when_no_env_var(monkeypatch, tmp_path):
     assert obj.certs_dir == Path(os.path.join(str(tmp_path), "certs"))
 
 
-def test_configure_mtls_preserves_existing_certs_dir():
+def test_configure_mtls_preserves_existing_certs_dir(tmp_path):
     """configure_mtls does not overwrite certs_dir when it is already set."""
     from pathlib import Path
 
@@ -414,11 +414,18 @@ def test_configure_mtls_preserves_existing_certs_dir():
     import logging
 
     obj._log = logging.getLogger("test")
-    obj.certs_dir = Path("/already/set")
+    # Use a tmp_path-based directory to avoid depending on absolute paths
+    preset = tmp_path / "already_set"
+    preset.mkdir()
+    # Create the expected client cert files so configure_mtls does not raise
+    (preset / "client.crt").write_text("dummy")
+    (preset / "client.key").write_text("dummy")
+    (preset / "ca.crt").write_text("dummy")
+    obj.certs_dir = Path(preset)
 
     obj.configure_mtls()
 
-    assert obj.certs_dir == Path("/already/set")
+    assert obj.certs_dir == Path(preset)
 
 
 def test_configure_mtls_raises_for_missing_dir(monkeypatch, tmp_path):
@@ -446,8 +453,9 @@ def test_configure_mtls_raises_for_missing_files(tmp_path):
 
     obj._log = logging.getLogger("test")
     # Create an empty certs dir with only ca.crt present
+    # Use the provided tmp_path as the certs directory and ensure it exists
     obj.certs_dir = tmp_path
-    tmp_path.mkdir()
+    tmp_path.mkdir(exist_ok=True)
     (tmp_path / "ca.crt").write_text("dummy")
 
     with pytest.raises(FileNotFoundError):
