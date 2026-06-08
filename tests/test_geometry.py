@@ -710,6 +710,8 @@ def test_load_lines_circular_arc_unrelated_deprecation_reraises(
 
     with (
         patch.object(pyiges.geometry.CircularArc, "to_vtk", side_effect=err),
-        pytest.raises(pv.core.errors.DeprecationError, match="Some unrelated deprecation"),
+        pytest.raises(
+            pv.core.errors.DeprecationError, match="Some unrelated deprecation"
+        ),
     ):
         mapdl.geometry._load_lines()
