@@ -26,12 +26,12 @@ import sys
 import types
 from unittest.mock import MagicMock
 
-import grpc
 import pytest
 
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlRuntimeError
 from ansys.mapdl.core.launcher import generate_start_parameters
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+import grpc
 
 
 def _make_fake_channel_ready(delay=0):
@@ -85,9 +85,8 @@ def test_wait_until_healthy_timeout(monkeypatch):
 
     import logging
 
-    import grpc
-
     from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+    import grpc
 
     channel, future = _make_fake_channel_ready(delay=5.0)
 
@@ -420,3 +419,36 @@ def test_configure_mtls_preserves_existing_certs_dir():
     obj.configure_mtls()
 
     assert obj.certs_dir == Path("/already/set")
+
+
+def test_configure_mtls_raises_for_missing_dir(monkeypatch, tmp_path):
+    """configure_mtls should raise FileNotFoundError when the certs_dir does not exist."""
+    monkeypatch.delenv("ANSYS_GRPC_CERTIFICATES", raising=False)
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    import logging
+
+    obj._log = logging.getLogger("test")
+    obj.certs_dir = tmp_path / "does_not_exist"
+
+    with pytest.raises(FileNotFoundError):
+        obj.configure_mtls()
+
+
+def test_configure_mtls_raises_for_missing_files(tmp_path):
+    """configure_mtls should raise FileNotFoundError when required client cert files are missing."""
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    import logging
+
+    obj._log = logging.getLogger("test")
+    # Create an empty certs dir with only ca.crt present
+    obj.certs_dir = tmp_path
+    tmp_path.mkdir()
+    (tmp_path / "ca.crt").write_text("dummy")
+
+    with pytest.raises(FileNotFoundError):
+        obj.configure_mtls()

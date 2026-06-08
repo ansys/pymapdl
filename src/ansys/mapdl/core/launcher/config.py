@@ -426,6 +426,13 @@ def resolve_launch_config(
     # Resolve transport mode
     resolved_transport_mode = resolve_transport_mode(transport_mode)
 
+    # If user provided certs_dir but did not explicitly set transport_mode,
+    # silently infer mTLS transport.
+    if resolved_transport_mode is None and certs_dir is not None:
+        from .models import TransportMode
+
+        resolved_transport_mode = TransportMode.MTLS
+
     # Resolve additional switches (explicit arg or PYMAPDL_ADDITIONAL_SWITCHES env var)
     resolved_additional_switches = resolve_additional_switches(additional_switches)
 

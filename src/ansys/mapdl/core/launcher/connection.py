@@ -115,10 +115,10 @@ def create_grpc_client(
         finish_job_on_exit=config.finish_job_on_exit,
         run_location=config.run_location,
         launched=process_info is not None,
-        # transport_mode=config.transport_mode,
-        # uds_dir=config.uds_dir,
-        # uds_id=config.uds_id,
-        # certs_dir=config.certs_dir,
+        transport_mode=(config.transport_mode.value if config.transport_mode else None),
+        uds_dir=config.uds_dir,
+        uds_id=config.uds_id,
+        certs_dir=(str(config.certs_dir) if config.certs_dir else None),
     )
 
     # Clear database if requested

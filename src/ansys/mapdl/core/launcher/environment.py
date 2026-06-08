@@ -184,6 +184,28 @@ def prepare_environment(config: LaunchConfig) -> EnvironmentConfig:
         LOG.debug("Extending system environment with user-provided variables")
         env.update(config.add_env_vars)
 
+    # If launching with mTLS, ensure MAPDL process receives the certificates
+    # path via ANSYS_GRPC_CERTIFICATES so the server can start its secure gRPC
+    # endpoint with the same certificates.
+    try:
+        from .models import TransportMode
+
+        is_mtls = config.transport_mode == TransportMode.MTLS
+    except Exception:
+        is_mtls = False
+
+    if is_mtls:
+        # Prefer explicit certs_dir, then existing environment var, then cwd/certs
+        if config.certs_dir:
+            env["ANSYS_GRPC_CERTIFICATES"] = str(config.certs_dir)
+        else:
+            env.setdefault(
+                "ANSYS_GRPC_CERTIFICATES",
+                os.environ.get(
+                    "ANSYS_GRPC_CERTIFICATES", os.path.join(os.getcwd(), "certs")
+                ),
+            )
+
     return EnvironmentConfig(variables=env, replace_all=False)
 
 

@@ -43,11 +43,12 @@ from warnings import warn
 import weakref
 
 from ansys.tools.common.versioning import version_string_as_tuple
-import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
-import numpy as np
 from numpy.typing import NDArray
 import psutil
+
+import grpc
+import numpy as np
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
@@ -659,13 +660,40 @@ class MapdlGrpc(MapdlBase):
         pass
 
     def configure_mtls(self) -> None:
-        """Configure mTLS transport-specific settings."""
-        # Set defaults for certificates
+        """Configure mTLS transport-specific settings.
+
+        Resolves the certificates directory (from the configured value, the
+        ANSYS_GRPC_CERTIFICATES environment variable, or ./certs) and validates
+        that the client-side certificate files exist. Raises FileNotFoundError
+        with a helpful message if validation fails.
+        """
+        # Resolve certs_dir if not provided
         if self.certs_dir is None:
             self.certs_dir = Path(
                 os.environ.get(
                     "ANSYS_GRPC_CERTIFICATES", os.path.join(os.getcwd(), "certs")
                 )
+            )
+        else:
+            # Accept string or Path
+            self.certs_dir = Path(self.certs_dir)
+
+        # Validate that certs_dir exists
+        if not self.certs_dir.exists() or not self.certs_dir.is_dir():
+            raise FileNotFoundError(
+                f"mTLS certificate directory not found: '{self.certs_dir}'. "
+                "Provide a valid certs_dir or set ANSYS_GRPC_CERTIFICATES environment variable."
+            )
+
+        # Client-side certificate files expected by PyMAPDL
+        required_client_files = ["client.crt", "client.key", "ca.crt"]
+        missing = [
+            f for f in required_client_files if not (self.certs_dir / f).is_file()
+        ]
+        if missing:
+            raise FileNotFoundError(
+                f"mTLS certificate directory '{self.certs_dir}' is missing files: {missing}. "
+                "Ensure 'client.crt', 'client.key', and 'ca.crt' are present."
             )
 
     def _after_run(self, command: str) -> None:
