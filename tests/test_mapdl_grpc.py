@@ -324,24 +324,20 @@ class TestKillProcess:
         """_kill_process is a no-op when _mapdl_process is None."""
         mock = _make_mock_mapdl()
         mock._terminate_process = Mock()
-        mock._join_pipe_drainer_threads = Mock()
 
         MapdlGrpc._kill_process(mock)
 
         mock._terminate_process.assert_not_called()
-        mock._join_pipe_drainer_threads.assert_called_once()
 
-    def test_terminates_and_joins_when_process_set(self):
-        """_terminate_process and _join_pipe_drainer_threads are both called."""
+    def test_terminates_when_process_set(self):
+        """_terminate_process is called; joining is deferred to _close_process."""
         mock = _make_mock_mapdl()
         mock._mapdl_process = _make_mock_process()
         mock._terminate_process = Mock()
-        mock._join_pipe_drainer_threads = Mock()
 
         MapdlGrpc._kill_process(mock)
 
         mock._terminate_process.assert_called_once_with(mock._mapdl_process)
-        mock._join_pipe_drainer_threads.assert_called_once()
 
     def test_lock_prevents_concurrent_double_teardown(self):
         """Concurrent calls serialize: the second waits for the first."""
@@ -356,7 +352,6 @@ class TestKillProcess:
             call_log.append("end")
 
         mock._terminate_process = slow_terminate
-        mock._join_pipe_drainer_threads = Mock()
         mock._mapdl_process = _make_mock_process()
 
         t1 = threading.Thread(target=MapdlGrpc._kill_process, args=(mock,))

@@ -2025,14 +2025,20 @@ class MapdlGrpc(MapdlBase):
 
         Acquires ``_process_close_lock`` to prevent concurrent teardowns,
         then delegates to :meth:`_terminate_process` (SIGTERM → pipe-close →
-        wait → SIGKILL) and :meth:`_join_pipe_drainer_threads`.
+        wait → SIGKILL).
+
+        Notes
+        -----
+        Does **not** join the pipe-drainer threads here because MAPDL may have
+        spawned child processes that also hold the write ends of stdout/stderr
+        open.  Those children are killed by :meth:`_kill_child_processes`,
+        which must run first.  Call :meth:`_join_pipe_drainer_threads` only
+        after all child processes are gone (see :meth:`_close_process`).
         """
         with self._process_close_lock:
             if self._mapdl_process is not None:
                 self._log.debug("Killing process using subprocess.Popen.terminate")
                 self._terminate_process(self._mapdl_process)
-
-            self._join_pipe_drainer_threads()
 
     def _kill_child_processes(self, timeout=2):
         pids = self._pids.copy()
@@ -2081,8 +2087,13 @@ class MapdlGrpc(MapdlBase):
             # killing main process (subprocess)
             self._kill_process()
 
-            # Killing child processes
+            # Killing child processes (they also hold the pipe write ends open,
+            # so they must die before we join the drainer threads).
             self._kill_child_processes(timeout=timeout)
+
+            # All write ends of stdout/stderr are now closed; drainer threads
+            # will see EOF and exit almost immediately.
+            self._join_pipe_drainer_threads()
 
         if self.is_alive:
             raise MapdlRuntimeError("MAPDL could not be exited.")
