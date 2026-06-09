@@ -115,6 +115,48 @@ uv run pytest -p no:randomly --maxfail=100 tests/
 uv run pytest -m "not slow"
 ```
 
+Running CI-like tests via tox docker envs
+---------------------------------------
+
+Test engineers may need to reproduce CI test runs locally. The repository provides tox envs that orchestrate Docker containers, build images, and run the test matrix similar to CI. Use uv/uvx to match CI execution (CI runs: `uvx tox -e docker-test-remote`).
+
+Common tox envs and purpose for testers:
+
+- docker-run-mapdl — Start a MAPDL Docker container (background) to run integration tests against a live instance.
+- docker-run-mapdl-dpf — Start MAPDL + DPF containers for DPF-enabled integration tests.
+- docker-stop-mapdl — Stop/remove MAPDL containers started earlier.
+- docker-stop-mapdl-dpf — Stop/remove MAPDL+DPF containers.
+- docker-test-local-build — Build local Docker images then run the full test matrix against them.
+- docker-test-remote-build — Trigger a remote/CI-like image build and run tests against those images.
+- docker-test-local — Run tests using local Docker images/containers (CI-like behavior on your machine).
+- docker-test-remote — Run tests against remote images/environment (mirrors CI closely).
+
+Recommended tester workflow:
+
+1. Prepare environment variables (see example.env files in each directory and copy to .env).
+2. Start containers if needed: `uvx tox -e docker-run-mapdl` or `tox -e docker-run-mapdl`.
+3. Run the test env: `uvx tox -e docker-test-local` (or `-e docker-test-remote` to mirror CI).
+4. Stop containers: `uvx tox -e docker-stop-mapdl`.
+
+Example (Unix/macOS):
+
+```sh
+export PYMAPDL_PORT=50052 PYMAPDL_START_INSTANCE=True
+uvx tox -e docker-run-mapdl
+uvx tox -e docker-test-local
+uvx tox -e docker-stop-mapdl
+```
+
+Note on environment variable files
+
+Each directory that needs environment variables contains an `example.env` file with keys and sample values. Copy or rename the appropriate `example.env` to `.env` and update values for your environment — tox envs will load `.env` when present.
+
+Tips for testers
+
+- Prefer `uvx` so test runs use the pinned virtual environment as CI does.
+- Use `PYMAPDL_START_INSTANCE=False` to test against an existing instance rather than launching containers.
+- When adding or debugging flaky tests, reproduce CI with `docker-test-remote` to rule out environment differences.
+
 ## Best Practices
 
 - Use pytest fixtures from `conftest.py`

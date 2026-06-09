@@ -88,6 +88,58 @@ uv run pytest tests/
 uv run pytest tests/test_specific.py -v
 ```
 
+## Running CI-like tests via tox docker envs
+
+The repository provides several tox environments that orchestrate Docker containers and run tests similarly to the CI. If the required environment variables are set (see examples below), a developer can run tests locally as if running in the CI pipeline.
+
+Common tox envs:
+
+- ``docker-run-mapdl`` — Start a MAPDL Docker container (background). Useful to start the MAPDL service without running tests.
+- ``docker-run-mapdl-dpf`` — Start MAPDL and DPF Docker containers required for DPF-enabled tests.
+- ``docker-stop-mapdl`` — Stop and remove MAPDL containers started by docker-run-mapdl.
+- ``docker-stop-mapdl-dpf`` — Stop and remove MAPDL+DPF containers started by docker-run-mapdl-dpf.
+- ``docker-test-local-build`` — Build local Docker images then run the full test matrix against local-built images.
+- ``docker-test-remote-build`` — Trigger a CI-like remote image build (or use prebuilt remote images) then run tests against those images.
+- ``docker-test-local`` — Run tests using local Docker images/containers (CI-like behavior on your machine).
+- ``docker-test-remote`` — Run tests against remote images/environment (mirrors CI environment closely).
+
+Usage notes:
+- Set env vars to control test behavior (examples below). When these are set, the tox envs will start
+  required Docker services, build images if needed, run tests, and stop containers.
+- Recommended workflow: start MAPDL/Dpf containers, run tests, then stop containers.
+  Or use the combined test envs that handle lifecycle automatically.
+
+Examples (Unix/macOS):
+
+# Start MAPDL container (background)
+PYMAPDL_PORT=50052 PYMAPDL_START_INSTANCE=True tox -e docker-run-mapdl
+
+# Run tests using local build and Docker containers (CI-like)
+PYMAPDL_PORT=50052 PYMAPDL_START_INSTANCE=True TOX_TEST_MODE=local tox -e docker-test-local
+
+# Run remote-build (build image remotely) and tests
+PYMAPDL_PORT=50052 PYMAPDL_START_INSTANCE=True TOX_TEST_MODE=remote tox -e docker-test-remote-build
+
+Examples (Windows PowerShell):
+
+$env:PYMAPDL_PORT = "50052"; $env:PYMAPDL_START_INSTANCE = "True"; tox -e docker-run-mapdl
+
+These examples demonstrate running tests locally while mirroring CI behaviour. Adjust env vars to match your machine and network configuration.
+
+Note about using uv/uvx
+
+The project recommends using the uv/uvx wrappers when invoking tox to ensure tests run inside the pinned virtual environment.
+The CI uses uvx to run tox; for example:
+
+   uvx tox -e docker-test-remote
+
+On developer machines, use `uv` or `uvx` consistently (e.g., `uvx tox -e docker-test-local`) so the execution environment matches CI.
+
+Environment variable files
+
+Required environment variables are provided as example.env files in the respective directories (for example, in test, ci, or docker-related folders). Copy or rename the appropriate example.env to .env and edit the values to match your setup — the tox environments will load the .env files when present.
+
+
 ## Don't
 
 - Don't modify auto-generated files in `_commands/` directory
