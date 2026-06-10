@@ -249,10 +249,10 @@ on a remote server or container and it does not have access to the local filesys
       - ``Remote`` testing
     * - Launching MAPDL
       - PyMAPDL finds the local MAPDL installation and launches an MAPDL instance with the specified configuration.
-        Use :env:`PYMAPDL_PORT` to specify the port.
+        Use :envvar:`PYMAPDL_PORT` to specify the port.
       - PyMAPDL connects to a running instance of MAPDL that is expected to be running on a remote server or container.
-        Use :env:`PYMAPDL_START_INSTANCE` to set this option.
-        You need to start MAPDL before running the tests, and use :env:`PYMAPDL_PORT` and :env:`PYMAPDL_IP` environment variables
+        Use :envvar:`PYMAPDL_START_INSTANCE` to set this option.
+        You need to start MAPDL before running the tests, and use :envvar:`PYMAPDL_PORT` and :envvar:`PYMAPDL_IP` environment variables
         to configure the connection to the running instance.
     * - Access to local resources
       - Has access to the local filesystem and resources.
@@ -454,9 +454,9 @@ Windows PowerShell example:
 
 Environment variables that influence behaviour:
 
-- :env:`PYMAPDL_START_INSTANCE`: When True, tox envs will start MAPDL/Dpf containers; set to False to reuse existing instances.
-- :env:`PYMAPDL_PORT` / :env:`PYMAPDL_IP`: Connection address/port used by tests.
-- :env:`TOX_TEST_MODE`: "local" or "remote" to select the test/build flow used by the tox envs.
+- :envvar:`PYMAPDL_START_INSTANCE`: When True, tox envs will start MAPDL/Dpf containers; set to False to reuse existing instances.
+- :envvar:`PYMAPDL_PORT` / :envvar:`PYMAPDL_IP`: Connection address/port used by tests.
+- :envvar:`TOX_TEST_MODE`: "local" or "remote" to select the test/build flow used by the tox envs.
 
 .. note::
     The tox docker envs are intended to mirror CI steps. Ensure Docker is running and you have sufficient permissions.
