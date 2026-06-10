@@ -1714,7 +1714,7 @@ class MapdlGrpc(MapdlBase):
         self, cmd: str, mute: bool = False
     ) -> Optional[str]:  # numpydoc ignore=RT01
         """Send a MAPDL command and return the response as a string"""
-        if self.channel is not None and not self.channel.is_alive:
+        if self._channel is not None and not self.is_alive:
             self._exited = True
             raise MapdlExitedError(
                 f"Mapdl exited (gRPC channel is '{self.channel_state}') before running the command: {cmd}"
@@ -1744,7 +1744,7 @@ class MapdlGrpc(MapdlBase):
     @protect_grpc
     def _send_command_stream(self, cmd, verbose=False) -> str:  # numpydoc ignore=RT01
         """Send a command and expect a streaming response"""
-        if self.channel is not None and not self.channel.is_alive:
+        if self._channel is not None and not self.is_alive:
             self._exited = True
             raise MapdlExitedError(
                 f"Mapdl exited (gRPC channel is '{self.channel_state}') before running the command: {cmd}"
