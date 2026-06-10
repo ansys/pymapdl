@@ -256,7 +256,7 @@ on a remote server or container and it does not have access to the local filesys
         to configure the connection to the running instance.
     * - Access to local resources
       - Has access to the local filesystem and resources.
-      - Does not have access to the local filesystem and resources. PyMAPDL will upload/download files to the remote instance as needed.
+      - Does not have access to the local filesystem and resources. PyMAPDL uploads/downloads files to the remote instance as needed.
 
 
 Creation of a unit test
