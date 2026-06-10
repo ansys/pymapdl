@@ -92,4 +92,4 @@ Check that you have installed the package correctly by importing the module:
 
 
 For information on launching PyMAPDL and connecting it
-to an MAPDL instance, see:ref:`ref_launch_pymapdl`.
+to an MAPDL instance, see :ref:`_ref_launch_pymapdl`.
