@@ -27,9 +27,9 @@ on:
 
       use_cache_examples:
         description: |
-          Whether to use the examples cache. Default is "true".
+          Whether to use the examples cache. Default is "false".
         required: false
-        default: true
+        default: false
         type: boolean
 
       use_cache_doc_build:

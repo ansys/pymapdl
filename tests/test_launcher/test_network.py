@@ -718,9 +718,15 @@ class TestPhase2NetworkIntegration:
                 with patch(
                     "ansys.mapdl.core.launcher.environment.is_wsl", return_value=False
                 ):
-                    config = resolve_launch_config(start_instance=True)
-                    assert config.port == 50052
-                    assert config.ip == "127.0.0.1"
+                    with patch(
+                        "ansys.mapdl.core.launcher.network.check_port_status",
+                        return_value=PortStatus(
+                            port=50052, available=True, used_by_mapdl=False
+                        ),
+                    ):
+                        config = resolve_launch_config(start_instance=True)
+                        assert config.port == 50052
+                        assert config.ip == "127.0.0.1"
 
 
 # ============================================================================
