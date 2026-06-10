@@ -937,11 +937,11 @@ Ansys Developer Ecosystem Resources
 
 Ansys has an extensive developer ecosystem where you can find assistance for a variety of issues.
 
-- `Developer Portal <_developer_portal>` - blog posts, documentation, guides
-  - `Developer Forum <_developer_forum>` - scripting & usage support for PyAnsys and other Ansys developer tools
-- `Ansys Innovation Space <_ansys_innovation_space>` - product support forum and training material
-- `GitHub <_pymapdl_repo>` - development support, bug reporting, feature requests, etc.
-- `Ansys Learning Hub <_ansys_learning_hub>` - training, courses, and learning plans
+- `Developer Portal <_developer_portal>`: Blog posts, documentation, and guide
+  - `Developer Forum <_developer_forum>`: Scripting and usage support for PyAnsys and other Ansys developer tools
+- `Ansys Innovation Space <_ansys_innovation_space>`: Product support forum and training materials
+- `GitHub <_pymapdl_repo>`: Development support, bug reporting, feature requests, and more.
+- `Ansys Learning Hub <_ansys_learning_hub>`: Training, courses and learning plans
 
 
 More help needed?
