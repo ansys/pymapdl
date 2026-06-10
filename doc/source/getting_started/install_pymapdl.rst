@@ -10,7 +10,7 @@ Python module
 ~~~~~~~~~~~~~
 
 .. note::
-   These instructions assume you are working on Windows and are familiar 
+   These instructions assume you are working on Windows and are familiar
    with ``pip`` and the command line. If you have not heard of these before
    or are not comfortable with them it is recommended that you read through
    the `Python Packaging User Guide Tutorial on pip <python_installing_packages>`
@@ -19,7 +19,7 @@ Python module
 The ``ansys.mapdl.core`` package currently supports Python 3.10 through
 Python 3.13 on Windows, macOS, and Linux.
 
-Install the latest release from `PyPi <pymapdl_pypi_>`_ with this command on 
+Install the latest release from `PyPi <pymapdl_pypi_>`_ with this command on
 the command line, terminal, or in powershell:
 
 .. code:: console
@@ -34,9 +34,9 @@ Alternatively, install the latest release from
    pip install git+https://github.com/ansys/pymapdl.git
 
 
-For a local *development* version, install with these commands. 
-This is assuming you are familiar with git and have it installed, 
-see `here <_developing_pymapdl>` for more details. 
+For a local *development* version, install with these commands.
+This is assuming you are familiar with git and have it installed,
+see `here <_developing_pymapdl>` for more details.
 
 .. code:: console
 
