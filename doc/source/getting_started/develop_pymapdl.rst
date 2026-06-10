@@ -444,7 +444,7 @@ Environment variable files
 Required environment variables for the tox Docker envs are provided in ``docker/run/example.env`` and ``docker/testing/example.env``.
 Copy each ``example.env`` to a ``.env`` file in the same directory and update the values to match your environment.
 For example: ``cp docker/testing/example.env docker/testing/.env``.
-The tox envs will read these ``.env`` files when present.
+The tox envs read these ``.env`` files when present.
 
 Windows PowerShell example:
 
@@ -454,7 +454,7 @@ Windows PowerShell example:
 
 Environment variables that influence behaviour:
 
-- :envvar:`PYMAPDL_START_INSTANCE`: When True, tox envs will start MAPDL/Dpf containers; set to False to reuse existing instances.
+- :envvar:`PYMAPDL_START_INSTANCE`: When True, tox envs start MAPDL/Dpf containers; set to False to reuse existing instances.
 - :envvar:`PYMAPDL_PORT` / :envvar:`PYMAPDL_IP`: Connection address/port used by tests.
 - :envvar:`TOX_TEST_MODE`: "local" or "remote" to select the test/build flow used by the tox envs.
 
