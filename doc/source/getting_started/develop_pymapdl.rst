@@ -399,9 +399,9 @@ Common tox envs and quick explanation:
 **Testing**:
 
 - ``docker-test-local-build``:
-  Build local Docker image with ``local`` configuration and run the full test matrix against it.
+  Rebuild the local-host Docker image (``local`` profile) without running tests.
 - ``docker-test-remote-build``:
-  Build local Docker image with ``remote`` configuration and run the full test matrix against it.
+  Rebuild the remote-host Docker image (``remote`` profile) without running tests.
 - ``docker-test-local``:
   Run tests using local Docker images/containers (CI-like behavior on your machine).
 - ``docker-test-remote``:
