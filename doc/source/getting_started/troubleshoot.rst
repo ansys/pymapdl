@@ -932,7 +932,7 @@ Known Issues
   :func:`Mapdl.eread() <ansys.mapdl.core.Mapdl.eread>` methods.
 
 
-Ansys Developer Ecosystem Resources
+Ansys developer ecosystem resources
 -----------------------------------
 
 Ansys has an extensive developer ecosystem where you can find assistance for a variety of issues.
