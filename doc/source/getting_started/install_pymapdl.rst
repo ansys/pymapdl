@@ -33,9 +33,9 @@ Alternatively, install the latest release from
    pip install git+https://github.com/ansys/pymapdl.git
 
 
-For a local *development* version, install with these commands.
-This is assuming you are familiar with git and have it installed,
-see `here <_developing_pymapdl>` for more details.
+For a local *development* version, install with the following commands.
+If you are familiar with git or do not have it installed,
+see the `contributing to PyMAPDL guide <_developing_pymapdl>` for more information.
 
 .. code:: console
 
