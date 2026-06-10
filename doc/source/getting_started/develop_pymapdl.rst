@@ -441,10 +441,10 @@ Or for local runs:
 Environment variable files
 **************************
 
-Required environment variables for the tox docker envs are provided in ``example.env``files located in the
-corresponding directories (for example under ``tests/``, ``ci/``, or ``docker/``).
-Copy or rename each ``example.env`` to ``.env`` and update the values to match your environment,
-the tox envs will read ``.env`` files when present.
+Required environment variables for the tox Docker envs are provided in ``docker/run/example.env`` and ``docker/testing/example.env``.
+Copy each ``example.env`` to a ``.env`` file in the same directory and update the values to match your environment.
+For example: ``cp docker/testing/example.env docker/testing/.env``.
+The tox envs will read these ``.env`` files when present.
 
 Windows PowerShell example:
 
