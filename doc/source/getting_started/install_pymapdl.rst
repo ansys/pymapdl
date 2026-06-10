@@ -11,8 +11,7 @@ Python module
 
 .. note::
    These instructions assume you are working on Windows and are familiar
-   with ``pip`` and the command line. If you have not heard of these before
-   or are not comfortable with them it is recommended that you read through
+   with ``pip`` and the command line. If they are new to you, you should read
    the `Python Packaging User Guide Tutorial on pip <python_installing_packages>`
    before proceeding.
 
