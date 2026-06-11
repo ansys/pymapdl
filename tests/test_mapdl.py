@@ -2148,16 +2148,20 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 def test_save_on_exit(mapdl, cleared, save):
 
     with (
-        patch.object(mapdl, "_exit_mapdl") as mock_exit,
+        patch.object(mapdl, "_release_resources") as mock_release,
         patch.object(mapdl, "save") as mock_save,
     ):
 
-        mock_exit.return_value = None
+        def _set_exited(*args, **kwargs):
+            # Simulate what _release_resources does: mark the instance as exited.
+            mapdl._exited = True
+
+        mock_release.side_effect = _set_exited
         mock_save.return_value = None
 
         mapdl.exit(save=save, force=True)
 
-        mock_exit.assert_called_once()
+        mock_release.assert_called_once()
         if save:
             mock_save.assert_called_once()
         else:
@@ -3114,51 +3118,145 @@ def test_requires_package_speed():
 @pytest.mark.parametrize("start_instance", [True, False])
 @pytest.mark.parametrize("exited", [True, False])
 @pytest.mark.parametrize("launched", [True, False])
-@pytest.mark.parametrize("on_hpc", [True, False])
-@pytest.mark.parametrize("finish_job_on_exit", [True, False])
-def test_garbage_clean_del(
-    start_instance, exited, launched, on_hpc, finish_job_on_exit
-):
+@pytest.mark.parametrize("cleanup_on_exit", [True, False])
+def test_garbage_clean_del(start_instance, exited, launched, cleanup_on_exit):
     from ansys.mapdl.core import Mapdl
 
     class DummyMapdl(Mapdl):
         def __init__(self):
             pass
 
-    with (
-        patch.object(DummyMapdl, "_exit_mapdl") as mock_exit,
-        patch.object(DummyMapdl, "kill_job") as mock_kill,
-    ):
-
-        mock_exit.return_value = None
-        mock_kill.return_value = None
+    with patch.object(DummyMapdl, "_release_resources") as mock_release:
+        mock_release.return_value = None
 
         # Setup
         mapdl = DummyMapdl()
         mapdl._path = ""
-        mapdl._jobid = 1001
 
         # Config
         mapdl._start_instance = start_instance
         mapdl._exited = exited
         mapdl._launched = launched
-        mapdl._mapdl_on_hpc = on_hpc
-        mapdl.finish_job_on_exit = finish_job_on_exit
+        mapdl._cleanup = cleanup_on_exit  # mirrors cleanup_on_exit parameter
 
         del mapdl
 
-        if exited or not start_instance or not launched:
-            mock_exit.assert_not_called()
+        should_release = not exited and start_instance and launched and cleanup_on_exit
+        if should_release:
+            mock_release.assert_called_once()
         else:
-            mock_exit.assert_called_once()
+            mock_release.assert_not_called()
 
-        if exited or not start_instance:
-            mock_kill.assert_not_called()
-        else:
-            if on_hpc and finish_job_on_exit:
-                mock_kill.assert_called_once()
-            else:
-                mock_kill.assert_not_called()
+
+@stack(*PATCH_MAPDL_START)
+def test_exit_is_idempotent():
+    """Calling exit() twice must not error and _release_resources is called once."""
+    start_parm = {
+        "ip": "123.45.67.99",
+        "local": True,
+        "set_no_abort": False,
+        "launched": True,
+        "start_instance": True,
+        "transport_mode": "insecure",
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+
+    with patch.object(mapdl, "_release_resources") as mock_release:
+        mock_release.side_effect = lambda *a, **kw: setattr(mapdl, "_exited", True)
+
+        mapdl.exit(force=True)
+        mapdl.exit(force=True)  # second call must be a no-op
+
+        mock_release.assert_called_once()
+
+    mapdl.__del__ = lambda: None  # prevent cleanup on GC
+
+
+@stack(*PATCH_MAPDL_START)
+def test_release_resources_closes_channel():
+    """_release_resources() must close the gRPC channel."""
+    from unittest.mock import MagicMock
+
+    start_parm = {
+        "ip": "123.45.67.99",
+        "local": False,
+        "set_no_abort": False,
+        "launched": True,
+        "start_instance": True,
+        "transport_mode": "insecure",
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+
+    # Replace the stub channel (an empty string from the patch) with a real mock.
+    mock_channel = MagicMock()
+    mapdl._channel = mock_channel
+
+    with (
+        patch.object(mapdl, "_exit_mapdl"),
+        patch.object(mapdl, "_cleanup_loggers"),
+    ):
+        mapdl._release_resources()
+
+    mock_channel.close.assert_called_once()
+    assert mapdl._exited
+
+    mapdl.__del__ = lambda: None  # prevent double cleanup on GC
+
+
+@stack(*PATCH_MAPDL_START)
+def test_release_resources_calls_cleanup_loggers():
+    """_release_resources() must wire _cleanup_loggers()."""
+    from unittest.mock import MagicMock
+
+    start_parm = {
+        "ip": "123.45.67.99",
+        "local": False,
+        "set_no_abort": False,
+        "launched": True,
+        "start_instance": True,
+        "transport_mode": "insecure",
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+    mapdl._channel = MagicMock()  # replace stub with real mock
+
+    with (
+        patch.object(mapdl, "_exit_mapdl"),
+        patch.object(mapdl, "_cleanup_loggers") as mock_loggers,
+    ):
+        mapdl._release_resources()
+
+    mock_loggers.assert_called_once()
+    assert mapdl._exited
+
+    mapdl.__del__ = lambda: None  # prevent double cleanup on GC
+
+
+@stack(*PATCH_MAPDL_START)
+def test_del_honours_cleanup_on_exit_false():
+    """When cleanup_on_exit=False, __del__ must not call _release_resources."""
+    start_parm = {
+        "ip": "123.45.67.99",
+        "local": True,
+        "set_no_abort": False,
+        "launched": True,
+        "start_instance": True,
+        "transport_mode": "insecure",
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+    mapdl._cleanup = False  # mirrors cleanup_on_exit=False
+
+    with patch.object(type(mapdl), "_release_resources") as mock_release:
+        mock_release.return_value = None
+        mapdl.__del__()
+
+    mock_release.assert_not_called()
+
+    mapdl._cleanup = True
+    mapdl.__del__ = lambda: None  # prevent cleanup on GC
 
 
 @pytest.mark.parametrize("prop", ["mute"])

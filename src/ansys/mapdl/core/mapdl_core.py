@@ -313,7 +313,7 @@ class _MapdlCore(Commands):
         """Initialize connection with MAPDL."""
         self._show_matplotlib_figures = True  # for testing
         self._query = None
-        self._exited: bool = False
+        self.__exited: bool = False
         self._ignore_errors: bool = False
         self._apdl_log: Optional[TextIO] = None
         self._store_commands: bool = False
@@ -640,6 +640,19 @@ class _MapdlCore(Commands):
     def exited(self):
         """Return true if the MAPDL session exited"""
         return self._exited
+
+    @property
+    def _exited(self):
+        return self.__exited
+
+    @_exited.setter
+    def _exited(self, value):
+        import traceback
+        import warnings
+
+        warnings.warn(traceback.format_exc())
+
+        self.__exited = value
 
     @property
     def file_type_for_plots(self):
@@ -2532,10 +2545,6 @@ class _MapdlCore(Commands):
         """Exit from MAPDL"""
         raise NotImplementedError("Implemented by child class")
 
-    def __del__(self):
-        """Kill MAPDL when garbage cleaning"""
-        self.exit()
-
     def _cleanup_loggers(self):
         """Clean up all the loggers"""
         # Detached from ``__del__`` for easier testing
@@ -3352,7 +3361,7 @@ class _MapdlCore(Commands):
                 return os.listdir(local_path)
             return []
 
-        elif self._exited:
+        elif self.exited:
             raise MapdlExitedError("Cannot list remote files since MAPDL has exited")
 
         # this will sometimes return 'LINUX x6', 'LIN', or 'L'
