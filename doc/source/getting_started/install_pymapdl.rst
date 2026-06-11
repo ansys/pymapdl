@@ -10,7 +10,7 @@ Python module
 ~~~~~~~~~~~~~
 
 .. note::
-   These instructions assume you are working on Windows and are familiar
+   These instructions assume you are working on Windows/macOS/Linux and are familiar
    with ``pip`` and the command line. If they are new to you, you should read
    the `Python Packaging User Guide Tutorial on pip <python_installing_packages>`
    before proceeding.
