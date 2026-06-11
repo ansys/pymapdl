@@ -1811,9 +1811,11 @@ class MapdlGrpc(MapdlBase):
                 self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
                 return
 
-        self._exiting = True
-        self._release_resources(path=self._path)
-        self._exiting = False
+        try:
+            self._exiting = True
+            self._release_resources(path=self._path)
+        finally:
+            self._exiting = False
 
     def _exit_mapdl(self, path: Optional[str] = None) -> None:
         """Exit MAPDL and remove the lock file in `path`"""
@@ -1860,7 +1862,7 @@ class MapdlGrpc(MapdlBase):
 
         from ansys.mapdl import core as pymapdl
 
-        path = path or self._path
+        path = path or getattr(self, "_path", None)
 
         # 1. Kill MAPDL process + remove lock file
         try:
