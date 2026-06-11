@@ -34,7 +34,7 @@ Alternatively, install the latest release from
 
 
 For a local *development* version, install with the following commands.
-If you are familiar with git or do not have it installed,
+If you are unfamiliar with git or do not have it installed,
 see the `contributing to PyMAPDL guide <_developing_pymapdl>` for more information.
 
 .. code:: console
