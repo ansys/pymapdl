@@ -248,10 +248,10 @@ on a remote server or container and it does not have access to the local filesys
       - ``Local`` testing
       - ``Remote`` testing
     * - Launching MAPDL
-      - PyMAPDL finds the local MAPDL installation and launches an MAPDL instance with the specified configuration.
+      - PyMAPDL finds the local MAPDL installation and launches a MAPDL instance with the specified configuration.
         Use :envvar:`PYMAPDL_PORT` to specify the port.
       - PyMAPDL connects to a running instance of MAPDL that is expected to be running on a remote server or container.
-        Use :envvar:`PYMAPDL_START_INSTANCE` to set this option.
+        Set :envvar:`PYMAPDL_START_INSTANCE` to ``False`` so PyMAPDL connects instead of launching a local instance.
         You need to start MAPDL before running the tests, and use :envvar:`PYMAPDL_PORT` and :envvar:`PYMAPDL_IP` environment variables
         to configure the connection to the running instance.
     * - Access to local resources
@@ -380,7 +380,7 @@ Running CI-like tests with tox docker envs
 
 The project provides tox environments that start Docker services, build images if
 necessary, and run the test matrix similarly to the CI pipeline. These are useful
-for reproducing CI behaviour locally.
+for reproducing CI behavior locally.
 
 Common tox envs and quick explanation:
 

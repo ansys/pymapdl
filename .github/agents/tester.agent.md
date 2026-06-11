@@ -18,10 +18,11 @@ uv run pytest --cov=src/ansys/mapdl/core --cov-report=term
 ## MAPDL instances are expensive — mock whenever possible
 
 ```python
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 
 def test_feature_without_mapdl():
+    expected_value = object()
     mock_mapdl = Mock()
     mock_mapdl.some_method.return_value = expected_value
     ...
@@ -51,7 +52,7 @@ Accepted strings: `"local"`, `"remote"`, `"grpc"`, `"console"`, `"dpf"`, `"linux
 
 | Variable | Purpose |
 |---|---|
-| `PYMAPDL_START_INSTANCE=False` | Connect to existing instance instead of launching one |
+| `PYMAPDL_START_INSTANCE` | Set to `False` to connect to an existing instance instead of launching one |
 | `PYMAPDL_PORT` | gRPC server port (default `50052`) |
 | `PYMAPDL_IP` | gRPC server IP (default `127.0.0.1`) |
 | `ON_LOCAL` | Force `local` mode detection |

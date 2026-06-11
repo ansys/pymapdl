@@ -24,7 +24,7 @@ description: >
 ```sh
 uv run pre-commit install           # once
 uv run pre-commit run --all-files   # before every commit
-uv run pytest                       # tests (set PYMAPDL_START_INSTANCE=False to skip MAPDL)
+uv run pytest                       # tests (set PYMAPDL_START_INSTANCE=False to connect to an existing instance instead of launching MAPDL)
 ```
 
 ## CI-like testing via tox + Docker
@@ -41,8 +41,8 @@ Key envs:
 | `docker-stop-mapdl-dpf` | Stop/remove MAPDL+DPF containers |
 | `docker-test-local` | Run tests against local Docker images |
 | `docker-test-remote` | Run tests mirroring CI (remote images) |
-| `docker-test-local-build` | Build local images, then test |
-| `docker-test-remote-build` | Trigger remote image build, then test |
+| `docker-test-local-build` | Rebuild the local-host image without running tests |
+| `docker-test-remote-build` | Rebuild the remote-host image without running tests |
 
 Each directory that needs env vars contains an `example.env`. Copy to `.env` and edit — tox loads it automatically.
 
