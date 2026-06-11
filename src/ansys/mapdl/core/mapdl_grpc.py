@@ -960,7 +960,7 @@ class MapdlGrpc(MapdlBase):
                 monitor_thread.join(timeout=1.0)
                 self._log.debug("Stopped MAPDL monitoring thread")
 
-        self._exited = False
+            self._exited = False
 
     @staticmethod
     def _check_process_handle(proc) -> bool | None:
