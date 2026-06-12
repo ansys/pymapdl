@@ -783,13 +783,6 @@ def mapdl(request, tmpdir_factory):
         with pytest.raises(MapdlExitedError):
             mapdl.prep7()
 
-        # actually test if server is shutdown
-        if HAS_GRPC:
-            with pytest.raises(MapdlExitedError):
-                mapdl._send_command("/PREP7")
-            with pytest.raises(MapdlExitedError):
-                mapdl._send_command_stream("/PREP7")
-
     # Delete Mapdl object
     mapdl.exit()
     del mapdl

@@ -88,9 +88,9 @@ tests = [
 doc = [
   "ansys-dpf-core[graphics]==0.13.6",
   "ansys-mapdl-reader==0.56.0",
-  "ansys-sphinx-theme==1.8.1",
+  "ansys-sphinx-theme==1.8.2",
   "ansys-tools-visualization-interface==0.13.3",
-  "grpcio==1.80.0",
+  "grpcio==1.81.0",
   "imageio-ffmpeg==0.6.0",
   "imageio==2.37.3",
   "jupyter==1.1.1",
@@ -124,7 +124,7 @@ doc = [
 
 [dependency-groups]
 
-tox = ["tox==4.54.0"]
+tox = ["tox==4.55.0"]
 
 [tool.flit.module]
 name = "ansys.mapdl.core"
