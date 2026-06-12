@@ -2169,14 +2169,8 @@ def test_save_on_exit(mapdl, cleared, save):
 
     assert mapdl.exited
     assert mapdl._exited
-    exited = mapdl._exited
 
-    with (
-        patch.object(mapdl, "_run") as mock_run,
-        patch.object(mapdl, "_exited") as mock__exited,
-    ):
-
-        mock__exited.return_value = exited
+    with patch.object(mapdl, "_run") as mock_run:
 
         with pytest.raises(MapdlExitedError):
             mapdl.prep7()

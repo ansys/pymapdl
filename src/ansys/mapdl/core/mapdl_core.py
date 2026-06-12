@@ -647,11 +647,6 @@ class _MapdlCore(Commands):
 
     @_exited.setter
     def _exited(self, value):
-        import traceback
-        import warnings
-
-        warnings.warn(traceback.format_exc())
-
         self.__exited = value
 
     @property
