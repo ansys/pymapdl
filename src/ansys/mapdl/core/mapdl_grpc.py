@@ -960,7 +960,7 @@ class MapdlGrpc(MapdlBase):
                 monitor_thread.join(timeout=1.0)
                 self._log.debug("Stopped MAPDL monitoring thread")
 
-        self._exited = False
+            self._exited = False
 
     @staticmethod
     def _check_process_handle(proc) -> bool | None:
@@ -1784,17 +1784,13 @@ class MapdlGrpc(MapdlBase):
         --------
         >>> mapdl.exit()
         """
-        # check if permitted to start (and hence exit) instances
         from ansys.mapdl import core as pymapdl
 
         self._log.debug(
-            f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
+            f"Exiting MAPDL gRPC instance {self.ip}:{self.port} on '{self._path}'."
         )
 
-        mapdl_path = self._path  # using cached version
-
         if self._exited:
-            # Already exited.
             self._log.debug("Already exited")
             return
 
@@ -1803,7 +1799,7 @@ class MapdlGrpc(MapdlBase):
             self.save()
 
         if not force:
-            # ignore this method if PYMAPDL_START_INSTANCE=False
+            # Ignore this method if PYMAPDL_START_INSTANCE=False
             if not self._start_instance or not self._launched:
                 self._log.info(
                     "Ignoring exit due to PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't launch the instance."
@@ -1815,39 +1811,11 @@ class MapdlGrpc(MapdlBase):
                 self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
                 return
 
-        # Exiting MAPDL instance if we launched.
-        self._exiting = True
-
-        # Remove UDS socket file if using UDS transport.
-        # The socket is always named 'mapdl-{PORT}.sock' (uds_id == str(port)).
-        if self.transport_mode == "uds":
-            socket_path = os.path.join(self.uds_dir, f"mapdl-{self.port}.sock")
-            if os.path.exists(socket_path):
-                try:
-                    os.remove(socket_path)
-                    self._log.debug(f"Removed UDS socket file {socket_path}")
-                except OSError:  # pragma: no cover
-                    self._log.warning(f"Failed to remove UDS socket file {socket_path}")
-
-        self._exit_mapdl(path=mapdl_path)
-        self._exited = True
-
-        if self.finish_job_on_exit and self._mapdl_on_hpc:
-            self.kill_job(self.jobid)
-            self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
-
-        # Exiting remote instances
-        if self._remote_instance:  # pragma: no cover
-            # No cover: The CI is working with a single MAPDL instance
-            self._remote_instance.delete()
-
-        self._exiting = False
-
-        # Post-kill tasks
-        self._remove_temp_dir_on_exit(mapdl_path)
-
-        if self._local and self._port in pymapdl._LOCAL_PORTS:
-            pymapdl._LOCAL_PORTS.remove(self._port)
+        try:
+            self._exiting = True
+            self._release_resources(path=self._path)
+        finally:
+            self._exiting = False
 
     def _exit_mapdl(self, path: Optional[str] = None) -> None:
         """Exit MAPDL and remove the lock file in `path`"""
@@ -1862,6 +1830,100 @@ class MapdlGrpc(MapdlBase):
             self._remove_lock_file(path, use_cached=True)
         else:
             self._exit_mapdl_server()
+
+    def _release_resources(self, path: Optional[str] = None) -> None:
+        """Release all resources held by this MAPDL instance.
+
+        This is the single, idempotent cleanup entry-point used by both
+        :meth:`exit` and :meth:`__del__`.  Calling it more than once is safe —
+        subsequent calls return immediately because ``_exited`` is ``True``.
+
+        Steps performed (in order):
+
+        1. Kill the MAPDL server process and remove the lock file.
+        2. Close the gRPC channel.
+        3. Remove the UDS socket file (Unix Domain Socket transport only).
+        4. Remove the port from the global ``_LOCAL_PORTS`` registry.
+        5. Cancel the SLURM/HPC job (if applicable).
+        6. Delete the remote PyMAPDL server instance (if applicable).
+        7. Remove the temporary working directory (if ``remove_temp_dir_on_exit``).
+        8. Clean up logger handlers.
+        9. Mark the instance as exited (``_exited = True``).
+
+        Notes
+        -----
+        All steps are individually wrapped in ``try/except`` so that a failure
+        in one step does not prevent the remaining resources from being freed.
+        This also makes the method safe to call from ``__del__``, where the
+        interpreter may have already begun tearing down module globals.
+        """
+        if self._exited:
+            return
+
+        from ansys.mapdl import core as pymapdl
+
+        path = path or getattr(self, "_path", None)
+
+        # 1. Kill MAPDL process + remove lock file
+        try:
+            self._exit_mapdl(path)
+        except Exception as e:
+            self._log.debug("Error during _exit_mapdl: %s", e)
+
+        # 2. Close gRPC channel
+        try:
+            if hasattr(self, "_channel") and self._channel is not None:
+                self._channel.close()
+                self._log.debug("gRPC channel closed")
+        except Exception as e:
+            self._log.debug("Error closing gRPC channel: %s", e)
+
+        # 3. Remove UDS socket file
+        try:
+            if getattr(self, "transport_mode", None) == "uds":
+                socket_path = os.path.join(self.uds_dir, f"mapdl-{self.port}.sock")
+                if os.path.exists(socket_path):
+                    os.remove(socket_path)
+                    self._log.debug("Removed UDS socket file %s", socket_path)
+        except Exception as e:
+            self._log.debug("Error removing UDS socket: %s", e)
+
+        # 4. Deregister port from global registry
+        try:
+            if self._local and self._port in pymapdl._LOCAL_PORTS:
+                pymapdl._LOCAL_PORTS.remove(self._port)
+        except Exception as e:
+            self._log.debug("Error removing port from _LOCAL_PORTS: %s", e)
+
+        # 5. Cancel HPC job
+        try:
+            if self._mapdl_on_hpc and self.finish_job_on_exit:
+                self.kill_job(self.jobid)
+                self._log.debug("HPC job %s cancelled", self.jobid)
+        except Exception as e:
+            self._log.debug("Error cancelling HPC job: %s", e)
+
+        # 6. Delete remote PyMAPDL server instance
+        try:
+            if self._remote_instance:  # pragma: no cover
+                self._remote_instance.delete()
+        except Exception as e:
+            self._log.debug("Error deleting remote instance: %s", e)
+
+        # 7. Remove temporary working directory
+        try:
+            self._remove_temp_dir_on_exit(path)
+        except Exception as e:
+            self._log.debug("Error removing temp dir: %s", e)
+
+        # 8. Clean up logger handlers
+        try:
+            self._cleanup_loggers()
+        except Exception as e:
+            self._log.debug("Error during logger cleanup: %s", e)
+
+        # 9. Mark exited — must be LAST so that prior steps can still log
+        self._exited = True
 
     def _remove_temp_dir_on_exit(self, path=None):
         """Removes the temporary directory created by the launcher.
@@ -1981,7 +2043,6 @@ class MapdlGrpc(MapdlBase):
             raise MapdlRuntimeError("MAPDL could not be exited.")
         else:
             self._log.debug("All MAPDL processes exited")
-            self._exited = True
 
     def _cache_pids(self):
         """Store the process IDs used when launching MAPDL.
@@ -4046,20 +4107,35 @@ class MapdlGrpc(MapdlBase):
         subprocess.Popen(cmd)  # nosec B603
 
     def __del__(self):
-        """In case the object is deleted"""
-        # We are just going to escape early if needed, and kill the HPC job.
-        # The garbage collector remove attributes before we can evaluate this.
-        if self._exited:
+        """Release resources when the object is garbage-collected.
+
+        Notes
+        -----
+        The garbage collector may begin tearing down module globals before this
+        method runs, so every attribute access is guarded with ``hasattr`` and
+        wrapped in ``try/except``.  The actual cleanup is delegated to
+        :meth:`_release_resources`, which is itself idempotent.
+        """
+        try:
+            if self._exited:
+                return
+        except AttributeError:
             return
 
-        if hasattr(self, "_start_instance") and not self._start_instance:
-            # Early skip if start_instance is False
+        # Honour cleanup_on_exit=False: self._cleanup stores that flag.
+        if not getattr(self, "_cleanup", True):
             return
 
-        # Killing the instance if we launched it.
-        if self._launched:
-            self._exit_mapdl(self._path)
+        # Only clean up instances that PyMAPDL launched itself.
+        if not getattr(self, "_start_instance", True):
+            return
 
-        # Exiting HPC job
-        if self._mapdl_on_hpc and self.finish_job_on_exit:
-            self.kill_job(self.jobid)
+        if not getattr(self, "_launched", False):
+            return
+
+        try:
+            self._release_resources(getattr(self, "_path", None))
+        except (
+            Exception
+        ):  # nosec B110 - best-effort cleanup during GC; logging is unreliable here
+            pass
