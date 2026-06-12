@@ -472,7 +472,7 @@ class MapdlGrpc(MapdlBase):
         self._launched: bool = start_parm.get("launched", False)  # type: ignore[assignment]
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
-        self._exited: Optional[bool] = None
+        self.__exited: Optional[bool] = None
         self._db: Optional[MapdlDb] = None
         self.__server_version: Optional[str] = None
         self._state: Optional[grpc.Future] = None
@@ -1609,7 +1609,7 @@ class MapdlGrpc(MapdlBase):
         if mute is None:
             mute = self._mute
 
-        if self._exited:
+        if self.exited:
             raise MapdlExitedError(
                 f"The MAPDL instance has been exited before running the command: {cmd}"
             )
@@ -1773,7 +1773,7 @@ class MapdlGrpc(MapdlBase):
         """To be called from a thread to verify MAPDL instance is alive"""
         self._initialised.set()
         while True:
-            if self._exited:
+            if self.exited:
                 break
 
             try:
@@ -1822,7 +1822,7 @@ class MapdlGrpc(MapdlBase):
             f"Exiting MAPDL gRPC instance {self.ip}:{self.port} on '{self._path}'."
         )
 
-        if self._exited:
+        if self.exited:
             self._log.debug("Already exited")
             return
 
@@ -1889,7 +1889,7 @@ class MapdlGrpc(MapdlBase):
         This also makes the method safe to call from ``__del__``, where the
         interpreter may have already begun tearing down module globals.
         """
-        if self._exited:
+        if self.exited:
             return
 
         from ansys.mapdl import core as pymapdl
@@ -1987,7 +1987,7 @@ class MapdlGrpc(MapdlBase):
         processes orphaned. This is useful for killing a remote process but not
         a local process.
         """
-        if self._exited:
+        if self.exited:
             return
 
         # Default
@@ -3490,7 +3490,7 @@ class MapdlGrpc(MapdlBase):
             )
             return False
 
-        if self._exited:
+        if self.exited:
             self._log.debug("MAPDL instance is not alive because it is exited.")
             return False
 
@@ -3516,7 +3516,7 @@ class MapdlGrpc(MapdlBase):
             return check
 
         except Exception as error:
-            if self._exited:
+            if self.exited:
                 return False
 
             self._log.debug(
@@ -3755,7 +3755,7 @@ class MapdlGrpc(MapdlBase):
     @supress_logging
     def __str__(self):
         try:
-            if self._exited:
+            if self.exited:
                 return "MAPDL exited"
             stats = self.slashstatus("PROD", mute=False)
         except:  # pragma: no cover
@@ -3865,7 +3865,7 @@ class MapdlGrpc(MapdlBase):
 
         if self._local:
             return open(self.directory / error_file).read()
-        elif self._exited:
+        elif self.exited:
             raise MapdlExitedError(
                 "Cannot list error file when MAPDL Service has exited"
             )
@@ -4242,7 +4242,7 @@ class MapdlGrpc(MapdlBase):
         :meth:`_release_resources`, which is itself idempotent.
         """
         try:
-            if self._exited:
+            if self.exited:
                 return
         except AttributeError:
             return
