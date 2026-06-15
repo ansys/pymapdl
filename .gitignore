@@ -13,6 +13,7 @@
 .fuse_hidden*
 *~
 *swp
+.DS_Store
 
 # emacs
 flycheck*
@@ -97,8 +98,8 @@ venv*
 .idea/
 /.vs
 
-# Docker testing secrets - never commit real credentials
-docker/testing/.env
+# Env vars and secrets
+.env
 
 # Extra
 doc/source/errors.txt
@@ -110,5 +111,3 @@ doc/webserver.pid
 # Profiling
 prof
 .github/skills/pymapdl-cli
-docker/run/.env
-docker/testing/.env
