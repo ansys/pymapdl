@@ -1904,9 +1904,7 @@ class MapdlGrpc(MapdlBase):
 
         # 2. Close gRPC channel
         try:
-            if hasattr(self, "_channel") and self._channel is not None:
-                self._channel.close()
-                self._log.debug("gRPC channel closed")
+            self._close_grpc_channel()
         except Exception as e:
             self._log.debug("Error closing gRPC channel: %s", e)
 
