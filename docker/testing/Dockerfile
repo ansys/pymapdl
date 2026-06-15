@@ -19,9 +19,6 @@ ENV VENV_PATH="/tmp/.venv_container"
 
 WORKDIR /home
 
-# Add corporate CA so curl/git succeed behind TLS-intercepting proxies
-COPY ZscalerRootCA.crt /usr/local/share/ca-certificates/ZscalerRootCA.crt
-
 # Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends  \
@@ -122,9 +119,6 @@ ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 # ----------------
 # Installing dependencies
 USER root
-
-# Add corporate CA so curl/git succeed behind TLS-intercepting proxies
-COPY ZscalerRootCA.crt /usr/local/share/ca-certificates/ZscalerRootCA.crt
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
