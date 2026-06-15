@@ -19,6 +19,9 @@ ENV VENV_PATH="/tmp/.venv_container"
 
 WORKDIR /home
 
+# Add corporate CA so curl/git succeed behind TLS-intercepting proxies
+COPY ZscalerRootCA.crt /usr/local/share/ca-certificates/ZscalerRootCA.crt
+
 # Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends  \
@@ -30,12 +33,13 @@ RUN apt-get update && \
     git \
     openssh-client \
     curl && \
+    update-ca-certificates && \
     # Installing uv
     curl -LsSf https://astral.sh/uv/install.sh | sh \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Set PATH to include uv and pre-install Python interpreter.
+    # Set PATH to include uv and pre-install Python interpreter.
 # Both must happen before the dep pre-install step below.
 ENV PATH="/root/.local/bin:$HOME/.local/bin:$PATH"
 
@@ -119,6 +123,9 @@ ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 # Installing dependencies
 USER root
 
+# Add corporate CA so curl/git succeed behind TLS-intercepting proxies
+COPY ZscalerRootCA.crt /usr/local/share/ca-certificates/ZscalerRootCA.crt
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     ca-certificates \
@@ -128,9 +135,10 @@ RUN apt-get update && \
     graphviz \
     git \
     openssh-client \
-    curl \
+    curl && \
     # Installing uv
-    && curl -LsSf https://astral.sh/uv/install.sh | sh \
+    update-ca-certificates && \
+    curl -LsSf https://astral.sh/uv/install.sh | sh \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

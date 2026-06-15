@@ -1902,6 +1902,13 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error during _exit_mapdl: %s", e)
 
+        # Ensure PIPE-drainer threads (stdout/stderr/startup) are joined so
+        # that background reader threads do not leak after teardown.
+        try:
+            self._join_pipe_drainer_threads()
+        except Exception as e:
+            self._log.debug("Error joining pipe-drainer threads: %s", e)
+
         # 2. Close gRPC channel
         try:
             self._close_grpc_channel()
