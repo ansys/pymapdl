@@ -44,6 +44,7 @@ def _make_mock_mapdl():
     m._stderr_thread = None
     m._startup_stdout_thread = None
     m._mapdl_process = None
+    m._channel = None
     return m
 
 
