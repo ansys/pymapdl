@@ -77,11 +77,13 @@ jobs:
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
-              // React neutrally to the comment
-              github.rest.reactions.createForIssueComment({
-                owner: 'ansys',
-                repo: 'pymapdl',
-                comment_id: process.env.COMMENT_ID,
+              // React with +1 to the triggering comment
+              const commentId = Number(process.env.COMMENT_ID);
+
+              await github.rest.reactions.createForIssueComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: commentId,
                 content: '+1',
               });
 
