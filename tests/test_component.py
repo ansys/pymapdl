@@ -428,7 +428,7 @@ def test_lots_of_components(mapdl, cleared):
         mapdl.run("*enddo")
 
     assert len(mapdl.components) == 999
-    cmp = mapdl.components
+    cmp = str(mapdl.components)
     for i in range(1, 1000):
         assert (
             f"NODE_{i}_U760_P79420_SAPH400_HINGE_BODY_SIDE_UPR_FR_DR_LH_123_Aasdf_asdfa_123_"
