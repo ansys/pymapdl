@@ -149,7 +149,10 @@ class Component(tuple):
         items_: Union[Tuple[int, ...], List[int], "Component", NDArray, int, str, None],
     ) -> "Component":
         """Create a new Component instance."""
-        if not isinstance(type_, str) or type_.upper() not in VALID_ENTITIES:
+        if not isinstance(type_, str) or (
+            type_.upper() not in VALID_ENTITIES
+            and not re.match(r"LVL\d+$", type_, re.IGNORECASE)
+        ):
             raise ValueError(
                 f"The value '{type_}' is not allowed for 'type' definition."
             )
@@ -162,7 +165,7 @@ class Component(tuple):
             items_ = tuple()
         elif isinstance(items_, (int, str)):
             # Handle single values
-            items_ = (int(items_),) if isinstance(items_, (int, str)) else tuple()
+            items_ = (int(items_),) if isinstance(items_, int) else (items_,)
         elif not isinstance(items_, tuple):
             # Fallback for any iterable
             try:
@@ -360,6 +363,14 @@ class ComponentManager:
                 raise ComponentDoesNotExits(
                     f"The component named '{key}' does not exist in the MAPDL instance."
                 )
+
+        if re.match(r"LVL\d+$", cmtype, re.IGNORECASE):
+            # Assembly: return subcomponent names with the assembly-level type.
+            cmlist_str = self._mapdl.cmlist(key, 1)
+            subcomp_names = _parse_assembly_subcomponents(cmlist_str, key)
+            if forced_to_select:
+                self._mapdl.cmsel("U", key)
+            return Component(cmtype, subcomp_names)  # type: ignore[arg-type]
 
         output: List[int] = self._mapdl._parse_cmlist_indiv(key, cmtype)
         if forced_to_select:
@@ -609,6 +620,46 @@ def _parse_cmlist_indiv(
     return items_int
 
 
+def _parse_assembly_subcomponents(cmlist_output: str, assembly_name: str) -> List[str]:
+    """Extract subcomponent names from a cmlist output block for an assembly.
+
+    Parameters
+    ----------
+    cmlist_output : str
+        Raw output from ``CMLIST`` for the assembly.
+    assembly_name : str
+        Name of the assembly (case-insensitive).
+
+    Returns
+    -------
+    list of str
+        Names of the subcomponents belonging to the assembly.
+    """
+    subcomps: List[str] = []
+    in_assembly = False
+    for line in cmlist_output.splitlines():
+        parts = line.split()
+        if not parts:
+            if in_assembly:
+                break
+            continue
+        if not in_assembly:
+            if (
+                parts[0].upper() == assembly_name.upper()
+                and len(parts) >= 2
+                and re.match(r"LVL\d+", parts[1], re.IGNORECASE)
+            ):
+                in_assembly = True
+                if len(parts) >= 3:
+                    subcomps.append(parts[2])
+        else:
+            if len(parts) == 1:
+                subcomps.append(parts[0])
+            else:
+                break  # Next component entry starts
+    return subcomps
+
+
 def _parse_cmlist(cmlist: Optional[str] = None) -> Dict[str, Any]:
     include_selection = False
     if cmlist is None:
@@ -648,5 +699,5 @@ def _parse_cmlist(cmlist: Optional[str] = None) -> Dict[str, Any]:
     return {
         extract(each_line, 0): extract_line(each_line)
         for each_line in cmlist.splitlines()
-        if each_line
+        if each_line and len(each_line.split()) >= 2
     }
