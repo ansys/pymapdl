@@ -164,8 +164,13 @@ class Component(tuple):
         elif items_ is None:
             items_ = tuple()
         elif isinstance(items_, (int, str)):
-            # Handle single values
-            items_ = (int(items_),) if isinstance(items_, int) else (items_,)
+            # Handle single values.
+            # For assembly types (LVL*) the single item is a component name
+            # string; for all entity types numeric strings must be cast to int.
+            if isinstance(items_, str) and re.match(r"LVL\d+$", type_, re.IGNORECASE):
+                items_ = (items_,)
+            else:
+                items_ = (int(items_),)
         elif not isinstance(items_, tuple):
             # Fallback for any iterable
             try:
