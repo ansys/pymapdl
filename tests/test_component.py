@@ -444,7 +444,7 @@ def test_subcomponents(mapdl, cleared):
         mapdl.run("*do,i,1,10")
         mapdl.run("nsel,none")
         mapdl.run("n,i,i,0,0")
-        mapdl.cm(f"NODE_%i%", "NODE")
+        mapdl.cm("NODE_%i%", "NODE")
         mapdl.run("*enddo")
 
     mapdl.allsel()
