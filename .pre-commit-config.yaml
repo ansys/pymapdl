@@ -38,7 +38,7 @@ repos:
   - id: isort
 
 - repo: https://github.com/numpy/numpydoc
-  rev: 16a20aad58d5532fb12c2a87af0eb4ea290bacb4  # frozen: v1.10.0
+  rev: 7625e372b78ed5689b2707b07b57d45ce39f6b4a  # frozen: v1.11.0rc0
   hooks:
     - id: numpydoc-validation
       exclude: |
@@ -97,7 +97,7 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 943377262562a12b57292fc98fabd7dbf81451fe  # frozen: 0.37.2
+  rev: 8ef330cbb7204d388aa7a620f9549bcea8009663  # frozen: 0.37.3
   hooks:
     - id: check-github-workflows
 
