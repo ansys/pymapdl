@@ -279,6 +279,7 @@ class ComponentManager:
 
         self._mapdl_weakref: weakref.ReferenceType[Mapdl] = weakref.ref(mapdl)
         self.__comp: UNDERLYING_DICT = {}
+        self._subcomponents: Dict[str, List[str]] = {}
         self._update_always: bool = True
         self._autoselect_components: bool = (
             False  # if True, PyMAPDL will try to select the CM first if it does not appear in the CMLIST output.
@@ -327,7 +328,7 @@ class ComponentManager:
     def _comp(self) -> UNDERLYING_DICT:
         """Dictionary with components names and types."""
         if self.__comp is None or self._update_always:
-            self.__comp = self._mapdl._parse_cmlist()
+            self.__comp, self._subcomponents = self._mapdl._parse_cmlist()
         return self.__comp
 
     @_comp.setter
@@ -365,9 +366,9 @@ class ComponentManager:
                 )
 
         if re.match(r"LVL\d+$", cmtype, re.IGNORECASE):
-            # Assembly: return subcomponent names with the assembly-level type.
-            cmlist_str = self._mapdl.cmlist(key, 1)
-            subcomp_names = _parse_assembly_subcomponents(cmlist_str, key)
+            # Assembly: subcomponent names were already collected during the
+            # initial _parse_cmlist pass — no extra MAPDL call needed.
+            subcomp_names = self._subcomponents.get(key.upper(), [])
             if forced_to_select:
                 self._mapdl.cmsel("U", key)
             return Component(cmtype, subcomp_names)  # type: ignore[arg-type]
@@ -620,50 +621,22 @@ def _parse_cmlist_indiv(
     return items_int
 
 
-def _parse_assembly_subcomponents(cmlist_output: str, assembly_name: str) -> List[str]:
-    """Extract subcomponent names from a cmlist output block for an assembly.
-
-    Parameters
-    ----------
-    cmlist_output : str
-        Raw output from ``CMLIST`` for the assembly.
-    assembly_name : str
-        Name of the assembly (case-insensitive).
+def _parse_cmlist(
+    cmlist: Optional[str] = None,
+) -> Tuple[Dict[str, Any], Dict[str, List[str]]]:
+    """Parse the output of the CMLIST command.
 
     Returns
     -------
-    list of str
-        Names of the subcomponents belonging to the assembly.
+    tuple
+        A pair ``(comp_dict, assembly_subcomps)`` where *comp_dict* maps
+        component names to their type (or ``[selection, type]`` when the
+        selection column is present) and *assembly_subcomps* maps each
+        assembly name to the list of its subcomponent names.
     """
-    subcomps: List[str] = []
-    in_assembly = False
-    for line in cmlist_output.splitlines():
-        parts = line.split()
-        if not parts:
-            if in_assembly:
-                break
-            continue
-        if not in_assembly:
-            if (
-                parts[0].upper() == assembly_name.upper()
-                and len(parts) >= 2
-                and re.match(r"LVL\d+", parts[1], re.IGNORECASE)
-            ):
-                in_assembly = True
-                if len(parts) >= 3:
-                    subcomps.append(parts[2])
-        else:
-            if len(parts) == 1:
-                subcomps.append(parts[0])
-            else:
-                break  # Next component entry starts
-    return subcomps
-
-
-def _parse_cmlist(cmlist: Optional[str] = None) -> Dict[str, Any]:
     include_selection = False
     if cmlist is None:
-        return {}
+        return {}, {}
     if re.search(r"NAME\s+TYPE\s+SUBCOMPONENTS", cmlist):
         # header
         #  "NAME                            TYPE      SUBCOMPONENTS"
@@ -685,19 +658,35 @@ def _parse_cmlist(cmlist: Optional[str] = None) -> Dict[str, Any]:
     else:
         raise ValueError("The format of the CMLIST output is not recognaised.")
 
-    cmlist = "\n".join(blocks)
+    # Index of the TYPE token (0-based within split tokens of a component line)
+    type_idx = 2 if include_selection else 1
 
-    def extract(each_line, ind):
-        return each_line.split()[ind].strip()
+    comp_dict: Dict[str, Any] = {}
+    assembly_subcomps: Dict[str, List[str]] = {}
+    current_assembly: Optional[str] = None
 
-    def extract_line(each_line):
-        if include_selection:
-            return [extract(each_line, 1), extract(each_line, 2)]
-        else:
-            return extract(each_line, 1)
+    for line in "\n".join(blocks).splitlines():
+        parts = line.split()
+        if not parts:
+            current_assembly = None
+            continue
+        if len(parts) >= 2:
+            # Regular component line or assembly header line
+            name = parts[0]
+            value: Any = [parts[1], parts[2]] if include_selection else parts[1]
+            comp_dict[name] = value
+            if re.match(r"LVL\d+$", parts[type_idx], re.IGNORECASE):
+                current_assembly = name.upper()
+                assembly_subcomps[current_assembly] = []
+                # First subcomponent may appear on the same line
+                first_subcomp_idx = type_idx + 1
+                if len(parts) > first_subcomp_idx:
+                    assembly_subcomps[current_assembly].append(parts[first_subcomp_idx])
+            else:
+                current_assembly = None
+        elif current_assembly is not None:
+            # Continuation line: a single subcomponent name belonging to the
+            # current assembly block
+            assembly_subcomps[current_assembly].append(parts[0])
 
-    return {
-        extract(each_line, 0): extract_line(each_line)
-        for each_line in cmlist.splitlines()
-        if each_line and len(each_line.split()) >= 2
-    }
+    return comp_dict, assembly_subcomps
