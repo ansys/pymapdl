@@ -418,8 +418,9 @@ def test_big_component(mapdl, cleared):
 def test_lots_of_components(mapdl, cleared):
     mapdl.prep7()
 
+    n_cmp = 999
     with mapdl.non_interactive:
-        mapdl.run("*do,i,1,999")
+        mapdl.run(f"*do,i,1,{n_cmp}")
         mapdl.run("nsel,none")
         mapdl.run("n,i,i,0,0")
         mapdl.run(
@@ -427,11 +428,11 @@ def test_lots_of_components(mapdl, cleared):
         )
         mapdl.run("*enddo")
 
-    assert len(mapdl.components) == 999
+    assert len(mapdl.components) == n_cmp
     cmp = str(mapdl.components)
-    for i in range(1, 1000):
+    for i in range(1, n_cmp + 1):
         assert (
-            f"NODE_{i}_U760_P79420_SAPH400_HINGE_BODY_SIDE_UPR_FR_DR_LH_123_Aasdf_asdfa_123_"
+            f"NODE_{i}_U760_P79420_SAPH400_HINGE_BODY_SIDE_UPR_FR_DR_LH_123_Aasdf_asdfa_123_".upper()
             in cmp
         )
 
