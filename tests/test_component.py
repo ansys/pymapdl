@@ -81,6 +81,35 @@ def test_component_wrong_init():
         Component("asdf", [1, 2, 3])
 
 
+def test_component_single_int_item():
+    cm = Component("NODE", 5)
+    assert cm == (5,)
+    assert isinstance(cm[0], int)
+
+
+def test_component_single_numeric_str_item():
+    cm = Component("NODE", "5")
+    assert cm == (5,)
+    assert isinstance(cm[0], int)
+
+
+def test_component_single_str_item_lvl():
+    cm = Component("LVL1", "NODE_1")
+    assert cm == ("NODE_1",)
+    assert isinstance(cm[0], str)
+    assert cm.type == "LVL1"
+
+
+def test_component_generic_iterable_item():
+    cm = Component("NODE", (x for x in [1, 2, 3]))
+    assert cm == (1, 2, 3)
+
+
+def test_component_non_iterable_item_fallback():
+    cm = Component("NODE", object())
+    assert cm == ()
+
+
 def test_logger(mapdl, cleared):
     assert mapdl.components.logger == mapdl.logger
 
