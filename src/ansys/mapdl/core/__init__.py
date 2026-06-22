@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,10 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-###############################################################################
-# Imports
-# =======
-#
 import logging
 import os
 from typing import Dict, List, Tuple
