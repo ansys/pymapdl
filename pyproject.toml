@@ -124,7 +124,7 @@ doc = [
 
 [dependency-groups]
 
-tox = ["tox==4.55.0"]
+tox = ["tox==4.55.1"]
 
 [tool.flit.module]
 name = "ansys.mapdl.core"
