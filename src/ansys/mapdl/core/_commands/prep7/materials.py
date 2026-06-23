@@ -1,6 +1,6 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
-#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -383,7 +383,7 @@ class Materials(CommandsBase):
 
             * ``NUXY`` - Minor Poisson's ratios (also NUYZ, NUXZ) (NUXY = ν:sub:`yx`, as described in
               `Stress-Strain Relationships
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_str1.html#eq84e81ad6-8b11-4580-8034-9e5f20df8c23>`_
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_str1.html#eq84e81ad6-8b11-4580 - 8034-9e5f20df8c23>`_
 
             * ``PERX`` - Electric relative permittivities (also PERY, PERZ)
 
@@ -393,7 +393,7 @@ class Materials(CommandsBase):
 
             * ``PRXY`` - Major Poisson's ratios (also PRYZ, PRXZ) (PRXY = ν:sub:`xy`, as described in
               `Stress-Strain Relationships
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_str1.html#eq84e81ad6-8b11-4580-8034-9e5f20df8c23>`_
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_str1.html#eq84e81ad6-8b11-4580 - 8034-9e5f20df8c23>`_
 
             * ``QRATE`` - Heat generation rate for thermal mass element ``MASS71``. Fraction of plastic work
               converted to heat (Taylor-Quinney coefficient) or fraction of viscoelastic loss converted to heat

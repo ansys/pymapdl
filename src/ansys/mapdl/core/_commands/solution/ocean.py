@@ -1,6 +1,6 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
-#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -572,7 +572,7 @@ class Ocean(CommandsBase):
 
         When specifying an ocean wave type, issue the :ref:`octable` command to input either :ref:`wave
         location data or <octablewavelocinput>` `Wave Spectrum Input Data
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_OCTABLE.html#eq74124840-ae99-4778-8938-c48ecc8cdee7>`_
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_OCTABLE.html#eq74124840-ae99-4778 - 8938-c48ecc8cdee7>`_
         wave spectrum data.
 
         .. _octablewavelocinput:
