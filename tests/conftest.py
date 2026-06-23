@@ -26,6 +26,7 @@ import os
 from pathlib import Path
 from shutil import get_terminal_size
 from sys import platform
+import threading
 from typing import Any
 from unittest.mock import patch
 
@@ -1356,3 +1357,57 @@ def psd_analysis(mapdl, cleared):
     from ansys.mapdl.core.examples import vmfiles
 
     mapdl.input(vmfiles["vm203"])
+
+
+@pytest.fixture(autouse=True, scope="module")
+def _check_no_leaked_mapdl_threads():
+    """Warn when MAPDL-owned daemon threads leak between test modules.
+
+    Catches regressions where threads started for a ``MapdlPool`` or
+    ``MapdlGrpc`` instance are not properly cleaned up, which can cause
+    segfaults or ``ValueError`` crashes in unrelated subsequent tests.
+
+    Only threads that are *new* within the current module are checked.
+    Threads that already existed at module setup time (e.g. from a
+    session-scoped ``mapdl`` fixture that is still alive) are ignored.
+    """
+    _LEAKED_TARGET_NAMES = ("enqueue_output", "reader", "_poll_connectivity")
+
+    def _is_mapdl_drainer(t: threading.Thread) -> bool:
+        target = getattr(t, "_target", None)
+        if target is not None and target.__name__ in _LEAKED_TARGET_NAMES:
+            return True
+        # gRPC poll threads embed the function name in the thread name
+        return any(name in (t.name or "") for name in _LEAKED_TARGET_NAMES)
+
+    # Snapshot of thread identities that are already alive when this module
+    # starts.  Session-scoped MAPDL instances will be in this set; we must
+    # not report them as leaks just because they survive across modules.
+    pre_existing_idents = {
+        t.ident for t in threading.enumerate() if t.daemon and _is_mapdl_drainer(t)
+    }
+
+    yield
+
+    import gc
+    import warnings
+
+    gc.collect()
+
+    leaked = [
+        t
+        for t in threading.enumerate()
+        if t.daemon and _is_mapdl_drainer(t) and t.ident not in pre_existing_idents
+    ]
+    if leaked:
+        warnings.warn(
+            f"Leaked MAPDL daemon threads detected after module teardown: "
+            f"{[t.name for t in leaked]}. "
+            f"This may cause segfaults in subsequent test modules.",
+            stacklevel=2,
+        )
+        raise RuntimeError(
+            f"Leaked MAPDL daemon threads detected after module teardown: "
+            f"{[t.name for t in leaked]}. "
+            f"This may cause segfaults in subsequent test modules."
+        )

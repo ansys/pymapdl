@@ -452,6 +452,7 @@ class MapdlGrpc(MapdlBase):
         # gRPC request specific locks as these gRPC request are not thread safe
         self._vget_lock: bool = False
         self._get_lock: bool = False
+        self._process_close_lock = threading.Lock()
 
         self._prioritize_thermal: bool = False
         self._locked: bool = False  # being used within MapdlPool
@@ -471,7 +472,7 @@ class MapdlGrpc(MapdlBase):
         self._launched: bool = start_parm.get("launched", False)  # type: ignore[assignment]
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
-        self._exited: Optional[bool] = None
+        self.__exited: Optional[bool] = None
         self._db: Optional[MapdlDb] = None
         self.__server_version: Optional[str] = None
         self._state: Optional[grpc.Future] = None
@@ -503,6 +504,12 @@ class MapdlGrpc(MapdlBase):
         self._jobid: int = start_parm.get("jobid")  # type: ignore[assignment]
         self._mapdl_on_hpc: bool = bool(self._jobid)
         self.finish_job_on_exit: bool = start_parm.get("finish_job_on_exit", True)  # type: ignore[assignment]
+
+        # Thread handles for PIPE drainers (always initialised so _kill_process
+        # can safely call getattr without an AttributeError on early exit)
+        self._stdout_thread: Optional[threading.Thread] = None
+        self._stderr_thread: Optional[threading.Thread] = None
+        self._startup_stdout_thread: Optional[threading.Thread] = None
 
         # Queueing the stds
         if not self._mapdl_on_hpc and self._mapdl_process:
@@ -721,6 +728,9 @@ class MapdlGrpc(MapdlBase):
 
         self._stdout_queue, self._stdout_thread = _create_queue_for_std(process.stdout)
         self._stderr_queue, self._stderr_thread = _create_queue_for_std(process.stderr)
+        # Track the startup reader thread (set by wait_for_process_ready) so it
+        # can be joined when the instance is torn down.
+        self._startup_stdout_thread = getattr(process, "_startup_stdout_thread", None)
 
     def _create_channel(self, ip: str, port: int) -> grpc.Channel:
         """Create a gRPC channel using the specified transport mode.
@@ -1599,7 +1609,7 @@ class MapdlGrpc(MapdlBase):
         if mute is None:
             mute = self._mute
 
-        if self._exited:
+        if self.exited:
             raise MapdlExitedError(
                 f"The MAPDL instance has been exited before running the command: {cmd}"
             )
@@ -1704,6 +1714,17 @@ class MapdlGrpc(MapdlBase):
         self, cmd: str, mute: bool = False
     ) -> Optional[str]:  # numpydoc ignore=RT01
         """Send a MAPDL command and return the response as a string"""
+        if self._channel is not None and not self.is_alive:
+            self._exited = True
+            raise MapdlExitedError(
+                f"Mapdl exited (gRPC channel is '{self.channel_state}') before running the command: {cmd}"
+            )
+
+        if self._exited:
+            raise MapdlExitedError(
+                f"The MAPDL instance has been exited before running the command: {cmd}"
+            )
+
         opt = ""
         if mute:
             opt = "MUTE"  # suppress any output
@@ -1712,6 +1733,7 @@ class MapdlGrpc(MapdlBase):
         # TODO: Capture keyboard exception and place this in a thread
         if self._stub is None:
             raise MapdlRuntimeError("MAPDL stub not initialized")
+
         grpc_response = self._stub.SendCommand(request)
 
         resp = grpc_response.response
@@ -1722,6 +1744,16 @@ class MapdlGrpc(MapdlBase):
     @protect_grpc
     def _send_command_stream(self, cmd, verbose=False) -> str:  # numpydoc ignore=RT01
         """Send a command and expect a streaming response"""
+        if self._channel is not None and not self.is_alive:
+            self._exited = True
+            raise MapdlExitedError(
+                f"Mapdl exited (gRPC channel is '{self.channel_state}') before running the command: {cmd}"
+            )
+
+        if self._exited:
+            raise MapdlExitedError(
+                f"The MAPDL instance has been exited before running the command: {cmd}"
+            )
         request = pb_types.CmdRequest(command=cmd)
         time_step = self._get_time_step_stream()
         metadata = [("time_step_stream", str(time_step))]
@@ -1741,7 +1773,7 @@ class MapdlGrpc(MapdlBase):
         """To be called from a thread to verify MAPDL instance is alive"""
         self._initialised.set()
         while True:
-            if self._exited:
+            if self.exited:
                 break
 
             try:
@@ -1790,7 +1822,7 @@ class MapdlGrpc(MapdlBase):
             f"Exiting MAPDL gRPC instance {self.ip}:{self.port} on '{self._path}'."
         )
 
-        if self._exited:
+        if self.exited:
             self._log.debug("Already exited")
             return
 
@@ -1857,7 +1889,7 @@ class MapdlGrpc(MapdlBase):
         This also makes the method safe to call from ``__del__``, where the
         interpreter may have already begun tearing down module globals.
         """
-        if self._exited:
+        if self.exited:
             return
 
         from ansys.mapdl import core as pymapdl
@@ -1870,11 +1902,16 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error during _exit_mapdl: %s", e)
 
+        # Ensure PIPE-drainer threads (stdout/stderr/startup) are joined so
+        # that background reader threads do not leak after teardown.
+        try:
+            self._join_pipe_drainer_threads()
+        except Exception as e:
+            self._log.debug("Error joining pipe-drainer threads: %s", e)
+
         # 2. Close gRPC channel
         try:
-            if hasattr(self, "_channel") and self._channel is not None:
-                self._channel.close()
-                self._log.debug("gRPC channel closed")
+            self._close_grpc_channel()
         except Exception as e:
             self._log.debug("Error closing gRPC channel: %s", e)
 
@@ -1955,7 +1992,7 @@ class MapdlGrpc(MapdlBase):
         processes orphaned. This is useful for killing a remote process but not
         a local process.
         """
-        if self._exited:
+        if self.exited:
             return
 
         # Default
@@ -1970,24 +2007,112 @@ class MapdlGrpc(MapdlBase):
 
         return
 
-    def _kill_process(self):
-        """Kill process stored in self._mapdl_process"""
-        if self._mapdl_process is not None:
-            self._log.debug("Killing process using subprocess.Popen.terminate")
-            process = self._mapdl_process
-            if process.poll() is None:
-                # process hasn't terminated
-                process.terminate()
+    def _close_grpc_channel(self) -> None:
+        """Close the gRPC channel, stopping the ``_poll_connectivity`` thread.
 
-            # Close any open file handle for stdout redirect
-            fh = getattr(process, "_stdout_file_handle", None)
-            if fh and not getattr(fh, "closed", False):
-                try:
-                    fh.close()
-                    self._log.debug("Closed stdout file handle")
-                    setattr(process, "_stdout_file_handle", None)
-                except OSError as e:
-                    self._log.debug(f"Error closing stdout file handle: {e}")
+        Safe to call multiple times; subsequent calls are no-ops.
+        """
+        channel = getattr(self, "_channel", None)
+        if channel is not None:
+            try:
+                channel.close()
+                self._log.debug("gRPC channel closed")
+            except Exception as e:
+                self._log.debug(f"Error closing gRPC channel: {e}")
+            finally:
+                self._channel = None
+
+    def _close_process_pipes(self, process: subprocess.Popen) -> None:  # type: ignore[type-arg]
+        """Close all open I/O streams attached to *process*.
+
+        Closes ``process.stdout`` and ``process.stderr`` (PIPE handles) so
+        that PIPE-drainer threads blocked on ``readline`` are unblocked and
+        can exit.  Also closes the ``_stdout_file_handle`` redirect file, if
+        one was attached to the process by ``_start_subprocess``.
+
+        Parameters
+        ----------
+        process : subprocess.Popen
+            The subprocess handle whose streams should be closed.
+        """
+        for stream in (process.stdout, process.stderr):
+            try:
+                if stream is not None and not stream.closed:
+                    stream.close()
+            except OSError as e:
+                self._log.debug(f"Error closing process stream: {e}")
+
+        fh = getattr(process, "_stdout_file_handle", None)
+        if fh and not getattr(fh, "closed", False):
+            try:
+                fh.close()
+                self._log.debug("Closed stdout file handle")
+                setattr(process, "_stdout_file_handle", None)
+            except OSError as e:
+                self._log.debug(f"Error closing stdout file handle: {e}")
+
+    def _terminate_process(self, process: subprocess.Popen) -> None:  # type: ignore[type-arg]
+        """Terminate *process*, close its pipes, and wait for it to exit.
+
+        Sends ``SIGTERM``, explicitly closes ``stdout`` and ``stderr`` so any
+        PIPE-drainer threads unblock immediately, then waits up to 2 seconds
+        for the process to exit.  If it has not exited by then, ``SIGKILL`` is
+        sent and the wait is repeated.
+
+        Parameters
+        ----------
+        process : subprocess.Popen
+            The subprocess handle to terminate.
+        """
+        if process.poll() is None:
+            self._log.debug("Sending SIGTERM to MAPDL process")
+            process.terminate()
+
+        self._close_process_pipes(process)
+
+        try:
+            process.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            self._log.debug("Process did not exit after SIGTERM; sending SIGKILL")
+            process.kill()
+            try:
+                process.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                self._log.debug("Process did not exit after SIGKILL")
+
+    def _join_pipe_drainer_threads(self) -> None:
+        """Join all PIPE-drainer threads, giving each up to 2 seconds.
+
+        Waits for ``_stdout_thread``, ``_stderr_thread``, and
+        ``_startup_stdout_thread`` to finish.  A debug message is logged for
+        any thread that does not exit within the timeout.
+        """
+        for attr in ("_stdout_thread", "_stderr_thread", "_startup_stdout_thread"):
+            t = getattr(self, attr, None)
+            if t is not None and t.is_alive():
+                t.join(timeout=2)
+                if t.is_alive():
+                    self._log.debug(f"Thread {attr} did not exit in time")
+
+    def _kill_process(self) -> None:
+        """Kill the process stored in ``self._mapdl_process``.
+
+        Acquires ``_process_close_lock`` to prevent concurrent teardowns,
+        then delegates to :meth:`_terminate_process` (SIGTERM → pipe-close →
+        wait → SIGKILL).
+
+        Notes
+        -----
+        Does **not** join the pipe-drainer threads here because MAPDL may have
+        spawned child processes that also hold the write ends of stdout/stderr
+        open.  Those children are killed by :meth:`_kill_child_processes`,
+        which must run first.  Call :meth:`_join_pipe_drainer_threads` only
+        after all child processes are gone (see :meth:`_close_process`).
+        """
+        with self._process_close_lock:
+            if self._mapdl_process is not None:
+                self._log.debug("Killing process using subprocess.Popen.terminate")
+                self._terminate_process(self._mapdl_process)
 
     def _kill_child_processes(self, timeout=2):
         pids = self._pids.copy()
@@ -2036,8 +2161,13 @@ class MapdlGrpc(MapdlBase):
             # killing main process (subprocess)
             self._kill_process()
 
-            # Killing child processes
+            # Killing child processes (they also hold the pipe write ends open,
+            # so they must die before we join the drainer threads).
             self._kill_child_processes(timeout=timeout)
+
+            # All write ends of stdout/stderr are now closed; drainer threads
+            # will see EOF and exit almost immediately.
+            self._join_pipe_drainer_threads()
 
         if self.is_alive:
             raise MapdlRuntimeError("MAPDL could not be exited.")
@@ -3365,7 +3495,7 @@ class MapdlGrpc(MapdlBase):
             )
             return False
 
-        if self._exited:
+        if self.exited:
             self._log.debug("MAPDL instance is not alive because it is exited.")
             return False
 
@@ -3391,7 +3521,7 @@ class MapdlGrpc(MapdlBase):
             return check
 
         except Exception as error:
-            if self._exited:
+            if self.exited:
                 return False
 
             self._log.debug(
@@ -3630,7 +3760,7 @@ class MapdlGrpc(MapdlBase):
     @supress_logging
     def __str__(self):
         try:
-            if self._exited:
+            if self.exited:
                 return "MAPDL exited"
             stats = self.slashstatus("PROD", mute=False)
         except:  # pragma: no cover
@@ -3740,7 +3870,7 @@ class MapdlGrpc(MapdlBase):
 
         if self._local:
             return open(self.directory / error_file).read()
-        elif self._exited:
+        elif self.exited:
             raise MapdlExitedError(
                 "Cannot list error file when MAPDL Service has exited"
             )
@@ -4117,7 +4247,7 @@ class MapdlGrpc(MapdlBase):
         :meth:`_release_resources`, which is itself idempotent.
         """
         try:
-            if self._exited:
+            if self.exited:
                 return
         except AttributeError:
             return
