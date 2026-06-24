@@ -81,6 +81,35 @@ def test_component_wrong_init():
         Component("asdf", [1, 2, 3])
 
 
+def test_component_single_int_item():
+    cm = Component("NODE", 5)
+    assert cm == (5,)
+    assert isinstance(cm[0], int)
+
+
+def test_component_single_numeric_str_item():
+    cm = Component("NODE", "5")
+    assert cm == (5,)
+    assert isinstance(cm[0], int)
+
+
+def test_component_single_str_item_lvl():
+    cm = Component("LVL1", "NODE_1")
+    assert cm == ("NODE_1",)
+    assert isinstance(cm[0], str)
+    assert cm.type == "LVL1"
+
+
+def test_component_generic_iterable_item():
+    cm = Component("NODE", (x for x in [1, 2, 3]))
+    assert cm == (1, 2, 3)
+
+
+def test_component_non_iterable_item_fallback():
+    cm = Component("NODE", object())
+    assert cm == ()
+
+
 def test_logger(mapdl, cleared):
     assert mapdl.components.logger == mapdl.logger
 
@@ -413,3 +442,70 @@ def test_big_component(mapdl, cleared):
     assert "MANY_NODES" in str(mapdl.components)
     assert len(mapdl.components["many_nodes"]) == 999
     assert all(isinstance(item, int) for item in mapdl.components["many_nodes"])
+
+
+def test_lots_of_components(mapdl, cleared):
+    mapdl.prep7()
+
+    n_cmp = 999
+    with mapdl.non_interactive:
+        mapdl.run(f"*do,i,1,{n_cmp}")
+        mapdl.run("nsel,none")
+        mapdl.run("n,i,i,0,0")
+        mapdl.run(
+            "cm,NODE_%i%_U760_P79420_SAPH400_HINGE_BODY_SIDE_UPR_FR_DR_LH_123_Aasdf_asdfa_123_, node"
+        )
+        mapdl.run("*enddo")
+
+    assert len(mapdl.components) == n_cmp
+    cmp = str(mapdl.components)
+    for i in range(1, n_cmp + 1):
+        assert (
+            f"NODE_{i}_U760_P79420_SAPH400_HINGE_BODY_SIDE_UPR_FR_DR_LH_123_Aasdf_asdfa_123_".upper()
+            in cmp
+        )
+
+
+def test_subcomponents(mapdl, cleared):
+    mapdl.prep7()
+
+    with mapdl.non_interactive:
+        mapdl.run("*do,i,1,10")
+        mapdl.run("nsel,none")
+        mapdl.run("n,i,i,0,0")
+        mapdl.cm("NODE_%i%", "NODE")
+        mapdl.run("*enddo")
+
+    mapdl.allsel()
+
+    for i in range(1, 11):
+        assert f"NODE_{i}" in str(mapdl.components)
+        assert len(mapdl.components[f"NODE_{i}"]) == 1
+        assert mapdl.components[f"NODE_{i}"][0] == i
+
+    mapdl.cmgrp(
+        "assembly",
+        "NODE_1",
+        "NODE_2",
+        "NODE_3",
+        "NODE_4",
+        "NODE_5",
+        "NODE_6",
+        "NODE_7",
+        "NODE_8",
+    )
+
+    print(mapdl.components)  # This will trigger COMP parsing
+
+    assert "ASSEMBLY" in str(mapdl.components)
+    assert len(mapdl.components["assembly"]) == 8
+    assert "LVL" in mapdl.components["assembly"].type
+    assert mapdl.components["assembly"].type == "LVL1"
+    assert "NODE_1" in mapdl.components["assembly"].items
+    assert "NODE_2" in mapdl.components["assembly"].items
+    assert "NODE_3" in mapdl.components["assembly"].items
+    assert "NODE_4" in mapdl.components["assembly"].items
+    assert "NODE_5" in mapdl.components["assembly"].items
+    assert "NODE_6" in mapdl.components["assembly"].items
+    assert "NODE_7" in mapdl.components["assembly"].items
+    assert "NODE_8" in mapdl.components["assembly"].items
