@@ -5,7 +5,7 @@ Securing connections with mTLS
 ========================================
 
 Mutual TLS (mTLS) is the recommended transport mode when connecting to MAPDL over
-a network, particularly in remote.
+a network, particularly for remote connections.
 Unlike plain TLS, mTLS requires **both** the server and the client to present a
 valid certificate signed by a shared Certificate Authority (CA). This mutual
 authentication guarantees that:
@@ -18,7 +18,7 @@ authentication guarantees that:
 Certificate files
 =================
 
-An mTLS setup requires three pairs of files: one for the CA, one for the server,
+An mTLS setup requires three pairs of files — one for the CA, one for the server,
 and one for the client. All files use PEM encoding.
 
 .. list-table::
