@@ -1,6 +1,6 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
-#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -331,7 +331,7 @@ class PathOperations(CommandsBase):
         Parameters
         ----------
         oper : str
-            Type of operation to be performed. See `Notes <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_PCALC.html#eqb7ec3fe5-6192-4739-ab47-6047369573ed>`_ below for specific descriptions of each operation:
+            Type of operation to be performed. See `Notes <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_PCALC.html#eqb7ec3fe5-6192 - 4739-ab47-6047369573ed>`_ below for specific descriptions of each operation:
 
             * ``ADD`` - Adds two existing path items.
 
