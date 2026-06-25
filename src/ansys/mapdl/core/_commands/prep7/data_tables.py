@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -1270,7 +1270,7 @@ class DataTables(CommandsBase):
           <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_mullinseffect.html#thymullinspseudoelas>`_
 
           `Mullins Effect ( TB,CDM)
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/aQw8sq22dldm.html#eq131b2f6e-5292-4143-80f8-e779d52f1a70>`_
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/aQw8sq22dldm.html#eq131b2f6e-5292 - 4143-80f8-e779d52f1a70>`_
 
           `Mullins Effect Model
           <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_STR8_3.html#>`_
@@ -1356,7 +1356,7 @@ class DataTables(CommandsBase):
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_
             -based fatigue crack-growth analysis only.
           * `TFDK
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#eq5a0147ef-6ed3-4a7a-9998-213217e78bdf>`_
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#eq5a0147ef-6ed3-4a7a-9998 - 213217e78bdf>`_
             -- Tabular fatigue law for fatigue crack-growth. Used in a `SMART
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_
             -based fatigue crack-growth analysis only.
@@ -1383,7 +1383,7 @@ class DataTables(CommandsBase):
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_
             -based static crack-growth analysis only.
 
-          Fatigue `crack-closure <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#polynomclosure>`_ option. Valid in a `SMART <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_ -based fatigue crack-growth analysis only, with crack-growth based on `Paris`` law <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#eq4f61610d-5010-4a2d-83de-3c60fba4be9f>`_ or `tabular fatigue <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#eq5a0147ef-6ed3-4a7a-9998-213217e78bdf>`_ law.
+          Fatigue `crack-closure <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#polynomclosure>`_ option. Valid in a `SMART <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_ -based fatigue crack-growth analysis only, with crack-growth based on `Paris`` law <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#eq4f61610d-5010-4a2d-83de-3c60fba4be9f>`_ or `tabular fatigue <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#eq5a0147ef-6ed3-4a7a-9998 - 213217e78bdf>`_ law.
 
           * `ELBER
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#eqe9cf92f4-6e7c-48c1-b951-5ef12345157a>`_
@@ -1438,7 +1438,7 @@ class DataTables(CommandsBase):
           * ``DILA`` - Drucker-Prager concrete dilatation.
 
           * ``HSD2`` - Drucker-Prager concrete `exponential
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/mat_geomechanics.html#eq02d041b8-8522-4917-93c4-d757c809944b>`_
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/mat_geomechanics.html#eq02d041b8-8522 - 4917-93c4-d757c809944b>`_
             `hardening/softening/dilitation (HSD)
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/mat_geomechanics.html#matDPconcrlinearsoft>`_
             behavior.
@@ -1448,7 +1448,7 @@ class DataTables(CommandsBase):
             HSD behavior.
 
           * ``HSD5`` - Drucker-Prager concrete `fracture energy
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/mat_geomechanics.html#eqdae60069-4439-4532-9997-8223567cabd8>`_
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/mat_geomechanics.html#eqdae60069 - 4439-4532 - 9997-8223567cabd8>`_
             HSD behavior.
 
           * ``HSD6`` - Drucker-Prager concrete `linear
@@ -1620,7 +1620,7 @@ class DataTables(CommandsBase):
 
         * ``References:`` - `Anisotropic Dielectric Loss Tangent
           <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/mat_electricmagnet.html#eq2d35a8da-
-          dc5d-4cd9-9141-6540016c1258>`_
+          dc5d-4cd9-9141 - 6540016c1258>`_
 
         .. _TBdmge:
 
@@ -2022,7 +2022,7 @@ class DataTables(CommandsBase):
             For ``NPTS``, default = 2 and maximum = 2.
 
           * ``OGDEN`` - `Ogden model
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/aQw8sq22dldm.html#eqfac052c9-3204-4464-961f-51beb045c192>`_.
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/aQw8sq22dldm.html#eqfac052c9-3204 - 4464-961f-51beb045c192>`_.
             For ``NPTS``, default = 1 and maximum is the number of terms in the energy function.
 
           * ``POLY`` - `Polynomial form model

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -284,7 +284,7 @@ def test_parameters_name(mapdl, cleared, func, par_name):
             id="Name too long",
         ),
         pytest.param(
-            "aasdf234asdf5678901-2345",
+            "aasdf234asdf5678901 - 2345",
             id="Not valid sign -",
         ),
         pytest.param(

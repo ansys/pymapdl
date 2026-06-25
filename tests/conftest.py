@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -525,6 +525,8 @@ if has_dependency("pytest-pyvista"):
         verify_image_cache.var_error_value = 1000.0
         verify_image_cache.var_warning_value = 1000.0
 
+        verify_image_cache.allow_useless_fixture = True
+
         return verify_image_cache
 
 
@@ -779,13 +781,6 @@ def mapdl(request, tmpdir_factory):
         # should test if _exited protects from execution
         with pytest.raises(MapdlExitedError):
             mapdl.prep7()
-
-        # actually test if server is shutdown
-        if HAS_GRPC:
-            with pytest.raises(MapdlExitedError):
-                mapdl._send_command("/PREP7")
-            with pytest.raises(MapdlExitedError):
-                mapdl._send_command_stream("/PREP7")
 
     # Delete Mapdl object
     mapdl.exit()

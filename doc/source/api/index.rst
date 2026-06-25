@@ -35,5 +35,6 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
    pool
    post
    Pyansys Math <https://math.docs.pyansys.com/version/stable/>
+   plugin
    solution
    xpl

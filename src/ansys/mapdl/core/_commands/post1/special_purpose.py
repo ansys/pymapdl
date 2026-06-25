@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -3797,7 +3797,7 @@ class SpecialPurpose(CommandsBase):
 
         Either the modal assurance criterion (MAC) or the frequency response function (FRF) correlation
         method is used. (For more details see `POST1 - Modal Assurance Criterion (MAC)
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_post16.html#eqff29ac61-1393-4410-9090-572b02773534>`_
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_post16.html#eqff29ac61-1393 - 4410-9090-572b02773534>`_
         `POST1 - Frequency response function correlation
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thryFRF120.html#eqcaaee52b-1bb5-4b48-a411-6a162a579399>`_
 

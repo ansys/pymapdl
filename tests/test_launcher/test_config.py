@@ -1,6 +1,24 @@
-# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 """Unit tests for launcher.config module."""
 
@@ -279,6 +297,118 @@ class TestConfigPort:
         with patch.dict(os.environ, {}, clear=True):
             port = resolve_port(None)
             assert port is not None and port > 0
+
+
+class TestAutoPortSelection:
+    """Tests for automatic port selection when default port is in use."""
+
+    def test_auto_selects_next_port_when_default_in_use(self):
+        """When no port is given and the default is busy, the next free port is used."""
+        from ansys.mapdl.core.launcher.models import PortStatus
+
+        busy_status = PortStatus(available=False, used_by_mapdl=True, port=50052)
+        free_status = PortStatus(available=True, used_by_mapdl=False, port=50053)
+
+        with (
+            patch.dict(os.environ, {"PYMAPDL_PORT": ""}),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_start_instance",
+                return_value=True,
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_exec_file",
+                return_value="/fake/mapdl",
+            ),
+            patch("ansys.mapdl.core.launcher.config.resolve_version", return_value=252),
+            patch(
+                "ansys.mapdl.core.launcher.network.check_port_status",
+                side_effect=[busy_status, busy_status, free_status],
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.validation.validate_config",
+                return_value=None,
+            ),
+        ):
+            config = resolve_launch_config(port=None, start_instance=True)
+            # Port must have been bumped away from the busy 50052
+            assert config.port != 50052
+            assert config.port > 50052
+
+    def test_does_not_auto_select_when_port_is_explicit(self):
+        """When a port is explicitly provided, it is used as-is (no auto-selection)."""
+        with (
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_start_instance",
+                return_value=True,
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_exec_file",
+                return_value="/fake/mapdl",
+            ),
+            patch("ansys.mapdl.core.launcher.config.resolve_version", return_value=252),
+            patch(
+                "ansys.mapdl.core.launcher.network.check_port_status",
+            ) as mock_check_port_status,
+            patch(
+                "ansys.mapdl.core.launcher.validation.validate_config",
+                return_value=None,
+            ),
+        ):
+            # Explicit port — should stay at 50100 even though it is "busy"
+            config = resolve_launch_config(port=50100, start_instance=True)
+            assert config.port == 50100
+            mock_check_port_status.assert_not_called()
+
+    def test_does_not_auto_select_when_pymapdl_port_env_set(self):
+        """When PYMAPDL_PORT env var is set, auto-selection is not triggered."""
+        with (
+            patch.dict(os.environ, {"PYMAPDL_PORT": "50200"}),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_start_instance",
+                return_value=True,
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_exec_file",
+                return_value="/fake/mapdl",
+            ),
+            patch("ansys.mapdl.core.launcher.config.resolve_version", return_value=252),
+            patch(
+                "ansys.mapdl.core.launcher.network.check_port_status",
+            ) as mock_check_port_status,
+            patch(
+                "ansys.mapdl.core.launcher.validation.validate_config",
+                return_value=None,
+            ),
+        ):
+            config = resolve_launch_config(port=None, start_instance=True)
+            assert config.port == 50200
+            mock_check_port_status.assert_not_called()
+
+    def test_keeps_default_port_when_auto_selection_probe_fails(self):
+        """When auto-selection probing fails, keep the resolved default port."""
+        with (
+            patch.dict(os.environ, {"PYMAPDL_PORT": ""}),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_start_instance",
+                return_value=True,
+            ),
+            patch(
+                "ansys.mapdl.core.launcher.config.resolve_exec_file",
+                return_value="/fake/mapdl",
+            ),
+            patch("ansys.mapdl.core.launcher.config.resolve_version", return_value=252),
+            patch(
+                "ansys.mapdl.core.launcher.network.check_port_status",
+                side_effect=RuntimeError("error cause"),
+            ),
+            patch("ansys.mapdl.core.launcher.config.LOG.debug") as mock_debug,
+        ):
+            config = resolve_launch_config(port=None, start_instance=True)
+
+            assert config.port == 50052
+            mock_debug.assert_any_call(
+                "Could not auto-select available port: error cause"
+            )
 
 
 class TestConfigNproc:

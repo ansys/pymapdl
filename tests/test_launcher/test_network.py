@@ -1,7 +1,24 @@
-# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 """Unit tests for launcher.network module."""
 
@@ -718,9 +735,15 @@ class TestPhase2NetworkIntegration:
                 with patch(
                     "ansys.mapdl.core.launcher.environment.is_wsl", return_value=False
                 ):
-                    config = resolve_launch_config(start_instance=True)
-                    assert config.port == 50052
-                    assert config.ip == "127.0.0.1"
+                    with patch(
+                        "ansys.mapdl.core.launcher.network.check_port_status",
+                        return_value=PortStatus(
+                            port=50052, available=True, used_by_mapdl=False
+                        ),
+                    ):
+                        config = resolve_launch_config(start_instance=True)
+                        assert config.port == 50052
+                        assert config.ip == "127.0.0.1"
 
 
 # ============================================================================
@@ -796,7 +819,7 @@ class TestPhase4PortMaxAttemptsEdgeCases:
 
             result = find_available_port(start_port=50052, max_attempts=1000)
             assert result == 50552
-            assert mock_check.call_count == 501  # Checked 50052-50552 (501 ports)
+            assert mock_check.call_count == 501  # Checked 50052 - 50552 (501 ports)
 
     def test_find_available_port_early_exit_when_found(self):
         """Test that search exits early when port found (doesn't check remaining).

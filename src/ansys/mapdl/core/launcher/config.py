@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -27,8 +27,14 @@ This module contains pure functions that resolve configuration from:
 2. Environment variables
 3. System defaults
 
-All functions are pure (same input → same output) and raise
+Most helper functions are pure (same input -> same output) and raise
 ConfigurationError for invalid states.
+
+Note
+----
+``resolve_launch_config`` may perform runtime port availability probing when
+starting a local instance without an explicitly requested port. In that case,
+the resolved port can depend on host runtime state.
 """
 
 import os
@@ -93,6 +99,13 @@ def resolve_launch_config(
     1. Explicit argument (if not None)
     2. Environment variable (if set)
     3. Default value
+
+    Note
+    ----
+    When launching a new local instance and no port is explicitly requested
+    (via ``port`` argument or ``PYMAPDL_PORT`` presence), this function can probe
+    port availability and auto-select the next free port if the default is busy.
+    Therefore, the final resolved ``port`` may depend on runtime host state.
 
     This function combines user-provided arguments, environment variable
     overrides, and system defaults to produce a complete ``LaunchConfig``
@@ -383,6 +396,25 @@ def resolve_launch_config(
     # Resolve core parameters
     resolved_run_location = resolve_run_location(run_location)
     resolved_port = resolve_port(port)
+
+    # When starting a new instance and the user did not explicitly request a
+    # specific port (neither via the argument nor PYMAPDL_PORT env var),
+    # automatically find the next available port if the default is already
+    # occupied.
+    _port_explicitly_set = port is not None or bool(os.getenv("PYMAPDL_PORT"))
+    if resolved_start_instance and not _port_explicitly_set:
+        try:
+            from .network import check_port_status, find_available_port
+
+            _status = check_port_status(resolved_port)
+            if not _status.available:
+                resolved_port = find_available_port(start_port=resolved_port)
+                LOG.debug(
+                    f"Default port was in use; automatically selected port {resolved_port}."
+                )
+        except Exception as e:
+            LOG.debug(f"Could not auto-select available port: {e}")
+
     resolved_ip = resolve_ip(ip, resolved_start_instance, launch_on_hpc=launch_on_hpc)
     resolved_mode = resolve_mode(mode, resolved_version)
     resolved_nproc = resolve_nproc(nproc)

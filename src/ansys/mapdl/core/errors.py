@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -361,6 +361,27 @@ class MapdlgRPCError(MapdlRuntimeError):
 
 class IncorrectMPIConfigurationError(MapdlDidNotStart):
     """Raised when the MPI configuration is incorrect"""
+
+    def __init__(self, msg=""):
+        super().__init__(msg)
+
+
+class PluginError(MapdlRuntimeError):
+    """Raised when a plugin fails"""
+
+    def __init__(self, msg=""):
+        super().__init__(msg)
+
+
+class PluginLoadError(PluginError):
+    """Raised when a plugin fails to load"""
+
+    def __init__(self, msg=""):
+        super().__init__(msg)
+
+
+class PluginUnloadError(PluginError):
+    """Raised when a plugin fails to unload"""
 
     def __init__(self, msg=""):
         super().__init__(msg)
