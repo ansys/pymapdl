@@ -56,7 +56,7 @@
 
         If you want to find learning resources, see :ref:`ref_learning` and
         start with :ref:`ref_pymapdl_course`.
-    
+
     .. grid-item-card:: :fa:`terminal` Get started quickly
         :link: ref_getting_started
         :link-type: ref
