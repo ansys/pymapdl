@@ -35,7 +35,7 @@
 
 .. title is given using the
 
-**What do you want to do? I want to...**
+**What do you want to do?**
 
 .. vale on
 
@@ -43,69 +43,65 @@
     :gutter: 1 2 3 3
     :padding: 1 2 3 3
 
-    .. grid-item-card:: :fa:`newspaper` Know what is PyMAPDL
+    .. grid-item-card:: :fa:`newspaper` Learn what PyMAPDL is
         :link: ref_project_page
         :link-type: ref
 
-        Check our project page :ref:`ref_project_page`
-        where a quick project overview can be found.
-        Learn what this project is about!
+        If you want to learn what PyMAPDL is, how it works, and why you
+        should use it, see :ref:`ref_project_page`.
 
     .. grid-item-card:: :fa:`book` Learn how to use PyMAPDL
         :link: ref_learning
         :link-type: ref
 
-        Check our :ref:`ref_learning` section.
-        It is recommended you follow the
-        :ref:`ref_pymapdl_course` course.
+        If you want to find learning resources, see :ref:`ref_learning` and
+        start with :ref:`ref_pymapdl_course`.
 
-    .. grid-item-card:: :fa:`terminal` Learn how to get started
+    .. grid-item-card:: :fa:`terminal` Get started quickly
         :link: ref_getting_started
         :link-type: ref
 
-        Check our :ref:`ref_getting_started` section to learn to
-        install MAPDL, install PyMAPDL or launch PyMAPDL.
+        If you want to install MAPDL, install PyMAPDL, or launch PyMAPDL,
+        see :ref:`ref_getting_started`.
 
-    .. grid-item-card:: :fa:`gears` See some PyMAPDL usage examples
+    .. grid-item-card:: :fa:`gears` Explore PyMAPDL examples
         :link: ref_examples
         :link-type: ref
 
-        In our :ref:`ref_examples` section, you
-        can find a great collection of PyMAPDL
-        user cases.
+        If you want to explore a great collection of PyMAPDL examples, see
+        :ref:`ref_examples`.
 
-    .. grid-item-card:: :fa:`book-open-reader` Use the different library modules
+    .. grid-item-card:: :fa:`book-open-reader` Use PyMAPDL modules
         :link: ref_user_guide
         :link-type: ref
 
-        Check our :ref:`ref_user_guide` chapter.
-        Don't miss the right side bar with the table content.
+        If you want to use PyMAPDL modules for basic, intermediate, advanced,
+        or high-performance workflows, see :ref:`ref_user_guide`.
 
-    .. grid-item-card:: :fa:`question` Help with PyMAPDL
+    .. grid-item-card:: :fa:`question` Troubleshoot PyMAPDL
         :link: ref_troubleshooting
         :link-type: ref
 
-        Check our :ref:`ref_troubleshooting` section.
-        Additionally, there are some helpful
-        resources in like frequently asked questions.
+        If you want to resolve issues you encounter while using PyMAPDL,
+        see :ref:`ref_troubleshooting`.
 
-    .. grid-item-card:: :fa:`users` Contribute to PyMAPDL project
+    .. grid-item-card:: :fa:`users` Contribute to PyMAPDL
         :link: ref_contributing
         :link-type: ref
 
-        Great!! Check our :ref:`ref_contributing`
-        section to start contribute.
+        If you want to contribute to PyMAPDL, see
+        :ref:`ref_contributing`.
 
-    .. grid-item-card:: :fa:`user-pen` Document or create an example for PyMAPDL
+    .. grid-item-card:: :fa:`user-pen` Improve documentation or add an example
         :link: write_documentation
         :link-type: ref
 
-        Check our :ref:`write_documentation` section.
+        If you want to improve documentation or add an example, see
+        :ref:`write_documentation`.
 
     .. grid-item-card:: :fa:`keyboard` Develop PyMAPDL
         :link: developing_pymapdl
         :link-type: ref
 
-        Check our :ref:`developing_pymapdl` section
-        to get guidance about setting
-        the project for development.
+        If you want to fix a bug or build a new feature, see
+        :ref:`developing_pymapdl`.
