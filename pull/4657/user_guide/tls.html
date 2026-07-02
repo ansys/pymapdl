@@ -1,0 +1,1103 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Securing connections with mTLS &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/ansys-sphinx-theme.css?v=5ffe81b6" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/ansys-sphinx-theme.css?v=5ffe81b6" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../_static/documentation_options.js?v=5a96a97e"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/tls';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/user_guide/tls.html" />
+    <link rel="icon" href="../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.74.dev0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../mapdl_commands/index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../mapdl_commands/index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="https://github.com/ansys/pymapdl/edit/main/doc/source/user_guide/tls.rst" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Securing connections with mTLS</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="securing-connections-with-mtls">
+<span id="ref-tls-guide"></span><h1>Securing connections with mTLS<a class="headerlink" href="#securing-connections-with-mtls" title="Link to this heading">#</a></h1>
+<p>Mutual TLS (mTLS) is the recommended transport mode when connecting to MAPDL over
+a network, particularly in remote.
+Unlike plain TLS, mTLS requires <strong>both</strong> the server and the client to present a
+valid certificate signed by a shared Certificate Authority (CA). This mutual
+authentication guarantees that:</p>
+<ul class="simple">
+<li><p>PyMAPDL only connects to a trusted MAPDL server.</p></li>
+<li><p>MAPDL only accepts connections from trusted clients.</p></li>
+<li><p>All gRPC traffic is encrypted in transit.</p></li>
+</ul>
+<section id="certificate-files">
+<h2>Certificate files<a class="headerlink" href="#certificate-files" title="Link to this heading">#</a></h2>
+<p>An mTLS setup requires three pairs of files: one for the CA, one for the server,
+and one for the client. All files use PEM encoding.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Party</p></th>
+<th class="head"><p>Files</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Certificate Authority</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ca.key</span></code>, <code class="docutils literal notranslate"><span class="pre">ca.crt</span></code></p></td>
+<td><p>Root of trust. The CA signs both the server and client certificates.
+<code class="docutils literal notranslate"><span class="pre">ca.key</span></code> must be kept secret; <code class="docutils literal notranslate"><span class="pre">ca.crt</span></code> is distributed to all parties.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Server (MAPDL)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">server.key</span></code>, <code class="docutils literal notranslate"><span class="pre">server.crt</span></code></p></td>
+<td><p>Presented by MAPDL to prove its identity. The certificate carries
+<code class="docutils literal notranslate"><span class="pre">SERVER_AUTH</span></code> extended key usage and Subject Alternative Names (SANs)
+matching the hostname or IP address that clients use to connect.</p></td>
+</tr>
+<tr class="row-even"><td><p>Client (PyMAPDL)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">client.key</span></code>, <code class="docutils literal notranslate"><span class="pre">client.crt</span></code></p></td>
+<td><p>Presented by PyMAPDL to prove its identity. The certificate carries
+<code class="docutils literal notranslate"><span class="pre">CLIENT_AUTH</span></code> extended key usage.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The server and client certificates must be signed by the same CA so that each
+party can verify the other.</p>
+</div>
+</section>
+<section id="generating-certificates">
+<h2>Generating certificates<a class="headerlink" href="#generating-certificates" title="Link to this heading">#</a></h2>
+<p>The following Python script generates a complete set of self-signed certificates
+using the <code class="docutils literal notranslate"><span class="pre">cryptography</span></code> package (RSA 4096-bit keys, SHA-256 signing). It
+produces the full CA → server → client chain and writes all files to a <code class="docutils literal notranslate"><span class="pre">certs/</span></code>
+output directory.</p>
+<p>First, install the required dependency:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install cryptography</span>
+</pre></div>
+</div>
+<p>Then run the script below, adjusting <code class="docutils literal notranslate"><span class="pre">SERVER_HOSTS</span></code> and <code class="docutils literal notranslate"><span class="pre">CLIENT_NAME</span></code> as
+needed:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Generate mTLS certificates for MAPDL gRPC connections.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">cryptography</span><span class="w"> </span><span class="kn">import</span> <span class="n">x509</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cryptography.hazmat.primitives</span><span class="w"> </span><span class="kn">import</span> <span class="n">hashes</span><span class="p">,</span> <span class="n">serialization</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cryptography.hazmat.primitives.asymmetric</span><span class="w"> </span><span class="kn">import</span> <span class="n">rsa</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cryptography.x509.oid</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtendedKeyUsageOID</span><span class="p">,</span> <span class="n">NameOID</span>
+
+<span class="c1"># ── Configuration ────────────────────────────────────────────────────────────</span>
+<span class="c1"># Each entry is (primary_hostname, [extra_SANs]). For a remote server add its</span>
+<span class="c1"># hostname and IP, e.g. (&quot;my-mapdl-host&quot;, [&quot;192.168.1.10&quot;]).</span>
+<span class="c1"># For HPC deployments add one entry per compute node.</span>
+<span class="n">SERVER_HOSTS</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">])]</span>
+<span class="n">CLIENT_NAME</span> <span class="o">=</span> <span class="s2">&quot;PyMAPDL Client&quot;</span>
+<span class="n">VALIDITY_DAYS</span> <span class="o">=</span> <span class="mi">365</span>  <span class="c1"># 1 year</span>
+<span class="n">OUTPUT_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;certs&quot;</span><span class="p">)</span>
+<span class="c1"># ─────────────────────────────────────────────────────────────────────────────</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_new_key</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">rsa</span><span class="o">.</span><span class="n">RSAPrivateKey</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">rsa</span><span class="o">.</span><span class="n">generate_private_key</span><span class="p">(</span><span class="n">public_exponent</span><span class="o">=</span><span class="mi">65537</span><span class="p">,</span> <span class="n">key_size</span><span class="o">=</span><span class="mi">4096</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_save_key</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">rsa</span><span class="o">.</span><span class="n">RSAPrivateKey</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span>
+        <span class="n">key</span><span class="o">.</span><span class="n">private_bytes</span><span class="p">(</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="n">serialization</span><span class="o">.</span><span class="n">Encoding</span><span class="o">.</span><span class="n">PEM</span><span class="p">,</span>
+            <span class="nb">format</span><span class="o">=</span><span class="n">serialization</span><span class="o">.</span><span class="n">PrivateFormat</span><span class="o">.</span><span class="n">PKCS8</span><span class="p">,</span>
+            <span class="n">encryption_algorithm</span><span class="o">=</span><span class="n">serialization</span><span class="o">.</span><span class="n">NoEncryption</span><span class="p">(),</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_save_cert</span><span class="p">(</span><span class="n">cert</span><span class="p">:</span> <span class="n">x509</span><span class="o">.</span><span class="n">Certificate</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="n">cert</span><span class="o">.</span><span class="n">public_bytes</span><span class="p">(</span><span class="n">serialization</span><span class="o">.</span><span class="n">Encoding</span><span class="o">.</span><span class="n">PEM</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validity</span><span class="p">(</span><span class="n">days</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">now</span><span class="p">,</span> <span class="n">now</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">make_ca</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">rsa</span><span class="o">.</span><span class="n">RSAPrivateKey</span><span class="p">,</span> <span class="n">days</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">x509</span><span class="o">.</span><span class="n">Certificate</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a self-signed CA certificate.&quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">x509</span><span class="o">.</span><span class="n">Name</span><span class="p">([</span><span class="n">x509</span><span class="o">.</span><span class="n">NameAttribute</span><span class="p">(</span><span class="n">NameOID</span><span class="o">.</span><span class="n">COMMON_NAME</span><span class="p">,</span> <span class="s2">&quot;My CA&quot;</span><span class="p">)])</span>
+    <span class="n">nb</span><span class="p">,</span> <span class="n">na</span> <span class="o">=</span> <span class="n">_validity</span><span class="p">(</span><span class="n">days</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">x509</span><span class="o">.</span><span class="n">CertificateBuilder</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">subject_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">issuer_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">public_key</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">public_key</span><span class="p">())</span>
+        <span class="o">.</span><span class="n">serial_number</span><span class="p">(</span><span class="n">x509</span><span class="o">.</span><span class="n">random_serial_number</span><span class="p">())</span>
+        <span class="o">.</span><span class="n">not_valid_before</span><span class="p">(</span><span class="n">nb</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">not_valid_after</span><span class="p">(</span><span class="n">na</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">add_extension</span><span class="p">(</span><span class="n">x509</span><span class="o">.</span><span class="n">BasicConstraints</span><span class="p">(</span><span class="n">ca</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_length</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span> <span class="n">critical</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">add_extension</span><span class="p">(</span>
+            <span class="n">x509</span><span class="o">.</span><span class="n">KeyUsage</span><span class="p">(</span>
+                <span class="n">digital_signature</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">key_cert_sign</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">crl_sign</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">key_encipherment</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">data_encipherment</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">key_agreement</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">content_commitment</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">encipher_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">decipher_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">critical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">hashes</span><span class="o">.</span><span class="n">SHA256</span><span class="p">())</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">make_server_cert</span><span class="p">(</span>
+    <span class="n">key</span><span class="p">:</span> <span class="n">rsa</span><span class="o">.</span><span class="n">RSAPrivateKey</span><span class="p">,</span>
+    <span class="n">ca_cert</span><span class="p">:</span> <span class="n">x509</span><span class="o">.</span><span class="n">Certificate</span><span class="p">,</span>
+    <span class="n">ca_key</span><span class="p">:</span> <span class="n">rsa</span><span class="o">.</span><span class="n">RSAPrivateKey</span><span class="p">,</span>
+    <span class="n">common_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">sans</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">days</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">x509</span><span class="o">.</span><span class="n">Certificate</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a server certificate signed by the CA.&quot;&quot;&quot;</span>
+    <span class="n">san_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">x509</span><span class="o">.</span><span class="n">DNSName</span><span class="p">(</span><span class="n">common_name</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sans</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="n">common_name</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
+
+                <span class="n">san_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x509</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">s</span><span class="p">)))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">san_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x509</span><span class="o">.</span><span class="n">DNSName</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+
+    <span class="n">nb</span><span class="p">,</span> <span class="n">na</span> <span class="o">=</span> <span class="n">_validity</span><span class="p">(</span><span class="n">days</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">x509</span><span class="o">.</span><span class="n">CertificateBuilder</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">subject_name</span><span class="p">(</span><span class="n">x509</span><span class="o">.</span><span class="n">Name</span><span class="p">([</span><span class="n">x509</span><span class="o">.</span><span class="n">NameAttribute</span><span class="p">(</span><span class="n">NameOID</span><span class="o">.</span><span class="n">COMMON_NAME</span><span class="p">,</span> <span class="n">common_name</span><span class="p">)]))</span>
+        <span class="o">.</span><span class="n">issuer_name</span><span class="p">(</span><span class="n">ca_cert</span><span class="o">.</span><span class="n">subject</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">public_key</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">public_key</span><span class="p">())</span>
+        <span class="o">.</span><span class="n">serial_number</span><span class="p">(</span><span class="n">x509</span><span class="o">.</span><span class="n">random_serial_number</span><span class="p">())</span>
+        <span class="o">.</span><span class="n">not_valid_before</span><span class="p">(</span><span class="n">nb</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">not_valid_after</span><span class="p">(</span><span class="n">na</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">add_extension</span><span class="p">(</span><span class="n">x509</span><span class="o">.</span><span class="n">SubjectAlternativeName</span><span class="p">(</span><span class="n">san_list</span><span class="p">),</span> <span class="n">critical</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">add_extension</span><span class="p">(</span>
+            <span class="n">x509</span><span class="o">.</span><span class="n">KeyUsage</span><span class="p">(</span>
+                <span class="n">digital_signature</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">key_encipherment</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">key_cert_sign</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">crl_sign</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">data_encipherment</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">key_agreement</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">content_commitment</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">encipher_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">decipher_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">critical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">add_extension</span><span class="p">(</span>
+            <span class="n">x509</span><span class="o">.</span><span class="n">ExtendedKeyUsage</span><span class="p">([</span><span class="n">ExtendedKeyUsageOID</span><span class="o">.</span><span class="n">SERVER_AUTH</span><span class="p">]),</span> <span class="n">critical</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">ca_key</span><span class="p">,</span> <span class="n">hashes</span><span class="o">.</span><span class="n">SHA256</span><span class="p">())</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">make_client_cert</span><span class="p">(</span>
+    <span class="n">key</span><span class="p">:</span> <span class="n">rsa</span><span class="o">.</span><span class="n">RSAPrivateKey</span><span class="p">,</span>
+    <span class="n">ca_cert</span><span class="p">:</span> <span class="n">x509</span><span class="o">.</span><span class="n">Certificate</span><span class="p">,</span>
+    <span class="n">ca_key</span><span class="p">:</span> <span class="n">rsa</span><span class="o">.</span><span class="n">RSAPrivateKey</span><span class="p">,</span>
+    <span class="n">common_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">days</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">x509</span><span class="o">.</span><span class="n">Certificate</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a client certificate signed by the CA.&quot;&quot;&quot;</span>
+    <span class="n">nb</span><span class="p">,</span> <span class="n">na</span> <span class="o">=</span> <span class="n">_validity</span><span class="p">(</span><span class="n">days</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">x509</span><span class="o">.</span><span class="n">CertificateBuilder</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">subject_name</span><span class="p">(</span><span class="n">x509</span><span class="o">.</span><span class="n">Name</span><span class="p">([</span><span class="n">x509</span><span class="o">.</span><span class="n">NameAttribute</span><span class="p">(</span><span class="n">NameOID</span><span class="o">.</span><span class="n">COMMON_NAME</span><span class="p">,</span> <span class="n">common_name</span><span class="p">)]))</span>
+        <span class="o">.</span><span class="n">issuer_name</span><span class="p">(</span><span class="n">ca_cert</span><span class="o">.</span><span class="n">subject</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">public_key</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">public_key</span><span class="p">())</span>
+        <span class="o">.</span><span class="n">serial_number</span><span class="p">(</span><span class="n">x509</span><span class="o">.</span><span class="n">random_serial_number</span><span class="p">())</span>
+        <span class="o">.</span><span class="n">not_valid_before</span><span class="p">(</span><span class="n">nb</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">not_valid_after</span><span class="p">(</span><span class="n">na</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">add_extension</span><span class="p">(</span>
+            <span class="n">x509</span><span class="o">.</span><span class="n">SubjectAlternativeName</span><span class="p">([</span><span class="n">x509</span><span class="o">.</span><span class="n">DNSName</span><span class="p">(</span><span class="n">common_name</span><span class="p">)]),</span> <span class="n">critical</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">add_extension</span><span class="p">(</span>
+            <span class="n">x509</span><span class="o">.</span><span class="n">KeyUsage</span><span class="p">(</span>
+                <span class="n">digital_signature</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">key_encipherment</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">key_cert_sign</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">crl_sign</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">data_encipherment</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">key_agreement</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">content_commitment</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">encipher_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">decipher_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">critical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">add_extension</span><span class="p">(</span>
+            <span class="n">x509</span><span class="o">.</span><span class="n">ExtendedKeyUsage</span><span class="p">([</span><span class="n">ExtendedKeyUsageOID</span><span class="o">.</span><span class="n">CLIENT_AUTH</span><span class="p">]),</span> <span class="n">critical</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">ca_key</span><span class="p">,</span> <span class="n">hashes</span><span class="o">.</span><span class="n">SHA256</span><span class="p">())</span>
+    <span class="p">)</span>
+
+
+<span class="n">OUTPUT_DIR</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># CA</span>
+<span class="n">ca_key</span> <span class="o">=</span> <span class="n">_new_key</span><span class="p">()</span>
+<span class="n">ca_cert</span> <span class="o">=</span> <span class="n">make_ca</span><span class="p">(</span><span class="n">ca_key</span><span class="p">,</span> <span class="n">VALIDITY_DAYS</span><span class="p">)</span>
+<span class="n">_save_key</span><span class="p">(</span><span class="n">ca_key</span><span class="p">,</span> <span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="s2">&quot;ca.key&quot;</span><span class="p">)</span>
+<span class="n">_save_cert</span><span class="p">(</span><span class="n">ca_cert</span><span class="p">,</span> <span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="s2">&quot;ca.crt&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generated CA&quot;</span><span class="p">)</span>
+
+<span class="c1"># Server certificate(s)</span>
+<span class="k">for</span> <span class="n">hostname</span><span class="p">,</span> <span class="n">extra_sans</span> <span class="ow">in</span> <span class="n">SERVER_HOSTS</span><span class="p">:</span>
+    <span class="n">stem</span> <span class="o">=</span> <span class="s2">&quot;server&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">SERVER_HOSTS</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">hostname</span>
+    <span class="n">srv_key</span> <span class="o">=</span> <span class="n">_new_key</span><span class="p">()</span>
+    <span class="n">srv_cert</span> <span class="o">=</span> <span class="n">make_server_cert</span><span class="p">(</span>
+        <span class="n">srv_key</span><span class="p">,</span> <span class="n">ca_cert</span><span class="p">,</span> <span class="n">ca_key</span><span class="p">,</span> <span class="n">hostname</span><span class="p">,</span> <span class="n">extra_sans</span><span class="p">,</span> <span class="n">VALIDITY_DAYS</span>
+    <span class="p">)</span>
+    <span class="n">_save_key</span><span class="p">(</span><span class="n">srv_key</span><span class="p">,</span> <span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stem</span><span class="si">}</span><span class="s2">.key&quot;</span><span class="p">)</span>
+    <span class="n">_save_cert</span><span class="p">(</span><span class="n">srv_cert</span><span class="p">,</span> <span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stem</span><span class="si">}</span><span class="s2">.crt&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated server certificate for </span><span class="si">{</span><span class="n">hostname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Client certificate</span>
+<span class="n">cli_key</span> <span class="o">=</span> <span class="n">_new_key</span><span class="p">()</span>
+<span class="n">cli_cert</span> <span class="o">=</span> <span class="n">make_client_cert</span><span class="p">(</span><span class="n">cli_key</span><span class="p">,</span> <span class="n">ca_cert</span><span class="p">,</span> <span class="n">ca_key</span><span class="p">,</span> <span class="n">CLIENT_NAME</span><span class="p">,</span> <span class="n">VALIDITY_DAYS</span><span class="p">)</span>
+<span class="n">_save_key</span><span class="p">(</span><span class="n">cli_key</span><span class="p">,</span> <span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="s2">&quot;client.key&quot;</span><span class="p">)</span>
+<span class="n">_save_cert</span><span class="p">(</span><span class="n">cli_cert</span><span class="p">,</span> <span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="s2">&quot;client.crt&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generated client certificate&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">All certificates written to &#39;</span><span class="si">{</span><span class="n">OUTPUT_DIR</span><span class="si">}</span><span class="s2">/&#39;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>After running the script, the output directory contains:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>certs/
+├── ca.key
+├── ca.crt
+├── server.key
+├── server.crt
+├── client.key
+└── client.crt
+</pre></div>
+</div>
+<p>For multiple servers (HPC), each node gets its own <code class="docutils literal notranslate"><span class="pre">&lt;hostname&gt;.key</span></code> /
+<code class="docutils literal notranslate"><span class="pre">&lt;hostname&gt;.crt</span></code> pair alongside the shared <code class="docutils literal notranslate"><span class="pre">ca.crt</span></code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Self-signed certificates are suitable for testing and private deployments but
+should not be used in production without a proper PKI review. Keep all
+<code class="docutils literal notranslate"><span class="pre">.key</span></code> files private and never commit them to a repository.</p>
+</div>
+</section>
+<section id="launching-mapdl-with-mtls">
+<h2>Launching MAPDL with mTLS<a class="headerlink" href="#launching-mapdl-with-mtls" title="Link to this heading">#</a></h2>
+<p>MAPDL reads its server certificate and key from the directory pointed to by the
+<code class="docutils literal notranslate"><span class="pre">ANSYS_MAPDL_CERTS_PATH</span></code> environment variable. The directory must contain
+<code class="docutils literal notranslate"><span class="pre">server.crt</span></code>, <code class="docutils literal notranslate"><span class="pre">server.key</span></code>, and <code class="docutils literal notranslate"><span class="pre">ca.crt</span></code>.</p>
+<p>Set this variable before starting MAPDL, or pass it through <code class="docutils literal notranslate"><span class="pre">add_env_vars</span></code> when
+using <a class="reference internal" href="../api/_autosummary/ansys.mapdl.core.launcher.launch_mapdl.html#ansys.mapdl.core.launcher.launch_mapdl" title="ansys.mapdl.core.launcher.launch_mapdl"><code class="xref py py-func docutils literal notranslate"><span class="pre">launch_mapdl()</span></code></a>.</p>
+<p><strong>Option 1: Shell environment (manual MAPDL launch):</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">export ANSYS_MAPDL_CERTS_PATH=/path/to/certs</span>
+<span class="go">/ansys_inc/v252/ansys/bin/mapdl -grpc -port 50052 -transport mtls</span>
+</pre></div>
+</div>
+<p><strong>Option 2: Pass via PyMAPDL</strong> (let PyMAPDL start the MAPDL process):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">launch_mapdl</span>
+
+<span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">(</span>
+    <span class="n">transport_mode</span><span class="o">=</span><span class="s2">&quot;mtls&quot;</span><span class="p">,</span>
+    <span class="n">certs_dir</span><span class="o">=</span><span class="s2">&quot;/path/to/certs&quot;</span><span class="p">,</span>
+    <span class="n">add_env_vars</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ANSYS_MAPDL_CERTS_PATH&quot;</span><span class="p">:</span> <span class="s2">&quot;/path/to/certs&quot;</span><span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">add_env_vars</span></code> dictionary is merged on top of the current shell
+environment, so existing variables (license server, MPI settings, etc.) are
+preserved.</p>
+</div>
+</section>
+<section id="connecting-pymapdl-to-an-existing-mtls-enabled-mapdl-instance">
+<h2>Connecting PyMAPDL to an existing mTLS-enabled MAPDL instance<a class="headerlink" href="#connecting-pymapdl-to-an-existing-mtls-enabled-mapdl-instance" title="Link to this heading">#</a></h2>
+<p>When connecting to an already-running MAPDL instance, set the transport mode and
+certificate directory either in code or via environment variables.</p>
+<p><strong>Using</strong> <a class="reference internal" href="../api/_autosummary/ansys.mapdl.core.launcher.launch_mapdl.html#ansys.mapdl.core.launcher.launch_mapdl" title="ansys.mapdl.core.launcher.launch_mapdl"><code class="xref py py-func docutils literal notranslate"><span class="pre">launch_mapdl()</span></code></a> <strong>(connect only):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">launch_mapdl</span>
+
+<span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">(</span>
+    <span class="n">start_instance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">ip</span><span class="o">=</span><span class="s2">&quot;192.168.1.10&quot;</span><span class="p">,</span>
+    <span class="n">port</span><span class="o">=</span><span class="mi">50052</span><span class="p">,</span>
+    <span class="n">transport_mode</span><span class="o">=</span><span class="s2">&quot;mtls&quot;</span><span class="p">,</span>
+    <span class="n">certs_dir</span><span class="o">=</span><span class="s2">&quot;/path/to/certs&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Using environment variables</strong> (no code changes required):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">export PYMAPDL_GRPC_TRANSPORT=mtls</span>
+<span class="go">export ANSYS_GRPC_CERTIFICATES=/path/to/certs</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">launch_mapdl</span>
+
+<span class="c1"># Transport mode and certs directory are read from the environment</span>
+<span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">(</span><span class="n">start_instance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="s2">&quot;192.168.1.10&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">50052</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The relevant environment variables are summarised below.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 40.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Environment variable</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PYMAPDL_GRPC_TRANSPORT</span></code> or <code class="docutils literal notranslate"><span class="pre">ANSYS_MAPDL_GRPC_TRANSPORT</span></code></p></td>
+<td><p>Sets the gRPC transport mode for PyMAPDL. Set to <code class="docutils literal notranslate"><span class="pre">mtls</span></code> to enable
+mutual TLS. <code class="docutils literal notranslate"><span class="pre">PYMAPDL_GRPC_TRANSPORT</span></code> takes precedence if both are
+set.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ANSYS_GRPC_CERTIFICATES</span></code></p></td>
+<td><p>Path to the directory containing the <strong>client</strong> certificates
+(<code class="docutils literal notranslate"><span class="pre">ca.crt</span></code>, <code class="docutils literal notranslate"><span class="pre">client.crt</span></code>, <code class="docutils literal notranslate"><span class="pre">client.key</span></code>) used by PyMAPDL.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ANSYS_MAPDL_CERTS_PATH</span></code></p></td>
+<td><p>Path to the directory containing the <strong>server</strong> certificates
+(<code class="docutils literal notranslate"><span class="pre">ca.crt</span></code>, <code class="docutils literal notranslate"><span class="pre">server.crt</span></code>, <code class="docutils literal notranslate"><span class="pre">server.key</span></code>) read by the MAPDL process.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="end-to-end-example">
+<h2>End-to-end example<a class="headerlink" href="#end-to-end-example" title="Link to this heading">#</a></h2>
+<p>The following example shows a complete workflow on a single machine.</p>
+<p><strong>Step 1: Generate certificates</strong></p>
+<p>Run the script from the <a class="reference internal" href="#generating-certificates">Generating certificates</a> section with the default
+<code class="docutils literal notranslate"><span class="pre">SERVER_HOSTS</span> <span class="pre">=</span> <span class="pre">[(&quot;localhost&quot;,</span> <span class="pre">[&quot;127.0.0.1&quot;])]</span></code> setting. This creates the
+<code class="docutils literal notranslate"><span class="pre">certs/</span></code> directory in the current working directory.</p>
+<p><strong>Step 2: Launch MAPDL with mTLS</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">launch_mapdl</span>
+
+<span class="n">certs_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;certs&quot;</span><span class="p">)</span>
+
+<span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">(</span>
+    <span class="n">transport_mode</span><span class="o">=</span><span class="s2">&quot;mtls&quot;</span><span class="p">,</span>
+    <span class="n">certs_dir</span><span class="o">=</span><span class="n">certs_path</span><span class="p">,</span>
+    <span class="n">add_env_vars</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ANSYS_MAPDL_CERTS_PATH&quot;</span><span class="p">:</span> <span class="n">certs_path</span><span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Step 3: Verify the connection and run commands</strong></p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mapdl</span><span class="p">)</span>
+<span class="go">Product:             Ansys Mechanical Enterprise</span>
+<span class="go">MAPDL Version:       25.2</span>
+<span class="go">ansys.mapdl version: ...</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mapdl</span><span class="o">.</span><span class="n">prep7</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mapdl</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mapdl</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.74.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.8.2. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

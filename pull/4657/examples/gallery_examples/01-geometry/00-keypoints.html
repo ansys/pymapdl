@@ -1,0 +1,1924 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Keypoints &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=5ffe81b6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=5ffe81b6" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=5a96a97e"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="../../../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/gallery_examples/01-geometry/00-keypoints';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/examples/gallery_examples/01-geometry/00-keypoints.html" />
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Lines" href="01-lines.html" />
+    <link rel="prev" title="Geometry examples" href="index.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.74.dev0" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../mapdl_commands/index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="../../index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../mapdl_commands/index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../00-mapdl-examples/index.html">Full examples using PyMAPDL</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Geometry examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Keypoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="01-lines.html">Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-areas.html">Areas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03-volumes.html">Volumes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04-primitives.html">Primitives</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../02-tips-n-tricks/index.html">Miscellaneous examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03-general-fea/index.html">Academic finite element examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../extended_examples/index.html">Extended examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devportal.html">PyMAPDL Developer Portal articles</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://examples.mapdl.docs.pyansys.com/verif-manual/index.html">Verification Manual</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html">Technology Showcases</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="https://github.com/ansys/pymapdl/edit/main/doc/source/examples/gallery_examples/01-geometry/00-keypoints.rst" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">Examples</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="index.html" class="nav-link">Geometry examples</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Keypoints</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-examples-gallery-examples-01-geometry-00-keypoints-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="keypoints">
+<span id="ref-basic-geometry-keypoints"></span><span id="sphx-glr-examples-gallery-examples-01-geometry-00-keypoints-py"></span><h1>Keypoints<a class="headerlink" href="#keypoints" title="Link to this heading">#</a></h1>
+<p>This example shows how to create basic geometry
+using keypoints commands.</p>
+<p>This section is focused on creating keypoints.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">launch_mapdl</span>
+
+<span class="c1"># start MAPDL and enter the pre-processing routine</span>
+<span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">prep7</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mapdl</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Mapdl
+-----
+PyMAPDL Version:     0.74.dev0
+Interface:           grpc
+Product:             Ansys Mechanical Enterprise
+MAPDL Version:       25.2
+Running on:          localhost
+                     (127.0.0.1)
+</pre></div>
+</div>
+<section id="apdl-command-k">
+<h2>APDL Command: K<a class="headerlink" href="#apdl-command-k" title="Link to this heading">#</a></h2>
+<p>Create a single keypoint at <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></code>.  Note that the first
+value is an empty string to allow MAPDL to pick the keypoint number.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k0</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k0</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>1
+</pre></div>
+</div>
+<p>Create keypoint at (10, 11, 12) while specifying the keypoint number.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k1</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k1</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2
+</pre></div>
+</div>
+</section>
+<section id="apdl-command-kbetw">
+<h2>APDL Command: KBETW<a class="headerlink" href="#apdl-command-kbetw" title="Link to this heading">#</a></h2>
+<p>Create keypoint between two keypoints</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k2</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">kbetw</span><span class="p">(</span><span class="n">kp1</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k0</span></a><span class="p">,</span> <span class="n">kp2</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k1</span></a><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k2</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>3
+</pre></div>
+</div>
+</section>
+<section id="apdl-command-kcenter">
+<h2>APDL Command: KCENTER<a class="headerlink" href="#apdl-command-kcenter" title="Link to this heading">#</a></h2>
+<p>Create keypoint at the center of a circular arc defined by three locations.
+Note that we first clear mapdl before generating this geometry</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">prep7</span><span class="p">()</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k0</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k1</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k2</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k3</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">kcenter</span><span class="p">(</span><span class="s2">&quot;KP&quot;</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k0</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k1</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k2</span></a><span class="p">)</span>
+<span class="nb">print</span><span class="p">([</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k0</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k1</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k2</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k3</span></a><span class="p">])</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[1, 2, 3, 4]
+</pre></div>
+</div>
+</section>
+<section id="keypoint-ids">
+<h2>Keypoint IDs<a class="headerlink" href="#keypoint-ids" title="Link to this heading">#</a></h2>
+<p>Return an array of the keypoint IDs
+Note that this matches the array <code class="docutils literal notranslate"><span class="pre">[k0,</span> <span class="pre">k1,</span> <span class="pre">k2,</span> <span class="pre">k3]</span></code> (due to sorting)</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">knum</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">knum</span></a>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">knum</span></a>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>array([1, 2, 3, 4], dtype=int32)
+</pre></div>
+</div>
+</section>
+<section id="keypoints-geometry">
+<h2>Keypoints geometry<a class="headerlink" href="#keypoints-geometry" title="Link to this heading">#</a></h2>
+<p>Get the VTK <code class="docutils literal notranslate"><span class="pre">MultiBlock</span></code> containing keypoints. This VTK mesh can be
+saved or plotted.  For more information, visit
+<a class="reference external" href="https://docs.pyvista.org/version/stable/">PyVista documentation</a>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">keypoints</span> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">keypoints</span>
+<span class="n">keypoints</span>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<div><style>/* PyVista HTML repr stylesheet.
+ * Uses pv- prefix to avoid conflicts with other libraries.
+ */
+
+:root {
+  --pv-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
+  --pv-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
+  --pv-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
+  --pv-border-color: var(--jp-border-color2, #e0e0e0);
+  --pv-disabled-color: var(--jp-layout-color3, #bdbdbd);
+  --pv-background-color-row-even: var(--jp-layout-color1, #f5f5f5);
+  --pv-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
+  --pv-badge-active: #1b5e20;
+  --pv-badge-normals: #0d47a1;
+  --pv-badge-vectors: #00695c;
+  --pv-badge-tcoords: #4527a0;
+}
+
+body[data-jp-theme-light="false"] {
+  --pv-font-color0: var(--jp-content-font-color0, rgba(255, 255, 255, 1));
+  --pv-font-color2: var(--jp-content-font-color2, rgba(255, 255, 255, 0.54));
+  --pv-font-color3: var(--jp-content-font-color3, rgba(255, 255, 255, 0.38));
+  --pv-border-color: var(--jp-border-color2, #424242);
+  --pv-disabled-color: var(--jp-layout-color3, #616161);
+  --pv-background-color-row-even: var(--jp-layout-color1, #1a1a1a);
+  --pv-background-color-row-odd: var(--jp-layout-color2, #252525);
+  --pv-badge-active: #66bb6a;
+  --pv-badge-normals: #64b5f6;
+  --pv-badge-vectors: #4db6ac;
+  --pv-badge-tcoords: #b39ddb;
+}
+
+html[theme="dark"],
+html[data-theme="dark"],
+body[data-theme="dark"],
+body.vscode-dark {
+  --pv-font-color0: rgba(255, 255, 255, 1);
+  --pv-font-color2: rgba(255, 255, 255, 0.54);
+  --pv-font-color3: rgba(255, 255, 255, 0.38);
+  --pv-border-color: #424242;
+  --pv-disabled-color: #616161;
+  --pv-background-color-row-even: #1a1a1a;
+  --pv-background-color-row-odd: #252525;
+  --pv-badge-active: #66bb6a;
+  --pv-badge-normals: #64b5f6;
+  --pv-badge-vectors: #4db6ac;
+  --pv-badge-tcoords: #b39ddb;
+}
+
+/* OS-level dark mode fallback: applies when no explicit data-theme is set */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) {
+    --pv-font-color0: rgba(255, 255, 255, 1);
+    --pv-font-color2: rgba(255, 255, 255, 0.54);
+    --pv-font-color3: rgba(255, 255, 255, 0.38);
+    --pv-border-color: #424242;
+    --pv-disabled-color: #616161;
+    --pv-background-color-row-even: #1a1a1a;
+    --pv-background-color-row-odd: #252525;
+    --pv-badge-active: #66bb6a;
+    --pv-badge-normals: #64b5f6;
+    --pv-badge-vectors: #4db6ac;
+    --pv-badge-tcoords: #b39ddb;
+  }
+}
+
+.pv-wrap {
+  display: block !important;
+  min-width: 300px;
+  max-width: 700px;
+  line-height: 1.6;
+  padding-bottom: 4px;
+  font-family: var(--jp-ui-font-family, sans-serif);
+  font-size: var(--jp-ui-font-size1, 13px);
+  color: var(--pv-font-color0);
+}
+
+.pv-text-repr-fallback {
+  display: none;
+}
+
+/* Header */
+.pv-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-bottom: solid 1px var(--pv-border-color);
+  margin-bottom: 4px;
+}
+
+.pv-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.pv-obj-type {
+  font-weight: 600;
+  color: var(--pv-font-color0);
+}
+
+.pv-header-badge {
+  display: inline-block;
+  font-size: 0.75em;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 3px;
+  color: var(--pv-font-color2);
+  border: 1px solid var(--pv-border-color);
+  white-space: nowrap;
+}
+
+/* Metadata (always-visible key-value rows) */
+.pv-metadata {
+  margin: 4px 0 6px 0;
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+
+.pv-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px 14px;
+  padding: 1px 0;
+}
+
+.pv-meta-row-label {
+  color: var(--pv-font-color2);
+  font-weight: 500;
+  white-space: nowrap;
+  min-width: 60px;
+}
+
+.pv-meta-entry {
+  white-space: nowrap;
+}
+
+/* Copy-to-clipboard button */
+.pv-copy-btn {
+  display: inline-block;
+  cursor: pointer;
+  opacity: 0.5;
+  font-size: 0.85em;
+  padding: 0 3px;
+  vertical-align: middle;
+  transition: opacity 0.15s;
+  user-select: none;
+  border: none;
+  background: none;
+  color: var(--pv-font-color3);
+}
+
+.pv-copy-btn:hover {
+  opacity: 1;
+  color: var(--pv-font-color0);
+}
+
+.pv-meta-label {
+  color: var(--pv-font-color3);
+  font-weight: 400;
+  padding-right: 2px;
+}
+
+/* Sections grid */
+.pv-sections {
+  padding-left: 0 !important;
+  display: grid;
+  grid-template-columns: 150px auto auto auto 1fr 20px 20px;
+  margin-block-start: 0;
+  margin-block-end: 0;
+  list-style: none;
+}
+
+.pv-section-item {
+  display: contents;
+}
+
+/* Hidden checkbox for expand/collapse */
+.pv-section-item > input {
+  display: block;
+  opacity: 0;
+  height: 0;
+  margin: 0;
+}
+
+.pv-section-item > input + label {
+  color: var(--pv-disabled-color);
+}
+
+.pv-section-item > input:enabled + label {
+  cursor: pointer;
+  color: var(--pv-font-color2);
+}
+
+.pv-section-item > input:enabled + label:hover {
+  color: var(--pv-font-color0);
+}
+
+/* Section summary (left column label) */
+.pv-section-summary {
+  grid-column: 1;
+  color: var(--pv-font-color2);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pv-section-summary > span {
+  display: inline-block;
+  padding-left: 0.3em;
+}
+
+.pv-section-summary-in:disabled + label {
+  color: var(--pv-font-color2);
+}
+
+/* Expand/collapse arrows */
+.pv-section-summary-in + label:before {
+  display: inline-block;
+  content: "\25b6";
+  font-size: 11px;
+  width: 15px;
+  text-align: center;
+}
+
+.pv-section-summary-in:disabled + label:before {
+  color: var(--pv-disabled-color);
+}
+
+.pv-section-summary-in:checked + label:before {
+  content: "\25bc";
+}
+
+.pv-section-summary-in:checked + label > span {
+  display: none;
+}
+
+.pv-section-summary,
+.pv-section-inline-details {
+  padding-top: 4px;
+}
+
+.pv-section-inline-details {
+  grid-column: 2 / -1;
+}
+
+.pv-section-details {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  margin-bottom: 5px;
+}
+
+.pv-section-summary-in ~ .pv-section-details {
+  display: none;
+}
+
+.pv-section-summary-in:checked ~ .pv-section-inline-details {
+  display: none;
+}
+
+.pv-section-summary-in:checked ~ .pv-section-details {
+  display: block;
+}
+
+.pv-section-summary-in:checked ~ .pv-section-details:has(.pv-var-list) {
+  display: contents;
+}
+
+/* Variable (array) list */
+.pv-var-list,
+.pv-var-item {
+  display: contents;
+}
+
+.pv-var-item > div,
+.pv-var-item label,
+.pv-var-item > .pv-var-name span {
+  background-color: var(--pv-background-color-row-even);
+  border-color: var(--pv-background-color-row-odd);
+  margin-bottom: 0;
+  padding-top: 2px;
+}
+
+.pv-var-list > li:nth-child(odd) > div,
+.pv-var-list > li:nth-child(odd) > label,
+.pv-var-list > li:nth-child(odd) > .pv-var-name span {
+  background-color: var(--pv-background-color-row-odd);
+  border-color: var(--pv-background-color-row-even);
+}
+
+.pv-var-name {
+  grid-column: 1;
+}
+
+.pv-var-dims {
+  grid-column: 2;
+}
+
+.pv-var-dtype {
+  grid-column: 3;
+  text-align: right;
+  color: var(--pv-font-color2);
+}
+
+.pv-var-range {
+  grid-column: 4;
+  color: var(--pv-font-color3);
+  font-size: 0.92em;
+}
+
+.pv-var-badges {
+  grid-column: 5;
+  padding-left: 8px;
+}
+
+.pv-var-name,
+.pv-var-dims,
+.pv-var-dtype,
+.pv-var-range {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px;
+}
+
+.pv-var-name:hover,
+.pv-var-dims:hover,
+.pv-var-dtype:hover,
+.pv-var-range:hover {
+  overflow: visible;
+  width: auto;
+  z-index: 1;
+}
+
+.pv-var-name span {
+  padding-left: 25px !important;
+}
+
+.pv-var-name-active span {
+  font-weight: 600;
+}
+
+/* Badges */
+.pv-badge {
+  display: inline-block;
+  font-size: 0.75em;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+.pv-badge-active {
+  color: var(--pv-badge-active);
+  border: 1px solid var(--pv-badge-active);
+}
+
+.pv-badge-normals {
+  color: var(--pv-badge-normals);
+  border: 1px solid var(--pv-badge-normals);
+}
+
+.pv-badge-vectors {
+  color: var(--pv-badge-vectors);
+  border: 1px solid var(--pv-badge-vectors);
+}
+
+.pv-badge-tcoords {
+  color: var(--pv-badge-tcoords);
+  border: 1px solid var(--pv-badge-tcoords);
+}
+
+/* Logo and Icons */
+.pv-logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.pv-logo svg {
+  width: 28px;
+  height: 28px;
+}
+
+.pv-brand-logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.pv-brand-logo svg {
+  height: 20px;
+  width: auto;
+}
+
+/* Children list (MultiBlock / PartitionedDataSet) */
+.pv-children-list {
+  padding-left: 25px !important;
+  list-style: none;
+}
+
+.pv-children-list li {
+  padding: 1px 0;
+}
+
+.pv-child-name {
+  font-weight: 500;
+}
+
+.pv-child-type {
+  color: var(--pv-font-color2);
+  font-style: italic;
+}
+
+.pv-child-type:before {
+  content: "\00b7";
+  padding: 0 6px;
+  font-style: normal;
+}
+
+.pv-child-detail {
+  color: var(--pv-font-color3);
+  font-size: 0.9em;
+}
+
+.pv-child-detail:not(:empty):before {
+  content: "\00b7";
+  padding: 0 6px;
+}
+</style><pre class='pv-text-repr-fallback'>Multiblock (0x7f43ecae1e40)
+  N Blocks:   4
+  X Bounds:   0.000e+00, 1.000e+00
+  Y Bounds:   -1.000e+00, 1.000e+00
+  Z Bounds:   0.000e+00, 0.000e+00</pre><div class='pv-wrap' style='display:none'><div class='pv-header'><span class='pv-logo'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="pv-mb-top1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffd040"/>
+      <stop offset="100%" stop-color="#376fa0"/>
+    </linearGradient>
+    <linearGradient id="pv-mb-top2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#376fa0"/>
+      <stop offset="100%" stop-color="#ffd040"/>
+    </linearGradient>
+  </defs>
+  <polygon points="13,2 22,6 13,10 4,6" fill="url(#pv-mb-top1)" opacity="0.9"/>
+  <polygon points="4,6 13,10 13,17 4,13" fill="#1a4a70" opacity="0.9"/>
+  <polygon points="22,6 13,10 13,17 22,13" fill="#376fa0" opacity="0.85"/>
+  <g stroke="rgba(255,255,255,0.4)" stroke-width="0.35" fill="none">
+    <polygon points="13,2 22,6 13,10 4,6"/>
+    <line x1="13" y1="10" x2="13" y2="17"/>
+    <line x1="4" y1="6" x2="4" y2="13"/>
+    <line x1="22" y1="6" x2="22" y2="13"/>
+    <line x1="4" y1="13" x2="13" y2="17"/>
+    <line x1="22" y1="13" x2="13" y2="17"/>
+  </g>
+  <polygon points="17,7 26,11 17,15 8,11" fill="url(#pv-mb-top2)" opacity="0.9"/>
+  <polygon points="8,11 17,15 17,22 8,18" fill="#1a4a70" opacity="0.85"/>
+  <polygon points="26,11 17,15 17,22 26,18" fill="#376fa0" opacity="0.85"/>
+  <g stroke="rgba(255,255,255,0.4)" stroke-width="0.35" fill="none">
+    <polygon points="17,7 26,11 17,15 8,11"/>
+    <line x1="17" y1="15" x2="17" y2="22"/>
+    <line x1="8" y1="11" x2="8" y2="18"/>
+    <line x1="26" y1="11" x2="26" y2="18"/>
+    <line x1="8" y1="18" x2="17" y2="22"/>
+    <line x1="26" y1="18" x2="17" y2="22"/>
+  </g>
+  <polygon points="19,13 28,17 19,21 10,17" fill="url(#pv-mb-top1)" opacity="0.95"/>
+  <polygon points="10,17 19,21 19,28 10,24" fill="#1a4a70" opacity="0.9"/>
+  <polygon points="28,17 19,21 19,28 28,24" fill="#376fa0" opacity="0.9"/>
+  <g stroke="rgba(255,255,255,0.45)" stroke-width="0.35" fill="none">
+    <polygon points="19,13 28,17 19,21 10,17"/>
+    <line x1="19" y1="21" x2="19" y2="28"/>
+    <line x1="10" y1="17" x2="10" y2="24"/>
+    <line x1="28" y1="17" x2="28" y2="24"/>
+    <line x1="10" y1="24" x2="19" y2="28"/>
+    <line x1="28" y1="24" x2="19" y2="28"/>
+  </g>
+</svg>
+</span><div class='pv-header-text'><div class='pv-obj-type'>Multiblock <span class='pv-header-badge'>4 blocks</span> <span class='pv-header-badge'>16 KiB</span></div></div><span class='pv-brand-logo'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 24">
+  <text x="0" y="18" font-family="system-ui,-apple-system,sans-serif" font-size="18" font-weight="700" font-style="italic" letter-spacing="-0.5">
+    <tspan fill="#3776AB" opacity="0.7">P</tspan><tspan fill="#FFD43B" opacity="0.7">y</tspan><tspan fill="#008c9e">Vista</tspan>
+  </text>
+</svg>
+</span></div><div class='pv-metadata'><div class='pv-meta-row pv-copyable'><span class='pv-meta-row-label'>Bounds</span><button class='pv-copy-btn' title='Copy to clipboard' data-copy='(0.0, 1.0, -1.0, 1.0, 0.0, 0.0)' onclick="navigator.clipboard.writeText(this.dataset.copy)">⧉</button><span class='pv-meta-entry'><span class='pv-meta-label'>X</span> [0.000e+00, 1.000e+00]</span><span class='pv-meta-entry'><span class='pv-meta-label'>Y</span> [-1.000e+00, 1.000e+00]</span><span class='pv-meta-entry'><span class='pv-meta-label'>Z</span> [0.000e+00, 0.000e+00]</span></div></div><ul class='pv-sections'><li class='pv-section-item'><input id='section-d02a2cfc-3da7-408c-88a8-107b0eeb49ce' class='pv-section-summary-in' type='checkbox' checked /><label for='section-d02a2cfc-3da7-408c-88a8-107b0eeb49ce' class='pv-section-summary' title='Expand/collapse section'>Blocks: <span>(4)</span></label><div class='pv-section-inline-details'></div><div class='pv-section-details'><ul class='pv-children-list'><li><span class='pv-child-name'>kp 1</span><span class='pv-child-type'>PolyData</span><span class='pv-child-detail'>1 pts · 1 cells · 4 KiB</span></li><li><span class='pv-child-name'>kp 2</span><span class='pv-child-type'>PolyData</span><span class='pv-child-detail'>1 pts · 1 cells · 4 KiB</span></li><li><span class='pv-child-name'>kp 3</span><span class='pv-child-type'>PolyData</span><span class='pv-child-detail'>1 pts · 1 cells · 4 KiB</span></li><li><span class='pv-child-name'>kp 4</span><span class='pv-child-type'>PolyData</span><span class='pv-child-detail'>1 pts · 1 cells · 4 KiB</span></li></ul></div></li></ul></div></div>
+</div>
+<br />
+<br /></section>
+<section id="keypoint-coordinates">
+<h2>Keypoint Coordinates<a class="headerlink" href="#keypoint-coordinates" title="Link to this heading">#</a></h2>
+<p>Return an array of the keypoint locations</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.PolyData.html#pyvista.PolyData" title="pyvista.PolyData" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">kloc</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">get_keypoints</span><span class="p">()</span>
+<a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.PolyData.html#pyvista.PolyData" title="pyvista.PolyData" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">kloc</span></a>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<div><style>/* PyVista HTML repr stylesheet.
+ * Uses pv- prefix to avoid conflicts with other libraries.
+ */
+
+:root {
+  --pv-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
+  --pv-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
+  --pv-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
+  --pv-border-color: var(--jp-border-color2, #e0e0e0);
+  --pv-disabled-color: var(--jp-layout-color3, #bdbdbd);
+  --pv-background-color-row-even: var(--jp-layout-color1, #f5f5f5);
+  --pv-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
+  --pv-badge-active: #1b5e20;
+  --pv-badge-normals: #0d47a1;
+  --pv-badge-vectors: #00695c;
+  --pv-badge-tcoords: #4527a0;
+}
+
+body[data-jp-theme-light="false"] {
+  --pv-font-color0: var(--jp-content-font-color0, rgba(255, 255, 255, 1));
+  --pv-font-color2: var(--jp-content-font-color2, rgba(255, 255, 255, 0.54));
+  --pv-font-color3: var(--jp-content-font-color3, rgba(255, 255, 255, 0.38));
+  --pv-border-color: var(--jp-border-color2, #424242);
+  --pv-disabled-color: var(--jp-layout-color3, #616161);
+  --pv-background-color-row-even: var(--jp-layout-color1, #1a1a1a);
+  --pv-background-color-row-odd: var(--jp-layout-color2, #252525);
+  --pv-badge-active: #66bb6a;
+  --pv-badge-normals: #64b5f6;
+  --pv-badge-vectors: #4db6ac;
+  --pv-badge-tcoords: #b39ddb;
+}
+
+html[theme="dark"],
+html[data-theme="dark"],
+body[data-theme="dark"],
+body.vscode-dark {
+  --pv-font-color0: rgba(255, 255, 255, 1);
+  --pv-font-color2: rgba(255, 255, 255, 0.54);
+  --pv-font-color3: rgba(255, 255, 255, 0.38);
+  --pv-border-color: #424242;
+  --pv-disabled-color: #616161;
+  --pv-background-color-row-even: #1a1a1a;
+  --pv-background-color-row-odd: #252525;
+  --pv-badge-active: #66bb6a;
+  --pv-badge-normals: #64b5f6;
+  --pv-badge-vectors: #4db6ac;
+  --pv-badge-tcoords: #b39ddb;
+}
+
+/* OS-level dark mode fallback: applies when no explicit data-theme is set */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) {
+    --pv-font-color0: rgba(255, 255, 255, 1);
+    --pv-font-color2: rgba(255, 255, 255, 0.54);
+    --pv-font-color3: rgba(255, 255, 255, 0.38);
+    --pv-border-color: #424242;
+    --pv-disabled-color: #616161;
+    --pv-background-color-row-even: #1a1a1a;
+    --pv-background-color-row-odd: #252525;
+    --pv-badge-active: #66bb6a;
+    --pv-badge-normals: #64b5f6;
+    --pv-badge-vectors: #4db6ac;
+    --pv-badge-tcoords: #b39ddb;
+  }
+}
+
+.pv-wrap {
+  display: block !important;
+  min-width: 300px;
+  max-width: 700px;
+  line-height: 1.6;
+  padding-bottom: 4px;
+  font-family: var(--jp-ui-font-family, sans-serif);
+  font-size: var(--jp-ui-font-size1, 13px);
+  color: var(--pv-font-color0);
+}
+
+.pv-text-repr-fallback {
+  display: none;
+}
+
+/* Header */
+.pv-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-bottom: solid 1px var(--pv-border-color);
+  margin-bottom: 4px;
+}
+
+.pv-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.pv-obj-type {
+  font-weight: 600;
+  color: var(--pv-font-color0);
+}
+
+.pv-header-badge {
+  display: inline-block;
+  font-size: 0.75em;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 3px;
+  color: var(--pv-font-color2);
+  border: 1px solid var(--pv-border-color);
+  white-space: nowrap;
+}
+
+/* Metadata (always-visible key-value rows) */
+.pv-metadata {
+  margin: 4px 0 6px 0;
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+
+.pv-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px 14px;
+  padding: 1px 0;
+}
+
+.pv-meta-row-label {
+  color: var(--pv-font-color2);
+  font-weight: 500;
+  white-space: nowrap;
+  min-width: 60px;
+}
+
+.pv-meta-entry {
+  white-space: nowrap;
+}
+
+/* Copy-to-clipboard button */
+.pv-copy-btn {
+  display: inline-block;
+  cursor: pointer;
+  opacity: 0.5;
+  font-size: 0.85em;
+  padding: 0 3px;
+  vertical-align: middle;
+  transition: opacity 0.15s;
+  user-select: none;
+  border: none;
+  background: none;
+  color: var(--pv-font-color3);
+}
+
+.pv-copy-btn:hover {
+  opacity: 1;
+  color: var(--pv-font-color0);
+}
+
+.pv-meta-label {
+  color: var(--pv-font-color3);
+  font-weight: 400;
+  padding-right: 2px;
+}
+
+/* Sections grid */
+.pv-sections {
+  padding-left: 0 !important;
+  display: grid;
+  grid-template-columns: 150px auto auto auto 1fr 20px 20px;
+  margin-block-start: 0;
+  margin-block-end: 0;
+  list-style: none;
+}
+
+.pv-section-item {
+  display: contents;
+}
+
+/* Hidden checkbox for expand/collapse */
+.pv-section-item > input {
+  display: block;
+  opacity: 0;
+  height: 0;
+  margin: 0;
+}
+
+.pv-section-item > input + label {
+  color: var(--pv-disabled-color);
+}
+
+.pv-section-item > input:enabled + label {
+  cursor: pointer;
+  color: var(--pv-font-color2);
+}
+
+.pv-section-item > input:enabled + label:hover {
+  color: var(--pv-font-color0);
+}
+
+/* Section summary (left column label) */
+.pv-section-summary {
+  grid-column: 1;
+  color: var(--pv-font-color2);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pv-section-summary > span {
+  display: inline-block;
+  padding-left: 0.3em;
+}
+
+.pv-section-summary-in:disabled + label {
+  color: var(--pv-font-color2);
+}
+
+/* Expand/collapse arrows */
+.pv-section-summary-in + label:before {
+  display: inline-block;
+  content: "\25b6";
+  font-size: 11px;
+  width: 15px;
+  text-align: center;
+}
+
+.pv-section-summary-in:disabled + label:before {
+  color: var(--pv-disabled-color);
+}
+
+.pv-section-summary-in:checked + label:before {
+  content: "\25bc";
+}
+
+.pv-section-summary-in:checked + label > span {
+  display: none;
+}
+
+.pv-section-summary,
+.pv-section-inline-details {
+  padding-top: 4px;
+}
+
+.pv-section-inline-details {
+  grid-column: 2 / -1;
+}
+
+.pv-section-details {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  margin-bottom: 5px;
+}
+
+.pv-section-summary-in ~ .pv-section-details {
+  display: none;
+}
+
+.pv-section-summary-in:checked ~ .pv-section-inline-details {
+  display: none;
+}
+
+.pv-section-summary-in:checked ~ .pv-section-details {
+  display: block;
+}
+
+.pv-section-summary-in:checked ~ .pv-section-details:has(.pv-var-list) {
+  display: contents;
+}
+
+/* Variable (array) list */
+.pv-var-list,
+.pv-var-item {
+  display: contents;
+}
+
+.pv-var-item > div,
+.pv-var-item label,
+.pv-var-item > .pv-var-name span {
+  background-color: var(--pv-background-color-row-even);
+  border-color: var(--pv-background-color-row-odd);
+  margin-bottom: 0;
+  padding-top: 2px;
+}
+
+.pv-var-list > li:nth-child(odd) > div,
+.pv-var-list > li:nth-child(odd) > label,
+.pv-var-list > li:nth-child(odd) > .pv-var-name span {
+  background-color: var(--pv-background-color-row-odd);
+  border-color: var(--pv-background-color-row-even);
+}
+
+.pv-var-name {
+  grid-column: 1;
+}
+
+.pv-var-dims {
+  grid-column: 2;
+}
+
+.pv-var-dtype {
+  grid-column: 3;
+  text-align: right;
+  color: var(--pv-font-color2);
+}
+
+.pv-var-range {
+  grid-column: 4;
+  color: var(--pv-font-color3);
+  font-size: 0.92em;
+}
+
+.pv-var-badges {
+  grid-column: 5;
+  padding-left: 8px;
+}
+
+.pv-var-name,
+.pv-var-dims,
+.pv-var-dtype,
+.pv-var-range {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px;
+}
+
+.pv-var-name:hover,
+.pv-var-dims:hover,
+.pv-var-dtype:hover,
+.pv-var-range:hover {
+  overflow: visible;
+  width: auto;
+  z-index: 1;
+}
+
+.pv-var-name span {
+  padding-left: 25px !important;
+}
+
+.pv-var-name-active span {
+  font-weight: 600;
+}
+
+/* Badges */
+.pv-badge {
+  display: inline-block;
+  font-size: 0.75em;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+.pv-badge-active {
+  color: var(--pv-badge-active);
+  border: 1px solid var(--pv-badge-active);
+}
+
+.pv-badge-normals {
+  color: var(--pv-badge-normals);
+  border: 1px solid var(--pv-badge-normals);
+}
+
+.pv-badge-vectors {
+  color: var(--pv-badge-vectors);
+  border: 1px solid var(--pv-badge-vectors);
+}
+
+.pv-badge-tcoords {
+  color: var(--pv-badge-tcoords);
+  border: 1px solid var(--pv-badge-tcoords);
+}
+
+/* Logo and Icons */
+.pv-logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.pv-logo svg {
+  width: 28px;
+  height: 28px;
+}
+
+.pv-brand-logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.pv-brand-logo svg {
+  height: 20px;
+  width: auto;
+}
+
+/* Children list (MultiBlock / PartitionedDataSet) */
+.pv-children-list {
+  padding-left: 25px !important;
+  list-style: none;
+}
+
+.pv-children-list li {
+  padding: 1px 0;
+}
+
+.pv-child-name {
+  font-weight: 500;
+}
+
+.pv-child-type {
+  color: var(--pv-font-color2);
+  font-style: italic;
+}
+
+.pv-child-type:before {
+  content: "\00b7";
+  padding: 0 6px;
+  font-style: normal;
+}
+
+.pv-child-detail {
+  color: var(--pv-font-color3);
+  font-size: 0.9em;
+}
+
+.pv-child-detail:not(:empty):before {
+  content: "\00b7";
+  padding: 0 6px;
+}
+</style><pre class='pv-text-repr-fallback'>PolyData (0x7f444a99c400)
+  N Cells:    4
+  N Points:   4
+  N Strips:   0
+  X Bounds:   0.000e+00, 1.000e+00
+  Y Bounds:   -1.000e+00, 1.000e+00
+  Z Bounds:   0.000e+00, 0.000e+00
+  N Arrays:   1</pre><div class='pv-wrap' style='display:none'><div class='pv-header'><span class='pv-logo'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="pv-pd-g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffd040"/>
+      <stop offset="100%" stop-color="#376fa0"/>
+    </linearGradient>
+  </defs>
+  <polygon points="6,6 22,4 14,16" fill="#376fa0" opacity="0.9"/>
+  <polygon points="22,4 28,16 14,16" fill="url(#pv-pd-g1)" opacity="0.85"/>
+  <polygon points="6,6 14,16 4,26" fill="#1a4a70" opacity="0.85"/>
+  <polygon points="14,16 28,16 20,28" fill="#376fa0" opacity="0.8"/>
+  <polygon points="4,26 14,16 20,28" fill="#ffd040" opacity="0.8"/>
+  <g stroke="rgba(255,255,255,0.65)" stroke-width="0.6" fill="none">
+    <line x1="6" y1="6" x2="22" y2="4"/>
+    <line x1="22" y1="4" x2="28" y2="16"/>
+    <line x1="28" y1="16" x2="20" y2="28"/>
+    <line x1="20" y1="28" x2="4" y2="26"/>
+    <line x1="4" y1="26" x2="6" y2="6"/>
+    <line x1="6" y1="6" x2="14" y2="16"/>
+    <line x1="22" y1="4" x2="14" y2="16"/>
+    <line x1="28" y1="16" x2="14" y2="16"/>
+    <line x1="14" y1="16" x2="4" y2="26"/>
+    <line x1="14" y1="16" x2="20" y2="28"/>
+  </g>
+  <g fill="rgba(255,255,255,0.85)">
+    <circle cx="6" cy="6" r="1.3"/>
+    <circle cx="22" cy="4" r="1.3"/>
+    <circle cx="28" cy="16" r="1.3"/>
+    <circle cx="14" cy="16" r="1.3"/>
+    <circle cx="20" cy="28" r="1.3"/>
+    <circle cx="4" cy="26" r="1.3"/>
+  </g>
+</svg>
+</span><div class='pv-header-text'><div class='pv-obj-type'>PolyData <span class='pv-header-badge'>4 points</span> <span class='pv-header-badge'>4 cells</span> <span class='pv-header-badge'>4 KiB</span></div></div><span class='pv-brand-logo'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 24">
+  <text x="0" y="18" font-family="system-ui,-apple-system,sans-serif" font-size="18" font-weight="700" font-style="italic" letter-spacing="-0.5">
+    <tspan fill="#3776AB" opacity="0.7">P</tspan><tspan fill="#FFD43B" opacity="0.7">y</tspan><tspan fill="#008c9e">Vista</tspan>
+  </text>
+</svg>
+</span></div><div class='pv-metadata'><div class='pv-meta-row pv-copyable'><span class='pv-meta-row-label'>Bounds</span><button class='pv-copy-btn' title='Copy to clipboard' data-copy='(0.0, 1.0, -1.0, 1.0, 0.0, 0.0)' onclick="navigator.clipboard.writeText(this.dataset.copy)">⧉</button><span class='pv-meta-entry'><span class='pv-meta-label'>X</span> [0.000e+00, 1.000e+00]</span><span class='pv-meta-entry'><span class='pv-meta-label'>Y</span> [-1.000e+00, 1.000e+00]</span><span class='pv-meta-entry'><span class='pv-meta-label'>Z</span> [0.000e+00, 0.000e+00]</span></div><div class='pv-meta-row pv-copyable'><span class='pv-meta-row-label'>Cells</span><span class='pv-meta-entry'><span class='pv-meta-label'>verts</span> 4</span></div></div><ul class='pv-sections'><li class='pv-section-item'><input id='section-2de0921d-5440-4bd3-ac82-7e40ab3aab26' class='pv-section-summary-in' type='checkbox' checked /><label for='section-2de0921d-5440-4bd3-ac82-7e40ab3aab26' class='pv-section-summary' title='Expand/collapse section'>Point Data: <span>(1)</span></label><div class='pv-section-inline-details'>entity_num <span class='pv-badge pv-badge-active'>active</span></div><div class='pv-section-details'><ul class='pv-var-list'><li class='pv-var-item'><div class='pv-var-name pv-var-name-active'><span>entity_num</span><button class='pv-copy-btn' title='Copy to clipboard' data-copy='entity_num' onclick="navigator.clipboard.writeText(this.dataset.copy)">⧉</button></div><div class='pv-var-dims'>scalar</div><div class='pv-var-dtype'>int64</div><div class='pv-var-range'>[1.000e+00, 4.000e+00]</div><div class='pv-var-badges'> <span class='pv-badge pv-badge-active'>active</span></div></li></ul></div></li></ul></div></div>
+</div>
+<br />
+<br /></section>
+<section id="apdl-command-kdist">
+<h2>APDL Command: KDIST<a class="headerlink" href="#apdl-command-kdist" title="Link to this heading">#</a></h2>
+<p>Calculate the distance between two keypoints.  Note that you could
+compute this yourself from <code class="docutils literal notranslate"><span class="pre">kloc</span></code></p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">dist</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">kdist</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k0</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k1</span></a><span class="p">)</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">dist</span></a>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[1.414213562, 1.0, -1.0, 0.0]
+</pre></div>
+</div>
+</section>
+<section id="keypoint-selection">
+<h2>Keypoint Selection<a class="headerlink" href="#keypoint-selection" title="Link to this heading">#</a></h2>
+<p>There are two approaches for selecting keypoints, the old “legacy”
+style and the new style.  The old style is valuable for those who
+are comfortable with the existing MAPDL commands, and new style is
+useful for selecting keypoints in a pythonic manner.</p>
+<p>This example generates a series of random keypoints and selects them</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">prep7</span><span class="p">()</span>
+
+<span class="c1"># create 20 random keypoints</span>
+<span class="k">for</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">_</span></a> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+    <span class="n">mapdl</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="o">*</span><a href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.random.html#numpy.random.random" title="numpy.random.random" class="sphx-glr-backref-module-numpy-random sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span></a><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="c1"># Print the keypoint numbers</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mapdl</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">knum</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20]
+</pre></div>
+</div>
+<p>Select every other keypoint with the old style command.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">ksel</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;KP&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mapdl</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">knum</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ 1  3  5  7  9 11 13 15 17 19]
+</pre></div>
+</div>
+<p>Select every other keypoint with the new style command.</p>
+<p>Note that the item IDs are 1 based in MAPDL, while Python ranges are
+0 based.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">keypoint_select</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mapdl</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">knum</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ 1  3  5  7  9 11 13 15 17 19]
+</pre></div>
+</div>
+<p>Select keypoints from a list</p>
+<p>Note that you can <code class="docutils literal notranslate"><span class="pre">return_selected</span></code> if you want to see what you
+have selected.  This is helpful when reselecting from existing
+areas.</p>
+<p>Note that you could use a numpy array here as well.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">items</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">keypoint_select</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="n">return_selected</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">items</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ 1  5 10 20]
+</pre></div>
+</div>
+</section>
+<section id="apdl-command-kplot">
+<h2>APDL Command: KPLOT<a class="headerlink" href="#apdl-command-kplot" title="Link to this heading">#</a></h2>
+<p>Plot the keypoints while displaying the keypoint numbers</p>
+<p>There are a variety of plotting options available for all the common
+plotting methods.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">kplot</span><span class="p">(</span>
+    <span class="n">show_keypoint_numbering</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">background</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+    <span class="n">show_bounds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">font_size</span><span class="o">=</span><span class="mi">26</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_00-keypoints_001.png" srcset="../../../_images/sphx_glr_00-keypoints_001.png" alt="00 keypoints" class = "sphx-glr-single-img"/></section>
+<section id="stop-mapdl">
+<h2>Stop mapdl<a class="headerlink" href="#stop-mapdl" title="Link to this heading">#</a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.963 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-gallery-examples-01-geometry-00-keypoints-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../../_downloads/d759a8c5c0a14da22fbcec00b3a2d94f/00-keypoints.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">00-keypoints.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../../_downloads/a2ec7097da1ea648fdb88be8822d7534/00-keypoints.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">00-keypoints.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../../_downloads/15120439ad2a681e84c0d13289a0e1eb/00-keypoints.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">00-keypoints.zip</span></code></a></p>
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.74.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.8.2. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>
