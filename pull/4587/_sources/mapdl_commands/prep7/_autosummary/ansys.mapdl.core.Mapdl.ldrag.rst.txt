@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.ldrag
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.ldrag

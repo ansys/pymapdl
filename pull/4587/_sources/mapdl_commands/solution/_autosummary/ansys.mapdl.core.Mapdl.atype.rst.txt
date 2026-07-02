@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.atype
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.atype

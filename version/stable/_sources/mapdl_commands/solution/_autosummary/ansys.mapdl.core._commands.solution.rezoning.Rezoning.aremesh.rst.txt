@@ -1,0 +1,6 @@
+﻿aremesh
+=======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.rezoning
+
+.. automethod:: Rezoning.aremesh

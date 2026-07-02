@@ -1,0 +1,6 @@
+﻿muted
+=====
+
+.. currentmodule:: ansys.mapdl.core
+
+.. autoproperty:: Mapdl.muted

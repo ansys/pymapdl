@@ -1,0 +1,6 @@
+﻿iclwid
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.graphics.scaling
+
+.. automethod:: Scaling.iclwid

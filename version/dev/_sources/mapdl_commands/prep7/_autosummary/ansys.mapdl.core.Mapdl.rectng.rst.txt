@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.rectng
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.rectng

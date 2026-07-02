@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.asba
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.asba

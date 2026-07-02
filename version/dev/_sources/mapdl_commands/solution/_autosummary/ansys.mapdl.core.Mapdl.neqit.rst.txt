@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.neqit
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.neqit

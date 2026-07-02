@@ -1,0 +1,1034 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>sfe &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=a23b20f3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=affbdea0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'mapdl_commands/solution/_autosummary/ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sfe';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="sfedele" href="ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sfedele.html" />
+    <link rel="prev" title="sfdele" href="ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sfdele.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.72.dev0" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/solution/_autosummary/ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sfe.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    
+<!--
+  Announcement Version Loader
+  Dynamically loads the announcement.html content into the announcement_msg div.
+-->
+<div id="announcement_msg" aria-live="polite"></div>
+<script>
+  // Fetch and inject the announcement HTML content
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status} Announcement.html file not found, Please ignore this, if you are in dev/stable documentation`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      var msgDiv = document.getElementById("announcement_msg");
+      if (msgDiv) {
+        msgDiv.innerHTML = text;
+      }
+    })
+    .catch((error) => {
+      // Log only unexpected fetch errors
+      if (!(error.message && error.message.startsWith("HTTP error: 404"))) {
+        console.error(`Fetch problem: ${error.message} Announcement.html could not be loaded.`);
+      }
+    });
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Session</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../session/index.html">Session</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Database</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../database/index.html">Database</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Graphics</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../graphics/index.html">Graphics</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">APDL</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/abbreviations.html">Abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/parameter_definition.html">ParameterDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/matrix_operations.html">MatrixOperations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/macro_files.html">MacroFiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/encryption_decryption.html">EncryptionDecryption</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/array_parameters.html">ArrayParameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apdl/process_controls.html">ProcessControls</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Preprocessing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../prep7/index.html">Prep7</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Solution</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Solution</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../analysis_options.html">AnalysisOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../inertia.html">Inertia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../spectrum_options.html">SpectrumOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dynamic_options.html">DynamicOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../additive_manufacturing.html">AdditiveManufacturing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../misc_loads.html">MiscLoads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nonlinear_options.html">NonlinearOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rezoning.html">Rezoning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../load_step_options.html">LoadStepOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../fe_body_loads.html">FeBodyLoads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../solid_body_loads.html">SolidBodyLoads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_nonlinear_options.html">NonlinearOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../fe_constraints.html">FeConstraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../solid_constraints.html">SolidConstraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../birth_and_death.html">BirthAndDeath</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../fe_forces.html">FeForces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../solid_forces.html">SolidForces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_status.html">Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_gap_conditions.html">GapConditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../radiosity.html">Radiosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../load_step_operations.html">LoadStepOperations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../master_dof.html">MasterDof</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis_2d_to_3d.html">Analysis2DTo3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ocean.html">Ocean</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../fe_surface_loads.html">FeSurfaceLoads</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sf.html">sf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sfbeam.html">sfbeam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sfcontrol.html">sfcontrol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sfcum.html">sfcum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sfdele.html">sfdele</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">sfe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sfedele.html">sfedele</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sfelist.html">sfelist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sffun.html">sffun</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sfgrad.html">sfgrad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sflist.html">sflist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sfscale.html">sfscale</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../solid_surface_loads.html">SolidSurfaceLoads</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post1/index.html">Post1</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">POST26</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../post26/index.html">Post26</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux2/index.html">Aux2</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux3/index.html">Aux3</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX12</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux12/index.html">Aux12</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AUX15</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../aux15/index.html">Aux15</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">MAP</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../map/index.html">Map</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Connection</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../conn.html">Connection commands</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Undocumented</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../inqfun.html">Undocumented inquire commands</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="None" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">MAPDL commands</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../index.html" class="nav-link">Solution</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../fe_surface_loads.html" class="nav-link">FeSurfaceLoads</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">sfe</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="sfe">
+<h1>sfe<a class="headerlink" href="#sfe" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sfe">
+<span class="sig-prename descclassname"><span class="pre">FeSurfaceLoads.</span></span><span class="sig-name descname"><span class="pre">sfe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lkey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value4</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshflag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads.sfe" title="Link to this definition">#</a></dt>
+<dd><p>Defines surface loads on elements.</p>
+<p>Mechanical APDL Command: <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SFE.html">SFE</a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>elem</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Element to which surface load applies. If ALL, apply load to all selected elements ( <span class="xref std std-ref">esel</span>
+). If <code class="docutils literal notranslate"><span class="pre">Elem</span></code> = P, graphical picking is enabled and all remaining command fields are ignored
+(valid only in the GUI). A component name may be substituted for <code class="docutils literal notranslate"><span class="pre">Elem</span></code>.</p>
+</dd>
+<dt><strong>lkey</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Load key or face number associated with surface load (defaults to 1). Load keys (1,2,3, etc.)
+are listed under “Surface Loads” in the input data table for each element type in the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html">Element
+Reference</a>.</p>
+<p>If you issue <span class="xref std std-ref">sfcontrol</span> before <span class="xref std std-ref">sfe</span>, <code class="docutils literal notranslate"><span class="pre">LKEY</span></code> is the face number for <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SFCONTROL.html#">supported
+structural solid and shell elements</a>.</p>
+</dd>
+<dt><strong>lab</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Valid surface load label. Load labels are listed under “Surface Loads” in the input table for
+each element type in the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html">Element Reference</a>.</p>
+<blockquote>
+<div><p>This command contains some tables and extra information which can be inspected in the original</p>
+</div></blockquote>
+<p>documentation pointed above.</p>
+<p id="sfe1">Thermal labels CONV and HFLUX are mutually exclusive.</p>
+<p id="sfe2">For an acoustic analysis, apply the fluid-structure interaction flag (Label = FSI) to only the
+<code class="docutils literal notranslate"><span class="pre">FLUID29</span></code>, <code class="docutils literal notranslate"><span class="pre">FLUID30</span></code>, <code class="docutils literal notranslate"><span class="pre">FLUID220</span></code>, and <code class="docutils literal notranslate"><span class="pre">FLUID221</span></code> elements.</p>
+<p id="sfe4">When a load vector exists for a thermal superelement, it must be applied and have a scale factor
+of 1 ( <span class="xref std std-ref">sfe</span>,,,SELV,,1).</p>
+</dd>
+<dt><strong>kval</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Value key. If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = PRES:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">or</span> <span class="pre">1</span></code> - <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> through <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are used as real components of pressures.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> - <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> through <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are used as imaginary components of pressures.</p></li>
+</ul>
+<p>Value key. If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = CONV:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">or</span> <span class="pre">1</span></code> - For thermal analyses, <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> through <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are used as the film
+coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> - For thermal analyses, <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> through <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are the bulk temperatures.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">3</span></code> - <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> through <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are used as film effectiveness.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">4</span></code> - <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> through <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are used as free stream temperature.</p></li>
+</ul>
+<p>Value key. If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = RAD:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">or</span> <span class="pre">1</span></code> - <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> through <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are used as the emissivities.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> - <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> through <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are ambient temperatures.</p></li>
+</ul>
+<p>Value key. If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = RDSF:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">or</span> <span class="pre">1</span></code> - <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> is the emissivity value between 0 and 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> - <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> is the enclosure number.</p></li>
+</ul>
+<p>Value key. If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = IMPD:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">or</span> <span class="pre">1</span></code> - For acoustic harmonic analyses, VALUE1 through VALUE4 are used as the real part of
+the impedance.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> - For acoustic harmonic analyses, VALUE1 through VALUE4 are used as the imaginary part of
+the impedance.</p></li>
+</ul>
+<p>Value key. If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = SHLD:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">or</span> <span class="pre">1</span></code> - For acoustic analyses, <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> through <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are used as the normal velocity
+(harmonic) or normal acceleration (transient).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> - For acoustic analyses, <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> through <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are used as the phase angle for
+harmonic response analyses.</p></li>
+</ul>
+<p>Value key. If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = ATTN:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">or</span> <span class="pre">1</span></code> - For acoustic analyses, <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> through <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are used as the absorption
+coefficient of the surface.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> - For acoustic analyses, <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> through <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are used as the transmission loss
+(dB) of the coupled wall in an energy diffusion solution for room acoustics.</p></li>
+</ul>
+<p>Value key. If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = SELV:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">or</span> <span class="pre">1</span></code> - <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> is the multiplier on real load vector <code class="docutils literal notranslate"><span class="pre">LKEY</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> - <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> is the multiplier on imaginary load vector <code class="docutils literal notranslate"><span class="pre">LKEY</span></code>.</p></li>
+</ul>
+<p>If only one set of data is supplied, the other set of data defaults to previously specified values
+(or zero if not previously specified) in the all of the following cases:</p>
+<ul class="simple">
+<li><p>Emissivities are supplied and <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = RAD</p></li>
+<li><p>Temperatures are supplied and <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = RAD</p></li>
+<li><p>Temperatures are supplied and <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = CONV</p></li>
+<li><p>Film coefficients are supplied and <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = CONV</p></li>
+<li><p>Normal velocity/acceleration for acoustics is supplied and <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = SHLD</p></li>
+<li><p>Phase angle for acoustics is supplied and <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = SHLD</p></li>
+</ul>
+</dd>
+<dt><strong>value1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>First surface load value (typically at the first node of the face), or the name of a table for
+specifying tabular boundary conditions.</p>
+<p>Face nodes are listed in the order given for <strong>Surface Loads</strong> in the input data table for each element type in the <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html">Element Reference</a>. For example, for <code class="docutils literal notranslate"><span class="pre">SOLID185</span></code>, the item 1-JILK associates <code class="docutils literal notranslate"><span class="pre">LKEY</span></code> = 1 (face 1) with nodes J, I, L, and K. Surface load value <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> then applies to node J of face 1. To specify a table, enclose the table name in percent signs (%), for example, <code class="docutils literal notranslate"><span class="pre">tabname</span></code>. Use the <span class="xref std std-ref">dim</span> command to define a table. Only one table can be specified, and it must be specified in the <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> position; tables specified in the <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code>, <code class="docutils literal notranslate"><span class="pre">VALUE3</span></code>, or <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> positions are ignored. <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> applies to node I, etc.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = PRES and <code class="docutils literal notranslate"><span class="pre">KVAL</span></code> = 2, this value is the imaginary pressure component, used by the following supported elements:</p>
+<ul class="simple">
+<li><p>Surface elements: <code class="docutils literal notranslate"><span class="pre">SURF153</span></code>, <code class="docutils literal notranslate"><span class="pre">SURF154</span></code> and <code class="docutils literal notranslate"><span class="pre">SURF159</span></code>.</p></li>
+<li><p>Solid and solid-shell elements: <code class="docutils literal notranslate"><span class="pre">PLANE182</span></code>, <code class="docutils literal notranslate"><span class="pre">PLANE183</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLID185</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLID186</span></code>,
+<code class="docutils literal notranslate"><span class="pre">SOLID187</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLSH190</span></code>, and <code class="docutils literal notranslate"><span class="pre">SOLID285</span></code>.</p></li>
+<li><p>Shell elements: <code class="docutils literal notranslate"><span class="pre">SHELL181</span></code>, <code class="docutils literal notranslate"><span class="pre">SHELL281</span></code>, <code class="docutils literal notranslate"><span class="pre">SHELL208</span></code>, and <code class="docutils literal notranslate"><span class="pre">SHELL209</span></code>.</p></li>
+<li><p>Coupled-field elements with structural degrees of freedom: <code class="docutils literal notranslate"><span class="pre">PLANE222</span></code>, <code class="docutils literal notranslate"><span class="pre">PLANE223</span></code>,
+<code class="docutils literal notranslate"><span class="pre">SOLID225</span></code>, <code class="docutils literal notranslate"><span class="pre">SOLID226</span></code>, and <code class="docutils literal notranslate"><span class="pre">SOLID227</span></code>.</p></li>
+</ul>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = CONV, <code class="docutils literal notranslate"><span class="pre">KVAL</span></code> = 0 or 1, and <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> = - <code class="docutils literal notranslate"><span class="pre">N</span></code>, the film coefficient is assumed to
+be a function of temperature and is determined from the HF property table for material <code class="docutils literal notranslate"><span class="pre">N</span></code> (
+<span class="xref std std-ref">mp</span> ). (See the <span class="xref std std-ref">scopt</span> command for a way to override this option and use - <code class="docutils literal notranslate"><span class="pre">N</span></code> as the
+film coefficient.) The temperature used to evaluate the film coefficient is usually the average
+between the bulk and wall temperatures, but may be user-defined for some elements.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = CONV, <code class="docutils literal notranslate"><span class="pre">KVAL</span></code> = 2, <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> specifies the bulk temperature. If <span class="xref std std-ref">kbc</span>,0 has been
+issued for ramped loads, the bulk temperature is ramped from the value defined by <span class="xref std std-ref">tunif</span> to
+that specified on <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> (for the first loadstep). If a table name is specified for <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code>,
+the <span class="xref std std-ref">kbc</span> command is ignored and tabular values are used.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = PORT, <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> is a port number representing a waveguide port. The port number must
+be an integer between 1 and 50. For an acoustic 2×2 transfer admittance matrix, the port number can
+be any positive integer. The smaller port number corresponds to port 1 of the 2×2 transfer
+admittance matrix, and the greater port number corresponds to port 2. If one port of the transfer
+admittance matrix is connecting to the acoustic-structural interaction interface, the port number
+corresponds to port 2 of the transfer admittance matrix. A pair of ports of the 2×2 transfer
+admittance matrix must be defined in the same element.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = RDSF, <code class="docutils literal notranslate"><span class="pre">KVAL</span></code> = 0 or 1, and <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> = - <code class="docutils literal notranslate"><span class="pre">N</span></code>, the emissivity is assumed to be a
+function of the temperature, and is determined from the EMISS property table for material <code class="docutils literal notranslate"><span class="pre">N</span></code> (
+<span class="xref std std-ref">mp</span> ). The material <code class="docutils literal notranslate"><span class="pre">N</span></code> does not need to correlate with the underlying solid thermal
+elements. If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = RDSF, <code class="docutils literal notranslate"><span class="pre">KVAL</span></code> = 2, and <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> is negative, radiation direction is
+reversed and will occur inside the element for the flagged radiation surfaces.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = FSIN in a unidirectional Mechanical APDL-to-CFX analysis, <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> is not used.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = SELV, <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> represents the scale factor (default = 0.0).</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = ATTN, <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> is the absorption coefficient.</p>
+</dd>
+<dt><strong>value2</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Surface load values at the second, third, and fourth nodes (if any) of the face.</p>
+<p>If all three values are blank, all default to <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code>, giving a constant load. Zero or other
+blank values are used as zero.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code>, <code class="docutils literal notranslate"><span class="pre">VALUE3</span></code>, or <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are magnitudes of the load, they are ignored if
+<code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> is a table. If <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code>, <code class="docutils literal notranslate"><span class="pre">VALUE3</span></code>, or <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are any other values, they are
+used even if <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> is a table (for example, the load direction for face 5 of <code class="docutils literal notranslate"><span class="pre">SURF154</span></code> ).</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = FSIN in a unidirectional Mechanical APDL-to-CFX analysis, <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is the surface
+interface number (not available in the GUI). <code class="docutils literal notranslate"><span class="pre">VALUE3</span></code> and <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are not used.</p>
+</dd>
+<dt><strong>value3</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Surface load values at the second, third, and fourth nodes (if any) of the face.</p>
+<p>If all three values are blank, all default to <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code>, giving a constant load. Zero or other
+blank values are used as zero.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code>, <code class="docutils literal notranslate"><span class="pre">VALUE3</span></code>, or <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are magnitudes of the load, they are ignored if
+<code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> is a table. If <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code>, <code class="docutils literal notranslate"><span class="pre">VALUE3</span></code>, or <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are any other values, they are
+used even if <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> is a table (for example, the load direction for face 5 of <code class="docutils literal notranslate"><span class="pre">SURF154</span></code> ).</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = FSIN in a unidirectional Mechanical APDL-to-CFX analysis, <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is the surface
+interface number (not available in the GUI). <code class="docutils literal notranslate"><span class="pre">VALUE3</span></code> and <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are not used.</p>
+</dd>
+<dt><strong>value4</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Surface load values at the second, third, and fourth nodes (if any) of the face.</p>
+<p>If all three values are blank, all default to <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code>, giving a constant load. Zero or other
+blank values are used as zero.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code>, <code class="docutils literal notranslate"><span class="pre">VALUE3</span></code>, or <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are magnitudes of the load, they are ignored if
+<code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> is a table. If <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code>, <code class="docutils literal notranslate"><span class="pre">VALUE3</span></code>, or <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are any other values, they are
+used even if <code class="docutils literal notranslate"><span class="pre">VALUE1</span></code> is a table (for example, the load direction for face 5 of <code class="docutils literal notranslate"><span class="pre">SURF154</span></code> ).</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = FSIN in a unidirectional Mechanical APDL-to-CFX analysis, <code class="docutils literal notranslate"><span class="pre">VALUE2</span></code> is the surface
+interface number (not available in the GUI). <code class="docutils literal notranslate"><span class="pre">VALUE3</span></code> and <code class="docutils literal notranslate"><span class="pre">VALUE4</span></code> are not used.</p>
+</dd>
+<dt><strong>meshflag</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Specifies how to apply normal pressure loading on the mesh. Valid in a <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/Hlp_G_ADVREZ.html">nonlinear adaptivity
+analysis</a>
+when <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = PRES and <code class="docutils literal notranslate"><span class="pre">KVAL</span></code> = 0 or 1.</p>
+<p>0 - Pressure loading occurs on the current mesh (default).</p>
+<p>1 - Pressure loading occurs on the initial mesh for nonlinear adaptivity.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p id="sfe-notes"><span class="xref std std-ref">sfe</span> defines surface loads on selected elements.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>You cannot use <span class="xref std std-ref">sfe</span> with the <code class="docutils literal notranslate"><span class="pre">INFIN110</span></code> or <code class="docutils literal notranslate"><span class="pre">INFIN111</span></code> elements without prior knowledge
+of element-face orientation (that is, you must know which face is the exterior in order to flag
+it). Also, for surface-effect elements <code class="docutils literal notranslate"><span class="pre">SURF153</span></code> and <code class="docutils literal notranslate"><span class="pre">SURF154</span></code>, use <code class="docutils literal notranslate"><span class="pre">LKEY</span></code> to enable
+tangential and other loads. For <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SFCONTROL.html#">supported structural solid and shell elements</a>, issue
+<span class="xref std std-ref">sfcontrol</span> to define tangential and other loads.</p>
+</div>
+<p><span class="xref std std-ref">sfe</span> can apply tapered loads over the faces of most elements.</p>
+<p>You can use these related surface-load commands with <span class="xref std std-ref">sfe</span> :</p>
+<ul class="simple">
+<li><p><span class="xref std std-ref">sf</span> - Defines surface loads on nodes.</p></li>
+<li><p><span class="xref std std-ref">sfbeam</span> - For beam elements allowing lateral surface loads that can be offset from the
+nodes, this command specifies the loads and offsets.</p></li>
+<li><p><span class="xref std std-ref">sfcontrol</span> - Applies general (normal, tangential, and other) surface loads to <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SFCONTROL.html#">supported
+structural elements</a>.</p></li>
+<li><p><span class="xref std std-ref">sfcum</span> - Accumulates (adds) surface loads applied via <span class="xref std std-ref">sfe</span>.</p></li>
+<li><p><span class="xref std std-ref">sfdele</span> - Delete loads applied via <span class="xref std std-ref">sfe</span>.</p></li>
+<li><p><span class="xref std std-ref">sffun</span> - Applies loads from a node-vs.-value function.</p></li>
+<li><p><span class="xref std std-ref">sfgrad</span> - Applies an alternate tapered load.</p></li>
+</ul>
+<p>The <span class="xref std std-ref">sfe</span> command can also define fluid-pressure-penetration loads ( <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = PRES) at a
+contact interface. For this type of load, <code class="docutils literal notranslate"><span class="pre">LKEY</span></code> = 1 is used to specify the normal pressure
+values, <code class="docutils literal notranslate"><span class="pre">LKEY</span></code> = 3 is used to specify the tangential pressure values along the x direction of
+<span class="xref std std-ref">esys</span>, <code class="docutils literal notranslate"><span class="pre">LKEY</span></code> = 4 is used to specify the tangential pressure values along the y direction of
+<span class="xref std std-ref">esys</span>, and <code class="docutils literal notranslate"><span class="pre">LKEY</span></code> = 2 is used to specify starting points and penetrating points. See
+<a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/ctecfluidpress.html#fl_press_dir_2D">Applying Fluid Penetration Pressure</a></p>
+<p>Film effectiveness and free-stream temperatures specified via <code class="docutils literal notranslate"><span class="pre">Lab</span></code> = CONV are valid only for
+<code class="docutils literal notranslate"><span class="pre">SURF151</span></code> and <code class="docutils literal notranslate"><span class="pre">SURF152</span></code>. Film effectiveness must be between 0 and 1 and it defaults to 0. If
+film effectiveness is applied, bulk temperature is ignored. When film effectiveness and free stream
+temperatures are specified, the commands to specify a surface-load gradient ( <span class="xref std std-ref">sfgrad</span> ) or
+surface-load accumulation ( <span class="xref std std-ref">sfcum</span> ) are not valid. For more information about film
+effectiveness, see <a class="reference external" href="https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_heat1.html#thyeq10conductnov1601">Conduction, Convection, and Mass Transport (Advection)</a></p>
+<p>You can specify a table name only when using structural (PRES) and thermal (CONV [film coefficient,
+bulk temperature, film effectiveness, and free stream temperature], HFLUX), diffusion flux (DFLUX),
+surface emissivity and ambient temperature (RAD), impedance (IMPD), normal velocity or acceleration
+(SHLD), absorption coefficient (ATTN), and substructure (SELV) surface load labels.</p>
+<p>When a tabular function load is applied to an element, the load will not vary according to the
+positioning of the element in space.</p>
+<p>For cases where Lab=FSI, MXWF, FREE, and INF, VALUE is not needed.</p>
+<p>In a mode-superposition harmonic or transient analysis, you must apply the load in the modal portion
+of the analysis. Mechanical APDL calculates a load vector and writes it to the <code class="file docutils literal notranslate"><span class="pre">MODE</span></code> file,
+which you
+can apply via the <span class="xref std std-ref">lvscale</span> command.</p>
+<p>This command is also valid in the PREP7 and <span class="xref std std-ref">slashmap</span> processors.</p>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.72.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.7.2. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

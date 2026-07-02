@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.nladaptive
+=================================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.nladaptive

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.accoption
+================================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.accoption

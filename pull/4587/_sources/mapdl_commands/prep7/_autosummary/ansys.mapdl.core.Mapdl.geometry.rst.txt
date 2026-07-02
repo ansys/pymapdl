@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.geometry
+===============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. autoproperty:: Mapdl.geometry

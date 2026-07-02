@@ -1,0 +1,6 @@
+﻿hptdelete
+=========
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.hard_points
+
+.. automethod:: HardPoints.hptdelete

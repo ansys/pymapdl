@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.secplot
+==============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.secplot

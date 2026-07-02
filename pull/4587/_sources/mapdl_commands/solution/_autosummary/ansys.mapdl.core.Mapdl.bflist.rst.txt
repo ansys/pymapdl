@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.bflist
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.bflist

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.hptdelete
+================================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.hptdelete

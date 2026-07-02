@@ -1,0 +1,6 @@
+﻿spec
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.status
+
+.. automethod:: Status.spec

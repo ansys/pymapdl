@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.naxis
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.naxis

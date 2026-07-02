@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.afillt
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.afillt

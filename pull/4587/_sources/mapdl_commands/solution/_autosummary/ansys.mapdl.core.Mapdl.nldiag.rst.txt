@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.nldiag
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.nldiag

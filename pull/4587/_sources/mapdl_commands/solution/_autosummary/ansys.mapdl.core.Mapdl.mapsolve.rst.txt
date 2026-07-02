@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.mapsolve
+===============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.mapsolve

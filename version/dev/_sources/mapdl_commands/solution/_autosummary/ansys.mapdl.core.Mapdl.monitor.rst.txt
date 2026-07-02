@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.monitor
+==============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.monitor

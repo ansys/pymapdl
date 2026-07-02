@@ -1,0 +1,6 @@
+﻿nslv
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.database.selecting
+
+.. automethod:: Selecting.nslv

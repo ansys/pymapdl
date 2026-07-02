@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.aptn
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.aptn

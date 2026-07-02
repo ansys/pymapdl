@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.cecyc
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.cecyc

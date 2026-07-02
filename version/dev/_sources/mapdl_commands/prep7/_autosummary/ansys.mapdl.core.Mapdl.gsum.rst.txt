@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.gsum
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.gsum

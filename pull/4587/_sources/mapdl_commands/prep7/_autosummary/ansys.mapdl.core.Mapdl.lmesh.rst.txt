@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.lmesh
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.lmesh
