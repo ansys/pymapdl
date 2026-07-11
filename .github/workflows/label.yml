@@ -128,7 +128,7 @@ jobs:
       pull-requests: write  # Needed to comment on pull requests with changelog info
     runs-on: ubuntu-latest
     steps:
-    - uses: ansys/actions/doc-changelog@d946b24b9a765f4169bcc94afdb27bd1a0533741 #v10.3.2
+    - uses: ansys/actions/doc-changelog@a5b0351dc277d68c2dc1beca2d2674c7dfa4fc55 #v10.3.3
       with:
         bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
         bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
