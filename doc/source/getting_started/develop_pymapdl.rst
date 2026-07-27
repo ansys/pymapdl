@@ -231,6 +231,33 @@ along with integration tests. The difference between a unit test and an
 integration test is that the latter tests several units of the code to ensure
 that they all work together.
 
+``local`` vs ``remote`` testing
+-------------------------------
+
+The PyMAPDL test suite is designed to run when MAPDL is installed on the local
+machine (``local`` testing) and when it is not (``remote`` testing).
+When working in ``local`` MAPDL is launched by the test suite, and it has
+access to the local resources, while in ``remote`` it is expected to be running
+on a remote server or container and it does not have access to the local filesystem.
+
+
+.. flat-table:: Key differences between ``local`` and ``remote`` testing
+    :header-rows: 1
+
+    * - Mode
+      - ``Local`` testing
+      - ``Remote`` testing
+    * - Launching MAPDL
+      - PyMAPDL finds the local MAPDL installation and launches a MAPDL instance with the specified configuration.
+        Use :envvar:`PYMAPDL_PORT` to specify the port.
+      - PyMAPDL connects to a running instance of MAPDL that is expected to be running on a remote server or container.
+        Set :envvar:`PYMAPDL_START_INSTANCE` to ``False`` so PyMAPDL connects instead of launching a local instance.
+        You need to start MAPDL before running the tests, and use :envvar:`PYMAPDL_PORT` and :envvar:`PYMAPDL_IP` environment variables
+        to configure the connection to the running instance.
+    * - Access to local resources
+      - Has access to the local filesystem and resources.
+      - Does not have access to the local filesystem and resources. PyMAPDL uploads/downloads files to the remote instance as needed.
+
 
 Creation of a unit test
 -----------------------
@@ -347,6 +374,94 @@ Additionally, you can use any :ref:`ref_environment_variables`
 like the :envvar:`PYMAPDL_MAPDL_EXEC` and :envvar:`PYMAPDL_MAPDL_VERSION`
 environment variables to specify the MAPDL executable path and the version to launch (if
 multiple versions of MAPDL are installed).
+
+Running CI-like tests with tox docker envs
+-----------------------------------------
+
+The project provides tox environments that start Docker services, build images if
+necessary, and run the test matrix similarly to the CI pipeline. These are useful
+for reproducing CI behavior locally.
+
+Common tox envs and quick explanation:
+
+**Run MAPDL containers**:
+
+- ``docker-run-mapdl``:
+  Start a MAPDL Docker container (background). Useful to start MAPDL and connect local services
+  to it (i.e. ``pytest`` which requires a running container).
+- ``docker-run-mapdl-dpf``:
+  Start MAPDL and DPF containers required for DPF-enabled tests.
+- ``docker-stop-mapdl``:
+  Stop and remove MAPDL containers started by ``docker-run-mapdl``.
+- ``docker-stop-mapdl-dpf``:
+  Stop and remove MAPDL+DPF containers started by ``docker-run-mapdl-dpf``.
+
+**Testing**:
+
+- ``docker-test-local-build``:
+  Rebuild the local-host Docker image (``local`` profile) without running tests.
+- ``docker-test-remote-build``:
+  Rebuild the remote-host Docker image (``remote`` profile) without running tests.
+- ``docker-test-local``:
+  Run tests using local Docker images/containers (CI-like behavior on your machine).
+- ``docker-test-remote``:
+  Run tests against remote images/environment (mirrors CI environment closely).
+
+Typical usage:
+
+.. code:: console
+
+    # Start MAPDL container (background) then run local tests
+    export ANSYSLMD_LICENSE_FILE=1055@license-server
+    export DOCKER_IMAGE=ghcr.io/ansys/mapdl:v25.2.7-ubuntu-cicd
+    tox -e docker-run-mapdl
+    pytest -k "my_test"  # run tests that require a running container
+
+    # Or run combined test env (starts containers, runs tests, stops containers)
+    export ANSYSLMD_LICENSE_FILE=1055@license-server
+    export DOCKER_IMAGE=ghcr.io/ansys/mapdl:v25.2.7-ubuntu-cicd
+    tox -e docker-test-local
+
+Note about uv/uvx
+*****************
+
+The repository's CI uses the uvx wrapper to run tox inside the pinned virtual environment.
+Developers are encouraged to use uv or uvx too. Example (CI-like remote test run):
+
+.. code:: console
+
+    uvx tox -e docker-test-remote
+
+Or for local runs:
+
+.. code:: console
+
+    uvx tox -e docker-test-local
+
+Environment variable files
+**************************
+
+Required environment variables for the tox Docker envs are provided in ``docker/run/example.env`` and ``docker/testing/example.env``.
+Copy each ``example.env`` to a ``.env`` file in the same directory and update the values to match your environment.
+For example: ``cp docker/testing/example.env docker/testing/.env``.
+The tox envs read these ``.env`` files when present.
+
+Windows PowerShell example:
+
+.. code:: powershell
+
+    $env:PYTEST_ARGUMENTS = "-vvv tests/test_mapdl.py"; tox -e docker-run-mapdl
+
+Environment variables that influence behaviour:
+
+- :envvar:`PYMAPDL_START_INSTANCE`: When True, tox envs start MAPDL/Dpf containers; set to False to reuse existing instances.
+- :envvar:`PYMAPDL_PORT` / :envvar:`PYMAPDL_IP`: Connection address/port used by tests.
+- :envvar:`TOX_TEST_MODE`: "local" or "remote" to select the test/build flow used by the tox envs.
+
+.. note::
+    The tox docker envs are intended to mirror CI steps. Ensure Docker is running and you have sufficient permissions.
+    For long-running or repeated work, prefer starting containers with ``docker-run-mapdl`` and stopping them later
+    with ``docker-stop-mapdl`` to reduce rebuild time.
 
 Continuous integration and continuous deployment
 ------------------------------------------------

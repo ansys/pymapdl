@@ -48,7 +48,7 @@
 .. _ansys: https://www.ansys.com/
 .. _ansys_help: https://ansyshelp.ansys.com
 .. _ansys_student_version: https://www.ansys.com/academic/students
-.. _ansys_innovation_space: https://courses.ansys.com/
+.. _ansys_innovation_space: https://innovationspace.ansys.com
 .. _ansys_innovation_space_structures: https://courses.ansys.com/index.php/structures/
 .. _ansys_innovation_space_fluids: https://courses.ansys.com/index.php/fluids/
 .. _ansys_innovation_space_materials: https://courses.ansys.com/index.php/materials/
@@ -60,6 +60,7 @@
 
 .. # Developer portal
 .. _developer_portal: https://developer.ansys.com
+.. _developer_forum: https://discuss.ansys.com
 
 .. # Ansys guides
 .. _ansys_command_reference_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_cmd/Hlp_C_CmdTOC.html
@@ -90,6 +91,7 @@
 .. _ansys_krylov_sweep_harmonic_analysis: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_str/str_Krysweep.html
 
 .. #Ansys learning
+.. _ansys_learning_hub: https://learninghub.ansys.com/learn
 .. _learning_resources: https://www.ansys.com/academic/learning-resources
 .. _course_intro_python: https://courses.ansys.com/index.php/courses/intro-to-python/
 .. _course_getting_started_pymapdl: https://courses.ansys.com/index.php/courses/getting-started-with-pymapdl/
@@ -118,6 +120,7 @@
 .. _pyinstaller: https://pyinstaller.org
 .. _pytest_parametrize: https://docs.pytest.org/en/7.3.x/how-to/parametrize.html
 .. _python_context_manager: https://docs.python.org/3/reference/datamodel.html#with-statement-context-managers
+.. _python_installing_packages: https://packaging.python.org/en/latest/tutorials/installing-packages/
 .. _pyvista_eye_dome_lighting: https://docs.pyvista.org/examples/02-plot/edl.html
 .. _simutech_linux_dependencies: https://install.simutechgroup.com/info-required-linux-packages-and-libraries
 .. _slurm_docs: https://slurm.schedmd.com

@@ -180,6 +180,7 @@ struc
 subselected
 substep
 sur
+Synopsys
 tablet
 thermomechanical
 thermomechanically
@@ -195,6 +196,8 @@ UNSYM
 unsymmetric
 UPF
 UPFs
+uv
+uvx
 viscoplastic
 vise
 Vissarion
@@ -209,4 +212,3 @@ Windows Subsystem for Linux
 wsl
 WSL
 Zhu
-Synopsys

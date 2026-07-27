@@ -1,6 +1,6 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
-#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -182,7 +182,7 @@ print(output)
 #
 # For more details, see `Validation of a Modal Work Approach for Forced
 # Response Analysis of Bladed Disks
-# <https://www.mdpi.com/2076-3417/11/12/5437/pdf>`_, or the `Cyclic Symmetry
+# <https://www.mdpi.com/2076 - 3417/11/12/5437/pdf>`_, or the `Cyclic Symmetry
 # Analysis Guide
 # <https://ansyshelp.ansys.com/Views/Secured/corp/v222/en/pdf/Ansys_Mechanical_APDL_Cyclic_Symmetry_Analysis_Guide.pdf>`_
 #
