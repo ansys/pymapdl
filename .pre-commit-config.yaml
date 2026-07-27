@@ -19,21 +19,21 @@ repos:
       args: [ "-x"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: d2823d321df3af8f878f7ee3414dc94d037145b9  # frozen: v2.1.0
+  rev: 41e691678310dfd3833f7ab4e180ddb014310356  # frozen: v2.3.0
   hooks:
     - id: mypy
       args: [ --follow-imports=silent, --config-file=pyproject.toml]
       exclude: ^(doc/|examples/)
 
 - repo: https://github.com/ansys/pre-commit-hooks
-  rev: ad4e7598809ad98cde5aaf52d80040c7ac56e7cf  # frozen: v0.7.2
+  rev: 55c5b6a5439abd847613579c6924da750e8b78b2  # frozen: v0.8.0
   hooks:
   - id: add-license-headers
     args:
     - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
-  rev: dac090ce4d9ee313d086e2e89ab1acb8c2664fa1  # frozen: 9.0.0a3
+  rev: 7f321d375f31a2f03833bc9a548e8783f2b5c420  # frozen: 9.0.0b1
   hooks:
   - id: isort
 
@@ -69,7 +69,7 @@ repos:
   - id: flake8
 
 - repo: https://github.com/codespell-project/codespell
-  rev: 2ccb47ff45ad361a21071a7eedda4c37e6ae8c5a  # frozen: v2.4.2
+  rev: 57b21406f092110c18776e39b0bda50d37c945c8  # frozen: v2.4.3
   hooks:
   - id: codespell
     args: ["--toml", "pyproject.toml"]
@@ -97,7 +97,7 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 8ef330cbb7204d388aa7a620f9549bcea8009663  # frozen: 0.37.3
+  rev: 1a4bb160cab6417b3045e1b37b6b72449243e658  # frozen: 0.37.4
   hooks:
     - id: check-github-workflows
 
@@ -109,7 +109,7 @@ repos:
       args: [--option, "reorder_arrays=true", --option, "reorder_keys=true"]
 
 - repo: https://github.com/zizmorcore/zizmor-pre-commit
-  rev: 9257c6050c0261b8c57e712f632dc4a8010109a9  # frozen: v1.25.2
+  rev: 64a97fb7fa63188393d3215c6e312f5f9c6d0f78  # frozen: v1.27.0
   hooks:
     - id: zizmor
       args: ["--pedantic"]

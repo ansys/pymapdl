@@ -10,6 +10,24 @@ This document contains the release notes for the project.
 .. towncrier release notes start
 
 
+.. _v0.73.2:
+
+`0.73.2 <https://github.com/ansys/pymapdl/releases/tag/v0.73.2>`_ - July 02, 2026
+================================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Fixed
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Implement missing abstract methods for ansys-tools-visualization-interface 0.13.x
+          - `#4601 <https://github.com/ansys/pymapdl/pull/4601>`_
+
+
 .. _v0.73.1:
 
 `0.73.1 <https://github.com/ansys/pymapdl/releases/tag/v0.73.1>`_ - June 08, 2026
