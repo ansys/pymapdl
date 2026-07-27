@@ -90,7 +90,7 @@ doc = [
   "ansys-mapdl-reader==0.56.0",
   "ansys-sphinx-theme==1.9.0",
   "ansys-tools-visualization-interface==0.13.3",
-  "grpcio==1.81.1",
+  "grpcio==1.82.1",
   "imageio-ffmpeg==0.6.0",
   "imageio==2.37.4",
   "jupyter==1.1.1",
