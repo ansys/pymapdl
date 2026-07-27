@@ -658,7 +658,7 @@ def _parse_cmlist(
         )
         # Using `cmlist,all` which also includes selection
         include_selection = True
-    elif "LIST ALL SELECTED COMPONENTS":
+    elif "LIST ALL SELECTED COMPONENTS" in cmlist:
         blocks = cmlist.splitlines()[1:]
     else:
         raise ValueError("The format of the CMLIST output is not recognaised.")
