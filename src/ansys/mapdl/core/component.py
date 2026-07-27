@@ -661,7 +661,7 @@ def _parse_cmlist(
     elif "LIST ALL SELECTED COMPONENTS" in cmlist:
         blocks = cmlist.splitlines()[1:]
     else:
-        raise ValueError("The format of the CMLIST output is not recognaised.")
+        raise ValueError("The format of the CMLIST output is not recognized.")
 
     # Index of the TYPE token (0-based within split tokens of a component line)
     type_idx = 2 if include_selection else 1
