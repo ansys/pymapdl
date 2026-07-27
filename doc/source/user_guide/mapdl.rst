@@ -1287,8 +1287,18 @@ environment variable. The following table describes all arguments.
 |                                       |    user@machine:~$ export ANSYS_MAPDL_GRPC_TRANSPORT=mtls                        |
 |                                       |                                                                                  |
 +---------------------------------------+----------------------------------------------------------------------------------+
-| :envvar:`ANSYS_GRPC_CERTIFICATES`     | Path to the directory containing the                                             |
-|                                       | client-side mTLS certificates                                                    |
+| :envvar:`ANSYS_MAPDL_UDS_PATH`        | Path to the Ansys MAPDL Unix Domain Socket (UDS) directory.                      |
+|                                       | MAPDL creates or looks for the UDS file in this directory.                       |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export ANSYS_MAPDL_UDS_PATH=/path/to/uds/dir                  |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`ANSYS_GRPC_CERTIFICATES`     | Ansys products default environment variable.                                     |
+|                                       | Path to the directory containing the mTLS certificates                           |
 |                                       | (``ca.crt``, ``client.crt``,                                                     |
 |                                       | ``client.key``) used by PyMAPDL when                                             |
 |                                       | ``transport_mode`` is ``mtls``.                                                  |
@@ -1304,8 +1314,8 @@ environment variable. The following table describes all arguments.
 |                                       |    user@machine:~$ export ANSYS_GRPC_CERTIFICATES=/path/to/certs                 |
 |                                       |                                                                                  |
 +---------------------------------------+----------------------------------------------------------------------------------+
-| :envvar:`ANSYS_MAPDL_CERTS_PATH`      | Path to the directory containing the                                             |
-|                                       | server-side mTLS certificates                                                    |
+| :envvar:`PYMAPDL_GRPC_CERTIFICATES`   | Path to the directory containing the                                             |
+|                                       | mTLS certificates for the PyMAPDL client                                         |
 |                                       | (``ca.crt``, ``server.crt``,                                                     |
 |                                       | ``server.key``) read by the MAPDL                                                |
 |                                       | process itself.                                                                  |
@@ -1315,6 +1325,6 @@ environment variable. The following table describes all arguments.
 |                                       |                                                                                  |
 |                                       | .. code-block:: console                                                          |
 |                                       |                                                                                  |
-|                                       |    user@machine:~$ export ANSYS_MAPDL_CERTS_PATH=/path/to/certs                  |
+|                                       |    user@machine:~$ export PYMAPDL_GRPC_CERTIFICATES=/path/to/certs               |
 |                                       |                                                                                  |
 +---------------------------------------+----------------------------------------------------------------------------------+

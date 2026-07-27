@@ -2,22 +2,29 @@
 
 .. _ref_launch_pymapdl:
 
-
+==============
 Launch PyMAPDL
 ==============
 
 PyMAPDL can start MAPDL locally, or it can connect to a session already running locally or
 on a remote machine.
 
-* `Launch PyMAPDL with a local MAPDL instance`_
-* `Connect PyMAPDL to a local MAPDL instance`_
-* `Connect PyMAPDL to a remote MAPDL instance`_
+* :ref:`launch_pymapdl_local`_
+  * :ref:`launching_pymapdl_without_client`_
+* :ref:`connect_pymapdl_to_a_local_mapdl_instance`_
+  * :ref:`launch_grpc_mapdl_session`_
+  * :ref:`connect_grpc_mapdl_session`_
+* :ref:`connect_grpc_remote_mapdl_session`_
+* :ref:`setting_mapdl_location`_
+* :ref:`securing_pymapdl_connection`_
 
 If you have any problem launching PyMAPDL, see :ref:`Launching issues <ref_launching_issue>`.
 
 
+.. _launch_pymapdl_local:
+
 Launch PyMAPDL with a local MAPDL instance
-------------------------------------------
+==========================================
 
 You can use the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
 function to start MAPDL and automatically connect to it:
@@ -42,8 +49,10 @@ For more information on controlling how MAPDL launches locally, see the
 description of the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function.
 
 
+.. _launching_pymapdl_without_client:
+
 Launch MAPDL process without creating a client
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------
 
 Sometimes you may want to launch a MAPDL process without immediately creating a
 client connection. This is useful for:
@@ -79,8 +88,10 @@ you to manage the process independently from the client connection.
    with ``start_instance=False`` for that purpose.
 
 
+.. _connect_pymapdl_to_a_local_mapdl_instance:
+
 Connect PyMAPDL to a local MAPDL instance
------------------------------------------
+=========================================
 
 Connect to a local MAPDL instance requires two steps: launching a
 local MAPDL session and connect to it.
@@ -88,7 +99,7 @@ local MAPDL session and connect to it.
 .. _launch_grpc_mapdl_session:
 
 Launch a local gRPC MAPDL session
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------
 
 You can start MAPDL from the command line and then connect to it.
 
@@ -152,10 +163,11 @@ From version v0.68, you can use a command line interface to launch, stop, and li
 local MAPDL instances.
 For more information, see :ref:`ref_cli`.
 
+
 .. _connect_grpc_mapdl_session:
 
 Connect to the local MAPDL instance
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------
 
 An MAPDL gRPC server can be connected to from the same host by using
 this code:
@@ -183,7 +195,7 @@ For more information, see :ref:`pymapdl_docker`.
 .. _connect_grpc_remote_mapdl_session:
 
 Connect PyMAPDL to a remote MAPDL instance
-------------------------------------------
+==========================================
 
 If you want to connect to a **remote** MAPDL instance, you must know the IP
 address of that instance.
@@ -204,8 +216,10 @@ Note that you must have started an MAPDL instance in gRPC mode on the computer w
 the referenced IP address and hostname for this to work because PyMAPDL cannot launch remote instances.
 
 
+.. _setting_mapdl_location:
+
 Setting the MAPDL location in PyMAPDL
--------------------------------------
+=====================================
 
 To run, PyMAPDL must know the location of the MAPDL binary.
 Most of the time this can be automatically determined, but
@@ -316,3 +330,216 @@ keyword argument:
             custom_exec = "/usr/ansys_inc/v241/ansys/bin/ansys241t"
             add_switch = f" -custom {custom_exec}"
             mapdl = launch_mapdl(additional_switches=add_switch)
+
+
+.. _securing_pymapdl_connection:
+
+Securing your PyMAPDL connection
+================================
+
+PyMAPDL supports four gRPC transport modes: ``insecure``, ``uds``, ``wnua``, and ``mtls``.
+When no transport mode is specified, PyMAPDL selects the most secure available mode automatically
+based on the operating system:
+
+* **Linux** → ``uds`` (Unix Domain Socket)
+* **Windows** → ``wnua`` (Windows Named User Authentication)
+* **macOS and other platforms** → ``insecure`` (with a warning)
+
+To override the automatic selection, pass the ``transport_mode`` argument to
+:func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`, or set the
+:envvar:`PYMAPDL_GRPC_TRANSPORT` environment variable before starting Python.
+
+
+Insecure
+--------
+
+The ``insecure`` transport mode sends gRPC traffic without any encryption or
+authentication. It is supported on all platforms and can be used for both local and
+remote connections.
+
+This the default transport mode on older MAPDL versions, before ANSYS MAPDL 2024 R2.
+
+.. warning::
+
+   Do not use insecure mode over untrusted or remote networks. All traffic between
+   PyMAPDL and MAPDL is sent in plain text and can be intercepted. For local
+   connections, prefer ``uds`` on Linux/macOS or ``wnua`` on Windows. For remote
+   connections, use ``mtls``.
+
+.. code-block:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(transport_mode="insecure")
+
+Alternatively, set the environment variable before running your script:
+
+.. tab-set::
+
+    .. tab-item:: Linux/macOS
+        :sync: key1
+
+        .. code-block:: console
+
+            export PYMAPDL_GRPC_TRANSPORT=insecure
+
+    .. tab-item:: Windows
+        :sync: key2
+
+        .. code-block:: pwsh-session
+
+            $env:PYMAPDL_GRPC_TRANSPORT = "insecure"
+
+
+Unix Domain Socket (UDS)
+------------------------
+
+The ``uds`` transport mode uses a Unix domain socket file instead of a TCP connection.
+Because the socket lives only on the local filesystem, no network traffic is exposed and
+the connection cannot be accessed from outside the machine. This mode is the default on
+Linux.
+
+This mode is not supported on Windows.
+
+MAPDL names its socket file ``mapdl-<PORT>.sock`` and places it in the directory
+pointed to by the :envvar:`ANSYS_MAPDL_UDS_PATH` environment variable. If that
+variable is not set, PyMAPDL uses ``~/.conn`` by default.
+
+.. code-block:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(transport_mode="uds")
+
+To use a custom socket directory, pass the ``uds_dir`` argument:
+
+.. code-block:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(transport_mode="uds", uds_dir="/tmp/mapdl-sockets")
+
+Alternatively, set the environment variables before running your script:
+
+.. tab-set::
+
+    .. tab-item:: Linux/macOS
+        :sync: key1
+
+        .. code-block:: console
+
+            export PYMAPDL_GRPC_TRANSPORT=uds
+            export ANSYS_MAPDL_UDS_PATH=/tmp/mapdl-sockets
+
+.. note::
+
+   UDS does not support remote connections. For remote connections, use
+   ``mtls`` instead.
+
+
+Windows Named User Authentication (WNUA)
+----------------------------------------
+
+The ``wnua`` transport mode authenticates the connection
+using the identity of the logged-in Windows user. Only the same user who launched the
+MAPDL process can connect to it, providing access control without requiring certificates
+or any additional configuration. This mode is the default on Windows.
+
+This mode is only supported on Windows.
+
+.. code-block:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(transport_mode="wnua")
+
+Alternatively, set the environment variable before running your script:
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key2
+
+        .. code-block:: pwsh-session
+
+            $env:PYMAPDL_GRPC_TRANSPORT = "wnua"
+
+.. note::
+
+   WNUA does not support remote connections. For remote connections, use
+   ``mtls`` instead.
+
+
+Mutual Transport Layer Security (mTLS)
+---------------------------------------
+
+The ``mtls`` transport mode encrypts all gRPC traffic and requires both PyMAPDL and
+MAPDL to present certificates signed by a shared Certificate Authority (CA). This mutual
+authentication ensures that only trusted clients can connect to trusted servers. It is
+the recommended mode for remote connections and production deployments.
+
+.. code-block:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(
+        transport_mode="mtls",
+        certs_dir="/path/to/certs",
+    )
+
+Alternatively, set the environment variables before running your script:
+
+.. tab-set::
+
+    .. tab-item:: Linux/macOS
+        :sync: key1
+
+        .. code-block:: console
+
+            export PYMAPDL_GRPC_TRANSPORT=mtls
+            export ANSYS_GRPC_CERTIFICATES=/path/to/certs
+
+    .. tab-item:: Windows
+        :sync: key2
+
+        .. code-block:: pwsh-session
+
+            $env:PYMAPDL_GRPC_TRANSPORT = "mtls"
+            $env:ANSYS_GRPC_CERTIFICATES = "C:\path\to\certs"
+
+For full setup instructions, including certificate generation and launching MAPDL with
+mTLS enabled, see :ref:`ref_tls_guide`.
+
+
+Transport mode comparison
+--------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 14 15 20 15 36
+
+   * - Mode
+     - Encryption
+     - OS support
+     - Remote support
+     - Recommended use case
+   * - ``insecure``
+     - None
+     - All
+     - Yes (discouraged)
+     - Testing and development on trusted local networks only
+   * - ``uds``
+     - Filesystem isolation
+     - Linux
+     - No
+     - Default local mode on Linux; same-machine connections
+   * - ``wnua``
+     - User authentication
+     - Windows only
+     - No
+     - Default local mode on Windows; same-machine connections
+   * - ``mtls``
+     - TLS + mutual auth
+     - All
+     - Yes
+     - Production deployments, remote connections, and HPC
