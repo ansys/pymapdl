@@ -478,8 +478,9 @@ def test_subcomponents(mapdl, cleared):
 
     mapdl.allsel()
 
+    cmp_repr = str(mapdl.components)
     for i in range(1, 11):
-        assert f"NODE_{i}" in str(mapdl.components)
+        assert f"NODE_{i}" in cmp_repr
         assert len(mapdl.components[f"NODE_{i}"]) == 1
         assert mapdl.components[f"NODE_{i}"][0] == i
 
@@ -495,7 +496,7 @@ def test_subcomponents(mapdl, cleared):
         "NODE_8",
     )
 
-    print(mapdl.components)  # This will trigger COMP parsing
+    _ = str(mapdl.components)  # Trigger component parsing
 
     assert "ASSEMBLY" in str(mapdl.components)
     assert len(mapdl.components["assembly"]) == 8
