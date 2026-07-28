@@ -26,10 +26,8 @@ import sys
 import pytest
 
 from ansys.mapdl.core.launcher import launch_mapdl
-from conftest import requires_dependency
 
 
-@requires_dependency("cryptography")
 @pytest.fixture
 def generate_certs(tmp_path):
     """Generate mTLS test certificates using ``ansys.tools.common.utils``.
@@ -42,6 +40,10 @@ def generate_certs(tmp_path):
     ``client.crt``, and ``client.key`` into a temporary ``certs/``
     subdirectory and returns its :class:`~pathlib.Path`.
     """
+    pytest.importorskip(
+        "cryptography",
+        reason="cryptography package required; install ansys-tools-common[other]",
+    )
     from ansys.tools.common.utils import generate_test_certificates
 
     certs_dir = tmp_path / "certs"
