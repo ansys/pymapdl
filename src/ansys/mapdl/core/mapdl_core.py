@@ -3193,7 +3193,9 @@ class _MapdlCore(Commands):
                 self._parent()._run("/nopr")
             self._parent()._mute = self._previous_mute
 
-    def _parse_cmlist(self, cmlist: Optional[str] = None) -> Dict[str, Any]:
+    def _parse_cmlist(
+        self, cmlist: Optional[str] = None
+    ) -> Tuple[Dict[str, Any], Dict[str, List[str]]]:
         from ansys.mapdl.core.component import _parse_cmlist
 
         if not cmlist:
