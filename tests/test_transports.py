@@ -460,3 +460,26 @@ def test_configure_mtls_raises_for_missing_files(tmp_path):
 
     with pytest.raises(FileNotFoundError):
         obj.configure_mtls()
+
+
+def test_configure_wnua_is_no_op():
+    """configure_wnua runs without error (no-op on any platform when mocked)."""
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    obj._log = logging.getLogger("test")
+    obj.transport_mode = "wnua"
+
+    # Should not raise
+    obj.configure_wnua()
+
+
+def test_configure_insecure_is_no_op():
+    """configure_insecure runs without error."""
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    obj._log = logging.getLogger("test")
+    obj.transport_mode = "insecure"
+
+    obj.configure_insecure()

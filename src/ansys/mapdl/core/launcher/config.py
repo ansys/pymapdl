@@ -1094,7 +1094,14 @@ def resolve_transport_mode(transport_mode: Optional[str]) -> Optional[TransportM
         ConfigurationError: If transport mode is invalid
     """
     if transport_mode is None:
-        return None
+        # Fall back to environment variables in precedence order
+        env_val = os.environ.get("PYMAPDL_GRPC_TRANSPORT") or os.environ.get(
+            "ANSYS_MAPDL_GRPC_TRANSPORT"
+        )
+        if env_val is None:
+            return None
+        # Validate the env var value through the same mapping logic
+        transport_mode = env_val
 
     mode_lower = transport_mode.lower()
     if mode_lower == "insecure":

@@ -1278,6 +1278,8 @@ environment variable. The following table describes all arguments.
 |                                       | Used when the transport mode should be                                           |
 |                                       | set at the Ansys product level rather                                            |
 |                                       | than per PyMAPDL installation.                                                   |
+|                                       | If :envvar:`PYMAPDL_GRPC_TRANSPORT` is also set,                                 |
+|                                       | it takes precedence and this variable is ignored.                                |
 |                                       | See :ref:`ref_tls_guide`.                                                        |
 |                                       |                                                                                  |
 |                                       | **Example:**                                                                     |

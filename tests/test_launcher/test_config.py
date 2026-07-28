@@ -906,6 +906,55 @@ class TestResolveTransportMode:
         with pytest.raises(ConfigurationError):
             resolve_transport_mode("invalid_mode")
 
+    def test_resolve_transport_mode_reads_pymapdl_grpc_transport(self, monkeypatch):
+        """PYMAPDL_GRPC_TRANSPORT env var is read when transport_mode is None."""
+        monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", "mtls")
+        monkeypatch.delenv("ANSYS_MAPDL_GRPC_TRANSPORT", raising=False)
+        mode = resolve_transport_mode(None)
+        assert mode == TransportMode.MTLS
+
+    def test_resolve_transport_mode_reads_ansys_mapdl_grpc_transport(self, monkeypatch):
+        """ANSYS_MAPDL_GRPC_TRANSPORT env var is read as alias when PYMAPDL_GRPC_TRANSPORT not set."""
+        monkeypatch.delenv("PYMAPDL_GRPC_TRANSPORT", raising=False)
+        monkeypatch.setenv("ANSYS_MAPDL_GRPC_TRANSPORT", "insecure")
+        mode = resolve_transport_mode(None)
+        assert mode == TransportMode.INSECURE
+
+    def test_resolve_transport_mode_pymapdl_takes_precedence(self, monkeypatch):
+        """PYMAPDL_GRPC_TRANSPORT takes precedence over ANSYS_MAPDL_GRPC_TRANSPORT."""
+        monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", "mtls")
+        monkeypatch.setenv("ANSYS_MAPDL_GRPC_TRANSPORT", "insecure")
+        mode = resolve_transport_mode(None)
+        assert mode == TransportMode.MTLS
+
+    def test_resolve_transport_mode_argument_takes_precedence_over_env(
+        self, monkeypatch
+    ):
+        """Explicit argument overrides env vars."""
+        monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", "insecure")
+        mode = resolve_transport_mode("mtls")
+        assert mode == TransportMode.MTLS
+
+    def test_resolve_transport_mode_invalid_env_var_raises(self, monkeypatch):
+        """Invalid value in env var raises ConfigurationError."""
+        monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", "invalid_mode")
+        with pytest.raises(ConfigurationError):
+            resolve_transport_mode(None)
+
+    def test_resolve_transport_mode_env_vars_cleared_returns_none(self, monkeypatch):
+        """Returns None when no argument and no env vars set."""
+        monkeypatch.delenv("PYMAPDL_GRPC_TRANSPORT", raising=False)
+        monkeypatch.delenv("ANSYS_MAPDL_GRPC_TRANSPORT", raising=False)
+        mode = resolve_transport_mode(None)
+        assert mode is None
+
+    def test_resolve_launch_config_transport_from_env_var(self, monkeypatch):
+        """resolve_launch_config picks up PYMAPDL_GRPC_TRANSPORT env var."""
+        monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", "mtls")
+        monkeypatch.delenv("ANSYS_MAPDL_GRPC_TRANSPORT", raising=False)
+        config = resolve_launch_config(start_instance=False, ip="127.0.0.1", port=50052)
+        assert config.transport_mode == TransportMode.MTLS
+
 
 class TestResolveRunLocation:
     """Tests for run_location resolution."""

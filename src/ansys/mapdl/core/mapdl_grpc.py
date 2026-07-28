@@ -408,9 +408,13 @@ class MapdlGrpc(MapdlBase):
         )
 
         self.transport_mode = transport_mode
-        self.uds_dir: Path = (
-            Path(uds_dir) if uds_dir is not None else Path("~").expanduser() / ".conn"
-        )
+        if uds_dir is not None:
+            self.uds_dir: Path = Path(uds_dir)
+        else:
+            _env_uds = os.environ.get("ANSYS_MAPDL_UDS_PATH")
+            self.uds_dir = (
+                Path(_env_uds) if _env_uds else Path("~").expanduser() / ".conn"
+            )
 
         # Optional uds identifier (stringified port) may be supplied by caller
         self.uds_id: Optional[str] = str(uds_id) if uds_id is not None else None
