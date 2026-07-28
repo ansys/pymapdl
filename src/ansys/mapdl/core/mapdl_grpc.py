@@ -43,11 +43,12 @@ from warnings import warn
 import weakref
 
 from ansys.tools.common.versioning import version_string_as_tuple
-import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
-import numpy as np
 from numpy.typing import NDArray
 import psutil
+
+import grpc
+import numpy as np
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
@@ -4157,6 +4158,10 @@ class MapdlGrpc(MapdlBase):
             if self._exited:
                 return
         except AttributeError:
+            return
+
+        # If the process was never actually launched, there is nothing to release.
+        if not getattr(self, "_launched", False):
             return
 
         # Honour cleanup_on_exit=False: self._cleanup stores that flag.

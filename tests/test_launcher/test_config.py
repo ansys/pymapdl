@@ -871,8 +871,10 @@ class TestResolveStartInstance:
 class TestResolveTransportMode:
     """Tests for transport mode resolution."""
 
-    def test_resolve_transport_mode_none(self):
-        """Test transport mode resolution with None."""
+    def test_resolve_transport_mode_none(self, monkeypatch):
+        """Test transport mode resolution with None and no env vars set returns None."""
+        monkeypatch.delenv("PYMAPDL_GRPC_TRANSPORT", raising=False)
+        monkeypatch.delenv("ANSYS_MAPDL_GRPC_TRANSPORT", raising=False)
         mode = resolve_transport_mode(None)
         assert mode is None
 
