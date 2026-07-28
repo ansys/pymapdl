@@ -26,9 +26,8 @@ import tempfile
 from typing import Optional, Union
 import weakref
 
-from numpy.typing import NDArray
-
 import numpy as np
+from numpy.typing import NDArray
 
 try:
     from ansys.mapdl.reader._reader import write_array
@@ -40,11 +39,12 @@ except ModuleNotFoundError:  # pragma: no cover
 
     _HAS_READER = False
 
+import numpy as np
+
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.mapdl_core import MAX_PARAM_CHARS
 from ansys.mapdl.core.misc import supress_logging
-import numpy as np
 
 ROUTINE_MAP = {
     0: "Begin level",

@@ -24,6 +24,8 @@ import logging
 import os
 from typing import Dict, List, Tuple
 
+from platformdirs import user_data_dir
+
 # Apply NumPy compatibility patches for dependencies
 from ansys.mapdl.core import _numpy_compat  # noqa: F401
 
@@ -32,7 +34,6 @@ from ansys.mapdl.core import _numpy_compat  # noqa: F401
 # =======
 #
 from ansys.mapdl.core.logging import Logger
-from platformdirs import user_data_dir
 
 LOG: Logger = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
 LOG.debug("Loaded logging module as LOG")

@@ -25,10 +25,10 @@
 import os
 from unittest.mock import patch
 
+import numpy as np
 import pytest
 
 from conftest import has_dependency, requires
-import numpy as np
 
 if not has_dependency("pyvista"):
     pytest.skip(

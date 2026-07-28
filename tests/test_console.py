@@ -38,9 +38,8 @@ from conftest import clear, has_dependency, requires
 # skip entire module unless --console is enabled
 pytestmark = requires("console")
 
-import pytest
-
 import numpy as np
+import pytest
 
 if has_dependency("pyvista"):
     import pyvista

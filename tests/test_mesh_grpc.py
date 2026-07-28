@@ -24,10 +24,10 @@
 
 import os
 
+import numpy as np
 import pytest
 
 from conftest import has_dependency, requires
-import numpy as np
 
 if has_dependency("pyvista"):
     import pyvista as pv

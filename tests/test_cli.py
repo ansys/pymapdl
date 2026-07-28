@@ -28,11 +28,11 @@ from typing import Callable
 from unittest.mock import MagicMock, patch
 from urllib.parse import urlparse
 
+import numpy as np
 import psutil
 import pytest
 
 import ansys.mapdl.core.cli.helpers as helpers_module
-import numpy as np
 
 core_module = helpers_module
 from ansys.mapdl.core.cli.helpers import get_ansys_process_from_port

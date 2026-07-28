@@ -43,12 +43,11 @@ from warnings import warn
 import weakref
 
 from ansys.tools.common.versioning import version_string_as_tuple
+import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
+import numpy as np
 from numpy.typing import NDArray
 import psutil
-
-import grpc
-import numpy as np
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:

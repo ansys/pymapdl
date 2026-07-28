@@ -24,6 +24,7 @@ import os
 import re
 
 from ansys.tools.common.versioning import server_meets_version
+import numpy as np
 import pytest
 
 ## Checking MAPDL versions
@@ -31,7 +32,6 @@ from ansys.mapdl.core.database import MINIMUM_MAPDL_VERSION, DBDef, MapdlDb
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlVersionError
 from ansys.mapdl.core.misc import random_string
 from conftest import ON_CI, TestClass
-import numpy as np
 
 SKIP_ON_VERSIONS = ["22.2", "23.1", "23.2", "24.1", "24.2", "25.1", "25.2"]
 
