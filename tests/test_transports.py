@@ -133,8 +133,34 @@ def test_configure_uds_sets_socket_dir_and_id(tmp_path, monkeypatch):
     obj.configure_uds(port=50052)
 
     assert obj.uds_dir == str(uds_dir)
-    # uds_id is set to the stringified port; create_channel builds 'mapdl-50052.sock'
+    # uds_id defaults to the stringified port when the caller did not provide one
     assert obj.uds_id == "50052"
+
+
+def test_configure_uds_preserves_caller_supplied_uds_id(tmp_path, monkeypatch):
+    """configure_uds must not overwrite a uds_id already set by the caller."""
+    import platform
+
+    monkeypatch.setattr(os, "name", "posix")
+    monkeypatch.setattr(platform, "system", lambda: "Linux")
+
+    fake_mod = types.ModuleType("ansys.tools.common.cyberchannel")
+    fake_mod.verify_transport_mode = lambda mode: None
+    monkeypatch.setitem(sys.modules, "ansys.tools.common.cyberchannel", fake_mod)
+
+    import logging
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    obj._log = logging.getLogger("test")
+    obj.uds_dir = str(tmp_path)
+    obj.uds_id = "custom-id"  # pre-supplied by caller
+
+    obj.configure_uds(port=50052)
+
+    # Must not be overwritten
+    assert obj.uds_id == "custom-id"
 
 
 def test_exit_removes_uds_socket(tmp_path, monkeypatch):
@@ -320,10 +346,10 @@ def test_remote_ip_with_uds_raises(monkeypatch):
 
 
 def test_create_channel_passes_uds_service(tmp_path, monkeypatch):
-    """_create_channel passes uds_service='mapdl' and uds_id=port to create_channel.
+    """_create_channel passes uds_service='mapdl' and uds_id from self.uds_id to create_channel.
 
-    This is the fix for issue #4435: the old code omitted uds_service, causing
-    ansys-tools-common to raise ValueError.
+    Verifies fix for issue #4435 (uds_service omission) and that uds_id is taken
+    from self.uds_id (converted to int) rather than being hardcoded to port.
     """
     import platform
 
