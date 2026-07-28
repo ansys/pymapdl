@@ -465,9 +465,9 @@ def test_configure_mtls_raises_for_missing_files(tmp_path):
 
 def test_configure_wnua_is_no_op():
     """configure_wnua runs without error (no-op on any platform when mocked)."""
-    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-
     import logging
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
     obj = object.__new__(MapdlGrpc)
     obj._log = logging.getLogger("test")
