@@ -133,7 +133,6 @@ def test_connect_with_mocked_channel(monkeypatch, generate_certs):
     assert str(captured_calls[0].get("certs_dir")) == str(generate_certs)
 
 
-@pytest.mark.local
 def test_local_launch_with_certs(monkeypatch, generate_certs):
     # This test requires local MAPDL and therefore is marked 'local'. It will try
     # to call launch_mapdl to start MAPDL but uses start_instance=False to connect
