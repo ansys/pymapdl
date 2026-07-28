@@ -467,6 +467,8 @@ def test_configure_wnua_is_no_op():
     """configure_wnua runs without error (no-op on any platform when mocked)."""
     from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
+    import logging
+
     obj = object.__new__(MapdlGrpc)
     obj._log = logging.getLogger("test")
     obj.transport_mode = "wnua"

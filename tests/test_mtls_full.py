@@ -79,9 +79,6 @@ def test_launch_mapdl_infers_mtls_and_passes_transport(
         def clear(self):
             return None
 
-    monkeypatch.setitem(
-        sys.modules, "ansys.mapdl.core.mapdl_grpc.MapdlGrpc", DummyMapdlGrpc
-    )
 
     # Also patch the actual class name used by launcher import path
     monkeypatch.setattr(

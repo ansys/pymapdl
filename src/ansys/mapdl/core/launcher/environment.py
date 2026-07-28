@@ -187,13 +187,9 @@ def prepare_environment(config: LaunchConfig) -> EnvironmentConfig:
     # If launching with mTLS, ensure MAPDL process receives the certificates
     # path via ANSYS_GRPC_CERTIFICATES so the server can start its secure gRPC
     # endpoint with the same certificates.
-    try:
-        from .models import TransportMode
+    from .models import TransportMode
 
-        is_mtls = config.transport_mode == TransportMode.MTLS
-    except Exception:
-        is_mtls = False
-
+    is_mtls = config.transport_mode == TransportMode.MTLS
     if is_mtls:
         # Prefer explicit certs_dir, then existing environment var, then cwd/certs
         if config.certs_dir:
