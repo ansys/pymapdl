@@ -39,11 +39,10 @@ PyMAPDL including direct mesh access through VTK.
 
 # sphinx_gallery_thumbnail_number = 3
 
-import numpy as np
-
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.plotting import MapdlTheme
+import numpy as np
 
 mapdl = pymapdl.launch_mapdl()
 

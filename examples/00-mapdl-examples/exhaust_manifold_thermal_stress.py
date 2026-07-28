@@ -68,12 +68,12 @@ Boundary Conditions
 # Import all necessary modules and launch an instance of MAPDL
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-import numpy as np
 import pandas as pd
 import pyvista as pv
 
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.examples import download_manifold_example_data
+import numpy as np
 
 # start mapdl
 mapdl = launch_mapdl()

@@ -25,11 +25,11 @@
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Sequence, Tuple, Union
 
-import numpy as np
 from numpy.typing import NDArray
 
 from ansys.mapdl.core import _HAS_PYVISTA, Mapdl
 from ansys.mapdl.core.errors import VersionError
+import numpy as np
 
 if _HAS_PYVISTA:
     import pyvista as pv

@@ -117,7 +117,6 @@ def create_grpc_client(
         launched=process_info is not None,
         transport_mode=(config.transport_mode.value if config.transport_mode else None),
         uds_dir=config.uds_dir,
-        uds_id=config.uds_id,
         certs_dir=(str(config.certs_dir) if config.certs_dir else None),
     )
 

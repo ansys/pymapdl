@@ -40,11 +40,11 @@ if not has_dependency("ansys-platform-instancemanagement"):
 from unittest.mock import Mock, patch
 
 import ansys.platform.instancemanagement as pypim
-import grpc
 
 from ansys.mapdl.core.launcher import LaunchConfig, LaunchMode
 from ansys.mapdl.core.launcher.connection import create_grpc_client
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH
+import grpc
 
 # ============================================================================
 # Helper Functions
@@ -81,7 +81,6 @@ def _create_test_config(**overrides):
         "mapdl_output": None,
         "transport_mode": None,
         "uds_dir": None,
-        "uds_id": None,
         "certs_dir": None,
     }
     defaults.update(overrides)

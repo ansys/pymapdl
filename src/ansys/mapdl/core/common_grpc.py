@@ -25,11 +25,10 @@
 import time
 from typing import Any, Dict, List, Literal, Optional, get_args
 
-import grpc
-import numpy as np
-
 from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlRuntimeError
+import grpc
+import numpy as np
 
 # chunk sizes for streaming and file streaming
 DEFAULT_CHUNKSIZE: int = 256 * 1024  # 256 kB

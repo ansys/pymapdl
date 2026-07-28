@@ -33,9 +33,8 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 if TYPE_CHECKING:
     from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
-import grpc
-
 from ansys.mapdl.core import LOG as logger
+import grpc
 
 SIGINT_TRACKER: List[bool] = []
 

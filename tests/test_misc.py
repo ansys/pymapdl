@@ -25,7 +25,6 @@
 import os
 import pathlib
 
-import numpy as np
 import pytest
 
 from ansys.mapdl.core.misc import (
@@ -40,6 +39,7 @@ from ansys.mapdl.core.misc import (
     run_as,
 )
 from conftest import requires
+import numpy as np
 
 
 @pytest.mark.parametrize(

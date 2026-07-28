@@ -31,9 +31,8 @@ using area commands.
 
 """
 
-import numpy as np
-
 from ansys.mapdl.core import launch_mapdl
+import numpy as np
 
 # start MAPDL and enter the pre-processing routine
 mapdl = launch_mapdl()

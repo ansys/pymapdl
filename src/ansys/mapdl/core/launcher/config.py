@@ -82,7 +82,6 @@ def resolve_launch_config(
     mapdl_output: Optional[str] = None,
     transport_mode: Optional[str] = None,
     uds_dir: Optional[str] = None,
-    uds_id: Optional[str] = None,
     certs_dir: Optional[str] = None,
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
@@ -278,10 +277,6 @@ def resolve_launch_config(
         Directory for Unix Domain Socket (UDS) files when using ``'uds'``
         transport. Defaults to :class:`None`, which uses ``~/.conn``.
 
-    uds_id : Optional[str]
-        Identifier for UDS socket file when using ``'uds'`` transport.
-        Defaults to :class:`None`, which uses ``mapdl-{port}``.
-
     certs_dir : Optional[str]
         Directory containing certificates for ``'mtls'`` transport.
         Defaults to :class:`None`.
@@ -473,7 +468,6 @@ def resolve_launch_config(
         mapdl_output=mapdl_output,
         transport_mode=resolved_transport_mode,
         uds_dir=uds_dir,
-        uds_id=uds_id,
         certs_dir=certs_dir,
         env_vars=resolved_replace_env_vars,
         add_env_vars=resolved_add_env_vars,

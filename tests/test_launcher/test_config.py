@@ -1756,7 +1756,6 @@ class TestConfigurationIntegration:
                 mapdl_output=None,
                 transport_mode="insecure",
                 uds_dir=None,
-                uds_id=None,
                 certs_dir=None,
                 add_env_vars={"ANS_CMD": "NODIAG"},
                 license_server_check=False,

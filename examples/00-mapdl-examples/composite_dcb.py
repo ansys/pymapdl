@@ -82,10 +82,10 @@ import tempfile
 
 from ansys.dpf import core as dpf
 import matplotlib.pyplot as plt
-import numpy as np
 import pyvista as pv
 
 from ansys.mapdl.core import launch_mapdl
+import numpy as np
 
 # Start MAPDL as a service
 mapdl = launch_mapdl()

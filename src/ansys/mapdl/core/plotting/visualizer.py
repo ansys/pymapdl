@@ -27,7 +27,6 @@ from typing import Any, Callable, Dict, Iterable, Optional, Union
 
 from ansys.tools.visualization_interface import Plotter
 from ansys.tools.visualization_interface.backends.pyvista import PyVistaBackendInterface
-import numpy as np
 from numpy.typing import NDArray
 
 from ansys.mapdl.core import LOG as logger
@@ -43,6 +42,7 @@ from ansys.mapdl.core.plotting.consts import (
     POINT_SIZE,
 )
 from ansys.mapdl.core.plotting.theme import MapdlTheme
+import numpy as np
 
 _FIRST_USE_RUN = False
 

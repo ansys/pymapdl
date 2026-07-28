@@ -22,10 +22,10 @@
 
 import click
 
+from ansys.mapdl.core import launch_mapdl
+
 # Import packages
 import numpy as np
-
-from ansys.mapdl.core import launch_mapdl
 
 
 @click.command()

@@ -43,11 +43,12 @@ from warnings import warn
 import weakref
 
 from ansys.tools.common.versioning import version_string_as_tuple
-import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
-import numpy as np
 from numpy.typing import NDArray
 import psutil
+
+import grpc
+import numpy as np
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
@@ -392,7 +393,6 @@ class MapdlGrpc(MapdlBase):
         remote_instance: Optional["PIM_Instance"] = None,
         transport_mode: Optional[str] = None,
         uds_dir: Optional[Union[str, Path]] = None,
-        uds_id: Optional[str] = None,
         certs_dir: Optional[Union[str, Path]] = None,
         **start_parm: dict[str, Any],
     ):
@@ -414,9 +414,6 @@ class MapdlGrpc(MapdlBase):
             self.uds_dir = (
                 Path(_env_uds) if _env_uds else Path("~").expanduser() / ".conn"
             )
-
-        # Optional uds identifier (stringified port) may be supplied by caller
-        self.uds_id: Optional[str] = str(uds_id) if uds_id is not None else None
 
         self.certs_dir: Path | None = Path(certs_dir) if certs_dir is not None else None
         self.grpc_options = start_parm.pop("grpc_options", DEFAULT_GRPC_OPTIONS)
@@ -648,13 +645,11 @@ class MapdlGrpc(MapdlBase):
     def configure_uds(self, port: int) -> None:
         """Configure UDS transport-specific settings.
 
-        MAPDL always names its socket ``mapdl-{PORT}.sock`` inside the
-        directory set via the ``ANSYS_MAPDL_UDS_PATH`` environment variable.
-        However, this is only applicable when launching new instances.
+        MAPDL derives the socket identifier from the port number automatically,
+        naming its socket ``mapdl-{PORT}.sock`` inside the directory set via the
+        ``ANSYS_MAPDL_UDS_PATH`` environment variable.
         """
-        # Only fall back to the port when the caller did not supply a uds_id.
-        if self.uds_id is None:
-            self.uds_id = str(port)
+        pass
 
     def configure_insecure(self) -> None:
         """Configure insecure transport-specific settings."""
@@ -747,7 +742,7 @@ class MapdlGrpc(MapdlBase):
             host=ip,
             port=port,
             uds_service="mapdl",
-            uds_id=int(self.uds_id) if self.uds_id is not None else port,
+            uds_id=port,
             uds_dir=self.uds_dir,
             certs_dir=self.certs_dir,
             grpc_options=self.grpc_options,
@@ -1491,7 +1486,6 @@ class MapdlGrpc(MapdlBase):
             mapdl_output=args.get("mapdl_output"),
             transport_mode=args.get("transport_mode"),
             uds_dir=args.get("uds_dir"),
-            uds_id=args.get("uds_id"),
             certs_dir=args.get("certs_dir"),
         )
         cmd = _generate_launch_command(config)

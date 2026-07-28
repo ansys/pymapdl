@@ -3,8 +3,9 @@ import os
 from typing import Any, TypedDict
 
 import click
-import numpy as np
 from numpy.typing import NDArray
+
+import numpy as np
 
 BIG_WIDTH = 80
 SMALL_WIDTH = 8

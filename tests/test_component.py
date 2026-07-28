@@ -23,7 +23,6 @@
 import re
 import warnings
 
-import numpy as np
 import pytest
 
 from ansys.mapdl.core.component import (
@@ -34,6 +33,7 @@ from ansys.mapdl.core.component import (
 )
 from ansys.mapdl.core.errors import ComponentNoData
 from conftest import TestClass, clear
+import numpy as np
 
 
 def test_str_rep(mapdl, cleared):

@@ -25,11 +25,11 @@
 import re
 
 from ansys.tools.common.versioning import SemanticVersion
-import numpy as np
 import pytest
 
 from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
 from conftest import requires
+import numpy as np
 
 # skip entire module unless HAS_GRPC
 pytestmark = requires("grpc")

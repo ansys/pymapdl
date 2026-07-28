@@ -34,12 +34,12 @@ from typing import (
 )
 import weakref
 
-# from ansys.dpf import post
-import numpy as np
-
 from ansys.mapdl.core import _HAS_DPF, _HAS_PYVISTA, LOG, Logger, Mapdl  # type: ignore
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import check_valid_ip, get_local_ip, parse_ip_route
+
+# from ansys.dpf import post
+import numpy as np
 
 if _HAS_DPF:
     from ansys.dpf import core as dpf

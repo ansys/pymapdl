@@ -26,12 +26,12 @@ import sys
 import types
 from unittest.mock import MagicMock
 
-import grpc
 import pytest
 
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlRuntimeError
 from ansys.mapdl.core.launcher import generate_start_parameters
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+import grpc
 
 
 def _make_fake_channel_ready(delay=0):
@@ -85,9 +85,8 @@ def test_wait_until_healthy_timeout(monkeypatch):
 
     import logging
 
-    import grpc
-
     from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+    import grpc
 
     channel, future = _make_fake_channel_ready(delay=5.0)
 
@@ -104,8 +103,8 @@ def test_wait_until_healthy_timeout(monkeypatch):
 
 
 def test_configure_uds_sets_socket_dir_and_id(tmp_path, monkeypatch):
-    """configure_uds resolves uds_dir and sets uds_id to str(port) so that
-    ``create_channel`` constructs the correct ``mapdl-{PORT}.sock`` path."""
+    """configure_uds is a no-op; MAPDL derives the socket identifier from the
+    port automatically, naming its socket ``mapdl-{PORT}.sock``."""
 
     import platform
 
@@ -128,39 +127,10 @@ def test_configure_uds_sets_socket_dir_and_id(tmp_path, monkeypatch):
     obj._port = 50052
     obj.transport_mode = "uds"
     obj.uds_dir = str(uds_dir)
-    obj.uds_id = None
 
     obj.configure_uds(port=50052)
 
     assert obj.uds_dir == str(uds_dir)
-    # uds_id defaults to the stringified port when the caller did not provide one
-    assert obj.uds_id == "50052"
-
-
-def test_configure_uds_preserves_caller_supplied_uds_id(tmp_path, monkeypatch):
-    """configure_uds must not overwrite a uds_id already set by the caller."""
-    import platform
-
-    monkeypatch.setattr(os, "name", "posix")
-    monkeypatch.setattr(platform, "system", lambda: "Linux")
-
-    fake_mod = types.ModuleType("ansys.tools.common.cyberchannel")
-    fake_mod.verify_transport_mode = lambda mode: None
-    monkeypatch.setitem(sys.modules, "ansys.tools.common.cyberchannel", fake_mod)
-
-    import logging
-
-    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-
-    obj = object.__new__(MapdlGrpc)
-    obj._log = logging.getLogger("test")
-    obj.uds_dir = str(tmp_path)
-    obj.uds_id = "custom-id"  # pre-supplied by caller
-
-    obj.configure_uds(port=50052)
-
-    # Must not be overwritten
-    assert obj.uds_id == "custom-id"
 
 
 def test_exit_removes_uds_socket(tmp_path, monkeypatch):
@@ -197,7 +167,6 @@ def test_exit_removes_uds_socket(tmp_path, monkeypatch):
     obj._log = logging.getLogger("test")
     obj.transport_mode = "uds"
     obj.uds_dir = str(uds_dir)
-    obj.uds_id = "50052"  # internal value set by configure_uds (str(port))
     obj._start_instance = True
     obj._launched = True
     obj._exited = False
@@ -346,10 +315,10 @@ def test_remote_ip_with_uds_raises(monkeypatch):
 
 
 def test_create_channel_passes_uds_service(tmp_path, monkeypatch):
-    """_create_channel passes uds_service='mapdl' and uds_id from self.uds_id to create_channel.
+    """_create_channel passes uds_service='mapdl' and uds_id=port to create_channel.
 
-    Verifies fix for issue #4435 (uds_service omission) and that uds_id is taken
-    from self.uds_id (converted to int) rather than being hardcoded to port.
+    Verifies fix for issue #4435 (uds_service omission) and that uds_id is
+    derived from the port number (MAPDL always names its socket mapdl-{PORT}.sock).
     """
     import platform
 
@@ -378,7 +347,6 @@ def test_create_channel_passes_uds_service(tmp_path, monkeypatch):
     obj._log = logging.getLogger("test")
     obj.transport_mode = "uds"
     obj.uds_dir = uds_dir
-    obj.uds_id = "50052"
     obj.certs_dir = None
     obj.grpc_options = []
 
