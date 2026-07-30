@@ -203,7 +203,7 @@ changes to
 .. math:: \pmb{K}(\pmb{\xi})\pmb{U}(\pmb{\xi}) = \pmb{F}(\pmb{\xi})
 
 Here :math:`\pmb{\xi}` collects sources of system randomness. The Monte Carlo simulation for solving the preceding equation
-consists of generating a large number of :math:`N_{sim}` of samples :math:`\pmb{\xi}, i=1,\dots ,N_{sim}` from their probability
+consists of generating a large number of :math:`N_{sim}` of samples :math:`\pmb{\xi}, k=1,\dots ,N_{sim}` from their probability
 distribution and for each of these samples solving the deterministic problem:
 
 .. math:: \pmb{K}(\pmb{\xi}_{(i)})\pmb{U}(\pmb{\xi}_{(i)}) = \pmb{F}(\pmb{\xi}_{(i)})
