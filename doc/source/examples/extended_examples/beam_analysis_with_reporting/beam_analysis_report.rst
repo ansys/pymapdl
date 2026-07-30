@@ -143,8 +143,8 @@ Fully clamped boundary conditions on the ends are implemented as:
     :start-at:  print(f"\n-- Setting MAPDL Boundary conditions --")
     :end-at: mapdl.d(last_node, "ROTZ", 0)
 
-Distributed Load Application
-----------------------------
+Applying Distributed Load
+-------------------------
 
 The uniformly distributed load is applied as equivalent nodal forces:
 
