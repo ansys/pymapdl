@@ -21,9 +21,9 @@
    Mapdl.cwd
    Mapdl.default_file_type_for_plots
    Mapdl.directory
+   Mapdl.exit
    Mapdl.exited
    Mapdl.exiting
-   Mapdl.exit
    Mapdl.file_type_for_plots
    Mapdl.finish_job_on_exit
    Mapdl.force_output
@@ -35,11 +35,12 @@
    Mapdl.get_nsol
    Mapdl.get_value
    Mapdl.get_variable
+   Mapdl.graphics_backend
    Mapdl.hostname
    Mapdl.ignore_errors
    Mapdl.info
-   Mapdl.inquire
    Mapdl.input_strings
+   Mapdl.inquire
    Mapdl.is_alive
    Mapdl.is_console
    Mapdl.is_corba
@@ -78,7 +79,6 @@
    Mapdl.screenshot
    Mapdl.set_log_level
    Mapdl.thermal_result
-   Mapdl.graphics_backend
    Mapdl.version
 
 
