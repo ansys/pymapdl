@@ -116,7 +116,7 @@ Constants
 
 
 Session management and launcher
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 High-level helpers to start or connect to MAPDL instances live in the
 :mod:`ansys.mapdl.core.launcher` module. Use :func:`ansys.mapdl.core.launcher.launch_mapdl`
