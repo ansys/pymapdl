@@ -141,5 +141,3 @@ Note
     on the :class:`ansys.mapdl.core.mapdl_grpc.MapdlGrpc` subclass (see methods
     above). Local sessions may automatically make files available for download
     while remote sessions require explicit :meth:`mapdl_grpc.MapdlGrpc.download`.
-    Also, session-id checks are performed internally to detect mismatches when
-    reconnecting — see :mod:`ansys.mapdl.core.mapdl_grpc` for details.
