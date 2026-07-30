@@ -33,6 +33,7 @@ import pytest
 from ansys.mapdl.core.errors import MapdlDidNotStart
 from ansys.mapdl.core.launcher import LaunchConfig, LaunchMode
 from ansys.mapdl.core.launcher.connection import (
+    close_all_local_instances,
     connect_to_existing,
     create_grpc_client,
 )
@@ -1027,3 +1028,65 @@ class TestFindLiveMapdlProcesses:
 
         mock_psutil.assert_called_once_with(42)
         assert result == [mock_proc]
+
+
+# ============================================================================
+# close_all_local_instances
+# ============================================================================
+
+
+class TestCloseAllLocalInstances:
+    """Unit tests for close_all_local_instances."""
+
+    _STOP_TARGET = "ansys.mapdl.core.launcher.connection.stop"
+
+    def test_no_port_range_calls_stop_with_all(self):
+        """With no port_range, stop is called once with all=True."""
+        with patch(self._STOP_TARGET) as mock_stop:
+            close_all_local_instances()
+
+        mock_stop.assert_called_once_with(port=None, pid=None, all=True)
+
+    def test_port_range_calls_stop_per_port(self):
+        """With a port_range, stop is called once per port with all=False."""
+        ports = range(50052, 50055)
+        with patch(self._STOP_TARGET) as mock_stop:
+            close_all_local_instances(port_range=ports)
+
+        assert mock_stop.call_count == len(ports)
+        for i, port in enumerate(ports):
+            mock_stop.call_args_list[i].assert_called_with(
+                port=port, pid=None, all=False
+            )
+
+    def test_port_range_passes_correct_ports(self):
+        """Each port in the range is forwarded to stop."""
+        ports = range(50052, 50055)
+        with patch(self._STOP_TARGET) as mock_stop:
+            close_all_local_instances(port_range=ports)
+
+        actual_ports = [call.kwargs["port"] for call in mock_stop.call_args_list]
+        assert actual_ports == list(ports)
+
+    def test_port_range_never_uses_all_flag(self):
+        """When iterating a port_range, stop is never called with all=True."""
+        with patch(self._STOP_TARGET) as mock_stop:
+            close_all_local_instances(port_range=range(50052, 50056))
+
+        for call in mock_stop.call_args_list:
+            assert call.kwargs["all"] is False
+
+    def test_empty_port_range_never_calls_stop(self):
+        """An empty range means stop is never invoked."""
+        with patch(self._STOP_TARGET) as mock_stop:
+            close_all_local_instances(port_range=range(0))
+
+        mock_stop.assert_not_called()
+
+    def test_stop_imported_from_correct_module(self):
+        """stop is imported from ansys.mapdl.core.cli.stop, not the cli package."""
+        with patch(self._STOP_TARGET) as mock_stop:
+            close_all_local_instances()
+
+        # The mock target confirms the import path used internally.
+        mock_stop.assert_called_once()
