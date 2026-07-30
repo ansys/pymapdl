@@ -52,6 +52,8 @@ function (PDF):
 
 Here :math:`\mu` is the mean load, and :math:`\sigma^2` is its variance.
 
+.. vale off
+
 Stochastic processes
 ~~~~~~~~~~~~~~~~~~~~
 **Definition:**
@@ -66,6 +68,8 @@ This `infinite` collection of random variables over the interval :math:`I` is ca
 as it assigns to each outcome :math:`\theta` of the experiment a function :math:`X(t, \theta)`, known as a realization or sample
 function. Lastly, if :math:`X` is indexed by some spatial coordinate :math:`s \in D \subseteq \mathbb{R}^n` rather than time :math:`t`,
 then :math:`\{X(s), s \in D\}` is called a random field.
+
+.. vale on
 
 Practical example
 +++++++++++++++++
