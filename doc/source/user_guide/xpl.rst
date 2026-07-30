@@ -6,7 +6,7 @@ A specific property under the ``Mapdl`` class is dedicated for XPL. It's
 based on the APDL Math ``*XPL`` command and can be used to explore binary
 files generated from APDL.
 
-All APDL files are organized the same way, as a tree or records. For
+All APDL files are organized the same way, as a tree or as records. For
 example, a binary result file has the structure outlined in the
 :ref:`ref_rst_structure` figure.
 

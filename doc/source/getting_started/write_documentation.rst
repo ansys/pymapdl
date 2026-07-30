@@ -142,8 +142,8 @@ Here's a short summary of how to write good documentation:
 Vale linting tool
 =================
 
-On the GitHub repository, the CI/CD runs `Vale <vale_>`_, a powerful and extensible linting tool for
-checking the writing of each pull request.
+On the GitHub repository, the CI/CD runs `Vale <vale_>`_, a powerful and extensible
+linting tool that checks the writing of each pull request.
 If you want to verify locally as well, you must install Vale locally:
 
 Installation
