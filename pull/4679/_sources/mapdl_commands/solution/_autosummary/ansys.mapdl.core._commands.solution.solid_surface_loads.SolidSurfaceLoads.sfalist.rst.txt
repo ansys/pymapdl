@@ -1,0 +1,6 @@
+﻿sfalist
+=======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.solid_surface_loads
+
+.. automethod:: SolidSurfaceLoads.sfalist
