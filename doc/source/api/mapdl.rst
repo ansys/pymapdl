@@ -18,10 +18,12 @@
    Mapdl.busy
    Mapdl.chain_commands
    Mapdl.check_parameter_names
+   Mapdl.cwd
    Mapdl.default_file_type_for_plots
    Mapdl.directory
    Mapdl.exited
    Mapdl.exiting
+   Mapdl.exit
    Mapdl.file_type_for_plots
    Mapdl.finish_job_on_exit
    Mapdl.force_output
@@ -36,6 +38,7 @@
    Mapdl.hostname
    Mapdl.ignore_errors
    Mapdl.info
+   Mapdl.inquire
    Mapdl.input_strings
    Mapdl.is_alive
    Mapdl.is_console
