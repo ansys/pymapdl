@@ -1038,7 +1038,7 @@ class TestFindLiveMapdlProcesses:
 class TestCloseAllLocalInstances:
     """Unit tests for close_all_local_instances."""
 
-    _STOP_TARGET = "ansys.mapdl.core.launcher.connection.stop"
+    _STOP_TARGET = "ansys.mapdl.core.cli.stop.stop"
 
     def test_no_port_range_calls_stop_with_all(self):
         """With no port_range, stop is called once with all=True."""
