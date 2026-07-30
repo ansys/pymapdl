@@ -149,7 +149,7 @@ MAPDL installation can communicate with the Windows hosts. If you are having
 problems after setting the firewall rules, you might have to turn off the Windows
 firewall for the WSL ethernet virtual interface. This might pose some unknown
 side effects and security risk so use it with caution. For more information, see
-:ref:`Disable firewall on WSL ethernet <disable_firewall_on_wsl_ethernet_section>`.
+:ref:`Turn off firewall on WSL ethernet <disable_firewall_on_wsl_ethernet_section>`.
 
 
 Set up an environmental variable in WSL that points to Windows host license server
@@ -257,7 +257,7 @@ address is not correct, you can specify the IP address to connect to like this:
 You might need to turn off the Microsoft Firewall completely or at least
 for the WSL network connection.
 To do so, follow
-:ref:`Disable firewall on WSL ethernet <disable_firewall_on_wsl_ethernet_section>`.
+:ref:`Turn off firewall on WSL ethernet <disable_firewall_on_wsl_ethernet_section>`.
 
 
 For more information, see the issue `Launching MAPDL from WSL <wsl_launching_mapdl_>`_
