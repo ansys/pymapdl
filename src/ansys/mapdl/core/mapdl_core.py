@@ -643,10 +643,17 @@ class _MapdlCore(Commands):
 
     @property
     def _exited(self):
+        self._log.debug(
+            "Checking if MAPDL has exited. Current status: %s", self.__exited
+        )
         return self.__exited
 
     @_exited.setter
     def _exited(self, value):
+        import traceback
+
+        traceback.print_exc()
+        warn(f"Setting MAPDL to exited. New status: {value}")
         self.__exited = value
 
     @property

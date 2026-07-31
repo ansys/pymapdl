@@ -31,7 +31,7 @@ import re
 import shutil
 import tempfile
 import time
-from unittest.mock import PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 from warnings import catch_warnings
 
 import grpc
@@ -3126,6 +3126,7 @@ def test_garbage_clean_del(start_instance, exited, launched, cleanup_on_exit):
         # Setup
         mapdl = DummyMapdl()
         mapdl._path = ""
+        mapdl._log = MagicMock()
 
         # Config
         mapdl._start_instance = start_instance
@@ -3170,7 +3171,6 @@ def test_exit_is_idempotent():
 @stack(*PATCH_MAPDL_START)
 def test_release_resources_closes_channel():
     """_release_resources() must close the gRPC channel."""
-    from unittest.mock import MagicMock
 
     start_parm = {
         "ip": "123.45.67.99",
@@ -3202,7 +3202,6 @@ def test_release_resources_closes_channel():
 @stack(*PATCH_MAPDL_START)
 def test_release_resources_calls_cleanup_loggers():
     """_release_resources() must wire _cleanup_loggers()."""
-    from unittest.mock import MagicMock
 
     start_parm = {
         "ip": "123.45.67.99",
