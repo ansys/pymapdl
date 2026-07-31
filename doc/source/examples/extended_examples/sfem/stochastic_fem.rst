@@ -78,13 +78,23 @@ the length of the beam :math:`x`.  Instead of being a single random value, :math
 is uncertain at each point along the domain, and it changes continuously across the beam. Mathematically, :math:`E(x)`
 is a random field:
 
+
+.. vale off
+
 .. math:: E(x) : x \in [0,L] \longrightarrow \mathbb{R}
+
+
+.. vale on
 
 Here:
 
 * :math:`x` is the spatial coordinate along the length of the beam (:math:`x \in [0,L]`).
 * :math:`E(x)` is a random variable at each point :math:`x`, and its randomness is described
   by a covariance function or an autocorrelation function.
+
+For example, :math:`E(x)` could be a Gaussian random field, in which case it has the stationarity
+property, making its statistics completely defined by its mean (:math:`\mu_E`), standard deviation
+.. vale off
 
 For example, :math:`E(x)` could be a Gaussian random field, in which case it has the stationarity
 property, making its statistics completely defined by its mean (:math:`\mu_E`), standard deviation
@@ -95,6 +105,9 @@ that the mean and standard deviation of every random variable :math:`E(x)` is co
 this equation:
 
 .. math:: C_E(x_i,x_j) = \sigma_E^2e^{-\frac{\lvert x_i-x_j \rvert}{\ell}}
+
+
+.. vale on
 
 Here :math:`\sigma_E^2` is the variance, and :math:`\ell` is the correlation length parameter.
 
@@ -162,7 +175,14 @@ It is worth mentioning that :math:`\lambda` and :math:`\omega` in the series exp
 
 .. note::
   In the case of an asymmetric domain, such as :math:`\mathbb{D}=[-t_{min},t_{max}]`, a shift parameter :math:`T = (t_{min}+t_{max})/2` is required and the corresponding
-  symmetric domain becomes defined by this equation:
+.. vale off
+
+.. note::
+In the case of an asymmetric domain, such as :math:`\mathbb{D}=[-t_{min},t_{max}]`, a shift parameter :math:`T = (t_{min}+t_{max})/2` is required and the corresponding
+symmetric domain becomes defined by this equation:
+
+.. vale on
+
 
   .. math:: D' = D - T = \biggl[\frac{t_{min}-t_{max}}{2}, \frac{t_{max}-t_{min}}{2} \biggr]
 
@@ -173,7 +193,15 @@ It is worth mentioning that :math:`\lambda` and :math:`\omega` in the series exp
 The K-L expansion of a Gaussian process has the property that :math:`\xi_{c,n}` and :math:`\xi_{s,n}` are independent
 standard normal variables, that is they follow the :math:`\mathcal{N}(0,1)` distribution. Another property is
 that :math:`\lambda_{c,n}` and :math:`\lambda_{s,n}` converge to zero fast (in the mean square sense). For practical implementation,
+.. vale off
+
+The K-L expansion of a Gaussian process has the property that :math:`\xi_{c,n}` and :math:`\xi_{s,n}` are independent
+standard normal variables, that is they follow the :math:`\mathcal{N}(0,1)` distribution. Another property is
+that :math:`\lambda_{c,n}` and :math:`\lambda_{s,n}` converge to zero fast (in the mean square sense). For practical implementation,
 this means that the infinite series of the K-L expansion is truncated after a finite number of terms, giving the approximation:
+
+.. vale on
+
 
 .. math:: X(t) \approx \hat{X}(t) = \sum_{n=1}^P \sqrt{\lambda_{c,n}}\cdot\varphi_{c,n}(t)\cdot\xi_{c,n} + \sum_{n=1}^Q \sqrt{\lambda_{s,n}}\cdot\varphi_{s,n}(t)\cdot\xi_{s,n}
    :label: approximation
@@ -185,7 +213,12 @@ Equation :math:numref:`approximation` is computationally feasible to handle. A s
 
 2. Insert these values into equation :math:numref:`approximation` in other to obtain the j-th realization:
 
+
+.. vale off
+
 .. math:: \hat{X}^j(t) = \sum_{n=1}^P \sqrt{\lambda_{c,n}}\cdot\varphi_{c,n}(t)\cdot\xi_{c,n}^j + \sum_{n=1}^Q \sqrt{\lambda_{s,n}}\cdot\varphi_{s,n}(t)\cdot\xi_{s,n}^j
+
+.. vale on
 
 3. To generate additional realizations, simply draw new random values for :math:`\xi_{c,n}, n=1,\dots ,P, \quad \xi_{s,n}, n=1,\dots ,Q` each from :math:`\mathcal{N}(0,1)`.
 
@@ -200,13 +233,18 @@ For linear static problems in the context of FEM, the system equations that must
 
 changes to
 
+
+.. vale off
+
 .. math:: \pmb{K}(\pmb{\xi})\pmb{U}(\pmb{\xi}) = \pmb{F}(\pmb{\xi})
 
 Here :math:`\pmb{\xi}` collects sources of system randomness. The Monte Carlo simulation for solving the preceding equation
 consists of generating a large number of :math:`N_{sim}` of samples :math:`\pmb{\xi}, k=1,\dots ,N_{sim}` from their probability
 distribution and for each of these samples solving the deterministic problem:
 
-.. math:: \pmb{K}(\pmb{\xi}_{(i)})\pmb{U}(\pmb{\xi}_{(i)}) = \pmb{F}(\pmb{\xi}_{(i)})
+.. vale on
+
+.. math:: \pmb{K}(\pmb{\xi}_{(k)})\pmb{U}(\pmb{\xi}_{(k)}) = \pmb{F}(\pmb{\xi}_{(k)})
 
 The next step is to collect the :math:`N_{sim}` response vectors :math:`\pmb{U_i} := \pmb{U}(\pmb{\xi}_{(i)})` and perform a statistical
 postprocessing to extract useful information such as mean value, variance, histogram, and
