@@ -180,6 +180,7 @@ struc
 subselected
 substep
 sur
+synopsys
 Synopsys
 tablet
 thermomechanical
