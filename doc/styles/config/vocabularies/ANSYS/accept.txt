@@ -23,7 +23,6 @@
 [Rs]ST
 [Ss]ubsystem
 [Ss]uperelements
-[Ss]ynopsys
 [Vv]on Mises
 [Ww]indows
 2D
@@ -181,6 +180,8 @@ struc
 subselected
 substep
 sur
+synopsys
+Synopsys
 tablet
 thermomechanical
 thermomechanically
