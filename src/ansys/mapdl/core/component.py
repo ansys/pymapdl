@@ -39,12 +39,12 @@ from typing import (
 import warnings
 import weakref
 
-import numpy as np
 from numpy.typing import NDArray
 
 from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import ComponentDoesNotExits, ComponentIsNotSelected
 from ansys.mapdl.core.misc import is_float
+import numpy as np
 
 if TYPE_CHECKING:  # pragma: no cover
     import logging

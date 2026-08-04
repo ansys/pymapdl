@@ -36,9 +36,8 @@ SURF154 elements. This is a static analysis example.
 
 import os
 
-import numpy as np
-
 from ansys.mapdl.core import launch_mapdl
+import numpy as np
 
 # start Ansys in the current working directory with default jobname "file"
 mapdl = launch_mapdl(run_location=os.getcwd(), version=23.1)

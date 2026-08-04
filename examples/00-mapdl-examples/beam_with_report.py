@@ -51,10 +51,9 @@ This example requires the following imports:
 from datetime import datetime
 from pathlib import Path
 
-import numpy as np
-
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.plotting import GraphicsBackend
+import numpy as np
 
 ###############################################################################
 # Workflow design

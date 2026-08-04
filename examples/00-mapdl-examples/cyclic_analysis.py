@@ -41,10 +41,10 @@ First, start MAPDL as a service.
 
 # sphinx_gallery_thumbnail_number = 3
 
-import numpy as np
 import pyvista as pv
 
 from ansys.mapdl.core import launch_mapdl
+import numpy as np
 
 mapdl = launch_mapdl()
 

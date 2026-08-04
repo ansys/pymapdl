@@ -25,10 +25,10 @@ from pathlib import Path
 import time
 from unittest.mock import MagicMock, patch
 
-import numpy as np
 import pytest
 
 from conftest import ON_LOCAL, has_dependency
+import numpy as np
 
 if has_dependency("ansys-tools-common"):
     from ansys.tools.common.path import find_mapdl

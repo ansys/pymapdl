@@ -30,11 +30,11 @@ import time
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
-import numpy as np
 
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE, parse_chunks
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from ansys.mapdl.core.misc import requires_package, supress_logging, threaded
+import numpy as np
 
 TMP_NODE_CM = "__NODE__"
 

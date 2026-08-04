@@ -24,9 +24,8 @@
 
 from typing import TYPE_CHECKING, Any
 
-import numpy as np
-
 from ansys.mapdl.core import _HAS_MATPLOTLIB, _HAS_PYVISTA
+import numpy as np
 
 MAPDL_colorbar = (
     np.array(

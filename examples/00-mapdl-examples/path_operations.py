@@ -36,10 +36,10 @@ First, start MAPDL as a service and disable all but error messages.
 # sphinx_gallery_thumbnail_number = 3
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pyvista as pv
 
 from ansys.mapdl.core import launch_mapdl
+import numpy as np
 
 mapdl = launch_mapdl(loglevel="ERROR")
 

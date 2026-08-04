@@ -44,10 +44,10 @@ import shutil
 import tempfile
 from warnings import warn
 
-import numpy as np
 import pytest
 
 from conftest import HAS_DPF, ON_LOCAL, TEST_DPF_BACKEND, clear, solved_box_func
+import numpy as np
 
 DPF_PORT = int(os.environ.get("DPF_PORT", 50056))  # Set in ci.yaml
 

@@ -40,6 +40,7 @@ Element Method (2nd Ed., PWS Publishing 1993).
 import itertools
 
 import matplotlib.pyplot as plt
+
 import numpy as np
 
 np.set_printoptions(linewidth=120)

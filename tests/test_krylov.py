@@ -25,10 +25,10 @@
 import os
 
 from ansys.tools.common.versioning import server_meets_version
-import numpy as np
 import pytest
 
 from conftest import has_dependency
+import numpy as np
 
 if not has_dependency("ansys-math-core"):
     # Needs ansys-math-core
