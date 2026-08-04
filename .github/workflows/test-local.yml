@@ -201,7 +201,7 @@ jobs:
           apt-get update && apt install -y libgl1 libglx-mesa0 xvfb libgomp1 graphviz curl git && apt-get clean
 
       - name: "Setup Python"
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 #v6.3.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 #v7.0.0
         with:
           python-version: ${{ inputs.python-version }}
 
