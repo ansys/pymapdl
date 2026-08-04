@@ -9,14 +9,13 @@ import warnings
 
 import ansys.tools.visualization_interface as viz_interface
 from ansys_sphinx_theme import ansys_favicon, get_version_match
+import numpy as np
 import plotly.io as pio
 from plotly.io._sg_scraper import plotly_sg_scraper
 import pyvista
 from sphinx.application import Sphinx
 from sphinx.util import logging
 from sphinx_gallery.sorting import FileNameSortKey
-
-import numpy as np
 
 pio.renderers.default = "sphinx_gallery"
 

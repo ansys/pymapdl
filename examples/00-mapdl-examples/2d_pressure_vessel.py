@@ -62,12 +62,12 @@ Problem Figure
 
 import matplotlib.pyplot as plt
 
-from ansys.mapdl.core import launch_mapdl
-
 ###############################################################################
 # Launch MAPDL
 # ~~~~~~~~~~~~
 import numpy as np
+
+from ansys.mapdl.core import launch_mapdl
 
 # start mapdl
 mapdl = launch_mapdl()

@@ -34,11 +34,11 @@ from pathlib import Path
 import tempfile
 
 from ansys.dpf import core as dpf
+import numpy as np
 from pytwin import write_binary
 
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.examples.downloads import download_example_data
-import numpy as np
 
 
 def compress_id_list(id_list: np.ndarray):

@@ -24,11 +24,11 @@ import logging
 import re
 from unittest.mock import patch
 
+import numpy as np
 import pytest
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.parameters import interp_star_status
-import numpy as np
 
 GOLDEN_TESTS = {
     "parameter status": """PARAMETER STATUS- PORT  (     12 PARAMETERS DEFINED)

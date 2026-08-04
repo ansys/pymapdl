@@ -41,9 +41,9 @@ Thanks SimuTech!
 # sphinx_gallery_thumbnail_number = 4
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from ansys.mapdl.core import launch_mapdl
-import numpy as np
 
 mapdl = launch_mapdl(loglevel="ERROR")
 

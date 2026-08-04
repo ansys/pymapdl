@@ -48,9 +48,10 @@ from typing import (
 )
 from warnings import warn
 
+import numpy as np
+
 from ansys.mapdl.core import _HAS_PYVISTA, _HAS_VISUALIZER, LOG
 from ansys.mapdl.core.plotting import GraphicsBackend
-import numpy as np
 
 if TYPE_CHECKING:
     from ansys.mapdl.core.mapdl import MapdlBase as Mapdl

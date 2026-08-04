@@ -26,6 +26,8 @@ Classes and functions for returning/manipulating result data
 
 from pathlib import Path
 
+import numpy as np
+
 from ansys.mapdl.core.reader.core import (
     DPFResultCore,
     NotImplementedInDPFBackend,
@@ -39,7 +41,6 @@ from ansys.mapdl.core.reader.types import (
     Rnum,
     SolutionType,
 )
-import numpy as np
 
 
 class DPFResultData(DPFResultCore):

@@ -36,8 +36,9 @@ Also shown here:
 
 """
 
-from ansys.mapdl.core import launch_mapdl
 import numpy as np
+
+from ansys.mapdl.core import launch_mapdl
 
 # start mapdl, enter the preprocessor, and set the units
 mapdl = launch_mapdl()

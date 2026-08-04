@@ -23,6 +23,7 @@
 import inspect
 from unittest.mock import patch
 
+import numpy as np
 import pytest
 
 from ansys.mapdl.core.commands import (
@@ -36,7 +37,6 @@ from ansys.mapdl.core.commands import (
 )
 from ansys.mapdl.core.examples.verif_files import vmfiles
 from conftest import NullContext, TestClass, has_dependency, requires
-import numpy as np
 
 if has_dependency("pandas"):
     import pandas as pd

@@ -29,6 +29,7 @@ import tempfile
 from typing import Union
 import warnings
 
+import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
 from ansys.mapdl.core import LOG as logger
@@ -51,7 +52,6 @@ from ansys.mapdl.core.misc import (
     supress_logging,
 )
 from ansys.mapdl.core.plotting import GraphicsBackend
-import numpy as np
 
 TMP_VAR = "__tmpvar__"
 

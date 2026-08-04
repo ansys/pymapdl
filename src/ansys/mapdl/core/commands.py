@@ -24,8 +24,9 @@ from functools import wraps
 import re
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from ansys.mapdl.core import _HAS_PANDAS
 import numpy as np
+
+from ansys.mapdl.core import _HAS_PANDAS
 
 if _HAS_PANDAS:
     import pandas

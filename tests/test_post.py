@@ -25,10 +25,10 @@
 import inspect
 import re
 
+import numpy as np
 import pytest
 
 from conftest import NullContext, TestClass, clear, has_dependency, requires
-import numpy as np
 
 if has_dependency("ansys-tools-visualization_interface"):
     from pyvista.plotting.renderer import CameraPosition

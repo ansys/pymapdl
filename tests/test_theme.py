@@ -31,6 +31,7 @@ if not has_dependency("pyvista"):
 
 
 import matplotlib
+import numpy as np
 
 from ansys.mapdl.core.plotting.theme import (
     MapdlTheme,
@@ -39,7 +40,6 @@ from ansys.mapdl.core.plotting.theme import (
     get_ansys_color_cycle,
     get_ansys_colors,
 )
-import numpy as np
 
 
 def test_load_theme():

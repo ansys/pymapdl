@@ -26,12 +26,12 @@ import sys
 import types
 from unittest.mock import MagicMock
 
+import grpc
 import pytest
 
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlRuntimeError
 from ansys.mapdl.core.launcher import generate_start_parameters
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-import grpc
 
 
 def _make_fake_channel_ready(delay=0):
@@ -85,8 +85,9 @@ def test_wait_until_healthy_timeout(monkeypatch):
 
     import logging
 
-    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
     import grpc
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
     channel, future = _make_fake_channel_ready(delay=5.0)
 

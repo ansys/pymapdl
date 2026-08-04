@@ -25,9 +25,8 @@
 from ansys.mapdl.reader import _reader, _relaxmidside
 from ansys.mapdl.reader.elements import ETYPE_MAP
 from ansys.mapdl.reader.misc import unique_rows
-import pyvista as pv
-
 import numpy as np
+import pyvista as pv
 
 INVALID_ALLOWABLE_TYPES = TypeError(
     "`allowable_types` must be an array " "of ANSYS element types from 1 and 300"
