@@ -1314,17 +1314,3 @@ environment variable. The following table describes all arguments.
 |                                       |    user@machine:~$ export ANSYS_GRPC_CERTIFICATES=/path/to/certs                 |
 |                                       |                                                                                  |
 +---------------------------------------+----------------------------------------------------------------------------------+
-| :envvar:`PYMAPDL_GRPC_CERTIFICATES`   | Path to the directory containing the                                             |
-|                                       | mTLS certificates for the PyMAPDL client                                         |
-|                                       | (``ca.crt``, ``server.crt``,                                                     |
-|                                       | ``server.key``) read by the MAPDL                                                |
-|                                       | process itself.                                                                  |
-|                                       | See :ref:`ref_tls_guide`.                                                        |
-|                                       |                                                                                  |
-|                                       | **Example:**                                                                     |
-|                                       |                                                                                  |
-|                                       | .. code-block:: console                                                          |
-|                                       |                                                                                  |
-|                                       |    user@machine:~$ export PYMAPDL_GRPC_CERTIFICATES=/path/to/certs               |
-|                                       |                                                                                  |
-+---------------------------------------+----------------------------------------------------------------------------------+

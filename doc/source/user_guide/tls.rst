@@ -143,11 +143,11 @@ You can pass the certificate directory to
         certs_dir="/path/to/certs",
     )
 
-.. note:: Using `certs_dir` automatically sets the ``ANSYS_GRPC_CERTIFICATES``
+.. note:: Using ``certs_dir`` automatically sets the ``ANSYS_GRPC_CERTIFICATES``
    environment variable for the MAPDL process while additionally checking that
    the required certificate files exist in the directory.
 
-Or using the ``add_env_vars`` argument is used to set the ``ANSYS_GRPC_CERTIFICATES``
+Alternatively, use the ``add_env_vars`` argument to set the ``ANSYS_GRPC_CERTIFICATES``
 environment variable.
 
 .. code-block:: python

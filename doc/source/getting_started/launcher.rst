@@ -9,14 +9,14 @@ Launch PyMAPDL
 PyMAPDL can start MAPDL locally, or it can connect to a session already running locally or
 on a remote machine.
 
-* :ref:`launch_pymapdl_local`_
-  * :ref:`launching_pymapdl_without_client`_
-* :ref:`connect_pymapdl_to_a_local_mapdl_instance`_
-  * :ref:`launch_grpc_mapdl_session`_
-  * :ref:`connect_grpc_mapdl_session`_
-* :ref:`connect_grpc_remote_mapdl_session`_
-* :ref:`setting_mapdl_location`_
-* :ref:`securing_pymapdl_connection`_
+* :ref:`launch_pymapdl_local`
+  * :ref:`launching_pymapdl_without_client`
+* :ref:`connect_pymapdl_to_a_local_mapdl_instance`
+  * :ref:`launch_grpc_mapdl_session`
+  * :ref:`connect_grpc_mapdl_session`
+* :ref:`connect_grpc_remote_mapdl_session`
+* :ref:`setting_mapdl_location`
+* :ref:`securing_pymapdl_connection`
 
 If you have any problem launching PyMAPDL, see :ref:`Launching issues <ref_launching_issue>`.
 
@@ -357,7 +357,7 @@ The ``insecure`` transport mode sends gRPC traffic without any encryption or
 authentication. It is supported on all platforms and can be used for both local and
 remote connections.
 
-This the default transport mode on older MAPDL versions, before ANSYS MAPDL 2024 R2.
+This is the default transport mode on older MAPDL versions, before Ansys MAPDL 2024 R2.
 
 .. warning::
 

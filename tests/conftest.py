@@ -294,7 +294,6 @@ def pytest_report_header(config, start_path):
         "IGNORE_POOL",
         "ANSYS_MAPDL_UDS_PATH",
         "ANSYS_GRPC_CERTIFICATES",
-        "PYMAPDL_GRPC_CERTIFICATES",
         "PYMAPDL_GRPC_TRANSPORT",
         "ANSYS_MAPDL_GRPC_TRANSPORT",
     ]:
