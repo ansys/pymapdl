@@ -4159,10 +4159,6 @@ class MapdlGrpc(MapdlBase):
         except AttributeError:
             return
 
-        # If the process was never actually launched, there is nothing to release.
-        if not getattr(self, "_launched", False):
-            return
-
         # Honour cleanup_on_exit=False: self._cleanup stores that flag.
         if not getattr(self, "_cleanup", True):
             return
@@ -4171,6 +4167,7 @@ class MapdlGrpc(MapdlBase):
         if not getattr(self, "_start_instance", True):
             return
 
+        # If the process was never actually launched, there is nothing to release.
         if not getattr(self, "_launched", False):
             return
 
