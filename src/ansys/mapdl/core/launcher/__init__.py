@@ -120,7 +120,6 @@ def _launch_mapdl_common(
     mapdl_output: Optional[str],
     transport_mode: Optional[str],
     uds_dir: Optional[str],
-    uds_id: Optional[str],
     certs_dir: Optional[str],
     add_env_vars: Optional[Dict[str, str]],
     replace_env_vars: Optional[Dict[str, str]],
@@ -165,7 +164,6 @@ def _launch_mapdl_common(
             mapdl_output=mapdl_output,
             transport_mode=transport_mode,
             uds_dir=uds_dir,
-            uds_id=uds_id,
             certs_dir=certs_dir,
             add_env_vars=add_env_vars,
             replace_env_vars=replace_env_vars,
@@ -279,7 +277,6 @@ def launch_mapdl(
     mapdl_output: Optional[str] = None,
     transport_mode: Optional[str] = None,
     uds_dir: Optional[str] = None,
-    uds_id: Optional[str] = None,
     certs_dir: Optional[str] = None,
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
@@ -457,10 +454,6 @@ def launch_mapdl(
     uds_dir : Optional[str]
         Directory for Unix Domain Socket (UDS) files with ``'uds'`` transport.
         Defaults to :class:`None` (uses ``~/.conn``).
-
-    uds_id : Optional[str]
-        Identifier for UDS socket file with ``'uds'`` transport.
-        Defaults to :class:`None` (uses ``mapdl-{port}``).
 
     certs_dir : Optional[str]
         Directory containing certificates for ``'mtls'`` transport.
@@ -683,7 +676,6 @@ def launch_mapdl(
         mapdl_output=mapdl_output,
         transport_mode=transport_mode,
         uds_dir=uds_dir,
-        uds_id=uds_id,
         certs_dir=certs_dir,
         add_env_vars=add_env_vars,
         replace_env_vars=replace_env_vars,
@@ -745,7 +737,6 @@ def launch_mapdl_process(
     mapdl_output: Optional[str] = None,
     transport_mode: Optional[str] = None,
     uds_dir: Optional[str] = None,
-    uds_id: Optional[str] = None,
     certs_dir: Optional[str] = None,
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
@@ -895,9 +886,6 @@ def launch_mapdl_process(
         Directory for Unix Domain Socket (UDS) files.
         Defaults to :class:`None` (``~/.conn``).
 
-    uds_id : Optional[str]
-        Identifier for UDS socket file. Defaults to :class:`None` (``mapdl-{port}``).
-
     certs_dir : Optional[str]
         Directory with certificates for ``'mtls'`` transport.
         Defaults to :class:`None`.
@@ -1030,7 +1018,6 @@ def launch_mapdl_process(
         mapdl_output=mapdl_output,
         transport_mode=transport_mode,
         uds_dir=uds_dir,
-        uds_id=uds_id,
         certs_dir=certs_dir,
         add_env_vars=add_env_vars,
         replace_env_vars=replace_env_vars,

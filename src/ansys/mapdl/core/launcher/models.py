@@ -140,8 +140,6 @@ class LaunchConfig:
         gRPC transport mechanism (INSECURE, UDS, WNUA, MTLS)
     uds_dir : Optional[str]
         Unix domain socket directory path
-    uds_id : Optional[str]
-        Unix domain socket identifier
     certs_dir : Optional[str]
         Directory containing mTLS certificates
     env_vars : Dict[str, str]
@@ -248,7 +246,6 @@ class LaunchConfig:
     # Transport configuration
     transport_mode: Optional[TransportMode]
     uds_dir: Optional[str]
-    uds_id: Optional[str]
     certs_dir: Optional[str]
 
     # Environment

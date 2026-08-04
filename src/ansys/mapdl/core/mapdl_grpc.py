@@ -406,9 +406,13 @@ class MapdlGrpc(MapdlBase):
         )
 
         self.transport_mode = transport_mode
-        self.uds_dir: Path = (
-            Path(uds_dir) if uds_dir is not None else Path("~").expanduser() / ".conn"
-        )
+        if uds_dir is not None:
+            self.uds_dir: Path = Path(uds_dir)
+        else:
+            _env_uds = os.environ.get("ANSYS_MAPDL_UDS_PATH")
+            self.uds_dir = (
+                Path(_env_uds) if _env_uds else Path("~").expanduser() / ".conn"
+            )
 
         self.certs_dir: Path | None = Path(certs_dir) if certs_dir is not None else None
         self.grpc_options = start_parm.pop("grpc_options", DEFAULT_GRPC_OPTIONS)
@@ -640,13 +644,11 @@ class MapdlGrpc(MapdlBase):
     def configure_uds(self, port: int) -> None:
         """Configure UDS transport-specific settings.
 
-        MAPDL always names its socket ``mapdl-{PORT}.sock`` inside the
-        directory set via the ``ANSYS_MAPDL_UDS_PATH`` environment variable.
-        However, this is only applicable when launching new instances.
+        MAPDL derives the socket identifier from the port number automatically,
+        naming its socket ``mapdl-{PORT}.sock`` inside the directory set via the
+        ``ANSYS_MAPDL_UDS_PATH`` environment variable.
         """
-        # Set uds_id to the stringified port so create_channel builds
-        # the correct 'mapdl-{PORT}.sock' path.
-        self.uds_id = str(port)
+        pass
 
     def configure_insecure(self) -> None:
         """Configure insecure transport-specific settings."""
@@ -657,16 +659,6 @@ class MapdlGrpc(MapdlBase):
         """Configure WNUA transport-specific settings."""
         # No specific configuration needed for WNUA transport
         pass
-
-    def configure_mtls(self) -> None:
-        """Configure mTLS transport-specific settings."""
-        # Set defaults for certificates
-        if self.certs_dir is None:
-            self.certs_dir = Path(
-                os.environ.get(
-                    "ANSYS_GRPC_CERTIFICATES", os.path.join(os.getcwd(), "certs")
-                )
-            )
 
     def _after_run(self, command: str) -> None:
         if command[:4].upper() == "/CLE":
@@ -1493,7 +1485,6 @@ class MapdlGrpc(MapdlBase):
             mapdl_output=args.get("mapdl_output"),
             transport_mode=args.get("transport_mode"),
             uds_dir=args.get("uds_dir"),
-            uds_id=args.get("uds_id"),
             certs_dir=args.get("certs_dir"),
         )
         cmd = _generate_launch_command(config)
@@ -4107,6 +4098,51 @@ class MapdlGrpc(MapdlBase):
         # to ensure the job is stopped properly, let's issue the scancel twice.
         subprocess.Popen(cmd)  # nosec B603
 
+    def configure_mtls(self) -> None:
+        """Configure mTLS transport-specific settings.
+
+        Resolves the certificates directory (from the configured value, the
+        ANSYS_GRPC_CERTIFICATES environment variable, or ./certs). If the
+        certs_dir was explicitly provided by the caller, ensure it exists and
+        contains the required client certificate files. When certs_dir is None
+        we only set the resolved path (env var or ./certs) and do not raise if
+        the directory is absent; this matches historical behavior relied on by
+        the test-suite and callers that defer validation later.
+        """
+        # Track whether caller provided certs_dir
+        provided = self.certs_dir is not None
+
+        # Resolve certs_dir if not provided
+        if not provided:
+            self.certs_dir = Path(
+                os.environ.get(
+                    "ANSYS_GRPC_CERTIFICATES", os.path.join(os.getcwd(), "certs")
+                )
+            )
+        else:
+            # Accept string or Path
+            # Ensure a str is passed to Path to satisfy type checkers
+            self.certs_dir = Path(str(self.certs_dir))
+
+        # If caller provided certs_dir, ensure it exists and is a directory
+        if provided and (not self.certs_dir.exists() or not self.certs_dir.is_dir()):
+            raise FileNotFoundError(
+                f"mTLS certificate directory not found: '{self.certs_dir}'. "
+                "Provide a valid certs_dir or set ANSYS_GRPC_CERTIFICATES environment variable."
+            )
+
+        # If the directory exists (whether provided or resolved), validate required files
+        if self.certs_dir.exists() and self.certs_dir.is_dir():
+            required_client_files = ["client.crt", "client.key", "ca.crt"]
+            missing = [
+                f for f in required_client_files if not (self.certs_dir / f).is_file()
+            ]
+            if missing:
+                raise FileNotFoundError(
+                    f"mTLS certificate directory '{self.certs_dir}' is missing files: {missing}. "
+                    "Ensure 'client.crt', 'client.key', and 'ca.crt' are present."
+                )
+
     def __del__(self):
         """Release resources when the object is garbage-collected.
 
@@ -4131,6 +4167,7 @@ class MapdlGrpc(MapdlBase):
         if not getattr(self, "_start_instance", True):
             return
 
+        # If the process was never actually launched, there is nothing to release.
         if not getattr(self, "_launched", False):
             return
 

@@ -22,6 +22,8 @@
 # - AWP_ROOT: MAPDL version environment variable name (default: AWP_ROOT251)
 # - AWP_ROOT_VALUE: MAPDL installation path in container (default: /ansys_inc)
 # - DOCKER_USER: Username inside container (default: mapdl)
+# - PYMAPDL_PORT: Port for PyMAPDL gRPC server (default: 50052)
+# - DPF_PORT: Port for DPF server (default: 50056)
 #
 # USAGE
 # =====
@@ -65,7 +67,7 @@ services:
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
       - ANSYS_LOCK=OFF
     ports:
-      - '50052:50052'
+      - '${PYMAPDL_PORT:-50052}:50052'
       - '50055:50055'
     image: ${DOCKER_IMAGE}
     platform: linux/amd64
@@ -78,7 +80,7 @@ services:
     image: ${DPF_DOCKER_IMAGE}
     platform: linux/amd64
     ports:
-      - '50056:50052'
+      - '${DPF_PORT:-50056}:50052'
     restart: always
     environment:
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
@@ -95,11 +97,14 @@ services:
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
       - ANSYS_LOCK=OFF
       - ${AWP_ROOT:-AWP_ROOT251}=${AWP_ROOT_VALUE:-/ansys_inc}
+      - PYMAPDL_PORT=${PYMAPDL_PORT:-50052}
+      - DPF_PORT=${DPF_PORT:-50056}
     # If also running the `mapdl` service, you need to set different ports
     # to avoid conflicts.
     ports:
-      - '50052:50052'
+      - '${PYMAPDL_PORT:-50052}:${PYMAPDL_PORT:-50052}'
       - '50055:50055'
+      - '${DPF_PORT:-50056}:${DPF_PORT:-50056}'
     platform: linux/amd64
     image: ${DOCKER_IMAGE}
     # Mount the current directory to /home/${DOCKER_USER:-mapdl}/pymapdl

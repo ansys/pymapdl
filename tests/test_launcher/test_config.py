@@ -257,6 +257,22 @@ class TestConfigResolveExecFile:
                 start_instance=True,
             )
 
+    def test_resolve_exec_file_hpc_missing_warns_but_returns(self):
+        """Test that HPC launch with nonexistent exec_file warns but does not raise."""
+        import warnings
+
+        with patch("os.path.isfile", return_value=False):
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                result = resolve_exec_file(
+                    "/remote/cluster/mapdl",
+                    None,
+                    start_instance=True,
+                    launch_on_hpc=True,
+                )
+        assert result == "/remote/cluster/mapdl"
+        assert any(issubclass(warning.category, UserWarning) for warning in w)
+
 
 class TestConfigPort:
     """Tests for port resolution."""
@@ -297,6 +313,12 @@ class TestConfigPort:
         with patch.dict(os.environ, {}, clear=True):
             port = resolve_port(None)
             assert port is not None and port > 0
+
+    def test_resolve_port_out_of_range_from_env_var(self):
+        """Test that PYMAPDL_PORT=0 (out of valid range) raises ConfigurationError."""
+        with patch.dict(os.environ, {"PYMAPDL_PORT": "0"}):
+            with pytest.raises((ConfigurationError, ValueError)):
+                resolve_port(None)
 
 
 class TestAutoPortSelection:
@@ -450,6 +472,12 @@ class TestConfigNproc:
         """Test nproc with large value (many cores)."""
         nproc = resolve_nproc(512)
         assert nproc == 512
+
+    def test_resolve_nproc_zero_from_env_var(self):
+        """Test that PYMAPDL_NPROC=0 (below minimum) raises ConfigurationError."""
+        with patch.dict(os.environ, {"PYMAPDL_NPROC": "0"}):
+            with pytest.raises((ConfigurationError, ValueError)):
+                resolve_nproc(None)
 
 
 class TestConfigTimeout:
@@ -867,12 +895,21 @@ class TestResolveStartInstance:
             result = resolve_start_instance(None, ip=None)
             assert result is False
 
+    def test_resolve_start_instance_defaults_to_true(self, monkeypatch):
+        """Test that resolve_start_instance returns True when no args or env vars are set."""
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+        monkeypatch.delenv("PYMAPDL_IP", raising=False)
+        result = resolve_start_instance(None, ip=None)
+        assert result is True
+
 
 class TestResolveTransportMode:
     """Tests for transport mode resolution."""
 
-    def test_resolve_transport_mode_none(self):
-        """Test transport mode resolution with None."""
+    def test_resolve_transport_mode_none(self, monkeypatch):
+        """Test transport mode resolution with None and no env vars set returns None."""
+        monkeypatch.delenv("PYMAPDL_GRPC_TRANSPORT", raising=False)
+        monkeypatch.delenv("ANSYS_MAPDL_GRPC_TRANSPORT", raising=False)
         mode = resolve_transport_mode(None)
         assert mode is None
 
@@ -906,6 +943,64 @@ class TestResolveTransportMode:
         with pytest.raises(ConfigurationError):
             resolve_transport_mode("invalid_mode")
 
+    def test_resolve_transport_mode_reads_pymapdl_grpc_transport(self, monkeypatch):
+        """PYMAPDL_GRPC_TRANSPORT env var is read when transport_mode is None."""
+        monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", "mtls")
+        monkeypatch.delenv("ANSYS_MAPDL_GRPC_TRANSPORT", raising=False)
+        mode = resolve_transport_mode(None)
+        assert mode == TransportMode.MTLS
+
+    def test_resolve_transport_mode_reads_ansys_mapdl_grpc_transport(self, monkeypatch):
+        """ANSYS_MAPDL_GRPC_TRANSPORT env var is read as alias when PYMAPDL_GRPC_TRANSPORT not set."""
+        monkeypatch.delenv("PYMAPDL_GRPC_TRANSPORT", raising=False)
+        monkeypatch.setenv("ANSYS_MAPDL_GRPC_TRANSPORT", "insecure")
+        mode = resolve_transport_mode(None)
+        assert mode == TransportMode.INSECURE
+
+    def test_resolve_transport_mode_pymapdl_takes_precedence(self, monkeypatch):
+        """PYMAPDL_GRPC_TRANSPORT takes precedence over ANSYS_MAPDL_GRPC_TRANSPORT."""
+        monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", "mtls")
+        monkeypatch.setenv("ANSYS_MAPDL_GRPC_TRANSPORT", "insecure")
+        mode = resolve_transport_mode(None)
+        assert mode == TransportMode.MTLS
+
+    def test_resolve_transport_mode_argument_takes_precedence_over_env(
+        self, monkeypatch
+    ):
+        """Explicit argument overrides env vars."""
+        monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", "insecure")
+        mode = resolve_transport_mode("mtls")
+        assert mode == TransportMode.MTLS
+
+    def test_resolve_transport_mode_invalid_env_var_raises(self, monkeypatch):
+        """Invalid value in env var raises ConfigurationError."""
+        monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", "invalid_mode")
+        with pytest.raises(ConfigurationError):
+            resolve_transport_mode(None)
+
+    def test_resolve_transport_mode_env_vars_cleared_returns_none(self, monkeypatch):
+        """Returns None when no argument and no env vars set."""
+        monkeypatch.delenv("PYMAPDL_GRPC_TRANSPORT", raising=False)
+        monkeypatch.delenv("ANSYS_MAPDL_GRPC_TRANSPORT", raising=False)
+        mode = resolve_transport_mode(None)
+        assert mode is None
+
+    def test_resolve_launch_config_transport_from_env_var(self, monkeypatch):
+        """resolve_launch_config picks up PYMAPDL_GRPC_TRANSPORT env var."""
+        monkeypatch.setenv("PYMAPDL_GRPC_TRANSPORT", "mtls")
+        monkeypatch.delenv("ANSYS_MAPDL_GRPC_TRANSPORT", raising=False)
+        config = resolve_launch_config(start_instance=False, ip="127.0.0.1", port=50052)
+        assert config.transport_mode == TransportMode.MTLS
+
+    def test_certs_dir_infers_mtls_when_no_transport_mode(self, monkeypatch):
+        """Providing certs_dir without transport_mode silently infers mTLS."""
+        monkeypatch.delenv("PYMAPDL_GRPC_TRANSPORT", raising=False)
+        monkeypatch.delenv("ANSYS_MAPDL_GRPC_TRANSPORT", raising=False)
+        config = resolve_launch_config(
+            certs_dir="/path/to/certs", start_instance=False, port=50052
+        )
+        assert config.transport_mode == TransportMode.MTLS
+
 
 class TestResolveRunLocation:
     """Tests for run_location resolution."""
@@ -929,6 +1024,23 @@ class TestResolveRunLocation:
         assert os.path.isabs(location)
         assert os.path.exists(location)
         assert "ansys_" in os.path.basename(location)
+
+    def test_resolve_run_location_makedirs_failure_raises(self):
+        """Test ConfigurationError when os.makedirs fails for a nonexistent path."""
+        with patch("os.path.exists", return_value=False):
+            with patch("os.makedirs", side_effect=OSError("permission denied")):
+                with pytest.raises(
+                    ConfigurationError, match="Cannot create run_location"
+                ):
+                    resolve_run_location("/no/permission/dir")
+
+    def test_resolve_run_location_tmpdir_failure_raises(self):
+        """Test ConfigurationError when tempfile.mkdtemp fails."""
+        import tempfile
+
+        with patch.object(tempfile, "mkdtemp", side_effect=OSError("disk full")):
+            with pytest.raises(ConfigurationError, match="Cannot create temporary"):
+                resolve_run_location(None)
 
 
 class TestResolveVersion:
@@ -1707,7 +1819,6 @@ class TestConfigurationIntegration:
                 mapdl_output=None,
                 transport_mode="insecure",
                 uds_dir=None,
-                uds_id=None,
                 certs_dir=None,
                 add_env_vars={"ANS_CMD": "NODIAG"},
                 license_server_check=False,

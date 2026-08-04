@@ -71,7 +71,6 @@ def create_launch_config(**kwargs):
         "mapdl_output": None,
         "transport_mode": None,
         "uds_dir": None,
-        "uds_id": None,
         "certs_dir": None,
     }
     defaults.update(kwargs)
@@ -168,6 +167,40 @@ class TestGenerateLaunchCommand:
         # Linux should not have Windows-specific arguments
         assert ".__tmp__.inp" not in cmd
         assert "-b" not in cmd
+
+    def test_generate_launch_command_adds_transport_mtls(self):
+        """'-transport mtls' is added to the launch command when transport_mode=MTLS."""
+        from ansys.mapdl.core.launcher.models import TransportMode
+
+        config = create_launch_config(transport_mode=TransportMode.MTLS)
+        cmd = process._generate_launch_command(config)
+        assert "-transport" in cmd
+        idx = cmd.index("-transport")
+        assert cmd[idx + 1] == "mtls"
+
+    def test_generate_launch_command_adds_transport_insecure(self):
+        """'-transport insecure' is added when transport_mode=INSECURE."""
+        from ansys.mapdl.core.launcher.models import TransportMode
+
+        config = create_launch_config(transport_mode=TransportMode.INSECURE)
+        cmd = process._generate_launch_command(config)
+        assert "-transport" in cmd
+        assert cmd[cmd.index("-transport") + 1] == "insecure"
+
+    def test_generate_launch_command_adds_transport_uds(self):
+        """'-transport uds' is added when transport_mode=UDS."""
+        from ansys.mapdl.core.launcher.models import TransportMode
+
+        config = create_launch_config(transport_mode=TransportMode.UDS)
+        cmd = process._generate_launch_command(config)
+        assert "-transport" in cmd
+        assert cmd[cmd.index("-transport") + 1] == "uds"
+
+    def test_generate_launch_command_no_transport_flag_when_none(self):
+        """No '-transport' flag is added when transport_mode=None."""
+        config = create_launch_config(transport_mode=None)
+        cmd = process._generate_launch_command(config)
+        assert "-transport" not in cmd
 
 
 # ============================================================================

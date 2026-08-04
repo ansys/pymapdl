@@ -79,7 +79,6 @@ def _create_test_hpc_config(**kwargs):
         "mapdl_output": None,
         "transport_mode": None,
         "uds_dir": None,
-        "uds_id": None,
         "certs_dir": None,
     }
     defaults.update(kwargs)
