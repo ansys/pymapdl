@@ -989,7 +989,7 @@ class ComponentListing(CommandListingOutput):
         from ansys.mapdl.core.component import _parse_cmlist  # type: ignore
 
         # To keep same API as commands
-        return np.array(list(_parse_cmlist(self).keys()))
+        return np.array(list(_parse_cmlist(self)[0].keys()))
 
 
 class StringWithLiteralRepr(str):

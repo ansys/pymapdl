@@ -104,9 +104,9 @@ To install Ansys products in WSL Linux, perform these steps:
    - ``-<product_flag>`` : Specifies the one or more products to install.
      If you omit this argument, all products are installed. The *Ansys, Inc.
      Installation Guides* in the Ansys Help provides a list of valid
-     values for the ``product_flags`` argument in `Chapter 6
+     values for the ``product_flags`` argument in `section 6
      <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v241/en/installation/unix_silent.html>`_
-     of the *Linux Installation Guide* and `Chapter 7
+     of the *Linux Installation Guide* and `section 7
      <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v241/en/installation/win_silent.html>`_
      of the *Windows Installation Guide*.
 
@@ -149,7 +149,7 @@ MAPDL installation can communicate with the Windows hosts. If you are having
 problems after setting the firewall rules, you might have to turn off the Windows
 firewall for the WSL ethernet virtual interface. This might pose some unknown
 side effects and security risk so use it with caution. For more information, see
-:ref:`Disable firewall on WSL ethernet <disable_firewall_on_wsl_ethernet_section>`.
+:ref:`Turn off firewall on WSL ethernet <disable_firewall_on_wsl_ethernet_section>`.
 
 
 Set up an environmental variable in WSL that points to Windows host license server
@@ -257,7 +257,7 @@ address is not correct, you can specify the IP address to connect to like this:
 You might need to turn off the Microsoft Firewall completely or at least
 for the WSL network connection.
 To do so, follow
-:ref:`Disable firewall on WSL ethernet <disable_firewall_on_wsl_ethernet_section>`.
+:ref:`Turn off firewall on WSL ethernet <disable_firewall_on_wsl_ethernet_section>`.
 
 
 For more information, see the issue `Launching MAPDL from WSL <wsl_launching_mapdl_>`_
@@ -378,9 +378,9 @@ full path to the ``options`` file.
 
 .. _disable_firewall_on_wsl_ethernet_section:
 
-Disable firewall on WSL ethernet
-================================
-There are two methods for disabling the firewall on the WSL ethernet.
+Turn off firewall on WSL ethernet
+=================================
+There are two methods for turning off the firewall on the WSL ethernet.
 
 Method 1
 ~~~~~~~~

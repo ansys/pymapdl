@@ -266,7 +266,7 @@ if START_INSTANCE and not ON_LOCAL:
 
 
 @pytest.hookimpl(trylast=True)
-def pytest_report_header(config, start_path, startdir):
+def pytest_report_header(config, start_path):
     text = []
     text += ["Testing variables".center(get_terminal_size()[0], "-")]
     text += [
