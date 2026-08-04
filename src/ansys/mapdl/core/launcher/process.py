@@ -347,6 +347,10 @@ def _generate_launch_command(config: LaunchConfig) -> List[str]:
     cmd.extend(["-port", str(config.port)])
     cmd.append("-grpc")
 
+    # Add transport mode flag when explicitly configured
+    if config.transport_mode is not None:
+        cmd.extend(["-transport", config.transport_mode.value])
+
     # Resource arguments
     if config.ram:
         cmd.extend(["-m", str(config.ram)])

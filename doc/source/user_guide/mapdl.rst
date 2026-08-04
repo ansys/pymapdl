@@ -1278,6 +1278,8 @@ environment variable. The following table describes all arguments.
 |                                       | Used when the transport mode should be                                           |
 |                                       | set at the Ansys product level rather                                            |
 |                                       | than per PyMAPDL installation.                                                   |
+|                                       | If :envvar:`PYMAPDL_GRPC_TRANSPORT` is also set,                                 |
+|                                       | it takes precedence and this variable is ignored.                                |
 |                                       | See :ref:`ref_tls_guide`.                                                        |
 |                                       |                                                                                  |
 |                                       | **Example:**                                                                     |
@@ -1298,10 +1300,10 @@ environment variable. The following table describes all arguments.
 |                                       |                                                                                  |
 +---------------------------------------+----------------------------------------------------------------------------------+
 | :envvar:`ANSYS_GRPC_CERTIFICATES`     | Ansys products default environment variable.                                     |
-|                                       | Path to the directory containing the mTLS certificates                           |
-|                                       | (``ca.crt``, ``client.crt``,                                                     |
-|                                       | ``client.key``) used by PyMAPDL when                                             |
-|                                       | ``transport_mode`` is ``mtls``.                                                  |
+|                                       | Path to the directory containing the mTLS certificates.                          |
+|                                       | PyMAPDL requires ``ca.crt``, ``client.crt``, and ``client.key``.                 |
+|                                       | When launching MAPDL with ``mtls``, MAPDL also requires ``server.crt`` and       |
+|                                       | ``server.key`` in the same directory.                                            |
 |                                       | Falls back to a ``certs/`` subdirectory                                          |
 |                                       | of the current working directory if                                              |
 |                                       | not set.                                                                         |

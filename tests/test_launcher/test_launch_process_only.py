@@ -78,7 +78,6 @@ class TestLaunchMapdlProcessOnly:
             "mapdl_output": None,
             "transport_mode": None,
             "uds_dir": None,
-            "uds_id": None,
             "certs_dir": None,
             "env_vars": {},
         }
