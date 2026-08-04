@@ -58,7 +58,7 @@ Each wheelhouse archive contains all the Python wheels necessary to install
 PyMAPDL from scratch on Windows and Linux. You can install
 this on an isolated system with a fresh Python installation or on a virtual environment.
 
-For example, on Linux with Python 3.10, unzip the wheelhouse archive and install it with
+For example, on Linux with Python 3.10, unzip the wheelhouse archive, and install it with
 these commands:
 
 .. code:: console

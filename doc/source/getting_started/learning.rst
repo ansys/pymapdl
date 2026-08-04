@@ -143,7 +143,7 @@ Ansys help
 ==========
 
 `Ansys Help <ansys_help_>`_ is the official Ansys website for
-documentation, tutorials and videos.
+documentation, tutorials, and videos.
 
 An `MAPDL introductory tutorials guide <ansys_introductory_mapdl_courses_>`_ which
 cover different topics such as

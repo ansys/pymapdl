@@ -265,7 +265,7 @@ def close_all_local_instances(port_range: range | None = None) -> None:
     >>> import ansys.mapdl.core as pymapdl
     >>> pymapdl.close_all_local_instances()
     """
-    from ansys.mapdl.core.cli import stop
+    from ansys.mapdl.core.cli.stop import stop
 
     if port_range is None:
         stop(port=None, pid=None, all=True)
