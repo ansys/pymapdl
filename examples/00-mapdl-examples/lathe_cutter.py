@@ -90,10 +90,11 @@ Define variables and launch MAPDL.
 
 import os
 
+import numpy as np
+
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.examples.downloads import download_example_data
 from ansys.mapdl.core.plotting import GraphicsBackend
-import numpy as np
 
 # cwd = current working directory
 path = os.getcwd()

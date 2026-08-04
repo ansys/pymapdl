@@ -34,6 +34,8 @@ import time
 from unittest.mock import PropertyMock, patch
 from warnings import catch_warnings
 
+import grpc
+import numpy as np
 import psutil
 import pytest
 
@@ -50,8 +52,6 @@ from conftest import (
     has_dependency,
     requires,
 )
-import grpc
-import numpy as np
 
 if has_dependency("pyvista"):
     from pyvista import MultiBlock

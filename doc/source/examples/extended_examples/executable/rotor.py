@@ -20,8 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core import launch_mapdl
 import numpy as np
+
+from ansys.mapdl.core import launch_mapdl
 
 # Launch MAPDL
 mapdl = launch_mapdl()

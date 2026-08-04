@@ -52,6 +52,8 @@ from uuid import uuid4
 from warnings import warn
 import weakref
 
+import numpy as np
+
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import _HAS_DPF, _HAS_VISUALIZER
@@ -88,7 +90,6 @@ from ansys.mapdl.core.misc import (
     supress_logging,
 )
 from ansys.mapdl.core.plotting import GraphicsBackend
-import numpy as np
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.reader import Archive

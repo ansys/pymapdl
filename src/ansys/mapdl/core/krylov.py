@@ -25,10 +25,10 @@ from typing import List, Literal, Optional, Tuple, TypeAlias, Union
 import weakref
 
 from ansys.math.core.math import AnsMath, AnsVec
+import numpy as np
 
 from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
-import numpy as np
 
 # Residual algorithm options - single source of truth
 RESIDUAL_ALGORITHM: List[str] = [

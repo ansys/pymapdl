@@ -32,10 +32,10 @@ import weakref
 
 from ansys.api.mapdl.v0 import mapdl_db_pb2_grpc
 from ansys.tools.common.versioning import server_meets_version
+import grpc
 
 from ansys.mapdl.core.errors import MapdlConnectionError
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
-import grpc
 
 MINIMUM_MAPDL_VERSION = "21.1"
 FAILING_DATABASE_MAPDL = ["24.1", "24.2"]

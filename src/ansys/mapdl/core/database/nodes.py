@@ -30,10 +30,10 @@ import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.api.mapdl.v0 import mapdl_db_pb2
+import numpy as np
 from numpy.lib import recfunctions
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
-import numpy as np
 
 from ..common_grpc import DEFAULT_CHUNKSIZE
 from .database import DBDef, MapdlDb, check_mapdl_db_is_alive
