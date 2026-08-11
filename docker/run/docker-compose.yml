@@ -84,6 +84,7 @@ services:
     restart: always
     environment:
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
+      - ANSYS_DPF_ACCEPT_LA=Y
 
   mapdl-local:
     profiles:
