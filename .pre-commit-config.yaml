@@ -33,7 +33,7 @@ repos:
     - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
-  rev: 7f321d375f31a2f03833bc9a548e8783f2b5c420  # frozen: 9.0.0b1
+  rev: 8d8d49d0f5ded46bb10bb860b0841be14ba42a65  # frozen: 9.0.0b2
   hooks:
   - id: isort
 
@@ -97,7 +97,7 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 1a4bb160cab6417b3045e1b37b6b72449243e658  # frozen: 0.37.4
+  rev: c4654a7e007c9619a5eb63c39a456572a0fa1851  # frozen: 0.38.0
   hooks:
     - id: check-github-workflows
 
