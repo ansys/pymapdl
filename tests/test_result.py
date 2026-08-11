@@ -44,16 +44,16 @@ import shutil
 import tempfile
 from warnings import warn
 
-import numpy as np
 import pytest
 
 from conftest import HAS_DPF, ON_LOCAL, TEST_DPF_BACKEND, clear, solved_box_func
+import numpy as np
 
 DPF_PORT = int(os.environ.get("DPF_PORT", 50056))  # Set in ci.yaml
 
 if not HAS_DPF:
     pytest.skip(
-        "Skipping DPF tests because DPF tests are skipped or DPF is not installed."
+        "Skipping DPF tests because DPF tests are skipped or DPF is not installed. "
         "Please install the ansys-dpf-core package.",
         allow_module_level=True,
     )
@@ -1111,6 +1111,11 @@ class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(Example):
     def test_material_properties(self, mapdl, reader, post, result):
         # This model does not have material properties defined because it uses
         # MASS21, CONTA175 and TARGE169
+        if mapdl.version >= 26.1:
+            pytest.skip(
+                "Empty material properties are not available in this version of MAPDL."
+            )
+
         assert result.materials
         assert not result.materials[1]
         assert len(result.materials) == 1
