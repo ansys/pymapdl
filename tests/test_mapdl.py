@@ -3126,7 +3126,6 @@ def test_garbage_clean_del(start_instance, exited, launched, cleanup_on_exit):
         # Setup
         mapdl = DummyMapdl()
         mapdl._path = ""
-        mapdl._log = MagicMock()
 
         # Config
         mapdl._start_instance = start_instance
