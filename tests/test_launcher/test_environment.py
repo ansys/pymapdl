@@ -1,6 +1,24 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 """Unit tests for launcher.environment module."""
 
@@ -55,7 +73,6 @@ def _create_test_config(**overrides):
         "mapdl_output": None,
         "transport_mode": None,
         "uds_dir": None,
-        "uds_id": None,
         "certs_dir": None,
         "env_vars": {},
     }
@@ -132,6 +149,45 @@ class TestEnvironmentDetection:
             result = is_ubuntu()
             assert result is False
 
+    def test_is_ubuntu_lsb_release_attribute_error(self):
+        """Test is_ubuntu falls through when lsb_release raises AttributeError."""
+        import sys
+        from unittest.mock import MagicMock
+
+        mock_lsb = MagicMock()
+        mock_lsb.get_distro_information.side_effect = AttributeError(
+            "no attribute 'get_distro_information'"
+        )
+        with patch.dict(sys.modules, {"lsb_release": mock_lsb}):
+            with patch("platform.platform", return_value="Linux-ubuntu"):
+                result = is_ubuntu()
+        # Falls through to platform check; "ubuntu" is in the platform string
+        assert result is True
+
+    def test_is_ubuntu_via_lsb_release_success(self):
+        """Test Ubuntu detection when lsb_release is available and reports Ubuntu."""
+        import sys
+        from unittest.mock import MagicMock
+
+        mock_lsb = MagicMock()
+        mock_lsb.get_distro_information.return_value = {"ID": "Ubuntu"}
+        with patch.dict(sys.modules, {"lsb_release": mock_lsb}):
+            with patch("os.name", "posix"):
+                result = is_ubuntu()
+        assert result is True
+
+    def test_is_ubuntu_via_lsb_release_not_ubuntu(self):
+        """Test is_ubuntu returns False when lsb_release reports a different distro."""
+        import sys
+        from unittest.mock import MagicMock
+
+        mock_lsb = MagicMock()
+        mock_lsb.get_distro_information.return_value = {"ID": "Debian"}
+        with patch.dict(sys.modules, {"lsb_release": mock_lsb}):
+            with patch("os.name", "posix"):
+                result = is_ubuntu()
+        assert result is False
+
 
 class TestEnvironmentWSLHelpers:
     """Tests for WSL helper functions."""
@@ -192,6 +248,16 @@ class TestEnvironmentWSLHelpers:
         with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=False):
             result = get_windows_host_ip()
             assert result is None
+
+    def test_get_windows_host_ip_called_process_error(self):
+        """Test that CalledProcessError during subprocess is handled gracefully."""
+        with patch("ansys.mapdl.core.launcher.environment.is_wsl", return_value=True):
+            with patch("subprocess.run") as mock_subprocess:
+                mock_subprocess.side_effect = subprocess.CalledProcessError(
+                    returncode=1, cmd="ip"
+                )
+                result = get_windows_host_ip()
+                assert result is None
 
 
 # ============================================================================
@@ -278,6 +344,58 @@ class TestEnvironmentPrepare:
             result = prepare_environment(config)
             assert isinstance(result, EnvironmentConfig)
             assert result.variables["ANS_CMD_NODIAG"] == "TRUE"
+
+    def test_prepare_environment_mtls_with_explicit_certs_dir(self):
+        """Test that mTLS transport sets ANSYS_GRPC_CERTIFICATES from certs_dir."""
+        from ansys.mapdl.core.launcher.models import TransportMode
+
+        config = _create_test_config(
+            transport_mode=TransportMode.MTLS, certs_dir="/custom/certs/path"
+        )
+
+        result = prepare_environment(config)
+
+        assert result.variables["ANSYS_GRPC_CERTIFICATES"] == "/custom/certs/path"
+
+    def test_prepare_environment_mtls_without_certs_dir_uses_env_var(self):
+        """Test mTLS transport falls back to ANSYS_GRPC_CERTIFICATES env var."""
+        from ansys.mapdl.core.launcher.models import TransportMode
+
+        config = _create_test_config(transport_mode=TransportMode.MTLS, certs_dir=None)
+
+        with patch.dict(
+            os.environ, {"ANSYS_GRPC_CERTIFICATES": "/env/certs"}, clear=False
+        ):
+            result = prepare_environment(config)
+
+        assert result.variables["ANSYS_GRPC_CERTIFICATES"] == "/env/certs"
+
+    def test_prepare_environment_mtls_without_certs_dir_defaults_to_cwd(self):
+        """Test mTLS transport defaults to cwd/certs when no certs_dir or env var."""
+        from ansys.mapdl.core.launcher.models import TransportMode
+
+        config = _create_test_config(transport_mode=TransportMode.MTLS, certs_dir=None)
+        env_without_certs = {
+            k: v for k, v in os.environ.items() if k != "ANSYS_GRPC_CERTIFICATES"
+        }
+
+        with patch.dict(os.environ, env_without_certs, clear=True):
+            result = prepare_environment(config)
+
+        expected = os.path.join(os.getcwd(), "certs")
+        assert result.variables["ANSYS_GRPC_CERTIFICATES"] == expected
+
+    def test_prepare_environment_non_mtls_does_not_set_certs(self):
+        """Test that non-mTLS transport does not set ANSYS_GRPC_CERTIFICATES."""
+        config = _create_test_config(transport_mode=None, certs_dir=None)
+        env_without_certs = {
+            k: v for k, v in os.environ.items() if k != "ANSYS_GRPC_CERTIFICATES"
+        }
+
+        with patch.dict(os.environ, env_without_certs, clear=True):
+            result = prepare_environment(config)
+
+        assert "ANSYS_GRPC_CERTIFICATES" not in result.variables
 
 
 class TestEnvironmentVariables:

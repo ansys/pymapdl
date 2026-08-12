@@ -1,6 +1,6 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
-#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -53,7 +53,7 @@ DPF_PORT = int(os.environ.get("DPF_PORT", 50056))  # Set in ci.yaml
 
 if not HAS_DPF:
     pytest.skip(
-        "Skipping DPF tests because DPF tests are skipped or DPF is not installed."
+        "Skipping DPF tests because DPF tests are skipped or DPF is not installed. "
         "Please install the ansys-dpf-core package.",
         allow_module_level=True,
     )
@@ -1111,6 +1111,11 @@ class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(Example):
     def test_material_properties(self, mapdl, reader, post, result):
         # This model does not have material properties defined because it uses
         # MASS21, CONTA175 and TARGE169
+        if mapdl.version >= 26.1:
+            pytest.skip(
+                "Empty material properties are not available in this version of MAPDL."
+            )
+
         assert result.materials
         assert not result.materials[1]
         assert len(result.materials) == 1

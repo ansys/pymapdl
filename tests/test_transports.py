@@ -1,6 +1,6 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
-#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 
 import logging
 import os
@@ -105,8 +104,8 @@ def test_wait_until_healthy_timeout(monkeypatch):
 
 
 def test_configure_uds_sets_socket_dir_and_id(tmp_path, monkeypatch):
-    """configure_uds resolves uds_dir and sets uds_id to str(port) so that
-    ``create_channel`` constructs the correct ``mapdl-{PORT}.sock`` path."""
+    """configure_uds is a no-op; MAPDL derives the socket identifier from the
+    port automatically, naming its socket ``mapdl-{PORT}.sock``."""
 
     import platform
 
@@ -129,13 +128,10 @@ def test_configure_uds_sets_socket_dir_and_id(tmp_path, monkeypatch):
     obj._port = 50052
     obj.transport_mode = "uds"
     obj.uds_dir = str(uds_dir)
-    obj.uds_id = None
 
     obj.configure_uds(port=50052)
 
     assert obj.uds_dir == str(uds_dir)
-    # uds_id is set to the stringified port; create_channel builds 'mapdl-50052.sock'
-    assert obj.uds_id == "50052"
 
 
 def test_exit_removes_uds_socket(tmp_path, monkeypatch):
@@ -172,7 +168,6 @@ def test_exit_removes_uds_socket(tmp_path, monkeypatch):
     obj._log = logging.getLogger("test")
     obj.transport_mode = "uds"
     obj.uds_dir = str(uds_dir)
-    obj.uds_id = "50052"  # internal value set by configure_uds (str(port))
     obj._start_instance = True
     obj._launched = True
     obj._exited = False
@@ -323,8 +318,8 @@ def test_remote_ip_with_uds_raises(monkeypatch):
 def test_create_channel_passes_uds_service(tmp_path, monkeypatch):
     """_create_channel passes uds_service='mapdl' and uds_id=port to create_channel.
 
-    This is the fix for issue #4435: the old code omitted uds_service, causing
-    ansys-tools-common to raise ValueError.
+    Verifies fix for issue #4435 (uds_service omission) and that uds_id is
+    derived from the port number (MAPDL always names its socket mapdl-{PORT}.sock).
     """
     import platform
 
@@ -353,7 +348,6 @@ def test_create_channel_passes_uds_service(tmp_path, monkeypatch):
     obj._log = logging.getLogger("test")
     obj.transport_mode = "uds"
     obj.uds_dir = uds_dir
-    obj.uds_id = "50052"
     obj.certs_dir = None
     obj.grpc_options = []
 
@@ -406,7 +400,7 @@ def test_configure_mtls_uses_cwd_certs_when_no_env_var(monkeypatch, tmp_path):
     assert obj.certs_dir == Path(os.path.join(str(tmp_path), "certs"))
 
 
-def test_configure_mtls_preserves_existing_certs_dir():
+def test_configure_mtls_preserves_existing_certs_dir(tmp_path):
     """configure_mtls does not overwrite certs_dir when it is already set."""
     from pathlib import Path
 
@@ -416,8 +410,74 @@ def test_configure_mtls_preserves_existing_certs_dir():
     import logging
 
     obj._log = logging.getLogger("test")
-    obj.certs_dir = Path("/already/set")
+    # Use a tmp_path-based directory to avoid depending on absolute paths
+    preset = tmp_path / "already_set"
+    preset.mkdir()
+    # Create the expected client cert files so configure_mtls does not raise
+    (preset / "client.crt").write_text("dummy")
+    (preset / "client.key").write_text("dummy")
+    (preset / "ca.crt").write_text("dummy")
+    obj.certs_dir = Path(preset)
 
     obj.configure_mtls()
 
-    assert obj.certs_dir == Path("/already/set")
+    assert obj.certs_dir == Path(preset)
+
+
+def test_configure_mtls_raises_for_missing_dir(monkeypatch, tmp_path):
+    """configure_mtls should raise FileNotFoundError when the certs_dir does not exist."""
+    monkeypatch.delenv("ANSYS_GRPC_CERTIFICATES", raising=False)
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    import logging
+
+    obj._log = logging.getLogger("test")
+    obj.certs_dir = tmp_path / "does_not_exist"
+
+    with pytest.raises(FileNotFoundError):
+        obj.configure_mtls()
+
+
+def test_configure_mtls_raises_for_missing_files(tmp_path):
+    """configure_mtls should raise FileNotFoundError when required client cert files are missing."""
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    import logging
+
+    obj._log = logging.getLogger("test")
+    # Create an empty certs dir with only ca.crt present
+    # Use the provided tmp_path as the certs directory and ensure it exists
+    obj.certs_dir = tmp_path
+    tmp_path.mkdir(exist_ok=True)
+    (tmp_path / "ca.crt").write_text("dummy")
+
+    with pytest.raises(FileNotFoundError):
+        obj.configure_mtls()
+
+
+def test_configure_wnua_is_no_op():
+    """configure_wnua runs without error (no-op on any platform when mocked)."""
+    import logging
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    obj._log = logging.getLogger("test")
+    obj.transport_mode = "wnua"
+
+    # Should not raise
+    obj.configure_wnua()
+
+
+def test_configure_insecure_is_no_op():
+    """configure_insecure runs without error."""
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    obj = object.__new__(MapdlGrpc)
+    obj._log = logging.getLogger("test")
+    obj.transport_mode = "insecure"
+
+    obj.configure_insecure()

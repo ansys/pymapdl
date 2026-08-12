@@ -1,6 +1,24 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 """Unit tests for launcher.connection module."""
 
@@ -15,6 +33,7 @@ import pytest
 from ansys.mapdl.core.errors import MapdlDidNotStart
 from ansys.mapdl.core.launcher import LaunchConfig, LaunchMode
 from ansys.mapdl.core.launcher.connection import (
+    close_all_local_instances,
     connect_to_existing,
     create_grpc_client,
 )
@@ -123,7 +142,6 @@ def _create_test_config(**overrides):
         "mapdl_output": None,
         "transport_mode": None,
         "uds_dir": None,
-        "uds_id": None,
         "certs_dir": None,
     }
     defaults.update(overrides)
@@ -1009,3 +1027,65 @@ class TestFindLiveMapdlProcesses:
 
         mock_psutil.assert_called_once_with(42)
         assert result == [mock_proc]
+
+
+# ============================================================================
+# close_all_local_instances
+# ============================================================================
+
+
+class TestCloseAllLocalInstances:
+    """Unit tests for close_all_local_instances."""
+
+    _STOP_TARGET = "ansys.mapdl.core.cli.stop.stop"
+
+    def test_no_port_range_calls_stop_with_all(self):
+        """With no port_range, stop is called once with all=True."""
+        with patch(self._STOP_TARGET) as mock_stop:
+            close_all_local_instances()
+
+        mock_stop.assert_called_once_with(port=None, pid=None, all=True)
+
+    def test_port_range_calls_stop_per_port(self):
+        """With a port_range, stop is called once per port with all=False."""
+        ports = range(50052, 50055)
+        with patch(self._STOP_TARGET) as mock_stop:
+            close_all_local_instances(port_range=ports)
+
+        assert mock_stop.call_count == len(ports)
+        for i, port in enumerate(ports):
+            mock_stop.call_args_list[i].assert_called_with(
+                port=port, pid=None, all=False
+            )
+
+    def test_port_range_passes_correct_ports(self):
+        """Each port in the range is forwarded to stop."""
+        ports = range(50052, 50055)
+        with patch(self._STOP_TARGET) as mock_stop:
+            close_all_local_instances(port_range=ports)
+
+        actual_ports = [call.kwargs["port"] for call in mock_stop.call_args_list]
+        assert actual_ports == list(ports)
+
+    def test_port_range_never_uses_all_flag(self):
+        """When iterating a port_range, stop is never called with all=True."""
+        with patch(self._STOP_TARGET) as mock_stop:
+            close_all_local_instances(port_range=range(50052, 50056))
+
+        for call in mock_stop.call_args_list:
+            assert call.kwargs["all"] is False
+
+    def test_empty_port_range_never_calls_stop(self):
+        """An empty range means stop is never invoked."""
+        with patch(self._STOP_TARGET) as mock_stop:
+            close_all_local_instances(port_range=range(0))
+
+        mock_stop.assert_not_called()
+
+    def test_stop_imported_from_correct_module(self):
+        """stop is imported from ansys.mapdl.core.cli.stop, not the cli package."""
+        with patch(self._STOP_TARGET) as mock_stop:
+            close_all_local_instances()
+
+        # The mock target confirms the import path used internally.
+        mock_stop.assert_called_once()

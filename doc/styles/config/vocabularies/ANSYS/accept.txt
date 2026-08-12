@@ -53,6 +53,7 @@ breakpoint
 centerline
 CentOS
 CentOS7
+certs_dir
 Chao
 ci
 container_layout
@@ -180,6 +181,7 @@ struc
 subselected
 substep
 sur
+synopsys
 Synopsys
 tablet
 thermomechanical
@@ -194,6 +196,7 @@ unconverged
 unpause
 UNSYM
 unsymmetric
+untrusted
 UPF
 UPFs
 uv

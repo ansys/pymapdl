@@ -1,6 +1,6 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
-#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -82,7 +82,6 @@ def resolve_launch_config(
     mapdl_output: Optional[str] = None,
     transport_mode: Optional[str] = None,
     uds_dir: Optional[str] = None,
-    uds_id: Optional[str] = None,
     certs_dir: Optional[str] = None,
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
@@ -278,10 +277,6 @@ def resolve_launch_config(
         Directory for Unix Domain Socket (UDS) files when using ``'uds'``
         transport. Defaults to :class:`None`, which uses ``~/.conn``.
 
-    uds_id : Optional[str]
-        Identifier for UDS socket file when using ``'uds'`` transport.
-        Defaults to :class:`None`, which uses ``mapdl-{port}``.
-
     certs_dir : Optional[str]
         Directory containing certificates for ``'mtls'`` transport.
         Defaults to :class:`None`.
@@ -426,6 +421,13 @@ def resolve_launch_config(
     # Resolve transport mode
     resolved_transport_mode = resolve_transport_mode(transport_mode)
 
+    # If user provided certs_dir but did not explicitly set transport_mode,
+    # silently infer mTLS transport.
+    if resolved_transport_mode is None and certs_dir is not None:
+        from .models import TransportMode
+
+        resolved_transport_mode = TransportMode.MTLS
+
     # Resolve additional switches (explicit arg or PYMAPDL_ADDITIONAL_SWITCHES env var)
     resolved_additional_switches = resolve_additional_switches(additional_switches)
 
@@ -466,7 +468,6 @@ def resolve_launch_config(
         mapdl_output=mapdl_output,
         transport_mode=resolved_transport_mode,
         uds_dir=uds_dir,
-        uds_id=uds_id,
         certs_dir=certs_dir,
         env_vars=resolved_replace_env_vars,
         add_env_vars=resolved_add_env_vars,
@@ -1087,7 +1088,14 @@ def resolve_transport_mode(transport_mode: Optional[str]) -> Optional[TransportM
         ConfigurationError: If transport mode is invalid
     """
     if transport_mode is None:
-        return None
+        # Fall back to environment variables in precedence order
+        env_val = os.environ.get("PYMAPDL_GRPC_TRANSPORT") or os.environ.get(
+            "ANSYS_MAPDL_GRPC_TRANSPORT"
+        )
+        if env_val is None:
+            return None
+        # Validate the env var value through the same mapping logic
+        transport_mode = env_val
 
     mode_lower = transport_mode.lower()
     if mode_lower == "insecure":

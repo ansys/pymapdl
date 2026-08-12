@@ -1,6 +1,6 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
-#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -115,10 +115,9 @@ def create_grpc_client(
         finish_job_on_exit=config.finish_job_on_exit,
         run_location=config.run_location,
         launched=process_info is not None,
-        # transport_mode=config.transport_mode,
-        # uds_dir=config.uds_dir,
-        # uds_id=config.uds_id,
-        # certs_dir=config.certs_dir,
+        transport_mode=(config.transport_mode.value if config.transport_mode else None),
+        uds_dir=config.uds_dir,
+        certs_dir=(str(config.certs_dir) if config.certs_dir else None),
     )
 
     # Clear database if requested
@@ -265,7 +264,7 @@ def close_all_local_instances(port_range: range | None = None) -> None:
     >>> import ansys.mapdl.core as pymapdl
     >>> pymapdl.close_all_local_instances()
     """
-    from ansys.mapdl.core.cli import stop
+    from ansys.mapdl.core.cli.stop import stop
 
     if port_range is None:
         stop(port=None, pid=None, all=True)

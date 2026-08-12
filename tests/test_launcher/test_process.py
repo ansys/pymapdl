@@ -1,7 +1,24 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 """Unit tests for launcher.process module."""
 
@@ -55,7 +72,6 @@ def create_launch_config(**kwargs):
         "mapdl_output": None,
         "transport_mode": None,
         "uds_dir": None,
-        "uds_id": None,
         "certs_dir": None,
     }
     defaults.update(kwargs)
@@ -152,6 +168,40 @@ class TestGenerateLaunchCommand:
         # Linux should not have Windows-specific arguments
         assert ".__tmp__.inp" not in cmd
         assert "-b" not in cmd
+
+    def test_generate_launch_command_adds_transport_mtls(self):
+        """'-transport mtls' is added to the launch command when transport_mode=MTLS."""
+        from ansys.mapdl.core.launcher.models import TransportMode
+
+        config = create_launch_config(transport_mode=TransportMode.MTLS)
+        cmd = process._generate_launch_command(config)
+        assert "-transport" in cmd
+        idx = cmd.index("-transport")
+        assert cmd[idx + 1] == "mtls"
+
+    def test_generate_launch_command_adds_transport_insecure(self):
+        """'-transport insecure' is added when transport_mode=INSECURE."""
+        from ansys.mapdl.core.launcher.models import TransportMode
+
+        config = create_launch_config(transport_mode=TransportMode.INSECURE)
+        cmd = process._generate_launch_command(config)
+        assert "-transport" in cmd
+        assert cmd[cmd.index("-transport") + 1] == "insecure"
+
+    def test_generate_launch_command_adds_transport_uds(self):
+        """'-transport uds' is added when transport_mode=UDS."""
+        from ansys.mapdl.core.launcher.models import TransportMode
+
+        config = create_launch_config(transport_mode=TransportMode.UDS)
+        cmd = process._generate_launch_command(config)
+        assert "-transport" in cmd
+        assert cmd[cmd.index("-transport") + 1] == "uds"
+
+    def test_generate_launch_command_no_transport_flag_when_none(self):
+        """No '-transport' flag is added when transport_mode=None."""
+        config = create_launch_config(transport_mode=None)
+        cmd = process._generate_launch_command(config)
+        assert "-transport" not in cmd
 
 
 # ============================================================================

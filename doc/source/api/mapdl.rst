@@ -18,8 +18,10 @@
    Mapdl.busy
    Mapdl.chain_commands
    Mapdl.check_parameter_names
+   Mapdl.cwd
    Mapdl.default_file_type_for_plots
    Mapdl.directory
+   Mapdl.exit
    Mapdl.exited
    Mapdl.exiting
    Mapdl.file_type_for_plots
@@ -33,10 +35,12 @@
    Mapdl.get_nsol
    Mapdl.get_value
    Mapdl.get_variable
+   Mapdl.graphics_backend
    Mapdl.hostname
    Mapdl.ignore_errors
    Mapdl.info
    Mapdl.input_strings
+   Mapdl.inquire
    Mapdl.is_alive
    Mapdl.is_console
    Mapdl.is_corba
@@ -75,7 +79,6 @@
    Mapdl.screenshot
    Mapdl.set_log_level
    Mapdl.thermal_result
-   Mapdl.graphics_backend
    Mapdl.version
 
 
@@ -110,3 +113,31 @@ Constants
    mapdl_grpc.MapdlGrpc.mute
    mapdl_grpc.MapdlGrpc.port
    mapdl_grpc.MapdlGrpc.upload
+
+
+Session management and launcher
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+High-level helpers to start or connect to MAPDL instances live in the
+:mod:`ansys.mapdl.core.launcher` module. Use :func:`ansys.mapdl.core.launcher.launch_mapdl`
+to start or connect to an instance; for lower-level process control use
+:func:`ansys.mapdl.core.launcher.launch_mapdl_process` or
+:func:`ansys.mapdl.core.launcher.close_all_local_instances`.
+
+.. autosummary::
+   :toctree: _autosummary
+
+   launcher.launch_mapdl
+   launcher.launch_mapdl_process
+   launcher.close_all_local_instances
+
+
+Transport-specific behavior
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note
+    Some session-management and file-transfer behavior is transport-specific.
+    For example, file upload/download and session persistence are implemented
+    on the :class:`ansys.mapdl.core.mapdl_grpc.MapdlGrpc` subclass (see methods
+    above). Local sessions may automatically make files available for download
+    while remote sessions require explicit :meth:`mapdl_grpc.MapdlGrpc.download`.

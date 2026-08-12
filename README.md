@@ -84,7 +84,7 @@ PyMAPDL includes specialized AI agent configurations to help with development, t
 - **Test Engineer**: Maintains test coverage, implements mocking strategies
 - **Code Reviewer**: Comprehensive PR reviews ensuring quality standards
 
-See [AGENTS.md](AGENTS.md) for detailed agent specifications and [.github/AGENTS_GUIDE.md](.github/AGENTS_GUIDE.md) for usage examples.
+See [AGENTS.md](AGENTS.md) for detailed agent specifications and [.github/HOW_TO_USE_AGENTS.md](.github/HOW_TO_USE_AGENTS.md) for usage examples.
 
 
 ## Project transition -  legacy support

@@ -45,6 +45,7 @@ This section provides a general overview of PyMAPDL and how you use it.
    plugins
    xpl
    krylov
+   tls
 
 .. toctree::
    :maxdepth: 1

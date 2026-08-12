@@ -26,6 +26,8 @@
 .. _dev_guide_setup_your_environment: https://dev.docs.pyansys.com/how-to/setting-up.html
 .. _dev_guide_branch_names: https://dev.docs.pyansys.com/how-to/contributing.html#branch-naming-conventions
 .. _dev_guide_commit_names: https://dev.docs.pyansys.com/how-to/contributing.html#commit-naming-conventions
+.. _certificate_generation_utilities: https://tools.docs.pyansys.com/version/stable/user_guide/certificate_generation.html
+.. _secure_grpc_docs: https://tools.docs.pyansys.com/version/stable/user_guide/secure_grpc.html
 
 .. #Other libraries
 .. _pyvista_docs: https://docs.pyvista.org/version/stable/
@@ -86,7 +88,6 @@
 .. _pymapdl_ex_vm: https://examples.mapdl.docs.pyansys.com/verif-manual/index.html
 .. _pymapdl_cheat_sheet: https://mapdl.docs.pyansys.com/stable/_static/_static/cheat_sheet.pdf
 
-
 .. # Ansys Structural Guide links:
 .. _ansys_krylov_sweep_harmonic_analysis: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_str/str_Krysweep.html
 
@@ -143,7 +144,6 @@
 .. _what_is_apdl_ansys_blog: https://www.ansys.com/blog/what-is-apdl
 .. _What_is_the_Windows_Subsystem_for_Linux: https://docs.microsoft.com/en-us/windows/wsl/about
 .. _WikipediaWSL: https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux
-
 
 .. #Github links:
 .. _gh_creating_pat: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token

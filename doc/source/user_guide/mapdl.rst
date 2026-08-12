@@ -1260,3 +1260,59 @@ environment variable. The following table describes all arguments.
 |                                       |                                                                                  |
 |                                       | Only for developing purposes.                                                    |
 +---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`PYMAPDL_GRPC_TRANSPORT`      | gRPC transport mode used by PyMAPDL.                                             |
+|                                       | Accepted values: ``insecure``, ``uds``,                                          |
+|                                       | ``wnua``, ``mtls``.                                                              |
+|                                       | Takes precedence over                                                            |
+|                                       | :envvar:`ANSYS_MAPDL_GRPC_TRANSPORT`.                                            |
+|                                       | See :ref:`ref_tls_guide`.                                                        |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export PYMAPDL_GRPC_TRANSPORT=mtls                            |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`ANSYS_MAPDL_GRPC_TRANSPORT`  | Alias for :envvar:`PYMAPDL_GRPC_TRANSPORT`.                                      |
+|                                       | Used when the transport mode should be                                           |
+|                                       | set at the Ansys product level rather                                            |
+|                                       | than per PyMAPDL installation.                                                   |
+|                                       | If :envvar:`PYMAPDL_GRPC_TRANSPORT` is also set,                                 |
+|                                       | it takes precedence and this variable is ignored.                                |
+|                                       | See :ref:`ref_tls_guide`.                                                        |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export ANSYS_MAPDL_GRPC_TRANSPORT=mtls                        |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`ANSYS_MAPDL_UDS_PATH`        | Path to the Ansys MAPDL Unix Domain Socket (UDS) directory.                      |
+|                                       | MAPDL creates or looks for the UDS file in this directory.                       |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export ANSYS_MAPDL_UDS_PATH=/path/to/uds/dir                  |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`ANSYS_GRPC_CERTIFICATES`     | Ansys products default environment variable.                                     |
+|                                       | Path to the directory containing the mTLS certificates.                          |
+|                                       | PyMAPDL requires ``ca.crt``, ``client.crt``, and ``client.key``.                 |
+|                                       | When launching MAPDL with ``mtls``, MAPDL also requires ``server.crt`` and       |
+|                                       | ``server.key`` in the same directory.                                            |
+|                                       | Falls back to a ``certs/`` subdirectory                                          |
+|                                       | of the current working directory if                                              |
+|                                       | not set.                                                                         |
+|                                       | See :ref:`ref_tls_guide`.                                                        |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export ANSYS_GRPC_CERTIFICATES=/path/to/certs                 |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+

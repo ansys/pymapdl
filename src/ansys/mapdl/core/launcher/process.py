@@ -1,6 +1,6 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
-#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -347,6 +347,10 @@ def _generate_launch_command(config: LaunchConfig) -> List[str]:
     cmd.extend(["-np", str(config.nproc)])
     cmd.extend(["-port", str(config.port)])
     cmd.append("-grpc")
+
+    # Add transport mode flag when explicitly configured
+    if config.transport_mode is not None:
+        cmd.extend(["-transport", config.transport_mode.value])
 
     # Resource arguments
     if config.ram:

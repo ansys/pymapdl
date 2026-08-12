@@ -1,6 +1,6 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
-#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -989,7 +989,7 @@ class ComponentListing(CommandListingOutput):
         from ansys.mapdl.core.component import _parse_cmlist  # type: ignore
 
         # To keep same API as commands
-        return np.array(list(_parse_cmlist(self).keys()))
+        return np.array(list(_parse_cmlist(self)[0].keys()))
 
 
 class StringWithLiteralRepr(str):

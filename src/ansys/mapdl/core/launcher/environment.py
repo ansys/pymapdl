@@ -1,6 +1,6 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
-#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -183,6 +183,24 @@ def prepare_environment(config: LaunchConfig) -> EnvironmentConfig:
         # is preserved (MPI paths, license servers, PATH, etc.).
         LOG.debug("Extending system environment with user-provided variables")
         env.update(config.add_env_vars)
+
+    # If launching with mTLS, ensure MAPDL process receives the certificates
+    # path via ANSYS_GRPC_CERTIFICATES so the server can start its secure gRPC
+    # endpoint with the same certificates.
+    from .models import TransportMode
+
+    is_mtls = config.transport_mode == TransportMode.MTLS
+    if is_mtls:
+        # Prefer explicit certs_dir, then existing environment var, then cwd/certs
+        if config.certs_dir:
+            env["ANSYS_GRPC_CERTIFICATES"] = str(config.certs_dir)
+        else:
+            env.setdefault(
+                "ANSYS_GRPC_CERTIFICATES",
+                os.environ.get(
+                    "ANSYS_GRPC_CERTIFICATES", os.path.join(os.getcwd(), "certs")
+                ),
+            )
 
     return EnvironmentConfig(variables=env, replace_all=False)
 

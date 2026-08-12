@@ -1,6 +1,6 @@
 # Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
-#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -267,7 +267,7 @@ if START_INSTANCE and not ON_LOCAL:
 
 
 @pytest.hookimpl(trylast=True)
-def pytest_report_header(config, start_path, startdir):
+def pytest_report_header(config, start_path):
     text = []
     text += ["Testing variables".center(get_terminal_size()[0], "-")]
     text += [
@@ -294,7 +294,7 @@ def pytest_report_header(config, start_path, startdir):
         "DPF_START_SERVER",
         "IGNORE_POOL",
         "ANSYS_MAPDL_UDS_PATH",
-        "ANSYS_MAPDL_CERTS_PATH",
+        "ANSYS_GRPC_CERTIFICATES",
         "PYMAPDL_GRPC_TRANSPORT",
         "ANSYS_MAPDL_GRPC_TRANSPORT",
     ]:
