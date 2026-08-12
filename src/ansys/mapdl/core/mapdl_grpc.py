@@ -2968,6 +2968,9 @@ class MapdlGrpc(MapdlBase):
         There are some considerations to keep in mind when using this command:
 
         * The glob pattern search does not search recursively in remote instances.
+        * You can download a specific file located in a subdirectory of the
+          MAPDL working directory by giving its relative path, for example
+          ``'subdir/file.rst'``.
         * In a remote instance, it is not possible to list or download files in different
           locations than the MAPDL working directory.
         * If you are in local and provide a file path, downloading files
@@ -3125,9 +3128,13 @@ class MapdlGrpc(MapdlBase):
             )
 
         for each_file in list_files:
+            out_file_name = os.path.join(target_dir, each_file)
+            # 'each_file' might include subdirectories (relative to the
+            # MAPDL working directory), which might not exist yet locally.
+            os.makedirs(os.path.dirname(out_file_name) or ".", exist_ok=True)
             self._download(
                 each_file,
-                out_file_name=os.path.join(target_dir, each_file),
+                out_file_name=out_file_name,
                 chunk_size=chunk_size,
                 progress_bar=progress_bar,
             )
@@ -3147,17 +3154,37 @@ class MapdlGrpc(MapdlBase):
         else:
             extension = ""
 
+        # A glob pattern (with '*', '?' or '[') requires listing the
+        # directory content to filter against.
+        is_glob = bool(re.search(r"[*?\[]", file))
+        # A path with a directory component (for example
+        # ``tmp_dir/file.rst``) points inside a subdirectory of the working
+        # directory.
+        has_subdir = bool(os.path.dirname(file))
+
         if self.is_local:
             # filtering with glob (accepting *)
-            if not os.path.dirname(file):
+            if not os.path.isabs(file):
+                # Relative paths (including ones with subdirectories) are
+                # resolved against the MAPDL working directory.
                 file = str(self.directory / file)
             list_files = glob.glob(file + extension, recursive=recursive)
 
-        else:
+        elif is_glob or not has_subdir:
+            # Either a glob pattern, or a plain filename in the top level of
+            # the working directory: both can be validated against
+            # ``list_files``.
             base_name = os.path.basename(file + extension)
             self_files = self.list_files()
 
             list_files = fnmatch.filter(self_files, base_name)
+
+        else:
+            # Literal file path inside a subdirectory of the working
+            # directory. ``list_files`` only returns the top level of the
+            # working directory, so it cannot be used to validate files in
+            # subdirectories. Trust the explicit path instead.
+            list_files = [file + extension if extension else file]
 
         # filtering by extension
         list_files = [file for file in list_files if file.endswith(extension)]
