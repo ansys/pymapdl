@@ -30,7 +30,6 @@ import sys
 import time
 from unittest.mock import patch
 
-import grpc
 import pytest
 
 from ansys.mapdl.core import examples
@@ -46,6 +45,7 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import random_string
+import grpc
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -359,8 +359,30 @@ def test_validate_files_remote_subdirectory():
     mapdl = MapdlGrpc.__new__(MapdlGrpc)
     mapdl._local = False
     mapdl.list_files = lambda: ["tmp_dir", "other.txt"]
+    mapdl.inquire = lambda strarray, func, arg1: True
 
     assert mapdl._validate_files("tmp_dir/file.rst") == ["tmp_dir/file.rst"]
+
+
+def test_validate_files_remote_missing_subdirectory_file():
+    """A missing literal subdirectory file must raise as top-level files do."""
+    mapdl = MapdlGrpc.__new__(MapdlGrpc)
+    mapdl._local = False
+    mapdl.list_files = lambda: ["tmp_dir", "other.txt"]
+    mapdl.inquire = lambda strarray, func, arg1: False
+
+    with pytest.raises(FileNotFoundError):
+        mapdl._validate_files("tmp_dir/missing.rst")
+
+
+def test_validate_files_remote_path_traversal_rejected():
+    """Paths that escape the working directory must be rejected."""
+    mapdl = MapdlGrpc.__new__(MapdlGrpc)
+    mapdl._local = False
+    mapdl.inquire = lambda strarray, func, arg1: True
+
+    with pytest.raises(ValueError, match="Parent directory references"):
+        mapdl._validate_files("../escape.rst")
 
 
 def test_validate_files_remote_missing_top_level_file():
@@ -379,6 +401,7 @@ def test_download_from_remote_subdirectory(tmp_path):
     mapdl = MapdlGrpc.__new__(MapdlGrpc)
     mapdl._local = False
     mapdl.list_files = lambda: ["other.txt"]
+    mapdl.inquire = lambda strarray, func, arg1: True
 
     written = {}
 

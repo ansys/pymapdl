@@ -28,7 +28,7 @@ import glob
 import io
 import json
 import os
-from pathlib import Path, PurePath
+from pathlib import Path, PurePath, PurePosixPath
 import re
 import shutil
 
@@ -43,11 +43,12 @@ from warnings import warn
 import weakref
 
 from ansys.tools.common.versioning import version_string_as_tuple
-import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
-import numpy as np
 from numpy.typing import NDArray
 import psutil
+
+import grpc
+import numpy as np
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
@@ -3128,18 +3129,45 @@ class MapdlGrpc(MapdlBase):
             )
 
         for each_file in list_files:
-            out_file_name = os.path.join(target_dir, each_file)
+            safe_relative_file = self._validate_remote_relative_path(each_file)
+            out_file_name = os.path.join(target_dir, safe_relative_file)
             # 'each_file' might include subdirectories (relative to the
             # MAPDL working directory), which might not exist yet locally.
             os.makedirs(os.path.dirname(out_file_name) or ".", exist_ok=True)
             self._download(
-                each_file,
+                safe_relative_file,
                 out_file_name=out_file_name,
                 chunk_size=chunk_size,
                 progress_bar=progress_bar,
             )
 
         return list_files
+
+    @staticmethod
+    def _validate_remote_relative_path(path: str) -> str:
+        """Validate a relative remote file path to keep downloads in target_dir."""
+        normalized_path = os.path.normpath(path.replace("\\", "/"))
+        normalized = PurePosixPath(normalized_path)
+
+        if normalized.is_absolute():
+            raise ValueError(
+                f"Path '{path}' is invalid. Absolute paths are not allowed for remote downloads."
+            )
+
+        if ".." in normalized.parts:
+            raise ValueError(
+                f"Path '{path}' is invalid. Parent directory references are not allowed."
+            )
+
+        if normalized.parts and re.match(r"^[a-zA-Z]:$", normalized.parts[0]):
+            raise ValueError(
+                f"Path '{path}' is invalid. Drive-letter paths are not allowed for remote downloads."
+            )
+
+        if str(normalized) in [".", ""]:
+            raise ValueError(f"Path '{path}' is invalid.")
+
+        return str(normalized)
 
     def _validate_files(
         self, file: str, extension: Optional[str] = None, recursive: bool = True
@@ -3183,8 +3211,11 @@ class MapdlGrpc(MapdlBase):
             # Literal file path inside a subdirectory of the working
             # directory. ``list_files`` only returns the top level of the
             # working directory, so it cannot be used to validate files in
-            # subdirectories. Trust the explicit path instead.
-            list_files = [file + extension if extension else file]
+            # subdirectories.
+            file_to_check = self._validate_remote_relative_path(file + extension)
+            list_files = (
+                [file_to_check] if self.inquire("", "EXIST", file_to_check) else []
+            )
 
         # filtering by extension
         list_files = [file for file in list_files if file.endswith(extension)]
