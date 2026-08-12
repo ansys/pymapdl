@@ -290,7 +290,7 @@ jobs:
       mapdl-version: ${{ matrix.mapdl-version }}
       file-name: "local-${{ matrix.mapdl-version }}"
       tags: "local"
-      latest-version: "252"
+      latest-version: "261"
       test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') && !contains(matrix.mapdl-version, '24') }}
       upload-logs: true
 
@@ -319,7 +319,7 @@ jobs:
       mapdl-version: ${{ matrix.mapdl-version }}
       file-name: "${{ matrix.mapdl-version }}-minimal"
       tags: "local,minimal"
-      latest-version: "252"
+      latest-version: "261"
       test_dpf: false
       upload-logs: true
 
@@ -343,7 +343,7 @@ jobs:
       username: ${{ github.actor }}
       log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
-      latest-version: "252"
+      latest-version: "261"
       mapdl-version: ${{ matrix.mapdl-version }}
       testing-minimal: false
       on-console: true
