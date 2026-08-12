@@ -190,6 +190,18 @@ or `PyMAPDL Discussions <pymapdl_discussions_>`_ for raising issues,
 request new features, or asking questions.
 
 
+PyMAPDL MCP
+-----------
+The `PyMAPDL MCP <pymapdl_mcp_docs_>`_ (Model Context Protocol) is a complementary integration
+that enables AI-powered interactions with MAPDL through AI agents and code editors. This integration
+allows you to leverage large language models to assist with MAPDL scripting and analysis workflows.
+
+For more information on the PyMAPDL MCP, visit:
+
+- `PyMAPDL MCP Documentation <pymapdl_mcp_docs_>`_
+- `PyMAPDL MCP Repository <pymapdl_mcp_repo_>`_
+
+
 Project index
 -------------
 

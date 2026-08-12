@@ -85,6 +85,13 @@
         If you want to resolve issues you encounter while using PyMAPDL,
         see :ref:`ref_troubleshooting`.
 
+    .. grid-item-card:: :fa:`robot` Try PyMAPDL MCP
+        :link: pymapdl_mcp_docs
+        :link-type: ref
+
+        If you want to use AI agents and code editors with PyMAPDL, see
+        the :ref:`PyMAPDL MCP documentation <pymapdl_mcp_docs>`.
+
     .. grid-item-card:: :fa:`users` Contribute to PyMAPDL
         :link: ref_contributing
         :link-type: ref
