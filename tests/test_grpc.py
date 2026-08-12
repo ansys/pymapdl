@@ -30,6 +30,7 @@ import sys
 import time
 from unittest.mock import patch
 
+import grpc
 import pytest
 
 from ansys.mapdl.core import examples
@@ -45,7 +46,6 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import random_string
-import grpc
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
