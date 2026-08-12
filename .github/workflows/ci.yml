@@ -564,6 +564,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Needed to push documentation to gh-pages branch
+      pull-requests: write  # Needed to comment on closed PRs when their preview documentation is removed
     needs: [docs-build]
     steps:
       - name: "Deploy the latest documentation"
