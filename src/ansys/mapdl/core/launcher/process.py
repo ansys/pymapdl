@@ -355,6 +355,10 @@ def _generate_launch_command(config: LaunchConfig) -> List[str]:
     if config.ram:
         cmd.extend(["-m", str(config.ram)])
 
+    # License type
+    if config.license_type:
+        cmd.extend(["-p", str(config.license_type)])
+
     # Additional switches
     if config.additional_switches:
         cmd.extend(shlex.split(config.additional_switches))
