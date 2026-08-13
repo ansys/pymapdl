@@ -692,6 +692,8 @@ class MapdlGrpc(MapdlBase):
 
     def _connect_to_mapdl(self, timeout: int):
         """(Re)connect to an existing MAPDL instance"""
+        self._ensure_channel()
+
         try:
             self._multi_connect(timeout=timeout)
         except MapdlConnectionError as err:  # pragma: no cover
@@ -704,6 +706,43 @@ class MapdlGrpc(MapdlBase):
         else:
             self._log.debug("Connection established")
 
+    def _ensure_channel(self) -> None:
+        """Rebuild the gRPC channel if it was closed.
+
+        A closed gRPC channel cannot be reopened, and :meth:`_close_grpc_channel`
+        clears ``_channel``. Reconnecting to a still-running MAPDL therefore
+        requires building a brand new channel and resubscribing to its
+        connectivity updates.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        MapdlRuntimeError
+            If the IP or the port is unknown, so no channel can be built.
+
+        Examples
+        --------
+        >>> mapdl.exit()          # closes the channel, MAPDL keeps running
+        >>> mapdl._ensure_channel()
+        >>> mapdl.channel_state
+        'CONNECTING'
+        """
+        if self._channel is not None:
+            return
+
+        ip, port = self._ip, self._port
+        if ip is None or port is None:  # pragma: no cover
+            raise MapdlRuntimeError(
+                "Cannot rebuild the gRPC channel: the MAPDL IP or port is unknown."
+            )
+
+        self._log.debug("Recreating channel to %s:%s", ip, port)
+        self._channel = self._create_channel(ip, port)
+        self._subscribe_to_channel()
+
     def reconnect_to_mapdl(self, timeout: Optional[int] = None):
         """Reconnect to an already instantiated MAPDL instance.
 
@@ -714,6 +753,11 @@ class MapdlGrpc(MapdlBase):
         ----------
         timeout : int, optional
             Timeout before raising an exception, by default None
+
+        Notes
+        -----
+        The gRPC channel is rebuilt when it has been closed, for instance by a
+        previous :meth:`exit` call that left MAPDL running.
         """
 
         if timeout is None:
@@ -1627,6 +1671,20 @@ class MapdlGrpc(MapdlBase):
         if mute is None:
             mute = self._mute
 
+        # Cheap, purely local liveness check: 'channel_state' reads the value
+        # cached by the connectivity callback, whereas 'is_alive' would issue a
+        # '_ctrl("VERSION")' round-trip on every single command. Only the
+        # terminal states are treated as dead; 'CONNECTING' is a normal
+        # transient and must not permanently mark the instance as exited.
+        if self._channel is not None and self.channel_state in (
+            "SHUTDOWN",
+            "TRANSIENT_FAILURE",
+        ):
+            self._exited = True
+            raise MapdlExitedError(
+                f"Mapdl exited (gRPC channel is '{self.channel_state}') before running the command: {cmd}"
+            )
+
         if self.exited:
             raise MapdlExitedError(
                 f"The MAPDL instance has been exited before running the command: {cmd}"
@@ -1640,11 +1698,16 @@ class MapdlGrpc(MapdlBase):
             raise ValueError("Maximum command length must be less than 640 characters")
 
         self._busy = True
-        if verbose:
-            response = self._send_command_stream(cmd, True)
-        else:
-            response = self._send_command(cmd, mute=mute)
-        self._busy = False
+        try:
+            if verbose:
+                response = self._send_command_stream(cmd, True)
+            else:
+                response = self._send_command(cmd, mute=mute)
+        finally:
+            # '_busy' must be cleared even when the command raises, otherwise
+            # 'is_alive' short-circuits on it forever and the liveness guard
+            # above is permanently disabled.
+            self._busy = False
 
         return response.strip()
 
@@ -1732,17 +1795,6 @@ class MapdlGrpc(MapdlBase):
         self, cmd: str, mute: bool = False
     ) -> Optional[str]:  # numpydoc ignore=RT01
         """Send a MAPDL command and return the response as a string"""
-        if self._channel is not None and not self.is_alive:
-            self._exited = True
-            raise MapdlExitedError(
-                f"Mapdl exited (gRPC channel is '{self.channel_state}') before running the command: {cmd}"
-            )
-
-        if self._exited:
-            raise MapdlExitedError(
-                f"The MAPDL instance has been exited before running the command: {cmd}"
-            )
-
         opt = ""
         if mute:
             opt = "MUTE"  # suppress any output
@@ -1762,16 +1814,6 @@ class MapdlGrpc(MapdlBase):
     @protect_grpc
     def _send_command_stream(self, cmd, verbose=False) -> str:  # numpydoc ignore=RT01
         """Send a command and expect a streaming response"""
-        if self._channel is not None and not self.is_alive:
-            self._exited = True
-            raise MapdlExitedError(
-                f"Mapdl exited (gRPC channel is '{self.channel_state}') before running the command: {cmd}"
-            )
-
-        if self._exited:
-            raise MapdlExitedError(
-                f"The MAPDL instance has been exited before running the command: {cmd}"
-            )
         request = pb_types.CmdRequest(command=cmd)
         time_step = self._get_time_step_stream()
         metadata = [("time_step_stream", str(time_step))]
@@ -1819,13 +1861,19 @@ class MapdlGrpc(MapdlBase):
 
         Notes
         -----
-        If Mapdl didn't start the instance, then this will be ignored unless
+        If Mapdl didn't start the instance, then MAPDL is kept alive unless
         ``force=True``.
 
         If ``PYMAPDL_START_INSTANCE`` is set to ``False`` (generally set in
-        remote testing or documentation build), then this will be
-        ignored. Override this behavior with ``force=True`` to always force
+        remote testing or documentation build), then then MAPDL is kept alive.
+        Override this behavior with ``force=True`` to always force
         exiting MAPDL regardless of your local environment.
+
+        The client side is always released, because closing the gRPC channel
+        is a purely client-side operation that does not stop the server. The
+        instance is therefore marked as exited and its background threads are
+        joined. Call :meth:`reconnect_to_mapdl` to build a fresh channel and
+        resume driving the same MAPDL session.
 
         If ``Mapdl.finish_job_on_exit`` is set to ``True`` and there is a valid
         JobID in ``Mapdl.jobid``, then the SLURM job will be canceled.
@@ -1840,37 +1888,80 @@ class MapdlGrpc(MapdlBase):
             f"Exiting MAPDL gRPC instance {self.ip}:{self.port} on '{self._path}'."
         )
 
-        if self.exited:
-            self._log.debug("Already exited")
-            # The instance may have been marked as exited by an error handler
-            # (for instance when MAPDL crashed) without ever releasing the
-            # channel. Close it here so the '_poll_connectivity' daemon thread
-            # does not outlive this object.
-            self._close_grpc_channel()
-            return
-
-        if save:
-            self._log.debug("Saving MAPDL database")
-            self.save()
-
-        if not force:
-            # Ignore this method if PYMAPDL_START_INSTANCE=False
-            if not self._start_instance or not self._launched:
-                self._log.info(
-                    "Ignoring exit due to PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't launch the instance."
-                )
-                return
-
-            # or building the gallery
-            if pymapdl.BUILDING_GALLERY:
-                self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
-                return
-
         try:
             self._exiting = True
+
+            if self.exited:
+                self._log.debug("Already exited")
+                # '_exited' is also set by the gRPC error handlers when MAPDL
+                # crashes, without releasing anything, so the channel and the
+                # PIPE-drainer threads may still be live. The helper is
+                # idempotent, so a regular repeated exit costs nothing.
+                self._disconnect_but_leave_mapdl_running()
+                return
+
+            if save:
+                self._log.debug("Saving MAPDL database")
+                self.save()
+
+            if not force:
+                # Ignore this method if PYMAPDL_START_INSTANCE=False
+                if not self._start_instance or not self._launched:
+                    self._log.info(
+                        "Ignoring exit due to PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't launch the instance."
+                    )
+                    self._disconnect_but_leave_mapdl_running()
+                    return
+
+                # or building the gallery
+                if pymapdl.BUILDING_GALLERY:
+                    self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
+                    self._disconnect_but_leave_mapdl_running()
+                    return
+
+            # Step 3 of '_release_resources' closes the gRPC channel.
             self._release_resources(path=self._path)
+
         finally:
             self._exiting = False
+
+    def _disconnect_but_leave_mapdl_running(self) -> None:
+        """Close the client side of the connection, leaving MAPDL running.
+
+        Closing a gRPC channel is a purely client-side operation: it cancels
+        pending RPCs and releases the socket, but it does not stop the MAPDL
+        server. This is what :meth:`exit` performs on the paths where MAPDL
+        itself must survive, so that the ``_poll_connectivity`` daemon thread
+        and the PIPE-drainer threads do not outlive this object.
+
+        The instance is marked as exited because the channel is gone. Use
+        :meth:`reconnect_to_mapdl` to build a fresh channel and resume driving
+        the same MAPDL session.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> mapdl.exit()          # PYMAPDL_START_INSTANCE=False
+        >>> mapdl.exited
+        True
+        >>> mapdl.reconnect_to_mapdl()
+        >>> mapdl.exited
+        False
+        """
+        try:
+            self._close_grpc_channel()
+        except Exception as e:
+            self._log.debug("Error closing gRPC channel: %s", e)
+
+        try:
+            self._join_pipe_drainer_threads()
+        except Exception as e:
+            self._log.debug("Error joining pipe-drainer threads: %s", e)
+
+        self._exited = True
 
     def _exit_mapdl(self, path: Optional[str] = None) -> None:
         """Exit MAPDL and remove the lock file in `path`"""
@@ -1889,37 +1980,61 @@ class MapdlGrpc(MapdlBase):
     def _release_resources(self, path: Optional[str] = None) -> None:
         """Release all resources held by this MAPDL instance.
 
-        This is the single, idempotent cleanup entry-point used by both
-        :meth:`exit` and :meth:`__del__`.  Calling it more than once is safe —
-        subsequent calls return immediately because ``_exited`` is ``True``.
+        This is the single, idempotent cleanup entry-point. It is reached
+        through :meth:`exit`, which :meth:`__del__` also calls. Calling it more
+        than once is safe: subsequent calls return immediately because
+        ``_exited`` is ``True``.
 
         Steps performed (in order):
 
         1. Kill the MAPDL server process and remove the lock file.
-        2. Close the gRPC channel.
-        3. Remove the UDS socket file (Unix Domain Socket transport only).
-        4. Remove the port from the global ``_LOCAL_PORTS`` registry.
-        5. Cancel the SLURM/HPC job (if applicable).
-        6. Delete the remote PyMAPDL server instance (if applicable).
-        7. Remove the temporary working directory (if ``remove_temp_dir_on_exit``).
-        8. Clean up logger handlers.
-        9. Mark the instance as exited (``_exited = True``).
+        2. Join the stdout, stderr, and startup PIPE-drainer threads.
+        3. Close the gRPC channel.
+        4. Remove the UDS socket file (Unix Domain Socket transport only).
+        5. Remove the port from the global ``_LOCAL_PORTS`` registry.
+        6. Cancel the SLURM/HPC job (if applicable).
+        7. Delete the remote PyMAPDL server instance (if applicable).
+        8. Mark the instance as exited (``_exited = True``).
+        9. Remove the temporary working directory (if ``remove_temp_dir_on_exit``).
+        10. Clean up logger handlers.
+
+        Parameters
+        ----------
+        path : str, optional
+            Working directory to remove the lock file from and to delete when
+            ``remove_temp_dir_on_exit`` is ``True``. The default is ``None``,
+            in which case ``self._path`` is used.
+
+        Returns
+        -------
+        None
 
         Notes
         -----
-        All steps are individually wrapped in ``try/except`` so that a failure
-        in one step does not prevent the remaining resources from being freed.
-        This also makes the method safe to call from ``__del__``, where the
-        interpreter may have already begun tearing down module globals.
-        """
-        if self.exited:
-            # Even when already exited the channel may still be open, because
-            # '_exited' is also set by the gRPC error handlers without any
-            # cleanup. Closing it here stops the '_poll_connectivity' thread.
-            self._close_grpc_channel()
-            return
+        Steps 1 to 7 run while ``_exited`` is still ``False`` so that they can
+        reach the server and emit log records. Step 8 flips the flag *before*
+        the temporary directory is removed, because
+        :meth:`_remove_temp_dir_on_exit` falls back to the ``directory``
+        property, which would otherwise issue an ``/INQUIRE`` command against
+        an already dead server. Logger handlers are torn down last, so every
+        preceding step can still log.
 
-        from ansys.mapdl import core as pymapdl
+        Each step is individually wrapped in ``try/except`` so that a failure
+        in one step does not prevent the remaining resources from being freed.
+        This also makes the method safe to call during interpreter shutdown,
+        where module globals may already have been torn down.
+
+        Examples
+        --------
+        This method is called internally by :meth:`exit`, so it is rarely
+        invoked directly.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> mapdl._release_resources()
+        >>> mapdl.exited
+        True
+        """
 
         path = path or getattr(self, "_path", None)
 
@@ -1929,20 +2044,20 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error during _exit_mapdl: %s", e)
 
-        # Ensure PIPE-drainer threads (stdout/stderr/startup) are joined so
+        # 2. Ensure PIPE-drainer threads (stdout/stderr/startup) are joined so
         # that background reader threads do not leak after teardown.
         try:
             self._join_pipe_drainer_threads()
         except Exception as e:
             self._log.debug("Error joining pipe-drainer threads: %s", e)
 
-        # 2. Close gRPC channel
+        # 3. Close gRPC channel
         try:
             self._close_grpc_channel()
         except Exception as e:
             self._log.debug("Error closing gRPC channel: %s", e)
 
-        # 3. Remove UDS socket file
+        # 4. Remove UDS socket file
         try:
             if getattr(self, "transport_mode", None) == "uds":
                 socket_path = os.path.join(self.uds_dir, f"mapdl-{self.port}.sock")
@@ -1952,14 +2067,16 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error removing UDS socket: %s", e)
 
-        # 4. Deregister port from global registry
+        # 5. Deregister port from global registry
         try:
+            from ansys.mapdl import core as pymapdl
+
             if self._local and self._port in pymapdl._LOCAL_PORTS:
                 pymapdl._LOCAL_PORTS.remove(self._port)
         except Exception as e:
             self._log.debug("Error removing port from _LOCAL_PORTS: %s", e)
 
-        # 5. Cancel HPC job
+        # 6. Cancel HPC job
         try:
             if self._mapdl_on_hpc and self.finish_job_on_exit:
                 self.kill_job(self.jobid)
@@ -1967,27 +2084,28 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error cancelling HPC job: %s", e)
 
-        # 6. Delete remote PyMAPDL server instance
+        # 7. Delete remote PyMAPDL server instance
         try:
             if self._remote_instance:  # pragma: no cover
                 self._remote_instance.delete()
         except Exception as e:
             self._log.debug("Error deleting remote instance: %s", e)
 
-        # 7. Remove temporary working directory
+        # 8. Mark exited — before the temp dir removal, so that the 'directory'
+        # fallback in '_remove_temp_dir_on_exit' cannot query the dead server
+        self._exited = True
+
+        # 9. Remove temporary working directory
         try:
             self._remove_temp_dir_on_exit(path)
         except Exception as e:
             self._log.debug("Error removing temp dir: %s", e)
 
-        # 8. Clean up logger handlers
+        # 10. Clean up logger handlers
         try:
             self._cleanup_loggers()
         except Exception as e:
             self._log.debug("Error during logger cleanup: %s", e)
-
-        # 9. Mark exited — must be LAST so that prior steps can still log
-        self._exited = True
 
     def _remove_temp_dir_on_exit(self, path=None):
         """Removes the temporary directory created by the launcher.
@@ -2026,8 +2144,8 @@ class MapdlGrpc(MapdlBase):
         if self._version is None or self._version < 24.1:
             self._ctrl("EXIT")
 
+        # We can't use the non-cached version because of recursion error.
         elif self._version >= 24.1:
-            # We can't use the non-cached version because of recursion error.
             # self.run("/EXIT,NOSAVE,,,,,SERVER")
             self.finish()
             self._ctrl("EXIT")
@@ -2211,10 +2329,6 @@ class MapdlGrpc(MapdlBase):
             # Killing child processes (they also hold the pipe write ends open,
             # so they must die before we join the drainer threads).
             self._kill_child_processes(timeout=timeout)
-
-            # All write ends of stdout/stderr are now closed; drainer threads
-            # will see EOF and exit almost immediately.
-            self._join_pipe_drainer_threads()
 
         if self.is_alive:
             raise MapdlRuntimeError("MAPDL could not be exited.")
@@ -4334,40 +4448,35 @@ class MapdlGrpc(MapdlBase):
         Notes
         -----
         The garbage collector may begin tearing down module globals before this
-        method runs, so every attribute access is guarded with ``hasattr`` and
-        wrapped in ``try/except``.  The actual cleanup is delegated to
-        :meth:`_release_resources`, which is itself idempotent.
+        method runs, so every attribute access is guarded with ``getattr`` and
+        wrapped in ``try/except``. Cleanup is delegated to
+        :meth:`_release_resources`, which is idempotent and does not issue any
+        MAPDL command that :meth:`exit` would add on top, such as ``save()``.
+        Calling :meth:`exit` here instead would risk gRPC round-trips during a
+        garbage-collection pass or interpreter shutdown.
 
         The gRPC channel is closed unconditionally, before any of the
         early-return checks, because it is a purely client-side resource whose
         ``_poll_connectivity`` daemon thread outlives this object otherwise.
         """
-        try:
-            self._close_grpc_channel()
-        except (
-            Exception
-        ):  # nosec B110 - best-effort cleanup during GC; logging is unreliable here
-            pass
 
         try:
-            if self.exited:
+            # Nothing left to release if the instance already exited.
+            if getattr(self, "_exited", False):
                 return
-        except AttributeError:
-            return
 
-        # Honour cleanup_on_exit=False: self._cleanup stores that flag.
-        if not getattr(self, "_cleanup", True):
-            return
+            # Honour cleanup_on_exit=False: self._cleanup stores that flag.
+            if not getattr(self, "_cleanup", True):
+                return
 
-        # Only clean up instances that PyMAPDL launched itself.
-        if not getattr(self, "_start_instance", True):
-            return
+            # Only clean up instances that PyMAPDL launched itself.
+            if not getattr(self, "_start_instance", True):
+                return
 
-        # If the process was never actually launched, there is nothing to release.
-        if not getattr(self, "_launched", False):
-            return
+            # If the process was never actually launched, there is nothing to release.
+            if not getattr(self, "_launched", False):
+                return
 
-        try:
             self._release_resources(getattr(self, "_path", None))
         except (
             Exception

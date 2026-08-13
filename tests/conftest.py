@@ -542,6 +542,23 @@ class NullContext:
         pass
 
 
+def reconnect_if_disconnected(mapdl) -> None:
+    """Rebuild the gRPC channel when a previous test released it.
+
+    ``exit()`` always closes the client side of the connection, even on the
+    paths where MAPDL itself is left running (``PYMAPDL_START_INSTANCE=False``
+    or a gallery build), because closing a gRPC channel does not stop the
+    server. The session-scoped ``mapdl`` fixture is shared by the whole suite,
+    so a test that calls ``exit()`` leaves it marked as exited. Reconnect here
+    so the remaining tests keep driving the same MAPDL session.
+    """
+    if not hasattr(mapdl, "reconnect_to_mapdl"):
+        return  # the console interface has no gRPC channel
+
+    if mapdl.exited or getattr(mapdl, "_channel", None) is None:
+        mapdl.reconnect_to_mapdl()
+
+
 @pytest.fixture(autouse=True, scope="function")
 def run_before_and_after_tests(
     request: pytest.FixtureRequest,
@@ -553,6 +570,8 @@ def run_before_and_after_tests(
         return
 
     mapdl = request.getfixturevalue("mapdl")  # get the mapdl fixture
+
+    reconnect_if_disconnected(mapdl)
 
     # Always verify clean state before any test that uses mapdl, regardless of
     # DEBUG_TESTING — prevents silent state leaks (mute, non-interactive) from
