@@ -266,9 +266,11 @@ class TestStartSubprocess:
             # The file handle must be stored so _kill_process can close it
             assert proc._stdout_file_handle is not None
             assert not proc._stdout_file_handle.closed
-            proc.wait(timeout=10)
-            proc._stdout_file_handle.close()
-            assert proc.poll() is not None
+            try:
+                proc.wait(timeout=10)
+                assert proc.poll() is not None
+            finally:
+                proc._stdout_file_handle.close()
 
     def test_start_subprocess_without_output_file(self):
         """Test starting subprocess without output file has no file handle."""
@@ -288,7 +290,55 @@ class TestStartSubprocess:
             assert proc._stdout_file_handle is None
             assert proc.stdout is not None
             assert proc.stderr is not None
-            proc.wait(timeout=10)
+
+    def test_start_subprocess_closes_file_handle_when_popen_fails(self):
+        """If Popen raises, the stdout redirect file handle must be closed."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_file = os.path.join(tmpdir, "output.txt")
+            cmd = [sys.executable, "-c", "print('test')"]
+
+            with (
+                patch.object(subprocess, "Popen", side_effect=OSError("boom")),
+                pytest.raises(OSError, match="boom"),
+            ):
+                process._start_subprocess(
+                    cmd=cmd,
+                    cwd=tmpdir,
+                    env=os.environ.copy(),
+                    output_file=output_file,
+                )
+
+            # The handle opened before Popen failed must not have leaked.
+            with open(output_file, "rb") as fh:
+                pass
+            assert fh.closed
+
+    def test_start_subprocess_popen_failure_survives_close_error(self):
+        """A failure while closing the handle must not mask the Popen error."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_file = os.path.join(tmpdir, "output.txt")
+            cmd = [sys.executable, "-c", "print('test')"]
+
+            mock_handle = Mock()
+            mock_handle.close.side_effect = OSError("close failed")
+
+            with (
+                patch.object(subprocess, "Popen", side_effect=OSError("boom")),
+                patch(
+                    "ansys.mapdl.core.launcher.process.open",
+                    return_value=mock_handle,
+                    create=True,
+                ),
+                pytest.raises(OSError, match="boom"),
+            ):
+                process._start_subprocess(
+                    cmd=cmd,
+                    cwd=tmpdir,
+                    env=os.environ.copy(),
+                    output_file=output_file,
+                )
+
+            mock_handle.close.assert_called_once()
 
 
 # ============================================================================
@@ -539,7 +589,8 @@ class TestWaitForProcessReady:
         mock_process.stdout = mock_stdout
 
         mock_queue = Mock(spec=Queue)
-        mock_monitor.return_value = (mock_queue, Mock())
+        mock_thread = Mock()
+        mock_monitor.return_value = (mock_queue, mock_thread)
 
         process.wait_for_process_ready(
             process=mock_process,
@@ -551,6 +602,9 @@ class TestWaitForProcessReady:
         mock_wait_dir.assert_called_once()
         mock_wait_err.assert_called_once()
         mock_grpc.assert_called_once_with(mock_queue, 10)
+        # The startup reader thread must be attached to the process so
+        # downstream teardown logic can join it.
+        assert mock_process._startup_stdout_thread is mock_thread
 
     def test_wait_for_process_ready_process_died(self):
         """Test handling process that died immediately."""
