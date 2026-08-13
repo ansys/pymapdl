@@ -107,7 +107,7 @@ class Component(tuple):
     type\_ : str
         The entity type. For instance "NODES", "KP", "VOLU", etc
 
-    items\_ : None, str, int, List[int], np.array[int]]
+    items\_ : None, str, int, Component, List[int], Tuple[int, ...], np.ndarray
         Item ids contained in the component.
 
     Examples
