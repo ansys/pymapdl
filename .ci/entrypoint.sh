@@ -32,15 +32,10 @@ fi
 
 if [[ $MAPDL_IMAGE == *"cicd"* || $MAPDL_IMAGE == *"amd"* ]]; then
     # The "cicd" and "amd" image flavours are built without Intel MPI (only
-    # OpenMPI is shipped, see the AMD flavour rules in
-    # ansys-internal/mapdl-docker-image-builder's `customizer.sh`). Without
-    # this explicit "-mpi openmpi" flag, MAPDL's own `anssh.ini` falls back to
-    # auto-detecting the MPI implementation from the *host's* real CPU
-    # (`grep AMD /proc/cpuinfo`), defaulting to Intel MPI whenever the
-    # underlying CI runner isn't an AMD machine. Since Intel MPI isn't present
-    # in these images, that leads to an intermittent, runner-CPU-dependent
-    # "mpirun: command not found" failure. Forcing OpenMPI here makes MAPDL
-    # startup deterministic regardless of the runner's CPU vendor.
+    # OpenMPI is shipped. Without this explicit "-mpi openmpi" flag, MAPDL's 
+    # own `anssh.ini` falls back to auto-detecting the MPI implementation
+    # from the *host's* real CPU, defaulting to Intel MPI whenever the
+    # underlying CI runner isn't an AMD machine.
     echo "Using OpenMPI for CICD/AMD version"
     export MPI="-mpi openmpi"
 else
