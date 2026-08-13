@@ -37,11 +37,13 @@ Notes
 
 """
 
+import gc
 from inspect import signature
 import os
 import re
 import shutil
 import tempfile
+from unittest.mock import MagicMock, patch
 from warnings import warn
 
 import numpy as np
@@ -85,6 +87,7 @@ from ansys.mapdl.core.examples import (
 )
 from ansys.mapdl.core.logging import PymapdlCustomAdapter as MAPDLLogger
 from ansys.mapdl.core.misc import create_temp_dir
+from ansys.mapdl.core.reader.core import _gc_disabled
 
 
 def validate(result_values, reader_values=None, post_values=None, rtol=1e-5, atol=1e-8):
@@ -401,9 +404,90 @@ def test_error_initialization_rst_file_not_found():
         DPFResult(rst_file=rst_file)
 
 
+class TestGCDuringDPFAPILoad:
+    """Tests for the garbage collector guard around the DPF client API load.
+
+    See https://github.com/ansys/pymapdl/issues/4704.
+    """
+
+    def test_gc_disabled_restores_state(self):
+        assert gc.isenabled()
+
+        with _gc_disabled():
+            assert not gc.isenabled()
+
+        assert gc.isenabled()
+
+    def test_gc_disabled_restores_state_on_exception(self):
+        assert gc.isenabled()
+
+        with pytest.raises(RuntimeError, match="Loading failed"):
+            with _gc_disabled():
+                assert not gc.isenabled()
+                raise RuntimeError("Loading failed")
+
+        assert gc.isenabled()
+
+    def test_gc_disabled_does_not_enable_gc(self):
+        gc.disable()
+        try:
+            with _gc_disabled():
+                assert not gc.isenabled()
+
+            assert not gc.isenabled()
+        finally:
+            gc.enable()
+
+    @pytest.mark.parametrize(
+        "mode,kwargs",
+        [
+            ("InProcess", {}),
+            ("LocalGrpc", {}),
+            ("RemoteGrpc", {"external_ip": "127.0.0.1", "external_port": 50054}),
+        ],
+    )
+    def test_gc_disabled_while_connecting(self, mode, kwargs):
+        """The collector must be off while DPF loads its client API."""
+        from ansys.mapdl.core.reader import DPFResult
+
+        gc_states = []
+
+        def record_gc_state(*args, **kwargs):
+            gc_states.append(gc.isenabled())
+            return "server"
+
+        result = DPFResult.__new__(DPFResult)
+
+        mock_dpf = MagicMock()
+        mock_dpf.server.start_local_server.side_effect = record_gc_state
+        mock_dpf.server.connect_to_server.side_effect = record_gc_state
+
+        with patch("ansys.mapdl.core.reader.core.dpf", mock_dpf):
+            result._connect_to_dpf_using_mode(mode=mode, **kwargs)
+
+        assert gc_states == [False], "The GC was enabled during the DPF API load."
+        assert result._server == "server"
+        assert gc.isenabled()
+
+    def test_remote_grpc_requires_ip_and_port(self):
+        from ansys.mapdl.core.reader import DPFResult
+
+        result = DPFResult.__new__(DPFResult)
+
+        with pytest.raises(ValueError, match="external_ip and external_port"):
+            result._connect_to_dpf_using_mode(mode="RemoteGrpc")
+
+    def test_unknown_mode(self):
+        from ansys.mapdl.core.reader import DPFResult
+
+        result = DPFResult.__new__(DPFResult)
+
+        with pytest.raises(ValueError, match="Unknown DPF connection mode"):
+            result._connect_to_dpf_using_mode(mode="NotAMode")
+
+
 @pytest.mark.skipif(ON_LOCAL, reason="Skip on local machine")
-def test_dpf_connection():
-    # uses 127.0.0.1 and port 50054 by default
+def test_dpf_connection():  # uses 127.0.0.1 and port 50054 by default
     try:
         grpc_con = dpf_core.connect_to_server(port=DPF_PORT)
         assert grpc_con.live
