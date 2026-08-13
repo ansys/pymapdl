@@ -23,9 +23,9 @@
 """
 .. _ref_psd_vm203:
 
-=========================
+===============================================
 Dynamic Load Effect on a Supported Thick Plate
-=========================
+===============================================
 
 This example demonstrates how to perform a random vibration analysis
 using PyMAPDL.
