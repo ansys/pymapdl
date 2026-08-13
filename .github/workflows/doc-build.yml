@@ -72,6 +72,7 @@ jobs:
   doc-build:
     name: Build documentation
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       contents: read  # Needed to read repository contents for documentation build
       packages: read  # Needed to pull Docker images from GitHub packages
