@@ -133,7 +133,7 @@ class TestRunExitedGuard:
         return mock
 
     @pytest.mark.parametrize("state", ["SHUTDOWN", "TRANSIENT_FAILURE"])
-    def test_raises_on_terminal_channel_state(self, state):
+    def test_raises_on_fatal_channel_state(self, state):
         """A dead channel marks the instance exited and raises."""
         mock = self._mock_for_run(channel_state=state)
 

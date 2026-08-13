@@ -1593,8 +1593,9 @@ class MapdlGrpc(MapdlBase):
 
         # Cheap, purely local liveness check: 'channel_state' reads the value
         # cached by the connectivity callback, whereas 'is_alive' would issue a
-        # '_ctrl("VERSION")' round-trip on every single command. Only the
-        # terminal states are treated as dead; 'CONNECTING' is a normal
+        # '_ctrl("VERSION")' round-trip on every single command. Only
+        # 'SHUTDOWN' (channel closed) and 'TRANSIENT_FAILURE' (channel could
+        # not connect) are treated as dead; 'CONNECTING' is a normal
         # transient and must not permanently mark the instance as exited.
         if self._channel is not None and self.channel_state in (
             "SHUTDOWN",

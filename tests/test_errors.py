@@ -20,15 +20,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from unittest.mock import MagicMock
+
 import pytest
 
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
     MapdlException,
+    MapdlExitedError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
     protect_from,
+    protect_grpc,
 )
+from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from conftest import NullContext
 
 error_shape_error_limits = """
@@ -186,3 +191,38 @@ def test_protect_from(message, condition, context):
     with context:
         myobj = myclass()
         myobj.raising()
+
+
+def test_protect_grpc_translates_closed_channel_value_error():
+    """A 'Cannot invoke RPC on closed channel' ValueError becomes a
+    'MapdlExitedError' and marks the instance as exited."""
+    mock_mapdl = MagicMock(spec=MapdlGrpc)
+    mock_mapdl._log = MagicMock()
+    mock_mapdl._exited = False
+    mock_mapdl.exited = False
+
+    @protect_grpc
+    def raising(self):
+        raise ValueError("Cannot invoke RPC on closed channel")
+
+    with pytest.raises(MapdlExitedError, match="closed channel"):
+        raising(mock_mapdl)
+
+    assert mock_mapdl._exited is True
+
+
+def test_protect_grpc_reraises_unrelated_value_error():
+    """A 'ValueError' unrelated to a closed channel must propagate unchanged."""
+    mock_mapdl = MagicMock(spec=MapdlGrpc)
+    mock_mapdl._log = MagicMock()
+    mock_mapdl._exited = False
+    mock_mapdl.exited = False
+
+    @protect_grpc
+    def raising(self):
+        raise ValueError("some unrelated argument error")
+
+    with pytest.raises(ValueError, match="some unrelated argument error"):
+        raising(mock_mapdl)
+
+    assert mock_mapdl._exited is False
