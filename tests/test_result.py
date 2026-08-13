@@ -42,6 +42,8 @@ from inspect import signature
 import os
 import re
 import shutil
+import subprocess
+import sys
 import tempfile
 from unittest.mock import MagicMock, patch
 from warnings import warn
@@ -52,6 +54,7 @@ import pytest
 from conftest import HAS_DPF, ON_LOCAL, TEST_DPF_BACKEND, clear, solved_box_func
 
 DPF_PORT = int(os.environ.get("DPF_PORT", 50056))  # Set in ci.yaml
+DPF_IP = os.environ.get("DPF_IP", "127.0.0.1")
 
 if not HAS_DPF:
     pytest.skip(
@@ -404,6 +407,52 @@ def test_error_initialization_rst_file_not_found():
         DPFResult(rst_file=rst_file)
 
 
+GC_DURING_API_LOAD_SCRIPT = '''
+"""Child process for the #4704 regression test.
+
+Connects to a remote DPF server, leaves unreferenced ``DataSources`` objects
+behind in reference cycles so that only the cyclic collector can reclaim them,
+then connects again. The second connection re-runs ``load_client_api()``, which
+is the window in which a collection pass must not run DPF finalizers.
+
+Each attempt starts from a drained collector and creates few enough objects to
+stay below the generation 0 threshold, so no collection happens before the
+load. The allocations of the load itself then cross the threshold and the pass
+fires inside the window. Ten attempts make the crash reliable: without the
+guard this script segfaults every time.
+"""
+
+import gc
+import sys
+
+from ansys.dpf import core as dpf
+
+from ansys.mapdl.core.reader.core import DPFResultCore
+
+ip = sys.argv[1]
+port = int(sys.argv[2])
+
+result = DPFResultCore.__new__(DPFResultCore)
+result._connect_to_dpf_using_mode("RemoteGrpc", ip, port)
+server = result._server
+
+for attempt in range(10):
+    gc.collect()  # start each attempt with no pending garbage
+    for _ in range(40):
+        data_sources = dpf.DataSources(server=server)
+        cycle = {"data_sources": data_sources}
+        cycle["self"] = cycle  # only the cyclic collector can reclaim this
+        del data_sources, cycle
+
+    # Reloads the DPF client API while the objects above await collection.
+    result._connect_to_dpf_using_mode("RemoteGrpc", ip, port)
+    print(f"attempt {attempt} survived", flush=True)
+
+gc.collect()
+print("SURVIVED")
+'''
+
+
 class TestGCDuringDPFAPILoad:
     """Tests for the garbage collector guard around the DPF client API load.
 
@@ -484,6 +533,35 @@ class TestGCDuringDPFAPILoad:
 
         with pytest.raises(ValueError, match="Unknown DPF connection mode"):
             result._connect_to_dpf_using_mode(mode="NotAMode")
+
+    @pytest.mark.skipif(ON_LOCAL, reason="Requires the remote DPF service used in CI")
+    def test_no_segfault_when_gc_runs_during_api_load(self, tmp_path):
+        """Reproduce the crash conditions of #4704 and check the process survives.
+
+        Every new DPF server connection re-runs ``load_client_api()``. If the
+        cyclic collector fires during that load and finalizes a ``DataSources``,
+        its ``__del__`` calls into the half-loaded C API and the interpreter
+        segfaults. Without the guard, this scenario crashes reproducibly.
+
+        The scenario runs in a subprocess because the failure mode is a
+        segmentation fault, which would take the test session down with it.
+        """
+        script = tmp_path / "gc_during_dpf_api_load.py"
+        script.write_text(GC_DURING_API_LOAD_SCRIPT)
+
+        proc = subprocess.run(
+            [sys.executable, str(script), DPF_IP, str(DPF_PORT)],
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+
+        assert proc.returncode == 0, (
+            f"The DPF connection crashed with return code {proc.returncode} "
+            f"(-11 or 139 means SIGSEGV).\n"
+            f"stdout:\n{proc.stdout}\nstderr:\n{proc.stderr}"
+        )
+        assert "SURVIVED" in proc.stdout
 
 
 @pytest.mark.skipif(ON_LOCAL, reason="Skip on local machine")
