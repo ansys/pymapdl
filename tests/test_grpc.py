@@ -352,6 +352,74 @@ def test_screenshot_path_filters_by_jobname(tmp_path):
     os.remove(screenshot_path)
 
 
+def test_validate_files_remote_subdirectory():
+    """A literal path inside a subdirectory should be trusted as-is,
+    since ``list_files`` only returns the top level of the working
+    directory (see #4697)."""
+    mapdl = MapdlGrpc.__new__(MapdlGrpc)
+    mapdl._local = False
+    mapdl.list_files = lambda: ["tmp_dir", "other.txt"]
+    mapdl.inquire = lambda strarray, func, arg1: True
+
+    assert mapdl._validate_files("tmp_dir/file.rst") == ["tmp_dir/file.rst"]
+
+
+def test_validate_files_remote_missing_subdirectory_file():
+    """A missing literal subdirectory file must raise as top-level files do."""
+    mapdl = MapdlGrpc.__new__(MapdlGrpc)
+    mapdl._local = False
+    mapdl.list_files = lambda: ["tmp_dir", "other.txt"]
+    mapdl.inquire = lambda strarray, func, arg1: False
+
+    with pytest.raises(FileNotFoundError):
+        mapdl._validate_files("tmp_dir/missing.rst")
+
+
+def test_validate_files_remote_path_traversal_rejected():
+    """Paths that escape the working directory must be rejected."""
+    mapdl = MapdlGrpc.__new__(MapdlGrpc)
+    mapdl._local = False
+    mapdl.inquire = lambda strarray, func, arg1: True
+
+    with pytest.raises(ValueError, match="Parent directory references"):
+        mapdl._validate_files("../escape.rst")
+
+
+def test_validate_files_remote_missing_top_level_file():
+    """A literal top level filename that cannot be found must still raise."""
+    mapdl = MapdlGrpc.__new__(MapdlGrpc)
+    mapdl._local = False
+    mapdl.list_files = lambda: ["other.txt"]
+
+    with pytest.raises(FileNotFoundError):
+        mapdl._validate_files("__notafile__")
+
+
+def test_download_from_remote_subdirectory(tmp_path):
+    """Downloading a file in a subdirectory should recreate the
+    subdirectory structure locally (see #4697)."""
+    mapdl = MapdlGrpc.__new__(MapdlGrpc)
+    mapdl._local = False
+    mapdl.list_files = lambda: ["other.txt"]
+    mapdl.inquire = lambda strarray, func, arg1: True
+
+    written = {}
+
+    def fake_download(
+        target_name, out_file_name=None, chunk_size=None, progress_bar=None
+    ):
+        written[target_name] = out_file_name
+        with open(out_file_name, "w") as fid:
+            fid.write("data")
+
+    mapdl._download = fake_download
+
+    result = mapdl._download_from_remote("tmp_dir/file.rst", target_dir=str(tmp_path))
+
+    assert result == ["tmp_dir/file.rst"]
+    assert os.path.exists(tmp_path / "tmp_dir" / "file.rst")
+
+
 @pytest.mark.parametrize(
     "files_to_download,expected_output",
     [

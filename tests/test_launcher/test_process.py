@@ -115,6 +115,21 @@ class TestGenerateLaunchCommand:
 
         assert "-m" not in cmd
 
+    def test_generate_command_with_license_type(self):
+        """Test command generation with license type."""
+        config = create_launch_config(license_type="meba")
+        cmd = process._generate_launch_command(config)
+
+        assert "-p" in cmd
+        assert cmd[cmd.index("-p") + 1] == "meba"
+
+    def test_generate_command_without_license_type(self):
+        """Test command generation without license type."""
+        config = create_launch_config(license_type=None)
+        cmd = process._generate_launch_command(config)
+
+        assert "-p" not in cmd
+
     def test_generate_command_with_switches(self):
         """Test command generation with additional switches."""
         config = create_launch_config(additional_switches="-dis -acc -w")
