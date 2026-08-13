@@ -541,6 +541,24 @@ class NullContext:
         pass
 
 
+def restore_connection(mapdl) -> None:
+    """Rebuild the gRPC channel if the test just released it.
+
+    ``exit()`` always closes the client side of the connection, even on the
+    paths where MAPDL itself is left running (``PYMAPDL_START_INSTANCE=False``
+    or a gallery build), because closing a gRPC channel does not stop the
+    server. The ``mapdl`` fixture is session-scoped and shared by the whole
+    suite, so a test that calls ``exit()`` must hand the instance back in a
+    usable state. This runs at teardown, so no exited or disconnected state
+    ever crosses a test boundary.
+    """
+    if not hasattr(mapdl, "reconnect_to_mapdl"):
+        return  # the console interface has no gRPC channel
+
+    if mapdl.exited or getattr(mapdl, "_channel", None) is None:
+        mapdl.reconnect_to_mapdl()
+
+
 @pytest.fixture(autouse=True, scope="function")
 def run_before_and_after_tests(
     request: pytest.FixtureRequest,
@@ -554,8 +572,11 @@ def run_before_and_after_tests(
     mapdl = request.getfixturevalue("mapdl")  # get the mapdl fixture
 
     # Always verify clean state before any test that uses mapdl, regardless of
-    # DEBUG_TESTING — prevents silent state leaks (mute, non-interactive) from
-    # a previously failed test propagating to the next test.
+    # DEBUG_TESTING — prevents silent state leaks (mute, non-interactive,
+    # exited) from a previously failed test propagating to the next test.
+    assert (
+        not mapdl.exited
+    ), "mapdl is exited before the test. A previous test likely left it dirty."
     assert (
         not mapdl.mute
     ), "mapdl.mute is True before the test. A previous test likely left it dirty."
@@ -580,6 +601,11 @@ def run_before_and_after_tests(
         assert not mapdl.exited, "MAPDL is exited before the test. It should not!"
 
     yield  # this is where the testing happens
+
+    # Hand the shared instance back usable: a test that called 'exit()' released
+    # the channel, which does not stop MAPDL. Repair it here rather than at the
+    # start of the next test, so that nothing leaks across the boundary.
+    restore_connection(mapdl)
 
     if DEBUG_TESTING:
         log_end_test(mapdl, test_name)
