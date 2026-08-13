@@ -816,7 +816,8 @@ class MapdlPool:
         Parameters
         ----------
         block : bool, optional
-            When ``True``, wait until all processes are closed.
+            When ``True``, wait until all processes are closed before
+            returning.  Default is ``False``.
 
         Examples
         --------
