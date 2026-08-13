@@ -39,12 +39,12 @@ from typing import (
 import warnings
 import weakref
 
-import numpy as np
 from numpy.typing import NDArray
 
 from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import ComponentDoesNotExits, ComponentIsNotSelected
 from ansys.mapdl.core.misc import is_float
+import numpy as np
 
 if TYPE_CHECKING:  # pragma: no cover
     import logging
@@ -98,16 +98,16 @@ def _check_valid_pyobj_to_entities(
 
 
 class Component(tuple):
-    """Component object
+    r"""Component object
 
     Object which contain the definition of a component.
 
     Parameters
     ----------
-    type_ : str
+    type\_ : str
         The entity type. For instance "NODES", "KP", "VOLU", etc
 
-    items_ : None, str, int, List[int], np.array[int]]
+    items\_ : None, str, int, Component, List[int], Tuple[int, ...], np.ndarray
         Item ids contained in the component.
 
     Examples
