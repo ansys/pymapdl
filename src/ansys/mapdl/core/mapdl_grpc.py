@@ -38,7 +38,17 @@ import subprocess  # nosec B404
 import tempfile
 import threading
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    Union,
+)
 from warnings import warn
 import weakref
 
@@ -487,6 +497,7 @@ class MapdlGrpc(MapdlBase):
             grpc.ChannelConnectivity.CONNECTING
         )
         self._time_step_stream: Optional[int] = None
+        self._connectivity_callback: Optional[Callable[[Any], None]] = None
 
         if channel is None:
             self._log.debug("Creating channel to %s:%s", ip, port)
@@ -750,10 +761,25 @@ class MapdlGrpc(MapdlBase):
     def _subscribe_to_channel(self):
         """Subscribe to channel status and store the value in 'mapdl._channel_state'"""
 
+        # A weak reference is used so that the gRPC ``_poll_connectivity``
+        # daemon thread, which keeps the callback alive for as long as the
+        # subscription lasts, does not keep this instance alive too.  A strong
+        # reference here creates an uncollectable cycle
+        # (thread -> state -> callback -> mapdl -> channel -> state) that
+        # prevents ``__del__`` from ever running, leaking both the instance and
+        # the polling thread.
+        self_ref = weakref.ref(self)
+
         # Callback function to monitor state changes
         def connectivity_callback(connectivity):
-            self._log.debug(f"Channel connectivity changed to: {connectivity}")
-            self._channel_state = connectivity
+            mapdl = self_ref()
+            if mapdl is None:
+                return
+            mapdl._log.debug(f"Channel connectivity changed to: {connectivity}")
+            mapdl._channel_state = connectivity
+
+        # Keep a handle so the callback can be unsubscribed on teardown
+        self._connectivity_callback = connectivity_callback
 
         # Subscribe to channel state changes
         self._channel.subscribe(connectivity_callback, try_to_connect=True)
@@ -1864,9 +1890,7 @@ class MapdlGrpc(MapdlBase):
 
         # 2. Close gRPC channel
         try:
-            if hasattr(self, "_channel") and self._channel is not None:
-                self._channel.close()
-                self._log.debug("gRPC channel closed")
+            self._close_grpc_channel()
         except Exception as e:
             self._log.debug("Error closing gRPC channel: %s", e)
 
@@ -1916,6 +1940,41 @@ class MapdlGrpc(MapdlBase):
 
         # 9. Mark exited — must be LAST so that prior steps can still log
         self._exited = True
+
+    def _close_grpc_channel(self) -> None:
+        """Unsubscribe from and close the gRPC channel.
+
+        Removes the connectivity callback registered by
+        :meth:`_subscribe_to_channel` and closes the channel, which is what
+        terminates the gRPC ``_poll_connectivity`` daemon thread.  That thread
+        only exits once the channel has no subscribers left, so failing to do
+        this leaks one daemon thread per instance.
+
+        Safe to call multiple times; subsequent calls are no-ops.  It is also
+        safe to call on an instance that is already marked as exited, which is
+        precisely the case that used to leak, because ``exit()`` returns early
+        for such instances.
+        """
+        channel = getattr(self, "_channel", None)
+        callback = getattr(self, "_connectivity_callback", None)
+
+        self._channel = None
+        self._connectivity_callback = None
+
+        if channel is None:
+            return
+
+        if callback is not None:
+            try:
+                channel.unsubscribe(callback)
+            except Exception as e:
+                self._log.debug(f"Error unsubscribing from gRPC channel: {e}")
+
+        try:
+            channel.close()
+            self._log.debug("gRPC channel closed")
+        except Exception as e:
+            self._log.debug(f"Error closing gRPC channel: {e}")
 
     def _remove_temp_dir_on_exit(self, path=None):
         """Removes the temporary directory created by the launcher.
@@ -4209,7 +4268,17 @@ class MapdlGrpc(MapdlBase):
         method runs, so every attribute access is guarded with ``hasattr`` and
         wrapped in ``try/except``.  The actual cleanup is delegated to
         :meth:`_release_resources`, which is itself idempotent.
+
+        The gRPC channel is closed unconditionally, before any of the
+        early-return checks below, because it is a purely client-side resource
+        whose ``_poll_connectivity`` daemon thread outlives this object
+        otherwise.
         """
+        try:
+            self._close_grpc_channel()
+        except Exception:  # nosec B110 - best-effort cleanup during GC
+            pass
+
         try:
             if self._exited:
                 return
