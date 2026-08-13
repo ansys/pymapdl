@@ -44,9 +44,10 @@ Public API:
 
 import os
 import platform
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Tuple, Union
 
 from ansys.mapdl.core import LOG
+from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 
 from .config import LOCALHOST, MAPDL_DEFAULT_PORT, resolve_launch_config  # noqa: F401
 from .connection import (
@@ -84,12 +85,98 @@ __all__ = [
     "_create_queue_for_std",
     "check_process_is_alive",
     "get_process_at_port",
+    "get_default_ansys",
+    "get_default_ansys_path",
+    "get_default_ansys_version",
 ]
 
 
 def generate_start_parameters(kwargs: dict) -> dict:
     """Generate start parameters dict (backward compatibility shim)."""
     return {k: v for k, v in kwargs.items()}
+
+
+def get_default_ansys() -> Union[Tuple[str, float], Tuple[Literal[""], Literal[""]]]:
+    """Search for ansys path within the standard install location.
+
+    Returns the path and version of the latest MAPDL version installed.
+
+    Returns
+    -------
+    ansys_path : str
+        Full path to the ANSYS executable.
+
+    version : float
+        Version float.  For example, 21.1 corresponds to 2021R1.
+
+    Examples
+    --------
+    Within Windows
+
+    >>> from ansys.mapdl.core.launcher import get_default_ansys
+    >>> get_default_ansys()
+    'C:/Program Files/ANSYS Inc/v211/ANSYS/bin/winx64/ansys211.exe', 21.1
+
+    Within Linux
+
+    >>> get_default_ansys()
+    (/usr/ansys_inc/v211/ansys/bin/ansys211, 21.1)
+    """
+    from ansys.tools.common.path import find_mapdl
+
+    return find_mapdl(supported_versions=SUPPORTED_ANSYS_VERSIONS)
+
+
+def get_default_ansys_path() -> str:
+    """Search for ansys path within the standard install location.
+
+    Returns the path of the latest MAPDL version installed.
+
+    Returns
+    -------
+    str
+        Full path to the ANSYS executable.
+
+    Examples
+    --------
+    Within Windows
+
+    >>> from ansys.mapdl.core.launcher import get_default_ansys_path
+    >>> get_default_ansys_path()
+    'C:/Program Files/ANSYS Inc/v211/ANSYS/bin/winx64/ansys211.exe'
+
+    Within Linux
+
+    >>> get_default_ansys_path()
+    '/usr/ansys_inc/v211/ansys/bin/ansys211'
+    """
+    return get_default_ansys()[0]
+
+
+def get_default_ansys_version() -> float:
+    """Search for ansys path within the standard install location.
+
+    Returns the version of the latest MAPDL version installed.
+
+    Returns
+    -------
+    float
+        Version float.  For example, 21.1 corresponds to 2021R1.
+
+    Examples
+    --------
+    Within Windows
+
+    >>> from ansys.mapdl.core.launcher import get_default_ansys_version
+    >>> get_default_ansys_version()
+    21.1
+
+    Within Linux
+
+    >>> get_default_ansys_version()
+    21.1
+    """
+    return get_default_ansys()[1]
 
 
 def _launch_mapdl_common(
