@@ -10,12 +10,14 @@ Components
 
    component.ComponentManager
 
-Component is a lightweight ``tuple`` subclass, so its inherited ``tuple``
-methods (``count``, ``index``) and simple ``type``/``items`` properties
-don't need their own generated pages.
+The :class:`~ansys.mapdl.core.component.Component` class represents a single
+named component and subclasses the built-in ``tuple`` type to store the
+selected entity IDs. Because it inherits directly from ``tuple``, it also
+exposes the standard ``tuple`` API (such as ``count()`` and ``index()``),
+which is documented in the Python standard library and isn't duplicated here.
+The ``type`` and ``items`` properties are specific to this class and are
+documented on this page instead of being generated as separate pages.
 
-.. autosummary::
-   :toctree: _autosummary
-   :template: base.rst
-
-   component.Component
+.. autoclass:: ansys.mapdl.core.component.Component
+   :members: type, items
+   :show-inheritance:
