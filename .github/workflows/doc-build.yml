@@ -159,7 +159,7 @@ jobs:
       - name: "Install OS packages"
         shell: bash
         run: |
-          sudo apt update && sudo apt install zip pandoc libgl1 libglx-mesa0 xvfb texlive-latex-extra latexmk graphviz texlive-xetex texlive-fonts-extra qpdf xindy librsvg2-bin
+          sudo apt update && sudo apt install zip pandoc libgl1 libglx-mesa0 xvfb texlive-latex-extra latexmk graphviz texlive-xetex texlive-fonts-extra qpdf xindy librsvg2-bin moreutils
 
       - name: "Test virtual framebuffer"
         shell: bash
@@ -245,7 +245,15 @@ jobs:
           DPF_DEFAULT_GRPC_MODE: 'insecure'
         run: |
           export PYTHONFAULTHANDLER=1
-          xvfb-run make -C doc ${BUILDER} SPHINXOPTS="-j auto" | tee doc_build.log
+          # Temporary diagnostics for the intermittent hangs seen during the
+          # "updating environment"/intersphinx phase of the doc build
+          # (https://github.com/ansys/pymapdl/pull/4707). "-vv" makes Sphinx
+          # log each source file read and each intersphinx inventory fetch;
+          # piping through "ts" timestamps every line so the exact moment a
+          # hang starts is visible in the artifact even without live logs.
+          xvfb-run make -C doc ${BUILDER} SPHINXOPTS="-j auto -vv" 2>&1 \
+            | ts '%Y-%m-%dT%H:%M:%.S' \
+            | tee doc_build.log
 
       - name: "Substitute defective GIF"
         shell: bash

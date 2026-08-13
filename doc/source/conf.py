@@ -130,6 +130,11 @@ intersphinx_mapping = {
     "pytwin": ("https://twin.docs.pyansys.com/version/stable/", None),
 }
 
+# Fail fast instead of hanging indefinitely when a remote inventory is slow or
+# unreachable. Sphinx's default (no timeout) has caused the documentation
+# build job to freeze for the full CI timeout on a stalled fetch.
+intersphinx_timeout = 10
+
 suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
 sd_fontawesome_latex = True
 
