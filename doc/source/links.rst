@@ -88,6 +88,10 @@
 .. _pymapdl_ex_vm: https://examples.mapdl.docs.pyansys.com/verif-manual/index.html
 .. _pymapdl_cheat_sheet: https://mapdl.docs.pyansys.com/stable/_static/_static/cheat_sheet.pdf
 
+.. # PyMAPDL MCP related
+.. _pymapdl_mcp_docs: https://mapdl-mcp.docs.pyansys.com/
+.. _pymapdl_mcp_repo: https://github.com/ansys/pymapdl-mcp
+
 .. # Ansys Structural Guide links:
 .. _ansys_krylov_sweep_harmonic_analysis: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_str/str_Krysweep.html
 

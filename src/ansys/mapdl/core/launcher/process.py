@@ -462,7 +462,12 @@ def _start_subprocess(
         )
     except Exception:
         if stdout_file_handle is not None:
-            stdout_file_handle.close()
+            try:
+                stdout_file_handle.close()
+            except OSError:
+                # Preserve the original Popen failure even if closing the
+                # handle itself raises (e.g. a flush/IO error).
+                pass
         raise
 
     # Keep a reference to the output file so _kill_process can close it
