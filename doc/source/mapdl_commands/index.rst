@@ -197,7 +197,7 @@ Undocumented miscellaneous commands.
    :maxdepth: 1
    :caption: Miscellaneous
 
-   misc
+   misc/index
 
 
 *****************************
