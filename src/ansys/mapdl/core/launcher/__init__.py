@@ -115,12 +115,12 @@ def get_default_ansys() -> Union[Tuple[str, float], Tuple[Literal[""], Literal["
 
     >>> from ansys.mapdl.core.launcher import get_default_ansys
     >>> get_default_ansys()
-    'C:/Program Files/ANSYS Inc/v211/ANSYS/bin/winx64/ansys211.exe', 21.1
+    ('C:/Program Files/ANSYS Inc/v211/ANSYS/bin/winx64/ansys211.exe', 21.1)
 
     Within Linux
 
     >>> get_default_ansys()
-    (/usr/ansys_inc/v211/ansys/bin/ansys211, 21.1)
+    ('/usr/ansys_inc/v211/ansys/bin/ansys211', 21.1)
     """
     from ansys.tools.common.path import find_mapdl
 
@@ -153,15 +153,16 @@ def get_default_ansys_path() -> str:
     return get_default_ansys()[0]
 
 
-def get_default_ansys_version() -> float:
+def get_default_ansys_version() -> Union[float, Literal[""]]:
     """Search for ansys path within the standard install location.
 
     Returns the version of the latest MAPDL version installed.
 
     Returns
     -------
-    float
+    float or str
         Version float.  For example, 21.1 corresponds to 2021R1.
+        Returns an empty string when MAPDL cannot be found.
 
     Examples
     --------
