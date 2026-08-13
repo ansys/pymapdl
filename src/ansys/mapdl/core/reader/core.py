@@ -20,7 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from contextlib import contextmanager
 from functools import wraps
+import gc
 import os
 import pathlib
 import socket
@@ -30,6 +32,7 @@ from typing import (
     Any,
     Callable,
     Iterable,
+    Iterator,
     Literal,
 )
 import weakref
@@ -137,6 +140,37 @@ def update_result(function: Callable[..., Any]) -> Callable[..., Any]:
         return function(self, *args, **kwargs)
 
     return wrapper
+
+
+@contextmanager
+def _gc_disabled() -> Iterator[None]:
+    """Temporarily disable the cyclic garbage collector.
+
+    Loading the DPF client API goes through :mod:`ctypes`, which allocates
+    memory and can therefore trigger a collection pass. If that pass finalizes
+    a DPF object, its ``__del__`` calls into the very C API that is still being
+    loaded, and the process segfaults. Disabling the collector for the duration
+    of the call closes that re-entrancy window.
+
+    Yields
+    ------
+    None
+        Nothing is yielded. The collector state is restored on exit.
+
+    Examples
+    --------
+    >>> with _gc_disabled():
+    ...     dpf.server.start_local_server()
+    """
+    was_enabled = gc.isenabled()
+    if was_enabled:
+        gc.disable()
+
+    try:
+        yield
+    finally:
+        if was_enabled:
+            gc.enable()
 
 
 class DPFResultCore:
@@ -352,26 +386,31 @@ class DPFResultCore:
         external_ip: str | None = None,
         external_port: int | None = None,
     ):
-        if mode == "InProcess":
-            dpf.server.set_server_configuration(
-                dpf.server_factory.AvailableServerConfigs.InProcessServer
+        if mode == "RemoteGrpc" and (external_ip is None or external_port is None):
+            raise ValueError(
+                "external_ip and external_port should be provided for RemoteGrpc communication"
             )
-            srvr = dpf.server.start_local_server()
-        elif mode == "LocalGrpc":
-            dpf.server.set_server_configuration(
-                dpf.server_factory.AvailableServerConfigs.GrpcServer
-            )
-            srvr = dpf.server.start_local_server()
-        elif mode == "RemoteGrpc":
-            dpf.server.set_server_configuration(
-                dpf.server_factory.AvailableServerConfigs.GrpcServer
-            )
-            if external_ip is not None and external_port is not None:
-                srvr = dpf.server.connect_to_server(ip=external_ip, port=external_port)
-            else:
-                raise ValueError(
-                    "external_ip and external_port should be provided for RemoteGrpc communication"
+        elif mode not in ("InProcess", "LocalGrpc", "RemoteGrpc"):
+            raise ValueError(f"Unknown DPF connection mode: {mode}")
+
+        # The garbage collector is disabled while the DPF client API is being
+        # loaded. See the `_gc_disabled` context manager for the rationale.
+        with _gc_disabled():
+            if mode == "InProcess":
+                dpf.server.set_server_configuration(
+                    dpf.server_factory.AvailableServerConfigs.InProcessServer
                 )
+                srvr = dpf.server.start_local_server()
+            elif mode == "LocalGrpc":
+                dpf.server.set_server_configuration(
+                    dpf.server_factory.AvailableServerConfigs.GrpcServer
+                )
+                srvr = dpf.server.start_local_server()
+            else:
+                dpf.server.set_server_configuration(
+                    dpf.server_factory.AvailableServerConfigs.GrpcServer
+                )
+                srvr = dpf.server.connect_to_server(ip=external_ip, port=external_port)
 
         self._server = srvr
 
