@@ -563,7 +563,7 @@ References
 Additional files
 ================
 
-* :download:`beam_with_report.py <ref_beam_report_example_>`: Complete Python script.
+* :download:`beam_with_report.py <../../../../../examples/00-mapdl-examples/beam_with_report.py>`: Complete Python script.
 
 Examples of the generated report files are:
 

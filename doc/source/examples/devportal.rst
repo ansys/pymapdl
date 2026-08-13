@@ -22,7 +22,7 @@ connect to Ansys experts and the growing Ansys developer community.
     :gutter: 2
 
     .. grid-item-card:: Biomedical catheter design analysis
-      :img-top: https://developer.ansys.com/sites/default/files/inline-images/BMCatheter_1_0.png
+      :img-top: ../_static/pyansys-logo-light_mode.png
       :link: https://developer.ansys.com/blog/biomedical-catheter-design-analysis
       :text-align: center
       :class-title: pyansys-card-title
@@ -32,7 +32,7 @@ connect to Ansys experts and the growing Ansys developer community.
 
 
     .. grid-item-card:: Postprocessing of simplified bolted connections with the help of PyAnsys
-      :img-top: https://developer.ansys.com/sites/default/files/inline-images/Postprocessing_of_simplified_bolted_connections_with_the_help_of_PyAnsys_image_04.jpg
+      :img-top: ../_static/pyansys-logo-light_mode.png
       :link: https://developer.ansys.com/blog/postprocessing-simplified-bolted-connections-help-pyansys
       :text-align: center
       :class-title: pyansys-card-title

@@ -1,4 +1,4 @@
-.. |pyansyscontact| replace:: `PyAnsys Core team <pyansys.core@ansys.com>`_
+.. |pyansyscontact| replace:: `PyAnsys Core team <pyansys.core@ansys.com>`__
 
 .. |pyansyscontactemail| replace:: pyansys.core@ansys.com
 
