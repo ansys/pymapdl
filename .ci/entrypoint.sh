@@ -32,7 +32,7 @@ fi
 
 if [[ $MAPDL_IMAGE == *"cicd"* || $MAPDL_IMAGE == *"amd"* ]]; then
     # The "cicd" and "amd" image flavours are built without Intel MPI (only
-    # OpenMPI is shipped. Without this explicit "-mpi openmpi" flag, MAPDL's 
+    # OpenMPI is shipped. Without this explicit "-mpi openmpi" flag, MAPDL's
     # own `anssh.ini` falls back to auto-detecting the MPI implementation
     # from the *host's* real CPU, defaulting to Intel MPI whenever the
     # underlying CI runner isn't an AMD machine.
