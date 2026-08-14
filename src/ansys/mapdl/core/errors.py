@@ -429,6 +429,17 @@ def protect_grpc(func: Callable) -> Callable:
                 # Exit while-loop if success
                 break
 
+            except ValueError as error:
+                if "Cannot invoke RPC on closed channel" not in str(error):
+                    raise
+
+                mapdl = retrieve_mapdl_from_args(args)
+                mapdl._log.debug("RPC invoked on a closed channel: MAPDL has exited.")
+                mapdl._exited = True
+                raise MapdlExitedError(
+                    "MAPDL has exited: cannot invoke RPC on a closed channel."
+                ) from error
+
             except grpc.RpcError as error:
                 mapdl = retrieve_mapdl_from_args(args)
 
