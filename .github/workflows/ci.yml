@@ -243,7 +243,7 @@ jobs:
   build-test-remote-matrix:
     name: "Build remote test matrix"
     runs-on: ubuntu-latest
-    needs: [ smoke-tests ]
+    needs: [ check-changelog-fragment  ]
     permissions:
       contents: read  # Needed to read repository contents for matrix build
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -266,7 +266,7 @@ jobs:
 
   build-test-remote:
     name: "Remote: ${{ matrix.mapdl-version }}"
-    needs: [ build-test-remote-matrix ] #,
+    needs: [ build-test-remote-matrix, smoke-tests ]
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-test-remote-matrix.outputs.matrix) }}
@@ -288,7 +288,7 @@ jobs:
   build-test-local-matrix:
     name: "Build test matrix for minimal and local"
     runs-on: ubuntu-latest
-    needs: [ smoke-tests ]
+    needs: [ check-changelog-fragment  ]
     permissions:
       contents: read  # Needed to read repository contents for matrix build
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -311,7 +311,7 @@ jobs:
   build-test-ubuntu-local:
     name: "Local: ${{ matrix.mapdl-version }}"
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs: [ build-test-local-matrix ]
+    needs: [ build-test-local-matrix , smoke-tests]
     uses: ./.github/workflows/test-local.yml
     permissions:
       contents: read  # Needed to read repository contents for tests
