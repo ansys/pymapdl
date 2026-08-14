@@ -794,12 +794,22 @@ def mapdl(request, tmpdir_factory):
 #
 
 
+from ansys.mapdl.core.launcher.models import ProcessInfo as _ProcessInfo
 from ansys.mapdl.core.launcher.models import ValidationResult as _ValidationResult
 
 
 # Necessary patches to patch Mapdl launch
 def _returns(return_=None):
     return lambda *args, **kwargs: return_
+
+
+def _fake_launch_mapdl_process(config, env_vars=None, *args, **kwargs):
+    """Fake replacement for ``launcher.process.launch_mapdl_process``.
+
+    Avoids spawning a real MAPDL subprocess and waiting for its gRPC server
+    to come up, returning fabricated process information instead.
+    """
+    return _ProcessInfo(process=None, port=config.port, ip=config.ip, pid=99999)
 
 
 # Methods to patch in MAPDL when launching
@@ -842,9 +852,11 @@ _meth_patch_MAPDL_launch = [
 _meth_patch_MAPDL = _meth_patch_MAPDL_launch.copy()
 _meth_patch_MAPDL.extend(
     [
-        # launcher methods
-        ("ansys.mapdl.core.launcher.launch_grpc", _returns(None)),
-        ("ansys.mapdl.core.launcher.check_mapdl_launch", _returns(None)),
+        # launcher methods: avoid actually launching a MAPDL process.
+        (
+            "ansys.mapdl.core.launcher._launch_mapdl_process",
+            _fake_launch_mapdl_process,
+        ),
     ]
 )
 
