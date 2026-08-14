@@ -2112,6 +2112,41 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug(f"Error closing gRPC channel: {e}")
 
+    def _close_grpc_channel(self) -> None:
+        """Unsubscribe from and close the gRPC channel.
+
+        Removes the connectivity callback registered by
+        :meth:`_subscribe_to_channel` and closes the channel, which is what
+        terminates the gRPC ``_poll_connectivity`` daemon thread.  That thread
+        only exits once the channel has no subscribers left, so failing to do
+        this leaks one daemon thread per instance.
+
+        Safe to call multiple times; subsequent calls are no-ops.  It is also
+        safe to call on an instance that is already marked as exited, which is
+        precisely the case that used to leak, because ``exit()`` returns early
+        for such instances.
+        """
+        channel = getattr(self, "_channel", None)
+        callback = getattr(self, "_connectivity_callback", None)
+
+        self._channel = None
+        self._connectivity_callback = None
+
+        if channel is None:
+            return
+
+        if callback is not None:
+            try:
+                channel.unsubscribe(callback)
+            except Exception as e:
+                self._log.debug(f"Error unsubscribing from gRPC channel: {e}")
+
+        try:
+            channel.close()
+            self._log.debug("gRPC channel closed")
+        except Exception as e:
+            self._log.debug(f"Error closing gRPC channel: {e}")
+
     def _remove_temp_dir_on_exit(self, path=None):
         """Removes the temporary directory created by the launcher.
 
