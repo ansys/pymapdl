@@ -56,20 +56,6 @@ jobs:
           github_token: ${{ secrets.github_token }}
           assignees: ${{ github.actor }}
 
-  update-changelog:
-    name: "Update CHANGELOG (on release)"
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write  # Needed to update changelog files
-      pull-requests: write  # Needed to create pull requests with changelog updates
-    steps:
-      - uses: ansys/actions/doc-deploy-changelog@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
-        with:
-          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
-          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
-
   pull-request-name:
     if: github.event_name == 'pull_request'
     name: Check the name of the pull-request
@@ -565,10 +551,25 @@ jobs:
           library-name: ${{ env.PACKAGE_NAME }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
+  update-changelog:
+    name: "Update CHANGELOG (on release)"
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    runs-on: ubuntu-latest
+    needs: [package]
+    permissions:
+      contents: write  # Needed to update changelog files
+      pull-requests: write  # Needed to create pull requests with changelog updates
+    steps:
+      - uses: ansys/actions/doc-deploy-changelog@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
+        with:
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
+
   release:
     name: "Release project"
-    if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
-    needs: [package, update-changelog]
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    needs: [package]
     runs-on: ubuntu-latest
     # Specifying a GitHub environment is optional, but strongly encouraged
     environment: release
