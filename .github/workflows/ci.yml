@@ -41,13 +41,13 @@ jobs:
   add_labels:
     name: Adding assignee if there is none.
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     permissions:
       pull-requests: write  # Needed to add assignees to pull requests
     steps:
       - uses: actions-ecosystem/action-add-assignees@a5b84af721c4a621eb9c7a4a95ec20a90d0b88e9 #v1.0.1
         if: |
           (
-          github.event_name == 'pull_request' &&
           github.actor != 'dependabot[bot]' &&
           github.actor != 'pyansys-ci-bot' &&
           toJson(github.event.pull_request.assignees) == '[]'
@@ -56,24 +56,62 @@ jobs:
           github_token: ${{ secrets.github_token }}
           assignees: ${{ github.actor }}
 
-  update-changelog:
-    name: "Update CHANGELOG (on release)"
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+  check-vulnerabilities:
+    name: "Check library vulnerabilities"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ansys/actions/check-vulnerabilities@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
+        with:
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          python-package-name: ${{ env.PACKAGE_NAME }}
+          dev-mode: ${{ github.ref != 'refs/heads/main' }}
+
+  actions-security:
+    name: "Check actions security"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ansys/actions/check-actions-security@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
+        with:
+          generate-summary: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          auditing-level: 'high'
+          trust-ansys-actions: true
+
+  check-changelog-fragment:
+    name: "Check changelog fragment exists"
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Needed to update changelog files
-      pull-requests: write  # Needed to create pull requests with changelog updates
+      contents: read  # Needed to checkout the repository
+      actions: write  # Needed to cancel the workflow run
     steps:
-      - uses: ansys/actions/doc-deploy-changelog@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+        if: github.event_name == 'pull_request'
         with:
-          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
-          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
+          persist-credentials: false
 
+      - name: "Check changelog fragment exists"
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          file=$(find doc/changelog.d -type f -name "${PR_NUMBER}.*.md")
+
+          if [ -z "$file" ]; then
+            echo "::warning::No changelog fragment found in doc/changelog.d for PR #${PR_NUMBER}."
+            echo "Please add a changelog fragment named '${PR_NUMBER}.<category>.md' to doc/changelog.d."
+            gh run cancel "${RUN_ID}"
+            sleep 60  # Give GitHub time to process the cancellation before the job exits
+          fi
+
+          echo "Found changelog fragment: $file"
 
   pull-request-name:
     if: github.event_name == 'pull_request'
     name: Check the name of the pull-request
+    needs: [ check-changelog-fragment ]
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read  # Needed to read pull request details
@@ -83,10 +121,10 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-
   doc-style:
     name: "Documentation style ${{ matrix.folder }}"
     runs-on: ubuntu-latest
+    needs: [ pull-request-name ]
     permissions:
       contents: read
     strategy:
@@ -101,10 +139,56 @@ jobs:
           vale-config: ${{ matrix.folder }}/.vale.ini
           vale-version: "3.4.1"
 
+  docs-build:
+    name: "Build documentation"
+    needs: doc-style
+    uses: ./.github/workflows/doc-build.yml
+    permissions:
+      contents: read  # Needed to read repository contents for documentation build
+      packages: read  # Needed to pull Docker images from GitHub packages
+    secrets:
+      license-server: ${{ secrets.LICENSE_SERVER }}
+      username: ${{ github.actor }}
+      password: ${{ secrets.GITHUB_TOKEN }}
+
+  doc-deploy-pr:
+    name: "Deploy PR documentation"
+    runs-on: ubuntu-latest
+    needs: [docs-build]
+    if: contains(github.event.pull_request.labels.*.name, 'deploy pr docs')
+    permissions:
+      contents: write  # Needed to push documentation to gh-pages branch
+      pull-requests: write  # Needed to comment on pull requests with documentation link
+    steps:
+      - uses: ansys/actions/doc-deploy-pr@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
+        with:
+          cname: ${{ env.DOCUMENTATION_CNAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
+          maximum-pr-doc-deployments: 3
+
+  upload-dev-docs:
+    name: "Upload dev documentation"
+    if: github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Needed to push documentation to gh-pages branch
+      pull-requests: write  # Needed to comment on closed PRs when their preview documentation is removed
+    needs: [docs-build]
+    steps:
+      - name: "Deploy the latest documentation"
+        uses: ansys/actions/doc-deploy-dev@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
+        with:
+          cname: ${{ env.DOCUMENTATION_CNAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
 
   smoke-tests:
     name: "${{ matrix.os }} | Py ${{ matrix.python-version }} | Rel ${{ matrix.should-release }}"
     runs-on: ${{ matrix.os }}
+    needs: [ check-changelog-fragment ]
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 20
     permissions: {}
@@ -143,65 +227,10 @@ jobs:
           ${PYTHON_ACTIVATE}
           python -c "from pyvista.plotting import system_supports_plotting; print('System support plotting ' + str(system_supports_plotting()))"
 
-
-  check-vulnerabilities:
-    name: "Check library vulnerabilities"
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: ansys/actions/check-vulnerabilities@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
-        with:
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-          python-package-name: ${{ env.PACKAGE_NAME }}
-          dev-mode: ${{ github.ref != 'refs/heads/main' }}
-
-  actions-security:
-    name: "Check actions security"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: ansys/actions/check-actions-security@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
-        with:
-          generate-summary: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          auditing-level: 'high'
-          trust-ansys-actions: true
-
-  docs-build:
-    name: "Build documentation"
-    needs: doc-style
-    uses: ./.github/workflows/doc-build.yml
-    permissions:
-      contents: read  # Needed to read repository contents for documentation build
-      packages: read  # Needed to pull Docker images from GitHub packages
-    secrets:
-      license-server: ${{ secrets.LICENSE_SERVER }}
-      username: ${{ github.actor }}
-      password: ${{ secrets.GITHUB_TOKEN }}
-
-
-  doc-deploy-pr:
-    name: "Deploy PR documentation"
-    runs-on: ubuntu-latest
-    needs: docs-build
-    if: contains(github.event.pull_request.labels.*.name, 'deploy pr docs')
-    permissions:
-      contents: write  # Needed to push documentation to gh-pages branch
-      pull-requests: write  # Needed to comment on pull requests with documentation link
-    steps:
-      - uses: ansys/actions/doc-deploy-pr@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
-        with:
-          cname: ${{ env.DOCUMENTATION_CNAME }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
-          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
-          maximum-pr-doc-deployments: 3
-
-
   build-test-remote-matrix:
     name: "Build remote test matrix"
     runs-on: ubuntu-latest
+    needs: [ check-changelog-fragment  ]
     permissions:
       contents: read  # Needed to read repository contents for matrix build
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -222,10 +251,9 @@ jobs:
           local: false
           run_all_builds: ${{ inputs.run_all_builds }}
 
-
   build-test-remote:
     name: "Remote: ${{ matrix.mapdl-version }}"
-    needs: [ build-test-remote-matrix] #smoke-tests,
+    needs: [ build-test-remote-matrix, smoke-tests ]
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-test-remote-matrix.outputs.matrix) }}
@@ -247,6 +275,7 @@ jobs:
   build-test-local-matrix:
     name: "Build test matrix for minimal and local"
     runs-on: ubuntu-latest
+    needs: [ check-changelog-fragment  ]
     permissions:
       contents: read  # Needed to read repository contents for matrix build
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -266,11 +295,10 @@ jobs:
           local: true
           run_all_builds: ${{ inputs.run_all_builds }}
 
-
   build-test-ubuntu-local:
     name: "Local: ${{ matrix.mapdl-version }}"
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs: [smoke-tests, build-test-local-matrix]
+    needs: [ build-test-local-matrix , smoke-tests]
     uses: ./.github/workflows/test-local.yml
     permissions:
       contents: read  # Needed to read repository contents for tests
@@ -292,65 +320,6 @@ jobs:
       tags: "local"
       latest-version: "261"
       test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') && !contains(matrix.mapdl-version, '24') }}
-      upload-logs: true
-
-
-  build-test-ubuntu-minimal: # TODO: Enable again when minimal builds are stable
-    name: "Local-min: ${{ matrix.mapdl-version }}"
-    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs: [build-test-ubuntu-local, build-test-remote]
-    uses: ./.github/workflows/test-local.yml
-    permissions:
-      contents: read  # Needed to read repository contents for tests
-      packages: read  # Needed to pull Docker images from GitHub packages
-    strategy:
-      fail-fast: false
-      matrix:
-        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu-cicd']
-    secrets:
-      license-server: ${{ secrets.LICENSE_SERVER }}
-      codecov-token: ${{ secrets.CODECOV_TOKEN }}
-      token: ${{ secrets.GITHUB_TOKEN }}
-      username: ${{ github.actor }}
-      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
-    with:
-      testing-minimal: true
-      pytest-arguments: ''
-      mapdl-version: ${{ matrix.mapdl-version }}
-      file-name: "${{ matrix.mapdl-version }}-minimal"
-      tags: "local,minimal"
-      latest-version: "261"
-      test_dpf: false
-      upload-logs: true
-
-
-  build-test-ubuntu-console:
-    name: "Local-min-console: ${{ matrix.mapdl-version }}"
-    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs: [build-test-ubuntu-local, build-test-remote]
-    permissions:
-      contents: read  # Needed to read repository contents for tests
-      packages: read  # Needed to pull Docker images from GitHub packages
-    uses: ./.github/workflows/test-local.yml
-    strategy:
-      fail-fast: false
-      matrix:
-        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu-cicd']
-    secrets:
-      license-server: ${{ secrets.LICENSE_SERVER }}
-      codecov-token: ${{ secrets.CODECOV_TOKEN }}
-      token: ${{ secrets.GITHUB_TOKEN }}
-      username: ${{ github.actor }}
-      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
-    with:
-      latest-version: "261"
-      mapdl-version: ${{ matrix.mapdl-version }}
-      testing-minimal: false
-      on-console: true
-      pytest-arguments: '-k console'
-      file-name: "${{ matrix.mapdl-version }}-console"
-      tags: "local,console"
-      test_dpf: false
       upload-logs: true
 
   docker-compose-test-remote:
@@ -490,9 +459,89 @@ jobs:
           echo "Stopping all services..."
           docker compose --profile local-host down -v || true
 
+  test_julia:
+    name: "Julia ${{ matrix.julia-version }} | ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    needs: [ smoke-tests ]
+    permissions:
+      contents: read
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        julia-version: ['1.10.3', '1.10.4']
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: "Run Julia testing"
+        uses: ./.github/actions/test-julia
+        with:
+          julia-version: ${{ matrix.julia-version }}
+
+  build-test-ubuntu-minimal:
+    name: "Local-min: ${{ matrix.mapdl-version }}"
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [ build-test-ubuntu-local, build-test-remote, docker-compose-test-remote, docker-compose-test-local, test_julia ]
+    uses: ./.github/workflows/test-local.yml
+    permissions:
+      contents: read  # Needed to read repository contents for tests
+      packages: read  # Needed to pull Docker images from GitHub packages
+    strategy:
+      fail-fast: false
+      matrix:
+        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu-cicd']
+    secrets:
+      license-server: ${{ secrets.LICENSE_SERVER }}
+      codecov-token: ${{ secrets.CODECOV_TOKEN }}
+      token: ${{ secrets.GITHUB_TOKEN }}
+      username: ${{ github.actor }}
+      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
+    with:
+      testing-minimal: true
+      pytest-arguments: ''
+      mapdl-version: ${{ matrix.mapdl-version }}
+      file-name: "${{ matrix.mapdl-version }}-minimal"
+      tags: "local,minimal"
+      latest-version: "261"
+      test_dpf: false
+      upload-logs: true
+
+  build-test-ubuntu-console:
+    name: "Local-min-console: ${{ matrix.mapdl-version }}"
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [ build-test-ubuntu-local, build-test-remote, docker-compose-test-remote, docker-compose-test-local, test_julia ]
+    permissions:
+      contents: read  # Needed to read repository contents for tests
+      packages: read  # Needed to pull Docker images from GitHub packages
+    uses: ./.github/workflows/test-local.yml
+    strategy:
+      fail-fast: false
+      matrix:
+        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu-cicd']
+    secrets:
+      license-server: ${{ secrets.LICENSE_SERVER }}
+      codecov-token: ${{ secrets.CODECOV_TOKEN }}
+      token: ${{ secrets.GITHUB_TOKEN }}
+      username: ${{ github.actor }}
+      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
+    with:
+      latest-version: "261"
+      mapdl-version: ${{ matrix.mapdl-version }}
+      testing-minimal: false
+      on-console: true
+      pytest-arguments: '-k console'
+      file-name: "${{ matrix.mapdl-version }}-console"
+      tags: "local,console"
+      test_dpf: false
+      upload-logs: true
+
   package:
     name: "Package library"
-    needs: [build-test-remote, build-test-ubuntu-local, docs-build, build-test-ubuntu-minimal, docker-compose-test-remote, docker-compose-test-local]
+    needs: [ docs-build, build-test-ubuntu-minimal, build-test-ubuntu-console ]
     runs-on: ubuntu-latest
     permissions:
       contents: read  # Needed to read repository contents for packaging
@@ -503,11 +552,25 @@ jobs:
           library-name: ${{ env.PACKAGE_NAME }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
+  update-changelog:
+    name: "Update CHANGELOG (on release)"
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    runs-on: ubuntu-latest
+    needs: [package]
+    permissions:
+      contents: write  # Needed to update changelog files
+      pull-requests: write  # Needed to create pull requests with changelog updates
+    steps:
+      - uses: ansys/actions/doc-deploy-changelog@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
+        with:
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
 
   release:
     name: "Release project"
-    if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
-    needs: [package, update-changelog]
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    needs: [package]
     runs-on: ubuntu-latest
     # Specifying a GitHub environment is optional, but strongly encouraged
     environment: release
@@ -539,14 +602,13 @@ jobs:
           additional-artifacts: "minimum_requirements.txt"
           token: ${{ secrets.GITHUB_TOKEN }}
 
-
   upload-docs-release:
     name: "Upload release documentation"
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Needed to push documentation to gh-pages branch
-    needs: [release]
+    needs: [release, update-changelog]
     steps:
       - name: "Deploy the stable documentation"
         uses: ansys/actions/doc-deploy-stable@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
@@ -557,28 +619,9 @@ jobs:
           bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
           bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
 
-
-  upload-dev-docs:
-    name: "Upload dev documentation"
-    if: github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write  # Needed to push documentation to gh-pages branch
-      pull-requests: write  # Needed to comment on closed PRs when their preview documentation is removed
-    needs: [docs-build]
-    steps:
-      - name: "Deploy the latest documentation"
-        uses: ansys/actions/doc-deploy-dev@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
-        with:
-          cname: ${{ env.DOCUMENTATION_CNAME }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
-          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
-
-
   notify:
     name: "Notify failed build"
-    needs: [smoke-tests, docs-build, build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, docker-compose-test-remote, docker-compose-test-local]
+    needs: [ upload-docs-release ]
     if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     permissions:
@@ -591,35 +634,9 @@ jobs:
           title-template: "Failed scheduled build"
           label-name: "Build failed"
 
-
-  test_julia:
-    name: "Julia ${{ matrix.julia-version }} | ${{ matrix.os }}"
-    runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
-    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    strategy:
-      fail-fast: false
-      matrix:
-        julia-version: ['1.10.3', '1.10.4']
-        os: [ubuntu-latest, windows-latest]
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: "Run Julia testing"
-        uses: ./.github/actions/test-julia
-        with:
-          julia-version: ${{ matrix.julia-version }}
-
-
   pytest-summary:
     name: Pytest summary for all the test jobs
-    needs: [
-      build-test-remote, build-test-ubuntu-local, build-test-ubuntu-console, build-test-ubuntu-minimal, docker-compose-test-remote, docker-compose-test-local
-      ]
+    needs: [ upload-docs-release ]
     if: always()
     runs-on: ubuntu-latest
     permissions:
