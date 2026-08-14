@@ -27,6 +27,7 @@ import weakref
 from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
 import pytest
 
+from ansys.mapdl.core.errors import MapdlExitedError
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc, MapdlRuntimeError
 
 
@@ -119,6 +120,88 @@ def test_get_non_interactive_mode(mapdl):
 
     # reset
     mapdl._store_commands = False
+
+
+class TestRunExitedGuard:
+    """The liveness guards live in ``_run``, ahead of ``self._busy = True``."""
+
+    @staticmethod
+    def _mock_for_run(channel_state="READY", exited=False):
+        mock = _make_mock_mapdl()
+        mock._mute = False
+        mock._channel = Mock()
+        mock.channel_state = channel_state
+        mock.exited = exited
+        mock._exited = exited
+        mock._busy = False
+        return mock
+
+    @pytest.mark.parametrize("state", ["SHUTDOWN", "TRANSIENT_FAILURE"])
+    def test_raises_on_fatal_channel_state(self, state):
+        """A dead channel marks the instance exited and raises."""
+        mock = self._mock_for_run(channel_state=state)
+
+        with pytest.raises(MapdlExitedError, match=state):
+            MapdlGrpc._run(mock, "/PREP7")
+
+        assert mock._exited is True
+        mock._send_command.assert_not_called()
+
+    @pytest.mark.parametrize("state", ["IDLE", "READY", "CONNECTING"])
+    def test_non_terminal_channel_state_is_not_fatal(self, state):
+        """'CONNECTING' is a normal transient and must not kill the instance."""
+        mock = self._mock_for_run(channel_state=state)
+        mock._send_command.return_value = "OK"
+
+        assert MapdlGrpc._run(mock, "/PREP7") == "OK"
+        assert mock._exited is False
+
+    def test_raises_when_already_exited(self):
+        """An exited instance refuses to run commands."""
+        mock = self._mock_for_run(exited=True)
+
+        with pytest.raises(MapdlExitedError):
+            MapdlGrpc._run(mock, "/PREP7")
+
+        mock._send_command.assert_not_called()
+
+    def test_guard_does_not_issue_an_rpc_per_command(self):
+        """The guard reads the cached channel state, it does not call '_ctrl'."""
+        mock = self._mock_for_run()
+        mock._send_command.return_value = "OK"
+
+        MapdlGrpc._run(mock, "/PREP7")
+
+        mock._ctrl.assert_not_called()
+        mock.is_alive.assert_not_called()
+
+    def test_busy_is_cleared_when_the_command_raises(self):
+        """'_busy' must not stay latched, or the guard is disabled forever."""
+        mock = self._mock_for_run()
+        mock._send_command.side_effect = MapdlRuntimeError("boom")
+
+        with pytest.raises(MapdlRuntimeError):
+            MapdlGrpc._run(mock, "/PREP7")
+
+        assert mock._busy is False
+
+
+class TestSendCommand:
+    """``_send_command`` no longer carries a guard; it just sends."""
+
+    def test_sends_the_command(self):
+        """The command reaches the stub and the response is returned."""
+        mock = _make_mock_mapdl()
+        mock._exited = False
+        mock._stub = MagicMock()
+        resp = MagicMock()
+        resp.response = "OK"
+        mock._stub.SendCommand.return_value = resp
+
+        result = MapdlGrpc._send_command(mock, "/PREP7")
+
+        assert result == "OK"
+        mock._stub.SendCommand.assert_called_once()
 
 
 class TestCloseGrpcChannel:
