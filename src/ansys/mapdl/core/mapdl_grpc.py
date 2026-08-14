@@ -1618,7 +1618,22 @@ class MapdlGrpc(MapdlBase):
         if mute is None:
             mute = self._mute
 
-        if self._exited:
+        # Cheap, purely local liveness check: 'channel_state' reads the value
+        # cached by the connectivity callback, whereas 'is_alive' would issue a
+        # '_ctrl("VERSION")' round-trip on every single command. Only
+        # 'SHUTDOWN' (channel closed) and 'TRANSIENT_FAILURE' (channel could
+        # not connect) are treated as dead; 'CONNECTING' is a normal
+        # transient and must not permanently mark the instance as exited.
+        if self._channel is not None and self.channel_state in (
+            "SHUTDOWN",
+            "TRANSIENT_FAILURE",
+        ):
+            self._exited = True
+            raise MapdlExitedError(
+                f"Mapdl exited (gRPC channel is '{self.channel_state}') before running the command: {cmd}"
+            )
+
+        if self.exited:
             raise MapdlExitedError(
                 f"The MAPDL instance has been exited before running the command: {cmd}"
             )
@@ -1631,11 +1646,16 @@ class MapdlGrpc(MapdlBase):
             raise ValueError("Maximum command length must be less than 640 characters")
 
         self._busy = True
-        if verbose:
-            response = self._send_command_stream(cmd, True)
-        else:
-            response = self._send_command(cmd, mute=mute)
-        self._busy = False
+        try:
+            if verbose:
+                response = self._send_command_stream(cmd, True)
+            else:
+                response = self._send_command(cmd, mute=mute)
+        finally:
+            # '_busy' must be cleared even when the command raises, otherwise
+            # 'is_alive' short-circuits on it forever and the liveness guard
+            # above is permanently disabled.
+            self._busy = False
 
         return response.strip()
 
