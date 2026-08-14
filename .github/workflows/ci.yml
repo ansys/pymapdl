@@ -125,6 +125,7 @@ jobs:
     name: "Documentation style ${{ matrix.folder }}"
     runs-on: ubuntu-latest
     needs: [ pull-request-name ]
+    # This jobs runs if the above is skipped or successful. This is to show nicer graphs in the summary windows.
     if: always() && (needs.pull-request-name.result == 'success' || needs.pull-request-name.result == 'skipped')
     permissions:
       contents: read
