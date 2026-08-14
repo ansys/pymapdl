@@ -27,6 +27,7 @@ import weakref
 from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
 import pytest
 
+from ansys.mapdl.core.errors import MapdlExitedError
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc, MapdlRuntimeError
 
 
