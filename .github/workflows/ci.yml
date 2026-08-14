@@ -124,8 +124,6 @@ jobs:
   doc-style:
     name: "Documentation style ${{ matrix.folder }}"
     runs-on: ubuntu-latest
-    if: always() && (needs.pull-request-name.result == 'success' || needs.pull-request-name.result == 'skipped')
-    needs: [ pull-request-name ]
     permissions:
       contents: read
     strategy:
