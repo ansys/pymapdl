@@ -3010,43 +3010,46 @@ def test_timeout_when_exiting(mapdl, is_exited):
 
     handle_generic_grpc_error = errors.handle_generic_grpc_error
 
-    with (
-        patch("ansys.mapdl.core.mapdl_grpc.pb_types.CmdRequest") as mock_cmdrequest,
-        patch(
-            "ansys.mapdl.core.mapdl_grpc.MapdlGrpc.is_alive", new_callable=PropertyMock
-        ) as mock_is_alive,
-        patch.object(mapdl, "_connect") as mock_connect,
-        patch(
-            "ansys.mapdl.core.errors.handle_generic_grpc_error", autospec=True
-        ) as mock_handle,
-        patch.object(mapdl, "_exit_mapdl") as mock_exit_mapdl,
-    ):
+    try:
+        with (
+            patch("ansys.mapdl.core.mapdl_grpc.pb_types.CmdRequest") as mock_cmdrequest,
+            patch(
+                "ansys.mapdl.core.mapdl_grpc.MapdlGrpc.is_alive",
+                new_callable=PropertyMock,
+            ) as mock_is_alive,
+            patch.object(mapdl, "_connect") as mock_connect,
+            patch(
+                "ansys.mapdl.core.errors.handle_generic_grpc_error", autospec=True
+            ) as mock_handle,
+            patch.object(mapdl, "_exit_mapdl") as mock_exit_mapdl,
+        ):
 
-        mock_exit_mapdl.return_value = None  # Avoid exiting
-        mock_is_alive.return_value = False
-        mock_connect.return_value = None  # patched to avoid timeout
-        mock_cmdrequest.side_effect = raise_exception
-        mock_handle.side_effect = handle_generic_grpc_error
+            mock_exit_mapdl.return_value = None  # Avoid exiting
+            mock_is_alive.return_value = False
+            mock_connect.return_value = None  # patched to avoid timeout
+            mock_cmdrequest.side_effect = raise_exception
+            mock_handle.side_effect = handle_generic_grpc_error
 
-        with pytest.raises(MapdlExitedError):
-            mapdl.prep7()
+            with pytest.raises(MapdlExitedError):
+                mapdl.prep7()
 
-        # After
-        assert mapdl._exited
+            # After
+            assert mapdl._exited
 
-        assert mock_handle.call_count == 1
+            assert mock_handle.call_count == 1
 
-        if is_exited:
-            # Checking no trying to reconnect
-            assert mock_connect.call_count == 0
-            assert mock_cmdrequest.call_count == 1
-            assert mock_is_alive.call_count == 1
+            if is_exited:
+                # Checking no trying to reconnect
+                assert mock_connect.call_count == 0
+                assert mock_cmdrequest.call_count == 1
+                assert mock_is_alive.call_count == 1
 
-        else:
-            assert mock_connect.call_count == errors.N_ATTEMPTS
-            assert mock_cmdrequest.call_count == errors.N_ATTEMPTS + 1
-            assert mock_is_alive.call_count == errors.N_ATTEMPTS + 1
+            else:
+                assert mock_connect.call_count == errors.N_ATTEMPTS
+                assert mock_cmdrequest.call_count == errors.N_ATTEMPTS + 1
+                assert mock_is_alive.call_count == errors.N_ATTEMPTS + 1
 
+    finally:
         mapdl._exited = False
 
 
