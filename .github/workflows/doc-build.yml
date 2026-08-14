@@ -159,7 +159,7 @@ jobs:
       - name: "Install OS packages"
         shell: bash
         run: |
-          sudo apt update && sudo apt install zip pandoc libgl1 libglx-mesa0 xvfb texlive-latex-extra latexmk graphviz texlive-xetex texlive-fonts-extra qpdf xindy librsvg2-bin
+          sudo apt update && sudo apt install zip pandoc libgl1 libglx-mesa0 xvfb texlive-latex-extra latexmk graphviz texlive-xetex texlive-fonts-extra qpdf xindy librsvg2-bin moreutils
 
       - name: "Test virtual framebuffer"
         shell: bash
@@ -245,7 +245,18 @@ jobs:
           DPF_DEFAULT_GRPC_MODE: 'insecure'
         run: |
           export PYTHONFAULTHANDLER=1
-          xvfb-run make -C doc ${BUILDER} SPHINXOPTS="-j auto" | tee doc_build.log
+          # Temporary diagnostics for the intermittent hangs seen during the
+          # doc build (https://github.com/ansys/pymapdl/pull/4707). The
+          # timestamped "-vv" log showed the freeze happens right after the
+          # "env-purge-doc" loop finishes, at the point where Sphinx forks
+          # worker processes (multiprocessing, "-j auto") for parallel source
+          # reading. gRPC's native completion-queue threads, left over from
+          # the gallery examples' MAPDL sessions, are known to deadlock a
+          # forked child if still alive at fork time. Forcing "-j 1" disables
+          # that fork so we can confirm/rule out this hypothesis.
+          xvfb-run make -C doc ${BUILDER} SPHINXOPTS="-j 1 -vv" 2>&1 \
+            | ts '%Y-%m-%dT%H:%M:%.S' \
+            | tee doc_build.log
 
       - name: "Substitute defective GIF"
         shell: bash
