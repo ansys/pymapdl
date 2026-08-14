@@ -115,8 +115,6 @@ jobs:
   check-vulnerabilities:
     name: "Check library vulnerabilities"
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: ansys/actions/check-vulnerabilities@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
         with:
