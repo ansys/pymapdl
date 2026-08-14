@@ -202,6 +202,7 @@ class TestSendCommand:
         assert result == "OK"
         mock._stub.SendCommand.assert_called_once()
 
+
 class TestCloseGrpcChannel:
     """Tests for MapdlGrpc._close_grpc_channel."""
 
