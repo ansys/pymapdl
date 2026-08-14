@@ -14,6 +14,7 @@
 # Modify this script as needed to include additional log files or directories.
 
 set +e  # Do not stop if a file is missing, just report it.
+LOG_NAMES="${LOG_NAMES:-logs}"
 
 # Colors for error/warning messages (GitHub Actions renders ANSI colors).
 RED='\033[0;31m'
@@ -32,8 +33,8 @@ display_file () {
     if [ -f "$file_pat" ]; then
         cat "$file_pat"
     else
-        echo -e "${RED}Failed to show $file_description file: '$file_pat' does not exist.${NC}"
-        echo -e "${YELLOW}Check the 'PYMAPDL_DEBUG_TESTING' env var is set to 'True'.${NC}"
+        printf '%b\n' "${RED}Failed to show $file_description file: '$file_pat' does not exist.${NC}"
+        printf '%b\n' "${YELLOW}If you expect this file, enable it with PYMAPDL_DEBUG_TESTING=true (or 'True').${NC}"
     fi
     echo "::endgroup::"
 }

@@ -21,13 +21,14 @@
 # Note:
 #   Ensure you have the necessary permissions to read from MAPDL_LOGS_DIR and write to
 
+LOG_NAMES="${LOG_NAMES:-logs}"
 mkdir -p "$LOG_NAMES" && echo "Successfully generated directory $LOG_NAMES"
 
 echo "Copying the log files..."
-mv ./*.log ./"$LOG_NAMES"/ 2>/dev/null || echo "No log files could be found"
-mv ./*apdl.out ./"$LOG_NAMES"/ 2>/dev/null || echo "No APDL log files could be found"
-mv ./*pymapdl.apdl ./"$LOG_NAMES"/ 2>/dev/null || echo "No PYMAPDL APDL log files could be found"
-mv /home/mapdl/dpf_logs ./"$LOG_NAMES"/ 2>/dev/null || echo "No DPF log files could be found"
+if compgen -G "./*.log" > /dev/null; then mv ./*.log "./$LOG_NAMES/"; else echo "No log files could be found"; fi
+if compgen -G "./*apdl.out" > /dev/null; then mv ./*apdl.out "./$LOG_NAMES/"; else echo "No APDL log files could be found"; fi
+if compgen -G "./*pymapdl.apdl" > /dev/null; then mv ./*pymapdl.apdl "./$LOG_NAMES/"; else echo "No PYMAPDL APDL log files could be found"; fi
+if [ -e /home/mapdl/dpf_logs ]; then mv /home/mapdl/dpf_logs "./$LOG_NAMES/"; else echo "No DPF log files could be found"; fi
 
 echo "Copying the profiling files..."
 mkdir -p ./"$LOG_NAMES"/prof
