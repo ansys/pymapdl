@@ -381,7 +381,6 @@ If you are responsible for maintaining Ansys licensing or have a personal instal
 `Ansys Installation and Licensing documentation <ansys_installation_and_licensing_>`_.
 If you cannot find the information you need, open a customer request ticket.
 
-For more information, download the :download:`ANSYS Licensing Guide <lic_guide.pdf>`.
 For an example blog post on licensing issues at ANSYS 2020R1, see `Changes to Licensing at ANSYS 2020R1 <padt_licensing_>`_.
 
 
