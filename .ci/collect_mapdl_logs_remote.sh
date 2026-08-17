@@ -65,6 +65,10 @@ ls -la
 
 docker ps > ./"$LOG_NAMES"/docker_ps_end.log && echo "Successfully printed the docker ps" || echo -e "${RED}Failed to print the docker ps${NC}"
 
+# Capture docker events (die/restart/oom) for post-mortem analysis of unexpected container restarts.
+docker events --since 1h --until "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --filter "container=$MAPDL_INSTANCE" --filter "event=die" --filter "event=restart" --filter "event=oom" \
+    > ./"$LOG_NAMES"/docker_events.log 2>&1 && echo "Successfully collected docker events" || echo "Failed to collect docker events"
+
 ###############################################################################
 echo "Collecting and printing logs..."
 mv ./*.log ./"$LOG_NAMES"/ 2>/dev/null && echo "Successfully moved log files." || echo -e "${YELLOW}MAPDL run docker log not found.${NC}"
