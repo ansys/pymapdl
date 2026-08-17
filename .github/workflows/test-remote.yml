@@ -94,7 +94,6 @@ jobs:
       PYMAPDL_DB_PORT: 21002  # default won't work on GitHub runners
       PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
       # Automatically enabled when the job is re-run with debug logging.
-      PYMAPDL_DEBUG_TESTING: ${{ runner.debug == '1' }}
       PYMAPDL_GRPC_TRANSPORT: 'insecure'
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
@@ -262,6 +261,7 @@ jobs:
           file_name: "${{ inputs.file-name }}"
           MAPDL_VERSION: "${{ inputs.mapdl-version }}"
           PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
+          PYMAPDL_DEBUG_TESTING: ${{ runner.debug == '1' }}
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
