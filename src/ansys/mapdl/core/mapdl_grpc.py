@@ -684,8 +684,43 @@ class MapdlGrpc(MapdlBase):
             # For some reason the session hasn't been created
             self._create_session()
 
+    def _ensure_channel(self) -> None:
+        """Rebuild the gRPC channel if it has been closed.
+
+        A closed gRPC channel cannot be reopened, so after
+        :meth:`_close_grpc_channel` (or :meth:`_disconnect_but_leave_mapdl_running`)
+        has run, ``self._channel`` is ``None``. This rebuilds it via
+        :meth:`_create_channel` and re-subscribes with
+        :meth:`_subscribe_to_channel`, so that :meth:`reconnect_to_mapdl` can
+        resume driving the same MAPDL session.
+
+        Raises
+        ------
+        MapdlRuntimeError
+            If the IP address or port of the instance is unknown, since both
+            are required to rebuild the channel.
+
+        Returns
+        -------
+        None
+        """
+        if self._channel is not None:
+            return
+
+        if self._ip is None or self._port is None:
+            raise MapdlRuntimeError(
+                "Cannot rebuild the gRPC channel: the IP address or port of "
+                "this MAPDL instance is unknown."
+            )
+
+        self._log.debug("Rebuilding gRPC channel to %s:%s", self._ip, self._port)
+        self._channel = self._create_channel(self._ip, self._port)
+        self._subscribe_to_channel()
+
     def _connect_to_mapdl(self, timeout: int):
         """(Re)connect to an existing MAPDL instance"""
+        self._ensure_channel()
+
         try:
             self._multi_connect(timeout=timeout)
         except MapdlConnectionError as err:  # pragma: no cover
@@ -703,6 +738,12 @@ class MapdlGrpc(MapdlBase):
 
         Re-establish an stopped or crashed gRPC connection with an already alive
         MAPDL instance. This function does not relaunch the MAPDL instance.
+
+        Notes
+        -----
+        If the gRPC channel was previously closed (for example after
+        :meth:`exit` released the client side while leaving MAPDL running),
+        the channel is rebuilt and re-subscribed automatically.
 
         Parameters
         ----------
@@ -1808,13 +1849,22 @@ class MapdlGrpc(MapdlBase):
 
         Notes
         -----
-        If Mapdl didn't start the instance, then this will be ignored unless
+        If Mapdl didn't start the instance, then MAPDL is kept alive unless
         ``force=True``.
 
         If ``PYMAPDL_START_INSTANCE`` is set to ``False`` (generally set in
-        remote testing or documentation build), then this will be
-        ignored. Override this behavior with ``force=True`` to always force
+        remote testing or documentation build), then MAPDL is kept alive.
+        Override this behavior with ``force=True`` to always force
         exiting MAPDL regardless of your local environment.
+
+        On every path where MAPDL itself is left running (the ones above,
+        an instance that has already exited, or an instance built while
+        ``pymapdl.BUILDING_GALLERY`` is set), the client side of the
+        connection — the gRPC channel and the PIPE-drainer threads — is
+        still released, because closing a gRPC channel is a purely
+        client-side operation that does not stop the MAPDL server. Call
+        :meth:`reconnect_to_mapdl` to build a fresh channel and resume
+        driving the same MAPDL session.
 
         If ``Mapdl.finish_job_on_exit`` is set to ``True`` and there is a valid
         JobID in ``Mapdl.jobid``, then the SLURM job will be canceled.
@@ -1829,32 +1879,79 @@ class MapdlGrpc(MapdlBase):
             f"Exiting MAPDL gRPC instance {self.ip}:{self.port} on '{self._path}'."
         )
 
-        if self._exited:
-            self._log.debug("Already exited")
-            return
-
-        if save:
-            self._log.debug("Saving MAPDL database")
-            self.save()
-
-        if not force:
-            # Ignore this method if PYMAPDL_START_INSTANCE=False
-            if not self._start_instance or not self._launched:
-                self._log.info(
-                    "Ignoring exit due to PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't launch the instance."
-                )
-                return
-
-            # or building the gallery
-            if pymapdl.BUILDING_GALLERY:
-                self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
-                return
-
         try:
             self._exiting = True
+
+            if self.exited:
+                self._log.debug("Already exited")
+                # '_exited' is also set by the gRPC error handlers when MAPDL
+                # crashes, with no cleanup performed. The helper is
+                # idempotent, so calling it again on a regular repeated exit
+                # costs nothing.
+                self._disconnect_but_leave_mapdl_running()
+                return
+
+            if save:
+                self._log.debug("Saving MAPDL database")
+                self.save()
+
+            if not force:
+                # Ignore this method if PYMAPDL_START_INSTANCE=False
+                if not self._start_instance or not self._launched:
+                    self._log.info(
+                        "Ignoring exit due to PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't launch the instance."
+                    )
+                    self._disconnect_but_leave_mapdl_running()
+                    return
+
+                # or building the gallery
+                if pymapdl.BUILDING_GALLERY:
+                    self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
+                    self._disconnect_but_leave_mapdl_running()
+                    return
+
+            # Step 3 of '_release_resources' closes the gRPC channel.
             self._release_resources(path=self._path)
         finally:
             self._exiting = False
+
+    def _disconnect_but_leave_mapdl_running(self) -> None:
+        """Close the client side of the connection, leaving MAPDL running.
+
+        Closing a gRPC channel is a purely client-side operation: it cancels
+        pending RPCs and releases the socket, but it does not stop the MAPDL
+        server. This is what :meth:`exit` performs on the paths where MAPDL
+        itself must survive, so that the ``_poll_connectivity`` daemon thread
+        and the PIPE-drainer threads do not outlive this object.
+
+        The instance is marked as exited because the channel is gone. Use
+        :meth:`reconnect_to_mapdl` to build a fresh channel and resume driving
+        the same MAPDL session.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> mapdl.exit()          # PYMAPDL_START_INSTANCE=False
+        >>> mapdl.exited
+        True
+        >>> mapdl.reconnect_to_mapdl()
+        >>> mapdl.exited
+        False
+        """
+        try:
+            self._close_grpc_channel()
+        except Exception as e:
+            self._log.debug("Error closing gRPC channel: %s", e)
+
+        try:
+            self._join_pipe_drainer_threads()
+        except Exception as e:
+            self._log.debug("Error joining pipe-drainer threads: %s", e)
+
+        self._exited = True
 
     def _exit_mapdl(self, path: Optional[str] = None) -> None:
         """Exit MAPDL and remove the lock file in `path`"""

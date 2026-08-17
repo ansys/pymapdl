@@ -208,7 +208,7 @@ jobs:
           docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y -p ${DPF_PORT}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${DPF_PORT}." > log_dpf.log &
 
       - name: "Getting files change filters"
-        uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 #v4.0.2
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d #v4.0.3
         id: changes
         with:
           filters: |
@@ -276,10 +276,21 @@ jobs:
           MAPDL_0: ${{ steps.mapdl_0.outputs.container-name }}
           MAPDL_1: ${{ steps.mapdl_1.outputs.container-name }}
         run: |
-          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  "${MAPDL_0}")
-          echo "Number of restarts in the MAPDL_0 container: $N_RESTART"
-          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  "${MAPDL_1}")
-          echo "Number of restarts in the MAPDL_1 container: $N_RESTART"
+          for CONTAINER in "${MAPDL_0}" "${MAPDL_1}"; do
+            N_RESTART=$(docker inspect --format '{{ .RestartCount }}' "${CONTAINER}")
+            OOM_KILLED=$(docker inspect --format '{{ .State.OOMKilled }}' "${CONTAINER}")
+            EXIT_CODE=$(docker inspect --format '{{ .State.ExitCode }}' "${CONTAINER}")
+            STATE_ERROR=$(docker inspect --format '{{ .State.Error }}' "${CONTAINER}")
+            FINISHED_AT=$(docker inspect --format '{{ .State.FinishedAt }}' "${CONTAINER}")
+            echo "Container ${CONTAINER}: restarts=$N_RESTART, OOMKilled=$OOM_KILLED, exit_code=$EXIT_CODE, state_error='$STATE_ERROR', last_finished_at=$FINISHED_AT"
+          done
+
+      - name: "Check for OOM kills in the kernel log"
+        if: always()
+        run: |
+          echo "Searching dmesg/journal for OOM-killer activity (best effort, may be unavailable on hosted runners)..."
+          (dmesg 2>/dev/null | grep -i -E "killed process|out of memory|oom" ) || echo "No OOM entries found in dmesg (or dmesg unavailable)."
+          (sudo -n journalctl -k --since "-30 min" 2>/dev/null | grep -i -E "killed process|out of memory|oom" ) || echo "No OOM entries found in journalctl (or journalctl unavailable)."
 
       - name: "Upload pytest reports to GitHub"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1

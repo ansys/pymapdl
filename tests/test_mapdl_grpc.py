@@ -590,3 +590,140 @@ class TestConnectivityCallbackDoesNotLeakInstance:
 
         assert dummy._channel_state == "READY"
         assert dummy._connectivity_callback is callback
+
+
+class TestDisconnectButLeaveMapdlRunning:
+    """``exit()`` always releases the client side, even when MAPDL survives.
+
+    Closing a gRPC channel does not stop the MAPDL server, so the paths that
+    deliberately leave MAPDL running must still release the channel and the
+    PIPE-drainer threads, otherwise their daemon threads leak.
+    """
+
+    @staticmethod
+    def _mock_for_exit(start_instance=True, launched=True):
+        mock = _make_mock_mapdl()
+        mock.exited = False
+        mock._exited = False
+        mock._exiting = False
+        mock._path = ""
+        mock._start_instance = start_instance
+        mock._launched = launched
+        return mock
+
+    @pytest.mark.parametrize(
+        "start_instance,launched", [(False, True), (True, False), (False, False)]
+    )
+    def test_disconnects_when_pymapdl_did_not_launch_mapdl(
+        self, start_instance, launched
+    ):
+        """MAPDL is left running, but the channel is released."""
+        mock = self._mock_for_exit(start_instance, launched)
+
+        MapdlGrpc.exit(mock)
+
+        mock._disconnect_but_leave_mapdl_running.assert_called_once()
+        mock._release_resources.assert_not_called()
+
+    def test_disconnects_when_building_the_gallery(self):
+        """Each gallery example owns its instance, so the channel must close."""
+        mock = self._mock_for_exit()
+
+        with patch("ansys.mapdl.core.BUILDING_GALLERY", True):
+            MapdlGrpc.exit(mock)
+
+        mock._disconnect_but_leave_mapdl_running.assert_called_once()
+        mock._release_resources.assert_not_called()
+
+    def test_force_still_releases_everything(self):
+        """force=True performs the full teardown instead."""
+        mock = self._mock_for_exit(start_instance=False, launched=False)
+
+        MapdlGrpc.exit(mock, force=True)
+
+        mock._release_resources.assert_called_once()
+        mock._disconnect_but_leave_mapdl_running.assert_not_called()
+
+    def test_closes_channel_joins_threads_and_marks_exited(self):
+        """The helper releases both resources and reports the instance dead."""
+        mock = _make_mock_mapdl()
+        mock._exited = False
+
+        MapdlGrpc._disconnect_but_leave_mapdl_running(mock)
+
+        mock._close_grpc_channel.assert_called_once()
+        mock._join_pipe_drainer_threads.assert_called_once()
+        assert mock._exited is True
+
+    def test_a_failing_close_does_not_prevent_the_join(self):
+        """Each step is independent so one failure cannot leak the other."""
+        mock = _make_mock_mapdl()
+        mock._exited = False
+        mock._close_grpc_channel.side_effect = RuntimeError("boom")
+
+        MapdlGrpc._disconnect_but_leave_mapdl_running(mock)
+
+        mock._join_pipe_drainer_threads.assert_called_once()
+        assert mock._exited is True
+
+    def test_already_exited_still_releases_the_client_side(self):
+        """A crashed instance flagged by an error handler must still be freed."""
+        mock = self._mock_for_exit()
+        mock.exited = True
+        mock._exited = True
+
+        MapdlGrpc.exit(mock)
+
+        mock._disconnect_but_leave_mapdl_running.assert_called_once()
+        mock._release_resources.assert_not_called()
+
+
+class TestEnsureChannel:
+    """A closed gRPC channel cannot be reopened; it must be rebuilt."""
+
+    def test_rebuilds_and_resubscribes_when_the_channel_was_closed(self):
+        """'_close_grpc_channel' clears '_channel', so reconnecting rebuilds it."""
+        mock = _make_mock_mapdl()
+        mock._channel = None
+        mock._ip = "127.0.0.1"
+        mock._port = 50052
+        new_channel = Mock()
+        mock._create_channel.return_value = new_channel
+
+        MapdlGrpc._ensure_channel(mock)
+
+        mock._create_channel.assert_called_once_with("127.0.0.1", 50052)
+        assert mock._channel is new_channel
+        mock._subscribe_to_channel.assert_called_once()
+
+    def test_is_a_no_op_when_the_channel_is_still_open(self):
+        """An open channel must never be replaced underneath a live session."""
+        mock = _make_mock_mapdl()
+        channel = Mock()
+        mock._channel = channel
+
+        MapdlGrpc._ensure_channel(mock)
+
+        mock._create_channel.assert_not_called()
+        mock._subscribe_to_channel.assert_not_called()
+        assert mock._channel is channel
+
+    def test_reconnect_rebuilds_the_channel_and_clears_exited(self):
+        """'reconnect_to_mapdl' resurrects an instance released by 'exit()'."""
+        mock = _make_mock_mapdl()
+        mock._timeout = 5
+        mock._exited = True
+
+        MapdlGrpc.reconnect_to_mapdl(mock)
+
+        mock._connect_to_mapdl.assert_called_once_with(5)
+        assert mock._exited is False
+
+    def test_connect_to_mapdl_ensures_the_channel_first(self):
+        """The channel must exist before '_multi_connect' uses it."""
+        mock = _make_mock_mapdl()
+
+        MapdlGrpc._connect_to_mapdl(mock, timeout=5)
+
+        mock._ensure_channel.assert_called_once()
+        mock._multi_connect.assert_called_once_with(timeout=5)
