@@ -271,6 +271,7 @@ class TestStartSubprocess:
                 assert proc.poll() is not None
             finally:
                 proc._stdout_file_handle.close()
+            assert proc.poll() is not None
 
     def test_start_subprocess_without_output_file(self):
         """Test starting subprocess without output file has no file handle."""
@@ -290,6 +291,7 @@ class TestStartSubprocess:
             assert proc._stdout_file_handle is None
             assert proc.stdout is not None
             assert proc.stderr is not None
+            proc.wait(timeout=10)
 
     def test_start_subprocess_closes_file_handle_when_popen_fails(self):
         """If Popen raises, the stdout redirect file handle must be closed."""

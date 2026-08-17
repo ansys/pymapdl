@@ -683,8 +683,43 @@ class MapdlGrpc(MapdlBase):
             # For some reason the session hasn't been created
             self._create_session()
 
+    def _ensure_channel(self) -> None:
+        """Rebuild the gRPC channel if it has been closed.
+
+        A closed gRPC channel cannot be reopened, so after
+        :meth:`_close_grpc_channel` (or :meth:`_disconnect_but_leave_mapdl_running`)
+        has run, ``self._channel`` is ``None``. This rebuilds it via
+        :meth:`_create_channel` and re-subscribes with
+        :meth:`_subscribe_to_channel`, so that :meth:`reconnect_to_mapdl` can
+        resume driving the same MAPDL session.
+
+        Raises
+        ------
+        MapdlRuntimeError
+            If the IP address or port of the instance is unknown, since both
+            are required to rebuild the channel.
+
+        Returns
+        -------
+        None
+        """
+        if self._channel is not None:
+            return
+
+        if self._ip is None or self._port is None:
+            raise MapdlRuntimeError(
+                "Cannot rebuild the gRPC channel: the IP address or port of "
+                "this MAPDL instance is unknown."
+            )
+
+        self._log.debug("Rebuilding gRPC channel to %s:%s", self._ip, self._port)
+        self._channel = self._create_channel(self._ip, self._port)
+        self._subscribe_to_channel()
+
     def _connect_to_mapdl(self, timeout: int):
         """(Re)connect to an existing MAPDL instance"""
+        self._ensure_channel()
+
         try:
             self._multi_connect(timeout=timeout)
         except MapdlConnectionError as err:  # pragma: no cover
@@ -702,6 +737,12 @@ class MapdlGrpc(MapdlBase):
 
         Re-establish an stopped or crashed gRPC connection with an already alive
         MAPDL instance. This function does not relaunch the MAPDL instance.
+
+        Notes
+        -----
+        If the gRPC channel was previously closed (for example after
+        :meth:`exit` released the client side while leaving MAPDL running),
+        the channel is rebuilt and re-subscribed automatically.
 
         Parameters
         ----------
@@ -1807,13 +1848,22 @@ class MapdlGrpc(MapdlBase):
 
         Notes
         -----
-        If Mapdl didn't start the instance, then this will be ignored unless
+        If Mapdl didn't start the instance, then MAPDL is kept alive unless
         ``force=True``.
 
         If ``PYMAPDL_START_INSTANCE`` is set to ``False`` (generally set in
-        remote testing or documentation build), then this will be
-        ignored. Override this behavior with ``force=True`` to always force
+        remote testing or documentation build), then MAPDL is kept alive.
+        Override this behavior with ``force=True`` to always force
         exiting MAPDL regardless of your local environment.
+
+        On every path where MAPDL itself is left running (the ones above,
+        an instance that has already exited, or an instance built while
+        ``pymapdl.BUILDING_GALLERY`` is set), the client side of the
+        connection — the gRPC channel and the PIPE-drainer threads — is
+        still released, because closing a gRPC channel is a purely
+        client-side operation that does not stop the MAPDL server. Call
+        :meth:`reconnect_to_mapdl` to build a fresh channel and resume
+        driving the same MAPDL session.
 
         If ``Mapdl.finish_job_on_exit`` is set to ``True`` and there is a valid
         JobID in ``Mapdl.jobid``, then the SLURM job will be canceled.
@@ -1828,32 +1878,79 @@ class MapdlGrpc(MapdlBase):
             f"Exiting MAPDL gRPC instance {self.ip}:{self.port} on '{self._path}'."
         )
 
-        if self._exited:
-            self._log.debug("Already exited")
-            return
-
-        if save:
-            self._log.debug("Saving MAPDL database")
-            self.save()
-
-        if not force:
-            # Ignore this method if PYMAPDL_START_INSTANCE=False
-            if not self._start_instance or not self._launched:
-                self._log.info(
-                    "Ignoring exit due to PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't launch the instance."
-                )
-                return
-
-            # or building the gallery
-            if pymapdl.BUILDING_GALLERY:
-                self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
-                return
-
         try:
             self._exiting = True
+
+            if self.exited:
+                self._log.debug("Already exited")
+                # '_exited' is also set by the gRPC error handlers when MAPDL
+                # crashes, with no cleanup performed. The helper is
+                # idempotent, so calling it again on a regular repeated exit
+                # costs nothing.
+                self._disconnect_but_leave_mapdl_running()
+                return
+
+            if save:
+                self._log.debug("Saving MAPDL database")
+                self.save()
+
+            if not force:
+                # Ignore this method if PYMAPDL_START_INSTANCE=False
+                if not self._start_instance or not self._launched:
+                    self._log.info(
+                        "Ignoring exit due to PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't launch the instance."
+                    )
+                    self._disconnect_but_leave_mapdl_running()
+                    return
+
+                # or building the gallery
+                if pymapdl.BUILDING_GALLERY:
+                    self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
+                    self._disconnect_but_leave_mapdl_running()
+                    return
+
+            # Step 3 of '_release_resources' closes the gRPC channel.
             self._release_resources(path=self._path)
         finally:
             self._exiting = False
+
+    def _disconnect_but_leave_mapdl_running(self) -> None:
+        """Close the client side of the connection, leaving MAPDL running.
+
+        Closing a gRPC channel is a purely client-side operation: it cancels
+        pending RPCs and releases the socket, but it does not stop the MAPDL
+        server. This is what :meth:`exit` performs on the paths where MAPDL
+        itself must survive, so that the ``_poll_connectivity`` daemon thread
+        and the PIPE-drainer threads do not outlive this object.
+
+        The instance is marked as exited because the channel is gone. Use
+        :meth:`reconnect_to_mapdl` to build a fresh channel and resume driving
+        the same MAPDL session.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> mapdl.exit()          # PYMAPDL_START_INSTANCE=False
+        >>> mapdl.exited
+        True
+        >>> mapdl.reconnect_to_mapdl()
+        >>> mapdl.exited
+        False
+        """
+        try:
+            self._close_grpc_channel()
+        except Exception as e:
+            self._log.debug("Error closing gRPC channel: %s", e)
+
+        try:
+            self._join_pipe_drainer_threads()
+        except Exception as e:
+            self._log.debug("Error joining pipe-drainer threads: %s", e)
+
+        self._exited = True
 
     def _exit_mapdl(self, path: Optional[str] = None) -> None:
         """Exit MAPDL and remove the lock file in `path`"""
@@ -1879,26 +1976,55 @@ class MapdlGrpc(MapdlBase):
         Steps performed (in order):
 
         1. Kill the MAPDL server process and remove the lock file.
-        2. Close the gRPC channel.
-        3. Remove the UDS socket file (Unix Domain Socket transport only).
-        4. Remove the port from the global ``_LOCAL_PORTS`` registry.
-        5. Cancel the SLURM/HPC job (if applicable).
-        6. Delete the remote PyMAPDL server instance (if applicable).
-        7. Remove the temporary working directory (if ``remove_temp_dir_on_exit``).
-        8. Clean up logger handlers.
-        9. Mark the instance as exited (``_exited = True``).
+        2. Join the stdout, stderr, and startup PIPE-drainer threads.
+        3. Close the gRPC channel.
+        4. Remove the UDS socket file (Unix Domain Socket transport only).
+        5. Remove the port from the global ``_LOCAL_PORTS`` registry.
+        6. Cancel the SLURM/HPC job (if applicable).
+        7. Delete the remote PyMAPDL server instance (if applicable).
+        8. Mark the instance as exited (``_exited = True``).
+        9. Remove the temporary working directory (if ``remove_temp_dir_on_exit``).
+        10. Clean up logger handlers.
+
+        Parameters
+        ----------
+        path : str, optional
+            Working directory to remove the lock file from and to delete when
+            ``remove_temp_dir_on_exit`` is ``True``. The default is ``None``,
+            in which case ``self._path`` is used.
+
+        Returns
+        -------
+        None
 
         Notes
         -----
-        All steps are individually wrapped in ``try/except`` so that a failure
+        Steps 1 to 7 run while ``_exited`` is still ``False`` so that they can
+        reach the server and emit log records. Step 8 flips the flag *before*
+        the temporary directory is removed, because
+        :meth:`_remove_temp_dir_on_exit` falls back to the ``directory``
+        property, which would otherwise issue an ``/INQUIRE`` command against
+        an already dead server. Logger handlers are torn down last, so every
+        preceding step can still log.
+
+        Each step is individually wrapped in ``try/except`` so that a failure
         in one step does not prevent the remaining resources from being freed.
-        This also makes the method safe to call from ``__del__``, where the
-        interpreter may have already begun tearing down module globals.
+        This also makes the method safe to call during interpreter shutdown,
+        where module globals may already have been torn down.
+
+        Examples
+        --------
+        This method is called internally by :meth:`exit`, so it is rarely
+        invoked directly.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> mapdl._release_resources()
+        >>> mapdl.exited
+        True
         """
         if self._exited:
             return
-
-        from ansys.mapdl import core as pymapdl
 
         path = path or getattr(self, "_path", None)
 
@@ -1908,13 +2034,20 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error during _exit_mapdl: %s", e)
 
-        # 2. Close gRPC channel
+        # 2. Ensure PIPE-drainer threads (stdout/stderr/startup) are joined so
+        # that background reader threads do not leak after teardown.
+        try:
+            self._join_pipe_drainer_threads()
+        except Exception as e:
+            self._log.debug("Error joining pipe-drainer threads: %s", e)
+
+        # 3. Close gRPC channel
         try:
             self._close_grpc_channel()
         except Exception as e:
             self._log.debug("Error closing gRPC channel: %s", e)
 
-        # 3. Remove UDS socket file
+        # 4. Remove UDS socket file
         try:
             if getattr(self, "transport_mode", None) == "uds":
                 socket_path = os.path.join(self.uds_dir, f"mapdl-{self.port}.sock")
@@ -1924,14 +2057,16 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error removing UDS socket: %s", e)
 
-        # 4. Deregister port from global registry
+        # 5. Deregister port from global registry
         try:
+            from ansys.mapdl import core as pymapdl
+
             if self._local and self._port in pymapdl._LOCAL_PORTS:
                 pymapdl._LOCAL_PORTS.remove(self._port)
         except Exception as e:
             self._log.debug("Error removing port from _LOCAL_PORTS: %s", e)
 
-        # 5. Cancel HPC job
+        # 6. Cancel HPC job
         try:
             if self._mapdl_on_hpc and self.finish_job_on_exit:
                 self.kill_job(self.jobid)
@@ -1939,27 +2074,28 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error cancelling HPC job: %s", e)
 
-        # 6. Delete remote PyMAPDL server instance
+        # 7. Delete remote PyMAPDL server instance
         try:
             if self._remote_instance:  # pragma: no cover
                 self._remote_instance.delete()
         except Exception as e:
             self._log.debug("Error deleting remote instance: %s", e)
 
-        # 7. Remove temporary working directory
+        # 8. Mark exited — before the temp dir removal, so that the 'directory'
+        # fallback in '_remove_temp_dir_on_exit' cannot query the dead server
+        self._exited = True
+
+        # 9. Remove temporary working directory
         try:
             self._remove_temp_dir_on_exit(path)
         except Exception as e:
             self._log.debug("Error removing temp dir: %s", e)
 
-        # 8. Clean up logger handlers
+        # 10. Clean up logger handlers
         try:
             self._cleanup_loggers()
         except Exception as e:
             self._log.debug("Error during logger cleanup: %s", e)
-
-        # 9. Mark exited — must be LAST so that prior steps can still log
-        self._exited = True
 
     def _close_grpc_channel(self) -> None:
         """Unsubscribe from and close the gRPC channel.
@@ -2041,24 +2177,115 @@ class MapdlGrpc(MapdlBase):
 
         return
 
-    def _kill_process(self):
-        """Kill process stored in self._mapdl_process"""
-        if self._mapdl_process is not None:
-            self._log.debug("Killing process using subprocess.Popen.terminate")
-            process = self._mapdl_process
-            if process.poll() is None:
-                # process hasn't terminated
-                process.terminate()
+    def _close_process_pipes(self, process: subprocess.Popen) -> None:  # type: ignore[type-arg]
+        """Close all open I/O streams attached to *process*.
 
-            # Close any open file handle for stdout redirect
-            fh = getattr(process, "_stdout_file_handle", None)
-            if fh and not getattr(fh, "closed", False):
-                try:
-                    fh.close()
-                    self._log.debug("Closed stdout file handle")
-                    setattr(process, "_stdout_file_handle", None)
-                except OSError as e:
-                    self._log.debug(f"Error closing stdout file handle: {e}")
+        Closes ``process.stdout`` and ``process.stderr`` (PIPE handles) so
+        that PIPE-drainer threads blocked on ``readline`` are unblocked and
+        can exit.  Also closes the ``_stdout_file_handle`` redirect file, if
+        one was attached to the process by ``_start_subprocess``.
+
+        Parameters
+        ----------
+        process : subprocess.Popen
+            The subprocess handle whose streams should be closed.
+
+        Returns
+        -------
+        None
+        """
+        for stream in (process.stdout, process.stderr):
+            try:
+                if stream is not None and not stream.closed:
+                    stream.close()
+            except OSError as e:
+                self._log.debug(f"Error closing process stream: {e}")
+
+        fh = getattr(process, "_stdout_file_handle", None)
+        if fh and not getattr(fh, "closed", False):
+            try:
+                fh.close()
+                self._log.debug("Closed stdout file handle")
+                setattr(process, "_stdout_file_handle", None)
+            except OSError as e:
+                self._log.debug(f"Error closing stdout file handle: {e}")
+
+    def _terminate_process(self, process: subprocess.Popen) -> None:  # type: ignore[type-arg]
+        """Terminate *process*, close its pipes, and wait for it to exit.
+
+        Sends ``SIGTERM``, explicitly closes ``stdout`` and ``stderr`` so any
+        PIPE-drainer threads unblock immediately, then waits up to 2 seconds
+        for the process to exit.  If it has not exited by then, ``SIGKILL`` is
+        sent and the wait is repeated.
+
+        Parameters
+        ----------
+        process : subprocess.Popen
+            The subprocess handle to terminate.
+
+        Returns
+        -------
+        None
+        """
+        if process.poll() is None:
+            self._log.debug("Sending SIGTERM to MAPDL process")
+            process.terminate()
+
+        self._close_process_pipes(process)
+
+        try:
+            process.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            self._log.debug("Process did not exit after SIGTERM; sending SIGKILL")
+            process.kill()
+            try:
+                process.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                self._log.debug("Process did not exit after SIGKILL")
+
+    def _join_pipe_drainer_threads(self) -> None:
+        """Join all PIPE-drainer threads, giving each up to 2 seconds.
+
+        Waits for ``_stdout_thread``, ``_stderr_thread``, and
+        ``_startup_stdout_thread`` to finish.  A debug message is logged for
+        any thread that does not exit within the timeout.  Every attribute
+        access is ``getattr``-guarded so this is safe to call on a partially
+        constructed instance.
+
+        Returns
+        -------
+        None
+        """
+        for attr in ("_stdout_thread", "_stderr_thread", "_startup_stdout_thread"):
+            t = getattr(self, attr, None)
+            if t is not None and t.is_alive():
+                t.join(timeout=2)
+                if t.is_alive():
+                    self._log.debug(f"Thread {attr} did not exit in time")
+
+    def _kill_process(self) -> None:
+        """Kill the process stored in ``self._mapdl_process``.
+
+        Acquires ``_process_close_lock`` to prevent concurrent teardowns,
+        then delegates to :meth:`_terminate_process` (SIGTERM → pipe-close →
+        wait → SIGKILL).
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        Does **not** join the pipe-drainer threads here because MAPDL may have
+        spawned child processes that also hold the write ends of stdout/stderr
+        open.  Those children are killed by :meth:`_kill_child_processes`,
+        which must run first.  Call :meth:`_join_pipe_drainer_threads` only
+        after all child processes are gone (see :meth:`_close_process`).
+        """
+        with self._process_close_lock:
+            if self._mapdl_process is not None:
+                self._log.debug("Killing process using subprocess.Popen.terminate")
+                self._terminate_process(self._mapdl_process)
 
     def _kill_child_processes(self, timeout=2):
         pids = self._pids.copy()
