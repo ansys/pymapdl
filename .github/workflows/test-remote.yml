@@ -290,7 +290,7 @@ jobs:
         run: |
           echo "Searching dmesg/journal for OOM-killer activity (best effort, may be unavailable on hosted runners)..."
           (dmesg 2>/dev/null | grep -i -E "killed process|out of memory|oom" ) || echo "No OOM entries found in dmesg (or dmesg unavailable)."
-          (sudo journalctl -k --since "-30 min" 2>/dev/null | grep -i -E "killed process|out of memory|oom" ) || echo "No OOM entries found in journalctl (or journalctl unavailable)."
+          (sudo -n journalctl -k --since "-30 min" 2>/dev/null | grep -i -E "killed process|out of memory|oom" ) || echo "No OOM entries found in journalctl (or journalctl unavailable)."
 
       - name: "Upload pytest reports to GitHub"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
