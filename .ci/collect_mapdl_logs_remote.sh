@@ -29,13 +29,13 @@ display_files() {
     echo "Displaying files with pattern $pattern: $file_pattern"
     if compgen -G "$file_pattern" > /dev/null; then
         for f in $file_pattern; do
-            echo "::group:: $file_type file $f"
+            echo "::group:: $file_type file $f" > /dev/null
             if [ -f "$f" ]; then
                 cat "$f"
             else
                 echo -e "${RED}Failed to show $file_type file: '$f' does not exist.${NC}"
             fi
-            echo "::endgroup::"
+            echo "::endgroup::" > /dev/null
         done
     else
         echo -e "${YELLOW}No $pattern files to print.${NC}"
