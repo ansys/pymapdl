@@ -10,6 +10,43 @@ This document contains the release notes for the project.
 .. towncrier release notes start
 
 
+.. _v0.74.1:
+
+`0.74.1 <https://github.com/ansys/pymapdl/releases/tag/v0.74.1>`_ - August 14, 2026
+==================================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Fixed
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Advertise PyMAPDL MCP in documentation
+          - `#4699 <https://github.com/ansys/pymapdl/pull/4699>`_
+
+        * - Download files located in subdirectories of the MAPDL working directory
+          - `#4700 <https://github.com/ansys/pymapdl/pull/4700>`_
+
+        * - Add missing -p license_type flag to launch command
+          - `#4701 <https://github.com/ansys/pymapdl/pull/4701>`_
+
+        * - Restore get_default_ansys* helpers removed in launcher refactor
+          - `#4717 <https://github.com/ansys/pymapdl/pull/4717>`_
+
+
+  .. tab-item:: Documentation
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Improve Component/launcher API docs, fix docstring RST bug
+          - `#4716 <https://github.com/ansys/pymapdl/pull/4716>`_
+
+
 .. _v0.74.0:
 
 `0.74.0 <https://github.com/ansys/pymapdl/releases/tag/v0.74.0>`_ - August 06, 2026
