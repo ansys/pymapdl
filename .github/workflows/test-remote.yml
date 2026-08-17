@@ -74,6 +74,11 @@ jobs:
   test-remote:
     name: Test PyMAPDL with remote MAPDL instances
     runs-on: ubuntu-latest
+    # Safety net: successful runs typically take 10-15 minutes. Without this,
+    # a hung test (e.g. a VTK/Xvfb rendering deadlock that pytest-timeout
+    # cannot interrupt) can block the runner for up to GitHub's 360-minute
+    # default job timeout before anyone notices.
+    timeout-minutes: 60
     permissions:
       contents: read  # Needed to read repository contents for tests
       packages: read  # Needed to pull Docker images from GitHub packages
