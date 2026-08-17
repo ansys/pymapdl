@@ -96,4 +96,4 @@ echo "::endgroup::"
 
 ###############################################################################
 echo "Tar files..."
-tar --remove-files -cvzf ./"$LOG_NAMES".tgz ./"$LOG_NAMES" && echo "Successfully compressed logs." || echo -e "${RED}Failed to compress${NC}"
+tar -cvzf ./"$LOG_NAMES".tgz ./"$LOG_NAMES" && echo "Successfully compressed logs." || echo -e "${RED}Failed to compress${NC}"
