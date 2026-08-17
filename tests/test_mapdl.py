@@ -3256,6 +3256,67 @@ def test_del_honours_cleanup_on_exit_false():
     mapdl.__del__ = lambda: None  # prevent cleanup on GC
 
 
+@stack(*PATCH_MAPDL_START)
+def test_del_does_not_cleanup_loggers():
+    """``__del__`` must never tear down the (shared) logger.
+
+    The logger and its handlers are shared, process-wide ``logging`` state.
+    Closing them from garbage-collection-driven code can race with another,
+    still-alive ``Mapdl`` instance still logging through the same handler
+    (surfacing as ``ValueError: I/O operation on closed file`` or
+    ``AttributeError`` on ``self._log`` elsewhere). Only the explicit
+    :meth:`exit` path is allowed to release logging resources.
+    """
+    start_parm = {
+        "ip": "123.45.67.99",
+        "local": True,
+        "set_no_abort": False,
+        "launched": True,
+        "start_instance": True,
+        "transport_mode": "insecure",
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+    mapdl._cleanup = True  # mirrors cleanup_on_exit=True regardless of env
+
+    with patch.object(mapdl, "_release_resources") as mock_release:
+        mapdl.__del__()
+
+    mock_release.assert_called_once()
+    _, kwargs = mock_release.call_args
+    assert kwargs.get("cleanup_loggers") is False
+
+    mapdl.__del__ = lambda: None  # prevent double cleanup on GC
+
+
+@stack(*PATCH_MAPDL_START)
+def test_exit_cleans_up_loggers_but_del_does_not():
+    """``exit()`` releases logger resources; ``__del__`` leaves them alone."""
+    from unittest.mock import MagicMock
+
+    start_parm = {
+        "ip": "123.45.67.99",
+        "local": True,
+        "set_no_abort": False,
+        "launched": True,
+        "start_instance": True,
+        "transport_mode": "insecure",
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+    mapdl._channel = MagicMock()
+
+    with (
+        patch.object(mapdl, "_exit_mapdl"),
+        patch.object(mapdl, "_cleanup_loggers") as mock_loggers,
+    ):
+        mapdl.exit(force=True)
+
+    mock_loggers.assert_called_once()
+
+    mapdl.__del__ = lambda: None  # prevent cleanup on GC
+
+
 @pytest.mark.parametrize("prop", ["mute"])
 def test_muted(mapdl, prop):
     assert not mapdl.mute
