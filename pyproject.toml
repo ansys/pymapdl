@@ -161,6 +161,12 @@ addopts = [
   "--reruns=1",
   "--strict-markers",
   "--timeout=180",
+  # The default "signal" method relies on SIGALRM being handled between
+  # Python bytecode instructions, so it can't interrupt a test stuck in a
+  # blocking native call (e.g. a VTK/Xvfb rendering deadlock), which can hang
+  # a CI job for hours instead of failing after --timeout. "thread" method
+  # dumps tracebacks and forces the process to exit when a test overruns.
+  "--timeout-method=thread",
   "-ra",
   "-vvv",
 ]
