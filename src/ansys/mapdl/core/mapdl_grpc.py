@@ -2227,12 +2227,23 @@ class MapdlGrpc(MapdlBase):
                 self._log.debug(f"Error closing stdout file handle: {e}")
 
     def _terminate_process(self, process: subprocess.Popen) -> None:  # type: ignore[type-arg]
-        """Terminate *process*, close its pipes, and wait for it to exit.
+        """Terminate *process*, wait for it to exit, then close its pipes.
 
-        Sends ``SIGTERM``, explicitly closes ``stdout`` and ``stderr`` so any
-        PIPE-drainer threads unblock immediately, then waits up to 2 seconds
-        for the process to exit.  If it has not exited by then, ``SIGKILL`` is
-        sent and the wait is repeated.
+        Sends ``SIGTERM`` and waits up to 2 seconds for the process to exit.
+        If it has not exited by then, ``SIGKILL`` is sent and the wait is
+        repeated. The stdout/stderr PIPEs are only closed *after* the process
+        has exited (or the waits above have been exhausted), and that close
+        itself is bounded by a watchdog thread.
+
+        Notes
+        -----
+        Closing the PIPEs while the process (or one of its children — see
+        :meth:`_kill_child_processes`, which must run first) still holds the
+        write end open can deadlock: the PIPE-drainer thread is blocked
+        inside ``readline()`` holding the stream's internal lock, so
+        ``stream.close()`` from this thread blocks forever waiting on that
+        same lock instead of raising. Waiting for the process to exit first,
+        and bounding the close with a watchdog thread, prevents that hang.
 
         Parameters
         ----------
@@ -2247,8 +2258,6 @@ class MapdlGrpc(MapdlBase):
             self._log.debug("Sending SIGTERM to MAPDL process")
             process.terminate()
 
-        self._close_process_pipes(process)
-
         try:
             process.wait(timeout=2)
         except subprocess.TimeoutExpired:
@@ -2258,6 +2267,21 @@ class MapdlGrpc(MapdlBase):
                 process.wait(timeout=2)
             except subprocess.TimeoutExpired:
                 self._log.debug("Process did not exit after SIGKILL")
+
+        # Close the PIPEs on a daemon watchdog thread bounded to 5 seconds,
+        # instead of calling '_close_process_pipes' directly, so a close that
+        # unexpectedly blocks (for example, an untracked grandchild process
+        # still holding the write end open) cannot hang this thread forever.
+        closer = threading.Thread(
+            target=self._close_process_pipes, args=(process,), daemon=True
+        )
+        closer.start()
+        closer.join(timeout=5)
+        if closer.is_alive():
+            self._log.debug(
+                "Closing MAPDL process PIPEs did not complete in time; "
+                "continuing without waiting further."
+            )
 
     def _join_pipe_drainer_threads(self) -> None:
         """Join all PIPE-drainer threads, giving each up to 2 seconds.
@@ -2347,11 +2371,19 @@ class MapdlGrpc(MapdlBase):
         """
         self._log.debug("Closing processes")
         if self._local:
+            # Kill child processes *before* the main process. Child/grandchild
+            # processes (for example, MAPDL's distributed/MPI workers) can
+            # inherit the stdout/stderr PIPE write ends. If they are still
+            # alive when '_kill_process' closes those PIPEs, the
+            # PIPE-drainer threads blocked in 'readline()' never see EOF, and
+            # 'stream.close()' deadlocks waiting on the same internal lock
+            # the reader thread holds. Killing every descendant first
+            # guarantees no process still holds the write end open, so
+            # closing the PIPEs cannot hang.
+            self._kill_child_processes(timeout=timeout)
+
             # killing main process (subprocess)
             self._kill_process()
-
-            # Killing child processes
-            self._kill_child_processes(timeout=timeout)
 
         if self.is_alive:
             raise MapdlRuntimeError("MAPDL could not be exited.")
