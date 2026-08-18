@@ -2541,11 +2541,18 @@ class _MapdlCore(Commands):
         raise NotImplementedError("Implemented by child class")
 
     def _cleanup_loggers(self):
-        """Clean up all the loggers"""
-        # Detached from ``__del__`` for easier testing
-        # if not hasattr(self, "_log"):
-        #     return  # Early exit if logger has been already cleaned.
+        """Clean up all the loggers.
 
+        Notes
+        -----
+        Only ever call this from the explicit, deterministic :meth:`exit`
+        path (through ``_release_resources(cleanup_loggers=True)``), never
+        from ``__del__``/garbage collection. This instance's logger and its
+        handlers are shared, process-wide ``logging`` state (see
+        :class:`ansys.mapdl.core.logging.Logger`), so closing them from
+        non-deterministic GC-driven code can race with another, still-alive
+        ``Mapdl`` instance still logging through the same handler.
+        """
         logger = self._log
         logger.setLevel(logging.CRITICAL + 1)
 

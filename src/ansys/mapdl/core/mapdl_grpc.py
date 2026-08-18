@@ -1966,7 +1966,9 @@ class MapdlGrpc(MapdlBase):
         else:
             self._exit_mapdl_server()
 
-    def _release_resources(self, path: Optional[str] = None) -> None:
+    def _release_resources(
+        self, path: Optional[str] = None, cleanup_loggers: bool = True
+    ) -> None:
         """Release all resources held by this MAPDL instance.
 
         This is the single, idempotent cleanup entry-point used by both
@@ -1984,7 +1986,7 @@ class MapdlGrpc(MapdlBase):
         7. Delete the remote PyMAPDL server instance (if applicable).
         8. Mark the instance as exited (``_exited = True``).
         9. Remove the temporary working directory (if ``remove_temp_dir_on_exit``).
-        10. Clean up logger handlers.
+        10. Clean up logger handlers (only when ``cleanup_loggers`` is ``True``).
 
         Parameters
         ----------
@@ -1992,6 +1994,20 @@ class MapdlGrpc(MapdlBase):
             Working directory to remove the lock file from and to delete when
             ``remove_temp_dir_on_exit`` is ``True``. The default is ``None``,
             in which case ``self._path`` is used.
+        cleanup_loggers : bool, optional
+            Whether to tear down this instance's logger handlers (step 10).
+            The default is ``True``, which is what :meth:`exit` uses since it
+            runs at a deterministic point chosen by the caller.
+
+            ``__del__`` passes ``False``: the ``pymapdl_global`` logger and
+            its handlers are shared, process-wide state (see
+            :class:`ansys.mapdl.core.logging.Logger`), and closing a handler
+            from garbage-collection-driven code can race with another,
+            still-alive ``Mapdl`` instance that logs through the same
+            handler — surfacing as ``ValueError: I/O operation on closed
+            file`` or ``AttributeError`` on ``self._log`` elsewhere. Shared,
+            non-exclusively-owned resources like the logger are only ever
+            released from the explicit, deterministic :meth:`exit` path.
 
         Returns
         -------
@@ -2091,11 +2107,17 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error removing temp dir: %s", e)
 
-        # 10. Clean up logger handlers
-        try:
-            self._cleanup_loggers()
-        except Exception as e:
-            self._log.debug("Error during logger cleanup: %s", e)
+        # 10. Clean up logger handlers.
+        # Skipped when called from ``__del__`` (``cleanup_loggers=False``):
+        # the logger and its handlers are shared, process-wide state, and
+        # tearing them down from non-deterministic, GC-driven code can race
+        # with another still-alive ``Mapdl`` instance logging through the
+        # same handler. See the ``cleanup_loggers`` parameter documentation.
+        if cleanup_loggers:
+            try:
+                self._cleanup_loggers()
+            except Exception as e:
+                self._log.debug("Error during logger cleanup: %s", e)
 
     def _close_grpc_channel(self) -> None:
         """Unsubscribe from and close the gRPC channel.
@@ -4552,6 +4574,18 @@ class MapdlGrpc(MapdlBase):
         early-return checks below, because it is a purely client-side resource
         whose ``_poll_connectivity`` daemon thread outlives this object
         otherwise.
+
+        ``_release_resources`` is called with ``cleanup_loggers=False``.
+        Unlike the gRPC channel or the MAPDL process, which this instance
+        exclusively owns, the logger and its handlers are shared, process-wide
+        state (see :class:`ansys.mapdl.core.logging.Logger`). Closing a
+        handler from here — non-deterministic, garbage-collection-driven code
+        that can run at any point, including while another ``Mapdl`` instance
+        is still logging through the same handler — is what causes errors
+        such as ``ValueError: I/O operation on closed file`` or
+        ``AttributeError`` on ``self._log`` elsewhere. Only :meth:`exit`,
+        which runs at a point deterministically chosen by the caller, is
+        allowed to tear down logging resources.
         """
         try:
             self._close_grpc_channel()
@@ -4577,7 +4611,7 @@ class MapdlGrpc(MapdlBase):
             return
 
         try:
-            self._release_resources(getattr(self, "_path", None))
+            self._release_resources(getattr(self, "_path", None), cleanup_loggers=False)
         except (
             Exception
         ):  # nosec B110 - best-effort cleanup during GC; logging is unreliable here
