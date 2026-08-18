@@ -4639,7 +4639,7 @@ class MapdlGrpc(MapdlBase):
 
         try:
             self._exiting = True
-            self._release_resources(getattr(self, "_path", None))
+            self._release_resources(getattr(self, "_path", None), cleanup_loggers=False)
         except (
             Exception
         ):  # nosec B110 - best-effort cleanup during GC; logging is unreliable here
