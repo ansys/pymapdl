@@ -13,22 +13,34 @@
 #
 # Modify this script as needed to include additional log files or directories.
 
+set +e  # Do not stop if a file is missing, just report it.
+LOG_NAMES="${LOG_NAMES:-logs}"
+
+# Colors for error/warning messages (GitHub Actions renders ANSI colors).
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No color
+
+#####
+# Displaying a file inside a collapsible GitHub Actions log group.
+# The group is always closed, even if the file cannot be shown, to avoid
+# leaving nested/unclosed groups in the workflow log.
+display_file () {
+    local file_pat="$1"
+    local file_description="$2"
+
+    echo "::group:: $file_description: $file_pat"
+    if [ -f "$file_pat" ]; then
+        cat "$file_pat"
+    else
+        printf '%b\n' "${RED}Failed to show $file_description file: '$file_pat' does not exist.${NC}"
+        printf '%b\n' "${YELLOW}If you expect this file, enable it with PYMAPDL_DEBUG_TESTING=true (or 'True').${NC}"
+    fi
+    echo "::endgroup::"
+}
 
 #####
 # Displaying files
-FILE_PAT=./"$LOG_NAMES"/pymapdl.log
-FILE_DESCRIPTION="PyMAPDL log"
-
-(echo "::group:: $FILE_DESCRIPTION: $FILE_PAT" && cat "$FILE_PAT" && echo "::endgroup::") || echo "Failed to show $FILE_DESCRIPTION file"
-
-#####
-FILE_PAT=./"$LOG_NAMES"/pymapdl.apdl
-FILE_DESCRIPTION="PyMAPDL APDL log"
-
-(echo "::group:: $FILE_DESCRIPTION: $FILE_PAT" && cat "$FILE_PAT" && echo "::endgroup::") || echo "Failed to show $FILE_DESCRIPTION file"
-
-#####
-FILE_PAT=./"$LOG_NAMES"/apdl.out
-FILE_DESCRIPTION="MAPDL Output"
-
-(echo "::group:: $FILE_DESCRIPTION: $FILE_PAT" && cat "$FILE_PAT" && echo "::endgroup::") || echo "Failed to show $FILE_DESCRIPTION file"
+display_file "./$LOG_NAMES/pymapdl.log" "PyMAPDL log"
+display_file "./$LOG_NAMES/pymapdl.apdl" "PyMAPDL APDL log"
+display_file "./$LOG_NAMES/apdl.out" "MAPDL Output"

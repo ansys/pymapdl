@@ -243,6 +243,9 @@ jobs:
           BUILDER: ${{ inputs.builder }}
           PYMAPDL_GRPC_TRANSPORT: 'insecure'
           DPF_DEFAULT_GRPC_MODE: 'insecure'
+          # Verbose Sphinx output ("-vv") only when the job is re-run with
+          # debug logging enabled, to keep normal build logs readable.
+          SPHINX_VERBOSITY: ${{ runner.debug == '1' && '-vv' || '' }}
         run: |
           export PYTHONFAULTHANDLER=1
           # Temporary diagnostics for the intermittent hangs seen during the
@@ -254,7 +257,7 @@ jobs:
           # the gallery examples' MAPDL sessions, are known to deadlock a
           # forked child if still alive at fork time. Forcing "-j 1" disables
           # that fork so we can confirm/rule out this hypothesis.
-          xvfb-run make -C doc ${BUILDER} SPHINXOPTS="-j 1 -vv" 2>&1 \
+          xvfb-run make -C doc ${BUILDER} SPHINXOPTS="-j 1 ${SPHINX_VERBOSITY}" 2>&1 \
             | ts '%Y-%m-%dT%H:%M:%.S' \
             | tee doc_build.log
 
