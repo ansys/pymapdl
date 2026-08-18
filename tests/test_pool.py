@@ -79,6 +79,60 @@ def patch_spawn_mapdl(*args, **kwargs):
     return mock_thread
 
 
+class FakeMapdlInstance:
+    """Minimal stand-in for a real MAPDL gRPC instance.
+
+    Implements just enough of the interface used by
+    :class:`~ansys.mapdl.core.pool.MapdlPool` (``exit``, ``prep7``,
+    ``clear``, ``post1``, ``inquire``, ``locked``, ``busy``,
+    ``exited``/``_exited``, ``port``) so the pool's spawn, monitor, heal,
+    and timeout logic can be exercised without launching a real MAPDL
+    process.
+    """
+
+    def __init__(self, port=None, run_location=None, **kwargs):
+        self._port = port
+        self.port = port
+        self._path = run_location
+        self.directory = run_location
+        self.locked = False
+        self.busy = False
+        self._exited = False
+        self._cleanup = False
+
+    @property
+    def exited(self):
+        return self._exited
+
+    def prep7(self):
+        return "PREP7"
+
+    def clear(self):
+        pass
+
+    def post1(self):
+        pass
+
+    def inquire(self, *args, **kwargs):
+        return ""
+
+    def exit(self, *args, **kwargs):
+        self._exited = True
+
+
+def fake_launch_mapdl(*args, **kwargs):
+    """Stand-in for ``launch_mapdl`` that returns a :class:`FakeMapdlInstance`
+    instead of starting a real MAPDL process."""
+    return FakeMapdlInstance(
+        port=kwargs.get("port"), run_location=kwargs.get("run_location")
+    )
+
+
+# A dummy path matching the ``vNNN/ansys`` pattern expected by the version
+# check, so ``MapdlPool`` does not need a real MAPDL installation.
+FAKE_EXEC_FILE = "/usr/ansys_inc/v242/ansys/bin/mapdl"
+
+
 class TestMapdlPool:
 
     @pytest.fixture(scope="class")
@@ -98,6 +152,10 @@ class TestMapdlPool:
                 additional_switches=QUICK_LAUNCH_SWITCHES,
                 nproc=NPROC,
                 wait=True,  # make sure that the pool is ready before testing
+                # Speeding up detection/restart of killed instances in the
+                # tests below (default is 1.0s), since the actual restart
+                # time is dominated by the real MAPDL launch anyway.
+                monitor_refresh=0.1,
             )
         else:
             port2 = int(os.environ.get("PYMAPDL_PORT2", 50057))
@@ -143,6 +201,31 @@ class TestMapdlPool:
         pool_creator.wait_for_ready()
         return pool_creator
 
+    @pytest.fixture
+    def fake_pool(self, tmp_path):
+        """A ``MapdlPool`` backed by :class:`FakeMapdlInstance` objects.
+
+        This exercises the pool's spawn/monitor/heal/timeout logic
+        without launching real MAPDL processes, so tests using it run
+        fast and do not require a MAPDL installation.
+        """
+        with patch("ansys.mapdl.core.pool.launch_mapdl", fake_launch_mapdl):
+            mapdl_pool = MapdlPool(
+                2,
+                run_location=str(tmp_path),
+                port=51100,
+                exec_file=FAKE_EXEC_FILE,
+                start_instance=True,
+                wait=True,
+                progress_bar=False,
+                # Fast detection/restart of "killed" fake instances.
+                monitor_refresh=0.02,
+            )
+
+            yield mapdl_pool
+
+            mapdl_pool.exit(block=True)
+
     @requires("local")
     def test_invalid_exec(self, monkeypatch):
         monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
@@ -156,21 +239,21 @@ class TestMapdlPool:
                 additional_switches=QUICK_LAUNCH_SWITCHES,
             )
 
-    @skip_if_ignore_pool
-    @requires("local")
-    def test_heal(self, pool):
+    def test_heal(self, fake_pool):
+        # Uses a pool of fake (non-MAPDL) instances so the heal logic can
+        # be tested without launching real MAPDL processes.
+        pool = fake_pool
         pool_sz = len(pool)
         pool_names = pool._names  # copy pool names
 
         # Killing one instance
         pool[0].exit()
 
-        time.sleep(1)  # wait for shutdown
-        timeout = time.time() + TWAIT
+        timeout = time.time() + 5
         while len(pool) < pool_sz:
-            time.sleep(0.1)
+            time.sleep(0.01)
             if time.time() > timeout:
-                raise TimeoutError(f"Failed to restart instance in {TWAIT} seconds")
+                raise TimeoutError("Failed to restart instance in 5 seconds")
 
         assert pool._names == pool_names
         assert len(pool) == pool_sz
@@ -183,9 +266,11 @@ class TestMapdlPool:
         _ = pool.map(lambda mapdl: mapdl.prep7())
         assert len(pool) == pool_sz
 
-    @skip_if_ignore_pool
-    @requires("local")
-    def test_map_timeout(self, pool):
+    def test_map_timeout(self, fake_pool):
+        # Uses a pool of fake (non-MAPDL) instances: since func() runs
+        # instantly against the fake, the only wall-clock time spent is
+        # the (small) sleep durations below plus the fast fake restart.
+        pool = fake_pool
         pool_sz = len(pool)
 
         def func(mapdl, tsleep):
@@ -195,15 +280,15 @@ class TestMapdlPool:
             mapdl.post1()
             return tsleep
 
-        timeout = 2
-        times = np.array([0, 1, 3, 4])
+        timeout = 0.2
+        times = np.array([0, 0.05, 0.3, 0.5])
         output = pool.map(func, times, timeout=timeout, wait=True)
 
         assert len(output) == (times < timeout).sum()
 
         # the timeout option kills the MAPDL instance when we reach the timeout.
         # Let's wait for the pool to heal before continuing
-        pool.wait_for_ready(TWAIT)
+        pool.wait_for_ready(5)
         assert len(pool) == pool_sz
 
     @skip_if_ignore_pool
@@ -280,12 +365,13 @@ class TestMapdlPool:
             assert pool._names(i) in dirs_path_pool
             assert f"Instance_{i}" in dirs_path_pool
 
-    @skip_if_ignore_pool
-    @requires("local")
-    def test_directory_names_default_with_restart(self, pool):
+    def test_directory_names_default_with_restart(self, fake_pool):
+        # Uses a pool of fake (non-MAPDL) instances so the restart/heal
+        # logic can be exercised without launching real MAPDL processes.
+        pool = fake_pool
 
         pool[1].exit()
-        pool.wait_for_ready()
+        pool.wait_for_ready(5)
 
         dirs_path_pool = os.listdir(pool._root_dir)
 
