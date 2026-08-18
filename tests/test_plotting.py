@@ -1329,6 +1329,38 @@ def test_add_mesh():
     assert pl3.meshes[1] == sphere
 
 
+@pytest.mark.parametrize(
+    "kwargs,expected",
+    [
+        ({"notebook": False}, {"notebook": False}),
+        ({"notebook": True}, {"notebook": True}),
+        ({"off_screen": True}, {"off_screen": True}),
+        (
+            {"notebook": False, "off_screen": True, "window_size": [800, 600]},
+            {"notebook": False, "off_screen": True, "window_size": [800, 600]},
+        ),
+    ],
+)
+def test_show_forwards_notebook_and_off_screen(kwargs, expected):
+    """Regression test for #4635.
+
+    ``notebook``/``off_screen``/``window_size`` passed to ``show`` must reach
+    the underlying backend instead of being silently dropped, since dropping
+    them makes the backend fall back to its own (sometimes incorrect)
+    auto-detection - for example, detecting Spyder's IPython console as a
+    Jupyter notebook.
+    """
+    pl = MapdlPlotter()
+
+    with patch.object(pl._backend, "show") as mock_show:
+        pl.show(**kwargs)
+
+    mock_show.assert_called_once()
+    _, call_kwargs = mock_show.call_args
+    for key, value in expected.items():
+        assert call_kwargs.get(key) == value
+
+
 def test_plot_path_screenshoot(mapdl, cleared, tmpdir):
     mapdl.graphics("POWER")
     # mapdl.screenshot is not affected by the device.
