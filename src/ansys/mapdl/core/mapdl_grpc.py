@@ -487,6 +487,7 @@ class MapdlGrpc(MapdlBase):
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
         self._exited: Optional[bool] = None
+        self._process_close_lock: threading.Lock = threading.Lock()
         self._db: Optional[MapdlDb] = None
         self.__server_version: Optional[str] = None
         self._state: Optional[grpc.Future] = None
@@ -1911,6 +1912,7 @@ class MapdlGrpc(MapdlBase):
 
             # Step 3 of '_release_resources' closes the gRPC channel.
             self._release_resources(path=self._path)
+
         finally:
             self._exiting = False
 
@@ -2028,6 +2030,11 @@ class MapdlGrpc(MapdlBase):
         This also makes the method safe to call during interpreter shutdown,
         where module globals may already have been torn down.
 
+        Callers must set ``_exiting = True`` before invoking this method (and
+        reset it once done), so that :attr:`is_alive` short-circuits instead
+        of issuing a live gRPC call against a server that step 1 may have
+        just killed. Both :meth:`exit` and :meth:`__del__` do this.
+
         Examples
         --------
         This method is called internally by :meth:`exit`, so it is rarely
@@ -2119,7 +2126,7 @@ class MapdlGrpc(MapdlBase):
             except Exception as e:
                 self._log.debug("Error during logger cleanup: %s", e)
 
-    def _close_grpc_channel(self) -> None:
+    def _close_grpc_channel(self, exiting: bool = False) -> None:
         """Unsubscribe from and close the gRPC channel.
 
         Removes the connectivity callback registered by
@@ -2132,6 +2139,12 @@ class MapdlGrpc(MapdlBase):
         safe to call on an instance that is already marked as exited, which is
         precisely the case that used to leak, because ``exit()`` returns early
         for such instances.
+
+        Parameters
+        ----------
+        exiting : bool, optional
+            Whether this is being called during the exit process. If True, it
+            will suppress logging of errors during channel closure. Default is False.
         """
         channel = getattr(self, "_channel", None)
         callback = getattr(self, "_connectivity_callback", None)
@@ -2146,13 +2159,16 @@ class MapdlGrpc(MapdlBase):
             try:
                 channel.unsubscribe(callback)
             except Exception as e:
-                self._log.debug(f"Error unsubscribing from gRPC channel: {e}")
+                if not exiting:
+                    self._log.debug(f"Error unsubscribing from gRPC channel: {e}")
 
         try:
             channel.close()
-            self._log.debug("gRPC channel closed")
+            if not exiting:
+                self._log.debug("gRPC channel closed")
         except Exception as e:
-            self._log.debug(f"Error closing gRPC channel: {e}")
+            if not exiting:
+                self._log.debug(f"Error closing gRPC channel: {e}")
 
     def _remove_temp_dir_on_exit(self, path=None):
         """Removes the temporary directory created by the launcher.
@@ -2625,7 +2641,9 @@ class MapdlGrpc(MapdlBase):
         return os.path.join(path, jobname + "0." + preference)
 
     @protect_grpc
-    def _ctrl(self, cmd: str, opt1: str = ""):  # numpydoc ignore=RT01
+    def _ctrl(
+        self, cmd: str, opt1: str = "", timeout: Optional[float] = 1.0
+    ):  # numpydoc ignore=RT01
         """Issue control command to the MAPDL server.
 
         Available commands:
@@ -2654,6 +2672,26 @@ class MapdlGrpc(MapdlBase):
 
         - ``mem-stats``
             To be added
+
+        Parameters
+        ----------
+        cmd : str
+            Control command to send. See the commands documented above.
+        opt1 : str, optional
+            Option accompanying ``cmd``. The default is ``""``.
+        timeout : float, optional
+            Maximum time in seconds to wait for the server to respond before
+            raising a gRPC deadline-exceeded error. The default is ``1.0``.
+            Use ``None`` to wait indefinitely. Bounding this call prevents an
+            unresponsive or already-dead server (for example, one whose
+            process was just killed during teardown) from hanging the caller
+            forever, since the underlying gRPC channel does not detect a
+            severed local connection on its own.
+
+        Returns
+        -------
+        str or None
+            The server response, if any.
         """
         self._log.debug(f'Issuing CtrlRequest "{cmd}" with option "{opt1}".')
         request = anskernel.CtrlRequest(ctrl=str(cmd), opt1=str(opt1))
@@ -2665,12 +2703,12 @@ class MapdlGrpc(MapdlBase):
         if cmd.lower() == "exit":
             try:
                 # this always returns an error as the connection is closed
-                self._stub.Ctrl(request)
+                self._stub.Ctrl(request, timeout=timeout)
             except (_InactiveRpcError, _MultiThreadedRendezvous):
                 pass
             return
 
-        resp = self._stub.Ctrl(request)
+        resp = self._stub.Ctrl(request, timeout=timeout)
 
         if cmd.lower() == "set_verb" and str(opt1) == "0":
             warn("Disabling gRPC verbose ('_ctr') by issuing also '/VERIFY' command.")
@@ -4566,53 +4604,45 @@ class MapdlGrpc(MapdlBase):
         Notes
         -----
         The garbage collector may begin tearing down module globals before this
-        method runs, so every attribute access is guarded with ``hasattr`` and
-        wrapped in ``try/except``.  The actual cleanup is delegated to
+        method runs, so every attribute access is guarded with ``getattr`` and
+        wrapped in ``try/except``.  The full teardown is delegated to
         :meth:`_release_resources`, which is itself idempotent.
 
-        The gRPC channel is closed unconditionally, before any of the
-        early-return checks below, because it is a purely client-side resource
-        whose ``_poll_connectivity`` daemon thread outlives this object
-        otherwise.
-
-        ``_release_resources`` is called with ``cleanup_loggers=False``.
-        Unlike the gRPC channel or the MAPDL process, which this instance
-        exclusively owns, the logger and its handlers are shared, process-wide
-        state (see :class:`ansys.mapdl.core.logging.Logger`). Closing a
-        handler from here — non-deterministic, garbage-collection-driven code
-        that can run at any point, including while another ``Mapdl`` instance
-        is still logging through the same handler — is what causes errors
-        such as ``ValueError: I/O operation on closed file`` or
-        ``AttributeError`` on ``self._log`` elsewhere. Only :meth:`exit`,
-        which runs at a point deterministically chosen by the caller, is
-        allowed to tear down logging resources.
+        When the instance is already exited, was launched with
+        ``cleanup_on_exit=False``, did not launch MAPDL itself
+        (``_start_instance=False``), or was never actually launched, the full
+        teardown in :meth:`_release_resources` is skipped (it would either be
+        a no-op or kill a server this instance does not own). Even then, the
+        gRPC channel is still closed and the instance is marked as exited,
+        because the channel is a purely client-side resource whose
+        ``_poll_connectivity`` daemon thread outlives this object otherwise.
         """
-        try:
-            self._close_grpc_channel()
-        except Exception:  # nosec B110 - best-effort cleanup during GC
-            pass
+        # Check early exit conditions.
+        if (
+            getattr(self, "_exited", False)
+            or not getattr(self, "_cleanup", True)
+            or not getattr(self, "_start_instance", True)
+            or not getattr(self, "_launched", False)
+        ):
 
-        try:
-            if self._exited:
+            try:
+                self._exiting = True
+                self._close_grpc_channel()
+            except (
+                Exception
+            ):  # nosec B110 - best-effort cleanup during GC; logging is unreliable here
+                pass
+            finally:
+                self._exited = True
+                self._exiting = False
                 return
-        except AttributeError:
-            return
-
-        # Honour cleanup_on_exit=False: self._cleanup stores that flag.
-        if not getattr(self, "_cleanup", True):
-            return
-
-        # Only clean up instances that PyMAPDL launched itself.
-        if not getattr(self, "_start_instance", True):
-            return
-
-        # If the process was never actually launched, there is nothing to release.
-        if not getattr(self, "_launched", False):
-            return
 
         try:
+            self._exiting = True
             self._release_resources(getattr(self, "_path", None), cleanup_loggers=False)
         except (
             Exception
         ):  # nosec B110 - best-effort cleanup during GC; logging is unreliable here
             pass
+        finally:
+            self._exiting = False

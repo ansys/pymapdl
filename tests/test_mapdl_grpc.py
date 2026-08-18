@@ -340,14 +340,18 @@ class TestKillProcess:
 
     def test_lock_prevents_concurrent_double_teardown(self):
         """Concurrent calls serialize: the second waits for the first."""
-        import time as _time
-
         mock = _make_mock_mapdl()
         call_log = []
+        t1_started = threading.Event()
+        release_t1 = threading.Event()
 
         def slow_terminate(proc):
             call_log.append("start")
-            _time.sleep(0.05)
+            t1_started.set()
+            # t1 holds _process_close_lock for the whole call, so t2 is
+            # guaranteed to block on it until release_t1 is set below,
+            # regardless of scheduling — no arbitrary sleep needed.
+            release_t1.wait(timeout=2)
             call_log.append("end")
 
         mock._terminate_process = slow_terminate
@@ -356,8 +360,11 @@ class TestKillProcess:
         t1 = threading.Thread(target=MapdlGrpc._kill_process, args=(mock,))
         t2 = threading.Thread(target=MapdlGrpc._kill_process, args=(mock,))
         t1.start()
-        _time.sleep(0.01)
+        assert t1_started.wait(timeout=2)
+
         t2.start()
+        release_t1.set()
+
         t1.join(timeout=2)
         t2.join(timeout=2)
 
@@ -504,6 +511,11 @@ class TestCloseGrpcChannel:
         channel.unsubscribe.assert_called_once_with(callback)
         channel.close.assert_called_once()
         assert mock._connectivity_callback is None
+        # Enforce ordering: unsubscribe() must happen strictly before close(),
+        # so a regression that swaps the order is caught even though both
+        # methods are still called exactly once.
+        method_names = [call[0] for call in channel.mock_calls]
+        assert method_names.index("unsubscribe") < method_names.index("close")
 
     def test_unsubscribe_failure_does_not_prevent_close(self):
         """A failing unsubscribe() is logged and close() still runs."""
