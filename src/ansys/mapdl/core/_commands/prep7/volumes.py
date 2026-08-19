@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase, parse
+from ansys.mapdl.core._commands import CommandsBase
 
 
 class Volumes(CommandsBase):
@@ -266,7 +266,7 @@ class Volumes(CommandsBase):
         3
         """
         command = f"V,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8}"
-        return parse.parse_v(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def va(
         self,
@@ -379,7 +379,7 @@ class Volumes(CommandsBase):
         1
         """
         command = f"VA,{a1},{a2},{a3},{a4},{a5},{a6},{a7},{a8},{a9},{a10}"
-        return parse.parse_v(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def vdele(
         self,

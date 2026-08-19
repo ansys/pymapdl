@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase, parse
+from ansys.mapdl.core._commands import CommandsBase
 
 
 class Lines(CommandsBase):
@@ -160,7 +160,7 @@ class Lines(CommandsBase):
         command = (
             f"BSPLIN,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}"
         )
-        return parse.parse_line_no(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def circle(
         self,
@@ -236,7 +236,7 @@ class Lines(CommandsBase):
         [1, 2, 3, 4]
         """
         command = f"CIRCLE,{pcent},{rad},{paxis},{pzero},{arc},{nseg}"
-        return parse.parse_line_nos(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def l(
         self,
@@ -337,7 +337,7 @@ class Lines(CommandsBase):
         1
         """
         command = f"L,{p1},{p2},{ndiv},{space},{xv1},{yv1},{zv1},{xv2},{yv2},{zv2}"
-        return parse.parse_line_no(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def l2ang(
         self,
@@ -411,9 +411,7 @@ class Lines(CommandsBase):
         9
         """
         command = f"L2ANG,{nl1},{nl2},{ang1},{ang2},{phit1},{phit2}"
-        msg = self.run(command, **kwargs)
-        if msg:
-            return parse.parse_line_no(msg)
+        return self.run(command, **kwargs)
 
     def l2tan(self, nl1: str = "", nl2: str = "", **kwargs):
         r"""Generates a line tangent to two lines.
@@ -462,7 +460,7 @@ class Lines(CommandsBase):
         >>> mapdl.lplot(cpos='xy')
         """
         command = f"L2TAN,{nl1},{nl2}"
-        return parse.parse_line_no(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def lang(
         self,
@@ -538,7 +536,7 @@ class Lines(CommandsBase):
         2
         """
         command = f"LANG,{nl1},{p3},{ang},{phit},{locat}"
-        return parse.parse_line_no(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def larc(self, p1: str = "", p2: str = "", pc: str = "", rad: str = "", **kwargs):
         r"""Defines a circular arc.
@@ -593,7 +591,7 @@ class Lines(CommandsBase):
         1
         """
         command = f"LARC,{p1},{p2},{pc},{rad}"
-        return parse.parse_line_no(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def larea(self, p1: str = "", p2: str = "", narea: str = "", **kwargs):
         r"""Generates the shortest line between two keypoints on an area.
@@ -641,7 +639,7 @@ class Lines(CommandsBase):
         1
         """
         command = f"LAREA,{p1},{p2},{narea}"
-        return parse.parse_line_no(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def lcomb(self, nl1: str = "", nl2: str = "", keep: str = "", **kwargs):
         r"""Combines adjacent lines into one line.
@@ -698,7 +696,7 @@ class Lines(CommandsBase):
         1
         """
         command = f"LCOMB,{nl1},{nl2},{keep}"
-        return parse.parse_line_no(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def ldele(
         self,
@@ -964,7 +962,7 @@ class Lines(CommandsBase):
         1
         """
         command = f"LEXTND,{nl1},{nk1},{dist},{keep}"
-        return parse.parse_line_no(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def lfillt(
         self, nl1: str = "", nl2: str = "", rad: str = "", pcent: str = "", **kwargs
@@ -1022,7 +1020,7 @@ class Lines(CommandsBase):
         3
         """
         command = f"LFILLT,{nl1},{nl2},{rad},{pcent}"
-        return parse.parse_line_no(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def lgen(
         self,
@@ -1499,7 +1497,7 @@ class Lines(CommandsBase):
         1
         """
         command = f"LSTR,{p1},{p2}"
-        return parse.parse_line_no(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def lsum(self, **kwargs):
         r"""Calculates and prints geometry statistics of the selected lines.
@@ -1676,7 +1674,7 @@ class Lines(CommandsBase):
         2
         """
         command = f"LTAN,{nl1},{p3},{xv3},{yv3},{zv3}"
-        return parse.parse_line_no(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def ltran(
         self,
@@ -1872,7 +1870,7 @@ class Lines(CommandsBase):
         command = (
             f"SPLINE,{p1},{p2},{p3},{p4},{p5},{p6},{xv1},{yv1},{zv1},{xv6},{yv6},{zv6}"
         )
-        return parse.parse_line_nos(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def ssln(self, fact: str = "", size: str = "", **kwargs):
         r"""Selects and displays small lines in the model.
