@@ -70,10 +70,14 @@ GitHub Codespaces is disabled for the PyMAPDL repository. The repository
 includes separate configurations for development and documentation that you
 can use when setting up Codespaces in a fork or another repository:
 
-* :file:`.devcontainer/codespaces-dev/devcontainer.json` configures the
-  development environment.
-* :file:`.devcontainer/codespaces-docs/devcontainer.json` adds the tools
-  needed to build the documentation.
+* :file:`.devcontainer/codespaces-dev/devcontainer.json` builds the
+  development container, including its test dependencies.
+* :file:`.devcontainer/codespaces-docs/devcontainer.json` builds the
+  documentation container, including its documentation dependencies.
+
+Each configuration uses the Dockerfile in its own directory. Ensure that its
+base image is available to your repository and is configured for your MAPDL
+license before creating the codespace.
 
 Select the appropriate configuration when you create a codespace in your fork
 or repository. See `the Visual Studio Code Dev Containers documentation
