@@ -501,7 +501,7 @@ APDL loops using ``*DO`` or ``*DOWHILE`` can be implemented Pythonically,
 using the :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
 attribute directly, or with the dedicated
 :meth:`Mapdl.do() <ansys.mapdl.core.Mapdl.do>` and
-:meth:`Mapdl.while_() <ansys.mapdl.core.Mapdl.while_>` context managers, which
+:meth:`Mapdl.dowhile() <ansys.mapdl.core.Mapdl.dowhile>` context managers, which
 wrap ``*DO``/``*DOWHILE`` and ``*ENDDO`` and automatically use
 ``non_interactive`` for you:
 

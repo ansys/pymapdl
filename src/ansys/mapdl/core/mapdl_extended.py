@@ -81,7 +81,7 @@ class _MapdlCommandExtended(_MapdlCore):
         super().__init__(*args, **kwargs)
         self._graphics_backend = GraphicsBackend.PYVISTA
         # Number of currently nested ``*DO``/``*DOWHILE`` loops opened
-        # through :meth:`do` or :meth:`while_`.
+        # through :meth:`do` or :meth:`dowhile`.
         self._do_loop_level: int = 0
 
     @wraps(_MapdlCore.file)
@@ -3447,7 +3447,7 @@ class _MapdlExtended(_MapdlCommandExtended):
         )
 
     class _DoLoop:
-        """Context manager backing :meth:`Mapdl.do` and :meth:`Mapdl.while_`.
+        """Context manager backing :meth:`Mapdl.do` and :meth:`Mapdl.dowhile`.
 
         It opens the loop (``*DO`` or ``*DOWHILE``) on ``__enter__`` and
         closes it (``*ENDDO``) on ``__exit__``, automatically entering
@@ -3471,7 +3471,7 @@ class _MapdlExtended(_MapdlCommandExtended):
                     "Cannot open another APDL do-loop: MAPDL only supports "
                     f"{MAX_DO_LOOP_LEVEL} levels of nested '*DO'/'*DOWHILE' "
                     "loops. Reduce the number of nested 'mapdl.do' or "
-                    "'mapdl.while_' context managers."
+                    "'mapdl.dowhile' context managers."
                 )
 
             mapdl._do_loop_level += 1
@@ -3563,7 +3563,7 @@ class _MapdlExtended(_MapdlCommandExtended):
         command = f"*DO,{par},{ival},{fval},{inc}"
         return self._DoLoop(self, command, **kwargs)
 
-    def while_(
+    def dowhile(
         self,
         par: str,
         **kwargs: KwargDict,
@@ -3607,7 +3607,7 @@ class _MapdlExtended(_MapdlCommandExtended):
         every pass.
 
         >>> mapdl.parameters["cont"] = 5
-        >>> with mapdl.while_("cont"):
+        >>> with mapdl.dowhile("cont"):
         ...     mapdl.n("cont", "cont", 0, 0)
         ...     mapdl.run("cont = cont - 1")
 

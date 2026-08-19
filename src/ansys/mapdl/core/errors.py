@@ -182,7 +182,7 @@ class MapdlDoLoopLimitError(MapdlRuntimeError):
 
     MAPDL only supports a limited number of nested do-loops. See
     :attr:`Mapdl.do() <ansys.mapdl.core.Mapdl.do>` and
-    :attr:`Mapdl.while_() <ansys.mapdl.core.Mapdl.while_>`.
+    :attr:`Mapdl.dowhile() <ansys.mapdl.core.Mapdl.dowhile>`.
     """
 
     def __init__(

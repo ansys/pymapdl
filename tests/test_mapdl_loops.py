@@ -20,11 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Unit tests for the ``Mapdl.do`` and ``Mapdl.while_`` loop context managers.
+"""Unit tests for the ``Mapdl.do`` and ``Mapdl.dowhile`` loop context managers.
 
 These tests do not require a live MAPDL instance: they exercise the context
 manager logic against a lightweight fake that mimics only the bits of
-:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` that ``do``/``while_`` rely
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` that ``do``/``dowhile`` rely
 on.
 """
 
@@ -88,8 +88,8 @@ def test_do_emits_do_and_enddo(fake_mapdl):
     assert fake_mapdl._do_loop_level == 0
 
 
-def test_while_emits_dowhile_and_enddo(fake_mapdl):
-    with fake_mapdl.while_("cont"):
+def test_dowhile_emits_dowhile_and_enddo(fake_mapdl):
+    with fake_mapdl.dowhile("cont"):
         fake_mapdl.run("cont = cont - 1")
 
     assert fake_mapdl.commands == ["*DOWHILE,cont", "cont = cont - 1", "*ENDDO"]
@@ -123,10 +123,10 @@ def test_do_does_not_reenter_non_interactive_when_already_active(fake_mapdl):
     assert len(fake_mapdl.non_interactive_exits) == 1
 
 
-def test_nested_do_and_while_share_the_same_loop_counter(fake_mapdl):
+def test_nested_do_and_dowhile_share_the_same_loop_counter(fake_mapdl):
     with fake_mapdl.do("i", 1, 10):
         assert fake_mapdl._do_loop_level == 1
-        with fake_mapdl.while_("j"):
+        with fake_mapdl.dowhile("j"):
             assert fake_mapdl._do_loop_level == 2
             fake_mapdl.run("body")
         assert fake_mapdl._do_loop_level == 1

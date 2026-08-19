@@ -22,6 +22,7 @@
    Mapdl.default_file_type_for_plots
    Mapdl.directory
    Mapdl.do
+   Mapdl.dowhile
    Mapdl.exit
    Mapdl.exited
    Mapdl.exiting
@@ -81,7 +82,6 @@
    Mapdl.set_log_level
    Mapdl.thermal_result
    Mapdl.version
-   Mapdl.while_
 
 
 Constants
