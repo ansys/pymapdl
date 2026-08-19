@@ -445,6 +445,19 @@ def protect_grpc(func: Callable) -> Callable:
 
                 mapdl._log.debug("A gRPC error has been detected.")
 
+                if error.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                    # Reconnecting and retrying would only spend another full
+                    # deadline on an instance which is already not answering.
+                    deadline = getattr(mapdl, "rpc_timeout", None)
+                    raise MapdlConnectionError(
+                        f"The gRPC call '{func.__name__}' did not complete within "
+                        f"its deadline of {deadline} seconds. MAPDL might have "
+                        "died or stopped answering.\n"
+                        "You can change this deadline using the 'rpc_timeout' "
+                        "argument of the 'Mapdl' class, or the "
+                        "'PYMAPDL_RPC_TIMEOUT' environment variable."
+                    ) from error
+
                 if not mapdl.exited:
                     i_attemps += 1
                     if i_attemps <= n_attempts:

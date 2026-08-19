@@ -119,6 +119,51 @@ VOID_REQUEST = anskernel.EmptyRequest()
 # Default 256 MB message length
 MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024**2))
 
+# Environment variable setting the default deadline for each gRPC call.
+ENV_RPC_TIMEOUT = "PYMAPDL_RPC_TIMEOUT"
+
+
+def resolve_rpc_timeout(rpc_timeout: Optional[float] = None) -> Optional[float]:
+    """Resolve the deadline to apply to each gRPC call.
+
+    Parameters
+    ----------
+    rpc_timeout : float, optional
+        Deadline in seconds. If ``None``, the ``PYMAPDL_RPC_TIMEOUT``
+        environment variable is used. When neither is given, the calls have no
+        deadline and block until MAPDL answers.
+
+    Returns
+    -------
+    float or None
+        Deadline in seconds, or ``None`` when the calls must not expire.
+
+    Examples
+    --------
+    >>> from ansys.mapdl.core.mapdl_grpc import resolve_rpc_timeout
+    >>> resolve_rpc_timeout(30)
+    30.0
+    """
+    if rpc_timeout is None:
+        rpc_timeout = os.environ.get(ENV_RPC_TIMEOUT)  # type: ignore[assignment]
+
+    if rpc_timeout is None or rpc_timeout == "":
+        return None
+
+    try:
+        rpc_timeout = float(rpc_timeout)
+    except ValueError as error:
+        raise ValueError(
+            f"The gRPC timeout must be a number in seconds, not {rpc_timeout!r}."
+        ) from error
+
+    if rpc_timeout <= 0:
+        raise ValueError(
+            f"The gRPC timeout must be a positive number in seconds, not {rpc_timeout}."
+        )
+
+    return rpc_timeout
+
 
 def _drain_queue(queue) -> str:
     """Drain all available items from a queue into a string.
@@ -349,6 +394,13 @@ class MapdlGrpc(MapdlBase):
         If not found, it will use the "certs" folder assuming it is in the current working
         directory.
 
+    rpc_timeout : float | None
+        Deadline in seconds applied to each gRPC call, so that a MAPDL instance
+        which died or stopped answering raises an exception instead of blocking
+        forever. By default `None`, which reads the ``PYMAPDL_RPC_TIMEOUT``
+        environment variable and, when that is unset too, lets the calls block
+        until MAPDL answers.
+
 
     Examples
     --------
@@ -403,6 +455,7 @@ class MapdlGrpc(MapdlBase):
         transport_mode: Optional[str] = None,
         uds_dir: Optional[Union[str, Path]] = None,
         certs_dir: Optional[Union[str, Path]] = None,
+        rpc_timeout: Optional[float] = None,
         **start_parm: dict[str, Any],
     ):
         """Initialize connection to the mapdl server"""
@@ -492,6 +545,7 @@ class MapdlGrpc(MapdlBase):
         self.__server_version: Optional[str] = None
         self._state: Optional[grpc.Future] = None
         self._timeout: int = timeout
+        self._rpc_timeout: Optional[float] = resolve_rpc_timeout(rpc_timeout)
         self._env_vars: Dict[str, str] = start_parm.get("env_vars", {})
         self._pids: List[Union[int, None]] = []
         self._channel_state: grpc.ChannelConnectivity = (
@@ -1779,6 +1833,38 @@ class MapdlGrpc(MapdlBase):
         """
         return self._mapdl_on_hpc
 
+    @property
+    def rpc_timeout(self) -> Optional[float]:
+        """Deadline in seconds applied to each gRPC call.
+
+        When MAPDL dies or stops answering in the middle of a request, the
+        underlying gRPC call can block forever. Setting this deadline makes such
+        a call raise :class:`MapdlConnectionError
+        <ansys.mapdl.core.errors.MapdlConnectionError>` instead. Set it to
+        ``None`` to let the calls block until MAPDL answers.
+
+        Notes
+        -----
+        The deadline applies to each call, so it must be longer than the slowest
+        command you expect to run, solves included.
+
+        Returns
+        -------
+        float or None
+            Deadline in seconds, or ``None`` when the calls do not expire.
+
+        Examples
+        --------
+        >>> mapdl.rpc_timeout = 600
+        >>> mapdl.rpc_timeout
+        600.0
+        """
+        return self._rpc_timeout
+
+    @rpc_timeout.setter
+    def rpc_timeout(self, value: Optional[float]) -> None:
+        self._rpc_timeout = None if value is None else resolve_rpc_timeout(value)
+
     @protect_grpc
     def _send_command(
         self, cmd: str, mute: bool = False
@@ -1792,7 +1878,7 @@ class MapdlGrpc(MapdlBase):
         # TODO: Capture keyboard exception and place this in a thread
         if self._stub is None:
             raise MapdlRuntimeError("MAPDL stub not initialized")
-        grpc_response = self._stub.SendCommand(request)
+        grpc_response = self._stub.SendCommand(request, timeout=self._rpc_timeout)
 
         resp = grpc_response.response
         if resp is not None:
@@ -1807,7 +1893,9 @@ class MapdlGrpc(MapdlBase):
         metadata = [("time_step_stream", str(time_step))]
         if self._stub is None:
             raise MapdlRuntimeError("MAPDL stub not initialized")
-        stream = self._stub.SendCommandS(request, metadata=metadata)
+        stream = self._stub.SendCommandS(
+            request, metadata=metadata, timeout=self._rpc_timeout
+        )
         response = []
         for item in stream:
             cmdout = "\n".join(item.cmdout)
@@ -3014,7 +3102,9 @@ class MapdlGrpc(MapdlBase):
 
         if verbose:
             request = pb_types.InputFileRequest(filename=filename)
-            strouts = self._stub.InputFileS(request, metadata=metadata)
+            strouts = self._stub.InputFileS(
+                request, metadata=metadata, timeout=self._rpc_timeout
+            )
             responses = []
             for strout in strouts:
                 lines = strout.cmdout
@@ -3067,7 +3157,9 @@ class MapdlGrpc(MapdlBase):
         # even though we don't care about the output, we still
         # need to check.  otherwise, since inputfile is
         # non-blocking, we could corrupt the service
-        chunks = self._stub.InputFileS(request, metadata=metadata)
+        chunks = self._stub.InputFileS(
+            request, metadata=metadata, timeout=self._rpc_timeout
+        )
         _ = [chunk.cmdout for chunk in chunks]  # unstable
 
         # all output (unless redirected) has been written to a temp output
@@ -3234,7 +3326,9 @@ class MapdlGrpc(MapdlBase):
         try:
             if self._stub is None:
                 raise MapdlRuntimeError("MAPDL stub not initialized")
-            response = self._stub.Get(pb_types.GetRequest(getcmd=cmd))
+            response = self._stub.Get(
+                pb_types.GetRequest(getcmd=cmd), timeout=self._rpc_timeout
+            )
         finally:
             self._get_lock = False
 
@@ -3673,7 +3767,9 @@ class MapdlGrpc(MapdlBase):
         ]
         if self._stub is None:
             raise MapdlRuntimeError("MAPDL stub not initialized")
-        chunks = self._stub.DownloadFile(request, metadata=metadata)
+        chunks = self._stub.DownloadFile(
+            request, metadata=metadata, timeout=self._rpc_timeout
+        )
         file_size = save_chunks_to_file(
             chunks,
             out_file_name,
@@ -3717,7 +3813,7 @@ class MapdlGrpc(MapdlBase):
         chunks_generator = get_file_chunks(file_name, progress_bar=progress_bar)
         if self._stub is None:
             raise MapdlRuntimeError("MAPDL stub not initialized")
-        response = self._stub.UploadFile(chunks_generator)
+        response = self._stub.UploadFile(chunks_generator, timeout=self._rpc_timeout)
 
         if not response.length:
             raise IOError("File failed to upload")
@@ -3758,7 +3854,9 @@ class MapdlGrpc(MapdlBase):
 
         cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
         try:
-            chunks = self._stub.VGet2(pb_types.GetRequest(getcmd=cmd))
+            chunks = self._stub.VGet2(
+                pb_types.GetRequest(getcmd=cmd), timeout=self._rpc_timeout
+            )
             values = parse_chunks(chunks)
         finally:
             self._vget_lock = False
@@ -3794,7 +3892,7 @@ class MapdlGrpc(MapdlBase):
         request = pb_types.DownloadFileRequest(name=target_name)
         if self._stub is None:
             raise MapdlRuntimeError("MAPDL stub not initialized")
-        chunks = self._stub.DownloadFile(request)
+        chunks = self._stub.DownloadFile(request, timeout=self._rpc_timeout)
         return b"".join([chunk.payload for chunk in chunks])
 
     @property
@@ -3891,7 +3989,7 @@ class MapdlGrpc(MapdlBase):
         request = pb_types.ParameterRequest(name=pname, array=False)
         if self._stub is None:
             raise MapdlRuntimeError("MAPDL stub not initialized")
-        presponse = self._stub.GetParameter(request)
+        presponse = self._stub.GetParameter(request, timeout=self._rpc_timeout)
         if presponse.val:
             return float(presponse.val[0])
 
@@ -3899,20 +3997,24 @@ class MapdlGrpc(MapdlBase):
     def _upload_raw(self, raw, save_as):  # consider private
         """Upload a binary string as a file"""
         chunks = chunk_raw(raw, save_as)
-        response = self._stub.UploadFile(chunks)
+        response = self._stub.UploadFile(chunks, timeout=self._rpc_timeout)
         if response.length != len(raw):
             raise IOError("Raw Bytes failed to upload")
 
     # TODO: not fully tested/implemented
     @protect_grpc
     def Param(self, pname):
-        presponse = self._stub.GetParameter(pb_types.ParameterRequest(name=pname))
+        presponse = self._stub.GetParameter(
+            pb_types.ParameterRequest(name=pname), timeout=self._rpc_timeout
+        )
         return presponse.val
 
     # TODO: not fully tested/implemented
     @protect_grpc
     def Var(self, num):
-        presponse = self._stub.GetVariable(pb_types.VariableRequest(inum=num))
+        presponse = self._stub.GetVariable(
+            pb_types.VariableRequest(inum=num), timeout=self._rpc_timeout
+        )
         return presponse.val
 
     @property
@@ -4018,14 +4120,14 @@ class MapdlGrpc(MapdlBase):
         APDLMATH vectors only.
         """
         request = pb_types.ParameterRequest(name=pname)
-        return self._stub.GetDataInfo(request)
+        return self._stub.GetDataInfo(request, timeout=self._rpc_timeout)
 
     @protect_grpc
     def _vec_data(self, pname):  # numpydoc ignore=RT01
         """Downloads vector data from a MAPDL MATH parameter"""
         dtype = ANSYS_VALUE_TYPE[self._data_info(pname).stype]
         request = pb_types.ParameterRequest(name=pname)
-        chunks = self._stub.GetVecData(request)
+        chunks = self._stub.GetVecData(request, timeout=self._rpc_timeout)
         return parse_chunks(chunks, dtype)
 
     @protect_grpc
@@ -4043,7 +4145,7 @@ class MapdlGrpc(MapdlBase):
 
         if mtype == 2:  # dense
             request = pb_types.ParameterRequest(name=pname)
-            chunks = self._stub.GetMatData(request)
+            chunks = self._stub.GetMatData(request, timeout=self._rpc_timeout)
             values = parse_chunks(chunks, stype)
             return np.transpose(np.reshape(values, shape[::-1]))
         elif mtype == 3:  # sparse

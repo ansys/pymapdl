@@ -30,7 +30,12 @@ from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
 import pytest
 
 from ansys.mapdl.core.errors import MapdlExitedError
-from ansys.mapdl.core.mapdl_grpc import MapdlGrpc, MapdlRuntimeError
+from ansys.mapdl.core.mapdl_grpc import (
+    ENV_RPC_TIMEOUT,
+    MapdlGrpc,
+    MapdlRuntimeError,
+    resolve_rpc_timeout,
+)
 
 
 def _make_mock_mapdl():
@@ -727,3 +732,61 @@ class TestEnsureChannel:
 
         mock._ensure_channel.assert_called_once()
         mock._multi_connect.assert_called_once_with(timeout=5)
+
+
+class TestRPCTimeout:
+    """A deadline on each gRPC call turns a dead MAPDL into an exception."""
+
+    def test_no_deadline_by_default(self, monkeypatch):
+        monkeypatch.delenv(ENV_RPC_TIMEOUT, raising=False)
+
+        assert resolve_rpc_timeout() is None
+
+    def test_read_from_the_environment(self, monkeypatch):
+        monkeypatch.setenv(ENV_RPC_TIMEOUT, "45.5")
+
+        assert resolve_rpc_timeout() == 45.5
+
+    def test_argument_wins_over_the_environment(self, monkeypatch):
+        monkeypatch.setenv(ENV_RPC_TIMEOUT, "10")
+
+        assert resolve_rpc_timeout(30) == 30.0
+
+    @pytest.mark.parametrize("value", ["not-a-number", 0, -1])
+    def test_invalid_deadlines_are_rejected(self, value):
+        with pytest.raises(ValueError, match="gRPC timeout must be a"):
+            resolve_rpc_timeout(value)
+
+    def test_property_can_disable_the_deadline(self, monkeypatch):
+        """Assigning 'None' must clear the deadline, environment or not."""
+        monkeypatch.setenv(ENV_RPC_TIMEOUT, "60")
+        mock = MagicMock(spec=MapdlGrpc)
+        mock._rpc_timeout = resolve_rpc_timeout()
+
+        assert MapdlGrpc.rpc_timeout.fget(mock) == 60.0
+
+        MapdlGrpc.rpc_timeout.fset(mock, None)
+        assert mock._rpc_timeout is None
+
+        MapdlGrpc.rpc_timeout.fset(mock, 5)
+        assert mock._rpc_timeout == 5.0
+
+    def test_send_command_applies_the_deadline(self):
+        mock = MagicMock(spec=MapdlGrpc)
+        mock._rpc_timeout = 12.0
+        mock._stub = MagicMock()
+
+        MapdlGrpc._send_command(mock, "/PREP7")
+
+        assert mock._stub.SendCommand.call_args.kwargs["timeout"] == 12.0
+
+    def test_streamed_command_applies_the_deadline(self):
+        mock = MagicMock(spec=MapdlGrpc)
+        mock._rpc_timeout = 12.0
+        mock._stub = MagicMock()
+        mock._stub.SendCommandS.return_value = []
+        mock._get_time_step_stream.return_value = 100
+
+        MapdlGrpc._send_command_stream(mock, "/PREP7")
+
+        assert mock._stub.SendCommandS.call_args.kwargs["timeout"] == 12.0

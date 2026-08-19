@@ -22,10 +22,12 @@
 
 from unittest.mock import MagicMock
 
+import grpc
 import pytest
 
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
+    MapdlConnectionError,
     MapdlException,
     MapdlExitedError,
     MapdlInvalidRoutineError,
@@ -226,3 +228,60 @@ def test_protect_grpc_reraises_unrelated_value_error():
         raising(mock_mapdl)
 
     assert mock_mapdl._exited is False
+
+
+class DeadlineExceededError(grpc.RpcError):
+    """gRPC error raised when a call does not complete within its deadline."""
+
+    def code(self):
+        """Return the gRPC status code.
+
+        Returns
+        -------
+        grpc.StatusCode
+            Always ``DEADLINE_EXCEEDED``.
+
+        Examples
+        --------
+        >>> DeadlineExceededError().code()
+        <StatusCode.DEADLINE_EXCEEDED: ...>
+        """
+        return grpc.StatusCode.DEADLINE_EXCEEDED
+
+    def details(self):
+        """Return the gRPC error details.
+
+        Returns
+        -------
+        str
+            Human readable details of the error.
+
+        Examples
+        --------
+        >>> DeadlineExceededError().details()
+        'Deadline Exceeded'
+        """
+        return "Deadline Exceeded"
+
+
+def test_protect_grpc_does_not_retry_after_a_deadline():
+    """An expired deadline means MAPDL is not answering, so retrying would only
+    spend another deadline waiting."""
+    mock_mapdl = MagicMock(spec=MapdlGrpc)
+    mock_mapdl._log = MagicMock()
+    mock_mapdl._exited = False
+    mock_mapdl.exited = False
+    mock_mapdl.rpc_timeout = 30
+
+    calls = []
+
+    @protect_grpc
+    def raising(self):
+        calls.append(1)
+        raise DeadlineExceededError()
+
+    with pytest.raises(MapdlConnectionError, match="deadline of 30 seconds"):
+        raising(mock_mapdl)
+
+    assert len(calls) == 1
+    mock_mapdl._connect.assert_not_called()

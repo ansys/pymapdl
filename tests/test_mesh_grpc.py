@@ -23,6 +23,8 @@
 """Test mesh"""
 
 import os
+import threading
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -33,6 +35,9 @@ if has_dependency("pyvista"):
     import pyvista as pv
 
 from ansys.mapdl.core import examples
+from ansys.mapdl.core.errors import MapdlConnectionError
+from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+from ansys.mapdl.core.mesh_grpc import MeshGrpc
 
 
 def test_empty_model(mapdl, cleared):
@@ -385,3 +390,85 @@ def test_ignore_cache_reset_context(mapdl, cleared, initial_state):
 
     assert mesh._ignore_cache_reset == initial_state
     mesh._ignore_cache_reset = previous_state
+
+
+def _make_mock_mesh(rpc_timeout=None):
+    """Return a 'MeshGrpc' wired to a mocked MAPDL instance."""
+    mesh = MeshGrpc.__new__(MeshGrpc)
+    mock_mapdl = MagicMock(spec=MapdlGrpc)
+    mock_mapdl.rpc_timeout = rpc_timeout
+    mock_mapdl._stub = MagicMock()
+    mesh._mapdl_weakref = lambda: mock_mapdl
+    mesh._ignore_cache_reset = False
+    mesh._chunk_size = None
+    mesh.logger = MagicMock()
+    return mesh, mock_mapdl
+
+
+class TestUpdateCacheIsSerial:
+    """MAPDL serves one request at a time, so the cache update must not overlap
+    its requests: doing so has crashed the server with a segmentation
+    violation."""
+
+    UPDATERS = (
+        "_update_cache_elem",
+        "_update_cache_element_desc",
+        "_update_cache_nnum",
+        "_update_node_coord",
+    )
+
+    def test_updates_run_one_after_another_in_the_calling_thread(self):
+        mesh, _ = _make_mock_mesh()
+        order = []
+        threads = []
+
+        def record(name):
+            def update():
+                order.append(name)
+                threads.append(threading.current_thread())
+
+            return update
+
+        for name in self.UPDATERS:
+            setattr(mesh, name, record(name))
+
+        mesh._update_cache()
+
+        assert order == list(self.UPDATERS)
+        assert threads == [threading.current_thread()] * len(self.UPDATERS)
+
+    def test_a_failing_update_propagates(self):
+        """A request which fails must surface instead of leaving an empty cache."""
+        mesh, _ = _make_mock_mesh()
+        for name in self.UPDATERS:
+            setattr(mesh, name, MagicMock())
+        mesh._update_cache_nnum.side_effect = MapdlConnectionError("MAPDL died")
+
+        with pytest.raises(MapdlConnectionError, match="MAPDL died"):
+            mesh._update_cache()
+
+        mesh._update_node_coord.assert_not_called()
+
+
+class TestMeshDeadlines:
+    """The mesh streams must expire instead of blocking on a dead MAPDL."""
+
+    def test_load_nodes_applies_the_deadline(self):
+        mesh, mock_mapdl = _make_mock_mesh(rpc_timeout=15.0)
+
+        with patch("ansys.mapdl.core.mesh_grpc.parse_chunks", return_value=np.zeros(3)):
+            mesh._load_nodes()
+
+        assert mock_mapdl._stub.Nodes.call_args.kwargs["timeout"] == 15.0
+
+    def test_load_element_types_applies_the_deadline(self):
+        mesh, mock_mapdl = _make_mock_mesh(rpc_timeout=15.0)
+
+        with patch(
+            "ansys.mapdl.core.mesh_grpc.parse_chunks",
+            return_value=np.array([1, 1, 2]),
+        ):
+            mesh._load_element_types()
+
+        call = mock_mapdl._stub.LoadElementTypeDescription.call_args
+        assert call.kwargs["timeout"] == 15.0

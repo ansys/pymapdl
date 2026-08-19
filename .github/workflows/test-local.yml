@@ -149,6 +149,10 @@ jobs:
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
       # Automatically enabled when the job is re-run with debug logging.
       PYMAPDL_GRPC_TRANSPORT: 'insecure'
+      # Deadline for each gRPC call, so that a MAPDL instance which crashed
+      # mid-request raises instead of blocking until pytest-timeout kills the
+      # whole session. Must stay below the 180 s pytest timeout.
+      PYMAPDL_RPC_TIMEOUT: 150
       PYTEST_ARGUMENTS: ""
       PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
       TESTING_MINIMAL: ${{ inputs.testing-minimal }}

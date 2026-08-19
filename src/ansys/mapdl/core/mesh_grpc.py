@@ -25,7 +25,6 @@
 from functools import wraps
 import os
 import re
-import threading
 import time
 import weakref
 
@@ -33,8 +32,9 @@ from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 import numpy as np
 
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE, parse_chunks
+from ansys.mapdl.core.errors import protect_grpc
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-from ansys.mapdl.core.misc import requires_package, supress_logging, threaded
+from ansys.mapdl.core.misc import requires_package, supress_logging
 
 TMP_NODE_CM = "__NODE__"
 
@@ -79,8 +79,6 @@ class MeshGrpc:
 
         self._freeze_model = False
         self._ignore_cache_reset = False
-        self._thread_lock_nodes = threading.Lock()
-        self._thread_lock_elem = threading.Lock()
         self._reset_cache()
 
     def __repr__(self):
@@ -160,7 +158,7 @@ class MeshGrpc:
         return self._ignore_cache_reset_context(self)
 
     def _update_cache(self):
-        """Threaded local cache update.
+        """Local cache update.
 
         Used when needing all the geometry entries from MAPDL.
         """
@@ -171,17 +169,13 @@ class MeshGrpc:
             with self._mapdl.save_selection:
                 self._mapdl.nsle("S", mute=True)
 
-                # not thread safe
+                # MAPDL serves one request at a time, so overlapping these
+                # requests gains nothing and has been seen to corrupt the
+                # server's internal state (segmentation violation in *VGET).
                 self._update_cache_elem()
-
-                threads = [
-                    self._update_cache_element_desc(),
-                    self._update_cache_nnum(),
-                    self._update_node_coord(),
-                ]
-
-                for thread in threads:
-                    thread.join()
+                self._update_cache_element_desc()
+                self._update_cache_nnum()
+                self._update_node_coord()
 
                 # somehow requesting path seems to help windows avoid an
                 # outright segfault prior to running CMSEL
@@ -193,7 +187,6 @@ class MeshGrpc:
         else:
             self.logger.debug("Ignoring cache reset.")
 
-    @threaded
     def _update_cache_nnum(self):
         if self._cache_nnum is None:
             self.logger.debug("Updating nodes cache")
@@ -207,14 +200,13 @@ class MeshGrpc:
     @property
     def _nnum(self):
         """Return node number cache"""
-        self._update_cache_nnum().join()
+        self._update_cache_nnum()
         return self._cache_nnum
 
     @_nnum.setter
     def _nnum(self, value):
         self._cache_nnum = value
 
-    @threaded
     def _update_cache_element_desc(self):
         if self._cache_element_desc is None:
             self.logger.debug("Updating elements (desc) cache")
@@ -223,7 +215,7 @@ class MeshGrpc:
     @property
     def _ekey(self):
         """Element key description"""
-        self._update_cache_element_desc().join()
+        self._update_cache_element_desc()
 
         # convert to ekey format
         if self._cache_element_desc:
@@ -233,9 +225,7 @@ class MeshGrpc:
             return np.vstack(ekey).astype(np.int32)
         return np.array([])
 
-    @threaded
     def _update_node_coord(self):
-        # with self._thread_lock_nodes:
         if self._node_coord is None:
             self._node_coord = self._load_nodes()
 
@@ -499,7 +489,7 @@ class MeshGrpc:
     @property
     def key_option(self):
         """Key options of selected element types."""
-        self._update_cache_element_desc().join()
+        self._update_cache_element_desc()
 
         key_opt = {}
         for einfo in self._cache_element_desc:
@@ -527,7 +517,7 @@ class MeshGrpc:
                [0.75 0.5  4.  ]
                [0.75 0.5  4.5 ]]
         """
-        self._update_node_coord().join()
+        self._update_node_coord()
         if self._node_coord is None:
             return np.empty(0)
         return self._node_coord
@@ -579,6 +569,7 @@ class MeshGrpc:
         """Returns an array of node rotations"""
         return self._mapdl.nlist(kinternal="").to_array()[:, 4:]
 
+    @protect_grpc
     def _load_nodes(self, chunk_size=None):
         """Loads nodes from server.
 
@@ -597,7 +588,7 @@ class MeshGrpc:
             chunk_size = self._chunk_size or DEFAULT_CHUNKSIZE
 
         request = anskernel.StreamRequest(chunk_size=chunk_size)
-        chunks = self._mapdl._stub.Nodes(request)
+        chunks = self._mapdl._stub.Nodes(request, timeout=self._mapdl.rpc_timeout)
         nodes = parse_chunks(chunks, np.double).reshape(-1, 3)
         return nodes
 
@@ -634,6 +625,7 @@ class MeshGrpc:
     def _elem_off(self, value):
         self._cache_elem_off = value
 
+    @protect_grpc
     def _load_elements_offset(self, chunk_size=None):
         """Loads elements from server
 
@@ -670,7 +662,9 @@ class MeshGrpc:
             chunk_size = self._chunk_size or DEFAULT_CHUNKSIZE
 
         request = anskernel.StreamRequest(chunk_size=chunk_size)
-        chunks = self._mapdl._stub.LoadElements(request)
+        chunks = self._mapdl._stub.LoadElements(
+            request, timeout=self._mapdl.rpc_timeout
+        )
         elem_raw = parse_chunks(chunks, np.int32)
 
         if len(elem_raw) == 0:  # for empty mesh.
@@ -691,6 +685,7 @@ class MeshGrpc:
         elems_[indx_elem] = self.enum
         return elems_, offset
 
+    @protect_grpc
     def _load_element_types(self, chunk_size=None):
         """Loads element types from the MAPDL server.
 
@@ -708,7 +703,9 @@ class MeshGrpc:
             chunk_size = self._chunk_size or DEFAULT_CHUNKSIZE
 
         request = anskernel.StreamRequest(chunk_size=chunk_size)
-        chunks = self._mapdl._stub.LoadElementTypeDescription(request)
+        chunks = self._mapdl._stub.LoadElementTypeDescription(
+            request, timeout=self._mapdl.rpc_timeout
+        )
         data = parse_chunks(chunks, np.int32)
         n_items = data[0]
         split_ind = data[1 : 1 + n_items]
