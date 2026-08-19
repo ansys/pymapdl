@@ -28,6 +28,7 @@ import shutil
 import tempfile
 from typing import Union
 import warnings
+import weakref
 
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
@@ -39,6 +40,7 @@ from ansys.mapdl.core.errors import (
     ComponentDoesNotExits,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
+    MapdlDoLoopLimitError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.mapdl_core import _MapdlCore
@@ -54,6 +56,12 @@ from ansys.mapdl.core.misc import (
 from ansys.mapdl.core.plotting import GraphicsBackend
 
 TMP_VAR = "__tmpvar__"
+
+# MAPDL only allows a limited number of nested do-loops (``*DO``/``*DOWHILE``).
+# One level of internal file switching is used for each nested loop, and
+# MAPDL supports twenty levels of nested file switching. See the ``*DO``
+# command documentation for more details.
+MAX_DO_LOOP_LEVEL = 20
 
 
 class _MapdlCommandExtended(_MapdlCore):
@@ -72,6 +80,9 @@ class _MapdlCommandExtended(_MapdlCore):
         """
         super().__init__(*args, **kwargs)
         self._graphics_backend = GraphicsBackend.PYVISTA
+        # Number of currently nested ``*DO``/``*DOWHILE`` loops opened
+        # through :meth:`do` or :meth:`while_`.
+        self._do_loop_level: int = 0
 
     @wraps(_MapdlCore.file)
     def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
@@ -3434,3 +3445,172 @@ class _MapdlExtended(_MapdlCommandExtended):
             it4num=it4num,
             **kwargs,
         )
+
+    class _DoLoop:
+        """Context manager backing :meth:`Mapdl.do` and :meth:`Mapdl.while_`.
+
+        It opens the loop (``*DO`` or ``*DOWHILE``) on ``__enter__`` and
+        closes it (``*ENDDO``) on ``__exit__``, automatically entering
+        :attr:`Mapdl.non_interactive` (unless it is already active) so the
+        whole loop is sent to MAPDL as a single block. It also keeps track
+        of how many loops are currently nested so the
+        :data:`MAX_DO_LOOP_LEVEL` limit imposed by MAPDL can be enforced.
+        """
+
+        def __init__(self, parent: "_MapdlExtended", command: str, **kwargs):
+            self._parent = weakref.ref(parent)
+            self._command = command
+            self._kwargs = kwargs
+            self._non_interactive_cm = None
+
+        def __enter__(self):
+            mapdl = self._parent()
+
+            if mapdl._do_loop_level >= MAX_DO_LOOP_LEVEL:
+                raise MapdlDoLoopLimitError(
+                    "Cannot open another APDL do-loop: MAPDL only supports "
+                    f"{MAX_DO_LOOP_LEVEL} levels of nested '*DO'/'*DOWHILE' "
+                    "loops. Reduce the number of nested 'mapdl.do' or "
+                    "'mapdl.while_' context managers."
+                )
+
+            mapdl._do_loop_level += 1
+            mapdl._log.debug(
+                f"Entering do-loop level {mapdl._do_loop_level}: {self._command}"
+            )
+
+            if not mapdl._store_commands:
+                self._non_interactive_cm = mapdl.non_interactive
+                self._non_interactive_cm.__enter__()
+
+            mapdl.run(self._command, **self._kwargs)
+            return self
+
+        def __exit__(self, *args):
+            mapdl = self._parent()
+            mapdl._do_loop_level -= 1
+            mapdl._log.debug(f"Exiting do-loop level {mapdl._do_loop_level + 1}")
+
+            try:
+                if args[0] is None:
+                    mapdl.run("*ENDDO")
+            finally:
+                if self._non_interactive_cm is not None:
+                    self._non_interactive_cm.__exit__(*args)
+
+    def do(
+        self,
+        par: str,
+        ival: MapdlFloat = "",
+        fval: MapdlFloat = "",
+        inc: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> "_MapdlExtended._DoLoop":
+        r"""Context manager for an APDL ``*DO`` loop.
+
+        Mechanical APDL Command: `\*DO <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DO.html>`_
+
+        The block of commands issued inside the ``with`` block is sent to
+        MAPDL once and executed repeatedly by MAPDL itself, similarly to
+        how the ``*DO``/``*ENDDO`` commands work when typed directly into
+        MAPDL. This is fundamentally different from a Python ``for`` loop:
+        the body of the ``with`` block is only evaluated once by Python to
+        build up the block of APDL commands, and MAPDL performs the actual
+        looping.
+
+        This method automatically uses the :attr:`Mapdl.non_interactive
+        <ansys.mapdl.core.Mapdl.non_interactive>` context manager (unless
+        it is already active) so the whole loop is sent to MAPDL as a
+        single block.
+
+        MAPDL allows a maximum of 20 levels of nested do-loops (shared
+        between ``*DO`` and ``*DOWHILE``). Attempting to nest more loops
+        than that raises a
+        :class:`MapdlDoLoopLimitError <ansys.mapdl.core.errors.MapdlDoLoopLimitError>`.
+
+        Parameters
+        ----------
+        par : str
+            The name of the scalar parameter used as the loop index. Any
+            existing parameter of the same name is redefined.
+
+        ival : str, optional
+            Initial value assigned to ``par``.
+
+        fval : str, optional
+            Final value. If ``ival`` exceeds ``fval`` and ``inc`` is
+            positive, the loop is not executed.
+
+        inc : str, optional
+            Increment applied to ``par`` for each successive loop. Defaults
+            to 1 in MAPDL. Negative increments and non-integer numbers are
+            allowed.
+
+        Returns
+        -------
+        contextlib.AbstractContextManager
+            Context manager that opens the ``*DO`` loop on entry and closes
+            it with ``*ENDDO`` on exit.
+
+        Examples
+        --------
+        Create 10 nodes along the X axis.
+
+        >>> with mapdl.do("i", 1, 10):
+        ...     mapdl.n("i", "i", 0, 0)
+
+        """
+        command = f"*DO,{par},{ival},{fval},{inc}"
+        return self._DoLoop(self, command, **kwargs)
+
+    def while_(
+        self,
+        par: str,
+        **kwargs: KwargDict,
+    ) -> "_MapdlExtended._DoLoop":
+        r"""Context manager for an APDL ``*DOWHILE`` loop.
+
+        Mechanical APDL Command: `\*DOWHILE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DOWHILE.html>`_
+
+        The loop repeats as long as the ``par`` parameter is truthy
+        (greater than 0.0) in MAPDL. Because MAPDL, not Python, performs
+        the looping, ``par`` must be a parameter that already exists (or is
+        set right before entering the loop) in MAPDL, and it must be
+        updated from within the ``with`` block using APDL commands so
+        MAPDL can re-evaluate it on every pass.
+
+        This method automatically uses the :attr:`Mapdl.non_interactive
+        <ansys.mapdl.core.Mapdl.non_interactive>` context manager (unless
+        it is already active) so the whole loop is sent to MAPDL as a
+        single block.
+
+        MAPDL allows a maximum of 20 levels of nested do-loops (shared
+        between ``*DO`` and ``*DOWHILE``). Attempting to nest more loops
+        than that raises a
+        :class:`MapdlDoLoopLimitError <ansys.mapdl.core.errors.MapdlDoLoopLimitError>`.
+
+        Parameters
+        ----------
+        par : str
+            Name of the scalar parameter checked before every pass. The
+            loop terminates once ``par`` is less than or equal to 0.0.
+
+        Returns
+        -------
+        contextlib.AbstractContextManager
+            Context manager that opens the ``*DOWHILE`` loop on entry and
+            closes it with ``*ENDDO`` on exit.
+
+        Examples
+        --------
+        Loop while the ``cont`` parameter is truthy, decrementing it on
+        every pass.
+
+        >>> mapdl.parameters["cont"] = 5
+        >>> with mapdl.while_("cont"):
+        ...     mapdl.n("cont", "cont", 0, 0)
+        ...     mapdl.run("cont = cont - 1")
+
+        """
+        command = f"*DOWHILE,{par}"
+        return self._DoLoop(self, command, **kwargs)
