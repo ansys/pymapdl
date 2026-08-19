@@ -13,9 +13,10 @@ configurations are in the `.devcontainer directory
 About the MAPDL container
 =========================
 
-The local development container is based on an Ansys MAPDL image. You must
-have access to that image and a valid MAPDL license to use it. If you need to
-create your own MAPDL image, see :ref:`ref_make_container`.
+The local development container is based on an Ansys MAPDL image. MAPDL images
+cannot be made publicly available because of licensing restrictions. Each
+person or organization must create and maintain its own image and have a valid
+MAPDL license. To create an image, see :ref:`ref_make_container`.
 
 
 License
