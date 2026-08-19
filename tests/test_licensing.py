@@ -22,9 +22,11 @@
 
 """Test PyMAPDL license.py module."""
 
+import io
 import os
 import time
 import types
+from unittest.mock import patch
 
 import pytest
 
@@ -262,18 +264,67 @@ def test_check_license_file_exception(license_checker):
 
 
 @requires("ansys-tools-common")
-def test_license_wait():
-    license_checker = licensing.LicenseChecker()
-    assert not license_checker._lic_file_thread
-    assert not license_checker._checkout_thread
+def test_license_wait(tmpdir):
+    # This test exercises the real checkout/file-parsing logic in
+    # 'LicenseChecker' without depending on an actual license server or a
+    # real 'ansysli_util' binary. The slowness and high variability of this
+    # test used to come from 'subprocess.Popen' reaching out to a real (and
+    # possibly unavailable/slow) license server in '_checkout_license', and
+    # from polling for a real 'licdebug' file that may take a while to
+    # appear. Faking the subprocess response and pointing the checker at a
+    # controlled temporary file keeps the parsing/threading logic under
+    # test while making the test fast and deterministic.
+    tmp_file = tmpdir.join("licdebug.log")
+    fake_util_path = tmpdir.join("ansysli_util")
+    fake_util_path.write("")  # dummy file so 'os.path.isfile' succeeds
 
-    license_checker.start(checkout_license=True)
-    assert license_checker._lic_file_thread
-    assert license_checker._checkout_thread
+    class FakeProcess:
+        """Mimics the subprocess.Popen object returned by a license checkout."""
 
-    license_checker.wait()
-    assert license_checker._lic_file_thread
-    assert license_checker._checkout_thread
+        def __init__(self, output: str):
+            self.stdout = io.BytesIO(output.encode())
+
+    with (
+        patch.object(
+            licensing,
+            "get_ansys_license_debug_file_path",
+            return_value=str(tmpdir),
+        ),
+        patch.object(
+            licensing,
+            "get_ansys_license_debug_file_name",
+            return_value=os.path.basename(tmp_file),
+        ),
+        patch.object(
+            licensing,
+            "get_ansys_license_utility_path",
+            return_value=str(fake_util_path),
+        ),
+        patch.object(
+            licensing.subprocess,
+            "Popen",
+            return_value=FakeProcess(FAKE_CHECKOUT_SUCCESS),
+        ) as mock_popen,
+    ):
+        # Write the fake checkout log asynchronously so the license file
+        # thread has to actually poll and tail the file, like it would in
+        # production.
+        write_log(tmp_file)
+
+        license_checker = licensing.LicenseChecker()
+        assert not license_checker._lic_file_thread
+        assert not license_checker._checkout_thread
+
+        license_checker.start(checkout_license=True)
+        assert license_checker._lic_file_thread
+        assert license_checker._checkout_thread
+
+        license_checker.wait()
+        assert license_checker._lic_file_thread
+        assert license_checker._checkout_thread
+
+    assert license_checker.check()
+    mock_popen.assert_called()
 
 
 def test_license_check():

@@ -33,7 +33,7 @@ from unittest.mock import patch
 import grpc
 import pytest
 
-from ansys.mapdl.core import examples
+from ansys.mapdl.core import errors, examples
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
@@ -829,7 +829,7 @@ def test_subscribe_to_channel(mapdl, cleared):
 
 
 @requires("remote")
-def test_exception_message_length(mapdl, cleared):
+def test_exception_message_length(mapdl, cleared, monkeypatch):
     # This test does not fail if running on local
     channel = grpc.insecure_channel(
         mapdl._channel_str,
@@ -843,6 +843,13 @@ def test_exception_message_length(mapdl, cleared):
     mapdl2.prep7()
     mapdl2.dim("myarr", "", 1e5)
     mapdl2.vfill("myarr", "rand", 0, 1)  # filling array with random numbers
+
+    # 'protect_grpc' retries any 'grpc.RpcError' (including
+    # 'RESOURCE_EXHAUSTED', triggered below) up to 'N_ATTEMPTS' times with
+    # exponential backoff before it inspects the error code and raises.
+    # That backoff sums to several real seconds and is not what this test
+    # verifies, so it's skipped here.
+    monkeypatch.setattr(errors, "sleep", lambda *args, **kwargs: None)
 
     # Retrieving
     with pytest.raises(MapdlgRPCError, match="Received message larger than max"):
@@ -866,6 +873,12 @@ def test_generic_grpc_exception(monkeypatch, grpc_channel):
 
     # Monkey patch to raise the same issue.
     monkeypatch.setattr(mapdl, "prep7", _raise_error_code)
+
+    # Since 'mapdl' is not marked as exited yet, 'protect_grpc' retries up
+    # to 'N_ATTEMPTS' times with exponential backoff (summing to several
+    # real seconds) before giving up. The retry timing itself is not what
+    # this test verifies, so it's skipped here.
+    monkeypatch.setattr(errors, "sleep", lambda *args, **kwargs: None)
 
     with pytest.raises(
         MapdlRuntimeError, match="MAPDL server connection terminated unexpectedly while"
