@@ -25,9 +25,15 @@
 These tests do not require a live MAPDL instance: they exercise the context
 manager logic against a lightweight fake that mimics only the bits of
 :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` that ``do``/``dowhile`` rely
-on.
+on. Notably, ``FakeMapdl`` does **not** stub out
+:class:`Mapdl.non_interactive <ansys.mapdl.core.mapdl_core._MapdlCore>`: it
+relies on the real, inherited :class:`_non_interactive
+<ansys.mapdl.core.mapdl_core._MapdlCore._non_interactive>` implementation, so
+these tests also guard against a partial ``*DO``/``*DOWHILE`` block leaking
+into a later flush through the shared ``_stored_commands`` buffer.
 """
 
+import logging
 from unittest.mock import MagicMock
 
 import pytest
@@ -36,43 +42,41 @@ from ansys.mapdl.core.errors import MapdlDoLoopLimitError
 from ansys.mapdl.core.mapdl_extended import MAX_DO_LOOP_LEVEL, _MapdlExtended
 
 
-class _FakeNonInteractive:
-    """Minimal stand-in for ``Mapdl._non_interactive``."""
-
-    def __init__(self, parent):
-        self._parent = parent
-
-    def __enter__(self):
-        self._parent._store_commands = True
-        self._parent.non_interactive_entries += 1
-
-    def __exit__(self, *args):
-        self._parent._store_commands = False
-        self._parent.non_interactive_exits.append(args)
-
-
 class FakeMapdl(_MapdlExtended):
     """Lightweight double implementing just enough of ``Mapdl`` for testing.
 
     It bypasses :class:`_MapdlCore.__init__ <ansys.mapdl.core.mapdl_core._MapdlCore>`
-    entirely, since that requires a real (or gRPC) connection.
+    entirely, since that requires a real (or gRPC) connection, but keeps the
+    real ``_store_commands``/``_stored_commands``/``non_interactive``
+    machinery from :class:`_MapdlCore <ansys.mapdl.core.mapdl_core._MapdlCore>`
+    so the actual buffering (and discarding) behavior is exercised.
     """
 
     def __init__(self):
         self._do_loop_level = 0
         self._store_commands = False
-        self.commands = []
-        self.non_interactive_entries = 0
-        self.non_interactive_exits = []
+        self._stored_commands = []
+        # Commands that were actually "sent" to MAPDL, either directly or
+        # through a flush of ``_stored_commands``.
+        self.sent_commands = []
         self._log = MagicMock()
+        # Avoid the ``self._parent().com(...)`` debug-only branch in
+        # ``_non_interactive.__enter__``, since ``com`` is not implemented
+        # on this fake.
+        self._log.logger.level = logging.WARNING
 
     def run(self, command, **kwargs):
-        self.commands.append(command)
+        if self._store_commands:
+            self._stored_commands.append(command)
+            return None
+        self.sent_commands.append(command)
         return command
 
-    @property
-    def non_interactive(self):
-        return _FakeNonInteractive(self)
+    def _flush_stored(self):
+        """Mimic ``_MapdlCore._flush_stored`` without touching real MAPDL."""
+        self.sent_commands.extend(self._stored_commands)
+        self._store_commands = False
+        self._stored_commands = []
 
 
 @pytest.fixture
@@ -84,16 +88,18 @@ def test_do_emits_do_and_enddo(fake_mapdl):
     with fake_mapdl.do("i", 1, 10, 2):
         fake_mapdl.run("N,i,i,0,0")
 
-    assert fake_mapdl.commands == ["*DO,i,1,10,2", "N,i,i,0,0", "*ENDDO"]
+    assert fake_mapdl.sent_commands == ["*DO,i,1,10,2", "N,i,i,0,0", "*ENDDO"]
     assert fake_mapdl._do_loop_level == 0
+    assert fake_mapdl._stored_commands == []
 
 
 def test_dowhile_emits_dowhile_and_enddo(fake_mapdl):
     with fake_mapdl.dowhile("cont"):
         fake_mapdl.run("cont = cont - 1")
 
-    assert fake_mapdl.commands == ["*DOWHILE,cont", "cont = cont - 1", "*ENDDO"]
+    assert fake_mapdl.sent_commands == ["*DOWHILE,cont", "cont = cont - 1", "*ENDDO"]
     assert fake_mapdl._do_loop_level == 0
+    assert fake_mapdl._stored_commands == []
 
 
 def test_do_enters_and_exits_non_interactive_when_not_already_active(fake_mapdl):
@@ -101,26 +107,29 @@ def test_do_enters_and_exits_non_interactive_when_not_already_active(fake_mapdl)
 
     with fake_mapdl.do("i", 1, 10):
         assert fake_mapdl._store_commands is True
+        assert fake_mapdl._stored_commands == ["*DO,i,1,10,"]
 
     assert fake_mapdl._store_commands is False
-    assert fake_mapdl.non_interactive_entries == 1
-    assert len(fake_mapdl.non_interactive_exits) == 1
+    assert fake_mapdl._stored_commands == []
+    assert fake_mapdl.sent_commands == ["*DO,i,1,10,", "*ENDDO"]
 
 
 def test_do_does_not_reenter_non_interactive_when_already_active(fake_mapdl):
     with fake_mapdl.non_interactive:
-        assert fake_mapdl.non_interactive_entries == 1
+        assert fake_mapdl._store_commands is True
 
         with fake_mapdl.do("i", 1, 10):
             fake_mapdl.run("body")
 
-        # The nested ``do`` did not touch non-interactive mode itself.
-        assert fake_mapdl.non_interactive_entries == 1
+        # The nested ``do`` did not flush or exit non-interactive mode
+        # itself: everything is still buffered.
         assert fake_mapdl._store_commands is True
+        assert fake_mapdl._stored_commands == ["*DO,i,1,10,", "body", "*ENDDO"]
+        assert fake_mapdl.sent_commands == []
 
     assert fake_mapdl._store_commands is False
-    assert fake_mapdl.non_interactive_entries == 1
-    assert len(fake_mapdl.non_interactive_exits) == 1
+    assert fake_mapdl._stored_commands == []
+    assert fake_mapdl.sent_commands == ["*DO,i,1,10,", "body", "*ENDDO"]
 
 
 def test_nested_do_and_dowhile_share_the_same_loop_counter(fake_mapdl):
@@ -132,7 +141,7 @@ def test_nested_do_and_dowhile_share_the_same_loop_counter(fake_mapdl):
         assert fake_mapdl._do_loop_level == 1
 
     assert fake_mapdl._do_loop_level == 0
-    assert fake_mapdl.commands == [
+    assert fake_mapdl.sent_commands == [
         "*DO,i,1,10,",
         "*DOWHILE,j",
         "body",
@@ -178,11 +187,56 @@ def test_exception_in_do_loop_skips_enddo_and_discards_commands(fake_mapdl):
             fake_mapdl.run("body")
             raise ValueError("boom")
 
-    assert fake_mapdl.commands == ["*DO,i,1,10,", "body"]
     assert fake_mapdl._do_loop_level == 0
     assert fake_mapdl._store_commands is False
 
-    # The non-interactive context was exited with the exception info, so it
-    # did not flush.
-    assert len(fake_mapdl.non_interactive_exits) == 1
-    assert fake_mapdl.non_interactive_exits[0][0] is ValueError
+    # No '*ENDDO' was ever queued, and nothing was actually sent to MAPDL:
+    # the whole (invalid, unterminated) block was discarded on exit.
+    assert fake_mapdl.sent_commands == []
+
+    # Regression: the buffer backing 'non_interactive' must be truncated,
+    # not just marked inactive, so the incomplete '*DO' block cannot survive
+    # to leak into a later, unrelated flush.
+    assert fake_mapdl._stored_commands == []
+
+
+def test_partial_do_block_does_not_leak_into_a_later_flush(fake_mapdl):
+    """A failed ``do`` loop must not poison a subsequent, unrelated one."""
+    with pytest.raises(ValueError, match="boom"):
+        with fake_mapdl.do("i", 1, 10):
+            fake_mapdl.run("body")
+            raise ValueError("boom")
+
+    assert fake_mapdl._stored_commands == []
+    assert fake_mapdl.sent_commands == []
+
+    # A later, successful loop must only contain its own commands: none of
+    # the aborted '*DO,i,1,10,'/'body' fragments should have leaked in.
+    with fake_mapdl.do("j", 1, 5):
+        fake_mapdl.run("N,j,j,0,0")
+
+    assert fake_mapdl.sent_commands == ["*DO,j,1,5,", "N,j,j,0,0", "*ENDDO"]
+    assert fake_mapdl._stored_commands == []
+
+
+def test_exception_inside_user_owned_non_interactive_discards_everything(fake_mapdl):
+    """A nested ``do`` raising inside a user-owned ``non_interactive`` block
+    must not leave a dangling partial block behind either."""
+    with pytest.raises(ValueError, match="boom"):
+        with fake_mapdl.non_interactive:
+            with fake_mapdl.do("i", 1, 10):
+                fake_mapdl.run("body")
+            raise ValueError("boom")
+
+    # The inner loop closed cleanly, but the outer, user-owned block never
+    # got to flush because of the exception raised after it: nothing must
+    # have been sent, and the buffer must be empty afterward.
+    assert fake_mapdl.sent_commands == []
+    assert fake_mapdl._stored_commands == []
+    assert fake_mapdl._store_commands is False
+
+    # A later, unrelated 'do' loop must not see any leftovers either.
+    with fake_mapdl.do("k", 1, 3):
+        fake_mapdl.run("N,k,k,0,0")
+
+    assert fake_mapdl.sent_commands == ["*DO,k,1,3,", "N,k,k,0,0", "*ENDDO"]
