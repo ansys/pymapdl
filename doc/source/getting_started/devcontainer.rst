@@ -66,14 +66,15 @@ container files are shared project configuration.
 Use GitHub Codespaces
 =====================
 
-The repository also provides separate configurations for development and
-documentation in GitHub Codespaces:
+GitHub Codespaces is disabled for the PyMAPDL repository. The repository
+includes separate configurations for development and documentation that you
+can use when setting up Codespaces in a fork or another repository:
 
 * :file:`.devcontainer/codespaces-dev/devcontainer.json` configures the
   development environment.
 * :file:`.devcontainer/codespaces-docs/devcontainer.json` adds the tools
   needed to build the documentation.
 
-Select the appropriate configuration when you create a codespace. See `the
-Visual Studio Code Dev Containers documentation
+Select the appropriate configuration when you create a codespace in your fork
+or repository. See `the Visual Studio Code Dev Containers documentation
 <vscode_devcontainers_containers_getting_started_>`_ for more information.
