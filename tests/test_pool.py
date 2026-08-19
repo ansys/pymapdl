@@ -213,7 +213,11 @@ class TestMapdlPool:
             mapdl_pool = MapdlPool(
                 2,
                 run_location=str(tmp_path),
-                port=51100,
+                # A port per instance is required here: if the 'PYMAPDL_IP'
+                # env var is set (for example on remote CI runs), a single
+                # int port would fail MapdlPool's ip/port validation, which
+                # requires as many ports as instances when 'ip' is a string.
+                port=[51100, 51101],
                 exec_file=FAKE_EXEC_FILE,
                 start_instance=True,
                 wait=True,
