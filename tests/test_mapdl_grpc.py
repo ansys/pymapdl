@@ -54,6 +54,7 @@ def _make_mock_mapdl():
     m._mapdl_process = None
     m._channel = None
     m._connectivity_callback = None
+    m._rpc_timeout = None
     return m
 
 
