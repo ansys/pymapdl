@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase, parse
+from ansys.mapdl.core._commands import CommandsBase
 
 
 class Nodes(CommandsBase):
@@ -476,7 +476,7 @@ class Nodes(CommandsBase):
         10
         """
         command = f"N,{node},{x},{y},{z},{thxy},{thyz},{thzx}"
-        return parse.parse_n(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def nang(
         self,
@@ -700,7 +700,7 @@ class Nodes(CommandsBase):
         >>> node_dist
         [16.673332000533065, 13.0, -3.0, 10.0]
         """
-        return parse.parse_ndist(self.run(f"NDIST,{nd1},{nd2}", **kwargs))
+        return self.run(f"NDIST,{nd1},{nd2}", **kwargs)
 
     def ngen(
         self,

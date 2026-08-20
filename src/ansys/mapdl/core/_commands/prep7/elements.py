@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase, parse
+from ansys.mapdl.core._commands import CommandsBase
 
 
 class Elements(CommandsBase):
@@ -219,7 +219,7 @@ class Elements(CommandsBase):
         2
         """
         command = f"E,{i},{j},{k},{l},{m},{n},{o},{p}"
-        return parse.parse_e(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def ecpchg(self, **kwargs):
         r"""Optimizes degree-of-freedom usage in a coupled acoustic model.
