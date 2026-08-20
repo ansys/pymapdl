@@ -22,6 +22,7 @@
 
 """A gRPC specific class and methods for the MAPDL gRPC client"""
 
+from contextlib import contextmanager
 import fnmatch
 from functools import wraps
 import glob
@@ -174,6 +175,18 @@ SERVICE_DEFAULT_CONFIG = {
 DEFAULT_GRPC_OPTIONS = [
     ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
     ("grpc.service_config", json.dumps(SERVICE_DEFAULT_CONFIG)),
+    # HTTP/2 keepalive pings: detect a peer that stopped answering (crashed,
+    # network partition, silently dropped connection) even while no RPC is
+    # exchanging data, without bounding how long any individual call (such as
+    # 'SOLVE') is allowed to run. A dead peer flips 'channel_state' to
+    # 'TRANSIENT_FAILURE' within roughly 'keepalive_time_ms' +
+    # 'keepalive_timeout_ms', instead of relying on the OS to eventually
+    # notice the broken TCP connection.
+    ("grpc.keepalive_time_ms", 20_000),
+    ("grpc.keepalive_timeout_ms", 10_000),
+    ("grpc.keepalive_permit_without_calls", 1),
+    ("grpc.http2.min_time_between_pings_ms", 20_000),
+    ("grpc.http2.max_pings_without_data", 0),
 ]
 
 
@@ -499,6 +512,14 @@ class MapdlGrpc(MapdlBase):
         )
         self._time_step_stream: Optional[int] = None
         self._connectivity_callback: Optional[Callable[[Any], None]] = None
+        # Handle to the gRPC call currently in flight (if any), so a
+        # connectivity-state watchdog can cancel it promptly when the
+        # transport is confirmed dead, instead of waiting for it to time out
+        # or hang forever. Guarded by '_current_call_lock' because it is
+        # written from the calling thread and read/cancelled from the gRPC
+        # connectivity callback thread.
+        self._current_call: Optional[grpc.Future] = None
+        self._current_call_lock: threading.Lock = threading.Lock()
 
         if channel is None:
             self._log.debug("Creating channel to %s:%s", ip, port)
@@ -812,6 +833,14 @@ class MapdlGrpc(MapdlBase):
         # the polling thread.
         self_ref = weakref.ref(self)
 
+        # States in which the transport is confirmed unusable: a call blocked
+        # on a connection that has reached one of these will never complete on
+        # its own.
+        dead_states = (
+            grpc.ChannelConnectivity.TRANSIENT_FAILURE,
+            grpc.ChannelConnectivity.SHUTDOWN,
+        )
+
         # Callback function to monitor state changes
         def connectivity_callback(connectivity):
             mapdl = self_ref()
@@ -820,11 +849,54 @@ class MapdlGrpc(MapdlBase):
             mapdl._log.debug(f"Channel connectivity changed to: {connectivity}")
             mapdl._channel_state = connectivity
 
+            if connectivity in dead_states:
+                with mapdl._current_call_lock:
+                    call = mapdl._current_call
+                if call is not None and not call.done():
+                    mapdl._log.debug(
+                        "Cancelling the in-flight gRPC call: the channel "
+                        f"became '{connectivity.name}'. MAPDL might have "
+                        "died or stopped answering."
+                    )
+                    call.cancel()
+
         # Keep a handle so the callback can be unsubscribed on teardown
         self._connectivity_callback = connectivity_callback
 
         # Subscribe to channel state changes
         self._channel.subscribe(connectivity_callback, try_to_connect=True)
+
+    @contextmanager
+    def _watched_call(self, call: grpc.Future):
+        """Track ``call`` as the in-flight gRPC call.
+
+        While ``call`` is tracked, the channel connectivity callback (see
+        :meth:`_subscribe_to_channel`) cancels it as soon as the channel is
+        confirmed dead (``TRANSIENT_FAILURE`` or ``SHUTDOWN``), instead of
+        letting it block until MAPDL eventually answers or the OS notices the
+        broken connection. This does not bound how long ``call`` may run while
+        the channel stays healthy, so long-running commands such as ``SOLVE``
+        are unaffected.
+
+        Parameters
+        ----------
+        call : grpc.Future
+            The in-flight gRPC call (or streaming response) to track. Must
+            support ``cancel()`` and ``done()``.
+
+        Yields
+        ------
+        grpc.Future
+            The same ``call`` passed in, for convenience.
+        """
+        with self._current_call_lock:
+            self._current_call = call
+        try:
+            yield call
+        finally:
+            with self._current_call_lock:
+                if self._current_call is call:
+                    self._current_call = None
 
     @property
     def channel_state(self) -> str:
@@ -1792,7 +1864,9 @@ class MapdlGrpc(MapdlBase):
         # TODO: Capture keyboard exception and place this in a thread
         if self._stub is None:
             raise MapdlRuntimeError("MAPDL stub not initialized")
-        grpc_response = self._stub.SendCommand(request)
+        future = self._stub.SendCommand.future(request)
+        with self._watched_call(future):
+            grpc_response = future.result()
 
         resp = grpc_response.response
         if resp is not None:
@@ -1809,11 +1883,12 @@ class MapdlGrpc(MapdlBase):
             raise MapdlRuntimeError("MAPDL stub not initialized")
         stream = self._stub.SendCommandS(request, metadata=metadata)
         response = []
-        for item in stream:
-            cmdout = "\n".join(item.cmdout)
-            if verbose:
-                print(cmdout)
-            response.append(cmdout.strip())
+        with self._watched_call(stream):
+            for item in stream:
+                cmdout = "\n".join(item.cmdout)
+                if verbose:
+                    print(cmdout)
+                response.append(cmdout.strip())
 
         return "".join(response)
 
