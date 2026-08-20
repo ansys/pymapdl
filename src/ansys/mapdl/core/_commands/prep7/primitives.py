@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase, parse
+from ansys.mapdl.core._commands import CommandsBase
 
 
 class Primitives(CommandsBase):
@@ -85,7 +85,7 @@ class Primitives(CommandsBase):
         1
         """
         command = f"BLC4,{xcorner},{ycorner},{width},{height},{depth}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def blc5(
         self,
@@ -154,7 +154,7 @@ class Primitives(CommandsBase):
         1
         """
         command = f"BLC5,{xcenter},{ycenter},{width},{height},{depth}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def block(
         self,
@@ -216,7 +216,7 @@ class Primitives(CommandsBase):
         1
         """
         command = f"BLOCK,{x1},{x2},{y1},{y2},{z1},{z2}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def con4(
         self,
@@ -283,7 +283,7 @@ class Primitives(CommandsBase):
         1
         """
         command = f"CON4,{xcenter},{ycenter},{rad1},{rad2},{depth}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def cone(
         self,
@@ -363,7 +363,7 @@ class Primitives(CommandsBase):
         1
         """
         command = f"CONE,{rbot},{rtop},{z1},{z2},{theta1},{theta2}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def cyl4(
         self,
@@ -461,7 +461,7 @@ class Primitives(CommandsBase):
         2
         """
         command = f"CYL4,{xcenter},{ycenter},{rad1},{theta1},{rad2},{theta2},{depth}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def cyl5(
         self,
@@ -530,7 +530,7 @@ class Primitives(CommandsBase):
         1
         """
         command = f"CYL5,{xedge1},{yedge1},{xedge2},{yedge2},{depth}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def cylind(
         self,
@@ -610,7 +610,7 @@ class Primitives(CommandsBase):
         1
         """
         command = f"CYLIND,{rad1},{rad2},{z1},{z2},{theta1},{theta2}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def pcirc(
         self,
@@ -674,7 +674,7 @@ class Primitives(CommandsBase):
         1
         """
         command = f"PCIRC,{rad1},{rad2},{theta1},{theta2}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def poly(self, **kwargs):
         r"""Creates a polygonal area based on working plane coordinate pairs.
@@ -861,7 +861,7 @@ class Primitives(CommandsBase):
         commands for alternate ways to create rectangles.
         """
         command = f"RECTNG,{x1},{x2},{y1},{y2}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def rpoly(
         self,
@@ -1063,7 +1063,7 @@ class Primitives(CommandsBase):
         1
         """
         command = f"SPH4,{xcenter},{ycenter},{rad1},{rad2}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def sph5(
         self,
@@ -1117,7 +1117,7 @@ class Primitives(CommandsBase):
         1
         """
         command = f"SPH5,{xedge1},{yedge1},{xedge2},{yedge2}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def sphere(
         self,
@@ -1184,7 +1184,7 @@ class Primitives(CommandsBase):
         1
         """
         command = f"SPHERE,{rad1},{rad2},{theta1},{theta2}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def torus(
         self,
@@ -1275,4 +1275,4 @@ class Primitives(CommandsBase):
         1
         """
         command = f"TORUS,{rad1},{rad2},{rad3},{theta1},{theta2}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)

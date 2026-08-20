@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase, parse
+from ansys.mapdl.core._commands import CommandsBase
 
 
 class Areas(CommandsBase):
@@ -175,7 +175,7 @@ class Areas(CommandsBase):
         1
         """
         command = f"A,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8},{p9},{p10},{p11},{p12},{p13},{p14},{p15},{p16},{p17},{p18}"
-        return parse.parse_a(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def adele(
         self,
@@ -649,7 +649,7 @@ class Areas(CommandsBase):
         1
         """
         command = f"AL,{l1},{l2},{l3},{l4},{l5},{l6},{l7},{l8},{l9},{l10}"
-        return parse.parse_a(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def alist(
         self, na1: str = "", na2: str = "", ninc: str = "", lab: str = "", **kwargs

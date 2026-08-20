@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase, parse
+from ansys.mapdl.core._commands import CommandsBase
 
 
 class ElementType(CommandsBase):
@@ -244,7 +244,7 @@ class ElementType(CommandsBase):
         command = (
             f"ET,{itype},{ename},{kop1},{kop2},{kop3},{kop4},{kop5},{kop6},{inopr}"
         )
-        return parse.parse_et(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def etchg(self, cnv: str = "", **kwargs):
         r"""Changes element types to their corresponding types.
