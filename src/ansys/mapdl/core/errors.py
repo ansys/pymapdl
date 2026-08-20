@@ -177,6 +177,22 @@ class MapdlCommandIgnoredError(MapdlRuntimeError):
     pass
 
 
+class MapdlDoLoopLimitError(MapdlRuntimeError):
+    """Raised when too many ``*DO``/``*DOWHILE`` loops are nested.
+
+    MAPDL only supports a limited number of nested do-loops. See
+    :attr:`Mapdl.do() <ansys.mapdl.core.Mapdl.do>` and
+    :attr:`Mapdl.dowhile() <ansys.mapdl.core.Mapdl.dowhile>`.
+    """
+
+    def __init__(
+        self,
+        msg: str = "Exceeded the maximum number of nested MAPDL do-loops.",
+        notes: str = "",
+    ):
+        super().__init__(msg=msg, notes=notes)
+
+
 class MapdlExitedError(MapdlRuntimeError):
     """Raised when MAPDL has exited"""
 

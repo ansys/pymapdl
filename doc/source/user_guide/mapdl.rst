@@ -497,9 +497,67 @@ Hence you cannot use those arguments in Python code unless you use the following
    # ...
    # etc
 
-APDL loops using ``*DO`` or ``*DOWHILE`` should also be implemented
+APDL loops using ``*DO`` or ``*DOWHILE`` can be implemented Pythonically,
 using the :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
-attribute or implemented Pythonically.
+attribute directly, or with the dedicated
+:meth:`Mapdl.do() <ansys.mapdl.core.Mapdl.do>` and
+:meth:`Mapdl.dowhile() <ansys.mapdl.core.Mapdl.dowhile>` context managers, which
+wrap ``*DO``/``*DOWHILE`` and ``*ENDDO`` and automatically use
+``non_interactive`` for you:
+
+.. tab-set::
+
+    .. tab-item:: APDL
+        :sync: key1
+
+        .. code:: apdl
+
+            *DO,I,1,10
+            N,I,I,0,0
+            *ENDDO
+
+    .. tab-item:: Python-Non interactive
+
+        .. code:: python
+
+            with mapdl.non_interactive:
+                mapdl.run("*DO,I,1,10")
+                mapdl.n("I", "I", 0, 0)
+                mapdl.run("*ENDDO")
+
+    .. tab-item:: Python
+
+        .. code:: python
+
+            with mapdl.do("I", 1, 10):
+                mapdl.n("I", "I", 0, 0)
+
+Because MAPDL, and not Python, performs the actual looping, the body of the
+``with`` block is only evaluated once by Python to build the block of APDL
+commands. MAPDL also limits the number of nested ``*DO``/``*DOWHILE`` loops
+to 20 levels; exceeding this limit raises a
+:class:`MapdlDoLoopLimitError <ansys.mapdl.core.errors.MapdlDoLoopLimitError>`.
+
+If an exception is raised inside the ``with`` block, the ``*ENDDO`` is never
+sent to MAPDL, and only the (incomplete) commands buffered by that loop are
+discarded. Commands legitimately buffered before entering the loop, for
+example by an outer ``non_interactive`` block or an outer ``do``/``dowhile``
+loop, are preserved:
+
+.. code:: python
+
+    with mapdl.non_interactive:
+        mapdl.run("earlier command")
+
+        try:
+            with mapdl.do("i", 1, 10):
+                mapdl.run("body")
+                raise ValueError("boom")
+        except ValueError:
+            pass
+
+        # "earlier command" is still buffered; the aborted "*DO" block is not.
+        mapdl.run("later command")
 
 
 Warnings and errors
