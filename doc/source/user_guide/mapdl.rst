@@ -1260,6 +1260,23 @@ environment variable. The following table describes all arguments.
 |                                       |                                                                                  |
 |                                       | Only for developing purposes.                                                    |
 +---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`PYMAPDL_RPC_TIMEOUT`         | Deadline in seconds for each gRPC call. A MAPDL                                  |
+|                                       | instance that dies or stops answering mid-request                                |
+|                                       | then raises                                                                      |
+|                                       | :class:`MapdlConnectionError                                                     |
+|                                       | <ansys.mapdl.core.errors.MapdlConnectionError>`                                  |
+|                                       | instead of blocking forever. Unset by default,                                   |
+|                                       | which means the calls never expire. Set it above                                 |
+|                                       | the duration of your slowest command, solves                                     |
+|                                       | included.                                                                        |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export PYMAPDL_RPC_TIMEOUT=600                                |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
 | :envvar:`PYMAPDL_GRPC_TRANSPORT`      | gRPC transport mode used by PyMAPDL.                                             |
 |                                       | Accepted values: ``insecure``, ``uds``,                                          |
 |                                       | ``wnua``, ``mtls``.                                                              |

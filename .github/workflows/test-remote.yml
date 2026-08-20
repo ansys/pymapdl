@@ -102,6 +102,10 @@ jobs:
       PYMAPDL_GRPC_TRANSPORT: 'insecure'
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
+      # Deadline for each gRPC call, so that a MAPDL instance which crashed
+      # mid-request raises instead of blocking until pytest-timeout kills the
+      # whole session. Must stay below the 180 s pytest timeout.
+      PYMAPDL_RPC_TIMEOUT: 150
       PYMAPDL_START_INSTANCE: FALSE
       PYTEST_ARGUMENTS: '--ignore_image_cache'
       TEST_DPF_BACKEND: false
