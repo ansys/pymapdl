@@ -3611,6 +3611,7 @@ def test_osresult_presol(mapdl, solved_box):
 
 def test_do_emits_do_and_enddo_real_mapdl(mapdl):
     mapdl.clear()
+    mapdl.prep7()
     with mapdl.do("i", 1, 10, 2):
         mapdl.run("N,i,i,0,0")
 
