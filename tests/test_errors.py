@@ -22,10 +22,12 @@
 
 from unittest.mock import MagicMock
 
+import grpc
 import pytest
 
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
+    MapdlConnectionError,
     MapdlException,
     MapdlExitedError,
     MapdlInvalidRoutineError,
@@ -226,3 +228,21 @@ def test_protect_grpc_reraises_unrelated_value_error():
         raising(mock_mapdl)
 
     assert mock_mapdl._exited is False
+
+
+def test_protect_grpc_translates_future_cancelled_error():
+    """A 'FutureCancelledError', raised when the connectivity watchdog cancels
+    an in-flight call because the channel died, becomes a
+    'MapdlConnectionError' instead of propagating unchanged or retrying."""
+    mock_mapdl = MagicMock(spec=MapdlGrpc)
+    mock_mapdl._log = MagicMock()
+    mock_mapdl._exited = False
+    mock_mapdl.exited = False
+    mock_mapdl.channel_state = "TRANSIENT_FAILURE"
+
+    @protect_grpc
+    def raising(self):
+        raise grpc.FutureCancelledError()
+
+    with pytest.raises(MapdlConnectionError, match="TRANSIENT_FAILURE"):
+        raising(mock_mapdl)

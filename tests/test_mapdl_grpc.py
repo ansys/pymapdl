@@ -27,6 +27,7 @@ from unittest.mock import MagicMock, Mock, patch
 import weakref
 
 from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
+import grpc
 import pytest
 
 from ansys.mapdl.core.errors import MapdlExitedError
@@ -446,12 +447,12 @@ class TestSendCommand:
         mock._stub = MagicMock()
         resp = MagicMock()
         resp.response = "OK"
-        mock._stub.SendCommand.return_value = resp
+        mock._stub.SendCommand.future.return_value.result.return_value = resp
 
         result = MapdlGrpc._send_command(mock, "/PREP7")
 
         assert result == "OK"
-        mock._stub.SendCommand.assert_called_once()
+        mock._stub.SendCommand.future.assert_called_once()
 
 
 class TestCloseGrpcChannel:
@@ -590,6 +591,126 @@ class TestConnectivityCallbackDoesNotLeakInstance:
 
         assert dummy._channel_state == "READY"
         assert dummy._connectivity_callback is callback
+
+
+class TestConnectivityCancelsInFlightCall:
+    """The connectivity callback cancels a call once the channel is confirmed
+    dead, instead of leaving it to hang until MAPDL eventually answers."""
+
+    class _Dummy:
+        """Minimal stand-in exposing what the connectivity callback touches."""
+
+        def __init__(self, channel):
+            self._log = MagicMock()
+            self._channel = channel
+            self._channel_state = None
+            self._connectivity_callback = None
+            self._current_call = None
+            self._current_call_lock = threading.Lock()
+
+        _subscribe_to_channel = MapdlGrpc._subscribe_to_channel
+
+    def test_cancels_call_when_channel_becomes_transient_failure(self):
+        """A pending call is cancelled once the channel goes unhealthy."""
+        channel = Mock()
+        dummy = self._Dummy(channel)
+        dummy._subscribe_to_channel()
+        callback = channel.subscribe.call_args[0][0]
+
+        call = Mock()
+        call.done.return_value = False
+        dummy._current_call = call
+
+        callback(grpc.ChannelConnectivity.TRANSIENT_FAILURE)
+
+        call.cancel.assert_called_once()
+
+    def test_cancels_call_when_channel_shuts_down(self):
+        """A pending call is cancelled once the channel shuts down."""
+        channel = Mock()
+        dummy = self._Dummy(channel)
+        dummy._subscribe_to_channel()
+        callback = channel.subscribe.call_args[0][0]
+
+        call = Mock()
+        call.done.return_value = False
+        dummy._current_call = call
+
+        callback(grpc.ChannelConnectivity.SHUTDOWN)
+
+        call.cancel.assert_called_once()
+
+    def test_does_not_cancel_on_ready(self):
+        """A healthy transition must not touch any tracked call."""
+        channel = Mock()
+        dummy = self._Dummy(channel)
+        dummy._subscribe_to_channel()
+        callback = channel.subscribe.call_args[0][0]
+
+        call = Mock()
+        call.done.return_value = False
+        dummy._current_call = call
+
+        callback(grpc.ChannelConnectivity.READY)
+
+        call.cancel.assert_not_called()
+
+    def test_does_not_cancel_an_already_completed_call(self):
+        """A call that already finished must not be cancelled."""
+        channel = Mock()
+        dummy = self._Dummy(channel)
+        dummy._subscribe_to_channel()
+        callback = channel.subscribe.call_args[0][0]
+
+        call = Mock()
+        call.done.return_value = True
+        dummy._current_call = call
+
+        callback(grpc.ChannelConnectivity.TRANSIENT_FAILURE)
+
+        call.cancel.assert_not_called()
+
+    def test_no_error_when_no_call_is_in_flight(self):
+        """The callback must not raise when nothing is currently tracked."""
+        channel = Mock()
+        dummy = self._Dummy(channel)
+        dummy._subscribe_to_channel()
+        callback = channel.subscribe.call_args[0][0]
+
+        callback(grpc.ChannelConnectivity.TRANSIENT_FAILURE)  # must not raise
+
+
+class TestWatchedCall:
+    """``_watched_call`` tracks and releases the in-flight call."""
+
+    def test_tracks_call_and_clears_it_afterwards(self):
+        """The call is exposed as '_current_call' only while inside the
+        context manager."""
+        mock = _make_mock_mapdl()
+        mock._current_call = None
+        mock._current_call_lock = threading.Lock()
+
+        call = Mock()
+        with MapdlGrpc._watched_call(mock, call) as tracked:
+            assert tracked is call
+            assert mock._current_call is call
+
+        assert mock._current_call is None
+
+    def test_clears_only_its_own_call(self):
+        """A newer call tracked by a concurrent invocation is not cleared."""
+        mock = _make_mock_mapdl()
+        mock._current_call = None
+        mock._current_call_lock = threading.Lock()
+
+        call_a = Mock()
+        call_b = Mock()
+        with MapdlGrpc._watched_call(mock, call_a):
+            # Simulate a second, concurrent call replacing the tracked call
+            # before the first one's context manager exits.
+            mock._current_call = call_b
+
+        assert mock._current_call is call_b
 
 
 class TestDisconnectButLeaveMapdlRunning:
