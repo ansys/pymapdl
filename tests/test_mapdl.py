@@ -3779,3 +3779,27 @@ def test_exception_inside_user_owned_non_interactive_discards_everything(fake_ma
         fake_mapdl.run("N,k,k,0,0")
 
     assert fake_mapdl.sent_commands == ["*DO,k,1,3,", "N,k,k,0,0", "*ENDDO"]
+
+
+def test_exception_in_nested_do_loop_preserves_prior_buffered_commands(fake_mapdl):
+    """A failing ``do`` loop nested inside a user-owned ``non_interactive``
+    block must only discard its own (incomplete) commands, not whatever was
+    legitimately buffered before it."""
+    with fake_mapdl.non_interactive:
+        fake_mapdl.run("earlier command")
+
+        with pytest.raises(ValueError, match="boom"):
+            with fake_mapdl.do("i", 1, 10):
+                fake_mapdl.run("body")
+                raise ValueError("boom")
+
+        # Only the aborted loop's commands were dropped: the command
+        # buffered before it is still there, and the outer block is still
+        # active (the exception did not escape it).
+        assert fake_mapdl._stored_commands == ["earlier command"]
+        assert fake_mapdl._store_commands is True
+
+        fake_mapdl.run("later command")
+
+    assert fake_mapdl.sent_commands == ["earlier command", "later command"]
+    assert fake_mapdl._stored_commands == []

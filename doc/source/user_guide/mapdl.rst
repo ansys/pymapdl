@@ -538,6 +538,27 @@ commands. MAPDL also limits the number of nested ``*DO``/``*DOWHILE`` loops
 to 20 levels; exceeding this limit raises a
 :class:`MapdlDoLoopLimitError <ansys.mapdl.core.errors.MapdlDoLoopLimitError>`.
 
+If an exception is raised inside the ``with`` block, the ``*ENDDO`` is never
+sent to MAPDL, and only the (incomplete) commands buffered by that loop are
+discarded. Commands legitimately buffered before entering the loop, for
+example by an outer ``non_interactive`` block or an outer ``do``/``dowhile``
+loop, are preserved:
+
+.. code:: python
+
+    with mapdl.non_interactive:
+        mapdl.run("earlier command")
+
+        try:
+            with mapdl.do("i", 1, 10):
+                mapdl.run("body")
+                raise ValueError("boom")
+        except ValueError:
+            pass
+
+        # "earlier command" is still buffered; the aborted "*DO" block is not.
+        mapdl.run("later command")
+
 
 Warnings and errors
 -------------------

@@ -3455,6 +3455,18 @@ class _MapdlExtended(_MapdlCommandExtended):
         whole loop is sent to MAPDL as a single block. It also keeps track
         of how many loops are currently nested so the
         :data:`MAX_DO_LOOP_LEVEL` limit imposed by MAPDL can be enforced.
+
+        On ``__enter__``, the number of commands already buffered in
+        ``mapdl._stored_commands`` is recorded in ``_stored_commands_len``.
+        If an exception is raised inside the ``with`` block, ``__exit__``
+        truncates ``mapdl._stored_commands`` back to that length instead of
+        emitting ``*ENDDO``. This discards only the (incomplete, and
+        potentially invalid since it is missing its ``*ENDDO``) commands
+        buffered by this loop, without erasing commands legitimately
+        buffered before it, which matters when this loop is nested inside
+        an outer ``non_interactive`` block or an outer ``do``/``dowhile``
+        loop that did not fail and whose buffered commands must be
+        preserved.
         """
 
         def __init__(self, parent: "_MapdlExtended", command: str, **kwargs):
@@ -3462,6 +3474,7 @@ class _MapdlExtended(_MapdlCommandExtended):
             self._command = command
             self._kwargs = kwargs
             self._non_interactive_cm = None
+            self._stored_commands_len = 0
 
         def __enter__(self):
             mapdl = self._parent()
@@ -3483,6 +3496,8 @@ class _MapdlExtended(_MapdlCommandExtended):
                 self._non_interactive_cm = mapdl.non_interactive
                 self._non_interactive_cm.__enter__()
 
+            self._stored_commands_len = len(mapdl._stored_commands)
+
             mapdl.run(self._command, **self._kwargs)
             return self
 
@@ -3494,6 +3509,14 @@ class _MapdlExtended(_MapdlCommandExtended):
             try:
                 if args[0] is None:
                     mapdl.run("*ENDDO")
+                else:
+                    # An exception was raised: discard only the commands
+                    # buffered by this loop (which are incomplete since
+                    # they are missing their '*ENDDO'), keeping whatever
+                    # was legitimately buffered before it.
+                    mapdl._stored_commands = mapdl._stored_commands[
+                        : self._stored_commands_len
+                    ]
             finally:
                 if self._non_interactive_cm is not None:
                     self._non_interactive_cm.__exit__(*args)
@@ -3527,6 +3550,12 @@ class _MapdlExtended(_MapdlCommandExtended):
         between ``*DO`` and ``*DOWHILE``). Attempting to nest more loops
         than that raises a
         :class:`MapdlDoLoopLimitError <ansys.mapdl.core.errors.MapdlDoLoopLimitError>`.
+
+        If an exception is raised inside the ``with`` block, the ``*ENDDO``
+        is never sent and the (incomplete) commands buffered by this loop
+        are discarded, without affecting commands legitimately buffered
+        before entering the loop, for example by an outer ``non_interactive``
+        block or an outer ``do``/``dowhile`` loop.
 
         Parameters
         ----------
@@ -3588,6 +3617,12 @@ class _MapdlExtended(_MapdlCommandExtended):
         between ``*DO`` and ``*DOWHILE``). Attempting to nest more loops
         than that raises a
         :class:`MapdlDoLoopLimitError <ansys.mapdl.core.errors.MapdlDoLoopLimitError>`.
+
+        If an exception is raised inside the ``with`` block, the ``*ENDDO``
+        is never sent and the (incomplete) commands buffered by this loop
+        are discarded, without affecting commands legitimately buffered
+        before entering the loop, for example by an outer ``non_interactive``
+        block or an outer ``do``/``dowhile`` loop.
 
         Parameters
         ----------
