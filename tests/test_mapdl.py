@@ -3615,8 +3615,9 @@ def test_do_emits_do_and_enddo_real_mapdl(mapdl):
     with mapdl.do("i", 1, 10, 2):
         mapdl.run("N,i,i,0,0")
 
-    assert mapdl.mesh.n_nodes == 10
+    assert mapdl.mesh.n_node == 5
 
+    mapdl.parameters["cont"] = 3
     with mapdl.dowhile("cont"):
         mapdl.run("cont = cont - 1")
 
