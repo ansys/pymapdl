@@ -99,7 +99,7 @@ doc = [
   "jupyterlab>=3.2.8",
   "linuxdoc==20260504",
   "matplotlib==3.10.9",
-  "nbformat==5.10.4",
+  "nbformat==5.11.0",
   "numpydoc==1.10.0",
   "pandas==2.3.3",
   "plotly==6.9.0",
