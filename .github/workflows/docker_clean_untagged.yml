@@ -23,7 +23,7 @@ jobs:
     steps:
 
     - name: "Perform versions cleanup - except certain tags"
-      uses: ansys/actions/hk-package-clean-untagged@9dc4e3161033d2c2485fbf9687d40cfb7a661fb2 #v10.3.6
+      uses: ansys/actions/hk-package-clean-untagged@d98e1a4008dab392f8c114a483c2c5624076ccd6 #v11.0.1
       with:
         package-name: 'mapdl'
         token: ${{ secrets.GITHUB_TOKEN }}
