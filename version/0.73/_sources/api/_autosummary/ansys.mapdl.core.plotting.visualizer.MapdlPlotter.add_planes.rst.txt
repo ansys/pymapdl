@@ -1,0 +1,6 @@
+add\_planes
+===========
+
+.. currentmodule:: ansys.mapdl.core.plotting.visualizer
+
+.. automethod:: MapdlPlotter.add_planes

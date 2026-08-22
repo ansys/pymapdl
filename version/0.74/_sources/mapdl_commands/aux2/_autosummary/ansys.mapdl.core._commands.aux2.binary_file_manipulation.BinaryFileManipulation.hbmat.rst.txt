@@ -1,0 +1,6 @@
+﻿hbmat
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.aux2.binary_file_manipulation
+
+.. automethod:: BinaryFileManipulation.hbmat

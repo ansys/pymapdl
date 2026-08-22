@@ -1,0 +1,6 @@
+﻿atype
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.status
+
+.. automethod:: Status.atype

@@ -1,0 +1,6 @@
+﻿starexit
+========
+
+.. currentmodule:: ansys.mapdl.core._commands.apdl.process_controls
+
+.. automethod:: ProcessControls.starexit

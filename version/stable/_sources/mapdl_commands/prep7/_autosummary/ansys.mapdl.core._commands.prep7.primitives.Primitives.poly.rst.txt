@@ -1,0 +1,6 @@
+﻿poly
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.primitives
+
+.. automethod:: Primitives.poly

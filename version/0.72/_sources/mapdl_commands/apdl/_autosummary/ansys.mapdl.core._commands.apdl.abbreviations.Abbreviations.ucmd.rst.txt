@@ -1,0 +1,6 @@
+﻿ucmd
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.apdl.abbreviations
+
+.. automethod:: Abbreviations.ucmd

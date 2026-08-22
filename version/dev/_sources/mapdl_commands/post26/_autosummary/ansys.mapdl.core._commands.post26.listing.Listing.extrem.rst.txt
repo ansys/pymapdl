@@ -1,0 +1,6 @@
+﻿extrem
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.post26.listing
+
+.. automethod:: Listing.extrem

@@ -1,0 +1,6 @@
+point\_shape
+============
+
+.. currentmodule:: ansys.mapdl.core.plotting
+
+.. autoproperty:: MapdlTheme.point_shape

@@ -1,0 +1,6 @@
+﻿emsym
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.special_purpose
+
+.. automethod:: SpecialPurpose.emsym

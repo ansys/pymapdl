@@ -1,0 +1,6 @@
+﻿mapsolve
+========
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.rezoning
+
+.. automethod:: Rezoning.mapsolve
