@@ -53,6 +53,71 @@ _FIRST_SECTION_RE = re.compile(r"^\S[^\n]*\n-{3,}", re.MULTILINE)
 _SPHINX_ROLE_WITH_TARGET_RE = re.compile(r":\w[\w.:-]*:`([^`<>]+)\s*<[^>]*>`")
 _SPHINX_ROLE_SIMPLE_RE = re.compile(r":\w[\w.:-]*:`([^`]+)`")
 
+MISSING_RICH_RST_ERROR = (
+    "The 'rich-rst' package is required to use the 'help' command.\n"
+    "Install it via 'pip install rich-rst' and try again."
+)
+
+
+# ---------------------------------------------------------------------------
+# Public entry point
+# ---------------------------------------------------------------------------
+
+
+def help_command(command: str) -> str:
+    """Render the PyMAPDL docstring of a MAPDL command for a terminal.
+
+    Parameters
+    ----------
+    command : str
+        MAPDL command name to look up, including any leading ``/`` or ``*``
+        prefix. ``*`` and ``\\*`` map to the ``STAR<CMD>`` key and ``/`` maps
+        to ``SLASH<CMD>``, so the prefix is significant.
+
+    Returns
+    -------
+    str
+        The docstring formatted for a colour terminal, including ANSI escape
+        sequences. Strip them with :func:`click.strip_ansi` when writing to a
+        plain stream.
+
+    Raises
+    ------
+    ModuleNotFoundError
+        When the ``rich-rst`` package is not installed.
+    ValueError
+        When no PyMAPDL method matches *command*, or when the matching method
+        has no docstring.
+
+    Examples
+    --------
+    Get the documentation of the ``/PREP7`` command:
+
+    >>> from ansys.mapdl.core.cli.help import help_command
+    >>> print(help_command("/PREP7"))
+
+    """
+    try:
+        import rich_rst  # type: ignore # noqa: F401
+    except ModuleNotFoundError as err:
+        raise ModuleNotFoundError(MISSING_RICH_RST_ERROR) from err
+
+    from ansys.mapdl.core import Mapdl
+
+    method_name = _build_command_map().get(_normalise_user_input(command))
+    if method_name is None:
+        raise ValueError(
+            f"No PyMAPDL method found for MAPDL command {command!r}.\n"
+            "Use 'pymapdl help <COMMAND>' where COMMAND is a valid MAPDL "
+            "command name."
+        )
+
+    doc = inspect.getdoc(getattr(Mapdl, method_name))
+    if not doc:
+        raise ValueError(f"Method {method_name!r} has no docstring.")
+
+    return _format_rst_for_terminal(doc)
+
 
 # ---------------------------------------------------------------------------
 # RST → terminal formatter
@@ -157,16 +222,6 @@ def _format_rst_for_terminal(text: str) -> str:
     result = re.sub(r"\x1b\]8;id=[^;]+;", "\x1b]8;;", result)
 
     return result
-
-
-def _echo_doc(formatted: str) -> None:
-    """Output *formatted* to stdout, using a pager for long content on a TTY."""
-    if sys.stdout.isatty():
-        terminal_height = shutil.get_terminal_size(fallback=(80, 24)).lines
-        if formatted.count("\n") + 1 > terminal_height - 2:
-            click.echo_via_pager(formatted)
-            return
-    click.echo(formatted)
 
 
 # ---------------------------------------------------------------------------
@@ -283,7 +338,7 @@ def _normalise_user_input(command: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# CLI entry point
+# Click wrapper
 # ---------------------------------------------------------------------------
 
 
@@ -305,7 +360,7 @@ Examples:
 """,
 )
 @click.argument("command")
-def help_cmd(command: str) -> None:
+def help_cli(command: str) -> None:
     """Print the Python docstring for a MAPDL command.
 
     Parameters
@@ -330,40 +385,26 @@ def help_cmd(command: str) -> None:
         pymapdl help K
 
     """
-    from ansys.mapdl.core import Mapdl
-
     try:
-        import rich_rst  # type: ignore # noqa: F401
-
-    except ModuleNotFoundError:
-        click.echo(
-            click.style("ERROR:", fg="red")
-            + " The 'rich-rst' package is required to use the 'help' command.\n"
-            "Install it via 'pip install rich-rst' and try again.",
-            err=True,
-        )
+        formatted = help_command(command)
+    except (ModuleNotFoundError, ValueError) as err:
+        click.echo(click.style("ERROR:", fg="red") + f" {err}", err=True)
         sys.exit(1)
 
-    key = _normalise_user_input(command)
-    cmd_map = _build_command_map()
+    _echo_doc(formatted)
 
-    method_name = cmd_map.get(key)
-    if method_name is None:
-        click.echo(
-            click.style("ERROR:", fg="red")
-            + f" No PyMAPDL method found for MAPDL command {command!r}.\n"
-            "Use 'pymapdl help <COMMAND>' where COMMAND is a valid MAPDL command name.",
-            err=True,
-        )
-        sys.exit(1)
 
-    method = getattr(Mapdl, method_name)
-    doc = inspect.getdoc(method)
-    if not doc:
-        click.echo(
-            click.style("ERROR:", fg="red")
-            + f" Method {method_name!r} has no docstring.",
-            err=True,
-        )
-        sys.exit(1)
-    _echo_doc(_format_rst_for_terminal(doc))
+def _echo_doc(formatted: str) -> None:
+    """Output *formatted* to stdout, using a pager for long content on a TTY.
+
+    Parameters
+    ----------
+    formatted : str
+        Text to write to stdout.
+    """
+    if sys.stdout.isatty():
+        terminal_height = shutil.get_terminal_size(fallback=(80, 24)).lines
+        if formatted.count("\n") + 1 > terminal_height - 2:
+            click.echo_via_pager(formatted)
+            return
+    click.echo(formatted)

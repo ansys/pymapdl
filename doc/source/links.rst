@@ -31,6 +31,7 @@
 
 .. #Other libraries
 .. _pyvista_docs: https://docs.pyvista.org/version/stable/
+.. _click_docs: https://click.palletsprojects.com/
 .. _jupyter: https://jupyter.org/
 .. _grpc: https://grpc.io/
 .. _pandas_org: https://pandas.pydata.org/

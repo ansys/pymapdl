@@ -20,9 +20,114 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Dict, Optional
+"""``pymapdl start`` sub-command implementation."""
+
+import sys
+from typing import Dict, Optional, Tuple
 
 import click
+
+
+def start(
+    exec_file: Optional[str] = None,
+    run_location: Optional[str] = None,
+    jobname: str = "file",
+    nproc: int = 2,
+    ram: Optional[int] = None,
+    override: bool = False,
+    additional_switches: str = "",
+    start_timeout: int = 45,
+    port: Optional[int] = None,
+    license_type: Optional[str] = None,
+    version: Optional[str] = None,
+    loglevel: str = "",
+) -> Tuple[str, int, Optional[int]]:
+    """Launch an MAPDL instance without connecting a client to it.
+
+    Parameters
+    ----------
+    exec_file : str, optional
+        Location of the MAPDL executable. The cached location is used when
+        left at ``None`` and no environment variable is set. The executable
+        path can also be set through the ``PYMAPDL_MAPDL_EXEC`` environment
+        variable.
+    run_location : str, optional
+        MAPDL working directory. Defaults to a temporary working directory.
+        The directory is created when it does not exist.
+    jobname : str, default: "file"
+        MAPDL jobname.
+    nproc : int, default: 2
+        Number of processors.
+    ram : int, optional
+        Fixed amount of memory to request for MAPDL, in megabytes. When
+        ``None``, MAPDL uses as much as available on the host machine.
+    override : bool, default: False
+        Whether to delete the lock file at *run_location*. Useful when a
+        previous MAPDL session exited prematurely.
+    additional_switches : str, default: ""
+        Additional switches for MAPDL, for example ``"aa_r"`` for the academic
+        research license. Avoid switches such as ``-i``, ``-o`` or ``-b``,
+        which are already included.
+    start_timeout : int, default: 45
+        Maximum allowable time to connect to the MAPDL server.
+    port : int, optional
+        Port to launch the MAPDL gRPC server on. The final port is the first
+        one available after (or including) this port. Defaults to ``50052``,
+        or to the ``PYMAPDL_PORT`` environment variable when it is set.
+    license_type : str, optional
+        License name (for example ``"meba"``) or description (for example
+        ``"enterprise solver"``). When ``None``, the license server decides
+        which license to provide.
+    version : str, optional
+        Version of MAPDL to launch. When ``None``, the latest installed
+        version is used.
+    loglevel : str, default: ""
+        Logging level of the MAPDL process.
+
+    Returns
+    -------
+    tuple of (str, int, int or None)
+        IP address, port, and process ID of the launched instance. The process
+        ID is ``None`` when the process is not managed locally, such as on HPC
+        schedulers.
+
+    Raises
+    ------
+    LaunchError
+        When the MAPDL instance cannot be launched.
+
+    Examples
+    --------
+    Launch an instance on port 50054:
+
+    >>> from ansys.mapdl.core.cli.start import start
+    >>> ip, port, pid = start(port=50054)
+    >>> print(f"{ip}:{port}")
+    127.0.0.1:50054
+
+    """
+    from ansys.mapdl.core.launcher import launch_mapdl_process
+
+    return launch_mapdl_process(
+        exec_file=exec_file,
+        run_location=run_location,
+        jobname=jobname,
+        nproc=nproc,
+        ram=ram,
+        override=override,
+        additional_switches=additional_switches,
+        start_timeout=start_timeout,
+        port=port,
+        license_type=license_type,
+        version=version,
+        loglevel=loglevel,
+        start_instance=True,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Click wrapper
+# ---------------------------------------------------------------------------
 
 
 @click.command(
@@ -166,7 +271,7 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
     type=str,
     help="Version of MAPDL to launch. If ``None``, the latest version is used. Versions can be provided as integers (i.e. ``version=222``) or floats (i.e. ``version=22.2``). To retrieve the available installed versions, use the function :meth:`ansys.tools.common.path.get_available_ansys_installations`.",
 )
-def start(
+def start_cli(
     exec_file: Optional[str],
     run_location: Optional[str],
     jobname: str,
@@ -191,88 +296,88 @@ def start(
     replace_env_vars: Optional[Dict[str, str]],  # ignored
     version: Optional[str],
 ) -> None:
-    import logging
+    """Launch an MAPDL instance and print its connection information.
 
-    from ansys.mapdl.core.launcher import launch_mapdl_process
+    Parameters
+    ----------
+    exec_file : Optional[str]
+        Location of the MAPDL executable.
+    run_location : Optional[str]
+        MAPDL working directory.
+    jobname : str
+        MAPDL jobname.
+    nproc : int
+        Number of processors.
+    ram : Optional[int]
+        Fixed amount of memory to request for MAPDL.
+    mode : Optional[str]
+        Argument not allowed in the CLI. It is ignored.
+    override : bool
+        If :class:`True`, delete the lock file at the working directory.
+    loglevel : str
+        Logging level of the MAPDL process. When empty, PyMAPDL logging is
+        silenced so that only the command output reaches stdout.
+    additional_switches : str
+        Additional switches for MAPDL.
+    start_timeout : int
+        Maximum allowable time to connect to the MAPDL server.
+    port : Optional[int]
+        Port to launch the MAPDL gRPC server on.
+    cleanup_on_exit : Optional[bool]
+        Argument not allowed in the CLI. It is ignored.
+    start_instance : Optional[bool]
+        Argument not allowed in the CLI. It is ignored.
+    ip : Optional[str]
+        Argument not allowed in the CLI. It is ignored.
+    clear_on_connect : Optional[bool]
+        Argument not allowed in the CLI. It is ignored.
+    log_apdl : Optional[str]
+        Argument not allowed in the CLI. It is ignored.
+    remove_temp_dir_on_exit : Optional[bool]
+        Argument not allowed in the CLI. It is ignored.
+    license_server_check : Optional[bool]
+        Argument not allowed in the CLI. It is ignored.
+    license_type : Optional[str]
+        License type to request.
+    print_com : Optional[bool]
+        Argument not allowed in the CLI. It is ignored.
+    add_env_vars : Optional[Dict[str, str]]
+        Argument not allowed in the CLI. It is ignored.
+    replace_env_vars : Optional[Dict[str, str]]
+        Argument not allowed in the CLI. It is ignored.
+    version : Optional[str]
+        Version of MAPDL to launch.
+    """
+    from ansys.mapdl.core.cli.helpers import silence_logging
 
-    if mode is not None:
-        click.echo(
-            click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'mode'. Ignoring argument."
-        )
-
-    if cleanup_on_exit is not None:
-        click.echo(
-            click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'cleanup_on_exit'. Ignoring argument."
-        )
-
-    if start_instance is not None:
-        click.echo(
-            click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'start_instance'. Ignoring argument."
-        )
-
-    if ip is not None:
-        click.echo(
-            click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'ip'. Ignoring argument."
-        )
-
-    if clear_on_connect is not None:
-        click.echo(
-            click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'clear_on_connect'. Ignoring argument."
-        )
-
-    if log_apdl is not None:
-        click.echo(
-            click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'log_apdl'. Ignoring argument."
-        )
-
-    if remove_temp_dir_on_exit is not None:
-        click.echo(
-            click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'remove_temp_dir_on_exit'. Ignoring argument."
-        )
-
-    if print_com is not None:
-        click.echo(
-            click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'print_com'. Ignoring argument."
-        )
-
-    if add_env_vars is not None:
-        click.echo(
-            click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'add_env_vars'. Ignoring argument."
-        )
-
-    if replace_env_vars is not None:
-        click.echo(
-            click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'replace_env_vars'. Ignoring argument."
-        )
-
-    if license_server_check is not None:
-        click.echo(
-            click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'license_server_check'. Ignoring argument."
-        )
-
-    # Suppress all logging to stdout when using CLI
-    from ansys.mapdl.core import LOG
+    # Arguments accepted for parity with ``launch_mapdl`` that the CLI cannot
+    # honour, because it only starts the MAPDL process, it never builds a client.
+    ignored_arguments = {
+        "mode": mode,
+        "cleanup_on_exit": cleanup_on_exit,
+        "start_instance": start_instance,
+        "ip": ip,
+        "clear_on_connect": clear_on_connect,
+        "log_apdl": log_apdl,
+        "remove_temp_dir_on_exit": remove_temp_dir_on_exit,
+        "print_com": print_com,
+        "add_env_vars": add_env_vars,
+        "replace_env_vars": replace_env_vars,
+        "license_server_check": license_server_check,
+    }
+    for argument, value in ignored_arguments.items():
+        if value is not None:
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + f" The following argument is not allowed in CLI: '{argument}'."
+                " Ignoring argument."
+            )
 
     if not loglevel:
-        LOG.setLevel(
-            logging.CRITICAL + 1
-        )  # Set to a level higher than CRITICAL to suppress all logs
-        if LOG.std_out_handler:
-            LOG.std_out_handler.setLevel(logging.CRITICAL + 1)
+        silence_logging()
 
     try:
-        ip_addr, port_num, pid = launch_mapdl_process(
+        ip_addr, port_num, pid = start(
             exec_file=exec_file,
             run_location=run_location,
             jobname=jobname,
@@ -284,13 +389,12 @@ def start(
             port=port,
             license_type=license_type,
             version=version,
-            loglevel=loglevel,  # Set to highest level to suppress all logging
-            start_instance=True,
+            loglevel=loglevel,
         )
 
-    except Exception as e:
-        click.echo(click.style("ERROR:", fg="red") + f" {e}")
-        exit(1)
+    except Exception as err:
+        click.echo(click.style("ERROR:", fg="red") + f" {err}")
+        sys.exit(1)
 
     if pid is not None:
         header = f"Launched an MAPDL instance (PID={pid}) at "
