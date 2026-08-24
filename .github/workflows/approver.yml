@@ -54,7 +54,13 @@ jobs:
         )
     name: PR comment
     permissions:
+      # Note: this only scopes the auto-generated `GITHUB_TOKEN`. All API
+      # calls below explicitly use `secrets.PYANSYS_CI_BOT_TOKEN` (a bot
+      # PAT), whose actual scopes are managed on the bot account, so this
+      # block is unused in practice but kept for least-privilege hygiene
+      # in case the token input is ever removed.
       pull-requests: write  # Needed to approve pull requests
+      issues: write  # Needed to react to issue/PR comments
     runs-on: ubuntu-latest
     steps:
 
