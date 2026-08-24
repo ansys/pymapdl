@@ -22,6 +22,12 @@ on:
   issue_comment:
     types: [created, edited]
 
+  pull_request_review:
+    types: [submitted, edited]
+
+  pull_request_review_comment:
+    types: [created, edited]
+
 permissions: {}
 
 concurrency:
@@ -30,11 +36,17 @@ concurrency:
 
 jobs:
   autoapprove:
-    # This job only runs for pull request comments
+    # This job only runs for pull request comments and reviews
     name: PR comment
     if: (github.event.issue.pull_request &&
         contains(github.event.comment.body, '@pyansys-ci-bot LGTM') && (
           github.event.comment.user.login == 'germa89'
+        )) || (github.event.pull_request &&
+        contains(github.event.review.body, '@pyansys-ci-bot LGTM') && (
+          github.event.review.user.login == 'germa89'
+        )) || (github.event.pull_request &&
+        contains(github.event.pull_request_review_comment.body, '@pyansys-ci-bot LGTM') && (
+          github.event.pull_request_review_comment.user.login == 'germa89'
         )) || ( github.event_name == 'workflow_dispatch' )
     permissions:
       pull-requests: write  # Needed to approve pull requests
@@ -53,6 +65,14 @@ jobs:
           github_html_url: ${{ github.event.comment.html_url }}
           github_number: ${{ github.event.issue.number }}
           github_id: ${{ github.event.comment.id }}
+          github_review_login: ${{ github.event.review.user.login }}
+          github_review_html_url: ${{ github.event.review.html_url }}
+          github_review_number: ${{ github.event.pull_request.number }}
+          github_review_id: ${{ github.event.review.id }}
+          github_review_comment_login: ${{ github.event.pull_request_review_comment.user.login }}
+          github_review_comment_html_url: ${{ github.event.pull_request_review_comment.html_url }}
+          github_review_comment_number: ${{ github.event.pull_request.number }}
+          github_review_comment_id: ${{ github.event.pull_request_review_comment.id }}
         run: |
           if [[ $event_name == "workflow_dispatch" ]] ; then
             echo "On workflow dispatch"
@@ -60,6 +80,20 @@ jobs:
             echo "html_url=${inputs_html_url}" >> $GITHUB_OUTPUT
             echo "pull_request=${inputs_pr}" >> $GITHUB_OUTPUT
             echo "commentid=${inputs_commentid}" >> $GITHUB_OUTPUT
+
+          elif [[ $event_name == "pull_request_review" ]] ; then
+            echo "On $event_name"
+            echo "user=${github_review_login}" >> $GITHUB_OUTPUT
+            echo "html_url=${github_review_html_url}" >> $GITHUB_OUTPUT
+            echo "pull_request=${github_review_number}" >> $GITHUB_OUTPUT
+            echo "reviewid=${github_review_id}" >> $GITHUB_OUTPUT
+
+          elif [[ $event_name == "pull_request_review_comment" ]] ; then
+            echo "On $event_name"
+            echo "user=${github_review_comment_login}" >> $GITHUB_OUTPUT
+            echo "html_url=${github_review_comment_html_url}" >> $GITHUB_OUTPUT
+            echo "pull_request=${github_review_comment_number}" >> $GITHUB_OUTPUT
+            echo "reviewcommentid=${github_review_comment_id}" >> $GITHUB_OUTPUT
 
           else
             echo "On $event_name"
@@ -74,18 +108,37 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 #v9.0.0
         env:
           COMMENT_ID: ${{ steps.settings.outputs.commentid }}
+          REVIEW_ID: ${{ steps.settings.outputs.reviewid }}
+          REVIEW_COMMENT_ID: ${{ steps.settings.outputs.reviewcommentid }}
+          PULL_REQUEST: ${{ steps.settings.outputs.pull_request }}
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
-              // React with +1 to the triggering comment
-              const commentId = Number(process.env.COMMENT_ID);
-
-              await github.rest.reactions.createForIssueComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: commentId,
-                content: '+1',
-              });
+              // React with +1 to the triggering comment or review.
+              if (process.env.REVIEW_ID) {
+                await github.rest.reactions.createForPullRequestReview({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: Number(process.env.PULL_REQUEST),
+                  review_id: Number(process.env.REVIEW_ID),
+                  content: '+1',
+                });
+              } else if (process.env.REVIEW_COMMENT_ID) {
+                await github.rest.reactions.createForPullRequestReviewComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: Number(process.env.PULL_REQUEST),
+                  comment_id: Number(process.env.REVIEW_COMMENT_ID),
+                  content: '+1',
+                });
+              } else {
+                await github.rest.reactions.createForIssueComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: Number(process.env.COMMENT_ID),
+                  content: '+1',
+                });
+              }
 
       - name: "Grab url for GIF"
         id: image_grabber
