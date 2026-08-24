@@ -79,12 +79,9 @@ class MeshGrpc:
 
         self._freeze_model = False
         self._ignore_cache_reset = False
-        # MAPDL serves one request at a time. '_update_cache' kicks off
-        # '_update_cache_element_desc', '_update_cache_nnum' and
-        # '_update_node_coord' in separate threads so callers can keep working
-        # while they run, but this single lock still serializes the gRPC call
-        # each one makes, so at most one request is ever in flight on the
-        # server, regardless of which thread is holding it.
+        # MAPDL serves one request at a time. Some mesh cache updates run in
+        # separate threads, but this lock serializes the gRPC requests issued by
+        # MeshGrpc (only one mesh-related request is in flight at a time).
         self._thread_lock_grpc = threading.Lock()
         self._reset_cache()
 
