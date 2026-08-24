@@ -89,7 +89,9 @@ def connect_to_instance(
     Raises
     ------
     MapdlConnectionError
-        When no MAPDL instance can be reached at the given address.
+        When no MAPDL instance can be reached at the given address. The
+        underlying error is attached as a note on the exception, and the
+        original traceback is suppressed to keep the failure readable.
 
     Examples
     --------
@@ -102,6 +104,7 @@ def connect_to_instance(
     from ansys.mapdl.core.errors import MapdlConnectionError
     from ansys.mapdl.core.launcher.config import resolve_launch_config
     from ansys.mapdl.core.launcher.connection import connect_to_existing
+    from ansys.mapdl.core.launcher.errors import ConfigurationError
 
     try:
         config = resolve_launch_config(
@@ -111,17 +114,19 @@ def connect_to_instance(
             clear_on_connect=clear_on_connect,
             timeout=timeout,
         )
-    except Exception as err:
+    except (ConfigurationError, TypeError, ValueError) as err:
         raise MapdlConnectionError(
-            f"Could not resolve the connection to MAPDL at {ip}:{port} — {err}"
-        ) from err
+            f"Could not resolve the connection to MAPDL at {ip}:{port}.",
+            notes=str(err),
+        ) from None
 
     try:
         return connect_to_existing(config)
-    except Exception as err:
+    except (ConnectionError, OSError) as err:
         raise MapdlConnectionError(
-            f"Could not connect to MAPDL at {config.ip}:{config.port} — {err}"
-        ) from err
+            f"Could not connect to MAPDL at {config.ip}:{config.port}.",
+            notes=str(err),
+        ) from None
 
 
 def can_access_process(proc):

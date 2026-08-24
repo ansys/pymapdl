@@ -561,3 +561,71 @@ def test_connect_to_instance_wraps_configuration_failures():
     ):
         with pytest.raises(MapdlConnectionError, match="Could not resolve"):
             connect_to_instance(port=-1)
+
+
+def test_connect_to_instance_attaches_the_original_error_as_a_note():
+    """The low-level error is kept as a note instead of being appended inline."""
+    from ansys.mapdl.core.cli.helpers import connect_to_instance
+
+    with patch(
+        "ansys.mapdl.core.launcher.connection.connect_to_existing",
+        side_effect=ConnectionError("refused"),
+    ):
+        with pytest.raises(MapdlConnectionError) as excinfo:
+            connect_to_instance(ip="127.0.0.1", port=50052)
+
+    assert excinfo.value.notes == "refused"
+
+
+def test_connect_to_instance_suppresses_the_original_traceback():
+    """The re-raised error hides the low-level traceback, showing only its message."""
+    from ansys.mapdl.core.cli.helpers import connect_to_instance
+
+    with patch(
+        "ansys.mapdl.core.launcher.connection.connect_to_existing",
+        side_effect=ConnectionError("refused"),
+    ):
+        with pytest.raises(MapdlConnectionError) as excinfo:
+            connect_to_instance(ip="127.0.0.1", port=50052)
+
+    assert excinfo.value.__cause__ is None
+    assert excinfo.value.__suppress_context__ is True
+
+
+@pytest.mark.parametrize("error", [KeyError("boom"), AttributeError("boom")])
+def test_connect_to_instance_does_not_mask_unexpected_configuration_errors(error):
+    """Errors unrelated to configuration resolution are not disguised as connection errors."""
+    from ansys.mapdl.core.cli.helpers import connect_to_instance
+
+    with patch(
+        "ansys.mapdl.core.launcher.config.resolve_launch_config", side_effect=error
+    ):
+        with pytest.raises(type(error)):
+            connect_to_instance()
+
+
+@pytest.mark.parametrize("error", [KeyError("boom"), RuntimeError("boom")])
+def test_connect_to_instance_does_not_mask_unexpected_connection_errors(error):
+    """Errors unrelated to the connection attempt are not disguised as connection errors."""
+    from ansys.mapdl.core.cli.helpers import connect_to_instance
+
+    with patch(
+        "ansys.mapdl.core.launcher.connection.connect_to_existing", side_effect=error
+    ):
+        with pytest.raises(type(error)):
+            connect_to_instance()
+
+
+def test_connect_to_instance_does_not_double_wrap_mapdl_connection_errors():
+    """A MapdlConnectionError raised by the client itself is not wrapped again."""
+    from ansys.mapdl.core.cli.helpers import connect_to_instance
+
+    original = MapdlConnectionError("gRPC handshake failed")
+    with patch(
+        "ansys.mapdl.core.launcher.connection.connect_to_existing",
+        side_effect=original,
+    ):
+        with pytest.raises(MapdlConnectionError) as excinfo:
+            connect_to_instance()
+
+    assert excinfo.value is original
