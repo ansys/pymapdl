@@ -36,6 +36,22 @@ concurrency:
 
 jobs:
   autoapprove:
+    # Cheap pre-filter so the job (and the bot token) only runs for events
+    # that stand a chance of passing validation. The script still performs
+    # the full validation and logging; this is defense-in-depth to avoid
+    # burning runner minutes and exposing the token on every repo comment.
+    if: (github.event_name == 'workflow_dispatch') ||
+        (github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request &&
+        contains(github.event.comment.body, '@pyansys-ci-bot LGTM') &&
+        github.event.comment.user.login == 'germa89'
+        ) || (github.event_name == 'pull_request_review' &&
+        contains(github.event.review.body, '@pyansys-ci-bot LGTM') &&
+        github.event.review.user.login == 'germa89'
+        ) || (github.event_name == 'pull_request_review_comment' &&
+        contains(github.event.comment.body, '@pyansys-ci-bot LGTM') &&
+        github.event.comment.user.login == 'germa89'
+        )
     name: PR comment
     permissions:
       pull-requests: write  # Needed to approve pull requests
