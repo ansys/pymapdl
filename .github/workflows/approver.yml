@@ -36,122 +36,197 @@ concurrency:
 
 jobs:
   autoapprove:
-    # This job only runs for pull request comments and reviews
     name: PR comment
-    if: (github.event.issue.pull_request &&
-        contains(github.event.comment.body, '@pyansys-ci-bot LGTM') && (
-          github.event.comment.user.login == 'germa89'
-        )) || (github.event.pull_request &&
-        contains(github.event.review.body, '@pyansys-ci-bot LGTM') && (
-          github.event.review.user.login == 'germa89'
-        )) || (github.event.pull_request &&
-        contains(github.event.pull_request_review_comment.body, '@pyansys-ci-bot LGTM') && (
-          github.event.pull_request_review_comment.user.login == 'germa89'
-        )) || ( github.event_name == 'workflow_dispatch' )
     permissions:
       pull-requests: write  # Needed to approve pull requests
     runs-on: ubuntu-latest
     steps:
 
-      - name: "Settings"
-        id: settings
-        env:
-          event_name: ${{ github.event_name }}
-          inputs_user: ${{ inputs.user }}
-          inputs_html_url: ${{ inputs.html_url }}
-          inputs_pr: ${{ inputs.pr }}
-          inputs_commentid: ${{ inputs.commentid }}
-          github_login: ${{ github.event.comment.user.login }}
-          github_html_url: ${{ github.event.comment.html_url }}
-          github_number: ${{ github.event.issue.number }}
-          github_id: ${{ github.event.comment.id }}
-          github_review_login: ${{ github.event.review.user.login }}
-          github_review_html_url: ${{ github.event.review.html_url }}
-          github_review_number: ${{ github.event.pull_request.number }}
-          github_review_id: ${{ github.event.review.id }}
-          github_review_comment_login: ${{ github.event.pull_request_review_comment.user.login }}
-          github_review_comment_html_url: ${{ github.event.pull_request_review_comment.html_url }}
-          github_review_comment_number: ${{ github.event.pull_request.number }}
-          github_review_comment_id: ${{ github.event.pull_request_review_comment.id }}
-        run: |
-          if [[ $event_name == "workflow_dispatch" ]] ; then
-            echo "On workflow dispatch"
-            echo "user=${inputs_user}" >> $GITHUB_OUTPUT
-            echo "html_url=${inputs_html_url}" >> $GITHUB_OUTPUT
-            echo "pull_request=${inputs_pr}" >> $GITHUB_OUTPUT
-            echo "commentid=${inputs_commentid}" >> $GITHUB_OUTPUT
-
-          elif [[ $event_name == "pull_request_review" ]] ; then
-            echo "On $event_name"
-            echo "user=${github_review_login}" >> $GITHUB_OUTPUT
-            echo "html_url=${github_review_html_url}" >> $GITHUB_OUTPUT
-            echo "pull_request=${github_review_number}" >> $GITHUB_OUTPUT
-            echo "reviewid=${github_review_id}" >> $GITHUB_OUTPUT
-
-          elif [[ $event_name == "pull_request_review_comment" ]] ; then
-            echo "On $event_name"
-            echo "user=${github_review_comment_login}" >> $GITHUB_OUTPUT
-            echo "html_url=${github_review_comment_html_url}" >> $GITHUB_OUTPUT
-            echo "pull_request=${github_review_comment_number}" >> $GITHUB_OUTPUT
-            echo "reviewcommentid=${github_review_comment_id}" >> $GITHUB_OUTPUT
-
-          else
-            echo "On $event_name"
-            echo "user=${github_login}" >> $GITHUB_OUTPUT
-            echo "html_url=${github_html_url}" >> $GITHUB_OUTPUT
-            echo "pull_request=${github_number}" >> $GITHUB_OUTPUT
-            echo "commentid=${github_id}" >> $GITHUB_OUTPUT
-
-          fi;
-
-      - name: React to comment
+      - name: "Auto-approve on trusted LGTM"
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 #v9.0.0
         env:
-          COMMENT_ID: ${{ steps.settings.outputs.commentid }}
-          REVIEW_ID: ${{ steps.settings.outputs.reviewid }}
-          REVIEW_COMMENT_ID: ${{ steps.settings.outputs.reviewcommentid }}
-          PULL_REQUEST: ${{ steps.settings.outputs.pull_request }}
+          INPUTS: ${{ toJson(inputs) }}
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
-              // React with +1 to the triggering comment.
-              // Note: the GitHub REST API has no reaction endpoint for a
-              // pull request review itself (only for review comments,
-              // issue comments and commit comments), so reviews submitted
-              // with the LGTM trigger are acknowledged only through the
-              // auto-approve step below.
-              if (process.env.REVIEW_ID) {
+            const TRUSTED_USER = 'germa89';
+            const TRIGGER_PHRASE = '@pyansys-ci-bot LGTM';
+
+            const eventName = context.eventName;
+            const payload = context.payload;
+
+            core.info(`==> Event received: ${eventName}`);
+            core.debug(`Full event payload: ${JSON.stringify(payload, null, 2)}`);
+
+            // ---------------------------------------------------------------
+            // 1. Determine trigger context from the event that fired the job.
+            // ---------------------------------------------------------------
+            let user;
+            let htmlUrl;
+            let pullRequest;
+            let body;
+            let commentId;
+            let reviewId;
+            let reviewCommentId;
+
+            core.startGroup('1. Determine trigger context');
+            if (eventName === 'workflow_dispatch') {
+              const inputs = JSON.parse(process.env.INPUTS || '{}');
+              user = inputs.user;
+              htmlUrl = inputs.html_url;
+              pullRequest = Number(inputs.pr);
+              commentId = Number(inputs.commentid);
+              body = '';
+              core.info('Triggered manually through workflow_dispatch.');
+
+            } else if (eventName === 'pull_request_review') {
+              user = payload.review.user.login;
+              htmlUrl = payload.review.html_url;
+              pullRequest = payload.pull_request.number;
+              reviewId = payload.review.id;
+              body = payload.review.body || '';
+              core.info('Triggered by a pull request review.');
+
+            } else if (eventName === 'pull_request_review_comment') {
+              user = payload.comment.user.login;
+              htmlUrl = payload.comment.html_url;
+              pullRequest = payload.pull_request.number;
+              reviewCommentId = payload.comment.id;
+              body = payload.comment.body || '';
+              core.info('Triggered by a pull request review comment.');
+
+            } else if (eventName === 'issue_comment') {
+              user = payload.comment.user.login;
+              htmlUrl = payload.comment.html_url;
+              pullRequest = payload.issue.number;
+              commentId = payload.comment.id;
+              body = payload.comment.body || '';
+              core.info('Triggered by an issue/PR comment.');
+
+            } else {
+              core.info(`Unsupported event "${eventName}". Nothing to do.`);
+              core.endGroup();
+              return;
+            }
+
+            core.debug(`user=${user}`);
+            core.debug(`htmlUrl=${htmlUrl}`);
+            core.debug(`pullRequest=${pullRequest}`);
+            core.debug(`commentId=${commentId}`);
+            core.debug(`reviewId=${reviewId}`);
+            core.debug(`reviewCommentId=${reviewCommentId}`);
+            core.debug(`body=${body}`);
+            core.endGroup();
+
+            // ---------------------------------------------------------------
+            // 2. Validate the trigger: right event type on a PR, right
+            //    author, and the exact trigger phrase. Exit early otherwise.
+            // ---------------------------------------------------------------
+            core.startGroup('2. Validate trigger conditions');
+
+            if (eventName === 'issue_comment' && !payload.issue.pull_request) {
+              core.info('Comment was made on an issue, not a pull request. Skipping.');
+              core.endGroup();
+              return;
+            }
+
+            if (!pullRequest) {
+              core.info('Could not resolve a pull request number. Skipping.');
+              core.endGroup();
+              return;
+            }
+
+            if (eventName === 'workflow_dispatch') {
+              // Manual dispatch is trusted implicitly: only users with write
+              // access to the repository can trigger `workflow_dispatch`.
+              core.info('Manual workflow_dispatch trigger: skipping author/phrase checks.');
+            } else {
+              if (user !== TRUSTED_USER) {
+                core.info(`Author "${user}" is not the trusted user "${TRUSTED_USER}". Skipping.`);
+                core.endGroup();
+                return;
+              }
+
+              if (!body.includes(TRIGGER_PHRASE)) {
+                core.info(`Body does not contain the trigger phrase "${TRIGGER_PHRASE}". Skipping.`);
+                core.endGroup();
+                return;
+              }
+            }
+
+            core.info(`Trigger accepted: "${user}" approved PR #${pullRequest} via ${eventName}.`);
+            core.endGroup();
+
+            // ---------------------------------------------------------------
+            // 3. React with a thumbs-up to the triggering comment, when
+            //    possible. Note: the GitHub REST API has no reaction
+            //    endpoint for a pull request review itself (only for review
+            //    comments, issue comments and commit comments).
+            // ---------------------------------------------------------------
+            core.startGroup('3. React to the trigger');
+            try {
+              if (reviewId) {
                 core.info('Skipping reaction: pull request reviews cannot be reacted to.');
-              } else if (process.env.REVIEW_COMMENT_ID) {
+              } else if (reviewCommentId) {
                 await github.rest.reactions.createForPullRequestReviewComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  pull_number: Number(process.env.PULL_REQUEST),
-                  comment_id: Number(process.env.REVIEW_COMMENT_ID),
+                  pull_number: pullRequest,
+                  comment_id: reviewCommentId,
                   content: '+1',
                 });
-              } else {
+                core.info(`Reacted with +1 to review comment ${reviewCommentId}.`);
+              } else if (commentId) {
                 await github.rest.reactions.createForIssueComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  comment_id: Number(process.env.COMMENT_ID),
+                  comment_id: commentId,
                   content: '+1',
                 });
+                core.info(`Reacted with +1 to comment ${commentId}.`);
+              } else {
+                core.info('No reactable comment ID available. Skipping reaction.');
               }
+            } catch (error) {
+              core.warning(`Could not react to the trigger: ${error.message}`);
+            }
+            core.endGroup();
 
-      - name: "Grab url for GIF"
-        id: image_grabber
-        run: |
-          sudo apt-get install jq
-          export IMG_MSG=$(curl -s 'https://us-central1-lgtm-reloaded.cloudfunctions.net/lgtm' | jq -r '.markdown' | grep -v 'Powered By GIPHY')
-          echo "IMG_MSG=$IMG_MSG" >> $GITHUB_OUTPUT
+            // ---------------------------------------------------------------
+            // 4. Fetch a fun "LGTM" GIF to include in the approval message.
+            // ---------------------------------------------------------------
+            core.startGroup('4. Fetch approval GIF');
+            let gifMarkdown = '';
+            try {
+              const response = await fetch('https://us-central1-lgtm-reloaded.cloudfunctions.net/lgtm');
+              const data = await response.json();
+              gifMarkdown = (data.markdown || '')
+                .split('\n')
+                .filter((line) => !line.includes('Powered By GIPHY'))
+                .join('\n');
+              core.info('Fetched LGTM GIF markdown.');
+              core.debug(`gifMarkdown=${gifMarkdown}`);
+            } catch (error) {
+              core.warning(`Could not fetch LGTM GIF: ${error.message}`);
+            }
+            core.endGroup();
 
-      - uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 #v4.0.0
-        with:
-          review-message: |
-            :white_check_mark: Approving this PR because [${{ steps.settings.outputs.user }}](https://github.com/${{ steps.settings.outputs.user }}) said so in [here](${{ steps.settings.outputs.html_url }}) :grimacing:
+            // ---------------------------------------------------------------
+            // 5. Approve the pull request.
+            // ---------------------------------------------------------------
+            core.startGroup('5. Approve pull request');
+            const reviewMessage = [
+              `:white_check_mark: Approving this PR because [${user}](https://github.com/${user}) said so in [here](${htmlUrl}) :grimacing:`,
+              '',
+              gifMarkdown,
+            ].join('\n');
 
-            ${{ steps.image_grabber.outputs.IMG_MSG }}
-
-          pull-request-number: ${{ steps.settings.outputs.pull_request }}
-          github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pullRequest,
+              event: 'APPROVE',
+              body: reviewMessage,
+            });
+            core.info(`Approved PR #${pullRequest}.`);
+            core.endGroup();
