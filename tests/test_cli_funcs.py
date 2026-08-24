@@ -191,6 +191,76 @@ def test_stop_by_pid_omits_a_surviving_process():
         assert stop(pid=12345) == []
 
 
+def test_stop_by_pid_missing_process_returns_empty_list():
+    """A PID that no longer exists does not raise, it just reports nothing stopped."""
+    with patch("psutil.Process", side_effect=psutil.NoSuchProcess(12345)):
+        assert stop(pid=12345) == []
+
+
+def test_stop_by_pid_handles_unreachable_children():
+    """A child that disappears/cannot be inspected while listing does not raise."""
+    parent = MagicMock(spec=psutil.Process)
+    parent.children.side_effect = psutil.NoSuchProcess(12345)
+
+    with (
+        patch("psutil.Process", return_value=parent),
+        patch("ansys.mapdl.core.cli.stop._kill_process") as mock_kill,
+    ):
+        assert stop(pid=12345) == [12345]
+
+    mock_kill.assert_called_once_with(parent)
+
+
+@pytest.mark.parametrize("exc", [psutil.NoSuchProcess(99), psutil.AccessDenied(99)])
+def test_stop_by_pid_skips_a_child_that_cannot_be_killed(exc):
+    """A child that vanishes or is inaccessible while being killed is skipped, not raised."""
+    child = MagicMock(spec=psutil.Process)
+    child.pid = 99
+    parent = MagicMock(spec=psutil.Process)
+    parent.children.return_value = [child]
+
+    def _kill_side_effect(proc):
+        if proc is child:
+            raise exc
+
+    with (
+        patch("psutil.Process", return_value=parent),
+        patch("ansys.mapdl.core.cli.stop._kill_process", side_effect=_kill_side_effect),
+    ):
+        assert stop(pid=12345) == [12345]
+
+
+@pytest.mark.parametrize(
+    "exc", [psutil.NoSuchProcess(12345), psutil.AccessDenied(12345)]
+)
+def test_stop_by_pid_does_not_raise_when_parent_kill_fails(exc):
+    """A parent that vanishes or is inaccessible while being killed does not raise."""
+    parent = MagicMock(spec=psutil.Process)
+    parent.children.return_value = []
+
+    with (
+        patch("psutil.Process", return_value=parent),
+        patch("ansys.mapdl.core.cli.stop._kill_process", side_effect=exc),
+    ):
+        assert stop(pid=12345) == []
+
+
+@pytest.mark.parametrize(
+    "exc", [psutil.NoSuchProcess(12345), psutil.AccessDenied(12345)]
+)
+def test_stop_by_pid_treats_disappearance_during_wait_as_stopped(exc):
+    """If the process is already gone by the time wait() is called, it is reported stopped."""
+    parent = MagicMock(spec=psutil.Process)
+    parent.children.return_value = []
+    parent.wait.side_effect = exc
+
+    with (
+        patch("psutil.Process", return_value=parent),
+        patch("ansys.mapdl.core.cli.stop._kill_process"),
+    ):
+        assert stop(pid=12345) == [12345]
+
+
 # ---------------------------------------------------------------------------
 # list_instances
 # ---------------------------------------------------------------------------

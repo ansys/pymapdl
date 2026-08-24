@@ -163,6 +163,11 @@ def _stop_instance_on_port(port: int) -> List[int]:
 def _stop_process_tree(pid: int) -> List[int]:
     """Kill the process *pid* and all its children.
 
+    Any :class:`psutil.NoSuchProcess` or :class:`psutil.AccessDenied` raised
+    while looking up, killing, or waiting on a process is treated the same
+    way as elsewhere in this module: the process is skipped rather than the
+    exception being propagated.
+
     Parameters
     ----------
     pid : int
@@ -173,25 +178,49 @@ def _stop_process_tree(pid: int) -> List[int]:
     list of int
         Process IDs that are confirmed to have terminated. The parent PID is
         only included when the process is gone before the timeout elapses.
+        An empty list means that the process could not be found or that
+        nothing could be killed.
+
+    Raises
+    ------
+    ValueError
+        When *pid* cannot be converted to an integer.
     """
     try:
         pid = int(pid)
     except (TypeError, ValueError) as err:
         raise ValueError("PID provided could not be converted to int.") from err
 
-    proc = psutil.Process(pid)
+    try:
+        proc = psutil.Process(pid)
+    except psutil.NoSuchProcess:
+        return []
 
     stopped: List[int] = []
-    for child in proc.children(recursive=True):
-        _kill_process(child)
+
+    try:
+        children = proc.children(recursive=True)
+    except (psutil.NoSuchProcess, psutil.AccessDenied):
+        children = []
+
+    for child in children:
+        try:
+            _kill_process(child)
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
         stopped.append(child.pid)
 
-    _kill_process(proc)
+    try:
+        _kill_process(proc)
+    except (psutil.NoSuchProcess, psutil.AccessDenied):
+        return stopped
 
     try:
         proc.wait(timeout=_TERMINATION_TIMEOUT)
     except psutil.TimeoutExpired:
         return stopped
+    except (psutil.NoSuchProcess, psutil.AccessDenied):
+        pass
 
     stopped.append(pid)
     return stopped
