@@ -79,8 +79,10 @@ class MeshGrpc:
 
         self._freeze_model = False
         self._ignore_cache_reset = False
-        self._thread_lock_nodes = threading.Lock()
-        self._thread_lock_elem = threading.Lock()
+        # MAPDL serves one request at a time. Some mesh cache updates run in
+        # separate threads, but this lock serializes the gRPC requests issued by
+        # MeshGrpc (only one mesh-related request is in flight at a time).
+        self._thread_lock_grpc = threading.Lock()
         self._reset_cache()
 
     def __repr__(self):
@@ -171,7 +173,9 @@ class MeshGrpc:
             with self._mapdl.save_selection:
                 self._mapdl.nsle("S", mute=True)
 
-                # not thread safe
+                # '_update_cache_elem' runs first and alone: it is not
+                # guarded by '_thread_lock_grpc' and must finish before the
+                # threads below start, otherwise it could race with them.
                 self._update_cache_elem()
 
                 threads = [
@@ -195,14 +199,15 @@ class MeshGrpc:
 
     @threaded
     def _update_cache_nnum(self):
-        if self._cache_nnum is None:
-            self.logger.debug("Updating nodes cache")
-            nnum = self._mapdl.get_array("NODE", item1="NLIST")
-            self._cache_nnum = nnum.astype(np.int32)
+        with self._thread_lock_grpc:
+            if self._cache_nnum is None:
+                self.logger.debug("Updating nodes cache")
+                nnum = self._mapdl.get_array("NODE", item1="NLIST")
+                self._cache_nnum = nnum.astype(np.int32)
 
-        if self._cache_nnum.size == 1:
-            if self._cache_nnum[0] == 0:
-                self._cache_nnum = np.empty(0, np.int32)
+            if self._cache_nnum.size == 1:
+                if self._cache_nnum[0] == 0:
+                    self._cache_nnum = np.empty(0, np.int32)
 
     @property
     def _nnum(self):
@@ -216,9 +221,10 @@ class MeshGrpc:
 
     @threaded
     def _update_cache_element_desc(self):
-        if self._cache_element_desc is None:
-            self.logger.debug("Updating elements (desc) cache")
-            self._cache_element_desc = self._load_element_types()
+        with self._thread_lock_grpc:
+            if self._cache_element_desc is None:
+                self.logger.debug("Updating elements (desc) cache")
+                self._cache_element_desc = self._load_element_types()
 
     @property
     def _ekey(self):
@@ -235,9 +241,9 @@ class MeshGrpc:
 
     @threaded
     def _update_node_coord(self):
-        # with self._thread_lock_nodes:
-        if self._node_coord is None:
-            self._node_coord = self._load_nodes()
+        with self._thread_lock_grpc:
+            if self._node_coord is None:
+                self._node_coord = self._load_nodes()
 
     @property
     def _ans_etype(self):
