@@ -20,19 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Constants shared by the CLI commands and their click-independent functions.
-
-This module must stay free of imports so that building the ``pymapdl``
-command tree never pulls the rest of the library in.
-"""
+"""Constants shared by the CLI commands and their click-independent functions."""
 
 from typing import Tuple
 
-MAPDL_DEFAULT_IP = "127.0.0.1"
-"""IP address used when none is given and no environment variable is set."""
-
-MAPDL_DEFAULT_PORT = 50052
-"""gRPC port used when none is given and no environment variable is set."""
+from ansys.mapdl.core.launcher import LOCALHOST as MAPDL_DEFAULT_IP  # noqa: F401
+from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT  # noqa: F401
 
 DEFAULT_TIMEOUT = 10
 """Seconds to wait when connecting to a running MAPDL instance."""
