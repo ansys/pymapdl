@@ -508,7 +508,7 @@ def _find_skills_dir() -> pathlib.Path:
         ref = importlib.resources.files("ansys.mapdl.core.skills")
         return pathlib.Path(str(ref))
     except Exception:
-        return pathlib.Path(__file__).parent.parent.parent / "skills"
+        return pathlib.Path(__file__).parent.parent / "skills"
 
 
 def _parse_frontmatter(text: str) -> Tuple[Dict[str, str], str]:
