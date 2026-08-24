@@ -114,15 +114,14 @@ jobs:
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
-              // React with +1 to the triggering comment or review.
+              // React with +1 to the triggering comment.
+              // Note: the GitHub REST API has no reaction endpoint for a
+              // pull request review itself (only for review comments,
+              // issue comments and commit comments), so reviews submitted
+              // with the LGTM trigger are acknowledged only through the
+              // auto-approve step below.
               if (process.env.REVIEW_ID) {
-                await github.rest.reactions.createForPullRequestReview({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: Number(process.env.PULL_REQUEST),
-                  review_id: Number(process.env.REVIEW_ID),
-                  content: '+1',
-                });
+                core.info('Skipping reaction: pull request reviews cannot be reacted to.');
               } else if (process.env.REVIEW_COMMENT_ID) {
                 await github.rest.reactions.createForPullRequestReviewComment({
                   owner: context.repo.owner,
