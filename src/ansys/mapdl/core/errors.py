@@ -507,12 +507,7 @@ def protect_grpc(func: Callable) -> Callable:
 
                 if error.code() == grpc.StatusCode.UNAVAILABLE:
                     # Very likely the MAPDL server has died.
-                    suggestion = (
-                        "  MAPDL *might* have died because it executed a not-allowed command or ran out of memory.\n"
-                        "  Check the MAPDL command output for more details.\n"
-                        "  Open an issue on GitHub if you need assistance: "
-                        "https://github.com/ansys/pymapdl/issues"
-                    )
+                    suggestion = _build_unavailable_suggestion(mapdl)
 
                 # Generic error
                 handle_generic_grpc_error(error, func, args, kwargs, reason, suggestion)
@@ -532,6 +527,67 @@ def protect_grpc(func: Callable) -> Callable:
         return out
 
     return wrapper
+
+
+def _build_unavailable_suggestion(mapdl: "MapdlGrpc") -> str:
+    """Build the user-facing suggestion for a ``UNAVAILABLE`` gRPC error.
+
+    Parameters
+    ----------
+    mapdl : MapdlGrpc
+        The MAPDL instance whose underlying process just became unreachable.
+
+    Returns
+    -------
+    str
+        A suggestion message. When the locally tracked MAPDL subprocess was
+        terminated by ``SIGKILL``, the message calls that out explicitly and
+        points to the OS Out-Of-Memory (OOM) killer as the most common cause.
+        Otherwise, it falls back to the generic "might have died" message.
+
+    Notes
+    -----
+    The exit signal can only be retrieved when PyMAPDL is the parent process
+    of the local MAPDL subprocess (see
+    :meth:`MapdlGrpc._get_process_exit_signal
+    <ansys.mapdl.core.mapdl_grpc.MapdlGrpc._get_process_exit_signal>`). For
+    remote or previously-running instances, this falls back to the generic
+    message.
+    """
+    exit_signal = None
+    get_exit_signal = getattr(mapdl, "_get_process_exit_signal", None)
+    if callable(get_exit_signal):
+        exit_signal = get_exit_signal()
+
+    if exit_signal == signal.SIGKILL:
+        return (
+            "  MAPDL process was terminated with SIGKILL (signal 9).\n"
+            "  This is commonly caused by the operating system's Out-Of-Memory (OOM) killer forcibly terminating the process,\n"
+            "  but it can also happen if MAPDL was killed manually or by a job scheduler/resource limit.\n"
+            "  Check 'dmesg' / 'journalctl -k' (Linux) or your job scheduler logs for confirmation, and consider reducing\n"
+            "  model size, increasing available memory, or requesting more memory from your job scheduler.\n"
+            "  Open an issue on GitHub if you need assistance: "
+            "https://github.com/ansys/pymapdl/issues"
+        )
+
+    if exit_signal is not None:
+        try:
+            signal_name = signal.Signals(exit_signal).name
+        except ValueError:
+            signal_name = str(exit_signal)
+        return (
+            f"  MAPDL process was terminated by signal {exit_signal} ({signal_name}).\n"
+            "  Check the MAPDL command output or system logs for more details.\n"
+            "  Open an issue on GitHub if you need assistance: "
+            "https://github.com/ansys/pymapdl/issues"
+        )
+
+    return (
+        "  MAPDL *might* have died because it executed a not-allowed command or ran out of memory.\n"
+        "  Check the MAPDL command output for more details.\n"
+        "  Open an issue on GitHub if you need assistance: "
+        "https://github.com/ansys/pymapdl/issues"
+    )
 
 
 def retrieve_mapdl_from_args(args: tuple[Any, ...]) -> "MapdlGrpc":

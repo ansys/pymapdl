@@ -30,6 +30,7 @@ from ansys.mapdl.core.errors import (
     MapdlExitedError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
+    _build_unavailable_suggestion,
     protect_from,
     protect_grpc,
 )
@@ -226,3 +227,56 @@ def test_protect_grpc_reraises_unrelated_value_error():
         raising(mock_mapdl)
 
     assert mock_mapdl._exited is False
+
+
+class TestBuildUnavailableSuggestion:
+    """Tests for _build_unavailable_suggestion."""
+
+    def test_sigkill_points_to_oom(self):
+        """A SIGKILL (9) exit signal produces the OOM-specific suggestion."""
+        mock_mapdl = MagicMock(spec=MapdlGrpc)
+        mock_mapdl._get_process_exit_signal.return_value = 9
+
+        suggestion = _build_unavailable_suggestion(mock_mapdl)
+
+        assert "SIGKILL" in suggestion
+        assert "Out-Of-Memory" in suggestion
+        assert "dmesg" in suggestion
+
+    def test_other_signal_is_named(self):
+        """A non-SIGKILL exit signal is reported by name, without the OOM claim."""
+        mock_mapdl = MagicMock(spec=MapdlGrpc)
+        mock_mapdl._get_process_exit_signal.return_value = 11  # SIGSEGV
+
+        suggestion = _build_unavailable_suggestion(mock_mapdl)
+
+        assert "signal 11" in suggestion
+        assert "SIGSEGV" in suggestion
+        assert "Out-Of-Memory" not in suggestion
+
+    def test_unknown_signal_number_falls_back_to_number(self):
+        """An out-of-range signal number is shown as-is instead of a name."""
+        mock_mapdl = MagicMock(spec=MapdlGrpc)
+        mock_mapdl._get_process_exit_signal.return_value = 999
+
+        suggestion = _build_unavailable_suggestion(mock_mapdl)
+
+        assert "signal 999 (999)" in suggestion
+
+    def test_no_exit_signal_falls_back_to_generic_message(self):
+        """When the exit signal cannot be determined, use the generic message."""
+        mock_mapdl = MagicMock(spec=MapdlGrpc)
+        mock_mapdl._get_process_exit_signal.return_value = None
+
+        suggestion = _build_unavailable_suggestion(mock_mapdl)
+
+        assert "might* have died" in suggestion
+
+    def test_missing_helper_falls_back_to_generic_message(self):
+        """MAPDL objects without the helper (e.g. older mocks) still work."""
+        mock_mapdl = MagicMock()
+        del mock_mapdl._get_process_exit_signal
+
+        suggestion = _build_unavailable_suggestion(mock_mapdl)
+
+        assert "might* have died" in suggestion

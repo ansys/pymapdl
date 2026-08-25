@@ -372,6 +372,53 @@ class TestKillProcess:
         assert call_log == ["start", "end", "start", "end"]
 
 
+class TestGetProcessExitSignal:
+    """Tests for MapdlGrpc._get_process_exit_signal."""
+
+    def test_no_process_handle(self):
+        """Returns None when no process handle is stored."""
+        mock = _make_mock_mapdl()
+        mock._mapdl_process = None
+
+        assert MapdlGrpc._get_process_exit_signal(mock) is None
+
+    def test_handle_without_poll(self):
+        """Returns None when the handle has no 'poll' method (e.g. a bare
+        psutil.Process from a remote/heuristic match)."""
+        mock = _make_mock_mapdl()
+        mock._mapdl_process = object()
+
+        assert MapdlGrpc._get_process_exit_signal(mock) is None
+
+    def test_process_still_running(self):
+        """Returns None when poll() reports the process is still alive."""
+        mock = _make_mock_mapdl()
+        mock._mapdl_process = _make_mock_process(poll_return=None)
+
+        assert MapdlGrpc._get_process_exit_signal(mock) is None
+
+    def test_process_exited_normally(self):
+        """Returns None for a non-negative (non-signal) return code."""
+        mock = _make_mock_mapdl()
+        mock._mapdl_process = _make_mock_process(poll_return=0)
+
+        assert MapdlGrpc._get_process_exit_signal(mock) is None
+
+    def test_process_killed_by_sigkill(self):
+        """Returns 9 (SIGKILL) when poll() reports -9."""
+        mock = _make_mock_mapdl()
+        mock._mapdl_process = _make_mock_process(poll_return=-9)
+
+        assert MapdlGrpc._get_process_exit_signal(mock) == 9
+
+    def test_process_killed_by_other_signal(self):
+        """Returns the signal number for any other negative return code."""
+        mock = _make_mock_mapdl()
+        mock._mapdl_process = _make_mock_process(poll_return=-11)  # SIGSEGV
+
+        assert MapdlGrpc._get_process_exit_signal(mock) == 11
+
+
 class TestRunExitedGuard:
     """The liveness guards live in ``_run``, ahead of ``self._busy = True``."""
 
