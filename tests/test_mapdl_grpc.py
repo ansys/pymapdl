@@ -656,6 +656,7 @@ class TestConnectivityCancelsInFlightCall:
             self._current_call_lock = threading.Lock()
 
         _subscribe_to_channel = MapdlGrpc._subscribe_to_channel
+        _cancel_call_if_pending = MapdlGrpc._cancel_call_if_pending
 
     def test_cancels_call_when_channel_becomes_transient_failure(self):
         """A pending call is cancelled once the channel goes unhealthy."""
@@ -727,37 +728,93 @@ class TestConnectivityCancelsInFlightCall:
         callback(grpc.ChannelConnectivity.TRANSIENT_FAILURE)  # must not raise
 
 
+class TestTrackCallAndUntrackCall:
+    """``_track_call``/``_untrack_call`` are the only two places allowed to
+    mutate '_current_call', both funnelling through '_current_call_lock'."""
+
+    class _Dummy:
+        """Minimal stand-in exposing what these methods touch."""
+
+        def __init__(self):
+            self._current_call = None
+            self._current_call_lock = threading.Lock()
+
+        _track_call = MapdlGrpc._track_call
+        _untrack_call = MapdlGrpc._untrack_call
+
+    def test_track_call_records_the_call(self):
+        """Tracking a call exposes it as '_current_call'."""
+        dummy = self._Dummy()
+        call = Mock()
+
+        dummy._track_call(call)
+
+        assert dummy._current_call is call
+
+    def test_untrack_call_clears_its_own_call(self):
+        """Untracking the currently tracked call clears it."""
+        dummy = self._Dummy()
+        call = Mock()
+        dummy._track_call(call)
+
+        dummy._untrack_call(call)
+
+        assert dummy._current_call is None
+
+    def test_untrack_call_does_not_clear_a_newer_call(self):
+        """A newer call tracked by a concurrent invocation is not cleared by
+        an older one being untracked afterwards."""
+        dummy = self._Dummy()
+        call_a = Mock()
+        call_b = Mock()
+        dummy._track_call(call_a)
+
+        # Simulate a second, concurrent call replacing the tracked call
+        # before the first one is untracked.
+        dummy._track_call(call_b)
+        dummy._untrack_call(call_a)
+
+        assert dummy._current_call is call_b
+
+
 class TestWatchedCall:
     """``_watched_call`` tracks and releases the in-flight call."""
+
+    class _Dummy:
+        """Minimal stand-in exposing what '_watched_call' touches."""
+
+        def __init__(self):
+            self._current_call = None
+            self._current_call_lock = threading.Lock()
+
+        _track_call = MapdlGrpc._track_call
+        _untrack_call = MapdlGrpc._untrack_call
+        _watched_call = MapdlGrpc._watched_call
 
     def test_tracks_call_and_clears_it_afterwards(self):
         """The call is exposed as '_current_call' only while inside the
         context manager."""
-        mock = _make_mock_mapdl()
-        mock._current_call = None
-        mock._current_call_lock = threading.Lock()
+        dummy = self._Dummy()
 
         call = Mock()
-        with MapdlGrpc._watched_call(mock, call) as tracked:
+        with dummy._watched_call(call) as tracked:
             assert tracked is call
-            assert mock._current_call is call
+            assert dummy._current_call is call
 
-        assert mock._current_call is None
+        assert dummy._current_call is None
 
     def test_clears_only_its_own_call(self):
         """A newer call tracked by a concurrent invocation is not cleared."""
-        mock = _make_mock_mapdl()
-        mock._current_call = None
-        mock._current_call_lock = threading.Lock()
+        dummy = self._Dummy()
 
         call_a = Mock()
         call_b = Mock()
-        with MapdlGrpc._watched_call(mock, call_a):
+        with dummy._watched_call(call_a):
             # Simulate a second, concurrent call replacing the tracked call
             # before the first one's context manager exits.
-            mock._current_call = call_b
+            dummy._current_call = call_b
 
-        assert mock._current_call is call_b
+        assert dummy._current_call is call_b
 
 
 class TestDisconnectButLeaveMapdlRunning:

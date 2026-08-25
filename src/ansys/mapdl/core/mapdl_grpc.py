@@ -850,21 +850,66 @@ class MapdlGrpc(MapdlBase):
             mapdl._channel_state = connectivity
 
             if connectivity in dead_states:
-                with mapdl._current_call_lock:
-                    call = mapdl._current_call
-                if call is not None and not call.done():
-                    mapdl._log.debug(
-                        "Cancelling the in-flight gRPC call: the channel "
-                        f"became '{connectivity.name}'. MAPDL might have "
-                        "died or stopped answering."
-                    )
-                    call.cancel()
+                mapdl._cancel_call_if_pending(connectivity)
 
         # Keep a handle so the callback can be unsubscribed on teardown
         self._connectivity_callback = connectivity_callback
 
         # Subscribe to channel state changes
         self._channel.subscribe(connectivity_callback, try_to_connect=True)
+
+    def _track_call(self, call: grpc.Future) -> None:
+        """Record ``call`` as the in-flight gRPC call.
+
+        Parameters
+        ----------
+        call : grpc.Future
+            The gRPC call (or streaming response) to track.
+        """
+        with self._current_call_lock:
+            self._current_call = call
+
+    def _untrack_call(self, call: grpc.Future) -> None:
+        """Stop tracking ``call``, unless it was already replaced.
+
+        Only clears ``_current_call`` when it is still ``call``, so a newer
+        call tracked by a concurrent invocation is never clobbered by an
+        older one finishing later. The check and the clear happen under the
+        same lock acquisition so they behave as a single, uninterruptible
+        operation instead of two separate ones a second thread could step
+        between.
+
+        Parameters
+        ----------
+        call : grpc.Future
+            The gRPC call (or streaming response) to stop tracking.
+        """
+        with self._current_call_lock:
+            if self._current_call is call:
+                self._current_call = None
+
+    def _cancel_call_if_pending(self, connectivity: "grpc.ChannelConnectivity") -> None:
+        """Cancel the tracked in-flight call if it is still running.
+
+        Called from the channel connectivity callback once the transport is
+        confirmed dead, so a call blocked on it does not hang until MAPDL
+        eventually answers or the OS notices the broken connection.
+
+        Parameters
+        ----------
+        connectivity : grpc.ChannelConnectivity
+            The connectivity state that triggered the cancellation, used only
+            for the debug log message.
+        """
+        with self._current_call_lock:
+            call = self._current_call
+        if call is not None and not call.done():
+            self._log.debug(
+                "Cancelling the in-flight gRPC call: the channel "
+                f"became '{connectivity.name}'. MAPDL might have "
+                "died or stopped answering."
+            )
+            call.cancel()
 
     @contextmanager
     def _watched_call(self, call: grpc.Future):
@@ -889,14 +934,11 @@ class MapdlGrpc(MapdlBase):
         grpc.Future
             The same ``call`` passed in, for convenience.
         """
-        with self._current_call_lock:
-            self._current_call = call
+        self._track_call(call)
         try:
             yield call
         finally:
-            with self._current_call_lock:
-                if self._current_call is call:
-                    self._current_call = None
+            self._untrack_call(call)
 
     @property
     def channel_state(self) -> str:
