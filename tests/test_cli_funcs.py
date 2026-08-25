@@ -52,6 +52,7 @@ from ansys.mapdl.core.cli.start import start
 from ansys.mapdl.core.cli.stop import stop
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlRuntimeError
 from ansys.mapdl.core.plotting import GraphicsBackend
+from conftest import requires
 
 MOCK_SKILL_CONTENT = """\
 ---
@@ -266,6 +267,7 @@ def test_stop_by_pid_treats_disappearance_during_wait_as_stopped(exc):
 # ---------------------------------------------------------------------------
 
 
+@requires("tabulate")
 def test_list_instances_returns_a_table():
     """The table holds one row per running instance."""
     with patch("psutil.process_iter", return_value=[_make_mapdl_process(pid=777)]):
@@ -276,6 +278,7 @@ def test_list_instances_returns_a_table():
     assert "Command line" not in table
 
 
+@requires("tabulate")
 def test_list_instances_long_adds_every_column():
     """``long=True`` implies both the command line and the working directory."""
     with patch("psutil.process_iter", return_value=[_make_mapdl_process(pid=777)]):
@@ -286,6 +289,7 @@ def test_list_instances_long_adds_every_column():
     assert "/cwd/of/ansys251" in table
 
 
+@requires("tabulate")
 def test_list_instances_only_instances():
     """``instances=True`` hides the child processes and the extra column."""
     proc = _make_mapdl_process(pid=777)
