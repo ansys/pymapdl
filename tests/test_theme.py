@@ -64,3 +64,16 @@ def test_get_ansys_color_cycle():
     assert len(get_ansys_color_cycle(10)) == 10
     assert len(get_ansys_color_cycle(100)) == 100
     assert np.unique(get_ansys_color_cycle(100), axis=0).shape[0] == 9
+
+
+def test_plotting_lazy_import_mapdl_theme():
+    import ansys.mapdl.core.plotting as plotting
+
+    assert plotting.MapdlTheme is MapdlTheme
+
+
+def test_plotting_getattr_invalid_attribute():
+    import ansys.mapdl.core.plotting as plotting
+
+    with pytest.raises(AttributeError):
+        plotting.non_existing_attribute
