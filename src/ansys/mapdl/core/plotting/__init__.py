@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 from enum import Enum
+from typing import Any
 
 from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.plotting.consts import (
@@ -44,5 +45,18 @@ class GraphicsBackend(Enum):
     MAPDL = "mapdl"
 
 
-if _HAS_VISUALIZER:
-    from ansys.mapdl.core.plotting.theme import MapdlTheme  # noqa: F401
+def __getattr__(name: str) -> Any:
+    """Lazily import :class:`MapdlTheme <ansys.mapdl.core.plotting.theme.MapdlTheme>`.
+
+    ``MapdlTheme`` pulls in PyVista, Matplotlib, and pandas, which are slow to
+    import and are only needed by code that actually plots something. Most of
+    ``ansys.mapdl.core`` only needs :class:`GraphicsBackend` from this module,
+    so ``MapdlTheme`` is imported on first access instead of at module load
+    time, following :pep:`562`.
+    """
+    if name == "MapdlTheme" and _HAS_VISUALIZER:
+        from ansys.mapdl.core.plotting.theme import MapdlTheme
+
+        return MapdlTheme
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
