@@ -28,17 +28,20 @@ import shutil
 import tempfile
 from typing import Union
 import warnings
+import weakref
 
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
 from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.core import parse
 from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
     ComponentDoesNotExits,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
+    MapdlDoLoopLimitError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.mapdl_core import _MapdlCore
@@ -54,6 +57,12 @@ from ansys.mapdl.core.misc import (
 from ansys.mapdl.core.plotting import GraphicsBackend
 
 TMP_VAR = "__tmpvar__"
+
+# MAPDL only allows a limited number of nested do-loops (``*DO``/``*DOWHILE``).
+# One level of internal file switching is used for each nested loop, and
+# MAPDL supports twenty levels of nested file switching. See the ``*DO``
+# command documentation for more details.
+MAX_DO_LOOP_LEVEL = 20
 
 
 class _MapdlCommandExtended(_MapdlCore):
@@ -72,6 +81,9 @@ class _MapdlCommandExtended(_MapdlCore):
         """
         super().__init__(*args, **kwargs)
         self._graphics_backend = GraphicsBackend.PYVISTA
+        # Number of currently nested ``*DO``/``*DOWHILE`` loops opened
+        # through :meth:`do` or :meth:`dowhile`.
+        self._do_loop_level: int = 0
 
     @wraps(_MapdlCore.file)
     def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
@@ -2704,6 +2716,182 @@ class _MapdlCommandExtended(_MapdlCore):
         with self.non_interactive:
             return super().aflist(**kwargs)
 
+    @wraps(_MapdlCore.a)
+    def a(self, *args, **kwargs):
+        return parse.parse_a(super().a(*args, **kwargs))
+
+    @wraps(_MapdlCore.al)
+    def al(self, *args, **kwargs):
+        return parse.parse_a(super().al(*args, **kwargs))
+
+    @wraps(_MapdlCore.aadd)
+    def aadd(self, *args, **kwargs):
+        return parse.parse_output_areas(super().aadd(*args, **kwargs))
+
+    @wraps(_MapdlCore.asba)
+    def asba(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().asba(*args, **kwargs))
+
+    @wraps(_MapdlCore.et)
+    def et(self, *args, **kwargs):
+        return parse.parse_et(super().et(*args, **kwargs))
+
+    @wraps(_MapdlCore.e)
+    def e(self, *args, **kwargs):
+        return parse.parse_e(super().e(*args, **kwargs))
+
+    @wraps(_MapdlCore.k)
+    def k(self, *args, **kwargs):
+        return parse.parse_k(super().k(*args, **kwargs))
+
+    @wraps(_MapdlCore.kbetw)
+    def kbetw(self, *args, **kwargs):
+        return parse.parse_kpoint(super().kbetw(*args, **kwargs))
+
+    @wraps(_MapdlCore.kcenter)
+    def kcenter(self, *args, **kwargs):
+        return parse.parse_kpoint(super().kcenter(*args, **kwargs))
+
+    @wraps(_MapdlCore.kdist)
+    def kdist(self, *args, **kwargs):
+        return parse.parse_kdist(super().kdist(*args, **kwargs))
+
+    @wraps(_MapdlCore.kl)
+    def kl(self, *args, **kwargs):
+        return parse.parse_kl(super().kl(*args, **kwargs))
+
+    @wraps(_MapdlCore.knode)
+    def knode(self, *args, **kwargs):
+        return parse.parse_knode(super().knode(*args, **kwargs))
+
+    @wraps(_MapdlCore.bsplin)
+    def bsplin(self, *args, **kwargs):
+        return parse.parse_line_no(super().bsplin(*args, **kwargs))
+
+    @wraps(_MapdlCore.circle)
+    def circle(self, *args, **kwargs):
+        return parse.parse_line_nos(super().circle(*args, **kwargs))
+
+    @wraps(_MapdlCore.l)
+    def l(self, *args, **kwargs):
+        return parse.parse_line_no(super().l(*args, **kwargs))
+
+    @wraps(_MapdlCore.l2ang)
+    def l2ang(self, *args, **kwargs):
+        return parse.parse_line_no(super().l2ang(*args, **kwargs))
+
+    @wraps(_MapdlCore.l2tan)
+    def l2tan(self, *args, **kwargs):
+        return parse.parse_line_no(super().l2tan(*args, **kwargs))
+
+    @wraps(_MapdlCore.lang)
+    def lang(self, *args, **kwargs):
+        return parse.parse_line_no(super().lang(*args, **kwargs))
+
+    @wraps(_MapdlCore.larc)
+    def larc(self, *args, **kwargs):
+        return parse.parse_line_no(super().larc(*args, **kwargs))
+
+    @wraps(_MapdlCore.larea)
+    def larea(self, *args, **kwargs):
+        return parse.parse_line_no(super().larea(*args, **kwargs))
+
+    @wraps(_MapdlCore.lcomb)
+    def lcomb(self, *args, **kwargs):
+        return parse.parse_line_no(super().lcomb(*args, **kwargs))
+
+    @wraps(_MapdlCore.lextnd)
+    def lextnd(self, *args, **kwargs):
+        return parse.parse_line_no(super().lextnd(*args, **kwargs))
+
+    @wraps(_MapdlCore.lfillt)
+    def lfillt(self, *args, **kwargs):
+        return parse.parse_line_no(super().lfillt(*args, **kwargs))
+
+    @wraps(_MapdlCore.lstr)
+    def lstr(self, *args, **kwargs):
+        return parse.parse_line_no(super().lstr(*args, **kwargs))
+
+    @wraps(_MapdlCore.ltan)
+    def ltan(self, *args, **kwargs):
+        return parse.parse_line_no(super().ltan(*args, **kwargs))
+
+    @wraps(_MapdlCore.spline)
+    def spline(self, *args, **kwargs):
+        return parse.parse_line_nos(super().spline(*args, **kwargs))
+
+    @wraps(_MapdlCore.n)
+    def n(self, *args, **kwargs):
+        return parse.parse_n(super().n(*args, **kwargs))
+
+    @wraps(_MapdlCore.ndist)
+    def ndist(self, *args, **kwargs):
+        return parse.parse_ndist(super().ndist(*args, **kwargs))
+
+    @wraps(_MapdlCore.blc4)
+    def blc4(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().blc4(*args, **kwargs))
+
+    @wraps(_MapdlCore.blc5)
+    def blc5(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().blc5(*args, **kwargs))
+
+    @wraps(_MapdlCore.block)
+    def block(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().block(*args, **kwargs))
+
+    @wraps(_MapdlCore.con4)
+    def con4(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().con4(*args, **kwargs))
+
+    @wraps(_MapdlCore.cone)
+    def cone(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().cone(*args, **kwargs))
+
+    @wraps(_MapdlCore.cyl4)
+    def cyl4(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().cyl4(*args, **kwargs))
+
+    @wraps(_MapdlCore.cyl5)
+    def cyl5(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().cyl5(*args, **kwargs))
+
+    @wraps(_MapdlCore.cylind)
+    def cylind(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().cylind(*args, **kwargs))
+
+    @wraps(_MapdlCore.pcirc)
+    def pcirc(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().pcirc(*args, **kwargs))
+
+    @wraps(_MapdlCore.rectng)
+    def rectng(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().rectng(*args, **kwargs))
+
+    @wraps(_MapdlCore.sph4)
+    def sph4(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().sph4(*args, **kwargs))
+
+    @wraps(_MapdlCore.sph5)
+    def sph5(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().sph5(*args, **kwargs))
+
+    @wraps(_MapdlCore.sphere)
+    def sphere(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().sphere(*args, **kwargs))
+
+    @wraps(_MapdlCore.torus)
+    def torus(self, *args, **kwargs):
+        return parse.parse_output_volume_area(super().torus(*args, **kwargs))
+
+    @wraps(_MapdlCore.v)
+    def v(self, *args, **kwargs):
+        return parse.parse_v(super().v(*args, **kwargs))
+
+    @wraps(_MapdlCore.va)
+    def va(self, *args, **kwargs):
+        return parse.parse_v(super().va(*args, **kwargs))
+
 
 class _MapdlExtended(_MapdlCommandExtended):
     """Extend Mapdl class with new functions"""
@@ -3434,3 +3622,207 @@ class _MapdlExtended(_MapdlCommandExtended):
             it4num=it4num,
             **kwargs,
         )
+
+    class _DoLoop:
+        """Context manager backing :meth:`Mapdl.do` and :meth:`Mapdl.dowhile`.
+
+        It opens the loop (``*DO`` or ``*DOWHILE``) on ``__enter__`` and
+        closes it (``*ENDDO``) on ``__exit__``, automatically entering
+        :attr:`Mapdl.non_interactive` (unless it is already active) so the
+        whole loop is sent to MAPDL as a single block. It also keeps track
+        of how many loops are currently nested so the
+        :data:`MAX_DO_LOOP_LEVEL` limit imposed by MAPDL can be enforced.
+
+        On ``__enter__``, the number of commands already buffered in
+        ``mapdl._stored_commands`` is recorded in ``_stored_commands_len``.
+        If an exception is raised inside the ``with`` block, ``__exit__``
+        truncates ``mapdl._stored_commands`` back to that length instead of
+        emitting ``*ENDDO``. This discards only the (incomplete, and
+        potentially invalid since it is missing its ``*ENDDO``) commands
+        buffered by this loop, without erasing commands legitimately
+        buffered before it, which matters when this loop is nested inside
+        an outer ``non_interactive`` block or an outer ``do``/``dowhile``
+        loop that did not fail and whose buffered commands must be
+        preserved.
+        """
+
+        def __init__(self, parent: "_MapdlExtended", command: str, **kwargs):
+            self._parent = weakref.ref(parent)
+            self._command = command
+            self._kwargs = kwargs
+            self._non_interactive_cm = None
+            self._stored_commands_len = 0
+
+        def __enter__(self):
+            mapdl = self._parent()
+
+            if mapdl._do_loop_level >= MAX_DO_LOOP_LEVEL:
+                raise MapdlDoLoopLimitError(
+                    "Cannot open another APDL do-loop: MAPDL only supports "
+                    f"{MAX_DO_LOOP_LEVEL} levels of nested '*DO'/'*DOWHILE' "
+                    "loops. Reduce the number of nested 'mapdl.do' or "
+                    "'mapdl.dowhile' context managers."
+                )
+
+            mapdl._do_loop_level += 1
+            mapdl._log.debug(
+                f"Entering do-loop level {mapdl._do_loop_level}: {self._command}"
+            )
+
+            if not mapdl._store_commands:
+                self._non_interactive_cm = mapdl.non_interactive
+                self._non_interactive_cm.__enter__()
+
+            self._stored_commands_len = len(mapdl._stored_commands)
+
+            mapdl.run(self._command, **self._kwargs)
+            return self
+
+        def __exit__(self, *args):
+            mapdl = self._parent()
+            mapdl._do_loop_level -= 1
+            mapdl._log.debug(f"Exiting do-loop level {mapdl._do_loop_level + 1}")
+
+            try:
+                if args[0] is None:
+                    mapdl.run("*ENDDO")
+                else:
+                    # An exception was raised: discard only the commands
+                    # buffered by this loop (which are incomplete since
+                    # they are missing their '*ENDDO'), keeping whatever
+                    # was legitimately buffered before it.
+                    mapdl._stored_commands = mapdl._stored_commands[
+                        : self._stored_commands_len
+                    ]
+            finally:
+                if self._non_interactive_cm is not None:
+                    self._non_interactive_cm.__exit__(*args)
+
+    def do(
+        self,
+        par: str,
+        ival: MapdlFloat = "",
+        fval: MapdlFloat = "",
+        inc: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> "_MapdlExtended._DoLoop":
+        r"""Context manager for an APDL ``*DO`` loop.
+
+        Mechanical APDL Command: `\*DO <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DO.html>`_
+
+        The block of commands issued inside the ``with`` block is sent to
+        MAPDL once and executed repeatedly by MAPDL itself, similarly to
+        how the ``*DO``/``*ENDDO`` commands work when typed directly into
+        MAPDL. This is fundamentally different from a Python ``for`` loop:
+        the body of the ``with`` block is only evaluated once by Python to
+        build up the block of APDL commands, and MAPDL performs the actual
+        looping.
+
+        This method automatically uses the :attr:`Mapdl.non_interactive
+        <ansys.mapdl.core.Mapdl.non_interactive>` context manager (unless
+        it is already active) so the whole loop is sent to MAPDL as a
+        single block.
+
+        MAPDL allows a maximum of 20 levels of nested do-loops (shared
+        between ``*DO`` and ``*DOWHILE``). Attempting to nest more loops
+        than that raises a
+        :class:`MapdlDoLoopLimitError <ansys.mapdl.core.errors.MapdlDoLoopLimitError>`.
+
+        If an exception is raised inside the ``with`` block, the ``*ENDDO``
+        is never sent and the (incomplete) commands buffered by this loop
+        are discarded, without affecting commands legitimately buffered
+        before entering the loop, for example by an outer ``non_interactive``
+        block or an outer ``do``/``dowhile`` loop.
+
+        Parameters
+        ----------
+        par : str
+            The name of the scalar parameter used as the loop index. Any
+            existing parameter of the same name is redefined.
+
+        ival : str, optional
+            Initial value assigned to ``par``.
+
+        fval : str, optional
+            Final value. If ``ival`` exceeds ``fval`` and ``inc`` is
+            positive, the loop is not executed.
+
+        inc : str, optional
+            Increment applied to ``par`` for each successive loop. Defaults
+            to 1 in MAPDL. Negative increments and non-integer numbers are
+            allowed.
+
+        Returns
+        -------
+        contextlib.AbstractContextManager
+            Context manager that opens the ``*DO`` loop on entry and closes
+            it with ``*ENDDO`` on exit.
+
+        Examples
+        --------
+        Create 10 nodes along the X axis.
+
+        >>> with mapdl.do("i", 1, 10):
+        ...     mapdl.n("i", "i", 0, 0)
+
+        """
+        command = f"*DO,{par},{ival},{fval},{inc}"
+        return self._DoLoop(self, command, **kwargs)
+
+    def dowhile(
+        self,
+        par: str,
+        **kwargs: KwargDict,
+    ) -> "_MapdlExtended._DoLoop":
+        r"""Context manager for an APDL ``*DOWHILE`` loop.
+
+        Mechanical APDL Command: `\*DOWHILE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DOWHILE.html>`_
+
+        The loop repeats as long as the ``par`` parameter is truthy
+        (greater than 0.0) in MAPDL. Because MAPDL, not Python, performs
+        the looping, ``par`` must be a parameter that already exists (or is
+        set right before entering the loop) in MAPDL, and it must be
+        updated from within the ``with`` block using APDL commands so
+        MAPDL can re-evaluate it on every pass.
+
+        This method automatically uses the :attr:`Mapdl.non_interactive
+        <ansys.mapdl.core.Mapdl.non_interactive>` context manager (unless
+        it is already active) so the whole loop is sent to MAPDL as a
+        single block.
+
+        MAPDL allows a maximum of 20 levels of nested do-loops (shared
+        between ``*DO`` and ``*DOWHILE``). Attempting to nest more loops
+        than that raises a
+        :class:`MapdlDoLoopLimitError <ansys.mapdl.core.errors.MapdlDoLoopLimitError>`.
+
+        If an exception is raised inside the ``with`` block, the ``*ENDDO``
+        is never sent and the (incomplete) commands buffered by this loop
+        are discarded, without affecting commands legitimately buffered
+        before entering the loop, for example by an outer ``non_interactive``
+        block or an outer ``do``/``dowhile`` loop.
+
+        Parameters
+        ----------
+        par : str
+            Name of the scalar parameter checked before every pass. The
+            loop terminates once ``par`` is less than or equal to 0.0.
+
+        Returns
+        -------
+        contextlib.AbstractContextManager
+            Context manager that opens the ``*DOWHILE`` loop on entry and
+            closes it with ``*ENDDO`` on exit.
+
+        Examples
+        --------
+        Loop while the ``cont`` parameter is truthy, decrementing it on
+        every pass.
+
+        >>> mapdl.parameters["cont"] = 5
+        >>> with mapdl.dowhile("cont"):
+        ...     mapdl.n("cont", "cont", 0, 0)
+        ...     mapdl.run("cont = cont - 1")
+
+        """
+        command = f"*DOWHILE,{par}"
+        return self._DoLoop(self, command, **kwargs)

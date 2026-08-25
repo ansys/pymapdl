@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase, parse
+from ansys.mapdl.core._commands import CommandsBase
 
 
 class Booleans(CommandsBase):
@@ -110,7 +110,7 @@ class Booleans(CommandsBase):
         3
         """
         command = f"AADD,{na1},{na2},{na3},{na4},{na5},{na6},{na7},{na8},{na9}"
-        return parse.parse_output_areas(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def aglue(
         self,
@@ -675,7 +675,7 @@ class Booleans(CommandsBase):
         3
         """
         command = f"ASBA,{na1},{na2},{sepo},{keep1},{keep2}"
-        return parse.parse_output_volume_area(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def asbl(
         self, na: str = "", nl: str = "", keepa: str = "", keepl: str = "", **kwargs

@@ -271,7 +271,10 @@ def test_pymapdl_stop_permission_handling(run_cli):
     with (
         patch("psutil.process_iter", return_value=test_processes),
         patch("psutil.pid_exists", return_value=True),
-        patch("ansys.mapdl.core.cli.stop._kill_process", side_effect=mock_kill_process),
+        patch(
+            "ansys.mapdl.core.cli.stop._kill_process",
+            side_effect=mock_kill_process,
+        ),
     ):
 
         # Test 1: stop --all should not crash and only kill current user's ANSYS processes
@@ -327,7 +330,10 @@ def test_pymapdl_stop_with_username_containing_domain(run_cli):
         patch("getpass.getuser", return_value=current_user),
         patch("psutil.process_iter", return_value=[mock_process]),
         patch("psutil.pid_exists", return_value=True),
-        patch("ansys.mapdl.core.cli.stop._kill_process", side_effect=mock_kill_process),
+        patch(
+            "ansys.mapdl.core.cli.stop._kill_process",
+            side_effect=mock_kill_process,
+        ),
     ):
         killed_processes.clear()
         output = run_cli("stop --all")
@@ -2026,27 +2032,28 @@ def test_stop_port_kill_raises(run_cli):
 
 @requires("click")
 def test_stop_pid_invalid():
-    """Test stop callback with non-integer PID hits the ValueError branch (lines 149-150)."""
+    """Test the stop callback reports a PID that cannot be converted to int."""
     import click
     from click.testing import CliRunner
 
-    from ansys.mapdl.core.cli.stop import stop as stop_cmd
-
-    mock_proc = MagicMock(spec=psutil.Process)
-    mock_proc.children.return_value = []
+    from ansys.mapdl.core.cli.stop import stop_cli
 
     @click.command()
     def invoke_with_invalid_pid():
         """Wrapper that calls stop callback with a non-integer pid string."""
-        stop_cmd.callback(port=None, pid="not-an-int", all=False)
+        stop_cli.callback(port=None, pid="not-an-int", all=False)
 
     runner = CliRunner()
-    with (
-        patch("psutil.Process", return_value=mock_proc),
-        patch("ansys.mapdl.core.cli.stop._kill_process"),
-    ):
-        result = runner.invoke(invoke_with_invalid_pid, [])
+    result = runner.invoke(invoke_with_invalid_pid, [])
     assert "pid provided could not be converted to int" in result.output.lower()
+
+
+def test_stop_func_pid_invalid():
+    """``stop`` raises ValueError when the PID cannot be converted to int."""
+    from ansys.mapdl.core.cli.stop import stop
+
+    with pytest.raises(ValueError, match="could not be converted to int"):
+        stop(pid="not-an-int")
 
 
 @requires("click")
@@ -2076,12 +2083,12 @@ def test_stop_pid_kills_children(run_cli):
 
 @requires("click")
 def test_stop_pid_kill_failed(run_cli):
-    """Test stop --pid reports error when p.status == \'running\' after kill (line 162)."""
+    """Test stop --pid reports an error when the process outlives the kill."""
     pid = 12345
     mock_proc = MagicMock(spec=psutil.Process)
     mock_proc.children.return_value = []
-    # Simulate kill failure: p.status attribute equals the string "running"
-    mock_proc.status = "running"
+    # The process is still around once the termination timeout elapses.
+    mock_proc.wait.side_effect = psutil.TimeoutExpired(5)
 
     with (
         patch("psutil.Process", return_value=mock_proc),

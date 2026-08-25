@@ -20,12 +20,182 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+"""``pymapdl convert`` sub-command implementation."""
+
 import sys
-from typing import TextIO
+from typing import Optional, TextIO, Union
 
 import click
 
 from ansys.mapdl.core.plotting import GraphicsBackend
+
+
+def convert(
+    apdl_strings: str,
+    loglevel: str = "WARNING",
+    auto_exit: bool = True,
+    line_ending: Optional[str] = None,
+    exec_file: Optional[str] = None,
+    macros_as_functions: bool = True,
+    use_function_names: bool = True,
+    show_log: bool = False,
+    add_imports: bool = True,
+    comment_solve: bool = False,
+    cleanup_output: bool = True,
+    header: Union[bool, str] = True,
+    print_com: bool = True,
+    only_commands: bool = False,
+    graphics_backend: Optional[Union[str, GraphicsBackend]] = None,
+    clear_at_start: bool = False,
+    check_parameter_names: bool = False,
+) -> str:
+    """Convert an APDL script to PyMAPDL code.
+
+    Parameters
+    ----------
+    apdl_strings : str
+        APDL code to convert.
+    loglevel : str, default: "WARNING"
+        Logging level of the MAPDL object in the generated script.
+    auto_exit : bool, default: True
+        Whether to add a line at the end of the script to exit MAPDL.
+    line_ending : str, optional
+        Line ending of the generated script. When ``None``, ``"\\n"`` is used.
+    exec_file : str, optional
+        Location of the MAPDL executable to include in the generated
+        ``launch_mapdl`` call.
+    macros_as_functions : bool, default: True
+        Whether to convert MAPDL macros to Python functions.
+    use_function_names : bool, default: True
+        Whether to convert MAPDL commands to
+        :class:`ansys.mapdl.core.Mapdl` methods. When ``True``, the MAPDL
+        command ``K`` becomes ``mapdl.k``, otherwise ``mapdl.run("k")``.
+    show_log : bool, default: False
+        Whether to print the converted commands through a logger.
+    add_imports : bool, default: True
+        Whether to add the import and ``launch_mapdl`` lines at the beginning
+        of the generated script. Overrides *auto_exit*.
+    comment_solve : bool, default: False
+        Whether to comment out the lines containing ``"SOLVE"`` or ``"/EOF"``.
+    cleanup_output : bool, default: True
+        Whether to format the output with ``autopep8``, which must be
+        installed.
+    header : bool or str, default: True
+        When ``True``, the default header is written in the first line of the
+        output. When a string, it is used as the header.
+    print_com : bool, default: True
+        Whether to print ``/COM`` arguments to the Python console.
+    only_commands : bool, default: False
+        Whether to convert only the commands, without header, imports, or exit
+        commands. Overrides *header*, *add_imports*, and *auto_exit*.
+    graphics_backend : str or GraphicsBackend, optional
+        Graphics backend to set on the generated MAPDL object. Accepts a
+        :class:`ansys.mapdl.core.plotting.GraphicsBackend` member or its name,
+        which is case insensitive. When ``None``, the
+        :class:`ansys.mapdl.core.Mapdl` default is used.
+    clear_at_start : bool, default: False
+        Whether to add a ``mapdl.clear()`` call after the MAPDL object is
+        created.
+    check_parameter_names : bool, default: False
+        Whether the generated MAPDL object checks parameter names, raising an
+        exception on leading underscores.
+
+    Returns
+    -------
+    str
+        The converted PyMAPDL code.
+
+    Raises
+    ------
+    ValueError
+        When *graphics_backend* does not name a valid graphics backend.
+
+    Examples
+    --------
+    Convert a small APDL block:
+
+    >>> from ansys.mapdl.core.cli.convert import convert
+    >>> print(convert("/prep7", only_commands=True))
+    mapdl.prep7()
+
+    """
+    from ansys.mapdl.core.convert import convert_apdl_block
+
+    return convert_apdl_block(
+        apdl_strings=apdl_strings,
+        loglevel=loglevel,
+        auto_exit=auto_exit,
+        line_ending=line_ending,
+        exec_file=exec_file,
+        macros_as_functions=macros_as_functions,
+        use_function_names=use_function_names,
+        show_log=show_log,
+        add_imports=add_imports,
+        comment_solve=comment_solve,
+        cleanup_output=cleanup_output,
+        header=header,
+        print_com=print_com,
+        only_commands=only_commands,
+        graphics_backend=resolve_graphics_backend(graphics_backend),
+        clear_at_start=clear_at_start,
+        check_parameter_names=check_parameter_names,
+    )
+
+
+def resolve_graphics_backend(
+    graphics_backend: Optional[Union[str, GraphicsBackend]],
+) -> Optional[GraphicsBackend]:
+    """Coerce a graphics backend name to a :class:`GraphicsBackend` member.
+
+    Parameters
+    ----------
+    graphics_backend : str or GraphicsBackend, optional
+        Backend name, which is case insensitive, or an already resolved
+        member. When ``None``, no backend is requested.
+
+    Returns
+    -------
+    GraphicsBackend or None
+        The resolved backend, or ``None`` when *graphics_backend* is ``None``.
+
+    Raises
+    ------
+    ValueError
+        When *graphics_backend* does not name a valid graphics backend.
+
+    Examples
+    --------
+    >>> from ansys.mapdl.core.cli.convert import resolve_graphics_backend
+    >>> resolve_graphics_backend("pyvista")
+    <GraphicsBackend.PYVISTA: 0>
+
+    """
+    if graphics_backend is None:
+        return None
+
+    allowed_backends = GraphicsBackend.__members__
+
+    if (
+        isinstance(graphics_backend, str)
+        and graphics_backend.upper() in allowed_backends
+    ):
+        return GraphicsBackend[graphics_backend.upper()]
+
+    if graphics_backend in list(allowed_backends.values()):
+        return graphics_backend
+
+    allowed_backend_string = ", ".join(
+        [str(each) for each in allowed_backends.values()]
+    )
+    raise ValueError(
+        f"Invalid graphics backend '{graphics_backend}'. "
+        f"Allowed values are: {allowed_backend_string}."
+    )
+
+
+# ---------------------------------------------------------------------------
+# Click wrapper
+# ---------------------------------------------------------------------------
 
 
 @click.command(
@@ -198,7 +368,7 @@ this value. Defaults to `None` which is Mapdl class default.""",
     type=bool,
     help="""Set MAPDL object to avoid parameter name checks (do not raise leading underscored parameter exceptions). Defaults to `False`.""",
 )
-def convert(
+def convert_cli(
     file: TextIO,
     output: TextIO,
     loglevel: str,
@@ -219,45 +389,30 @@ def convert(
     check_parameter_names: bool,
 ) -> None:
     """Convert MAPDL code to PyMAPDL"""
-    from ansys.mapdl.core.convert import convert_apdl_block
+    try:
+        backend = resolve_graphics_backend(graphics_backend)
+    except ValueError as err:
+        raise click.BadParameter(str(err), param_hint="'--graphics_backend'") from err
 
-    allowed_backends = GraphicsBackend.__members__
-    backend = None
-
-    if graphics_backend is not None:
-        if (
-            isinstance(graphics_backend, str)
-            and graphics_backend.upper() in allowed_backends
-        ):
-            backend = GraphicsBackend[graphics_backend.upper()]
-        elif graphics_backend in list(allowed_backends.values()):
-            backend = graphics_backend
-        else:
-            allowed_backend_string = ", ".join(
-                [str(each) for each in allowed_backends.values()]
-            )
-            raise ValueError(
-                f"Invalid graphics backend '{graphics_backend}'. Allowed values are: {allowed_backend_string}."
-            )
-
-    converted_code = convert_apdl_block(
-        apdl_strings=file.read(),
-        loglevel=loglevel,
-        auto_exit=auto_exit,
-        line_ending=line_ending,
-        exec_file=exec_file,
-        macros_as_functions=macros_as_functions,
-        use_function_names=use_function_names,
-        show_log=show_log,
-        add_imports=add_imports,
-        comment_solve=comment_solve,
-        cleanup_output=cleanup_output,
-        header=header,
-        print_com=print_com,
-        only_commands=only_commands,
-        graphics_backend=backend,
-        clear_at_start=clear_at_start,
-        check_parameter_names=check_parameter_names,
+    click.echo(
+        convert(
+            apdl_strings=file.read(),
+            loglevel=loglevel,
+            auto_exit=auto_exit,
+            line_ending=line_ending,
+            exec_file=exec_file,
+            macros_as_functions=macros_as_functions,
+            use_function_names=use_function_names,
+            show_log=show_log,
+            add_imports=add_imports,
+            comment_solve=comment_solve,
+            cleanup_output=cleanup_output,
+            header=header,
+            print_com=print_com,
+            only_commands=only_commands,
+            graphics_backend=backend,
+            clear_at_start=clear_at_start,
+            check_parameter_names=check_parameter_names,
+        ),
+        file=output,
     )
-
-    click.echo(converted_code, file=output)

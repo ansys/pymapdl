@@ -578,3 +578,82 @@ To obtain help on converter usage, options, and examples, type this command:
 The ``pymapdl convert`` command uses the
 :func:`convert_script() <ansys.mapdl.core.convert_script>` function.
 Hence, this command accepts most of this function's arguments.
+
+
+.. _ref_cli_programmatic:
+
+Use the commands from Python
+============================
+
+Every ``pymapdl`` sub-command is a thin Click wrapper, named ``<name>_cli``,
+around a plain function named ``<name>`` that lives in the same module, for
+example :func:`ansys.mapdl.core.cli.stop.stop`. Import the plain function to
+get the same behavior from Python, which avoids spawning a shell and parsing
+text output:
+
+.. code:: python
+
+    from ansys.mapdl.core.cli.exec import exec_commands
+    from ansys.mapdl.core.cli.start import start
+    from ansys.mapdl.core.cli.stop import stop
+
+    ip, port, pid = start(port=50054, nproc=4)
+    print(exec_commands(commands=["/prep7", "BLOCK,0,1,0,1,0,1"], port=port))
+    stop(pid=pid)
+
+The mapping between commands and functions is direct. Each function takes the
+long form of the command options as keyword arguments:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Command
+     - Function
+   * - ``pymapdl start``
+     - :func:`start() <ansys.mapdl.core.cli.start.start>`
+   * - ``pymapdl stop``
+     - :func:`stop() <ansys.mapdl.core.cli.stop.stop>`
+   * - ``pymapdl list``
+     - :func:`list_instances() <ansys.mapdl.core.cli.list_instances.list_instances>`
+   * - ``pymapdl check``
+     - :func:`check() <ansys.mapdl.core.cli.check.check>`
+   * - ``pymapdl exec``
+     - :func:`exec_commands() <ansys.mapdl.core.cli.exec.exec_commands>`
+   * - ``pymapdl convert``
+     - :func:`convert() <ansys.mapdl.core.cli.convert.convert>`
+   * - ``pymapdl help``
+     - :func:`help_command() <ansys.mapdl.core.cli.help.help_command>`
+   * - ``pymapdl skills list``
+     - :func:`list_skills() <ansys.mapdl.core.cli.skills.list_skills>`
+   * - ``pymapdl skills show``
+     - :func:`show_skill() <ansys.mapdl.core.cli.skills.show_skill>`
+   * - ``pymapdl skills install``
+     - :func:`install_skill() <ansys.mapdl.core.cli.skills.install_skill>`
+
+These functions return data and raise exceptions, they never print to stdout
+nor exit the interpreter. Rendering and exit codes are the responsibility of
+the Click wrapper. So a failure surfaces as a regular Python exception that
+you can handle:
+
+.. code:: python
+
+    from ansys.mapdl.core.cli.check import check
+    from ansys.mapdl.core.errors import MapdlConnectionError
+
+    try:
+        info = check(port=50052)
+    except MapdlConnectionError:
+        print("No instance is running on port 50052.")
+    else:
+        print(info["information"]["mapdl_version"])
+
+Two functions return a string that is meant to be printed rather than parsed:
+:func:`list_instances() <ansys.mapdl.core.cli.list_instances.list_instances>`
+returns the rendered table, and :func:`help_command()
+<ansys.mapdl.core.cli.help.help_command>` returns the docstring with the ANSI
+escape sequences of a color terminal. To get the instances as data instead of a
+table, use :func:`get_mapdl_instances()
+<ansys.mapdl.core.cli.helpers.get_mapdl_instances>`.
+
+For the full signatures, see :ref:`ref_cli_api`.

@@ -1574,11 +1574,15 @@ class _MapdlCore(Commands):
             self._parent()._store_commands = False
 
             if args[0] is not None:
-                # An exception was raised, let's exit now without flushing
+                # An exception was raised, let's exit now without flushing.
+                # Discard whatever was buffered so an incomplete (and
+                # potentially invalid, for example a '*DO' missing its
+                # '*ENDDO') block cannot leak into a later flush.
                 self._parent()._log.debug(
                     "An exception was found in the `non_interactive` environment. "
-                    "Hence the commands are not flushed."
+                    "Hence the commands are not flushed and are discarded."
                 )
+                self._parent()._stored_commands = []
                 return None
             else:
                 # No exception so let's flush.

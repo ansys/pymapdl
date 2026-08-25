@@ -21,6 +21,8 @@
    Mapdl.cwd
    Mapdl.default_file_type_for_plots
    Mapdl.directory
+   Mapdl.do
+   Mapdl.dowhile
    Mapdl.exit
    Mapdl.exited
    Mapdl.exiting

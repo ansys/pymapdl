@@ -28,7 +28,7 @@ from unittest.mock import patch
 from click.testing import CliRunner
 import pytest
 
-from ansys.mapdl.core.cli.skills import _parse_frontmatter, skills
+from ansys.mapdl.core.cli.skills import _find_skills_dir, _parse_frontmatter, skills
 
 MOCK_SKILL_CONTENT = """\
 ---
@@ -67,6 +67,32 @@ def test_parse_frontmatter_no_frontmatter():
     meta, body = _parse_frontmatter(text)
     assert meta == {}
     assert body == text
+
+
+# ---------------------------------------------------------------------------
+# _find_skills_dir unit tests
+# ---------------------------------------------------------------------------
+
+
+def test_find_skills_dir_via_importlib_resources_points_to_bundled_skills():
+    """The primary lookup resolves to the real, existing skills directory."""
+    skills_dir = _find_skills_dir()
+
+    assert skills_dir.name == "skills"
+    assert skills_dir.parent.name == "core"
+    assert skills_dir.exists()
+    assert (skills_dir / "pymapdl-cli" / "SKILL.md").exists()
+
+
+def test_find_skills_dir_fallback_points_to_the_same_directory():
+    """The ``importlib.resources`` failure fallback resolves to the real skills directory."""
+    with patch("importlib.resources.files", side_effect=ModuleNotFoundError):
+        skills_dir = _find_skills_dir()
+
+    assert skills_dir.name == "skills"
+    assert skills_dir.parent.name == "core"
+    assert skills_dir.exists()
+    assert (skills_dir / "pymapdl-cli" / "SKILL.md").exists()
 
 
 # ---------------------------------------------------------------------------
