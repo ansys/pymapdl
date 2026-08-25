@@ -53,11 +53,12 @@ from warnings import warn
 import weakref
 
 from ansys.tools.common.versioning import version_string_as_tuple
-import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
-import numpy as np
 from numpy.typing import NDArray
 import psutil
+
+import grpc
+import numpy as np
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
@@ -1226,6 +1227,48 @@ class MapdlGrpc(MapdlBase):
             True if the MAPDL process is alive, False otherwise.
         """
         return self._is_alive_subprocess()
+
+    def _get_process_exit_signal(self) -> Optional[int]:
+        """Return the POSIX signal number that terminated the MAPDL process.
+
+        Returns
+        -------
+        int or None
+            The signal number (for example ``9`` for ``SIGKILL``) if the
+            locally tracked subprocess was terminated by a signal. Returns
+            ``None`` if the process is still running, exited normally (a
+            non-negative return code), or if no local process handle is
+            available (for example, when connected to a remote or
+            already-running MAPDL instance, where PyMAPDL is not the parent
+            process and cannot retrieve its exit status).
+
+        Notes
+        -----
+        This relies on ``subprocess.Popen.poll()``, which only reports a
+        negative return code (``-signal_number``) on POSIX platforms when the
+        child was terminated by a signal. It is ``None`` on Windows, where
+        signal-based termination is not exposed the same way.
+
+        A ``SIGKILL`` (9) result is a strong indicator that the process was
+        forcibly terminated by the operating system, most commonly the Linux
+        Out-Of-Memory (OOM) killer, though it can also result from a manual
+        ``kill -9`` or a job scheduler enforcing a resource limit.
+
+        Examples
+        --------
+        >>> mapdl._get_process_exit_signal()
+        9
+        """
+        process = self._mapdl_process
+        if process is None or not hasattr(process, "poll"):
+            return None
+
+        returncode = process.poll()
+        if returncode is None or returncode >= 0:
+            # Still running, or exited normally/with a non-signal error code.
+            return None
+
+        return -returncode
 
     def _post_mortem_checks(self, process=None):
         """Check possible reasons for not having a successful connection."""
