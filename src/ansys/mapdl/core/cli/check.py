@@ -20,9 +20,154 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+"""``pymapdl check`` sub-command implementation."""
+
 import sys
+from typing import Any, Callable, Dict, List
 
 import click
+
+from ansys.mapdl.core.cli.constants import (
+    DEFAULT_TIMEOUT,
+    MAPDL_DEFAULT_IP,
+    MAPDL_DEFAULT_PORT,
+)
+from ansys.mapdl.core.cli.helpers import connect_to_instance
+
+# Width of the key column of the human-readable report.
+_KEY_WIDTH = 24
+
+
+def check(
+    ip: str = MAPDL_DEFAULT_IP,
+    port: int = MAPDL_DEFAULT_PORT,
+    timeout: int = DEFAULT_TIMEOUT,
+) -> Dict[str, Any]:
+    """Collect diagnostic information from a running MAPDL instance.
+
+    Parameters
+    ----------
+    ip : str, default: "127.0.0.1"
+        IP address of the MAPDL gRPC server.
+    port : int, default: 50052
+        Port of the MAPDL gRPC server.
+    timeout : int, default: 10
+        Seconds to wait when establishing the gRPC connection.
+
+    Returns
+    -------
+    dict
+        Nested dictionary with the ``connection``, ``information``,
+        ``geometry``, ``mesh``, and ``post_processing`` sections, as returned
+        by :func:`ansys.mapdl.core.information.get_mapdl_info`.
+
+    Raises
+    ------
+    MapdlConnectionError
+        When no MAPDL instance can be reached at the given address.
+
+    Examples
+    --------
+    Report the version of the instance running on the default port:
+
+    >>> from ansys.mapdl.core.cli.check import check
+    >>> check()["information"]["mapdl_version"]
+    '2021 R2'
+
+    """
+    from ansys.mapdl.core.information import get_mapdl_info
+
+    mapdl = connect_to_instance(ip=ip, port=port, timeout=timeout)
+    return get_mapdl_info(mapdl)
+
+
+def format_info(data: Dict[str, Any], style: Callable[[str], str] = str) -> str:
+    """Render the output of :func:`check` as a human-readable report.
+
+    Parameters
+    ----------
+    data : dict
+        Nested dictionary as returned by :func:`check`.
+    style : callable, default: str
+        Callable applied to every section title, used to highlight them. The
+        default leaves the titles unchanged.
+
+    Returns
+    -------
+    str
+        Multi-line report ready to be printed.
+
+    Examples
+    --------
+    Render a report without any highlighting:
+
+    >>> from ansys.mapdl.core.cli.check import check, format_info
+    >>> print(format_info(check()))
+
+    """
+    lines: List[str] = []
+
+    for section, content in data.items():
+        lines.append("")
+        lines.append(style(_titleize(section)))
+
+        if "error" in content:
+            lines.append(_row("Error", content["error"]))
+            continue
+
+        for key, value in content.items():
+            if isinstance(value, dict):
+                lines.append("")
+                lines.append(style(f"  {_titleize(key)}"))
+                lines.extend(
+                    _row(_titleize(subkey), subvalue, indent=4)
+                    for subkey, subvalue in value.items()
+                )
+            else:
+                lines.append(_row(_titleize(key), value))
+
+    return "\n".join(lines)
+
+
+def _titleize(key: str) -> str:
+    """Turn a snake_case key into a human-readable title.
+
+    Parameters
+    ----------
+    key : str
+        Key to convert.
+
+    Returns
+    -------
+    str
+        The key with underscores replaced by spaces and capitalized.
+    """
+    return key.replace("_", " ").capitalize()
+
+
+def _row(key: str, value: Any, indent: int = 2) -> str:
+    """Format a single ``key``/``value`` line of the report.
+
+    Parameters
+    ----------
+    key : str
+        Name shown in the left column.
+    value : any
+        Value shown in the right column.
+    indent : int, default: 2
+        Number of leading spaces.
+
+    Returns
+    -------
+    str
+        The formatted line.
+    """
+    return f"{' ' * indent}{key.ljust(_KEY_WIDTH)}{value}"
+
+
+# ---------------------------------------------------------------------------
+# Click wrapper
+# ---------------------------------------------------------------------------
 
 
 @click.command(
@@ -64,7 +209,7 @@ Examples:
     default=False,
     help="Output diagnostic information as a JSON object.",
 )
-def check(ip: str, port: int, timeout: int, as_json: bool) -> None:
+def check_cli(ip: str, port: int, timeout: int, as_json: bool) -> None:
     """Connect to a running MAPDL instance and print diagnostic information.
 
     Parameters
@@ -80,81 +225,19 @@ def check(ip: str, port: int, timeout: int, as_json: bool) -> None:
         human-readable text.
     """
     import json
-    import logging
 
-    from ansys.mapdl.core import LOG
+    from ansys.mapdl.core.cli.helpers import silence_logging
+    from ansys.mapdl.core.errors import MapdlConnectionError
 
-    LOG.setLevel(logging.CRITICAL + 1)
-    if LOG.std_out_handler:
-        LOG.std_out_handler.setLevel(logging.CRITICAL + 1)
+    silence_logging()
 
     try:
-        from ansys.mapdl.core.launcher.config import resolve_launch_config
-        from ansys.mapdl.core.launcher.connection import connect_to_existing
-
-        config = resolve_launch_config(
-            ip=ip,
-            port=port,
-            start_instance=False,
-            clear_on_connect=False,
-            timeout=timeout,
-        )
-        mapdl = connect_to_existing(config)
-
-    except Exception as e:
-        click.echo(
-            click.style("ERROR:", fg="red")
-            + f" Could not connect to MAPDL at {ip}:{port} — {e}",
-            err=True,
-        )
+        data = check(ip=ip, port=port, timeout=timeout)
+    except MapdlConnectionError as err:
+        click.echo(click.style("ERROR:", fg="red") + f" {err}", err=True)
         sys.exit(1)
-
-    from ansys.mapdl.core.information import get_mapdl_info
-
-    data = get_mapdl_info(mapdl)
 
     if as_json:
         click.echo(json.dumps(data, indent=2))
     else:
-        _print_info_human_readable(data)
-
-
-def _print_info_human_readable(data: dict) -> None:
-    """Render ``get_mapdl_info`` output as formatted text.
-
-    Parameters
-    ----------
-    data : dict
-        Nested dictionary returned by :func:`get_mapdl_info`.
-    """
-    W = 24  # key column width
-
-    def row(key: str, value) -> None:
-        click.echo(f"  {key.ljust(W)}{value}")
-
-    def section(title: str) -> None:
-        click.echo("")
-        click.echo(click.style(title, bold=True))
-
-    def subsection(title: str) -> None:
-        click.echo("")
-        click.echo(click.style(f"  {title}", bold=True))
-
-    def subrow(key: str, value) -> None:
-        click.echo(f"    {key.ljust(W)}{value}")
-
-    for each_section in data:
-        section(each_section.replace("_", " ").capitalize())
-
-        if "error" in data[each_section]:
-            row("Error", data[each_section]["error"])
-        else:
-            for key, value in data[each_section].items():
-                key = key.replace("_", " ").capitalize()
-                if isinstance(value, dict):
-                    subsection(key)
-                    for subkey, subvalue in value.items():
-                        subkey = subkey.replace("_", " ").capitalize()
-                        subrow(subkey, subvalue)
-                else:
-                    row(key, value)
+        click.echo(format_info(data, style=lambda text: click.style(text, bold=True)))
