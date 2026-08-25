@@ -34,7 +34,7 @@ import numpy as np
 
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE, parse_chunks
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-from ansys.mapdl.core.misc import requires_package, supress_logging, threaded
+from ansys.mapdl.core.misc import requires_package, supress_logging
 
 TMP_NODE_CM = "__NODE__"
 
@@ -79,9 +79,10 @@ class MeshGrpc:
 
         self._freeze_model = False
         self._ignore_cache_reset = False
-        # MAPDL serves one request at a time. Some mesh cache updates run in
-        # separate threads, but this lock serializes the gRPC requests issued by
-        # MeshGrpc (only one mesh-related request is in flight at a time).
+
+        # MAPDL serves one request at a time, so this lock serializes the
+        # gRPC requests issued by MeshGrpc (only one mesh-related request is
+        # in flight at a time).
         self._thread_lock_grpc = threading.Lock()
         self._reset_cache()
 
@@ -162,7 +163,7 @@ class MeshGrpc:
         return self._ignore_cache_reset_context(self)
 
     def _update_cache(self):
-        """Threaded local cache update.
+        """Local cache update.
 
         Used when needing all the geometry entries from MAPDL.
         """
@@ -175,17 +176,11 @@ class MeshGrpc:
 
                 # '_update_cache_elem' runs first and alone: it is not
                 # guarded by '_thread_lock_grpc' and must finish before the
-                # threads below start, otherwise it could race with them.
+                # calls below start, otherwise it could race with them.
                 self._update_cache_elem()
-
-                threads = [
-                    self._update_cache_element_desc(),
-                    self._update_cache_nnum(),
-                    self._update_node_coord(),
-                ]
-
-                for thread in threads:
-                    thread.join()
+                self._update_cache_element_desc()
+                self._update_cache_nnum()
+                self._update_node_coord()
 
                 # somehow requesting path seems to help windows avoid an
                 # outright segfault prior to running CMSEL
@@ -197,7 +192,6 @@ class MeshGrpc:
         else:
             self.logger.debug("Ignoring cache reset.")
 
-    @threaded
     def _update_cache_nnum(self):
         with self._thread_lock_grpc:
             if self._cache_nnum is None:
@@ -212,14 +206,13 @@ class MeshGrpc:
     @property
     def _nnum(self):
         """Return node number cache"""
-        self._update_cache_nnum().join()
+        self._update_cache_nnum()
         return self._cache_nnum
 
     @_nnum.setter
     def _nnum(self, value):
         self._cache_nnum = value
 
-    @threaded
     def _update_cache_element_desc(self):
         with self._thread_lock_grpc:
             if self._cache_element_desc is None:
@@ -229,7 +222,7 @@ class MeshGrpc:
     @property
     def _ekey(self):
         """Element key description"""
-        self._update_cache_element_desc().join()
+        self._update_cache_element_desc()
 
         # convert to ekey format
         if self._cache_element_desc:
@@ -239,7 +232,6 @@ class MeshGrpc:
             return np.vstack(ekey).astype(np.int32)
         return np.array([])
 
-    @threaded
     def _update_node_coord(self):
         with self._thread_lock_grpc:
             if self._node_coord is None:
@@ -505,7 +497,7 @@ class MeshGrpc:
     @property
     def key_option(self):
         """Key options of selected element types."""
-        self._update_cache_element_desc().join()
+        self._update_cache_element_desc()
 
         key_opt = {}
         for einfo in self._cache_element_desc:
@@ -533,7 +525,7 @@ class MeshGrpc:
                [0.75 0.5  4.  ]
                [0.75 0.5  4.5 ]]
         """
-        self._update_node_coord().join()
+        self._update_node_coord()
         if self._node_coord is None:
             return np.empty(0)
         return self._node_coord
