@@ -48,7 +48,7 @@ class GraphicsBackend(Enum):
 def __getattr__(name: str) -> Any:
     """Lazily import :class:`MapdlTheme <ansys.mapdl.core.plotting.theme.MapdlTheme>`.
 
-    ``MapdlTheme`` pulls in PyVista, Matplotlib, and pandas, which are slow to
+    ``MapdlTheme`` pulls in PyVista, Matplotlib, and ``cycler``, which are slow to
     import and are only needed by code that actually plots something. Most of
     ``ansys.mapdl.core`` only needs :class:`GraphicsBackend` from this module,
     so ``MapdlTheme`` is imported on first access instead of at module load
