@@ -468,9 +468,9 @@ def protect_grpc(func: Callable) -> Callable:
                     f"channel became '{channel_state}'."
                 )
                 raise MapdlConnectionError(
-                    f"The gRPC call '{func.__name__}' was cancelled because "
-                    f"the channel connectivity became '{channel_state}'. "
-                    "MAPDL might have died or stopped answering."
+                    "The in-flight gRPC call was cancelled because the channel "
+                    f"connectivity became '{channel_state}'. MAPDL might have died "
+                    "or stopped answering."
                 ) from error
 
             except grpc.RpcError as error:
