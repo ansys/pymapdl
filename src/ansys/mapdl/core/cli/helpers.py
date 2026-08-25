@@ -25,9 +25,108 @@ Minimal core functionality for CLI operations.
 This module avoids importing heavy dependencies like pandas, numpy, etc.
 """
 
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import psutil
+
+from ansys.mapdl.core.cli.constants import DEFAULT_TIMEOUT
+
+if TYPE_CHECKING:  # pragma: no cover
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+
+def silence_logging() -> None:
+    """Silence the PyMAPDL logger so that only command output reaches stdout.
+
+    The logger level is raised above ``CRITICAL``, which disables every
+    record, and the same is done on the standard output handler when it is
+    present.
+
+    Examples
+    --------
+    Silence PyMAPDL before writing machine-readable output:
+
+    >>> from ansys.mapdl.core.cli.helpers import silence_logging
+    >>> silence_logging()
+
+    """
+    import logging
+
+    from ansys.mapdl.core import LOG
+
+    LOG.setLevel(logging.CRITICAL + 1)
+    if LOG.std_out_handler:
+        LOG.std_out_handler.setLevel(logging.CRITICAL + 1)
+
+
+def connect_to_instance(
+    ip: Optional[str] = None,
+    port: Optional[int] = None,
+    clear_on_connect: bool = False,
+    timeout: int = DEFAULT_TIMEOUT,
+) -> "MapdlGrpc":
+    """Connect to an already running MAPDL instance.
+
+    Parameters
+    ----------
+    ip : str, optional
+        IP address of the MAPDL gRPC server. When ``None``, the value of the
+        ``PYMAPDL_IP`` environment variable is used, defaulting to
+        ``"127.0.0.1"``.
+    port : int, optional
+        Port of the MAPDL gRPC server. When ``None``, the value of the
+        ``PYMAPDL_PORT`` environment variable is used, defaulting to ``50052``.
+    clear_on_connect : bool, default: False
+        Whether to clear the MAPDL database upon connecting.
+    timeout : int, default: 10
+        Seconds to wait when establishing the gRPC connection.
+
+    Returns
+    -------
+    ansys.mapdl.core.mapdl_grpc.MapdlGrpc
+        Client connected to the running instance.
+
+    Raises
+    ------
+    MapdlConnectionError
+        When no MAPDL instance can be reached at the given address. The
+        underlying error is attached as a note on the exception, and the
+        original traceback is suppressed to keep the failure readable.
+
+    Examples
+    --------
+    Connect to the instance running on the default port:
+
+    >>> from ansys.mapdl.core.cli.helpers import connect_to_instance
+    >>> mapdl = connect_to_instance()
+
+    """
+    from ansys.mapdl.core.errors import MapdlConnectionError
+    from ansys.mapdl.core.launcher.config import resolve_launch_config
+    from ansys.mapdl.core.launcher.connection import connect_to_existing
+    from ansys.mapdl.core.launcher.errors import ConfigurationError
+
+    try:
+        config = resolve_launch_config(
+            ip=ip,
+            port=port,
+            start_instance=False,
+            clear_on_connect=clear_on_connect,
+            timeout=timeout,
+        )
+    except (ConfigurationError, TypeError, ValueError) as err:
+        raise MapdlConnectionError(
+            f"Could not resolve the connection to MAPDL at {ip}:{port}.",
+            notes=str(err),
+        ) from None
+
+    try:
+        return connect_to_existing(config)
+    except (ConnectionError, OSError) as err:
+        raise MapdlConnectionError(
+            f"Could not connect to MAPDL at {config.ip}:{config.port}.",
+            notes=str(err),
+        ) from None
 
 
 def can_access_process(proc):

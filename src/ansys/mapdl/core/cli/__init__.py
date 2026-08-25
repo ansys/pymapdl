@@ -55,23 +55,23 @@ if _HAS_CLICK:
     def main(ctx: click.Context):
         pass
 
-    from ansys.mapdl.core.cli.check import check as check_cmd
-    from ansys.mapdl.core.cli.convert import convert as convert_cmd
-    from ansys.mapdl.core.cli.exec import exec_cmd
-    from ansys.mapdl.core.cli.help import help_cmd
-    from ansys.mapdl.core.cli.list_instances import list_instances
-    from ansys.mapdl.core.cli.skills import skills as skills_cmd
-    from ansys.mapdl.core.cli.start import start as start_cmd
-    from ansys.mapdl.core.cli.stop import stop as stop_cmd
+    from ansys.mapdl.core.cli.check import check_cli
+    from ansys.mapdl.core.cli.convert import convert_cli
+    from ansys.mapdl.core.cli.exec import exec_cli
+    from ansys.mapdl.core.cli.help import help_cli
+    from ansys.mapdl.core.cli.list_instances import list_instances_cli
+    from ansys.mapdl.core.cli.skills import skills as skills_cli
+    from ansys.mapdl.core.cli.start import start_cli
+    from ansys.mapdl.core.cli.stop import stop_cli
 
-    main.add_command(check_cmd, name="check")
-    main.add_command(convert_cmd, name="convert")
-    main.add_command(exec_cmd, name="exec")
-    main.add_command(help_cmd, name="help")
-    main.add_command(list_instances, name="list")
-    main.add_command(skills_cmd, name="skills")
-    main.add_command(start_cmd, name="start")
-    main.add_command(stop_cmd, name="stop")
+    main.add_command(check_cli, name="check")
+    main.add_command(convert_cli, name="convert")
+    main.add_command(exec_cli, name="exec")
+    main.add_command(help_cli, name="help")
+    main.add_command(list_instances_cli, name="list")
+    main.add_command(skills_cli, name="skills")
+    main.add_command(start_cli, name="start")
+    main.add_command(stop_cli, name="stop")
 
 
 else:
