@@ -3247,6 +3247,46 @@ def test_release_resources_closes_channel():
 
 
 @stack(*PATCH_MAPDL_START)
+def test_release_resources_logs_on_deterministic_exit_path():
+    """``_release_resources(cleanup_loggers=True)`` must log defensively.
+
+    Complements ``test_release_resources_suppresses_logging_when_called_like_del``:
+    on the deterministic ``exit()`` path (``cleanup_loggers=True``), failures
+    while joining PIPE-drainer threads or closing the gRPC channel must still
+    be logged, since logging is reliable there.
+    """
+    from unittest.mock import MagicMock
+
+    start_parm = {
+        "ip": "123.45.67.99",
+        "local": False,
+        "set_no_abort": False,
+        "launched": True,
+        "start_instance": True,
+        "transport_mode": "insecure",
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+    mapdl._channel = MagicMock()  # replace stub with real mock
+
+    with (
+        patch.object(mapdl, "_exit_mapdl"),
+        patch.object(mapdl, "_cleanup_loggers"),
+        patch.object(
+            mapdl, "_join_pipe_drainer_threads", side_effect=RuntimeError("boom")
+        ),
+        patch.object(mapdl, "_close_grpc_channel", side_effect=RuntimeError("boom")),
+        patch.object(mapdl, "_log") as mock_log,
+    ):
+        mapdl._release_resources(cleanup_loggers=True)
+
+    assert mock_log.debug.call_count == 2
+    assert mapdl._exited
+
+    mapdl.__del__ = lambda: None  # prevent double cleanup on GC
+
+
+@stack(*PATCH_MAPDL_START)
 def test_release_resources_calls_cleanup_loggers():
     """_release_resources() must wire _cleanup_loggers()."""
     from unittest.mock import MagicMock

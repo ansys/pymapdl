@@ -1016,6 +1016,23 @@ class TestDisconnectButLeaveMapdlRunning:
         mock._join_pipe_drainer_threads.assert_called_once()
         assert mock._exited is True
 
+    def test_a_failing_join_is_logged_on_the_deterministic_path(self):
+        """A failure joining the PIPE-drainer threads is logged when exiting=False.
+
+        Complements ``test_a_failing_close_does_not_prevent_the_join``, which
+        only exercises the channel-close failure branch: this covers the
+        analogous failure branch for ``_join_pipe_drainer_threads``.
+        """
+        mock = _make_mock_mapdl()
+        mock._exited = False
+        mock._join_pipe_drainer_threads.side_effect = RuntimeError("boom")
+
+        MapdlGrpc._disconnect_but_leave_mapdl_running(mock)
+
+        mock._close_grpc_channel.assert_called_once()
+        mock._log.debug.assert_called_once()
+        assert mock._exited is True
+
     def test_exiting_is_forwarded_to_channel_close_and_thread_join(self):
         """``exiting=True`` is forwarded to both helper calls.
 
