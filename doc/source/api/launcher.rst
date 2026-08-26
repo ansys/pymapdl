@@ -14,6 +14,7 @@ library `ansys-tools-common.path <ansys_tools_common_>`_.
    launch_mapdl
    launch_mapdl_process
    close_all_local_instances
+   stop
 
 
 ``ansys-tools-common.path`` functions

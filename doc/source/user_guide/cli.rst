@@ -183,6 +183,65 @@ Alternatively, you can stop all the running instances by using:
             Success: Ansys instances have been stopped.
 
 
+Stop MAPDL instances from Python
+---------------------------------
+
+You do not need to shell out to the CLI to stop an instance, and you do not
+need to have launched it with :func:`launch_mapdl()
+<ansys.mapdl.core.launcher.launch_mapdl>` either. Use
+:func:`stop() <ansys.mapdl.core.launcher.connection.stop>` directly, with
+the same ``port``, ``pid``, and ``all`` options as the CLI command:
+
+.. code:: python
+
+    from ansys.mapdl.core.launcher import stop
+
+    # Stop the instance on the default port (50052)
+    stop()
+
+    # Stop the instance running on a specific port
+    stop(port=50053)
+
+    # Stop a specific process (and its children) by PID
+    stop(pid=40952)
+
+    # Stop every MAPDL instance owned by the current user
+    stop(all=True)
+
+``stop()`` returns the list of process IDs that were actually stopped, so you
+can check whether it found anything to kill:
+
+.. code:: python
+
+    stopped = stop(port=50053)
+    if not stopped:
+        print("No instance was running on port 50053.")
+
+To stop every local MAPDL instance within a range of ports instead of every
+instance owned by the user, use :func:`close_all_local_instances()
+<ansys.mapdl.core.launcher.connection.close_all_local_instances>`, which is a
+thin wrapper around ``stop()``:
+
+.. code:: python
+
+    import ansys.mapdl.core as pymapdl
+
+    # Stop every local instance
+    pymapdl.close_all_local_instances()
+
+    # Only stop instances within a specific port range
+    pymapdl.close_all_local_instances(port_range=range(50052, 50200))
+
+If you already hold a connected :class:`Mapdl <ansys.mapdl.core.Mapdl>`
+instance, prefer its :meth:`~ansys.mapdl.core.Mapdl.exit` method instead,
+because it lets MAPDL shut down gracefully (optionally saving the database)
+before the process is terminated:
+
+.. code:: python
+
+    mapdl.exit(save=True)
+
+
 List MAPDL instances and processes
 ==================================
 
@@ -587,15 +646,26 @@ Use the commands from Python
 
 Every ``pymapdl`` sub-command is a thin Click wrapper, named ``<name>_cli``,
 around a plain function named ``<name>`` that lives in the same module, for
-example :func:`ansys.mapdl.core.cli.stop.stop`. Import the plain function to
+example :func:`ansys.mapdl.core.cli.start.start`. Import the plain function to
 get the same behavior from Python, which avoids spawning a shell and parsing
-text output:
+text output.
+
+.. note::
+
+   :func:`stop() <ansys.mapdl.core.launcher.connection.stop>` is the
+   exception to the "same module" rule: it lives in
+   :mod:`ansys.mapdl.core.launcher.connection` so it can also be used by
+   :func:`close_all_local_instances()
+   <ansys.mapdl.core.launcher.connection.close_all_local_instances>` without
+   depending on the CLI package. Import it with ``from
+   ansys.mapdl.core.launcher import stop`` (or the equivalent
+   ``ansys.mapdl.core.cli.stop.stop`` alias, kept for backward compatibility).
 
 .. code:: python
 
     from ansys.mapdl.core.cli.exec import exec_commands
     from ansys.mapdl.core.cli.start import start
-    from ansys.mapdl.core.cli.stop import stop
+    from ansys.mapdl.core.launcher import stop
 
     ip, port, pid = start(port=50054, nproc=4)
     print(exec_commands(commands=["/prep7", "BLOCK,0,1,0,1,0,1"], port=port))
@@ -613,7 +683,7 @@ long form of the command options as keyword arguments:
    * - ``pymapdl start``
      - :func:`start() <ansys.mapdl.core.cli.start.start>`
    * - ``pymapdl stop``
-     - :func:`stop() <ansys.mapdl.core.cli.stop.stop>`
+     - :func:`stop() <ansys.mapdl.core.launcher.connection.stop>`
    * - ``pymapdl list``
      - :func:`list_instances() <ansys.mapdl.core.cli.list_instances.list_instances>`
    * - ``pymapdl check``
