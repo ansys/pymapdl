@@ -598,6 +598,7 @@ class TestConnectivityCallbackDoesNotLeakInstance:
                 self._channel = channel
                 self._channel_state = None
                 self._connectivity_callback = None
+                self._start_ping_abuse_probe = MagicMock()
 
             _subscribe_to_channel = MapdlGrpc._subscribe_to_channel
 
@@ -626,6 +627,7 @@ class TestConnectivityCallbackDoesNotLeakInstance:
                 self._channel = channel
                 self._channel_state = None
                 self._connectivity_callback = None
+                self._start_ping_abuse_probe = MagicMock()
 
             _subscribe_to_channel = MapdlGrpc._subscribe_to_channel
 
@@ -654,6 +656,7 @@ class TestConnectivityCancelsInFlightCall:
             self._connectivity_callback = None
             self._current_call = None
             self._current_call_lock = threading.Lock()
+            self._start_ping_abuse_probe = MagicMock()
 
         _subscribe_to_channel = MapdlGrpc._subscribe_to_channel
         _cancel_call_if_pending = MapdlGrpc._cancel_call_if_pending
@@ -815,6 +818,90 @@ class TestWatchedCall:
             dummy._current_call = call_b
 
         assert dummy._current_call is call_b
+
+
+class TestPingAbuseProbe:
+    """The background probe thread keeps long-running calls from tripping the
+    MAPDL gRPC server's ping-abuse protection (see ``PING_ABUSE_INTERVAL_S``).
+    """
+
+    class _Dummy:
+        """Minimal stand-in exposing what the probe methods touch."""
+
+        def __init__(self):
+            self._log = MagicMock()
+            self._ping_probe_stop_event = threading.Event()
+            self._ping_probe_thread = None
+            self._ctrl = MagicMock()
+
+        _ping_abuse_probe_loop = MapdlGrpc._ping_abuse_probe_loop
+        _start_ping_abuse_probe = MapdlGrpc._start_ping_abuse_probe
+        _stop_ping_abuse_probe = MapdlGrpc._stop_ping_abuse_probe
+
+    def test_start_spawns_a_daemon_thread(self):
+        """Starting the probe creates a running daemon thread."""
+        dummy = self._Dummy()
+
+        dummy._start_ping_abuse_probe()
+
+        assert dummy._ping_probe_thread is not None
+        assert dummy._ping_probe_thread.is_alive()
+        assert dummy._ping_probe_thread.daemon
+
+        dummy._stop_ping_abuse_probe()
+
+    def test_start_is_a_noop_when_already_running(self):
+        """Calling start twice does not replace a live thread."""
+        dummy = self._Dummy()
+        dummy._start_ping_abuse_probe()
+        first_thread = dummy._ping_probe_thread
+
+        dummy._start_ping_abuse_probe()
+
+        assert dummy._ping_probe_thread is first_thread
+
+        dummy._stop_ping_abuse_probe()
+
+    def test_stop_joins_and_clears_the_thread(self):
+        """Stopping the probe joins the thread and clears the reference."""
+        dummy = self._Dummy()
+        dummy._start_ping_abuse_probe()
+
+        dummy._stop_ping_abuse_probe()
+
+        assert dummy._ping_probe_thread is None
+        assert dummy._ping_probe_stop_event.is_set()
+
+    def test_stop_is_a_noop_when_never_started(self):
+        """Stopping a probe that was never started must not raise."""
+        dummy = self._Dummy()
+
+        dummy._stop_ping_abuse_probe()  # must not raise
+
+        assert dummy._ping_probe_thread is None
+
+    def test_loop_probes_with_ctrl_version_and_survives_rpc_errors(self):
+        """Each wake-up issues a bounded ``Ctrl("VERSION")`` probe; a failure
+        is logged, not raised, so the loop keeps running."""
+        dummy = self._Dummy()
+        dummy._ctrl.side_effect = grpc.RpcError("boom")
+
+        # Make the stop event "time out" exactly once, then report a stop
+        # request, so the loop body runs exactly one iteration.
+        wait_calls = []
+
+        def fake_wait(timeout):
+            wait_calls.append(timeout)
+            return len(wait_calls) > 1
+
+        dummy._ping_probe_stop_event.wait = fake_wait
+
+        dummy._ping_abuse_probe_loop()
+
+        dummy._ctrl.assert_called_once()
+        assert dummy._ctrl.call_args[0][0] == "VERSION"
+        assert "timeout" in dummy._ctrl.call_args[1]
+        assert dummy._log.debug.called
 
 
 class TestDisconnectButLeaveMapdlRunning:
