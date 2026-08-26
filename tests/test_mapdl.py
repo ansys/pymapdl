@@ -3276,6 +3276,46 @@ def test_release_resources_calls_cleanup_loggers():
 
 
 @stack(*PATCH_MAPDL_START)
+def test_release_resources_suppresses_logging_when_called_like_del():
+    """``_release_resources(cleanup_loggers=False)`` must not log on failure.
+
+    Regression test for https://github.com/ansys/pymapdl/issues/4728: when
+    called the way ``__del__`` calls it (``cleanup_loggers=False``), failures
+    while joining PIPE-drainer threads or closing the gRPC channel must not
+    be logged, since logging can be unreliable during interpreter shutdown.
+    """
+    from unittest.mock import MagicMock
+
+    start_parm = {
+        "ip": "123.45.67.99",
+        "local": False,
+        "set_no_abort": False,
+        "launched": True,
+        "start_instance": True,
+        "transport_mode": "insecure",
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+    mapdl._channel = MagicMock()  # replace stub with real mock
+
+    with (
+        patch.object(mapdl, "_exit_mapdl"),
+        patch.object(mapdl, "_cleanup_loggers"),
+        patch.object(
+            mapdl, "_join_pipe_drainer_threads", side_effect=RuntimeError("boom")
+        ),
+        patch.object(mapdl, "_close_grpc_channel", side_effect=RuntimeError("boom")),
+        patch.object(mapdl, "_log") as mock_log,
+    ):
+        mapdl._release_resources(cleanup_loggers=False)
+
+    mock_log.debug.assert_not_called()
+    assert mapdl._exited
+
+    mapdl.__del__ = lambda: None  # prevent double cleanup on GC
+
+
+@stack(*PATCH_MAPDL_START)
 def test_del_honours_cleanup_on_exit_false():
     """When cleanup_on_exit=False, __del__ must not call _release_resources."""
     start_parm = {
@@ -3295,6 +3335,43 @@ def test_del_honours_cleanup_on_exit_false():
         mapdl.__del__()
 
     mock_release.assert_not_called()
+
+    mapdl._cleanup = True
+    mapdl.__del__ = lambda: None  # prevent cleanup on GC
+
+
+@stack(*PATCH_MAPDL_START)
+def test_del_early_exit_joins_pipe_drainer_threads():
+    """``__del__``'s early-exit branch must not leak PIPE-drainer threads.
+
+    Regression test for https://github.com/ansys/pymapdl/issues/4728: when
+    the full teardown in ``_release_resources`` is skipped (for example
+    ``cleanup_on_exit=False``), the stdout/stderr/startup PIPE-drainer
+    threads must still be joined, not just the gRPC channel closed.
+    """
+    start_parm = {
+        "ip": "123.45.67.99",
+        "local": True,
+        "set_no_abort": False,
+        "launched": True,
+        "start_instance": True,
+        "transport_mode": "insecure",
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+    mapdl._cleanup = False  # mirrors cleanup_on_exit=False, hits the early exit
+
+    with (
+        patch.object(type(mapdl), "_release_resources") as mock_release,
+        patch.object(mapdl, "_close_grpc_channel") as mock_close_channel,
+        patch.object(mapdl, "_join_pipe_drainer_threads") as mock_join_threads,
+    ):
+        mapdl.__del__()
+
+    mock_release.assert_not_called()
+    mock_close_channel.assert_called_once_with(exiting=True)
+    mock_join_threads.assert_called_once_with(exiting=True)
+    assert mapdl._exited is True
 
     mapdl._cleanup = True
     mapdl.__del__ = lambda: None  # prevent cleanup on GC

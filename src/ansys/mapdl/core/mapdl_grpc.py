@@ -2175,7 +2175,7 @@ class MapdlGrpc(MapdlBase):
         finally:
             self._exiting = False
 
-    def _disconnect_but_leave_mapdl_running(self) -> None:
+    def _disconnect_but_leave_mapdl_running(self, exiting: bool = False) -> None:
         """Close the client side of the connection, leaving MAPDL running.
 
         Closing a gRPC channel is a purely client-side operation: it cancels
@@ -2187,6 +2187,17 @@ class MapdlGrpc(MapdlBase):
         The instance is marked as exited because the channel is gone. Use
         :meth:`reconnect_to_mapdl` to build a fresh channel and resume driving
         the same MAPDL session.
+
+        Parameters
+        ----------
+        exiting : bool, optional
+            Whether this is being called from best-effort, garbage-collection
+            driven teardown (:meth:`__del__`) rather than the deterministic
+            :meth:`exit` path. If ``True``, this suppresses this method's own
+            debug logging, and is forwarded to :meth:`_close_grpc_channel` and
+            :meth:`_join_pipe_drainer_threads` to suppress theirs, since
+            logging is unreliable during interpreter shutdown. The default is
+            ``False``.
 
         Returns
         -------
@@ -2202,14 +2213,16 @@ class MapdlGrpc(MapdlBase):
         False
         """
         try:
-            self._close_grpc_channel()
+            self._close_grpc_channel(exiting=exiting)
         except Exception as e:
-            self._log.debug("Error closing gRPC channel: %s", e)
+            if not exiting:
+                self._log.debug("Error closing gRPC channel: %s", e)
 
         try:
-            self._join_pipe_drainer_threads()
+            self._join_pipe_drainer_threads(exiting=exiting)
         except Exception as e:
-            self._log.debug("Error joining pipe-drainer threads: %s", e)
+            if not exiting:
+                self._log.debug("Error joining pipe-drainer threads: %s", e)
 
         self._exited = True
 
@@ -2310,6 +2323,13 @@ class MapdlGrpc(MapdlBase):
 
         path = path or getattr(self, "_path", None)
 
+        # ``cleanup_loggers`` is False only when called from ``__del__``, so
+        # it doubles here as a proxy for "this is best-effort, GC-driven
+        # teardown, where logging may be unreliable" (see the ``exiting``
+        # parameters of ``_join_pipe_drainer_threads`` and
+        # ``_close_grpc_channel``).
+        exiting = not cleanup_loggers
+
         # 1. Kill MAPDL process + remove lock file
         try:
             self._exit_mapdl(path)
@@ -2319,15 +2339,17 @@ class MapdlGrpc(MapdlBase):
         # 2. Ensure PIPE-drainer threads (stdout/stderr/startup) are joined so
         # that background reader threads do not leak after teardown.
         try:
-            self._join_pipe_drainer_threads()
+            self._join_pipe_drainer_threads(exiting=exiting)
         except Exception as e:
-            self._log.debug("Error joining pipe-drainer threads: %s", e)
+            if not exiting:
+                self._log.debug("Error joining pipe-drainer threads: %s", e)
 
         # 3. Close gRPC channel
         try:
-            self._close_grpc_channel()
+            self._close_grpc_channel(exiting=exiting)
         except Exception as e:
-            self._log.debug("Error closing gRPC channel: %s", e)
+            if not exiting:
+                self._log.debug("Error closing gRPC channel: %s", e)
 
         # 4. Remove UDS socket file
         try:
@@ -2566,7 +2588,7 @@ class MapdlGrpc(MapdlBase):
                 "continuing without waiting further."
             )
 
-    def _join_pipe_drainer_threads(self) -> None:
+    def _join_pipe_drainer_threads(self, exiting: bool = False) -> None:
         """Join all PIPE-drainer threads, giving each up to 2 seconds.
 
         Waits for ``_stdout_thread``, ``_stderr_thread``, and
@@ -2574,6 +2596,15 @@ class MapdlGrpc(MapdlBase):
         any thread that does not exit within the timeout.  Every attribute
         access is ``getattr``-guarded so this is safe to call on a partially
         constructed instance.
+
+        Parameters
+        ----------
+        exiting : bool, optional
+            Whether this is being called from best-effort, garbage-collection
+            driven teardown (:meth:`__del__`). If ``True``, suppresses the
+            debug log emitted when a thread does not exit in time, since
+            logging is unreliable during interpreter shutdown. The default is
+            ``False``.
 
         Returns
         -------
@@ -2583,7 +2614,7 @@ class MapdlGrpc(MapdlBase):
             t = getattr(self, attr, None)
             if t is not None and t.is_alive():
                 t.join(timeout=2)
-                if t.is_alive():
+                if t.is_alive() and not exiting:
                     self._log.debug(f"Thread {attr} did not exit in time")
 
     def _kill_process(self) -> None:
@@ -4873,10 +4904,12 @@ class MapdlGrpc(MapdlBase):
         ``cleanup_on_exit=False``, did not launch MAPDL itself
         (``_start_instance=False``), or was never actually launched, the full
         teardown in :meth:`_release_resources` is skipped (it would either be
-        a no-op or kill a server this instance does not own). Even then, the
-        gRPC channel is still closed and the instance is marked as exited,
-        because the channel is a purely client-side resource whose
-        ``_poll_connectivity`` daemon thread outlives this object otherwise.
+        a no-op or kill a server this instance does not own). Even then,
+        :meth:`_disconnect_but_leave_mapdl_running` still closes the gRPC
+        channel, joins the PIPE-drainer threads, and marks the instance as
+        exited, because those are purely client-side resources (the
+        ``_poll_connectivity`` daemon thread and the stdout/stderr/startup
+        reader threads) that outlive this object otherwise.
         """
         # Check early exit conditions.
         if (
@@ -4888,7 +4921,7 @@ class MapdlGrpc(MapdlBase):
 
             try:
                 self._exiting = True
-                self._close_grpc_channel()
+                self._disconnect_but_leave_mapdl_running(exiting=True)
             except (
                 Exception
             ):  # nosec B110 - best-effort cleanup during GC; logging is unreliable here

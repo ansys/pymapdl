@@ -316,6 +316,19 @@ class TestJoinPipeDrainerThreads:
 
         mock._log.debug.assert_called()
 
+    def test_exiting_suppresses_logging_when_thread_does_not_exit(self):
+        """``exiting=True`` suppresses the "did not exit in time" debug log."""
+        mock = _make_mock_mapdl()
+        t = MagicMock(spec=threading.Thread)
+        t.is_alive.side_effect = [True, True]  # alive before AND after join
+        t.name = "_stdout_thread"
+        mock._stdout_thread = t
+
+        MapdlGrpc._join_pipe_drainer_threads(mock, exiting=True)
+
+        t.join.assert_called_once_with(timeout=2)
+        mock._log.debug.assert_not_called()
+
 
 class TestKillProcess:
     """Tests for MapdlGrpc._kill_process (orchestrator)."""
@@ -575,6 +588,31 @@ class TestCloseGrpcChannel:
 
         MapdlGrpc._close_grpc_channel(mock)  # must not raise
 
+        channel.close.assert_called_once()
+
+    def test_exiting_suppresses_close_error_logging(self):
+        """``exiting=True`` suppresses debug logging, even on close() failure."""
+        mock = _make_mock_mapdl()
+        channel = Mock()
+        channel.close.side_effect = RuntimeError("channel already gone")
+        mock._channel = channel
+
+        MapdlGrpc._close_grpc_channel(mock, exiting=True)  # must not raise
+
+        mock._log.debug.assert_not_called()
+        assert mock._channel is None
+
+    def test_exiting_suppresses_unsubscribe_error_logging(self):
+        """``exiting=True`` also suppresses logging of unsubscribe() failures."""
+        mock = _make_mock_mapdl()
+        channel = Mock()
+        channel.unsubscribe.side_effect = RuntimeError("not subscribed")
+        mock._channel = channel
+        mock._connectivity_callback = lambda connectivity: None  # noqa: E731
+
+        MapdlGrpc._close_grpc_channel(mock, exiting=True)  # must not raise
+
+        mock._log.debug.assert_not_called()
         channel.close.assert_called_once()
 
 
@@ -976,6 +1014,34 @@ class TestDisconnectButLeaveMapdlRunning:
         MapdlGrpc._disconnect_but_leave_mapdl_running(mock)
 
         mock._join_pipe_drainer_threads.assert_called_once()
+        assert mock._exited is True
+
+    def test_exiting_is_forwarded_to_channel_close_and_thread_join(self):
+        """``exiting=True`` is forwarded to both helper calls.
+
+        Regression test for https://github.com/ansys/pymapdl/issues/4728:
+        ``__del__``'s early-exit branch relies on this forwarding to suppress
+        logging that is unreliable during interpreter shutdown.
+        """
+        mock = _make_mock_mapdl()
+        mock._exited = False
+
+        MapdlGrpc._disconnect_but_leave_mapdl_running(mock, exiting=True)
+
+        mock._close_grpc_channel.assert_called_once_with(exiting=True)
+        mock._join_pipe_drainer_threads.assert_called_once_with(exiting=True)
+        assert mock._exited is True
+
+    def test_exiting_suppresses_own_error_logging(self):
+        """``exiting=True`` suppresses this method's own debug logging."""
+        mock = _make_mock_mapdl()
+        mock._exited = False
+        mock._close_grpc_channel.side_effect = RuntimeError("boom")
+        mock._join_pipe_drainer_threads.side_effect = RuntimeError("boom too")
+
+        MapdlGrpc._disconnect_but_leave_mapdl_running(mock, exiting=True)
+
+        mock._log.debug.assert_not_called()
         assert mock._exited is True
 
     def test_already_exited_still_releases_the_client_side(self):
