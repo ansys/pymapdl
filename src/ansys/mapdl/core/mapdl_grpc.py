@@ -22,6 +22,7 @@
 
 """A gRPC specific class and methods for the MAPDL gRPC client"""
 
+from contextlib import contextmanager
 import fnmatch
 from functools import wraps
 import glob
@@ -171,9 +172,52 @@ SERVICE_DEFAULT_CONFIG = {
     ]
 }
 
+# Cadence for the HTTP/2 keepalive pings and the ping-abuse probe (see
+# '_ping_abuse_probe_loop' and 'DEFAULT_GRPC_OPTIONS' below). Empirically
+# verified against a live MAPDL gRPC server (docker image
+# 'ghcr.io/ansys/mapdl:v26.1.0-ubuntu-cicd') while a genuinely long call
+# ('SOLVE' and '/WAIT') was in flight:
+#
+# * grpc-core's default server-side ping-abuse policy requires at least 5
+#   minutes between two consecutive "no data" HTTP/2 pings while a call is
+#   in flight, tolerates up to 2 "strikes" (closer-than-allowed pings), and
+#   sends a 'GOAWAY' ('too_many_pings') on the 3rd strike.
+# * Two pings spaced 'PING_ABUSE_INTERVAL_S' apart never accumulate more
+#   than 1 strike (the very first ping received on a fresh tracker is
+#   always free), so pinging twice in a row is safe.
+# * A 3rd, real (non-ping) RPC call resets the strikes counter to 0, because
+#   the server also resets its ping-abuse tracker whenever it sends back
+#   real application data, not just a ping ACK. So replacing every 3rd
+#   keepalive ping with one cheap real RPC (see '_ping_abuse_probe_loop')
+#   lets the ping/ping/probe cycle repeat indefinitely without ever
+#   tripping the abuse policy, confirmed over multiple repeated cycles
+#   against the live server.
+PING_ABUSE_INTERVAL_S = 24
+# Replace every 3rd keepalive ping with a real probe RPC, before a 3rd
+# un-reset ping would trip the server's abuse policy.
+PING_ABUSE_PROBE_EVERY_N_PINGS = 3
+PING_ABUSE_PROBE_INTERVAL_S = PING_ABUSE_INTERVAL_S * PING_ABUSE_PROBE_EVERY_N_PINGS
+# Bounded timeout for the probe RPC itself, so a truly unresponsive server
+# cannot make the probe thread hang.
+PING_ABUSE_PROBE_TIMEOUT_S = 5.0
+
 DEFAULT_GRPC_OPTIONS = [
     ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
     ("grpc.service_config", json.dumps(SERVICE_DEFAULT_CONFIG)),
+    # HTTP/2 keepalive pings: detect a peer that stopped answering (crashed,
+    # network partition, silently dropped connection) even while no RPC is
+    # exchanging data, without bounding how long any individual call (such as
+    # 'SOLVE') is allowed to run. A dead peer flips 'channel_state' to
+    # 'TRANSIENT_FAILURE' within roughly 'keepalive_time_ms' +
+    # 'keepalive_timeout_ms', instead of relying on the OS to eventually
+    # notice the broken TCP connection. The interval is paired with the
+    # ping-abuse probe (see 'PING_ABUSE_INTERVAL_S' above) so consecutive
+    # pings never trip the MAPDL gRPC server's ping-abuse protection.
+    ("grpc.keepalive_time_ms", PING_ABUSE_INTERVAL_S * 1000),
+    ("grpc.keepalive_timeout_ms", 10_000),
+    ("grpc.keepalive_permit_without_calls", 1),
+    ("grpc.http2.min_time_between_pings_ms", PING_ABUSE_INTERVAL_S * 1000),
+    ("grpc.http2.max_pings_without_data", 0),
 ]
 
 
@@ -499,6 +543,20 @@ class MapdlGrpc(MapdlBase):
         )
         self._time_step_stream: Optional[int] = None
         self._connectivity_callback: Optional[Callable[[Any], None]] = None
+        # Handle to the gRPC call currently in flight (if any), so a
+        # connectivity-state watchdog can cancel it promptly when the
+        # transport is confirmed dead, instead of waiting for it to time out
+        # or hang forever. Guarded by '_current_call_lock' because it is
+        # written from the calling thread and read/cancelled from the gRPC
+        # connectivity callback thread.
+        self._current_call: Optional[grpc.Future] = None
+        self._current_call_lock: threading.Lock = threading.Lock()
+        # Background thread that periodically issues a lightweight real RPC
+        # (see '_ping_abuse_probe_loop') to keep the MAPDL gRPC server's
+        # ping-abuse protection from tripping during long calls. Started by
+        # '_subscribe_to_channel' and stopped by '_close_grpc_channel'.
+        self._ping_probe_stop_event: threading.Event = threading.Event()
+        self._ping_probe_thread: Optional[threading.Thread] = None
 
         if channel is None:
             self._log.debug("Creating channel to %s:%s", ip, port)
@@ -812,6 +870,14 @@ class MapdlGrpc(MapdlBase):
         # the polling thread.
         self_ref = weakref.ref(self)
 
+        # States in which the transport is confirmed unusable: a call blocked
+        # on a connection that has reached one of these will never complete on
+        # its own.
+        dead_states = (
+            grpc.ChannelConnectivity.TRANSIENT_FAILURE,
+            grpc.ChannelConnectivity.SHUTDOWN,
+        )
+
         # Callback function to monitor state changes
         def connectivity_callback(connectivity):
             mapdl = self_ref()
@@ -820,11 +886,159 @@ class MapdlGrpc(MapdlBase):
             mapdl._log.debug(f"Channel connectivity changed to: {connectivity}")
             mapdl._channel_state = connectivity
 
+            if connectivity in dead_states:
+                mapdl._cancel_call_if_pending(connectivity)
+
         # Keep a handle so the callback can be unsubscribed on teardown
         self._connectivity_callback = connectivity_callback
 
         # Subscribe to channel state changes
         self._channel.subscribe(connectivity_callback, try_to_connect=True)
+
+        self._start_ping_abuse_probe()
+
+    def _ping_abuse_probe_loop(self) -> None:
+        """Periodically issue a lightweight real RPC to reset the MAPDL gRPC
+        server's ping-abuse tracker.
+
+        Runs on its own daemon thread, started by :meth:`_subscribe_to_channel`
+        and stopped by :meth:`_close_grpc_channel`. Every
+        ``PING_ABUSE_PROBE_INTERVAL_S`` seconds it calls
+        ``self._ctrl("VERSION", ...)``, a cheap, already-bounded RPC. This is
+        real application data, not an HTTP/2 ping, so it resets the server's
+        ping-abuse strike counter (see the comment above
+        ``PING_ABUSE_INTERVAL_S``), preventing the HTTP/2 keepalive pings
+        configured in ``DEFAULT_GRPC_OPTIONS`` from ever accumulating a 3rd,
+        connection-ending strike while a long call (such as ``SOLVE``) keeps
+        the channel busy for longer than a few ping intervals.
+
+        Failures (for example, MAPDL is genuinely unresponsive) are only
+        logged: the connectivity-state watchdog set up in
+        :meth:`_subscribe_to_channel` is the sole authority on declaring the
+        channel dead and cancelling any in-flight call.
+        """
+        while not self._ping_probe_stop_event.wait(PING_ABUSE_PROBE_INTERVAL_S):
+            try:
+                self._ctrl("VERSION", timeout=PING_ABUSE_PROBE_TIMEOUT_S)
+            except (grpc.RpcError, MapdlRuntimeError) as exc:
+                self._log.debug(f"Ping-abuse probe RPC failed: {exc}")
+
+    def _start_ping_abuse_probe(self) -> None:
+        """Start the background ping-abuse probe thread, if not already running.
+
+        Safe to call more than once (for example, on reconnect): a thread
+        already running is left untouched.
+        """
+        if self._ping_probe_thread is not None and self._ping_probe_thread.is_alive():
+            return
+
+        self._ping_probe_stop_event.clear()
+        self._ping_probe_thread = threading.Thread(
+            target=self._ping_abuse_probe_loop,
+            name="pymapdl-ping-abuse-probe",
+            daemon=True,
+        )
+        self._ping_probe_thread.start()
+
+    def _stop_ping_abuse_probe(self) -> None:
+        """Stop the background ping-abuse probe thread, if running.
+
+        Safe to call multiple times; subsequent calls are no-ops.
+        """
+        stop_event = getattr(self, "_ping_probe_stop_event", None)
+        if stop_event is not None:
+            stop_event.set()
+
+        thread = getattr(self, "_ping_probe_thread", None)
+        self._ping_probe_thread = None
+        if (
+            thread is not None
+            and thread.is_alive()
+            and thread is not threading.current_thread()
+        ):
+            thread.join(timeout=PING_ABUSE_PROBE_TIMEOUT_S)
+
+    def _track_call(self, call: grpc.Future) -> None:
+        """Record ``call`` as the in-flight gRPC call.
+
+        Parameters
+        ----------
+        call : grpc.Future
+            The gRPC call (or streaming response) to track.
+        """
+        with self._current_call_lock:
+            self._current_call = call
+
+    def _untrack_call(self, call: grpc.Future) -> None:
+        """Stop tracking ``call``, unless it was already replaced.
+
+        Only clears ``_current_call`` when it is still ``call``, so a newer
+        call tracked by a concurrent invocation is never clobbered by an
+        older one finishing later. The check and the clear happen under the
+        same lock acquisition so they behave as a single, uninterruptible
+        operation instead of two separate ones a second thread could step
+        between.
+
+        Parameters
+        ----------
+        call : grpc.Future
+            The gRPC call (or streaming response) to stop tracking.
+        """
+        with self._current_call_lock:
+            if self._current_call is call:
+                self._current_call = None
+
+    def _cancel_call_if_pending(self, connectivity: "grpc.ChannelConnectivity") -> None:
+        """Cancel the tracked in-flight call if it is still running.
+
+        Called from the channel connectivity callback once the transport is
+        confirmed dead, so a call blocked on it does not hang until MAPDL
+        eventually answers or the OS notices the broken connection.
+
+        Parameters
+        ----------
+        connectivity : grpc.ChannelConnectivity
+            The connectivity state that triggered the cancellation, used only
+            for the debug log message.
+        """
+        with self._current_call_lock:
+            call = self._current_call
+        if call is not None and not call.done():
+            self._log.debug(
+                "Cancelling the in-flight gRPC call: the channel "
+                f"became '{connectivity.name}'. MAPDL might have "
+                "died or stopped answering."
+            )
+            call.cancel()
+
+    @contextmanager
+    def _watched_call(self, call: grpc.Future):
+        """Track ``call`` as the in-flight gRPC call.
+
+        While ``call`` is tracked, the channel connectivity callback (see
+        :meth:`_subscribe_to_channel`) cancels it as soon as the channel is
+        confirmed dead (``TRANSIENT_FAILURE`` or ``SHUTDOWN``), instead of
+        letting it block until MAPDL eventually answers or the OS notices the
+        broken connection. This does not bound how long ``call`` may run while
+        the channel stays healthy, so long-running commands such as ``SOLVE``
+        are unaffected.
+
+        Parameters
+        ----------
+        call : grpc.Future
+            The in-flight gRPC call (or streaming response) to track. Must
+            support ``cancel()`` and ``done()``.
+
+        Yields
+        ------
+        grpc.Future
+            The same ``call`` passed in, for convenience.
+        """
+        self._track_call(call)
+        try:
+            yield call
+        finally:
+            self._untrack_call(call)
 
     @property
     def channel_state(self) -> str:
@@ -1834,7 +2048,9 @@ class MapdlGrpc(MapdlBase):
         # TODO: Capture keyboard exception and place this in a thread
         if self._stub is None:
             raise MapdlRuntimeError("MAPDL stub not initialized")
-        grpc_response = self._stub.SendCommand(request)
+        future = self._stub.SendCommand.future(request)
+        with self._watched_call(future):
+            grpc_response = future.result()
 
         resp = grpc_response.response
         if resp is not None:
@@ -1851,11 +2067,12 @@ class MapdlGrpc(MapdlBase):
             raise MapdlRuntimeError("MAPDL stub not initialized")
         stream = self._stub.SendCommandS(request, metadata=metadata)
         response = []
-        for item in stream:
-            cmdout = "\n".join(item.cmdout)
-            if verbose:
-                print(cmdout)
-            response.append(cmdout.strip())
+        with self._watched_call(stream):
+            for item in stream:
+                cmdout = "\n".join(item.cmdout)
+                if verbose:
+                    print(cmdout)
+                response.append(cmdout.strip())
 
         return "".join(response)
 
@@ -2188,6 +2405,8 @@ class MapdlGrpc(MapdlBase):
             Whether this is being called during the exit process. If True, it
             will suppress logging of errors during channel closure. Default is False.
         """
+        self._stop_ping_abuse_probe()
+
         channel = getattr(self, "_channel", None)
         callback = getattr(self, "_connectivity_callback", None)
 

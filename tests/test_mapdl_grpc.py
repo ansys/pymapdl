@@ -27,6 +27,7 @@ from unittest.mock import MagicMock, Mock, patch
 import weakref
 
 from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
+import grpc
 import pytest
 
 from ansys.mapdl.core.errors import MapdlExitedError
@@ -493,12 +494,12 @@ class TestSendCommand:
         mock._stub = MagicMock()
         resp = MagicMock()
         resp.response = "OK"
-        mock._stub.SendCommand.return_value = resp
+        mock._stub.SendCommand.future.return_value.result.return_value = resp
 
         result = MapdlGrpc._send_command(mock, "/PREP7")
 
         assert result == "OK"
-        mock._stub.SendCommand.assert_called_once()
+        mock._stub.SendCommand.future.assert_called_once()
 
 
 class TestCloseGrpcChannel:
@@ -597,6 +598,7 @@ class TestConnectivityCallbackDoesNotLeakInstance:
                 self._channel = channel
                 self._channel_state = None
                 self._connectivity_callback = None
+                self._start_ping_abuse_probe = MagicMock()
 
             _subscribe_to_channel = MapdlGrpc._subscribe_to_channel
 
@@ -625,6 +627,7 @@ class TestConnectivityCallbackDoesNotLeakInstance:
                 self._channel = channel
                 self._channel_state = None
                 self._connectivity_callback = None
+                self._start_ping_abuse_probe = MagicMock()
 
             _subscribe_to_channel = MapdlGrpc._subscribe_to_channel
 
@@ -637,6 +640,268 @@ class TestConnectivityCallbackDoesNotLeakInstance:
 
         assert dummy._channel_state == "READY"
         assert dummy._connectivity_callback is callback
+
+
+class TestConnectivityCancelsInFlightCall:
+    """The connectivity callback cancels a call once the channel is confirmed
+    dead, instead of leaving it to hang until MAPDL eventually answers."""
+
+    class _Dummy:
+        """Minimal stand-in exposing what the connectivity callback touches."""
+
+        def __init__(self, channel):
+            self._log = MagicMock()
+            self._channel = channel
+            self._channel_state = None
+            self._connectivity_callback = None
+            self._current_call = None
+            self._current_call_lock = threading.Lock()
+            self._start_ping_abuse_probe = MagicMock()
+
+        _subscribe_to_channel = MapdlGrpc._subscribe_to_channel
+        _cancel_call_if_pending = MapdlGrpc._cancel_call_if_pending
+
+    def test_cancels_call_when_channel_becomes_transient_failure(self):
+        """A pending call is cancelled once the channel goes unhealthy."""
+        channel = Mock()
+        dummy = self._Dummy(channel)
+        dummy._subscribe_to_channel()
+        callback = channel.subscribe.call_args[0][0]
+
+        call = Mock()
+        call.done.return_value = False
+        dummy._current_call = call
+
+        callback(grpc.ChannelConnectivity.TRANSIENT_FAILURE)
+
+        call.cancel.assert_called_once()
+
+    def test_cancels_call_when_channel_shuts_down(self):
+        """A pending call is cancelled once the channel shuts down."""
+        channel = Mock()
+        dummy = self._Dummy(channel)
+        dummy._subscribe_to_channel()
+        callback = channel.subscribe.call_args[0][0]
+
+        call = Mock()
+        call.done.return_value = False
+        dummy._current_call = call
+
+        callback(grpc.ChannelConnectivity.SHUTDOWN)
+
+        call.cancel.assert_called_once()
+
+    def test_does_not_cancel_on_ready(self):
+        """A healthy transition must not touch any tracked call."""
+        channel = Mock()
+        dummy = self._Dummy(channel)
+        dummy._subscribe_to_channel()
+        callback = channel.subscribe.call_args[0][0]
+
+        call = Mock()
+        call.done.return_value = False
+        dummy._current_call = call
+
+        callback(grpc.ChannelConnectivity.READY)
+
+        call.cancel.assert_not_called()
+
+    def test_does_not_cancel_an_already_completed_call(self):
+        """A call that already finished must not be cancelled."""
+        channel = Mock()
+        dummy = self._Dummy(channel)
+        dummy._subscribe_to_channel()
+        callback = channel.subscribe.call_args[0][0]
+
+        call = Mock()
+        call.done.return_value = True
+        dummy._current_call = call
+
+        callback(grpc.ChannelConnectivity.TRANSIENT_FAILURE)
+
+        call.cancel.assert_not_called()
+
+    def test_no_error_when_no_call_is_in_flight(self):
+        """The callback must not raise when nothing is currently tracked."""
+        channel = Mock()
+        dummy = self._Dummy(channel)
+        dummy._subscribe_to_channel()
+        callback = channel.subscribe.call_args[0][0]
+
+        callback(grpc.ChannelConnectivity.TRANSIENT_FAILURE)  # must not raise
+
+
+class TestTrackCallAndUntrackCall:
+    """``_track_call``/``_untrack_call`` are the only two places allowed to
+    mutate '_current_call', both funnelling through '_current_call_lock'."""
+
+    class _Dummy:
+        """Minimal stand-in exposing what these methods touch."""
+
+        def __init__(self):
+            self._current_call = None
+            self._current_call_lock = threading.Lock()
+
+        _track_call = MapdlGrpc._track_call
+        _untrack_call = MapdlGrpc._untrack_call
+
+    def test_track_call_records_the_call(self):
+        """Tracking a call exposes it as '_current_call'."""
+        dummy = self._Dummy()
+        call = Mock()
+
+        dummy._track_call(call)
+
+        assert dummy._current_call is call
+
+    def test_untrack_call_clears_its_own_call(self):
+        """Untracking the currently tracked call clears it."""
+        dummy = self._Dummy()
+        call = Mock()
+        dummy._track_call(call)
+
+        dummy._untrack_call(call)
+
+        assert dummy._current_call is None
+
+    def test_untrack_call_does_not_clear_a_newer_call(self):
+        """A newer call tracked by a concurrent invocation is not cleared by
+        an older one being untracked afterwards."""
+        dummy = self._Dummy()
+        call_a = Mock()
+        call_b = Mock()
+        dummy._track_call(call_a)
+
+        # Simulate a second, concurrent call replacing the tracked call
+        # before the first one is untracked.
+        dummy._track_call(call_b)
+        dummy._untrack_call(call_a)
+
+        assert dummy._current_call is call_b
+
+
+class TestWatchedCall:
+    """``_watched_call`` tracks and releases the in-flight call."""
+
+    class _Dummy:
+        """Minimal stand-in exposing what '_watched_call' touches."""
+
+        def __init__(self):
+            self._current_call = None
+            self._current_call_lock = threading.Lock()
+
+        _track_call = MapdlGrpc._track_call
+        _untrack_call = MapdlGrpc._untrack_call
+        _watched_call = MapdlGrpc._watched_call
+
+    def test_tracks_call_and_clears_it_afterwards(self):
+        """The call is exposed as '_current_call' only while inside the
+        context manager."""
+        dummy = self._Dummy()
+
+        call = Mock()
+        with dummy._watched_call(call) as tracked:
+            assert tracked is call
+            assert dummy._current_call is call
+
+        assert dummy._current_call is None
+
+    def test_clears_only_its_own_call(self):
+        """A newer call tracked by a concurrent invocation is not cleared."""
+        dummy = self._Dummy()
+
+        call_a = Mock()
+        call_b = Mock()
+        with dummy._watched_call(call_a):
+            # Simulate a second, concurrent call replacing the tracked call
+            # before the first one's context manager exits.
+            dummy._current_call = call_b
+
+        assert dummy._current_call is call_b
+
+
+class TestPingAbuseProbe:
+    """The background probe thread keeps long-running calls from tripping the
+    MAPDL gRPC server's ping-abuse protection (see ``PING_ABUSE_INTERVAL_S``).
+    """
+
+    class _Dummy:
+        """Minimal stand-in exposing what the probe methods touch."""
+
+        def __init__(self):
+            self._log = MagicMock()
+            self._ping_probe_stop_event = threading.Event()
+            self._ping_probe_thread = None
+            self._ctrl = MagicMock()
+
+        _ping_abuse_probe_loop = MapdlGrpc._ping_abuse_probe_loop
+        _start_ping_abuse_probe = MapdlGrpc._start_ping_abuse_probe
+        _stop_ping_abuse_probe = MapdlGrpc._stop_ping_abuse_probe
+
+    def test_start_spawns_a_daemon_thread(self):
+        """Starting the probe creates a running daemon thread."""
+        dummy = self._Dummy()
+
+        dummy._start_ping_abuse_probe()
+
+        assert dummy._ping_probe_thread is not None
+        assert dummy._ping_probe_thread.is_alive()
+        assert dummy._ping_probe_thread.daemon
+
+        dummy._stop_ping_abuse_probe()
+
+    def test_start_is_a_noop_when_already_running(self):
+        """Calling start twice does not replace a live thread."""
+        dummy = self._Dummy()
+        dummy._start_ping_abuse_probe()
+        first_thread = dummy._ping_probe_thread
+
+        dummy._start_ping_abuse_probe()
+
+        assert dummy._ping_probe_thread is first_thread
+
+        dummy._stop_ping_abuse_probe()
+
+    def test_stop_joins_and_clears_the_thread(self):
+        """Stopping the probe joins the thread and clears the reference."""
+        dummy = self._Dummy()
+        dummy._start_ping_abuse_probe()
+
+        dummy._stop_ping_abuse_probe()
+
+        assert dummy._ping_probe_thread is None
+        assert dummy._ping_probe_stop_event.is_set()
+
+    def test_stop_is_a_noop_when_never_started(self):
+        """Stopping a probe that was never started must not raise."""
+        dummy = self._Dummy()
+
+        dummy._stop_ping_abuse_probe()  # must not raise
+
+        assert dummy._ping_probe_thread is None
+
+    def test_loop_probes_with_ctrl_version_and_survives_rpc_errors(self):
+        """Each wake-up issues a bounded ``Ctrl("VERSION")`` probe; a failure
+        is logged, not raised, so the loop keeps running."""
+        dummy = self._Dummy()
+        dummy._ctrl.side_effect = grpc.RpcError("boom")
+
+        # Make the stop event "time out" exactly once, then report a stop
+        # request, so the loop body runs exactly one iteration.
+        wait_calls = []
+
+        def fake_wait(timeout):
+            wait_calls.append(timeout)
+            return len(wait_calls) > 1
+
+        dummy._ping_probe_stop_event.wait = fake_wait
+
+        dummy._ping_abuse_probe_loop()
+
+        dummy._ctrl.assert_called_once()
+        assert dummy._ctrl.call_args[0][0] == "VERSION"
+        assert "timeout" in dummy._ctrl.call_args[1]
+        assert dummy._log.debug.called
 
 
 class TestDisconnectButLeaveMapdlRunning:
