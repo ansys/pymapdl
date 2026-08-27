@@ -23,6 +23,7 @@
 import gc
 import subprocess
 import threading
+import time
 from unittest.mock import MagicMock, Mock, patch
 import weakref
 
@@ -1039,3 +1040,71 @@ class TestEnsureChannel:
 
         mock._ensure_channel.assert_called_once()
         mock._multi_connect.assert_called_once_with(timeout=5)
+
+
+class TestCtrlExitHardTimeout:
+    """``_ctrl("exit")`` must never hang forever, even if the underlying
+    gRPC channel/transport does not honor its own per-call deadline once the
+    server process has died (observed on Windows/WNUA)."""
+
+    class _Dummy:
+        """Minimal stand-in exposing what '_ctrl' touches for the EXIT path."""
+
+        def __init__(self, stub):
+            self._log = MagicMock()
+            self._stub = stub
+            self.transport_mode = "wnua"
+
+        _ctrl = MapdlGrpc._ctrl
+
+    def test_returns_promptly_when_the_stub_raises_the_expected_error(self):
+        """The common case: the connection drops and the stub raises the
+        expected gRPC error almost immediately."""
+        stub = Mock()
+        stub.Ctrl.side_effect = grpc.RpcError("connection closed")
+        # make it look like the expected type without importing internals
+        from grpc._channel import _InactiveRpcError
+
+        stub.Ctrl.side_effect = _InactiveRpcError(MagicMock())
+        dummy = self._Dummy(stub)
+
+        dummy._ctrl("exit")
+
+        stub.Ctrl.assert_called_once()
+
+    def test_reraises_unexpected_errors(self):
+        """Any error other than the expected gRPC "connection closed" family
+        must still propagate to the caller."""
+        stub = Mock()
+        stub.Ctrl.side_effect = ValueError("boom")
+        dummy = self._Dummy(stub)
+
+        with pytest.raises(ValueError, match="boom"):
+            dummy._ctrl("exit")
+
+    def test_does_not_hang_when_the_stub_call_never_returns(self):
+        """If the blocking 'stub.Ctrl' call never returns (simulating a
+        transport that does not honor its own deadline), '_ctrl' must give
+        up after its own hard wall-clock timeout instead of hanging
+        forever."""
+        never_return = threading.Event()
+
+        def blocking_call(*args, **kwargs):
+            # Block far longer than the hard timeout used below; the
+            # calling thread must not wait for this.
+            never_return.wait(30)
+            return None
+
+        stub = Mock()
+        stub.Ctrl.side_effect = blocking_call
+        dummy = self._Dummy(stub)
+
+        start = time.time()
+        dummy._ctrl("exit", timeout=0.1)
+        elapsed = time.time() - start
+
+        # hard_timeout = timeout (0.1) + buffer (5.0) = 5.1s; give some slack
+        assert elapsed < 8.0
+        dummy._log.warning.assert_called_once()
+
+        never_return.set()

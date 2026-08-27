@@ -2959,14 +2959,98 @@ class MapdlGrpc(MapdlBase):
 
         if self._stub is None:
             raise MapdlRuntimeError("MAPDL stub not initialized")
+        stub = self._stub
 
         # handle socket closing upon exit
         if cmd.lower() == "exit":
-            try:
-                # this always returns an error as the connection is closed
-                self._stub.Ctrl(request, timeout=timeout)
-            except (_InactiveRpcError, _MultiThreadedRendezvous):
-                pass
+            # The server process is expected to die (almost) immediately
+            # after receiving this command, and the blocking Ctrl("EXIT")
+            # call is expected to fail once the connection is severed.
+            #
+            # However, on at least some local transports (observed with
+            # WNUA on Windows, but WNUA itself is just a plain
+            # 'grpc.insecure_channel' under the hood - see
+            # 'ansys.tools.common.cyberchannel.create_wnua_channel' - so
+            # this is not believed to be WNUA-specific), gRPC's own
+            # per-call deadline (``timeout``) and connectivity-state
+            # callbacks are not reliably honored once the peer process is
+            # killed abruptly: the call can block in
+            # 'grpc._channel._Rendezvous._blocking' -> 'call.next_event()'
+            # indefinitely, well past ``timeout``, hanging the caller
+            # forever.
+            #
+            # To guard against that, run the blocking call in a background
+            # thread and enforce our own hard wall-clock timeout from this
+            # (calling) thread via 'Thread.join'. That join does not depend
+            # on gRPC's completion queue or deadline machinery at all, so
+            # it bounds the wait even if the underlying transport never
+            # reports the connection as dead. If the call does not return
+            # in time we abandon the wait: the background thread is left
+            # running as a daemon (gRPC gives no safe way to cancel/abort
+            # an in-flight blocking call), and process-based cleanup
+            # (``_close_process`` / PID-based killing) takes over instead.
+            self._log.debug(
+                f"transport_mode={getattr(self, 'transport_mode', None)!r} "
+                f"ctrl_timeout={timeout!r}"
+            )
+
+            call_result: Dict[str, BaseException] = {}
+
+            def _call_ctrl_exit() -> None:
+                try:
+                    # this always returns an error as the connection is closed
+                    stub.Ctrl(request, timeout=timeout)
+                except (
+                    BaseException
+                ) as exc:  # noqa: BLE001 - captured, handled by caller
+                    call_result["error"] = exc
+
+            call_thread = threading.Thread(
+                target=_call_ctrl_exit,
+                name="pymapdl-ctrl-exit",
+                daemon=True,
+            )
+            t_start = time.time()
+            call_thread.start()
+
+            # extra slack on top of the gRPC-level timeout to allow for
+            # normal call/response overhead before we give up waiting
+            hard_timeout_buffer = 5.0
+            hard_timeout = (
+                timeout + hard_timeout_buffer if timeout is not None else 10.0
+            )
+            call_thread.join(hard_timeout)
+
+            if call_thread.is_alive():
+                self._log.warning(
+                    f"Ctrl('EXIT') call did not return within "
+                    f"{hard_timeout:.1f}s (hard wall-clock timeout); "
+                    "abandoning the wait since the underlying transport "
+                    "did not honor the per-call deadline. Proceeding with "
+                    "process-based cleanup instead. The background thread "
+                    "issuing the call will keep running until the "
+                    "connection is eventually closed."
+                )
+                return
+
+            elapsed = time.time() - t_start
+            error = call_result.get("error")
+            if error is None:
+                self._log.debug(
+                    f"Ctrl('EXIT') returned normally after {elapsed:.2f}s "
+                    "(unexpected: usually errors)"
+                )
+            elif isinstance(error, (_InactiveRpcError, _MultiThreadedRendezvous)):
+                self._log.debug(
+                    f"Ctrl('EXIT') raised expected {type(error).__name__} "
+                    f"after {elapsed:.2f}s: {error}"
+                )
+            else:
+                self._log.debug(
+                    f"Ctrl('EXIT') raised unexpected {type(error).__name__} "
+                    f"after {elapsed:.2f}s: {error}"
+                )
+                raise error
             return
 
         resp = self._stub.Ctrl(request, timeout=timeout)
