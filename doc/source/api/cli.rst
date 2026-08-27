@@ -22,7 +22,10 @@ exit the interpreter. For an introduction with examples, see
    <ansys.mapdl.core.launcher.connection.close_all_local_instances>`. It is
    still re-exported as ``ansys.mapdl.core.cli.stop.stop`` and
    ``ansys.mapdl.core.launcher.stop`` for convenience, and the ``pymapdl
-   stop`` command wraps it the same way as every other sub-command.
+   stop`` command wraps it the same way as every other sub-command. For
+   consistency with :func:`launch_mapdl()
+   <ansys.mapdl.core.launcher.launch_mapdl>`, it is also exposed at the top
+   level of the package as :func:`stop_mapdl() <ansys.mapdl.core.stop_mapdl>`.
 
 Manage instances
 -----------------
