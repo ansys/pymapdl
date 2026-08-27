@@ -23,6 +23,7 @@
 """Test the information module"""
 
 import inspect
+import re
 
 import pytest
 
@@ -128,6 +129,97 @@ def test_mapdl_info(mapdl, cleared, capfd):
     assert "Product" in out
     assert "MAPDL Version" in out
     assert "UPDATE" in out
+
+
+@pytest.mark.xfail(
+    reason=(
+        "The '/STATUS' command does not populate the release/build/update "
+        "version fields on the MAPDL versions tested (v25.1, v25.2, v26.1 "
+        "'ubuntu-cicd' images). See #4760."
+    )
+)
+def test_mapdl_version_release_build_update_format(mapdl, cleared):
+    """Regression test for #4540.
+
+    ``mapdl.info.mapdl_version_release``, ``mapdl_version_build`` and
+    ``mapdl_version_update`` are parsed from the ``/STATUS`` MAPDL command
+    output. If MAPDL stops reporting this banner correctly (for example,
+    returning blank/placeholder values such as ``RELEASE`` with nothing
+    after it, ``BUILD  0.0`` or ``UPDATE  0``), these fields silently
+    become useless. This test pins down the expected format so a
+    server-side regression is caught instead of passing silently (the
+    previous test only checked ``isinstance(value, str)``, which blank
+    strings also satisfy).
+
+    Currently marked ``xfail`` because this is broken on every MAPDL
+    version tested so far (see #4760), not just a one-off regression.
+    Remove the ``xfail`` marker once that issue is resolved.
+    """
+    info = mapdl.info
+
+    release = info.mapdl_version_release
+    build = info.mapdl_version_build
+    update = info.mapdl_version_update
+
+    assert (
+        release
+    ), "MAPDL version release is empty. The '/STATUS' output format may have changed server-side."
+    assert re.fullmatch(
+        r"\d{4}\s*R\d+", release
+    ), f"Unexpected MAPDL version release format: {release!r}"
+
+    assert (
+        build
+    ), "MAPDL version build is empty. The '/STATUS' output format may have changed server-side."
+    assert re.fullmatch(
+        r"\d+(\.\d+)?", build
+    ), f"Unexpected MAPDL version build format: {build!r}"
+    assert build != "0.0", (
+        "MAPDL version build returned the placeholder value '0.0'. "
+        "This means the '/STATUS' command is no longer reporting the "
+        "real build number (see #4540)."
+    )
+
+    assert (
+        update
+    ), "MAPDL version update is empty. The '/STATUS' output format may have changed server-side."
+    assert update.isdigit(), f"Unexpected MAPDL version update format: {update!r}"
+    assert update != "0", (
+        "MAPDL version update returned the placeholder value '0'. "
+        "This means the '/STATUS' command is no longer reporting the "
+        "real update date (see #4540)."
+    )
+
+
+@pytest.mark.xfail(
+    reason=(
+        "The '/STATUS'-parsed build number does not match 'mapdl.version' "
+        "on the MAPDL versions tested (v25.1, v25.2, v26.1 'ubuntu-cicd' "
+        "images). See #4760."
+    )
+)
+def test_mapdl_version_build_matches_reported_version(mapdl, cleared):
+    """Cross-check the ``/STATUS``-parsed build number against ``mapdl.version``.
+
+    ``mapdl.version`` (backed by ``mapdl.parameters.revision``) comes from a
+    completely different MAPDL query than ``mapdl.info.mapdl_version_build``
+    (parsed from ``/STATUS``). If the two disagree, it means MAPDL's
+    ``/STATUS`` banner is broken or out of sync, which is exactly what
+    happened in #4540 (``/STATUS`` reported ``BUILD  0.0`` while
+    ``mapdl.version`` correctly reported ``26.1``).
+
+    Currently marked ``xfail`` because this is broken on every MAPDL
+    version tested so far (see #4760), not just a one-off regression.
+    Remove the ``xfail`` marker once that issue is resolved.
+    """
+    build = mapdl.info.mapdl_version_build
+    reported_version = mapdl.version
+
+    assert float(build) == pytest.approx(reported_version, abs=1e-6), (
+        f"MAPDL version build parsed from '/STATUS' ({build!r}) does not "
+        f"match 'mapdl.version' ({reported_version!r}). This indicates the "
+        "'/STATUS' command output is no longer reliable server-side."
+    )
 
 
 def test_info_title(mapdl, cleared):
