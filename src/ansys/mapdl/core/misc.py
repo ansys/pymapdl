@@ -125,6 +125,41 @@ def check_valid_routine(routine: Union[str, ROUTINES]) -> bool:
     return True
 
 
+def quote_path_if_needed(path: Union[str, "os.PathLike[str]"]) -> str:
+    """Wrap a path in single quotes if it contains a space.
+
+    MAPDL/APDL command arguments are whitespace-sensitive, so a
+    path with a space must be quoted to be interpreted as a single
+    argument. If the path is already wrapped in single quotes, it is
+    returned unchanged.
+
+    Parameters
+    ----------
+    path : str or os.PathLike
+        Path (or any other command argument) to conditionally wrap in
+        single quotes.
+
+    Returns
+    -------
+    str
+        The path, wrapped in single quotes if it contains a space and
+        was not already wrapped.
+
+    Examples
+    --------
+    >>> quote_path_if_needed("file.rst")
+    'file.rst'
+    >>> quote_path_if_needed("my file.rst")
+    "'my file.rst'"
+    >>> quote_path_if_needed("'my file.rst'")
+    "'my file.rst'"
+    """
+    path = str(path)
+    if " " in path and not (path.startswith("'") and path.endswith("'")):
+        return f"'{path}'"
+    return path
+
+
 def is_float(input_string: str) -> bool:
     """Returns true when a string can be converted to a float"""
     try:
