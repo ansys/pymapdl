@@ -16,6 +16,20 @@ library `ansys-tools-common.path <ansys_tools_common_>`_.
    close_all_local_instances
    stop
 
+.. note::
+
+   :func:`stop() <ansys.mapdl.core.launcher.stop>` is also exposed at the top
+   level of the package as :func:`stop_mapdl() <ansys.mapdl.core.stop_mapdl>`,
+   for consistency with :func:`launch_mapdl()
+   <ansys.mapdl.core.launcher.launch_mapdl>`.
+
+.. currentmodule:: ansys.mapdl.core
+
+.. autosummary::
+   :toctree: _autosummary
+
+   stop_mapdl
+
 
 ``ansys-tools-common.path`` functions
 --------------------------------------
