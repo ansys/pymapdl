@@ -39,6 +39,7 @@ from ansys.mapdl.core.misc import (
     quote_path_if_needed,
     requires_package,
     run_as,
+    unquote_path,
 )
 from conftest import requires
 
@@ -72,6 +73,29 @@ def test_check_valid_ip(ip):
 )
 def test_quote_path_if_needed(path, expected):
     assert quote_path_if_needed(path) == expected
+
+
+@pytest.mark.parametrize(
+    "path,expected",
+    [
+        ("file.rst", "file.rst"),
+        ("'my file.rst'", "my file.rst"),
+        ("my file.rst", "my file.rst"),
+        (
+            "'C:/Users/some user/results/file.rst'",
+            "C:/Users/some user/results/file.rst",
+        ),
+        ("", ""),
+        ("'", "'"),
+    ],
+)
+def test_unquote_path(path, expected):
+    assert unquote_path(path) == expected
+
+
+def test_quote_unquote_path_roundtrip():
+    path = "my file.rst"
+    assert unquote_path(quote_path_if_needed(path)) == path
 
 
 @pytest.mark.parametrize("ip", ["asdf", "300.2.2.2"])

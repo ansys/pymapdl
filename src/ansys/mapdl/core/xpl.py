@@ -31,7 +31,7 @@ import numpy as np
 
 from .common_grpc import ANSYS_VALUE_TYPE
 from .errors import MapdlRuntimeError
-from .misc import quote_path_if_needed, random_string
+from .misc import quote_path_if_needed, random_string, unquote_path
 
 MYCTYPE = {
     np.int32: "I",
@@ -450,7 +450,7 @@ class ansXpl:
             num_last = -1
 
         dtype = np.double
-        file_extension = pathlib.Path(self._filename).suffix[1:]
+        file_extension = pathlib.Path(unquote_path(self._filename)).suffix[1:]
         if file_extension.lower() != "rst":
             raise MapdlRuntimeError(
                 "This method only supports extracting records from result files"

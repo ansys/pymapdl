@@ -160,6 +160,38 @@ def quote_path_if_needed(path: Union[str, "os.PathLike[str]"]) -> str:
     return path
 
 
+def unquote_path(path: Union[str, "os.PathLike[str]"]) -> str:
+    """Remove a single pair of wrapping single quotes from a path.
+
+    This is the counterpart of :func:`quote_path_if_needed`. Use it
+    before performing file-name inspection (for example, checking the
+    file suffix with :class:`pathlib.Path`) on a path that might have
+    been quoted to survive being passed as an MAPDL/APDL command
+    argument.
+
+    Parameters
+    ----------
+    path : str or os.PathLike
+        Path (or any other command argument) to conditionally unwrap.
+
+    Returns
+    -------
+    str
+        The path, without the wrapping single quotes if it had any.
+
+    Examples
+    --------
+    >>> unquote_path("file.rst")
+    'file.rst'
+    >>> unquote_path("'my file.rst'")
+    'my file.rst'
+    """
+    path = str(path)
+    if path.startswith("'") and path.endswith("'") and len(path) >= 2:
+        return path[1:-1]
+    return path
+
+
 def is_float(input_string: str) -> bool:
     """Returns true when a string can be converted to a float"""
     try:
