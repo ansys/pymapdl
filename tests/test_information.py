@@ -131,6 +131,13 @@ def test_mapdl_info(mapdl, cleared, capfd):
     assert "UPDATE" in out
 
 
+@pytest.mark.xfail(
+    reason=(
+        "The '/STATUS' command does not populate the release/build/update "
+        "version fields on the MAPDL versions tested (v25.1, v25.2, v26.1 "
+        "'ubuntu-cicd' images). See #4760."
+    )
+)
 def test_mapdl_version_release_build_update_format(mapdl, cleared):
     """Regression test for #4540.
 
@@ -143,6 +150,10 @@ def test_mapdl_version_release_build_update_format(mapdl, cleared):
     server-side regression is caught instead of passing silently (the
     previous test only checked ``isinstance(value, str)``, which blank
     strings also satisfy).
+
+    Currently marked ``xfail`` because this is broken on every MAPDL
+    version tested so far (see #4760), not just a one-off regression.
+    Remove the ``xfail`` marker once that issue is resolved.
     """
     info = mapdl.info
 
@@ -180,6 +191,13 @@ def test_mapdl_version_release_build_update_format(mapdl, cleared):
     )
 
 
+@pytest.mark.xfail(
+    reason=(
+        "The '/STATUS'-parsed build number does not match 'mapdl.version' "
+        "on the MAPDL versions tested (v25.1, v25.2, v26.1 'ubuntu-cicd' "
+        "images). See #4760."
+    )
+)
 def test_mapdl_version_build_matches_reported_version(mapdl, cleared):
     """Cross-check the ``/STATUS``-parsed build number against ``mapdl.version``.
 
@@ -189,6 +207,10 @@ def test_mapdl_version_build_matches_reported_version(mapdl, cleared):
     ``/STATUS`` banner is broken or out of sync, which is exactly what
     happened in #4540 (``/STATUS`` reported ``BUILD  0.0`` while
     ``mapdl.version`` correctly reported ``26.1``).
+
+    Currently marked ``xfail`` because this is broken on every MAPDL
+    version tested so far (see #4760), not just a one-off regression.
+    Remove the ``xfail`` marker once that issue is resolved.
     """
     build = mapdl.info.mapdl_version_build
     reported_version = mapdl.version
