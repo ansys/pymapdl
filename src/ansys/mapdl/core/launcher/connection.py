@@ -317,8 +317,8 @@ def stop(
 
     Raises
     ------
-    ValueError
-        When *pid* cannot be converted to an integer.
+    TypeError
+        When *pid* is given but is not an int.
 
     Examples
     --------
@@ -334,12 +334,14 @@ def stop(
     [23644, 23645]
 
     """
-    from ansys.mapdl.core.cli.constants import MAPDL_DEFAULT_PORT
+    from .config import MAPDL_DEFAULT_PORT
 
     if all:
         return _stop_all_instances()
 
     if pid and not port:
+        if not isinstance(pid, int):
+            raise TypeError(f"'pid' must be an int, got {type(pid).__name__!r}.")
         return _stop_process_tree(pid)
 
     return _stop_instance_on_port(port or MAPDL_DEFAULT_PORT)
@@ -353,7 +355,7 @@ def _stop_all_instances() -> List[int]:
     list of int
         Process IDs of the processes that have been killed.
     """
-    from ansys.mapdl.core.cli.helpers import can_access_process
+    from .network import can_access_process
 
     stopped: List[int] = []
 
@@ -392,7 +394,7 @@ def _stop_instance_on_port(port: int) -> List[int]:
         Process ID of the killed instance, or an empty list when no instance
         is running on *port*.
     """
-    from ansys.mapdl.core.cli.helpers import get_ansys_process_from_port
+    from .network import get_ansys_process_from_port
 
     proc = get_ansys_process_from_port(port)
     if proc is None:
@@ -422,21 +424,14 @@ def _stop_process_tree(pid: int) -> List[int]:
     Returns
     -------
     list of int
-        Process IDs that are confirmed to have terminated. The parent PID is
-        only included when the process is gone before the timeout elapses.
-        An empty list means that the process could not be found or that
-        nothing could be killed.
-
-    Raises
-    ------
-    ValueError
-        When *pid* cannot be converted to an integer.
+        Process IDs that were killed. Only the parent PID is confirmed to
+        have actually terminated, because :meth:`psutil.Process.wait` is
+        called on it before it is added to the result; children are killed
+        but not waited on individually, so a killed child may still be in
+        the process of exiting when its PID is returned. An empty list means
+        that the process could not be found or that nothing could be
+        killed.
     """
-    try:
-        pid = int(pid)
-    except (TypeError, ValueError) as err:
-        raise ValueError("PID provided could not be converted to int.") from err
-
     try:
         proc = psutil.Process(pid)
     except psutil.NoSuchProcess:

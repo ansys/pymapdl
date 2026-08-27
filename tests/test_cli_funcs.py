@@ -111,7 +111,9 @@ def test_stop_defaults_to_the_default_port():
     """Without arguments, the instance on port 50052 is targeted."""
     from ansys.mapdl.core.cli.constants import MAPDL_DEFAULT_PORT
 
-    with patch("ansys.mapdl.core.cli.helpers.get_ansys_process_from_port") as mock_get:
+    with patch(
+        "ansys.mapdl.core.launcher.network.get_ansys_process_from_port"
+    ) as mock_get:
         mock_get.return_value = None
         assert stop() == []
 
@@ -124,7 +126,7 @@ def test_stop_returns_the_killed_pid():
 
     with (
         patch(
-            "ansys.mapdl.core.cli.helpers.get_ansys_process_from_port",
+            "ansys.mapdl.core.launcher.network.get_ansys_process_from_port",
             return_value=proc,
         ),
         patch("ansys.mapdl.core.launcher.connection._kill_process") as mock_kill,
@@ -150,7 +152,9 @@ def test_stop_all_takes_precedence_over_port():
     """``all=True`` wins over an explicit port."""
     with (
         patch("psutil.process_iter", return_value=[]),
-        patch("ansys.mapdl.core.cli.helpers.get_ansys_process_from_port") as mock_get,
+        patch(
+            "ansys.mapdl.core.launcher.network.get_ansys_process_from_port"
+        ) as mock_get,
     ):
         assert stop(port=50055, all=True) == []
 

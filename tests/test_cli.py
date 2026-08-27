@@ -2032,7 +2032,7 @@ def test_stop_port_kill_raises(run_cli):
 
 @requires("click")
 def test_stop_pid_invalid():
-    """Test the stop callback reports a PID that cannot be converted to int."""
+    """Test the stop callback reports a PID that is not an int."""
     import click
     from click.testing import CliRunner
 
@@ -2045,14 +2045,14 @@ def test_stop_pid_invalid():
 
     runner = CliRunner()
     result = runner.invoke(invoke_with_invalid_pid, [])
-    assert "pid provided could not be converted to int" in result.output.lower()
+    assert "'pid' must be an int" in result.output.lower()
 
 
 def test_stop_func_pid_invalid():
-    """``stop`` raises ValueError when the PID cannot be converted to int."""
+    """``stop`` raises TypeError when the PID is not an int."""
     from ansys.mapdl.core.cli.stop import stop
 
-    with pytest.raises(ValueError, match="could not be converted to int"):
+    with pytest.raises(TypeError, match="'pid' must be an int"):
         stop(pid="not-an-int")
 
 

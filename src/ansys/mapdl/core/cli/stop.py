@@ -81,7 +81,7 @@ def stop_cli(port: Optional[int], pid: Optional[int], all: bool) -> None:
     """
     try:
         stopped = stop(port=port, pid=pid, all=all)
-    except ValueError as err:
+    except (ValueError, TypeError) as err:
         click.echo(click.style("ERROR: ", fg="red") + str(err))
         return
 
