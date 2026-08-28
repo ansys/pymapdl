@@ -79,7 +79,7 @@ tests = [
   "pytest-pyvista==0.3.3",
   "pytest-random-order==1.2.0",
   "pytest-reportlog==1.0.0",
-  "pytest-rerunfailures==16.4",
+  "pytest-rerunfailures==16.6",
   "pytest-timeout==2.4.0",
   "pytest==9.1.1",
   "scipy==1.15.3",
