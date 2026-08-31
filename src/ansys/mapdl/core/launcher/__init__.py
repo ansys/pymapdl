@@ -56,6 +56,7 @@ from .connection import (
     create_grpc_client,
 )
 from .connection import close_all_local_instances  # noqa: F401
+from .connection import stop  # noqa: F401
 from .environment import prepare_environment
 from .errors import ConfigurationError, LaunchError
 from .hpc import (

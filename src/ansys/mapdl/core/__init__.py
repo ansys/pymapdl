@@ -108,6 +108,7 @@ run_every_import()
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
 from ansys.mapdl.core.launcher import close_all_local_instances
+from ansys.mapdl.core.launcher import stop as stop_mapdl
 
 # override default launcher when on pyansys.com
 if "ANSJUPHUB_VER" in os.environ:  # pragma: no cover
