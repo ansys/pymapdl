@@ -25,11 +25,13 @@ from unittest.mock import MagicMock
 import grpc
 import pytest
 
+from ansys.mapdl.core import errors as errors_module
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
     MapdlConnectionError,
     MapdlException,
     MapdlExitedError,
+    MapdlgRPCError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
     _build_unavailable_suggestion,
@@ -300,3 +302,58 @@ def test_protect_grpc_translates_future_cancelled_error():
 
     with pytest.raises(MapdlConnectionError, match="TRANSIENT_FAILURE"):
         raising(mock_mapdl)
+
+
+class _FakeRpcError(grpc.RpcError):
+    """Minimal 'grpc.RpcError' double exposing 'code()'/'details()'."""
+
+    def __init__(self, code, details):
+        self._code = code
+        self._details = details
+
+    def code(self):
+        return self._code
+
+    def details(self):
+        return self._details
+
+
+@pytest.mark.parametrize(
+    "details,expected_limit",
+    [
+        # Message format seen with streaming RPCs (gRPC wraps it with
+        # "Stream removed (CLIENT: ...)").
+        (
+            "Stream removed (CLIENT: Received message larger than max "
+            "(262152 vs. 1024))",
+            262152,
+        ),
+        # Message format seen with unary RPCs.
+        ("Received message larger than max (512 vs. 100)", 512),
+    ],
+)
+def test_protect_grpc_translates_resource_exhausted_error(
+    monkeypatch, details, expected_limit
+):
+    """A 'RESOURCE_EXHAUSTED' error whose details report a message that is
+    too large becomes a 'MapdlgRPCError' suggesting
+    'PYMAPDL_MAX_MESSAGE_LENGTH' set to the received message size, regardless
+    of whether gRPC wraps the details with a 'Stream removed' prefix."""
+    monkeypatch.setattr(errors_module, "sleep", lambda *args, **kwargs: None)
+
+    mock_mapdl = MagicMock(spec=MapdlGrpc)
+    mock_mapdl._log = MagicMock()
+    mock_mapdl._exited = False
+    mock_mapdl.exited = False
+    mock_mapdl.is_alive = True
+
+    @protect_grpc
+    def raising(self, n_attempts=0):
+        raise _FakeRpcError(grpc.StatusCode.RESOURCE_EXHAUSTED, details)
+
+    with pytest.raises(
+        MapdlgRPCError, match="Received message larger than max"
+    ) as excinfo:
+        raising(mock_mapdl, n_attempts=0)
+
+    assert f"PYMAPDL_MAX_MESSAGE_LENGTH={expected_limit}" in str(excinfo.value)
