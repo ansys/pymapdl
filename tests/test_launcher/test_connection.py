@@ -1037,7 +1037,7 @@ class TestFindLiveMapdlProcesses:
 class TestCloseAllLocalInstances:
     """Unit tests for close_all_local_instances."""
 
-    _STOP_TARGET = "ansys.mapdl.core.cli.stop.stop"
+    _STOP_TARGET = "ansys.mapdl.core.launcher.connection.stop"
 
     def test_no_port_range_calls_stop_with_all(self):
         """With no port_range, stop is called once with all=True."""
@@ -1080,10 +1080,12 @@ class TestCloseAllLocalInstances:
 
     def test_stop_is_callable_without_click(self):
         """The stop used internally is the plain function, not the Click command."""
-        from ansys.mapdl.core.cli.stop import stop
+        from ansys.mapdl.core.launcher.connection import stop
 
         assert not hasattr(stop, "callback"), "stop must not be a Click command"
 
-        with patch("ansys.mapdl.core.cli.stop._stop_all_instances") as mock_all:
+        with patch(
+            "ansys.mapdl.core.launcher.connection._stop_all_instances"
+        ) as mock_all:
             mock_all.return_value = [123]
             assert stop(all=True) == [123]

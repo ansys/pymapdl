@@ -30,6 +30,14 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 import psutil
 
 from ansys.mapdl.core.cli.constants import DEFAULT_TIMEOUT
+from ansys.mapdl.core.launcher.network import (
+    get_ansys_process_from_port as _get_ansys_process_from_port,
+)
+from ansys.mapdl.core.launcher.network import (
+    is_valid_ansys_process_name as _is_valid_ansys_process_name,
+)
+from ansys.mapdl.core.launcher.network import can_access_process as _can_access_process
+from ansys.mapdl.core.launcher.network import is_alive_status as _is_alive_status
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
@@ -146,33 +154,17 @@ def can_access_process(proc):
     bool
         True if we can safely access the process
     """
-    import getpass
-    import platform
-
-    try:
-        # Check if we can access basic process info and if it belongs to current user
-        current_user = getpass.getuser()
-        process_user = proc.username()
-        if platform.system() == "Windows" and "\\" in process_user:
-            return current_user == process_user.split("\\")[-1]
-        return process_user == current_user
-    except (psutil.AccessDenied, psutil.NoSuchProcess):
-        # Cannot access process or process doesn't exist
-        return False
+    return _can_access_process(proc)
 
 
 def is_valid_ansys_process_name(name: str) -> bool:
     """Check if process name indicates ANSYS/MAPDL"""
-    return ("ansys" in name.lower()) or ("mapdl" in name.lower())
+    return _is_valid_ansys_process_name(name)
 
 
 def is_alive_status(status) -> bool:
     """Check if process status indicates alive"""
-    return status in [
-        psutil.STATUS_RUNNING,
-        psutil.STATUS_IDLE,
-        psutil.STATUS_SLEEPING,
-    ]
+    return _is_alive_status(status)
 
 
 def get_mapdl_instances() -> List[Dict[str, Any]]:
@@ -254,28 +246,16 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
 
 
 def get_ansys_process_from_port(port: int):
-    # Filter by name first
-    potential_procs = []
-    for proc in psutil.process_iter(attrs=["name"]):
-        name = proc.info["name"]
-        if is_valid_ansys_process_name(name):
-            potential_procs.append(proc)
+    """Find the ANSYS/MAPDL gRPC process listening on a given port.
 
-    for proc in potential_procs:
-        try:
-            status = proc.status()
-            if not is_alive_status(status):
-                continue
-            cmdline = proc.cmdline()
-            if "-grpc" not in cmdline:
-                continue
-            # Check port from cmdline arguments
-            try:
-                port_index = cmdline.index("-port")
-                proc_port = int(cmdline[port_index + 1])
-            except (ValueError, IndexError):
-                continue
-            if proc_port == port:
-                return proc
-        except (psutil.NoSuchProcess, psutil.ZombieProcess, psutil.AccessDenied):
-            continue
+    Parameters
+    ----------
+    port : int
+        Port to look for in the process command line arguments.
+
+    Returns
+    -------
+    Optional[psutil.Process]
+        The matching process, or ``None`` if none is found.
+    """
+    return _get_ansys_process_from_port(port)
