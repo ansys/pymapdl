@@ -584,6 +584,16 @@ def pytest_unconfigure(config: pytest.Config) -> None:
     faulthandler.enable(file=fileno)
     faulthandler.dump_traceback_later(timeout, exit=True)
 
+    # Emit a marker so CI logs positively confirm the watchdog is live. Without
+    # it a healthy run is indistinguishable from one where this hook silently
+    # bailed out, and the next hang would again produce no traceback.
+    print(
+        f"\n[pymapdl] shutdown watchdog armed: {timeout:.0f}s "
+        "(set PYMAPDL_SHUTDOWN_TIMEOUT to change, 0 to disable)",
+        file=sys.stderr,
+        flush=True,
+    )
+
 
 ################################################################
 #
