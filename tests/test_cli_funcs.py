@@ -111,7 +111,9 @@ def test_stop_defaults_to_the_default_port():
     """Without arguments, the instance on port 50052 is targeted."""
     from ansys.mapdl.core.cli.constants import MAPDL_DEFAULT_PORT
 
-    with patch("ansys.mapdl.core.cli.stop.get_ansys_process_from_port") as mock_get:
+    with patch(
+        "ansys.mapdl.core.launcher.network.get_ansys_process_from_port"
+    ) as mock_get:
         mock_get.return_value = None
         assert stop() == []
 
@@ -124,10 +126,10 @@ def test_stop_returns_the_killed_pid():
 
     with (
         patch(
-            "ansys.mapdl.core.cli.stop.get_ansys_process_from_port",
+            "ansys.mapdl.core.launcher.network.get_ansys_process_from_port",
             return_value=proc,
         ),
-        patch("ansys.mapdl.core.cli.stop._kill_process") as mock_kill,
+        patch("ansys.mapdl.core.launcher.connection._kill_process") as mock_kill,
     ):
         assert stop(port=50053) == [4321]
 
@@ -141,7 +143,7 @@ def test_stop_all_returns_every_killed_pid():
     with (
         patch("psutil.process_iter", return_value=procs),
         patch("psutil.pid_exists", return_value=True),
-        patch("ansys.mapdl.core.cli.stop._kill_process"),
+        patch("ansys.mapdl.core.launcher.connection._kill_process"),
     ):
         assert stop(all=True) == [1, 2]
 
@@ -150,7 +152,9 @@ def test_stop_all_takes_precedence_over_port():
     """``all=True`` wins over an explicit port."""
     with (
         patch("psutil.process_iter", return_value=[]),
-        patch("ansys.mapdl.core.cli.stop.get_ansys_process_from_port") as mock_get,
+        patch(
+            "ansys.mapdl.core.launcher.network.get_ansys_process_from_port"
+        ) as mock_get,
     ):
         assert stop(port=50055, all=True) == []
 
@@ -169,7 +173,7 @@ def test_stop_by_pid_kills_children_first():
     with (
         patch("psutil.Process", return_value=parent),
         patch(
-            "ansys.mapdl.core.cli.stop._kill_process",
+            "ansys.mapdl.core.launcher.connection._kill_process",
             side_effect=lambda proc: killed.append(proc),
         ),
     ):
@@ -187,7 +191,7 @@ def test_stop_by_pid_omits_a_surviving_process():
 
     with (
         patch("psutil.Process", return_value=parent),
-        patch("ansys.mapdl.core.cli.stop._kill_process"),
+        patch("ansys.mapdl.core.launcher.connection._kill_process"),
     ):
         assert stop(pid=12345) == []
 
@@ -205,7 +209,7 @@ def test_stop_by_pid_handles_unreachable_children():
 
     with (
         patch("psutil.Process", return_value=parent),
-        patch("ansys.mapdl.core.cli.stop._kill_process") as mock_kill,
+        patch("ansys.mapdl.core.launcher.connection._kill_process") as mock_kill,
     ):
         assert stop(pid=12345) == [12345]
 
@@ -226,7 +230,10 @@ def test_stop_by_pid_skips_a_child_that_cannot_be_killed(exc):
 
     with (
         patch("psutil.Process", return_value=parent),
-        patch("ansys.mapdl.core.cli.stop._kill_process", side_effect=_kill_side_effect),
+        patch(
+            "ansys.mapdl.core.launcher.connection._kill_process",
+            side_effect=_kill_side_effect,
+        ),
     ):
         assert stop(pid=12345) == [12345]
 
@@ -241,7 +248,7 @@ def test_stop_by_pid_does_not_raise_when_parent_kill_fails(exc):
 
     with (
         patch("psutil.Process", return_value=parent),
-        patch("ansys.mapdl.core.cli.stop._kill_process", side_effect=exc),
+        patch("ansys.mapdl.core.launcher.connection._kill_process", side_effect=exc),
     ):
         assert stop(pid=12345) == []
 
@@ -257,7 +264,7 @@ def test_stop_by_pid_treats_disappearance_during_wait_as_stopped(exc):
 
     with (
         patch("psutil.Process", return_value=parent),
-        patch("ansys.mapdl.core.cli.stop._kill_process"),
+        patch("ansys.mapdl.core.launcher.connection._kill_process"),
     ):
         assert stop(pid=12345) == [12345]
 

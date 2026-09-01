@@ -24,6 +24,7 @@
 
 from enum import Enum
 from functools import cache, wraps
+import re
 import signal
 import sys
 import threading
@@ -505,9 +506,15 @@ def protect_grpc(func: Callable) -> Callable:
 
                 if error.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:
                     if "Received message larger than max" in error.details():
-                        try:
-                            lim_ = int(error.details().split("(")[1].split("vs")[0])
-                        except IndexError:
+                        # Some gRPC versions wrap the message as
+                        # "Stream removed (CLIENT: Received message larger
+                        # than max (<received> vs. <limit>))", so the
+                        # received size is matched with a regex instead of
+                        # blindly splitting on "(".
+                        match = re.search(r"\((\d+)\s*vs\.?\s*\d+\)", error.details())
+                        if match:
+                            lim_ = int(match.group(1))
+                        else:
                             lim_ = int(512 * 1024**2)
 
                         raise MapdlgRPCError(

@@ -124,7 +124,10 @@ High-level helpers to start or connect to MAPDL instances live in the
 :mod:`ansys.mapdl.core.launcher` module. Use :func:`ansys.mapdl.core.launcher.launch_mapdl`
 to start or connect to an instance; for lower-level process control use
 :func:`ansys.mapdl.core.launcher.launch_mapdl_process` or
-:func:`ansys.mapdl.core.launcher.close_all_local_instances`.
+:func:`ansys.mapdl.core.launcher.close_all_local_instances`. To stop an
+instance, use :func:`ansys.mapdl.core.stop_mapdl`, exposed at the top level
+of the package for consistency with
+:func:`ansys.mapdl.core.launcher.launch_mapdl`.
 
 .. autosummary::
    :toctree: _autosummary
@@ -132,6 +135,7 @@ to start or connect to an instance; for lower-level process control use
    launcher.launch_mapdl
    launcher.launch_mapdl_process
    launcher.close_all_local_instances
+   stop_mapdl
 
 
 Transport-specific behavior

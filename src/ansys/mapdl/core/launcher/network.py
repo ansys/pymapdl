@@ -262,6 +262,98 @@ def get_process_at_port(port: int) -> Optional[psutil.Process]:
     return None
 
 
+def get_ansys_process_from_port(port: int) -> Optional[psutil.Process]:
+    """Find the ANSYS/MAPDL gRPC process listening on a given port.
+
+    Unlike :func:`get_process_at_port`, this filters candidate processes by
+    name first (cheap) before inspecting their command line arguments for
+    ``-grpc`` and the requested ``-port`` value.
+
+    Parameters
+    ----------
+    port : int
+        Port to look for in the process command line arguments.
+
+    Returns
+    -------
+    Optional[psutil.Process]
+        The matching process, or ``None`` if none is found.
+    """
+    # Filter by name first
+    potential_procs = []
+    for proc in psutil.process_iter(attrs=["name"]):
+        name = proc.info["name"]
+        if is_valid_ansys_process_name(name):
+            potential_procs.append(proc)
+
+    for proc in potential_procs:
+        try:
+            status = proc.status()
+            if not is_alive_status(status):
+                continue
+            cmdline = proc.cmdline()
+            if "-grpc" not in cmdline:
+                continue
+            # Check port from cmdline arguments
+            try:
+                port_index = cmdline.index("-port")
+                proc_port = int(cmdline[port_index + 1])
+            except (ValueError, IndexError):
+                continue
+            if proc_port == port:
+                return proc
+        except (psutil.NoSuchProcess, psutil.ZombieProcess, psutil.AccessDenied):
+            continue
+
+    return None
+
+
+def can_access_process(proc: psutil.Process) -> bool:
+    """Check if we have permission to access and interact with a process.
+
+    Returns True if:
+    1. We can access the process information (no AccessDenied)
+    2. The process belongs to the current user
+
+    Parameters
+    ----------
+    proc : psutil.Process
+        The process to check
+
+    Returns
+    -------
+    bool
+        True if we can safely access the process
+    """
+    import getpass
+    import platform
+
+    try:
+        # Check if we can access basic process info and if it belongs to current user
+        current_user = getpass.getuser()
+        process_user = proc.username()
+        if platform.system() == "Windows" and "\\" in process_user:
+            return current_user == process_user.split("\\")[-1]
+        return process_user == current_user
+    except (psutil.AccessDenied, psutil.NoSuchProcess):
+        # Cannot access process or process doesn't exist
+        return False
+
+
+def is_valid_ansys_process_name(name: str) -> bool:
+    """Check if process name indicates ANSYS/MAPDL"""
+    return ("ansys" in name.lower()) or ("mapdl" in name.lower())
+
+
+def is_alive_status(status) -> bool:
+    """Check if process status indicates alive"""
+    return status in [
+        psutil.STATUS_RUNNING,
+        psutil.STATUS_IDLE,
+        psutil.STATUS_SLEEPING,
+    ]
+
+
 def _is_mapdl_process(process: psutil.Process) -> bool:
     """Check if a process is an ANSYS MAPDL instance.
 
