@@ -36,6 +36,7 @@ import shutil
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
 import subprocess  # nosec B404
+import sys
 import tempfile
 import threading
 import time
@@ -200,6 +201,12 @@ PING_ABUSE_PROBE_INTERVAL_S = PING_ABUSE_INTERVAL_S * PING_ABUSE_PROBE_EVERY_N_P
 # Bounded timeout for the probe RPC itself, so a truly unresponsive server
 # cannot make the probe thread hang.
 PING_ABUSE_PROBE_TIMEOUT_S = 5.0
+
+# Hard wall-clock bound for closing the gRPC channel. ``grpc.Channel.close``
+# waits on condition variables that are only notified by gRPC's own
+# channel-spin thread, with no timeout of its own, so a wedged call or a
+# stalled spin thread would otherwise block the caller forever.
+CHANNEL_CLOSE_TIMEOUT_S = 10.0
 
 DEFAULT_GRPC_OPTIONS = [
     ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
@@ -2421,6 +2428,13 @@ class MapdlGrpc(MapdlBase):
         precisely the case that used to leak, because ``exit()`` returns early
         for such instances.
 
+        The close is never allowed to block indefinitely. It is skipped
+        entirely once the interpreter is finalizing, and bounded by
+        ``CHANNEL_CLOSE_TIMEOUT_S`` otherwise, because ``grpc.Channel.close``
+        waits without a timeout for gRPC's channel-spin thread to drain the
+        remaining calls and connectivity events. When that thread cannot run,
+        the wait never ends and the calling thread deadlocks.
+
         Parameters
         ----------
         exiting : bool, optional
@@ -2438,20 +2452,55 @@ class MapdlGrpc(MapdlBase):
         if channel is None:
             return
 
-        if callback is not None:
+        if sys.is_finalizing():
+            # During interpreter finalization CPython parks every daemon
+            # thread the moment it next tries to reacquire the GIL, and that
+            # includes gRPC's channel-spin thread. Both ``unsubscribe`` and
+            # ``close`` wait on condition variables that only that thread can
+            # notify (``_cygrpc._close`` loops on ``integrated_call_states``
+            # and ``connectivity_due`` with no timeout of its own), so calling
+            # them here deadlocks the main thread forever rather than raising.
+            # The process is exiting and the OS reclaims the sockets anyway,
+            # so dropping the reference is enough.
+            return
+
+        def _unsubscribe_and_close() -> None:
+            if callback is not None:
+                try:
+                    channel.unsubscribe(callback)
+                except Exception as e:
+                    if not exiting:
+                        self._log.debug(f"Error unsubscribing from gRPC channel: {e}")
+
             try:
-                channel.unsubscribe(callback)
+                channel.close()
             except Exception as e:
                 if not exiting:
-                    self._log.debug(f"Error unsubscribing from gRPC channel: {e}")
+                    self._log.debug(f"Error closing gRPC channel: {e}")
 
-        try:
-            channel.close()
-            if not exiting:
+        # Outside of finalization the spin thread is normally alive, but the
+        # same wait can still stall (for example on a call that never reports
+        # termination after the peer was killed). Bound it from this thread
+        # with ``Thread.join``, which does not depend on gRPC machinery. If it
+        # expires we abandon the daemon thread: gRPC offers no way to cancel an
+        # in-flight blocking close.
+        close_thread = threading.Thread(
+            target=_unsubscribe_and_close,
+            name="pymapdl-close-grpc-channel",
+            daemon=True,
+        )
+        close_thread.start()
+        close_thread.join(CHANNEL_CLOSE_TIMEOUT_S)
+
+        if not exiting:
+            if close_thread.is_alive():
+                self._log.debug(
+                    "Timed out after %s s while closing the gRPC channel. "
+                    "Abandoning the close call.",
+                    CHANNEL_CLOSE_TIMEOUT_S,
+                )
+            else:
                 self._log.debug("gRPC channel closed")
-        except Exception as e:
-            if not exiting:
-                self._log.debug(f"Error closing gRPC channel: {e}")
 
     def _remove_temp_dir_on_exit(self, path=None):
         """Removes the temporary directory created by the launcher.
