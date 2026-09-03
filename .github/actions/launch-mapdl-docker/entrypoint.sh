@@ -37,6 +37,15 @@ MEMORY_WORKSPACE_MB="${MEMORY_WORKSPACE_MB:-6000}"
 ENABLE_DPF_SERVER="${ENABLE_DPF_SERVER:-false}"
 DPF_PORT_INTERNAL="${DPF_PORT_INTERNAL:-50055}"
 
+# Best-effort core dump setup (see plan.md Phase 0 §3.1). `--ulimit core=-1`
+# on `docker run` already removes the size limit; this additionally tries to
+# point core dumps at the MAPDL working directory with a descriptive name so
+# they survive alongside the other collected logs. `core_pattern` is a
+# host-wide (not namespaced) sysctl on most kernels, so this may silently
+# no-op inside the container -- that is fine, it is best effort only.
+ulimit -c unlimited 2>/dev/null || true
+sysctl -w kernel.core_pattern="/jobs/core.%e.%p" >/dev/null 2>&1 || true
+
 debug "Configuration:"
 debug "  VERSION: ${VERSION}"
 debug "  MAPDL_VERSION: ${MAPDL_VERSION}"

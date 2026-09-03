@@ -73,6 +73,32 @@ MEMORY_DB_MB="${MEMORY_DB_MB:-6000}"
 MEMORY_WORKSPACE_MB="${MEMORY_WORKSPACE_MB:-6000}"
 TRANSPORT="${TRANSPORT:-insecure}"
 TIMEOUT="${TIMEOUT:-60}"
+EXTRA_ENV="${EXTRA_ENV:-}"
+ANS_DEBUG_CRASH="${ANS_DEBUG_CRASH:-1}"
+ENABLE_CORE_DUMPS="${ENABLE_CORE_DUMPS:-true}"
+
+# Crash-diagnostics instrumentation (see plan.md Phase 0 §3.1):
+# - ANS_DEBUG_CRASH=1 makes MAPDL's signal handler (sytrap.F) print the full
+#   developer call stack (PrintBackTrace) to stdout on a crash.
+# - --ulimit core=-1 lets the process dump core on a fatal signal instead of
+#   silently disappearing; the core file is collected alongside the other
+#   MAPDL logs.
+EXTRA_ENV_ARGS=()
+if [[ -n "${ANS_DEBUG_CRASH}" && "${ANS_DEBUG_CRASH}" != "false" && "${ANS_DEBUG_CRASH}" != "0" ]]; then
+    EXTRA_ENV_ARGS+=("-e" "ANS_DEBUG_CRASH=${ANS_DEBUG_CRASH}")
+fi
+if [[ -n "${EXTRA_ENV}" ]]; then
+    while IFS= read -r _env_line; do
+        [[ -z "${_env_line}" ]] && continue
+        EXTRA_ENV_ARGS+=("-e" "${_env_line}")
+    done <<< "${EXTRA_ENV}"
+fi
+
+CORE_DUMP_ARGS=()
+if [[ "${ENABLE_CORE_DUMPS}" == "true" ]]; then
+    # Unlimited core dump size for the container's processes.
+    CORE_DUMP_ARGS+=("--ulimit" "core=-1")
+fi
 
 
 echo -e "\n"
@@ -181,6 +207,9 @@ echo "  Instance Name: ${INSTANCE_NAME}"
 echo "  CPU Vendor: ${CPU_VENDOR}"
 echo "  Reserved memory: ${MEMORY_MB}"
 echo "  Reserved swap memory: ${MEMORY_SWAP_MB}"
+echo "  ANS_DEBUG_CRASH: ${ANS_DEBUG_CRASH}"
+echo "  Core dumps enabled: ${ENABLE_CORE_DUMPS}"
+echo "  Extra env vars: ${EXTRA_ENV:-<none>}"
 echo -e "\n"
 
 echo -e "\nMAPDL Configuration:"
@@ -259,6 +288,8 @@ docker run \
   --mount type=bind,src="${ENTRYPOINT_PATH}",dst=/entrypoint.sh \
   -e OMPI_ALLOW_RUN_AS_ROOT=1 \
   -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+  "${EXTRA_ENV_ARGS[@]}" \
+  "${CORE_DUMP_ARGS[@]}" \
   "${MAPDL_IMAGE}" \
   -c "chmod +x /entrypoint.sh && /entrypoint.sh"
 
