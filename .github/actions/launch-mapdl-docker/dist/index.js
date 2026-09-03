@@ -27663,9 +27663,14 @@ async function run() {
     const transport = core.getInput('transport') || 'insecure';
     const timeout = parseInt(core.getInput('timeout') || '60');
     const wait = core.getInput('wait') || 'true';
-    const extraEnv = core.getInput('extra-env') || '';
-    const ansDebugCrash = core.getInput('ans-debug-crash') || '1';
-    const enableCoreDumps = core.getInput('enable-core-dumps') || 'true';
+    // These three inputs already have defaults declared in action.yml, so
+    // core.getInput() never returns an unset value here. Do NOT `|| default`
+    // on top of that: it would silently turn an explicit '' (documented as
+    // "omit the variable") back into the default, which is not what callers
+    // asking to omit ANS_DEBUG_CRASH would expect.
+    const extraEnv = core.getInput('extra-env');
+    const ansDebugCrash = core.getInput('ans-debug-crash');
+    const enableCoreDumps = core.getInput('enable-core-dumps');
 
     // Save instance name for cleanup - maintain array of instances
     let instanceNames = [];

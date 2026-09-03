@@ -74,8 +74,12 @@ MEMORY_WORKSPACE_MB="${MEMORY_WORKSPACE_MB:-6000}"
 TRANSPORT="${TRANSPORT:-insecure}"
 TIMEOUT="${TIMEOUT:-60}"
 EXTRA_ENV="${EXTRA_ENV:-}"
-ANS_DEBUG_CRASH="${ANS_DEBUG_CRASH:-1}"
-ENABLE_CORE_DUMPS="${ENABLE_CORE_DUMPS:-true}"
+# Use unset-only defaulting (no ":") so an explicit empty string set by a
+# caller (documented as "omit this variable") is preserved instead of being
+# silently replaced by the default -- unlike "${VAR:-default}", which also
+# triggers on an empty string.
+ANS_DEBUG_CRASH="${ANS_DEBUG_CRASH-1}"
+ENABLE_CORE_DUMPS="${ENABLE_CORE_DUMPS-true}"
 
 # Crash-diagnostics instrumentation (see plan.md Phase 0 §3.1):
 # - ANS_DEBUG_CRASH=1 makes MAPDL's signal handler (sytrap.F) print the full

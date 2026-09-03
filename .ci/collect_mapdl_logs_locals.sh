@@ -28,6 +28,7 @@ echo "Copying the log files..."
 if compgen -G "./*.log" > /dev/null; then mv ./*.log "./$LOG_NAMES/"; else echo "No log files could be found"; fi
 if compgen -G "./*apdl.out" > /dev/null; then mv ./*apdl.out "./$LOG_NAMES/"; else echo "No APDL log files could be found"; fi
 if compgen -G "./*pymapdl.apdl" > /dev/null; then mv ./*pymapdl.apdl "./$LOG_NAMES/"; else echo "No PYMAPDL APDL log files could be found"; fi
+if compgen -G "./*.crash" > /dev/null; then mv ./*.crash "./$LOG_NAMES/" && echo "Successfully moved crash files."; else echo "No crash files could be found"; fi
 if compgen -G "./core.*" > /dev/null || compgen -G "./core" > /dev/null; then mv ./core* "./$LOG_NAMES/" && echo "Successfully moved core dump files."; else echo "No core dump files could be found"; fi
 if [ -e /home/mapdl/dpf_logs ]; then mv /home/mapdl/dpf_logs "./$LOG_NAMES/"; else echo "No DPF log files could be found"; fi
 
