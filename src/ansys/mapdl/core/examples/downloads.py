@@ -29,10 +29,10 @@ from typing import Callable, Dict, Optional
 import zipfile
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import _HAS_REQUESTS
+from ansys.mapdl.core import _HAS_ATC
 
-if _HAS_REQUESTS:
-    import requests
+if _HAS_ATC:
+    from ansys.tools.common.example_download import download_manager
 
 
 def check_directory_exist(directory: str) -> Callable:
@@ -79,25 +79,24 @@ def _get_file_url(filename: str, directory: Optional[str] = None) -> str:
     return f"https://github.com/ansys/example-data/raw/master/{filename}"
 
 
-def _check_url_exist(url: str) -> bool:
-    response = requests.get(url, timeout=10)  # 10 seconds timeout
-    return response.status_code == 200
-
-
 @check_directory_exist(pymapdl.EXAMPLES_PATH)
-def _retrieve_file(url: str, filename: str) -> str:
-    # First check if file has already been downloaded
+def _retrieve_file(filename: str, directory: Optional[str] = None) -> str:
+    # First check if file has already been downloaded (and, if applicable,
+    # already decompressed), so we avoid hitting the network again.
     local_path = os.path.join(pymapdl.EXAMPLES_PATH, os.path.basename(filename))
     local_path_no_zip = local_path.replace(".zip", "")
     if os.path.isfile(local_path_no_zip) or os.path.isdir(local_path_no_zip):
         return local_path_no_zip
 
-    # Perform download
-    requested_file = requests.get(url, timeout=10)
-    requested_file.raise_for_status()
-
-    with open(local_path, "wb") as f:
-        f.write(requested_file.content)
+    # Delegate the actual download (with retries and caching) to the shared
+    # ``ansys-tools-common`` example downloader, storing files in PyMAPDL's
+    # own persistent cache directory instead of the library's default temp
+    # directory.
+    local_path = download_manager.download_file(
+        filename=os.path.basename(filename),
+        directory=directory or "",
+        destination=pymapdl.EXAMPLES_PATH,
+    )
 
     if get_ext(local_path) in [".zip"]:
         _decompress(local_path)
@@ -108,16 +107,16 @@ def _retrieve_file(url: str, filename: str) -> str:
 def _download_file(filename: str, directory: Optional[str] = None) -> str:
     url = _get_file_url(filename, directory)
     try:
-        return _retrieve_file(url, filename)
-    except requests.exceptions.HTTPError as e:
-        raise requests.exceptions.HTTPError(
+        return _retrieve_file(filename, directory)
+    except RuntimeError as e:
+        raise RuntimeError(
             "Retrieving the file from internet failed.\n"
             "You can download this file from:\n"
             f"{url}\n"
             "\n"
             "The reported error message is:\n"
             f"{str(e)}"
-        )
+        ) from e
 
 
 def download_bracket() -> str:
