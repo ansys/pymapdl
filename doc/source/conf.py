@@ -336,11 +336,20 @@ html_theme_options = {
         "json_url": f"https://{cname}/versions.json",
         "version_match": switcher_version,
     },
-    # Removing the secondary sidebar for the MAPDL commands
+    # Keep the default right-column page navigation on every page, except
+    # for the very large, auto-generated MAPDL commands reference where a
+    # per-page table of contents is not useful, and the landing page, which
+    # has no headings and would otherwise reserve an empty column that
+    # pushes the card grid off-center.
+    #
+    # NOTE: when several patterns match a page, pydata-sphinx-theme uses the
+    # *last* matching entry (see ``_get_matching_sidebar_items`` in
+    # ``pydata_sphinx_theme.utils``), so the catch-all "**" pattern must be
+    # declared first and the more specific override(s) after it.
     "secondary_sidebar_items": {
-        # "mapdl_commands/**/**": [],
-        # "mapdl_commands/index": [],
-        "**": [],  # "page-toc", "edit-this-page", "sourcelink"]
+        "**": ["page-toc", "edit-this-page", "sourcelink"],
+        "mapdl_commands/**": [],
+        "index": [],
     },
     "navbar_persistent": [],
     "primary_sidebar_end": ["edit-this-page", "sourcelink"],
