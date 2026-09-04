@@ -142,7 +142,7 @@ jobs:
   docs-build:
     name: "Build documentation"
     needs: doc-style
-    uses: ./.github/workflows/doc-build.yml
+    uses: $/.github/workflows/doc-build.yml
     permissions:
       contents: read  # Needed to read repository contents for documentation build
       packages: read  # Needed to pull Docker images from GitHub packages
@@ -244,7 +244,7 @@ jobs:
           persist-credentials: false
 
       - name: Build matrix for remote testing
-        uses: ./.github/actions/build-matrix
+        uses: $/.github/actions/build-matrix
         id: set-matrix
         with:
           token_teams_user_read: ${{ secrets.TOKEN_TEAMS_USER_READ }}
@@ -260,7 +260,7 @@ jobs:
     permissions:
       contents: read  # Needed to read repository contents for tests
       packages: read  # Needed to pull Docker images from GitHub packages
-    uses: ./.github/workflows/test-remote.yml
+    uses: $/.github/workflows/test-remote.yml
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
@@ -288,7 +288,7 @@ jobs:
           persist-credentials: false
 
       - name: Build matrix for local, minimal and console testing
-        uses: ./.github/actions/build-matrix
+        uses: $/.github/actions/build-matrix
         id: set-matrix
         with:
           token_teams_user_read: ${{ secrets.TOKEN_TEAMS_USER_READ }}
@@ -299,7 +299,7 @@ jobs:
     name: "Local: ${{ matrix.mapdl-version }}"
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [ build-test-local-matrix , smoke-tests]
-    uses: ./.github/workflows/test-local.yml
+    uses: $/.github/workflows/test-local.yml
     permissions:
       contents: read  # Needed to read repository contents for tests
       packages: read  # Needed to pull Docker images from GitHub packages
@@ -478,7 +478,7 @@ jobs:
           persist-credentials: false
 
       - name: "Run Julia testing"
-        uses: ./.github/actions/test-julia
+        uses: $/.github/actions/test-julia
         with:
           julia-version: ${{ matrix.julia-version }}
 
@@ -486,7 +486,7 @@ jobs:
     name: "Local-min: ${{ matrix.mapdl-version }}"
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [ build-test-ubuntu-local, build-test-remote, docker-compose-test-remote, docker-compose-test-local, test_julia ]
-    uses: ./.github/workflows/test-local.yml
+    uses: $/.github/workflows/test-local.yml
     permissions:
       contents: read  # Needed to read repository contents for tests
       packages: read  # Needed to pull Docker images from GitHub packages
@@ -517,7 +517,7 @@ jobs:
     permissions:
       contents: read  # Needed to read repository contents for tests
       packages: read  # Needed to pull Docker images from GitHub packages
-    uses: ./.github/workflows/test-local.yml
+    uses: $/.github/workflows/test-local.yml
     strategy:
       fail-fast: false
       matrix:
@@ -649,6 +649,6 @@ jobs:
           persist-credentials: false
 
       - name: "Run Pytest-summary action"
-        uses: ./.github/actions/pytest-summary
+        uses: $/.github/actions/pytest-summary
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}

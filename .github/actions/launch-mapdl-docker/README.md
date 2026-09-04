@@ -34,7 +34,7 @@ steps:
       password: ${{ secrets.GITHUB_TOKEN }}
 
   - name: Launch MAPDL
-    uses: ./.github/actions/launch-mapdl-on-docker
+    uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
     with:
       mapdl-version: '25.2'  # Automatically uses v25.2-ubuntu-cicd
       license-server: ${{ secrets.LICENSE_SERVER }}
@@ -54,7 +54,7 @@ steps:
       password: ${{ secrets.GITHUB_TOKEN }}
 
   - name: Launch MAPDL
-    uses: ./.github/actions/launch-mapdl-on-docker
+    uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
     with:
       mapdl-image: 'ghcr.io/ansys/mapdl:v25.1.0'  # Auto-extracts version 25.1
       license-server: ${{ secrets.LICENSE_SERVER }}
@@ -74,7 +74,7 @@ steps:
       password: ${{ secrets.REGISTRY_PASSWORD }}
 
   - name: Launch MAPDL
-    uses: ./.github/actions/launch-mapdl-on-docker
+    uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
     with:
       mapdl-image: 'my-registry.com/custom/mapdl:mytag'
       mapdl-version: '25.1'  # Required for custom registries
@@ -89,7 +89,7 @@ steps:
 
 ```yaml
 - name: Launch MAPDL with DPF
-  uses: ./.github/actions/launch-mapdl-on-docker
+  uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
   with:
     mapdl-version: '25.2'  # Automatically uses v25.2-ubuntu-cicd
     license-server: ${{ secrets.LICENSE_SERVER }}
@@ -101,7 +101,7 @@ steps:
 
 ```yaml
 - name: Launch MAPDL
-  uses: ./.github/actions/launch-mapdl-on-docker
+  uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
   with:
     mapdl-version: '25.2'
     license-server: ${{ secrets.LICENSE_SERVER }}
@@ -115,7 +115,7 @@ steps:
 
 ```yaml
 - name: Launch MAPDL with official image
-  uses: ./.github/actions/launch-mapdl-on-docker
+  uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
   with:
     mapdl-image: 'ghcr.io/ansys/mapdl:v25.1.0'  # Version auto-extracted to 25.1
     license-server: ${{ secrets.LICENSE_SERVER }}
@@ -125,7 +125,7 @@ steps:
 
 ```yaml
 - name: Launch MAPDL with custom image
-  uses: ./.github/actions/launch-mapdl-on-docker
+  uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
   with:
     mapdl-image: 'my-registry.com/custom/mapdl:mytag'
     mapdl-version: '25.1'  # Required for custom registries
@@ -136,7 +136,7 @@ steps:
 
 ```yaml
 - name: Instance 0
-  uses: ./.github/actions/launch-mapdl-on-docker
+  uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
   with:
     instance-name: 'MAPDL_0'
     mapdl-version: '25.2'
@@ -144,7 +144,7 @@ steps:
     pymapdl-port: '21000'
 
 - name: Instance 1
-  uses: ./.github/actions/launch-mapdl-on-docker
+  uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
   with:
     instance-name: 'MAPDL_1'
     mapdl-version: '25.2'
@@ -156,7 +156,7 @@ steps:
 
 ```yaml
 - id: mapdl
-  uses: ./.github/actions/launch-mapdl-on-docker
+  uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
   with:
     mapdl-version: '25.2'
     license-server: ${{ secrets.LICENSE_SERVER }}
@@ -304,7 +304,7 @@ Simply copy the entire `.github/actions/launch-mapdl-on-docker/` directory to yo
 
 ```yaml
 - name: Launch MAPDL
-  uses: ./.github/actions/launch-mapdl-on-docker
+  uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
   with:
     mapdl-version: '25.2'
     instance-name: 'MAPDL_0'
@@ -362,7 +362,7 @@ Check logs:
 ```yaml
 - name: Launch MAPDL
   id: mapdl
-  uses: ./.github/actions/launch-mapdl-on-docker
+  uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
   with:
     mapdl-version: '25.2'
     license-server: ${{ secrets.LICENSE_SERVER }}
@@ -449,7 +449,7 @@ jobs:
 
       - name: Launch MAPDL
         id: mapdl
-        uses: ./.github/actions/launch-mapdl-on-docker
+        uses: ansys/pymapdl/.github/actions/launch-mapdl-docker@main
         with:
           mapdl-version: '25.2'
           license-server: ${{ secrets.LICENSE_SERVER }}
