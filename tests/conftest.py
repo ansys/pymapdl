@@ -22,9 +22,12 @@
 
 from collections import namedtuple
 from collections.abc import Generator
+import faulthandler
+import io
 import os
 from pathlib import Path
 from shutil import get_terminal_size
+import sys
 from sys import platform
 from typing import Any
 from unittest.mock import patch
@@ -505,6 +508,91 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: pytest.ExitCode):
     failure_rate = (100.0 * session.testsfailed) / session.testscollected
     if failure_rate <= acceptable_failure_rate:
         session.exitstatus = 0
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_unconfigure(config: pytest.Config) -> None:
+    """Bound and instrument everything that runs after the test session.
+
+    ``--timeout`` (``pytest-timeout``) only guards individual tests. Once the
+    last test is torn down and the summary is printed, nothing bounds the rest
+    of the process: plugin teardown, ``atexit`` handlers (including
+    :func:`logging.shutdown`), the shutdown garbage collection that runs
+    ``MapdlGrpc.__del__``, and the wait for the process' standard streams to
+    close.
+
+    A hang in that window is invisible: pytest reports every test as passed and
+    then the job stalls silently until the CI runner kills it an hour later,
+    with no traceback to work from. Arming a :mod:`faulthandler` watchdog here
+    turns that silent stall into a fast failure that dumps the stack of *every*
+    thread, which is what identifies the blocking thread.
+
+    The watchdog is a native thread that does not need the GIL, so it still
+    fires while the interpreter is finalizing, and ``exit=True`` makes it call
+    ``_exit()`` rather than attempt a clean shutdown that is already wedged.
+
+    This hook is ``trylast`` on purpose: pytest's own ``faulthandler`` plugin
+    calls :func:`faulthandler.disable` in its ``pytest_unconfigure``, which
+    cancels any pending :func:`faulthandler.dump_traceback_later` and closes
+    the file descriptor it writes to. Arming the watchdog before that runs
+    would silently disable it.
+
+    Set ``PYMAPDL_SHUTDOWN_TIMEOUT`` to change the budget in seconds, or to
+    ``0`` to disable the watchdog.
+
+    Parameters
+    ----------
+    config : pytest.Config
+        The pytest configuration object being torn down.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    Give the shutdown phase 60 seconds instead of the default:
+
+    >>> import os
+    >>> os.environ["PYMAPDL_SHUTDOWN_TIMEOUT"] = "60"
+    """
+    try:
+        timeout = float(os.environ.get("PYMAPDL_SHUTDOWN_TIMEOUT", 300))
+    except ValueError:
+        timeout = 300.0
+
+    if timeout <= 0:
+        return
+
+    # pytest's 'faulthandler' plugin has just disabled 'faulthandler' and
+    # closed the descriptor it had duplicated, so re-enable it against a
+    # descriptor that stays valid for the rest of the interpreter's life.
+    stream = sys.stderr if sys.stderr is not None else sys.__stderr__
+    if stream is None:
+        return
+
+    try:
+        fileno: int = stream.fileno()
+    except (AttributeError, ValueError, io.UnsupportedOperation):
+        # 'sys.stderr' is not backed by a real file descriptor (for example,
+        # under 'pytest-xdist'); the watchdog cannot report anything useful.
+        return
+
+    if fileno < 0:
+        return
+
+    faulthandler.enable(file=fileno)
+    faulthandler.dump_traceback_later(timeout, exit=True)
+
+    # Emit a marker so CI logs positively confirm the watchdog is live. Without
+    # it a healthy run is indistinguishable from one where this hook silently
+    # bailed out, and the next hang would again produce no traceback.
+    print(
+        f"\n[pymapdl] shutdown watchdog armed: {timeout:.0f}s "
+        "(set PYMAPDL_SHUTDOWN_TIMEOUT to change, 0 to disable)",
+        file=sys.stderr,
+        flush=True,
+    )
 
 
 ################################################################

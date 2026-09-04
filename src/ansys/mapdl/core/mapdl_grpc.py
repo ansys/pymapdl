@@ -36,6 +36,7 @@ import shutil
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
 import subprocess  # nosec B404
+import sys
 import tempfile
 import threading
 import time
@@ -200,6 +201,12 @@ PING_ABUSE_PROBE_INTERVAL_S = PING_ABUSE_INTERVAL_S * PING_ABUSE_PROBE_EVERY_N_P
 # Bounded timeout for the probe RPC itself, so a truly unresponsive server
 # cannot make the probe thread hang.
 PING_ABUSE_PROBE_TIMEOUT_S = 5.0
+
+# Hard wall-clock bound for closing the gRPC channel. ``grpc.Channel.close``
+# waits on condition variables that are only notified by gRPC's own
+# channel-spin thread, with no timeout of its own, so a wedged call or a
+# stalled spin thread would otherwise block the caller forever.
+CHANNEL_CLOSE_TIMEOUT_S = 10.0
 
 DEFAULT_GRPC_OPTIONS = [
     ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
@@ -2421,6 +2428,13 @@ class MapdlGrpc(MapdlBase):
         precisely the case that used to leak, because ``exit()`` returns early
         for such instances.
 
+        The close is never allowed to block indefinitely. It is skipped
+        entirely once the interpreter is finalizing, and bounded by
+        ``CHANNEL_CLOSE_TIMEOUT_S`` otherwise, because ``grpc.Channel.close``
+        waits without a timeout for gRPC's channel-spin thread to drain the
+        remaining calls and connectivity events. When that thread cannot run,
+        the wait never ends and the calling thread deadlocks.
+
         Parameters
         ----------
         exiting : bool, optional
@@ -2438,20 +2452,55 @@ class MapdlGrpc(MapdlBase):
         if channel is None:
             return
 
-        if callback is not None:
+        if sys.is_finalizing():
+            # During interpreter finalization CPython parks every daemon
+            # thread the moment it next tries to reacquire the GIL, and that
+            # includes gRPC's channel-spin thread. Both ``unsubscribe`` and
+            # ``close`` wait on condition variables that only that thread can
+            # notify (``_cygrpc._close`` loops on ``integrated_call_states``
+            # and ``connectivity_due`` with no timeout of its own), so calling
+            # them here deadlocks the main thread forever rather than raising.
+            # The process is exiting and the OS reclaims the sockets anyway,
+            # so dropping the reference is enough.
+            return
+
+        def _unsubscribe_and_close() -> None:
+            if callback is not None:
+                try:
+                    channel.unsubscribe(callback)
+                except Exception as e:
+                    if not exiting:
+                        self._log.debug(f"Error unsubscribing from gRPC channel: {e}")
+
             try:
-                channel.unsubscribe(callback)
+                channel.close()
             except Exception as e:
                 if not exiting:
-                    self._log.debug(f"Error unsubscribing from gRPC channel: {e}")
+                    self._log.debug(f"Error closing gRPC channel: {e}")
 
-        try:
-            channel.close()
-            if not exiting:
+        # Outside of finalization the spin thread is normally alive, but the
+        # same wait can still stall (for example on a call that never reports
+        # termination after the peer was killed). Bound it from this thread
+        # with ``Thread.join``, which does not depend on gRPC machinery. If it
+        # expires we abandon the daemon thread: gRPC offers no way to cancel an
+        # in-flight blocking close.
+        close_thread = threading.Thread(
+            target=_unsubscribe_and_close,
+            name="pymapdl-close-grpc-channel",
+            daemon=True,
+        )
+        close_thread.start()
+        close_thread.join(CHANNEL_CLOSE_TIMEOUT_S)
+
+        if not exiting:
+            if close_thread.is_alive():
+                self._log.debug(
+                    "Timed out after %s s while closing the gRPC channel. "
+                    "Abandoning the close call.",
+                    CHANNEL_CLOSE_TIMEOUT_S,
+                )
+            else:
                 self._log.debug("gRPC channel closed")
-        except Exception as e:
-            if not exiting:
-                self._log.debug(f"Error closing gRPC channel: {e}")
 
     def _remove_temp_dir_on_exit(self, path=None):
         """Removes the temporary directory created by the launcher.
@@ -2990,14 +3039,94 @@ class MapdlGrpc(MapdlBase):
 
         if self._stub is None:
             raise MapdlRuntimeError("MAPDL stub not initialized")
+        stub = self._stub
 
         # handle socket closing upon exit
         if cmd.lower() == "exit":
-            try:
-                # this always returns an error as the connection is closed
-                self._stub.Ctrl(request, timeout=timeout)
-            except (_InactiveRpcError, _MultiThreadedRendezvous):
-                pass
+            # The server process is expected to die (almost) immediately
+            # after receiving this command, and the blocking Ctrl("EXIT")
+            # call is expected to fail once the connection is severed.
+            #
+            # However, on at least some local transports (observed with
+            # WNUA on Windows, but WNUA itself is just a plain
+            # 'grpc.insecure_channel' under the hood - see
+            # 'ansys.tools.common.cyberchannel.create_wnua_channel' - so
+            # this is not believed to be WNUA-specific), gRPC's own
+            # per-call deadline (``timeout``) and connectivity-state
+            # callbacks are not reliably honored once the peer process is
+            # killed abruptly: the call can block in
+            # 'grpc._channel._Rendezvous._blocking' -> 'call.next_event()'
+            # indefinitely, well past ``timeout``, hanging the caller
+            # forever.
+            #
+            # To guard against that, run the blocking call in a background
+            # thread and enforce our own hard wall-clock timeout from this
+            # (calling) thread via 'Thread.join'. That join does not depend
+            # on gRPC's completion queue or deadline machinery at all, so
+            # it bounds the wait even if the underlying transport never
+            # reports the connection as dead. If the call does not return
+            # in time we abandon the wait: the background thread is left
+            # running as a daemon (gRPC gives no safe way to cancel/abort
+            # an in-flight blocking call), and process-based cleanup
+            # (``_close_process`` / PID-based killing) takes over instead.
+            self._log.debug(
+                f"transport_mode={getattr(self, 'transport_mode', None)!r} "
+                f"ctrl_timeout={timeout!r}"
+            )
+
+            call_result: Dict[str, Exception] = {}
+
+            def _call_ctrl_exit() -> None:
+                try:
+                    # this always returns an error as the connection is closed
+                    stub.Ctrl(request, timeout=timeout)
+                except Exception as exc:  # noqa: BLE001 - captured, handled by caller
+                    call_result["error"] = exc
+
+            call_thread = threading.Thread(
+                target=_call_ctrl_exit,
+                name="pymapdl-ctrl-exit",
+                daemon=True,
+            )
+            t_start = time.time()
+            call_thread.start()
+
+            # extra slack on top of the gRPC-level timeout to allow for
+            # normal call/response overhead before we give up waiting
+            hard_timeout_buffer = 3.0
+            hard_timeout = timeout + hard_timeout_buffer if timeout is not None else 5.0
+            call_thread.join(hard_timeout)
+
+            if call_thread.is_alive():
+                self._log.warning(
+                    f"Ctrl('EXIT') call did not return within "
+                    f"{hard_timeout:.1f}s (hard wall-clock timeout); "
+                    "abandoning the wait since the underlying transport "
+                    "did not honor the per-call deadline. Proceeding with "
+                    "process-based cleanup instead. The background thread "
+                    "issuing the call will keep running until the "
+                    "connection is eventually closed."
+                )
+                return
+
+            elapsed = time.time() - t_start
+            error = call_result.get("error")
+            if error is None:
+                self._log.debug(
+                    f"Ctrl('EXIT') returned normally after {elapsed:.2f}s "
+                    "(unexpected: usually errors)"
+                )
+            elif isinstance(error, (_InactiveRpcError, _MultiThreadedRendezvous)):
+                self._log.debug(
+                    f"Ctrl('EXIT') raised expected {type(error).__name__} "
+                    f"after {elapsed:.2f}s: {error}"
+                )
+            else:
+                self._log.debug(
+                    f"Ctrl('EXIT') raised unexpected {type(error).__name__} "
+                    f"after {elapsed:.2f}s: {error}"
+                )
+                raise error
             return
 
         resp = self._stub.Ctrl(request, timeout=timeout)

@@ -23,6 +23,8 @@
 import gc
 import subprocess
 import threading
+import time
+from types import MethodType
 from unittest.mock import MagicMock, Mock, patch
 import weakref
 
@@ -30,6 +32,7 @@ from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
 import grpc
 import pytest
 
+from ansys.mapdl.core import mapdl_grpc
 from ansys.mapdl.core.errors import MapdlExitedError
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc, MapdlRuntimeError
 
@@ -1122,3 +1125,145 @@ class TestEnsureChannel:
 
         mock._ensure_channel.assert_called_once()
         mock._multi_connect.assert_called_once_with(timeout=5)
+
+
+class TestCtrlExitHardTimeout:
+    """``_ctrl("exit")`` must never hang forever, even if the underlying
+    gRPC channel/transport does not honor its own per-call deadline once the
+    server process has died (observed on Windows/WNUA)."""
+
+    class _Dummy:
+        """Minimal stand-in exposing what '_ctrl' touches for the EXIT path."""
+
+        def __init__(self, stub):
+            self._log = MagicMock()
+            self._stub = stub
+            self.transport_mode = "wnua"
+
+        _ctrl = MapdlGrpc._ctrl
+
+    def test_returns_promptly_when_the_stub_raises_the_expected_error(self):
+        """The common case: the connection drops and the stub raises the
+        expected gRPC error almost immediately."""
+        stub = Mock()
+        # Make it look like the expected type (used by MapdlGrpc._ctrl)
+        from ansys.mapdl.core.mapdl_grpc import _InactiveRpcError
+
+        stub.Ctrl.side_effect = _InactiveRpcError(MagicMock())
+        dummy = self._Dummy(stub)
+
+        dummy._ctrl("exit")
+
+        stub.Ctrl.assert_called_once()
+
+    def test_reraises_unexpected_errors(self):
+        """Any error other than the expected gRPC "connection closed" family
+        must still propagate to the caller."""
+        stub = Mock()
+        stub.Ctrl.side_effect = ValueError("boom")
+        dummy = self._Dummy(stub)
+
+        with pytest.raises(ValueError, match="boom"):
+            dummy._ctrl("exit")
+
+    def test_does_not_hang_when_the_stub_call_never_returns(self):
+        """If the blocking 'stub.Ctrl' call never returns (simulating a
+        transport that does not honor its own deadline), '_ctrl' must give
+        up after its own hard wall-clock timeout instead of hanging
+        forever."""
+        never_return = threading.Event()
+
+        def blocking_call(*args, **kwargs):
+            # Block far longer than the hard timeout used below; the
+            # calling thread must not wait for this.
+            never_return.wait(30)
+            return None
+
+        stub = Mock()
+        stub.Ctrl.side_effect = blocking_call
+        dummy = self._Dummy(stub)
+
+        start = time.time()
+        dummy._ctrl("exit", timeout=0.1)
+        elapsed = time.time() - start
+
+        # hard_timeout = timeout (0.1) + buffer (5.0) = 5.1s; give some slack
+        assert elapsed < 8.0
+        dummy._log.warning.assert_called_once()
+
+        never_return.set()
+
+
+class TestCloseGrpcChannelHardTimeout:
+    """``_close_grpc_channel`` must never hang forever.
+
+    ``grpc.Channel.close`` cancels the outstanding calls and then waits,
+    without any timeout of its own, for gRPC's channel-spin thread to drain
+    ``integrated_call_states`` and ``connectivity_due``.  When that daemon
+    thread cannot run any more, the wait never ends.  This was observed in
+    CI as a job that stalled for the whole job budget after the test session
+    had already reported success, with the main thread blocked in
+    ``__del__`` -> ``_close_grpc_channel`` -> ``grpc.Channel.close``.
+    """
+
+    @staticmethod
+    def _dummy(channel):
+        """Build a minimal stand-in exposing what '_close_grpc_channel' touches."""
+        dummy = Mock()
+        dummy._channel = channel
+        dummy._connectivity_callback = Mock()
+        dummy._close_grpc_channel = MethodType(MapdlGrpc._close_grpc_channel, dummy)
+        return dummy
+
+    def test_closes_the_channel_and_clears_the_references(self):
+        """The healthy path still unsubscribes and closes the channel."""
+        channel = Mock()
+        dummy = self._dummy(channel)
+        callback = dummy._connectivity_callback
+
+        dummy._close_grpc_channel()
+
+        channel.unsubscribe.assert_called_once_with(callback)
+        channel.close.assert_called_once()
+        assert dummy._channel is None
+        assert dummy._connectivity_callback is None
+
+    def test_is_a_noop_without_a_channel(self):
+        """Calling it twice, or on an instance that never connected, is safe."""
+        dummy = self._dummy(None)
+
+        dummy._close_grpc_channel()
+
+        assert dummy._channel is None
+
+    def test_does_not_hang_when_close_never_returns(self):
+        """A wedged 'channel.close' must not block the calling thread."""
+        never_return = threading.Event()
+        channel = Mock()
+        channel.close.side_effect = lambda *args, **kwargs: never_return.wait(30)
+        dummy = self._dummy(channel)
+
+        start = time.time()
+        with patch.object(mapdl_grpc, "CHANNEL_CLOSE_TIMEOUT_S", 0.5):
+            dummy._close_grpc_channel()
+        elapsed = time.time() - start
+
+        assert elapsed < 5.0
+        assert dummy._channel is None
+
+        never_return.set()
+
+    def test_skips_closing_while_the_interpreter_is_finalizing(self):
+        """During finalization gRPC's spin thread is parked, so both
+        'unsubscribe' and 'close' would deadlock instead of raising.  The
+        process is exiting anyway, so the channel must simply be dropped."""
+        channel = Mock()
+        dummy = self._dummy(channel)
+
+        with patch.object(mapdl_grpc.sys, "is_finalizing", return_value=True):
+            dummy._close_grpc_channel(exiting=True)
+
+        channel.close.assert_not_called()
+        channel.unsubscribe.assert_not_called()
+        assert dummy._channel is None
+        assert dummy._connectivity_callback is None
