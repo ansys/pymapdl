@@ -3093,7 +3093,7 @@ class MapdlGrpc(MapdlBase):
 
             # extra slack on top of the gRPC-level timeout to allow for
             # normal call/response overhead before we give up waiting
-            hard_timeout_buffer = 5.0
+            hard_timeout_buffer = timeout + 3 # extra time
             hard_timeout = (
                 timeout + hard_timeout_buffer if timeout is not None else 10.0
             )
