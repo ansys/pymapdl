@@ -3074,15 +3074,13 @@ class MapdlGrpc(MapdlBase):
                 f"ctrl_timeout={timeout!r}"
             )
 
-            call_result: Dict[str, BaseException] = {}
+            call_result: Dict[str, Exception] = {}
 
             def _call_ctrl_exit() -> None:
                 try:
                     # this always returns an error as the connection is closed
                     stub.Ctrl(request, timeout=timeout)
-                except (
-                    BaseException
-                ) as exc:  # noqa: BLE001 - captured, handled by caller
+                except Exception as exc:  # noqa: BLE001 - captured, handled by caller
                     call_result["error"] = exc
 
             call_thread = threading.Thread(

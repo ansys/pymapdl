@@ -1146,9 +1146,8 @@ class TestCtrlExitHardTimeout:
         """The common case: the connection drops and the stub raises the
         expected gRPC error almost immediately."""
         stub = Mock()
-        stub.Ctrl.side_effect = grpc.RpcError("connection closed")
-        # make it look like the expected type without importing internals
-        from grpc._channel import _InactiveRpcError
+        # Make it look like the expected type (used by MapdlGrpc._ctrl)
+        from ansys.mapdl.core.mapdl_grpc import _InactiveRpcError
 
         stub.Ctrl.side_effect = _InactiveRpcError(MagicMock())
         dummy = self._Dummy(stub)
