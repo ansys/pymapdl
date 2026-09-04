@@ -233,6 +233,9 @@ When using custom registries (not from `ghcr.io/ansys/mapdl` or `ansys/mapdl`):
 | `transport`            | `insecure`          | gRPC transport mode                        |
 | `timeout`              | `60`                | Startup timeout (seconds)                  |
 | `wait`                 | `true`              | Wait for services to be ready (`true`/`false`) |
+| `ans-debug-crash`      | `1`                 | Set `ANS_DEBUG_CRASH` in the container so MAPDL prints a full backtrace on crash |
+| `enable-core-dumps`    | `true`              | Enable unlimited core dumps (`--ulimit core=-1`) |
+| `extra-env`            | `''`                | Extra `KEY=VALUE` env vars (one per line) passed through to the container |
 
 ### Outputs
 
