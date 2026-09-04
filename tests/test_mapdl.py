@@ -1124,8 +1124,9 @@ def test_cdread(mapdl, clear_at_end):
     mapdl.cdread("db", "model2", extension="cdb")
     assert random_letters in mapdl.parameters["PARMTEST"]
 
-    with pytest.raises(ValueError):
-        mapdl.cdread("all", "model2", "cdb")
+    mapdl.clear()
+    mapdl.cdread("all", "model2", "cdb")
+    assert random_letters in mapdl.parameters["PARMTEST"]
 
     with pytest.raises(ValueError):
         mapdl.cdread("test", "model2", "cdb")

@@ -3016,15 +3016,9 @@ class MapdlGrpc(MapdlBase):
         """Wraps CDREAD"""
         option = option.strip().upper()
 
-        if option not in ["DB", "SOLID", "COMB"]:
+        if option not in ["ALL", "DB", "SOLID", "COMB"]:
             raise ValueError(
                 f'Option "{option}" is not supported.  Please '
-                "Input the geometry and mesh files separately "
-                r'with "\INPUT" or ``mapdl.input``'
-            )
-        if option == "ALL":
-            raise ValueError(
-                f'Option "{option}" is not supported in gRPC mode.  Please '
                 "Input the geometry and mesh files separately "
                 r'with "\INPUT" or ``mapdl.input``'
             )
@@ -3032,12 +3026,22 @@ class MapdlGrpc(MapdlBase):
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)
         kwargs.setdefault("orig_cmd", "CDREAD")
-        kwargs.setdefault("cd_read_option", option.upper())
+        kwargs.setdefault("cd_read_option", option)
 
-        fname = self._get_file_name(fname, ext, "cdb")
-        fname = self._get_file_path(fname, kwargs["progress_bar"])
+        cdb_fname = self._get_file_name(fname, ext, "cdb")
+        cdb_fname = self._get_file_path(cdb_fname, kwargs["progress_bar"])
 
-        self.input(fname, **kwargs)
+        if option == "ALL":
+            # 'ALL' reads two archives: the command/database file resolved
+            # above (``cdb_fname``), and a solid-model/IGES archive.  Per
+            # CDREAD documented defaults, 'fnamei' defaults to the *original*
+            # 'fname' argument (not the already-suffixed 'cdb_fname'), and
+            # 'exti' defaults to 'iges' when omitted.
+            iges_fname = self._get_file_name(fnamei or fname, exti, "iges")
+            iges_fname = self._get_file_path(iges_fname, kwargs["progress_bar"])
+            kwargs["fnamei"] = iges_fname
+
+        return self.input(cdb_fname, **kwargs)
 
     @wraps(MapdlBase.tbft)
     def tbft(  # numpydoc ignore=RT01
@@ -3283,7 +3287,11 @@ class MapdlGrpc(MapdlBase):
 
         # Running method
         #
-        if "CDRE" in orig_cmd.upper():
+        is_cdread = "CDRE" in orig_cmd.upper()
+        cd_read_option = kwargs.get("cd_read_option", "COMB").upper()
+        is_cdread_all = is_cdread and cd_read_option == "ALL"
+
+        if is_cdread:
             # CDREAD already uploads the file, and since the priority in
             # `_get_file_path` is for the files in the python working directory,
             # we skip that function here.
@@ -3304,7 +3312,12 @@ class MapdlGrpc(MapdlBase):
             ("chunk_size", str(chunk_size)),
         ]
 
-        if verbose:
+        if verbose and not is_cdread_all:
+            # For 'DB'/'SOLID'/'COMB', the archive itself is a valid sequence
+            # of APDL commands, so it can be streamed and run directly.
+            # 'ALL' cannot take this shortcut: it first needs the IGES
+            # archive imported through '/AUX15' before the CDB file is read,
+            # so it always goes through the multi-command driver file below.
             request = pb_types.InputFileRequest(filename=filename)
             strouts = self._stub.InputFileS(request, metadata=metadata)
             responses = []
@@ -3317,7 +3330,8 @@ class MapdlGrpc(MapdlBase):
             return response.strip()
 
         ##
-        # Otherwise, not verbose
+        # Otherwise, not verbose (or 'CDREAD,ALL', which always needs the
+        # multi-command driver file below, even when 'verbose' is requested)
 
         # since we can't directly run /INPUT, we have to write a
         # temporary input file that tells MAPDL to read the input
@@ -3326,10 +3340,42 @@ class MapdlGrpc(MapdlBase):
         tmp_name = f"_input_tmp_{id_}_.inp"
         tmp_out = f"_input_tmp_{id_}_.out"
 
-        if "CDRE" in orig_cmd.upper():
+        if is_cdread_all:
+            # 'CDREAD,ALL' restores two archives: the solid-model geometry
+            # and loads (IGES format) and the rest of the database (CDB
+            # format).  MAPDL itself performs this as a sequence of
+            # commands, so we replicate it explicitly here instead of
+            # relying on 'CDREAD' to locate the second file, since the gRPC
+            # implementation is the one responsible for uploading and
+            # locating both archives:
+            #   /AUX15            (enter the IGES file-transfer processor)
+            #   IGESIN            (import the solid-model/loads archive)
+            #   FINISH            (leave /AUX15)
+            #   /INPUT            (read the CDB database archive)
+            #   /PREP7            (CDREAD leaves the user in /PREP7)
+            fnamei = kwargs.get("fnamei")
+            if not fnamei:
+                raise ValueError(
+                    "The 'fnamei' argument (the IGES archive) must be "
+                    "supplied when using 'CDREAD' with the 'ALL' option."
+                )
+            tmp_dat = (
+                f"/OUT,{tmp_out}\n"
+                "/AUX15\n"
+                f"IGESIN,'{fnamei}'\n"
+                "FINISH\n"
+                f"/INPUT,'{filename}'\n"
+                "/PREP7\n"
+                "/RMTMP\n"
+                "/OUT,"
+            )
+            delete_uploaded_files = False
+
+        elif is_cdread:
             # Using CDREAD
-            option = kwargs.get("cd_read_option", "COMB")
-            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{option}','{filename}'\n/OUT,"
+            tmp_dat = (
+                f"/OUT,{tmp_out}\n{orig_cmd},'{cd_read_option}','{filename}'\n/OUT,"
+            )
             delete_uploaded_files = False
 
         else:
@@ -3351,7 +3397,10 @@ class MapdlGrpc(MapdlBase):
 
         # Escaping early if inside non_interactive context
         if self._store_commands:
-            self._stored_commands.append(tmp_dat.splitlines()[1])
+            # Excludes the leading and trailing '/OUT' redirection lines,
+            # keeping every command in between (a single one for 'DB',
+            # 'SOLID', 'COMB', and plain '/INPUT'; several for 'ALL').
+            self._stored_commands.extend(tmp_dat.splitlines()[1:-1])
             return None
 
         request = pb_types.InputFileRequest(filename=tmp_name, opt="MUTE")
@@ -3388,6 +3437,12 @@ class MapdlGrpc(MapdlBase):
             self.slashdelete(tmp_out)
             if filename in self.list_files() and delete_uploaded_files:
                 self.slashdelete(filename)
+
+        if verbose:
+            # 'CDREAD,ALL' redirects its output to a file (see 'tmp_dat'
+            # above) instead of streaming it, so it cannot be printed line by
+            # line as it runs. Print it once fully captured instead.
+            print(output)
 
         return output
 
