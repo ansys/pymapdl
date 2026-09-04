@@ -158,6 +158,13 @@ class MapdlPool:
         The location of the MAPDL executable.  Will use the cached
         location when left at the default ``None``.
 
+    monitor_refresh : float, optional
+        How often, in seconds, the background monitoring thread checks
+        for failed instances to restart them when ``restart_failed`` is
+        ``True``. Defaults to ``1.0``. Lowering this value makes the pool
+        detect and restart failed instances faster, at the cost of more
+        frequent polling.
+
     **kwargs : dict, optional
         Additional keyword arguments. For a complete listing, see the
         description for the :func:`ansys.mapdl.core.launcher.launch_mapdl`
@@ -213,11 +220,13 @@ class MapdlPool:
         start_instance: Optional[bool] = None,
         exec_file: Optional[str] = None,
         timeout: int = 30,
+        monitor_refresh: float = 1.0,
         **kwargs,
     ) -> None:
         """Initialize several instances of mapdl"""
         self._instances: List[None] = []
         self._n_instances = n_instances
+        self._monitor_refresh = monitor_refresh
 
         if run_location is None:
             run_location = create_temp_dir()
@@ -375,7 +384,7 @@ class MapdlPool:
         if restart_failed:
             # This name is using the wrapped to specify the thread name
             self._pool_monitor_thread = self._monitor_pool(
-                thread_name="Monitoring_Thread"
+                refresh=self._monitor_refresh, thread_name="Monitoring_Thread"
             )
 
         self._verify_unique_ports()
@@ -816,7 +825,8 @@ class MapdlPool:
         Parameters
         ----------
         block : bool, optional
-            When ``True``, wait until all processes are closed.
+            When ``True``, wait until all processes are closed before
+            returning.  Default is ``False``.
 
         Examples
         --------

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core._commands import CommandsBase, parse
+from ansys.mapdl.core._commands import CommandsBase
 
 
 class Keypoints(CommandsBase):
@@ -106,7 +106,7 @@ class Keypoints(CommandsBase):
         5
         """
         command = f"K,{npt},{x},{y},{z}"
-        return parse.parse_k(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def kbetw(
         self,
@@ -176,7 +176,7 @@ class Keypoints(CommandsBase):
         3
         """
         command = f"KBETW,{kp1},{kp2},{kpnew},{type_},{value}"
-        return parse.parse_kpoint(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def kcenter(
         self,
@@ -252,7 +252,7 @@ class Keypoints(CommandsBase):
         4
         """
         command = f"KCENTER,{type_},{val1},{val2},{val3},{val4},{kpnew}"
-        return parse.parse_kpoint(self.run(command, **kwargs))
+        return self.run(command, **kwargs)
 
     def kdele(self, np1: str = "", np2: str = "", ninc: str = "", **kwargs):
         r"""Deletes unmeshed keypoints.
@@ -342,7 +342,7 @@ class Keypoints(CommandsBase):
         >>> dist
         [13.96424004376894, 1.0, -5.0, 13.0]
         """
-        return parse.parse_kdist(self.run(f"KDIST,{kp1},{kp2}", **kwargs))
+        return self.run(f"KDIST,{kp1},{kp2}", **kwargs)
 
     def kfill(
         self,
@@ -537,7 +537,7 @@ class Keypoints(CommandsBase):
         1
         """
         cmd = f"KL,{nl1},{ratio},{nk1}"
-        return parse.parse_kl(self.run(cmd, **kwargs))
+        return self.run(cmd, **kwargs)
 
     def klist(
         self, np1: str = "", np2: str = "", ninc: str = "", lab: str = "", **kwargs
@@ -760,7 +760,7 @@ class Keypoints(CommandsBase):
         1
         """
         cmd = f"KNODE,{npt},{node}"
-        return parse.parse_knode(self.run(cmd, **kwargs))
+        return self.run(cmd, **kwargs)
 
     def kplot(
         self, np1: str = "", np2: str = "", ninc: str = "", lab: str = "", **kwargs

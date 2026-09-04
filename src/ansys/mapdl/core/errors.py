@@ -24,6 +24,7 @@
 
 from enum import Enum
 from functools import cache, wraps
+import re
 import signal
 import sys
 import threading
@@ -175,6 +176,22 @@ class MapdlCommandIgnoredError(MapdlRuntimeError):
     """Raised when MAPDL ignores a command."""
 
     pass
+
+
+class MapdlDoLoopLimitError(MapdlRuntimeError):
+    """Raised when too many ``*DO``/``*DOWHILE`` loops are nested.
+
+    MAPDL only supports a limited number of nested do-loops. See
+    :attr:`Mapdl.do() <ansys.mapdl.core.Mapdl.do>` and
+    :attr:`Mapdl.dowhile() <ansys.mapdl.core.Mapdl.dowhile>`.
+    """
+
+    def __init__(
+        self,
+        msg: str = "Exceeded the maximum number of nested MAPDL do-loops.",
+        notes: str = "",
+    ):
+        super().__init__(msg=msg, notes=notes)
 
 
 class MapdlExitedError(MapdlRuntimeError):
@@ -429,6 +446,34 @@ def protect_grpc(func: Callable) -> Callable:
                 # Exit while-loop if success
                 break
 
+            except ValueError as error:
+                if "Cannot invoke RPC on closed channel" not in str(error):
+                    raise
+
+                mapdl = retrieve_mapdl_from_args(args)
+                mapdl._log.debug("RPC invoked on a closed channel: MAPDL has exited.")
+                mapdl._exited = True
+                raise MapdlExitedError(
+                    "MAPDL has exited: cannot invoke RPC on a closed channel."
+                ) from error
+
+            except grpc.FutureCancelledError as error:
+                # Raised by 'MapdlGrpc._watched_call' cancelling the in-flight
+                # call once the channel connectivity callback confirms the
+                # transport is dead ('TRANSIENT_FAILURE'/'SHUTDOWN'), rather
+                # than letting the call hang indefinitely.
+                mapdl = retrieve_mapdl_from_args(args)
+                channel_state = getattr(mapdl, "channel_state", None)
+                mapdl._log.debug(
+                    "The in-flight gRPC call was cancelled because the "
+                    f"channel became '{channel_state}'."
+                )
+                raise MapdlConnectionError(
+                    "The in-flight gRPC call was cancelled because the channel "
+                    f"connectivity became '{channel_state}'. MAPDL might have died "
+                    "or stopped answering."
+                ) from error
+
             except grpc.RpcError as error:
                 mapdl = retrieve_mapdl_from_args(args)
 
@@ -461,9 +506,15 @@ def protect_grpc(func: Callable) -> Callable:
 
                 if error.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:
                     if "Received message larger than max" in error.details():
-                        try:
-                            lim_ = int(error.details().split("(")[1].split("vs")[0])
-                        except IndexError:
+                        # Some gRPC versions wrap the message as
+                        # "Stream removed (CLIENT: Received message larger
+                        # than max (<received> vs. <limit>))", so the
+                        # received size is matched with a regex instead of
+                        # blindly splitting on "(".
+                        match = re.search(r"\((\d+)\s*vs\.?\s*\d+\)", error.details())
+                        if match:
+                            lim_ = int(match.group(1))
+                        else:
                             lim_ = int(512 * 1024**2)
 
                         raise MapdlgRPCError(
@@ -480,12 +531,7 @@ def protect_grpc(func: Callable) -> Callable:
 
                 if error.code() == grpc.StatusCode.UNAVAILABLE:
                     # Very likely the MAPDL server has died.
-                    suggestion = (
-                        "  MAPDL *might* have died because it executed a not-allowed command or ran out of memory.\n"
-                        "  Check the MAPDL command output for more details.\n"
-                        "  Open an issue on GitHub if you need assistance: "
-                        "https://github.com/ansys/pymapdl/issues"
-                    )
+                    suggestion = _build_unavailable_suggestion(mapdl)
 
                 # Generic error
                 handle_generic_grpc_error(error, func, args, kwargs, reason, suggestion)
@@ -505,6 +551,67 @@ def protect_grpc(func: Callable) -> Callable:
         return out
 
     return wrapper
+
+
+def _build_unavailable_suggestion(mapdl: "MapdlGrpc") -> str:
+    """Build the user-facing suggestion for a ``UNAVAILABLE`` gRPC error.
+
+    Parameters
+    ----------
+    mapdl : MapdlGrpc
+        The MAPDL instance whose underlying process just became unreachable.
+
+    Returns
+    -------
+    str
+        A suggestion message. When the locally tracked MAPDL subprocess was
+        terminated by ``SIGKILL``, the message calls that out explicitly and
+        points to the OS Out-Of-Memory (OOM) killer as the most common cause.
+        Otherwise, it falls back to the generic "might have died" message.
+
+    Notes
+    -----
+    The exit signal can only be retrieved when PyMAPDL is the parent process
+    of the local MAPDL subprocess (see
+    :meth:`MapdlGrpc._get_process_exit_signal
+    <ansys.mapdl.core.mapdl_grpc.MapdlGrpc._get_process_exit_signal>`). For
+    remote or previously-running instances, this falls back to the generic
+    message.
+    """
+    exit_signal = None
+    get_exit_signal = getattr(mapdl, "_get_process_exit_signal", None)
+    if callable(get_exit_signal):
+        exit_signal = get_exit_signal()
+
+    if exit_signal == signal.SIGKILL:
+        return (
+            "  MAPDL process was terminated with SIGKILL (signal 9).\n"
+            "  This is commonly caused by the operating system's Out-Of-Memory (OOM) killer forcibly terminating the process,\n"
+            "  but it can also happen if MAPDL was killed manually or by a job scheduler/resource limit.\n"
+            "  Check 'dmesg' / 'journalctl -k' (Linux) or your job scheduler logs for confirmation, and consider reducing\n"
+            "  model size, increasing available memory, or requesting more memory from your job scheduler.\n"
+            "  Open an issue on GitHub if you need assistance: "
+            "https://github.com/ansys/pymapdl/issues"
+        )
+
+    if exit_signal is not None:
+        try:
+            signal_name = signal.Signals(exit_signal).name
+        except ValueError:
+            signal_name = str(exit_signal)
+        return (
+            f"  MAPDL process was terminated by signal {exit_signal} ({signal_name}).\n"
+            "  Check the MAPDL command output or system logs for more details.\n"
+            "  Open an issue on GitHub if you need assistance: "
+            "https://github.com/ansys/pymapdl/issues"
+        )
+
+    return (
+        "  MAPDL *might* have died because it executed a not-allowed command or ran out of memory.\n"
+        "  Check the MAPDL command output for more details.\n"
+        "  Open an issue on GitHub if you need assistance: "
+        "https://github.com/ansys/pymapdl/issues"
+    )
 
 
 def retrieve_mapdl_from_args(args: tuple[Any, ...]) -> "MapdlGrpc":

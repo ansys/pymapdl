@@ -18,6 +18,7 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
    :maxdepth: 2
    :hidden:
 
+   cli
    commands
    components
    database

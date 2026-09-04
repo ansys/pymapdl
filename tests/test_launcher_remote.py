@@ -81,7 +81,6 @@ def _create_test_config(**overrides):
         "mapdl_output": None,
         "transport_mode": None,
         "uds_dir": None,
-        "uds_id": None,
         "certs_dir": None,
     }
     defaults.update(overrides)

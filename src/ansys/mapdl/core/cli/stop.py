@@ -20,11 +20,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+"""``pymapdl stop`` sub-command implementation.
+
+The click-independent :func:`stop` implementation lives in
+:mod:`ansys.mapdl.core.launcher.connection` so it can be reused from regular
+Python scripts (for example by
+:func:`ansys.mapdl.core.launcher.connection.close_all_local_instances`)
+without importing ``click``. It is re-exported here for backward
+compatibility and for the ``pymapdl stop`` click command below.
+"""
+
 from typing import Optional
 
 import click
 
-from ansys.mapdl.core.cli.helpers import can_access_process, get_ansys_process_from_port
+from ansys.mapdl.core.cli.constants import MAPDL_DEFAULT_PORT
+from ansys.mapdl.core.launcher.connection import stop  # noqa: F401
 
 
 @click.command(
@@ -53,7 +64,7 @@ By default, it stops instances running on the port 50052.""",
     default=False,
     help="Kill all MAPDL instances",
 )
-def stop(port: Optional[int], pid: Optional[int], all: bool) -> None:
+def stop_cli(port: Optional[int], pid: Optional[int], all: bool) -> None:
     """Stop MAPDL instances running on a given port or with a given process id (PID).
 
     This command stops MAPDL instances running on a given port or with a given process id (PID).
@@ -68,120 +79,38 @@ def stop(port: Optional[int], pid: Optional[int], all: bool) -> None:
     all : bool
         If :class:`True`, kill all the instances regardless their port or PID.
     """
-    import psutil
-
-    PROCESS_OK_STATUS = [
-        # List of all process status, comment out the ones that means that
-        # process is not OK.
-        # If process is OK, it means it can be killed normally.
-        psutil.STATUS_RUNNING,  #
-        psutil.STATUS_SLEEPING,  #
-        psutil.STATUS_DISK_SLEEP,  #
-        # psutil.STATUS_STOPPED, #
-        # psutil.STATUS_TRACING_STOP, #
-        # psutil.STATUS_ZOMBIE, #
-        psutil.STATUS_DEAD,  #
-        # psutil.STATUS_WAKE_KILL, #
-        # psutil.STATUS_WAKING, #
-        psutil.STATUS_PARKED,  # (Linux)
-        psutil.STATUS_IDLE,  # (Linux, macOS, FreeBSD)
-        # psutil.STATUS_LOCKED, # (FreeBSD)
-        # psutil.STATUS_WAITING, # (FreeBSD)
-        # psutil.STATUS_SUSPENDED, # (NetBSD)
-    ]
-
-    if not pid and not port:
-        port = 50052
-
-    if port or all:
-        killed_ = False
-        if all:
-            for proc in psutil.process_iter():
-                try:
-                    # First check if we can access the process
-                    if not can_access_process(proc):
-                        continue
-
-                    if _is_valid_ansys_process(PROCESS_OK_STATUS, proc):
-                        # Killing "all"
-                        try:
-                            _kill_process(proc)
-                            killed_ = True
-                        except psutil.NoSuchProcess:
-                            pass
-
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    continue
-        else:
-            # Killing by ports
-            proc = get_ansys_process_from_port(port)
-            if proc:
-                try:
-                    _kill_process(proc)
-                    killed_ = True
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    pass
-
-        if all:
-            str_ = ""
-        else:
-            str_ = f" running on port {port}"
-
-        if not killed_:
-            click.echo(
-                click.style("ERROR: ", fg="red")
-                + "No Ansys instances"
-                + str_
-                + " have been found."
-            )
-        else:
-            click.echo(
-                click.style("Success: ", fg="green")
-                + "Ansys instances"
-                + str_
-                + " have been stopped."
-            )
+    try:
+        stopped = stop(port=port, pid=pid, all=all)
+    except (ValueError, TypeError) as err:
+        click.echo(click.style("ERROR: ", fg="red") + str(err))
         return
 
-    if pid:
-        try:
-            pid = int(pid)
-        except ValueError:
-            click.echo(
-                click.style("ERROR: ", fg="red")
-                + "PID provided could not be converted to int."
-            )
-
-        p = psutil.Process(pid)
-        for child in p.children(recursive=True):
-            _kill_process(child)
-
-        _kill_process(p)
-
-        if p.status == "running":
-            click.echo(
-                click.style("ERROR: ", fg="red")
-                + f"The process with PID {pid} and its children could not be killed."
-            )
-        else:
+    if pid and not port and not all:
+        if pid in stopped:
             click.echo(
                 click.style("Success: ", fg="green")
                 + f"The process with PID {pid} and its children have been stopped."
             )
+        else:
+            click.echo(
+                click.style("ERROR: ", fg="red")
+                + f"The process with PID {pid} and its children could not be killed."
+            )
         return
 
+    target = "" if all else f" running on port {port or MAPDL_DEFAULT_PORT}"
 
-def _kill_process(proc):
-    proc.kill()
-
-
-def _is_valid_ansys_process(PROCESS_OK_STATUS, proc):
-    import psutil
-
-    from ansys.mapdl.core.launcher.network import _is_mapdl_process as is_ansys_process
-
-    return (
-        psutil.pid_exists(proc.pid)
-        and proc.status() in PROCESS_OK_STATUS
-        and is_ansys_process(proc)
-    )
+    if stopped:
+        click.echo(
+            click.style("Success: ", fg="green")
+            + "Ansys instances"
+            + target
+            + " have been stopped."
+        )
+    else:
+        click.echo(
+            click.style("ERROR: ", fg="red")
+            + "No Ansys instances"
+            + target
+            + " have been found."
+        )

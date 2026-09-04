@@ -84,7 +84,6 @@ class TestLaunchMapdlOrchestration:
             "mapdl_output": None,
             "transport_mode": None,
             "uds_dir": None,
-            "uds_id": None,
             "certs_dir": None,
         }
         defaults.update(overrides)
@@ -300,7 +299,6 @@ class TestUdsEnvVarInjection:
             mapdl_output=None,
             transport_mode=transport_mode,
             uds_dir=uds_dir,
-            uds_id=None,
             certs_dir=None,
         )
 

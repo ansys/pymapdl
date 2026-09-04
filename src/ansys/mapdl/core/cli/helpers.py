@@ -25,9 +25,116 @@ Minimal core functionality for CLI operations.
 This module avoids importing heavy dependencies like pandas, numpy, etc.
 """
 
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import psutil
+
+from ansys.mapdl.core.cli.constants import DEFAULT_TIMEOUT
+from ansys.mapdl.core.launcher.network import (
+    get_ansys_process_from_port as _get_ansys_process_from_port,
+)
+from ansys.mapdl.core.launcher.network import (
+    is_valid_ansys_process_name as _is_valid_ansys_process_name,
+)
+from ansys.mapdl.core.launcher.network import can_access_process as _can_access_process
+from ansys.mapdl.core.launcher.network import is_alive_status as _is_alive_status
+
+if TYPE_CHECKING:  # pragma: no cover
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+
+def silence_logging() -> None:
+    """Silence the PyMAPDL logger so that only command output reaches stdout.
+
+    The logger level is raised above ``CRITICAL``, which disables every
+    record, and the same is done on the standard output handler when it is
+    present.
+
+    Examples
+    --------
+    Silence PyMAPDL before writing machine-readable output:
+
+    >>> from ansys.mapdl.core.cli.helpers import silence_logging
+    >>> silence_logging()
+
+    """
+    import logging
+
+    from ansys.mapdl.core import LOG
+
+    LOG.setLevel(logging.CRITICAL + 1)
+    if LOG.std_out_handler:
+        LOG.std_out_handler.setLevel(logging.CRITICAL + 1)
+
+
+def connect_to_instance(
+    ip: Optional[str] = None,
+    port: Optional[int] = None,
+    clear_on_connect: bool = False,
+    timeout: int = DEFAULT_TIMEOUT,
+) -> "MapdlGrpc":
+    """Connect to an already running MAPDL instance.
+
+    Parameters
+    ----------
+    ip : str, optional
+        IP address of the MAPDL gRPC server. When ``None``, the value of the
+        ``PYMAPDL_IP`` environment variable is used, defaulting to
+        ``"127.0.0.1"``.
+    port : int, optional
+        Port of the MAPDL gRPC server. When ``None``, the value of the
+        ``PYMAPDL_PORT`` environment variable is used, defaulting to ``50052``.
+    clear_on_connect : bool, default: False
+        Whether to clear the MAPDL database upon connecting.
+    timeout : int, default: 10
+        Seconds to wait when establishing the gRPC connection.
+
+    Returns
+    -------
+    ansys.mapdl.core.mapdl_grpc.MapdlGrpc
+        Client connected to the running instance.
+
+    Raises
+    ------
+    MapdlConnectionError
+        When no MAPDL instance can be reached at the given address. The
+        underlying error is attached as a note on the exception, and the
+        original traceback is suppressed to keep the failure readable.
+
+    Examples
+    --------
+    Connect to the instance running on the default port:
+
+    >>> from ansys.mapdl.core.cli.helpers import connect_to_instance
+    >>> mapdl = connect_to_instance()
+
+    """
+    from ansys.mapdl.core.errors import MapdlConnectionError
+    from ansys.mapdl.core.launcher.config import resolve_launch_config
+    from ansys.mapdl.core.launcher.connection import connect_to_existing
+    from ansys.mapdl.core.launcher.errors import ConfigurationError
+
+    try:
+        config = resolve_launch_config(
+            ip=ip,
+            port=port,
+            start_instance=False,
+            clear_on_connect=clear_on_connect,
+            timeout=timeout,
+        )
+    except (ConfigurationError, TypeError, ValueError) as err:
+        raise MapdlConnectionError(
+            f"Could not resolve the connection to MAPDL at {ip}:{port}.",
+            notes=str(err),
+        ) from None
+
+    try:
+        return connect_to_existing(config)
+    except (ConnectionError, OSError) as err:
+        raise MapdlConnectionError(
+            f"Could not connect to MAPDL at {config.ip}:{config.port}.",
+            notes=str(err),
+        ) from None
 
 
 def can_access_process(proc):
@@ -47,33 +154,17 @@ def can_access_process(proc):
     bool
         True if we can safely access the process
     """
-    import getpass
-    import platform
-
-    try:
-        # Check if we can access basic process info and if it belongs to current user
-        current_user = getpass.getuser()
-        process_user = proc.username()
-        if platform.system() == "Windows" and "\\" in process_user:
-            return current_user == process_user.split("\\")[-1]
-        return process_user == current_user
-    except (psutil.AccessDenied, psutil.NoSuchProcess):
-        # Cannot access process or process doesn't exist
-        return False
+    return _can_access_process(proc)
 
 
 def is_valid_ansys_process_name(name: str) -> bool:
     """Check if process name indicates ANSYS/MAPDL"""
-    return ("ansys" in name.lower()) or ("mapdl" in name.lower())
+    return _is_valid_ansys_process_name(name)
 
 
 def is_alive_status(status) -> bool:
     """Check if process status indicates alive"""
-    return status in [
-        psutil.STATUS_RUNNING,
-        psutil.STATUS_IDLE,
-        psutil.STATUS_SLEEPING,
-    ]
+    return _is_alive_status(status)
 
 
 def get_mapdl_instances() -> List[Dict[str, Any]]:
@@ -155,28 +246,16 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
 
 
 def get_ansys_process_from_port(port: int):
-    # Filter by name first
-    potential_procs = []
-    for proc in psutil.process_iter(attrs=["name"]):
-        name = proc.info["name"]
-        if is_valid_ansys_process_name(name):
-            potential_procs.append(proc)
+    """Find the ANSYS/MAPDL gRPC process listening on a given port.
 
-    for proc in potential_procs:
-        try:
-            status = proc.status()
-            if not is_alive_status(status):
-                continue
-            cmdline = proc.cmdline()
-            if "-grpc" not in cmdline:
-                continue
-            # Check port from cmdline arguments
-            try:
-                port_index = cmdline.index("-port")
-                proc_port = int(cmdline[port_index + 1])
-            except (ValueError, IndexError):
-                continue
-            if proc_port == port:
-                return proc
-        except (psutil.NoSuchProcess, psutil.ZombieProcess, psutil.AccessDenied):
-            continue
+    Parameters
+    ----------
+    port : int
+        Port to look for in the process command line arguments.
+
+    Returns
+    -------
+    Optional[psutil.Process]
+        The matching process, or ``None`` if none is found.
+    """
+    return _get_ansys_process_from_port(port)

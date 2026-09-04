@@ -13,13 +13,13 @@ ci:
 
 repos:
 - repo: https://github.com/shellcheck-py/shellcheck-py
-  rev: 745eface02aef23e168a8afb6b5737818efbea95  # frozen: v0.11.0.1
+  rev: a6564f5d57444e123433a5c9af733e3975c77229  # frozen: v0.11.0.1-1
   hooks:
     - id: shellcheck
       args: [ "-x"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: 41e691678310dfd3833f7ab4e180ddb014310356  # frozen: v2.3.0
+  rev: 7ff8d35ae36a7d2b968f2f90b4c723e292e594ee  # frozen: v2.3.1
   hooks:
     - id: mypy
       args: [ --follow-imports=silent, --config-file=pyproject.toml]
@@ -33,7 +33,7 @@ repos:
     - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
-  rev: 7f321d375f31a2f03833bc9a548e8783f2b5c420  # frozen: 9.0.0b1
+  rev: 131f4adcd5582bfc53928ab0d740eceb8b506b6c  # frozen: 9.0.1
   hooks:
   - id: isort
 
@@ -97,7 +97,7 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 1a4bb160cab6417b3045e1b37b6b72449243e658  # frozen: 0.37.4
+  rev: c4654a7e007c9619a5eb63c39a456572a0fa1851  # frozen: 0.38.0
   hooks:
     - id: check-github-workflows
 
@@ -109,7 +109,7 @@ repos:
       args: [--option, "reorder_arrays=true", --option, "reorder_keys=true"]
 
 - repo: https://github.com/zizmorcore/zizmor-pre-commit
-  rev: 451b56af716f9f0d0c2b816503a3fd0cf8b036fa  # frozen: v1.29.0
+  rev: cef8b8350da46d8114c7e6b7272aebdccdf193ce  # frozen: v1.30.0
   hooks:
     - id: zizmor
       args: ["--pedantic"]

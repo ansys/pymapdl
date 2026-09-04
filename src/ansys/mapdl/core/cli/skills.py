@@ -20,11 +20,478 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+"""``pymapdl skills`` sub-command group."""
+
+from dataclasses import dataclass, field
 import pathlib
 import re
 import sys
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import click
+
+from ansys.mapdl.core.cli.constants import GLOBAL_UNSUPPORTED, SUPPORTED_ENVS
+
+# Directories inside a skill that are never installed.
+_EXCLUDED_DIRECTORIES = ("evals", "workspace")
+
+_INCOMPLETE_PLAN_ERROR = (
+    "The installation plan is missing paths required by the {env!r} environment."
+)
+
+
+class UnknownSkillError(ValueError):
+    """Raised when the requested skill is not bundled with PyMAPDL.
+
+    Parameters
+    ----------
+    skill_name : str
+        Identifier that could not be resolved.
+    available : sequence of str
+        Identifiers of the skills that are available.
+    """
+
+    def __init__(self, skill_name: str, available: Sequence[str]) -> None:
+        self.skill_name = skill_name
+        self.available = list(available)
+        super().__init__(
+            f"Unknown skill {skill_name!r}. "
+            "Run 'pymapdl skills list' to see available skills."
+        )
+
+
+class UnsupportedScopeError(ValueError):
+    """Raised when an environment does not support the requested scope.
+
+    Parameters
+    ----------
+    env : str
+        AI coding environment.
+    scope : str
+        Requested installation scope.
+    """
+
+    def __init__(self, env: str, scope: str) -> None:
+        self.env = env
+        self.scope = scope
+        super().__init__(f"--{scope} is not supported for the '{env}' environment.")
+
+
+@dataclass(frozen=True)
+class SkillInfo:
+    """Metadata of a bundled skill.
+
+    Parameters
+    ----------
+    name : str
+        Skill identifier.
+    description : str
+        One-line description taken from the skill frontmatter.
+    path : pathlib.Path
+        Path to the ``SKILL.md`` file of the skill.
+    """
+
+    name: str
+    description: str
+    path: pathlib.Path
+
+
+@dataclass(frozen=True)
+class SkillInstallPlan:
+    """Files an installation is going to create or update.
+
+    Parameters
+    ----------
+    skill_name : str
+        Skill identifier.
+    env : str
+        AI coding environment the skill is installed into.
+    scope : str
+        Either ``"local"`` or ``"global"``.
+    skill_dir : pathlib.Path
+        Directory holding the bundled skill files.
+    skill_md_text : str
+        Full content of the ``SKILL.md`` file.
+    description : str
+        Description taken from the skill frontmatter.
+    body : str
+        Content of ``SKILL.md`` without its frontmatter.
+    actions : list of str
+        Human-readable description of the planned file operations.
+    dest_dir : pathlib.Path, optional
+        Directory the skill files are copied to.
+    dest_file : pathlib.Path, optional
+        Single file the skill is written to.
+    config_file : pathlib.Path, optional
+        Configuration file of the environment that gets a reference appended.
+    config_line : str, optional
+        Reference line used to detect an already installed skill.
+    config_text : str, optional
+        Full text appended to *config_file*.
+    section_header : str, optional
+        Markdown heading used to detect an already installed skill.
+    """
+
+    skill_name: str
+    env: str
+    scope: str
+    skill_dir: pathlib.Path
+    skill_md_text: str
+    description: str
+    body: str
+    actions: List[str] = field(default_factory=list)
+    dest_dir: Optional[pathlib.Path] = None
+    dest_file: Optional[pathlib.Path] = None
+    config_file: Optional[pathlib.Path] = None
+    config_line: Optional[str] = None
+    config_text: Optional[str] = None
+    section_header: Optional[str] = None
+
+    @property
+    def summary(self) -> str:
+        """Return the planned file operations as a multi-line string."""
+        return "\n".join(self.actions)
+
+
+def list_skills(skills_dir: Optional[pathlib.Path] = None) -> List[SkillInfo]:
+    """List the skills bundled with this PyMAPDL installation.
+
+    Parameters
+    ----------
+    skills_dir : pathlib.Path, optional
+        Directory holding one sub-directory per skill. Defaults to the
+        directory bundled with the package.
+
+    Returns
+    -------
+    list of SkillInfo
+        Available skills, sorted by directory name. Empty when no skill is
+        bundled.
+
+    Examples
+    --------
+    Print the name of every bundled skill:
+
+    >>> from ansys.mapdl.core.cli.skills import list_skills
+    >>> [skill.name for skill in list_skills()]
+    ['pymapdl-cli']
+
+    """
+    if skills_dir is None:
+        skills_dir = _find_skills_dir()
+
+    skills: List[SkillInfo] = []
+    if not skills_dir.exists():
+        return skills
+
+    for entry in sorted(skills_dir.iterdir()):
+        skill_md = entry / "SKILL.md"
+        if not entry.is_dir() or not skill_md.exists():
+            continue
+
+        meta, _ = _parse_frontmatter(skill_md.read_text(encoding="utf-8"))
+        skills.append(
+            SkillInfo(
+                name=meta.get("name", entry.name),
+                description=meta.get("description", ""),
+                path=skill_md,
+            )
+        )
+
+    return skills
+
+
+def show_skill(skill_name: str, skills_dir: Optional[pathlib.Path] = None) -> str:
+    """Return the full ``SKILL.md`` content of a bundled skill.
+
+    Parameters
+    ----------
+    skill_name : str
+        Skill identifier, as reported by :func:`list_skills`.
+    skills_dir : pathlib.Path, optional
+        Directory holding one sub-directory per skill. Defaults to the
+        directory bundled with the package.
+
+    Returns
+    -------
+    str
+        Content of the ``SKILL.md`` file, frontmatter included.
+
+    Raises
+    ------
+    UnknownSkillError
+        When *skill_name* is not bundled with PyMAPDL.
+
+    Examples
+    --------
+    >>> from ansys.mapdl.core.cli.skills import show_skill
+    >>> print(show_skill("pymapdl-cli"))
+
+    """
+    if skills_dir is None:
+        skills_dir = _find_skills_dir()
+
+    skill_md = skills_dir / skill_name / "SKILL.md"
+    if not skill_md.exists():
+        raise UnknownSkillError(
+            skill_name, [skill.name for skill in list_skills(skills_dir)]
+        )
+
+    return skill_md.read_text(encoding="utf-8")
+
+
+def plan_skill_install(
+    skill_name: str,
+    env: str,
+    scope: str = "local",
+    skills_dir: Optional[pathlib.Path] = None,
+) -> SkillInstallPlan:
+    """Resolve the file operations needed to install a skill.
+
+    Nothing is written to disk. Pass the result to
+    :func:`apply_skill_install` to perform the installation.
+
+    Parameters
+    ----------
+    skill_name : str
+        Skill identifier, as reported by :func:`list_skills`.
+    env : str
+        AI coding environment. One of :data:`SUPPORTED_ENVS`.
+    scope : str, default: "local"
+        Either ``"local"`` to install into the current working directory, or
+        ``"global"`` to install into the home directory of the user.
+    skills_dir : pathlib.Path, optional
+        Directory holding one sub-directory per skill. Defaults to the
+        directory bundled with the package.
+
+    Returns
+    -------
+    SkillInstallPlan
+        The files that are created or updated by the installation.
+
+    Raises
+    ------
+    UnknownSkillError
+        When *skill_name* is not bundled with PyMAPDL.
+    UnsupportedScopeError
+        When *env* does not support *scope*.
+    ValueError
+        When *env* is not a supported environment.
+
+    Examples
+    --------
+    Inspect what a local Claude installation would do:
+
+    >>> from ansys.mapdl.core.cli.skills import plan_skill_install
+    >>> print(plan_skill_install("pymapdl-cli", "claude").summary)
+
+    """
+    if env not in SUPPORTED_ENVS:
+        raise ValueError(
+            f"Unknown environment {env!r}. "
+            f"Supported environments are: {', '.join(SUPPORTED_ENVS)}."
+        )
+
+    if skills_dir is None:
+        skills_dir = _find_skills_dir()
+
+    skill_dir = skills_dir / skill_name
+    if not skill_dir.exists() or not (skill_dir / "SKILL.md").exists():
+        raise UnknownSkillError(
+            skill_name, [skill.name for skill in list_skills(skills_dir)]
+        )
+
+    if scope == "global" and env in GLOBAL_UNSUPPORTED:
+        raise UnsupportedScopeError(env, scope)
+
+    skill_md_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+    meta, body = _parse_frontmatter(skill_md_text)
+
+    common: Dict[str, Any] = {
+        "skill_name": skill_name,
+        "env": env,
+        "scope": scope,
+        "skill_dir": skill_dir,
+        "skill_md_text": skill_md_text,
+        "description": meta.get("description", ""),
+        "body": body,
+    }
+
+    root = pathlib.Path.cwd() if scope == "local" else pathlib.Path.home()
+
+    if env == "claude":
+        dest_dir = root / ".claude" / "skills" / skill_name
+        config_file = (
+            root / "CLAUDE.md" if scope == "local" else root / ".claude" / "CLAUDE.md"
+        )
+        config_line = f"@.claude/skills/{skill_name}/SKILL.md"
+        return SkillInstallPlan(
+            dest_dir=dest_dir,
+            config_file=config_file,
+            config_line=config_line,
+            config_text=(
+                f"<!-- You can find the {skill_name} instructions and usage in"
+                f" .claude/skills/{skill_name}/SKILL.md -->\n"
+                f"{config_line}"
+            ),
+            actions=[
+                f"  Copy skill files to: {dest_dir}",
+                f"  Update config file:  {config_file}",
+                f"  Add reference:       {config_line}",
+            ],
+            **common,
+        )
+
+    if env == "copilot":
+        dest_file = pathlib.Path.cwd() / ".github" / "skills" / skill_name / "SKILL.md"
+        return SkillInstallPlan(
+            dest_file=dest_file,
+            actions=[f"  Write skill file to: {dest_file}"],
+            **common,
+        )
+
+    if env == "codex":
+        dest_dir = root / ".codex" / "skills" / skill_name
+        config_file = root / "AGENTS.md"
+        section_header = f"## Skill: {skill_name}"
+        return SkillInstallPlan(
+            dest_dir=dest_dir,
+            config_file=config_file,
+            section_header=section_header,
+            actions=[
+                f"  Copy skill files to: {dest_dir}",
+                f"  Update config file:  {config_file}",
+                f"  Append section:      {section_header}",
+            ],
+            **common,
+        )
+
+    dest_file = root / ".cursor" / "rules" / f"{skill_name}.mdc"
+    return SkillInstallPlan(
+        dest_file=dest_file,
+        actions=[f"  Write skill file to: {dest_file}"],
+        **common,
+    )
+
+
+def apply_skill_install(plan: SkillInstallPlan) -> List[str]:
+    """Perform the installation described by *plan*.
+
+    Parameters
+    ----------
+    plan : SkillInstallPlan
+        Plan built by :func:`plan_skill_install`.
+
+    Returns
+    -------
+    list of str
+        Human-readable log of what has been written or skipped.
+
+    Raises
+    ------
+    ValueError
+        When *plan* does not hold every path its environment needs.
+
+    Examples
+    --------
+    >>> from ansys.mapdl.core.cli.skills import apply_skill_install, plan_skill_install
+    >>> apply_skill_install(plan_skill_install("pymapdl-cli", "cursor"))
+    ['  wrote /home/user/.cursor/rules/pymapdl-cli.mdc']
+
+    """
+    if plan.env == "claude":
+        if (
+            plan.dest_dir is None
+            or plan.config_file is None
+            or plan.config_line is None
+        ):
+            raise ValueError(_INCOMPLETE_PLAN_ERROR.format(env=plan.env))
+
+        _copy_skill_files(plan.skill_dir, plan.dest_dir)
+        plan.config_file.parent.mkdir(parents=True, exist_ok=True)
+        if _append_if_missing(plan.config_file, plan.config_line, plan.config_text):
+            return [f"  updated {plan.config_file}"]
+        return [f"  notice: reference already present in {plan.config_file}, skipping."]
+
+    if plan.env == "codex":
+        if (
+            plan.dest_dir is None
+            or plan.config_file is None
+            or plan.section_header is None
+        ):
+            raise ValueError(_INCOMPLETE_PLAN_ERROR.format(env=plan.env))
+
+        _copy_skill_files(plan.skill_dir, plan.dest_dir)
+        plan.config_file.parent.mkdir(parents=True, exist_ok=True)
+        section = f"\n{plan.section_header}\n\n{plan.body}\n"
+        if _append_if_missing(plan.config_file, plan.section_header, section):
+            return [f"  updated {plan.config_file}"]
+        return [f"  notice: section already present in {plan.config_file}, skipping."]
+
+    if plan.dest_file is None:
+        raise ValueError(_INCOMPLETE_PLAN_ERROR.format(env=plan.env))
+
+    if plan.env == "copilot":
+        content = plan.skill_md_text
+    else:
+        content = f"---\ndescription: {plan.description}\n---\n{plan.body}"
+
+    plan.dest_file.parent.mkdir(parents=True, exist_ok=True)
+    plan.dest_file.write_text(content, encoding="utf-8")
+    return [f"  wrote {plan.dest_file}"]
+
+
+def install_skill(
+    skill_name: str,
+    env: str,
+    scope: str = "local",
+    skills_dir: Optional[pathlib.Path] = None,
+) -> List[str]:
+    """Install a bundled skill into an AI coding environment.
+
+    All files in the skill directory, except ``evals/`` and ``workspace/``,
+    are copied to the target location, and a reference is added to the main
+    configuration file of the environment so that the AI tool discovers the
+    skill. Running the function twice is safe: existing references are not
+    duplicated.
+
+    Parameters
+    ----------
+    skill_name : str
+        Skill identifier, as reported by :func:`list_skills`.
+    env : str
+        AI coding environment. One of :data:`SUPPORTED_ENVS`.
+    scope : str, default: "local"
+        Either ``"local"`` to install into the current working directory, or
+        ``"global"`` to install into the home directory of the user.
+    skills_dir : pathlib.Path, optional
+        Directory holding one sub-directory per skill. Defaults to the
+        directory bundled with the package.
+
+    Returns
+    -------
+    list of str
+        Human-readable log of what has been written or skipped.
+
+    Raises
+    ------
+    UnknownSkillError
+        When *skill_name* is not bundled with PyMAPDL.
+    UnsupportedScopeError
+        When *env* does not support *scope*.
+
+    Examples
+    --------
+    Install the ``pymapdl-cli`` skill for Claude in the current project:
+
+    >>> from ansys.mapdl.core.cli.skills import install_skill
+    >>> install_skill("pymapdl-cli", env="claude")
+    ['  updated /home/user/project/CLAUDE.md']
+
+    """
+    return apply_skill_install(
+        plan_skill_install(skill_name, env=env, scope=scope, skills_dir=skills_dir)
+    )
 
 
 def _find_skills_dir() -> pathlib.Path:
@@ -44,7 +511,7 @@ def _find_skills_dir() -> pathlib.Path:
         return pathlib.Path(__file__).parent.parent / "skills"
 
 
-def _parse_frontmatter(text: str) -> tuple:
+def _parse_frontmatter(text: str) -> Tuple[Dict[str, str], str]:
     """Parse YAML frontmatter from a markdown string.
 
     Parameters
@@ -73,159 +540,8 @@ def _parse_frontmatter(text: str) -> tuple:
     return meta, body
 
 
-def _list_skills(skills_dir: pathlib.Path) -> list:
-    """Return a list of ``(name, description, skill_path)`` for every bundled skill.
-
-    Parameters
-    ----------
-    skills_dir : pathlib.Path
-        Root directory that contains one sub-directory per skill.
-
-    Returns
-    -------
-    list of tuple[str, str, pathlib.Path]
-        Each element is ``(name, description, skill_md_path)``.
-    """
-    result: list[tuple[str, str, pathlib.Path]] = []
-    if not skills_dir.exists():
-        return result
-    for entry in sorted(skills_dir.iterdir()):
-        if not entry.is_dir():
-            continue
-        skill_md = entry / "SKILL.md"
-        if not skill_md.exists():
-            continue
-        text = skill_md.read_text(encoding="utf-8")
-        meta, _ = _parse_frontmatter(text)
-        name = meta.get("name", entry.name)
-        description = meta.get("description", "")
-        result.append((name, description, skill_md))
-    return result
-
-
-# ---------------------------------------------------------------------------
-# Click command group
-# ---------------------------------------------------------------------------
-
-
-@click.group(short_help="Manage and install PyMAPDL AI skills.")
-def skills():
-    """Manage and install bundled PyMAPDL AI skills.
-
-    Use the sub-commands to list available skills, inspect their content,
-    and install them into your AI coding environment.
-    """
-
-
-# ---------------------------------------------------------------------------
-# pymapdl skills list
-# ---------------------------------------------------------------------------
-
-
-@skills.command(
-    name="list",
-    short_help="List all bundled skills.",
-    help="""List all skills bundled with this PyMAPDL installation.
-
-    Prints each skill's name and a one-line description to stdout.""",
-)
-def list_skills():
-    """List all skills bundled with this PyMAPDL installation.
-
-    Prints each skill's name and a one-line description to stdout.
-
-    Examples
-    --------
-    List all bundled skills:
-
-        pymapdl skills list
-
-    """
-    skills_dir = _find_skills_dir()
-    entries = _list_skills(skills_dir)
-    if not entries:
-        click.echo("No skills are bundled with this PyMAPDL installation.")
-        return
-    click.echo("")
-    click.echo(click.style("Available skills:", bold=True))
-    for name, description, _ in entries:
-        click.echo(f"- {name}")
-
-    click.echo("")
-    for name, description, _ in entries:
-        click.echo(f"{name}")
-        click.echo("-" * len(name))
-        if description:
-            click.echo(description)
-
-
-# ---------------------------------------------------------------------------
-# pymapdl skills show
-# ---------------------------------------------------------------------------
-
-
-@skills.command(
-    name="show",
-    short_help="Print a skill's SKILL.md to stdout.",
-    help="""Print the full content of a skill's SKILL.md to stdout.
-
-SKILL_NAME is the skill identifier as shown by ``pymapdl skills list``
-(e.g. ``pymapdl-cli``).  Redirect stdout to capture the file locally:
-
-\b
-Example:
-    pymapdl skills show pymapdl-cli > SKILL.md
-    """,
-)
-@click.argument("skill_name")
-def show_skill(skill_name: str) -> None:
-    """Print the full content of a skill's SKILL.md to stdout.
-
-    SKILL_NAME is the skill identifier as shown by ``pymapdl skills list``
-    (e.g. ``pymapdl-cli``).  Redirect stdout to capture the file locally:
-
-    Parameters
-    ----------
-    skill_name : str
-        Identifier of the skill to show, as shown by ``pymapdl skills list``
-        (e.g. ``pymapdl-cli``).
-
-    Examples
-    --------
-    Print the SKILL.md for the 'pymapdl-cli' skill to the console:
-
-        pymapdl skills show pymapdl-cli
-
-    Save the SKILL.md for the 'pymapdl-cli' skill to a local file:
-
-        pymapdl skills show pymapdl-cli > SKILL.md
-
-    """
-    skills_dir = _find_skills_dir()
-    skill_md = skills_dir / skill_name / "SKILL.md"
-    if not skill_md.exists():
-        available = [e[0] for e in _list_skills(skills_dir)]
-        click.echo(
-            click.style("ERROR:", fg="red") + f" Unknown skill {skill_name!r}. "
-            "Run 'pymapdl skills list' to see available skills.",
-            err=True,
-        )
-        if available:
-            click.echo("Available skills: " + ", ".join(available), err=True)
-        sys.exit(1)
-    click.echo(skill_md.read_text(encoding="utf-8"))
-
-
-# ---------------------------------------------------------------------------
-# pymapdl skills install
-# ---------------------------------------------------------------------------
-
-_SUPPORTED_ENVS = ("claude", "copilot", "codex", "cursor")
-_GLOBAL_UNSUPPORTED = ("copilot",)
-
-
 def _copy_skill_files(src_dir: pathlib.Path, dst_dir: pathlib.Path) -> None:
-    """Copy all files from *src_dir* to *dst_dir*, excluding ``evals/``.
+    """Copy all files from *src_dir* to *dst_dir*, excluding ``evals/`` and ``workspace/``.
 
     Parameters
     ----------
@@ -241,7 +557,7 @@ def _copy_skill_files(src_dir: pathlib.Path, dst_dir: pathlib.Path) -> None:
         if src_file.is_dir():
             continue
         rel = src_file.relative_to(src_dir)
-        if any(part in ("evals", "workspace") for part in rel.parts):
+        if any(part in _EXCLUDED_DIRECTORIES for part in rel.parts):
             continue
         dst_file = dst_dir / rel
         dst_file.parent.mkdir(parents=True, exist_ok=True)
@@ -249,7 +565,7 @@ def _copy_skill_files(src_dir: pathlib.Path, dst_dir: pathlib.Path) -> None:
 
 
 def _append_if_missing(
-    file_path: pathlib.Path, line: str, text: str | None = None
+    file_path: pathlib.Path, line: str, text: Optional[str] = None
 ) -> bool:
     """Append *text* to *file_path* if *line* is not already present.
 
@@ -279,6 +595,114 @@ def _append_if_missing(
             fh.write("\n")
         fh.write(payload + "\n")
     return True
+
+
+# ---------------------------------------------------------------------------
+# Click wrappers
+# ---------------------------------------------------------------------------
+
+
+@click.group(short_help="Manage and install PyMAPDL AI skills.")
+def skills():
+    """Manage and install bundled PyMAPDL AI skills.
+
+    Use the sub-commands to list available skills, inspect their content,
+    and install them into your AI coding environment.
+    """
+
+
+def _abort_unknown_skill(error: UnknownSkillError) -> None:
+    """Report an unknown skill on stderr and exit with a non-zero code.
+
+    Parameters
+    ----------
+    error : UnknownSkillError
+        Error raised while resolving the skill name.
+    """
+    click.echo(click.style("ERROR:", fg="red") + f" {error}", err=True)
+    if error.available:
+        click.echo("Available skills: " + ", ".join(error.available), err=True)
+    sys.exit(1)
+
+
+@skills.command(
+    name="list",
+    short_help="List all bundled skills.",
+    help="""List all skills bundled with this PyMAPDL installation.
+
+    Prints each skill's name and a one-line description to stdout.""",
+)
+def list_skills_cli() -> None:
+    """List all skills bundled with this PyMAPDL installation.
+
+    Prints each skill's name and a one-line description to stdout.
+
+    Examples
+    --------
+    List all bundled skills:
+
+        pymapdl skills list
+
+    """
+    entries = list_skills()
+    if not entries:
+        click.echo("No skills are bundled with this PyMAPDL installation.")
+        return
+
+    click.echo("")
+    click.echo(click.style("Available skills:", bold=True))
+    for skill in entries:
+        click.echo(f"- {skill.name}")
+
+    click.echo("")
+    for skill in entries:
+        click.echo(skill.name)
+        click.echo("-" * len(skill.name))
+        if skill.description:
+            click.echo(skill.description)
+
+
+@skills.command(
+    name="show",
+    short_help="Print a skill's SKILL.md to stdout.",
+    help="""Print the full content of a skill's SKILL.md to stdout.
+
+SKILL_NAME is the skill identifier as shown by ``pymapdl skills list``
+(e.g. ``pymapdl-cli``).  Redirect stdout to capture the file locally:
+
+\b
+Example:
+    pymapdl skills show pymapdl-cli > SKILL.md
+    """,
+)
+@click.argument("skill_name")
+def show_skill_cli(skill_name: str) -> None:
+    """Print the full content of a skill's SKILL.md to stdout.
+
+    SKILL_NAME is the skill identifier as shown by ``pymapdl skills list``
+    (e.g. ``pymapdl-cli``).  Redirect stdout to capture the file locally:
+
+    Parameters
+    ----------
+    skill_name : str
+        Identifier of the skill to show, as shown by ``pymapdl skills list``
+        (e.g. ``pymapdl-cli``).
+
+    Examples
+    --------
+    Print the SKILL.md for the 'pymapdl-cli' skill to the console:
+
+        pymapdl skills show pymapdl-cli
+
+    Save the SKILL.md for the 'pymapdl-cli' skill to a local file:
+
+        pymapdl skills show pymapdl-cli > SKILL.md
+
+    """
+    try:
+        click.echo(show_skill(skill_name))
+    except UnknownSkillError as err:
+        _abort_unknown_skill(err)
 
 
 @skills.command(
@@ -315,7 +739,7 @@ Install the 'pymapdl-cli' skill globally for use with Claude:
 @click.option(
     "--env",
     required=True,
-    type=click.Choice(_SUPPORTED_ENVS),
+    type=click.Choice(SUPPORTED_ENVS),
     help=(
         "AI coding environment to install the skill into.  "
         "Each environment receives a copy of the skill files (excluding "
@@ -342,7 +766,7 @@ Install the 'pymapdl-cli' skill globally for use with Claude:
     default=False,
     help="Skip the confirmation prompt and proceed immediately.",
 )
-def install_skill(skill_name: str, env: str, scope: str, yes: bool) -> None:
+def install_skill_cli(skill_name: str, env: str, scope: str, yes: bool) -> None:
     """Install a skill's files into an AI coding environment.
 
     SKILL_NAME is the skill identifier as shown by ``pymapdl skills list``
@@ -387,121 +811,21 @@ def install_skill(skill_name: str, env: str, scope: str, yes: bool) -> None:
       pymapdl skills install pymapdl-cli --env claude --global
 
     """
-    skills_dir = _find_skills_dir()
-    skill_dir = skills_dir / skill_name
-    if not skill_dir.exists() or not (skill_dir / "SKILL.md").exists():
-        available = [e[0] for e in _list_skills(skills_dir)]
-        click.echo(
-            click.style("ERROR:", fg="red") + f" Unknown skill {skill_name!r}. "
-            "Run 'pymapdl skills list' to see available skills.",
-            err=True,
-        )
-        if available:
-            click.echo("Available skills: " + ", ".join(available), err=True)
+    try:
+        plan = plan_skill_install(skill_name, env=env, scope=scope)
+    except UnknownSkillError as err:
+        _abort_unknown_skill(err)
+    except UnsupportedScopeError as err:
+        click.echo(click.style("ERROR:", fg="red") + f" {err}", err=True)
         sys.exit(1)
-
-    if scope == "global" and env in _GLOBAL_UNSUPPORTED:
-        click.echo(
-            click.style("ERROR:", fg="red")
-            + f" --global is not supported for the '{env}' environment.",
-            err=True,
-        )
-        sys.exit(1)
-
-    skill_md_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
-    meta, body = _parse_frontmatter(skill_md_text)
-    description = meta.get("description", "")
-
-    cwd = pathlib.Path.cwd()
-    home = pathlib.Path.home()
-
-    # Resolve destination paths per env + scope
-    if env == "claude":
-        if scope == "local":
-            dest_dir = cwd / ".claude" / "skills" / skill_name
-            config_file = cwd / "CLAUDE.md"
-        else:
-            dest_dir = home / ".claude" / "skills" / skill_name
-            config_file = home / ".claude" / "CLAUDE.md"
-        config_line = f"@.claude/skills/{skill_name}/SKILL.md"
-        config_text = (
-            f"<!-- You can find the {skill_name} instructions and usage in"
-            f" .claude/skills/{skill_name}/SKILL.md -->\n"
-            f"{config_line}"
-        )
-        action_desc = (
-            f"  Copy skill files to: {dest_dir}\n"
-            f"  Update config file:  {config_file}\n"
-            f"  Add reference:       {config_line}"
-        )
-    elif env == "copilot":
-        dest_file = cwd / ".github" / "skills" / skill_name / "SKILL.md"
-        action_desc = f"  Write skill file to: {dest_file}\n"
-    elif env == "codex":
-        if scope == "local":
-            dest_dir = cwd / ".codex" / "skills" / skill_name
-            config_file = cwd / "AGENTS.md"
-        else:
-            dest_dir = home / ".codex" / "skills" / skill_name
-            config_file = home / "AGENTS.md"
-        section_header = f"## Skill: {skill_name}"
-        action_desc = (
-            f"  Copy skill files to: {dest_dir}\n"
-            f"  Update config file:  {config_file}\n"
-            f"  Append section:      {section_header}"
-        )
-    elif env == "cursor":
-        if scope == "local":
-            dest_file = cwd / ".cursor" / "rules" / f"{skill_name}.mdc"
-        else:
-            dest_file = home / ".cursor" / "rules" / f"{skill_name}.mdc"
-        action_desc = f"  Write skill file to: {dest_file}"
 
     click.echo(f"Installing skill '{skill_name}' for env '{env}' ({scope}):")
-    click.echo(action_desc)
+    click.echo(plan.summary)
 
     if not yes:
         click.confirm("Proceed?", default=False, abort=True)
 
-    # Perform the installation
-    if env == "claude":
-        _copy_skill_files(skill_dir, dest_dir)
-        config_file.parent.mkdir(parents=True, exist_ok=True)
-        added = _append_if_missing(config_file, config_line, config_text)
-        if not added:
-            click.echo(
-                f"  notice: reference already present in {config_file}, skipping."
-            )
-        else:
-            click.echo(f"  updated {config_file}")
-        click.echo(click.style("Done.", fg="green"))
+    for message in apply_skill_install(plan):
+        click.echo(message)
 
-    elif env == "copilot":
-        dest_file.parent.mkdir(parents=True, exist_ok=True)
-        dest_file.write_text(skill_md_text, encoding="utf-8")
-        click.echo(f"  wrote {dest_file}")
-        click.echo(click.style("Done.", fg="green"))
-
-    elif env == "codex":
-        _copy_skill_files(skill_dir, dest_dir)
-        config_file.parent.mkdir(parents=True, exist_ok=True)
-        section_header = f"## Skill: {skill_name}"
-        existing = (
-            config_file.read_text(encoding="utf-8") if config_file.exists() else ""
-        )
-        if section_header in existing:
-            click.echo(f"  notice: section already present in {config_file}, skipping.")
-        else:
-            with open(config_file, "a", encoding="utf-8") as fh:
-                if existing and not existing.endswith("\n"):
-                    fh.write("\n")
-                fh.write(f"\n{section_header}\n\n{body}\n")
-            click.echo(f"  updated {config_file}")
-        click.echo(click.style("Done.", fg="green"))
-
-    elif env == "cursor":
-        mdc_content = f"---\ndescription: {description}\n---\n{body}"
-        dest_file.parent.mkdir(parents=True, exist_ok=True)
-        dest_file.write_text(mdc_content, encoding="utf-8")
-        click.echo(f"  wrote {dest_file}")
-        click.echo(click.style("Done.", fg="green"))
+    click.echo(click.style("Done.", fg="green"))

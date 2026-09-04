@@ -183,6 +183,67 @@ Alternatively, you can stop all the running instances by using:
             Success: Ansys instances have been stopped.
 
 
+Stop MAPDL instances from Python
+---------------------------------
+
+You do not need to shell out to the command-line tool to stop an instance, and you do not
+need to have launched it with :func:`launch_mapdl()
+<ansys.mapdl.core.launcher.launch_mapdl>` either. Use
+:func:`stop_mapdl() <ansys.mapdl.core.launcher.connection.stop>`, exposed at
+the top level of the package for consistency with :func:`launch_mapdl()
+<ansys.mapdl.core.launcher.launch_mapdl>`, with the same ``port``, ``pid``,
+and ``all`` options as the command-line tool:
+
+.. code:: python
+
+    from ansys.mapdl.core import stop_mapdl
+
+    # Stop the instance on the default port (50052)
+    stop_mapdl()
+
+    # Stop the instance running on a specific port
+    stop_mapdl(port=50053)
+
+    # Stop a specific process (and its children) by PID
+    stop_mapdl(pid=40952)
+
+    # Stop every MAPDL instance owned by the current user
+    stop_mapdl(all=True)
+
+``stop_mapdl()`` returns the list of process IDs that were actually stopped,
+so you can check whether it found anything to stop:
+
+.. code:: python
+
+    stopped = stop_mapdl(port=50053)
+    if not stopped:
+        print("No instance was running on port 50053.")
+
+To stop every local MAPDL instance within a range of ports instead of every
+instance owned by the user, use :func:`close_all_local_instances()
+<ansys.mapdl.core.launcher.connection.close_all_local_instances>`, which is a
+thin wrapper around ``stop()``:
+
+.. code:: python
+
+    import ansys.mapdl.core as pymapdl
+
+    # Stop every local instance
+    pymapdl.close_all_local_instances()
+
+    # Only stop instances within a specific port range
+    pymapdl.close_all_local_instances(port_range=range(50052, 50200))
+
+If you already hold a connected :class:`Mapdl <ansys.mapdl.core.Mapdl>`
+instance, prefer its :meth:`~ansys.mapdl.core.Mapdl.exit` method instead,
+because it lets MAPDL shut down gracefully (optionally saving the database)
+before the process is terminated:
+
+.. code:: python
+
+    mapdl.exit(save=True)
+
+
 List MAPDL instances and processes
 ==================================
 
@@ -578,3 +639,96 @@ To obtain help on converter usage, options, and examples, type this command:
 The ``pymapdl convert`` command uses the
 :func:`convert_script() <ansys.mapdl.core.convert_script>` function.
 Hence, this command accepts most of this function's arguments.
+
+
+.. _ref_cli_programmatic:
+
+Use the commands from Python
+============================
+
+Every ``pymapdl`` sub-command is a thin Click wrapper, named ``<name>_cli``,
+around a plain function named ``<name>`` that lives in the same module, for
+example :func:`ansys.mapdl.core.cli.start.start`. Import the plain function to
+get the same behavior from Python, which avoids spawning a shell and parsing
+text output.
+
+.. note::
+
+   :func:`stop() <ansys.mapdl.core.launcher.connection.stop>` is the
+   exception to the "same module" rule: it lives in
+   :mod:`ansys.mapdl.core.launcher.connection` so it can also be used by
+   :func:`close_all_local_instances()
+   <ansys.mapdl.core.launcher.connection.close_all_local_instances>` without
+   depending on the CLI package. For consistency with :func:`launch_mapdl()
+   <ansys.mapdl.core.launcher.launch_mapdl>`, it is also exposed at the top
+   level of the package as ``stop_mapdl``. Import it with ``from
+   ansys.mapdl.core import stop_mapdl`` (or the equivalent ``from
+   ansys.mapdl.core.launcher import stop`` and ``ansys.mapdl.core.cli.stop.stop``
+   aliases, kept for backward compatibility).
+
+.. code:: python
+
+    from ansys.mapdl.core import stop_mapdl
+    from ansys.mapdl.core.cli.exec import exec_commands
+    from ansys.mapdl.core.cli.start import start
+
+    ip, port, pid = start(port=50054, nproc=4)
+    print(exec_commands(commands=["/prep7", "BLOCK,0,1,0,1,0,1"], port=port))
+    stop_mapdl(pid=pid)
+
+The mapping between commands and functions is direct. Each function takes the
+long form of the command options as keyword arguments:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Command
+     - Function
+   * - ``pymapdl start``
+     - :func:`start() <ansys.mapdl.core.cli.start.start>`
+   * - ``pymapdl stop``
+     - :func:`stop() <ansys.mapdl.core.launcher.connection.stop>`
+   * - ``pymapdl list``
+     - :func:`list_instances() <ansys.mapdl.core.cli.list_instances.list_instances>`
+   * - ``pymapdl check``
+     - :func:`check() <ansys.mapdl.core.cli.check.check>`
+   * - ``pymapdl exec``
+     - :func:`exec_commands() <ansys.mapdl.core.cli.exec.exec_commands>`
+   * - ``pymapdl convert``
+     - :func:`convert() <ansys.mapdl.core.cli.convert.convert>`
+   * - ``pymapdl help``
+     - :func:`help_command() <ansys.mapdl.core.cli.help.help_command>`
+   * - ``pymapdl skills list``
+     - :func:`list_skills() <ansys.mapdl.core.cli.skills.list_skills>`
+   * - ``pymapdl skills show``
+     - :func:`show_skill() <ansys.mapdl.core.cli.skills.show_skill>`
+   * - ``pymapdl skills install``
+     - :func:`install_skill() <ansys.mapdl.core.cli.skills.install_skill>`
+
+These functions return data and raise exceptions, they never print to stdout
+nor exit the interpreter. Rendering and exit codes are the responsibility of
+the Click wrapper. So a failure surfaces as a regular Python exception that
+you can handle:
+
+.. code:: python
+
+    from ansys.mapdl.core.cli.check import check
+    from ansys.mapdl.core.errors import MapdlConnectionError
+
+    try:
+        info = check(port=50052)
+    except MapdlConnectionError:
+        print("No instance is running on port 50052.")
+    else:
+        print(info["information"]["mapdl_version"])
+
+Two functions return a string that is meant to be printed rather than parsed:
+:func:`list_instances() <ansys.mapdl.core.cli.list_instances.list_instances>`
+returns the rendered table, and :func:`help_command()
+<ansys.mapdl.core.cli.help.help_command>` returns the docstring with the ANSI
+escape sequences of a color terminal. To get the instances as data instead of a
+table, use :func:`get_mapdl_instances()
+<ansys.mapdl.core.cli.helpers.get_mapdl_instances>`.
+
+For the full signatures, see :ref:`ref_cli_api`.

@@ -31,7 +31,7 @@ import numpy as np
 
 from .common_grpc import ANSYS_VALUE_TYPE
 from .errors import MapdlRuntimeError
-from .misc import random_string
+from .misc import quote_path_if_needed, random_string, unquote_path
 
 MYCTYPE = {
     np.int32: "I",
@@ -102,7 +102,7 @@ class ansXpl:
         Opening the file.mode ANSYS File
         """
         self._filename = filename
-        out = self._mapdl.run(f"*XPL,OPEN,{filename},,{option}")
+        out = self._mapdl.run(f"*XPL,OPEN,{quote_path_if_needed(filename)},,{option}")
         self._open = True
         return out
 
@@ -365,7 +365,7 @@ class ansXpl:
          =====      ANSYS File Xplorer : Copy file.full ANSYS file to file tmpfile.full
             >>      Remove existing output file tmpfile.full
         """
-        return self._mapdl.run(f"*XPL,COPY,{newfile},{option}")
+        return self._mapdl.run(f"*XPL,COPY,{quote_path_if_needed(newfile)},{option}")
 
     def save(self):
         """Save the current file, ignoring the marked records."""
@@ -450,14 +450,15 @@ class ansXpl:
             num_last = -1
 
         dtype = np.double
-        file_extension = pathlib.Path(self._filename).suffix[1:]
+        file_extension = pathlib.Path(unquote_path(self._filename)).suffix[1:]
         if file_extension.lower() != "rst":
             raise MapdlRuntimeError(
                 "This method only supports extracting records from result files"
             )
 
         self._mapdl.run(
-            f"*DMAT,{rand_name},{MYCTYPE[dtype]},IMPORT,{file_extension},{self._filename},"
+            f"*DMAT,{rand_name},{MYCTYPE[dtype]},IMPORT,{file_extension},"
+            f"{quote_path_if_needed(self._filename)},"
             f"{num_first},{num_last},{recordname}",
             mute=False,
         )

@@ -31,7 +31,7 @@ import re
 import shutil
 import tempfile
 import time
-from unittest.mock import PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 from warnings import catch_warnings
 
 import grpc
@@ -64,12 +64,14 @@ from ansys.mapdl.core.errors import (
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlConnectionError,
+    MapdlDoLoopLimitError,
     MapdlExitedError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.helpers import is_installed
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME
+from ansys.mapdl.core.mapdl_extended import MAX_DO_LOOP_LEVEL, _MapdlExtended
 from ansys.mapdl.core.misc import random_string, stack
 from ansys.mapdl.core.plotting import GraphicsBackend
 
@@ -268,6 +270,48 @@ def warns_in_cdread_error_log(mapdl, tmpdir):
             or (warn_cdread_3 in error_log)
         )
         return any(warns)
+
+
+class FakeMapdl(_MapdlExtended):
+    """Lightweight double implementing just enough of ``Mapdl`` for testing.
+
+    It bypasses :class:`_MapdlCore.__init__ <ansys.mapdl.core.mapdl_core._MapdlCore>`
+    entirely, since that requires a real (or gRPC) connection, but keeps the
+    real ``_store_commands``/``_stored_commands``/``non_interactive``
+    machinery from :class:`_MapdlCore <ansys.mapdl.core.mapdl_core._MapdlCore>`
+    so the actual buffering (and discarding) behavior is exercised.
+    """
+
+    def __init__(self):
+        self._do_loop_level = 0
+        self._store_commands = False
+        self._stored_commands = []
+        # Commands that were actually "sent" to MAPDL, either directly or
+        # through a flush of ``_stored_commands``.
+        self.sent_commands = []
+        self._log = MagicMock()
+        # Avoid the ``self._parent().com(...)`` debug-only branch in
+        # ``_non_interactive.__enter__``, since ``com`` is not implemented
+        # on this fake.
+        self._log.logger.level = logging.WARNING
+
+    def run(self, command, **kwargs):
+        if self._store_commands:
+            self._stored_commands.append(command)
+            return None
+        self.sent_commands.append(command)
+        return command
+
+    def _flush_stored(self):
+        """Mimic ``_MapdlCore._flush_stored`` without touching real MAPDL."""
+        self.sent_commands.extend(self._stored_commands)
+        self._store_commands = False
+        self._stored_commands = []
+
+
+@pytest.fixture
+def fake_mapdl():
+    return FakeMapdl()
 
 
 @pytest.mark.parametrize("command", DEPRECATED_COMMANDS)
@@ -3010,43 +3054,46 @@ def test_timeout_when_exiting(mapdl, is_exited):
 
     handle_generic_grpc_error = errors.handle_generic_grpc_error
 
-    with (
-        patch("ansys.mapdl.core.mapdl_grpc.pb_types.CmdRequest") as mock_cmdrequest,
-        patch(
-            "ansys.mapdl.core.mapdl_grpc.MapdlGrpc.is_alive", new_callable=PropertyMock
-        ) as mock_is_alive,
-        patch.object(mapdl, "_connect") as mock_connect,
-        patch(
-            "ansys.mapdl.core.errors.handle_generic_grpc_error", autospec=True
-        ) as mock_handle,
-        patch.object(mapdl, "_exit_mapdl") as mock_exit_mapdl,
-    ):
+    try:
+        with (
+            patch("ansys.mapdl.core.mapdl_grpc.pb_types.CmdRequest") as mock_cmdrequest,
+            patch(
+                "ansys.mapdl.core.mapdl_grpc.MapdlGrpc.is_alive",
+                new_callable=PropertyMock,
+            ) as mock_is_alive,
+            patch.object(mapdl, "_connect") as mock_connect,
+            patch(
+                "ansys.mapdl.core.errors.handle_generic_grpc_error", autospec=True
+            ) as mock_handle,
+            patch.object(mapdl, "_exit_mapdl") as mock_exit_mapdl,
+        ):
 
-        mock_exit_mapdl.return_value = None  # Avoid exiting
-        mock_is_alive.return_value = False
-        mock_connect.return_value = None  # patched to avoid timeout
-        mock_cmdrequest.side_effect = raise_exception
-        mock_handle.side_effect = handle_generic_grpc_error
+            mock_exit_mapdl.return_value = None  # Avoid exiting
+            mock_is_alive.return_value = False
+            mock_connect.return_value = None  # patched to avoid timeout
+            mock_cmdrequest.side_effect = raise_exception
+            mock_handle.side_effect = handle_generic_grpc_error
 
-        with pytest.raises(MapdlExitedError):
-            mapdl.prep7()
+            with pytest.raises(MapdlExitedError):
+                mapdl.prep7()
 
-        # After
-        assert mapdl._exited
+            # After
+            assert mapdl._exited
 
-        assert mock_handle.call_count == 1
+            assert mock_handle.call_count == 1
 
-        if is_exited:
-            # Checking no trying to reconnect
-            assert mock_connect.call_count == 0
-            assert mock_cmdrequest.call_count == 1
-            assert mock_is_alive.call_count == 1
+            if is_exited:
+                # Checking no trying to reconnect
+                assert mock_connect.call_count == 0
+                assert mock_cmdrequest.call_count == 1
+                assert mock_is_alive.call_count == 1
 
-        else:
-            assert mock_connect.call_count == errors.N_ATTEMPTS
-            assert mock_cmdrequest.call_count == errors.N_ATTEMPTS + 1
-            assert mock_is_alive.call_count == errors.N_ATTEMPTS + 1
+            else:
+                assert mock_connect.call_count == errors.N_ATTEMPTS
+                assert mock_cmdrequest.call_count == errors.N_ATTEMPTS + 1
+                assert mock_is_alive.call_count == errors.N_ATTEMPTS + 1
 
+    finally:
         mapdl._exited = False
 
 
@@ -3200,6 +3247,46 @@ def test_release_resources_closes_channel():
 
 
 @stack(*PATCH_MAPDL_START)
+def test_release_resources_logs_on_deterministic_exit_path():
+    """``_release_resources(cleanup_loggers=True)`` must log defensively.
+
+    Complements ``test_release_resources_suppresses_logging_when_called_like_del``:
+    on the deterministic ``exit()`` path (``cleanup_loggers=True``), failures
+    while joining PIPE-drainer threads or closing the gRPC channel must still
+    be logged, since logging is reliable there.
+    """
+    from unittest.mock import MagicMock
+
+    start_parm = {
+        "ip": "123.45.67.99",
+        "local": False,
+        "set_no_abort": False,
+        "launched": True,
+        "start_instance": True,
+        "transport_mode": "insecure",
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+    mapdl._channel = MagicMock()  # replace stub with real mock
+
+    with (
+        patch.object(mapdl, "_exit_mapdl"),
+        patch.object(mapdl, "_cleanup_loggers"),
+        patch.object(
+            mapdl, "_join_pipe_drainer_threads", side_effect=RuntimeError("boom")
+        ),
+        patch.object(mapdl, "_close_grpc_channel", side_effect=RuntimeError("boom")),
+        patch.object(mapdl, "_log") as mock_log,
+    ):
+        mapdl._release_resources(cleanup_loggers=True)
+
+    assert mock_log.debug.call_count == 2
+    assert mapdl._exited
+
+    mapdl.__del__ = lambda: None  # prevent double cleanup on GC
+
+
+@stack(*PATCH_MAPDL_START)
 def test_release_resources_calls_cleanup_loggers():
     """_release_resources() must wire _cleanup_loggers()."""
     from unittest.mock import MagicMock
@@ -3229,6 +3316,46 @@ def test_release_resources_calls_cleanup_loggers():
 
 
 @stack(*PATCH_MAPDL_START)
+def test_release_resources_suppresses_logging_when_called_like_del():
+    """``_release_resources(cleanup_loggers=False)`` must not log on failure.
+
+    Regression test for https://github.com/ansys/pymapdl/issues/4728: when
+    called the way ``__del__`` calls it (``cleanup_loggers=False``), failures
+    while joining PIPE-drainer threads or closing the gRPC channel must not
+    be logged, since logging can be unreliable during interpreter shutdown.
+    """
+    from unittest.mock import MagicMock
+
+    start_parm = {
+        "ip": "123.45.67.99",
+        "local": False,
+        "set_no_abort": False,
+        "launched": True,
+        "start_instance": True,
+        "transport_mode": "insecure",
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+    mapdl._channel = MagicMock()  # replace stub with real mock
+
+    with (
+        patch.object(mapdl, "_exit_mapdl"),
+        patch.object(mapdl, "_cleanup_loggers"),
+        patch.object(
+            mapdl, "_join_pipe_drainer_threads", side_effect=RuntimeError("boom")
+        ),
+        patch.object(mapdl, "_close_grpc_channel", side_effect=RuntimeError("boom")),
+        patch.object(mapdl, "_log") as mock_log,
+    ):
+        mapdl._release_resources(cleanup_loggers=False)
+
+    mock_log.debug.assert_not_called()
+    assert mapdl._exited
+
+    mapdl.__del__ = lambda: None  # prevent double cleanup on GC
+
+
+@stack(*PATCH_MAPDL_START)
 def test_del_honours_cleanup_on_exit_false():
     """When cleanup_on_exit=False, __del__ must not call _release_resources."""
     start_parm = {
@@ -3250,6 +3377,104 @@ def test_del_honours_cleanup_on_exit_false():
     mock_release.assert_not_called()
 
     mapdl._cleanup = True
+    mapdl.__del__ = lambda: None  # prevent cleanup on GC
+
+
+@stack(*PATCH_MAPDL_START)
+def test_del_early_exit_joins_pipe_drainer_threads():
+    """``__del__``'s early-exit branch must not leak PIPE-drainer threads.
+
+    Regression test for https://github.com/ansys/pymapdl/issues/4728: when
+    the full teardown in ``_release_resources`` is skipped (for example
+    ``cleanup_on_exit=False``), the stdout/stderr/startup PIPE-drainer
+    threads must still be joined, not just the gRPC channel closed.
+    """
+    start_parm = {
+        "ip": "123.45.67.99",
+        "local": True,
+        "set_no_abort": False,
+        "launched": True,
+        "start_instance": True,
+        "transport_mode": "insecure",
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+    mapdl._cleanup = False  # mirrors cleanup_on_exit=False, hits the early exit
+
+    with (
+        patch.object(type(mapdl), "_release_resources") as mock_release,
+        patch.object(mapdl, "_close_grpc_channel") as mock_close_channel,
+        patch.object(mapdl, "_join_pipe_drainer_threads") as mock_join_threads,
+    ):
+        mapdl.__del__()
+
+    mock_release.assert_not_called()
+    mock_close_channel.assert_called_once_with(exiting=True)
+    mock_join_threads.assert_called_once_with(exiting=True)
+    assert mapdl._exited is True
+
+    mapdl._cleanup = True
+    mapdl.__del__ = lambda: None  # prevent cleanup on GC
+
+
+@stack(*PATCH_MAPDL_START)
+def test_del_does_not_cleanup_loggers():
+    """``__del__`` must never tear down the (shared) logger.
+
+    The logger and its handlers are shared, process-wide ``logging`` state.
+    Closing them from garbage-collection-driven code can race with another,
+    still-alive ``Mapdl`` instance still logging through the same handler
+    (surfacing as ``ValueError: I/O operation on closed file`` or
+    ``AttributeError`` on ``self._log`` elsewhere). Only the explicit
+    :meth:`exit` path is allowed to release logging resources.
+    """
+    start_parm = {
+        "ip": "123.45.67.99",
+        "local": True,
+        "set_no_abort": False,
+        "launched": True,
+        "start_instance": True,
+        "transport_mode": "insecure",
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+    mapdl._cleanup = True  # mirrors cleanup_on_exit=True regardless of env
+
+    with patch.object(mapdl, "_release_resources") as mock_release:
+        mapdl.__del__()
+
+    mock_release.assert_called_once()
+    _, kwargs = mock_release.call_args
+    assert kwargs.get("cleanup_loggers") is False
+
+    mapdl.__del__ = lambda: None  # prevent double cleanup on GC
+
+
+@stack(*PATCH_MAPDL_START)
+def test_exit_cleans_up_loggers_but_del_does_not():
+    """``exit()`` releases logger resources; ``__del__`` leaves them alone."""
+    from unittest.mock import MagicMock
+
+    start_parm = {
+        "ip": "123.45.67.99",
+        "local": True,
+        "set_no_abort": False,
+        "launched": True,
+        "start_instance": True,
+        "transport_mode": "insecure",
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+    mapdl._channel = MagicMock()
+
+    with (
+        patch.object(mapdl, "_exit_mapdl"),
+        patch.object(mapdl, "_cleanup_loggers") as mock_loggers,
+    ):
+        mapdl.exit(force=True)
+
+    mock_loggers.assert_called_once()
+
     mapdl.__del__ = lambda: None  # prevent cleanup on GC
 
 
@@ -3483,3 +3708,216 @@ def test_osresult_presol(mapdl, solved_box):
     mapdl.post1()
 
     assert mapdl.presol("SRES", "SY")
+
+
+############################
+# MAPDL LOOP TESTS
+# ----------------
+# Unit tests for the ``Mapdl.do`` and ``Mapdl.dowhile`` loop context managers.
+
+# These tests do not require a live MAPDL instance: they exercise the context
+# manager logic against a lightweight fake that mimics only the bits of
+# :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` that ``do``/``dowhile`` rely
+# on. Notably, ``FakeMapdl`` does **not** stub out
+# :class:`Mapdl.non_interactive <ansys.mapdl.core.mapdl_core._MapdlCore>`: it
+# relies on the real, inherited :class:`_non_interactive
+# <ansys.mapdl.core.mapdl_core._MapdlCore._non_interactive>` implementation, so
+# these tests also guard against a partial ``*DO``/``*DOWHILE`` block leaking
+# into a later flush through the shared ``_stored_commands`` buffer.
+
+
+def test_do_emits_do_and_enddo_real_mapdl(mapdl):
+    mapdl.clear()
+    mapdl.prep7()
+    with mapdl.do("i", 1, 10, 2):
+        mapdl.run("N,i,i,0,0")
+
+    assert mapdl.mesh.n_node == 5
+
+    mapdl.parameters["cont"] = 3
+    with mapdl.dowhile("cont"):
+        mapdl.run("cont = cont - 1")
+
+    assert mapdl.parameters["cont"] == 0
+
+
+def test_do_emits_do_and_enddo(fake_mapdl):
+    with fake_mapdl.do("i", 1, 10, 2):
+        fake_mapdl.run("N,i,i,0,0")
+
+    assert fake_mapdl.sent_commands == ["*DO,i,1,10,2", "N,i,i,0,0", "*ENDDO"]
+    assert fake_mapdl._do_loop_level == 0
+    assert fake_mapdl._stored_commands == []
+
+
+def test_dowhile_emits_dowhile_and_enddo(fake_mapdl):
+    with fake_mapdl.dowhile("cont"):
+        fake_mapdl.run("cont = cont - 1")
+
+    assert fake_mapdl.sent_commands == ["*DOWHILE,cont", "cont = cont - 1", "*ENDDO"]
+    assert fake_mapdl._do_loop_level == 0
+    assert fake_mapdl._stored_commands == []
+
+
+def test_do_enters_and_exits_non_interactive_when_not_already_active(fake_mapdl):
+    assert fake_mapdl._store_commands is False
+
+    with fake_mapdl.do("i", 1, 10):
+        assert fake_mapdl._store_commands is True
+        assert fake_mapdl._stored_commands == ["*DO,i,1,10,"]
+
+    assert fake_mapdl._store_commands is False
+    assert fake_mapdl._stored_commands == []
+    assert fake_mapdl.sent_commands == ["*DO,i,1,10,", "*ENDDO"]
+
+
+def test_do_does_not_reenter_non_interactive_when_already_active(fake_mapdl):
+    with fake_mapdl.non_interactive:
+        assert fake_mapdl._store_commands is True
+
+        with fake_mapdl.do("i", 1, 10):
+            fake_mapdl.run("body")
+
+        # The nested ``do`` did not flush or exit non-interactive mode
+        # itself: everything is still buffered.
+        assert fake_mapdl._store_commands is True
+        assert fake_mapdl._stored_commands == ["*DO,i,1,10,", "body", "*ENDDO"]
+        assert fake_mapdl.sent_commands == []
+
+    assert fake_mapdl._store_commands is False
+    assert fake_mapdl._stored_commands == []
+    assert fake_mapdl.sent_commands == ["*DO,i,1,10,", "body", "*ENDDO"]
+
+
+def test_nested_do_and_dowhile_share_the_same_loop_counter(fake_mapdl):
+    with fake_mapdl.do("i", 1, 10):
+        assert fake_mapdl._do_loop_level == 1
+        with fake_mapdl.dowhile("j"):
+            assert fake_mapdl._do_loop_level == 2
+            fake_mapdl.run("body")
+        assert fake_mapdl._do_loop_level == 1
+
+    assert fake_mapdl._do_loop_level == 0
+    assert fake_mapdl.sent_commands == [
+        "*DO,i,1,10,",
+        "*DOWHILE,j",
+        "body",
+        "*ENDDO",
+        "*ENDDO",
+    ]
+
+
+def test_do_loop_nesting_limit_is_enforced(fake_mapdl):
+    contexts = [fake_mapdl.do("i", 1, 2) for _ in range(MAX_DO_LOOP_LEVEL + 1)]
+
+    entered = []
+    with pytest.raises(MapdlDoLoopLimitError):
+        for context in contexts:
+            context.__enter__()
+            entered.append(context)
+
+    assert fake_mapdl._do_loop_level == MAX_DO_LOOP_LEVEL
+
+    # Clean up the loops we did manage to open.
+    for context in reversed(entered):
+        context.__exit__(None, None, None)
+
+    assert fake_mapdl._do_loop_level == 0
+
+
+def test_do_loop_level_is_restored_after_the_limit_is_hit(fake_mapdl):
+    for _ in range(MAX_DO_LOOP_LEVEL):
+        fake_mapdl.do("i", 1, 2).__enter__()
+
+    with pytest.raises(MapdlDoLoopLimitError):
+        with fake_mapdl.do("i", 1, 2):
+            pass  # pragma: no cover - should never execute the body
+
+    # The failed attempt to open a loop must not have incremented the
+    # counter.
+    assert fake_mapdl._do_loop_level == MAX_DO_LOOP_LEVEL
+
+
+def test_exception_in_do_loop_skips_enddo_and_discards_commands(fake_mapdl):
+    with pytest.raises(ValueError, match="boom"):
+        with fake_mapdl.do("i", 1, 10):
+            fake_mapdl.run("body")
+            raise ValueError("boom")
+
+    assert fake_mapdl._do_loop_level == 0
+    assert fake_mapdl._store_commands is False
+
+    # No '*ENDDO' was ever queued, and nothing was actually sent to MAPDL:
+    # the whole (invalid, unterminated) block was discarded on exit.
+    assert fake_mapdl.sent_commands == []
+
+    # Regression: the buffer backing 'non_interactive' must be truncated,
+    # not just marked inactive, so the incomplete '*DO' block cannot survive
+    # to leak into a later, unrelated flush.
+    assert fake_mapdl._stored_commands == []
+
+
+def test_partial_do_block_does_not_leak_into_a_later_flush(fake_mapdl):
+    """A failed ``do`` loop must not poison a subsequent, unrelated one."""
+    with pytest.raises(ValueError, match="boom"):
+        with fake_mapdl.do("i", 1, 10):
+            fake_mapdl.run("body")
+            raise ValueError("boom")
+
+    assert fake_mapdl._stored_commands == []
+    assert fake_mapdl.sent_commands == []
+
+    # A later, successful loop must only contain its own commands: none of
+    # the aborted '*DO,i,1,10,'/'body' fragments should have leaked in.
+    with fake_mapdl.do("j", 1, 5):
+        fake_mapdl.run("N,j,j,0,0")
+
+    assert fake_mapdl.sent_commands == ["*DO,j,1,5,", "N,j,j,0,0", "*ENDDO"]
+    assert fake_mapdl._stored_commands == []
+
+
+def test_exception_inside_user_owned_non_interactive_discards_everything(fake_mapdl):
+    """A nested ``do`` raising inside a user-owned ``non_interactive`` block
+    must not leave a dangling partial block behind either."""
+    with pytest.raises(ValueError, match="boom"):
+        with fake_mapdl.non_interactive:
+            with fake_mapdl.do("i", 1, 10):
+                fake_mapdl.run("body")
+            raise ValueError("boom")
+
+    # The inner loop closed cleanly, but the outer, user-owned block never
+    # got to flush because of the exception raised after it: nothing must
+    # have been sent, and the buffer must be empty afterward.
+    assert fake_mapdl.sent_commands == []
+    assert fake_mapdl._stored_commands == []
+    assert fake_mapdl._store_commands is False
+
+    # A later, unrelated 'do' loop must not see any leftovers either.
+    with fake_mapdl.do("k", 1, 3):
+        fake_mapdl.run("N,k,k,0,0")
+
+    assert fake_mapdl.sent_commands == ["*DO,k,1,3,", "N,k,k,0,0", "*ENDDO"]
+
+
+def test_exception_in_nested_do_loop_preserves_prior_buffered_commands(fake_mapdl):
+    """A failing ``do`` loop nested inside a user-owned ``non_interactive``
+    block must only discard its own (incomplete) commands, not whatever was
+    legitimately buffered before it."""
+    with fake_mapdl.non_interactive:
+        fake_mapdl.run("earlier command")
+
+        with pytest.raises(ValueError, match="boom"):
+            with fake_mapdl.do("i", 1, 10):
+                fake_mapdl.run("body")
+                raise ValueError("boom")
+
+        # Only the aborted loop's commands were dropped: the command
+        # buffered before it is still there, and the outer block is still
+        # active (the exception did not escape it).
+        assert fake_mapdl._stored_commands == ["earlier command"]
+        assert fake_mapdl._store_commands is True
+
+        fake_mapdl.run("later command")
+
+    assert fake_mapdl.sent_commands == ["earlier command", "later command"]
+    assert fake_mapdl._stored_commands == []

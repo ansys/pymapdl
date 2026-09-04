@@ -26,9 +26,12 @@
 .. _dev_guide_setup_your_environment: https://dev.docs.pyansys.com/how-to/setting-up.html
 .. _dev_guide_branch_names: https://dev.docs.pyansys.com/how-to/contributing.html#branch-naming-conventions
 .. _dev_guide_commit_names: https://dev.docs.pyansys.com/how-to/contributing.html#commit-naming-conventions
+.. _certificate_generation_utilities: https://tools.docs.pyansys.com/version/stable/user_guide/certificate_generation.html
+.. _secure_grpc_docs: https://tools.docs.pyansys.com/version/stable/user_guide/secure_grpc.html
 
 .. #Other libraries
 .. _pyvista_docs: https://docs.pyvista.org/version/stable/
+.. _click_docs: https://click.palletsprojects.com/
 .. _jupyter: https://jupyter.org/
 .. _grpc: https://grpc.io/
 .. _pandas_org: https://pandas.pydata.org/
@@ -86,6 +89,9 @@
 .. _pymapdl_ex_vm: https://examples.mapdl.docs.pyansys.com/verif-manual/index.html
 .. _pymapdl_cheat_sheet: https://mapdl.docs.pyansys.com/stable/_static/_static/cheat_sheet.pdf
 
+.. # PyMAPDL MCP related
+.. _pymapdl_mcp_docs: https://mapdl-mcp.docs.pyansys.com/
+.. _pymapdl_mcp_repo: https://github.com/ansys/pymapdl-mcp
 
 .. # Ansys Structural Guide links:
 .. _ansys_krylov_sweep_harmonic_analysis: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_str/str_Krysweep.html
@@ -144,7 +150,6 @@
 .. _What_is_the_Windows_Subsystem_for_Linux: https://docs.microsoft.com/en-us/windows/wsl/about
 .. _WikipediaWSL: https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux
 
-
 .. #Github links:
 .. _gh_creating_pat: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
 .. _gh_centos_wsl_1: https://github.com/wsldl-pg/CentWSL/
@@ -192,17 +197,17 @@
 .. _pymapdl_latest_pdf_doc: https://github.com/ansys/pymapdl/releases/download/v%%PYMAPDLVERSION%%.0/pymapdl-Documentation-%%PYMAPDLVERSION%%.0.pdf
 .. _pymapdl_conf_file: https://github.com/ansys/pymapdl/blob/main/doc/source/conf.py
 .. _pymapdl_search_issues_pr: https://github.com/ansys/pymapdl/issues?q=
-.. _pymapdl_latest_github_release: https://github.com/ansys/pymapdl/releases/latest
 .. _pymapdl_discussion_speed_pymapdl_mapdl: https://github.com/ansys/pymapdl/discussions/757
 .. _pymapdl_devcontainer_configuration: https://github.com/ansys/pymapdl/blob/main/.devcontainer/devcontainer-local/devcontainer.json
-.. _pymapdl_build_docker_compose: https://github.com/ansys/pymapdl/tree/main/.devcontainer/docker-compose.yml
-.. _pymapdl_codespaces_welcome_dev: https://github.com/ansys/pymapdl/blob/main/.devcontainer/welcome.rst
+.. _pymapdl_devcontainer_dockerfile: https://github.com/ansys/pymapdl/blob/main/.devcontainer/devcontainer-local/Dockerfile
+.. _pymapdl_build_docker_compose: https://github.com/ansys/pymapdl/blob/main/.devcontainer/devcontainer-local/docker-compose.yml
+.. _pymapdl_codespaces_welcome_dev: https://github.com/ansys/pymapdl/blob/main/.devcontainer/codespaces-dev/welcome.rst
 .. _pymapdl_codespaces_welcome_docs: https://github.com/ansys/pymapdl/blob/main/.devcontainer/codespaces-docs/welcome.rst
 .. _pymapdl_codespaces_welcome_local: https://github.com/ansys/pymapdl/blob/main/.devcontainer/devcontainer-local/welcome.rst
 .. _pymapdl_devcontainer_directory: https://github.com/ansys/pymapdl/tree/main/.devcontainer
-.. _pymapdl_create_codespace_dev_quick_start: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fdevcontainer.json
+.. _pymapdl_create_codespace_dev_quick_start: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fcodespaces-dev%2Fdevcontainer.json
 .. _pymapdl_create_codespace_docs_quick_start: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
-.. _pymapdl_create_codespace_dev: https://codespaces.new/ansys/pymapdl?devcontainer_path=.devcontainer%2Fdevcontainer.json
+.. _pymapdl_create_codespace_dev: https://codespaces.new/ansys/pymapdl?devcontainer_path=.devcontainer%2Fcodespaces-dev%2Fdevcontainer.json
 .. _pymapdl_create_codespace_docs: https://codespaces.new/ansys/pymapdl?devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
 .. _pymapdl_examples_template: https://mapdl.docs.pyansys.com/version/stable/examples/gallery_examples/02-tips-n-tricks/00-example-template.html
 .. _pymapdl_bracket_static_example: https://mapdl.docs.pyansys.com/version/stable/examples/gallery_examples/00-mapdl-examples/bracket_static.html#sphx-glr-examples-gallery-examples-00-mapdl-examples-bracket-static-py

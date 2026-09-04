@@ -20,15 +20,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from unittest.mock import MagicMock
+
+import grpc
 import pytest
 
+from ansys.mapdl.core import errors as errors_module
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
+    MapdlConnectionError,
     MapdlException,
+    MapdlExitedError,
+    MapdlgRPCError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
+    _build_unavailable_suggestion,
     protect_from,
+    protect_grpc,
 )
+from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from conftest import NullContext
 
 error_shape_error_limits = """
@@ -186,3 +196,164 @@ def test_protect_from(message, condition, context):
     with context:
         myobj = myclass()
         myobj.raising()
+
+
+def test_protect_grpc_translates_closed_channel_value_error():
+    """A 'Cannot invoke RPC on closed channel' ValueError becomes a
+    'MapdlExitedError' and marks the instance as exited."""
+    mock_mapdl = MagicMock(spec=MapdlGrpc)
+    mock_mapdl._log = MagicMock()
+    mock_mapdl._exited = False
+    mock_mapdl.exited = False
+
+    @protect_grpc
+    def raising(self):
+        raise ValueError("Cannot invoke RPC on closed channel")
+
+    with pytest.raises(MapdlExitedError, match="closed channel"):
+        raising(mock_mapdl)
+
+    assert mock_mapdl._exited is True
+
+
+def test_protect_grpc_reraises_unrelated_value_error():
+    """A 'ValueError' unrelated to a closed channel must propagate unchanged."""
+    mock_mapdl = MagicMock(spec=MapdlGrpc)
+    mock_mapdl._log = MagicMock()
+    mock_mapdl._exited = False
+    mock_mapdl.exited = False
+
+    @protect_grpc
+    def raising(self):
+        raise ValueError("some unrelated argument error")
+
+    with pytest.raises(ValueError, match="some unrelated argument error"):
+        raising(mock_mapdl)
+
+    assert mock_mapdl._exited is False
+
+
+class TestBuildUnavailableSuggestion:
+    """Tests for _build_unavailable_suggestion."""
+
+    def test_sigkill_points_to_oom(self):
+        """A SIGKILL (9) exit signal produces the OOM-specific suggestion."""
+        mock_mapdl = MagicMock(spec=MapdlGrpc)
+        mock_mapdl._get_process_exit_signal.return_value = 9
+
+        suggestion = _build_unavailable_suggestion(mock_mapdl)
+
+        assert "SIGKILL" in suggestion
+        assert "Out-Of-Memory" in suggestion
+        assert "dmesg" in suggestion
+
+    def test_other_signal_is_named(self):
+        """A non-SIGKILL exit signal is reported by name, without the OOM claim."""
+        mock_mapdl = MagicMock(spec=MapdlGrpc)
+        mock_mapdl._get_process_exit_signal.return_value = 11  # SIGSEGV
+
+        suggestion = _build_unavailable_suggestion(mock_mapdl)
+
+        assert "signal 11" in suggestion
+        assert "SIGSEGV" in suggestion
+        assert "Out-Of-Memory" not in suggestion
+
+    def test_unknown_signal_number_falls_back_to_number(self):
+        """An out-of-range signal number is shown as-is instead of a name."""
+        mock_mapdl = MagicMock(spec=MapdlGrpc)
+        mock_mapdl._get_process_exit_signal.return_value = 999
+
+        suggestion = _build_unavailable_suggestion(mock_mapdl)
+
+        assert "signal 999 (999)" in suggestion
+
+    def test_no_exit_signal_falls_back_to_generic_message(self):
+        """When the exit signal cannot be determined, use the generic message."""
+        mock_mapdl = MagicMock(spec=MapdlGrpc)
+        mock_mapdl._get_process_exit_signal.return_value = None
+
+        suggestion = _build_unavailable_suggestion(mock_mapdl)
+
+        assert "might* have died" in suggestion
+
+    def test_missing_helper_falls_back_to_generic_message(self):
+        """MAPDL objects without the helper (e.g. older mocks) still work."""
+        mock_mapdl = MagicMock()
+        del mock_mapdl._get_process_exit_signal
+
+        suggestion = _build_unavailable_suggestion(mock_mapdl)
+
+        assert "might* have died" in suggestion
+
+
+def test_protect_grpc_translates_future_cancelled_error():
+    """A 'FutureCancelledError', raised when the connectivity watchdog cancels
+    an in-flight call because the channel died, becomes a
+    'MapdlConnectionError' instead of propagating unchanged or retrying."""
+    mock_mapdl = MagicMock(spec=MapdlGrpc)
+    mock_mapdl._log = MagicMock()
+    mock_mapdl._exited = False
+    mock_mapdl.exited = False
+    mock_mapdl.channel_state = "TRANSIENT_FAILURE"
+
+    @protect_grpc
+    def raising(self):
+        raise grpc.FutureCancelledError()
+
+    with pytest.raises(MapdlConnectionError, match="TRANSIENT_FAILURE"):
+        raising(mock_mapdl)
+
+
+class _FakeRpcError(grpc.RpcError):
+    """Minimal 'grpc.RpcError' double exposing 'code()'/'details()'."""
+
+    def __init__(self, code, details):
+        self._code = code
+        self._details = details
+
+    def code(self):
+        return self._code
+
+    def details(self):
+        return self._details
+
+
+@pytest.mark.parametrize(
+    "details,expected_limit",
+    [
+        # Message format seen with streaming RPCs (gRPC wraps it with
+        # "Stream removed (CLIENT: ...)").
+        (
+            "Stream removed (CLIENT: Received message larger than max "
+            "(262152 vs. 1024))",
+            262152,
+        ),
+        # Message format seen with unary RPCs.
+        ("Received message larger than max (512 vs. 100)", 512),
+    ],
+)
+def test_protect_grpc_translates_resource_exhausted_error(
+    monkeypatch, details, expected_limit
+):
+    """A 'RESOURCE_EXHAUSTED' error whose details report a message that is
+    too large becomes a 'MapdlgRPCError' suggesting
+    'PYMAPDL_MAX_MESSAGE_LENGTH' set to the received message size, regardless
+    of whether gRPC wraps the details with a 'Stream removed' prefix."""
+    monkeypatch.setattr(errors_module, "sleep", lambda *args, **kwargs: None)
+
+    mock_mapdl = MagicMock(spec=MapdlGrpc)
+    mock_mapdl._log = MagicMock()
+    mock_mapdl._exited = False
+    mock_mapdl.exited = False
+    mock_mapdl.is_alive = True
+
+    @protect_grpc
+    def raising(self, n_attempts=0):
+        raise _FakeRpcError(grpc.StatusCode.RESOURCE_EXHAUSTED, details)
+
+    with pytest.raises(
+        MapdlgRPCError, match="Received message larger than max"
+    ) as excinfo:
+        raising(mock_mapdl, n_attempts=0)
+
+    assert f"PYMAPDL_MAX_MESSAGE_LENGTH={expected_limit}" in str(excinfo.value)

@@ -497,9 +497,67 @@ Hence you cannot use those arguments in Python code unless you use the following
    # ...
    # etc
 
-APDL loops using ``*DO`` or ``*DOWHILE`` should also be implemented
+APDL loops using ``*DO`` or ``*DOWHILE`` can be implemented Pythonically,
 using the :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
-attribute or implemented Pythonically.
+attribute directly, or with the dedicated
+:meth:`Mapdl.do() <ansys.mapdl.core.Mapdl.do>` and
+:meth:`Mapdl.dowhile() <ansys.mapdl.core.Mapdl.dowhile>` context managers, which
+wrap ``*DO``/``*DOWHILE`` and ``*ENDDO`` and automatically use
+``non_interactive`` for you:
+
+.. tab-set::
+
+    .. tab-item:: APDL
+        :sync: key1
+
+        .. code:: apdl
+
+            *DO,I,1,10
+            N,I,I,0,0
+            *ENDDO
+
+    .. tab-item:: Python-Non interactive
+
+        .. code:: python
+
+            with mapdl.non_interactive:
+                mapdl.run("*DO,I,1,10")
+                mapdl.n("I", "I", 0, 0)
+                mapdl.run("*ENDDO")
+
+    .. tab-item:: Python
+
+        .. code:: python
+
+            with mapdl.do("I", 1, 10):
+                mapdl.n("I", "I", 0, 0)
+
+Because MAPDL, and not Python, performs the actual looping, the body of the
+``with`` block is only evaluated once by Python to build the block of APDL
+commands. MAPDL also limits the number of nested ``*DO``/``*DOWHILE`` loops
+to 20 levels; exceeding this limit raises a
+:class:`MapdlDoLoopLimitError <ansys.mapdl.core.errors.MapdlDoLoopLimitError>`.
+
+If an exception is raised inside the ``with`` block, the ``*ENDDO`` is never
+sent to MAPDL, and only the (incomplete) commands buffered by that loop are
+discarded. Commands legitimately buffered before entering the loop, for
+example by an outer ``non_interactive`` block or an outer ``do``/``dowhile``
+loop, are preserved:
+
+.. code:: python
+
+    with mapdl.non_interactive:
+        mapdl.run("earlier command")
+
+        try:
+            with mapdl.do("i", 1, 10):
+                mapdl.run("body")
+                raise ValueError("boom")
+        except ValueError:
+            pass
+
+        # "earlier command" is still buffered; the aborted "*DO" block is not.
+        mapdl.run("later command")
 
 
 Warnings and errors
@@ -1259,4 +1317,60 @@ environment variable. The following table describes all arguments.
 |                                       | defaults to 256 MB.                                                              |
 |                                       |                                                                                  |
 |                                       | Only for developing purposes.                                                    |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`PYMAPDL_GRPC_TRANSPORT`      | gRPC transport mode used by PyMAPDL.                                             |
+|                                       | Accepted values: ``insecure``, ``uds``,                                          |
+|                                       | ``wnua``, ``mtls``.                                                              |
+|                                       | Takes precedence over                                                            |
+|                                       | :envvar:`ANSYS_MAPDL_GRPC_TRANSPORT`.                                            |
+|                                       | See :ref:`ref_tls_guide`.                                                        |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export PYMAPDL_GRPC_TRANSPORT=mtls                            |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`ANSYS_MAPDL_GRPC_TRANSPORT`  | Alias for :envvar:`PYMAPDL_GRPC_TRANSPORT`.                                      |
+|                                       | Used when the transport mode should be                                           |
+|                                       | set at the Ansys product level rather                                            |
+|                                       | than per PyMAPDL installation.                                                   |
+|                                       | If :envvar:`PYMAPDL_GRPC_TRANSPORT` is also set,                                 |
+|                                       | it takes precedence and this variable is ignored.                                |
+|                                       | See :ref:`ref_tls_guide`.                                                        |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export ANSYS_MAPDL_GRPC_TRANSPORT=mtls                        |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`ANSYS_MAPDL_UDS_PATH`        | Path to the Ansys MAPDL Unix Domain Socket (UDS) directory.                      |
+|                                       | MAPDL creates or looks for the UDS file in this directory.                       |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export ANSYS_MAPDL_UDS_PATH=/path/to/uds/dir                  |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`ANSYS_GRPC_CERTIFICATES`     | Ansys products default environment variable.                                     |
+|                                       | Path to the directory containing the mTLS certificates.                          |
+|                                       | PyMAPDL requires ``ca.crt``, ``client.crt``, and ``client.key``.                 |
+|                                       | When launching MAPDL with ``mtls``, MAPDL also requires ``server.crt`` and       |
+|                                       | ``server.key`` in the same directory.                                            |
+|                                       | Falls back to a ``certs/`` subdirectory                                          |
+|                                       | of the current working directory if                                              |
+|                                       | not set.                                                                         |
+|                                       | See :ref:`ref_tls_guide`.                                                        |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export ANSYS_GRPC_CERTIFICATES=/path/to/certs                 |
+|                                       |                                                                                  |
 +---------------------------------------+----------------------------------------------------------------------------------+

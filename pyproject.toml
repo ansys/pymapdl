@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "flit_core.buildapi"
-requires = ["flit_core >=3.11,<4"]
+requires = ["flit_core >=3.11,<5"]
 
 [project]
 # Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
@@ -52,12 +52,12 @@ version = "0.74.dev0"
 jupyter = ["ipywidgets", "jupyterlab>=3"]
 
 graphics = [
-  "ansys-tools-visualization-interface>=0.9.0,<0.14.0",
+  "ansys-tools-visualization-interface>=0.9.0,<0.15.0",
   "matplotlib>=3.0.0",                                  # for colormaps for pyvista
 ]
 
 all = [
-  "ansys-tools-visualization-interface>=0.9.0,<0.14.0",
+  "ansys-tools-visualization-interface>=0.9.0,<0.15.0",
   "ipywidgets",
   "jupyterlab>=3",
   "matplotlib>=3.0.0",                                  # for colormaps for pyvista
@@ -66,7 +66,8 @@ all = [
 tests = [
   "ansys-dpf-core[graphics]==0.13.6",
   "ansys-mapdl-reader==0.56.0",
-  "ansys-tools-visualization-interface==0.13.3",
+  "ansys-tools-common[other]==0.5.2",
+  "ansys-tools-visualization-interface==0.14.0",
   "autopep8==2.3.2",
   "matplotlib==3.10.9",
   "pandas==2.3.3",
@@ -78,7 +79,7 @@ tests = [
   "pytest-pyvista==0.3.3",
   "pytest-random-order==1.2.0",
   "pytest-reportlog==1.0.0",
-  "pytest-rerunfailures==16.4",
+  "pytest-rerunfailures==16.6",
   "pytest-timeout==2.4.0",
   "pytest==9.1.1",
   "scipy==1.15.3",
@@ -89,8 +90,8 @@ doc = [
   "ansys-dpf-core[graphics]==0.13.6",
   "ansys-mapdl-reader==0.56.0",
   "ansys-sphinx-theme==1.9.0",
-  "ansys-tools-visualization-interface==0.13.3",
-  "grpcio==1.82.1",
+  "ansys-tools-visualization-interface==0.14.0",
+  "grpcio==1.83.0",
   "imageio-ffmpeg==0.6.0",
   "imageio==2.37.4",
   "jupyter==1.1.1",
@@ -98,7 +99,7 @@ doc = [
   "jupyterlab>=3.2.8",
   "linuxdoc==20260504",
   "matplotlib==3.10.9",
-  "nbformat==5.10.4",
+  "nbformat==5.11.0",
   "numpydoc==1.10.0",
   "pandas==2.3.3",
   "plotly==6.9.0",
@@ -124,7 +125,7 @@ doc = [
 
 [dependency-groups]
 
-tox = ["tox==4.57.2"]
+tox = ["tox==4.60.0"]
 
 [tool.flit.module]
 name = "ansys.mapdl.core"
@@ -160,6 +161,12 @@ addopts = [
   "--reruns=1",
   "--strict-markers",
   "--timeout=180",
+  # The default "signal" method relies on SIGALRM being handled between
+  # Python bytecode instructions, so it can't interrupt a test stuck in a
+  # blocking native call (e.g. a VTK/Xvfb rendering deadlock), which can hang
+  # a CI job for hours instead of failing after --timeout. "thread" method
+  # dumps tracebacks and forces the process to exit when a test overruns.
+  "--timeout-method=thread",
   "-ra",
   "-vvv",
 ]

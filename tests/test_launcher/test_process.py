@@ -25,6 +25,7 @@
 import os
 from queue import Queue
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -71,7 +72,6 @@ def create_launch_config(**kwargs):
         "mapdl_output": None,
         "transport_mode": None,
         "uds_dir": None,
-        "uds_id": None,
         "certs_dir": None,
     }
     defaults.update(kwargs)
@@ -114,6 +114,21 @@ class TestGenerateLaunchCommand:
         cmd = process._generate_launch_command(config)
 
         assert "-m" not in cmd
+
+    def test_generate_command_with_license_type(self):
+        """Test command generation with license type."""
+        config = create_launch_config(license_type="meba")
+        cmd = process._generate_launch_command(config)
+
+        assert "-p" in cmd
+        assert cmd[cmd.index("-p") + 1] == "meba"
+
+    def test_generate_command_without_license_type(self):
+        """Test command generation without license type."""
+        config = create_launch_config(license_type=None)
+        cmd = process._generate_launch_command(config)
+
+        assert "-p" not in cmd
 
     def test_generate_command_with_switches(self):
         """Test command generation with additional switches."""
@@ -169,6 +184,40 @@ class TestGenerateLaunchCommand:
         assert ".__tmp__.inp" not in cmd
         assert "-b" not in cmd
 
+    def test_generate_launch_command_adds_transport_mtls(self):
+        """'-transport mtls' is added to the launch command when transport_mode=MTLS."""
+        from ansys.mapdl.core.launcher.models import TransportMode
+
+        config = create_launch_config(transport_mode=TransportMode.MTLS)
+        cmd = process._generate_launch_command(config)
+        assert "-transport" in cmd
+        idx = cmd.index("-transport")
+        assert cmd[idx + 1] == "mtls"
+
+    def test_generate_launch_command_adds_transport_insecure(self):
+        """'-transport insecure' is added when transport_mode=INSECURE."""
+        from ansys.mapdl.core.launcher.models import TransportMode
+
+        config = create_launch_config(transport_mode=TransportMode.INSECURE)
+        cmd = process._generate_launch_command(config)
+        assert "-transport" in cmd
+        assert cmd[cmd.index("-transport") + 1] == "insecure"
+
+    def test_generate_launch_command_adds_transport_uds(self):
+        """'-transport uds' is added when transport_mode=UDS."""
+        from ansys.mapdl.core.launcher.models import TransportMode
+
+        config = create_launch_config(transport_mode=TransportMode.UDS)
+        cmd = process._generate_launch_command(config)
+        assert "-transport" in cmd
+        assert cmd[cmd.index("-transport") + 1] == "uds"
+
+    def test_generate_launch_command_no_transport_flag_when_none(self):
+        """No '-transport' flag is added when transport_mode=None."""
+        config = create_launch_config(transport_mode=None)
+        cmd = process._generate_launch_command(config)
+        assert "-transport" not in cmd
+
 
 # ============================================================================
 # Temp Input File Tests
@@ -200,10 +249,10 @@ class TestStartSubprocess:
     """Tests for subprocess start function."""
 
     def test_start_subprocess_with_output_file(self):
-        """Test starting subprocess with output file."""
+        """Test starting subprocess with output file stores _stdout_file_handle."""
         with tempfile.TemporaryDirectory() as tmpdir:
             output_file = os.path.join(tmpdir, "output.txt")
-            cmd = ["python", "-c", "print('test')"]
+            cmd = [sys.executable, "-c", "print('test')"]
 
             proc = process._start_subprocess(
                 cmd=cmd,
@@ -214,13 +263,20 @@ class TestStartSubprocess:
 
             assert proc is not None
             assert isinstance(proc, subprocess.Popen)
-            proc.wait(timeout=10)
+            # The file handle must be stored so _kill_process can close it
+            assert proc._stdout_file_handle is not None
+            assert not proc._stdout_file_handle.closed
+            try:
+                proc.wait(timeout=10)
+                assert proc.poll() is not None
+            finally:
+                proc._stdout_file_handle.close()
             assert proc.poll() is not None
 
     def test_start_subprocess_without_output_file(self):
-        """Test starting subprocess without output file."""
+        """Test starting subprocess without output file has no file handle."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            cmd = ["python", "-c", "print('test')"]
+            cmd = [sys.executable, "-c", "print('test')"]
 
             proc = process._start_subprocess(
                 cmd=cmd,
@@ -231,7 +287,60 @@ class TestStartSubprocess:
 
             assert proc is not None
             assert isinstance(proc, subprocess.Popen)
+            # No file redirect — handle should be None, pipes should be open
+            assert proc._stdout_file_handle is None
+            assert proc.stdout is not None
+            assert proc.stderr is not None
             proc.wait(timeout=10)
+
+    def test_start_subprocess_closes_file_handle_when_popen_fails(self):
+        """If Popen raises, the stdout redirect file handle must be closed."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_file = os.path.join(tmpdir, "output.txt")
+            cmd = [sys.executable, "-c", "print('test')"]
+
+            with (
+                patch.object(subprocess, "Popen", side_effect=OSError("boom")),
+                pytest.raises(OSError, match="boom"),
+            ):
+                process._start_subprocess(
+                    cmd=cmd,
+                    cwd=tmpdir,
+                    env=os.environ.copy(),
+                    output_file=output_file,
+                )
+
+            # The handle opened before Popen failed must not have leaked.
+            with open(output_file, "rb") as fh:
+                pass
+            assert fh.closed
+
+    def test_start_subprocess_popen_failure_survives_close_error(self):
+        """A failure while closing the handle must not mask the Popen error."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_file = os.path.join(tmpdir, "output.txt")
+            cmd = [sys.executable, "-c", "print('test')"]
+
+            mock_handle = Mock()
+            mock_handle.close.side_effect = OSError("close failed")
+
+            with (
+                patch.object(subprocess, "Popen", side_effect=OSError("boom")),
+                patch(
+                    "ansys.mapdl.core.launcher.process.open",
+                    return_value=mock_handle,
+                    create=True,
+                ),
+                pytest.raises(OSError, match="boom"),
+            ):
+                process._start_subprocess(
+                    cmd=cmd,
+                    cwd=tmpdir,
+                    env=os.environ.copy(),
+                    output_file=output_file,
+                )
+
+            mock_handle.close.assert_called_once()
 
 
 # ============================================================================
@@ -243,34 +352,47 @@ class TestMonitorStdout:
     """Tests for stdout monitoring."""
 
     def test_monitor_stdout_with_pipe(self):
-        """Test monitoring stdout with pipe."""
+        """Test monitoring stdout with pipe returns (queue, thread)."""
         mock_pipe = Mock()
         mock_pipe.readline.side_effect = [b"line1\n", b"line2\n", b""]
 
-        queue = process._monitor_stdout(mock_pipe)
+        queue, thread = process._monitor_stdout(mock_pipe)
 
         assert queue is not None
         assert isinstance(queue, Queue)
+        assert thread is not None
+        assert isinstance(thread, threading.Thread)
 
         time.sleep(0.3)
 
         assert not queue.empty()
 
     def test_monitor_stdout_without_pipe(self):
-        """Test monitoring stdout returns None without pipe."""
+        """Test monitoring stdout returns (None, None) without pipe."""
         result = process._monitor_stdout(None)
-        assert result is None
+        assert result == (None, None)
 
     def test_monitor_stdout_with_error(self):
-        """Test monitoring stdout handles errors."""
+        """Test monitoring stdout handles errors gracefully."""
         mock_pipe = Mock()
         mock_pipe.readline.side_effect = ValueError("Pipe closed")
 
-        queue = process._monitor_stdout(mock_pipe)
+        queue, thread = process._monitor_stdout(mock_pipe)
 
         time.sleep(0.3)
 
         assert queue is not None
+        assert thread is not None
+
+    def test_monitor_stdout_thread_is_daemon(self):
+        """Test that the reader thread is a daemon thread."""
+        mock_pipe = Mock()
+        mock_pipe.readline.side_effect = [b""]
+
+        _, thread = process._monitor_stdout(mock_pipe)
+
+        assert thread is not None
+        assert thread.daemon is True
 
 
 # ============================================================================
@@ -436,7 +558,7 @@ class TestWaitForProcessReady:
         mock_process.poll.return_value = None
         mock_process.stdout = None
 
-        mock_monitor.return_value = None
+        mock_monitor.return_value = (None, None)
 
         process.wait_for_process_ready(
             process=mock_process,
@@ -469,7 +591,8 @@ class TestWaitForProcessReady:
         mock_process.stdout = mock_stdout
 
         mock_queue = Mock(spec=Queue)
-        mock_monitor.return_value = mock_queue
+        mock_thread = Mock()
+        mock_monitor.return_value = (mock_queue, mock_thread)
 
         process.wait_for_process_ready(
             process=mock_process,
@@ -481,6 +604,9 @@ class TestWaitForProcessReady:
         mock_wait_dir.assert_called_once()
         mock_wait_err.assert_called_once()
         mock_grpc.assert_called_once_with(mock_queue, 10)
+        # The startup reader thread must be attached to the process so
+        # downstream teardown logic can join it.
+        assert mock_process._startup_stdout_thread is mock_thread
 
     def test_wait_for_process_ready_process_died(self):
         """Test handling process that died immediately."""
@@ -655,21 +781,22 @@ class TestPhase4QueueMonitoringEdgeCases:
     """
 
     def test_monitor_stdout_creates_queue(self):
-        """Test that _monitor_stdout creates queue when stdout available."""
+        """Test that _monitor_stdout creates (queue, thread) when stdout available."""
         mock_stdout = Mock()
         mock_stdout.readline = Mock(side_effect=[b"line1\n", b"line2\n", b""])
 
-        queue = process._monitor_stdout(mock_stdout)
+        queue, thread = process._monitor_stdout(mock_stdout)
 
         assert queue is not None
-
         assert isinstance(queue, process.Queue)
+        assert thread is not None
+        assert isinstance(thread, threading.Thread)
 
     def test_monitor_stdout_returns_none_when_no_stdout(self):
-        """Test that _monitor_stdout returns None when stdout is None."""
-        queue = process._monitor_stdout(None)
+        """Test that _monitor_stdout returns (None, None) when stdout is None."""
+        result = process._monitor_stdout(None)
 
-        assert queue is None
+        assert result == (None, None)
 
     def test_check_grpc_server_ready_success(self):
         """Test gRPC server ready detection with both patterns."""

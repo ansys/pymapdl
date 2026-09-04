@@ -277,7 +277,8 @@ def wait_for_process_ready(
     LOG.debug("Checking MAPDL process startup")
 
     # Set up stdout monitoring
-    stdout_queue = _monitor_stdout(process.stdout)
+    stdout_queue, stdout_monitor_thread = _monitor_stdout(process.stdout)
+    process._startup_stdout_thread = stdout_monitor_thread  # type: ignore[attr-defined]
 
     # Check process alive
     check_process_is_alive(process, run_location)
@@ -347,9 +348,17 @@ def _generate_launch_command(config: LaunchConfig) -> List[str]:
     cmd.extend(["-port", str(config.port)])
     cmd.append("-grpc")
 
+    # Add transport mode flag when explicitly configured
+    if config.transport_mode is not None:
+        cmd.extend(["-transport", config.transport_mode.value])
+
     # Resource arguments
     if config.ram:
         cmd.extend(["-m", str(config.ram)])
+
+    # License type
+    if config.license_type:
+        cmd.extend(["-p", str(config.license_type)])
 
     # Additional switches
     if config.additional_switches:
@@ -423,8 +432,10 @@ def _start_subprocess(
     stdout_arg: Union[int, IO[bytes]]
     stderr_arg: int
 
+    stdout_file_handle: Optional[IO[bytes]] = None
     if output_file:
-        stdout_arg = open(output_file, "wb", 0)  # todo: handle file closing
+        stdout_file_handle = open(output_file, "wb", 0)
+        stdout_arg = stdout_file_handle
         stderr_arg = subprocess.STDOUT
     else:
         stdout_arg = subprocess.PIPE
@@ -439,15 +450,30 @@ def _start_subprocess(
     )
 
     # Launch process
-    process = subprocess.Popen(
-        cmd,
-        shell=False,  # Security: avoid shell injection  # nosec B603
-        cwd=cwd,
-        stdin=subprocess.DEVNULL,
-        stdout=stdout_arg,
-        stderr=stderr_arg,
-        env=env,
-    )
+    try:
+        process = subprocess.Popen(
+            cmd,
+            shell=False,  # Security: avoid shell injection  # nosec B603
+            cwd=cwd,
+            stdin=subprocess.DEVNULL,
+            stdout=stdout_arg,
+            stderr=stderr_arg,
+            env=env,
+        )
+    except Exception:
+        if stdout_file_handle is not None:
+            try:
+                stdout_file_handle.close()
+            except OSError:
+                # Preserve the original Popen failure even if closing the
+                # handle itself raises (e.g. a flush/IO error).
+                pass
+        raise
+
+    # Keep a reference to the output file so _kill_process can close it
+    # explicitly.  When stdout=PIPE, process.stdout is the pipe; when
+    # stdout is a file Popen does not expose it, so we store it here.
+    process._stdout_file_handle = stdout_file_handle  # type: ignore[attr-defined]
 
     LOG.debug(f"MAPDL process started with PID: {process.pid}")
     return process
@@ -493,7 +519,9 @@ def _create_temp_input_file(run_location: str) -> None:
     LOG.debug(f"Created temporary input file: {tmp_inp_path}")
 
 
-def _monitor_stdout(stdout: Optional[object]) -> Optional[Queue]:
+def _monitor_stdout(
+    stdout: Optional[object],
+) -> Tuple[Optional[Queue], Optional[threading.Thread]]:
     """Set up background thread to monitor subprocess stdout.
 
     Starts a daemon thread that reads lines from subprocess stdout and
@@ -507,8 +535,9 @@ def _monitor_stdout(stdout: Optional[object]) -> Optional[Queue]:
 
     Returns
     -------
-    Optional[Queue]
-        Queue for reading stdout lines, or None if stdout is not available
+    tuple[Optional[Queue], Optional[threading.Thread]]
+        Queue for reading stdout lines and the daemon thread doing the
+        reading, or ``(None, None)`` if stdout is not available.
 
     Raises
     ------
@@ -521,7 +550,7 @@ def _monitor_stdout(stdout: Optional[object]) -> Optional[Queue]:
     >>> from ansys.mapdl.core.launcher.process import _monitor_stdout
     >>> import subprocess
     >>> process = subprocess.Popen(..., stdout=subprocess.PIPE)
-    >>> stdout_queue = _monitor_stdout(process.stdout)
+    >>> stdout_queue, stdout_thread = _monitor_stdout(process.stdout)
     >>> if stdout_queue:
     ...     line = stdout_queue.get(timeout=1)
 
@@ -529,12 +558,12 @@ def _monitor_stdout(stdout: Optional[object]) -> Optional[Queue]:
     -----
     - Internal utility function
     - Runs in background daemon thread (won't block process exit)
-    - Returns None if stdout cannot be monitored
+    - Returns ``(None, None)`` if stdout cannot be monitored
     - Thread closes stdout when end-of-stream reached
     - Gracefully handles process termination
     """
     if not stdout:
-        return None
+        return None, None
 
     queue: Queue = Queue()
 
@@ -551,7 +580,7 @@ def _monitor_stdout(stdout: Optional[object]) -> Optional[Queue]:
     thread = threading.Thread(target=reader, daemon=True)
     thread.start()
 
-    return queue
+    return queue, thread
 
 
 def _wait_directory_ready(run_location: str, timeout: int) -> None:

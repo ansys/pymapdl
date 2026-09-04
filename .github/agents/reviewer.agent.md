@@ -34,7 +34,7 @@ Reviewer **blocks merge** if any quality condition fails.
 
 ### CI/CD
 - [ ] All CI checks passing
-- [ ] Changelog entry added (if using `changelog.d/`)
+- [ ] No hand-written changelog fragment in `doc/changelog.d/` (CI/CD generates it)
 
 ## Commands
 

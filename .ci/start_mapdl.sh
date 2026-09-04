@@ -94,7 +94,7 @@ CMD=$(cat <<-_EOT_
 run \
   --entrypoint /bin/bash \
   --name ${INSTANCE_NAME} \
-  --restart unless-stopped \
+  --restart on-failure:3 \
   -e ANSYSLMD_LICENSE_FILE=1055@${LICENSE_SERVER} \
   -e ANSYS_LOCK="OFF" \
   ${DPF_ON} \

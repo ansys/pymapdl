@@ -109,7 +109,7 @@ uv pip install --python "${VENV_PATH}" -e ".[tests]"
 # shellcheck disable=SC2086
 time xvfb-run -a "${VENV_PATH}/bin/pytest" \
   --basetemp=/tmp/pytest-tmp \
-  -vv \
+  -v \
   ${PYTEST_ARGUMENTS}
 
 PYTEST_EXIT=$?

@@ -142,7 +142,6 @@ def _create_test_config(**overrides):
         "mapdl_output": None,
         "transport_mode": None,
         "uds_dir": None,
-        "uds_id": None,
         "certs_dir": None,
     }
     defaults.update(overrides)
@@ -1038,26 +1037,22 @@ class TestFindLiveMapdlProcesses:
 class TestCloseAllLocalInstances:
     """Unit tests for close_all_local_instances."""
 
-    _STOP_TARGET = "ansys.mapdl.core.cli.stop.stop"
+    _STOP_TARGET = "ansys.mapdl.core.launcher.connection.stop"
 
     def test_no_port_range_calls_stop_with_all(self):
         """With no port_range, stop is called once with all=True."""
         with patch(self._STOP_TARGET) as mock_stop:
             close_all_local_instances()
 
-        mock_stop.assert_called_once_with(port=None, pid=None, all=True)
+        mock_stop.assert_called_once_with(all=True)
 
     def test_port_range_calls_stop_per_port(self):
-        """With a port_range, stop is called once per port with all=False."""
+        """With a port_range, stop is called once per port."""
         ports = range(50052, 50055)
         with patch(self._STOP_TARGET) as mock_stop:
             close_all_local_instances(port_range=ports)
 
         assert mock_stop.call_count == len(ports)
-        for i, port in enumerate(ports):
-            mock_stop.call_args_list[i].assert_called_with(
-                port=port, pid=None, all=False
-            )
 
     def test_port_range_passes_correct_ports(self):
         """Each port in the range is forwarded to stop."""
@@ -1074,7 +1069,7 @@ class TestCloseAllLocalInstances:
             close_all_local_instances(port_range=range(50052, 50056))
 
         for call in mock_stop.call_args_list:
-            assert call.kwargs["all"] is False
+            assert not call.kwargs.get("all", False)
 
     def test_empty_port_range_never_calls_stop(self):
         """An empty range means stop is never invoked."""
@@ -1083,10 +1078,14 @@ class TestCloseAllLocalInstances:
 
         mock_stop.assert_not_called()
 
-    def test_stop_imported_from_correct_module(self):
-        """stop is imported from ansys.mapdl.core.cli.stop, not the cli package."""
-        with patch(self._STOP_TARGET) as mock_stop:
-            close_all_local_instances()
+    def test_stop_is_callable_without_click(self):
+        """The stop used internally is the plain function, not the Click command."""
+        from ansys.mapdl.core.launcher.connection import stop
 
-        # The mock target confirms the import path used internally.
-        mock_stop.assert_called_once()
+        assert not hasattr(stop, "callback"), "stop must not be a Click command"
+
+        with patch(
+            "ansys.mapdl.core.launcher.connection._stop_all_instances"
+        ) as mock_all:
+            mock_all.return_value = [123]
+            assert stop(all=True) == [123]

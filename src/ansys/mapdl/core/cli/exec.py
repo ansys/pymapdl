@@ -20,17 +20,172 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+"""``pymapdl exec`` sub-command implementation."""
+
 import select
 import sys
-from typing import Optional, Tuple
+from typing import Optional, Sequence, Tuple
 
 import click
+
+from ansys.mapdl.core.cli.constants import DEFAULT_TIMEOUT
+from ansys.mapdl.core.cli.helpers import connect_to_instance
+
+STDIN_MARKER = "-"
+
+NO_SOURCE_ERROR = (
+    "Provide commands via positional COMMANDS, '-c CMD', '--file PATH', "
+    "or stdin ('-')."
+)
+MULTIPLE_SOURCES_ERROR = (
+    "Only one input source may be used at a time: "
+    "positional COMMANDS, '-c', '--file', or stdin ('-')."
+)
+EMPTY_INPUT_ERROR = "No commands to run (input is empty)."
+
+
+def exec_commands(
+    input_arg: Optional[str] = None,
+    commands: Sequence[str] = (),
+    script_file: Optional[str] = None,
+    port: Optional[int] = None,
+    ip: Optional[str] = None,
+    clear_on_connect: bool = False,
+    timeout: int = DEFAULT_TIMEOUT,
+) -> str:
+    """Send APDL commands to a running MAPDL instance and return its output.
+
+    Exactly one command source must be given: *input_arg*, *commands*,
+    *script_file*, or stdin.
+
+    Parameters
+    ----------
+    input_arg : str, optional
+        One or more inline APDL commands, separated by newlines, or ``"-"`` to
+        read the commands from stdin. When ``None`` and no other source is
+        given, stdin is read as long as it is a pipe carrying data.
+    commands : sequence of str, default: ()
+        APDL commands. Each item may itself hold several commands separated by
+        newlines. All items are joined with newlines and sent as a single
+        block.
+    script_file : str, optional
+        Path to an APDL script file whose content is sent to MAPDL.
+    port : int, optional
+        gRPC port of the running MAPDL instance. Defaults to ``50052``, or to
+        the ``PYMAPDL_PORT`` environment variable when it is set.
+    ip : str, optional
+        IP address of the running MAPDL instance. Defaults to ``"127.0.0.1"``,
+        or to the ``PYMAPDL_IP`` environment variable when it is set.
+    clear_on_connect : bool, default: False
+        Whether to clear the MAPDL database upon connecting. Off by default so
+        that successive calls share the same model state.
+    timeout : int, default: 10
+        Seconds to wait when establishing the gRPC connection.
+
+    Returns
+    -------
+    str
+        Output returned by MAPDL. Can be empty.
+
+    Raises
+    ------
+    ValueError
+        When no command source or more than one command source is given, or
+        when the resolved command block is empty.
+    MapdlConnectionError
+        When no MAPDL instance can be reached at the given address.
+    MapdlRuntimeError
+        When MAPDL fails while running the commands.
+
+    Examples
+    --------
+    Send two commands to the instance running on the default port:
+
+    >>> from ansys.mapdl.core.cli.exec import exec_commands
+    >>> print(exec_commands(commands=["/prep7", "BLOCK,0,1,0,1,0,1"]))
+
+    """
+    from ansys.mapdl.core.errors import MapdlRuntimeError
+
+    command_block = resolve_command_block(
+        input_arg=input_arg, commands=commands, script_file=script_file
+    )
+
+    mapdl = connect_to_instance(
+        ip=ip, port=port, clear_on_connect=clear_on_connect, timeout=timeout
+    )
+
+    try:
+        return mapdl.input_strings(command_block) or ""
+    except Exception as err:
+        raise MapdlRuntimeError(f"Command execution failed — {err}") from err
+
+
+def resolve_command_block(
+    input_arg: Optional[str] = None,
+    commands: Sequence[str] = (),
+    script_file: Optional[str] = None,
+) -> str:
+    """Build the APDL command block from the available command sources.
+
+    Parameters
+    ----------
+    input_arg : str, optional
+        Inline APDL commands, or ``"-"`` to read the commands from stdin.
+    commands : sequence of str, default: ()
+        APDL commands to join with newlines.
+    script_file : str, optional
+        Path to an APDL script file.
+
+    Returns
+    -------
+    str
+        The APDL commands to send to MAPDL.
+
+    Raises
+    ------
+    ValueError
+        When no source or more than one source is given, or when the resulting
+        block is empty.
+
+    Examples
+    --------
+    >>> from ansys.mapdl.core.cli.exec import resolve_command_block
+    >>> resolve_command_block(commands=["/prep7", "SAVE"])
+    '/prep7\\nSAVE'
+
+    """
+    use_stdin = input_arg == STDIN_MARKER or (
+        input_arg is None and not commands and script_file is None and _stdin_has_data()
+    )
+    use_inline = input_arg is not None and input_arg != STDIN_MARKER
+
+    n_sources = sum([bool(commands), script_file is not None, use_stdin, use_inline])
+    if n_sources == 0:
+        raise ValueError(NO_SOURCE_ERROR)
+    if n_sources > 1:
+        raise ValueError(MULTIPLE_SOURCES_ERROR)
+
+    if script_file is not None:
+        with open(script_file, "r") as fid:
+            command_block = fid.read()
+    elif use_stdin:
+        command_block = sys.stdin.read()
+    elif use_inline:
+        command_block = input_arg or ""
+    else:
+        command_block = "\n".join(commands)
+
+    if not command_block.strip():
+        raise ValueError(EMPTY_INPUT_ERROR)
+
+    return command_block
 
 
 def _stdin_has_data() -> bool:
     """Return ``True`` only when stdin is non-interactive *and* data is ready.
 
-    Uses a zero-timeout ``select`` call so the function never blocks.  Three
+    Uses a zero-timeout ``select`` call so the function never blocks.  Four
     cases are handled:
 
     * **Normal TTY** – user is typing interactively → ``False``.
@@ -43,6 +198,11 @@ def _stdin_has_data() -> bool:
       handles and raises ``OSError``.  We cannot check data availability, so
       we return ``True`` and let stdin be read normally (may block if nothing
       is piped).
+
+    Returns
+    -------
+    bool
+        Whether stdin can be read without blocking on user input.
     """
     if sys.stdin.isatty():
         return False
@@ -62,6 +222,11 @@ def _stdin_has_data() -> bool:
         # availability, so fall through to stdin — may block if nothing is
         # piped, but that is the expected behaviour on Windows.
         return True
+
+
+# ---------------------------------------------------------------------------
+# Click wrapper
+# ---------------------------------------------------------------------------
 
 
 @click.command(
@@ -135,7 +300,7 @@ MAPDL output is written to stdout so it can be consumed by scripts or LLM agents
     show_default=True,
     help="Seconds to wait when establishing the gRPC connection to the running instance.",
 )
-def exec_cmd(
+def exec_cli(
     input_arg: Optional[str],
     commands: Tuple[str, ...],
     script_file: Optional[str],
@@ -183,85 +348,27 @@ def exec_cmd(
     timeout : int
         Seconds to wait when establishing the gRPC connection.
     """
-    import logging
+    from ansys.mapdl.core.cli.helpers import silence_logging
+    from ansys.mapdl.core.errors import MapdlRuntimeError
 
-    # ------------------------------------------------------------------ #
-    # Resolve the command source                                           #
-    # ------------------------------------------------------------------ #
+    # Keep stdout clean so that the MAPDL output can be piped.
+    silence_logging()
 
-    use_stdin = input_arg == "-" or (
-        input_arg is None and not commands and script_file is None and _stdin_has_data()
-    )
-    use_inline = input_arg is not None and input_arg != "-"
-    n_sources = sum([bool(commands), script_file is not None, use_stdin, use_inline])
-
-    if n_sources == 0:
-        raise click.UsageError(
-            "Provide commands via positional COMMANDS, '-c CMD', '--file PATH', or stdin ('-')."
-        )
-    if n_sources > 1:
-        raise click.UsageError(
-            "Only one input source may be used at a time: "
-            "positional COMMANDS, '-c', '--file', or stdin ('-')."
-        )
-
-    if script_file is not None:
-        with open(script_file, "r") as fh:
-            cmd_block = fh.read()
-    elif use_stdin:
-        cmd_block = sys.stdin.read()
-    elif use_inline:
-        cmd_block = input_arg or ""
-    else:
-        cmd_block = "\n".join(commands)
-
-    if not cmd_block.strip():
-        raise click.UsageError("No commands to run (input is empty).")
-
-    # ------------------------------------------------------------------ #
-    # Suppress all PyMAPDL/grpc logging to keep stdout clean              #
-    # ------------------------------------------------------------------ #
-    from ansys.mapdl.core import LOG
-
-    LOG.setLevel(logging.CRITICAL + 1)
-    if LOG.std_out_handler:
-        LOG.std_out_handler.setLevel(logging.CRITICAL + 1)
-
-    # ------------------------------------------------------------------ #
-    # Connect to the existing MAPDL instance                              #
-    # ------------------------------------------------------------------ #
     try:
-        from ansys.mapdl.core.launcher.config import resolve_launch_config
-        from ansys.mapdl.core.launcher.connection import connect_to_existing
-
-        config = resolve_launch_config(
+        output = exec_commands(
+            input_arg=input_arg,
+            commands=commands,
+            script_file=script_file,
             ip=ip,
             port=port,
-            start_instance=False,
             clear_on_connect=clear_on_connect,
             timeout=timeout,
         )
-        mapdl = connect_to_existing(config)
-
-    except Exception as e:
-        click.echo(
-            click.style("ERROR:", fg="red")
-            + f" Could not connect to MAPDL at {ip}:{port} — {e}",
-            err=True,
-        )
+    except ValueError as err:
+        raise click.UsageError(str(err)) from err
+    except MapdlRuntimeError as err:
+        click.echo(click.style("ERROR:", fg="red") + f" {err}", err=True)
         sys.exit(1)
 
-    # ------------------------------------------------------------------ #
-    # Execute commands and stream output                                  #
-    # ------------------------------------------------------------------ #
-    try:
-        output = mapdl.input_strings(cmd_block)
-        if output:
-            click.echo(output)
-
-    except Exception as e:
-        click.echo(
-            click.style("ERROR:", fg="red") + f" Command execution failed — {e}",
-            err=True,
-        )
-        sys.exit(1)
+    if output:
+        click.echo(output)

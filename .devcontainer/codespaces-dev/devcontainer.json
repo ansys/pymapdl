@@ -21,8 +21,8 @@
 	// "runServices": [""],
 	// Uncomment the next line if you want to keep your containers running after VS Code shuts down.
 	// "shutdownAction": "none",
-	// Uncomment the next line to run commands after the container is created - for example installing curl.
-	"postCreateCommand": "/bin/bash ./.devcontainer/start.sh",
+	// Add a postCreateCommand that runs a script containing your custom startup configuration.
+	// "postCreateCommand": "/bin/bash ./.devcontainer/codespaces-dev/start.sh",
 
 	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
 	// "remoteUser": "root",
