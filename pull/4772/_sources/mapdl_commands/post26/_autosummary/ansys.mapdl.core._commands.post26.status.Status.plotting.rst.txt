@@ -1,0 +1,6 @@
+﻿plotting
+========
+
+.. currentmodule:: ansys.mapdl.core._commands.post26.status
+
+.. automethod:: Status.plotting

@@ -1,0 +1,6 @@
+﻿format\_info
+============
+
+.. currentmodule:: ansys.mapdl.core.cli.check
+
+.. autofunction:: format_info

@@ -1,0 +1,6 @@
+﻿autots
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.load_step_options
+
+.. automethod:: LoadStepOptions.autots

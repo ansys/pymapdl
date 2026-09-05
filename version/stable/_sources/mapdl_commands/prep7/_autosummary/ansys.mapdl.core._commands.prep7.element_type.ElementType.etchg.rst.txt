@@ -1,0 +1,6 @@
+﻿etchg
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.element_type
+
+.. automethod:: ElementType.etchg

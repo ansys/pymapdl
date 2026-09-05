@@ -1,0 +1,6 @@
+﻿list\_skills
+============
+
+.. currentmodule:: ansys.mapdl.core.cli.skills
+
+.. autofunction:: list_skills

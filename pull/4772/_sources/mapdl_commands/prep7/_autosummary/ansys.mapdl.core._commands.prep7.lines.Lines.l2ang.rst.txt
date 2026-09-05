@@ -1,0 +1,6 @@
+﻿l2ang
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.lines
+
+.. automethod:: Lines.l2ang

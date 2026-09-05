@@ -1,0 +1,6 @@
+﻿decrypt
+=======
+
+.. currentmodule:: ansys.mapdl.core._commands.apdl.encryption_decryption
+
+.. automethod:: EncryptionDecryption.decrypt

@@ -1,0 +1,6 @@
+﻿ldele
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.lines
+
+.. automethod:: Lines.ldele

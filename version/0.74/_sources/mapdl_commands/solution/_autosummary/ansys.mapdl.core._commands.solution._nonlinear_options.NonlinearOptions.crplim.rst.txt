@@ -1,0 +1,6 @@
+﻿crplim
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution._nonlinear_options
+
+.. automethod:: NonlinearOptions.crplim

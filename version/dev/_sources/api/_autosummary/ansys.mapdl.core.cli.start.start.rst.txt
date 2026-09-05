@@ -1,0 +1,6 @@
+﻿start
+=====
+
+.. currentmodule:: ansys.mapdl.core.cli.start
+
+.. autofunction:: start
