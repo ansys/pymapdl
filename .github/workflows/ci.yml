@@ -628,7 +628,7 @@ jobs:
       issues: write  # Needed to create issues on build failures
     steps:
       - name: "Open issue"
-        uses: jayqi/failed-build-issue-action@1a893bbf43ef1c2a8705e2b115cd4f0fe3c5649b #v1.2.0
+        uses: jayqi/failed-build-issue-action@940568ce50eeef3f31a920614cefcc6102d2f930 #v1.3.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           title-template: "Failed scheduled build"
