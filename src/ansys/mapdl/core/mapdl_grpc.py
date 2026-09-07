@@ -91,6 +91,7 @@ from ansys.mapdl.core.errors import (
     protect_from,
     protect_grpc,
 )
+from ansys.mapdl.core.lazy_array import LazyArray
 from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat, MapdlInt
 from ansys.mapdl.core.misc import (
@@ -4541,11 +4542,21 @@ class MapdlGrpc(MapdlBase):
         tstrt: MapdlFloat = "",
         kcplx: MapdlInt = "",
         **kwargs: KwargDict,
-    ) -> NDArray[np.float64]:
-        """Wraps VGET"""
+    ) -> Union[NDArray[np.float64], LazyArray]:
+        """Wraps VGET
+
+        .. note::
+            The MAPDL ``VGET`` command runs immediately, but the array
+            values are not downloaded until the returned
+            :class:`LazyArray <ansys.mapdl.core.lazy_array.LazyArray>` is
+            used (indexing, iteration, ``len()``, or any NumPy operation).
+            This avoids an unnecessary download when the return value is
+            not used. Use ``np.asarray(result)`` to force materialization
+            into a plain :class:`numpy.ndarray`.
+        """
         super().vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
         if not self._store_commands:
-            return self.parameters[par]
+            return LazyArray(self, par)
 
     def get_variable(
         self,
