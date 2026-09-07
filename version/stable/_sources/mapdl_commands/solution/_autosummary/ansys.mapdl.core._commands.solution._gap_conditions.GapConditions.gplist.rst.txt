@@ -1,0 +1,6 @@
+﻿gplist
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution._gap_conditions
+
+.. automethod:: GapConditions.gplist

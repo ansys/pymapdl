@@ -1,0 +1,6 @@
+add\_text
+=========
+
+.. currentmodule:: ansys.mapdl.core.plotting.visualizer
+
+.. automethod:: MapdlPlotter.add_text

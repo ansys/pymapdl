@@ -1,0 +1,6 @@
+﻿linp
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.booleans
+
+.. automethod:: Booleans.linp

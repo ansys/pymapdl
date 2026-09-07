@@ -1,0 +1,6 @@
+﻿lsengine
+========
+
+.. currentmodule:: ansys.mapdl.core._commands.apdl.matrix_operations
+
+.. automethod:: MatrixOperations.lsengine

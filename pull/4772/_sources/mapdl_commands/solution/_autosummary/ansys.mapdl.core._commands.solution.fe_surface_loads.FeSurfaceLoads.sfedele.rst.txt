@@ -1,0 +1,6 @@
+﻿sfedele
+=======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.fe_surface_loads
+
+.. automethod:: FeSurfaceLoads.sfedele

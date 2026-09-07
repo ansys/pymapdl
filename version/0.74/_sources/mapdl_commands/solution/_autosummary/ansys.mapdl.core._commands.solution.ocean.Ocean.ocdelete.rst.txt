@@ -1,0 +1,6 @@
+﻿ocdelete
+========
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.ocean
+
+.. automethod:: Ocean.ocdelete

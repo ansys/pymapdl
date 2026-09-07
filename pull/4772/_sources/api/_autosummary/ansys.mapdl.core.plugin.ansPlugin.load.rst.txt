@@ -1,0 +1,6 @@
+load
+====
+
+.. currentmodule:: ansys.mapdl.core.plugin
+
+.. automethod:: ansPlugin.load

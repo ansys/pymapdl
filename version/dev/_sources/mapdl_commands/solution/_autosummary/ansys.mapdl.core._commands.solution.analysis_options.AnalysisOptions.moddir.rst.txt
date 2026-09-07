@@ -1,0 +1,6 @@
+﻿moddir
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.analysis_options
+
+.. automethod:: AnalysisOptions.moddir

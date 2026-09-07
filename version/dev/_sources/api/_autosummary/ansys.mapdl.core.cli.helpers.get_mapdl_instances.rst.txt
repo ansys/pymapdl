@@ -1,0 +1,6 @@
+﻿get\_mapdl\_instances
+=====================
+
+.. currentmodule:: ansys.mapdl.core.cli.helpers
+
+.. autofunction:: get_mapdl_instances

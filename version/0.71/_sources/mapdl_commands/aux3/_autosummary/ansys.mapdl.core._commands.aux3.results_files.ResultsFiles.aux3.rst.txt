@@ -1,0 +1,6 @@
+﻿aux3
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.aux3.results_files
+
+.. automethod:: ResultsFiles.aux3

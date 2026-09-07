@@ -1,0 +1,6 @@
+﻿ampowder
+========
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.additive_manufacturing
+
+.. automethod:: AdditiveManufacturing.ampowder

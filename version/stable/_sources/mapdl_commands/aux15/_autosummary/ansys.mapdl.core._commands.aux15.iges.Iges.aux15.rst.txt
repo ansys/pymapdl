@@ -1,0 +1,6 @@
+﻿aux15
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.aux15.iges
+
+.. automethod:: Iges.aux15

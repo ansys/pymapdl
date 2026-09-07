@@ -1,0 +1,6 @@
+﻿ceims
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.constraint_equations
+
+.. automethod:: ConstraintEquations.ceims

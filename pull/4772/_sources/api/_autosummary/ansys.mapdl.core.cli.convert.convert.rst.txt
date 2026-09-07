@@ -1,0 +1,6 @@
+﻿convert
+=======
+
+.. currentmodule:: ansys.mapdl.core.cli.convert
+
+.. autofunction:: convert

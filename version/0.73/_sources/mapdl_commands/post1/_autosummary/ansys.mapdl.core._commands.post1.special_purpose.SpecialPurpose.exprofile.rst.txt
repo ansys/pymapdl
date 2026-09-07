@@ -1,0 +1,6 @@
+﻿exprofile
+=========
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.special_purpose
+
+.. automethod:: SpecialPurpose.exprofile
