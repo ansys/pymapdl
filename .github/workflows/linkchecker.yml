@@ -14,7 +14,7 @@ permissions: {}
 jobs:
   linkcheck:
     name: "Check Links"
-    uses: ./.github/workflows/doc-build.yml
+    uses: $/.github/workflows/doc-build.yml
     permissions:
       contents: read  # Needed to read repository contents for link checking
       packages: read  # Needed to pull Docker images from GitHub packages
