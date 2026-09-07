@@ -33,7 +33,7 @@ repos:
     - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
-  rev: d5f40fa0553aa4bba71fcd73cf42933ae14d5116  # frozen: 9.0.0b5
+  rev: 131f4adcd5582bfc53928ab0d740eceb8b506b6c  # frozen: 9.0.1
   hooks:
   - id: isort
 
@@ -109,7 +109,7 @@ repos:
       args: [--option, "reorder_arrays=true", --option, "reorder_keys=true"]
 
 - repo: https://github.com/zizmorcore/zizmor-pre-commit
-  rev: 451b56af716f9f0d0c2b816503a3fd0cf8b036fa  # frozen: v1.29.0
+  rev: cef8b8350da46d8114c7e6b7272aebdccdf193ce  # frozen: v1.30.0
   hooks:
     - id: zizmor
       args: ["--pedantic"]
