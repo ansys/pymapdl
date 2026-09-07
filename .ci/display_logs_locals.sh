@@ -40,7 +40,25 @@ display_file () {
 }
 
 #####
+# Displaying files matching a glob pattern (the crash file name is derived
+# from the MAPDL jobname, so it is not a fixed path like the other logs).
+display_files () {
+    local pattern="$1"
+    local file_description="$2"
+    local file_pattern="./$LOG_NAMES/$pattern"
+
+    if compgen -G "$file_pattern" > /dev/null; then
+        for f in $file_pattern; do
+            display_file "$f" "$file_description"
+        done
+    else
+        printf '%b\n' "${YELLOW}No $pattern files to print.${NC}"
+    fi
+}
+
+#####
 # Displaying files
 display_file "./$LOG_NAMES/pymapdl.log" "PyMAPDL log"
 display_file "./$LOG_NAMES/pymapdl.apdl" "PyMAPDL APDL log"
 display_file "./$LOG_NAMES/apdl.out" "MAPDL Output"
+display_files "*.crash" "Crash"

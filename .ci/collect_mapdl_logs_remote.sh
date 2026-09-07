@@ -55,6 +55,10 @@ echo "Collecting MAPDL logs from remote container..."
 (docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$FILE*.err' > /dev/null; then mv -f $FILE*.err /mapdl_logs && echo 'Successfully moved err files.'; fi") || echo -e "${YELLOW}Failed to move the 'err' files into a local file${NC}"
 (docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$FILE*.log' > /dev/null; then mv -f $FILE*.log /mapdl_logs && echo 'Successfully moved log files.'; fi") || echo -e "${YELLOW}Failed to move the 'log' files into a local file${NC}"
 (docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$WDIR*.crash' > /dev/null; then mv -f $WDIR*.crash /mapdl_logs && echo 'Successfully moved crash files.'; fi") || echo -e "${YELLOW}Failed to move the 'crash' files into a local file${NC}"
+# Core dump files, if core dumps are enabled and MAPDL crashed with a fatal signal.
+# Match both the default kernel core filename ("core", no dot) and the
+# "core.%e.%p"-style pattern set by entrypoint.sh.
+(docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$WDIR""core*' > /dev/null; then mv -f $WDIR""core* /mapdl_logs && echo 'Successfully moved core dump files.'; fi") || echo -e "${YELLOW}No core dump files found (or failed to move them)${NC}"
 
 docker cp "$MAPDL_INSTANCE":/home/mapdl/dpf_logs ./"$LOG_NAMES"/ && echo "Successfully copied the 'dpf_logs' files into a local directory" || echo -e "${YELLOW}Failed to copy the 'dpf_logs' files into a local directory${NC}"
 docker cp "$MAPDL_INSTANCE":/mapdl_logs/. ./"$LOG_NAMES"/. && echo "Successfully copied the $LOG_NAMES files into a local directory" || echo -e "${RED}Failed to copy the $LOG_NAMES files into a local directory${NC}"
@@ -76,6 +80,7 @@ mv ./*.log ./"$LOG_NAMES"/ 2>/dev/null && echo "Successfully moved log files." |
 display_files "*.log" "Log"
 display_files "*.err" "Error"
 display_files "*.out" "Output"
+display_files "*.crash" "Crash"
 
 ###############################################################################
 echo "Moving the profiling files..."

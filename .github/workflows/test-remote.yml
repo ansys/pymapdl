@@ -291,6 +291,26 @@ jobs:
             echo "Container ${CONTAINER}: restarts=$N_RESTART, OOMKilled=$OOM_KILLED, exit_code=$EXIT_CODE, state_error='$STATE_ERROR', last_finished_at=$FINISHED_AT"
           done
 
+      # MAPDL is exec'd as PID 1 inside the container (see entrypoint.sh), so
+      # its stdout -- including the crash-time PrintStackTrace/PrintBackTrace
+      # output enabled by ANS_DEBUG_CRASH -- is the container's own stdout,
+      # which `docker logs` can retrieve even after MAPDL itself has died.
+      - name: "Capture full container stdout/stderr (docker logs)"
+        if: always()
+        env:
+          MAPDL_0: ${{ steps.mapdl_0.outputs.container-name }}
+          MAPDL_1: ${{ steps.mapdl_1.outputs.container-name }}
+          LOG_NAMES: logs-${{ inputs.file-name }}
+        shell: bash
+        run: |
+          mkdir -p "./${LOG_NAMES}"
+          for CONTAINER in "${MAPDL_0}" "${MAPDL_1}"; do
+            [ -z "${CONTAINER}" ] && continue
+            docker logs "${CONTAINER}" > "./${LOG_NAMES}/${CONTAINER}.container-stdout.log" 2>&1 \
+              && echo "Successfully captured docker logs for ${CONTAINER}" \
+              || echo "Failed to capture docker logs for ${CONTAINER}"
+          done
+
       - name: "Check for OOM kills in the kernel log"
         if: always()
         run: |
