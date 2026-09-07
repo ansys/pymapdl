@@ -39,9 +39,7 @@ def mock_mapdl():
     """Return a mock MAPDL instance with a mocked ``parameters`` mapping."""
     mapdl = MagicMock()
     mapdl.parameters = MagicMock()
-    mapdl.parameters.__getitem__ = MagicMock(
-        return_value=np.array([1.0, 2.0, 3.0])
-    )
+    mapdl.parameters.__getitem__ = MagicMock(return_value=np.array([1.0, 2.0, 3.0]))
     return mapdl
 
 
