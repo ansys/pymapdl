@@ -70,8 +70,12 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.helpers import is_installed
 from ansys.mapdl.core.launcher import launch_mapdl
-from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME
-from ansys.mapdl.core.mapdl_extended import MAX_DO_LOOP_LEVEL, _MapdlExtended
+from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME, _MapdlCore
+from ansys.mapdl.core.mapdl_extended import (
+    MAX_DO_LOOP_LEVEL,
+    _MapdlCommandExtended,
+    _MapdlExtended,
+)
 from ansys.mapdl.core.misc import random_string, stack
 from ansys.mapdl.core.plotting import GraphicsBackend
 
@@ -2642,6 +2646,45 @@ def test_get_array_non_interactive(mapdl, solved_box):
     with pytest.raises(MapdlRuntimeError):
         with mapdl.non_interactive:
             mapdl.get_array("asdf", "2")
+
+
+def test_etable_returns_command_output_by_default():
+    mapdl = object.__new__(_MapdlCommandExtended)
+
+    with patch.object(_MapdlCore, "etable", return_value="command output") as etable:
+        assert mapdl.etable("MOMY_I", "SMISC", 3) == "command output"
+
+    etable.assert_called_once_with("MOMY_I", "SMISC", 3, "")
+
+
+def test_etable_returns_array():
+    mapdl = object.__new__(_MapdlCommandExtended)
+    mapdl.get_array = MagicMock(return_value=np.array([1.0, 2.0]))
+
+    with patch.object(_MapdlCore, "etable", return_value="command output") as etable:
+        values = mapdl.etable("MOMY_I", "SMISC", 3, return_arr=True)
+
+    np.testing.assert_array_equal(values, [1.0, 2.0])
+    etable.assert_called_once_with("MOMY_I", "SMISC", 3, "")
+    mapdl.get_array.assert_called_once_with("ELEM", "", "ETAB", "MOMY_I")
+
+
+def test_etable_returns_array_with_default_label():
+    mapdl = object.__new__(_MapdlCommandExtended)
+    mapdl.get_array = MagicMock(return_value=np.array([1.0]))
+
+    with patch.object(_MapdlCore, "etable", return_value="command output"):
+        mapdl.etable("", "SMISC", 3, return_arr=True)
+
+    mapdl.get_array.assert_called_once_with("ELEM", "", "ETAB", "SMIS3")
+
+
+@pytest.mark.parametrize("label", ["REFL", "STAT", "ERAS"])
+def test_etable_array_rejects_reserved_labels(label):
+    mapdl = object.__new__(_MapdlCommandExtended)
+
+    with pytest.raises(ValueError, match="reserved ETABLE operation"):
+        mapdl.etable(label, return_arr=True)
 
 
 def test_default_file_type_for_plots(mapdl, cleared):

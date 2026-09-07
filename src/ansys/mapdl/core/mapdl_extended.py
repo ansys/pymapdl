@@ -267,6 +267,77 @@ class _MapdlCommandExtended(_MapdlCore):
 
         return wrapped(self, *args, **kwargs)
 
+    def etable(
+        self,
+        lab: str = "",
+        item: str = "",
+        comp: str = "",
+        option: str = "",
+        *,
+        return_arr: bool = False,
+        **kwargs: KwargDict,
+    ) -> Union[str, NDArray[np.float64]]:
+        """Fill an element table and optionally return its values.
+
+        Parameters
+        ----------
+        lab : str, optional
+            User-defined label for the element table column.
+        item : str, optional
+            Label identifying the result item.
+        comp : str, optional
+            Component or sequence number for the result item.
+        option : str, optional
+            Element table storage option, such as ``"MIN"``, ``"MAX"``,
+            or ``"AVG"``.
+        return_arr : bool, optional
+            If ``True``, return the populated element-table column as a
+            NumPy array. If ``False``, return the MAPDL command output.
+        **kwargs
+            Additional keyword arguments passed to the MAPDL command.
+
+        Returns
+        -------
+        str or numpy.ndarray
+            MAPDL command output by default, or the element-table values
+            when ``return_arr=True``.
+
+        Raises
+        ------
+        ValueError
+            If ``return_arr=True`` is used with a reserved ETABLE operation
+            that does not identify a single column.
+
+        Examples
+        --------
+        Return the Y-direction moment at the I and J nodes of a line
+        element.
+
+        >>> moment_i = mapdl.etable("MOMY_I", "SMISC", 3, return_arr=True)
+        >>> moment_j = mapdl.etable("MOMY_J", "SMISC", 16, return_arr=True)
+        """
+        reserved_labels = {"REFL", "STAT", "ERAS"}
+        label = str(lab).strip()
+        if return_arr and (
+            label.upper() in reserved_labels
+            or str(item).strip().upper() in reserved_labels
+        ):
+            raise ValueError(
+                "return_arr=True requires an ETABLE column label, not a "
+                "reserved ETABLE operation."
+            )
+
+        output = super().etable(lab, item, comp, option, **kwargs)
+        if not return_arr:
+            return output
+
+        if label:
+            array_label = label
+        else:
+            array_label = f"{str(item)[:4]}{str(comp)[:4]}".upper()
+
+        return self.get_array("ELEM", "", "ETAB", array_label)
+
     @wraps(_MapdlCore.esel)
     def esel(self, *args, **kwargs) -> str:
         """Wraps previons ESEL to allow to use a list/tuple/array for vmin.
