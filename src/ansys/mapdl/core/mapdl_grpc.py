@@ -3387,6 +3387,16 @@ class MapdlGrpc(MapdlBase):
             if not self._apdl_log.closed:
                 self._apdl_log.write(tmp_dat)
 
+        # Escaping early if inside non_interactive context. The commands are
+        # executed when the context exits, so there is no need to write or
+        # upload a temporary input file.
+        if self._store_commands:
+            # Excludes the leading and trailing '/OUT' redirection lines,
+            # keeping every command in between (a single one for 'DB',
+            # 'SOLID', 'COMB', and plain '/INPUT'; several for 'ALL').
+            self._stored_commands.extend(tmp_dat.splitlines()[1:-1])
+            return None
+
         if self._local:
             local_path = self.directory
             tmp_name_path = os.path.join(local_path, tmp_name)
@@ -3394,14 +3404,6 @@ class MapdlGrpc(MapdlBase):
                 f.write(tmp_dat)
         else:
             self._upload_raw(tmp_dat.encode(), tmp_name)
-
-        # Escaping early if inside non_interactive context
-        if self._store_commands:
-            # Excludes the leading and trailing '/OUT' redirection lines,
-            # keeping every command in between (a single one for 'DB',
-            # 'SOLID', 'COMB', and plain '/INPUT'; several for 'ALL').
-            self._stored_commands.extend(tmp_dat.splitlines()[1:-1])
-            return None
 
         request = pb_types.InputFileRequest(filename=tmp_name, opt="MUTE")
 
