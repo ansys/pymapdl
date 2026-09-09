@@ -604,7 +604,6 @@ class Test_MAPDL_commands(TestClass):
         "create",
         "end",
         "eplot",
-        "etable",
         "geometry",
         "input",
         "kplot",

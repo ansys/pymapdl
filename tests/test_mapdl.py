@@ -70,10 +70,9 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.helpers import is_installed
 from ansys.mapdl.core.launcher import launch_mapdl
-from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME, _MapdlCore
+from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME
 from ansys.mapdl.core.mapdl_extended import (
     MAX_DO_LOOP_LEVEL,
-    _MapdlCommandExtended,
     _MapdlExtended,
 )
 from ansys.mapdl.core.misc import random_string, stack
@@ -2648,43 +2647,68 @@ def test_get_array_non_interactive(mapdl, solved_box):
             mapdl.get_array("asdf", "2")
 
 
-def test_etable_returns_command_output_by_default():
-    mapdl = object.__new__(_MapdlCommandExtended)
+def test_get_etable_with_explicit_label():
+    mapdl = object.__new__(_MapdlExtended)
+    values = np.array([1.0, 2.0])
+    mapdl.etable = MagicMock()
+    mapdl.get_array = MagicMock(return_value=values)
 
-    with patch.object(_MapdlCore, "etable", return_value="command output") as etable:
-        assert mapdl.etable("MOMY_I", "SMISC", 3) == "command output"
+    result = mapdl.get_etable("SMISC", 3, "MAX", "MOMY_I")
 
-    etable.assert_called_once_with("MOMY_I", "SMISC", 3, "")
-
-
-def test_etable_returns_array():
-    mapdl = object.__new__(_MapdlCommandExtended)
-    mapdl.get_array = MagicMock(return_value=np.array([1.0, 2.0]))
-
-    with patch.object(_MapdlCore, "etable", return_value="command output") as etable:
-        values = mapdl.etable("MOMY_I", "SMISC", 3, return_arr=True)
-
-    np.testing.assert_array_equal(values, [1.0, 2.0])
-    etable.assert_called_once_with("MOMY_I", "SMISC", 3, "")
+    np.testing.assert_array_equal(result, values)
+    assert mapdl.etable.call_args.args == ("MOMY_I", "SMISC", 3, "MAX")
     mapdl.get_array.assert_called_once_with("ELEM", "", "ETAB", "MOMY_I")
 
 
-def test_etable_returns_array_with_default_label():
-    mapdl = object.__new__(_MapdlCommandExtended)
-    mapdl.get_array = MagicMock(return_value=np.array([1.0]))
+def test_get_etable_with_temporary_label():
+    mapdl = object.__new__(_MapdlExtended)
+    events = []
+    values = np.array([1.0])
 
-    with patch.object(_MapdlCore, "etable", return_value="command output"):
-        mapdl.etable("", "SMISC", 3, return_arr=True)
+    def record_etable(*args):
+        events.append(("etable", args))
 
-    mapdl.get_array.assert_called_once_with("ELEM", "", "ETAB", "SMIS3")
+    def record_get_array(*args):
+        events.append(("get_array", args))
+        return values
+
+    mapdl.etable = MagicMock(side_effect=record_etable)
+    mapdl.get_array = MagicMock(side_effect=record_get_array)
+
+    with patch("ansys.mapdl.core.mapdl_extended.random_string", return_value="abcd"):
+        result = mapdl.get_etable("SMISC", 3, "AVG")
+
+    np.testing.assert_array_equal(result, values)
+    assert events == [
+        ("etable", ("__abcd__", "SMISC", 3, "AVG")),
+        ("get_array", ("ELEM", "", "ETAB", "__abcd__")),
+        ("etable", ("__abcd__", "ERAS")),
+    ]
 
 
-@pytest.mark.parametrize("label", ["REFL", "STAT", "ERAS"])
-def test_etable_array_rejects_reserved_labels(label):
-    mapdl = object.__new__(_MapdlCommandExtended)
+def test_get_etable_cleans_up_temporary_label_on_error():
+    mapdl = object.__new__(_MapdlExtended)
+    events = []
 
-    with pytest.raises(ValueError, match="reserved ETABLE operation"):
-        mapdl.etable(label, return_arr=True)
+    def record_etable(*args):
+        events.append(("etable", args))
+
+    def raise_get_array(*args):
+        events.append(("get_array", args))
+        raise RuntimeError("unable to retrieve element table")
+
+    mapdl.etable = MagicMock(side_effect=record_etable)
+    mapdl.get_array = MagicMock(side_effect=raise_get_array)
+
+    with patch("ansys.mapdl.core.mapdl_extended.random_string", return_value="abcd"):
+        with pytest.raises(RuntimeError, match="unable to retrieve element table"):
+            mapdl.get_etable("SMISC", 3)
+
+    assert events == [
+        ("etable", ("__abcd__", "SMISC", 3, "")),
+        ("get_array", ("ELEM", "", "ETAB", "__abcd__")),
+        ("etable", ("__abcd__", "ERAS")),
+    ]
 
 
 def test_default_file_type_for_plots(mapdl, cleared):

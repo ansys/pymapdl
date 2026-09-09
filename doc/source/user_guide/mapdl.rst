@@ -245,6 +245,23 @@ Being aware of this kind of behavior and how the :meth:`non_interactive context 
 works is crucial for advanced usage of PyMAPDL.
 
 
+Retrieving element table values
+-------------------------------
+
+Use the :meth:`mapdl.get_etable() <ansys.mapdl.core.Mapdl.get_etable>` method
+to create an element table column and retrieve its values as a NumPy array:
+
+.. code:: python
+
+    moment_i = mapdl.get_etable("SMISC", 3, lab="MOMY_I")
+    moment_j = mapdl.get_etable("SMISC", 16, lab="MOMY_J")
+
+When ``lab`` is provided, the named column remains in the MAPDL element table
+for commands such as ``PRETAB`` or ``SADD``. If ``lab`` is omitted, PyMAPDL
+uses a hidden temporary label and erases that column after retrieving the
+array.
+
+
 MAPDL macros
 ------------
 Note that macros created within PyMAPDL (rather than loaded from
