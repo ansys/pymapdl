@@ -26,12 +26,14 @@ These tests use a mocked ``Mapdl`` object (via ``mapdl.parameters``) and do
 not require a running MAPDL instance.
 """
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 
 import numpy as np
 import pytest
 
 from ansys.mapdl.core.lazy_array import LazyArray
+from ansys.mapdl.core.mapdl import MapdlBase
+from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
 
 @pytest.fixture
@@ -108,3 +110,153 @@ def test_not_instance_of_ndarray(mock_mapdl):
     """LazyArray is intentionally not an ndarray subclass (see docstring)."""
     lazy = LazyArray(mock_mapdl, "A")
     assert not isinstance(lazy, np.ndarray)
+
+
+def _mock_grpc_mapdl():
+    """Create the small portion of MapdlGrpc needed by the VGET wrapper."""
+    mapdl = object.__new__(MapdlGrpc)
+    mapdl._store_commands = False
+    mapdl._lazy_array_counter = 0
+    mapdl._lazy_array_snapshots = set()
+    mapdl._parameters = MagicMock()
+    mapdl._parameters.__contains__.return_value = False
+    mapdl._parameters.full_parameters_output = MagicMock()
+    mapdl._parameters._parm = {
+        "NODE": {"type": "ARRAY", "shape": (2, 1, 1)},
+    }
+    mapdl.dim = MagicMock()
+    mapdl.mfun = MagicMock()
+    mapdl.run = MagicMock()
+    return mapdl
+
+
+def test_unresolved_vgets_use_distinct_server_snapshots(monkeypatch):
+    """Repeated VGET calls must not alias an unresolved result."""
+    mapdl = _mock_grpc_mapdl()
+    monkeypatch.setattr(MapdlBase, "vget", lambda self, **kwargs: None)
+
+    before = mapdl.vget(par="NODE")
+    after = mapdl.vget(par="NODE")
+
+    assert before._parameter_name != after._parameter_name
+    assert mapdl.dim.call_args_list == [
+        call(
+            before._parameter_name,
+            type_="ARRAY",
+            imax=2,
+            jmax=1,
+            kmax=1,
+            mute=True,
+        ),
+        call(
+            after._parameter_name,
+            type_="ARRAY",
+            imax=2,
+            jmax=1,
+            kmax=1,
+            mute=True,
+        ),
+    ]
+    assert mapdl.mfun.call_args_list == [
+        call(before._parameter_name, "COPY", "NODE", mute=True),
+        call(after._parameter_name, "COPY", "NODE", mute=True),
+    ]
+    assert mapdl._lazy_array_snapshots == {
+        before._parameter_name,
+        after._parameter_name,
+    }
+
+    values = {
+        before._parameter_name: np.array([1.0, 2.0]),
+        after._parameter_name: np.array([4.0, 7.0]),
+    }
+    mapdl.parameters.__getitem__.side_effect = values.__getitem__
+
+    np.testing.assert_array_equal(np.asarray(before), [1.0, 2.0])
+    np.testing.assert_array_equal(np.asarray(after), [4.0, 7.0])
+    np.testing.assert_array_equal(after - before, [3.0, 5.0])
+    assert mapdl.run.call_count == 2
+    assert not mapdl._lazy_array_snapshots
+
+
+def test_lazy_array_close_deletes_unused_snapshot():
+    """An unused snapshot can be released without downloading its values."""
+    mapdl = _mock_grpc_mapdl()
+    snapshot = "_PYMAPDL_LAZY_0000000000000001"
+    mapdl._lazy_array_snapshots.add(snapshot)
+    lazy = LazyArray(
+        mapdl,
+        snapshot,
+        cleanup=lambda: mapdl._delete_lazy_array_snapshot(snapshot),
+    )
+
+    lazy.close()
+
+    mapdl.run.assert_called_once_with(f"{snapshot}=", mute=True)
+    mapdl.parameters.__getitem__.assert_not_called()
+    assert not mapdl._lazy_array_snapshots
+
+
+def test_snapshot_names_skip_existing_parameters():
+    """Snapshot names must be bounded and avoid existing MAPDL parameters."""
+    mapdl = _mock_grpc_mapdl()
+    mapdl.parameters.__contains__.side_effect = [True, False]
+
+    name = mapdl._new_lazy_array_snapshot()
+
+    assert name == "_PYMAPDL_LAZY_0000000000000002"
+    assert len(name) <= 32
+
+
+def test_snapshot_cleanup_propagates_errors():
+    """Cleanup errors must remain visible to the caller."""
+    mapdl = _mock_grpc_mapdl()
+    mapdl._lazy_array_snapshots.add("_PYMAPDL_LAZY_0000000000000001")
+    mapdl.run.side_effect = RuntimeError("delete failed")
+
+    with pytest.raises(RuntimeError, match="delete failed"):
+        mapdl._cleanup_lazy_array_snapshots()
+
+    assert mapdl._lazy_array_snapshots
+
+
+def test_vget_preserves_store_commands(monkeypatch):
+    """Command storage must not add a server snapshot."""
+    mapdl = _mock_grpc_mapdl()
+    mapdl._store_commands = True
+    monkeypatch.setattr(MapdlBase, "vget", lambda self, **kwargs: None)
+
+    assert mapdl.vget(par="NODE") is None
+    mapdl.mfun.assert_not_called()
+    assert not mapdl._lazy_array_snapshots
+
+
+def test_temporary_result_wrappers_materialize_snapshots(monkeypatch):
+    """NSOL, ESOL, and RPSD retain their ndarray-returning API."""
+    mapdl = _mock_grpc_mapdl()
+    mapdl.parameters.__getitem__.return_value = np.array([1.0, 2.0])
+    mapdl.vget = MagicMock(
+        side_effect=lambda *args, **kwargs: LazyArray(mapdl, "SNAPSHOT")
+    )
+
+    for wrapper, command in (("nsol", "nsol"), ("esol", "esol"), ("rpsd", "rpsd")):
+        monkeypatch.setattr(MapdlBase, command, lambda self, **kwargs: None)
+        result = getattr(MapdlGrpc, wrapper)(mapdl)
+        np.testing.assert_array_equal(result, [1.0, 2.0])
+
+    assert mapdl.parameters.__getitem__.call_count == 3
+
+
+def test_get_variable_deletes_source_after_vget():
+    """Deleting the temporary VGET parameter must not invalidate its result."""
+    mapdl = _mock_grpc_mapdl()
+    snapshot = "_PYMAPDL_LAZY_0000000000000001"
+    mapdl.parameters.__getitem__.return_value = np.array([1.0, 2.0])
+    mapdl.vget = MagicMock(return_value=LazyArray(mapdl, snapshot))
+
+    result = MapdlGrpc.get_variable(mapdl, ir=2)
+
+    np.testing.assert_array_equal(result, [1.0, 2.0])
+    mapdl.parameters.__getitem__.assert_called_once_with(snapshot)
+    mapdl.vget.assert_called_once_with(par="temp_var", ir=2, tstrt="", kcplx="")
+    mapdl.parameters.__delitem__.assert_called_once_with("temp_var")

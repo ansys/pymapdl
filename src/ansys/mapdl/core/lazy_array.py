@@ -29,7 +29,7 @@ downloads that value immediately, even if the caller never uses it. The
 used.
 """
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import numpy as np
 from numpy.lib.mixins import NDArrayOperatorsMixin
@@ -56,10 +56,11 @@ class LazyArray(NDArrayOperatorsMixin):
     working exactly as they would with a plain :class:`numpy.ndarray`.
 
     The resolved value is cached after the first use, so repeated access
-    does not trigger repeated downloads. Because of this cache, if the
-    underlying MAPDL parameter is overwritten between the creation of a
-    :class:`LazyArray` and its first use, only the value present at the
-    time of the first use is captured.
+    does not trigger repeated downloads. A caller that creates the proxy
+    directly from a mutable MAPDL parameter observes the value present when
+    the proxy is first used. Commands such as ``VGET`` provide a private
+    server-side snapshot so that their results remain independent of later
+    changes to the user-visible parameter.
 
     .. note::
         Unlike a real :class:`numpy.ndarray`, ``isinstance(value,
@@ -72,24 +73,52 @@ class LazyArray(NDArrayOperatorsMixin):
         MAPDL instance the parameter belongs to.
     parameter_name : str
         Name of the APDL parameter to retrieve lazily.
+    cleanup : callable, optional
+        Callback used to release a private server-side snapshot. The callback
+        is called after materialization or when
+        :meth:`close() <ansys.mapdl.core.lazy_array.LazyArray.close>` is called.
 
     Examples
     --------
-    >>> arr = mapdl.vget(par="A", ir=2)  # no data downloaded yet
+    >>> arr = mapdl.vget(par="A", ir=2)  # doctest: +SKIP
     >>> arr[0]  # doctest: +SKIP
-    0.0  # downloads the parameter values on first use
+    0.0
     """
 
-    def __init__(self, mapdl: "MapdlBase", parameter_name: str) -> None:
+    def __init__(
+        self,
+        mapdl: "MapdlBase",
+        parameter_name: str,
+        cleanup: Optional[Callable[[], None]] = None,
+    ) -> None:
         self._mapdl = mapdl
         self._parameter_name = parameter_name
+        self._cleanup = cleanup
         self._cached: Optional[NDArray[np.float64]] = None
 
     def _resolve(self) -> NDArray[np.float64]:
         """Download and cache the actual parameter values."""
         if self._cached is None:
-            self._cached = self._mapdl.parameters[self._parameter_name]
+            try:
+                value = self._mapdl.parameters[self._parameter_name]
+            except Exception as exc:
+                try:
+                    self._release_snapshot()
+                except Exception as cleanup_exc:
+                    raise cleanup_exc from exc
+                raise
+            self._cached = value
+        # If cleanup failed after a successful download, retry it on the next
+        # access rather than silently retaining the server-side snapshot.
+        self._release_snapshot()
         return self._cached
+
+    def _release_snapshot(self) -> None:
+        """Release the server-side snapshot, if this proxy owns one."""
+        if self._cleanup is not None:
+            cleanup = self._cleanup
+            cleanup()
+            self._cleanup = None
 
     def __array__(self, dtype: Any = None) -> NDArray[np.float64]:
         array = self._resolve()
@@ -118,11 +147,25 @@ class LazyArray(NDArrayOperatorsMixin):
 
         Examples
         --------
-        >>> arr = mapdl.vget(par="A", ir=2)  # no data downloaded yet
+        >>> arr = mapdl.vget(par="A", ir=2)  # doctest: +SKIP
         >>> arr.resolve()  # doctest: +SKIP
         array([0., 1., 2.])
         """
         return self._resolve()
+
+    def close(self) -> None:
+        """Release an unused server-side snapshot.
+
+        This method does not download the array. It is useful when a lazy
+        result is known not to be needed before the associated MAPDL
+        connection is closed.
+
+        Raises
+        ------
+        Exception
+            Any exception raised while deleting the server-side snapshot.
+        """
+        self._release_snapshot()
 
     def __getitem__(self, index: Any) -> Any:
         return self._resolve()[index]
