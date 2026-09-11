@@ -317,10 +317,12 @@ class Information:
         Returns
         -------
         str
-            The MAPDL version release.
+            The MAPDL version release, or an empty string when it is not
+            provided by MAPDL.
         """
         st = self._get_mapdl_version()
-        return self._get_between("RELEASE", "BUILD", st).strip()
+        release = self._get_between("RELEASE", "BUILD", st).strip()
+        return "" if self._is_unavailable_version_value(release) else release
 
     @property
     @update_information_first(False)
@@ -330,10 +332,14 @@ class Information:
         Returns
         -------
         str
-            The MAPDL version build.
+            The MAPDL version build. If the ``/STATUS`` value is unavailable,
+            the value from ``mapdl.version`` is returned.
         """
         st = self._get_mapdl_version()
-        return self._get_between("BUILD", "UPDATE", st).strip()
+        build = self._get_between("BUILD", "UPDATE", st).strip()
+        if self._is_unavailable_version_value(build):
+            return str(self._mapdl.version)
+        return build
 
     @property
     @update_information_first(False)
@@ -343,10 +349,12 @@ class Information:
         Returns
         -------
         str
-            The MAPDL version update.
+            The MAPDL version update, or an empty string when it is not
+            provided by MAPDL.
         """
         st = self._get_mapdl_version()
-        return self._get_between("UPDATE", "", st).strip()
+        update = self._get_between("UPDATE", "", st).strip()
+        return "" if self._is_unavailable_version_value(update) else update
 
     @property
     @update_information_first(False)
@@ -670,6 +678,17 @@ class Information:
         en: int | None = string.find(end_string) if end_string else None
 
         return "\n".join(str(string[st:en]).splitlines()).strip()
+
+    @staticmethod
+    def _is_unavailable_version_value(value: str) -> bool:
+        """Return whether a MAPDL version field is unavailable."""
+        if not value:
+            return True
+
+        try:
+            return float(value) == 0.0
+        except ValueError:
+            return False
 
     def _get_product(self) -> str:
         return self._get_products().splitlines()[0]

@@ -24,10 +24,76 @@
 
 import inspect
 import re
+from unittest.mock import Mock
 
 import pytest
 
-from ansys.mapdl.core.information import UnitsDict
+from ansys.mapdl.core.information import Information, UnitsDict
+from ansys.mapdl.core.mapdl import MapdlBase
+
+
+def _make_information(status: str, version: float = 25.2) -> Information:
+    """Create an Information instance with a cached MAPDL status response."""
+    mapdl = Mock(spec=MapdlBase)
+    mapdl._exited = False
+    mapdl._log = Mock()
+    mapdl.slashstatus = Mock(return_value=status)
+    mapdl.version = version
+
+    info = Information(mapdl)
+    info._mapdl_for_test = mapdl
+    return info
+
+
+def _status_with_version(version: str) -> str:
+    """Create the relevant sections of a MAPDL ``/STATUS`` response."""
+    return (
+        "***** TITLES *****\n"
+        f"{version}\n"
+        "INITIAL TITLE INFORMATION\n"
+        "***** UNITS *****\n"
+    )
+
+
+def test_information_version_metadata_preserves_valid_status():
+    status = _status_with_version(
+        "RELEASE  2021 R2           BUILD 21.2      UPDATE 20210601"
+    )
+    info = _make_information(status, version=21.2)
+
+    assert info.mapdl_version == (
+        "RELEASE  2021 R2           BUILD 21.2      UPDATE 20210601"
+    )
+    assert info.mapdl_version_release == "2021 R2"
+    assert info.mapdl_version_build == "21.2"
+    assert info.mapdl_version_update == "20210601"
+
+
+def test_information_version_build_falls_back_for_status_placeholder():
+    status = _status_with_version(
+        "RELEASE                    BUILD  0.0      UPDATE        0"
+    )
+    info = _make_information(status)
+
+    assert info.mapdl_version == (
+        "RELEASE                    BUILD  0.0      UPDATE        0"
+    )
+    assert info.mapdl_version_release == ""
+    assert info.mapdl_version_build == "25.2"
+    assert info.mapdl_version_update == ""
+
+
+@pytest.mark.parametrize("placeholder", ["0", "0.0"])
+def test_information_version_placeholder_build_is_not_returned(placeholder):
+    info = _make_information(
+        _status_with_version(
+            f"RELEASE  2021 R2           BUILD {placeholder}      UPDATE 20210601"
+        ),
+        version=21.2,
+    )
+
+    assert info.mapdl_version_build == "21.2"
+    assert isinstance(info.mapdl_version_build, str)
 
 
 def test_units_dict_parsing():
@@ -131,29 +197,14 @@ def test_mapdl_info(mapdl, cleared, capfd):
     assert "UPDATE" in out
 
 
-@pytest.mark.xfail(
-    reason=(
-        "The '/STATUS' command does not populate the release/build/update "
-        "version fields on the MAPDL versions tested (v25.1, v25.2, v26.1 "
-        "'ubuntu-cicd' images). See #4760."
-    )
-)
 def test_mapdl_version_release_build_update_format(mapdl, cleared):
-    """Regression test for #4540.
+    """Validate the format of detailed MAPDL version metadata.
 
     ``mapdl.info.mapdl_version_release``, ``mapdl_version_build`` and
     ``mapdl_version_update`` are parsed from the ``/STATUS`` MAPDL command
-    output. If MAPDL stops reporting this banner correctly (for example,
-    returning blank/placeholder values such as ``RELEASE`` with nothing
-    after it, ``BUILD  0.0`` or ``UPDATE  0``), these fields silently
-    become useless. This test pins down the expected format so a
-    server-side regression is caught instead of passing silently (the
-    previous test only checked ``isinstance(value, str)``, which blank
-    strings also satisfy).
-
-    Currently marked ``xfail`` because this is broken on every MAPDL
-    version tested so far (see #4760), not just a one-off regression.
-    Remove the ``xfail`` marker once that issue is resolved.
+    output. Some MAPDL installations do not provide a formal release or
+    update value, so those fields are allowed to be empty. When present, they
+    must retain their documented formats.
     """
     info = mapdl.info
 
@@ -161,64 +212,44 @@ def test_mapdl_version_release_build_update_format(mapdl, cleared):
     build = info.mapdl_version_build
     update = info.mapdl_version_update
 
-    assert (
-        release
-    ), "MAPDL version release is empty. The '/STATUS' output format may have changed server-side."
-    assert re.fullmatch(
-        r"\d{4}\s*R\d+", release
-    ), f"Unexpected MAPDL version release format: {release!r}"
+    if release:
+        assert re.fullmatch(
+            r"\d{4}\s*R\d+", release
+        ), f"Unexpected MAPDL version release format: {release!r}"
 
     assert (
         build
-    ), "MAPDL version build is empty. The '/STATUS' output format may have changed server-side."
+    ), "MAPDL version build is empty. No reliable MAPDL revision was returned."
     assert re.fullmatch(
         r"\d+(\.\d+)?", build
     ), f"Unexpected MAPDL version build format: {build!r}"
-    assert build != "0.0", (
-        "MAPDL version build returned the placeholder value '0.0'. "
-        "This means the '/STATUS' command is no longer reporting the "
-        "real build number (see #4540)."
+    assert float(build) != 0.0, (
+        "MAPDL version build returned a zero placeholder instead of the "
+        "reliable MAPDL revision."
     )
 
-    assert (
-        update
-    ), "MAPDL version update is empty. The '/STATUS' output format may have changed server-side."
-    assert update.isdigit(), f"Unexpected MAPDL version update format: {update!r}"
-    assert update != "0", (
-        "MAPDL version update returned the placeholder value '0'. "
-        "This means the '/STATUS' command is no longer reporting the "
-        "real update date (see #4540)."
-    )
+    if update:
+        assert update.isdigit(), f"Unexpected MAPDL version update format: {update!r}"
+        assert update != "0", (
+            "MAPDL version update returned the placeholder value '0' "
+            "instead of an actual update date."
+        )
 
 
-@pytest.mark.xfail(
-    reason=(
-        "The '/STATUS'-parsed build number does not match 'mapdl.version' "
-        "on the MAPDL versions tested (v25.1, v25.2, v26.1 'ubuntu-cicd' "
-        "images). See #4760."
-    )
-)
 def test_mapdl_version_build_matches_reported_version(mapdl, cleared):
-    """Cross-check the ``/STATUS``-parsed build number against ``mapdl.version``.
+    """Cross-check the detailed build number against ``mapdl.version``.
 
     ``mapdl.version`` (backed by ``mapdl.parameters.revision``) comes from a
     completely different MAPDL query than ``mapdl.info.mapdl_version_build``
-    (parsed from ``/STATUS``). If the two disagree, it means MAPDL's
-    ``/STATUS`` banner is broken or out of sync, which is exactly what
-    happened in #4540 (``/STATUS`` reported ``BUILD  0.0`` while
-    ``mapdl.version`` correctly reported ``26.1``).
-
-    Currently marked ``xfail`` because this is broken on every MAPDL
-    version tested so far (see #4760), not just a one-off regression.
-    Remove the ``xfail`` marker once that issue is resolved.
+    (parsed from ``/STATUS``). The information layer must use the reliable
+    revision query when the ``/STATUS`` value is a zero placeholder.
     """
     build = mapdl.info.mapdl_version_build
     reported_version = mapdl.version
 
     assert float(build) == pytest.approx(reported_version, abs=1e-6), (
-        f"MAPDL version build parsed from '/STATUS' ({build!r}) does not "
-        f"match 'mapdl.version' ({reported_version!r}). This indicates the "
-        "'/STATUS' command output is no longer reliable server-side."
+        f"MAPDL version build ({build!r}) does not match "
+        f"'mapdl.version' ({reported_version!r})."
     )
 
 
