@@ -384,13 +384,10 @@ class _FakeMapdl:
 
 
 def test_instance_exit_does_not_close_global_file_handler(tmp_path, capsys):
-    """Closing an instance logger file handler keeps the parent one working.
+    """Cleaning an instance logger keeps the parent file handler working.
 
-    Instance loggers copy the handlers of the global logger. A plain
-    ``copy`` of a ``FileHandler`` shares its open stream, so the cleanup run
-    by ``Mapdl.exit()`` closed the global stream too. Every later record then
-    printed a ``--- Logging error ---`` traceback to stderr (see issue #4859).
-    This test does not need MAPDL.
+    Instance loggers forward to the global logger without owning its handlers.
+    Cleaning the instance must not close the parent's file stream.
     """
     from types import SimpleNamespace
 
@@ -410,8 +407,8 @@ def test_instance_exit_does_not_close_global_file_handler(tmp_path, capsys):
 
     fake_mapdl = _FakeMapdl()  # weak-referenceable, as required by the adapter
     child_name = f"{parent.logger.name}_instance"
-    instance_log = logging.PymapdlCustomAdapter(
-        parent._make_child_logger(child_name, deflogging.DEBUG), fake_mapdl
+    instance_log = parent.add_instance_logger(
+        child_name, fake_mapdl, level=deflogging.DEBUG
     )
     try:
         parent.logger.debug("Message before the instance exits")

@@ -37,7 +37,7 @@ LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
 def setup_logger(loglevel="INFO", log_file=True, mapdl_instance=None):
     """Setup the logger for a MAPDL instance.
 
-    .. deprecated:: 0.xx
+    .. deprecated:: 0.75.0
         This helper is deprecated and no longer used internally. Use
         :meth:`_CoreLoggingMixin.set_log_level` or the instance's ``_log``
         logger directly instead.
@@ -126,12 +126,8 @@ class _CoreLoggingMixin(_CoreMixinBase):
         instance_logger = self._log
         instance_logger.setLevel(logging.CRITICAL + 1)
 
-        from ansys.mapdl.core.logging import _finalize_child_logger
-
-        _finalize_child_logger(
-            instance_logger.logger.name,
-            getattr(instance_logger, "name_key", None),
-            logger._instances,
-        )
+        finalizer = getattr(instance_logger, "_finalizer", None)
+        if finalizer is not None and finalizer.alive:
+            finalizer()
         instance_logger.file_handler = None
         instance_logger.std_out_handler = None
