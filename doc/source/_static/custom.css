@@ -36,6 +36,15 @@
     box-shadow: 0 0rem 0rem rgba(250, 250, 250, 0.6) !important;
     }
 
+/* sphinx-design grid cards use a "stretched link" overlay (z-index: 1) so
+   the whole card is clickable. That overlay sits above any link nested in
+   the card body text, making it unclickable. Raise nested links above the
+   overlay so both the card link and the inline links stay clickable. */
+.sd-card .sd-card-body a:not(.sd-stretched-link) {
+    position: relative;
+    z-index: 2;
+}
+
 /* anything related to the light theme */
 html[data-theme="light"] {
     /* whatever you want to change */
