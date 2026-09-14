@@ -266,7 +266,8 @@ def supress_logging(func: Callable[P, R]) -> Callable[P, R]:
                 raise Exception("This wrapper cannot access MAPDL object")
 
         prior_log_level = mapdl._log.level  # type: ignore[attr-defined]
-        if prior_log_level != logging.CRITICAL:
+        suppressing = prior_log_level != logging.CRITICAL
+        if suppressing:
             # Stash the level that was in effect just before suppression so
             # that code running *inside* ``func`` (for example
             # ``_non_interactive.__enter__``, which checks the logger's
@@ -279,7 +280,13 @@ def supress_logging(func: Callable[P, R]) -> Callable[P, R]:
         try:
             return func(*args, **kwargs)
         finally:
-            if prior_log_level != logging.CRITICAL:
+            # Always restore, even if ``func`` raised: otherwise this
+            # instance's logger (and, with a real ``Mapdl`` instance,
+            # typically shared/reused across many calls) would be
+            # permanently stuck suppressed at ``CRITICAL`` after the first
+            # exception raised from within any ``@supress_logging``-
+            # decorated call.
+            if suppressing:
                 mapdl._set_log_level(prior_log_level)  # type: ignore[attr-defined]
                 mapdl._log._suppressed_from_level = None  # type: ignore[attr-defined]
 
