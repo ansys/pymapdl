@@ -195,7 +195,15 @@ if TYPE_CHECKING:  # pragma: no cover
 # ``weakref.finalize`` callbacks can run concurrently (for example, a
 # ``MapdlPool`` worker thread creating an instance logger while another
 # thread's instance is being garbage collected).
-_registry_lock = threading.Lock()
+#
+# Must be reentrant: replacing an entry in ``Logger._instances`` (a
+# ``weakref.WeakValueDictionary``) can drop the last strong reference to the
+# previous value stored under that key, which triggers its
+# ``weakref.finalize`` callback (``_finalize_child_logger``) synchronously,
+# on the same thread, before the assignment call returns. That callback also
+# acquires this lock, so a plain, non-reentrant ``threading.Lock`` would
+# self-deadlock in that scenario.
+_registry_lock = threading.RLock()
 
 ## Default configuration
 LOG_LEVEL = logging.DEBUG
