@@ -1589,8 +1589,11 @@ class _MapdlCore(Commands):
             # ``CRITICAL`` to silence its own verbose logging would also
             # incorrectly hide this debug-mode comment, even though the
             # user never asked for anything above debug level.
-            level = log_adapter._suppressed_from_level
-            if level is None:
+            level = getattr(log_adapter, "_suppressed_from_level", None)
+            if not isinstance(level, int):
+                # Either no suppression is in progress, or ``log_adapter``
+                # is a test double (for example a bare ``MagicMock``) that
+                # does not implement the real attribute.
                 level = log_adapter.logger.level
             if level <= logging.DEBUG:
                 # only commenting if on debug mode
