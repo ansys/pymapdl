@@ -2273,15 +2273,18 @@ class MapdlGrpc(MapdlBase):
             The default is ``True``, which is what :meth:`exit` uses since it
             runs at a deterministic point chosen by the caller.
 
-            ``__del__`` passes ``False``: the ``pymapdl_global`` logger and
-            its handlers are shared, process-wide state (see
-            :class:`ansys.mapdl.core.logging.Logger`), and closing a handler
-            from garbage-collection-driven code can race with another,
-            still-alive ``Mapdl`` instance that logs through the same
-            handler — surfacing as ``ValueError: I/O operation on closed
-            file`` or ``AttributeError`` on ``self._log`` elsewhere. Shared,
-            non-exclusively-owned resources like the logger are only ever
-            released from the explicit, deterministic :meth:`exit` path.
+            ``__del__`` passes ``False``: eager, synchronous cleanup during
+            non-deterministic garbage collection is avoided in favor of the
+            weakref-based safety net
+            (``ansys.mapdl.core.logging._finalize_child_logger``), which
+            performs the equivalent handler/registry cleanup automatically,
+            without racing other code, once this instance's logger adapter
+            itself is actually collected. Each instance's logger and
+            handlers are exclusively its own (see
+            :class:`ansys.mapdl.core.logging.GlobalForwardingHandler`), so
+            unlike before this refactor, this is purely a matter of when
+            cleanup happens (deterministic vs. GC-triggered), not a
+            correctness requirement to avoid touching shared state.
 
         Returns
         -------
@@ -2396,11 +2399,11 @@ class MapdlGrpc(MapdlBase):
             self._log.debug("Error removing temp dir: %s", e)
 
         # 10. Clean up logger handlers.
-        # Skipped when called from ``__del__`` (``cleanup_loggers=False``):
-        # the logger and its handlers are shared, process-wide state, and
-        # tearing them down from non-deterministic, GC-driven code can race
-        # with another still-alive ``Mapdl`` instance logging through the
-        # same handler. See the ``cleanup_loggers`` parameter documentation.
+        # Skipped when called from ``__del__`` (``cleanup_loggers=False``) in
+        # favor of the weakref-based safety net, which performs the same
+        # cleanup automatically once this instance's logger adapter is
+        # actually garbage collected. See the ``cleanup_loggers`` parameter
+        # documentation.
         if cleanup_loggers:
             try:
                 self._cleanup_loggers()
