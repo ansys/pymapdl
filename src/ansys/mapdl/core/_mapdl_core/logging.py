@@ -22,6 +22,7 @@
 import logging
 from pathlib import Path
 from typing import Literal, TextIO, Union
+from warnings import warn
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
@@ -34,11 +35,26 @@ LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
 
 
 def setup_logger(loglevel="INFO", log_file=True, mapdl_instance=None):
-    """Return the shared logger configured for a MAPDL instance."""
-    if hasattr(setup_logger, "log"):
-        return setup_logger.log
-    setup_logger.log = logger.add_instance_logger("MAPDL", mapdl_instance)
-    return setup_logger.log
+    """Setup the logger for a MAPDL instance.
+
+    .. deprecated:: 0.xx
+        This helper is deprecated and no longer used internally. Use
+        :meth:`_CoreLoggingMixin.set_log_level` or the instance's ``_log``
+        logger directly instead.
+    """
+    warn(
+        "'setup_logger' is deprecated and will be removed in a future "
+        "release. Use 'Mapdl.set_log_level()' or the instance's own "
+        "'mapdl._log' logger instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
+    if mapdl_instance is not None and getattr(mapdl_instance, "_log", None) is not None:
+        mapdl_instance._log.setLevel(loglevel)
+        return mapdl_instance._log
+
+    return logger.add_instance_logger("MAPDL", mapdl_instance, level=loglevel)
 
 
 class _CoreLoggingMixin(_CoreMixinBase):
@@ -55,7 +71,7 @@ class _CoreLoggingMixin(_CoreMixinBase):
         """Set the MAPDL Python logger level."""
         if isinstance(loglevel, str):
             loglevel = loglevel.upper()  # type: ignore[assignment]
-        setup_logger(loglevel=loglevel)
+        self._log.setLevel(loglevel)
 
     def _set_log_level(self, level):
         """Alias for :meth:`set_log_level`."""
@@ -107,15 +123,15 @@ class _CoreLoggingMixin(_CoreMixinBase):
 
     def _cleanup_loggers(self):
         """Clean up the instance logger and its handlers."""
-        log = self._log
-        log.setLevel(logging.CRITICAL + 1)
-        if log.hasHandlers():
-            for handler in log.logger.handlers:
-                if handler.stream and not handler.stream.closed:
-                    log.logger.removeHandler(handler)
-        if log.file_handler:
-            log.file_handler.close()
-            log.file_handler = None
-        if log.std_out_handler:
-            log.std_out_handler.close()
-            log.std_out_handler = None
+        instance_logger = self._log
+        instance_logger.setLevel(logging.CRITICAL + 1)
+
+        from ansys.mapdl.core.logging import _finalize_child_logger
+
+        _finalize_child_logger(
+            instance_logger.logger.name,
+            getattr(instance_logger, "name_key", None),
+            logger._instances,
+        )
+        instance_logger.file_handler = None
+        instance_logger.std_out_handler = None
