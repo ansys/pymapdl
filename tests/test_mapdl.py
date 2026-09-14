@@ -47,7 +47,6 @@ from conftest import (
     PATCH_MAPDL_START,
     QUICK_LAUNCH_SWITCHES,
     TEST_DPF_BACKEND,
-    VALID_PORTS,
     NullContext,
     has_dependency,
     requires,
@@ -79,11 +78,6 @@ from ansys.mapdl.core.plotting import GraphicsBackend
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEST_FILES = os.path.join(PATH, "test_files")
 FIRST_TIME_FILE = os.path.join(USER_DATA_PATH, ".firstime")
-
-if VALID_PORTS:
-    PORT1 = max(VALID_PORTS) + 1
-else:
-    PORT1 = 50090
 
 DEPRECATED_COMMANDS = [
     "edadapt",
@@ -2690,18 +2684,20 @@ def test_remove_temp_dir_on_exit(mapdl, cleared, tmpdir):
     assert os.path.exists(path) is False
 
 
-@pytest.mark.skipif(True, reason="See #4430")
 @requires("local")
-def test_remove_temp_dir_on_exit_with_launch_mapdl(mapdl, cleared):
+def test_remove_temp_dir_on_exit_with_launch_mapdl(mapdl, cleared, monkeypatch):
+    monkeypatch.delenv("PYMAPDL_PORT", raising=False)
+    mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True)
+    try:
+        assert mapdl_2.port != mapdl.port
+        path_ = mapdl_2.directory
+        assert os.path.exists(path_)
 
-    mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=PORT1)
-    path_ = mapdl_2.directory
-    assert os.path.exists(path_)
+        pids = mapdl_2._pids
+        assert all([psutil.pid_exists(pid) for pid in pids])  # checking pids too
+    finally:
+        mapdl_2.exit()
 
-    pids = mapdl_2._pids
-    assert all([psutil.pid_exists(pid) for pid in pids])  # checking pids too
-
-    mapdl_2.exit()
     assert not os.path.exists(path_)
     assert not all([psutil.pid_exists(pid) for pid in pids])
 
