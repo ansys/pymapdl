@@ -266,6 +266,17 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
     # from garbage collection, against a *different* logger that happens to
     # have reused the same dotted name in the meantime.
     _finalizer: Optional["weakref.finalize"] = None
+    # Set by ``ansys.mapdl.core.misc.supress_logging`` while it temporarily
+    # raises this adapter's underlying logger to ``CRITICAL`` to silence an
+    # internal call's own verbose logging. Records the level that was in
+    # effect just *before* that temporary override, so other code that
+    # needs to know the user's actual requested debug level (for example
+    # ``_MapdlCore._non_interactive.__enter__``, which decides whether to
+    # emit an APDL comment based on whether debug logging is enabled) can
+    # see through the suppression window instead of reading the
+    # momentarily-overridden ``CRITICAL`` level. ``None`` when no
+    # suppression is currently in progress.
+    _suppressed_from_level: Optional[int] = None
 
     def __init__(self, logger: logging.Logger, extra: Optional["MapdlBase"] = None):
         self.logger = logger

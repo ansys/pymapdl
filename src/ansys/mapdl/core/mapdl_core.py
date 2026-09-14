@@ -1581,7 +1581,18 @@ class _MapdlCore(Commands):
 
         def __enter__(self):
             self._parent()._log.debug("Entering in non-interactive mode")
-            if self._parent().logger.logger.level <= logging.DEBUG:
+            log_adapter = self._parent().logger
+            # Prefer the level captured just before any *ongoing*
+            # ``supress_logging`` suppression (see
+            # ``ansys.mapdl.core.misc.supress_logging``): otherwise, an
+            # internal call that temporarily raises the logger to
+            # ``CRITICAL`` to silence its own verbose logging would also
+            # incorrectly hide this debug-mode comment, even though the
+            # user never asked for anything above debug level.
+            level = log_adapter._suppressed_from_level
+            if level is None:
+                level = log_adapter.logger.level
+            if level <= logging.DEBUG:
                 # only commenting if on debug mode
                 self._parent().com("Entering in non_interactive mode")
             self._parent()._store_commands = True
