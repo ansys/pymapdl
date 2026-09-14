@@ -258,6 +258,14 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
     # that the weakref-based safety net (``_finalize_child_logger``) would
     # otherwise only clean up once this adapter is garbage collected.
     name_key: Optional[str] = None
+    # The ``weakref.finalize`` object registered against this adapter (see
+    # ``Logger._add_mapdl_instance_logger``). Eager cleanup paths must
+    # invoke *this exact* finalizer (which both runs its callback and marks
+    # itself dead) rather than calling ``_finalize_child_logger`` directly:
+    # doing so guarantees the callback can never fire a second time later,
+    # from garbage collection, against a *different* logger that happens to
+    # have reused the same dotted name in the meantime.
+    _finalizer: Optional["weakref.finalize"] = None
 
     def __init__(self, logger: logging.Logger, extra: Optional["MapdlBase"] = None):
         self.logger = logger
@@ -277,17 +285,22 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
 
     @property
     def level(self) -> int:
-        """Current *effective* logging level of the underlying logger.
+        """Current logging level explicitly set on the underlying logger.
 
         Unlike a plain attribute snapshotted at some point in time, this
-        always reflects the live level (cascading from ``pymapdl_global``
-        when the instance logger itself has no explicit level set, that is,
-        it is left at ``logging.NOTSET``). It is never ``None``, which keeps
-        callers like :func:`ansys.mapdl.core.misc.supress_logging` (which
-        reads this value to later restore it) safe from passing ``None``
-        into :func:`setLevel`.
+        always reflects the live value of ``self.logger.level``. In
+        particular, when the instance logger itself has no explicit level
+        set (that is, it is left at ``logging.NOTSET`` so it cascades from
+        ``pymapdl_global`` via ``getEffectiveLevel()``), this returns
+        ``logging.NOTSET`` (``0``) rather than the resolved effective level.
+        This is what keeps callers like
+        :func:`ansys.mapdl.core.misc.supress_logging` (which reads this
+        value to later restore it through :func:`setLevel`) from
+        accidentally pinning a cascading instance to a fixed numeric level:
+        restoring ``logging.NOTSET`` puts it back into cascading mode
+        instead. It is never ``None``, which keeps ``setLevel`` calls safe.
         """
-        return self.logger.getEffectiveLevel()
+        return self.logger.level
 
     def log_to_file(
         self, filename: str = FILE_NAME, level: LOG_LEVEL_TYPE = LOG_LEVEL
@@ -420,14 +433,29 @@ def _finalize_child_logger(
     singleton): only plain data (names) and the registry mapping itself are
     captured, so this callback cannot resurrect or keep alive anything
     beyond the process-wide ``logging`` state it is meant to clean up.
+
+    Only handlers this instance is known to own exclusively (its own
+    ``file_handler``/``std_out_handler``, tracked on the ``logging.Logger``
+    object by :func:`addfile_handler`/:func:`add_stdout_handler`) are
+    ``close()``-d. Any other handler found on the child (for example one a
+    caller attached manually, possibly shared with another logger) is only
+    detached via ``removeHandler``, never closed, so a shared stream is not
+    pulled out from under whoever else still uses it.
     """
     with _registry_lock:
         manager = logging.Logger.manager
         child = manager.loggerDict.get(full_name)
         if isinstance(child, logging.Logger):
+            owned_handlers = {
+                handler
+                for handler in (
+                    getattr(child, "file_handler", None),
+                    getattr(child, "std_out_handler", None),
+                )
+                if handler is not None
+            }
             for handler in list(child.handlers):
-                stream = getattr(handler, "stream", None)
-                if stream is not None and not getattr(stream, "closed", True):
+                if handler in owned_handlers:
                     try:
                         handler.close()
                     except (OSError, ValueError):  # pragma: no cover
@@ -458,24 +486,51 @@ class GlobalForwardingHandler(logging.Handler):
       reach every existing instance/child logger.
     * Closing or removing a specific instance's own handlers never touches
       ``pymapdl_global``'s handlers, because none are shared/copied.
+
+    A record only reaches :meth:`emit` once it has already passed the
+    originating child logger's own effective-level gate (whether that is an
+    explicit per-instance override or one cascaded from ``pymapdl_global``).
+    Records are therefore forwarded to every reachable handler
+    unconditionally, deliberately *not* re-checking each handler's own
+    configured ``level``: doing so would silently drop records from
+    instances explicitly configured to be more verbose than
+    ``pymapdl_global``'s own handlers (for example
+    ``launch_mapdl(loglevel="DEBUG")`` while the global stdout handler stays
+    at its default ``ERROR``), defeating that per-instance override.
+
+    Handlers are gathered by walking ``pymapdl_global`` and then its
+    ``parent`` chain for as long as each logger's own ``propagate`` is
+    ``True`` (mirroring ``logging.Logger.callHandlers``), so ancestor
+    handlers -- including the root logger's, such as ``pytest``'s
+    ``caplog`` handler -- also receive the record, not just
+    ``pymapdl_global``'s own direct handlers.
     """
 
     def __init__(self, global_logger: logging.Logger):
         super().__init__()
         self._global_logger_ref = weakref.ref(global_logger)
+        # Gives ``fake_record()``-style tests (which format using the first
+        # handler on an instance logger) a usable, PyMAPDL-formatted output,
+        # since this handler is always the first one attached to a freshly
+        # created instance/child logger.
+        self.setFormatter(PymapdlFormatter())
 
     def emit(self, record: logging.LogRecord) -> None:
         global_logger = self._global_logger_ref()
         if global_logger is None:  # pragma: no cover
             return
-        for handler in global_logger.handlers:
-            if handler is self:  # pragma: no cover
-                continue
-            if record.levelno >= handler.level:
+        logger: Optional[logging.Logger] = global_logger
+        while logger is not None:
+            for handler in logger.handlers:
+                if handler is self:  # pragma: no cover
+                    continue
                 try:
                     handler.handle(record)
                 except Exception:  # pragma: no cover
                     self.handleError(record)
+            if not logger.propagate:
+                break
+            logger = logger.parent
 
 
 class Logger:
@@ -685,10 +740,36 @@ class Logger:
         logging.logger
             Logger class.
         """
-        name = self.logger.name + "." + logger_name
-        child_logger = self._make_child_logger(logger_name, level)
         with _registry_lock:
+            name = self.logger.name + "." + logger_name
+            existing = self._instances.get(name)
+            if existing is not None:
+                # Re-requesting the same ``logger_name`` returns the same,
+                # already-registered logger instead of creating a second,
+                # redundant registry entry/finalizer for it.
+                return existing
+
+            # ``logger_name`` values that differ before sanitization (see
+            # :func:`_sanitize_logger_segment`) can still collide once dots
+            # are replaced, for example ``"a.b"`` and ``"a_b"``. Resolve
+            # such collisions the same way ``add_instance_logger`` does, so
+            # the second caller gets its own, distinct logger rather than
+            # silently aliasing the first one's.
+            count_ = 0
+            new_logger_name = logger_name
+            full_name = (
+                f"{self.logger.name}.{_sanitize_logger_segment(new_logger_name)}"
+            )
+            while full_name in logging.Logger.manager.loggerDict:
+                count_ += 1
+                new_logger_name = f"{logger_name}_{count_}"
+                full_name = (
+                    f"{self.logger.name}.{_sanitize_logger_segment(new_logger_name)}"
+                )
+
+            child_logger = self._make_child_logger(new_logger_name, level)
             self._instances[name] = child_logger
+
         weakref.finalize(
             child_logger,
             _finalize_child_logger,
@@ -696,7 +777,7 @@ class Logger:
             name,
             self._instances,
         )
-        return self._instances[name]
+        return child_logger
 
     def _add_mapdl_instance_logger(
         self,
@@ -719,7 +800,16 @@ class Logger:
         # and deregister it from ``logging.Logger.manager.loggerDict`` once
         # nothing but ``_instances`` and the owning ``Mapdl`` instance
         # reference it, i.e. once it is garbage collected.
-        weakref.finalize(
+        #
+        # The finalizer object itself is stashed on the adapter so eager
+        # cleanup (``MapdlBase._cleanup_loggers``) can call it directly. A
+        # ``weakref.finalize`` object can only ever run its callback once:
+        # invoking it here (instead of calling ``_finalize_child_logger``
+        # separately) atomically performs the cleanup *and* permanently
+        # disarms the later, GC-triggered call, so it cannot fire again
+        # against a different, unrelated logger that later reuses the same
+        # dotted name.
+        instance_logger._finalizer = weakref.finalize(
             instance_logger,
             _finalize_child_logger,
             child_logger.name,

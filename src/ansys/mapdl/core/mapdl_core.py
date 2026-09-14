@@ -280,7 +280,7 @@ def parse_to_short_cmd(command):
 def setup_logger(loglevel="INFO", log_file=True, mapdl_instance=None):
     """Setup logger.
 
-    .. deprecated:: 0.xx
+    .. deprecated:: 0.75.0
         This helper is deprecated and no longer used internally. Its
         previous implementation memoized a single logger per *process*
         (via a function attribute), so after the first call in a process,
@@ -2579,17 +2579,17 @@ class _MapdlCore(Commands):
         inst_logger = self._log
         inst_logger.setLevel(logging.CRITICAL + 1)
 
-        from ansys.mapdl.core import LOG
-        from ansys.mapdl.core.logging import _finalize_child_logger
-
-        full_name = inst_logger.logger.name
-        name_key = getattr(inst_logger, "name_key", None)
-        if name_key is not None:
-            # Closes any handlers still open on this instance's logger,
-            # removes them, deletes the ``logging.Logger`` entry from
-            # ``logging.Logger.manager.loggerDict``, and pops the ``LOG``
-            # registry entry -- immediately, rather than waiting for GC.
-            _finalize_child_logger(full_name, name_key, LOG._instances)
+        # Run the exact ``weakref.finalize`` object registered for this
+        # instance (see ``Logger._add_mapdl_instance_logger``), rather than
+        # calling ``_finalize_child_logger`` directly by name. Invoking the
+        # finalizer both performs the cleanup now and permanently disarms
+        # it, so the later, GC-triggered call (once ``inst_logger`` itself
+        # is collected) can never run a second time and mistakenly tear
+        # down a different, unrelated logger that has since reused this
+        # instance's dotted name.
+        finalizer = getattr(inst_logger, "_finalizer", None)
+        if finalizer is not None and finalizer.alive:
+            finalizer()
 
         inst_logger.file_handler = None
         inst_logger.std_out_handler = None
