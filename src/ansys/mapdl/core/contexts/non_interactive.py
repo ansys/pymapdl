@@ -38,8 +38,9 @@ class _NonInteractiveContext:
         parent = self._parent()
         parent._log.debug("Entering in non-interactive mode")
         log_adapter = parent.logger
-        level = log_adapter._suppressed_from_level
-        if level is None:
+        level = getattr(log_adapter, "_suppressed_from_level", None)
+        if not isinstance(level, int):
+            # Test doubles may not implement the suppression-level attribute.
             level = log_adapter.logger.level
         if level <= logging.DEBUG:
             parent.com("Entering in non_interactive mode")
