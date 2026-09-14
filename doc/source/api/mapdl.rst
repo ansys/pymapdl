@@ -79,6 +79,7 @@
    Mapdl.save_selection
    Mapdl.scalar_param
    Mapdl.screenshot
+   Mapdl.selector
    Mapdl.set_log_level
    Mapdl.thermal_result
    Mapdl.version
