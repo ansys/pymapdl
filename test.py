@@ -1,4 +1,3 @@
-
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.selector import Interval
 
