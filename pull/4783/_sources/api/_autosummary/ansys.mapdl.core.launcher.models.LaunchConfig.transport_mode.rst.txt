@@ -1,0 +1,6 @@
+transport\_mode
+===============
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.transport_mode

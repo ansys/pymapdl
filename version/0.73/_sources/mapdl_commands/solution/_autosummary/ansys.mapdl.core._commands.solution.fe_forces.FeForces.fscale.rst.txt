@@ -1,0 +1,6 @@
+﻿fscale
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.fe_forces
+
+.. automethod:: FeForces.fscale

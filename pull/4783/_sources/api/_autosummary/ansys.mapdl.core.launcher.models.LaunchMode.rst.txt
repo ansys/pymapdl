@@ -1,0 +1,23 @@
+﻿LaunchMode
+==========
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoclass:: LaunchMode
+
+   
+
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      LaunchMode.GRPC
+      LaunchMode.CONSOLE
+   
+   

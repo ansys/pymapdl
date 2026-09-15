@@ -1,0 +1,6 @@
+﻿neqit
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.nonlinear_options
+
+.. automethod:: NonlinearOptions.neqit

@@ -1,0 +1,1132 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Create training data for a 3D static reduced order model (ROM) &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=9e79609d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/ansys-sphinx-theme.css?v=9e79609d" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=cb9002b8" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=aadf6d2c"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/extended_examples/static_rom/static_rom_data_generation';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.71';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="I-Beam Analysis with Automated Report Generation" href="../beam_analysis_with_reporting/beam_analysis_report.html" />
+    <link rel="prev" title="Stochastic finite element method with PyMAPDL" href="../sfem/stochastic_fem.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.71.3" />
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/examples/extended_examples/static_rom/static_rom_data_generation.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../mapdl_commands/index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="../../index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+</div>
+
+    </header>
+  
+  
+    <div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(
+      (text) => (document.getElementById("announcement_msg").innerHTML = text),
+    )
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../mapdl_commands/index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../gallery_examples/00-mapdl-examples/index.html">Full examples using PyMAPDL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gallery_examples/01-geometry/index.html">Geometry examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gallery_examples/02-tips-n-tricks/index.html">Miscellaneous examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gallery_examples/03-general-fea/index.html">Academic finite element examples</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Extended examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference external" href="http://cartpole.mapdl.docs.pyansys.com/ml-rl-notebook.html">Cart-Pole Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ex_01-gmsh_example/ex_01-gmsh_example.html">Gmsh example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Krylov/krylov_example.html">Harmonic analysis using the frequency-sweep Krylov method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dash/dash_example.html">Use Dash to build a PyMAPDL web app</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../executable/executable.html">Create your own Python command-line app</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gui/executable.html">Create a GUI app in Python with PySide6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../hpc/hpc_ml_ga.html">Genetic algorithms and PyMAPDL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sfem/stochastic_fem.html">Stochastic finite element method with PyMAPDL</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Create training data for a 3D static reduced order model (ROM)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../beam_analysis_with_reporting/beam_analysis_report.html">I-Beam Analysis with Automated Report Generation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devportal.html">PyMAPDL Developer Portal articles</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://examples.mapdl.docs.pyansys.com/verif-manual/index.html">Verification Manual</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html">Technology Showcases</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item"> 
+<div class="tocsection editthispage">
+  <a href="https://github.com/ansys/pymapdl/edit/main/doc/source/examples/extended_examples/static_rom/static_rom_data_generation.rst">
+    <i class="fa-solid fa-pencil"></i>
+       Edit
+    on GitHub  
+  </a>
+</div>
+
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">Examples</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../index.html" class="nav-link">Extended examples</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Create training data for a 3D static reduced order model (ROM)</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="create-training-data-for-a-3d-static-reduced-order-model-rom">
+<span id="static-rom-data-generation"></span><h1>Create training data for a 3D static reduced order model (ROM)<a class="headerlink" href="#create-training-data-for-a-3d-static-reduced-order-model-rom" title="Link to this heading">#</a></h1>
+<p>This example shows how to run a parametric sweep on an MAPDL model and export
+the output displacement and stress data into the format required to build a static ROM
+with Ansys Twin Builder.</p>
+<p>The general data structure for the ROM building is shown in the following figure.</p>
+<figure class="align-default" id="id3">
+<img alt="../../../_images/static_ROM_file_structure.png" src="../../../_images/static_ROM_file_structure.png" />
+<figcaption>
+<p><span class="caption-text"><strong>Organization of files and directories for static ROM creation.</strong></span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>Here are the specific files outputted by the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ansys_pymadl_Static_ROM
+│
+├───displacement
+│   │   doe.csv
+│   │   points.bin
+│   │   settings.json
+│   │
+│   └───snapshots
+│           file0.bin
+│           file1.bin
+│           file2.bin
+│           file3.bin
+│
+└───stress
+    │   doe.csv
+    │   points.bin
+    │   settings.json
+    │
+    └───snapshots
+            file0.bin
+            file1.bin
+            file2.bin
+            file3.bin
+</pre></div>
+</div>
+<section id="mapdl-notch-model">
+<h2>MAPDL notch model<a class="headerlink" href="#mapdl-notch-model" title="Link to this heading">#</a></h2>
+<p>This example uses the model created in <a class="reference internal" href="../../gallery_examples/00-mapdl-examples/3d_notch.html#ref-3d-plane-stress-concentration"><span class="std std-ref">3D Stress Concentration Analysis for a Notched Plate</span></a> as a base. This
+example was modified to add a nodal component, <code class="docutils literal notranslate"><span class="pre">load_node</span></code>, to which the force is applied. This
+makes is simple to retrieve and modify the force scoping for parametric runs.</p>
+<p>The model, which uses load force in Newtons as the input, is parametrically varied.</p>
+</section>
+<section id="additional-packages-used">
+<h2>Additional packages used<a class="headerlink" href="#additional-packages-used" title="Link to this heading">#</a></h2>
+<p>In addition to PyMAPDL, the example requires that the following packages are installed and
+running:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://numpy.org">NumPy</a>, which is used for using NumPy arrays</p></li>
+<li><p><a class="reference external" href="https://dpf.docs.pyansys.com">PyDPF</a>, which is used to efficiently manipulate result data</p></li>
+<li><p><a class="reference external" href="https://twin.docs.pyansys.com">PyTwin</a>, which is used to convert result data to binary snapshots</p></li>
+</ul>
+</section>
+<section id="core-functions">
+<h2>Core functions<a class="headerlink" href="#core-functions" title="Link to this heading">#</a></h2>
+<section id="solve-the-mapdl-parametric-variations">
+<h3>Solve the MAPDL parametric variations<a class="headerlink" href="#solve-the-mapdl-parametric-variations" title="Link to this heading">#</a></h3>
+<p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">run_mapdl_variations()</span></code> function solves the MAPDL model for a set of parameter variations.
+It loads a saved MAPDL database and loops through a list of force values. For each value, it applies
+that force to a nodal component, solves the model, and records the location of the result file, along
+with the parameter names and values.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">run_mapdl_variations</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run the MAPDL model parametric variations.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list[tuple[str, dict]]</span>
+<span class="sd">        List of tuples of the MAPDL result file path (on the platform where MAPDL was executed) and</span>
+<span class="sd">        the parameter values for each variation solved.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Specify the force load variations</span>
+    <span class="n">forces</span> <span class="o">=</span> <span class="p">[</span><span class="mi">250</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">750</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span>
+
+    <span class="c1"># Start MAPDL and disable all but error messages</span>
+    <span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">(</span><span class="n">loglevel</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Download the example database</span>
+    <span class="n">notch_file</span> <span class="o">=</span> <span class="n">download_example_data</span><span class="p">(</span>
+        <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;3d_notch.db&quot;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="s2">&quot;pymapdl/static_ROM_data_generation&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">mapdl</span><span class="o">.</span><span class="n">resume</span><span class="p">(</span><span class="n">notch_file</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Initialize the outputs</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Solve the parameter variations</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">force_load</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">forces</span><span class="p">):</span>
+        <span class="c1"># Rename the job, change log, and error log files</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">filname</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;variation_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;/SOLU&quot;</span><span class="p">)</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">cmsel</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;load_node&quot;</span><span class="p">,</span> <span class="s2">&quot;NODE&quot;</span><span class="p">)</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">fdele</span><span class="p">(</span><span class="s2">&quot;ALL&quot;</span><span class="p">,</span> <span class="s2">&quot;FX&quot;</span><span class="p">)</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="s2">&quot;ALL&quot;</span><span class="p">,</span> <span class="s2">&quot;FX&quot;</span><span class="p">,</span> <span class="n">force_load</span><span class="p">)</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">allsel</span><span class="p">()</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">antype</span><span class="p">(</span><span class="s2">&quot;STATIC&quot;</span><span class="p">)</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+        <span class="n">mapdl</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="n">mute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">rst_path</span> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">result_file</span>
+        <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">rst_path</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;force[N]&quot;</span><span class="p">:</span> <span class="n">force_load</span><span class="p">}))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MAPDL run in: </span><span class="si">{</span><span class="n">mapdl</span><span class="o">.</span><span class="n">directory</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">mapdl</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">outputs</span>
+</pre></div>
+</div>
+</section>
+<section id="export-rom-data-for-the-solved-variations">
+<h3>Export ROM data for the solved variations<a class="headerlink" href="#export-rom-data-for-the-solved-variations" title="Link to this heading">#</a></h3>
+<p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">export_static_ROM_data()</span></code> function exports the ROM data from a set of solved
+parametric variations. The function loads each results file into DPF and gets the scoping. It then
+calls the <code class="xref py py-func docutils literal notranslate"><span class="pre">export_static_ROM_variation()</span></code> function to export the ROM data for that result file.
+The <code class="docutils literal notranslate"><span class="pre">new_metadata</span></code> Boolean is set to <code class="docutils literal notranslate"><span class="pre">True</span></code> on the first loop to trigger the creation of the
+<code class="docutils literal notranslate"><span class="pre">points.bin</span></code> and <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> files and a new <code class="docutils literal notranslate"><span class="pre">doe.csv</span></code> file.</p>
+<p>The <a class="reference external" href="https://twin.docs.pyansys.com/version/stable/api/examples/_autosummary/pytwin.write_binary.html#pytwin.write_binary" title="(in pytwin v0.10.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pytwin.write_binary()</span></code></a> function writes the result field data to a ROM binary
+file.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">export_static_ROM_data</span><span class="p">(</span>
+    <span class="n">mapdl_results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]],</span> <span class="n">output_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Export static ROM data to output folder.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mapdl_results: list[tuple[str, dict]]</span>
+<span class="sd">        List of tuples of the MAPDL result file path and the parameter values for each variation</span>
+<span class="sd">        solved.</span>
+<span class="sd">    output_folder: str|Path</span>
+<span class="sd">        Path to the folder to store ROM output data in.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">rst_path</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mapdl_results</span><span class="p">):</span>
+        <span class="c1"># Load the results to DPF and create scoping.</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">dpf</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">rst_path</span><span class="p">)</span>
+        <span class="n">scoping</span> <span class="o">=</span> <span class="n">get_scoping</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="c1"># Only create &#39;points.bin&#39; and &#39;settings.json&#39; files on first design point</span>
+        <span class="n">new_metadata</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span>
+
+        <span class="c1"># Export displacement and stress data</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;displacement&quot;</span><span class="p">,</span> <span class="s2">&quot;stress&quot;</span><span class="p">]:</span>
+            <span class="n">data_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_folder</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">export_static_ROM_variation</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span>
+                <span class="n">scoping</span><span class="p">,</span>
+                <span class="n">name</span><span class="p">,</span>
+                <span class="n">data_folder</span><span class="p">,</span>
+                <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+                <span class="n">snap_idx</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span>
+                <span class="n">new_metadata</span><span class="o">=</span><span class="n">new_metadata</span><span class="p">,</span>
+            <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="export-rom-data-for-a-specific-variation">
+<h3>Export ROM data for a specific variation<a class="headerlink" href="#export-rom-data-for-a-specific-variation" title="Link to this heading">#</a></h3>
+<p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">export_static_ROM_variation()</span></code> function exports ROM snapshot data for a specific
+parametric variation. The function exports a snapshot for <code class="docutils literal notranslate"><span class="pre">displacement</span></code> and for <code class="docutils literal notranslate"><span class="pre">stress</span></code> to
+correspondingly named folders and records the snapshot name and parameter data to the <code class="docutils literal notranslate"><span class="pre">doe.csv</span></code>
+file in that folder.</p>
+<p>The results are sorted by the scoping IDs to ensure consistent ordering of results and points.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">new_metadata</span></code> Boolean controls the creation of the <code class="docutils literal notranslate"><span class="pre">points.bin</span></code> and <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> files
+and a new <code class="docutils literal notranslate"><span class="pre">doe.csv</span></code> file. If it is <code class="docutils literal notranslate"><span class="pre">False</span></code>, the first two files are not written, and parameter
+data is appended to the existing <code class="docutils literal notranslate"><span class="pre">doe.csv</span></code> file.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">export_static_ROM_variation</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">dpf</span><span class="o">.</span><span class="n">Model</span><span class="p">,</span>
+    <span class="n">scoping</span><span class="p">:</span> <span class="n">dpf</span><span class="o">.</span><span class="n">Scoping</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">output_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">snap_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">new_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Export static ROM data for one parameter variation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : dpf.Model</span>
+<span class="sd">        DPF model with results data loaded.</span>
+<span class="sd">    scoping : dpf.Scoping</span>
+<span class="sd">        DPF nodal scoping for result export.</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Result quantity to export. Options are ``displacement`` and ``stress``.</span>
+<span class="sd">    output_folder : str|Path</span>
+<span class="sd">        Folder to store exported data in. Use separate folders for each physics type.</span>
+<span class="sd">    parameters : dict</span>
+<span class="sd">        Dictionary of name-value pairs for the input parameters used to generate the current</span>
+<span class="sd">        results.</span>
+<span class="sd">    snap_idx : int, default = 0</span>
+<span class="sd">        Unique ID for the current results.</span>
+<span class="sd">    new_metadata : bool, default = False</span>
+<span class="sd">        Whether to trigger the creation of the following files for a given</span>
+<span class="sd">        data generation run, overwriting any existing ones:  ``points.bin``,</span>
+<span class="sd">        ``settings.json``, and ``doe.csv``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create the output folder</span>
+    <span class="n">output_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_folder</span><span class="p">)</span>
+    <span class="n">output_folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Modify this section to export additional result types</span>
+    <span class="n">is_deformation</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;displacement&quot;</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">displacement</span>
+        <span class="n">is_deformation</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;stress&quot;</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">stress</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported result type: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Retrieve displacement and stress at last result set</span>
+    <span class="n">scoped_result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">on_last_time_freq</span><span class="o">.</span><span class="n">on_mesh_scoping</span><span class="p">(</span><span class="n">scoping</span><span class="p">)</span>
+
+    <span class="c1"># Result must be sorted by scoping to ensure consistency across outputs</span>
+    <span class="n">sorted_result</span> <span class="o">=</span> <span class="n">dpf</span><span class="o">.</span><span class="n">operators</span><span class="o">.</span><span class="n">logic</span><span class="o">.</span><span class="n">ascending_sort_fc</span><span class="p">(</span>
+        <span class="n">scoped_result</span><span class="p">,</span> <span class="n">sort_by_scoping</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">result_field</span> <span class="o">=</span> <span class="n">sorted_result</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">fields_container</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">new_metadata</span><span class="p">:</span>
+        <span class="n">write_points</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">scoping</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">)</span>
+        <span class="n">write_doe_headers</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+        <span class="n">write_settings</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">result_field</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">is_deformation</span><span class="o">=</span><span class="n">is_deformation</span><span class="p">)</span>
+
+    <span class="c1"># Write snapshots</span>
+    <span class="n">snapshot_folder</span> <span class="o">=</span> <span class="n">output_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;snapshots&quot;</span><span class="p">)</span>
+    <span class="n">snapshot_folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">snap_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;file</span><span class="si">{</span><span class="n">snap_idx</span><span class="si">}</span><span class="s2">.bin&quot;</span>
+    <span class="n">write_doe_entry</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">snap_name</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+    <span class="n">write_binary</span><span class="p">(</span><span class="n">snapshot_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">snap_name</span><span class="p">),</span> <span class="n">result_field</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="additional-functions">
+<h2>Additional functions<a class="headerlink" href="#additional-functions" title="Link to this heading">#</a></h2>
+<section id="set-the-export-scope">
+<h3>Set the export scope<a class="headerlink" href="#set-the-export-scope" title="Link to this heading">#</a></h3>
+<p>The ROM data is exported on all nodes connected to elements. The <code class="xref py py-func docutils literal notranslate"><span class="pre">get_scoping()</span></code> function gets
+the nodes that are connected to all the elements in the mesh. This avoids including any unconnected
+nodes, which have null values, in the scoping.</p>
+<p>The returned scoping initially contains duplicate node IDs because a node can be connected to
+multiple elements and is included once for each one. Creating a Python <code class="xref py py-type docutils literal notranslate"><span class="pre">set</span></code> of node IDs removes the
+duplicates.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_scoping</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">dpf</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return scoping of unique node IDs connected to elements in model.&quot;&quot;&quot;</span>
+    <span class="n">op</span> <span class="o">=</span> <span class="n">dpf</span><span class="o">.</span><span class="n">operators</span><span class="o">.</span><span class="n">scoping</span><span class="o">.</span><span class="n">connectivity_ids</span><span class="p">(</span>
+        <span class="n">mesh_scoping</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">meshed_region</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">scoping</span><span class="p">,</span>
+        <span class="n">mesh</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">meshed_region</span><span class="p">,</span>
+        <span class="n">take_mid_nodes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># Get output data</span>
+    <span class="n">connected_nodes_scoping</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">mesh_scoping</span><span class="p">()</span>
+    <span class="c1"># Compress the list to only keep unique IDs</span>
+    <span class="n">connected_nodes_scoping</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">connected_nodes_scoping</span><span class="o">.</span><span class="n">ids</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">connected_nodes_scoping</span>
+</pre></div>
+</div>
+</section>
+<section id="write-points-coordinates-file">
+<h3>Write points coordinates file<a class="headerlink" href="#write-points-coordinates-file" title="Link to this heading">#</a></h3>
+<p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">write_points()</span></code> function writes the x, y, z coordinates of the scoped nodes to the ROM <code class="docutils literal notranslate"><span class="pre">points.bin</span></code> file
+using the <a class="reference external" href="https://twin.docs.pyansys.com/version/stable/api/examples/_autosummary/pytwin.write_binary.html#pytwin.write_binary" title="(in pytwin v0.10.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pytwin.write_binary()</span></code></a> function.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">write_points</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">dpf</span><span class="o">.</span><span class="n">Model</span><span class="p">,</span> <span class="n">scoping</span><span class="p">:</span> <span class="n">dpf</span><span class="o">.</span><span class="n">Scoping</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write the ``points.bin`` file.&quot;&quot;&quot;</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">meshed_region</span><span class="o">.</span><span class="n">nodes</span>
+    <span class="n">scoped_node_indices</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">map_scoping</span><span class="p">(</span><span class="n">scoping</span><span class="p">)</span>
+    <span class="n">points_coordinates</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">coordinates_field</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">scoped_node_indices</span><span class="p">]</span>
+    <span class="n">write_binary</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">output_folder</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;points.bin&quot;</span><span class="p">),</span> <span class="n">points_coordinates</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="write-rom-settings">
+<h3>Write ROM settings<a class="headerlink" href="#write-rom-settings" title="Link to this heading">#</a></h3>
+<p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">write_settings()</span></code> function writes the ROM <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> file. This records
+information such as the field dimensionality (scalar, vector, tensor), result name,
+unit, and whether it represent a deformation. The full file specification is available
+in the Twin Builder Static ROM Builder documentation.</p>
+<p>The original node numbers from export scoping are compressed and stored in the <code class="docutils literal notranslate"><span class="pre">ids</span></code> field.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">write_settings</span><span class="p">(</span>
+    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="n">dpf</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">is_deformation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write the ``settings.json`` file.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">component_count</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
+        <span class="n">dimensionality</span> <span class="o">=</span> <span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">component_count</span><span class="p">]</span>
+        <span class="n">symmetricalDim</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="n">field</span><span class="o">.</span><span class="n">component_count</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="n">dimensionality</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="n">symmetricalDim</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported field dimensionality </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">component_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">settings</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;pointsCoordinates&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="n">compress_id_list</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">scoping</span><span class="o">.</span><span class="n">ids</span><span class="p">),</span>
+        <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="s2">&quot;Nodal&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="n">field</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span>
+        <span class="s2">&quot;unitDimension&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;unitFactor&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;deformation&quot;</span><span class="p">:</span> <span class="n">is_deformation</span><span class="p">,</span>
+        <span class="s2">&quot;dimensionality&quot;</span><span class="p">:</span> <span class="n">dimensionality</span><span class="p">,</span>
+        <span class="s2">&quot;symmetricalDim&quot;</span><span class="p">:</span> <span class="n">symmetricalDim</span><span class="p">,</span>
+        <span class="s2">&quot;namedSelections&quot;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="p">}</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;settings.json&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fw</span><span class="p">:</span>
+        <span class="c1"># Set default to convert Numpy int to int</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">fw</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="compress-id-list">
+<h3>Compress ID list<a class="headerlink" href="#compress-id-list" title="Link to this heading">#</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> specification supports storing lists of consecutive integers in a
+compressed fashion. The <code class="xref py py-func docutils literal notranslate"><span class="pre">compress_id_list()</span></code> function implements this compression.</p>
+<p>Runs of three or more incrementally increasing values are replaced by a sequence of
+<code class="docutils literal notranslate"><span class="pre">start,</span> <span class="pre">-1,</span> <span class="pre">end</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compress_id_list</span><span class="p">(</span><span class="n">id_list</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compress array of consecutive IDs.</span>
+
+<span class="sd">    Compress array by replacing runs of three or more consecutive integers with ``start, -1, end``.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; input = np.array([0, 1, 2, 3, 4, 5, 6, 28, 29, 30, 31, 13, 15, 17, 18, 19, 20])</span>
+<span class="sd">    &gt;&gt;&gt; compress_id_list(input)</span>
+<span class="sd">    [0, -1, 6, 28, -1, 31, 13, 15, 17, -1, 20]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">id_list</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="c1"># Find breaks in consecutive sequences.</span>
+    <span class="n">breaks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">id_list</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Add endpoints to form run boundaries</span>
+    <span class="n">run_starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">breaks</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">run_ends</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">breaks</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">id_list</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">run_starts</span><span class="p">,</span> <span class="n">run_ends</span><span class="p">):</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">id_list</span><span class="p">[</span><span class="n">start</span><span class="p">]),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">id_list</span><span class="p">[</span><span class="n">end</span><span class="p">])])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">id_list</span><span class="p">[</span><span class="n">start</span> <span class="p">:</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="run-the-script">
+<h2>Run the script<a class="headerlink" href="#run-the-script" title="Link to this heading">#</a></h2>
+<p>To run the script, install PyMAPDL and the additional dependencies listed in
+<a class="reference internal" href="#additional-packages-used">Additional packages used</a>. Then download and run
+<a class="reference download internal" download="" href="../../../_downloads/9c8c5a8a8d63b4fa49fa1ff650fa85f8/static_rom_data_generation.py"><code class="xref download docutils literal notranslate"><span class="pre">static_rom_data_generation.py</span></code></a>. The ROM data is stored in
+a folder named <code class="docutils literal notranslate"><span class="pre">ansys_pymadl_Static_ROM</span></code> in the system temporary folder.</p>
+</section>
+<section id="script-assumptions-and-modification-ideas">
+<h2>Script assumptions and modification ideas<a class="headerlink" href="#script-assumptions-and-modification-ideas" title="Link to this heading">#</a></h2>
+<section id="local-execution">
+<h3>Local execution<a class="headerlink" href="#local-execution" title="Link to this heading">#</a></h3>
+<p>The scripts assume that both the MAPDL solving and DPF export are performed locally on the same
+machine as the Python script execution.</p>
+<p>For potential modification options, see <a class="reference internal" href="../../gallery_examples/00-mapdl-examples/basic_dpf_example.html#ref-dpf-basic-example"><span class="std std-ref">Basic DPF-Core Usage with PyMAPDL</span></a>.</p>
+</section>
+<section id="additional-result-types">
+<h3>Additional result types<a class="headerlink" href="#additional-result-types" title="Link to this heading">#</a></h3>
+<p>The script exports <code class="docutils literal notranslate"><span class="pre">stress</span></code> and <code class="docutils literal notranslate"><span class="pre">displacement</span></code> results. You can include or
+exclude additional result types by modifying the <code class="xref py py-func docutils literal notranslate"><span class="pre">export_static_ROM_variation()</span></code>
+function.</p>
+<p>For example, you can add elastic strain by making these changes to
+the <code class="xref py py-func docutils literal notranslate"><span class="pre">export_static_ROM_variation()</span></code> function from line 181:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Modify this section to export additional result types</span>
+<span class="n">is_deformation</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;displacement&quot;</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">displacement</span>
+    <span class="n">is_deformation</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;stress&quot;</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">stress</span>
+<span class="c1"># Add additional quantities here</span>
+<span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;elastic_strain&quot;</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">elastic_strain</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported result type: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="modify-result-scoping">
+<h3>Modify result scoping<a class="headerlink" href="#modify-result-scoping" title="Link to this heading">#</a></h3>
+<p>The script exports results on all nodes that are connected to elements. This does not account for
+nodes that are connected to elements but do not have results associated with them. For example,
+MPC184 pilot nodes would not usually have a stress result.</p>
+<p>The script also does not allow scoping to components.</p>
+<p>You could modify the <code class="xref py py-func docutils literal notranslate"><span class="pre">get_scoping()</span></code> function to allow broader scoping options.</p>
+</section>
+<section id="modify-settings">
+<h3>Modify settings<a class="headerlink" href="#modify-settings" title="Link to this heading">#</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> files generated by the <code class="xref py py-func docutils literal notranslate"><span class="pre">write_settings()</span></code> function implicitly
+assume SI units. (<code class="docutils literal notranslate"><span class="pre">unitFactor</span></code> is a scaling factor from SI units.) These files do not
+include any information about unit dimensions.</p>
+<p>Here is an example for displacement:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;unitDimension&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Here is an example for stress:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;unitDimension&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>You can add logic to check the model units and change the <code class="docutils literal notranslate"><span class="pre">unitDimension</span></code> and <code class="docutils literal notranslate"><span class="pre">unitFactor</span></code>
+fields accordingly. While this information is not used to build the ROM, it can be used when
+consuming the ROM in downstream applications.</p>
+<p>If results are included on nodal components, you can reference them in the
+<code class="docutils literal notranslate"><span class="pre">namedSelections</span></code> field. Each entry consists of a name and the indices of the
+scoped nodes in the overall scoping (not node IDs). You can use the
+<code class="xref py py-func docutils literal notranslate"><span class="pre">compress_id_list()</span></code> function to compress long lists of nodes.</p>
+<p>For example, to add a named selection called <code class="docutils literal notranslate"><span class="pre">first_nodes</span></code> on the first one hundred scoped nodes
+and another called <code class="docutils literal notranslate"><span class="pre">second_nodes</span></code> to the fiftieth to one hundred and fiftieth nodes, you would add
+this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">namedSelections</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;first_nodes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">99</span><span class="p">],</span> <span class="s2">&quot;second_nodes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">49</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">149</span><span class="p">]}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text", "objectID"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../../../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.71.3 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.6.3. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

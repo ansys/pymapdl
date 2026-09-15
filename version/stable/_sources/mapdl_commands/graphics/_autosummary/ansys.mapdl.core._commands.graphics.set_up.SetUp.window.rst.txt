@@ -1,0 +1,6 @@
+﻿window
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.graphics.set_up
+
+.. automethod:: SetUp.window

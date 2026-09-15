@@ -1,0 +1,6 @@
+﻿com
+===
+
+.. currentmodule:: ansys.mapdl.core._commands.session.list_controls
+
+.. automethod:: ListControls.com

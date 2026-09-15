@@ -1,0 +1,6 @@
+list
+====
+
+.. currentmodule:: ansys.mapdl.core.plugin
+
+.. automethod:: ansPlugin.list

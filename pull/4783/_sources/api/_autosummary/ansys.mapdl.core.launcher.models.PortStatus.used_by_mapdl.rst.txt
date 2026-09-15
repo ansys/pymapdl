@@ -1,0 +1,6 @@
+used\_by\_mapdl
+===============
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: PortStatus.used_by_mapdl

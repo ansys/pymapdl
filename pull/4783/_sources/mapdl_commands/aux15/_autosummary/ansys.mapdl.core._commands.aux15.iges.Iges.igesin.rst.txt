@@ -1,0 +1,6 @@
+﻿igesin
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.aux15.iges
+
+.. automethod:: Iges.igesin

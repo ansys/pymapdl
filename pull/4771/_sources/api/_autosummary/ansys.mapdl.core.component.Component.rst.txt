@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.component.Component
+====================================
+
+.. currentmodule:: ansys.mapdl.core.component
+
+.. autoclass:: Component

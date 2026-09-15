@@ -1,0 +1,6 @@
+ignore\_cache\_reset
+====================
+
+.. currentmodule:: ansys.mapdl.core.mesh_grpc
+
+.. autoproperty:: MeshGrpc.ignore_cache_reset

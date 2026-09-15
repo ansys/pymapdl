@@ -1,0 +1,6 @@
+﻿asbw
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.booleans
+
+.. automethod:: Booleans.asbw

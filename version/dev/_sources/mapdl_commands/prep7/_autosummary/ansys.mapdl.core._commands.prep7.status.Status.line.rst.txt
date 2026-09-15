@@ -1,0 +1,6 @@
+﻿line
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.status
+
+.. automethod:: Status.line

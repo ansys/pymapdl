@@ -1,0 +1,6 @@
+﻿connect\_to\_instance
+=====================
+
+.. currentmodule:: ansys.mapdl.core.cli.helpers
+
+.. autofunction:: connect_to_instance

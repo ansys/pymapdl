@@ -1,0 +1,6 @@
+﻿fctyp
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.failure_criteria
+
+.. automethod:: FailureCriteria.fctyp
