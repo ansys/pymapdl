@@ -114,11 +114,92 @@ def test_download_example_data_true_download():
 
 @requires("requests")
 def test_failed_download():
-    from requests.exceptions import HTTPError
-
+    # ansys.tools.common.example_download.DownloadManager raises RuntimeError
+    # (rather than requests.exceptions.HTTPError) on download failures.
     filename = "non_existing_file"
-    with pytest.raises(HTTPError):
+    with pytest.raises(RuntimeError):
         _download_file(filename, directory=None)
+
+
+@requires("ansys.tools.common")
+def test_retrieve_file_skips_download_when_already_cached():
+    from ansys.mapdl.core.examples.downloads import _retrieve_file
+
+    filename = "unique_test_cached_file.txt"
+    os.makedirs(EXAMPLES_PATH, exist_ok=True)
+    local_path = os.path.join(EXAMPLES_PATH, filename)
+
+    try:
+        with open(local_path, "w") as fid:
+            fid.write("already downloaded")
+
+        with patch(
+            "ansys.mapdl.core.examples.downloads.download_manager"
+        ) as mock_manager:
+            result = _retrieve_file(filename, "some/dir")
+
+        mock_manager.download_file.assert_not_called()
+        assert result == local_path
+    finally:
+        if os.path.isfile(local_path):
+            os.remove(local_path)
+
+
+@requires("ansys.tools.common")
+def test_retrieve_file_uses_examples_path_as_destination():
+    from ansys.mapdl.core.examples.downloads import _retrieve_file
+
+    filename = "unique_test_destination_file.txt"
+    expected_local_path = os.path.join(EXAMPLES_PATH, filename)
+
+    with patch("ansys.mapdl.core.examples.downloads.download_manager") as mock_manager:
+        mock_manager.download_file.return_value = expected_local_path
+
+        result = _retrieve_file(filename, "some/dir")
+
+        mock_manager.download_file.assert_called_once_with(
+            filename=filename,
+            directory="some/dir",
+            destination=EXAMPLES_PATH,
+        )
+        assert result == expected_local_path
+
+
+@requires("ansys.tools.common")
+def test_retrieve_file_decompresses_zip(tmp_path):
+    import shutil
+    import zipfile
+
+    from ansys.mapdl.core.examples.downloads import _retrieve_file
+
+    zip_name = "unique_test_archive.zip"
+    os.makedirs(EXAMPLES_PATH, exist_ok=True)
+    zip_local_path = os.path.join(EXAMPLES_PATH, zip_name)
+
+    # `_decompress` extracts the archive contents directly into
+    # `EXAMPLES_PATH`, so the archive must contain a top-level entry
+    # matching the zip's own name (minus the ".zip" extension) for the
+    # returned path to resolve to an extracted directory.
+    inner_file = tmp_path / "inner.txt"
+    inner_file.write_text("hello")
+    with zipfile.ZipFile(zip_local_path, "w") as zip_ref:
+        zip_ref.write(inner_file, arcname="unique_test_archive/inner.txt")
+
+    try:
+        with patch(
+            "ansys.mapdl.core.examples.downloads.download_manager"
+        ) as mock_manager:
+            mock_manager.download_file.return_value = zip_local_path
+
+            result = _retrieve_file(zip_name, "some/dir")
+
+        assert result == zip_local_path[:-4]
+        assert os.path.isdir(result)
+        assert os.path.isfile(os.path.join(result, "inner.txt"))
+    finally:
+        shutil.rmtree(zip_local_path[:-4], ignore_errors=True)
+        if os.path.isfile(zip_local_path):
+            os.remove(zip_local_path)
 
 
 @requires("requests")
