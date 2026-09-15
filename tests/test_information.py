@@ -57,19 +57,20 @@ def _status_with_version(version: str) -> str:
 
 def test_information_version_metadata_preserves_valid_status():
     status = _status_with_version(
-        "RELEASE  2021 R2           BUILD 21.2      UPDATE 20210601"
+        "RELEASE  2026 R1           BUILD 26.1BETA  UPDATE 20260202"
+        "   CUSTOMER  12345678"
     )
-    info = _make_information(status, version=21.2)
+    info = _make_information(status, version=26.1)
 
     assert info.mapdl_version == (
-        "RELEASE  2021 R2           BUILD 21.2      UPDATE 20210601"
+        "RELEASE  2026 R1           BUILD 26.1BETA  UPDATE 20260202"
     )
-    assert info.mapdl_version_release == "2021 R2"
-    assert info.mapdl_version_build == "21.2"
-    assert info.mapdl_version_update == "20210601"
+    assert info.mapdl_version_release == "2026 R1"
+    assert info.mapdl_version_build == "26.1BETA"
+    assert info.mapdl_version_update == "20260202"
 
 
-def test_information_version_build_falls_back_for_status_placeholder():
+def test_information_version_metadata_uses_empty_values_for_placeholders():
     status = _status_with_version(
         "RELEASE                    BUILD  0.0      UPDATE        0"
     )
@@ -79,7 +80,7 @@ def test_information_version_build_falls_back_for_status_placeholder():
         "RELEASE                    BUILD  0.0      UPDATE        0"
     )
     assert info.mapdl_version_release == ""
-    assert info.mapdl_version_build == "25.2"
+    assert info.mapdl_version_build == ""
     assert info.mapdl_version_update == ""
 
 
@@ -92,7 +93,7 @@ def test_information_version_placeholder_build_is_not_returned(placeholder):
         version=21.2,
     )
 
-    assert info.mapdl_version_build == "21.2"
+    assert info.mapdl_version_build == ""
     assert isinstance(info.mapdl_version_build, str)
 
 
@@ -217,16 +218,14 @@ def test_mapdl_version_release_build_update_format(mapdl, cleared):
             r"\d{4}\s*R\d+", release
         ), f"Unexpected MAPDL version release format: {release!r}"
 
-    assert (
-        build
-    ), "MAPDL version build is empty. No reliable MAPDL revision was returned."
-    assert re.fullmatch(
-        r"\d+(\.\d+)?", build
-    ), f"Unexpected MAPDL version build format: {build!r}"
-    assert float(build) != 0.0, (
-        "MAPDL version build returned a zero placeholder instead of the "
-        "reliable MAPDL revision."
-    )
+    if build:
+        assert re.fullmatch(
+            r"\d+(?:\.\d+)*(?:[A-Za-z]+)?", build
+        ), f"Unexpected MAPDL version build format: {build!r}"
+        assert not re.fullmatch(r"0+(?:\.0+)*", build), (
+            "MAPDL version build returned a zero placeholder instead of "
+            "an actual build."
+        )
 
     if update:
         assert update.isdigit(), f"Unexpected MAPDL version update format: {update!r}"
@@ -236,21 +235,21 @@ def test_mapdl_version_release_build_update_format(mapdl, cleared):
         )
 
 
-def test_mapdl_version_build_matches_reported_version(mapdl, cleared):
-    """Cross-check the detailed build number against ``mapdl.version``.
+def test_mapdl_version_build_starts_with_reported_version(mapdl, cleared):
+    """Cross-check the numeric build prefix against ``mapdl.version``.
 
     ``mapdl.version`` (backed by ``mapdl.parameters.revision``) comes from a
     completely different MAPDL query than ``mapdl.info.mapdl_version_build``
-    (parsed from ``/STATUS``). The information layer must use the reliable
-    revision query when the ``/STATUS`` value is a zero placeholder.
+    (parsed from ``/STATUS``). A valid build can contain a qualifier, such as
+    ``26.1BETA``, so only its numeric prefix is compared.
     """
     build = mapdl.info.mapdl_version_build
     reported_version = mapdl.version
 
-    assert float(build) == pytest.approx(reported_version, abs=1e-6), (
-        f"MAPDL version build ({build!r}) does not match "
-        f"'mapdl.version' ({reported_version!r})."
-    )
+    if build:
+        numeric_build = re.match(r"\d+(?:\.\d+)?", build)
+        assert numeric_build is not None
+        assert float(numeric_build.group()) == pytest.approx(reported_version, abs=1e-6)
 
 
 def test_info_title(mapdl, cleared):

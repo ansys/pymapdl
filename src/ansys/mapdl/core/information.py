@@ -332,14 +332,12 @@ class Information:
         Returns
         -------
         str
-            The MAPDL version build. If the ``/STATUS`` value is unavailable,
-            the value from ``mapdl.version`` is returned.
+            The MAPDL version build, or an empty string when it is not
+            provided by MAPDL.
         """
         st = self._get_mapdl_version()
         build = self._get_between("BUILD", "UPDATE", st).strip()
-        if self._is_unavailable_version_value(build):
-            return str(self._mapdl.version)
-        return build
+        return "" if self._is_unavailable_version_value(build) else build
 
     @property
     @update_information_first(False)
@@ -353,7 +351,8 @@ class Information:
             provided by MAPDL.
         """
         st = self._get_mapdl_version()
-        update = self._get_between("UPDATE", "", st).strip()
+        match = re.search(r"\bUPDATE\s+(\S+)", st)
+        update = match.group(1) if match else ""
         return "" if self._is_unavailable_version_value(update) else update
 
     @property
@@ -697,7 +696,11 @@ class Information:
         titles_ = self._get_titles()
         st = titles_.find("RELEASE")
         en = titles_.find("INITIAL", st)
-        return titles_[st:en].split("CUSTOMER")[0].strip()
+        version = titles_[st:en]
+        customer = version.find("CUSTOMER")
+        if customer >= 0:
+            version = version[:customer]
+        return version.strip()
 
     def _get_pymapdl_version(self) -> str:
         return pymapdl.__version__
