@@ -353,8 +353,8 @@ class PostProcessing:
     def element_values(self, item, comp="", option="AVG") -> np.ndarray:
         """Compute the element-wise values for a given item and component.
 
-        This method uses :func:`Mapdl.etable()
-        <ansys.mapdl.core.Mapdl.etable` and returns a
+        This method uses :func:`Mapdl.get_etable()
+        <ansys.mapdl.core.Mapdl.get_etable>` and returns a
         ``numpy.ndarray`` rather than storing it within MAPDL.
 
         Parameters
@@ -479,9 +479,7 @@ class PostProcessing:
         >>> arr
         array([0., 0., 0., ..., 0., 0., 0.])
         """
-        tmp_table = "__ETABLE__"
-        self._mapdl.etable(tmp_table, item, comp, option, mute=True)
-        return self._mapdl.get_array("ELEM", 1, "ETAB", tmp_table)[
+        return self._mapdl.get_etable(item, comp, option, mute=True)[
             self.selected_elements
         ]
 
