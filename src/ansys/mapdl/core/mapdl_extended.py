@@ -3136,6 +3136,13 @@ class _MapdlExtended(_MapdlCommandExtended):
         """Uses the ``*VGET`` command to Return an array from ANSYS as a
         Python array.
 
+        The array is built from the currently selected entities (for
+        example, the selected nodes or elements), so make sure to call
+        :func:`Mapdl.nsel() <ansys.mapdl.core.Mapdl.nsel>`,
+        :func:`Mapdl.esel() <ansys.mapdl.core.Mapdl.esel>`, or an
+        equivalent selection command beforehand if you need to restrict
+        the entities used to fill the array.
+
         See `VGET
         <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_VGET_st.html>`
         for more details.
@@ -3178,6 +3185,15 @@ class _MapdlExtended(_MapdlCommandExtended):
         -----
         Please reference your Ansys help manual ``*VGET`` command tables
         for all the available ``*VGET`` values.
+
+        This method cannot be used while inside a
+        :func:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
+        context because it must retrieve the array value immediately, and
+        commands issued inside ``non_interactive`` are only sent to MAPDL
+        once the context exits. Calling it there raises a
+        :class:`MapdlRuntimeError <ansys.mapdl.core.errors.MapdlRuntimeError>`.
+        Use :func:`Mapdl.vget() <ansys.mapdl.core.Mapdl.vget>` to store the
+        result in a named MAPDL parameter instead.
 
         Returns
         -------
@@ -3225,6 +3241,98 @@ class _MapdlExtended(_MapdlCommandExtended):
                 raise MapdlRuntimeError("Unable to get array for %s" % entity)
             ntry += 1
         return arr
+
+    def get_etable(
+        self,
+        item: str,
+        comp: str = "",
+        option: str = "",
+        lab: str = "",
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
+        """Retrieve an element-table column as a NumPy array.
+
+        This method wraps the standard ``ETABLE``-then-``*VGET`` workflow:
+        it calls :func:`Mapdl.etable() <ansys.mapdl.core.Mapdl.etable>` to
+        fill an element-table column with ``item``/``comp`` for the
+        currently selected elements, and then calls
+        :func:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>` with
+        ``ELEM``/``ETAB`` to retrieve that column as a NumPy array. It
+        operates on the current ``POST1`` result set and the currently
+        selected elements, exactly like the ``etable``/``get_array``
+        sequence used by
+        :attr:`Mapdl.post_processing.element_values
+        <ansys.mapdl.core.post.PostProcessing.element_values>`.
+
+        Parameters
+        ----------
+        item : str
+            Label identifying the item. See the ``Item`` argument of
+            :func:`Mapdl.etable() <ansys.mapdl.core.Mapdl.etable>` for the
+            available labels.
+        comp : str, optional
+            Component of the item, if required.
+        option : str, optional
+            Option for storing element table data. One of ``"MIN"``,
+            ``"MAX"``, or ``"AVG"`` (default). See
+            :func:`Mapdl.etable() <ansys.mapdl.core.Mapdl.etable>` for
+            details.
+        lab : str, optional
+            Element-table label (the ``Lab`` argument of ``ETABLE``) used
+            to store the retrieved item. If omitted (default), a unique
+            hidden temporary label is generated, the column is erased
+            (``ETABLE,Lab,ERAS``) right after the values are retrieved,
+            and no trace of it is left in MAPDL. If you supply ``lab``,
+            the column is kept in the element table under that name so
+            you can reuse it in subsequent MAPDL operations (for example
+            ``SADD`` or ``SMULT``).
+
+        Returns
+        -------
+        numpy.ndarray
+            Array containing the requested element values, one value per
+            selected element.
+
+        Notes
+        -----
+        This method fills (and, for a temporary label, empties) an
+        element-table column as a side effect, so it should be called
+        after all the commands that must run beforehand have already
+        been executed, consistent with the restrictions documented in
+        :func:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>`.
+
+        Examples
+        --------
+        Retrieve the averaged element centroid value of the X component
+        stress for the current result set, using a temporary label.
+
+        >>> mapdl.post1()
+        >>> mapdl.set(1, 1)
+        >>> mapdl.get_etable("S", "X")
+        array([-1.12618148, -0.93902147, -0.88121128, ...,  0.        ,
+                0.        ,  0.        ])
+
+        Retrieve the maximum element thermal equivalent strain, keeping
+        the resulting element-table column under the ``"EPTHEQV"`` label
+        for later use.
+
+        >>> mapdl.get_etable("EPTH", "EQV", "MAX", lab="EPTHEQV")
+        array([0., 0., 0., ..., 0., 0., 0.])
+        >>> mapdl.get_array("ELEM", 1, "ETAB", "EPTHEQV")
+        array([0., 0., 0., ..., 0., 0., 0.])
+        """
+        keep_lab = bool(lab)
+        if not keep_lab:
+            lab = f"_ET{self._etable_lab_counter:05d}"
+            self._etable_lab_counter += 1
+
+        self.etable(lab, item, comp, option, **kwargs)
+
+        try:
+            return self.get_array("ELEM", 1, "ETAB", lab)
+        finally:
+            if not keep_lab:
+                self.etable(lab, "ERAS", mute=True)
 
     def _get_array(
         self,

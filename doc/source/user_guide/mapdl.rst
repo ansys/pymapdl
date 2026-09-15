@@ -139,6 +139,8 @@ The preceding methods return the IDs of the selected entities. For example:
     array([1, 2, 3, ..., 1998, 1999, 2000])
 
 
+.. _ref_non_interactive:
+
 Running in non-interactive mode
 -------------------------------
 
