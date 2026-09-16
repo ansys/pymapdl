@@ -630,3 +630,129 @@ def test_supress_logging_restores_prior_level_without_crashing():
         return "ok"
 
     assert fake_method(fake_mapdl) == "ok"
+
+
+## Tests for ``Logger.add_child_logger``, the subsystem-level counterpart of
+## ``add_instance_logger`` (no ``PymapdlCustomAdapter`` wrapping, not tied to
+## a MAPDL instance).
+
+
+@pytest.fixture(autouse=True)
+def _deregister_child_loggers_created_by_test():
+    """Deregister any ``LOG._instances`` entry a test adds, once it is done.
+
+    Unlike instance loggers, bare child loggers created via
+    ``Logger.add_child_logger`` are not reliably garbage collected (see
+    ``test_add_child_logger_survives_gc_unlike_instance_logger``): stdlib's
+    own ``logging.Logger.manager.loggerDict`` keeps its own strong
+    reference to them. Without this fixture, every test below would
+    permanently leak its child logger into the shared, process-wide ``LOG``
+    singleton, polluting unrelated tests that iterate over
+    ``LOG._instances`` (for example ``test_lowercases``).
+
+    Only names created *during* the test are removed, so pre-existing or
+    still-in-use registry entries from other tests are left untouched.
+    """
+    before = set(LOG._instances.keys())
+    yield
+    for name in set(LOG._instances.keys()) - before:
+        child_logger = LOG._instances.get(name)
+        if child_logger is not None:
+            logging._finalize_child_logger(child_logger.name, name, LOG._instances)
+
+
+def test_add_child_logger_is_real_child_of_global_logger():
+    """A child logger must be a true ``logging`` child of ``pymapdl_global``,
+    just like an instance logger, so it shares the global sinks and level
+    cascading."""
+    child_logger = LOG.add_child_logger("subsystem_a")
+    assert isinstance(child_logger, deflogging.Logger)
+    assert child_logger.name == f"{LOG.logger.name}.subsystem_a"
+    assert child_logger.parent is LOG.logger
+    assert child_logger.propagate is False
+    assert any(
+        isinstance(h, logging.GlobalForwardingHandler) for h in child_logger.handlers
+    )
+    assert child_logger.level == deflogging.NOTSET
+
+
+def test_add_child_logger_registers_in_instances():
+    """A child logger must be registered under its dotted name in
+    ``LOG._instances``, mirroring ``add_instance_logger``'s behavior."""
+    child_logger = LOG.add_child_logger("subsystem_b")
+    key = f"{LOG.logger.name}.subsystem_b"
+    assert LOG._instances[key] is child_logger
+
+
+def test_add_child_logger_returns_same_logger_for_same_name():
+    """Requesting the same ``logger_name`` twice must return the
+    already-registered logger instead of creating a duplicate entry."""
+    first = LOG.add_child_logger("subsystem_c")
+    second = LOG.add_child_logger("subsystem_c")
+    assert first is second
+
+
+def test_add_child_logger_deduplicates_sanitized_name_collisions():
+    """Names that collide only after sanitization (dots replaced with
+    underscores) must still get distinct loggers, the same way
+    ``add_instance_logger`` handles real name collisions."""
+    log_a = LOG.add_child_logger("subsystem.d")
+    log_b = LOG.add_child_logger("subsystem_d")
+    assert log_a.name != log_b.name
+
+
+def test_add_child_logger_respects_explicit_level():
+    """Passing ``level`` explicitly must set it directly instead of leaving
+    the logger at ``NOTSET`` for cascading."""
+    child_logger = LOG.add_child_logger("subsystem_e", level="DEBUG")
+    assert child_logger.level == deflogging.DEBUG
+
+
+def test_add_child_logger_level_cascades_from_global_logger():
+    """A child logger created without an explicit level must track
+    ``LOG.setLevel()`` via ``getEffectiveLevel()``."""
+    child_logger = LOG.add_child_logger("subsystem_f")
+    previous_level = LOG.logger.level
+    try:
+        LOG.logger.setLevel(deflogging.DEBUG)
+        assert child_logger.getEffectiveLevel() == deflogging.DEBUG
+        LOG.logger.setLevel(deflogging.ERROR)
+        assert child_logger.getEffectiveLevel() == deflogging.ERROR
+    finally:
+        LOG.logger.setLevel(previous_level)
+
+
+def test_add_child_logger_no_duplicate_emission(caplog):
+    """A record logged through a child logger must reach a given
+    ``pymapdl_global`` handler exactly once."""
+    buf = io.StringIO()
+    handler = deflogging.StreamHandler(buf)
+    handler.setLevel(deflogging.DEBUG)
+    LOG.logger.addHandler(handler)
+    previous_level = LOG.logger.level
+    LOG.logger.setLevel(deflogging.DEBUG)
+    try:
+        child_logger = LOG.add_child_logger("subsystem_g")
+        child_logger.debug("no-duplicate-child-message")
+        text = buf.getvalue()
+        assert text.count("no-duplicate-child-message") == 1
+    finally:
+        LOG.logger.removeHandler(handler)
+        LOG.logger.setLevel(previous_level)
+
+
+def test_add_child_logger_survives_gc_unlike_instance_logger():
+    """Unlike an instance logger, a bare child logger is *not* reliably
+    collected once dereferenced: ``logging.Logger.manager.loggerDict`` holds
+    its own strong reference to every ``logging.Logger`` it creates, so
+    without an owning wrapper object (such as ``PymapdlCustomAdapter``)
+    there is nothing left to become unreachable. This is the documented,
+    best-effort limitation of ``add_child_logger()``'s cleanup (see the
+    module docstring's *Resource cleanup* section)."""
+    child_logger = LOG.add_child_logger("subsystem_gc")
+    full_name = child_logger.name
+
+    del child_logger
+    gc.collect()
+
+    assert full_name in deflogging.Logger.manager.loggerDict

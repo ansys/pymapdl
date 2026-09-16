@@ -142,6 +142,32 @@ You can use this logger like this:
     INFO - GRPC_127.0.0.1:50056 -  <ipython-input-19-f09bb2d8785c> - <module> - This is a useful message
 
 
+Child (subsystem) logger
+~~~~~~~~~~~~~~~~~~~~~~~~
+Not every logger needs to represent a single MAPDL instance. Internal
+subsystems that span (or outlive) individual instances, for example a
+:class:`MapdlPool <ansys.mapdl.core.pool.MapdlPool>` or the launcher/
+connection layer, can use :func:`LOG.add_child_logger()
+<Logger.add_child_logger>` to get their own named logger without the
+per-instance :class:`PymapdlCustomAdapter` context.
+
+.. code:: pycon
+
+    >>> from ansys.mapdl.core import LOG
+    >>> pool_logger = LOG.add_child_logger("pool")
+    >>> pool_logger.info("Pool started with 4 workers.")
+
+    INFO -  -  <ipython-input-1-...> - <module> - Pool started with 4 workers.
+
+Like an instance logger, a child logger is a true child of
+``pymapdl_global`` in the standard ``logging`` hierarchy and forwards
+records to ``pymapdl_global``'s handlers at emit time via a
+:class:`GlobalForwardingHandler`, so it shares the same file/stdout sinks
+and, unless a ``level`` is passed explicitly, cascades ``LOG.setLevel(...)``
+changes the same way an instance logger does. Requesting the same
+``logger_name`` again returns the already-registered logger instead of
+creating a duplicate.
+
 Resource cleanup
 ~~~~~~~~~~~~~~~~
 Calling :func:`mapdl.exit() <ansys.mapdl.core.mapdl.MapdlBase.exit>` eagerly
@@ -741,23 +767,40 @@ class Logger:
     ):
         """Add a child logger to the main logger.
 
-        This logger is more general than an instance logger which is designed to
-        track the state of the MAPDL instances.
+        Use this for subsystem-level loggers (for example a connection pool
+        or the launcher) that are not tied to a single MAPDL instance. This
+        logger is more general than an instance logger, which is designed to
+        track the state of the MAPDL instances and is created with
+        :func:`add_instance_logger`.
 
-        If the logging level is in the arguments, a new logger with a reference
-        to the ``_global`` logger handlers is created instead of a child.
+        The returned logger is a true child of ``pymapdl_global`` in the
+        standard ``logging`` hierarchy: it forwards records to
+        ``pymapdl_global``'s handlers at emit time, so it shares the same
+        sinks (file, standard output). Unless ``level`` is given explicitly,
+        the child logger's level stays at ``NOTSET`` so it cascades from
+        ``pymapdl_global``, meaning a later ``LOG.setLevel(...)`` call also
+        changes its effective level. Requesting the same ``logger_name``
+        again returns the already-registered logger instead of creating a
+        duplicate.
 
         Parameters
         ----------
         logger_name : str
             Name of the logger.
         level : str or int, optional
-            Level of logging
+            Level of logging. If not given, the level cascades from the
+            main logger.
 
         Returns
         -------
         logging.logger
             Logger class.
+
+        Examples
+        --------
+        >>> from ansys.mapdl.core import LOG
+        >>> pool_logger = LOG.add_child_logger("pool")
+        >>> pool_logger.info("Pool started with 4 workers.")
         """
         with _registry_lock:
             name = self.logger.name + "." + logger_name
