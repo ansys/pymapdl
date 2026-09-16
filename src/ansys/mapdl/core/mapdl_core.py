@@ -278,15 +278,31 @@ def parse_to_short_cmd(command):
 
 
 def setup_logger(loglevel="INFO", log_file=True, mapdl_instance=None):
-    """Setup logger"""
+    """Setup logger.
 
-    # return existing log if this function has already been called
-    if hasattr(setup_logger, "log"):
-        return setup_logger.log
-    else:
-        setup_logger.log = logger.add_instance_logger("MAPDL", mapdl_instance)
+    .. deprecated:: 0.75.0
+        This helper is deprecated and no longer used internally. Its
+        previous implementation memoized a single logger per *process*
+        (via a function attribute), so after the first call in a process,
+        every subsequent call from any ``Mapdl`` instance silently no-oped
+        regardless of the ``loglevel``/``mapdl_instance`` arguments passed
+        in. Use :meth:`_MapdlCore.set_log_level` (which sets the level on
+        the calling instance's own ``self._log``), or the instance's
+        ``mapdl._log`` / the global ``LOG`` object directly, instead.
+    """
+    warn(
+        "'setup_logger' is deprecated and will be removed in a future "
+        "release. Use 'Mapdl.set_log_level()' or the instance's own "
+        "'mapdl._log' logger instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
 
-    return setup_logger.log
+    if mapdl_instance is not None and getattr(mapdl_instance, "_log", None) is not None:
+        mapdl_instance._log.setLevel(loglevel)
+        return mapdl_instance._log
+
+    return logger.add_instance_logger("MAPDL", mapdl_instance, level=loglevel)
 
 
 def _sanitize_start_parm(start_parm):
@@ -1565,7 +1581,21 @@ class _MapdlCore(Commands):
 
         def __enter__(self):
             self._parent()._log.debug("Entering in non-interactive mode")
-            if self._parent().logger.logger.level <= logging.DEBUG:
+            log_adapter = self._parent().logger
+            # Prefer the level captured just before any *ongoing*
+            # ``supress_logging`` suppression (see
+            # ``ansys.mapdl.core.misc.supress_logging``): otherwise, an
+            # internal call that temporarily raises the logger to
+            # ``CRITICAL`` to silence its own verbose logging would also
+            # incorrectly hide this debug-mode comment, even though the
+            # user never asked for anything above debug level.
+            level = getattr(log_adapter, "_suppressed_from_level", None)
+            if not isinstance(level, int):
+                # Either no suppression is in progress, or ``log_adapter``
+                # is a test double (for example a bare ``MagicMock``) that
+                # does not implement the real attribute.
+                level = log_adapter.logger.level
+            if level <= logging.DEBUG:
                 # only commenting if on debug mode
                 self._parent().com("Entering in non_interactive mode")
             self._parent()._store_commands = True
@@ -2099,7 +2129,7 @@ class _MapdlCore(Commands):
         """
         if isinstance(loglevel, str):
             loglevel = loglevel.upper()  # type: ignore[assignment]
-        setup_logger(loglevel=loglevel)
+        self._log.setLevel(loglevel)
 
     def _list(self, command):
         """Replaces *LIST command"""
@@ -2549,29 +2579,34 @@ class _MapdlCore(Commands):
 
         Notes
         -----
-        Only ever call this from the explicit, deterministic :meth:`exit`
-        path (through ``_release_resources(cleanup_loggers=True)``), never
-        from ``__del__``/garbage collection. This instance's logger and its
-        handlers are shared, process-wide ``logging`` state (see
-        :class:`ansys.mapdl.core.logging.Logger`), so closing them from
-        non-deterministic GC-driven code can race with another, still-alive
-        ``Mapdl`` instance still logging through the same handler.
+        This runs eagerly from the explicit, deterministic :meth:`exit`
+        path (through ``_release_resources(cleanup_loggers=True)``). It is
+        safe to call this eagerly (unlike before the logging-module
+        refactor) because each instance logger now owns its own handlers
+        exclusively: nothing is shared/copied with ``pymapdl_global`` or
+        with other ``Mapdl`` instances (see
+        :class:`ansys.mapdl.core.logging.GlobalForwardingHandler`). A
+        weakref-based safety net (``ansys.mapdl.core.logging._finalize_child_logger``)
+        performs the equivalent cleanup automatically for instances that are
+        never explicitly ``exit()``-ed, once they are garbage collected.
         """
-        logger = self._log
-        logger.setLevel(logging.CRITICAL + 1)
+        inst_logger = self._log
+        inst_logger.setLevel(logging.CRITICAL + 1)
 
-        if logger.hasHandlers():
-            for each_handler in logger.logger.handlers:
-                if each_handler.stream and not each_handler.stream.closed:
-                    logger.logger.removeHandler(each_handler)
+        # Run the exact ``weakref.finalize`` object registered for this
+        # instance (see ``Logger._add_mapdl_instance_logger``), rather than
+        # calling ``_finalize_child_logger`` directly by name. Invoking the
+        # finalizer both performs the cleanup now and permanently disarms
+        # it, so the later, GC-triggered call (once ``inst_logger`` itself
+        # is collected) can never run a second time and mistakenly tear
+        # down a different, unrelated logger that has since reused this
+        # instance's dotted name.
+        finalizer = getattr(inst_logger, "_finalizer", None)
+        if finalizer is not None and finalizer.alive:
+            finalizer()
 
-        if logger.file_handler:
-            logger.file_handler.close()
-            logger.file_handler = None
-
-        if logger.std_out_handler:
-            logger.std_out_handler.close()
-            logger.std_out_handler = None
+        inst_logger.file_handler = None
+        inst_logger.std_out_handler = None
 
     def is_png_found(self, text: str) -> bool:
         # findall returns None if there is no match

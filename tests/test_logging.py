@@ -22,9 +22,12 @@
 
 """ "Testing of log module"""
 
+import gc
+import io
 import logging as deflogging  # Default logging
 import os
 import re
+from unittest.mock import Mock
 
 import pytest
 
@@ -375,3 +378,381 @@ def test_lowercases():
 
         for each_logger in LOG._instances.values():
             each_logger.setLevel(each_loglevel.lower())
+
+
+## Regression tests for the logging-module refactor (resource-leak fixes).
+#
+# These use lightweight ``unittest.mock.Mock`` stand-ins for ``Mapdl``
+# instances (only a ``.name`` attribute is required by
+# ``Logger.add_instance_logger``/``PymapdlCustomAdapter``) so no real MAPDL
+# instance is needed.
+
+
+def _make_fake_instance_logger(name, level=None):
+    """Create an instance logger the same way ``_MapdlCore.__init__`` does."""
+    fake_mapdl = Mock()
+    fake_mapdl.name = name
+    return fake_mapdl, LOG.add_instance_logger(name, fake_mapdl, level=level)
+
+
+def test_instance_logger_is_real_child_of_global_logger():
+    """Instance loggers must be true ``logging`` children of ``pymapdl_global``.
+
+    This enables level cascading via ``getEffectiveLevel()`` while
+    ``propagate`` stays disabled (see ``GlobalForwardingHandler``) so
+    records are never delivered twice.
+    """
+    _, inst_log = _make_fake_instance_logger("172.30.30.1:50052")
+    assert inst_log.logger.name.startswith(f"{LOG.logger.name}.")
+    assert inst_log.logger.parent is LOG.logger
+    assert inst_log.logger.propagate is False
+    assert any(
+        isinstance(h, logging.GlobalForwardingHandler) for h in inst_log.logger.handlers
+    )
+
+
+def test_instance_logger_uniqueness_check_deduplicates():
+    """``add_instance_logger`` must detect real name collisions.
+
+    Regression test for a bug where the uniqueness check inspected
+    ``logging.root.manager.__dict__`` (the ``Manager`` object's own
+    attributes) instead of ``logging.Logger.manager.loggerDict`` (the
+    actual registered logger names), so it never triggered.
+    """
+    name = "172.30.30.2:50052"
+    _, log_a = _make_fake_instance_logger(name)
+    _, log_b = _make_fake_instance_logger(name)
+
+    assert log_a.logger.name != log_b.logger.name
+    assert log_b.logger.name.endswith("_1")
+
+
+def test_no_duplicate_log_emission(caplog):
+    """A record logged through an instance logger must reach a given
+    ``pymapdl_global`` handler exactly once.
+
+    Regression test for the double-emission bug: a real dotted hierarchy
+    combined with ``propagate=True`` *and* copied handlers used to deliver
+    every record twice (once via the instance's own handler copy, once via
+    propagation to the parent's original handler).
+    """
+    buf = io.StringIO()
+    handler = deflogging.StreamHandler(buf)
+    handler.setLevel(deflogging.DEBUG)
+    LOG.logger.addHandler(handler)
+    previous_level = LOG.logger.level
+    LOG.logger.setLevel(deflogging.DEBUG)
+    try:
+        _, inst_log = _make_fake_instance_logger("172.30.30.3:50052")
+        inst_log.debug("no-duplicate-message")
+        text = buf.getvalue()
+        assert text.count("no-duplicate-message") == 1
+    finally:
+        LOG.logger.removeHandler(handler)
+        LOG.logger.setLevel(previous_level)
+
+
+def test_global_sink_reaches_existing_instances_retroactively():
+    """Handlers added to ``LOG`` after an instance logger already exists
+    must still receive that instance's records (unified, "live" sink)."""
+    _, inst_log = _make_fake_instance_logger("172.30.30.4:50052")
+
+    buf = io.StringIO()
+    handler = deflogging.StreamHandler(buf)
+    handler.setLevel(deflogging.DEBUG)
+    LOG.logger.addHandler(handler)
+    previous_level = LOG.logger.level
+    LOG.logger.setLevel(deflogging.DEBUG)
+    try:
+        inst_log.debug("retroactive-message")
+        assert "retroactive-message" in buf.getvalue()
+    finally:
+        LOG.logger.removeHandler(handler)
+        LOG.logger.setLevel(previous_level)
+
+
+def test_level_cascades_from_global_logger():
+    """``LOG.setLevel()`` must cascade to instance loggers created without
+    an explicit level of their own (left at ``NOTSET``)."""
+    _, inst_log = _make_fake_instance_logger("172.30.30.5:50052", level=None)
+
+    previous_level = LOG.logger.level
+    try:
+        LOG.logger.setLevel(deflogging.WARNING)
+        assert inst_log.logger.getEffectiveLevel() == deflogging.WARNING
+
+        LOG.logger.setLevel(deflogging.DEBUG)
+        assert inst_log.logger.getEffectiveLevel() == deflogging.DEBUG
+    finally:
+        LOG.logger.setLevel(previous_level)
+
+
+def test_instances_registry_and_loggerdict_shrink_after_gc():
+    """``LOG._instances`` and ``logging.Logger.manager.loggerDict`` must not
+    grow without bound for instances that are simply dereferenced (never
+    explicitly ``exit()``-ed), which is the scenario behind the reported
+    resource leak."""
+    before_instances = len(LOG._instances)
+    before_loggerdict = len(deflogging.Logger.manager.loggerDict)
+
+    created = []
+    full_names = []
+    for i in range(25):
+        _, inst_log = _make_fake_instance_logger(f"172.31.{i}.1:5005{i % 10}")
+        created.append(inst_log)
+        full_names.append(inst_log.logger.name)
+    # Avoid leaving the loop variables bound to the last created instance,
+    # which would otherwise keep exactly that one instance alive below.
+    del _, inst_log
+
+    assert len(LOG._instances) >= before_instances + 25
+    assert len(deflogging.Logger.manager.loggerDict) >= before_loggerdict + 25
+
+    # Drop the only strong references and force collection.
+    del created
+    gc.collect()
+
+    assert len(LOG._instances) == before_instances
+    assert len(deflogging.Logger.manager.loggerDict) == before_loggerdict
+    for full_name in full_names:
+        assert full_name not in deflogging.Logger.manager.loggerDict
+
+
+def test_no_leaked_file_handles_after_many_create_destroy_cycles(tmp_path):
+    """Instance loggers with their own file handler must not leak open file
+    descriptors across many create/destroy cycles."""
+    psutil = pytest.importorskip("psutil")
+    if not hasattr(psutil.Process(), "num_fds"):
+        pytest.skip("num_fds() is only available on Unix platforms")
+
+    process = psutil.Process()
+    before_fds = process.num_fds()
+
+    for i in range(20):
+        fake_mapdl, inst_log = _make_fake_instance_logger(f"172.32.{i}.1:50052")
+        inst_log.log_to_file(str(tmp_path / f"instance_{i}.log"))
+        inst_log.debug("some message")
+
+        # Mirrors ``MapdlBase._cleanup_loggers``'s eager path.
+        name_key = getattr(inst_log, "name_key", None)
+        logging._finalize_child_logger(inst_log.logger.name, name_key, LOG._instances)
+
+    gc.collect()
+    after_fds = process.num_fds()
+    assert after_fds <= before_fds + 2  # small slack for unrelated fd churn
+
+
+def test_set_log_level_affects_multiple_instances_independently():
+    """``_MapdlCore.set_log_level`` must set the level on the *calling*
+    instance's own logger.
+
+    Regression test for a bug where it delegated to a module-level
+    ``setup_logger()`` helper that memoized a single logger process-wide
+    (via a function attribute), so only the first call in the whole
+    process ever had any effect.
+    """
+    from ansys.mapdl.core.mapdl_core import _MapdlCore
+
+    fake_a, log_a = _make_fake_instance_logger("172.33.1.1:50052")
+    fake_b, log_b = _make_fake_instance_logger("172.33.1.2:50052")
+    fake_a._log = log_a
+    fake_b._log = log_b
+
+    _MapdlCore.set_log_level(fake_a, "DEBUG")
+    _MapdlCore.set_log_level(fake_b, "ERROR")
+
+    assert log_a.logger.level == deflogging.DEBUG
+    assert log_b.logger.level == deflogging.ERROR
+
+
+def test_setup_logger_is_deprecated_and_works_per_instance():
+    """The legacy ``setup_logger`` helper is deprecated but still usable,
+    and must no longer memoize a single logger process-wide."""
+    from ansys.mapdl.core.mapdl_core import setup_logger
+
+    fake_a = Mock()
+    fake_a.name = "172.33.2.1:50052"
+    fake_a._log = None
+    fake_b = Mock()
+    fake_b.name = "172.33.2.2:50052"
+    fake_b._log = None
+
+    with pytest.deprecated_call():
+        log_a = setup_logger(loglevel="DEBUG", mapdl_instance=fake_a)
+    with pytest.deprecated_call():
+        log_b = setup_logger(loglevel="ERROR", mapdl_instance=fake_b)
+
+    assert log_a is not log_b
+    assert log_a.logger.level == deflogging.DEBUG
+    assert log_b.logger.level == deflogging.ERROR
+
+
+def test_instance_logger_level_is_never_none():
+    """``PymapdlCustomAdapter.level`` must never be ``None``.
+
+    Regression test for a crash surfaced once ``set_log_level`` was fixed to
+    actually apply its argument:
+    ``ansys.mapdl.core.misc.supress_logging`` reads ``mapdl._log.level``
+    before a call, to restore it afterwards. Because the level used to be a
+    static ``None`` class attribute until ``setLevel()`` was called
+    explicitly, a fresh instance logger (left at ``NOTSET`` for cascading)
+    would hand ``None`` back into ``setLevel``, raising
+    ``TypeError: Level not an integer or a valid string: None``.
+    """
+    _, inst_log = _make_fake_instance_logger("172.34.1.1:50052", level=None)
+    assert inst_log.level is not None
+    assert isinstance(inst_log.level, int)
+
+    # Must round-trip through setLevel without raising, mirroring
+    # ``supress_logging``'s save/restore pattern.
+    inst_log.setLevel(inst_log.level)
+
+
+def test_supress_logging_restores_prior_level_without_crashing():
+    """End-to-end regression test for the ``supress_logging`` decorator
+    interacting with a freshly-created (``NOTSET``) instance logger."""
+    from ansys.mapdl.core.mapdl import MapdlBase
+    from ansys.mapdl.core.misc import supress_logging
+
+    class _FakeMapdl(MapdlBase):
+        def __init__(self, log):
+            self._log = log
+
+        def _set_log_level(self, level):
+            self._log.setLevel(level)
+
+    _, inst_log = _make_fake_instance_logger("172.34.2.1:50052", level=None)
+    fake_mapdl = _FakeMapdl(inst_log)
+
+    @supress_logging
+    def fake_method(mapdl):
+        assert mapdl._log.level == deflogging.CRITICAL
+        return "ok"
+
+    assert fake_method(fake_mapdl) == "ok"
+
+
+## Tests for ``Logger.add_child_logger``, the subsystem-level counterpart of
+## ``add_instance_logger`` (no ``PymapdlCustomAdapter`` wrapping, not tied to
+## a MAPDL instance).
+
+
+@pytest.fixture(autouse=True)
+def _deregister_child_loggers_created_by_test():
+    """Deregister any ``LOG._instances`` entry a test adds, once it is done.
+
+    Unlike instance loggers, bare child loggers created via
+    ``Logger.add_child_logger`` are not reliably garbage collected (see
+    ``test_add_child_logger_survives_gc_unlike_instance_logger``): stdlib's
+    own ``logging.Logger.manager.loggerDict`` keeps its own strong
+    reference to them. Without this fixture, every test below would
+    permanently leak its child logger into the shared, process-wide ``LOG``
+    singleton, polluting unrelated tests that iterate over
+    ``LOG._instances`` (for example ``test_lowercases``).
+
+    Only names created *during* the test are removed, so pre-existing or
+    still-in-use registry entries from other tests are left untouched.
+    """
+    before = set(LOG._instances.keys())
+    yield
+    for name in set(LOG._instances.keys()) - before:
+        child_logger = LOG._instances.get(name)
+        if child_logger is not None:
+            logging._finalize_child_logger(child_logger.name, name, LOG._instances)
+
+
+def test_add_child_logger_is_real_child_of_global_logger():
+    """A child logger must be a true ``logging`` child of ``pymapdl_global``,
+    just like an instance logger, so it shares the global sinks and level
+    cascading."""
+    child_logger = LOG.add_child_logger("subsystem_a")
+    assert isinstance(child_logger, deflogging.Logger)
+    assert child_logger.name == f"{LOG.logger.name}.subsystem_a"
+    assert child_logger.parent is LOG.logger
+    assert child_logger.propagate is False
+    assert any(
+        isinstance(h, logging.GlobalForwardingHandler) for h in child_logger.handlers
+    )
+    assert child_logger.level == deflogging.NOTSET
+
+
+def test_add_child_logger_registers_in_instances():
+    """A child logger must be registered under its dotted name in
+    ``LOG._instances``, mirroring ``add_instance_logger``'s behavior."""
+    child_logger = LOG.add_child_logger("subsystem_b")
+    key = f"{LOG.logger.name}.subsystem_b"
+    assert LOG._instances[key] is child_logger
+
+
+def test_add_child_logger_returns_same_logger_for_same_name():
+    """Requesting the same ``logger_name`` twice must return the
+    already-registered logger instead of creating a duplicate entry."""
+    first = LOG.add_child_logger("subsystem_c")
+    second = LOG.add_child_logger("subsystem_c")
+    assert first is second
+
+
+def test_add_child_logger_deduplicates_sanitized_name_collisions():
+    """Names that collide only after sanitization (dots replaced with
+    underscores) must still get distinct loggers, the same way
+    ``add_instance_logger`` handles real name collisions."""
+    log_a = LOG.add_child_logger("subsystem.d")
+    log_b = LOG.add_child_logger("subsystem_d")
+    assert log_a.name != log_b.name
+
+
+def test_add_child_logger_respects_explicit_level():
+    """Passing ``level`` explicitly must set it directly instead of leaving
+    the logger at ``NOTSET`` for cascading."""
+    child_logger = LOG.add_child_logger("subsystem_e", level="DEBUG")
+    assert child_logger.level == deflogging.DEBUG
+
+
+def test_add_child_logger_level_cascades_from_global_logger():
+    """A child logger created without an explicit level must track
+    ``LOG.setLevel()`` via ``getEffectiveLevel()``."""
+    child_logger = LOG.add_child_logger("subsystem_f")
+    previous_level = LOG.logger.level
+    try:
+        LOG.logger.setLevel(deflogging.DEBUG)
+        assert child_logger.getEffectiveLevel() == deflogging.DEBUG
+        LOG.logger.setLevel(deflogging.ERROR)
+        assert child_logger.getEffectiveLevel() == deflogging.ERROR
+    finally:
+        LOG.logger.setLevel(previous_level)
+
+
+def test_add_child_logger_no_duplicate_emission(caplog):
+    """A record logged through a child logger must reach a given
+    ``pymapdl_global`` handler exactly once."""
+    buf = io.StringIO()
+    handler = deflogging.StreamHandler(buf)
+    handler.setLevel(deflogging.DEBUG)
+    LOG.logger.addHandler(handler)
+    previous_level = LOG.logger.level
+    LOG.logger.setLevel(deflogging.DEBUG)
+    try:
+        child_logger = LOG.add_child_logger("subsystem_g")
+        child_logger.debug("no-duplicate-child-message")
+        text = buf.getvalue()
+        assert text.count("no-duplicate-child-message") == 1
+    finally:
+        LOG.logger.removeHandler(handler)
+        LOG.logger.setLevel(previous_level)
+
+
+def test_add_child_logger_survives_gc_unlike_instance_logger():
+    """Unlike an instance logger, a bare child logger is *not* reliably
+    collected once dereferenced: ``logging.Logger.manager.loggerDict`` holds
+    its own strong reference to every ``logging.Logger`` it creates, so
+    without an owning wrapper object (such as ``PymapdlCustomAdapter``)
+    there is nothing left to become unreachable. This is the documented,
+    best-effort limitation of ``add_child_logger()``'s cleanup (see the
+    module docstring's *Resource cleanup* section)."""
+    child_logger = LOG.add_child_logger("subsystem_gc")
+    full_name = child_logger.name
+
+    del child_logger
+    gc.collect()
+
+    assert full_name in deflogging.Logger.manager.loggerDict
