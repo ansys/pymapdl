@@ -1259,6 +1259,73 @@ class TestCtrlExitHardTimeout:
 
         never_return.set()
 
+    def test_does_not_start_a_thread_when_interpreter_is_finalizing(self):
+        """During interpreter shutdown, 'threading.Thread(...).start()' raises
+        'RuntimeError: can't create new thread at interpreter shutdown'.
+        '_ctrl("exit")' must detect that (via 'sys.is_finalizing()') and fall
+        back to a direct, untracked call instead of spawning a thread."""
+        from ansys.mapdl.core.mapdl_grpc import _InactiveRpcError
+
+        stub = Mock()
+        stub.Ctrl.side_effect = _InactiveRpcError(MagicMock())
+        dummy = self._Dummy(stub)
+
+        with patch("ansys.mapdl.core.mapdl_grpc.sys.is_finalizing", return_value=True):
+            with patch("ansys.mapdl.core.mapdl_grpc.threading.Thread") as mock_thread:
+                dummy._ctrl("exit")
+
+        mock_thread.assert_not_called()
+        stub.Ctrl.assert_called_once()
+
+    def test_reraises_unexpected_errors_even_when_interpreter_is_finalizing(self):
+        """The direct fallback used during interpreter shutdown must still
+        only swallow the expected "connection closed" gRPC error family."""
+        stub = Mock()
+        stub.Ctrl.side_effect = ValueError("boom")
+        dummy = self._Dummy(stub)
+
+        with patch("ansys.mapdl.core.mapdl_grpc.sys.is_finalizing", return_value=True):
+            with pytest.raises(ValueError, match="boom"):
+                dummy._ctrl("exit")
+
+
+class TestExitMapdlRunsCloseProcessDespiteServerErrors:
+    """'_exit_mapdl' must still run the PID-based '_close_process' cleanup
+    even when '_exit_mapdl_server' (and the 'Ctrl("EXIT")' call it issues)
+    raises, such as during interpreter shutdown."""
+
+    class _Dummy:
+        def __init__(self, server_error):
+            self._log = MagicMock()
+            self._local = True
+            self._cache_pids = MagicMock()
+            self._exit_mapdl_server = MagicMock(side_effect=server_error)
+            self._close_process = MagicMock()
+            self._remove_lock_file = MagicMock()
+
+        _exit_mapdl = MapdlGrpc._exit_mapdl
+
+    def test_close_process_runs_when_exit_mapdl_server_raises(self):
+        dummy = self._Dummy(
+            RuntimeError("can't create new thread at interpreter shutdown")
+        )
+
+        dummy._exit_mapdl("/some/path")
+
+        dummy._exit_mapdl_server.assert_called_once()
+        dummy._close_process.assert_called_once()
+        dummy._remove_lock_file.assert_called_once()
+
+    def test_close_process_runs_when_exit_mapdl_server_succeeds(self):
+        dummy = self._Dummy(server_error=None)
+        dummy._exit_mapdl_server.side_effect = None
+
+        dummy._exit_mapdl("/some/path")
+
+        dummy._exit_mapdl_server.assert_called_once()
+        dummy._close_process.assert_called_once()
+        dummy._remove_lock_file.assert_called_once()
+
 
 class TestCloseGrpcChannelHardTimeout:
     """``_close_grpc_channel`` must never hang forever.

@@ -2369,7 +2369,17 @@ class MapdlGrpc(MapdlBase):
         if self._local:
             self._cache_pids()  # Recache processes
 
-            self._exit_mapdl_server()
+            # ``_exit_mapdl_server`` (and the ``Ctrl("EXIT")`` call it
+            # issues) can raise - for instance ``RuntimeError: can't create
+            # new thread at interpreter shutdown`` when this runs from
+            # ``__del__`` during interpreter finalization. The PID-based
+            # ``_close_process``/``_remove_lock_file`` cleanup below does not
+            # depend on the server having been asked to exit cleanly, so it
+            # must still run in that case rather than being skipped.
+            try:
+                self._exit_mapdl_server()
+            except Exception as e:
+                self._log.debug("Error during _exit_mapdl_server: %s", e)
 
             self._close_process()
 
@@ -3221,6 +3231,22 @@ class MapdlGrpc(MapdlBase):
                 f"transport_mode={getattr(self, 'transport_mode', None)!r} "
                 f"ctrl_timeout={timeout!r}"
             )
+
+            if sys.is_finalizing():
+                # CPython refuses to start new threads once the interpreter
+                # is finalizing (``RuntimeError: can't create new thread at
+                # interpreter shutdown``), which is exactly the situation
+                # ``__del__`` can run in. Fall back to a direct, untracked
+                # call bounded only by gRPC's own ``timeout``: it may not be
+                # reliably honored on every transport (see above), but
+                # spawning a thread here is not an option, and the
+                # PID-based ``_close_process`` cleanup that follows does not
+                # depend on this call succeeding or even returning.
+                try:
+                    stub.Ctrl(request, timeout=timeout)
+                except (_InactiveRpcError, _MultiThreadedRendezvous):
+                    pass
+                return
 
             call_result: Dict[str, Exception] = {}
 

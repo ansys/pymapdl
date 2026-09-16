@@ -537,8 +537,13 @@ def pytest_unconfigure(config: pytest.Config) -> None:
     the file descriptor it writes to. Arming the watchdog before that runs
     would silently disable it.
 
-    Set ``PYMAPDL_SHUTDOWN_TIMEOUT`` to change the budget in seconds, or to
-    ``0`` to disable the watchdog.
+    The watchdog is opt-in: it only arms when ``PYMAPDL_SHUTDOWN_TIMEOUT`` is
+    set (to a positive number of seconds), which the CI workflows already do.
+    This hook also runs whenever ``pytest.main()`` returns from a
+    programmatic, in-process invocation - that is not interpreter shutdown,
+    and a passing, otherwise idle caller has no wedged thread to report. An
+    unconditional default would arm the watchdog there too and ``exit()`` that
+    still-healthy process once the budget elapses.
 
     Parameters
     ----------
@@ -551,13 +556,21 @@ def pytest_unconfigure(config: pytest.Config) -> None:
 
     Examples
     --------
-    Give the shutdown phase 60 seconds instead of the default:
+    Give the shutdown phase 60 seconds:
 
     >>> import os
     >>> os.environ["PYMAPDL_SHUTDOWN_TIMEOUT"] = "60"
     """
+    raw_timeout = os.environ.get("PYMAPDL_SHUTDOWN_TIMEOUT")
+    if raw_timeout is None:
+        # Opt-in only: without an explicit budget, do not arm a watchdog that
+        # would '_exit()' the process later, since this hook also fires after
+        # a plain, in-process 'pytest.main()' call that is not followed by
+        # interpreter shutdown.
+        return
+
     try:
-        timeout = float(os.environ.get("PYMAPDL_SHUTDOWN_TIMEOUT", 300))
+        timeout = float(raw_timeout)
     except ValueError:
         timeout = 300.0
 
