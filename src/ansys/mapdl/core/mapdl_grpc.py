@@ -437,6 +437,72 @@ def _join_background_threads(
         pass
 
 
+def _run_with_hard_timeout(
+    instance: Any,
+    fn: Callable[[], None],
+    timeout: float,
+    thread_name: str,
+) -> Tuple[bool, Optional[BaseException]]:
+    """Run *fn* in a daemon thread bounded by a hard wall-clock timeout.
+
+    Factors out the "spawn a daemon thread, join it with our own timeout,
+    and abandon it (tracked for a later retry) if it is still running
+    afterward" pattern shared by every uncancellable blocking gRPC call in
+    this module (the ``Ctrl("EXIT")`` call and the gRPC channel close).
+    ``Thread.join`` does not depend on gRPC's completion queue or deadline
+    machinery at all, so it bounds the wait even when the underlying
+    transport never reports the call as terminated -- see
+    :func:`_track_background_thread` for why the thread cannot simply be
+    killed instead.
+
+    Parameters
+    ----------
+    instance : Any
+        The object to track the thread against (via
+        :func:`_track_background_thread`) if it does not finish in time.
+        Typically a :class:`MapdlGrpc` instance.
+    fn : Callable[[], None]
+        The blocking, no-argument callable to run in the background thread.
+        Any exception it raises is captured and returned rather than
+        propagated from the background thread.
+    timeout : float
+        Seconds to wait for *fn* to finish before abandoning it.
+    thread_name : str
+        Name given to the background thread, surfaced in stack dumps and
+        thread listings to help identify abandoned threads.
+
+    Returns
+    -------
+    Tuple[bool, Optional[BaseException]]
+        ``(timed_out, error)``. ``timed_out`` is ``True`` if *fn* did not
+        finish within *timeout*, in which case the thread has already been
+        registered via :func:`_track_background_thread` and *error* is
+        always ``None`` (whatever *fn* would have raised is unknown, since it
+        never finished). Otherwise ``timed_out`` is ``False`` and *error* is
+        the exception *fn* raised, if any, or ``None`` if it returned
+        normally.
+    """
+    result: Dict[str, BaseException] = {}
+
+    def _target() -> None:
+        try:
+            fn()
+        except BaseException as exc:  # noqa: BLE001 - captured, handled by caller
+            result["error"] = exc
+
+    thread = threading.Thread(target=_target, name=thread_name, daemon=True)
+    thread.start()
+    thread.join(timeout)
+
+    if thread.is_alive():
+        # Give '_join_background_threads' a later, bounded chance to reclaim
+        # this thread instead of leaking it for good.
+        _track_background_thread(instance, thread)
+        return True, None
+
+    return False, result.get("error")
+
+
 class MapdlGrpc(MapdlBase):
     """This class connects to a GRPC MAPDL server and allows commands
     to be passed to a persistent session.
@@ -2639,18 +2705,14 @@ class MapdlGrpc(MapdlBase):
         # with ``Thread.join``, which does not depend on gRPC machinery. If it
         # expires we abandon the daemon thread: gRPC offers no way to cancel an
         # in-flight blocking close.
-        close_thread = threading.Thread(
-            target=_unsubscribe_and_close,
-            name="pymapdl-close-grpc-channel",
-            daemon=True,
+        timed_out, _ = _run_with_hard_timeout(
+            self,
+            _unsubscribe_and_close,
+            CHANNEL_CLOSE_TIMEOUT_S,
+            thread_name="pymapdl-close-grpc-channel",
         )
-        close_thread.start()
-        close_thread.join(CHANNEL_CLOSE_TIMEOUT_S)
 
-        if close_thread.is_alive():
-            # Give '_join_background_threads' a later, bounded chance to
-            # reclaim this thread instead of leaking it for good.
-            _track_background_thread(self, close_thread)
+        if timed_out:
             if not exiting:
                 self._log.debug(
                     "Timed out after %s s while closing the gRPC channel. "
@@ -3248,35 +3310,28 @@ class MapdlGrpc(MapdlBase):
                     pass
                 return
 
-            call_result: Dict[str, Exception] = {}
-
             def _call_ctrl_exit() -> None:
-                try:
-                    # this always returns an error as the connection is closed
-                    stub.Ctrl(request, timeout=timeout)
-                except Exception as exc:  # noqa: BLE001 - captured, handled by caller
-                    call_result["error"] = exc
-
-            call_thread = threading.Thread(
-                target=_call_ctrl_exit,
-                name="pymapdl-ctrl-exit",
-                daemon=True,
-            )
-            t_start = time.time()
-            call_thread.start()
+                # this always returns an error as the connection is closed
+                stub.Ctrl(request, timeout=timeout)
 
             # extra slack on top of the gRPC-level timeout to allow for
             # normal call/response overhead before we give up waiting
             hard_timeout_buffer = 3.0
             hard_timeout = timeout + hard_timeout_buffer if timeout is not None else 5.0
-            call_thread.join(hard_timeout)
+            t_start = time.time()
+            timed_out, error = _run_with_hard_timeout(
+                self,
+                _call_ctrl_exit,
+                hard_timeout,
+                thread_name="pymapdl-ctrl-exit",
+            )
 
-            if call_thread.is_alive():
-                # Give '_join_background_threads' a later, bounded chance to
-                # reclaim this thread (typically once the MAPDL process has
-                # actually been killed and the call unblocks) instead of
+            if timed_out:
+                # The background thread issuing the call keeps running
+                # (typically until the MAPDL process has actually been
+                # killed and the call unblocks); '_join_background_threads'
+                # gets a later, bounded chance to reclaim it instead of
                 # leaking it for the remaining lifetime of the process.
-                _track_background_thread(self, call_thread)
                 self._log.warning(
                     f"Ctrl('EXIT') call did not return within "
                     f"{hard_timeout:.1f}s (hard wall-clock timeout); "
@@ -3289,7 +3344,6 @@ class MapdlGrpc(MapdlBase):
                 return
 
             elapsed = time.time() - t_start
-            error = call_result.get("error")
             if error is None:
                 self._log.debug(
                     f"Ctrl('EXIT') returned normally after {elapsed:.2f}s "
