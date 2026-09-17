@@ -69,7 +69,7 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.helpers import is_installed
 from ansys.mapdl.core.launcher import launch_mapdl
-from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME
+from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME, _MapdlCore
 from ansys.mapdl.core.mapdl_extended import (
     MAX_DO_LOOP_LEVEL,
     _MapdlExtended,
@@ -536,6 +536,43 @@ def test_chaining(mapdl, clear_at_end):
                 mapdl.k(i, i, i, i)
 
         assert mapdl.geometry.n_keypoint == 1000
+
+
+def test_chain_commands_restores_state_on_body_error():
+    parent = MagicMock()
+    parent._store_commands = False
+    parent._stored_commands = []
+
+    with pytest.raises(RuntimeError, match="body failure"):
+        with _MapdlCore._chain_commands(parent):
+            parent._stored_commands.append("incomplete command")
+            raise RuntimeError("body failure")
+
+    assert parent._store_commands is False
+    assert parent._stored_commands == []
+    parent._chain_stored.assert_not_called()
+
+
+def test_chain_commands_preserves_nested_state():
+    parent = MagicMock()
+    parent._store_commands = True
+    parent._stored_commands = ["outer command"]
+
+    with _MapdlCore._chain_commands(parent):
+        parent._stored_commands.append("inner command")
+
+    assert parent._store_commands is True
+    assert parent._stored_commands == ["outer command", "inner command"]
+    parent._chain_stored.assert_not_called()
+
+
+def test_restore_plot_device_handles_restore_failure():
+    parent = MagicMock()
+    parent.show.side_effect = RuntimeError("restore failure")
+
+    _MapdlCore._restore_plot_device(parent, "PNG", RuntimeError("primary failure"))
+
+    parent._log.exception.assert_called_once()
 
 
 def test_error(mapdl, clear_at_end):
