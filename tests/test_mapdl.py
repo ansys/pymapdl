@@ -490,32 +490,31 @@ def test_basic_command(mapdl):
 
 
 def test_allow_ignore(mapdl, clear_at_end):
-    with pytest.warns(DeprecationWarning):
-        mapdl.allow_ignore = True
+    try:
+        with pytest.warns(DeprecationWarning):
+            mapdl.allow_ignore = True
 
-    assert mapdl.allow_ignore is True
+        assert mapdl.allow_ignore is True
 
-    with pytest.warns(DeprecationWarning):
-        mapdl.allow_ignore = False
+        with pytest.warns(DeprecationWarning):
+            mapdl.allow_ignore = False
 
-    assert mapdl.allow_ignore is False
-    mapdl.finish()
+        assert mapdl.allow_ignore is False
+        mapdl.finish()
 
-    with pytest.raises(pymapdl.errors.MapdlInvalidRoutineError):
-        mapdl.k()
+        with pytest.raises(pymapdl.errors.MapdlInvalidRoutineError):
+            mapdl.k()
 
-    # Does not create keypoints and yet does not raise error
-    with pytest.warns(DeprecationWarning):
-        mapdl.allow_ignore = True
-    assert mapdl.allow_ignore is True
+        # Does not create keypoints and yet does not raise error
+        with pytest.warns(DeprecationWarning):
+            mapdl.allow_ignore = True
+        assert mapdl.allow_ignore is True
 
-    mapdl.finish()
-    mapdl.k()  # Raise an error because we are not in PREP7.
-    assert mapdl.get_value("KP", 0, "count") == 0.0  # Effectively no KP created.
-
-    # Reset
-    with pytest.warns(DeprecationWarning):
-        mapdl.allow_ignore = False
+        mapdl.finish()
+        mapdl.k()  # Raise an error because we are not in PREP7.
+        assert mapdl.get_value("KP", 0, "count") == 0.0  # Effectively no KP created.
+    finally:
+        mapdl.ignore_errors = False
 
 
 def test_chaining(mapdl, clear_at_end):
