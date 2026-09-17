@@ -575,6 +575,28 @@ def test_restore_plot_device_handles_restore_failure():
     parent._log.exception.assert_called_once()
 
 
+def test_save_selection_preserves_body_error_when_cleanup_fails():
+    parent = MagicMock()
+    context = _MapdlCore._save_selection(parent)
+    context.selection = [{"cmsel": {}}]
+    parent.allsel.side_effect = RuntimeError("cleanup failure")
+
+    context.__exit__(ValueError, ValueError("body failure"), None)
+
+    parent._log.exception.assert_called_once()
+
+
+def test_interactive_plotting_skips_noninteractive_mode():
+    parent = MagicMock()
+    parent._store_commands = True
+    context = _MapdlCore.WithInterativePlotting(parent, 1600)
+
+    type(context).__enter__.__wrapped__(context)
+    type(context).__exit__.__wrapped__(context, None, None, None)
+
+    parent.show.assert_not_called()
+
+
 def test_error(mapdl, clear_at_end):
     with pytest.raises(MapdlRuntimeError):
         mapdl.a(0, 0, 0, 0)
