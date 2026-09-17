@@ -28,12 +28,10 @@ nodes using arbitrary ``X``/``Y``/``Z`` coordinate criteria without having to
 manually translate the request into a sequence of low-level select commands.
 
 See the :class:`NodeSelector <ansys.mapdl.core.selector.NodeSelector>` class
-for the public API and the :class:`Interval <ansys.mapdl.core.selector.Interval>`
-class for the supported interval-criterion representation.
+for the public API.
 """
 
 from collections.abc import Mapping
-from dataclasses import dataclass
 import math
 from numbers import Real
 import string
@@ -54,7 +52,6 @@ import weakref
 import numpy as np
 from numpy.typing import NDArray
 
-from ansys.mapdl.core.errors import ComponentNoData
 from ansys.mapdl.core.misc import random_string
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -64,89 +61,13 @@ if TYPE_CHECKING:  # pragma: no cover
 #: are always processed (regardless of keyword-argument order).
 _AXES: Tuple[str, ...] = ("x", "y", "z")
 
+
 #: Python container types treated as an explicit "OR of discrete values".
-#: Strings, mappings, ``range`` and bare numbers are intentionally excluded
-#: and handled separately (see :func:`_normalize_axis_criterion`).
-_COLLECTION_TYPES = (list, tuple, set, frozenset, np.ndarray)
+#: Tuples are excluded because they represent inclusive intervals.
+_SAMPLE_COLLECTION_TYPES = (list, set, frozenset, np.ndarray)
 
-#: Prefix used for the temporary ``NODE`` components created while combining
-#: several axes. It only needs to be short, unique and a valid MAPDL
-#: component name (it must start with a letter).
+#: Prefix used for temporary ``NODE`` components combining multiple axes.
 _COMPONENT_PREFIX = "PYSEL"
-
-
-@dataclass(frozen=True)
-class Interval:
-    """An explicit, inclusive-bounds interval criterion.
-
-    ``Interval`` is used to request every node whose coordinate lies between
-    ``vmin`` and ``vmax`` (both bounds included), as opposed to a plain
-    list/tuple/set/frozenset/:class:`numpy.ndarray`, which always means an *OR*
-    of discrete values, or a bare :class:`range`, which is rejected because
-    its exclusive-stop semantics differ from MAPDL's inclusive selection
-    ranges.
-
-    At least one of ``vmin`` or ``vmax`` must be supplied. Leaving one bound
-    as ``None`` requests an open-ended interval on that side.
-    When used with the
-    :meth:`NodeSelector.select <ansys.mapdl.core.selector.NodeSelector.select>`
-    method, the missing bound is resolved from the model's coordinate extent.
-
-    Parameters
-    ----------
-    vmin : int or float, optional
-        Inclusive lower bound. ``None`` means "no lower bound".
-    vmax : int or float, optional
-        Inclusive upper bound. ``None`` means "no upper bound".
-
-    Raises
-    ------
-    TypeError
-        If a supplied bound is not a numeric coordinate.
-    ValueError
-        If both bounds are omitted, a bound is not finite, or ``vmin`` is
-        greater than ``vmax``.
-
-    Examples
-    --------
-    Select every node with ``1 <= x <= 5``.
-
-    >>> from ansys.mapdl.core.selector import Interval
-    >>> mapdl.selector.select(x=Interval(1, 5))  # doctest: +SKIP
-
-    Create an open-ended criterion for ``y >= 2``.
-
-    >>> Interval(vmin=2)
-    Interval(vmin=2, vmax=None)
-    """
-
-    vmin: Optional[Union[int, float]] = None
-    vmax: Optional[Union[int, float]] = None
-
-    def __post_init__(self) -> None:
-        if self.vmin is None and self.vmax is None:
-            raise ValueError(
-                "Interval requires at least one of 'vmin' or 'vmax' to be given."
-            )
-
-        for bound_name, bound in (("vmin", self.vmin), ("vmax", self.vmax)):
-            if bound is not None and (
-                isinstance(bound, bool) or not isinstance(bound, Real)
-            ):
-                raise TypeError(
-                    f"Interval {bound_name} must be a numeric coordinate or None; "
-                    f"got {bound!r}."
-                )
-            if bound is not None and not math.isfinite(bound):
-                raise ValueError(
-                    f"Interval {bound_name} must be finite; got {bound!r}."
-                )
-
-        if self.vmin is not None and self.vmax is not None and self.vmin > self.vmax:
-            raise ValueError(
-                f"Interval bounds are reversed: vmin ({self.vmin}) must not be "
-                f"greater than vmax ({self.vmax})."
-            )
 
 
 class _AxisSelection(NamedTuple):
@@ -160,12 +81,11 @@ class _AxisSelection(NamedTuple):
     values : tuple
         For ``kind == "values"``, the ordered, non-empty tuple of numeric
         values to ``OR`` together. For ``kind == "interval"``, the
-        ``(vmin, vmax)`` pair, where an open bound is represented by ``""``
-        until it is resolved to the corresponding model extent.
+        ``(vmin, vmax)`` pair.
     """
 
     kind: Literal["values", "interval"]
-    values: Tuple[Union[int, float, str], ...]
+    values: Tuple[Union[int, float], ...]
 
 
 def _reject(axis: str, message: str, *, error: type[Exception] = TypeError) -> NoReturn:
@@ -204,18 +124,12 @@ def _normalize_axis_criterion(axis: str, value: Any) -> _AxisSelection:
     _AxisSelection
         The normalized, internal representation of the criterion.
     """
-    if isinstance(value, Interval):
-        vmin = "" if value.vmin is None else value.vmin
-        vmax = "" if value.vmax is None else value.vmax
-        return _AxisSelection(kind="interval", values=(vmin, vmax))
-
     if isinstance(value, range):
         _reject(
             axis,
             "a bare 'range' is not accepted because its exclusive stop bound "
-            "differs from MAPDL's inclusive selection ranges; use "
-            "'Interval(vmin, vmax)' for a bounded range or an explicit list "
-            "of values instead.",
+            "differs from MAPDL's inclusive selection ranges; use a two-value "
+            "tuple for a bounded range instead.",
         )
 
     if isinstance(value, bool):
@@ -230,20 +144,31 @@ def _normalize_axis_criterion(axis: str, value: Any) -> _AxisSelection:
     if isinstance(value, Real):
         return _AxisSelection(kind="values", values=(_normalize_value(axis, value),))
 
-    if isinstance(value, _COLLECTION_TYPES):
-        if isinstance(value, np.ndarray) and value.ndim != 1:
+    if isinstance(value, tuple):
+        if len(value) != 2:
             _reject(
                 axis,
-                "a NumPy array criterion must be one-dimensional.",
+                "a tuple criterion must contain exactly two coordinate bounds.",
+                error=ValueError,
             )
+        vmin, vmax = (_normalize_value(axis, bound) for bound in value)
+        if vmin > vmax:
+            _reject(
+                axis,
+                f"interval bounds are reversed: vmin ({vmin}) must not be "
+                f"greater than vmax ({vmax}).",
+                error=ValueError,
+            )
+        return _AxisSelection(kind="interval", values=(vmin, vmax))
+
+    if isinstance(value, _SAMPLE_COLLECTION_TYPES):
+        if isinstance(value, np.ndarray) and value.ndim != 1:
+            _reject(axis, "a NumPy array criterion must be one-dimensional.")
         try:
             items = list(value)
         except TypeError:
-            _reject(
-                axis,
-                "a NumPy array criterion must be one-dimensional.",
-            )
-        if len(items) == 0:
+            _reject(axis, "a NumPy array criterion must be one-dimensional.")
+        if not items:
             _reject(
                 axis,
                 "an empty collection is not a valid criterion.",
@@ -257,8 +182,8 @@ def _normalize_axis_criterion(axis: str, value: Any) -> _AxisSelection:
     _reject(
         axis,
         f"unsupported criterion type {type(value).__name__!r}. Use a number, "
-        "a list/tuple/set/frozenset/numpy.ndarray of numbers, or an "
-        "'Interval'.",
+        "a list/set/frozenset/one-dimensional NumPy array of numbers, or a "
+        "two-value tuple of numbers.",
     )
 
 
@@ -294,8 +219,7 @@ class NodeSelector:
 
     Select every node with ``0 <= z <= 5``.
 
-    >>> from ansys.mapdl.core.selector import Interval
-    >>> mapdl.selector.select(z=Interval(0, 5))  # doctest: +SKIP
+    >>> mapdl.selector.select(z=(0, 5))  # doctest: +SKIP
     """
 
     def __init__(self, mapdl: "MapdlBase") -> None:
@@ -324,51 +248,39 @@ class NodeSelector:
         ``X``, ``Y`` and ``Z``, supplied through ``**kwargs``) accepts one of:
 
         * a scalar number, which selects nodes at that coordinate;
-        * a list/tuple/set/frozenset/one-dimensional
-          :class:`numpy.ndarray` of numbers, which selects nodes matching
-          *any* of those values (an *OR* within the axis); empty collections
-          are not valid criteria;
-        * an :class:`Interval <ansys.mapdl.core.selector.Interval>`, which
-          selects nodes whose coordinate lies
-          within the inclusive ``[vmin, vmax]`` bounds.
+        * a list, set, frozenset, or one-dimensional :class:`numpy.ndarray`
+          of numbers, which selects nodes matching *any* of those values;
+          empty collections are not valid criteria;
+        * a two-value tuple of numbers, which selects nodes whose coordinate
+          lies within the inclusive ``[vmin, vmax]`` bounds.
 
-        For an open-ended :class:`Interval <ansys.mapdl.core.selector.Interval>`,
-        the missing bound is obtained from the model extent before the final
-        ``NSEL`` command is issued. This avoids relying on MAPDL's omitted-bound
-        equality behavior while preserving MAPDL's active selection tolerance.
+        A tuple must contain exactly two finite numeric bounds in ascending
+        order. Open-ended intervals are not supported because an omitted
+        MAPDL ``NSEL`` bound has different semantics from an unbounded
+        interval.
 
-        Criteria supplied on different axes are combined with *AND*: the
-        resulting selection is the intersection across axes of the
-        per-axis, *OR*-combined value sets. When criteria are supplied for
-        multiple axes, each axis's set is first materialized independently
-        (from the full model) into a uniquely named temporary ``NODE``
-        component with the
-        :meth:`Mapdl.cm() <ansys.mapdl.core.Mapdl.cm>` method. The axes are
-        then combined using
-        :meth:`Mapdl.cmsel() <ansys.mapdl.core.Mapdl.cmsel>`
-        (``"S"`` for the first axis, ``"R"`` for every subsequent one, always
-        processed in ``x``, ``y``, ``z`` order regardless of keyword order).
-        Every temporary component is deleted with
-        :meth:`Mapdl.cmdele() <ansys.mapdl.core.Mapdl.cmdele>`
-        before returning, whether the call succeeds or raises.
+        Criteria supplied on different axes are combined with *AND*. For
+        multiple axes, each axis's set is materialized into a uniquely named
+        temporary ``NODE`` component. The axes are then combined with
+        ``CMSEL,S`` for the first axis and ``CMSEL,R`` for every subsequent
+        axis, always processed in ``x``, ``y``, ``z`` order regardless of
+        keyword order. Every temporary component is deleted before returning.
 
-        The resulting node selection intentionally replaces the caller's
-        previous active node selection and remains active after this method
-        returns; that previous selection is not restored. Existing
-        user-defined components are not redefined. Temporary components
-        created by this method are deleted before returning.
+        The caller's previous active selection is restored before this method
+        returns. The returned node IDs are evaluated while the coordinate
+        selection is active.
 
         Parameters
         ----------
-        x : number, collection of numbers, or Interval, optional
-            Criterion for the ``X`` coordinate. Collections can be
-            list/tuple/set/frozenset/:class:`numpy.ndarray` instances.
-        y : number, collection of numbers, or Interval, optional
-            Criterion for the ``Y`` coordinate. Collections can be
-            list/tuple/set/frozenset/:class:`numpy.ndarray` instances.
-        z : number, collection of numbers, or Interval, optional
-            Criterion for the ``Z`` coordinate. Collections can be
-            list/tuple/set/frozenset/:class:`numpy.ndarray` instances.
+        x : number, collection of numbers, or tuple of two numbers, optional
+            Criterion for the ``X`` coordinate. Lists, sets, frozensets, and
+            one-dimensional NumPy arrays represent discrete coordinate values.
+        y : number, collection of numbers, or tuple of two numbers, optional
+            Criterion for the ``Y`` coordinate. Lists, sets, frozensets, and
+            one-dimensional NumPy arrays represent discrete coordinate values.
+        z : number, collection of numbers, or tuple of two numbers, optional
+            Criterion for the ``Z`` coordinate. Lists, sets, frozensets, and
+            one-dimensional NumPy arrays represent discrete coordinate values.
         **kwargs : dict, optional
             Case-insensitive aliases for ``x``, ``y`` and ``z`` (that is,
             ``X``, ``Y`` and ``Z``). Supplying two non-``None`` criteria for
@@ -393,12 +305,8 @@ class NodeSelector:
         ValueError
             If no criteria are supplied at all, if two non-``None`` criteria
             specify the same axis through its case-insensitive aliases, if a
-            criterion is an empty collection, or if a coordinate or interval
-            bound is not finite.
-        RuntimeError
-            If an :class:`Interval <ansys.mapdl.core.selector.Interval>`
-            criterion has an open-ended bound and MAPDL returns a
-            non-numeric or non-finite model extent while resolving it.
+            tuple does not contain exactly two values, a collection is empty,
+            or a coordinate or interval bound is not finite.
 
         Examples
         --------
@@ -409,16 +317,13 @@ class NodeSelector:
         Select every node with ``x == 1`` and ``y`` in ``{1, 2}`` and
         ``0 <= z <= 5``.
 
-        >>> from ansys.mapdl.core.selector import Interval
-        >>> mapdl.selector.select(
-        ...     x=1, y=[1, 2], z=Interval(0, 5)
-        ... )  # doctest: +SKIP
+        >>> mapdl.selector.select(x=1, y=[1, 2], z=(0, 5))  # doctest: +SKIP
         """
         raw_criteria = self._collect_criteria(x, y, z, kwargs)
 
-        # Normalize and validate every axis *before* issuing a single MAPDL
-        # command, so that an invalid later axis never leaves a partial
-        # selection or an orphaned temporary component behind.
+        # Normalize and validate every axis before issuing a MAPDL command so
+        # an invalid later axis never leaves a partial selection or an orphaned
+        # temporary component behind.
         normalized: Dict[str, _AxisSelection] = {
             axis: _normalize_axis_criterion(axis, raw_criteria[axis])
             for axis in _AXES
@@ -477,108 +382,56 @@ class NodeSelector:
         """Translate normalized criteria into MAPDL commands and return the result."""
         mapdl = self._mapdl
 
-        # A single axis does not need a temporary component.  Besides
-        # avoiding unnecessary commands (particularly for remote sessions),
-        # this also makes an empty single-axis selection independent of CM's
-        # error-reporting mode.
-        if len(normalized) == 1:
-            axis, criterion = next(iter(normalized.items()))
-            self._select_axis(mapdl, axis, criterion)
-            return mapdl.mesh.nnum
-
-        created_components: List[str] = []
-        selection_failed = False
-        try:
-            for axis, criterion in normalized.items():
+        with mapdl.save_selection:
+            if len(normalized) == 1:
+                axis, criterion = next(iter(normalized.items()))
                 self._select_axis(mapdl, axis, criterion)
+                return mapdl.mesh.nnum
 
-                # CM reports an empty selection as ComponentNoData in the
-                # usual error mode, but that exception can be suppressed by
-                # ``mapdl.ignore_errors``.  Check the selected node array
-                # before attempting to create the temporary component so the
-                # empty result remains correct in either mode.
-                if mapdl.mesh.nnum.size == 0:
-                    mapdl.nsel("NONE")
-                    return mapdl.mesh.nnum
+            created_components: List[str] = []
+            selection_failed = False
+            try:
+                for axis, criterion in normalized.items():
+                    self._select_axis(mapdl, axis, criterion)
 
-                name = _component_name(axis)
-                try:
+                    if mapdl.mesh.n_node == 0:
+                        return mapdl.mesh.nnum
+
+                    name = _component_name(axis)
                     mapdl.cm(name, "NODE")
-                except ComponentNoData:
-                    # CM cannot represent an empty set.  The NSEL operation
-                    # above has already produced the correct empty selection,
-                    # so leave it active rather than turning a valid
-                    # no-match criterion into an exception.
-                    mapdl.nsel("NONE")
-                    return mapdl.mesh.nnum
-                created_components.append(name)
+                    created_components.append(name)
 
-            for i, name in enumerate(created_components):
-                mapdl.cmsel("S" if i == 0 else "R", name)
+                for i, name in enumerate(created_components):
+                    mapdl.cmsel("S" if i == 0 else "R", name)
 
-            return mapdl.mesh.nnum
-        except BaseException:
-            selection_failed = True
-            raise
-        finally:
-            cleanup_error = None
-            for name in created_components:
-                try:
-                    mapdl.cmdele(name)
-                except Exception as error:
-                    # Always attempt to delete every component.  If the
-                    # selection itself failed, leave that original exception
-                    # as the one propagated to the caller; otherwise expose
-                    # a cleanup failure rather than silently leaking it.
-                    if cleanup_error is None:
-                        cleanup_error = error
-            if cleanup_error is not None and not selection_failed:
-                raise cleanup_error
+                return mapdl.mesh.nnum
+            except BaseException:
+                selection_failed = True
+                raise
+            finally:
+                cleanup_error = None
+                for name in created_components:
+                    try:
+                        mapdl.cmdele(name)
+                    except Exception as error:
+                        if cleanup_error is None:
+                            cleanup_error = error
+                if cleanup_error is not None and not selection_failed:
+                    raise cleanup_error
 
     @staticmethod
-    def _select_axis(mapdl: "MapdlBase", axis: str, criterion: _AxisSelection) -> None:
+    def _select_axis(
+        mapdl: "MapdlBase",
+        axis: str,
+        criterion: _AxisSelection,
+    ) -> None:
         """Issue the ``NSEL`` command(s) selecting one axis from the full model."""
         axis_label = axis.upper()
 
         if criterion.kind == "interval":
             vmin, vmax = criterion.values
-            if vmin == "":
-                vmin = NodeSelector._coordinate_extent(mapdl, axis_label, "MNLOC")
-            if vmax == "":
-                vmax = NodeSelector._coordinate_extent(mapdl, axis_label, "MXLOC")
-
-            # An open-ended interval can be outside the model extent.  Avoid
-            # sending a reversed NSEL range in that case; the correct result
-            # is an empty active node selection.
-            if isinstance(vmin, Real) and isinstance(vmax, Real) and vmin > vmax:
-                mapdl.nsel("NONE")
-                return
-
             mapdl.nsel("S", "LOC", axis_label, vmin, vmax)
             return
 
         for i, value in enumerate(criterion.values):
             mapdl.nsel("S" if i == 0 else "A", "LOC", axis_label, value)
-
-    @staticmethod
-    def _coordinate_extent(
-        mapdl: "MapdlBase", axis: str, item: str
-    ) -> Union[int, float]:
-        """Return a selected-model coordinate extent for an open interval."""
-        # *GET with MNLOC/MXLOC uses the active node set.  Start from all
-        # nodes so that an open interval is not accidentally clipped by the
-        # caller's previous selection or by a component created for another
-        # axis in this selector call.
-        mapdl.nsel("ALL", mute=True)
-        extent = mapdl.get_value("NODE", 0, item, axis)
-        if isinstance(extent, bool) or not isinstance(extent, Real):
-            raise RuntimeError(
-                f"MAPDL returned a non-numeric {item} extent for the {axis} axis: "
-                f"{extent!r}."
-            )
-        if not math.isfinite(extent):
-            raise RuntimeError(
-                f"MAPDL returned a non-finite {item} extent for the {axis} axis: "
-                f"{extent!r}."
-            )
-        return extent
