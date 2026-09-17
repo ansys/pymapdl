@@ -102,6 +102,33 @@ inputs:
     required: false
     default: 'false'
 
+  extra-env:
+    description: |
+      Extra environment variables to pass through to the MAPDL container, one
+      `KEY=VALUE` pair per line. Used for crash-diagnostics instrumentation
+      (for example `ANS_DEBUG_CRASH=1`) without requiring changes to this
+      action for every new variable.
+    required: false
+    default: ''
+
+  ans-debug-crash:
+    description: |
+      Set the MAPDL `ANS_DEBUG_CRASH` environment variable inside the
+      container. When `1`, MAPDL's signal handler (`sytrap.F`) prints the
+      full developer call stack (`PrintBackTrace`) to stdout on a crash, in
+      addition to the `PrintStackTrace` output it always emits. Set to
+      `false`/`''` to omit the variable entirely.
+    required: false
+    default: '1'
+
+  enable-core-dumps:
+    description: |
+      Enable core dumps inside the container (`--ulimit core=-1` on
+      `docker run`) so a crash produces a `core*` file that can be collected
+      as a CI artifact, in addition to MAPDL's own stack trace output.
+    required: false
+    default: 'true'
+
 outputs:
   container-id:
     description: 'Docker container ID'
