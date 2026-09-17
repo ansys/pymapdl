@@ -114,12 +114,14 @@ def test_get_fallback_string(mapdl):
 
 
 def test_get_lock(mapdl):
-    mapdl._get_lock = True
+    previous_get_lock = mapdl._get_lock
+    try:
+        mapdl._get_lock = True
 
-    with pytest.raises(MapdlRuntimeError):
-        mapdl._get(entity="NODE", entnum="1", item1="U", it1num=1, timeout=0.5)
-
-    mapdl._get_lock = False
+        with pytest.raises(MapdlRuntimeError):
+            mapdl._get(entity="NODE", entnum="1", item1="U", it1num=1, timeout=0.5)
+    finally:
+        mapdl._get_lock = previous_get_lock
 
 
 def test_get_invalid_response_type(mapdl):
@@ -133,13 +135,14 @@ def test_get_invalid_response_type(mapdl):
 
 
 def test_get_non_interactive_mode(mapdl):
-    mapdl._store_commands = True
+    previous_store_commands = mapdl._store_commands
+    try:
+        mapdl._store_commands = True
 
-    with pytest.raises(MapdlRuntimeError):
-        mapdl._get(entity="NODE", entnum="1", item1="U", it1num=1)
-
-    # reset
-    mapdl._store_commands = False
+        with pytest.raises(MapdlRuntimeError):
+            mapdl._get(entity="NODE", entnum="1", item1="U", it1num=1)
+    finally:
+        mapdl._store_commands = previous_store_commands
 
 
 def test_cdread_all_resolves_both_archive_files():

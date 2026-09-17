@@ -34,6 +34,7 @@ from shutil import copyfile, rmtree
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
 from subprocess import DEVNULL, call  # nosec B404
+import sys
 import tempfile
 import time
 from typing import (
@@ -1618,40 +1619,59 @@ class _MapdlCore(Commands):
             self._parent()._log.debug("Exiting saving selection context")
 
             mapdl = self._parent()
-            mapdl.allsel()
-            mapdl.cmsel("None")
-
             selection = self.selection.pop()
             cmps = selection.pop("cmsel")
 
-            if cmps:
-                for each_name, each_value in cmps.items():
-                    mapdl.cmsel("a", each_name, each_value, mute=True)
+            try:
+                mapdl.allsel()
+                mapdl.cmsel("None")
 
-            for each_type, each_name in selection.items():
-                mapdl.cmsel("a", each_name, each_type, mute=True)
+                if cmps:
+                    for each_name, each_value in cmps.items():
+                        mapdl.cmsel("a", each_name, each_value, mute=True)
 
-                selfun = getattr(
-                    mapdl, ENTITIES_TO_SELECTION_MAPPING[each_type.upper()]
-                )
-                selfun("s", vmin=each_name, mute=True)
+                for each_type, each_name in selection.items():
+                    mapdl.cmsel("a", each_name, each_type, mute=True)
 
-                mapdl.cmdele(each_name, mute=True)
+                    selfun = getattr(
+                        mapdl, ENTITIES_TO_SELECTION_MAPPING[each_type.upper()]
+                    )
+                    selfun("s", vmin=each_name, mute=True)
+
+                    mapdl.cmdele(each_name, mute=True)
+            except Exception:
+                if args and args[0] is not None:
+                    mapdl._log.exception("Unable to restore the saved selection.")
+                    return None
+                raise
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
 
         def __init__(self, parent):
             self._parent = weakref.ref(parent)
+            self._previous_store_commands = False
+            self._stored_commands_len = 0
 
         def __enter__(self):
-            self._parent()._log.debug("Entering chained command mode")
-            self._parent()._store_commands = True
+            parent = self._parent()
+            parent._log.debug("Entering chained command mode")
+            self._previous_store_commands = parent._store_commands
+            self._stored_commands_len = len(parent._stored_commands)
+            parent._store_commands = True
 
         def __exit__(self, *args):
-            self._parent()._log.debug("Exiting chained command mode")
-            self._parent()._chain_stored()
-            self._parent()._store_commands = False
+            parent = self._parent()
+            parent._log.debug("Exiting chained command mode")
+            try:
+                if args[0] is not None:
+                    parent._stored_commands = parent._stored_commands[
+                        : self._stored_commands_len
+                    ]
+                elif not self._previous_store_commands:
+                    parent._chain_stored()
+            finally:
+                parent._store_commands = self._previous_store_commands
 
     class _RetainRoutine:
         """Store MAPDL's routine when entering and reverts it when exiting."""
@@ -2040,12 +2060,16 @@ class _MapdlCore(Commands):
 
             parent._log.debug("Entering in 'WithInterativePlotting' mode")
 
-            if not parent._store_commands:
+            self._active = not parent._store_commands
+            if not self._active:
+                return
+
+            self.previous_device = parent.file_type_for_plots
+            entered = False
+            try:
                 if not parent._png_mode:
                     parent.show("PNG", mute=True)
                     parent.gfile(self._pixel_res, mute=True)
-
-                self.previous_device = parent.file_type_for_plots
 
                 if parent.file_type_for_plots not in [
                     "PNG",
@@ -2054,6 +2078,14 @@ class _MapdlCore(Commands):
                     "VRML",
                 ]:
                     parent.show(parent.default_file_type_for_plots)
+                entered = True
+            finally:
+                if not entered:
+                    parent._restore_plot_device(
+                        self.previous_device,
+                        primary_exception=sys.exc_info()[1],
+                        use_property=True,
+                    )
 
         @requires_graphics
         def __exit__(self, *args) -> None:
@@ -2062,14 +2094,22 @@ class _MapdlCore(Commands):
                 raise MapdlRuntimeError("Parent reference is None")
 
             parent._log.debug("Exiting in 'WithInterativePlotting' mode")
-            parent.show("close", mute=True)
+            if not self._active:
+                return
 
-            if not parent._store_commands:
-                if not parent._png_mode:
-                    parent.show("PNG", mute=True)
-                    parent.gfile(self._pixel_res, mute=True)
+            try:
+                parent.show("close", mute=True)
 
-                parent.file_type_for_plots = self.previous_device
+                if not parent._store_commands:
+                    if not parent._png_mode:
+                        parent.show("PNG", mute=True)
+                        parent.gfile(self._pixel_res, mute=True)
+            finally:
+                parent._restore_plot_device(
+                    self.previous_device,
+                    primary_exception=sys.exc_info()[1],
+                    use_property=True,
+                )
 
     def set_log_level(self, loglevel: DEBUG_LEVELS) -> None:
         """Sets log level
@@ -2577,6 +2617,23 @@ class _MapdlCore(Commands):
         # findall returns None if there is no match
         return PNG_IS_WRITTEN_TO_FILE.findall(text) is not None
 
+    def _restore_plot_device(
+        self,
+        previous_device: VALID_FILE_TYPE_FOR_PLOT_LITERAL,
+        primary_exception: Optional[BaseException],
+        *,
+        use_property: bool = False,
+    ) -> None:
+        try:
+            if use_property:
+                self.file_type_for_plots = previous_device
+            else:
+                self.show(previous_device)
+        except Exception:
+            if primary_exception is None:
+                raise
+            self._log.exception("Unable to restore the previous plotting device.")
+
     def _get_plot_name(self, text: str) -> str:
         """Obtain the plot filename."""
         self._log.debug(f"Output from terminal used to find plot name: {text}")
@@ -2584,11 +2641,15 @@ class _MapdlCore(Commands):
         if self.is_png_found(text):
             # flush graphics writer
             previous_device = self.file_type_for_plots
-            self.show("CLOSE", mute=True)
-            # self.show("PNG", mute=True)
-
-            filename = self._screenshot_path()
-            self.show(previous_device)
+            try:
+                self.show("CLOSE", mute=True)
+                # self.show("PNG", mute=True)
+                filename = self._screenshot_path()
+            finally:
+                self._restore_plot_device(
+                    previous_device,
+                    primary_exception=sys.exc_info()[1],
+                )
             self._log.debug(f"Screenshot at: {filename}")
 
             if os.path.isfile(filename):
@@ -3200,9 +3261,11 @@ class _MapdlCore(Commands):
 
         def __exit__(self, *args):
             self._parent()._log.debug("Exiting force-output mode")
-            if self._in_nopr:
-                self._parent()._run("/nopr")
-            self._parent()._mute = self._previous_mute
+            try:
+                if self._in_nopr:
+                    self._parent()._run("/nopr")
+            finally:
+                self._parent()._mute = self._previous_mute
 
     def _parse_cmlist(
         self, cmlist: Optional[str] = None
@@ -3407,9 +3470,14 @@ class _MapdlCore(Commands):
             If given a wrong type for the ``savefig`` parameter.
         """
         previous_device = self.file_type_for_plots
-        self.show("PNG")
-        out_ = self.replot()
-        self.show(previous_device)  # previous device
+        try:
+            self.show("PNG")
+            out_ = self.replot()
+        finally:
+            self._restore_plot_device(
+                previous_device,
+                primary_exception=sys.exc_info()[1],
+            )
         file_name = self._get_plot_name(out_)
 
         if savefig:
