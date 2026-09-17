@@ -927,6 +927,107 @@ class TestWatchedCall:
         assert dummy._current_call is call_b
 
 
+class TestBackgroundThreadTracking:
+    """``_track_background_thread``/``_join_background_threads`` give
+    abandoned daemon threads (the ping-abuse probe, the ``Ctrl("EXIT")``
+    call, and the gRPC channel close) a later, bounded chance to be
+    reclaimed instead of leaking for the remaining process lifetime."""
+
+    def test_track_creates_the_list_on_first_use(self):
+        """A plain object with no '_background_threads' attribute yet still
+        works, since the tracking list is created lazily."""
+        instance = Mock(spec=[])
+        thread = threading.Thread(target=lambda: None)
+
+        mapdl_grpc._track_background_thread(instance, thread)
+
+        assert instance._background_threads == [thread]
+
+    def test_track_is_a_noop_on_a_read_only_test_double(self):
+        """A test double that cannot receive new attributes must not raise."""
+
+        class _ReadOnly:
+            __slots__ = ()
+
+        instance = _ReadOnly()
+
+        mapdl_grpc._track_background_thread(instance, Mock())  # must not raise
+
+    def test_join_is_a_noop_without_tracked_threads(self):
+        """Calling it on an instance with no tracked threads is safe."""
+        instance = Mock(spec=[])
+
+        mapdl_grpc._join_background_threads(instance)  # must not raise
+
+    def test_join_reclaims_a_thread_that_finishes_in_time(self):
+        """A thread that finishes within the retry timeout is dropped from
+        the tracked list."""
+        instance = Mock(spec=[])
+        instance._log = MagicMock()
+        thread = threading.Thread(target=lambda: None)
+        thread.start()
+        thread.join()  # already finished before being tracked
+        instance._background_threads = [thread]
+
+        mapdl_grpc._join_background_threads(instance, timeout=1.0)
+
+        assert instance._background_threads == []
+
+    def test_join_keeps_a_still_running_thread_and_logs_it(self):
+        """A thread still alive after its own retry timeout stays tracked and
+        is logged, so it can be retried again later."""
+        never_return = threading.Event()
+        instance = Mock(spec=[])
+        instance._log = MagicMock()
+        thread = threading.Thread(target=lambda: never_return.wait(30), daemon=True)
+        thread.start()
+        instance._background_threads = [thread]
+
+        mapdl_grpc._join_background_threads(instance, timeout=0.1)
+
+        assert instance._background_threads == [thread]
+        instance._log.debug.assert_called_once()
+
+        never_return.set()
+        thread.join()
+
+    def test_join_suppresses_logging_when_exiting(self):
+        """``exiting=True`` suppresses the debug log for a still-running
+        thread, since logging is unreliable during interpreter shutdown."""
+        never_return = threading.Event()
+        instance = Mock(spec=[])
+        instance._log = MagicMock()
+        thread = threading.Thread(target=lambda: never_return.wait(30), daemon=True)
+        thread.start()
+        instance._background_threads = [thread]
+
+        mapdl_grpc._join_background_threads(instance, timeout=0.1, exiting=True)
+
+        instance._log.debug.assert_not_called()
+
+        never_return.set()
+        thread.join()
+
+    def test_join_tolerates_a_read_only_test_double(self):
+        """A test double that cannot receive the updated list must not raise
+        even though a thread is still running."""
+        never_return = threading.Event()
+        thread = threading.Thread(target=lambda: never_return.wait(30), daemon=True)
+        thread.start()
+
+        class _ReadOnly:
+            _log = None
+
+            @property
+            def _background_threads(self):
+                return [thread]
+
+        mapdl_grpc._join_background_threads(_ReadOnly(), timeout=0.1)  # no raise
+
+        never_return.set()
+        thread.join()
+
+
 class TestPingAbuseProbe:
     """The background probe thread keeps long-running calls from tripping the
     MAPDL gRPC server's ping-abuse protection (see ``PING_ABUSE_INTERVAL_S``).
@@ -1009,6 +1110,26 @@ class TestPingAbuseProbe:
         assert dummy._ctrl.call_args[0][0] == "VERSION"
         assert "timeout" in dummy._ctrl.call_args[1]
         assert dummy._log.debug.called
+
+    def test_stop_tracks_a_thread_that_does_not_join_in_time(self):
+        """A probe thread stuck inside its RPC (for example, blocked on a
+        dead peer) must be registered for a later retry instead of leaked
+        silently."""
+        dummy = self._Dummy()
+        never_return = threading.Event()
+        stuck_thread = threading.Thread(
+            target=lambda: never_return.wait(30), daemon=True
+        )
+        stuck_thread.start()
+        dummy._ping_probe_thread = stuck_thread
+
+        with patch.object(mapdl_grpc, "PING_ABUSE_PROBE_TIMEOUT_S", 0.1):
+            dummy._stop_ping_abuse_probe()
+
+        assert dummy._background_threads == [stuck_thread]
+
+        never_return.set()
+        stuck_thread.join()
 
 
 class TestDisconnectButLeaveMapdlRunning:
@@ -1140,6 +1261,43 @@ class TestDisconnectButLeaveMapdlRunning:
 
         mock._disconnect_but_leave_mapdl_running.assert_called_once()
         mock._release_resources.assert_not_called()
+
+    def test_a_failing_background_thread_join_is_logged(self):
+        """A failure retrying abandoned background threads (the ping-abuse
+        probe, the ``Ctrl("EXIT")`` call, or the gRPC channel close) must be
+        logged, not raised, and must not prevent the instance from being
+        marked as exited."""
+        mock = _make_mock_mapdl()
+        mock._exited = False
+
+        with patch.object(
+            mapdl_grpc,
+            "_join_background_threads",
+            side_effect=RuntimeError("boom"),
+        ):
+            MapdlGrpc._disconnect_but_leave_mapdl_running(mock)
+
+        mock._close_grpc_channel.assert_called_once()
+        mock._join_pipe_drainer_threads.assert_called_once()
+        mock._log.debug.assert_called_once()
+        assert mock._exited is True
+
+    def test_exiting_suppresses_background_thread_join_error_logging(self):
+        """``exiting=True`` also suppresses the background-thread-join
+        failure log, for the same reason as the channel-close and
+        pipe-drainer failure logs."""
+        mock = _make_mock_mapdl()
+        mock._exited = False
+
+        with patch.object(
+            mapdl_grpc,
+            "_join_background_threads",
+            side_effect=RuntimeError("boom"),
+        ):
+            MapdlGrpc._disconnect_but_leave_mapdl_running(mock, exiting=True)
+
+        mock._log.debug.assert_not_called()
+        assert mock._exited is True
 
 
 class TestEnsureChannel:
@@ -1400,3 +1558,76 @@ class TestCloseGrpcChannelHardTimeout:
         channel.unsubscribe.assert_not_called()
         assert dummy._channel is None
         assert dummy._connectivity_callback is None
+
+
+class TestReleaseResourcesJoinsBackgroundThreads:
+    """'_release_resources' gives abandoned background threads (step 4) one
+    more bounded chance to exit, now that the MAPDL process is dead and the
+    gRPC channel is closed."""
+
+    @staticmethod
+    def _dummy():
+        """Build a minimal stand-in exposing what '_release_resources' touches."""
+        dummy = Mock()
+        dummy._exited = False
+        dummy._path = None
+        dummy._local = False
+        dummy._mapdl_on_hpc = False
+        dummy._remote_instance = None
+        dummy._port = 50052
+        dummy.transport_mode = "tcp"
+        dummy._release_resources = MethodType(MapdlGrpc._release_resources, dummy)
+        return dummy
+
+    def test_joins_background_threads_after_closing_the_channel(self):
+        """The healthy path retries background threads without raising."""
+        dummy = self._dummy()
+
+        dummy._release_resources()
+
+        dummy._close_grpc_channel.assert_called_once()
+        assert dummy._exited is True
+
+    def test_a_failing_background_thread_join_is_logged_not_raised(self):
+        """A failure in step 4 must not prevent the remaining steps (marking
+        the instance as exited) from running."""
+        dummy = self._dummy()
+
+        with patch.object(
+            mapdl_grpc,
+            "_join_background_threads",
+            side_effect=RuntimeError("boom"),
+        ):
+            dummy._release_resources()
+
+        assert dummy._exited is True
+        assert any(
+            "background threads" in str(call.args)
+            for call in dummy._log.debug.call_args_list
+        )
+
+
+class TestCtrlExitReturnsNormally:
+    """'_ctrl("exit")' logs, rather than raises, the unusual case where the
+    blocking 'Ctrl' call returns without an error."""
+
+    class _Dummy:
+        def __init__(self, stub):
+            self._log = MagicMock()
+            self._stub = stub
+            self.transport_mode = "grpc"
+
+        _ctrl = MapdlGrpc._ctrl
+
+    def test_logs_when_the_call_returns_without_raising(self):
+        stub = Mock()
+        stub.Ctrl.return_value = None
+        dummy = self._Dummy(stub)
+
+        dummy._ctrl("exit")
+
+        stub.Ctrl.assert_called_once()
+        assert any(
+            "returned normally" in str(call.args)
+            for call in dummy._log.debug.call_args_list
+        )
