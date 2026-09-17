@@ -22,8 +22,8 @@
 
 """Tests for the coordinate-based node selector (#3845)."""
 
-import gc
 from contextlib import nullcontext
+import gc
 import logging
 from unittest.mock import MagicMock
 
