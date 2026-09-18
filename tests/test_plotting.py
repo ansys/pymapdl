@@ -1046,22 +1046,26 @@ def test_WithInterativePlotting(mapdl, make_block):
 def test_file_type_for_plots(mapdl, cleared):
     assert mapdl.file_type_for_plots in ["PNG", "TIFF", "PNG", "VRML", "TERM", "CLOSE"]
 
-    mapdl.file_type_for_plots = "TIFF"
-    assert mapdl.file_type_for_plots == "TIFF"
+    previous_device = mapdl.file_type_for_plots
+    try:
+        mapdl.file_type_for_plots = "TIFF"
+        assert mapdl.file_type_for_plots == "TIFF"
 
-    with pytest.raises(ValueError):
-        mapdl.file_type_for_plots = "asdf"
+        with pytest.raises(ValueError):
+            mapdl.file_type_for_plots = "asdf"
 
-    n_files_ending_png_before = len(
-        [each for each in mapdl.list_files() if each.endswith(".png")]
-    )
+        n_files_ending_png_before = len(
+            [each for each in mapdl.list_files() if each.endswith(".png")]
+        )
 
-    mapdl.eplot(graphics_backend=GraphicsBackend.MAPDL)
-    n_files_ending_png_after = len(
-        [each for each in mapdl.list_files() if each.endswith(".png")]
-    )
+        mapdl.eplot(graphics_backend=GraphicsBackend.MAPDL)
+        n_files_ending_png_after = len(
+            [each for each in mapdl.list_files() if each.endswith(".png")]
+        )
 
-    assert n_files_ending_png_after > n_files_ending_png_before
+        assert n_files_ending_png_after > n_files_ending_png_before
+    finally:
+        mapdl.file_type_for_plots = previous_device
 
 
 @pytest.mark.parametrize("entity", ["KP", "LINE", "AREA", "VOLU", "NODE", "ELEM"])

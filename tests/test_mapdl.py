@@ -69,7 +69,7 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.helpers import is_installed
 from ansys.mapdl.core.launcher import launch_mapdl
-from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME
+from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME, _MapdlCore
 from ansys.mapdl.core.mapdl_extended import (
     MAX_DO_LOOP_LEVEL,
     _MapdlExtended,
@@ -360,15 +360,20 @@ def test_server_version(mapdl):
 
 @requires("grpc")
 def test_global_mute(mapdl):
-    mapdl.mute = True
-    assert mapdl.mute is True
-    assert mapdl.prep7() is None
+    previous_mute = mapdl.mute
+    previous_jobname = mapdl.jobname
+    try:
+        mapdl.mute = True
+        assert mapdl.mute is True
+        assert mapdl.prep7() is None
 
-    # commands like /INQUIRE must always return something
-    jobname = "file"
-    mapdl.jobname = jobname
-    assert mapdl.inquire("", "JOBNAME") == jobname
-    mapdl.mute = False
+        # commands like /INQUIRE must always return something
+        jobname = "file"
+        mapdl.jobname = jobname
+        assert mapdl.inquire("", "JOBNAME") == jobname
+    finally:
+        mapdl.mute = previous_mute
+        mapdl.jobname = previous_jobname
 
 
 def test_parsav_parres(mapdl, cleared, tmpdir):
@@ -490,32 +495,32 @@ def test_basic_command(mapdl):
 
 
 def test_allow_ignore(mapdl, clear_at_end):
-    with pytest.warns(DeprecationWarning):
-        mapdl.allow_ignore = True
+    previous_ignore_errors = mapdl.ignore_errors
+    try:
+        with pytest.warns(DeprecationWarning):
+            mapdl.allow_ignore = True
 
-    assert mapdl.allow_ignore is True
+        assert mapdl.allow_ignore is True
 
-    with pytest.warns(DeprecationWarning):
-        mapdl.allow_ignore = False
+        with pytest.warns(DeprecationWarning):
+            mapdl.allow_ignore = False
 
-    assert mapdl.allow_ignore is False
-    mapdl.finish()
+        assert mapdl.allow_ignore is False
+        mapdl.finish()
 
-    with pytest.raises(pymapdl.errors.MapdlInvalidRoutineError):
-        mapdl.k()
+        with pytest.raises(pymapdl.errors.MapdlInvalidRoutineError):
+            mapdl.k()
 
-    # Does not create keypoints and yet does not raise error
-    with pytest.warns(DeprecationWarning):
-        mapdl.allow_ignore = True
-    assert mapdl.allow_ignore is True
+        # Does not create keypoints and yet does not raise error
+        with pytest.warns(DeprecationWarning):
+            mapdl.allow_ignore = True
+        assert mapdl.allow_ignore is True
 
-    mapdl.finish()
-    mapdl.k()  # Raise an error because we are not in PREP7.
-    assert mapdl.get_value("KP", 0, "count") == 0.0  # Effectively no KP created.
-
-    # Reset
-    with pytest.warns(DeprecationWarning):
-        mapdl.allow_ignore = False
+        mapdl.finish()
+        mapdl.k()  # Raise an error because we are not in PREP7.
+        assert mapdl.get_value("KP", 0, "count") == 0.0  # Effectively no KP created.
+    finally:
+        mapdl.ignore_errors = previous_ignore_errors
 
 
 def test_chaining(mapdl, clear_at_end):
@@ -533,23 +538,84 @@ def test_chaining(mapdl, clear_at_end):
         assert mapdl.geometry.n_keypoint == 1000
 
 
+def test_chain_commands_restores_state_on_body_error():
+    parent = MagicMock()
+    parent._store_commands = False
+    parent._stored_commands = []
+
+    with pytest.raises(RuntimeError, match="body failure"):
+        with _MapdlCore._chain_commands(parent):
+            parent._stored_commands.append("incomplete command")
+            raise RuntimeError("body failure")
+
+    assert parent._store_commands is False
+    assert parent._stored_commands == []
+    parent._chain_stored.assert_not_called()
+
+
+def test_chain_commands_preserves_nested_state():
+    parent = MagicMock()
+    parent._store_commands = True
+    parent._stored_commands = ["outer command"]
+
+    with _MapdlCore._chain_commands(parent):
+        parent._stored_commands.append("inner command")
+
+    assert parent._store_commands is True
+    assert parent._stored_commands == ["outer command", "inner command"]
+    parent._chain_stored.assert_not_called()
+
+
+def test_restore_plot_device_handles_restore_failure():
+    parent = MagicMock()
+    parent.show.side_effect = RuntimeError("restore failure")
+
+    _MapdlCore._restore_plot_device(parent, "PNG", RuntimeError("primary failure"))
+
+    parent._log.exception.assert_called_once()
+
+
+def test_save_selection_preserves_body_error_when_cleanup_fails():
+    parent = MagicMock()
+    context = _MapdlCore._save_selection(parent)
+    context.selection = [{"cmsel": {}}]
+    parent.allsel.side_effect = RuntimeError("cleanup failure")
+
+    context.__exit__(ValueError, ValueError("body failure"), None)
+
+    parent._log.exception.assert_called_once()
+
+
+def test_interactive_plotting_skips_noninteractive_mode():
+    parent = MagicMock()
+    parent._store_commands = True
+    context = _MapdlCore.WithInterativePlotting(parent, 1600)
+
+    type(context).__enter__.__wrapped__(context)
+    type(context).__exit__.__wrapped__(context, None, None, None)
+
+    parent.show.assert_not_called()
+
+
 def test_error(mapdl, clear_at_end):
     with pytest.raises(MapdlRuntimeError):
         mapdl.a(0, 0, 0, 0)
 
 
 def test_ignore_errors(mapdl):
-    mapdl.prep7()
-    mapdl.ignore_errors = False
-    assert not mapdl.ignore_errors
-    mapdl.ignore_errors = True
-    assert mapdl.ignore_errors is True
+    previous_ignore_errors = mapdl.ignore_errors
+    try:
+        mapdl.prep7()
+        mapdl.ignore_errors = False
+        assert not mapdl.ignore_errors
+        mapdl.ignore_errors = True
+        assert mapdl.ignore_errors is True
 
-    # verify that an error is not raised
-    out = mapdl._run("A, 0, 0, 0")
-    assert "*** ERROR ***" in out
-
-    mapdl.ignore_errors = False
+        # verify that an error is not raised
+        out = mapdl._run("A, 0, 0, 0")
+        assert "*** ERROR ***" in out
+    finally:
+        mapdl.ignore_errors = previous_ignore_errors
     assert mapdl.ignore_errors is False
 
 
@@ -1418,18 +1484,19 @@ def test_get_file_path(mapdl, cleared, tmpdir):
     assert fobject not in os.listdir()
 
     prev = mapdl._local
-    mapdl._local = True
-    fname_ = mapdl._get_file_path(fobject)
-    assert fname in fname_
-    assert fobject not in mapdl.list_files()
-    assert os.path.exists(fname_)
+    try:
+        mapdl._local = True
+        fname_ = mapdl._get_file_path(fobject)
+        assert fname in fname_
+        assert fobject not in mapdl.list_files()
+        assert os.path.exists(fname_)
 
-    mapdl._local = False
-    fname_ = mapdl._get_file_path(fobject)
-    # If we are not in local, now it should have been uploaded
-    assert fname in mapdl.list_files()
-
-    mapdl._local = prev
+        mapdl._local = False
+        fname_ = mapdl._get_file_path(fobject)
+        # If we are not in local, now it should have been uploaded
+        assert fname in mapdl.list_files()
+    finally:
+        mapdl._local = prev
 
 
 @pytest.mark.parametrize(
@@ -1942,40 +2009,48 @@ def test_on_docker(mapdl, cleared):
 
 
 def test_deprecation_allow_ignore_warning(mapdl, cleared):
-    with pytest.warns(DeprecationWarning, match="'allow_ignore' is being deprecated"):
-        mapdl.allow_ignore = True
-
-    mapdl.ignore_errors = False
+    previous_ignore_errors = mapdl.ignore_errors
+    try:
+        with pytest.warns(
+            DeprecationWarning, match="'allow_ignore' is being deprecated"
+        ):
+            mapdl.allow_ignore = True
+    finally:
+        mapdl.ignore_errors = previous_ignore_errors
 
 
 def test_deprecation_allow_ignore_errors_mapping(mapdl, cleared):
-    with pytest.warns(
-        DeprecationWarning,
-        match="'allow_ignore' is being deprecated and will be removed in a future release",
-    ):
-        mapdl.allow_ignore = True
-        assert mapdl.allow_ignore == mapdl.ignore_errors
+    previous_ignore_errors = mapdl.ignore_errors
+    try:
+        with pytest.warns(
+            DeprecationWarning,
+            match="'allow_ignore' is being deprecated and will be removed in a future release",
+        ):
+            mapdl.allow_ignore = True
+            assert mapdl.allow_ignore == mapdl.ignore_errors
 
-    with pytest.warns(
-        DeprecationWarning,
-        match="'allow_ignore' is being deprecated and will be removed in a future release",
-    ):
-        mapdl.allow_ignore = False
-        assert mapdl.allow_ignore == mapdl.ignore_errors
+        with pytest.warns(
+            DeprecationWarning,
+            match="'allow_ignore' is being deprecated and will be removed in a future release",
+        ):
+            mapdl.allow_ignore = False
+            assert mapdl.allow_ignore == mapdl.ignore_errors
 
-    with pytest.warns(
-        DeprecationWarning,
-        match="'allow_ignore' is being deprecated and will be removed in a future release",
-    ):
-        mapdl.ignore_errors = True
-        assert mapdl.allow_ignore == mapdl.ignore_errors
+        with pytest.warns(
+            DeprecationWarning,
+            match="'allow_ignore' is being deprecated and will be removed in a future release",
+        ):
+            mapdl.ignore_errors = True
+            assert mapdl.allow_ignore == mapdl.ignore_errors
 
-    with pytest.warns(
-        DeprecationWarning,
-        match="'allow_ignore' is being deprecated and will be removed in a future release",
-    ):
-        mapdl.ignore_errors = False
-        assert mapdl.allow_ignore == mapdl.ignore_errors
+        with pytest.warns(
+            DeprecationWarning,
+            match="'allow_ignore' is being deprecated and will be removed in a future release",
+        ):
+            mapdl.ignore_errors = False
+            assert mapdl.allow_ignore == mapdl.ignore_errors
+    finally:
+        mapdl.ignore_errors = previous_ignore_errors
 
 
 def test_check_stds(mapdl, cleared):
@@ -2026,21 +2101,22 @@ def test_post_mortem_checks_no_process(mapdl, cleared):
     old_process = mapdl._mapdl_process
     old_mode = mapdl._mode
 
-    mapdl._mapdl_process = None
-    assert mapdl._post_mortem_checks() is None
-    assert mapdl._read_stds() is None
+    try:
+        mapdl._mapdl_process = None
+        assert mapdl._post_mortem_checks() is None
+        assert mapdl._read_stds() is None
 
-    mapdl._mapdl_process = True
-    mapdl._mode = "console"
-    assert mapdl._post_mortem_checks() is None
+        mapdl._mapdl_process = True
+        mapdl._mode = "console"
+        assert mapdl._post_mortem_checks() is None
 
-    # No process
-    mapdl._mapdl_process = None
-    mapdl._mode = "grpc"
-    assert mapdl._read_stds() is None
-
-    mapdl._mapdl_process = old_process
-    mapdl._mode = old_mode
+        # No process
+        mapdl._mapdl_process = None
+        mapdl._mode = "grpc"
+        assert mapdl._read_stds() is None
+    finally:
+        mapdl._mapdl_process = old_process
+        mapdl._mode = old_mode
 
 
 def test_avoid_non_interactive(mapdl, cleared):
@@ -2727,10 +2803,11 @@ def test_graphics_backend(mapdl, cleared):
     assert isinstance(mapdl.graphics_backend, GraphicsBackend)
 
     prev = mapdl.graphics_backend
-    mapdl.graphics_backend = GraphicsBackend.MAPDL
-    mapdl.eplot()
-
-    mapdl.graphics_backend = prev
+    try:
+        mapdl.graphics_backend = GraphicsBackend.MAPDL
+        mapdl.eplot()
+    finally:
+        mapdl.graphics_backend = prev
 
 
 @requires("local")
@@ -2743,10 +2820,14 @@ def test_remove_temp_dir_on_exit(mapdl, cleared, tmpdir):
     assert os.path.exists(filename)
 
     prev = mapdl.remove_temp_dir_on_exit
-    mapdl.remove_temp_dir_on_exit = True
-    mapdl._local = True  # Sanity check
-    mapdl._remove_temp_dir_on_exit(path)
-    mapdl.remove_temp_dir_on_exit = prev
+    prev_local = mapdl._local
+    try:
+        mapdl.remove_temp_dir_on_exit = True
+        mapdl._local = True  # Sanity check
+        mapdl._remove_temp_dir_on_exit(path)
+    finally:
+        mapdl.remove_temp_dir_on_exit = prev
+        mapdl._local = prev_local
 
     assert os.path.exists(filename) is False
     assert os.path.exists(path) is False
@@ -2821,44 +2902,45 @@ def test_lgwrite(mapdl, cleared, filename, ext, remove_grpc_extra, kedit):
 def test_screenshot(mapdl, make_block, tmpdir):
     """Test screenshot capabilities"""
     previous_device = mapdl.file_type_for_plots
-    mapdl.show("TIFF")
-    assert "TIFF" == mapdl.file_type_for_plots
+    try:
+        mapdl.show("TIFF")
+        assert "TIFF" == mapdl.file_type_for_plots
 
-    assert mapdl.screenshot() is None
-    assert "TIFF" == mapdl.file_type_for_plots
+        assert mapdl.screenshot() is None
+        assert "TIFF" == mapdl.file_type_for_plots
 
-    assert mapdl.screenshot(False) is None
-    assert "TIFF" == mapdl.file_type_for_plots
+        assert mapdl.screenshot(False) is None
+        assert "TIFF" == mapdl.file_type_for_plots
 
-    file_name = mapdl.screenshot(True)
-    assert "mapdl_screenshot.png" == file_name
-    assert "TIFF" == mapdl.file_type_for_plots
-    assert file_name in os.listdir(os.getcwd())
+        file_name = mapdl.screenshot(True)
+        assert "mapdl_screenshot.png" == file_name
+        assert "TIFF" == mapdl.file_type_for_plots
+        assert file_name in os.listdir(os.getcwd())
 
-    file_name = mapdl.screenshot(True)
-    assert "mapdl_screenshot_1.png" == file_name
-    assert "TIFF" == mapdl.file_type_for_plots
-    assert file_name in os.listdir(os.getcwd())
+        file_name = mapdl.screenshot(True)
+        assert "mapdl_screenshot_1.png" == file_name
+        assert "TIFF" == mapdl.file_type_for_plots
+        assert file_name in os.listdir(os.getcwd())
 
-    os.remove("mapdl_screenshot.png")
-    os.remove(file_name)
+        os.remove("mapdl_screenshot.png")
+        os.remove(file_name)
 
-    file_name = mapdl.screenshot(str(tmpdir))
-    assert "TIFF" == mapdl.file_type_for_plots
-    assert os.path.basename(file_name) in os.listdir(str(tmpdir))
+        file_name = mapdl.screenshot(str(tmpdir))
+        assert "TIFF" == mapdl.file_type_for_plots
+        assert os.path.basename(file_name) in os.listdir(str(tmpdir))
 
-    dest = os.path.join(tmpdir, "myscreenshot.png")
-    file_name = mapdl.screenshot(dest)
-    assert "TIFF" == mapdl.file_type_for_plots
-    assert os.path.exists(dest)
+        dest = os.path.join(tmpdir, "myscreenshot.png")
+        file_name = mapdl.screenshot(dest)
+        assert "TIFF" == mapdl.file_type_for_plots
+        assert os.path.exists(dest)
 
-    file_name = mapdl.screenshot("myscreenshot.png")
-    assert "TIFF" == mapdl.file_type_for_plots
-    assert os.path.exists(file_name)
-    assert os.path.exists(os.path.join(os.getcwd(), "myscreenshot.png"))
-    os.remove(file_name)
-
-    mapdl.file_type_for_plots = previous_device
+        file_name = mapdl.screenshot("myscreenshot.png")
+        assert "TIFF" == mapdl.file_type_for_plots
+        assert os.path.exists(file_name)
+        assert os.path.exists(os.path.join(os.getcwd(), "myscreenshot.png"))
+        os.remove(file_name)
+    finally:
+        mapdl.file_type_for_plots = previous_device
 
 
 def test_force_command_ignored_not_active_set(mapdl, cleared):
@@ -2909,13 +2991,19 @@ def test_cleanup_loggers(mapdl, cleared):
 
 def test_no_flush_stored(mapdl, cleared):
     assert not mapdl._store_commands
-    mapdl._store_commands = True
-    mapdl._stored_commands = []
+    previous_store_commands = mapdl._store_commands
+    previous_stored_commands = mapdl._stored_commands
+    try:
+        mapdl._store_commands = True
+        mapdl._stored_commands = []
 
-    mapdl._flush_stored()
+        mapdl._flush_stored()
 
-    assert not mapdl._store_commands
-    assert mapdl._stored_commands == []
+        assert not mapdl._store_commands
+        assert mapdl._stored_commands == []
+    finally:
+        mapdl._store_commands = previous_store_commands
+        mapdl._stored_commands = previous_stored_commands
 
 
 @pytest.mark.parametrize("ip", ["123.45.67.89", "myhostname"])

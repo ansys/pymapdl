@@ -1384,12 +1384,15 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
 
 
 def test_exited(mapdl, cleared):
-    mapdl._exited = True
-    with pytest.raises(MapdlRuntimeError):
-        mapdl.post_processing.plot_nodal_displacement(
-            "NORM", line_width=10, render_lines_as_tubes=True, smooth_shading=True
-        )
-    mapdl._exited = False
+    previous_exited = mapdl._exited
+    try:
+        mapdl._exited = True
+        with pytest.raises(MapdlRuntimeError):
+            mapdl.post_processing.plot_nodal_displacement(
+                "NORM", line_width=10, render_lines_as_tubes=True, smooth_shading=True
+            )
+    finally:
+        mapdl._exited = previous_exited
 
 
 ###############################################################################
