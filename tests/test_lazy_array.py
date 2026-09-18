@@ -182,7 +182,7 @@ def test_unresolved_vgets_use_distinct_server_snapshots(monkeypatch):
 def test_lazy_array_close_deletes_unused_snapshot():
     """An unused snapshot can be released without downloading its values."""
     mapdl = _mock_grpc_mapdl()
-    snapshot = "_PYMAPDL_LAZY_0000000000000001"
+    snapshot = "PYMAPDL_LAZY_0000000000000001"
     mapdl._lazy_array_snapshots.add(snapshot)
     lazy = LazyArray(
         mapdl,
@@ -204,14 +204,16 @@ def test_snapshot_names_skip_existing_parameters():
 
     name = mapdl._new_lazy_array_snapshot()
 
-    assert name == "_PYMAPDL_LAZY_0000000000000002"
+    assert name == "PYMAPDL_LAZY_0000000000000002"
     assert len(name) <= 32
+    mapdl.check_parameter_names = True
+    mapdl._check_parameter_name(name)
 
 
 def test_snapshot_cleanup_propagates_errors():
     """Cleanup errors must remain visible to the caller."""
     mapdl = _mock_grpc_mapdl()
-    mapdl._lazy_array_snapshots.add("_PYMAPDL_LAZY_0000000000000001")
+    mapdl._lazy_array_snapshots.add("PYMAPDL_LAZY_0000000000000001")
     mapdl.run.side_effect = RuntimeError("delete failed")
 
     with pytest.raises(RuntimeError, match="delete failed"):
@@ -250,7 +252,7 @@ def test_temporary_result_wrappers_materialize_snapshots(monkeypatch):
 def test_get_variable_deletes_source_after_vget():
     """Deleting the temporary VGET parameter must not invalidate its result."""
     mapdl = _mock_grpc_mapdl()
-    snapshot = "_PYMAPDL_LAZY_0000000000000001"
+    snapshot = "PYMAPDL_LAZY_0000000000000001"
     mapdl.parameters.__getitem__.return_value = np.array([1.0, 2.0])
     mapdl.vget = MagicMock(return_value=LazyArray(mapdl, snapshot))
 

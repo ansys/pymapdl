@@ -429,7 +429,7 @@ class MapdlGrpc(MapdlBase):
     # Required by `_name` method to be defined before __init__ be
     _ip: Optional[str] = None
     _port: Optional[int] = None
-    _lazy_array_prefix = "_PYMAPDL_LAZY_"
+    _lazy_array_prefix = "PYMAPDL_LAZY_"
 
     def __init__(
         self,
@@ -4618,8 +4618,8 @@ class MapdlGrpc(MapdlBase):
             if len(candidate) > MAX_PARAM_CHARS:  # pragma: no cover
                 raise MapdlRuntimeError("Unable to generate a valid lazy-array name.")
 
-            # Leading-underscore parameters are hidden by default. Include
-            # them while checking so a user parameter cannot be overwritten.
+            # Include parameters hidden by display settings while checking so
+            # a user parameter cannot be overwritten.
             with self.parameters.full_parameters_output:
                 if candidate not in self.parameters:
                     return candidate
