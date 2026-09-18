@@ -4657,7 +4657,7 @@ class MapdlGrpc(MapdlBase):
         had a chance to be released.
         """
         errors = []
-        for parameter_name in tuple(self._lazy_array_snapshots):
+        for parameter_name in tuple(getattr(self, "_lazy_array_snapshots", ())):
             try:
                 self._delete_lazy_array_snapshot(parameter_name)
             except Exception as error:
