@@ -260,3 +260,19 @@ def test_get_variable_deletes_source_after_vget():
     mapdl.parameters.__getitem__.assert_called_once_with(snapshot)
     mapdl.vget.assert_called_once_with(par="temp_var", ir=2, tstrt="", kcplx="")
     mapdl.parameters.__delitem__.assert_called_once_with("temp_var")
+
+
+def test_get_variable_without_snapshot_deletes_lazy_source():
+    """A LazyArray cannot resolve after its temporary parameter is deleted."""
+    parameter_name = "_temp_var_A1B2C3"
+    values = {parameter_name: np.array([1.0, 2.0])}
+    mapdl = MagicMock()
+    mapdl.parameters.__getitem__.side_effect = values.__getitem__
+    mapdl.parameters.__delitem__.side_effect = values.__delitem__
+    mapdl.vget.side_effect = lambda **kwargs: LazyArray(mapdl, kwargs["par"])
+
+    variable = mapdl.vget(par=parameter_name, ir=2, tstrt="", kcplx="")
+    del mapdl.parameters[parameter_name]
+
+    with pytest.raises(KeyError, match=parameter_name):
+        variable.resolve()
