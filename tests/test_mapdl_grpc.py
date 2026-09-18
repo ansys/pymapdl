@@ -28,6 +28,7 @@ import weakref
 
 from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
 import grpc
+import numpy as np
 import pytest
 
 from ansys.mapdl.core.errors import MapdlExitedError
@@ -1191,3 +1192,49 @@ class TestEnsureChannel:
 
         mock._ensure_channel.assert_called_once()
         mock._multi_connect.assert_called_once_with(timeout=5)
+
+
+class TestGetVariable:
+    """Tests for MapdlGrpc.get_variable."""
+
+    @staticmethod
+    def _make_mock():
+        mock = MagicMock(spec=MapdlGrpc)
+        mock.vget.return_value = np.array([1.0, 2.0, 3.0])
+        mock.parameters = MagicMock()
+        return mock
+
+    def test_forwards_ir_tstrt_kcplx_to_vget(self):
+        """`ir`, `tstrt`, and `kcplx` must be forwarded to `vget` unchanged,
+        using a private parameter name, as documented."""
+        mock = self._make_mock()
+
+        result = MapdlGrpc.get_variable(mock, ir=2, tstrt=1.5, kcplx=1)
+
+        mock.vget.assert_called_once_with(par="temp_var", ir=2, tstrt=1.5, kcplx=1)
+        np.testing.assert_array_equal(result, np.array([1.0, 2.0, 3.0]))
+
+    def test_uses_default_arguments_when_omitted(self):
+        mock = self._make_mock()
+
+        MapdlGrpc.get_variable(mock)
+
+        mock.vget.assert_called_once_with(par="temp_var", ir="", tstrt="", kcplx="")
+
+    def test_deletes_the_intermediate_parameter(self):
+        """The intermediate `temp_var` MAPDL parameter must not be left
+        behind after the values have been retrieved."""
+        mock = self._make_mock()
+
+        MapdlGrpc.get_variable(mock, ir=3)
+
+        mock.parameters.__delitem__.assert_called_once_with("temp_var")
+
+    def test_forwards_extra_kwargs_to_vget(self):
+        mock = self._make_mock()
+
+        MapdlGrpc.get_variable(mock, ir=2, mute=True)
+
+        mock.vget.assert_called_once_with(
+            par="temp_var", ir=2, tstrt="", kcplx="", mute=True
+        )
