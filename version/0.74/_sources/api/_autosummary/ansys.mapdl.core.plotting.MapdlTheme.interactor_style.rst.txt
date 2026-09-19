@@ -1,0 +1,6 @@
+interactor\_style
+=================
+
+.. currentmodule:: ansys.mapdl.core.plotting
+
+.. autoproperty:: MapdlTheme.interactor_style

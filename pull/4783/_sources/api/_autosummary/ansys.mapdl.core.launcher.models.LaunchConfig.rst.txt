@@ -1,0 +1,64 @@
+﻿LaunchConfig
+============
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoclass:: LaunchConfig
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      LaunchConfig.channel
+      LaunchConfig.finish_job_on_exit
+      LaunchConfig.force_intel
+      LaunchConfig.graphics_backend
+      LaunchConfig.jobid
+      LaunchConfig.license_server_check
+      LaunchConfig.exec_file
+      LaunchConfig.run_location
+      LaunchConfig.jobname
+      LaunchConfig.nproc
+      LaunchConfig.port
+      LaunchConfig.ip
+      LaunchConfig.mode
+      LaunchConfig.version
+      LaunchConfig.start_instance
+      LaunchConfig.ram
+      LaunchConfig.timeout
+      LaunchConfig.cleanup_on_exit
+      LaunchConfig.clear_on_connect
+      LaunchConfig.override
+      LaunchConfig.remove_temp_dir_on_exit
+      LaunchConfig.set_no_abort
+      LaunchConfig.additional_switches
+      LaunchConfig.license_type
+      LaunchConfig.launch_on_hpc
+      LaunchConfig.running_on_hpc
+      LaunchConfig.scheduler_options
+      LaunchConfig.loglevel
+      LaunchConfig.log_apdl
+      LaunchConfig.print_com
+      LaunchConfig.mapdl_output
+      LaunchConfig.transport_mode
+      LaunchConfig.uds_dir
+      LaunchConfig.certs_dir
+      LaunchConfig.env_vars
+      LaunchConfig.add_env_vars
+   
+   

@@ -1,0 +1,6 @@
+ram
+===
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.ram

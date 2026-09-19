@@ -1,0 +1,6 @@
+remove\_temp\_dir\_on\_exit
+===========================
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.remove_temp_dir_on_exit

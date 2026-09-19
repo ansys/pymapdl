@@ -1,0 +1,30 @@
+﻿EnvironmentConfig
+=================
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoclass:: EnvironmentConfig
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      EnvironmentConfig.replace_all
+      EnvironmentConfig.variables
+   
+   

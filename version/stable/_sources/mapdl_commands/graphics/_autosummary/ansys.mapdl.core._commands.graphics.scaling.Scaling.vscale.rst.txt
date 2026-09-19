@@ -1,0 +1,6 @@
+﻿vscale
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.graphics.scaling
+
+.. automethod:: Scaling.vscale

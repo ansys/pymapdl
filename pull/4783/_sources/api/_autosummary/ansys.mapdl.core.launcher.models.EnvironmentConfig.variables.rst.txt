@@ -1,0 +1,6 @@
+variables
+=========
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: EnvironmentConfig.variables

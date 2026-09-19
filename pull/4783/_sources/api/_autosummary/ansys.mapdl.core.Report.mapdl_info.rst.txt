@@ -1,0 +1,6 @@
+mapdl\_info
+===========
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Report.mapdl_info

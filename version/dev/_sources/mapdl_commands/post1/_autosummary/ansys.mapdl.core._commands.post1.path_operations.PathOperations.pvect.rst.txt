@@ -1,0 +1,6 @@
+﻿pvect
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.path_operations
+
+.. automethod:: PathOperations.pvect

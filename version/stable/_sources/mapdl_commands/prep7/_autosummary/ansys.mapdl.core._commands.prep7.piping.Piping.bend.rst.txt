@@ -1,0 +1,6 @@
+﻿bend
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.piping
+
+.. automethod:: Piping.bend
