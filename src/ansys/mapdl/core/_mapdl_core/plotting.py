@@ -31,11 +31,11 @@ import os  # noqa: F401
 import pathlib  # noqa: F401
 import re  # noqa: F401
 from shutil import copyfile, rmtree  # noqa: F401
-import sys  # noqa: F401
 
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
 from subprocess import DEVNULL, call  # nosec B404  # noqa: F401
+import sys  # noqa: F401
 import tempfile  # noqa: F401
 import time  # noqa: F401
 from typing import (  # noqa: F401
