@@ -340,40 +340,59 @@ class _CoreContextMixin(_CoreMixinBase):
             self._parent()._log.debug("Exiting saving selection context")
 
             mapdl = self._parent()
-            mapdl.allsel()
-            mapdl.cmsel("None")
-
             selection = self.selection.pop()
             cmps = selection.pop("cmsel")
 
-            if cmps:
-                for each_name, each_value in cmps.items():
-                    mapdl.cmsel("a", each_name, each_value, mute=True)
+            try:
+                mapdl.allsel()
+                mapdl.cmsel("None")
 
-            for each_type, each_name in selection.items():
-                mapdl.cmsel("a", each_name, each_type, mute=True)
+                if cmps:
+                    for each_name, each_value in cmps.items():
+                        mapdl.cmsel("a", each_name, each_value, mute=True)
 
-                selfun = getattr(
-                    mapdl, ENTITIES_TO_SELECTION_MAPPING[each_type.upper()]
-                )
-                selfun("s", vmin=each_name, mute=True)
+                for each_type, each_name in selection.items():
+                    mapdl.cmsel("a", each_name, each_type, mute=True)
 
-                mapdl.cmdele(each_name, mute=True)
+                    selfun = getattr(
+                        mapdl, ENTITIES_TO_SELECTION_MAPPING[each_type.upper()]
+                    )
+                    selfun("s", vmin=each_name, mute=True)
+
+                    mapdl.cmdele(each_name, mute=True)
+            except Exception:
+                if args and args[0] is not None:
+                    mapdl._log.exception("Unable to restore the saved selection.")
+                    return None
+                raise
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
 
         def __init__(self, parent):
             self._parent = weakref.ref(parent)
+            self._previous_store_commands = False
+            self._stored_commands_len = 0
 
         def __enter__(self):
-            self._parent()._log.debug("Entering chained command mode")
-            self._parent()._store_commands = True
+            parent = self._parent()
+            parent._log.debug("Entering chained command mode")
+            self._previous_store_commands = parent._store_commands
+            self._stored_commands_len = len(parent._stored_commands)
+            parent._store_commands = True
 
         def __exit__(self, *args):
-            self._parent()._log.debug("Exiting chained command mode")
-            self._parent()._chain_stored()
-            self._parent()._store_commands = False
+            parent = self._parent()
+            parent._log.debug("Exiting chained command mode")
+            try:
+                if args[0] is not None:
+                    parent._stored_commands = parent._stored_commands[
+                        : self._stored_commands_len
+                    ]
+                elif not self._previous_store_commands:
+                    parent._chain_stored()
+            finally:
+                parent._store_commands = self._previous_store_commands
 
     class _RetainRoutine:
         """Store MAPDL's routine when entering and reverts it when exiting."""
@@ -455,6 +474,8 @@ class _CoreContextMixin(_CoreMixinBase):
 
         def __exit__(self, *args):
             self._parent()._log.debug("Exiting force-output mode")
-            if self._in_nopr:
-                self._parent()._run("/nopr")
-            self._parent()._mute = self._previous_mute
+            try:
+                if self._in_nopr:
+                    self._parent()._run("/nopr")
+            finally:
+                self._parent()._mute = self._previous_mute

@@ -23,6 +23,7 @@
 """Module to support MAPDL CAD geometry"""
 
 from functools import wraps
+import sys
 from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -650,55 +651,118 @@ class Geometry:
 
             ## Duplication
             # duplicate areas to avoid affecting existing areas
-            # Getting the maximum area ID
-            a_num = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
-            # Setting the new areas ID starting number
-            self._mapdl.numstr("AREA", a_num, mute=True)
-            # Generating new areas
-            self._mapdl.agen(2, "ALL", noelem=1, mute=True)
+            a_num = None
+            a_max = None
+            areas_duplicated = False
+            numstr_changed = False
+            etype_old = None
+            etype_tmp = None
+            etype_created = False
+            type_changed = False
+            shpp_disabled = False
+            smartsize_enabled = False
+            mesh_attempted = False
 
-            # Getting the new maximum area ID
-            a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
-            self._mapdl.asel("S", "AREA", vmin=a_num + 1, vmax=a_max, mute=True)
+            try:
+                # Getting the maximum area ID
+                a_num = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
+                # Setting the new areas ID starting number
+                numstr_changed = True
+                self._mapdl.numstr("AREA", a_num, mute=True)
+                # Generating new areas
+                areas_duplicated = True
+                self._mapdl.agen(2, "ALL", noelem=1, mute=True)
 
-            # necessary to reset element/area meshing association
-            self._mapdl.aatt(mute=True)
+                # Getting the new maximum area ID
+                a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
+                self._mapdl.asel("S", "AREA", vmin=a_num + 1, vmax=a_max, mute=True)
 
-            # create a temporary etype
-            etype_max = int(self._mapdl.get(entity="ETYP", item1="NUM", it1num="MAX"))
-            etype_old = self._mapdl.parameters.type
-            etype_tmp = etype_max + 1
+                # necessary to reset element/area meshing association
+                self._mapdl.aatt(mute=True)
 
-            old_routine = self._mapdl.parameters.routine
+                # create a temporary etype
+                etype_max = int(
+                    self._mapdl.get(entity="ETYP", item1="NUM", it1num="MAX")
+                )
+                etype_old = self._mapdl.parameters.type
+                etype_tmp = etype_max + 1
 
-            self._mapdl.et(etype_tmp, "MESH200", 6, mute=True)
-            self._mapdl.shpp("off", mute=True)
-            self._mapdl.smrtsize(density, mute=True)
-            self._mapdl.type(etype_tmp, mute=True)
+                old_routine = self._mapdl.parameters.routine
 
-            if old_routine != "PREP7":
-                self._mapdl.prep7(mute=True)
+                etype_created = True
+                self._mapdl.et(etype_tmp, "MESH200", 6, mute=True)
+                shpp_disabled = True
+                self._mapdl.shpp("off", mute=True)
+                smartsize_enabled = True
+                self._mapdl.smrtsize(density, mute=True)
+                type_changed = True
+                self._mapdl.type(etype_tmp, mute=True)
 
-            # Mesh and get the number of elements per area
-            resp = self._mapdl.amesh("all")
-            elements_per_area = self.get_elements_per_area()
+                if old_routine != "PREP7":
+                    self._mapdl.prep7(mute=True)
 
-            self._mapdl.esla("S")
-            grid = self._mapdl.mesh._grid.linear_copy()
-            pd = pv.PolyData(grid.points, grid.cells)
+                # Mesh and get the number of elements per area
+                mesh_attempted = True
+                resp = self._mapdl.amesh("all")
+                elements_per_area = self.get_elements_per_area()
 
-            # pd['ansys_node_num'] = grid['ansys_node_num']
-            # pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']
-            # pd.clean(inplace=True)  # OPTIONAL
+                self._mapdl.esla("S")
+                grid = self._mapdl.mesh._grid.linear_copy()
+                pd = pv.PolyData(grid.points, grid.cells)
 
-            # delete all temporary meshes and clean up settings
-            self._mapdl.aclear("ALL", mute=True)
-            self._mapdl.adele("ALL", kswp=1, mute=True)
-            self._mapdl.numstr("AREA", 1, mute=True)
-            self._mapdl.type(etype_old, mute=True)
-            self._mapdl.etdele(etype_tmp, mute=True)
-            self._mapdl.shpp("ON", mute=True)
-            self._mapdl.smrtsize("OFF", mute=True)
+                # pd['ansys_node_num'] = grid['ansys_node_num']
+                # pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']
+                # pd.clean(inplace=True)  # OPTIONAL
+            finally:
+                primary_exception = sys.exc_info()[1]
+                cleanup_errors = []
+
+                def cleanup(command, *args, **kwargs):
+                    try:
+                        command(*args, **kwargs)
+                    except Exception as error:
+                        cleanup_errors.append(error)
+
+                if mesh_attempted:
+                    cleanup(self._mapdl.aclear, "ALL", mute=True)
+                if areas_duplicated and a_num is not None:
+                    if a_max is None:
+                        cleanup(
+                            self._mapdl.asel,
+                            "S",
+                            "AREA",
+                            vmin=a_num + 1,
+                            mute=True,
+                        )
+                    else:
+                        cleanup(
+                            self._mapdl.asel,
+                            "S",
+                            "AREA",
+                            vmin=a_num + 1,
+                            vmax=a_max,
+                            mute=True,
+                        )
+                    cleanup(self._mapdl.adele, "ALL", kswp=1, mute=True)
+                if numstr_changed:
+                    cleanup(self._mapdl.numstr, "AREA", 1, mute=True)
+                if type_changed and etype_old is not None:
+                    cleanup(self._mapdl.type, etype_old, mute=True)
+                if etype_created and etype_tmp is not None:
+                    cleanup(self._mapdl.etdele, etype_tmp, mute=True)
+                if shpp_disabled:
+                    cleanup(self._mapdl.shpp, "ON", mute=True)
+                if smartsize_enabled:
+                    cleanup(self._mapdl.smrtsize, "OFF", mute=True)
+
+                if cleanup_errors:
+                    if primary_exception is None:
+                        raise cleanup_errors[0]
+                    for error in cleanup_errors:
+                        self._mapdl._log.error(
+                            "Unable to clean up temporary surface state.",
+                            exc_info=(type(error), error, error.__traceback__),
+                        )
 
         # store the area number used for each element
         entity_num = np.empty(grid.n_cells, dtype=np.int32)

@@ -228,13 +228,15 @@ class Test_components(TestClass):
         mapdl.cmsel("NONE")
 
         prev = mapdl.components._autoselect_components
-        mapdl.components._autoselect_components = True
-        cm_ = mapdl.run("cmlist").upper()
-        assert "MYCOMP" not in cm_
-        assert "NODE" not in cm_
+        try:
+            mapdl.components._autoselect_components = True
+            cm_ = mapdl.run("cmlist").upper()
+            assert "MYCOMP" not in cm_
+            assert "NODE" not in cm_
 
-        assert mapdl.components["mycomp"] == (1, 2, 3)
-        mapdl.components._autoselect_components = prev
+            assert mapdl.components["mycomp"] == (1, 2, 3)
+        finally:
+            mapdl.components._autoselect_components = prev
 
     @staticmethod
     def test_contains_all(mapdl, reset):

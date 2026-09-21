@@ -31,6 +31,7 @@ import os  # noqa: F401
 import pathlib  # noqa: F401
 import re  # noqa: F401
 from shutil import copyfile, rmtree  # noqa: F401
+import sys  # noqa: F401
 
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
@@ -411,12 +412,16 @@ class _CorePlottingMixin(_CoreMixinBase):
 
             parent._log.debug("Entering in 'WithInterativePlotting' mode")
 
-            if not parent._store_commands:
+            self._active = not parent._store_commands
+            if not self._active:
+                return
+
+            self.previous_device = parent.file_type_for_plots
+            entered = False
+            try:
                 if not parent._png_mode:
                     parent.show("PNG", mute=True)
                     parent.gfile(self._pixel_res, mute=True)
-
-                self.previous_device = parent.file_type_for_plots
 
                 if parent.file_type_for_plots not in [
                     "PNG",
@@ -425,6 +430,14 @@ class _CorePlottingMixin(_CoreMixinBase):
                     "VRML",
                 ]:
                     parent.show(parent.default_file_type_for_plots)
+                entered = True
+            finally:
+                if not entered:
+                    parent._restore_plot_device(
+                        self.previous_device,
+                        primary_exception=sys.exc_info()[1],
+                        use_property=True,
+                    )
 
         @requires_graphics
         def __exit__(self, *args) -> None:
@@ -433,18 +446,43 @@ class _CorePlottingMixin(_CoreMixinBase):
                 raise MapdlRuntimeError("Parent reference is None")
 
             parent._log.debug("Exiting in 'WithInterativePlotting' mode")
-            parent.show("close", mute=True)
+            if not self._active:
+                return
 
-            if not parent._store_commands:
-                if not parent._png_mode:
-                    parent.show("PNG", mute=True)
-                    parent.gfile(self._pixel_res, mute=True)
+            try:
+                parent.show("close", mute=True)
 
-                parent.file_type_for_plots = self.previous_device
+                if not parent._store_commands:
+                    if not parent._png_mode:
+                        parent.show("PNG", mute=True)
+                        parent.gfile(self._pixel_res, mute=True)
+            finally:
+                parent._restore_plot_device(
+                    self.previous_device,
+                    primary_exception=sys.exc_info()[1],
+                    use_property=True,
+                )
 
     def is_png_found(self, text: str) -> bool:
         # findall returns None if there is no match
         return PNG_IS_WRITTEN_TO_FILE.findall(text) is not None
+
+    def _restore_plot_device(
+        self,
+        previous_device: VALID_FILE_TYPE_FOR_PLOT_LITERAL,
+        primary_exception: Optional[BaseException],
+        *,
+        use_property: bool = False,
+    ) -> None:
+        try:
+            if use_property:
+                self.file_type_for_plots = previous_device
+            else:
+                self.show(previous_device)
+        except Exception:
+            if primary_exception is None:
+                raise
+            self._log.exception("Unable to restore the previous plotting device.")
 
     def _get_plot_name(self, text: str) -> str:
         """Obtain the plot filename."""
@@ -453,11 +491,15 @@ class _CorePlottingMixin(_CoreMixinBase):
         if self.is_png_found(text):
             # flush graphics writer
             previous_device = self.file_type_for_plots
-            self.show("CLOSE", mute=True)
-            # self.show("PNG", mute=True)
-
-            filename = self._screenshot_path()
-            self.show(previous_device)
+            try:
+                self.show("CLOSE", mute=True)
+                # self.show("PNG", mute=True)
+                filename = self._screenshot_path()
+            finally:
+                self._restore_plot_device(
+                    previous_device,
+                    primary_exception=sys.exc_info()[1],
+                )
             self._log.debug(f"Screenshot at: {filename}")
 
             if os.path.isfile(filename):
@@ -578,9 +620,14 @@ class _CorePlottingMixin(_CoreMixinBase):
             If given a wrong type for the ``savefig`` parameter.
         """
         previous_device = self.file_type_for_plots
-        self.show("PNG")
-        out_ = self.replot()
-        self.show(previous_device)  # previous device
+        try:
+            self.show("PNG")
+            out_ = self.replot()
+        finally:
+            self._restore_plot_device(
+                previous_device,
+                primary_exception=sys.exc_info()[1],
+            )
         file_name = self._get_plot_name(out_)
 
         if savefig:
