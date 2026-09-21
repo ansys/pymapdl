@@ -104,7 +104,7 @@ Use :func:`Mapdl.get_variable() <ansys.mapdl.core.Mapdl.get_variable>` to
 retrieve the values of a POST26 variable defined with commands such as
 :func:`Mapdl.nsol() <ansys.mapdl.core.Mapdl.nsol>` or
 :func:`Mapdl.esol() <ansys.mapdl.core.Mapdl.esol>`. This is equivalent to
-the MAPDL `VGET <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_VGET_st.html>`_
+the MAPDL `VGET <https://ansyshelp.ansys.com/Views/Secured/corp/v252/en/ans_cmd/Hlp_C_VGET.html>`_
 command:
 
 .. code:: pycon
@@ -117,7 +117,7 @@ command:
 Use :func:`Mapdl.get_etable() <ansys.mapdl.core.Mapdl.get_etable>` to
 retrieve an element-table column as an array without having to manage
 the underlying `ETABLE
-<https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_ETABLE.html>`_
+<https://ansyshelp.ansys.com/Views/Secured/corp/v252/en/ans_cmd/Hlp_C_ETABLE.html>`_
 label yourself. This method fills the table with
 :func:`Mapdl.etable() <ansys.mapdl.core.Mapdl.etable>` and then retrieves
 it with :func:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>`:

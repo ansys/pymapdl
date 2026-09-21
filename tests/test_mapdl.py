@@ -2652,15 +2652,16 @@ def test_get_etable_with_explicit_label():
 
     np.testing.assert_array_equal(result, values)
     assert mapdl.etable.call_args.args == ("MOMY_I", "SMISC", 3, "MAX")
-    mapdl.get_array.assert_called_once_with("ELEM", "", "ETAB", "MOMY_I")
+    mapdl.get_array.assert_called_once_with("ELEM", 1, "ETAB", "MOMY_I")
 
 
 def test_get_etable_with_temporary_label():
     mapdl = object.__new__(_MapdlExtended)
+    mapdl._etable_lab_counter = 0
     events = []
     values = np.array([1.0])
 
-    def record_etable(*args):
+    def record_etable(*args, **kwargs):
         events.append(("etable", args))
 
     def record_get_array(*args):
@@ -2670,22 +2671,22 @@ def test_get_etable_with_temporary_label():
     mapdl.etable = MagicMock(side_effect=record_etable)
     mapdl.get_array = MagicMock(side_effect=record_get_array)
 
-    with patch("ansys.mapdl.core.mapdl_extended.random_string", return_value="abcd"):
-        result = mapdl.get_etable("SMISC", 3, "AVG")
+    result = mapdl.get_etable("SMISC", 3, "AVG")
 
     np.testing.assert_array_equal(result, values)
     assert events == [
-        ("etable", ("__abcd__", "SMISC", 3, "AVG")),
-        ("get_array", ("ELEM", "", "ETAB", "__abcd__")),
-        ("etable", ("__abcd__", "ERAS")),
+        ("etable", ("_ET00000", "SMISC", 3, "AVG")),
+        ("get_array", ("ELEM", 1, "ETAB", "_ET00000")),
+        ("etable", ("_ET00000", "ERAS")),
     ]
 
 
 def test_get_etable_cleans_up_temporary_label_on_error():
     mapdl = object.__new__(_MapdlExtended)
+    mapdl._etable_lab_counter = 0
     events = []
 
-    def record_etable(*args):
+    def record_etable(*args, **kwargs):
         events.append(("etable", args))
 
     def raise_get_array(*args):
@@ -2695,14 +2696,13 @@ def test_get_etable_cleans_up_temporary_label_on_error():
     mapdl.etable = MagicMock(side_effect=record_etable)
     mapdl.get_array = MagicMock(side_effect=raise_get_array)
 
-    with patch("ansys.mapdl.core.mapdl_extended.random_string", return_value="abcd"):
-        with pytest.raises(RuntimeError, match="unable to retrieve element table"):
-            mapdl.get_etable("SMISC", 3)
+    with pytest.raises(RuntimeError, match="unable to retrieve element table"):
+        mapdl.get_etable("SMISC", 3)
 
     assert events == [
-        ("etable", ("__abcd__", "SMISC", 3, "")),
-        ("get_array", ("ELEM", "", "ETAB", "__abcd__")),
-        ("etable", ("__abcd__", "ERAS")),
+        ("etable", ("_ET00000", "SMISC", 3, "")),
+        ("get_array", ("ELEM", 1, "ETAB", "_ET00000")),
+        ("etable", ("_ET00000", "ERAS")),
     ]
 
 

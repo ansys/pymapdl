@@ -3121,63 +3121,6 @@ class _MapdlExtended(_MapdlCommandExtended):
         else:
             self.slashdelete(filename)
 
-    def get_etable(
-        self,
-        item: str,
-        comp: str = "",
-        option: str = "",
-        lab: str = "",
-    ) -> NDArray[np.float64]:
-        """Create an element table column and return its values.
-
-        Parameters
-        ----------
-        item : str
-            Label identifying the result item.
-        comp : str, optional
-            Component or sequence number for the result item.
-        option : str, optional
-            Element table storage option, such as ``"MIN"``, ``"MAX"``,
-            or ``"AVG"``.
-        lab : str, optional
-            Label for the element table column. If omitted, a hidden temporary
-            label is used and erased after the values are retrieved. If
-            provided, the column remains available in MAPDL.
-
-        Returns
-        -------
-        numpy.ndarray
-            Values from the element table column for the selected elements.
-
-        Notes
-        -----
-        This method uses :meth:`Mapdl.etable` to create the column and
-        :meth:`Mapdl.get_array` to retrieve it. As with
-        :meth:`Mapdl.get_array`, it cannot be used inside the
-        :attr:`Mapdl.non_interactive` context.
-
-        Examples
-        --------
-        Retrieve sequence-number element results:
-
-        >>> moment_i = mapdl.get_etable("SMISC", 3, lab="MOMY_I")
-        >>> moment_j = mapdl.get_etable("SMISC", 16, lab="MOMY_J")
-
-        Retrieve a component-name result with a temporary element table
-        column:
-
-        >>> displacement_x = mapdl.get_etable("U", "X")
-        """
-        temporary_label = not lab
-        label = f"__{random_string(4)}__" if temporary_label else lab
-        self.etable(label, item, comp, option)
-        try:
-            values = self.get_array("ELEM", "", "ETAB", label)
-        finally:
-            if temporary_label:
-                self.etable(label, "ERAS")
-        return values
-
     @supress_logging
     def get_array(
         self,
@@ -3193,15 +3136,14 @@ class _MapdlExtended(_MapdlCommandExtended):
         """Uses the ``*VGET`` command to Return an array from ANSYS as a
         Python array.
 
-        The array is built from the currently selected entities (for
-        example, the selected nodes or elements), so make sure to call
-        :func:`Mapdl.nsel() <ansys.mapdl.core.Mapdl.nsel>`,
-        :func:`Mapdl.esel() <ansys.mapdl.core.Mapdl.esel>`, or an
-        equivalent selection command beforehand if you need to restrict
-        the entities used to fill the array.
+        Selection behavior depends on the requested entity and item. For
+        example, retrieving an ``ETAB`` item for ``ELEM`` returns values at
+        sequential element-number positions, including positions for
+        unselected or undefined elements. Do not rely on an entity selection
+        to determine the length or indexing of the returned array.
 
-        See `VGET
-        <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_VGET_st.html>`
+        See `*VGET
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v252/en/ans_cmd/Hlp_C_VGET_st.html>`
         for more details.
 
         Parameters
@@ -3314,12 +3256,7 @@ class _MapdlExtended(_MapdlCommandExtended):
         fill an element-table column with ``item``/``comp`` for the
         currently selected elements, and then calls
         :func:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>` with
-        ``ELEM``/``ETAB`` to retrieve that column as a NumPy array. It
-        operates on the current ``POST1`` result set and the currently
-        selected elements, exactly like the ``etable``/``get_array``
-        sequence used by
-        :attr:`Mapdl.post_processing.element_values
-        <ansys.mapdl.core.post.PostProcessing.element_values>`.
+        ``ELEM``/``ETAB`` to retrieve that column as a NumPy array.
 
         Parameters
         ----------
@@ -3347,8 +3284,13 @@ class _MapdlExtended(_MapdlCommandExtended):
         Returns
         -------
         numpy.ndarray
-            Array containing the requested element values, one value per
-            selected element.
+            Array containing the requested element-table values. The
+            underlying ``*VGET`` operation iterates over sequential
+            element numbers regardless of selection, so the array can
+            include entries for unselected or undefined elements. Use
+            :attr:`Mapdl.post_processing.element_values
+            <ansys.mapdl.core.post.PostProcessing.element_values>` to
+            retrieve values for only the currently selected elements.
 
         Notes
         -----

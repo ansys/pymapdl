@@ -382,13 +382,20 @@ class PostProcessing:
         -------
         numpy.ndarray
             Numpy array containing the requested element values for a
-            given item and component.
+            given item and component for the currently selected elements.
 
         Notes
         -----
+        This method returns values for the currently selected elements,
+        consistent with the other postprocessing result methods. The
+        underlying :func:`Mapdl.get_etable()
+        <ansys.mapdl.core.Mapdl.get_etable>` method retrieves sequential
+        element-number positions regardless of selection, so this method
+        filters that output with :attr:`selected_elements`.
+
         This an incomplete table of element values available to this
         method.  For a full table, see `ETABLE
-        <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_ETABLE.html>`_
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v252/en/ans_cmd/Hlp_C_ETABLE.html>`_
 
         +------+---------------------+--------------------------------------+
         | Item | Comp                | Description                          |

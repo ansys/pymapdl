@@ -4614,26 +4614,28 @@ class MapdlGrpc(MapdlBase):
         """
         Obtain the POST26 time-history variable values as an array.
 
-        This method wraps the ``VGET`` command to retrieve the values
-        previously stored in a POST26 variable (for example, with
+        This method uses the ``VGET`` command to copy a POST26 variable
+        (for example, one created with
         :func:`Mapdl.nsol() <ansys.mapdl.core.Mapdl.nsol>` or
-        :func:`Mapdl.esol() <ansys.mapdl.core.Mapdl.esol>`) without leaving
-        an intermediate MAPDL parameter behind.
+        :func:`Mapdl.esol() <ansys.mapdl.core.Mapdl.esol>`) into a temporary
+        MAPDL array parameter. It returns that parameter as a NumPy array and
+        then deletes the temporary parameter.
 
         Parameters
         ----------
-        ir : str, optional
+        ir : int, optional
             Reference number of the variable (1 to NV [NUMVAR]). This is
             the same ``nvar`` reference number used when defining the
             variable, for example with
             :func:`Mapdl.nsol() <ansys.mapdl.core.Mapdl.nsol>` or
             :func:`Mapdl.esol() <ansys.mapdl.core.Mapdl.esol>`.
 
-        tstrt : str, optional
+        tstrt : float, optional
             Time (or frequency) corresponding to start of IR data.  If between
-            values, the nearer value is used. By default it is the first value.
+            values, the nearer value is used. By default, retrieval starts at
+            0.0.
 
-        kcplx : str, optional
+        kcplx : int, optional
             Complex number key:
 
             * ``0`` - Use the real part of the IR data. Default.

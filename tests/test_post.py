@@ -109,6 +109,24 @@ class TestElementValuesUsesGetEtable:
         mapdl_mock.get_etable.assert_called_once_with("U", "Y", "AVG", mute=True)
 
 
+def test_element_values_filters_sparse_element_selection(mapdl, solved_box):
+    mapdl.post1()
+    mapdl.set(1, 1)
+
+    try:
+        mapdl.esel("S", "ELEM", vmin=1, vmax=1, mute=True)
+        mapdl.esel("A", "ELEM", vmin=3, vmax=3, mute=True)
+
+        raw_values = mapdl.get_etable("S", "X", mute=True)
+        selected_elements = mapdl.post_processing.selected_elements
+        selected_values = mapdl.post_processing.element_values("S", "X")
+
+        assert raw_values.size == selected_elements.size
+        np.testing.assert_allclose(selected_values, raw_values[selected_elements])
+    finally:
+        mapdl.allsel(mute=True)
+
+
 class Test_static_solve(TestClass):
 
     @staticmethod
