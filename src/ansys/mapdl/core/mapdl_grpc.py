@@ -91,7 +91,9 @@ from ansys.mapdl.core.errors import (
     protect_from,
     protect_grpc,
 )
+from ansys.mapdl.core.lazy_array import LazyArray
 from ansys.mapdl.core.mapdl import MapdlBase
+from ansys.mapdl.core.mapdl_core import MAX_PARAM_CHARS
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat, MapdlInt
 from ansys.mapdl.core.misc import (
     check_valid_ip,
@@ -427,6 +429,7 @@ class MapdlGrpc(MapdlBase):
     # Required by `_name` method to be defined before __init__ be
     _ip: Optional[str] = None
     _port: Optional[int] = None
+    _lazy_array_prefix = "PYMAPDL_LAZY_"
 
     def __init__(
         self,
@@ -508,9 +511,11 @@ class MapdlGrpc(MapdlBase):
         self._configure_transport(ip=ip, port=port)
         self._mode: Literal["grpc"] = "grpc"
 
-        # gRPC request specific locks as these gRPC request are not thread safe
-        self._vget_lock: bool = False
+        # gRPC request locks and lazy result bookkeeping.
         self._get_lock: bool = False
+        self._vget_lock: bool = False
+        self._lazy_array_counter: int = 0
+        self._lazy_array_parameters: set[str] = set()
 
         self._prioritize_thermal: bool = False
         self._locked: bool = False  # being used within MapdlPool
@@ -2150,6 +2155,14 @@ class MapdlGrpc(MapdlBase):
                 self._disconnect_but_leave_mapdl_running()
                 return
 
+            cleanup_error = None
+            try:
+                self._cleanup_lazy_array_parameters()
+            except Exception as error:
+                # Continue tearing down the connection, then report the
+                # cleanup failure to the caller.
+                cleanup_error = error
+
             if save:
                 self._log.debug("Saving MAPDL database")
                 self.save()
@@ -2161,16 +2174,22 @@ class MapdlGrpc(MapdlBase):
                         "Ignoring exit due to PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't launch the instance."
                     )
                     self._disconnect_but_leave_mapdl_running()
+                    if cleanup_error is not None:
+                        raise cleanup_error
                     return
 
                 # or building the gallery
                 if pymapdl.BUILDING_GALLERY:
                     self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
                     self._disconnect_but_leave_mapdl_running()
+                    if cleanup_error is not None:
+                        raise cleanup_error
                     return
 
             # Step 3 of '_release_resources' closes the gRPC channel.
             self._release_resources(path=self._path)
+            if cleanup_error is not None:
+                raise cleanup_error
 
         finally:
             self._exiting = False
@@ -4072,6 +4091,30 @@ class MapdlGrpc(MapdlBase):
             raise IOError("File failed to upload")
         return os.path.basename(file_name)
 
+    def _get_array_from_service(
+        self,
+        entity,
+        entnum,
+        item1,
+        it1num,
+        item2,
+        it2num,
+        kloop,
+    ) -> NDArray[np.float64]:
+        """Return an eager ``*VGET`` result through the gRPC service."""
+        while self._vget_lock:
+            time.sleep(0.001)
+        self._vget_lock = True
+
+        cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
+        try:
+            if self._stub is None:
+                raise MapdlRuntimeError("MAPDL stub not initialized")
+            chunks = self._stub.VGet2(pb_types.GetRequest(getcmd=cmd))
+            return parse_chunks(chunks)
+        finally:
+            self._vget_lock = False
+
     @protect_grpc
     def _get_array(
         self,
@@ -4083,35 +4126,44 @@ class MapdlGrpc(MapdlBase):
         it2num="",
         kloop="",
         **kwargs,
-    ):
-        """Do a gRPC VGET request.
-
-        Send a vget request, receive a bytes stream, and return it as
-        a numpy array.
-
-        Not thread safe as it uses a constant internal temporary
-        parameter name.  This method uses _vget_lock to ensure
-        multiple simultaneous request fail.
-
-        Returns
-        -------
-        values : np.ndarray
-            Numpy 1D array containing the requested *VGET item and entity.
-        """
+    ) -> Union[NDArray[np.float64], LazyArray]:
+        """Populate a private MAPDL parameter and return it lazily."""
         if "parm" in kwargs:
             raise ValueError("Parameter name `parm` not supported with gRPC")
-
-        while self._vget_lock:
-            time.sleep(0.001)
-        self._vget_lock = True
-
-        cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
+        if str(item1).strip().upper() == "ETAB":
+            return self._get_array_from_service(
+                entity, entnum, item1, it1num, item2, it2num, kloop
+            )
+        parameter_name = self._new_lazy_array_parameter()
         try:
-            chunks = self._stub.VGet2(pb_types.GetRequest(getcmd=cmd))
-            values = parse_chunks(chunks)
-        finally:
-            self._vget_lock = False
-        return values
+            output = self.starvget(
+                parameter_name,
+                entity,
+                entnum,
+                item1,
+                it1num,
+                item2,
+                it2num,
+                kloop,
+                mute=False,
+            )
+        except Exception as error:
+            try:
+                self._delete_lazy_array_parameter(parameter_name)
+            except Exception as cleanup_error:
+                raise cleanup_error from error
+            raise
+
+        if "the dimension number 1 is 0" in output:
+            self._delete_lazy_array_parameter(parameter_name)
+            return np.empty(0)
+
+        return LazyArray(
+            self,
+            parameter_name,
+            cleanup=lambda: self._delete_lazy_array_parameter(parameter_name),
+            flatten=True,
+        )
 
     def _screenshot_path(self):  # numpydoc ignore=RT01
         """Returns the local path of the MAPDL generated screenshot.
@@ -4590,6 +4642,38 @@ class MapdlGrpc(MapdlBase):
             self.__distributed = self.parameters.numcpu > 1
         return self.__distributed
 
+    def _new_lazy_array_parameter(self) -> str:
+        """Reserve an unused, valid MAPDL parameter name for a lazy result."""
+        prefix = self._lazy_array_prefix
+        while True:
+            self._lazy_array_counter += 1
+            candidate = f"{prefix}{self._lazy_array_counter:016X}"
+            if len(candidate) > MAX_PARAM_CHARS:  # pragma: no cover
+                raise MapdlRuntimeError("Unable to generate a valid lazy-array name.")
+
+            # Include parameters hidden by display settings while checking so
+            # a user parameter cannot be overwritten.
+            with self.parameters.full_parameters_output:
+                if candidate not in self.parameters:
+                    self._lazy_array_parameters.add(candidate)
+                    return candidate
+
+    def _delete_lazy_array_parameter(self, parameter_name: str) -> None:
+        """Delete an owned lazy-result parameter and unregister it."""
+        self.run(f"{parameter_name}=", mute=True)
+        self._lazy_array_parameters.remove(parameter_name)
+
+    def _cleanup_lazy_array_parameters(self) -> None:
+        """Delete every unresolved lazy-result parameter."""
+        errors = []
+        for parameter_name in tuple(getattr(self, "_lazy_array_parameters", ())):
+            try:
+                self._delete_lazy_array_parameter(parameter_name)
+            except Exception as error:
+                errors.append(error)
+        if errors:
+            raise errors[0]
+
     @wraps(MapdlBase.vget)
     def vget(  # numpydoc ignore=RT01
         self,
@@ -4599,10 +4683,11 @@ class MapdlGrpc(MapdlBase):
         kcplx: MapdlInt = "",
         **kwargs: KwargDict,
     ) -> NDArray[np.float64]:
-        """Wraps VGET"""
+        """Wraps VGET and returns its values eagerly."""
         super().vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
-        if not self._store_commands:
-            return self.parameters[par]
+        if self._store_commands:
+            return None
+        return self.parameters[par]
 
     def get_variable(
         self,
@@ -4610,9 +4695,9 @@ class MapdlGrpc(MapdlBase):
         tstrt: MapdlFloat = "",
         kcplx: MapdlInt = "",
         **kwargs: KwargDict,
-    ) -> NDArray[np.float64]:
+    ) -> LazyArray:
         """
-        Obtain the variable values.
+        Obtain variable values lazily.
 
         Parameters
         ----------
@@ -4620,7 +4705,7 @@ class MapdlGrpc(MapdlBase):
             Reference number of the variable (1 to NV [NUMVAR]).
 
         tstrt : str, optional
-            Time (or frequency) corresponding to start of IR data.  If between
+            Time (or frequency) corresponding to start of IR data. If between
             values, the nearer value is used. By default it is the first value.
 
         kcplx : str, optional
@@ -4632,13 +4717,39 @@ class MapdlGrpc(MapdlBase):
 
         Returns
         -------
-        np.array
-            Variable values as array.
+        LazyArray
+            Variable values downloaded from MAPDL when first used. Use
+            :func:`numpy.asarray` or :meth:`LazyArray.resolve` to materialize
+            the values explicitly.
+
+        Examples
+        --------
+        >>> values = mapdl.get_variable(2)  # doctest: +SKIP
+        >>> np.asarray(values)  # doctest: +SKIP
+        array([0., 1., 2.])
+
         """
-        par = "temp_var"
-        variable = self.vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
-        del self.parameters[par]
-        return variable
+        parameter_name = self._new_lazy_array_parameter()
+        try:
+            super().vget(
+                par=parameter_name,
+                ir=ir,
+                tstrt=tstrt,
+                kcplx=kcplx,
+                **kwargs,
+            )
+        except Exception as error:
+            try:
+                self._delete_lazy_array_parameter(parameter_name)
+            except Exception as cleanup_error:
+                raise cleanup_error from error
+            raise
+
+        return LazyArray(
+            self,
+            parameter_name,
+            cleanup=lambda: self._delete_lazy_array_parameter(parameter_name),
+        )
 
     @wraps(MapdlBase.nsol)
     def nsol(  # numpydoc ignore=RT01
@@ -4650,7 +4761,7 @@ class MapdlGrpc(MapdlBase):
         name: str = "",
         sector: MapdlInt = "",
         **kwargs: KwargDict,
-    ):
+    ) -> NDArray[np.float64]:
         """Wraps NSOL to return the variable as an array."""
         super().nsol(
             nvar=nvar,  # type: ignore[arg-type]
@@ -4747,7 +4858,7 @@ class MapdlGrpc(MapdlBase):
 
         Returns
         -------
-        np.array
+        numpy.ndarray
             Variable values
 
         Notes
@@ -4831,7 +4942,7 @@ class MapdlGrpc(MapdlBase):
 
         Returns
         -------
-        np.array
+        numpy.ndarray
             Variable values
 
         Notes
@@ -4885,8 +4996,8 @@ class MapdlGrpc(MapdlBase):
             sector=sector,
             **kwargs,
         )
-        # Using get_variable because it deletes the intermediate parameter after using it.
-        return self.get_variable(VAR_IR, tstrt=tstrt, kcplx=kcplx)
+        # Materialize the private result to preserve this method's ndarray API.
+        return self.get_variable(VAR_IR, tstrt=tstrt, kcplx=kcplx).resolve()
 
     def kill_job(self, jobid: int) -> None:
         """Kill an HPC job
