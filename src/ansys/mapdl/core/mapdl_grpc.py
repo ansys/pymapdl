@@ -513,6 +513,7 @@ class MapdlGrpc(MapdlBase):
 
         # gRPC request locks and lazy result bookkeeping.
         self._get_lock: bool = False
+        self._vget_lock: bool = False
         self._lazy_array_counter: int = 0
         self._lazy_array_parameters: set[str] = set()
 
@@ -4090,6 +4091,30 @@ class MapdlGrpc(MapdlBase):
             raise IOError("File failed to upload")
         return os.path.basename(file_name)
 
+    def _get_array_from_service(
+        self,
+        entity,
+        entnum,
+        item1,
+        it1num,
+        item2,
+        it2num,
+        kloop,
+    ) -> NDArray[np.float64]:
+        """Return an eager ``*VGET`` result through the gRPC service."""
+        while self._vget_lock:
+            time.sleep(0.001)
+        self._vget_lock = True
+
+        cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
+        try:
+            if self._stub is None:
+                raise MapdlRuntimeError("MAPDL stub not initialized")
+            chunks = self._stub.VGet2(pb_types.GetRequest(getcmd=cmd))
+            return parse_chunks(chunks)
+        finally:
+            self._vget_lock = False
+
     @protect_grpc
     def _get_array(
         self,
@@ -4105,7 +4130,10 @@ class MapdlGrpc(MapdlBase):
         """Populate a private MAPDL parameter and return it lazily."""
         if "parm" in kwargs:
             raise ValueError("Parameter name `parm` not supported with gRPC")
-
+        if str(item1).strip().upper() == "ETAB":
+            return self._get_array_from_service(
+                entity, entnum, item1, it1num, item2, it2num, kloop
+            )
         parameter_name = self._new_lazy_array_parameter()
         try:
             output = self.starvget(

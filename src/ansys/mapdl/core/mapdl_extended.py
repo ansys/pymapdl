@@ -3173,11 +3173,11 @@ class _MapdlExtended(_MapdlCommandExtended):
         label = f"__{random_string(4)}__" if temporary_label else lab
         self.etable(label, item, comp, option)
         try:
-            values = self.get_array("ELEM", "", "ETAB", label)
+            values = np.asarray(self.get_array("ELEM", "", "ETAB", label))
         finally:
             if temporary_label:
                 self.etable(label, "ERAS")
-        return np.asarray(values)
+        return values
 
     @supress_logging
     def get_array(
@@ -3195,7 +3195,9 @@ class _MapdlExtended(_MapdlCommandExtended):
 
         On gRPC connections, the returned :class:`LazyArray
         <ansys.mapdl.core.lazy_array.LazyArray>` downloads its values when it
-        is first used. Other connection types return a :class:`numpy.ndarray`
+        is first used. Element-table (``ETAB``) values remain eager because
+        MAPDL does not support retrieving them through a private ``*VGET``
+        parameter. Other connection types return a :class:`numpy.ndarray`
         immediately.
 
 

@@ -166,6 +166,7 @@ def _mock_grpc_mapdl():
     mapdl._log.level = "WARNING"
     mapdl._set_log_level = MagicMock()
     mapdl._store_commands = False
+    mapdl._vget_lock = False
     mapdl._lazy_array_counter = 0
     mapdl._lazy_array_parameters = set()
     mapdl._parameters = MagicMock()
@@ -307,6 +308,21 @@ def test_get_array_creates_lazy_private_parameter():
         mute=False,
     )
     mapdl.parameters.__getitem__.assert_not_called()
+
+
+def test_get_array_etable_uses_eager_grpc_service():
+    """ETAB values must use the gRPC service instead of a private *VGET."""
+    mapdl = _mock_grpc_mapdl()
+    values = np.array([1.0, 2.0])
+    mapdl._get_array_from_service = MagicMock(return_value=values)
+
+    result = mapdl.get_array("ELEM", 1, "ETAB", "VALUES")
+
+    np.testing.assert_array_equal(result, values)
+    mapdl._get_array_from_service.assert_called_once_with(
+        "ELEM", 1, "ETAB", "VALUES", "", "", ""
+    )
+    mapdl.starvget.assert_not_called()
 
 
 def test_get_array_materialization_deletes_private_parameter():

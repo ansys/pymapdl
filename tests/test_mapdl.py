@@ -2795,6 +2795,38 @@ def test_get_etable_with_temporary_label():
     ]
 
 
+def test_get_etable_resolves_lazy_values_before_erasing_temporary_label():
+    mapdl = object.__new__(_MapdlExtended)
+    events = []
+    lazy_mapdl = MagicMock()
+
+    def resolve_parameter(name):
+        events.append(("resolve", name))
+        return np.array([1.0])
+
+    def record_etable(*args):
+        events.append(("etable", args))
+
+    def record_get_array(*args):
+        events.append(("get_array", args))
+        return LazyArray(lazy_mapdl, "VALUES")
+
+    lazy_mapdl.parameters.__getitem__.side_effect = resolve_parameter
+    mapdl.etable = MagicMock(side_effect=record_etable)
+    mapdl.get_array = MagicMock(side_effect=record_get_array)
+
+    with patch("ansys.mapdl.core.mapdl_extended.random_string", return_value="abcd"):
+        result = mapdl.get_etable("SMISC", 3, "AVG")
+
+    np.testing.assert_array_equal(result, [1.0])
+    assert events == [
+        ("etable", ("__abcd__", "SMISC", 3, "AVG")),
+        ("get_array", ("ELEM", "", "ETAB", "__abcd__")),
+        ("resolve", "VALUES"),
+        ("etable", ("__abcd__", "ERAS")),
+    ]
+
+
 def test_get_etable_cleans_up_temporary_label_on_error():
     mapdl = object.__new__(_MapdlExtended)
     events = []
