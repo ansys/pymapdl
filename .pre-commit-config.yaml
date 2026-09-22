@@ -38,7 +38,7 @@ repos:
   - id: isort
 
 - repo: https://github.com/numpy/numpydoc
-  rev: 7625e372b78ed5689b2707b07b57d45ce39f6b4a  # frozen: v1.11.0rc0
+  rev: 9c52969be60d16e0e5e758d3f5d9a2c802e9a232  # frozen: v1.11.0
   hooks:
     - id: numpydoc-validation
       exclude: |
