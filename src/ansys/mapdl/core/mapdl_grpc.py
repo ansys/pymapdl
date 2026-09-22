@@ -4612,18 +4612,30 @@ class MapdlGrpc(MapdlBase):
         **kwargs: KwargDict,
     ) -> NDArray[np.float64]:
         """
-        Obtain the variable values.
+        Obtain the POST26 time-history variable values as an array.
+
+        This method uses the ``VGET`` command to copy a POST26 variable
+        (for example, one created with
+        :func:`Mapdl.nsol() <ansys.mapdl.core.Mapdl.nsol>` or
+        :func:`Mapdl.esol() <ansys.mapdl.core.Mapdl.esol>`) into a temporary
+        MAPDL array parameter. It returns that parameter as a NumPy array and
+        then deletes the temporary parameter.
 
         Parameters
         ----------
-        ir : str, optional
-            Reference number of the variable (1 to NV [NUMVAR]).
+        ir : int, optional
+            Reference number of the variable (1 to NV [NUMVAR]). This is
+            the same ``nvar`` reference number used when defining the
+            variable, for example with
+            :func:`Mapdl.nsol() <ansys.mapdl.core.Mapdl.nsol>` or
+            :func:`Mapdl.esol() <ansys.mapdl.core.Mapdl.esol>`.
 
-        tstrt : str, optional
+        tstrt : float, optional
             Time (or frequency) corresponding to start of IR data.  If between
-            values, the nearer value is used. By default it is the first value.
+            values, the nearer value is used. By default, retrieval starts at
+            0.0.
 
-        kcplx : str, optional
+        kcplx : int, optional
             Complex number key:
 
             * ``0`` - Use the real part of the IR data. Default.
@@ -4634,6 +4646,26 @@ class MapdlGrpc(MapdlBase):
         -------
         np.array
             Variable values as array.
+
+        Examples
+        --------
+        Define a POST26 variable with
+        :func:`Mapdl.nsol() <ansys.mapdl.core.Mapdl.nsol>` for the ``UX``
+        displacement of node 1, and then retrieve its values with
+        ``get_variable``.
+
+        >>> mapdl.post26()
+        >>> mapdl.nsol(2, 1, "U", "X")
+        >>> mapdl.get_variable(2)
+        array([0.        , 0.00108135, 0.00300901, ..., 0.03407310])
+
+        The same works for element results defined with
+        :func:`Mapdl.esol() <ansys.mapdl.core.Mapdl.esol>`, using
+        ``tstrt`` to skip the initial time (or frequency) values.
+
+        >>> mapdl.esol(3, 1, 1, "S", "Y")
+        >>> mapdl.get_variable(3, tstrt=1.0)
+        array([0.34632451, 0.36126732, ..., 0.38041256])
         """
         par = "temp_var"
         variable = self.vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
