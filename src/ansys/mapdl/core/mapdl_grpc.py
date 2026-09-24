@@ -201,6 +201,13 @@ PING_ABUSE_PROBE_INTERVAL_S = PING_ABUSE_INTERVAL_S * PING_ABUSE_PROBE_EVERY_N_P
 # cannot make the probe thread hang.
 PING_ABUSE_PROBE_TIMEOUT_S = 5.0
 
+# Bounded timeout for the 'VERSION' probe issued by 'is_alive'. It matches
+# 'PING_ABUSE_PROBE_TIMEOUT_S' so that both liveness checks agree on how long
+# a healthy server may take to answer. The '_ctrl' default of 1 second is too
+# tight on a loaded machine, where a slow answer would be misreported as a
+# dead instance.
+IS_ALIVE_PROBE_TIMEOUT_S = PING_ABUSE_PROBE_TIMEOUT_S
+
 DEFAULT_GRPC_OPTIONS = [
     ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
     ("grpc.service_config", json.dumps(SERVICE_DEFAULT_CONFIG)),
@@ -4155,9 +4162,9 @@ class MapdlGrpc(MapdlBase):
         bool
             True if the MAPDL instance is alive, False otherwise.
         """
-        if self.channel_state not in ["IDLE", "READY", None]:
+        if self.channel_state in ["TRANSIENT_FAILURE", "SHUTDOWN"]:
             self._log.debug(
-                "MAPDL instance is not alive because the channel is not 'IDLE' o 'READY'."
+                "MAPDL instance is not alive because the channel is in a dead state."
             )
             return False
 
@@ -4175,7 +4182,7 @@ class MapdlGrpc(MapdlBase):
             return False
 
         try:
-            check = bool(self._ctrl("VERSION"))
+            check = bool(self._ctrl("VERSION", timeout=IS_ALIVE_PROBE_TIMEOUT_S))
             if check:
                 self._log.debug(
                     "MAPDL instance is alive because version was retrieved."
@@ -4188,9 +4195,16 @@ class MapdlGrpc(MapdlBase):
 
         except Exception as error:
             if self._exited:
+                self._log.debug(
+                    f"MAPDL instance is not alive because retrieving version failed "
+                    f"after MAPDL exited with:\n{error}"
+                )
                 return False
 
-            self._log.debug(
+            # Logged at warning level because an unexpected probe failure is
+            # the main reason 'is_alive' reports a false negative, and a debug
+            # record is invisible on instances using the default log level.
+            self._log.warning(
                 f"MAPDL instance is not alive because retrieving version failed with:\n{error}"
             )
             return False

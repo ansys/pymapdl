@@ -31,7 +31,12 @@ import grpc
 import pytest
 
 from ansys.mapdl.core.errors import MapdlExitedError
-from ansys.mapdl.core.mapdl_grpc import MapdlGrpc, MapdlRuntimeError
+from ansys.mapdl.core.mapdl_grpc import (
+    IS_ALIVE_PROBE_TIMEOUT_S,
+    PING_ABUSE_PROBE_TIMEOUT_S,
+    MapdlGrpc,
+    MapdlRuntimeError,
+)
 
 
 def _make_mock_mapdl():
@@ -63,6 +68,67 @@ def _make_mock_process(poll_return=None):
     proc.stderr.closed = False
     proc._stdout_file_handle = None
     return proc
+
+
+class TestIsAlive:
+    """Unit tests for the gRPC liveness check."""
+
+    @staticmethod
+    def _make_liveness_mock(channel_state):
+        mock = _make_mock_mapdl()
+        mock.channel_state = channel_state
+        mock._exited = False
+        mock.busy = False
+        mock._exiting = False
+        return mock
+
+    def test_connecting_probes_version(self):
+        """A connecting channel uses the bounded VERSION probe."""
+        mock = self._make_liveness_mock("CONNECTING")
+        mock._ctrl.return_value = "VERSION"
+
+        assert MapdlGrpc.is_alive.fget(mock) is True
+
+        mock._ctrl.assert_called_once_with("VERSION", timeout=IS_ALIVE_PROBE_TIMEOUT_S)
+
+    def test_probe_timeout_matches_ping_abuse_probe(self):
+        """Both liveness probes allow the server the same time to answer."""
+        assert IS_ALIVE_PROBE_TIMEOUT_S == PING_ABUSE_PROBE_TIMEOUT_S
+
+    @pytest.mark.parametrize("channel_state", ["TRANSIENT_FAILURE", "SHUTDOWN"])
+    def test_dead_channel_states_skip_version_probe(self, channel_state):
+        """Confirmed dead channel states return false without an RPC."""
+        mock = self._make_liveness_mock(channel_state)
+
+        assert MapdlGrpc.is_alive.fget(mock) is False
+
+        mock._ctrl.assert_not_called()
+
+    def test_exited_probe_failure_is_logged(self):
+        """A failed probe on an exited instance leaves a diagnostic log."""
+        mock = self._make_liveness_mock("CONNECTING")
+
+        def fail_after_exit(*args, **kwargs):
+            mock._exited = True
+            raise RuntimeError("probe failed")
+
+        mock._ctrl.side_effect = fail_after_exit
+
+        assert MapdlGrpc.is_alive.fget(mock) is False
+
+        mock._log.debug.assert_called_once()
+        assert "retrieving version failed" in mock._log.debug.call_args.args[0]
+
+    def test_unexpected_probe_failure_is_warned(self):
+        """An unexpected probe failure is visible at the default log level."""
+        mock = self._make_liveness_mock("READY")
+        mock._ctrl.side_effect = RuntimeError("probe failed")
+
+        assert MapdlGrpc.is_alive.fget(mock) is False
+
+        mock._log.warning.assert_called_once()
+        assert "retrieving version failed" in mock._log.warning.call_args.args[0]
+        mock._log.debug.assert_not_called()
 
 
 def test_get_float(mapdl):
