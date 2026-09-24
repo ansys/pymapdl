@@ -29,7 +29,9 @@ except ImportError:
 
 try:
     # PyVista 0.49
-    from pyvista.core.utilities.geometric_sources import _translate_and_orient as translate
+    from pyvista.core.utilities.geometric_sources import (
+        _translate_and_orient as translate,
+    )
 except ImportError:
     # Older PyVista releases
     from pyvista.core.utilities import translate
