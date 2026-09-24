@@ -1089,17 +1089,10 @@ class MapdlGrpc(MapdlBase):
         --------
         >>> mapdl.wait_until_healthy(timeout=10.0)
         """
-        import concurrent.futures
-
-        # Use the public API to wait for channel readiness.
-        state_future = grpc.channel_ready_future(self._channel)
-        try:
-            state_future.result(timeout=timeout)
-        except concurrent.futures.TimeoutError:
-            current_state = self.channel_state
+        if not self._channel_settles(timeout):
             raise MapdlConnectionError(
                 f"Channel did not become healthy within {timeout} seconds. "
-                f"Current state: {current_state}"
+                f"Current state: {self.channel_state}"
             )
 
         self._log.debug("Channel is healthy and ready for use.")
