@@ -138,7 +138,7 @@ class Iges(CommandsBase):
         Controls various options during a model file transfer. A global solid model tolerance (GTOLER) can
         be specified.
 
-        The SMALL,YES option (default) delete small areas and can cause geometrical inconsistencies that
+        The SMALL,YES option (default) deletes small areas and can cause geometrical inconsistencies that
         could cause the import process to abort. Retaining the small areas increases processor time and
         memory usage.
 

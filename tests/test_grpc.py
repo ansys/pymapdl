@@ -901,21 +901,24 @@ def test_generic_grpc_exception_exited(monkeypatch, grpc_channel):
     def _null_close_process():
         return None
 
-    # faking exiting MAPDL
-    mapdl._exited = True
+    previous_exited = mapdl._exited
+    try:
+        # faking exiting MAPDL
+        mapdl._exited = True
 
-    # Monkey patch to raise the same issue.
-    monkeypatch.setattr(mapdl, "prep7", _raise_error_code)
+        # Monkey patch to raise the same issue.
+        monkeypatch.setattr(mapdl, "prep7", _raise_error_code)
 
-    # monkey patch `_close_process` so MAPDL does not exit when
-    monkeypatch.setattr(mapdl, "_close_process", _null_close_process)
+        # monkeypatch `_close_process` so MAPDL does not exit when
+        monkeypatch.setattr(mapdl, "_close_process", _null_close_process)
 
-    with pytest.raises(
-        MapdlExitedError, match="MAPDL server connection terminated unexpectedly while"
-    ):
-        mapdl.prep7(mapdl)
-
-    mapdl._exited = False  # Restoring
+        with pytest.raises(
+            MapdlExitedError,
+            match="MAPDL server connection terminated unexpectedly while",
+        ):
+            mapdl.prep7(mapdl)
+    finally:
+        mapdl._exited = previous_exited
 
 
 @pytest.mark.parametrize("platform", ["linux", "windows", "error"])

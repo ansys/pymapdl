@@ -70,7 +70,7 @@ class _AngleQueries(_QueryExecution):
         """Return the angle between 3 keypoints where ``k1`` is the vertex.
 
         Subtended angle between two lines (defined by three
-        keypoints where ``k1`` is the vertex node).
+        keypoints where ``k1`` is the vertex keypoint).
         Default is in radians.
 
         Parameters
