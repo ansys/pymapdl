@@ -32,8 +32,7 @@ import pytest
 
 from ansys.mapdl.core.errors import MapdlExitedError
 from ansys.mapdl.core.mapdl_grpc import (
-    IS_ALIVE_PROBE_TIMEOUT_S,
-    PING_ABUSE_PROBE_TIMEOUT_S,
+    IS_ALIVE_CHANNEL_SETTLE_TIMEOUT_S,
     MapdlGrpc,
     MapdlRuntimeError,
 )
@@ -82,18 +81,38 @@ class TestIsAlive:
         mock._exiting = False
         return mock
 
-    def test_connecting_probes_version(self):
-        """A connecting channel uses the bounded VERSION probe."""
+    def test_connecting_channel_that_settles_probes_version(self):
+        """A connecting channel that becomes ready is probed normally."""
         mock = self._make_liveness_mock("CONNECTING")
+        mock._channel_settles.return_value = True
         mock._ctrl.return_value = "VERSION"
 
         assert MapdlGrpc.is_alive.fget(mock) is True
 
-        mock._ctrl.assert_called_once_with("VERSION", timeout=IS_ALIVE_PROBE_TIMEOUT_S)
+        mock._channel_settles.assert_called_once_with(IS_ALIVE_CHANNEL_SETTLE_TIMEOUT_S)
+        mock._ctrl.assert_called_once_with("VERSION")
 
-    def test_probe_timeout_matches_ping_abuse_probe(self):
-        """Both liveness probes allow the server the same time to answer."""
-        assert IS_ALIVE_PROBE_TIMEOUT_S == PING_ABUSE_PROBE_TIMEOUT_S
+    def test_connecting_channel_that_stalls_skips_version_probe(self):
+        """A connecting channel that never becomes ready issues no RPC.
+
+        Issuing one is unsafe, because '_ctrl' is wrapped in 'protect_grpc',
+        whose error handler calls back into 'is_alive'.
+        """
+        mock = self._make_liveness_mock("CONNECTING")
+        mock._channel_settles.return_value = False
+
+        assert MapdlGrpc.is_alive.fget(mock) is False
+
+        mock._ctrl.assert_not_called()
+
+    def test_ready_channel_does_not_wait_for_settling(self):
+        """A ready channel is probed without waiting on connectivity."""
+        mock = self._make_liveness_mock("READY")
+        mock._ctrl.return_value = "VERSION"
+
+        assert MapdlGrpc.is_alive.fget(mock) is True
+
+        mock._channel_settles.assert_not_called()
 
     @pytest.mark.parametrize("channel_state", ["TRANSIENT_FAILURE", "SHUTDOWN"])
     def test_dead_channel_states_skip_version_probe(self, channel_state):
@@ -106,7 +125,7 @@ class TestIsAlive:
 
     def test_exited_probe_failure_is_logged(self):
         """A failed probe on an exited instance leaves a diagnostic log."""
-        mock = self._make_liveness_mock("CONNECTING")
+        mock = self._make_liveness_mock("READY")
 
         def fail_after_exit(*args, **kwargs):
             mock._exited = True
@@ -129,6 +148,46 @@ class TestIsAlive:
         mock._log.warning.assert_called_once()
         assert "retrieving version failed" in mock._log.warning.call_args.args[0]
         mock._log.debug.assert_not_called()
+
+
+class TestChannelSettles:
+    """Unit tests for the connectivity-based readiness wait."""
+
+    def test_returns_true_when_channel_becomes_ready(self):
+        """A channel reaching 'READY' within the timeout reports success."""
+        mock = _make_mock_mapdl()
+        future = Mock()
+
+        with patch("grpc.channel_ready_future", return_value=future) as ready_future:
+            assert MapdlGrpc._channel_settles(mock, 5.0) is True
+
+        ready_future.assert_called_once_with(mock._channel)
+        future.result.assert_called_once_with(timeout=5.0)
+        future.cancel.assert_called_once()
+
+    def test_returns_false_on_timeout(self):
+        """A channel that stalls reports failure instead of raising."""
+        import concurrent.futures
+
+        mock = _make_mock_mapdl()
+        future = Mock()
+        future.result.side_effect = concurrent.futures.TimeoutError()
+
+        with patch("grpc.channel_ready_future", return_value=future):
+            assert MapdlGrpc._channel_settles(mock, 0.01) is False
+
+    def test_subscription_is_cancelled_on_timeout(self):
+        """The readiness subscription is released even when it times out."""
+        import concurrent.futures
+
+        mock = _make_mock_mapdl()
+        future = Mock()
+        future.result.side_effect = concurrent.futures.TimeoutError()
+
+        with patch("grpc.channel_ready_future", return_value=future):
+            MapdlGrpc._channel_settles(mock, 0.01)
+
+        future.cancel.assert_called_once()
 
 
 def test_get_float(mapdl):

@@ -201,12 +201,11 @@ PING_ABUSE_PROBE_INTERVAL_S = PING_ABUSE_INTERVAL_S * PING_ABUSE_PROBE_EVERY_N_P
 # cannot make the probe thread hang.
 PING_ABUSE_PROBE_TIMEOUT_S = 5.0
 
-# Bounded timeout for the 'VERSION' probe issued by 'is_alive'. It matches
-# 'PING_ABUSE_PROBE_TIMEOUT_S' so that both liveness checks agree on how long
-# a healthy server may take to answer. The '_ctrl' default of 1 second is too
-# tight on a loaded machine, where a slow answer would be misreported as a
-# dead instance.
-IS_ALIVE_PROBE_TIMEOUT_S = PING_ABUSE_PROBE_TIMEOUT_S
+# Bounded wait for a channel that is still connecting to reach 'READY',
+# used by 'is_alive'. The wait goes through gRPC's connectivity machinery
+# rather than through a per-call deadline, because a per-call deadline is not
+# reliably honored once the peer process has died.
+IS_ALIVE_CHANNEL_SETTLE_TIMEOUT_S = 5.0
 
 DEFAULT_GRPC_OPTIONS = [
     ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
@@ -1104,6 +1103,35 @@ class MapdlGrpc(MapdlBase):
             )
 
         self._log.debug("Channel is healthy and ready for use.")
+
+    def _channel_settles(self, timeout: float) -> bool:
+        """Wait for a connecting channel to reach the 'READY' state.
+
+        The wait relies on gRPC's connectivity machinery instead of a per-call
+        deadline, because a per-call deadline is not reliably honored once the
+        peer process has died.
+
+        Parameters
+        ----------
+        timeout : float
+            Maximum time in seconds to wait for the channel to become ready.
+
+        Returns
+        -------
+        bool
+            ``True`` if the channel became ready within ``timeout``, and
+            ``False`` otherwise.
+        """
+        import concurrent.futures
+
+        future = grpc.channel_ready_future(self._channel)
+        try:
+            future.result(timeout=timeout)
+            return True
+        except concurrent.futures.TimeoutError:
+            return False
+        finally:
+            future.cancel()
 
     def _multi_connect(self, n_attempts=5, timeout=15):
         """Try to connect over a series of attempts to the channel.
@@ -4181,8 +4209,22 @@ class MapdlGrpc(MapdlBase):
             self._log.debug("MAPDL instance is expected to be exiting")
             return False
 
+        if self.channel_state == "CONNECTING" and not self._channel_settles(
+            IS_ALIVE_CHANNEL_SETTLE_TIMEOUT_S
+        ):
+            # A connecting channel is a normal transient on a fresh connection,
+            # but it is also the steady state of a peer that has died. Issuing
+            # an RPC here is unsafe: the per-call deadline is not reliably
+            # honored once the peer is gone, and '_ctrl' is itself wrapped in
+            # 'protect_grpc', whose error handler calls back into 'is_alive'.
+            self._log.debug(
+                "MAPDL instance is not alive because the channel did not "
+                f"become ready within {IS_ALIVE_CHANNEL_SETTLE_TIMEOUT_S} seconds."
+            )
+            return False
+
         try:
-            check = bool(self._ctrl("VERSION", timeout=IS_ALIVE_PROBE_TIMEOUT_S))
+            check = bool(self._ctrl("VERSION"))
             if check:
                 self._log.debug(
                     "MAPDL instance is alive because version was retrieved."
