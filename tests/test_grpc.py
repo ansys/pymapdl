@@ -124,13 +124,12 @@ def setup_for_cmatrix(mapdl, cleared):
 
 @pytest.fixture(scope="function")
 def grpc_channel(mapdl, cleared):
-    channel = grpc.insecure_channel(
+    return grpc.insecure_channel(
         mapdl._channel_str,
         options=[
             ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
         ],
     )
-    return channel
 
 
 def test_connect_via_channel(grpc_channel):
