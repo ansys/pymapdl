@@ -23,41 +23,10 @@
 
 """The explicit commands MAPDL extended mixin."""
 
-from functools import wraps  # noqa: F401
-import os  # noqa: F401
-import pathlib  # noqa: F401
-import re  # noqa: F401
-import shutil  # noqa: F401
-import tempfile  # noqa: F401
-from typing import Union  # noqa: F401
-import warnings  # noqa: F401
-import weakref  # noqa: F401
+from functools import wraps
 
-import numpy as np  # noqa: F401
-from numpy.typing import DTypeLike, NDArray  # noqa: F401
-
-from ansys.mapdl.core import LOG as logger  # noqa: F401
-from ansys.mapdl.core import parse  # noqa: F401
-from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput  # noqa: F401
-from ansys.mapdl.core.errors import (  # noqa: F401
-    CommandDeprecated,
-    ComponentDoesNotExits,
-    IncorrectWorkingDirectory,
-    MapdlCommandIgnoredError,
-    MapdlDoLoopLimitError,
-    MapdlRuntimeError,
-)
-from ansys.mapdl.core.mapdl_core import _MapdlCore  # noqa: F401
-from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat  # noqa: F401
-from ansys.mapdl.core.misc import (  # noqa: F401
-    allow_iterables_vmin,
-    allow_pickable_entities,
-    check_deprecated_vtk_kwargs,
-    random_string,
-    requires_graphics,
-    supress_logging,
-)
-from ansys.mapdl.core.plotting import GraphicsBackend  # noqa: F401
+from ansys.mapdl.core.errors import CommandDeprecated
+from ansys.mapdl.core.mapdl_core import _MapdlCore
 
 from . import _ExtendedMixinBase
 
