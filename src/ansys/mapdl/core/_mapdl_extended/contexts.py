@@ -23,8 +23,8 @@
 
 """The contexts MAPDL extended mixin."""
 
-import weakref
 from typing import TYPE_CHECKING
+import weakref
 
 from ansys.mapdl.core.errors import MapdlDoLoopLimitError
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat

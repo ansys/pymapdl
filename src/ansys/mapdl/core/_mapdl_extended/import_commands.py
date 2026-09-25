@@ -23,8 +23,8 @@
 
 """The import commands MAPDL extended mixin."""
 
-import os
 from functools import wraps
+import os
 
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 

@@ -23,8 +23,8 @@
 
 """The plotting commands MAPDL extended mixin."""
 
-import warnings
 from functools import wraps
+import warnings
 
 import numpy as np
 

@@ -24,11 +24,11 @@
 """The contexts MAPDL core responsibility mixin."""
 
 import logging
-import weakref
 
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
 from typing import TYPE_CHECKING
+import weakref
 
 from ansys.mapdl.core import _HAS_DPF
 from ansys.mapdl.core.errors import MapdlRuntimeError

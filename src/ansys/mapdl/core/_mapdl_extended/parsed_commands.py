@@ -23,8 +23,8 @@
 
 """The parsed commands MAPDL extended mixin."""
 
-import re
 from functools import wraps
+import re
 
 import numpy as np
 

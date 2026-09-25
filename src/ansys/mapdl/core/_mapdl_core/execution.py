@@ -23,6 +23,7 @@
 
 """The execution MAPDL core responsibility mixin."""
 
+from functools import wraps
 import os
 import re
 
@@ -31,12 +32,11 @@ import re
 import sys
 import tempfile
 import time
-from functools import wraps
 from typing import TYPE_CHECKING, Optional
 from warnings import warn
 
-from ansys.mapdl.core import _HAS_DPF
 from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.core import _HAS_DPF
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,

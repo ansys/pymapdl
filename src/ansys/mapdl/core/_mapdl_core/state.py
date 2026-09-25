@@ -30,8 +30,8 @@ import logging
 from typing import TYPE_CHECKING
 from warnings import warn
 
-from ansys.mapdl.core import _HAS_DPF
 from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.core import _HAS_DPF
 
 if TYPE_CHECKING:  # pragma: no cover
     if _HAS_DPF:

@@ -23,9 +23,9 @@
 
 """The parameter commands MAPDL extended mixin."""
 
-import warnings
 from functools import wraps
 from typing import Union
+import warnings
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl_core import _MapdlCore

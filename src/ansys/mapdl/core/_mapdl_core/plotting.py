@@ -26,16 +26,16 @@
 import glob
 import os
 import pathlib
-import sys
-import tempfile
-import weakref
 from shutil import copyfile, rmtree
 
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
 from subprocess import DEVNULL, call  # nosec B404
+import sys
+import tempfile
 from typing import TYPE_CHECKING, Optional
 from warnings import warn
+import weakref
 
 from ansys.mapdl.core import _HAS_DPF
 from ansys.mapdl.core.errors import MapdlRuntimeError
