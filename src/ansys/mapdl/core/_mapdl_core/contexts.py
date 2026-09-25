@@ -1,0 +1,395 @@
+# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
+# SPDX-License-Identifier: MIT
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
+"""The contexts MAPDL core responsibility mixin."""
+
+import logging
+
+# Subprocess is needed to start the backend. But
+# the input is controlled by the library. Excluding bandit check.
+from typing import TYPE_CHECKING
+import weakref
+
+from ansys.mapdl.core import _HAS_DPF
+from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.misc import check_valid_routine, random_string
+
+if TYPE_CHECKING:  # pragma: no cover
+    from ansys.mapdl.core.mapdl import MapdlBase
+
+    if _HAS_DPF:
+        pass
+
+
+from . import _CoreMixinBase
+from .constants import (
+    _TMP_COMP,
+    ENTITIES_TO_SELECTION_MAPPING,
+    MAX_COMMAND_LENGTH,
+)
+
+
+class _CoreContextMixin(_CoreMixinBase):
+    """Static responsibility mixin for the MAPDL core facade."""
+
+    @property
+    def chain_commands(self):
+        """Chain several mapdl commands.
+
+        Commands can be separated with ``"$"`` in MAPDL rather than
+        with a line break, so you could send multiple commands to
+        MAPDL with:
+
+        ``mapdl.run("/PREP7$K,1,1,2,3")``
+
+        This method is merely a convenience context manager to allow
+        for easy chaining of PyMAPDL commands to speed up sending
+        commands to MAPDL.
+
+        View the response from MAPDL with :attr:`Mapdl.last_response`.
+
+        Notes
+        -----
+        Distributed Ansys cannot properly handle condensed data input
+        and chained commands are not permitted in distributed ansys.
+
+        Examples
+        --------
+        >>> with mapdl.chain_commands:
+            mapdl.prep7()
+            mapdl.k(1, 1, 2, 3)
+        """
+        if self._distributed:
+            raise MapdlRuntimeError(
+                "Chained commands are not permitted in distributed ansys."
+            )
+        return self._chain_commands(self)
+
+    @property
+    def force_output(self):
+        """Force text output globally by turning the ``Mapdl.mute`` attribute to False
+        and activating text output (``/GOPR``)
+
+        You can still do changes to those inside this context.
+        """
+        return self._force_output(self)
+
+    @property
+    def non_interactive(self):
+        """Non-interactive context manager.
+
+        Allow to execute code without user interaction or waiting
+        between PyMAPDL responses.
+        It can also be used to execute some commands which are not
+        supported in interactive mode. For a complete list of commands
+        visit :ref:`ref_unsupported_interactive_commands`.
+
+        View the last response with :attr:`Mapdl.last_response` method.
+
+        Notes
+        -----
+        All the commands executed inside this context manager are not
+        executed until the context manager exits which then execute them
+        all at once in the MAPDL instance.
+
+        This command uses :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`
+        method.
+
+        Examples
+        --------
+        Use the non-interactive context manager for the VWRITE (
+        :func:`Mapdl.vwrite() <ansys.mapdl.core.Mapdl.vwrite>`)
+        command.
+
+        >>> with mapdl.non_interactive:
+        ...    mapdl.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
+        ...    mapdl.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
+        >>> mapdl.last_response
+        """
+        return self._non_interactive(self)
+
+    @property
+    def muted(self):
+        """Context manager that suppress all output from MAPDL
+
+        Use the `muted` context manager to suppress all the output. Similar to
+        setting `mapdl.mute = True` but only for the context manager.
+
+        Examples
+        --------
+        >>> with mapdl.muted:
+        ...    mapdl.run("/SOLU") # This call is muted
+        """
+        return self._muted(self)
+
+    def run_as_routine(self, routine):
+        """
+        Runs a command or commands at a routine and then revert to the prior routine.
+
+        This can be useful to avoid constantly changing between routines.
+
+        Parameters
+        ----------
+        routine : str
+            A MAPDL routine. For example, ``"PREP7"`` or ``"POST1"``.
+
+        Examples
+        --------
+        Enter ``PREP7`` and run ``numvar``, which requires ``POST26``, and
+        revert to the prior routine.
+
+        >>> mapdl.prep7()
+        >>> mapdl.parameters.routine
+        'PREP7'
+        >>> with mapdl.run_as_routine('POST26'):
+        ...     mapdl.numvar(200)
+        >>> mapdl.parameters.routine
+        'PREP7'
+        """
+        return self._RetainRoutine(self, routine)
+
+    def _chain_stored(self):
+        """Send a series of commands to MAPDL"""
+        # there's to be an limit to 640 characters per command, so
+        # when chaining commands they must be shorter than 640 (minus
+        # some overhead).
+        c = 0
+        chained_commands = []
+        chunk = []
+        for command in self._stored_commands:
+            len_command = len(command) + 1  # include sep var
+            if len_command + c > MAX_COMMAND_LENGTH:
+                chained_commands.append("$".join(chunk))
+                chunk = [command]
+                c = 0
+            else:
+                chunk.append(command)
+                c += len_command
+
+        # join the last
+        chained_commands.append("$".join(chunk))
+        self._stored_commands = []
+
+        responses = [self._run(command) for command in chained_commands]
+        self._response = "\n".join(responses)
+
+    class _non_interactive:
+        """Allows user to enter commands that need to run non-interactively."""
+
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+
+        def __enter__(self):
+            self._parent()._log.debug("Entering in non-interactive mode")
+            if self._parent().logger.logger.level <= logging.DEBUG:
+                # only commenting if on debug mode
+                self._parent().com("Entering in non_interactive mode")
+            self._parent()._store_commands = True
+
+        def __exit__(self, *args):
+            self._parent()._store_commands = False
+
+            if args[0] is not None:
+                # An exception was raised, let's exit now without flushing.
+                # Discard whatever was buffered so an incomplete (and
+                # potentially invalid, for example a '*DO' missing its
+                # '*ENDDO') block cannot leak into a later flush.
+                self._parent()._log.debug(
+                    "An exception was found in the `non_interactive` environment. "
+                    "Hence the commands are not flushed and are discarded."
+                )
+                self._parent()._stored_commands = []
+                return None
+            else:
+                # No exception so let's flush.
+                self._parent()._log.debug("Exiting non-interactive mode")
+                self._parent()._flush_stored()
+
+    class _save_selection:
+        """Save the selection and returns to it when exiting"""
+
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+            self.selection = []
+
+        def __enter__(self):
+            self._parent()._log.debug("Entering saving selection context")
+            mapdl = self._parent()
+
+            # Storing components
+            selection = {
+                "cmsel": mapdl.components._comp,
+            }
+            id_ = random_string(5)
+            for each_type, each_name in _TMP_COMP.items():
+                each_name = f"__{each_name}{id_}__"
+                selection[each_type] = each_name
+                mapdl.cm(
+                    each_name, each_type, mute=True
+                )  # to hide ComponentNoData error
+
+            self.selection.append(selection)
+
+        def __exit__(self, *args):
+            self._parent()._log.debug("Exiting saving selection context")
+
+            mapdl = self._parent()
+            selection = self.selection.pop()
+            cmps = selection.pop("cmsel")
+
+            try:
+                mapdl.allsel()
+                mapdl.cmsel("None")
+
+                if cmps:
+                    for each_name, each_value in cmps.items():
+                        mapdl.cmsel("a", each_name, each_value, mute=True)
+
+                for each_type, each_name in selection.items():
+                    mapdl.cmsel("a", each_name, each_type, mute=True)
+
+                    selfun = getattr(
+                        mapdl, ENTITIES_TO_SELECTION_MAPPING[each_type.upper()]
+                    )
+                    selfun("s", vmin=each_name, mute=True)
+
+                    mapdl.cmdele(each_name, mute=True)
+            except Exception:
+                if args and args[0] is not None:
+                    mapdl._log.exception("Unable to restore the saved selection.")
+                    return None
+                raise
+
+    class _chain_commands:
+        """Store MAPDL commands and send one chained command."""
+
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+            self._previous_store_commands = False
+            self._stored_commands_len = 0
+
+        def __enter__(self):
+            parent = self._parent()
+            parent._log.debug("Entering chained command mode")
+            self._previous_store_commands = parent._store_commands
+            self._stored_commands_len = len(parent._stored_commands)
+            parent._store_commands = True
+
+        def __exit__(self, *args):
+            parent = self._parent()
+            parent._log.debug("Exiting chained command mode")
+            try:
+                if args[0] is not None:
+                    parent._stored_commands = parent._stored_commands[
+                        : self._stored_commands_len
+                    ]
+                elif not self._previous_store_commands:
+                    parent._chain_stored()
+            finally:
+                parent._store_commands = self._previous_store_commands
+
+    class _RetainRoutine:
+        """Store MAPDL's routine when entering and reverts it when exiting."""
+
+        def __init__(self, parent, routine):
+            self._parent = weakref.ref(parent)
+            self._requested_routine = routine
+
+        def __enter__(self):
+            """Store the current routine and enter the requested routine."""
+            self._parent()._cache_routine()
+            self._parent()._log.debug(f"Caching routine {self._cached_routine}")
+
+            if (
+                self._requested_routine.lower().strip()
+                != self._cached_routine.lower().strip()
+            ):
+                self._parent()._enter_routine(self._requested_routine)
+
+        def __exit__(self, *args):
+            """Restore the original routine."""
+            self._parent()._log.debug(f"Restoring routine '{self._cached_routine}'")
+            self._parent()._resume_routine()
+
+        @property
+        def _cached_routine(self):
+            return self._parent()._cached_routine
+
+    class _muted:
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+            self.old_value = None
+
+        def __enter__(self):
+            self.old_value = self._parent().mute
+            self._parent().mute = True
+
+        def __exit__(self, *args):
+            self._parent().mute = self.old_value
+            self.old_value = None
+
+    def _enter_routine(self, routine):
+        # check the routine is valid since we're muting the output
+        check_valid_routine(routine)
+
+        if routine.lower() in ["begin level", "finish"]:
+            self.finish(mute=True)
+        else:
+            if not routine.startswith("/"):
+                routine = f"/{routine}"
+
+            self.run(f"{routine}", mute=True)
+
+    def _cache_routine(self):
+        """Cache the current routine."""
+        self._cached_routine = self.parameters.routine
+
+    def _resume_routine(self):
+        """Resume the cached routine."""
+        if self._cached_routine is not None:
+            self._enter_routine(self._cached_routine)
+            self._cached_routine = None
+
+    class _force_output:
+        """Allows user to enter commands that need to run with forced text output."""
+
+        def __init__(self, parent: "MapdlBase"):
+            self._parent: "MapdlBase" = weakref.ref(parent)
+
+        def __enter__(self):
+            self._parent()._log.debug("Entering force-output mode")
+            if self._parent().wrinqr(1) == 0:  # using wrinqr is more reliable than *get
+                self._in_nopr = True
+                self._parent()._run("/gopr")  # Going to PR mode
+            else:
+                self._in_nopr = False
+
+            self._previous_mute, self._parent()._mute = self._parent()._mute, False
+
+        def __exit__(self, *args):
+            self._parent()._log.debug("Exiting force-output mode")
+            try:
+                if self._in_nopr:
+                    self._parent()._run("/nopr")
+            finally:
+                self._parent()._mute = self._previous_mute
