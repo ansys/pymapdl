@@ -1,0 +1,6 @@
+scheduler\_options
+==================
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.scheduler_options

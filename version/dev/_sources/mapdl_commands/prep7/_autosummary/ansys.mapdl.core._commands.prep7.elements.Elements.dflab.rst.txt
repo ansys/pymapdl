@@ -1,0 +1,6 @@
+﻿dflab
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.elements
+
+.. automethod:: Elements.dflab

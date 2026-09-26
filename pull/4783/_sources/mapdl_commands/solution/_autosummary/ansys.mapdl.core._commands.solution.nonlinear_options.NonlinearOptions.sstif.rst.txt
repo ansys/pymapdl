@@ -1,0 +1,6 @@
+﻿sstif
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.nonlinear_options
+
+.. automethod:: NonlinearOptions.sstif

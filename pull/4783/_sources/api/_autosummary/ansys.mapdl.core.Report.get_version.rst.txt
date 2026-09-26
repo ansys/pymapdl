@@ -1,0 +1,6 @@
+get\_version
+============
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Report.get_version

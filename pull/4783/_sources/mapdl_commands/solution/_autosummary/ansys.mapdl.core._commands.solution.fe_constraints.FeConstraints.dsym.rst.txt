@@ -1,0 +1,6 @@
+﻿dsym
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.fe_constraints
+
+.. automethod:: FeConstraints.dsym

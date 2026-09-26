@@ -1,0 +1,6 @@
+﻿vcol
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.apdl.array_parameters
+
+.. automethod:: ArrayParameters.vcol

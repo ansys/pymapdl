@@ -1,0 +1,6 @@
+﻿int1
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.post26.operations
+
+.. automethod:: Operations.int1

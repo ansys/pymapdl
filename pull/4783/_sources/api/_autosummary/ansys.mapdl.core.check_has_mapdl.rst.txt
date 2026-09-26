@@ -1,0 +1,6 @@
+﻿check\_has\_mapdl
+=================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. autofunction:: check_has_mapdl

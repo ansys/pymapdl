@@ -1,0 +1,6 @@
+﻿psys
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.artificially_matched_layers
+
+.. automethod:: ArtificiallyMatchedLayers.psys

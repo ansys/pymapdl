@@ -1,0 +1,6 @@
+﻿ui
+==
+
+.. currentmodule:: ansys.mapdl.core._commands.session.run_controls
+
+.. automethod:: RunControls.ui

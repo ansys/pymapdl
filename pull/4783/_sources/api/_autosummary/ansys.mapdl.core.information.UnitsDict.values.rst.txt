@@ -1,0 +1,6 @@
+values
+======
+
+.. currentmodule:: ansys.mapdl.core.information
+
+.. automethod:: UnitsDict.values

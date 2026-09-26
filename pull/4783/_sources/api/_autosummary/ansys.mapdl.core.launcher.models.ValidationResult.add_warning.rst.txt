@@ -1,0 +1,6 @@
+add\_warning
+============
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. automethod:: ValidationResult.add_warning

@@ -1,0 +1,6 @@
+license\_server\_check
+======================
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.license_server_check
