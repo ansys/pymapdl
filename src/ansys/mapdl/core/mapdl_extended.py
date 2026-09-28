@@ -44,6 +44,7 @@ from ansys.mapdl.core.errors import (
     MapdlDoLoopLimitError,
     MapdlRuntimeError,
 )
+from ansys.mapdl.core.lazy_array import LazyArray
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 from ansys.mapdl.core.misc import (
@@ -3172,7 +3173,7 @@ class _MapdlExtended(_MapdlCommandExtended):
         label = f"__{random_string(4)}__" if temporary_label else lab
         self.etable(label, item, comp, option)
         try:
-            values = self.get_array("ELEM", "", "ETAB", label)
+            values = np.asarray(self.get_array("ELEM", "", "ETAB", label))
         finally:
             if temporary_label:
                 self.etable(label, "ERAS")
@@ -3189,9 +3190,16 @@ class _MapdlExtended(_MapdlCommandExtended):
         it2num: MapdlFloat = "",
         kloop: MapdlFloat = "",
         **kwargs: KwargDict,
-    ) -> NDArray[np.float64]:
-        """Uses the ``*VGET`` command to Return an array from ANSYS as a
-        Python array.
+    ) -> Union[NDArray[np.float64], LazyArray]:
+        """Use ``*VGET`` to retrieve an array from MAPDL.
+
+        On gRPC connections, the returned :class:`LazyArray
+        <ansys.mapdl.core.lazy_array.LazyArray>` downloads its values when it
+        is first used. Element-table (``ETAB``) values remain eager because
+        MAPDL does not support retrieving them through a private ``*VGET``
+        parameter. Other connection types return a :class:`numpy.ndarray`
+        immediately.
+
 
         See `VGET
         <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_VGET_st.html>`
@@ -3238,8 +3246,9 @@ class _MapdlExtended(_MapdlCommandExtended):
 
         Returns
         -------
-        numpy.ndarray
-            Array from MAPDL.
+        numpy.ndarray or LazyArray
+            Array from MAPDL. A gRPC ``LazyArray`` transfers its values only
+            when first used.
 
         Examples
         --------
@@ -3271,6 +3280,9 @@ class _MapdlExtended(_MapdlCommandExtended):
         arr = self._get_array(
             entity, entnum, item1, it1num, item2, it2num, kloop, **kwargs
         )
+
+        if isinstance(arr, LazyArray):
+            return arr
 
         # edge case where corba refuses to return the array
         ntry = 0
