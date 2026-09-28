@@ -658,9 +658,12 @@ class TestDPFResult:
         ],
     )
     def test_DPF_result_class(self, mapdl, _use_reader_backend, expected_cls):
-        # Set the backend
-        mapdl._use_reader_backend = _use_reader_backend
-        assert isinstance(mapdl.result, expected_cls)
+        previous_backend = mapdl._use_reader_backend
+        try:
+            mapdl._use_reader_backend = _use_reader_backend
+            assert isinstance(mapdl.result, expected_cls)
+        finally:
+            mapdl._use_reader_backend = previous_backend
 
     @pytest.mark.xfail(True, reason="Upload to remote using DPF is broken")
     def test_solve_rst_only(self, mapdl, result):

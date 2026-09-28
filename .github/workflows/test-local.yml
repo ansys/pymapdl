@@ -139,6 +139,10 @@ jobs:
       packages: read  # Needed to pull Docker images from GitHub packages
     env:
       ANSYS_MAPDL_GRPC_TRANSPORT: 'insecure'
+      # Crash-diagnostics instrumentation (see plan.md Phase 0 §3.1): makes
+      # MAPDL's signal handler print the full developer call stack
+      # (PrintBackTrace) to stdout on a crash.
+      ANS_DEBUG_CRASH: 1
       DATAPROCESSING_DEBUG: /home/mapdl/dpf_logs
       HAS_DPF: ${{ inputs.test_dpf }}
       OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
@@ -155,7 +159,10 @@ jobs:
 
     container:
       image: "${{ inputs.package-registry }}:${{ inputs.mapdl-version }}" # zizmor: ignore[unpinned-images]
-      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
+      # `--ulimit core=-1` allows an unlimited core dump on a fatal signal, so
+      # a crash produces a `core*` file that .ci/collect_mapdl_logs_locals.sh
+      # can pick up and upload alongside the other MAPDL logs.
+      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --ulimit core=-1 --entrypoint /bin/bash
       credentials:
         username: ${{ secrets.username }}
         password: ${{ secrets.token }}

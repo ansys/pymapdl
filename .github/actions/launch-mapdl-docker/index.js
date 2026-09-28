@@ -106,6 +106,14 @@ async function run() {
     const transport = core.getInput('transport') || 'insecure';
     const timeout = parseInt(core.getInput('timeout') || '60');
     const wait = core.getInput('wait') || 'true';
+    // These three inputs already have defaults declared in action.yml, so
+    // core.getInput() never returns an unset value here. Do NOT `|| default`
+    // on top of that: it would silently turn an explicit '' (documented as
+    // "omit the variable") back into the default, which is not what callers
+    // asking to omit ANS_DEBUG_CRASH would expect.
+    const extraEnv = core.getInput('extra-env');
+    const ansDebugCrash = core.getInput('ans-debug-crash');
+    const enableCoreDumps = core.getInput('enable-core-dumps');
 
     // Save instance name for cleanup - maintain array of instances
     let instanceNames = [];
@@ -143,6 +151,9 @@ async function run() {
     core.debug(`  Memory Swap (MB): ${memorySwapMb}`);
     core.debug(`  Timeout (s): ${timeout}`);
     core.debug(`  Wait for Services: ${wait}`);
+    core.debug(`  ANS_DEBUG_CRASH: ${ansDebugCrash}`);
+    core.debug(`  Enable Core Dumps: ${enableCoreDumps}`);
+    core.debug(`  Extra Env: ${extraEnv}`);
 
 
     // Set environment variables for the bash script
@@ -165,6 +176,9 @@ async function run() {
     process.env.TRANSPORT = transport;
     process.env.TIMEOUT = timeout.toString();
     process.env.DEBUG = DEBUG ? 'true' : 'false';
+    process.env.EXTRA_ENV = extraEnv;
+    process.env.ANS_DEBUG_CRASH = ansDebugCrash;
+    process.env.ENABLE_CORE_DUMPS = enableCoreDumps;
 
     // Run the launch script (from parent directory when compiled to dist/)
     core.startGroup('Launch MAPDL Docker Container');

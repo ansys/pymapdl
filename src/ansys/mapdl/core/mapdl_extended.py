@@ -3121,6 +3121,63 @@ class _MapdlExtended(_MapdlCommandExtended):
         else:
             self.slashdelete(filename)
 
+    def get_etable(
+        self,
+        item: str,
+        comp: str = "",
+        option: str = "",
+        lab: str = "",
+    ) -> NDArray[np.float64]:
+        """Create an element table column and return its values.
+
+        Parameters
+        ----------
+        item : str
+            Label identifying the result item.
+        comp : str, optional
+            Component or sequence number for the result item.
+        option : str, optional
+            Element table storage option, such as ``"MIN"``, ``"MAX"``,
+            or ``"AVG"``.
+        lab : str, optional
+            Label for the element table column. If omitted, a hidden temporary
+            label is used and erased after the values are retrieved. If
+            provided, the column remains available in MAPDL.
+
+        Returns
+        -------
+        numpy.ndarray
+            Values from the element table column for the selected elements.
+
+        Notes
+        -----
+        This method uses :meth:`Mapdl.etable` to create the column and
+        :meth:`Mapdl.get_array` to retrieve it. As with
+        :meth:`Mapdl.get_array`, it cannot be used inside the
+        :attr:`Mapdl.non_interactive` context.
+
+        Examples
+        --------
+        Retrieve sequence-number element results:
+
+        >>> moment_i = mapdl.get_etable("SMISC", 3, lab="MOMY_I")
+        >>> moment_j = mapdl.get_etable("SMISC", 16, lab="MOMY_J")
+
+        Retrieve a component-name result with a temporary element table
+        column:
+
+        >>> displacement_x = mapdl.get_etable("U", "X")
+        """
+        temporary_label = not lab
+        label = f"__{random_string(4)}__" if temporary_label else lab
+        self.etable(label, item, comp, option)
+        try:
+            values = self.get_array("ELEM", "", "ETAB", label)
+        finally:
+            if temporary_label:
+                self.etable(label, "ERAS")
+        return values
+
     @supress_logging
     def get_array(
         self,

@@ -114,12 +114,14 @@ def test_get_fallback_string(mapdl):
 
 
 def test_get_lock(mapdl):
-    mapdl._get_lock = True
+    previous_get_lock = mapdl._get_lock
+    try:
+        mapdl._get_lock = True
 
-    with pytest.raises(MapdlRuntimeError):
-        mapdl._get(entity="NODE", entnum="1", item1="U", it1num=1, timeout=0.5)
-
-    mapdl._get_lock = False
+        with pytest.raises(MapdlRuntimeError):
+            mapdl._get(entity="NODE", entnum="1", item1="U", it1num=1, timeout=0.5)
+    finally:
+        mapdl._get_lock = previous_get_lock
 
 
 def test_get_invalid_response_type(mapdl):
@@ -133,13 +135,80 @@ def test_get_invalid_response_type(mapdl):
 
 
 def test_get_non_interactive_mode(mapdl):
-    mapdl._store_commands = True
+    previous_store_commands = mapdl._store_commands
+    try:
+        mapdl._store_commands = True
 
-    with pytest.raises(MapdlRuntimeError):
-        mapdl._get(entity="NODE", entnum="1", item1="U", it1num=1)
+        with pytest.raises(MapdlRuntimeError):
+            mapdl._get(entity="NODE", entnum="1", item1="U", it1num=1)
+    finally:
+        mapdl._store_commands = previous_store_commands
 
-    # reset
-    mapdl._store_commands = False
+
+def test_cdread_all_resolves_both_archive_files():
+    """CDREAD ALL prepares both the CDB and IGES archive paths."""
+    mock_mapdl = MagicMock(spec=MapdlGrpc)
+    mock_mapdl._get_file_name.side_effect = lambda fname, ext, default: (
+        f"{fname}.{ext or default}"
+    )
+    mock_mapdl._get_file_path.side_effect = lambda fname, progress_bar: fname
+
+    MapdlGrpc.cdread(mock_mapdl, "all", "model", "cdb")
+
+    assert mock_mapdl._get_file_name.call_count == 2
+    assert mock_mapdl._get_file_name.call_args_list[0].args == (
+        "model",
+        "cdb",
+        "cdb",
+    )
+    assert mock_mapdl._get_file_name.call_args_list[1].args == (
+        "model",
+        "",
+        "iges",
+    )
+    mock_mapdl.input.assert_called_once_with(
+        "model.cdb",
+        verbose=False,
+        progress_bar=False,
+        orig_cmd="CDREAD",
+        cd_read_option="ALL",
+        fnamei="model.iges",
+    )
+
+
+def test_cdread_all_accepts_explicit_iges_archive():
+    """CDREAD ALL accepts an independently named IGES archive."""
+    mock_mapdl = MagicMock(spec=MapdlGrpc)
+    mock_mapdl._get_file_name.side_effect = lambda fname, ext, default: (
+        f"{fname}.{ext or default}"
+    )
+    mock_mapdl._get_file_path.side_effect = lambda fname, progress_bar: fname
+
+    MapdlGrpc.cdread(
+        mock_mapdl,
+        "ALL",
+        "model",
+        "cdb",
+        fnamei="geometry",
+        exti="iges",
+    )
+
+    mock_mapdl.input.assert_called_once_with(
+        "model.cdb",
+        verbose=False,
+        progress_bar=False,
+        orig_cmd="CDREAD",
+        cd_read_option="ALL",
+        fnamei="geometry.iges",
+    )
+
+
+def test_cdread_rejects_unknown_option():
+    """CDREAD continues to reject unsupported options."""
+    mock_mapdl = MagicMock(spec=MapdlGrpc)
+
+    with pytest.raises(ValueError, match='Option "UNKNOWN" is not supported'):
+        MapdlGrpc.cdread(mock_mapdl, "unknown", "model", "cdb")
 
 
 class TestCloseProcessPipes:
