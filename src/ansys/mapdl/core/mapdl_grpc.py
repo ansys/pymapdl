@@ -2960,11 +2960,10 @@ class MapdlGrpc(MapdlBase):
         _download(targets)
         return os.path.join(path, jobname + "0." + preference)
 
-    @protect_grpc
-    def _ctrl(
+    def _ctrl_once(
         self, cmd: str, opt1: str = "", timeout: Optional[float] = 1.0
     ):  # numpydoc ignore=RT01
-        """Issue control command to the MAPDL server.
+        """Issue one control command to the MAPDL server without retrying.
 
         Available commands:
 
@@ -3028,7 +3027,9 @@ class MapdlGrpc(MapdlBase):
                 pass
             return
 
-        resp = self._stub.Ctrl(request, timeout=timeout)
+        call = self._stub.Ctrl.future(request, timeout=timeout)
+        with self._watched_call(call):
+            resp = call.result()
 
         if cmd.lower() == "set_verb" and str(opt1) == "0":
             warn("Disabling gRPC verbose ('_ctr') by issuing also '/VERIFY' command.")
@@ -3036,6 +3037,13 @@ class MapdlGrpc(MapdlBase):
 
         if hasattr(resp, "response"):
             return resp.response
+
+    @protect_grpc
+    def _ctrl(
+        self, cmd: str, opt1: str = "", timeout: Optional[float] = 1.0
+    ):  # numpydoc ignore=RT01
+        """Issue a control command to the MAPDL server with retries."""
+        return self._ctrl_once(cmd=cmd, opt1=opt1, timeout=timeout)
 
     @wraps(MapdlBase.cdread)
     def cdread(
@@ -4217,7 +4225,7 @@ class MapdlGrpc(MapdlBase):
             return False
 
         try:
-            check = bool(self._ctrl("VERSION"))
+            check = bool(self._ctrl_once("VERSION"))
             if check:
                 self._log.debug(
                     "MAPDL instance is alive because version was retrieved."
