@@ -23,6 +23,7 @@
 """Test MAPDL interface"""
 
 from datetime import datetime
+import gc
 from importlib import reload
 import logging
 import os
@@ -3092,6 +3093,99 @@ def test_directory_pathlib_value(mapdl, cleared):
         path_rst = f"{mapdl.directory}/{mapdl.jobname}.rst"
 
     assert str(mapdl.directory / f"{mapdl.jobname}.rst") == path_rst
+
+
+def _make_mapdl_directory(path, files, *, platform="linux", local=False):
+    mapdl = object.__new__(_MapdlCore)
+    mapdl._platform = platform
+    mapdl._local = local
+    mapdl.list_files = MagicMock(return_value=files)
+    return mapdl, mapdl._wrap_directory(path)
+
+
+def test_mapdl_directory_is_file_checks_owning_mapdl():
+    first = _make_mapdl_directory("/mapdl/first", ["first.rst"])
+    second = _make_mapdl_directory("/mapdl/second", ["second.rst"])
+    first_directory = first[1]
+    second_directory = second[1]
+
+    assert (first_directory / "first.rst").is_file()
+    assert not (first_directory / "second.rst").is_file()
+    assert (second_directory / "second.rst").is_file()
+    assert not (second_directory / "first.rst").is_file()
+
+
+def test_mapdl_directory_is_file_survives_path_derivation():
+    _, directory = _make_mapdl_directory("/mapdl/run", ["result.rst"])
+
+    joined_with_operator = directory / "result.rst"
+    joined_with_method = directory.joinpath("result.rst")
+    changed_suffix = (directory / "result.out").with_suffix(".rst")
+    changed_name = (directory / "other.rst").with_name("result.rst")
+    joined_to_parent = (directory / "nested").parent / "result.rst"
+
+    assert joined_with_operator.is_file()
+    assert joined_with_method.is_file()
+    assert changed_suffix.is_file()
+    assert changed_name.is_file()
+    assert joined_to_parent.is_file()
+
+
+def test_remote_mapdl_directory_is_file_ignores_client_filesystem(tmp_path):
+    client_file = tmp_path / "client-only.rst"
+    client_file.touch()
+    platform = {"nt": "windows", "posix": "linux"}[os.name]
+    _, directory = _make_mapdl_directory(tmp_path, [], platform=platform)
+
+    assert not (directory / client_file.name).is_file()
+
+
+def test_local_mapdl_directory_does_not_report_directory_as_file(tmp_path):
+    child_directory = tmp_path / "child"
+    child_directory.mkdir()
+    platform = {"nt": "windows", "posix": "linux"}[os.name]
+    _, directory = _make_mapdl_directory(
+        tmp_path, [child_directory.name], platform=platform, local=True
+    )
+
+    assert not (directory / child_directory.name).is_file()
+
+
+def test_mapdl_directory_is_file_rejects_nested_path():
+    _, directory = _make_mapdl_directory("/mapdl/run", ["result.rst"])
+
+    with pytest.raises(ValueError, match="direct children"):
+        (directory / "nested" / "result.rst").is_file()
+
+
+def test_mapdl_directory_is_file_raises_when_mapdl_no_longer_exists():
+    mapdl, directory = _make_mapdl_directory("/mapdl/run", ["result.rst"])
+    result_file = directory / "result.rst"
+    del mapdl
+    gc.collect()
+
+    with pytest.raises(ReferenceError, match="no longer exists"):
+        result_file.is_file()
+
+
+def test_windows_mapdl_directory_is_file_is_case_insensitive():
+    _, directory = _make_mapdl_directory(
+        "C:/mapdl/run", ["RESULT.RST"], platform="windows"
+    )
+
+    assert (directory / "result.rst").is_file()
+
+
+def test_mapdl_directory_is_file_with_mapdl(mapdl, cleared, tmp_path):
+    filename = "pymapdl_directory_is_file.txt"
+    source = tmp_path / filename
+    source.write_text("MAPDL-aware path", encoding="utf-8")
+    mapdl.upload(source)
+
+    try:
+        assert (mapdl.directory / filename).is_file()
+    finally:
+        mapdl.slashdelete(filename)
 
 
 def test_load_not_raising_warning():
