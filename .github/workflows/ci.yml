@@ -325,6 +325,10 @@ jobs:
   docker-compose-test-remote:
     name: "Docker Compose Remote: ${{ matrix.mapdl-version }}"
     runs-on: ubuntu-latest
+    # These jobs normally finish in under 10 minutes. A teardown hang after the
+    # test session has passed produces no output at all, so without a timeout
+    # the job would occupy a runner until the 6-hour default.
+    timeout-minutes: 45
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [smoke-tests]
     permissions:
@@ -395,6 +399,8 @@ jobs:
   docker-compose-test-local:
     name: "Docker Compose Local: ${{ matrix.mapdl-version }}"
     runs-on: ubuntu-latest
+    # See the note on 'docker-compose-test-remote'.
+    timeout-minutes: 45
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [smoke-tests]
     permissions:
