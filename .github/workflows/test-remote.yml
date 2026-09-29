@@ -260,11 +260,18 @@ jobs:
           python -m pip install .[tests]
 
       - name: "Unit testing"
+        # Hard backstop for the phase that the in-process shutdown watchdog
+        # ('pytest_unconfigure' in 'tests/conftest.py') cannot cover, such as
+        # an orphaned child process keeping the step's stdout pipe open after
+        # pytest exited. Failing the step (instead of stalling until the job
+        # timeout) leaves time for the 'if: always()' log-collection steps.
+        timeout-minutes: 45
         env:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
           ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
           file_name: "${{ inputs.file-name }}"
           MAPDL_VERSION: "${{ inputs.mapdl-version }}"
+          PYMAPDL_SHUTDOWN_TIMEOUT: 300
           PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
           PYMAPDL_DEBUG_TESTING: ${{ runner.debug == '1' }}
         shell: bash
