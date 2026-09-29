@@ -353,8 +353,8 @@ class PostProcessing:
     def element_values(self, item, comp="", option="AVG") -> np.ndarray:
         """Compute the element-wise values for a given item and component.
 
-        This method uses :func:`Mapdl.etable()
-        <ansys.mapdl.core.Mapdl.etable` and returns a
+        This method uses :func:`Mapdl.get_etable()
+        <ansys.mapdl.core.Mapdl.get_etable>` and returns a
         ``numpy.ndarray`` rather than storing it within MAPDL.
 
         Parameters
@@ -382,13 +382,20 @@ class PostProcessing:
         -------
         numpy.ndarray
             Numpy array containing the requested element values for a
-            given item and component.
+            given item and component for the currently selected elements.
 
         Notes
         -----
+        This method returns values for the currently selected elements,
+        consistent with the other postprocessing result methods. The
+        underlying :func:`Mapdl.get_etable()
+        <ansys.mapdl.core.Mapdl.get_etable>` method retrieves sequential
+        element-number positions regardless of selection, so this method
+        filters that output with :attr:`selected_elements`.
+
         This an incomplete table of element values available to this
         method.  For a full table, see `ETABLE
-        <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_ETABLE.html>`_
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v252/en/ans_cmd/Hlp_C_ETABLE.html>`_
 
         +------+---------------------+--------------------------------------+
         | Item | Comp                | Description                          |
@@ -479,9 +486,7 @@ class PostProcessing:
         >>> arr
         array([0., 0., 0., ..., 0., 0., 0.])
         """
-        tmp_table = "__ETABLE__"
-        self._mapdl.etable(tmp_table, item, comp, option, mute=True)
-        return self._mapdl.get_array("ELEM", 1, "ETAB", tmp_table)[
+        return self._mapdl.get_etable(item, comp, option, mute=True)[
             self.selected_elements
         ]
 
