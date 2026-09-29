@@ -268,12 +268,11 @@ def supress_logging(func: Callable[P, R]) -> Callable[P, R]:
         if prior_log_level != "CRITICAL":
             mapdl._set_log_level("CRITICAL")  # type: ignore[attr-defined]
 
-        out = func(*args, **kwargs)
-
-        if prior_log_level != "CRITICAL":
-            mapdl._set_log_level(prior_log_level)  # type: ignore[attr-defined]
-
-        return out
+        try:
+            return func(*args, **kwargs)
+        finally:
+            if prior_log_level != "CRITICAL":
+                mapdl._set_log_level(prior_log_level)  # type: ignore[attr-defined]
 
     return wrapper
 

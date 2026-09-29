@@ -146,7 +146,10 @@ def test_solution_call(mapdl, cleared):
 
 
 def test_exited(mapdl, cleared):
-    mapdl._exited = True
-    with pytest.raises(MapdlRuntimeError):
-        parm = mapdl.solution.time_step_size
-    mapdl._exited = False
+    previous_exited = mapdl._exited
+    try:
+        mapdl._exited = True
+        with pytest.raises(MapdlRuntimeError):
+            mapdl.solution.time_step_size
+    finally:
+        mapdl._exited = previous_exited
