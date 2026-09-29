@@ -139,6 +139,8 @@ The preceding methods return the IDs of the selected entities. For example:
     array([1, 2, 3, ..., 1998, 1999, 2000])
 
 
+.. _ref_non_interactive:
+
 Running in non-interactive mode
 -------------------------------
 
@@ -243,6 +245,23 @@ You should not retrieve any data in a Pythonic way from the MAPDL instance while
 :meth:`non_interactive context <ansys.mapdl.core.Mapdl.non_interactive>` method.
 Being aware of this kind of behavior and how the :meth:`non_interactive context <ansys.mapdl.core.Mapdl.non_interactive>` method
 works is crucial for advanced usage of PyMAPDL.
+
+
+Retrieving element table values
+-------------------------------
+
+Use the :meth:`mapdl.get_etable() <ansys.mapdl.core.Mapdl.get_etable>` method
+to create an element table column and retrieve its values as a NumPy array:
+
+.. code:: python
+
+    moment_i = mapdl.get_etable("SMISC", 3, lab="MOMY_I")
+    moment_j = mapdl.get_etable("SMISC", 16, lab="MOMY_J")
+
+When ``lab`` is provided, the named column remains in the MAPDL element table
+for commands such as ``PRETAB`` or ``SADD``. If ``lab`` is omitted, PyMAPDL
+uses a hidden temporary label and erases that column after retrieving the
+array.
 
 
 MAPDL macros

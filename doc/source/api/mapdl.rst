@@ -31,7 +31,9 @@
    Mapdl.force_output
    Mapdl.get
    Mapdl.get_array
+   Mapdl.get_etable
    Mapdl.get_esol
+   Mapdl.get_etable
    Mapdl.get_nodal_constrains
    Mapdl.get_nodal_loads
    Mapdl.get_nsol

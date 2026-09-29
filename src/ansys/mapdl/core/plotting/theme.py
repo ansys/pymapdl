@@ -112,7 +112,7 @@ if _HAS_MATPLOTLIB and TYPE_CHECKING:
 def get_ansys_cmap(N: int = 9) -> "LinearSegmentedColormap":
     """Returns a Matplotlib colormap of given length.
 
-    Returns a Matplotlib colormap which is the result of interpolate the MAPDL
+    Returns a Matplotlib colormap which is the result of interpolating the MAPDL
     colormap to obtain a colormap of a given number of colors.
 
     Parameters

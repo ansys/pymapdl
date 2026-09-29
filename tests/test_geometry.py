@@ -22,7 +22,9 @@
 
 """Test geometry commands"""
 
-from unittest.mock import patch
+from contextlib import nullcontext
+import inspect
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -33,6 +35,26 @@ if has_dependency("pyvista"):
     import pyvista as pv
 
 from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
+
+
+def test_generate_surface_cleans_up_after_get_error():
+    mapdl = MagicMock()
+    mapdl.geometry.n_area = 0
+    mapdl.parameters.type = 1
+    mapdl.parameters.routine = "PREP7"
+    mapdl.save_selection = nullcontext()
+    mapdl.get.side_effect = [1, 2, ValueError("invalid element type")]
+
+    geometry = Geometry.__new__(Geometry)
+    geometry._mapdl = mapdl
+
+    generate_surface = inspect.unwrap(Geometry.generate_surface)
+    with pytest.raises(ValueError, match="invalid element type"):
+        generate_surface(geometry)
+
+    mapdl.asel.assert_any_call("S", "AREA", vmin=2, vmax=2, mute=True)
+    mapdl.adele.assert_called_once_with("ALL", kswp=1, mute=True)
+    mapdl.numstr.assert_any_call("AREA", 1, mute=True)
 
 
 def test_keypoint_selection(mapdl, cleared):
