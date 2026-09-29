@@ -1634,6 +1634,7 @@ class TestCtrlExitReturnsNormally:
         assert any(
             "returned normally" in str(call.args)
             for call in dummy._log.debug.call_args_list
+        )
 
 
 class TestGetVariable:
