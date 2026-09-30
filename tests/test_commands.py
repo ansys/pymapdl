@@ -232,6 +232,23 @@ def test_cmd_class_dlist_vm(mapdl, cleared):
     assert are_the_same_result(out_list, DLIST_RESULT)
 
 
+def test_boundary_conditions_listing_output_numeric_formats():
+    output = BoundaryConditionsListingOutput(
+        "\n".join(
+            (
+                "1 UX 10 .5 0.25",
+                "2 TEMP 001 1.0",
+                "3 UZ 0.",
+            )
+        )
+    )
+
+    assert output.to_list() == [
+        ["1", "UX", "10", ".5", "0.25"],
+        ["2", "TEMP", "001", "1.0"],
+    ]
+
+
 @pytest.mark.parametrize("func", LIST_OF_INQUIRE_FUNCTIONS)
 def test_inquire_functions(mapdl, cleared, func):
     func_ = getattr(mapdl, func)

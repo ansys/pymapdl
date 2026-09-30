@@ -30,14 +30,14 @@ import time
 from warnings import warn
 
 from ansys.mapdl.core import LOG
-from ansys.mapdl.core.constants import CONTINUE_IDX as CONTINUE_IDX
-from ansys.mapdl.core.constants import ERROR_IDX as ERROR_IDX
 from ansys.mapdl.core.constants import (
     MAPDL_CONSOLE_EXPECT_LIST,
     MAPDL_CONSOLE_IGNORED,
     MAPDL_CONSOLE_NITEMS,
     MAPDL_CONSOLE_READY_ITEMS,
 )
+from ansys.mapdl.core.constants import CONTINUE_IDX as CONTINUE_IDX
+from ansys.mapdl.core.constants import ERROR_IDX as ERROR_IDX
 from ansys.mapdl.core.constants import PROMPT_IDX as PROMPT_IDX
 from ansys.mapdl.core.constants import WARNING_IDX as WARNING_IDX
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError

@@ -79,7 +79,9 @@ REG_FLOAT_INT: re.Pattern[str] = re.compile(
     r"[+-]?[0-9]*[.]?[0-9]*[Ee]?[+-]?[0-9]+|\s[0-9]+\s"
 )
 BC_REGREP: re.Pattern[str] = re.compile(
-    r"^\s*([0-9]+)\s*([A-Za-z]+)((?:\s+[0-9]*[.]?[0-9]+)+)$"
+    r"^\s*([0-9]+)\s*([A-Za-z]+)"
+    r"(\s+(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)"
+    r"(?:\s+(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+))*)$"
 )
 MSG_NOT_PANDAS: str = """'Pandas' is not installed or could not be found.
 Hence this command is not applicable.
