@@ -23,70 +23,22 @@
 """Common gRPC functions"""
 
 import time
-from typing import Any, Dict, List, Literal, Optional, get_args
+from typing import Any, Optional
 
 import grpc
 import numpy as np
 
 from ansys.mapdl.core import LOG
+from ansys.mapdl.core import constants as _constants
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlRuntimeError
 
-# chunk sizes for streaming and file streaming
-DEFAULT_CHUNKSIZE: int = 256 * 1024  # 256 kB
-DEFAULT_FILE_CHUNK_SIZE: int = 1024 * 1024  # 1MB
-
-ANSYS_VALUE_TYPE: Dict[int, Optional[np.typing.DTypeLike]] = {
-    0: None,  # UNKNOWN
-    1: np.int32,  # INTEGER
-    2: np.int64,  # HYPER
-    3: np.int16,  # SHORT
-    4: np.float32,  # FLOAT
-    5: np.float64,  # DOUBLE
-    6: np.complex64,  # FCPLX
-    7: np.complex128,  # DCPLX
-    8: np.char,
-}
-
-
-VGET_ENTITY_TYPES_TYPING = Literal[
-    "NODE",
-    "ELEM",
-    "KP",
-    "LINE",
-    "AREA",
-    "VOLU",
-    "CDSY",
-    "RCON",
-    "TLAB",
-]
-
-VGET_ENTITY_TYPES: List[str] = list(get_args(VGET_ENTITY_TYPES_TYPING))
-
-STRESS_TYPES: List[str] = ["X", "Y", "Z", "XY", "YZ", "XZ", "1", "2", "3", "INT", "EQV"]
-COMP_TYPE: List[str] = ["X", "Y", "Z", "SUM"]
-VGET_NODE_ENTITY_TYPES: Dict[str, List[str]] = {
-    "U": ["X", "Y", "Z"],
-    "S": STRESS_TYPES,
-    "EPTO": STRESS_TYPES,
-    "EPEL": STRESS_TYPES,
-    "EPPL": STRESS_TYPES,
-    "EPCR": STRESS_TYPES,
-    "EPTH": STRESS_TYPES,
-    "EPDI": STRESS_TYPES,
-    "EPSW": [""],
-    "NL": ["SEPL", "SRAT", "HPRES", "EPEQ", "PSV", "PLWK"],
-    "HS": ["X", "Y", "Z"],
-    "BFE": ["TEMP"],
-    "TG": COMP_TYPE,
-    "TF": COMP_TYPE,
-    "PG": COMP_TYPE,
-    "EF": COMP_TYPE,
-    "D": COMP_TYPE,
-    "H": COMP_TYPE,
-    "B": COMP_TYPE,
-    "FMAG": COMP_TYPE,
-    "NLIST": [""],
-}
+ANSYS_VALUE_TYPE = _constants.ANSYS_VALUE_TYPE
+COMP_TYPE = _constants.COMMON_GRPC_COMP_TYPE
+DEFAULT_CHUNKSIZE = _constants.DEFAULT_CHUNKSIZE
+DEFAULT_FILE_CHUNK_SIZE = _constants.DEFAULT_FILE_CHUNK_SIZE
+STRESS_TYPES = _constants.COMMON_GRPC_STRESS_TYPES
+VGET_ENTITY_TYPES = _constants.VGET_ENTITY_TYPES
+VGET_NODE_ENTITY_TYPES = _constants.VGET_NODE_ENTITY_TYPES
 
 
 class GrpcError(MapdlRuntimeError):

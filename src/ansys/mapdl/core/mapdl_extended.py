@@ -36,6 +36,7 @@ from numpy.typing import DTypeLike, NDArray
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import parse
 from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput
+from ansys.mapdl.core.constants import MAX_DO_LOOP_LEVEL, TMP_VAR
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
     ComponentDoesNotExits,
@@ -55,14 +56,6 @@ from ansys.mapdl.core.misc import (
     supress_logging,
 )
 from ansys.mapdl.core.plotting import GraphicsBackend
-
-TMP_VAR = "__tmpvar__"
-
-# MAPDL only allows a limited number of nested do-loops (``*DO``/``*DOWHILE``).
-# One level of internal file switching is used for each nested loop, and
-# MAPDL supports twenty levels of nested file switching. See the ``*DO``
-# command documentation for more details.
-MAX_DO_LOOP_LEVEL = 20
 
 
 class _MapdlCommandExtended(_MapdlCore):

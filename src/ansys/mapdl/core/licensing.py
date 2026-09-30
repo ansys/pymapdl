@@ -32,26 +32,20 @@ import time
 from typing import Any, Iterator, Literal, Optional, Union
 
 from ansys.mapdl.core import _HAS_ATC, LOG
+from ansys.mapdl.core import constants as _constants
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.misc import threaded_daemon
 
 if _HAS_ATC:
     from ansys.tools.common.path import get_mapdl_path, version_from_path
+ALLOWABLE_LICENSES = _constants.ALLOWABLE_LICENSES
+APP_NAME = _constants.APP_NAME
+LICENSES = _constants.LICENSES
+LIC_FILE_ENVAR = _constants.LIC_FILE_ENVAR
+LIC_PATH_ENVAR = _constants.LIC_PATH_ENVAR
+LIC_TO_CHECK = _constants.LIC_TO_CHECK
+LOCALHOST = _constants.LOCALHOST
 
-LOCALHOST = "127.0.0.1"
-LIC_PATH_ENVAR = "ANSYSLIC_DIR"
-LIC_FILE_ENVAR = "ANSYSLMD_LICENSE_FILE"
-APP_NAME = "FEAT_ANSYS"  # TODO: We need to make sure this is the type of feature we need to checkout.
-LIC_TO_CHECK = ["mech_1"]
-
-LICENSES = {
-    "ansys": "Ansys Mechanical Enterprise",
-    "meba": "Ansys Mechanical Enterprise Solver",
-    "mech_2": "Ansys Mechanical Premium",
-    "mech_1": "Ansys Mechanical Pro",
-    "preppost": "Mechanical Enterprise PrepPost",
-}
-ALLOWABLE_LICENSES = list(LICENSES)
 Allowable_licenses = Literal["ansys", "meba", "mech_2", "mech_1", "preppost"]
 
 ## Regarding license checking.

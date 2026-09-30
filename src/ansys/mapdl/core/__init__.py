@@ -22,12 +22,16 @@
 
 import logging
 import os
-from typing import Dict, List, Tuple
-
-from platformdirs import user_data_dir
+from typing import List
 
 # Apply NumPy compatibility patches for dependencies
 from ansys.mapdl.core import _numpy_compat  # noqa: F401
+from ansys.mapdl.core.constants import (
+    EXAMPLES_PATH,
+    MINIMUM_PYTHON_VERSION,
+    USER_DATA_PATH,
+    VERSION_MAP,
+)
 
 ###############################################################################
 # Logging
@@ -45,20 +49,9 @@ LOG.debug("Loaded logging module as LOG")
 from ansys.mapdl.core._version import __version__
 from ansys.mapdl.core.helpers import is_installed, run_every_import, run_first_time
 
-# A dictionary relating PyMAPDL server versions with the unified install ones
-VERSION_MAP: Dict[Tuple[int, int, int], str] = {
-    (0, 0, 0): "2020R2",
-    (0, 3, 0): "2021R1",
-    (0, 4, 0): "2021R2",
-    (0, 4, 1): "2021R2",
-    (0, 5, 0): "2022R1",
-    (0, 5, 1): "2022R2",
-}
-
 BUILDING_GALLERY: bool = False
-
 DEPRECATING_MINIMUM_PYTHON_VERSION: bool = False
-MINIMUM_PYTHON_VERSION: Tuple[int, int] = (3, 10)
+
 
 # Import related globals
 _HAS_ATC: bool = is_installed("ansys.tools.common")
@@ -76,10 +69,6 @@ _HAS_VISUALIZER: bool = (
     is_installed("ansys.tools.visualization_interface") and _HAS_MATPLOTLIB
 )
 
-
-# Setup directories
-USER_DATA_PATH: str = user_data_dir(appname="ansys_mapdl_core", appauthor="Ansys")
-EXAMPLES_PATH: str = os.path.join(USER_DATA_PATH, "examples")
 
 # Store ports occupied by local instances
 _LOCAL_PORTS: List[int] = []

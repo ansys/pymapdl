@@ -28,69 +28,11 @@ from ansys.mapdl.reader.misc import unique_rows
 import numpy as np
 import pyvista as pv
 
+from ansys.mapdl.core.constants import MESH200_MAP, SHAPE_MAP, TARGE170_MAP
+
 INVALID_ALLOWABLE_TYPES = TypeError(
     "`allowable_types` must be an array " "of ANSYS element types from 1 and 300"
 )
-
-# map MESH200 elements to a pymapdl_reader/VTK element type (see elements.py)
-MESH200_MAP = {
-    0: 2,  # line
-    1: 2,  # line
-    2: 2,  # line
-    3: 2,  # line
-    4: 3,  # triangle
-    5: 3,  # triangle
-    6: 3,  # quadrilateral
-    7: 3,  # quadrilateral
-    8: 5,  # tetrahedron with 4 nodes
-    9: 5,  # tetrahedron with 10 nodes
-    10: 4,  # hex with 8 nodes
-    11: 4,
-}  # hex with 8 nodes
-
-SHAPE_MAP = {  # from ELIST definition
-    0: "",
-    1: "LINE",
-    2: "PARA",
-    3: "ARC ",
-    4: "CARC",
-    5: "",
-    6: "TRIA",
-    7: "QUAD",
-    8: "TRI6",
-    9: "QUA8",
-    10: "POIN",  # codespell-ignore
-    11: "CIRC",
-    12: "",
-    13: "",
-    14: "CYLI",
-    15: "CONE",
-    16: "SPHE",
-    17: "",
-    18: "",
-    19: "PILO",
-}
-# element type to VTK conversion function call map
-# 0: skip
-# 1: Point
-# 2: Line (linear or quadratic)
-# 3: Shell
-# 4: 3D Solid (Hexahedral, wedge, pyramid, tetrahedral)
-# 5: Tetrahedral
-# 6: Line (always linear)
-TARGE170_MAP = {
-    "TRI": 3,  # 3-Node Triangle
-    "QUAD": 3,  # 4-Node Quadrilateral
-    "CYLI": 0,  # Not supported (NS)  # Cylinder
-    "CONE": 0,  # NS  # Cone
-    "TRI6": 3,  # 6-Node triangle
-    "SPHE": 0,  # NS  # Sphere
-    "PILO": 1,  # Pilot Node
-    "QUAD8": 3,  # 8-Node Quadrilateral
-    "LINE": 2,  # Line
-    "PARA": 2,  # Parabola
-    "POINT": 1,  # Point
-}
 
 
 def _parse_vtk(

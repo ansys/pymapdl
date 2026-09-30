@@ -30,6 +30,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ansys.mapdl.core import _HAS_PYVISTA, Mapdl
+from ansys.mapdl.core import constants as _constants
 from ansys.mapdl.core.errors import VersionError
 
 if _HAS_PYVISTA:
@@ -38,45 +39,19 @@ if _HAS_PYVISTA:
 if TYPE_CHECKING:  # pragma: no cover
     from pyiges import Iges
 
-from ansys.mapdl.core.misc import requires_package, run_as, supress_logging
-from ansys.mapdl.core.plotting.theme import MapdlTheme
-
-VALID_SELECTION_TYPE = ["S", "R", "A", "U"]
-VALID_SELECTION_ENTYTY = ["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
-
 from ansys.mapdl.core.mapdl_core import (
     DEBUG_LEVELS,
     VALID_SELECTION_ENTITY_TP,
     VALID_SELECTION_TYPE_TP,
 )
+from ansys.mapdl.core.misc import requires_package, run_as, supress_logging
+from ansys.mapdl.core.plotting.theme import MapdlTheme
 
-FLST_LOOKUP = {
-    "NODE": 1,  # node numbers
-    "ELEM": 2,  # element numbers
-    "KP": 3,  # keypoint numbers
-    "LINE": 4,  # line numbers
-    "AREA": 5,  # area numbers
-    "VOLU": 6,  # volume numbers
-    "TRACE": 7,  # trace points
-    "COORD": 8,  # coordinate locations
-}
-
-VALID_TYPE_MSG = """- 'S' : Select a new set (default)
-- 'R' : Reselect a set from the current set.
-- 'A' : Additionally select a set and extend the current set.
-- 'U' : Unselect a set from the current set.
-"""
-
-VERSION_ERROR = """
-In PyMAPDL 0.66.0 and later, the new geometry module does not allow calls on
-``geometry.keypoints``, ``geometry.lines``, or ```geometry.areas```.
-
-You can activate the old API like this:
->>> mapdl.legacy_geometry = True
-
-For more information, see `Mesh and geometry <https://mapdl.docs.pyansys.com/version/stable/user_guide/mesh_geometry.html>`_.
-"""
-
+FLST_LOOKUP = _constants.FLST_LOOKUP
+VALID_SELECTION_ENTYTY = _constants.VALID_SELECTION_ENTYTY
+VALID_SELECTION_TYPE = _constants.VALID_SELECTION_TYPE
+VALID_TYPE_MSG = _constants.VALID_TYPE_MSG
+VERSION_ERROR = _constants.VERSION_ERROR
 
 if _HAS_PYVISTA:
 

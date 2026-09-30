@@ -29,6 +29,15 @@ import sys
 
 import click
 
+from ansys.mapdl.core.constants import (
+    _ANSYS_HELP_URL_RE,
+    _FIRST_SECTION_RE,
+    _MAPDL_CMD_RE,
+    _SPHINX_ROLE_SIMPLE_RE,
+    _SPHINX_ROLE_WITH_TARGET_RE,
+    MISSING_RICH_RST_ERROR,
+)
+
 # ---------------------------------------------------------------------------
 # Regex patterns
 # ---------------------------------------------------------------------------
@@ -38,25 +47,13 @@ import click
 #   Mechanical APDL Command: `/PREP7 <url>`_
 #   Mechanical APDL Command: `K <url>`_
 # The leading ``\`` is the RST escape for ``*``; the capture group includes it.
-_MAPDL_CMD_RE = re.compile(r"Mechanical APDL Command: `(\\?\*?/?[^\s<`]+)")
-
-# Detects an ansyshelp.ansys.com URL anywhere in the docstring.
-_ANSYS_HELP_URL_RE = re.compile(r"ansyshelp\.ansys\.com")
 
 # Matches the start of the first numpydoc section heading, i.e. a non-blank
 # line immediately followed by a line of three or more dashes.
-_FIRST_SECTION_RE = re.compile(r"^\S[^\n]*\n-{3,}", re.MULTILINE)
 
 # Sphinx role patterns used to strip custom roles before rich-rst sees them:
 #   :role:`display text <target>`  →  display text
 #   :role:`text`                   →  text
-_SPHINX_ROLE_WITH_TARGET_RE = re.compile(r":\w[\w.:-]*:`([^`<>]+)\s*<[^>]*>`")
-_SPHINX_ROLE_SIMPLE_RE = re.compile(r":\w[\w.:-]*:`([^`]+)`")
-
-MISSING_RICH_RST_ERROR = (
-    "The 'rich-rst' package is required to use the 'help' command.\n"
-    "Install it via 'pip install rich-rst' and try again."
-)
 
 
 # ---------------------------------------------------------------------------
