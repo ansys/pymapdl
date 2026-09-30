@@ -311,6 +311,10 @@ html_theme = "ansys_sphinx_theme"
 html_theme_options = {
     "logo": "pyansys",
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
+    "mcp_server": {
+        "url": "https://github.com/ansys/pymapdl-mcp",
+        "project_name": "PyMAPDL MCP Server",
+    },
     "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",
     "show_prev_next": False,
     "show_breadcrumbs": True,
