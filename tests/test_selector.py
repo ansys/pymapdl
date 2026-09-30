@@ -32,6 +32,7 @@ import pytest
 
 from ansys.mapdl.core.mapdl_extended import _MapdlExtended
 from ansys.mapdl.core.selector import NodeSelector
+from conftest import requires
 
 
 class _FakeMapdl(_MapdlExtended):
@@ -297,6 +298,32 @@ class TestSelectCleanup:
             NodeSelector(mapdl).select(x=1, y=2)
 
         assert mapdl.cmdele.call_count == 2
+
+
+@requires("grpc")
+def test_select_with_live_mapdl_restores_prior_node_selection(
+    mapdl, clear_at_start_and_end
+):
+    nodes = {
+        10: (1, 2, 0),
+        11: (1, 3, 1),
+        12: (1, 2, 2),
+        13: (1, 4, 1),
+        14: (2, 2, 1),
+        15: (1, 3, 3),
+        99: (-1, -1, -1),
+    }
+    for node_id, coordinates in nodes.items():
+        mapdl.n(node_id, *coordinates)
+
+    mapdl.nsel("S", "NODE", vmin=99)
+    prior_selection = np.array([99], dtype=np.int32)
+    np.testing.assert_array_equal(mapdl.mesh.nnum, prior_selection)
+
+    selected = mapdl.selector.select(x=1, y=[2, 3], z=(0, 2))
+
+    np.testing.assert_array_equal(selected, np.array([10, 11, 12], dtype=np.int32))
+    np.testing.assert_array_equal(mapdl.mesh.nnum, prior_selection)
 
 
 class TestSelectorProperty:
