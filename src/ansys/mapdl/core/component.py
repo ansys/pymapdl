@@ -34,7 +34,6 @@ from typing import (
     Tuple,
     TypeAlias,
     Union,
-    get_args,
 )
 import warnings
 import weakref
@@ -43,47 +42,26 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ansys.mapdl.core import Mapdl
+from ansys.mapdl.core import constants as _constants
 from ansys.mapdl.core.errors import ComponentDoesNotExits, ComponentIsNotSelected
 from ansys.mapdl.core.misc import is_float
 
 if TYPE_CHECKING:  # pragma: no cover
     import logging
 
-# Entity type options - single source of truth
+ENTITIES_MAPPING = _constants.ENTITIES_MAPPING
+SELECTOR_FUNCTION = _constants.SELECTOR_FUNCTION
+VALID_ENTITIES = _constants.VALID_ENTITIES
+WARNING_ENTITY = _constants.WARNING_ENTITY
+
+# Kept with the component API because this is a typing declaration, not a runtime constant.
 ENTITIES_TYP: TypeAlias = Literal[
     "NODE", "NODES", "ELEM", "ELEMS", "ELEMENTS", "VOLU", "AREA", "LINE", "KP"
 ]
 
-# Runtime list derived from the type alias above
-VALID_ENTITIES: List[str] = list(get_args(ENTITIES_TYP))
-
-SELECTOR_FUNCTION: List[str] = [
-    "NSEL",
-    "NSEL",
-    "ESEL",
-    "ESEL",
-    "ESEL",
-    "VSEL",
-    "ASEL",
-    "LSEL",
-    "KSEL",
-]
-
-ENTITIES_MAPPING: Dict[str, str] = {
-    entity.upper(): func for entity, func in zip(VALID_ENTITIES, SELECTOR_FUNCTION)
-}
-
 
 ITEMS_VALUES = Optional[Union[str, int, List[int], NDArray[Any]]]
 UNDERLYING_DICT = Dict[str, ITEMS_VALUES]
-
-WARNING_ENTITY: str = (
-    "Assuming a {default_entity} selection.\n"
-    "It is recommended you use the following notation to avoid this warning:\n"
-    ">>> mapdl.components['{key}'] = '{default_entity}', {value}\n"
-    "Alternatively, you disable this warning using:\n"
-    ">>> mapdl.components.default_entity_warning=False"
-)
 
 
 def _check_valid_pyobj_to_entities(

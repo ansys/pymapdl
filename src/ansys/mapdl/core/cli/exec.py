@@ -30,18 +30,12 @@ import click
 
 from ansys.mapdl.core.cli.constants import DEFAULT_TIMEOUT
 from ansys.mapdl.core.cli.helpers import connect_to_instance
-
-STDIN_MARKER = "-"
-
-NO_SOURCE_ERROR = (
-    "Provide commands via positional COMMANDS, '-c CMD', '--file PATH', "
-    "or stdin ('-')."
+from ansys.mapdl.core.constants import (
+    EMPTY_INPUT_ERROR,
+    MULTIPLE_SOURCES_ERROR,
+    NO_SOURCE_ERROR,
+    STDIN_MARKER,
 )
-MULTIPLE_SOURCES_ERROR = (
-    "Only one input source may be used at a time: "
-    "positional COMMANDS, '-c', '--file', or stdin ('-')."
-)
-EMPTY_INPUT_ERROR = "No commands to run (input is empty)."
 
 
 def exec_commands(

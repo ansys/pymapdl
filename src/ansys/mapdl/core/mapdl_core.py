@@ -58,6 +58,7 @@ import numpy as np
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import _HAS_DPF, _HAS_VISUALIZER
+from ansys.mapdl.core import constants as _constants
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
@@ -108,149 +109,28 @@ if TYPE_CHECKING:  # pragma: no cover
 
 from ansys.mapdl.core.post import PostProcessing
 
-MAX_PARAM_CHARS = 32
-SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
+ENTITIES_TO_SELECTION_MAPPING = _constants.ENTITIES_TO_SELECTION_MAPPING
+GUI_FONT_SIZE = _constants.GUI_FONT_SIZE
+INVAL_COMMANDS = _constants.INVAL_COMMANDS
+INVAL_COMMANDS_SILENT = _constants.INVAL_COMMANDS_SILENT
+LOG_APDL_DEFAULT_FILE_NAME = _constants.LOG_APDL_DEFAULT_FILE_NAME
+MAX_COMMAND_LENGTH = _constants.MAX_COMMAND_LENGTH
+MAX_PARAM_CHARS = _constants.MAX_PARAM_CHARS
+PLOT_COMMANDS = _constants.PLOT_COMMANDS
+PNG_IS_WRITTEN_TO_FILE = _constants.PNG_IS_WRITTEN_TO_FILE
+SESSION_ID_NAME = _constants.SESSION_ID_NAME
+VALID_DEVICES = _constants.VALID_DEVICES
+VALID_FILE_TYPE_FOR_PLOT = _constants.VALID_FILE_TYPE_FOR_PLOT
+VWRITE_MWRITE_REPLACEMENT = _constants.VWRITE_MWRITE_REPLACEMENT
+_ALLOWED_START_PARM = _constants._ALLOWED_START_PARM
+_PERMITTED_ERRORS = _constants._PERMITTED_ERRORS
+_TMP_COMP = _constants._TMP_COMP
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
-
-# Graphics device options - single source of truth
-VALID_DEVICES = ["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
 VALID_DEVICES_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
-
-# Plot file types (devices minus CLOSE) - derived from VALID_DEVICES
-VALID_FILE_TYPE_FOR_PLOT = VALID_DEVICES.copy()
-VALID_FILE_TYPE_FOR_PLOT.remove("CLOSE")
 VALID_FILE_TYPE_FOR_PLOT_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM"]
-
-_PERMITTED_ERRORS = [
-    r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
-    r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.",
-    r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*The distributed memory parallel solution does not support KRYLOV method",
-]
-
-_TMP_COMP = {
-    "KP": "cmp_kp",
-    "LINE": "cmp_line",
-    "AREA": "cmp_area",
-    "VOLU": "cmp_volu",
-    "NODE": "cmp_node",
-    "ELEM": "cmp_elem",
-}
-
-ENTITIES_TO_SELECTION_MAPPING = {
-    "KP": "ksel",
-    "LINE": "lsel",
-    "AREA": "asel",
-    "VOLU": "vsel",
-    "NODE": "nsel",
-    "ELEM": "esel",
-}
-
-# test for png file
-PNG_IS_WRITTEN_TO_FILE = re.compile(
-    "WRITTEN TO FILE"
-)  # getting the file name is buggy.
-
-VWRITE_MWRITE_REPLACEMENT = """
-Cannot use *VWRITE/*MWRITE directly as a command in MAPDL
-service mode.  Instead, run it as ``non_interactive``.
-
-For example, in the *VWRITE case:
-
-with self.non_interactive:
-    self.vwrite('%s(1)' % parm_name)
-    self.run('(F20.12)')
-"""
-
-## Invalid commands in interactive mode.
-INVAL_COMMANDS = {
-    "*VWR": VWRITE_MWRITE_REPLACEMENT,
-    "*MWR": VWRITE_MWRITE_REPLACEMENT,
-    "*CFO": "Run CFOPEN as ``non_interactive``",
-    "*CRE": "Create a function within python or run as non_interactive",
-    "*END": "Create a function within python or run as non_interactive",
-    "/EOF": "Unsupported command.  Use ``exit`` to stop the server.",
-    "*ASK": "Unsupported command.  Use python ``input`` instead.",
-    "*IF": "Use a python ``if`` or run as non_interactive",
-    "CMAT": "Run `CMAT` as ``non_interactive``.",
-    "*REP": "Run '*REPEAT' in ``non_interactive``.",
-    "LSRE": "Run 'LSREAD' in ``non_interactive``.",
-}
-
-## Soft-invalid commands
-# Invalid commands in interactive mode but their execution is just ignored.
-# The correspondent command is replaced by a comment using the command '\COM'
-# and a warning is recorded in the logger
-#
-# This commands can still be executed in ``non_interactive`` mode or using
-# ``Mapdl._run`` method.
-#
-# Format of the message:
-# f"{CMD} is ignored: {INVAL_COMMANDS_SILENT[CMD]}.
-#
-# NOTE
-# Obtain the command from the string supplied using
-#
-#    string.split(',')[0].upper()
-#
-# This way to get the command is different from the one used in ``INVAL_COMMANDS``.
-#
-INVAL_COMMANDS_SILENT = {
-    "/NOPR": "Suppressing console output is not recommended, use ``Mute`` parameter instead. This command is disabled in interactive mode."
-}
-
-PLOT_COMMANDS = [
-    "APLO",
-    "EPLO",
-    "KPLO",
-    "LPLO",
-    "NPLO",
-    "PLES",
-    "PLNS",
-    "PLVA",
-    "PSDG",
-    "SECP",
-    "SPGR",
-    "TBPL",
-    "VPLO",
-]
-MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
-
 VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
 VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
-
-GUI_FONT_SIZE = 15
-LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
-
-_ALLOWED_START_PARM = [
-    "additional_switches",
-    "check_parameter_names",
-    "env_vars",
-    "exec_file",
-    "finish_job_on_exit",
-    "hostname",
-    "ip",
-    "jobid",
-    "jobname",
-    "launch_on_hpc",
-    "launched",
-    "mode",
-    "nproc",
-    "override",
-    "port",
-    "print_com",
-    "process",
-    "ram",
-    "run_location",
-    "start_instance",
-    "start_timeout",
-    "timeout",
-    "use_reader_backend",
-    # Transport-related parameters
-    "transport_mode",
-    "uds_dir",
-    "certs_dir",
-]
 
 
 class STATUS(str, Enum):

@@ -28,17 +28,8 @@ from ansys.math.core.math import AnsMath, AnsVec
 import numpy as np
 
 from ansys.mapdl.core import Mapdl
+from ansys.mapdl.core.constants import RESIDUAL_ALGORITHM
 from ansys.mapdl.core.errors import MapdlRuntimeError
-
-# Residual algorithm options - single source of truth
-RESIDUAL_ALGORITHM: List[str] = [
-    "l-inf",
-    "linf",
-    "l-1",
-    "l1",
-    "l-2",
-    "l2",
-]
 
 # Type alias derived from the list above
 RESIDUAL_ALGORITHM_LITERAL: TypeAlias = Literal[

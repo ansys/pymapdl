@@ -41,34 +41,11 @@ except ModuleNotFoundError:  # pragma: no cover
 
 import numpy as np
 
+from ansys.mapdl.core.constants import ROUTINE_MAP, UNITS_MAP
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.mapdl_core import MAX_PARAM_CHARS
 from ansys.mapdl.core.misc import supress_logging
-
-ROUTINE_MAP = {
-    0: "Begin level",
-    17: "PREP7",
-    21: "SOLUTION",
-    31: "POST1",
-    36: "POST26",
-    52: "AUX2",
-    53: "AUX3",
-    62: "AUX12",
-    65: "AUX15",
-}
-
-UNITS_MAP = {
-    -1: "NONE",
-    0: "USER",
-    1: "SI",
-    2: "CGS",
-    3: "BFT",
-    4: "BIN",
-    5: "MKS",
-    6: "MPA",
-    7: "uMKS",
-}
 
 
 class Parameters:

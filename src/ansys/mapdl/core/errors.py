@@ -37,28 +37,15 @@ if TYPE_CHECKING:
 import grpc
 
 from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.core.constants import (
+    INITIAL_BACKOFF,
+    LOCKFILE_MSG,
+    MULTIPLIER_BACKOFF,
+    N_ATTEMPTS,
+    TYPE_MSG,
+)
 
 SIGINT_TRACKER: List[bool] = []
-
-# Configuration of 'protect_grpc' wrapper
-N_ATTEMPTS = 5
-INITIAL_BACKOFF = 0.1
-MULTIPLIER_BACKOFF = 2
-
-
-LOCKFILE_MSG: str = """
-Another ANSYS job with the same job name is already running in this
-directory, or the lock file has not been deleted from an abnormally
-terminated ANSYS run.
-
-Disable this check by passing ``override=True``
-"""
-
-
-TYPE_MSG: str = (
-    "Invalid datatype.  Must be one of the following:\n"
-    + "np.int32, np.int64, or np.double"
-)
 
 
 @cache

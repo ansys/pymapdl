@@ -24,9 +24,8 @@ from enum import IntEnum
 from typing import Union
 import warnings
 
+from ansys.mapdl.core.constants import QUERY_NAME
 from ansys.mapdl.core.errors import MapdlRuntimeError
-
-QUERY_NAME = "__QUERY_PARM__"
 
 
 class SelectionStatus(IntEnum):
