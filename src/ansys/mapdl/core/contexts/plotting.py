@@ -25,7 +25,9 @@
 import sys
 import weakref
 
-from ansys.mapdl.core._mapdl_core.constants import VALID_FILE_TYPE_FOR_PLOT_LITERAL
+from typing import Literal
+
+VALID_FILE_TYPE_FOR_PLOT_LITERAL = Literal["PNG", "TIFF", "VRML", "TERM"]
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import requires_graphics
 

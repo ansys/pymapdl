@@ -25,24 +25,11 @@
 import weakref
 
 from ansys.mapdl.core.misc import random_string
+from ansys.mapdl.core._mapdl_core.selection import (
+    ENTITIES_TO_SELECTION_MAPPING,
+    _TMP_COMP,
+)
 
-_TMP_COMP = {
-    "KP": "cmp_kp",
-    "LINE": "cmp_line",
-    "AREA": "cmp_area",
-    "VOLU": "cmp_volu",
-    "NODE": "cmp_node",
-    "ELEM": "cmp_elem",
-}
-
-ENTITIES_TO_SELECTION_MAPPING = {
-    "KP": "ksel",
-    "LINE": "lsel",
-    "AREA": "asel",
-    "VOLU": "vsel",
-    "NODE": "nsel",
-    "ELEM": "esel",
-}
 
 
 class _SaveSelectionContext:

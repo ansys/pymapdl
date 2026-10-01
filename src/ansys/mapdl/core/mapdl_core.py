@@ -109,23 +109,13 @@ if TYPE_CHECKING:  # pragma: no cover
         from ansys.mapdl.core.reader import DPFResult  # noqa: F401
 
 from ansys.mapdl.core._mapdl_core.constants import (  # noqa: F401
-    _ALLOWED_START_PARM,
     _PERMITTED_ERRORS,
-    DEBUG_LEVELS,
     GUI_FONT_SIZE,
     INVAL_COMMANDS,
     INVAL_COMMANDS_SILENT,
-    LOG_APDL_DEFAULT_FILE_NAME,
     MAX_PARAM_CHARS,
-    PLOT_COMMANDS,
-    PNG_IS_WRITTEN_TO_FILE,
     SESSION_ID_NAME,
     STATUS,
-    VALID_DEVICES,
-    VALID_DEVICES_LITERAL,
-    VALID_FILE_TYPE_FOR_PLOT,
-    VALID_FILE_TYPE_FOR_PLOT_LITERAL,
-    VALID_SELECTION_ENTITY_TP,
     VALID_SELECTION_TYPE_TP,
     VWRITE_MWRITE_REPLACEMENT,
 )
@@ -133,31 +123,62 @@ from ansys.mapdl.core._mapdl_core.execution import (
     _CoreExecutionMixin,
 )
 from ansys.mapdl.core._mapdl_core.execution import parse_to_short_cmd  # noqa: F401
-from ansys.mapdl.core._mapdl_core.execution import setup_logger  # noqa: F401
 from ansys.mapdl.core._mapdl_core.files import _CoreFileMixin
-from ansys.mapdl.core._mapdl_core.plotting import _CorePlottingMixin
+from ansys.mapdl.core._mapdl_core.plotting import (
+    PNG_IS_WRITTEN_TO_FILE,
+    PLOT_COMMANDS,
+    VALID_DEVICES,
+    VALID_DEVICES_LITERAL,
+    VALID_FILE_TYPE_FOR_PLOT,
+    VALID_FILE_TYPE_FOR_PLOT_LITERAL,
+    _CorePlottingMixin,
+)
 from ansys.mapdl.core._mapdl_core.selection import _CoreSelectionMixin
-from ansys.mapdl.core._mapdl_core.services import _CoreServicesMixin
+from ansys.mapdl.core._mapdl_core.subsystems import _CoreSubsystemsMixin
 from ansys.mapdl.core._mapdl_core.state import _CoreStateMixin
-from ansys.mapdl.core.contexts.chain_commands import (
-    _ChainCommandsContext,
+from ansys.mapdl.core._mapdl_core.logging import (
+    DEBUG_LEVELS,
+    LOG_APDL_DEFAULT_FILE_NAME,
+    _CoreLoggingMixin,
+    setup_logger,
 )
 from ansys.mapdl.core.contexts.chain_commands import MAX_COMMAND_LENGTH  # noqa: F401
-from ansys.mapdl.core.contexts.force_output import _ForceOutputContext
-from ansys.mapdl.core.contexts.muted import _MutedContext
-from ansys.mapdl.core.contexts.non_interactive import _NonInteractiveContext
-from ansys.mapdl.core.contexts.run_as_routine import (
-    _cache_routine,
-    _enter_routine,
-    _resume_routine,
-    _RunAsRoutineContext,
-)
-from ansys.mapdl.core.contexts.save_selection import (  # noqa: F401
+from ansys.mapdl.core.contexts.command_contexts import _CoreCommandContextMixin
+from ansys.mapdl.core._mapdl_core.selection import (  # noqa: F401
     _TMP_COMP,
     ENTITIES_TO_SELECTION_MAPPING,
 )
 from ansys.mapdl.core.post import PostProcessing  # noqa: F401
 
+
+_ALLOWED_START_PARM = [
+    "additional_switches",
+    "check_parameter_names",
+    "env_vars",
+    "exec_file",
+    "finish_job_on_exit",
+    "hostname",
+    "ip",
+    "jobid",
+    "jobname",
+    "launch_on_hpc",
+    "launched",
+    "mode",
+    "nproc",
+    "override",
+    "port",
+    "print_com",
+    "process",
+    "ram",
+    "run_location",
+    "start_instance",
+    "start_timeout",
+    "timeout",
+    "use_reader_backend",
+    "transport_mode",
+    "uds_dir",
+    "certs_dir",
+]
 
 def _sanitize_start_parm(start_parm):
     for each_key in start_parm:
@@ -166,8 +187,9 @@ def _sanitize_start_parm(start_parm):
 
 
 class _MapdlCore(
+    _CoreCommandContextMixin,
     _CoreStateMixin,
-    _CoreServicesMixin,
+    _CoreSubsystemsMixin,
     _CoreFileMixin,
     _CorePlottingMixin,
     _CoreSelectionMixin,
@@ -176,127 +198,6 @@ class _MapdlCore(
 ):
     """Contains methods in common between all Mapdl subclasses"""
 
-    @property
-    def chain_commands(self):
-        """Chain several mapdl commands.
-
-        Commands can be separated with ``"$"`` in MAPDL rather than
-        with a line break, so you could send multiple commands to
-        MAPDL with:
-
-        ``mapdl.run("/PREP7$K,1,1,2,3")``
-
-        This method is merely a convenience context manager to allow
-        for easy chaining of PyMAPDL commands to speed up sending
-        commands to MAPDL.
-
-        View the response from MAPDL with :attr:`Mapdl.last_response`.
-
-        Notes
-        -----
-        Distributed Ansys cannot properly handle condensed data input
-        and chained commands are not permitted in distributed ansys.
-
-        Examples
-        --------
-        >>> with mapdl.chain_commands:
-            mapdl.prep7()
-            mapdl.k(1, 1, 2, 3)
-        """
-        if self._distributed:
-            raise MapdlRuntimeError(
-                "Chained commands are not permitted in distributed ansys."
-            )
-        return _ChainCommandsContext(self)
-
-    @property
-    def force_output(self):
-        """Force text output globally by turning the ``Mapdl.mute`` attribute to False
-        and activating text output (``/GOPR``)
-
-        You can still do changes to those inside this context.
-        """
-        return _ForceOutputContext(self)
-
-    @property
-    def non_interactive(self):
-        """Non-interactive context manager.
-
-        Allow to execute code without user interaction or waiting
-        between PyMAPDL responses.
-        It can also be used to execute some commands which are not
-        supported in interactive mode. For a complete list of commands
-        visit :ref:`ref_unsupported_interactive_commands`.
-
-        View the last response with :attr:`Mapdl.last_response` method.
-
-        Notes
-        -----
-        All the commands executed inside this context manager are not
-        executed until the context manager exits which then execute them
-        all at once in the MAPDL instance.
-
-        This command uses :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`
-        method.
-
-        Examples
-        --------
-        Use the non-interactive context manager for the VWRITE (
-        :func:`Mapdl.vwrite() <ansys.mapdl.core.Mapdl.vwrite>`)
-        command.
-
-        >>> with mapdl.non_interactive:
-        ...    mapdl.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
-        ...    mapdl.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
-        >>> mapdl.last_response
-        """
-        return _NonInteractiveContext(self)
-
-    @property
-    def muted(self):
-        """Context manager that suppress all output from MAPDL
-
-        Use the `muted` context manager to suppress all the output. Similar to
-        setting `mapdl.mute = True` but only for the context manager.
-
-        Examples
-        --------
-        >>> with mapdl.muted:
-        ...    mapdl.run("/SOLU") # This call is muted
-        """
-        return _MutedContext(self)
-
-    def run_as_routine(self, routine):
-        """Run commands at a routine and then revert to the prior routine.
-
-        Parameters
-        ----------
-        routine : str
-            A MAPDL routine. For example, ``"PREP7"`` or ``"POST1"``.
-
-        Examples
-        --------
-        Enter ``PREP7`` and run ``numvar``, which requires ``POST26``, and
-        revert to the prior routine.
-
-        >>> mapdl.prep7()
-        >>> mapdl.parameters.routine
-        'PREP7'
-        >>> with mapdl.run_as_routine('POST26'):
-        ...     mapdl.numvar(200)
-        >>> mapdl.parameters.routine
-        'PREP7'
-        """
-        return _RunAsRoutineContext(self, routine)
-
-    def _enter_routine(self, routine):
-        return _enter_routine(self, routine)
-
-    def _cache_routine(self):
-        return _cache_routine(self)
-
-    def _resume_routine(self):
-        return _resume_routine(self)
 
     @check_deprecated_vtk_kwargs
     def __init__(

@@ -38,7 +38,6 @@ from ansys.mapdl.core.commands import (
     Commands,
     inject_docs,
 )
-from ansys.mapdl.core.contexts.save_selection import _SaveSelectionContext
 
 if TYPE_CHECKING:  # pragma: no cover
     if _HAS_DPF:
@@ -47,6 +46,24 @@ if TYPE_CHECKING:  # pragma: no cover
 
 from . import _CoreMixinBase
 from .constants import GUI_FONT_SIZE
+
+_TMP_COMP = {
+    "KP": "cmp_kp",
+    "LINE": "cmp_line",
+    "AREA": "cmp_area",
+    "VOLU": "cmp_volu",
+    "NODE": "cmp_node",
+    "ELEM": "cmp_elem",
+}
+
+ENTITIES_TO_SELECTION_MAPPING = {
+    "KP": "ksel",
+    "LINE": "lsel",
+    "AREA": "asel",
+    "VOLU": "vsel",
+    "NODE": "nsel",
+    "ELEM": "esel",
+}
 
 
 class _CoreSelectionMixin(_CoreMixinBase):
@@ -61,6 +78,8 @@ class _CoreSelectionMixin(_CoreMixinBase):
         when exit returns to that selection.
         """
         if self._save_selection_obj is None:
+            from ansys.mapdl.core.contexts.save_selection import _SaveSelectionContext
+
             self._save_selection_obj = _SaveSelectionContext(self)
         return self._save_selection_obj
 

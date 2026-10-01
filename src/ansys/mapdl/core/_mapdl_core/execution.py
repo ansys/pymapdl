@@ -29,13 +29,11 @@ import re
 
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
-import sys
 import tempfile
 import time
 from typing import TYPE_CHECKING, Optional
 from warnings import warn
 
-from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import _HAS_DPF
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
@@ -64,20 +62,12 @@ if TYPE_CHECKING:  # pragma: no cover
 
 from .constants import (
     _PERMITTED_ERRORS,
-    DEBUG_LEVELS,
     INVAL_COMMANDS,
     INVAL_COMMANDS_SILENT,
     MAX_PARAM_CHARS,
-    PLOT_COMMANDS,
 )
 
 
-def setup_logger(loglevel="INFO", log_file=True, mapdl_instance=None):
-    """Setup logger."""
-    if hasattr(setup_logger, "log"):
-        return setup_logger.log
-    setup_logger.log = logger.add_instance_logger("MAPDL", mapdl_instance)
-    return setup_logger.log
 
 
 def parse_to_short_cmd(command):
@@ -99,21 +89,9 @@ def parse_to_short_cmd(command):
         return
 
 
-def _plot_commands():
-    """Return plot commands while honoring the legacy facade patch target.
-
-    ``PLOT_COMMANDS`` remains defined by :mod:`._mapdl_core.constants`, but
-    older callers patch ``mapdl_core.PLOT_COMMANDS`` directly.  Resolve that
-    compatibility alias at the point of use without importing the public
-    facade during module initialization.
-    """
-    facade = sys.modules.get("ansys.mapdl.core.mapdl_core")
-    if facade is not None:
-        return getattr(facade, "PLOT_COMMANDS", PLOT_COMMANDS)
-    return PLOT_COMMANDS
 
 
-from . import _CoreMixinBase
+from . import _CoreMixinBase, plotting
 
 
 class _CoreExecutionMixin(_CoreMixinBase):
@@ -158,43 +136,7 @@ class _CoreExecutionMixin(_CoreMixinBase):
                 func = self.__getattribute__(name)
                 setattr(self, name, wrap_bc_listing_function(func))
 
-    @supress_logging
-    def __str__(self):
-        return self.info.__str__()
 
-    def set_log_level(self, loglevel: DEBUG_LEVELS) -> None:
-        """Sets log level
-
-        Parameters
-        ----------
-        loglevel : str, int
-            Log level.  Must be one of: ``'DEBUG', 'INFO', 'WARNING', 'ERROR'``.
-
-        Examples
-        --------
-        Set the log level to debug
-
-        >>> mapdl.set_log_level('DEBUG')
-
-        Set the log level to info
-
-        >>> mapdl.set_log_level('INFO')
-
-        Set the log level to warning
-
-        >>> mapdl.set_log_level('WARNING')
-
-        Set the log level to error
-
-        >>> mapdl.set_log_level('ERROR')
-        """
-        if isinstance(loglevel, str):
-            loglevel = loglevel.upper()  # type: ignore[assignment]
-        setup_logger(loglevel=loglevel)
-
-    def _set_log_level(self, level):
-        """Alias for set_log_level"""
-        self.set_log_level(level)
 
     def _list(self, command):
         """Replaces *LIST command"""
@@ -583,7 +525,7 @@ class _CoreExecutionMixin(_CoreMixinBase):
             self._raise_errors(text)
 
         # special returns for certain geometry commands
-        if short_cmd in _plot_commands():
+        if short_cmd in plotting.PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
             return self.screenshot(savefig=savefig, default_name="plot")
 

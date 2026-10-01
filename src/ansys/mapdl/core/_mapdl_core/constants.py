@@ -24,30 +24,12 @@
 """Shared constants for the MAPDL core mixins."""
 
 from enum import Enum
-import re
-from typing import Literal, TypeAlias
+from typing import Literal
 
 MAX_PARAM_CHARS = 32
 
 
 SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
-
-
-DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
-
-
-VALID_DEVICES = ["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
-
-
-VALID_DEVICES_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
-
-
-VALID_FILE_TYPE_FOR_PLOT = VALID_DEVICES.copy()
-VALID_FILE_TYPE_FOR_PLOT.remove("CLOSE")
-
-
-VALID_FILE_TYPE_FOR_PLOT_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM"]
-
 
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
@@ -56,9 +38,8 @@ _PERMITTED_ERRORS = [
 ]
 
 
-PNG_IS_WRITTEN_TO_FILE = re.compile(
-    "WRITTEN TO FILE"
-)  # getting the file name is buggy.
+
+
 
 
 VWRITE_MWRITE_REPLACEMENT = """
@@ -93,21 +74,6 @@ INVAL_COMMANDS_SILENT = {
 }
 
 
-PLOT_COMMANDS = [
-    "APLO",
-    "EPLO",
-    "KPLO",
-    "LPLO",
-    "NPLO",
-    "PLES",
-    "PLNS",
-    "PLVA",
-    "PSDG",
-    "SECP",
-    "SPGR",
-    "TBPL",
-    "VPLO",
-]
 
 
 VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
@@ -119,38 +85,6 @@ VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"
 GUI_FONT_SIZE = 15
 
 
-LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
-
-
-_ALLOWED_START_PARM = [
-    "additional_switches",
-    "check_parameter_names",
-    "env_vars",
-    "exec_file",
-    "finish_job_on_exit",
-    "hostname",
-    "ip",
-    "jobid",
-    "jobname",
-    "launch_on_hpc",
-    "launched",
-    "mode",
-    "nproc",
-    "override",
-    "port",
-    "print_com",
-    "process",
-    "ram",
-    "run_location",
-    "start_instance",
-    "start_timeout",
-    "timeout",
-    "use_reader_backend",
-    # Transport-related parameters
-    "transport_mode",
-    "uds_dir",
-    "certs_dir",
-]
 
 
 class STATUS(str, Enum):

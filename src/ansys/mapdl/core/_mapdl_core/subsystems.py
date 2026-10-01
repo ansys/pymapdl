@@ -28,7 +28,7 @@ import os
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
 import tempfile
-from typing import TYPE_CHECKING, Union
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING, Union
 
 from ansys.mapdl.core import _HAS_DPF
 from ansys.mapdl.core.errors import MapdlRuntimeError
@@ -37,6 +37,7 @@ from ansys.mapdl.core.misc import (
     last_created,
     random_string,
     requires_package,
+    run_as,
     supress_logging,
 )
 
@@ -57,7 +58,7 @@ from ansys.mapdl.core.post import PostProcessing
 from . import _CoreMixinBase
 
 
-class _CoreServicesMixin(_CoreMixinBase):
+class _CoreSubsystemsMixin(_CoreMixinBase):
     """Static responsibility mixin for the MAPDL core facade."""
 
     @property
@@ -77,6 +78,25 @@ class _CoreServicesMixin(_CoreMixinBase):
         if self.exited:  # pragma: no cover
             raise MapdlRuntimeError("MAPDL exited.")
         return self._componentmanager
+    def _parse_cmlist(
+        self, cmlist: Optional[str] = None
+    ) -> Tuple[Dict[str, Any], Dict[str, List[str]]]:
+        from ansys.mapdl.core.component import _parse_cmlist
+
+        if not cmlist:
+            cmlist = self.cmlist()
+
+        return _parse_cmlist(cmlist)
+
+    def _parse_cmlist_indiv(
+        self, cmname: str, cmtype: str, cmlist: Optional[str] = None
+    ) -> List[int]:
+        from ansys.mapdl.core.component import _parse_cmlist_indiv
+
+        if not cmlist:
+            cmlist = self.cmlist(cmname, 1)
+
+        return _parse_cmlist_indiv(cmname, cmtype, cmlist)
 
     @property
     def geometry(self) -> "Geometry":
@@ -125,6 +145,9 @@ class _CoreServicesMixin(_CoreMixinBase):
     def info(self):
         """General information"""
         return self._info
+    @supress_logging
+    def __str__(self):
+        return self.info.__str__()
 
     @property
     def mesh(self):
@@ -569,6 +592,13 @@ class _CoreServicesMixin(_CoreMixinBase):
             from ansys.mapdl.core.mapdl_geometry import Geometry
 
             return Geometry(self)
+    @supress_logging
+    @run_as("PREP7")
+    def _generate_iges(self):
+        """Save IGES geometry representation to disk"""
+        filename = self.directory / "_tmp.iges"
+        self.igesout(filename, att=1, mute=True)
+        return filename
 
     def _reset_cache(self):
         """Reset cached items"""

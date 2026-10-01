@@ -43,7 +43,7 @@ from ansys.mapdl.core._mapdl_extended.parameter_commands import (
 from ansys.mapdl.core.contexts.do_loop import (
     MAX_DO_LOOP_LEVEL as PRIVATE_MAX_DO_LOOP_LEVEL,
 )
-from ansys.mapdl.core.contexts.save_selection import _TMP_COMP as PRIVATE_TMP_COMP
+from ansys.mapdl.core._mapdl_core.selection import _TMP_COMP as PRIVATE_TMP_COMP
 from ansys.mapdl.core.errors import CommandDeprecated
 from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.mapdl_core import (
@@ -201,7 +201,7 @@ def test_no_duplicate_public_callables_among_sibling_mixins():
     sibling_groups = (
         (
             mapdl_core._CoreStateMixin,
-            mapdl_core._CoreServicesMixin,
+            mapdl_core._CoreSubsystemsMixin,
             mapdl_core._CoreFileMixin,
             mapdl_core._CorePlottingMixin,
             mapdl_core._CoreSelectionMixin,

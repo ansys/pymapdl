@@ -26,14 +26,14 @@
 import glob
 import os
 import pathlib
-from shutil import copyfile, rmtree
+import re
 
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
 from subprocess import DEVNULL, call  # nosec B404
 import sys
 import tempfile
-from typing import Optional
+from typing import Literal, Optional, TypeAlias
 from warnings import warn
 
 from ansys.mapdl.core.contexts.plotting import (
@@ -45,17 +45,47 @@ from ansys.mapdl.core.misc import random_string, supress_logging
 from ansys.mapdl.core.plotting import GraphicsBackend
 
 from . import _CoreMixinBase
-from .constants import (
-    PNG_IS_WRITTEN_TO_FILE,
-    VALID_DEVICES,
-    VALID_DEVICES_LITERAL,
-    VALID_FILE_TYPE_FOR_PLOT,
-    VALID_FILE_TYPE_FOR_PLOT_LITERAL,
-)
+from .constants import GUI_FONT_SIZE
+
+VALID_DEVICES = ["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
+VALID_DEVICES_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
+VALID_FILE_TYPE_FOR_PLOT = VALID_DEVICES.copy()
+VALID_FILE_TYPE_FOR_PLOT.remove("CLOSE")
+VALID_FILE_TYPE_FOR_PLOT_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM"]
+PNG_IS_WRITTEN_TO_FILE = re.compile("WRITTEN TO FILE")
+PLOT_COMMANDS = [
+    "APLO",
+    "EPLO",
+    "KPLO",
+    "LPLO",
+    "NPLO",
+    "PLES",
+    "PLNS",
+    "PLVA",
+    "PSDG",
+    "SECP",
+    "SPGR",
+    "TBPL",
+    "VPLO",
+]
 
 
 class _CorePlottingMixin(_CoreMixinBase):
     """Static responsibility mixin for the MAPDL core facade."""
+    @property
+    def _has_matplotlib(self):
+        try:
+            __import__("matplotlib")
+
+            return True
+        except ModuleNotFoundError:
+            return False
+    @property
+    def _png_mode(self):
+        """Returns True when MAPDL is set to write plots as png to file."""
+        with self.force_output:
+            return "PNG" in self.show(mute=False)
+
 
     @property
     def default_file_type_for_plots(self):

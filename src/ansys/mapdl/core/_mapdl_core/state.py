@@ -28,10 +28,11 @@ import logging
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
 from typing import TYPE_CHECKING
-from warnings import warn
+from uuid import uuid4
 
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import _HAS_DPF
+from ansys.mapdl.core.errors import MapdlRuntimeError
 
 if TYPE_CHECKING:  # pragma: no cover
     if _HAS_DPF:
@@ -39,7 +40,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 from . import _CoreMixinBase
-from .constants import STATUS
+from .constants import SESSION_ID_NAME, STATUS
 
 
 class _CoreStateMixin(_CoreMixinBase):
@@ -233,10 +234,6 @@ class _CoreStateMixin(_CoreMixinBase):
         """Whether check if the name which is given to the parameter is allowed or not"""
         self._check_parameter_names = value
 
-    @property
-    def logger(self) -> logging.Logger:
-        """MAPDL Python-based logger"""
-        return self._log
 
     @property
     def name(self) -> str:
@@ -289,25 +286,97 @@ class _CoreStateMixin(_CoreMixinBase):
     def _distributed(self):
         """MAPDL is running in distributed mode."""
         return "-smp" not in self._start_parm.get("additional_switches", "")
+    def _launch(self, *args, **kwargs):  # pragma: no cover
+        raise NotImplementedError("Implemented by child class")
 
-    @property
-    def _has_matplotlib(self):
-        try:
-            __import__("matplotlib")
 
-            return True
-        except ModuleNotFoundError:
+    def _check_mapdl_os(self):
+        platform = self.get_value("active", 0, "platform").strip()
+        if "l" in platform.lower():
+            self._platform = "linux"
+        elif "w" in platform.lower():  # pragma: no cover
+            self._platform = "windows"
+        else:  # pragma: no cover
+            raise MapdlRuntimeError("Unknown platform: {}".format(platform))
+        self.logger.debug(f"MAPDL is running on {self._platform} OS.")
+
+    def _check_on_docker(self):
+        """Check if MAPDL is running on docker."""
+        # self.get_mapdl_envvar("ON_DOCKER") # for later
+        if not self.is_grpc:  # pragma: no cover
             return False
 
-    @property
-    def _lockfile(self):
-        """Lockfile path"""
-        path = self.directory
-        if path is not None:
-            return path / f"{self.jobname}.lock"
+        if self.platform == "linux":
+            self.sys(
+                r"if grep -sq 'docker\|lxc' /proc/1/cgroup; then echo 'true' > __outputcmd__.txt; else echo 'false' > __outputcmd__.txt;fi;"
+            )
+        elif self.platform == "windows":  # pragma: no cover
+            return False  # TODO: check if it is running a windows docker container. So far it is not supported.
+
+        if not self.is_local:
+            sys_output = self._download_as_raw("__outputcmd__.txt").decode().strip()
+
+        else:
+            file_ = self.directory / "__outputcmd__.txt"
+            with open(file_, "r") as f:
+                sys_output = f.read().strip()
+
+        self._log.debug(f"The output of sys command is: '{sys_output}'.")
+        self.slashdelete("__outputcmd__.txt")  # cleaning
+        return sys_output == "true"
+    def _create_session(self):
+        """Generate a session ID."""
+        id_ = uuid4()
+        id_ = str(id_)[:31].replace("-", "")
+        self._session_id_ = id_
+        self._run(f"{SESSION_ID_NAME}='{id_}'")
 
     @property
-    def _png_mode(self):
-        """Returns True when MAPDL is set to write plots as png to file."""
-        with self.force_output:
-            return "PNG" in self.show(mute=False)
+    def _session_id(self):
+        """Return the session ID."""
+        return self._session_id_
+
+    def _check_session_id(self):
+        """Verify that the local session ID matches the remote MAPDL session ID."""
+        if self._checking_session_id_ or not self._strict_session_id_check:
+            # To avoid recursion error
+            return
+
+        pymapdl_session_id = self._session_id
+        if not pymapdl_session_id:
+            # We return early if pymapdl_session is not fixed yet.
+            return
+
+        self._checking_session_id_ = True
+        self._mapdl_session_id = self._get_mapdl_session_id()
+
+        self._checking_session_id_ = False
+
+        if pymapdl_session_id is None or self._mapdl_session_id is None:
+            return
+        elif self._strict_session_id_check:
+            if pymapdl_session_id != self._mapdl_session_id:
+                self._log.error("The session ids do not match")
+
+            else:
+                self._log.debug("The session ids match")
+                return True
+        else:
+            return pymapdl_session_id == self._mapdl_session_id
+
+    def _get_mapdl_session_id(self):
+        """Retrieve MAPDL session ID."""
+        from ansys.mapdl.core.parameters import interp_star_status
+
+        try:
+            parameter = interp_star_status(
+                self._run(f"*STATUS,{SESSION_ID_NAME}", mute=False)
+            )
+        except AttributeError:
+            return None
+
+        if parameter:
+            return parameter[SESSION_ID_NAME]["value"]
+        return None
+
+
