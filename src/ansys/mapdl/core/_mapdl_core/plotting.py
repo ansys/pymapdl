@@ -33,21 +33,16 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call  # nosec B404
 import sys
 import tempfile
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 from warnings import warn
-import weakref
 
-from ansys.mapdl.core import _HAS_DPF
+from ansys.mapdl.core.contexts.plotting import (
+    _InteractivePlottingContext,
+    _restore_plot_device,
+)
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.misc import random_string, requires_graphics, supress_logging
+from ansys.mapdl.core.misc import random_string, supress_logging
 from ansys.mapdl.core.plotting import GraphicsBackend
-
-if TYPE_CHECKING:  # pragma: no cover
-    from ansys.mapdl.core.mapdl import MapdlBase
-
-    if _HAS_DPF:
-        pass
-
 
 from . import _CoreMixinBase
 from .constants import (
@@ -318,73 +313,7 @@ class _CorePlottingMixin(_CoreMixinBase):
             Increasing the resolution produces a "sharper" image but
             takes longer to render.
         """
-        return self.WithInterativePlotting(self, pixel_res)
-
-    class WithInterativePlotting:
-        """Allows to redirect plots to MAPDL plots."""
-
-        def __init__(self, parent: "MapdlBase", pixel_res: int) -> None:
-            self._parent = weakref.ref(parent)
-            self._pixel_res = pixel_res
-
-        @requires_graphics
-        def __enter__(self) -> None:
-            parent = self._parent()
-            if parent is None:
-                raise MapdlRuntimeError("Parent reference is None")
-
-            parent._log.debug("Entering in 'WithInterativePlotting' mode")
-
-            self._active = not parent._store_commands
-            if not self._active:
-                return
-
-            self.previous_device = parent.file_type_for_plots
-            entered = False
-            try:
-                if not parent._png_mode:
-                    parent.show("PNG", mute=True)
-                    parent.gfile(self._pixel_res, mute=True)
-
-                if parent.file_type_for_plots not in [
-                    "PNG",
-                    "TIFF",
-                    "PNG",
-                    "VRML",
-                ]:
-                    parent.show(parent.default_file_type_for_plots)
-                entered = True
-            finally:
-                if not entered:
-                    parent._restore_plot_device(
-                        self.previous_device,
-                        primary_exception=sys.exc_info()[1],
-                        use_property=True,
-                    )
-
-        @requires_graphics
-        def __exit__(self, *args) -> None:
-            parent = self._parent()
-            if parent is None:
-                raise MapdlRuntimeError("Parent reference is None")
-
-            parent._log.debug("Exiting in 'WithInterativePlotting' mode")
-            if not self._active:
-                return
-
-            try:
-                parent.show("close", mute=True)
-
-                if not parent._store_commands:
-                    if not parent._png_mode:
-                        parent.show("PNG", mute=True)
-                        parent.gfile(self._pixel_res, mute=True)
-            finally:
-                parent._restore_plot_device(
-                    self.previous_device,
-                    primary_exception=sys.exc_info()[1],
-                    use_property=True,
-                )
+        return _InteractivePlottingContext(self, pixel_res)
 
     def is_png_found(self, text: str) -> bool:
         # findall returns None if there is no match
@@ -397,15 +326,12 @@ class _CorePlottingMixin(_CoreMixinBase):
         *,
         use_property: bool = False,
     ) -> None:
-        try:
-            if use_property:
-                self.file_type_for_plots = previous_device
-            else:
-                self.show(previous_device)
-        except Exception:
-            if primary_exception is None:
-                raise
-            self._log.exception("Unable to restore the previous plotting device.")
+        return _restore_plot_device(
+            self,
+            previous_device,
+            primary_exception,
+            use_property=use_property,
+        )
 
     def _get_plot_name(self, text: str) -> str:
         """Obtain the plot filename."""

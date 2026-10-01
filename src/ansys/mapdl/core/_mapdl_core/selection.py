@@ -38,6 +38,7 @@ from ansys.mapdl.core.commands import (
     Commands,
     inject_docs,
 )
+from ansys.mapdl.core.contexts.save_selection import _SaveSelectionContext
 
 if TYPE_CHECKING:  # pragma: no cover
     if _HAS_DPF:
@@ -60,7 +61,7 @@ class _CoreSelectionMixin(_CoreMixinBase):
         when exit returns to that selection.
         """
         if self._save_selection_obj is None:
-            self._save_selection_obj = self._save_selection(self)
+            self._save_selection_obj = _SaveSelectionContext(self)
         return self._save_selection_obj
 
     def _wrap_xsel_commands(self):

@@ -37,11 +37,13 @@ from ansys.mapdl.core._mapdl_core.constants import (
     SESSION_ID_NAME as PRIVATE_SESSION_ID_NAME,
 )
 from ansys.mapdl.core._mapdl_core.constants import STATUS as PRIVATE_STATUS
-from ansys.mapdl.core._mapdl_core.constants import _TMP_COMP as PRIVATE_TMP_COMP
-from ansys.mapdl.core._mapdl_extended.contexts import (
+from ansys.mapdl.core._mapdl_extended.parameter_commands import (
+    TMP_VAR as PRIVATE_TMP_VAR,
+)
+from ansys.mapdl.core.contexts.do_loop import (
     MAX_DO_LOOP_LEVEL as PRIVATE_MAX_DO_LOOP_LEVEL,
 )
-from ansys.mapdl.core._mapdl_extended.contexts import TMP_VAR as PRIVATE_TMP_VAR
+from ansys.mapdl.core.contexts.save_selection import _TMP_COMP as PRIVATE_TMP_COMP
 from ansys.mapdl.core.errors import CommandDeprecated
 from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.mapdl_core import (
@@ -87,7 +89,7 @@ def test_private_mixins_are_static_and_have_expected_relative_mro():
         mapdl_core._CoreStateMixin,
         mapdl_core._CoreExecutionMixin,
     )
-    extended_mixins = (mapdl_extended._ExtendedContextMixin,)
+    extended_mixins = ()
 
     core_mro = _MapdlCore.__mro__
     command_mro = _MapdlCommandExtended.__mro__
@@ -200,7 +202,6 @@ def test_no_duplicate_public_callables_among_sibling_mixins():
         (
             mapdl_core._CoreStateMixin,
             mapdl_core._CoreServicesMixin,
-            mapdl_core._CoreContextMixin,
             mapdl_core._CoreFileMixin,
             mapdl_core._CorePlottingMixin,
             mapdl_core._CoreSelectionMixin,
@@ -219,7 +220,6 @@ def test_no_duplicate_public_callables_among_sibling_mixins():
             mapdl_extended._ExtendedArrayMixin,
             mapdl_extended._ExtendedAnalysisMixin,
             mapdl_extended._ExtendedValueMixin,
-            mapdl_extended._ExtendedContextMixin,
         ),
     )
 

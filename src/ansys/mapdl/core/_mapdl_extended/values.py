@@ -42,6 +42,7 @@ class _ExtendedValueMixin(_ExtendedMixinBase):
         comp: str = "",
         option: str = "",
         lab: str = "",
+        **kwargs: KwargDict,
     ) -> NDArray[np.float64]:
         """Create an element table column and return its values.
 
@@ -83,21 +84,17 @@ class _ExtendedValueMixin(_ExtendedMixinBase):
 
         >>> displacement_x = mapdl.get_etable("U", "X")
         """
-        temporary_label = not lab
-        if temporary_label:
-            # Preserve the legacy public patch point after moving this method.
-            from ansys.mapdl.core import mapdl_extended
+        keep_lab = bool(lab)
+        if not keep_lab:
+            lab = f"_ET{self._etable_lab_counter:05d}"
+            self._etable_lab_counter += 1
 
-            label = f"__{mapdl_extended.random_string(4)}__"
-        else:
-            label = lab
-        self.etable(label, item, comp, option)
+        self.etable(lab, item, comp, option, **kwargs)
         try:
-            values = self.get_array("ELEM", "", "ETAB", label)
+            return self.get_array("ELEM", 1, "ETAB", lab)
         finally:
-            if temporary_label:
-                self.etable(label, "ERAS")
-        return values
+            if not keep_lab:
+                self.etable(lab, "ERAS", mute=True)
 
     def get_value(
         self,

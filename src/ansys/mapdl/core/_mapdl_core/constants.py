@@ -56,26 +56,6 @@ _PERMITTED_ERRORS = [
 ]
 
 
-_TMP_COMP = {
-    "KP": "cmp_kp",
-    "LINE": "cmp_line",
-    "AREA": "cmp_area",
-    "VOLU": "cmp_volu",
-    "NODE": "cmp_node",
-    "ELEM": "cmp_elem",
-}
-
-
-ENTITIES_TO_SELECTION_MAPPING = {
-    "KP": "ksel",
-    "LINE": "lsel",
-    "AREA": "asel",
-    "VOLU": "vsel",
-    "NODE": "nsel",
-    "ELEM": "esel",
-}
-
-
 PNG_IS_WRITTEN_TO_FILE = re.compile(
     "WRITTEN TO FILE"
 )  # getting the file name is buggy.
@@ -128,9 +108,6 @@ PLOT_COMMANDS = [
     "TBPL",
     "VPLO",
 ]
-
-
-MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
 
 
 VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]

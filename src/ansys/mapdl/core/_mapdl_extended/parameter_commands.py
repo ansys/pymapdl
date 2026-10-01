@@ -32,7 +32,8 @@ from ansys.mapdl.core.mapdl_core import _MapdlCore
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 
 from . import _ExtendedMixinBase
-from .contexts import TMP_VAR
+
+TMP_VAR = "__tmpvar__"
 
 
 class _ExtendedParameterCommandsMixin(_ExtendedMixinBase):
