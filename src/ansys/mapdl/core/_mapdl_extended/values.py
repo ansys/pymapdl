@@ -29,6 +29,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
+from ansys.mapdl.core.misc import random_string
 
 from . import _ExtendedMixinBase
 
@@ -84,13 +85,7 @@ class _ExtendedValueMixin(_ExtendedMixinBase):
         >>> displacement_x = mapdl.get_etable("U", "X")
         """
         temporary_label = not lab
-        if temporary_label:
-            # Preserve the legacy public patch point after moving this method.
-            from ansys.mapdl.core import mapdl_extended
-
-            label = f"__{mapdl_extended.random_string(4)}__"
-        else:
-            label = lab
+        label = f"__{random_string(4)}__" if temporary_label else lab
         self.etable(label, item, comp, option)
         try:
             values = self.get_array("ELEM", "", "ETAB", label)

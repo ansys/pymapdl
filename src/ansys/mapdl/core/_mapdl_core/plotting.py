@@ -59,6 +59,22 @@ from .constants import (
 )
 
 
+PLOT_COMMANDS = [
+    "APLO",
+    "EPLO",
+    "KPLO",
+    "LPLO",
+    "NPLO",
+    "PLES",
+    "PLNS",
+    "PLVA",
+    "PSDG",
+    "SECP",
+    "SPGR",
+    "TBPL",
+    "VPLO",
+]
+
 class _CorePlottingMixin(_CoreMixinBase):
     """Static responsibility mixin for the MAPDL core facade."""
 

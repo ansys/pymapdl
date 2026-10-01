@@ -29,7 +29,6 @@ import re
 
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
-import sys
 import tempfile
 import time
 from typing import TYPE_CHECKING, Optional
@@ -68,7 +67,6 @@ from .constants import (
     INVAL_COMMANDS,
     INVAL_COMMANDS_SILENT,
     MAX_PARAM_CHARS,
-    PLOT_COMMANDS,
 )
 
 
@@ -99,21 +97,9 @@ def parse_to_short_cmd(command):
         return
 
 
-def _plot_commands():
-    """Return plot commands while honoring the legacy facade patch target.
-
-    ``PLOT_COMMANDS`` remains defined by :mod:`._mapdl_core.constants`, but
-    older callers patch ``mapdl_core.PLOT_COMMANDS`` directly.  Resolve that
-    compatibility alias at the point of use without importing the public
-    facade during module initialization.
-    """
-    facade = sys.modules.get("ansys.mapdl.core.mapdl_core")
-    if facade is not None:
-        return getattr(facade, "PLOT_COMMANDS", PLOT_COMMANDS)
-    return PLOT_COMMANDS
 
 
-from . import _CoreMixinBase
+from . import _CoreMixinBase, plotting
 
 
 class _CoreExecutionMixin(_CoreMixinBase):
@@ -583,7 +569,7 @@ class _CoreExecutionMixin(_CoreMixinBase):
             self._raise_errors(text)
 
         # special returns for certain geometry commands
-        if short_cmd in _plot_commands():
+        if short_cmd in plotting.PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
             return self.screenshot(savefig=savefig, default_name="plot")
 

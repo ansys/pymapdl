@@ -2746,7 +2746,9 @@ def test_get_etable_with_temporary_label():
     mapdl.etable = MagicMock(side_effect=record_etable)
     mapdl.get_array = MagicMock(side_effect=record_get_array)
 
-    with patch("ansys.mapdl.core.mapdl_extended.random_string", return_value="abcd"):
+    with patch(
+        "ansys.mapdl.core._mapdl_extended.values.random_string", return_value="abcd"
+    ):
         result = mapdl.get_etable("SMISC", 3, "AVG")
 
     np.testing.assert_array_equal(result, values)
@@ -2771,7 +2773,9 @@ def test_get_etable_cleans_up_temporary_label_on_error():
     mapdl.etable = MagicMock(side_effect=record_etable)
     mapdl.get_array = MagicMock(side_effect=raise_get_array)
 
-    with patch("ansys.mapdl.core.mapdl_extended.random_string", return_value="abcd"):
+    with patch(
+        "ansys.mapdl.core._mapdl_extended.values.random_string", return_value="abcd"
+    ):
         with pytest.raises(RuntimeError, match="unable to retrieve element table"):
             mapdl.get_etable("SMISC", 3)
 

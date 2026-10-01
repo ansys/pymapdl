@@ -120,7 +120,6 @@ from ansys.mapdl.core._mapdl_core.constants import (  # noqa: F401
     LOG_APDL_DEFAULT_FILE_NAME,
     MAX_COMMAND_LENGTH,
     MAX_PARAM_CHARS,
-    PLOT_COMMANDS,
     PNG_IS_WRITTEN_TO_FILE,
     SESSION_ID_NAME,
     STATUS,

@@ -81,7 +81,6 @@ from ansys.mapdl.core.misc import (  # noqa: F401
     allow_iterables_vmin,
     allow_pickable_entities,
     check_deprecated_vtk_kwargs,
-    random_string,
     requires_graphics,
     supress_logging,
 )
