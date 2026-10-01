@@ -76,6 +76,7 @@ INVAL_COMMANDS_SILENT = {
 
 
 
+
 VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
 
 

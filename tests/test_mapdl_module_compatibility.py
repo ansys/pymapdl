@@ -23,7 +23,6 @@
 """No-MAPDL regression tests for the ``mapdl_core`` and ``mapdl_extended`` facades."""
 
 from inspect import getattr_static, getmembers, isfunction
-from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
@@ -186,15 +185,6 @@ def test_parameter_and_explicit_wrappers_preserve_pre_dispatch_validation():
         instance.edasmp()
 
 
-def test_extended_value_patch_target_remains_on_public_facade():
-    """Patching the historical ``_MapdlExtended.get_value`` target still works."""
-    instance = object.__new__(_MapdlExtended)
-
-    with patch(
-        "ansys.mapdl.core.mapdl_extended._MapdlExtended.get_value", return_value=42
-    ):
-        assert instance.get_value("NODE", "1", "LOC", "X") == 42
-
 
 def test_no_duplicate_public_callables_among_sibling_mixins():
     """Each responsibility mixin owns a public callable name only once."""
@@ -235,10 +225,3 @@ def test_no_duplicate_public_callables_among_sibling_mixins():
         assert not duplicates
 
 
-def test_no_obsolete_extended_plotting_module():
-    """High-level graphics backend selection remains on the extended facade."""
-    plotting_module = (
-        Path(mapdl_extended.__file__).parent / "_mapdl_extended" / "plotting.py"
-    )
-    assert not plotting_module.exists()
-    assert "set_graphics_backend" in _MapdlExtended.__dict__

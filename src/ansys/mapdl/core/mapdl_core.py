@@ -114,9 +114,11 @@ from ansys.mapdl.core._mapdl_core.constants import (  # noqa: F401
     INVAL_COMMANDS,
     INVAL_COMMANDS_SILENT,
     MAX_PARAM_CHARS,
+
     SESSION_ID_NAME,
     STATUS,
     VALID_SELECTION_TYPE_TP,
+    VALID_SELECTION_ENTITY_TP,
     VWRITE_MWRITE_REPLACEMENT,
 )
 from ansys.mapdl.core._mapdl_core.execution import (
