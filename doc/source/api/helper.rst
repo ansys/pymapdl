@@ -13,3 +13,13 @@ or automating other tasks.
 
    convert_apdl_block
    convert_script
+
+MAPDL availability
+-------------------
+
+.. currentmodule:: ansys.mapdl.core
+
+.. autosummary::
+   :toctree: _autosummary
+
+   check_has_mapdl

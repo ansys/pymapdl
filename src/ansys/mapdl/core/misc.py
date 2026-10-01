@@ -227,11 +227,11 @@ def random_string(stringLength: int = 10, letters: str = string.ascii_lowercase)
 
 
 def check_has_mapdl() -> bool:
-    """Safely wraps check_valid_ansys
+    """Check whether a local MAPDL installation is available.
 
     Returns
     -------
-    has_ansys : bool
+    bool
         True when this local installation has ANSYS installed in a
         standard location.
     """

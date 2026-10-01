@@ -3,10 +3,17 @@
 ``Information`` module
 ======================
 
+.. currentmodule:: ansys.mapdl.core.information
+
+.. autosummary::
+   :toctree: _autosummary
+
+   Information
+   UnitsDict
+   get_mapdl_info
+
 ``Information`` class attributes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. currentmodule:: ansys.mapdl.core.information
 
 .. autosummary::
    :toctree: _autosummary

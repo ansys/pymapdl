@@ -10,6 +10,22 @@ Components
 
    component.ComponentManager
 
+``ComponentManager`` members
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. currentmodule:: ansys.mapdl.core.component
+
+.. autosummary::
+   :toctree: _autosummary
+
+   ComponentManager.default_entity
+   ComponentManager.default_entity_warning
+   ComponentManager.logger
+   ComponentManager.names
+   ComponentManager.types
+   ComponentManager.items
+   ComponentManager.select
+
 The :class:`~ansys.mapdl.core.component.Component` class represents a single
 named component and subclasses the built-in ``tuple`` type to store the
 selected entity IDs. Because it inherits directly from ``tuple``, it also
