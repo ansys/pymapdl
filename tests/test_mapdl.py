@@ -2796,7 +2796,6 @@ def test_get_etable_with_temporary_label():
     mapdl.get_array = MagicMock(side_effect=record_get_array)
 
     result = mapdl.get_etable("SMISC", 3, "AVG")
-11: @ours
 
     np.testing.assert_array_equal(result, values)
     assert events == [
