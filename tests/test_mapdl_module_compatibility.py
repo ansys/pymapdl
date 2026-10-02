@@ -37,10 +37,10 @@ from ansys.mapdl.core._mapdl_core.constants import (
     SESSION_ID_NAME as PRIVATE_SESSION_ID_NAME,
 )
 from ansys.mapdl.core._mapdl_core.constants import STATUS as PRIVATE_STATUS
-from ansys.mapdl.core._mapdl_extended.parameter_commands import (
+from ansys.mapdl.core._mapdl_extended.apdl.parameter_definition import (
     TMP_VAR as PRIVATE_TMP_VAR,
 )
-from ansys.mapdl.core.contexts.do_loop import (
+from ansys.mapdl.core._mapdl_extended.contexts import (
     MAX_DO_LOOP_LEVEL as PRIVATE_MAX_DO_LOOP_LEVEL,
 )
 from ansys.mapdl.core._mapdl_core.selection import _TMP_COMP as PRIVATE_TMP_COMP

@@ -35,7 +35,7 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 
-from . import _ExtendedMixinBase
+from .. import _ExtendedMixinBase
 
 
 class _ExtendedFileCommandsMixin(_ExtendedMixinBase):

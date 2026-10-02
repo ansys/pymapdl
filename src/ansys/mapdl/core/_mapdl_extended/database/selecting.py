@@ -29,7 +29,7 @@ from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 from ansys.mapdl.core.misc import allow_iterables_vmin, allow_pickable_entities
 
-from . import _ExtendedMixinBase
+from .. import _ExtendedMixinBase
 
 
 class _ExtendedSelectionCommandsMixin(_ExtendedMixinBase):

@@ -28,7 +28,7 @@ from functools import wraps
 from ansys.mapdl.core.errors import CommandDeprecated
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 
-from . import _ExtendedMixinBase
+from .. import _ExtendedMixinBase
 
 
 class _ExtendedExplicitCommandsMixin(_ExtendedMixinBase):

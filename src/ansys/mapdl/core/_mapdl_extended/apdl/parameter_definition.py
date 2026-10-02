@@ -31,7 +31,7 @@ from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 
-from . import _ExtendedMixinBase
+from .. import _ExtendedMixinBase
 
 TMP_VAR = "__tmpvar__"
 
