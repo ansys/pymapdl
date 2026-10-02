@@ -58,6 +58,7 @@ from ansys.mapdl.core.mapdl_extended import (
     _MapdlCommandExtended,
     _MapdlExtended,
 )
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 
 def test_facade_symbols_and_helpers_are_reexported():
@@ -183,6 +184,96 @@ def test_parameter_and_explicit_wrappers_preserve_pre_dispatch_validation():
 
     with pytest.raises(CommandDeprecated, match="edasmp"):
         instance.edasmp()
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "edasmp",
+        "edbound",
+        "edbx",
+        "edcgen",
+        "edclist",
+        "edcmore",
+        "edcnstr",
+        "edcontact",
+        "edcrb",
+        "edcurve",
+        "eddbl",
+        "eddc",
+        "edipart",
+        "edlcs",
+        "edmp",
+        "ednb",
+        "edndtsd",
+        "ednrot",
+        "edpart",
+        "edpc",
+        "edsp",
+        "edweld",
+        "edadapt",
+        "edale",
+        "edbvis",
+        "edcadapt",
+        "edcpu",
+        "edcsc",
+        "edcts",
+        "eddamp",
+        "eddrelax",
+        "eddump",
+        "edenergy",
+        "edfplot",
+        "edgcale",
+        "edhgls",
+        "edhist",
+        "edhtime",
+        "edint",
+        "edis",
+        "edload",
+        "edopt",
+        "edout",
+        "edpl",
+        "edpvel",
+        "edrc",
+        "edrd",
+        "edri",
+        "edrst",
+        "edrun",
+        "edshell",
+        "edsolv",
+        "edstart",
+        "edterm",
+        "edtp",
+        "edvel",
+        "edwrite",
+        "rexport",
+    ],
+)
+def test_explicit_wrappers_forward_for_legacy_mapdl(command):
+    """Deprecated explicit commands still dispatch on legacy MAPDL versions."""
+    instance = object.__new__(_MapdlExtended)
+    instance._version = 19.0
+    instance.run = Mock(return_value="response")
+
+    getattr(instance, command)()
+
+    instance.run.assert_called_once()
+
+
+def test_extended_facade_wrappers_preserve_behavior():
+    """Moved facade wrappers retain forwarding and backend selection behavior."""
+    instance = object.__new__(_MapdlExtended)
+    instance._parameters = {"__temp_par__": 42}
+
+    with patch.object(_MapdlCore, "nrm") as nrm:
+        assert instance.nrm() == 42
+
+    nrm.assert_called_once_with(
+        name="", normtype="", parr="__temp_par__", normalize="", **{}
+    )
+
+    instance.set_graphics_backend(GraphicsBackend.PYVISTA)
+    assert instance._graphics_backend is GraphicsBackend.PYVISTA
 
 
 def test_no_duplicate_public_callables_among_sibling_mixins():
