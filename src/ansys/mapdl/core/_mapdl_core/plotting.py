@@ -27,6 +27,7 @@ import glob
 import os
 import pathlib
 import re
+from shutil import copyfile, rmtree
 
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
@@ -45,7 +46,6 @@ from ansys.mapdl.core.misc import random_string, supress_logging
 from ansys.mapdl.core.plotting import GraphicsBackend
 
 from . import _CoreMixinBase
-from .constants import GUI_FONT_SIZE
 
 VALID_DEVICES = ["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
 VALID_DEVICES_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
@@ -86,8 +86,10 @@ PLOT_COMMANDS = [
     "VPLO",
 ]
 
+
 class _CorePlottingMixin(_CoreMixinBase):
     """Static responsibility mixin for the MAPDL core facade."""
+
     @property
     def _has_matplotlib(self):
         try:
@@ -96,12 +98,12 @@ class _CorePlottingMixin(_CoreMixinBase):
             return True
         except ModuleNotFoundError:
             return False
+
     @property
     def _png_mode(self):
         """Returns True when MAPDL is set to write plots as png to file."""
         with self.force_output:
             return "PNG" in self.show(mute=False)
-
 
     @property
     def default_file_type_for_plots(self):

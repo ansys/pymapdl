@@ -21,12 +21,11 @@
 
 import logging
 from pathlib import Path
-from typing import Literal, Union
+from typing import Literal, TextIO, Union
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.misc import run_as, supress_logging
 
 from . import _CoreMixinBase
 
@@ -44,6 +43,8 @@ def setup_logger(loglevel="INFO", log_file=True, mapdl_instance=None):
 
 class _CoreLoggingMixin(_CoreMixinBase):
     """Static responsibility mixin for MAPDL logging APIs."""
+
+    _apdl_log: TextIO | None
 
     @property
     def logger(self) -> logging.Logger:

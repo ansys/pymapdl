@@ -23,12 +23,11 @@
 
 """The state MAPDL core responsibility mixin."""
 
-import logging
-
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
 from typing import TYPE_CHECKING
 from uuid import uuid4
+from warnings import warn
 
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import _HAS_DPF
@@ -234,7 +233,6 @@ class _CoreStateMixin(_CoreMixinBase):
         """Whether check if the name which is given to the parameter is allowed or not"""
         self._check_parameter_names = value
 
-
     @property
     def name(self) -> str:
         raise NotImplementedError("Implemented by child classes.")
@@ -286,9 +284,9 @@ class _CoreStateMixin(_CoreMixinBase):
     def _distributed(self):
         """MAPDL is running in distributed mode."""
         return "-smp" not in self._start_parm.get("additional_switches", "")
+
     def _launch(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError("Implemented by child class")
-
 
     def _check_mapdl_os(self):
         platform = self.get_value("active", 0, "platform").strip()
@@ -324,6 +322,7 @@ class _CoreStateMixin(_CoreMixinBase):
         self._log.debug(f"The output of sys command is: '{sys_output}'.")
         self.slashdelete("__outputcmd__.txt")  # cleaning
         return sys_output == "true"
+
     def _create_session(self):
         """Generate a session ID."""
         id_ = uuid4()
@@ -378,5 +377,3 @@ class _CoreStateMixin(_CoreMixinBase):
         if parameter:
             return parameter[SESSION_ID_NAME]["value"]
         return None
-
-
