@@ -58,7 +58,6 @@ from .constants import (
     VALID_FILE_TYPE_FOR_PLOT_LITERAL,
 )
 
-
 PLOT_COMMANDS = [
     "APLO",
     "EPLO",
@@ -74,6 +73,7 @@ PLOT_COMMANDS = [
     "TBPL",
     "VPLO",
 ]
+
 
 class _CorePlottingMixin(_CoreMixinBase):
     """Static responsibility mixin for the MAPDL core facade."""

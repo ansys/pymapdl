@@ -29,7 +29,6 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
-from ansys.mapdl.core.misc import random_string
 
 from . import _ExtendedMixinBase
 
@@ -43,56 +42,91 @@ class _ExtendedValueMixin(_ExtendedMixinBase):
         comp: str = "",
         option: str = "",
         lab: str = "",
+        **kwargs: KwargDict,
     ) -> NDArray[np.float64]:
-        """Create an element table column and return its values.
+        """Retrieve an element-table column as a NumPy array.
+
+        This method wraps the standard ``ETABLE``-then-``*VGET`` workflow:
+        it calls :func:`Mapdl.etable() <ansys.mapdl.core.Mapdl.etable>` to
+        fill an element-table column with ``item``/``comp`` for the
+        currently selected elements, and then calls
+        :func:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>` with
+        ``ELEM``/``ETAB`` to retrieve that column as a NumPy array.
 
         Parameters
         ----------
         item : str
-            Label identifying the result item.
+            Label identifying the item. See the ``Item`` argument of
+            :func:`Mapdl.etable() <ansys.mapdl.core.Mapdl.etable>` for the
+            available labels.
         comp : str, optional
-            Component or sequence number for the result item.
+            Component of the item, if required.
         option : str, optional
-            Element table storage option, such as ``"MIN"``, ``"MAX"``,
-            or ``"AVG"``.
+            Option for storing element table data. One of ``"MIN"``,
+            ``"MAX"``, or ``"AVG"`` (default). See
+            :func:`Mapdl.etable() <ansys.mapdl.core.Mapdl.etable>` for
+            details.
         lab : str, optional
-            Label for the element table column. If omitted, a hidden temporary
-            label is used and erased after the values are retrieved. If
-            provided, the column remains available in MAPDL.
+            Element-table label (the ``Lab`` argument of ``ETABLE``) used
+            to store the retrieved item. If omitted (default), a unique
+            hidden temporary label is generated, the column is erased
+            (``ETABLE,Lab,ERAS``) right after the values are retrieved,
+            and no trace of it is left in MAPDL. If you supply ``lab``,
+            the column is kept in the element table under that name so
+            you can reuse it in subsequent MAPDL operations (for example
+            ``SADD`` or ``SMULT``).
 
         Returns
         -------
         numpy.ndarray
-            Values from the element table column for the selected elements.
+            Array containing the requested element-table values. The
+            underlying ``*VGET`` operation iterates over sequential
+            element numbers regardless of selection, so the array can
+            include entries for unselected or undefined elements. Use
+            :attr:`Mapdl.post_processing.element_values
+            <ansys.mapdl.core.post.PostProcessing.element_values>` to
+            retrieve values for only the currently selected elements.
 
         Notes
         -----
-        This method uses :meth:`Mapdl.etable` to create the column and
-        :meth:`Mapdl.get_array` to retrieve it. As with
-        :meth:`Mapdl.get_array`, it cannot be used inside the
-        :attr:`Mapdl.non_interactive` context.
+        This method fills (and, for a temporary label, empties) an
+        element-table column as a side effect, so it should be called
+        after all the commands that must run beforehand have already
+        been executed, consistent with the restrictions documented in
+        :func:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>`.
 
         Examples
         --------
-        Retrieve sequence-number element results:
+        Retrieve the averaged element centroid value of the X component
+        stress for the current result set, using a temporary label.
 
-        >>> moment_i = mapdl.get_etable("SMISC", 3, lab="MOMY_I")
-        >>> moment_j = mapdl.get_etable("SMISC", 16, lab="MOMY_J")
+        >>> mapdl.post1()
+        >>> mapdl.set(1, 1)
+        >>> mapdl.get_etable("S", "X")
+        array([-1.12618148, -0.93902147, -0.88121128, ...,  0.        ,
+                0.        ,  0.        ])
 
-        Retrieve a component-name result with a temporary element table
-        column:
+        Retrieve the maximum element thermal equivalent strain, keeping
+        the resulting element-table column under the ``"EPTHEQV"`` label
+        for later use.
 
-        >>> displacement_x = mapdl.get_etable("U", "X")
+        >>> mapdl.get_etable("EPTH", "EQV", "MAX", lab="EPTHEQV")
+        array([0., 0., 0., ..., 0., 0., 0.])
+        >>> mapdl.get_array("ELEM", 1, "ETAB", "EPTHEQV")
+        array([0., 0., 0., ..., 0., 0., 0.])
         """
-        temporary_label = not lab
-        label = f"__{random_string(4)}__" if temporary_label else lab
-        self.etable(label, item, comp, option)
+        keep_lab = bool(lab)
+        if not keep_lab:
+            lab = f"_ET{self._etable_lab_counter:05d}"
+            self._etable_lab_counter += 1
+
+        self.etable(lab, item, comp, option, **kwargs)
+
         try:
-            values = self.get_array("ELEM", "", "ETAB", label)
+            return self.get_array("ELEM", 1, "ETAB", lab)
         finally:
-            if temporary_label:
-                self.etable(label, "ERAS")
-        return values
+            if not keep_lab:
+                self.etable(lab, "ERAS", mute=True)
 
     def get_value(
         self,

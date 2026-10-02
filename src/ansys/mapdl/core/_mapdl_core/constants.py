@@ -113,8 +113,6 @@ INVAL_COMMANDS_SILENT = {
 }
 
 
-
-
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
 
 

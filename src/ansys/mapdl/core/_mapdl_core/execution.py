@@ -97,8 +97,6 @@ def parse_to_short_cmd(command):
         return
 
 
-
-
 from . import _CoreMixinBase, plotting
 
 

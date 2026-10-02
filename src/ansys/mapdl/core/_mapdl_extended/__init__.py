@@ -32,6 +32,7 @@ if TYPE_CHECKING:
         """Type-only base for cooperative MAPDL extended mixins."""
 
         _vget_arr_counter: int
+        _etable_lab_counter: int
 
         def __getattr__(self, name: str) -> Any: ...
 

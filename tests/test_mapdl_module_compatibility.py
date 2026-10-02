@@ -183,7 +183,6 @@ def test_parameter_and_explicit_wrappers_preserve_pre_dispatch_validation():
         instance.edasmp()
 
 
-
 def test_no_duplicate_public_callables_among_sibling_mixins():
     """Each responsibility mixin owns a public callable name only once."""
     sibling_groups = (
@@ -223,5 +222,3 @@ def test_no_duplicate_public_callables_among_sibling_mixins():
             name: mixins for name, mixins in owners.items() if len(mixins) > 1
         }
         assert not duplicates
-
-

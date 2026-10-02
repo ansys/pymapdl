@@ -276,8 +276,14 @@ class _ExtendedArrayMixin(_ExtendedMixinBase):
         """Uses the ``*VGET`` command to Return an array from ANSYS as a
         Python array.
 
-        See `VGET
-        <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_VGET_st.html>`
+        Selection behavior depends on the requested entity and item. For
+        example, retrieving an ``ETAB`` item for ``ELEM`` returns values at
+        sequential element-number positions, including positions for
+        unselected or undefined elements. Do not rely on an entity selection
+        to determine the length or indexing of the returned array.
+
+        See `*VGET
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v252/en/ans_cmd/Hlp_C_VGET_st.html>`
         for more details.
 
         Parameters
@@ -318,6 +324,16 @@ class _ExtendedArrayMixin(_ExtendedMixinBase):
         -----
         Please reference your Ansys help manual ``*VGET`` command tables
         for all the available ``*VGET`` values.
+
+        This method cannot be used while inside a
+        :func:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
+        context because it must retrieve the array value immediately, and
+        commands issued inside ``non_interactive`` are only sent to MAPDL
+        once the context exits. Calling it there raises a
+        :class:`MapdlRuntimeError <ansys.mapdl.core.errors.MapdlRuntimeError>`.
+        Use :func:`Mapdl.vget() <ansys.mapdl.core.Mapdl.vget>` to store the
+        result in a named MAPDL parameter instead.
+
 
         Returns
         -------

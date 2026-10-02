@@ -39,11 +39,11 @@ from ansys.mapdl.core._mapdl_extended.analysis import (
     _ExtendedAnalysisMixin,
 )
 from ansys.mapdl.core._mapdl_extended.arrays import _ExtendedArrayMixin
+from ansys.mapdl.core._mapdl_extended.contexts import MAX_DO_LOOP_LEVEL  # noqa: F401
+from ansys.mapdl.core._mapdl_extended.contexts import TMP_VAR  # noqa: F401
 from ansys.mapdl.core._mapdl_extended.contexts import (
     _ExtendedContextMixin,
 )
-from ansys.mapdl.core._mapdl_extended.contexts import MAX_DO_LOOP_LEVEL  # noqa: F401
-from ansys.mapdl.core._mapdl_extended.contexts import TMP_VAR  # noqa: F401
 from ansys.mapdl.core._mapdl_extended.explicit_commands import (
     _ExtendedExplicitCommandsMixin,
 )
