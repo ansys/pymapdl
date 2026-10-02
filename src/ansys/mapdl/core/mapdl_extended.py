@@ -61,6 +61,9 @@ from ansys.mapdl.core._mapdl_extended.plotting_commands import (
 from ansys.mapdl.core._mapdl_extended.database.selecting import (
     _ExtendedSelectionCommandsMixin,
 )
+from ansys.mapdl.core._mapdl_extended.database.components import _ExtendedComponentMixin
+from ansys.mapdl.core._mapdl_extended.database.set_up import _ExtendedDatabaseSetupMixin
+from ansys.mapdl.core._mapdl_extended.post1.set_up import _ExtendedPostSetupMixin
 from ansys.mapdl.core._mapdl_extended.values import _ExtendedValueMixin
 from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput  # noqa: F401
 from ansys.mapdl.core._mapdl_extended.contexts import (
@@ -91,6 +94,9 @@ from ansys.mapdl.core.plotting import GraphicsBackend  # noqa: F401
 class _MapdlCommandExtended(
     _ExtendedFileCommandsMixin,
     _ExtendedSelectionCommandsMixin,
+    _ExtendedPostSetupMixin,
+    _ExtendedDatabaseSetupMixin,
+    _ExtendedComponentMixin,
     _ExtendedPlottingCommandsMixin,
     _ExtendedParameterCommandsMixin,
     _ExtendedExplicitCommandsMixin,

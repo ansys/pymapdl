@@ -35,49 +35,6 @@ from .. import _ExtendedMixinBase
 class _ExtendedSelectionCommandsMixin(_ExtendedMixinBase):
     """Static responsibility mixin for the extended MAPDL facade."""
 
-    @wraps(_MapdlCore.set)
-    def set(
-        self,
-        lstep="",
-        sbstep="",
-        fact="",
-        kimg="",
-        time="",
-        angle="",
-        nset="",
-        order="",
-        **kwargs,
-    ):
-        """Wraps SET to return a Command listing
-
-        Returns
-        -------
-        CommandListingOutput or str
-            Command listing output when LIST is specified, otherwise MAPDL command output.
-        """
-        output = super().set(
-            lstep, sbstep, fact, kimg, time, angle, nset, order, **kwargs
-        )
-
-        if (
-            isinstance(lstep, str)
-            and lstep.upper() == "LIST"
-            and not sbstep
-            and not fact
-        ):
-            return CommandListingOutput(
-                output,
-                magicwords=["SET", "TIME/FREQ"],
-                columns_names=[
-                    "SET",
-                    "TIME/FREQ",
-                    "LOAD STEP",
-                    "SUBSTEP",
-                    "CUMULATIVE",
-                ],
-            )
-        else:
-            return output
 
     @wraps(_MapdlCore.vsel)
     def vsel(self, *args, **kwargs) -> str:
@@ -211,16 +168,4 @@ class _ExtendedSelectionCommandsMixin(_ExtendedMixinBase):
 
         return wrapped(self, *args, **kwargs)
 
-    @wraps(_MapdlCore.clear)
-    def clear(self, read: str = "NOSTART", **kwargs):
-        """Wraps the MAPDL ``CLEAR`` command to use `NOSTART` with mute=True"""
-        if self.is_grpc:
-            self._create_session()
-        kwargs.setdefault("mute", True)
-        getattr(super(), "clear")(read=read, **kwargs)
 
-    @wraps(_MapdlCore.cmlist)
-    def cmlist(self, *args, **kwargs):
-        from ansys.mapdl.core.commands import ComponentListing
-
-        return ComponentListing(super().cmlist(*args, **kwargs))
