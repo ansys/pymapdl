@@ -38,10 +38,6 @@ _PERMITTED_ERRORS = [
 ]
 
 
-
-
-
-
 VWRITE_MWRITE_REPLACEMENT = """
 Cannot use *VWRITE/*MWRITE directly as a command in MAPDL
 service mode.  Instead, run it as ``non_interactive``.
@@ -74,9 +70,6 @@ INVAL_COMMANDS_SILENT = {
 }
 
 
-
-
-
 VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
 
 
@@ -84,8 +77,6 @@ VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"
 
 
 GUI_FONT_SIZE = 15
-
-
 
 
 class STATUS(str, Enum):

@@ -23,9 +23,8 @@
 """MAPDL plotting-device context manager."""
 
 import sys
-import weakref
-
 from typing import Literal
+import weakref
 
 VALID_FILE_TYPE_FOR_PLOT_LITERAL = Literal["PNG", "TIFF", "VRML", "TERM"]
 from ansys.mapdl.core.errors import MapdlRuntimeError

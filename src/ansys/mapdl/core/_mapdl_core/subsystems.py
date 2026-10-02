@@ -28,7 +28,7 @@ import os
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
 import tempfile
-from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from ansys.mapdl.core import _HAS_DPF
 from ansys.mapdl.core.errors import MapdlRuntimeError
@@ -78,6 +78,7 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
         if self.exited:  # pragma: no cover
             raise MapdlRuntimeError("MAPDL exited.")
         return self._componentmanager
+
     def _parse_cmlist(
         self, cmlist: Optional[str] = None
     ) -> Tuple[Dict[str, Any], Dict[str, List[str]]]:
@@ -145,6 +146,7 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
     def info(self):
         """General information"""
         return self._info
+
     @supress_logging
     def __str__(self):
         return self.info.__str__()
@@ -592,6 +594,7 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
             from ansys.mapdl.core.mapdl_geometry import Geometry
 
             return Geometry(self)
+
     @supress_logging
     @run_as("PREP7")
     def _generate_iges(self):

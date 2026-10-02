@@ -31,6 +31,7 @@ from .. import _ExtendedMixinBase
 
 class _ExtendedDatabaseSetupMixin(_ExtendedMixinBase):
     """Extended database setup commands."""
+
     @wraps(_MapdlCore.clear)
     def clear(self, read: str = "NOSTART", **kwargs):
         """Wraps the MAPDL ``CLEAR`` command to use `NOSTART` with mute=True"""

@@ -27,8 +27,7 @@ import weakref
 import numpy as np
 
 from ansys.mapdl.core._mapdl_core.constants import GUI_FONT_SIZE
-from ansys.mapdl.core.plotting.consts import POINT_SIZE
-
+from ansys.mapdl.core.plotting.consts import POINT_SIZE  # noqa: F401
 
 
 class MapdlPicker:
@@ -42,6 +41,7 @@ class MapdlPicker:
         if mapdl is None:
             raise ReferenceError("The MAPDL parent no longer exists")
         return getattr(mapdl, name)
+
     def pick(self, entity, pl, type_, previous_picked_entities, **kwargs):
         """Show a plot and get the selected entity."""
         _debug = kwargs.pop("_debug", False)  # for testing purposes

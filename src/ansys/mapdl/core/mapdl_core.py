@@ -114,11 +114,10 @@ from ansys.mapdl.core._mapdl_core.constants import (  # noqa: F401
     INVAL_COMMANDS,
     INVAL_COMMANDS_SILENT,
     MAX_PARAM_CHARS,
-
     SESSION_ID_NAME,
     STATUS,
-    VALID_SELECTION_TYPE_TP,
     VALID_SELECTION_ENTITY_TP,
+    VALID_SELECTION_TYPE_TP,
     VWRITE_MWRITE_REPLACEMENT,
 )
 from ansys.mapdl.core._mapdl_core.execution import (
@@ -126,32 +125,31 @@ from ansys.mapdl.core._mapdl_core.execution import (
 )
 from ansys.mapdl.core._mapdl_core.execution import parse_to_short_cmd  # noqa: F401
 from ansys.mapdl.core._mapdl_core.files import _CoreFileMixin
-from ansys.mapdl.core._mapdl_core.plotting import (
-    PNG_IS_WRITTEN_TO_FILE,
+from ansys.mapdl.core._mapdl_core.logging import (  # noqa: F401
+    DEBUG_LEVELS,
+    LOG_APDL_DEFAULT_FILE_NAME,
+    _CoreLoggingMixin,
+    setup_logger,
+)
+from ansys.mapdl.core._mapdl_core.plotting import (  # noqa: F401
     PLOT_COMMANDS,
+    PNG_IS_WRITTEN_TO_FILE,
     VALID_DEVICES,
     VALID_DEVICES_LITERAL,
     VALID_FILE_TYPE_FOR_PLOT,
     VALID_FILE_TYPE_FOR_PLOT_LITERAL,
     _CorePlottingMixin,
 )
-from ansys.mapdl.core._mapdl_core.selection import _CoreSelectionMixin
-from ansys.mapdl.core._mapdl_core.subsystems import _CoreSubsystemsMixin
-from ansys.mapdl.core._mapdl_core.state import _CoreStateMixin
-from ansys.mapdl.core._mapdl_core.logging import (
-    DEBUG_LEVELS,
-    LOG_APDL_DEFAULT_FILE_NAME,
-    _CoreLoggingMixin,
-    setup_logger,
-)
-from ansys.mapdl.core.contexts.chain_commands import MAX_COMMAND_LENGTH  # noqa: F401
-from ansys.mapdl.core.contexts.command_contexts import _CoreCommandContextMixin
 from ansys.mapdl.core._mapdl_core.selection import (  # noqa: F401
     _TMP_COMP,
     ENTITIES_TO_SELECTION_MAPPING,
+    _CoreSelectionMixin,
 )
+from ansys.mapdl.core._mapdl_core.state import _CoreStateMixin
+from ansys.mapdl.core._mapdl_core.subsystems import _CoreSubsystemsMixin
+from ansys.mapdl.core.contexts.chain_commands import MAX_COMMAND_LENGTH  # noqa: F401
+from ansys.mapdl.core.contexts.command_contexts import _CoreCommandContextMixin
 from ansys.mapdl.core.post import PostProcessing  # noqa: F401
-
 
 _ALLOWED_START_PARM = [
     "additional_switches",
@@ -182,6 +180,7 @@ _ALLOWED_START_PARM = [
     "certs_dir",
 ]
 
+
 def _sanitize_start_parm(start_parm):
     for each_key in start_parm:
         if each_key not in _ALLOWED_START_PARM:
@@ -200,7 +199,6 @@ class _MapdlCore(
     Commands,
 ):
     """Contains methods in common between all Mapdl subclasses"""
-
 
     @check_deprecated_vtk_kwargs
     def __init__(

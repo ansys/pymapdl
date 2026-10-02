@@ -24,12 +24,11 @@
 
 import weakref
 
-from ansys.mapdl.core.misc import random_string
 from ansys.mapdl.core._mapdl_core.selection import (
-    ENTITIES_TO_SELECTION_MAPPING,
     _TMP_COMP,
+    ENTITIES_TO_SELECTION_MAPPING,
 )
-
+from ansys.mapdl.core.misc import random_string
 
 
 class _SaveSelectionContext:

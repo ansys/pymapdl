@@ -32,6 +32,7 @@ from .. import _ExtendedMixinBase
 
 class _ExtendedPostSetupMixin(_ExtendedMixinBase):
     """Extended POST1 setup commands."""
+
     @wraps(_MapdlCore.set)
     def set(
         self,

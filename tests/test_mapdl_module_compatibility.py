@@ -36,13 +36,13 @@ from ansys.mapdl.core._mapdl_core.constants import (
     SESSION_ID_NAME as PRIVATE_SESSION_ID_NAME,
 )
 from ansys.mapdl.core._mapdl_core.constants import STATUS as PRIVATE_STATUS
+from ansys.mapdl.core._mapdl_core.selection import _TMP_COMP as PRIVATE_TMP_COMP
 from ansys.mapdl.core._mapdl_extended.apdl.parameter_definition import (
     TMP_VAR as PRIVATE_TMP_VAR,
 )
 from ansys.mapdl.core._mapdl_extended.contexts import (
     MAX_DO_LOOP_LEVEL as PRIVATE_MAX_DO_LOOP_LEVEL,
 )
-from ansys.mapdl.core._mapdl_core.selection import _TMP_COMP as PRIVATE_TMP_COMP
 from ansys.mapdl.core.errors import CommandDeprecated
 from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.mapdl_core import (
@@ -185,7 +185,6 @@ def test_parameter_and_explicit_wrappers_preserve_pre_dispatch_validation():
         instance.edasmp()
 
 
-
 def test_no_duplicate_public_callables_among_sibling_mixins():
     """Each responsibility mixin owns a public callable name only once."""
     sibling_groups = (
@@ -223,5 +222,3 @@ def test_no_duplicate_public_callables_among_sibling_mixins():
             name: mixins for name, mixins in owners.items() if len(mixins) > 1
         }
         assert not duplicates
-
-

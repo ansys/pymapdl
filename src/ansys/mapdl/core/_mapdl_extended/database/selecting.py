@@ -25,7 +25,6 @@
 
 from functools import wraps
 
-from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 from ansys.mapdl.core.misc import allow_iterables_vmin, allow_pickable_entities
 
@@ -34,7 +33,6 @@ from .. import _ExtendedMixinBase
 
 class _ExtendedSelectionCommandsMixin(_ExtendedMixinBase):
     """Static responsibility mixin for the extended MAPDL facade."""
-
 
     @wraps(_MapdlCore.vsel)
     def vsel(self, *args, **kwargs) -> str:
@@ -167,5 +165,3 @@ class _ExtendedSelectionCommandsMixin(_ExtendedMixinBase):
             return sel_func(*args, **kwargs)
 
         return wrapped(self, *args, **kwargs)
-
-

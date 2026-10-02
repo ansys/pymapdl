@@ -19,23 +19,24 @@
 
 """MAPDL command-wide context facade methods."""
 
+from ansys.mapdl.core._mapdl_core import _CoreMixinBase
 from ansys.mapdl.core.errors import MapdlRuntimeError
 
-from ansys.mapdl.core._mapdl_core import _CoreMixinBase
 from .chain_commands import _ChainCommandsContext
 from .force_output import _ForceOutputContext
 from .muted import _MutedContext
 from .non_interactive import _NonInteractiveContext
 from .run_as_routine import (
-    _RunAsRoutineContext,
     _cache_routine,
     _enter_routine,
     _resume_routine,
+    _RunAsRoutineContext,
 )
 
 
 class _CoreCommandContextMixin(_CoreMixinBase):
     """Expose command-wide contexts while implementations remain composed."""
+
     @property
     def chain_commands(self):
         """Chain several mapdl commands.

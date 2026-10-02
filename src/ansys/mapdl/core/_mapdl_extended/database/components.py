@@ -31,6 +31,7 @@ from .. import _ExtendedMixinBase
 
 class _ExtendedComponentMixin(_ExtendedMixinBase):
     """Extended component commands."""
+
     @wraps(_MapdlCore.cmlist)
     def cmlist(self, *args, **kwargs):
         from ansys.mapdl.core.commands import ComponentListing

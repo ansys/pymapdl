@@ -53,7 +53,7 @@ from ansys.mapdl.core.errors import (
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.mapdl_types import MapdlFloat
-from ansys.mapdl.core.misc import random_string, supress_logging
+from ansys.mapdl.core.misc import random_string
 
 if TYPE_CHECKING:  # pragma: no cover
     if _HAS_DPF:
@@ -66,8 +66,6 @@ from .constants import (
     INVAL_COMMANDS_SILENT,
     MAX_PARAM_CHARS,
 )
-
-
 
 
 def parse_to_short_cmd(command):
@@ -87,8 +85,6 @@ def parse_to_short_cmd(command):
         return short_cmd[:4].upper()
     except Exception:  # pragma: no cover
         return
-
-
 
 
 from . import _CoreMixinBase, plotting
@@ -135,8 +131,6 @@ class _CoreExecutionMixin(_CoreMixinBase):
             if name[0:4].upper() in CMD_BC_LISTING and name in dir(Commands):
                 func = self.__getattribute__(name)
                 setattr(self, name, wrap_bc_listing_function(func))
-
-
 
     def _list(self, command):
         """Replaces *LIST command"""

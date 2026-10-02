@@ -28,7 +28,7 @@ import pathlib
 
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 from warnings import warn
 
 from ansys.mapdl.core import _HAS_DPF
@@ -45,6 +45,7 @@ from . import _CoreMixinBase
 
 class _CoreFileMixin(_CoreMixinBase):
     """Static responsibility mixin for the MAPDL core facade."""
+
     @property
     def _lockfile(self):
         """Lockfile path"""
@@ -131,9 +132,6 @@ class _CoreFileMixin(_CoreMixinBase):
         self.cwd(path)
         self._path = self._wrap_directory(path)
 
-
-
-
     def _decompose_fname(
         self, fname: Union[str, pathlib.Path]
     ) -> Tuple[str, str, pathlib.Path]:
@@ -157,7 +155,6 @@ class _CoreFileMixin(_CoreMixinBase):
         """
         fname_path = pathlib.Path(fname)
         return (fname_path.stem, fname_path.suffix.replace(".", ""), fname_path.parent)
-
 
     def _get_file_path(self, fname: str, progress_bar: bool = False) -> str:
         """Find files in the Python and MAPDL working directories.
@@ -317,4 +314,3 @@ class _CoreFileMixin(_CoreMixinBase):
         if not files:
             warn("No files listed")
         return files
-

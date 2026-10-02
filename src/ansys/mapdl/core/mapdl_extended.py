@@ -38,38 +38,38 @@ from ansys.mapdl.core import parse  # noqa: F401
 from ansys.mapdl.core._mapdl_extended.analysis import (
     _ExtendedAnalysisMixin,
 )
+from ansys.mapdl.core._mapdl_extended.apdl.parameter_definition import (  # noqa: F401
+    TMP_VAR,
+    _ExtendedParameterCommandsMixin,
+)
 from ansys.mapdl.core._mapdl_extended.arrays import _ExtendedArrayMixin
-from ansys.mapdl.core._mapdl_extended.prep7.explicit_dynamics import (
-    _ExtendedExplicitCommandsMixin,
-)
-from ansys.mapdl.core._mapdl_extended.session.files import (
-    _ExtendedFileCommandsMixin,
-)
 from ansys.mapdl.core._mapdl_extended.aux15.iges import (
     _ExtendedImportCommandsMixin,
 )
-from ansys.mapdl.core._mapdl_extended.apdl.parameter_definition import (
-    _ExtendedParameterCommandsMixin,
+from ansys.mapdl.core._mapdl_extended.contexts import (  # noqa: F401
+    MAX_DO_LOOP_LEVEL,
+    _DoLoopContext,
 )
-from ansys.mapdl.core._mapdl_extended.apdl.parameter_definition import TMP_VAR  # noqa: F401
+from ansys.mapdl.core._mapdl_extended.database.components import _ExtendedComponentMixin
+from ansys.mapdl.core._mapdl_extended.database.selecting import (
+    _ExtendedSelectionCommandsMixin,
+)
+from ansys.mapdl.core._mapdl_extended.database.set_up import _ExtendedDatabaseSetupMixin
 from ansys.mapdl.core._mapdl_extended.parsed_commands import (
     _ExtendedParsedCommandsMixin,
 )
 from ansys.mapdl.core._mapdl_extended.plotting_commands import (
     _ExtendedPlottingCommandsMixin,
 )
-from ansys.mapdl.core._mapdl_extended.database.selecting import (
-    _ExtendedSelectionCommandsMixin,
-)
-from ansys.mapdl.core._mapdl_extended.database.components import _ExtendedComponentMixin
-from ansys.mapdl.core._mapdl_extended.database.set_up import _ExtendedDatabaseSetupMixin
 from ansys.mapdl.core._mapdl_extended.post1.set_up import _ExtendedPostSetupMixin
+from ansys.mapdl.core._mapdl_extended.prep7.explicit_dynamics import (
+    _ExtendedExplicitCommandsMixin,
+)
+from ansys.mapdl.core._mapdl_extended.session.files import (
+    _ExtendedFileCommandsMixin,
+)
 from ansys.mapdl.core._mapdl_extended.values import _ExtendedValueMixin
 from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput  # noqa: F401
-from ansys.mapdl.core._mapdl_extended.contexts import (
-    MAX_DO_LOOP_LEVEL,
-    _DoLoopContext,
-)
 from ansys.mapdl.core.errors import (  # noqa: F401
     CommandDeprecated,
     ComponentDoesNotExits,

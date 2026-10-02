@@ -29,8 +29,6 @@ from functools import wraps
 # the input is controlled by the library. Excluding bandit check.
 from typing import TYPE_CHECKING
 
-import numpy as np
-
 from ansys.mapdl.core import _HAS_DPF
 from ansys.mapdl.core.commands import (
     CMD_XSEL,
@@ -38,15 +36,14 @@ from ansys.mapdl.core.commands import (
     Commands,
     inject_docs,
 )
-
 from ansys.mapdl.core.plotting.picker import MapdlPicker
+
 if TYPE_CHECKING:  # pragma: no cover
     if _HAS_DPF:
         pass
 
 
 from . import _CoreMixinBase
-from .constants import GUI_FONT_SIZE
 
 _TMP_COMP = {
     "KP": "cmp_kp",
@@ -187,7 +184,6 @@ class _CoreSelectionMixin(_CoreMixinBase):
         elif entity == "VOLU":
             return self.geometry.vnum
 
-
     def _enable_picking_entities(
         self, entity, pl, type_, previous_picked_entities, **kwargs
     ):
@@ -195,6 +191,7 @@ class _CoreSelectionMixin(_CoreMixinBase):
         return MapdlPicker(self).pick(
             entity, pl, type_, previous_picked_entities, **kwargs
         )
+
     def _perform_entity_list_selection(
         self, entity, selection_function, type_, item, comp, vmin, kabs
     ):
