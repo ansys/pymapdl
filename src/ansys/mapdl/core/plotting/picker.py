@@ -219,7 +219,9 @@ class MapdlPicker:
 
         def callback_u():
             # inverting bool
-            pl.scene._inver_mouse_click_selection = not pl._inver_mouse_click_selection
+            pl.scene._inver_mouse_click_selection = (
+                not pl.scene._inver_mouse_click_selection
+            )
             pl.scene.remove_actor("_entity_picking_message")
 
             pl.scene._picking_text = pl.add_text(

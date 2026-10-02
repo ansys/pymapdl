@@ -188,6 +188,7 @@ def _sanitize_start_parm(start_parm):
 
 class _MapdlCore(
     _CoreCommandContextMixin,
+    _CoreLoggingMixin,
     _CoreStateMixin,
     _CoreSubsystemsMixin,
     _CoreFileMixin,
