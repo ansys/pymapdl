@@ -1,0 +1,25 @@
+﻿TransportMode
+=============
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoclass:: TransportMode
+
+   
+
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      TransportMode.INSECURE
+      TransportMode.UDS
+      TransportMode.WNUA
+      TransportMode.MTLS
+   
+   

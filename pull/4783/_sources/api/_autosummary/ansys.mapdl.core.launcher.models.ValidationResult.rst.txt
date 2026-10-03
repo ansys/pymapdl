@@ -1,0 +1,37 @@
+﻿ValidationResult
+================
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoclass:: ValidationResult
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      
+      
+      ValidationResult.add_error
+      
+      
+      ValidationResult.add_warning
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      ValidationResult.valid
+      ValidationResult.errors
+      ValidationResult.warnings
+   
+   

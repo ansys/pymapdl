@@ -1,0 +1,6 @@
+UDS
+===
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: TransportMode.UDS

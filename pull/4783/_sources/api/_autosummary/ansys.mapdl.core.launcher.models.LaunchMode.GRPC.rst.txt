@@ -1,0 +1,6 @@
+GRPC
+====
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchMode.GRPC

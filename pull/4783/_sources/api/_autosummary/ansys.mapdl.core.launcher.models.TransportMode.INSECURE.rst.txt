@@ -1,0 +1,6 @@
+INSECURE
+========
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: TransportMode.INSECURE

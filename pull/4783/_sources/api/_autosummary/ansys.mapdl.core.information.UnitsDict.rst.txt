@@ -1,0 +1,55 @@
+﻿UnitsDict
+=========
+
+.. currentmodule:: ansys.mapdl.core.information
+
+.. autoclass:: UnitsDict
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      
+      
+      UnitsDict.clear
+      
+      
+      UnitsDict.copy
+      
+      
+      UnitsDict.fromkeys
+      
+      
+      UnitsDict.get
+      
+      
+      UnitsDict.items
+      
+      
+      UnitsDict.keys
+      
+      
+      UnitsDict.pop
+      
+      
+      UnitsDict.popitem
+      
+      
+      UnitsDict.setdefault
+      
+      
+      UnitsDict.update
+      
+      
+      UnitsDict.values
+      
+   
+   
+
+   
+   
+   

@@ -1,0 +1,6 @@
+﻿exec\_commands
+==============
+
+.. currentmodule:: ansys.mapdl.core.cli.exec
+
+.. autofunction:: exec_commands

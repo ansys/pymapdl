@@ -1,0 +1,6 @@
+﻿cformat
+=======
+
+.. currentmodule:: ansys.mapdl.core._commands.graphics.labeling
+
+.. automethod:: Labeling.cformat

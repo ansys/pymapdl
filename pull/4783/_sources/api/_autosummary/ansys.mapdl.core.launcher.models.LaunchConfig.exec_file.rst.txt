@@ -1,0 +1,6 @@
+exec\_file
+==========
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.exec_file

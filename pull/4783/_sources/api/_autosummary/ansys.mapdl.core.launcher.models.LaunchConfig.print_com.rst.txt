@@ -1,0 +1,6 @@
+print\_com
+==========
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.print_com

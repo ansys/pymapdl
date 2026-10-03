@@ -1,0 +1,6 @@
+﻿r
+=
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.real_constants
+
+.. automethod:: RealConstants.r

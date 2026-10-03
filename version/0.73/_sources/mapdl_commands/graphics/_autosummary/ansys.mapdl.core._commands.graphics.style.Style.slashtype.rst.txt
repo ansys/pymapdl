@@ -1,0 +1,6 @@
+﻿slashtype
+=========
+
+.. currentmodule:: ansys.mapdl.core._commands.graphics.style
+
+.. automethod:: Style.slashtype

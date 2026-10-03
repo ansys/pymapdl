@@ -1,0 +1,6 @@
+﻿vput
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.post26.special_purpose
+
+.. automethod:: SpecialPurpose.vput

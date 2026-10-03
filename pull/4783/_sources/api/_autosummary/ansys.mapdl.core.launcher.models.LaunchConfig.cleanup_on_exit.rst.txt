@@ -1,0 +1,6 @@
+cleanup\_on\_exit
+=================
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.cleanup_on_exit
