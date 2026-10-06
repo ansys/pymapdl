@@ -29,23 +29,12 @@ import grpc
 import numpy as np
 
 from ansys.mapdl.core import LOG
+from ansys.mapdl.core.constants import ANSYS_VALUE_TYPE
+from ansys.mapdl.core.constants import DEFAULT_CHUNKSIZE  # noqa: F401
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlRuntimeError
 
-# chunk sizes for streaming and file streaming
-DEFAULT_CHUNKSIZE: int = 256 * 1024  # 256 kB
+# Chunk size for file streaming.
 DEFAULT_FILE_CHUNK_SIZE: int = 1024 * 1024  # 1MB
-
-ANSYS_VALUE_TYPE: Dict[int, Optional[np.typing.DTypeLike]] = {
-    0: None,  # UNKNOWN
-    1: np.int32,  # INTEGER
-    2: np.int64,  # HYPER
-    3: np.int16,  # SHORT
-    4: np.float32,  # FLOAT
-    5: np.float64,  # DOUBLE
-    6: np.complex64,  # FCPLX
-    7: np.complex128,  # DCPLX
-    8: np.char,
-}
 
 
 VGET_ENTITY_TYPES_TYPING = Literal[

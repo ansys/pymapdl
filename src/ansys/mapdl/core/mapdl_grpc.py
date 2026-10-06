@@ -76,11 +76,12 @@ except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
 
 from ansys.mapdl.core import _HAS_TQDM, __version__
-from ansys.mapdl.core.common_grpc import (
+from ansys.mapdl.core.common_grpc import DEFAULT_FILE_CHUNK_SIZE, parse_chunks
+from ansys.mapdl.core.constants import (
     ANSYS_VALUE_TYPE,
     DEFAULT_CHUNKSIZE,
-    DEFAULT_FILE_CHUNK_SIZE,
-    parse_chunks,
+    MAPDL_DEFAULT_PORT,
+    MAX_MESSAGE_LENGTH,
 )
 from ansys.mapdl.core.errors import (
     MapdlConnectionError,
@@ -116,9 +117,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.xpl import ansXpl
 
 VOID_REQUEST = anskernel.EmptyRequest()
-
-# Default 256 MB message length
-MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024**2))
 
 
 def _drain_queue(queue) -> str:
@@ -489,8 +487,6 @@ class MapdlGrpc(MapdlBase):
 
         # port and ip are needed to setup the log
         if port is None:
-            from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
-
             port = MAPDL_DEFAULT_PORT
 
         self._port: int = int(port)

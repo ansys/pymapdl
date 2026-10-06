@@ -32,13 +32,13 @@ import time
 from typing import Any, Iterator, Literal, Optional, Union
 
 from ansys.mapdl.core import _HAS_ATC, LOG
+from ansys.mapdl.core.constants import LOCALHOST  # noqa: F401
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.misc import threaded_daemon
 
 if _HAS_ATC:
     from ansys.tools.common.path import get_mapdl_path, version_from_path
 
-LOCALHOST = "127.0.0.1"
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
 LIC_FILE_ENVAR = "ANSYSLMD_LICENSE_FILE"
 APP_NAME = "FEAT_ANSYS"  # TODO: We need to make sure this is the type of feature we need to checkout.

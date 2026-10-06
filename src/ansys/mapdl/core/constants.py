@@ -20,18 +20,53 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Constants shared by the CLI commands and their click-independent functions."""
+"""Constants shared across PyMAPDL core modules."""
 
-from typing import Tuple
+import os
+from typing import Dict, Optional
 
-from ansys.mapdl.core.constants import LOCALHOST as MAPDL_DEFAULT_IP  # noqa: F401
-from ansys.mapdl.core.constants import MAPDL_DEFAULT_PORT  # noqa: F401
+import numpy as np
+from platformdirs import user_data_dir
 
-DEFAULT_TIMEOUT = 10
-"""Seconds to wait when connecting to a running MAPDL instance."""
+USER_DATA_PATH: str = user_data_dir(appname="ansys_mapdl_core", appauthor="Ansys")
 
-SUPPORTED_ENVS: Tuple[str, ...] = ("claude", "copilot", "codex", "cursor")
-"""AI coding environments a skill can be installed into."""
+# In descending order.
+SUPPORTED_ANSYS_VERSIONS: Dict[int, str] = {
+    271: "2027R1",
+    261: "2026R1",
+    252: "2025R2",
+    251: "2025R1",
+    242: "2024R2",
+    241: "2024R1",
+    232: "2023R2",
+    231: "2023R1",
+    222: "2022R2",
+    221: "2022R1",
+    212: "2021R2",
+    211: "2021R1",
+    202: "2020R2",
+    201: "2020R1",
+    195: "19.5",
+    194: "19.4",
+    193: "19.3",
+    192: "19.2",
+    191: "19.1",
+}
 
-GLOBAL_UNSUPPORTED: Tuple[str, ...] = ("copilot",)
-"""Environments that only support a local, per-project installation."""
+DEFAULT_CHUNKSIZE: int = 256 * 1024  # 256 kB
+ANSYS_VALUE_TYPE: Dict[int, Optional[np.typing.DTypeLike]] = {
+    0: None,  # UNKNOWN
+    1: np.int32,  # INTEGER
+    2: np.int64,  # HYPER
+    3: np.int16,  # SHORT
+    4: np.float32,  # FLOAT
+    5: np.float64,  # DOUBLE
+    6: np.complex64,  # FCPLX
+    7: np.complex128,  # DCPLX
+    8: np.char,
+}
+
+LOCALHOST = "127.0.0.1"
+MAPDL_DEFAULT_PORT = 50052
+MAX_PARAM_CHARS = 32
+MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024**2))

@@ -30,31 +30,9 @@ version_info = 0, 58, 'dev0'
 """
 
 import importlib.metadata as importlib_metadata
-from typing import Dict
+
+from ansys.mapdl.core.constants import SUPPORTED_ANSYS_VERSIONS  # noqa: F401
 
 # Read from the pyproject.toml
 # major, minor, patch
 __version__: str = importlib_metadata.version("ansys-mapdl-core")
-
-# In descending order
-SUPPORTED_ANSYS_VERSIONS: Dict[int, str] = {
-    271: "2027R1",
-    261: "2026R1",
-    252: "2025R2",
-    251: "2025R1",
-    242: "2024R2",
-    241: "2024R1",
-    232: "2023R2",
-    231: "2023R1",
-    222: "2022R2",
-    221: "2022R1",
-    212: "2021R2",
-    211: "2021R1",
-    202: "2020R2",
-    201: "2020R1",
-    195: "19.5",
-    194: "19.4",
-    193: "19.3",
-    192: "19.2",
-    191: "19.1",
-}
