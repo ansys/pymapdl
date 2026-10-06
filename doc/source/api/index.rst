@@ -37,5 +37,6 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
    post
    Pyansys Math <https://math.docs.pyansys.com/version/stable/>
    plugin
+   selector
    solution
    xpl
