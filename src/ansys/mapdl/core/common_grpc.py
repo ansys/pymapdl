@@ -23,22 +23,59 @@
 """Common gRPC functions"""
 
 import time
-from typing import Any, Optional
+from typing import Any, Dict, List, Literal, Optional, get_args
 
 import grpc
 import numpy as np
 
 from ansys.mapdl.core import LOG
-from ansys.mapdl.core import constants as _constants
+from ansys.mapdl.core.constants import ANSYS_VALUE_TYPE
+from ansys.mapdl.core.constants import DEFAULT_CHUNKSIZE  # noqa: F401
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlRuntimeError
 
-ANSYS_VALUE_TYPE = _constants.ANSYS_VALUE_TYPE
-COMP_TYPE = _constants.COMMON_GRPC_COMP_TYPE
-DEFAULT_CHUNKSIZE = _constants.DEFAULT_CHUNKSIZE
-DEFAULT_FILE_CHUNK_SIZE = _constants.DEFAULT_FILE_CHUNK_SIZE
-STRESS_TYPES = _constants.COMMON_GRPC_STRESS_TYPES
-VGET_ENTITY_TYPES = _constants.VGET_ENTITY_TYPES
-VGET_NODE_ENTITY_TYPES = _constants.VGET_NODE_ENTITY_TYPES
+# Chunk size for file streaming.
+DEFAULT_FILE_CHUNK_SIZE: int = 1024 * 1024  # 1MB
+
+
+VGET_ENTITY_TYPES_TYPING = Literal[
+    "NODE",
+    "ELEM",
+    "KP",
+    "LINE",
+    "AREA",
+    "VOLU",
+    "CDSY",
+    "RCON",
+    "TLAB",
+]
+
+VGET_ENTITY_TYPES: List[str] = list(get_args(VGET_ENTITY_TYPES_TYPING))
+
+STRESS_TYPES: List[str] = ["X", "Y", "Z", "XY", "YZ", "XZ", "1", "2", "3", "INT", "EQV"]
+COMP_TYPE: List[str] = ["X", "Y", "Z", "SUM"]
+VGET_NODE_ENTITY_TYPES: Dict[str, List[str]] = {
+    "U": ["X", "Y", "Z"],
+    "S": STRESS_TYPES,
+    "EPTO": STRESS_TYPES,
+    "EPEL": STRESS_TYPES,
+    "EPPL": STRESS_TYPES,
+    "EPCR": STRESS_TYPES,
+    "EPTH": STRESS_TYPES,
+    "EPDI": STRESS_TYPES,
+    "EPSW": [""],
+    "NL": ["SEPL", "SRAT", "HPRES", "EPEQ", "PSV", "PLWK"],
+    "HS": ["X", "Y", "Z"],
+    "BFE": ["TEMP"],
+    "TG": COMP_TYPE,
+    "TF": COMP_TYPE,
+    "PG": COMP_TYPE,
+    "EF": COMP_TYPE,
+    "D": COMP_TYPE,
+    "H": COMP_TYPE,
+    "B": COMP_TYPE,
+    "FMAG": COMP_TYPE,
+    "NLIST": [""],
+}
 
 
 class GrpcError(MapdlRuntimeError):

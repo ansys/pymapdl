@@ -26,28 +26,48 @@ Used when launching Mapdl via pexpect on Linux when <= 17.0
 """
 
 import os
+import re
 import time
 from warnings import warn
 
 from ansys.mapdl.core import LOG
-from ansys.mapdl.core.constants import CONTINUE_IDX as CONTINUE_IDX
-from ansys.mapdl.core.constants import ERROR_IDX as ERROR_IDX
-from ansys.mapdl.core.constants import (
-    MAPDL_CONSOLE_EXPECT_LIST,
-    MAPDL_CONSOLE_IGNORED,
-    MAPDL_CONSOLE_NITEMS,
-    MAPDL_CONSOLE_READY_ITEMS,
-)
-from ansys.mapdl.core.constants import PROMPT_IDX as PROMPT_IDX
-from ansys.mapdl.core.constants import WARNING_IDX as WARNING_IDX
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.misc import requires_package
 
-expect_list = MAPDL_CONSOLE_EXPECT_LIST
-ignored = MAPDL_CONSOLE_IGNORED
-nitems = MAPDL_CONSOLE_NITEMS
-ready_items = MAPDL_CONSOLE_READY_ITEMS
+ready_items = [
+    rb"BEGIN:",
+    rb"PREP7:",
+    rb"SOLU_LS[0-9]+:",
+    rb"POST1:",
+    rb"POST26:",
+    rb"RUNSTAT:",
+    rb"AUX2:",
+    rb"AUX3:",
+    rb"AUX12:",
+    rb"AUX15:",
+    # continue
+    rb"YES,NO OR CONTINUOUS\)\=",
+    rb"executed\?",
+    # errors
+    rb"SHOULD INPUT PROCESSING BE SUSPENDED\?",
+    rb"ANSYS Traceback",
+    rb"eMPIChildJob",
+    # prompts
+    rb"ENTER FORMAT for",
+]
+
+CONTINUE_IDX = ready_items.index(rb"YES,NO OR CONTINUOUS\)\=")
+WARNING_IDX = ready_items.index(rb"executed\?")
+ERROR_IDX = ready_items.index(rb"SHOULD INPUT PROCESSING BE SUSPENDED\?")
+PROMPT_IDX = ready_items.index(rb"ENTER FORMAT for")
+
+
+nitems = len(ready_items)
+expect_list = []
+for item in ready_items:
+    expect_list.append(re.compile(item))
+ignored = re.compile(r"[\s\S]+".join(["WARNING", "command", "ignored"]))
 
 
 def launch_pexpect(
@@ -215,7 +235,7 @@ class MapdlConsole(MapdlBase):
                 )
                 self._log.info(response + ready_items[i].decode("utf-8"))
                 raise MapdlRuntimeError(
-                    "User input expected.  " "Try using ``with mapdl.non_interactive``"
+                    "User input expected.  Try using ``with mapdl.non_interactive``"
                 )
             else:  # continue item
                 self._log.debug(

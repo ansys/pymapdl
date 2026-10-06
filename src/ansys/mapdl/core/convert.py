@@ -24,35 +24,109 @@ from collections import UserList
 from logging import Logger, StreamHandler
 import os
 import re
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from warnings import warn
 
 from ansys.mapdl.core import __version__
-from ansys.mapdl.core import constants as _constants
 from ansys.mapdl.core.commands import Commands
 from ansys.mapdl.core.misc import is_float
 from ansys.mapdl.core.plotting import GraphicsBackend
 
-ADD_IMPORTS_DEFAULT = _constants.ADD_IMPORTS_DEFAULT
-AUTO_EXIT_DEFAULT = _constants.AUTO_EXIT_DEFAULT
-CHECK_PARAMETER_NAMES_DEFAULT = _constants.CHECK_PARAMETER_NAMES_DEFAULT
-CLEANUP_OUTPUT_DEFAULT = _constants.CLEANUP_OUTPUT_DEFAULT
-CLEAR_AT_START_DEFAULT = _constants.CLEAR_AT_START_DEFAULT
-COMMANDS_TO_NOT_BE_CONVERTED = _constants.COMMANDS_TO_NOT_BE_CONVERTED
-COMMANDS_WITH_EMPTY_ARGS = _constants.COMMANDS_WITH_EMPTY_ARGS
-COMMENT_SOLVE_DEFAULT = _constants.COMMENT_SOLVE_DEFAULT
-EXEC_FILE_DEFAULT = _constants.EXEC_FILE_DEFAULT
-FORCED_MAPPING = _constants.FORCED_MAPPING
-FORMAT_OPTIONS = _constants.FORMAT_OPTIONS
-GRAPHICS_BACKEND_DEFAULT = _constants.GRAPHICS_BACKEND_DEFAULT
-HEADER_DEFAULT = _constants.HEADER_DEFAULT
-LINE_ENDING_DEFAULT = _constants.LINE_ENDING_DEFAULT
-LOGLEVEL_DEFAULT = _constants.LOGLEVEL_DEFAULT
-MACROS_AS_FUNCTIONS_DEFAULT = _constants.MACROS_AS_FUNCTIONS_DEFAULT
-ONLY_COMMANDS_DEFAULT = _constants.ONLY_COMMANDS_DEFAULT
-PRINT_COM_DEFAULT = _constants.PRINT_COM_DEFAULT
-SHOW_LOG_DEFAULT = _constants.SHOW_LOG_DEFAULT
-USE_FUNCTION_NAMES_DEFAULT = _constants.USE_FUNCTION_NAMES_DEFAULT
+# Because the APDL version has empty arguments, whereas the PyMAPDL
+# doesn't have them. Hence the order of arguments is messed up.
+
+FORMAT_OPTIONS: Dict[str, Any] = {
+    "select": "W191,W291,W293,W391,E115,E117,E122,E124,E125,E225,E231,E301,E303,F401,F403",
+    "max-line-length": 100,
+}
+
+LOGLEVEL_DEFAULT: str = "WARNING"
+AUTO_EXIT_DEFAULT: bool = True
+LINE_ENDING_DEFAULT: Optional[str] = None
+EXEC_FILE_DEFAULT: Optional[str] = None
+MACROS_AS_FUNCTIONS_DEFAULT: bool = True
+USE_FUNCTION_NAMES_DEFAULT: bool = True
+SHOW_LOG_DEFAULT: bool = False
+ADD_IMPORTS_DEFAULT: bool = True
+COMMENT_SOLVE_DEFAULT: bool = False
+CLEANUP_OUTPUT_DEFAULT: bool = True
+HEADER_DEFAULT: bool = True
+PRINT_COM_DEFAULT: bool = True
+ONLY_COMMANDS_DEFAULT: bool = False
+GRAPHICS_BACKEND_DEFAULT: Optional[GraphicsBackend] = None
+CLEAR_AT_START_DEFAULT: bool = False
+CHECK_PARAMETER_NAMES_DEFAULT: bool = True
+
+
+# This commands have "--" as one or some arguments
+COMMANDS_WITH_EMPTY_ARGS: Dict[str, Tuple[Any, ...]] = {
+    "/CMA": (),  # "/CMAP,
+    "/NER": (),  # "/NERR,
+    "/PBF": (),  # "/PBF,
+    "/PMO": (),  # "/PMORE,
+    "ADD": (),  # "ADD"
+    "ANTY": (),  # ANTYPE,
+    "ASBL": (),  # ASBL,
+    "ATAN": (),  # ATAN,
+    "BCSO": (),  # BCSOPTION,
+    "CDRE": (),  # CDREAD
+    "CLOG": (),  # CLOG,
+    "CONJ": (),  # CONJUG,
+    "CORI": (),  # CORIOLIS
+    "DERI": (),  # DERIV,
+    "DSPO": (),  # DSPOPTION,
+    "ENER": (),  # ENERSOL,
+    "ENSY": (),  # ENSYM,
+    "EQSL": (),  # EQSLV
+    "ESYM": (),  # ESYM,
+    "EXP": (),  # EXP,
+    "EXPA": (),  # EXPAND,
+    "FCLI": (),  # FCLIST,
+    "FILE": (),  # FILEAUX2,
+    "FLUR": (),  # FLUREAD,
+    "GMAT": (),  # GMATRIX,
+    "IMAG": (),  # IMAGIN,
+    "INT1": (),  # INT1,
+    "LARG": (),  # LARGE,
+    "LATT": (),  # LATT,
+    "MAP": (),  # MAP,
+    "MORP": (),  # MORPH,
+    "MPCO": (),  # MPCOPY,
+    "NLOG": (),  # NLOG,
+    "PLMA": (),  # PLMAP,
+    "PRED": (),  # PRED,
+    "PROD": (),  # PROD,
+    "QRDO": (),  # QRDOPT,
+    "QUOT": (),  # QUOT,
+    "RACE": (),  # RACE,
+    "RDEC": (),  # RDEC
+    "REAL": (),  # REALVAR,
+    "REME": (),  # REMESH,
+    "RPSD": (),  # RPSD
+    "SECR": (),  # SECREAD
+    "SECW": (),  # SECWRITE
+    "SESY": (),  # SESYMM,
+    "SETF": (),  # SETFGAP,
+    "SETR": (),  # SETRAN,
+    "SMAL": (),  # SMALL,
+    "SNOP": (),  # SNOPTION,
+    "SQRT": (),  # SQRT
+    "SURE": (),  # SURESU,
+    "THOP": (),  # THOPT,
+    "TINT": (),  # TINTP,
+    "XFDA": (),  # XFDATA
+}
+
+
+COMMANDS_TO_NOT_BE_CONVERTED: List[str] = [
+    "CMPL",  # CMPLOT default behaviour does not match the `mapdl.cmplot`'s at the moemnt
+    # CDREAD # commented above
+]
+
+FORCED_MAPPING: Dict[str, str] = {
+    # Forced mapping between MAPDL and PyMAPDL
+    "SECT": "sectype",  # Because it is shadowed by `sectinqr`
+}
 
 
 def convert_script(

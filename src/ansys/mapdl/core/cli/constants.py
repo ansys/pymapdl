@@ -22,10 +22,16 @@
 
 """Constants shared by the CLI commands and their click-independent functions."""
 
-from ansys.mapdl.core import constants as _constants
+from typing import Tuple
 
-DEFAULT_TIMEOUT = _constants.CLI_DEFAULT_TIMEOUT
-GLOBAL_UNSUPPORTED = _constants.GLOBAL_UNSUPPORTED
-MAPDL_DEFAULT_IP = _constants.LOCALHOST
-MAPDL_DEFAULT_PORT = _constants.MAPDL_DEFAULT_PORT
-SUPPORTED_ENVS = _constants.SUPPORTED_ENVS
+from ansys.mapdl.core.constants import LOCALHOST as MAPDL_DEFAULT_IP  # noqa: F401
+from ansys.mapdl.core.constants import MAPDL_DEFAULT_PORT  # noqa: F401
+
+DEFAULT_TIMEOUT = 10
+"""Seconds to wait when connecting to a running MAPDL instance."""
+
+SUPPORTED_ENVS: Tuple[str, ...] = ("claude", "copilot", "codex", "cursor")
+"""AI coding environments a skill can be installed into."""
+
+GLOBAL_UNSUPPORTED: Tuple[str, ...] = ("copilot",)
+"""Environments that only support a local, per-project installation."""

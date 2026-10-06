@@ -131,6 +131,7 @@ these loggers.
 """
 
 from copy import copy
+from datetime import datetime
 import logging
 import sys
 from types import TracebackType
@@ -148,24 +149,37 @@ from typing import (
 )
 import weakref
 
-from ansys.mapdl.core.constants import (
-    CRITICAL,
-    DEBUG,
-    DEFAULT_FILE_HEADER,
-    DEFAULT_STDOUT_HEADER,
-    ERROR,
-    FILE_MSG_FORMAT,
-    FILE_NAME,
-    INFO,
-    LOG_LEVEL,
-    NEW_SESSION_HEADER,
-    STDOUT_MSG_FORMAT,
-    WARN,
-)
-
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl import MapdlBase
 
+## Default configuration
+LOG_LEVEL = logging.DEBUG
+FILE_NAME = "pymapdl.log"
+
+# For convenience
+DEBUG = logging.DEBUG
+INFO = logging.INFO
+WARN = logging.WARN
+ERROR = logging.ERROR
+CRITICAL = logging.CRITICAL
+
+## Formatting
+
+STDOUT_MSG_FORMAT = (
+    "%(levelname)s - %(instance_name)s -  %(module)s - %(funcName)s - %(message)s"
+)
+
+FILE_MSG_FORMAT = STDOUT_MSG_FORMAT
+
+DEFAULT_STDOUT_HEADER = """
+LEVEL - INSTANCE NAME - MODULE - FUNCTION - MESSAGE
+"""
+DEFAULT_FILE_HEADER = DEFAULT_STDOUT_HEADER
+
+NEW_SESSION_HEADER = f"""
+===============================================================================
+       NEW SESSION - {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}
+==============================================================================="""
 
 LOG_LEVEL_STRING_TYPE = Literal["DEBUG", "INFO", "WARN", "WARNING", "ERROR", "CRITICAL"]
 LOG_LEVEL_TYPE = Union[LOG_LEVEL_STRING_TYPE, int]

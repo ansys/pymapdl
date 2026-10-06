@@ -24,8 +24,6 @@
 
 from typing import TYPE_CHECKING
 
-from ansys.mapdl.core.constants import MAX_CPU, MAX_MEM
-
 if TYPE_CHECKING:
     from ansys.mapdl.core.mapdl import MapdlBase as Mapdl
 
@@ -36,6 +34,10 @@ except ImportError:
         "Module `ansys-jupyterhub-manager` missing.\n"
         "This library is required to spawn instances on pyansys.com"
     )
+
+
+MAX_CPU: int = 128
+MAX_MEM: int = 256
 
 
 def check_manager() -> None:

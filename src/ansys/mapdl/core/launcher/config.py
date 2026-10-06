@@ -44,11 +44,13 @@ from typing import Any, Dict, Optional
 import warnings
 
 from ansys.mapdl.core import _HAS_ATC, LOG
-from ansys.mapdl.core.constants import LAUNCHER_DEFAULT_TIMEOUT as DEFAULT_TIMEOUT
 from ansys.mapdl.core.constants import LOCALHOST, MAPDL_DEFAULT_PORT
 
 from .errors import ConfigurationError
 from .models import LaunchConfig, LaunchMode, TransportMode
+
+# Constants
+DEFAULT_TIMEOUT = 45
 
 
 def resolve_launch_config(

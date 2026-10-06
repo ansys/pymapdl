@@ -30,13 +30,27 @@ from typing import TYPE_CHECKING, List, Optional
 import psutil
 
 from ansys.mapdl.core import LOG
-from ansys.mapdl.core.constants import _PROCESS_OK_STATUS, _TERMINATION_TIMEOUT
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
 from .models import LaunchConfig, ProcessInfo
 
 if TYPE_CHECKING:
     from ansys.mapdl.core.mapdl_console import MapdlConsole
+
+# Process statuses from which a process can be killed normally. Statuses such
+# as ``STATUS_ZOMBIE``, ``STATUS_STOPPED`` or ``STATUS_TRACING_STOP`` are
+# deliberately excluded because those processes cannot be terminated cleanly.
+_PROCESS_OK_STATUS = (
+    psutil.STATUS_RUNNING,
+    psutil.STATUS_SLEEPING,
+    psutil.STATUS_DISK_SLEEP,
+    psutil.STATUS_DEAD,
+    psutil.STATUS_PARKED,  # Linux
+    psutil.STATUS_IDLE,  # Linux, macOS and FreeBSD
+)
+
+# Seconds to wait for a process to disappear after it has been killed.
+_TERMINATION_TIMEOUT = 5.0
 
 
 def create_grpc_client(
@@ -320,7 +334,7 @@ def stop(
     [23644, 23645]
 
     """
-    from .config import MAPDL_DEFAULT_PORT
+    from ansys.mapdl.core.constants import MAPDL_DEFAULT_PORT
 
     if all:
         return _stop_all_instances()

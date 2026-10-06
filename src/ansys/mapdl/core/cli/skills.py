@@ -31,7 +31,13 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import click
 
 from ansys.mapdl.core.cli.constants import GLOBAL_UNSUPPORTED, SUPPORTED_ENVS
-from ansys.mapdl.core.constants import _EXCLUDED_DIRECTORIES, _INCOMPLETE_PLAN_ERROR
+
+# Directories inside a skill that are never installed.
+_EXCLUDED_DIRECTORIES = ("evals", "workspace")
+
+_INCOMPLETE_PLAN_ERROR = (
+    "The installation plan is missing paths required by the {env!r} environment."
+)
 
 
 class UnknownSkillError(ValueError):

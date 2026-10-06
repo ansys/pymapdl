@@ -20,12 +20,79 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Compatibility imports for MAPDL reader constants."""
+"""Defines constants for the MAPDL reader."""
 
-from ansys.mapdl.core import constants as _constants
+## Globals
+COMPONENTS: list[str] = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 
-COMPONENTS = _constants.COMPONENTS
-LOCATION_MAPPING = _constants.LOCATION_MAPPING
-MATERIAL_PROPERTIES = _constants.MATERIAL_PROPERTIES
-NOT_AVAILABLE_ARGUMENT = _constants.NOT_AVAILABLE_ARGUMENT
-NOT_AVAILABLE_METHOD = _constants.NOT_AVAILABLE_METHOD
+LOCATION_MAPPING: dict[str, str] = {
+    "NODE": "Nodal",
+    "ELEM": "Elemental",
+}
+
+MATERIAL_PROPERTIES: list[str] = [
+    "EX",
+    "EY",
+    "EZ",
+    "ALPX",
+    "ALPY",
+    "ALPZ",
+    "REFT",
+    "PRXY",
+    "PRYZ",
+    "PRX",
+    "NUXY",
+    "NUYZ",
+    "NUXZ",
+    "GXY",
+    "GYZ",
+    "GXZ",
+    "DAMP",
+    "MU",
+    "DENS",
+    "C",
+    "ENTH",
+    "KXX",
+    "KYY",
+    "KZZ",
+    "HF",
+    "EMIS",
+    "QRATE",
+    "VISC",
+    "SONC",
+    "RSVX",
+    "RSVY",
+    "RSVZ",
+    "PERX",
+    "PERY",
+    "PERZ",
+    "MURX",
+    "MURY",
+    "MURZ",
+    "MGXX",
+    "MGYY",
+    "MGZZ",
+    "XTEN",
+    "XCMP",
+    "YTEN",
+    "YCMP",
+    "ZTEN",
+    "ZCMP",
+    "XY",
+    "YZ",
+    "XZ",
+    "XYCP",
+    "YZCP",
+    "XZCP",
+    "XZIT",
+    "XZIC",
+    "YZIT",
+    "YZIC",
+]
+
+
+NOT_AVAILABLE_METHOD: str = """The method '{method}' has not been ported to the new DPF-based Results backend.
+If you still want to use it, you can switch to 'pymapdl-reader' backend using `mapdl.use_reader_backend = True`."""
+
+NOT_AVAILABLE_ARGUMENT: str = """The argument '{argument}' in this function has not been ported to the new DPF-based Results backend.
+If you still want to use it, you can switch to 'pymapdl-reader' backend using `mapdl.use_reader_backend = True`."""

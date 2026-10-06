@@ -27,7 +27,6 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 import numpy as np
 
 from ansys.mapdl.core import _HAS_PANDAS
-from ansys.mapdl.core import constants as _constants
 
 if TYPE_CHECKING:
     import pandas
@@ -52,20 +51,149 @@ from ._commands import (
     solution,
 )
 
-BC_REGREP = _constants.BC_REGREP
-CMD_BC_LISTING = _constants.CMD_BC_LISTING
-CMD_DOCSTRING_INJECTION = _constants.CMD_DOCSTRING_INJECTION
-CMD_ENTITY_LISTING = _constants.CMD_ENTITY_LISTING
-CMD_LISTING = _constants.CMD_LISTING
-CMD_RESULT_LISTING = _constants.CMD_RESULT_LISTING
-CMD_XSEL = _constants.CMD_XSEL
-COLNAMES_BC_LISTING = _constants.COLNAMES_BC_LISTING
-GROUP_DATA_START = _constants.GROUP_DATA_START
-MSG_BCLISTINGOUTPUT_TO_ARRAY = _constants.MSG_BCLISTINGOUTPUT_TO_ARRAY
-MSG_NOT_PANDAS = _constants.MSG_NOT_PANDAS
-REG_FLOAT_INT = _constants.REG_FLOAT_INT
-REG_LETTERS = _constants.REG_LETTERS
-XSEL_DOCSTRING_INJECTION = _constants.XSEL_DOCSTRING_INJECTION
+# compiled regular expressions used for parsing tablular outputs
+REG_LETTERS: re.Pattern[str] = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e
+REG_FLOAT_INT: re.Pattern[str] = re.compile(
+    r"[+-]?[0-9]*[.]?[0-9]*[Ee]?[+-]?[0-9]+|\s[0-9]+\s"
+)  # match number groups
+BC_REGREP: re.Pattern[str] = re.compile(
+    r"^\s*([0-9]+)\s*([A-Za-z]+)"
+    r"(\s+(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)"
+    r"(?:\s+(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+))*)$"
+)
+
+
+MSG_NOT_PANDAS: str = """'Pandas' is not installed or could not be found.
+Hence this command is not applicable.
+
+You can install it using:
+pip install pandas
+"""
+
+MSG_BCLISTINGOUTPUT_TO_ARRAY: str = """This command has strings values in some of its columns (such 'UX', 'FX', 'UY', 'TEMP', etc),
+so it cannot be converted to Numpy Array.
+
+Please use 'to_list' or 'to_dataframe' instead."""
+
+
+# Identify where the data start in the output
+GROUP_DATA_START: List[str] = ["NODE", "ELEM"]
+
+# Allowed commands to get output as array or dataframe.
+# In theory, these commands should follow the same format.
+# Some of them are not documented (already deprecated?)
+# So they are not in the Mapdl class,
+# so they won't be wrapped.
+CMD_RESULT_LISTING: List[str] = [
+    "NLIN",  # not documented
+    "PRCI",
+    "PRDI",  # Not documented.
+    "PREF",  # Not documented.
+    "PREN",
+    "PRER",
+    "PRES",
+    "PRET",
+    "PRGS",  # Not documented.
+    "PRIN",
+    "PRIT",
+    "PRJS",
+    "PRNL",
+    "PRNM",  # Not documented.
+    "PRNS",
+    "PROR",
+    "PRPA",
+    "PRRF",
+    "PRRS",
+    "PRSE",
+    "PRSS",  # Not documented.
+    "PRST",  # Not documented.
+    "PRVE",
+    "PRXF",  # Not documented.
+    "SWLI",
+]
+
+CMD_BC_LISTING: List[str] = [
+    "DKLI",
+    "DLLI",
+    "DALI",
+    "DLIS",
+    "FKLI",
+    "FLIS",
+    "SFLL",
+    # "SFAL",   Define two integers before label (regex)
+    # "SFLI",   Use two lines to define each BC in the list
+    # "SFEL",   Use two lines to define each BC in the list
+    "BFKL",
+    "BFLL",
+    "BFAL",
+]
+
+COLNAMES_BC_LISTING: Dict[str, List[str]] = {
+    "DKLI": ["KEYPOINT", "LABEL", "REAL", "IMAG", "EXP KEY"],
+    "DLLI": ["LINE", "LABEL", "REAL", "IMAG", "NAREA"],
+    "DALI": ["AREA", "LABEL", "REAL", "IMAG"],
+    "DLIS": ["NODE", "LABEL", "REAL", "IMAG"],
+    "FKLI": ["KEYPOINT", "LABEL", "REAL", "IMAG"],
+    "FLIS": ["NODE", "LABEL", "REAL", "IMAG"],
+    "SFLL": ["LINE", "LABEL", "VALI", "VALJ", "VAL2I", "VAL2J"],
+    "BFKL": ["KEYPOINT", "LABEL", "VALUE"],
+    "BFLL": ["LINE", "LABEL", "VALUE"],
+    "BFAL": ["AREA", "LABEL", "VALUE"],
+}
+
+CMD_ENTITY_LISTING: List[str] = [
+    "NLIS",
+    # "ELIS", # To be implemented later
+    # "KLIS",
+    # "LLIS",
+    # "ALIS",
+    # "VLIS",
+]
+
+CMD_LISTING: List[str] = []
+CMD_LISTING.extend(CMD_ENTITY_LISTING)
+CMD_LISTING.extend(CMD_RESULT_LISTING)
+
+# Adding empty lines to match current format.
+CMD_DOCSTRING_INJECTION: str = r"""
+Returns
+-------
+
+str
+    Str object with the command console output.
+
+    This object also has the extra methods:
+    :meth:`to_list() <ansys.mapdl.core.commands.CommandListingOutput.to_list>`,
+    :meth:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>` (only on listing commands) and
+    :meth:`to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput.to_dataframe>` (only if Pandas is installed).
+    |bl|
+    **NOTE**: If you use these methods, you might
+    obtain a lower precision than using :class:`Mesh <ansys.mapdl.core.mesh_grpc.MeshGrpc>` methods.
+    |bl|
+    For more information visit :ref:`user_guide_postprocessing`.
+"""
+
+XSEL_DOCSTRING_INJECTION: str = r"""
+Returns
+-------
+
+np.ndarray
+    Numpy array with the ids of the selected entities.
+
+    For more information visit :ref:`user_guide_postprocessing`.
+"""
+
+
+CMD_XSEL: List[str] = [
+    "NSEL",
+    "ESEL",
+    "KSEL",
+    "LSEL",
+    "ASEL",
+    "VSEL",
+    "ESLN",
+    "NSLE",
+]
 
 
 def get_indentation(indentation_regx: str, docstring: str) -> str:

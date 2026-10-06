@@ -31,9 +31,7 @@ version_info = 0, 58, 'dev0'
 
 import importlib.metadata as importlib_metadata
 
-from ansys.mapdl.core import constants as _constants
-
-SUPPORTED_ANSYS_VERSIONS = _constants.SUPPORTED_ANSYS_VERSIONS
+from ansys.mapdl.core.constants import SUPPORTED_ANSYS_VERSIONS  # noqa: F401
 
 # Read from the pyproject.toml
 # major, minor, patch

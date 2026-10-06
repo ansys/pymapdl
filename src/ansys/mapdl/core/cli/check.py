@@ -33,7 +33,9 @@ from ansys.mapdl.core.cli.constants import (
     MAPDL_DEFAULT_PORT,
 )
 from ansys.mapdl.core.cli.helpers import connect_to_instance
-from ansys.mapdl.core.constants import _KEY_WIDTH
+
+# Width of the key column of the human-readable report.
+_KEY_WIDTH = 24
 
 
 def check(

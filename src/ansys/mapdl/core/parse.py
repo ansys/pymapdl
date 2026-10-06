@@ -25,10 +25,19 @@
 import re
 from typing import Optional
 
-from ansys.mapdl.core import constants as _constants
+NUMERIC_CONST_PATTERN = r"""
+[-+]? # optional sign
+(?:
+(?: \d* \. \d+ ) # .1 .12 .123 etc 9.1 etc 98.1 etc
+|
+(?: \d+ \.? ) # 1. 12. 123. etc 1 12 123 etc
+)
+# followed by optional exponent part if desired
+(?: [Ee] [+-]? \d+ ) ?
+"""
 
-NUMERIC_CONST_PATTERN = _constants.NUMERIC_CONST_PATTERN
-NUM_PATTERN = _constants.NUM_PATTERN
+
+NUM_PATTERN = re.compile(NUMERIC_CONST_PATTERN, re.VERBOSE)
 
 
 def parse_kdist(msg: Optional[str] = None) -> Optional[list[float]]:

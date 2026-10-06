@@ -31,12 +31,9 @@ import warnings
 import weakref
 
 from ansys.mapdl.core import _HAS_ATC, _HAS_TQDM, LOG, launch_mapdl
+from ansys.mapdl.core.constants import LOCALHOST, MAPDL_DEFAULT_PORT
 from ansys.mapdl.core.errors import MapdlDidNotStart, MapdlRuntimeError, VersionError
-from ansys.mapdl.core.launcher.config import (
-    LOCALHOST,
-    MAPDL_DEFAULT_PORT,
-    resolve_start_instance,
-)
+from ansys.mapdl.core.launcher.config import resolve_start_instance
 from ansys.mapdl.core.launcher.network import check_port_status
 from ansys.mapdl.core.misc import (
     check_valid_ip,

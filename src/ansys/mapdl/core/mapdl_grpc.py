@@ -27,6 +27,7 @@ import fnmatch
 from functools import wraps
 import glob
 import io
+import json
 import os
 from pathlib import Path, PurePath, PurePosixPath
 import re
@@ -59,7 +60,13 @@ import numpy as np
 from numpy.typing import NDArray
 import psutil
 
-from ansys.mapdl.core.constants import MSG_IMPORT
+MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
+Please make sure you have the latest updated version using:
+
+'pip install ansys-api-mapdl' or 'pip install --upgrade ansys-api-mapdl'
+
+If this does not solve it, please reinstall 'ansys.mapdl.core'
+or contact Technical Support at 'https://github.com/ansys/pymapdl'."""
 
 try:
     from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
@@ -69,12 +76,12 @@ except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
 
 from ansys.mapdl.core import _HAS_TQDM, __version__
-from ansys.mapdl.core import constants as _constants
-from ansys.mapdl.core.common_grpc import (
+from ansys.mapdl.core.common_grpc import DEFAULT_FILE_CHUNK_SIZE, parse_chunks
+from ansys.mapdl.core.constants import (
     ANSYS_VALUE_TYPE,
     DEFAULT_CHUNKSIZE,
-    DEFAULT_FILE_CHUNK_SIZE,
-    parse_chunks,
+    MAPDL_DEFAULT_PORT,
+    MAX_MESSAGE_LENGTH,
 )
 from ansys.mapdl.core.errors import (
     MapdlConnectionError,
@@ -109,18 +116,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.database import MapdlDb
     from ansys.mapdl.core.xpl import ansXpl
 
-DEFAULT_GRPC_OPTIONS = _constants.DEFAULT_GRPC_OPTIONS
-DEFAULT_TIME_STEP_STREAM = _constants.DEFAULT_TIME_STEP_STREAM
-DEFAULT_TIME_STEP_STREAM_NT = _constants.DEFAULT_TIME_STEP_STREAM_NT
-DEFAULT_TIME_STEP_STREAM_POSIX = _constants.DEFAULT_TIME_STEP_STREAM_POSIX
-MAX_MESSAGE_LENGTH = _constants.MAX_MESSAGE_LENGTH
-PING_ABUSE_INTERVAL_S = _constants.PING_ABUSE_INTERVAL_S
-PING_ABUSE_PROBE_EVERY_N_PINGS = _constants.PING_ABUSE_PROBE_EVERY_N_PINGS
-PING_ABUSE_PROBE_INTERVAL_S = _constants.PING_ABUSE_PROBE_INTERVAL_S
-PING_ABUSE_PROBE_TIMEOUT_S = _constants.PING_ABUSE_PROBE_TIMEOUT_S
-SERVICE_DEFAULT_CONFIG = _constants.SERVICE_DEFAULT_CONFIG
-VAR_IR = _constants.VAR_IR
-
 VOID_REQUEST = anskernel.EmptyRequest()
 
 
@@ -147,6 +142,81 @@ def _drain_queue(queue) -> str:
         except Exception:
             break
     return "".join(lines)
+
+
+VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26)
+
+
+DEFAULT_TIME_STEP_STREAM = None
+DEFAULT_TIME_STEP_STREAM_NT = 500
+DEFAULT_TIME_STEP_STREAM_POSIX = 100
+
+# Retry policy for gRPC calls.
+SERVICE_DEFAULT_CONFIG = {
+    # see https://github.com/grpc/proposal/blob/master/A6-client-retries.md#retry-policy-capabilities
+    "methodConfig": [
+        {
+            # Match all packages and services.
+            # Otherwise: "name": [{"service": "<package>.<service>"}],
+            "name": [{}],
+            "retryPolicy": {
+                "maxAttempts": 5,
+                "initialBackoff": "0.01s",
+                "maxBackoff": "3s",
+                "backoffMultiplier": 3,
+                "retryableStatusCodes": ["UNAVAILABLE", "RESOURCE_EXHAUSTED"],
+            },
+        }
+    ]
+}
+
+# Cadence for the HTTP/2 keepalive pings and the ping-abuse probe (see
+# '_ping_abuse_probe_loop' and 'DEFAULT_GRPC_OPTIONS' below). Empirically
+# verified against a live MAPDL gRPC server (docker image
+# 'ghcr.io/ansys/mapdl:v26.1.0-ubuntu-cicd') while a genuinely long call
+# ('SOLVE' and '/WAIT') was in flight:
+#
+# * grpc-core's default server-side ping-abuse policy requires at least 5
+#   minutes between two consecutive "no data" HTTP/2 pings while a call is
+#   in flight, tolerates up to 2 "strikes" (closer-than-allowed pings), and
+#   sends a 'GOAWAY' ('too_many_pings') on the 3rd strike.
+# * Two pings spaced 'PING_ABUSE_INTERVAL_S' apart never accumulate more
+#   than 1 strike (the very first ping received on a fresh tracker is
+#   always free), so pinging twice in a row is safe.
+# * A 3rd, real (non-ping) RPC call resets the strikes counter to 0, because
+#   the server also resets its ping-abuse tracker whenever it sends back
+#   real application data, not just a ping ACK. So replacing every 3rd
+#   keepalive ping with one cheap real RPC (see '_ping_abuse_probe_loop')
+#   lets the ping/ping/probe cycle repeat indefinitely without ever
+#   tripping the abuse policy, confirmed over multiple repeated cycles
+#   against the live server.
+PING_ABUSE_INTERVAL_S = 24
+# Replace every 3rd keepalive ping with a real probe RPC, before a 3rd
+# un-reset ping would trip the server's abuse policy.
+PING_ABUSE_PROBE_EVERY_N_PINGS = 3
+PING_ABUSE_PROBE_INTERVAL_S = PING_ABUSE_INTERVAL_S * PING_ABUSE_PROBE_EVERY_N_PINGS
+# Bounded timeout for the probe RPC itself, so a truly unresponsive server
+# cannot make the probe thread hang.
+PING_ABUSE_PROBE_TIMEOUT_S = 5.0
+
+DEFAULT_GRPC_OPTIONS = [
+    ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+    ("grpc.service_config", json.dumps(SERVICE_DEFAULT_CONFIG)),
+    # HTTP/2 keepalive pings: detect a peer that stopped answering (crashed,
+    # network partition, silently dropped connection) even while no RPC is
+    # exchanging data, without bounding how long any individual call (such as
+    # 'SOLVE') is allowed to run. A dead peer flips 'channel_state' to
+    # 'TRANSIENT_FAILURE' within roughly 'keepalive_time_ms' +
+    # 'keepalive_timeout_ms', instead of relying on the OS to eventually
+    # notice the broken TCP connection. The interval is paired with the
+    # ping-abuse probe (see 'PING_ABUSE_INTERVAL_S' above) so consecutive
+    # pings never trip the MAPDL gRPC server's ping-abuse protection.
+    ("grpc.keepalive_time_ms", PING_ABUSE_INTERVAL_S * 1000),
+    ("grpc.keepalive_timeout_ms", 10_000),
+    ("grpc.keepalive_permit_without_calls", 1),
+    ("grpc.http2.min_time_between_pings_ms", PING_ABUSE_INTERVAL_S * 1000),
+    ("grpc.http2.max_pings_without_data", 0),
+]
 
 
 def get_start_instance(
@@ -417,8 +487,6 @@ class MapdlGrpc(MapdlBase):
 
         # port and ip are needed to setup the log
         if port is None:
-            from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
-
             port = MAPDL_DEFAULT_PORT
 
         self._port: int = int(port)

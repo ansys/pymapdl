@@ -26,16 +26,15 @@ import weakref
 
 import numpy as np
 
-from ansys.mapdl.core.constants import COMPONENT_STRESS_TYPE as COMPONENT_STRESS_TYPE
-from ansys.mapdl.core.constants import DISP_TYPE as DISP_TYPE
-from ansys.mapdl.core.constants import POST_COMP_TYPE, POST_STRESS_TYPES
-from ansys.mapdl.core.constants import PRINCIPAL_TYPE as PRINCIPAL_TYPE
-from ansys.mapdl.core.constants import ROT_TYPE as ROT_TYPE
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import requires_package, supress_logging
 
-COMP_TYPE = POST_COMP_TYPE
-STRESS_TYPES = POST_STRESS_TYPES
+COMPONENT_STRESS_TYPE = ["X", "Y", "Z", "XY", "YZ", "XZ"]
+PRINCIPAL_TYPE = ["1", "2", "3"]
+STRESS_TYPES = ["X", "Y", "Z", "XY", "YZ", "XZ", "1", "2", "3", "INT", "EQV"]
+COMP_TYPE = ["X", "Y", "Z", "SUM"]
+DISP_TYPE = ["X", "Y", "Z", "NORM", "ALL"]
+ROT_TYPE = ["X", "Y", "Z", "ALL"]
 
 
 def elem_check_inputs(component, option, component_type):

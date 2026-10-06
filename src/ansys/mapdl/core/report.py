@@ -26,13 +26,27 @@ import os
 from typing import Type
 
 from ansys.mapdl.core import _HAS_ATC, _HAS_PYANSYS_REPORT, _HAS_PYVISTA
-from ansys.mapdl.core.constants import ANSYS_ENV_VARS
 
 if _HAS_PYANSYS_REPORT:
     import ansys.tools.report as pyansys_report
 
 if _HAS_ATC:
     from ansys.tools.common.path import get_available_ansys_installations
+
+ANSYS_ENV_VARS = [
+    "PYMAPDL_START_INSTANCE",
+    "PYMAPDL_PORT",
+    "PYMAPDL_IP",
+    "PYMAPDL_NPROC",
+    "PYMAPDL_MAPDL_EXEC",
+    "PYMAPDL_MAPDL_VERSION",
+    "PYMAPDL_MAX_MESSAGE_LENGTH",
+    "PYMAPDL_ON_SLURM",
+    "ON_CI",
+    "ON_LOCAL",
+    "ON_REMOTE",
+    "P_SCHEMA",
+]
 
 
 class Plain_Report:

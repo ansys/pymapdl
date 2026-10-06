@@ -29,11 +29,18 @@ import weakref
 from ansys.api.mapdl.v0 import mapdl_pb2
 import numpy as np
 
-from ansys.mapdl.core.constants import MYCTYPE
-
-from .common_grpc import ANSYS_VALUE_TYPE
+from .constants import ANSYS_VALUE_TYPE
 from .errors import MapdlRuntimeError
 from .misc import quote_path_if_needed, random_string, unquote_path
+
+MYCTYPE = {
+    np.int32: "I",
+    np.int64: "L",
+    np.single: "F",
+    np.double: "D",
+    np.complex64: "C",
+    np.complex128: "Z",
+}
 
 
 class ansXpl:
