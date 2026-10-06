@@ -50,12 +50,12 @@ from ansys.mapdl.core import LOG
 from ansys.mapdl.core.constants import SUPPORTED_ANSYS_VERSIONS
 
 from .config import LOCALHOST, MAPDL_DEFAULT_PORT, resolve_launch_config  # noqa: F401
+from .connection import close_all_local_instances  # noqa: F401
 from .connection import (
     connect_to_existing,
     create_console_client,
     create_grpc_client,
 )
-from .connection import close_all_local_instances  # noqa: F401
 from .connection import stop  # noqa: F401
 from .environment import prepare_environment
 from .errors import ConfigurationError, LaunchError

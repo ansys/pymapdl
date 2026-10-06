@@ -19,7 +19,7 @@ repos:
       args: [ "-x"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: 7ff8d35ae36a7d2b968f2f90b4c723e292e594ee  # frozen: v2.3.1
+  rev: 2834ec6639549dd6796205c8f011dedcd587288b  # frozen: v2.4.0
   hooks:
     - id: mypy
       args: [ --follow-imports=silent, --config-file=pyproject.toml]
@@ -33,7 +33,7 @@ repos:
     - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
-  rev: 131f4adcd5582bfc53928ab0d740eceb8b506b6c  # frozen: 9.0.1
+  rev: 9f905615631c545f5aea2516508109350d1d2f7d  # frozen: 9.0.2
   hooks:
   - id: isort
 
@@ -57,14 +57,14 @@ repos:
     additional_dependencies: [black==25.12.0]
 
 - repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 4160603246a6b365d4a2af661c6d71b0a0f50478  # frozen: 26.5.1
+  rev: 96ae3e5802f3fe2d551e703e18f0a367d1a81ac2  # frozen: 26.10.0
   hooks:
   - id: black
     args:
       - --line-length=88
 
 - repo: https://github.com/PyCQA/flake8
-  rev: d93590f5be797aabb60e3b09f2f52dddb02f349f  # frozen: 7.3.0
+  rev: cfbbfdeb2391c14a37e101e92a77f54f329e1726  # frozen: 7.4.1
   hooks:
   - id: flake8
 
@@ -97,7 +97,7 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: c4654a7e007c9619a5eb63c39a456572a0fa1851  # frozen: 0.38.0
+  rev: 4f85d46a92dc17713078e5de73f8a13190edf6fc  # frozen: 0.38.2
   hooks:
     - id: check-github-workflows
 
