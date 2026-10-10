@@ -1,0 +1,6 @@
+﻿fslist
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.post1._fatigue
+
+.. automethod:: Fatigue.fslist

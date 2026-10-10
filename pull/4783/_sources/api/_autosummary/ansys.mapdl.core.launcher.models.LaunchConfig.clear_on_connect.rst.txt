@@ -1,0 +1,6 @@
+clear\_on\_connect
+==================
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.clear_on_connect

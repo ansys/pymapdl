@@ -1,0 +1,34 @@
+﻿ProcessInfo
+===========
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoclass:: ProcessInfo
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      ProcessInfo.hostname
+      ProcessInfo.jobid
+      ProcessInfo.pid
+      ProcessInfo.process
+      ProcessInfo.port
+      ProcessInfo.ip
+   
+   

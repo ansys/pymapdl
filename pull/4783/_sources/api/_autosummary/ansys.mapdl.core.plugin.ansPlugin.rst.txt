@@ -1,0 +1,34 @@
+﻿ansPlugin
+=========
+
+.. currentmodule:: ansys.mapdl.core.plugin
+
+.. autoclass:: ansPlugin
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      
+      
+      ansPlugin.commands
+      
+      
+      ansPlugin.list
+      
+      
+      ansPlugin.load
+      
+      
+      ansPlugin.unload
+      
+   
+   
+
+   
+   
+   

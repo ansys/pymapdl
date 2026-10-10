@@ -1,0 +1,6 @@
+﻿resolve\_command\_block
+=======================
+
+.. currentmodule:: ansys.mapdl.core.cli.exec
+
+.. autofunction:: resolve_command_block

@@ -1,0 +1,6 @@
+nproc
+=====
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.nproc

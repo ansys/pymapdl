@@ -1,0 +1,6 @@
+﻿spfreq
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.spectrum_options
+
+.. automethod:: SpectrumOptions.spfreq

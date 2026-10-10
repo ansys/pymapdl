@@ -1,0 +1,6 @@
+﻿trpdel
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.trace_points
+
+.. automethod:: TracePoints.trpdel

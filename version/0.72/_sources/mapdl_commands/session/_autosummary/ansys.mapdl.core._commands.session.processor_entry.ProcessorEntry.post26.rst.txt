@@ -1,0 +1,6 @@
+﻿post26
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.session.processor_entry
+
+.. automethod:: ProcessorEntry.post26

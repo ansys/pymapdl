@@ -1,0 +1,32 @@
+﻿HPCJobInfo
+==========
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoclass:: HPCJobInfo
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      HPCJobInfo.jobid
+      HPCJobInfo.state
+      HPCJobInfo.hostname
+      HPCJobInfo.ip
+   
+   

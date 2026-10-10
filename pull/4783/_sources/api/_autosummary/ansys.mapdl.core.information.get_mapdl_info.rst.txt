@@ -1,0 +1,6 @@
+﻿get\_mapdl\_info
+================
+
+.. currentmodule:: ansys.mapdl.core.information
+
+.. autofunction:: get_mapdl_info

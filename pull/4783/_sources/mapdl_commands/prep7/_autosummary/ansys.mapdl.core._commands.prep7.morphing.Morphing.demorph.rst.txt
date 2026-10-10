@@ -1,0 +1,6 @@
+﻿demorph
+=======
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.morphing
+
+.. automethod:: Morphing.demorph

@@ -1,0 +1,6 @@
+﻿lcfile
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.load_case_calculations
+
+.. automethod:: LoadCaseCalculations.lcfile
