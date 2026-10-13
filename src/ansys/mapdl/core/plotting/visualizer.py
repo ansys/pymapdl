@@ -1018,9 +1018,21 @@ class MapdlPlotter(Plotter):
         if notebook:
             self._off_screen = True  # pragma: no cover
 
+        # Forward the explicit ``notebook``/``off_screen`` arguments to the
+        # underlying backend. Without this, values such as ``notebook=False``
+        # (used to work around rendering issues in IDEs like Spyder, see
+        # #4635) were silently dropped and the backend fell back to its own
+        # auto-detection.
+        if notebook is not None:
+            kwargs.setdefault("notebook", notebook)
+
         if savefig:
             self._off_screen = True
             self._notebook = False
+            kwargs["notebook"] = False
+
+        if self._off_screen is not None:
+            kwargs.setdefault("off_screen", self._off_screen)
 
         # permit user to save the figure as a screenshot
         if self._savefig or savefig:
@@ -1041,6 +1053,8 @@ class MapdlPlotter(Plotter):
 
         else:
             if not return_plotter:
+                if window_size is not None:
+                    kwargs.setdefault("window_size", window_size)
                 self._backend.show(**kwargs)
 
         if return_plotter:
