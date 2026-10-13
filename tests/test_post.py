@@ -24,6 +24,7 @@
 
 import inspect
 import re
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import numpy as np
 import pytest
@@ -37,6 +38,7 @@ if has_dependency("ansys-tools-visualization_interface"):
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.post import (
     COMPONENT_STRESS_TYPE,
     PRINCIPAL_TYPE,
@@ -60,6 +62,69 @@ def test_repr(mapdl, cleared):
         "Enable routine POST1 to see a table of available results"
         not in mapdl.post_processing.__repr__()
     )
+
+
+class TestElementValuesUsesGetEtable:
+    """Unit tests (no live MAPDL needed) checking that
+    ``PostProcessing.element_values`` delegates to ``Mapdl.get_etable``
+    and preserves its selection-masking behavior."""
+
+    @staticmethod
+    def _make_post_processing(selected_mask, get_etable_return):
+        mapdl_mock = MagicMock(spec=MapdlBase)
+        mapdl_mock.get_etable.return_value = get_etable_return
+
+        post = PostProcessing(mapdl_mock)
+        return post, mapdl_mock
+
+    def test_element_values_delegates_to_get_etable(self):
+        selected_mask = np.array([True, False, True])
+        values = np.array([1.0, 2.0, 3.0])
+        post, mapdl_mock = self._make_post_processing(selected_mask, values)
+
+        with patch.object(
+            PostProcessing,
+            "selected_elements",
+            new_callable=PropertyMock,
+            return_value=selected_mask,
+        ):
+            result = post.element_values("S", "X", "MAX")
+
+        mapdl_mock.get_etable.assert_called_once_with("S", "X", "MAX", mute=True)
+        np.testing.assert_array_equal(result, np.array([1.0, 3.0]))
+
+    def test_element_values_uses_default_option(self):
+        selected_mask = np.array([True, True])
+        values = np.array([5.0, 6.0])
+        post, mapdl_mock = self._make_post_processing(selected_mask, values)
+
+        with patch.object(
+            PostProcessing,
+            "selected_elements",
+            new_callable=PropertyMock,
+            return_value=selected_mask,
+        ):
+            post.element_values("U", "Y")
+
+        mapdl_mock.get_etable.assert_called_once_with("U", "Y", "AVG", mute=True)
+
+
+def test_element_values_filters_sparse_element_selection(mapdl, solved_box):
+    mapdl.post1()
+    mapdl.set(1, 1)
+
+    try:
+        mapdl.esel("S", "ELEM", vmin=1, vmax=1, mute=True)
+        mapdl.esel("A", "ELEM", vmin=3, vmax=3, mute=True)
+
+        raw_values = mapdl.get_etable("S", "X", mute=True)
+        selected_elements = mapdl.post_processing.selected_elements
+        selected_values = mapdl.post_processing.element_values("S", "X")
+
+        assert raw_values.size == selected_elements.size
+        np.testing.assert_allclose(selected_values, raw_values[selected_elements])
+    finally:
+        mapdl.allsel(mute=True)
 
 
 class Test_static_solve(TestClass):

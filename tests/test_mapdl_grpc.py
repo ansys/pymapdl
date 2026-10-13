@@ -90,7 +90,6 @@ def test_get_fallback(mapdl):
         patch.object(mapdl, "_stub", autospec=True) as mock_stub,
         patch.object(mapdl, "run") as mock_run,
     ):
-
         mock_run.return_value = "VALUE= 789.012"
         mock_stub.Get.return_value = response
 
@@ -105,7 +104,6 @@ def test_get_fallback_string(mapdl):
         patch.object(mapdl, "_stub", autospec=True) as mock_stub,
         patch.object(mapdl, "run") as mock_run,
     ):
-
         mock_run.return_value = "VALUE= test_value"
         mock_stub.Get.return_value = response
 
@@ -1191,3 +1189,9 @@ class TestEnsureChannel:
 
         mock._ensure_channel.assert_called_once()
         mock._multi_connect.assert_called_once_with(timeout=5)
+
+
+# `MapdlGrpc.get_variable` now returns a `LazyArray` backed by a private,
+# per-call parameter name instead of eagerly downloading through a shared
+# "temp_var" parameter. See `tests/test_lazy_array.py` for its coverage
+# (notably `test_get_variable_uses_distinct_private_parameters`).

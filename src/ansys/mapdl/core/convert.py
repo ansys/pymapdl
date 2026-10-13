@@ -149,7 +149,7 @@ def convert_script(
     clear_at_start: bool = False,
     check_parameter_names: bool = True,
 ) -> List[str]:
-    """Converts an ANSYS input file to a python PyMAPDL script.
+    """Converts a MAPDL input file to a python PyMAPDL script.
 
     Parameters
     ----------
@@ -312,7 +312,7 @@ def convert_apdl_block(
     clear_at_start: bool = False,
     check_parameter_names: bool = False,
 ) -> List[str]:
-    """Converts an ANSYS input string to a python PyMAPDL string.
+    """Converts a MAPDL input string to a python PyMAPDL string.
 
     Parameters
     ----------

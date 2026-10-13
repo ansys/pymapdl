@@ -574,7 +574,9 @@ class MapdlGrpc(MapdlBase):
         self._subscribe_to_channel()
 
         # connect and validate to the channel
-        self._mapdl_process: Optional[subprocess.Popen] = start_parm.pop("process", None)  # type: ignore[assignment]
+        self._mapdl_process: Optional[subprocess.Popen] = start_parm.pop(
+            "process", None
+        )  # type: ignore[assignment]
 
         # saving for later use (for example open_gui)
         self._start_parm: Dict[str, Any] = start_parm
@@ -3512,7 +3514,7 @@ class MapdlGrpc(MapdlBase):
             self._apdl_log.write(commands + "\n")
 
         self._log.debug(
-            "Writing the following commands to a temporary " "apdl input file:\n%s",
+            "Writing the following commands to a temporary apdl input file:\n%s",
             commands,
         )
 
@@ -4697,18 +4699,32 @@ class MapdlGrpc(MapdlBase):
         **kwargs: KwargDict,
     ) -> LazyArray:
         """
-        Obtain variable values lazily.
+        Obtain the POST26 time-history variable values lazily.
+
+        This method uses the ``VGET`` command to copy a POST26 variable
+        (for example, one created with
+        :func:`Mapdl.nsol() <ansys.mapdl.core.Mapdl.nsol>` or
+        :func:`Mapdl.esol() <ansys.mapdl.core.Mapdl.esol>`) into a private
+        MAPDL array parameter. On gRPC connections, the returned
+        :class:`LazyArray <ansys.mapdl.core.lazy_array.LazyArray>` downloads
+        its values, and releases that private parameter, only when it is
+        first used.
 
         Parameters
         ----------
-        ir : str, optional
-            Reference number of the variable (1 to NV [NUMVAR]).
+        ir : int, optional
+            Reference number of the variable (1 to NV [NUMVAR]). This is
+            the same ``nvar`` reference number used when defining the
+            variable, for example with
+            :func:`Mapdl.nsol() <ansys.mapdl.core.Mapdl.nsol>` or
+            :func:`Mapdl.esol() <ansys.mapdl.core.Mapdl.esol>`.
 
-        tstrt : str, optional
-            Time (or frequency) corresponding to start of IR data. If between
-            values, the nearer value is used. By default it is the first value.
+        tstrt : float, optional
+            Time (or frequency) corresponding to start of IR data.  If between
+            values, the nearer value is used. By default, retrieval starts at
+            0.0.
 
-        kcplx : str, optional
+        kcplx : int, optional
             Complex number key:
 
             * ``0`` - Use the real part of the IR data. Default.
@@ -4724,10 +4740,23 @@ class MapdlGrpc(MapdlBase):
 
         Examples
         --------
-        >>> values = mapdl.get_variable(2)  # doctest: +SKIP
-        >>> np.asarray(values)  # doctest: +SKIP
-        array([0., 1., 2.])
+        Define a POST26 variable with
+        :func:`Mapdl.nsol() <ansys.mapdl.core.Mapdl.nsol>` for the ``UX``
+        displacement of node 1, and then retrieve its values with
+        ``get_variable``.
 
+        >>> mapdl.post26()
+        >>> mapdl.nsol(2, 1, "U", "X")
+        >>> np.asarray(mapdl.get_variable(2))
+        array([0.        , 0.00108135, 0.00300901, ..., 0.03407310])
+
+        The same works for element results defined with
+        :func:`Mapdl.esol() <ansys.mapdl.core.Mapdl.esol>`, using
+        ``tstrt`` to skip the initial time (or frequency) values.
+
+        >>> mapdl.esol(3, 1, 1, "S", "Y")
+        >>> np.asarray(mapdl.get_variable(3, tstrt=1.0))
+        array([0.34632451, 0.36126732, ..., 0.38041256])
         """
         parameter_name = self._new_lazy_array_parameter()
         try:
@@ -5086,7 +5115,6 @@ class MapdlGrpc(MapdlBase):
             or not getattr(self, "_start_instance", True)
             or not getattr(self, "_launched", False)
         ):
-
             try:
                 self._exiting = True
                 self._disconnect_but_leave_mapdl_running(exiting=True)

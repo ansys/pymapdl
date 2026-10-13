@@ -45,12 +45,22 @@ in the Y direction, you can use the following code:
    >>> mapdl.parameters["MY_UY"]
    array([1.0, 2.0, 3.0, ...])
 
-Or, if you want to retrieve the value of the array directly, you can use:
+Or, if you want to retrieve the value of the array directly, without storing
+it in an intermediate MAPDL parameter, you can use the
+:func:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>` method:
 
 .. code:: pycon
 
-   >>> mapdl.get_array("NODE", "U", "Y")
+   >>> mapdl.get_array("NODE", item1="U", it1num="Y")
    array([1.0, 2.0, 3.0, ...])
+
+You can also use :func:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>`
+to list entities, such as the currently selected node numbers:
+
+.. code:: pycon
+
+   >>> mapdl.get_array("NODE", item1="NLIST")
+   array([1., 2., 3., ...])
 
 You can also set both scalar and array parameters from Python objects
 using :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>`
@@ -77,6 +87,72 @@ ROUT``, you can access it with this code:
   >>> mapdl.parameters.routine
   'Begin level'
 
+.. _ref_parameters_retrieval_helpers:
+
+Retrieving POST26 variables and element-table results
+-----------------------------------------------------
+
+In addition to :func:`Mapdl.get_array()
+<ansys.mapdl.core.Mapdl.get_array>`, PyMAPDL provides two more helpers
+for retrieving common categories of MAPDL results directly as
+``numpy.ndarray`` objects: :func:`Mapdl.get_variable()
+<ansys.mapdl.core.Mapdl.get_variable>` for POST26 time-history variables,
+and :func:`Mapdl.get_etable() <ansys.mapdl.core.Mapdl.get_etable>` for
+POST1 element-table results.
+
+Use :func:`Mapdl.get_variable() <ansys.mapdl.core.Mapdl.get_variable>` to
+retrieve the values of a POST26 variable defined with commands such as
+:func:`Mapdl.nsol() <ansys.mapdl.core.Mapdl.nsol>` or
+:func:`Mapdl.esol() <ansys.mapdl.core.Mapdl.esol>`. This is equivalent to
+the MAPDL `VGET <https://ansyshelp.ansys.com/public/Views/Secured/corp/v252/en/ans_cmd/Hlp_C_VGET.html>`_
+command:
+
+.. code:: pycon
+
+   >>> mapdl.post26()
+   >>> mapdl.nsol(2, 1, "U", "X")
+   >>> mapdl.get_variable(2)
+   array([0.        , 0.00108135, 0.00300901, ..., 0.03407310])
+
+Use :func:`Mapdl.get_etable() <ansys.mapdl.core.Mapdl.get_etable>` to
+retrieve an element-table column as an array without having to manage
+the underlying `ETABLE
+<https://ansyshelp.ansys.com/public/Views/Secured/corp/v252/en/ans_cmd/Hlp_C_ETABLE.html>`_
+label yourself. This method fills the table with
+:func:`Mapdl.etable() <ansys.mapdl.core.Mapdl.etable>` and then retrieves
+it with :func:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>`:
+
+.. code:: pycon
+
+   >>> mapdl.post1()
+   >>> mapdl.set(1, 1)
+   >>> mapdl.get_etable("S", "X")
+   array([-1.12618148, -0.93902147, -0.88121128, ...,  0.        ])
+
+By default, :func:`Mapdl.get_etable() <ansys.mapdl.core.Mapdl.get_etable>`
+uses a unique hidden label for the element-table column and erases it
+after the values are retrieved. If you pass the ``lab`` argument, the
+column is kept in the element table under that name so that you can
+reuse it in subsequent MAPDL operations, such as ``SADD`` or ``SMULT``:
+
+.. code:: pycon
+
+   >>> mapdl.get_etable("S", "X", lab="SX_TABLE")
+   array([-1.12618148, -0.93902147, -0.88121128, ...,  0.        ])
+   >>> mapdl.get_array("ELEM", 1, "ETAB", "SX_TABLE")
+   array([-1.12618148, -0.93902147, -0.88121128, ...,  0.        ])
+
+.. note::
+   Like other data-retrieval helpers, :func:`Mapdl.get_array()
+   <ansys.mapdl.core.Mapdl.get_array>`, :func:`Mapdl.get_variable()
+   <ansys.mapdl.core.Mapdl.get_variable>`, and :func:`Mapdl.get_etable()
+   <ansys.mapdl.core.Mapdl.get_etable>` must be called only after the
+   commands that generate the data they retrieve have already run.
+   In particular, none of them can be used from inside a
+   :func:`Mapdl.non_interactive() <ansys.mapdl.core.Mapdl.non_interactive>`
+   context, since commands issued there are not sent to MAPDL until the
+   context exits. See :ref:`Running in non-interactive mode
+   <ref_non_interactive>` for more details.
 
 For a full list of the methods and attributes available to the
 ``Parameters`` class, see :ref:`ref_parameters_api`.

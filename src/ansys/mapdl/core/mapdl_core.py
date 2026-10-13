@@ -352,6 +352,7 @@ class _MapdlCore(Commands):
         self._local: bool = local
         self._cleanup: bool = True
         self._vget_arr_counter = 0
+        self._etable_lab_counter = 0
         self._cached_routine = None
         self._geometry = None
         self.legacy_geometry: bool = False

@@ -30,14 +30,14 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 import psutil
 
 from ansys.mapdl.core.cli.constants import DEFAULT_TIMEOUT
+from ansys.mapdl.core.launcher.network import can_access_process as _can_access_process
 from ansys.mapdl.core.launcher.network import (
     get_ansys_process_from_port as _get_ansys_process_from_port,
 )
+from ansys.mapdl.core.launcher.network import is_alive_status as _is_alive_status
 from ansys.mapdl.core.launcher.network import (
     is_valid_ansys_process_name as _is_valid_ansys_process_name,
 )
-from ansys.mapdl.core.launcher.network import can_access_process as _can_access_process
-from ansys.mapdl.core.launcher.network import is_alive_status as _is_alive_status
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
