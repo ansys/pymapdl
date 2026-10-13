@@ -632,7 +632,7 @@ class Test_MAPDL_commands(TestClass):
     @pytest.mark.parametrize("cmd", MAPDL_cmds)
     @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._send_command", fake_wrap)
     # Skip post processing the plot in PLESOL commands like.
-    @patch("ansys.mapdl.core.mapdl_core.PLOT_COMMANDS", [])
+    @patch("ansys.mapdl.core._mapdl_core.plotting.PLOT_COMMANDS", [])
     # skip retrieving value
     @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.scalar_param", fake_wrap)
     # Skip output the entity id after geometry manipulation
