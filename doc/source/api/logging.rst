@@ -24,6 +24,15 @@ Because both types of loggers are based in the Python module
 ``logging``, you can use any of the tools provided in this module to
 extend or modify these loggers.
 
+Every MAPDL instance logger is a genuine child of the global logger in the
+``logging`` hierarchy and forwards its records to whatever handlers the
+global logger currently has, without duplicating them. Its logger is
+deregistered automatically, either when the instance is explicitly exited or
+once the instance is garbage collected, so creating and discarding many
+``Mapdl`` instances in a single process does not leak loggers, handlers, or
+file descriptors. For more details, see the
+:mod:`ansys.mapdl.core.logging` module documentation.
+
 
 Logging API
 -----------
