@@ -3340,7 +3340,7 @@ class _MapdlExtended(_MapdlCommandExtended):
         self.etable(lab, item, comp, option, **kwargs)
 
         try:
-            return self.get_array("ELEM", 1, "ETAB", lab)
+            return np.asarray(self.get_array("ELEM", 1, "ETAB", lab))
         finally:
             if not keep_lab:
                 self.etable(lab, "ERAS", mute=True)

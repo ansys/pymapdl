@@ -2296,7 +2296,6 @@ def test_save_on_exit(mapdl, cleared, save):
     assert mapdl._exited
 
     with patch.object(mapdl, "_run") as mock_run:
-
         with pytest.raises(MapdlExitedError):
             mapdl.prep7()
 
@@ -2649,7 +2648,6 @@ def test_save_selection_2(mapdl, cleared, make_block):
 
     print("Starting...")
     with mapdl.save_selection:
-
         # do something
         mapdl.allsel()
         mapdl.cmsel("NONE")
@@ -2797,6 +2795,7 @@ def test_get_etable_with_temporary_label():
 
 def test_get_etable_resolves_lazy_values_before_erasing_temporary_label():
     mapdl = object.__new__(_MapdlExtended)
+    mapdl._etable_lab_counter = 0
     events = []
     lazy_mapdl = MagicMock()
 
@@ -2804,7 +2803,7 @@ def test_get_etable_resolves_lazy_values_before_erasing_temporary_label():
         events.append(("resolve", name))
         return np.array([1.0])
 
-    def record_etable(*args):
+    def record_etable(*args, **kwargs):
         events.append(("etable", args))
 
     def record_get_array(*args):
@@ -2815,15 +2814,14 @@ def test_get_etable_resolves_lazy_values_before_erasing_temporary_label():
     mapdl.etable = MagicMock(side_effect=record_etable)
     mapdl.get_array = MagicMock(side_effect=record_get_array)
 
-    with patch("ansys.mapdl.core.mapdl_extended.random_string", return_value="abcd"):
-        result = mapdl.get_etable("SMISC", 3, "AVG")
+    result = mapdl.get_etable("SMISC", 3, "AVG")
 
     np.testing.assert_array_equal(result, [1.0])
     assert events == [
-        ("etable", ("__abcd__", "SMISC", 3, "AVG")),
-        ("get_array", ("ELEM", "", "ETAB", "__abcd__")),
+        ("etable", ("_ET00000", "SMISC", 3, "AVG")),
+        ("get_array", ("ELEM", 1, "ETAB", "_ET00000")),
         ("resolve", "VALUES"),
-        ("etable", ("__abcd__", "ERAS")),
+        ("etable", ("_ET00000", "ERAS")),
     ]
 
 
@@ -3036,7 +3034,6 @@ def test_not_correct_et_element(mapdl, cleared):
 
 def test_ctrl(mapdl, cleared):
     with patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.run") as mck_run:
-
         mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
         mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
 
@@ -3109,7 +3106,6 @@ def test_directory_setter(mapdl, cleared):
     with patch(
         "ansys.mapdl.core.Mapdl.inquire", side_effect=MapdlExitedError("mocked error")
     ) as mck_inquire:
-
         assert prev_path == mapdl.directory
 
         mck_inquire.assert_called_once()
@@ -3289,7 +3285,6 @@ def test_timeout_when_exiting(mapdl, is_exited):
             ) as mock_handle,
             patch.object(mapdl, "_exit_mapdl") as mock_exit_mapdl,
         ):
-
             mock_exit_mapdl.return_value = None  # Avoid exiting
             mock_is_alive.return_value = False
             mock_connect.return_value = None  # patched to avoid timeout
@@ -3339,7 +3334,6 @@ def test_none_as_argument(mapdl, cmd, arg):
         kwargs = {}
 
     with patch.object(mapdl, "_run", **kwargs) as mock_run:
-
         mock_run.assert_not_called()
 
         func = getattr(mapdl, cmd)
