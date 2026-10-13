@@ -4,7 +4,8 @@ Launcher
 ========
 Various PyMAPDL specific launcher commands.
 Most of these commands are called from the
-library `ansys-tools-common.path <ansys_tools_common_>`_.
+library `ansys-tools-common.path
+<https://tools.docs.pyansys.com/version/stable/api/path.html>`_.
 
 .. currentmodule:: ansys.mapdl.core.launcher
 
@@ -29,6 +30,23 @@ library `ansys-tools-common.path <ansys_tools_common_>`_.
    :toctree: _autosummary
 
    stop_mapdl
+
+Launcher configuration models
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autosummary::
+   :toctree: _autosummary
+
+   LaunchMode
+   TransportMode
+   LaunchConfig
+   ProcessInfo
+   ValidationResult
+   PortStatus
+   HPCJobInfo
+   EnvironmentConfig
 
 
 ``ansys-tools-common.path`` functions
