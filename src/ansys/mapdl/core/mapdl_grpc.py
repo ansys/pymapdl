@@ -4129,41 +4129,26 @@ class MapdlGrpc(MapdlBase):
         kloop="",
         **kwargs,
     ) -> Union[NDArray[np.float64], LazyArray]:
-        """Populate a private MAPDL parameter and return it lazily."""
+        """Return a ``*VGET`` result lazily through the binary gRPC service.
+
+        The MAPDL command is not issued until the result is first used. On
+        resolution, the values stream directly through the binary ``VGet2``
+        service, so no private MAPDL parameter is created and no ``*STATUS``
+        text output is parsed.
+        """
         if "parm" in kwargs:
             raise ValueError("Parameter name `parm` not supported with gRPC")
         if str(item1).strip().upper() == "ETAB":
             return self._get_array_from_service(
                 entity, entnum, item1, it1num, item2, it2num, kloop
             )
-        parameter_name = self._new_lazy_array_parameter()
-        try:
-            output = self.starvget(
-                parameter_name,
-                entity,
-                entnum,
-                item1,
-                it1num,
-                item2,
-                it2num,
-                kloop,
-                mute=False,
-            )
-        except Exception as error:
-            try:
-                self._delete_lazy_array_parameter(parameter_name)
-            except Exception as cleanup_error:
-                raise cleanup_error from error
-            raise
-
-        if "the dimension number 1 is 0" in output:
-            self._delete_lazy_array_parameter(parameter_name)
-            return np.empty(0)
 
         return LazyArray(
             self,
-            parameter_name,
-            cleanup=lambda: self._delete_lazy_array_parameter(parameter_name),
+            "",
+            fetch=lambda: self._get_array_from_service(
+                entity, entnum, item1, it1num, item2, it2num, kloop
+            ),
             flatten=True,
         )
 
@@ -4676,6 +4661,20 @@ class MapdlGrpc(MapdlBase):
         if errors:
             raise errors[0]
 
+    def _read_owned_array_parameter(self, parameter_name: str) -> NDArray[np.float64]:
+        """Download an owned 1-D array parameter without parsing ``*STATUS``.
+
+        The row count is read with a binary ``*GET`` query and the values are
+        streamed with ``mwrite``, so this avoids the version-fragile
+        ``*STATUS,PRM_`` listing that
+        :meth:`Parameters.__getitem__ <ansys.mapdl.core.parameters.Parameters.__getitem__>`
+        performs to discover the array shape.
+        """
+        rows = int(self.get_value("PARM", parameter_name, "DIM", 1))
+        if rows == 0:
+            return np.empty(0)
+        return np.ravel(self.parameters._get_parameter_array(parameter_name, (rows,)))
+
     @wraps(MapdlBase.vget)
     def vget(  # numpydoc ignore=RT01
         self,
@@ -4778,6 +4777,7 @@ class MapdlGrpc(MapdlBase):
             self,
             parameter_name,
             cleanup=lambda: self._delete_lazy_array_parameter(parameter_name),
+            fetch=lambda: self._read_owned_array_parameter(parameter_name),
         )
 
     @wraps(MapdlBase.nsol)

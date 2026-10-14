@@ -75,6 +75,13 @@ class LazyArray(NDArrayOperatorsMixin):
     flatten : bool, default: False
         Return a one-dimensional view after resolution. This preserves the
         ``get_array()`` result shape while retaining MAPDL parameter storage.
+    fetch : callable, optional
+        Callback that downloads and returns the array when the value is first
+        used. When omitted, the values are read from
+        ``mapdl.parameters[parameter_name]``. Supplying a direct binary
+        downloader (for example the streaming ``VGet2`` service) avoids the
+        version-fragile ``*STATUS`` text parsing that the parameter mapping
+        performs, so it is both more robust and faster.
 
     Examples
     --------
@@ -89,17 +96,25 @@ class LazyArray(NDArrayOperatorsMixin):
         parameter_name: str,
         cleanup: Optional[Callable[[], None]] = None,
         flatten: bool = False,
+        fetch: Optional[Callable[[], NDArray[np.float64]]] = None,
     ) -> None:
         self._mapdl = mapdl
         self._parameter_name = parameter_name
         self._cleanup = cleanup
         self._flatten = flatten
+        self._fetch = fetch
         self._cached: Optional[NDArray[np.float64]] = None
+
+    def _download(self) -> NDArray[np.float64]:
+        """Download the backing values through the configured source."""
+        if self._fetch is not None:
+            return self._fetch()
+        return self._mapdl.parameters[self._parameter_name]
 
     def _resolve(self) -> NDArray[np.float64]:
         """Download and cache the actual parameter values."""
         if self._cached is None:
-            value = self._mapdl.parameters[self._parameter_name]
+            value = self._download()
             self._cached = np.ravel(value) if self._flatten else value
         # If cleanup failed after a successful download, retry it on the next
         # access rather than silently retaining the server-side parameter.

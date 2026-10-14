@@ -3137,10 +3137,11 @@ class _MapdlExtended(_MapdlCommandExtended):
         """Use ``*VGET`` to retrieve an array from MAPDL.
 
         On gRPC connections, the returned :class:`LazyArray
-        <ansys.mapdl.core.lazy_array.LazyArray>` downloads its values when it
-        is first used. Element-table (``ETAB``) values remain eager because
-        MAPDL does not support retrieving them through a private ``*VGET``
-        parameter. Other connection types return a :class:`numpy.ndarray`
+        <ansys.mapdl.core.lazy_array.LazyArray>` streams its values through the
+        binary ``*VGET`` service when it is first used, without creating a
+        MAPDL parameter. Element-table (``ETAB``) values are retrieved eagerly
+        instead, because their selection depends on the current state when the
+        call is made. Other connection types return a :class:`numpy.ndarray`
         immediately.
 
 
