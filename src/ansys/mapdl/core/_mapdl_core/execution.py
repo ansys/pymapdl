@@ -174,7 +174,7 @@ class _CoreExecutionMixin(_CoreMixinBase):
 
         # write to a temporary input file
         self._log.debug(
-            "Writing the following commands to a temporary " "apdl input file:\n%s",
+            "Writing the following commands to a temporary apdl input file:\n%s",
             commands,
         )
 
@@ -401,7 +401,50 @@ class _CoreExecutionMixin(_CoreMixinBase):
             # Console probably do not have this limitation, but I'm not certain.
             raise ValueError("Maximum command length must be less than 640 characters")
 
-        # Check kwargs
+        verbose, savefig, avoid_non_interactive = self._pop_run_kwargs(kwargs)
+
+        # Early exit if on non-interactive.
+        if self._store_commands and not avoid_non_interactive:
+            # If you are using NBLOCK on input, you should not strip the string
+            self._stored_commands.append(command)
+            return
+
+        if mute is None:
+            # ``mute`` only exists on gRPC instances.
+            mute = getattr(self, "mute", False)
+
+        command = command.strip()
+        is_comment = command.startswith("!") or command.upper().startswith("/COM")
+        cmd_ = command.split(",")[0].upper()
+
+        # always reset the cache
+        self._reset_cache()
+
+        command = self._preprocess_command(command, write_to_log)
+
+        if command[:4].upper() == "/LIS":
+            # simply return the contents of the file
+            return self.list(*command.split(",")[1:])
+
+        if "=" in command and not is_comment:
+            self._check_parameter_assignment(command, cmd_)
+
+        self._before_run(command)
+
+        short_cmd = parse_to_short_cmd(command)
+        self._log.debug(f"Running (verbose: {verbose}, mute={mute}): '{command}'")
+        text = self._run(command, verbose=verbose, mute=mute)
+
+        self._after_run(command)
+
+        if mute:
+            return
+
+        return self._process_run_response(text, short_cmd, savefig)
+
+    @staticmethod
+    def _pop_run_kwargs(kwargs: dict) -> tuple:
+        """Pop the ``run`` keyword arguments and warn about unused ones."""
         verbose = kwargs.pop("verbose", False)
         savefig = kwargs.pop("savefig", False)
 
@@ -423,26 +466,10 @@ class _CoreExecutionMixin(_CoreMixinBase):
                 "Make sure you are using the intended keyword arguments.",
                 UserWarning,
             )
+        return verbose, savefig, avoid_non_interactive
 
-        # Early exit if on non-interactive.
-        if self._store_commands and not avoid_non_interactive:
-            # If you are using NBLOCK on input, you should not strip the string
-            self._stored_commands.append(command)
-            return
-
-        if mute is None:
-            if hasattr(self, "mute"):
-                mute = self.mute
-            else:  # if not gRPC
-                mute = False
-
-        command = command.strip()
-
-        is_comment = command.startswith("!") or command.upper().startswith("/COM")
-
-        # always reset the cache
-        self._reset_cache()
-
+    def _preprocess_command(self, command: str, write_to_log: bool) -> str:
+        """Rewrite, validate, and log a command before it is sent to MAPDL."""
         # address MAPDL /INPUT level issue
         if command[:4].upper() == "/CLE":
             # Address gRPC issue
@@ -465,55 +492,38 @@ class _CoreExecutionMixin(_CoreMixinBase):
                 f"/com, PyMAPDL: {msg}"  # Using '!' makes the output of '_run' empty
             )
 
-        if command[:3].upper() in INVAL_COMMANDS:
-            exception = MapdlRuntimeError(
-                'Invalid PyMAPDL command "%s"\n\n%s'
-                % (command, INVAL_COMMANDS[command[:3].upper()])
-            )
-            raise exception
-        elif command[:4].upper() in INVAL_COMMANDS:
-            exception = MapdlRuntimeError(
-                'Invalid PyMAPDL command "%s"\n\n%s'
-                % (command, INVAL_COMMANDS[command[:4].upper()])
-            )
-            raise exception
-        elif write_to_log and self._apdl_log is not None:
+        for prefix in (command[:3].upper(), command[:4].upper()):
+            if prefix in INVAL_COMMANDS:
+                raise MapdlRuntimeError(
+                    'Invalid PyMAPDL command "%s"\n\n%s'
+                    % (command, INVAL_COMMANDS[prefix])
+                )
+
+        if write_to_log and self._apdl_log is not None:
             if not self._apdl_log.closed:
                 self._apdl_log.write("%s\n" % command)
 
-        if command[:4].upper() == "/LIS":
-            # simply return the contents of the file
-            return self.list(*command.split(",")[1:])
+        return command
 
-        if "=" in command and not is_comment:
-            # We are storing a parameter.
-            param_name = command.split("=")[0].strip()
+    def _check_parameter_assignment(self, command: str, cmd_: str) -> None:
+        """Validate the parameter name of an ``NAME=VALUE`` command."""
+        # We are storing a parameter.
+        param_name = command.split("=")[0].strip()
 
-            if cmd_[:4].upper() not in ["/COM", "/TIT", "/SYS"]:
-                # Edge case. `\title, 'par=1234' `
-                self._check_parameter_name(param_name)
+        if cmd_[:4].upper() not in ["/COM", "/TIT", "/SYS"]:
+            # Edge case. `\title, 'par=1234' `
+            self._check_parameter_name(param_name)
 
-        self._before_run(command)
-
-        short_cmd = parse_to_short_cmd(command)
-        self._log.debug(f"Running (verbose: {verbose}, mute={mute}): '{command}'")
-        text = self._run(command, verbose=verbose, mute=mute)
-
-        self._after_run(command)
-
-        if mute:
-            return
-
+    def _process_run_response(self, text: str, short_cmd, savefig):
+        """Store, check, and post-process the response of a command."""
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
-        if text:
-            self._response = StringWithLiteralRepr(text.strip())
-            if self._response is None:
-                raise MapdlRuntimeError("MAPDL did not return any response.")
-            response_ = "\n".join(self._response.splitlines()[:20])
-            self._log.info(response_)
-        else:
+        if not text:
             self._response = None
             return self._response
+
+        response = StringWithLiteralRepr(text.strip())
+        self._response = response
+        self._log.info("\n".join(response.splitlines()[:20]))
 
         if not self.ignore_errors:
             self._raise_errors(text)
@@ -666,7 +676,7 @@ class _CoreExecutionMixin(_CoreMixinBase):
         param_name = param_name.strip()
 
         match_valid_parameter_name = (
-            r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0," + f"{MAX_PARAM_CHARS-1}" + r"}$"
+            r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0," + f"{MAX_PARAM_CHARS - 1}" + r"}$"
         )
         # Using % is allowed, because of substitution, but it is very likely MAPDL will complain.
         if not re.search(match_valid_parameter_name, param_name):

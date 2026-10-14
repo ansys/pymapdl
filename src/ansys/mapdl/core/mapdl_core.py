@@ -22,93 +22,12 @@
 
 """Module to control interaction with MAPDL through Python"""
 
-from enum import Enum  # noqa: F401
-from functools import wraps  # noqa: F401
-import glob  # noqa: F401
-import logging  # noqa: F401
-import os  # noqa: F401
-import pathlib  # noqa: F401
-import re  # noqa: F401
-from shutil import copyfile, rmtree  # noqa: F401
+import pathlib
+from typing import TYPE_CHECKING, Any, Dict, Optional, TextIO, Union
 
-# Subprocess is needed to start the backend. But
-# the input is controlled by the library. Excluding bandit check.
-from subprocess import DEVNULL, call  # nosec B404  # noqa: F401
-import tempfile  # noqa: F401
-import time  # noqa: F401
-from typing import (  # noqa: F401
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    TextIO,
-    Tuple,
-    TypeAlias,
-    Union,
-)
-from uuid import uuid4  # noqa: F401
-from warnings import warn  # noqa: F401
-import weakref  # noqa: F401
-
-import numpy as np  # noqa: F401
-
-from ansys.mapdl import core as pymapdl  # noqa: F401
-from ansys.mapdl.core import LOG as logger  # noqa: F401
-from ansys.mapdl.core import _HAS_DPF, _HAS_VISUALIZER  # noqa: F401
-from ansys.mapdl.core.commands import (  # noqa: F401
-    CMD_BC_LISTING,
-    CMD_LISTING,
-    CMD_XSEL,
-    XSEL_DOCSTRING_INJECTION,
-    BoundaryConditionsListingOutput,
-    CommandListingOutput,
-    Commands,
-    StringWithLiteralRepr,
-    inject_docs,
-)
-from ansys.mapdl.core.errors import (  # noqa: F401
-    ComponentNoData,
-    MapdlCommandIgnoredError,
-    MapdlExitedError,
-    MapdlFileNotFoundError,
-    MapdlInvalidRoutineError,
-    MapdlRuntimeError,
-)
-from ansys.mapdl.core.information import Information  # noqa: F401
-from ansys.mapdl.core.inline_functions import Query  # noqa: F401
-from ansys.mapdl.core.mapdl_types import MapdlFloat  # noqa: F401
-from ansys.mapdl.core.misc import (  # noqa: F401
-    check_deprecated_vtk_kwargs,
-    check_valid_routine,
-    last_created,
-    random_string,
-    requires_graphics,
-    requires_package,
-    run_as,
-    supress_logging,
-)
-from ansys.mapdl.core.plotting import GraphicsBackend  # noqa: F401
-
-if TYPE_CHECKING:  # pragma: no cover
-    from ansys.mapdl.reader import Archive  # noqa: F401
-
-    from ansys.mapdl.core.component import ComponentManager  # noqa: F401
-    from ansys.mapdl.core.mapdl import MapdlBase  # noqa: F401
-    from ansys.mapdl.core.mapdl_geometry import (  # noqa: F401
-        Geometry,
-        LegacyGeometry,
-    )
-    from ansys.mapdl.core.parameters import Parameters  # noqa: F401
-    from ansys.mapdl.core.plugin import ansPlugin  # noqa: F401
-    from ansys.mapdl.core.solution import Solution  # noqa: F401
-    from ansys.mapdl.core.xpl import ansXpl  # noqa: F401
-
-    if _HAS_DPF:
-        from ansys.mapdl.core.reader import DPFResult  # noqa: F401
-
-from ansys.mapdl.core._mapdl_core.constants import (  # noqa: F401
+from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.core import _HAS_DPF, _HAS_VISUALIZER
+from ansys.mapdl.core._mapdl_core.constants import (
     _PERMITTED_ERRORS,
     GUI_FONT_SIZE,
     INVAL_COMMANDS,
@@ -122,16 +41,16 @@ from ansys.mapdl.core._mapdl_core.constants import (  # noqa: F401
 )
 from ansys.mapdl.core._mapdl_core.execution import (
     _CoreExecutionMixin,
+    parse_to_short_cmd,
 )
-from ansys.mapdl.core._mapdl_core.execution import parse_to_short_cmd  # noqa: F401
 from ansys.mapdl.core._mapdl_core.files import _CoreFileMixin
-from ansys.mapdl.core._mapdl_core.logging import (  # noqa: F401
+from ansys.mapdl.core._mapdl_core.logging import (
     DEBUG_LEVELS,
     LOG_APDL_DEFAULT_FILE_NAME,
     _CoreLoggingMixin,
     setup_logger,
 )
-from ansys.mapdl.core._mapdl_core.plotting import (  # noqa: F401
+from ansys.mapdl.core._mapdl_core.plotting import (
     PLOT_COMMANDS,
     PNG_IS_WRITTEN_TO_FILE,
     VALID_DEVICES,
@@ -140,16 +59,120 @@ from ansys.mapdl.core._mapdl_core.plotting import (  # noqa: F401
     VALID_FILE_TYPE_FOR_PLOT_LITERAL,
     _CorePlottingMixin,
 )
-from ansys.mapdl.core._mapdl_core.selection import (  # noqa: F401
+from ansys.mapdl.core._mapdl_core.selection import (
     _TMP_COMP,
     ENTITIES_TO_SELECTION_MAPPING,
     _CoreSelectionMixin,
 )
 from ansys.mapdl.core._mapdl_core.state import _CoreStateMixin
 from ansys.mapdl.core._mapdl_core.subsystems import _CoreSubsystemsMixin
-from ansys.mapdl.core.contexts.chain_commands import MAX_COMMAND_LENGTH  # noqa: F401
+from ansys.mapdl.core.commands import (
+    CMD_BC_LISTING,
+    CMD_LISTING,
+    CMD_XSEL,
+    XSEL_DOCSTRING_INJECTION,
+    BoundaryConditionsListingOutput,
+    CommandListingOutput,
+    Commands,
+    StringWithLiteralRepr,
+    inject_docs,
+)
+from ansys.mapdl.core.contexts.chain_commands import MAX_COMMAND_LENGTH
 from ansys.mapdl.core.contexts.command_contexts import _CoreCommandContextMixin
-from ansys.mapdl.core.post import PostProcessing  # noqa: F401
+from ansys.mapdl.core.errors import (
+    ComponentNoData,
+    MapdlCommandIgnoredError,
+    MapdlExitedError,
+    MapdlFileNotFoundError,
+    MapdlInvalidRoutineError,
+    MapdlRuntimeError,
+)
+from ansys.mapdl.core.information import Information
+from ansys.mapdl.core.inline_functions import Query
+from ansys.mapdl.core.mapdl_types import MapdlFloat
+from ansys.mapdl.core.misc import (
+    check_deprecated_vtk_kwargs,
+    check_valid_routine,
+    last_created,
+    random_string,
+    requires_graphics,
+    requires_package,
+    run_as,
+    supress_logging,
+)
+from ansys.mapdl.core.plotting import GraphicsBackend
+from ansys.mapdl.core.post import PostProcessing
+
+if TYPE_CHECKING:  # pragma: no cover
+    from ansys.mapdl.core.plugin import ansPlugin
+    from ansys.mapdl.core.xpl import ansXpl
+
+    if _HAS_DPF:
+        from ansys.mapdl.core.reader import DPFResult  # noqa: F401
+
+# Names re-exported for backward compatibility with code that imported them
+# from this module before the responsibility split.
+__all__ = [
+    "_MapdlCore",
+    "_sanitize_start_parm",
+    # Constants
+    "_PERMITTED_ERRORS",
+    "_TMP_COMP",
+    "DEBUG_LEVELS",
+    "ENTITIES_TO_SELECTION_MAPPING",
+    "GUI_FONT_SIZE",
+    "INVAL_COMMANDS",
+    "INVAL_COMMANDS_SILENT",
+    "LOG_APDL_DEFAULT_FILE_NAME",
+    "MAX_COMMAND_LENGTH",
+    "MAX_PARAM_CHARS",
+    "PLOT_COMMANDS",
+    "PNG_IS_WRITTEN_TO_FILE",
+    "SESSION_ID_NAME",
+    "STATUS",
+    "VALID_DEVICES",
+    "VALID_DEVICES_LITERAL",
+    "VALID_FILE_TYPE_FOR_PLOT",
+    "VALID_FILE_TYPE_FOR_PLOT_LITERAL",
+    "VALID_SELECTION_ENTITY_TP",
+    "VALID_SELECTION_TYPE_TP",
+    "VWRITE_MWRITE_REPLACEMENT",
+    # Helpers
+    "parse_to_short_cmd",
+    "setup_logger",
+    # Commands
+    "CMD_BC_LISTING",
+    "CMD_LISTING",
+    "CMD_XSEL",
+    "XSEL_DOCSTRING_INJECTION",
+    "BoundaryConditionsListingOutput",
+    "CommandListingOutput",
+    "Commands",
+    "StringWithLiteralRepr",
+    "inject_docs",
+    # Errors
+    "ComponentNoData",
+    "MapdlCommandIgnoredError",
+    "MapdlExitedError",
+    "MapdlFileNotFoundError",
+    "MapdlInvalidRoutineError",
+    "MapdlRuntimeError",
+    # Misc
+    "GraphicsBackend",
+    "Information",
+    "MapdlFloat",
+    "PostProcessing",
+    "Query",
+    "check_deprecated_vtk_kwargs",
+    "check_valid_routine",
+    "last_created",
+    "random_string",
+    "requires_graphics",
+    "requires_package",
+    "run_as",
+    "supress_logging",
+]
+
 
 _ALLOWED_START_PARM = [
     "additional_switches",

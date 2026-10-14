@@ -20,25 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from functools import wraps  # noqa: F401
-import os  # noqa: F401
-import pathlib  # noqa: F401
-import re  # noqa: F401
-import shutil  # noqa: F401
-import tempfile  # noqa: F401
-from typing import Union  # noqa: F401
-import warnings  # noqa: F401
-import weakref  # noqa: F401
+from functools import wraps
 
-import numpy as np  # noqa: F401
-from numpy.typing import DTypeLike, NDArray  # noqa: F401
-
-from ansys.mapdl.core import LOG as logger  # noqa: F401
-from ansys.mapdl.core import parse  # noqa: F401
 from ansys.mapdl.core._mapdl_extended.analysis import (
     _ExtendedAnalysisMixin,
 )
-from ansys.mapdl.core._mapdl_extended.apdl.parameter_definition import (  # noqa: F401
+from ansys.mapdl.core._mapdl_extended.apdl.parameter_definition import (
     TMP_VAR,
     _ExtendedParameterCommandsMixin,
 )
@@ -46,7 +33,7 @@ from ansys.mapdl.core._mapdl_extended.arrays import _ExtendedArrayMixin
 from ansys.mapdl.core._mapdl_extended.aux15.iges import (
     _ExtendedImportCommandsMixin,
 )
-from ansys.mapdl.core._mapdl_extended.contexts import (  # noqa: F401
+from ansys.mapdl.core._mapdl_extended.contexts import (
     MAX_DO_LOOP_LEVEL,
     _DoLoopContext,
 )
@@ -69,8 +56,8 @@ from ansys.mapdl.core._mapdl_extended.session.files import (
     _ExtendedFileCommandsMixin,
 )
 from ansys.mapdl.core._mapdl_extended.values import _ExtendedValueMixin
-from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput  # noqa: F401
-from ansys.mapdl.core.errors import (  # noqa: F401
+from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput
+from ansys.mapdl.core.errors import (
     CommandDeprecated,
     ComponentDoesNotExits,
     IncorrectWorkingDirectory,
@@ -78,16 +65,43 @@ from ansys.mapdl.core.errors import (  # noqa: F401
     MapdlDoLoopLimitError,
     MapdlRuntimeError,
 )
-from ansys.mapdl.core.mapdl_core import _MapdlCore  # noqa: F401
-from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat  # noqa: F401
-from ansys.mapdl.core.misc import (  # noqa: F401
+from ansys.mapdl.core.mapdl_core import _MapdlCore
+from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
+from ansys.mapdl.core.misc import (
     allow_iterables_vmin,
     allow_pickable_entities,
     check_deprecated_vtk_kwargs,
     requires_graphics,
     supress_logging,
 )
-from ansys.mapdl.core.plotting import GraphicsBackend  # noqa: F401
+from ansys.mapdl.core.plotting import GraphicsBackend
+
+# Names re-exported for backward compatibility with code that imported them
+# from this module before the responsibility split.
+__all__ = [
+    "_MapdlCommandExtended",
+    "_MapdlExtended",
+    "_MapdlCore",
+    "_DoLoopContext",
+    "MAX_DO_LOOP_LEVEL",
+    "TMP_VAR",
+    "CommandDeprecated",
+    "CommandListingOutput",
+    "CommandOutput",
+    "ComponentDoesNotExits",
+    "GraphicsBackend",
+    "IncorrectWorkingDirectory",
+    "KwargDict",
+    "MapdlCommandIgnoredError",
+    "MapdlDoLoopLimitError",
+    "MapdlFloat",
+    "MapdlRuntimeError",
+    "allow_iterables_vmin",
+    "allow_pickable_entities",
+    "check_deprecated_vtk_kwargs",
+    "requires_graphics",
+    "supress_logging",
+]
 
 
 class _MapdlCommandExtended(

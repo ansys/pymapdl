@@ -175,7 +175,6 @@ class _CoreFileMixin(_CoreMixinBase):
 
         fpath = os.path.dirname(fname)
         fname = fPath.name
-        fext = fPath.suffix
 
         # if there is no dirname, we are assuming the file is
         # in the python working directory.

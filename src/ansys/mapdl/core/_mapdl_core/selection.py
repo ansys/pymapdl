@@ -25,11 +25,6 @@
 
 from functools import wraps
 
-# Subprocess is needed to start the backend. But
-# the input is controlled by the library. Excluding bandit check.
-from typing import TYPE_CHECKING
-
-from ansys.mapdl.core import _HAS_DPF
 from ansys.mapdl.core.commands import (
     CMD_XSEL,
     XSEL_DOCSTRING_INJECTION,
@@ -38,12 +33,27 @@ from ansys.mapdl.core.commands import (
 )
 from ansys.mapdl.core.plotting.picker import MapdlPicker
 
-if TYPE_CHECKING:  # pragma: no cover
-    if _HAS_DPF:
-        pass
-
-
 from . import _CoreMixinBase
+
+# XSEL command -> (owner attribute, ID attribute) of the selected entities.
+_XSEL_OUTPUT = {
+    "NSEL": ("mesh", "nnum"),
+    "ESEL": ("mesh", "enum"),
+    "KSEL": ("geometry", "knum"),
+    "LSEL": ("geometry", "lnum"),
+    "ASEL": ("geometry", "anum"),
+    "VSEL": ("geometry", "vnum"),
+    "ESLN": ("mesh", "enum"),
+    "NSLE": ("mesh", "nnum"),
+}
+
+
+def _is_interactive_xsel(args, kwargs) -> bool:
+    """Return ``True`` when an XSEL command uses the interactive ``P`` item."""
+    if len(args) >= 2 and isinstance(args[1], str) and args[1].upper() == "P":
+        return True
+    return "item" in kwargs and kwargs["item"].upper() == "P"
+
 
 _TMP_COMP = {
     "KP": "cmp_kp",
@@ -86,87 +96,61 @@ class _CoreSelectionMixin(_CoreMixinBase):
         if self.is_console:
             return
 
-        def wrap_xsel_function(func):
-            if hasattr(func, "__func__"):
-                func.__func__.__doc__ = inject_docs(
-                    func.__func__.__doc__, XSEL_DOCSTRING_INJECTION
-                )
-            else:  # pragma: no cover
-                func.__doc__ = inject_docs(func.__doc__, XSEL_DOCSTRING_INJECTION)
-
-            def wrap_xsel_function_output(method):
-                # Injecting doc string modification
-                name = method.__func__.__name__.upper()
-                if not self.geometry:
-                    # Cases where the geometry module is not loaded
-                    return None
-
-                if name == "NSEL":
-                    return self.mesh.nnum
-                elif name == "ESEL":
-                    return self.mesh.enum
-                elif name == "KSEL":
-                    return self.geometry.knum
-                elif name == "LSEL":
-                    return self.geometry.lnum
-                elif name == "ASEL":
-                    return self.geometry.anum
-                elif name == "VSEL":
-                    return self.geometry.vnum
-                elif name == "ESLN":
-                    return self.mesh.enum
-                elif name == "NSLE":
-                    return self.mesh.nnum
-                else:
-                    return None
-
-            @wraps(func)
-            def inner_wrapper(*args, **kwargs):
-                # in interactive mode (item='p'), the output is not suppressed
-                if self._store_commands:
-                    # In non-interactive mode, execute the wrapped function and return its result.
-                    return func(*args, **kwargs)
-
-                is_interactive_arg = (
-                    True
-                    if len(args) >= 2
-                    and isinstance(args[1], str)
-                    and args[1].upper() == "P"
-                    else False
-                )
-                is_interactive_kwarg = (
-                    True
-                    if "item" in kwargs and kwargs["item"].upper() == "P"
-                    else False
-                )
-
-                return_mapdl_output = kwargs.pop(
-                    "return_mapdl_output", self._xsel_mapdl_output
-                )
-                if is_interactive_arg or is_interactive_kwarg:
-                    return_mapdl_output = True
-
-                output = func(*args, **kwargs)
-                if not return_mapdl_output:
-                    output = wrap_xsel_function_output(func)
-                return output
-
-            return inner_wrapper
-
         for name in dir(self):
             if name[0:4].upper() in CMD_XSEL and name in dir(
                 Commands
             ):  # avoid matching Mapdl properties which starts with same letters as MAPDL commands.
                 method = self.__getattribute__(name)
-                setattr(self, name, wrap_xsel_function(method))
+                setattr(self, name, self._wrap_xsel_function(method))
+
+    def _wrap_xsel_function(self, func):
+        """Wrap an XSEL command so it returns the selected entity IDs."""
+        if hasattr(func, "__func__"):
+            func.__func__.__doc__ = inject_docs(
+                func.__func__.__doc__, XSEL_DOCSTRING_INJECTION
+            )
+        else:  # pragma: no cover
+            func.__doc__ = inject_docs(func.__doc__, XSEL_DOCSTRING_INJECTION)
+
+        @wraps(func)
+        def inner_wrapper(*args, **kwargs):
+            # in interactive mode (item='p'), the output is not suppressed
+            if self._store_commands:
+                # In non-interactive mode, execute the wrapped function and return its result.
+                return func(*args, **kwargs)
+
+            return_mapdl_output = kwargs.pop(
+                "return_mapdl_output", self._xsel_mapdl_output
+            )
+            if _is_interactive_xsel(args, kwargs):
+                return_mapdl_output = True
+
+            output = func(*args, **kwargs)
+            if not return_mapdl_output:
+                output = self._xsel_selected_ids(func)
+            return output
+
+        return inner_wrapper
+
+    def _xsel_selected_ids(self, method):
+        """Return the IDs selected by an XSEL command."""
+        if not self.geometry:
+            # Cases where the geometry module is not loaded
+            return None
+
+        source, attribute = _XSEL_OUTPUT.get(
+            method.__func__.__name__.upper(), (None, None)
+        )
+        if source is None:
+            return None
+        return getattr(getattr(self, source), attribute)
 
     def _get_selected_(self, entity):
         """Get list of selected entities."""
         allowed_values = ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]
         if entity.upper() not in allowed_values:
             raise ValueError(
-                f"The value '{entity}' is not allowed."
-                f"Only {allowed_values} are allowed"
+                f"The value '{entity}' is not allowed.Only {allowed_values} are allowed"
             )
 
         entity = entity.upper()
