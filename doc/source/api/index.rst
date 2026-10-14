@@ -35,6 +35,7 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
    plotting
    pool
    post
+   report
    Pyansys Math <https://math.docs.pyansys.com/version/stable/>
    plugin
    solution
