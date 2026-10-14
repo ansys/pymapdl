@@ -24,8 +24,13 @@
 
 from typing import Tuple
 
-from ansys.mapdl.core.constants import LOCALHOST as MAPDL_DEFAULT_IP  # noqa: F401
-from ansys.mapdl.core.constants import MAPDL_DEFAULT_PORT  # noqa: F401
+from ansys.mapdl.core.constants import (  # noqa: F401  # pylint: disable=unused-import
+    LOCALHOST,
+    MAPDL_DEFAULT_PORT,
+)
+
+MAPDL_DEFAULT_IP = LOCALHOST
+"""Default IP address of the MAPDL instance."""
 
 DEFAULT_TIMEOUT = 10
 """Seconds to wait when connecting to a running MAPDL instance."""

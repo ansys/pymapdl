@@ -32,7 +32,9 @@ import time
 from typing import Any, Iterator, Literal, Optional, Union
 
 from ansys.mapdl.core import _HAS_ATC, LOG
-from ansys.mapdl.core.constants import LOCALHOST  # noqa: F401
+from ansys.mapdl.core.constants import (  # noqa: F401  # pylint: disable=unused-import
+    LOCALHOST,
+)
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.misc import threaded_daemon
 

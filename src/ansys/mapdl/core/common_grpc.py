@@ -29,8 +29,10 @@ import grpc
 import numpy as np
 
 from ansys.mapdl.core import LOG
-from ansys.mapdl.core.constants import ANSYS_VALUE_TYPE
-from ansys.mapdl.core.constants import DEFAULT_CHUNKSIZE  # noqa: F401
+from ansys.mapdl.core.constants import (  # noqa: F401  # pylint: disable=unused-import
+    ANSYS_VALUE_TYPE,
+    DEFAULT_CHUNKSIZE,
+)
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlRuntimeError
 
 # Chunk size for file streaming.
