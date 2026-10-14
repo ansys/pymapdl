@@ -22,7 +22,6 @@
 
 """Unit tests for launch_mapdl function in launcher.__init__ module."""
 
-import os
 from unittest.mock import Mock, patch
 
 import pytest
@@ -182,7 +181,6 @@ class TestLaunchMapdlOrchestration:
             patch("os.name", "posix"),
             patch("os.access", Mock(return_value=True)),
         ):
-
             mock_config.return_value = self._create_test_config(launch_on_hpc=True)
             mock_validate.return_value = ValidationResult(
                 valid=True, errors=[], warnings=[]
@@ -494,7 +492,7 @@ class TestUdsEnvVarInjection:
 @requires("local")
 @requires("linux")
 @requires("grpc")
-def test_launch_uds_transport(monkeypatch):
+def test_launch_uds_transport(monkeypatch, free_port):
     """Test that MAPDL defaults to UDS transport when launched locally on Linux.
 
     UDS (Unix Domain Sockets) is the default gRPC transport for local Linux
@@ -509,7 +507,7 @@ def test_launch_uds_transport(monkeypatch):
     try:
         mapdl_ = launch_mapdl(
             additional_switches=QUICK_LAUNCH_SWITCHES,
-            port=int(os.getenv("PYMAPDL_TEST_PORT", "50052")) + 20,
+            port=free_port,
         )
         assert mapdl_.transport_mode == "uds"
 
