@@ -4685,18 +4685,22 @@ class MapdlGrpc(MapdlBase):
             raise errors[0]
 
     def _read_owned_array_parameter(self, parameter_name: str) -> NDArray[np.float64]:
-        """Download an owned 1-D array parameter without parsing ``*STATUS``.
+        """Download an owned column-vector parameter without parsing ``*STATUS``.
 
         The row count is read with a binary ``*GET`` query and the values are
         streamed with ``mwrite``, so this avoids the version-fragile
         ``*STATUS,PRM_`` listing that
         :meth:`Parameters.__getitem__ <ansys.mapdl.core.parameters.Parameters.__getitem__>`
         performs to discover the array shape.
+
+        The result keeps the ``(rows, 1)`` shape that ``Parameters`` returns for
+        ``*VGET`` parameters, so ``get_variable`` results are unchanged.
+        ``get_array`` flattens it through ``LazyArray(flatten=True)``.
         """
         rows = int(self.get_value("PARM", parameter_name, "DIM", 1))
         if rows == 0:
             return np.empty(0)
-        return np.ravel(self.parameters._get_parameter_array(parameter_name, (rows,)))
+        return self.parameters._get_parameter_array(parameter_name, (rows, 1))
 
     @wraps(MapdlBase.vget)
     def vget(  # numpydoc ignore=RT01

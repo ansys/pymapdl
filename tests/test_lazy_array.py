@@ -398,7 +398,9 @@ def test_get_array_materialization_deletes_private_parameter():
 
     np.testing.assert_array_equal(np.asarray(lazy), [1.0, 2.0])
     mapdl.get_value.assert_called_once_with("PARM", parameter_name, "DIM", 1)
-    mapdl.parameters._get_parameter_array.assert_called_once_with(parameter_name, (2,))
+    mapdl.parameters._get_parameter_array.assert_called_once_with(
+        parameter_name, (2, 1)
+    )
     # The fragile *STATUS,PRM_ path must never be used.
     mapdl.parameters.__getitem__.assert_not_called()
     mapdl.run.assert_called_once_with(f"{parameter_name}=", mute=True)
@@ -456,7 +458,11 @@ def test_owned_parameter_cleanup_propagates_errors():
 
 
 def test_read_owned_array_parameter_uses_binary_path():
-    """Owned arrays resolve via binary *GET + mwrite, not *STATUS,PRM_."""
+    """Owned arrays resolve via binary *GET + mwrite, not *STATUS,PRM_.
+
+    The column-vector ``(rows, 1)`` shape is preserved so ``get_variable``
+    matches the eager ``nsol``/``esol`` wrappers.
+    """
     mapdl = _mock_grpc_mapdl()
     mapdl.get_value = MagicMock(return_value=3.0)
     expected = np.array([[1.0], [2.0], [3.0]])
@@ -464,10 +470,11 @@ def test_read_owned_array_parameter_uses_binary_path():
 
     result = mapdl._read_owned_array_parameter("PYMAPDL_LAZY_X")
 
-    np.testing.assert_array_equal(result, [1.0, 2.0, 3.0])
+    assert result.shape == (3, 1)
+    np.testing.assert_array_equal(result, expected)
     mapdl.get_value.assert_called_once_with("PARM", "PYMAPDL_LAZY_X", "DIM", 1)
     mapdl.parameters._get_parameter_array.assert_called_once_with(
-        "PYMAPDL_LAZY_X", (3,)
+        "PYMAPDL_LAZY_X", (3, 1)
     )
     mapdl.parameters.__getitem__.assert_not_called()
 
