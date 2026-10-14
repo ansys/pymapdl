@@ -2730,15 +2730,14 @@ def test_get_array_returns_lazy_array(mapdl, cleared):
 
     node_numbers = mapdl.get_array("NODE", item1="NLIST")
 
-    # The result is deferred and streams through the binary *VGET service, so
-    # it must not create a private MAPDL parameter.
     assert isinstance(node_numbers, LazyArray)
-    assert not mapdl._lazy_array_parameters
+    parameter_name = node_numbers._parameter_name
+    assert parameter_name in mapdl._lazy_array_parameters
 
     np.testing.assert_array_equal(node_numbers, [1.0])
 
-    # Resolution still creates no backing parameter to clean up.
-    assert not mapdl._lazy_array_parameters
+    assert parameter_name not in mapdl._lazy_array_parameters
+    assert parameter_name not in mapdl.parameters
 
 
 def test_get_etable_with_explicit_label():

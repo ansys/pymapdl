@@ -328,18 +328,46 @@ def test_failed_download_keeps_backing_parameter_for_retry():
     assert not mapdl._lazy_array_parameters
 
 
-def test_get_array_defers_to_binary_service():
-    """gRPC get_array must defer and never create a private parameter."""
+def test_get_array_issues_vget_immediately_and_defers_download():
+    """gRPC get_array must run *VGET at call time and defer only the download.
+
+    Running ``*VGET`` immediately snapshots the current selection, so changing
+    the selection afterward does not alter the result.
+    """
     mapdl = _mock_grpc_mapdl()
 
     lazy = mapdl.get_array("NODE", item1="NLIST")
 
     assert isinstance(lazy, LazyArray)
-    # Deferred: no download, no private parameter, no *VGET text command.
+    mapdl.starvget.assert_called_once_with(
+        lazy._parameter_name,
+        "NODE",
+        "",
+        "NLIST",
+        "",
+        "",
+        "",
+        "",
+        mute=False,
+    )
+    # The values are not downloaded until first use.
+    mapdl.get_value.assert_not_called()
     mapdl._get_array_from_service.assert_not_called()
-    mapdl.starvget.assert_not_called()
-    assert not mapdl._lazy_array_parameters
     mapdl.parameters.__getitem__.assert_not_called()
+    assert mapdl._lazy_array_parameters == {lazy._parameter_name}
+
+
+def test_get_array_empty_result_returns_empty_array():
+    """An empty *VGET result must return an empty array and free its source."""
+    mapdl = _mock_grpc_mapdl()
+    mapdl.starvget.return_value = "the dimension number 1 is 0"
+
+    result = mapdl.get_array("NODE", item1="NLIST")
+
+    assert isinstance(result, np.ndarray)
+    assert result.size == 0
+    mapdl.run.assert_called_once_with("PYMAPDL_LAZY_0000000000000001=", mute=True)
+    assert not mapdl._lazy_array_parameters
 
 
 def test_get_array_etable_uses_eager_grpc_service():
@@ -357,36 +385,62 @@ def test_get_array_etable_uses_eager_grpc_service():
     mapdl.starvget.assert_not_called()
 
 
-def test_get_array_materialization_streams_binary_values():
-    """gRPC get_array must stream values through VGet2 on first use."""
+def test_get_array_materialization_deletes_private_parameter():
+    """gRPC get_array must download once via the binary path, then release."""
     mapdl = _mock_grpc_mapdl()
-    mapdl._get_array_from_service = MagicMock(return_value=np.array([1.0, 2.0]))
+    mapdl.get_value = MagicMock(return_value=2.0)
+    mapdl.parameters._get_parameter_array = MagicMock(
+        return_value=np.array([[1.0], [2.0]])
+    )
 
     lazy = mapdl.get_array("NODE", item1="NLIST")
-    mapdl._get_array_from_service.assert_not_called()
+    parameter_name = lazy._parameter_name
 
     np.testing.assert_array_equal(np.asarray(lazy), [1.0, 2.0])
-    mapdl._get_array_from_service.assert_called_once_with(
-        "NODE", "", "NLIST", "", "", "", ""
-    )
-    # No private parameter was created, so nothing must be deleted.
-    mapdl.run.assert_not_called()
+    mapdl.get_value.assert_called_once_with("PARM", parameter_name, "DIM", 1)
+    mapdl.parameters._get_parameter_array.assert_called_once_with(parameter_name, (2,))
+    # The fragile *STATUS,PRM_ path must never be used.
+    mapdl.parameters.__getitem__.assert_not_called()
+    mapdl.run.assert_called_once_with(f"{parameter_name}=", mute=True)
     assert not mapdl._lazy_array_parameters
 
 
-def test_get_array_population_failure_propagates():
-    """A failed VGet2 stream must surface the error on first use."""
+def test_get_array_population_failure_cleans_up_private_parameter():
+    """Failed *VGET commands must not retain an unused private parameter."""
     mapdl = _mock_grpc_mapdl()
-    mapdl._get_array_from_service = MagicMock(side_effect=RuntimeError("VGET failed"))
-
-    lazy = mapdl.get_array("NODE", item1="NLIST")
+    mapdl.starvget.side_effect = RuntimeError("VGET failed")
 
     with pytest.raises(RuntimeError, match="VGET failed"):
-        np.asarray(lazy)
+        mapdl.get_array("NODE", item1="NLIST")
 
-    # No private parameter is created by get_array, so none must be cleaned up.
-    mapdl.run.assert_not_called()
+    mapdl.run.assert_called_once_with("PYMAPDL_LAZY_0000000000000001=", mute=True)
     assert not mapdl._lazy_array_parameters
+
+
+def test_get_array_population_failure_surfaces_cleanup_error():
+    """A cleanup failure after a failed *VGET must surface the delete error."""
+    mapdl = _mock_grpc_mapdl()
+    mapdl.starvget.side_effect = RuntimeError("VGET failed")
+    mapdl.run.side_effect = RuntimeError("delete failed")
+
+    with pytest.raises(RuntimeError, match="delete failed"):
+        mapdl.get_array("NODE", item1="NLIST")
+
+    assert mapdl._lazy_array_parameters == {"PYMAPDL_LAZY_0000000000000001"}
+
+
+def test_get_array_snapshots_selection_at_call_time():
+    """Resolving after a selection change must not change the issued *VGET."""
+    mapdl = _mock_grpc_mapdl()
+    mapdl.get_value = MagicMock(return_value=1.0)
+    mapdl.parameters._get_parameter_array = MagicMock(return_value=np.array([[7.0]]))
+
+    lazy = mapdl.get_array("NODE", item1="NLIST")
+    # A selection change after the call must not trigger another *VGET.
+    mapdl.starvget.reset_mock()
+
+    np.testing.assert_array_equal(np.asarray(lazy), [7.0])
+    mapdl.starvget.assert_not_called()
 
 
 def test_owned_parameter_cleanup_propagates_errors():

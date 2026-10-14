@@ -4129,12 +4129,13 @@ class MapdlGrpc(MapdlBase):
         kloop="",
         **kwargs,
     ) -> Union[NDArray[np.float64], LazyArray]:
-        """Return a ``*VGET`` result lazily through the binary gRPC service.
+        """Populate a private MAPDL parameter and return it lazily.
 
-        The MAPDL command is not issued until the result is first used. On
-        resolution, the values stream directly through the binary ``VGet2``
-        service, so no private MAPDL parameter is created and no ``*STATUS``
-        text output is parsed.
+        The ``*VGET`` command is issued immediately so the result reflects the
+        selection at call time, even if the selection changes before the values
+        are used. Only the download is deferred. On first use, the values are
+        read with a binary ``*GET`` plus ``mwrite`` rather than by parsing
+        ``*STATUS,PRM_`` output.
         """
         if "parm" in kwargs:
             raise ValueError("Parameter name `parm` not supported with gRPC")
@@ -4142,13 +4143,35 @@ class MapdlGrpc(MapdlBase):
             return self._get_array_from_service(
                 entity, entnum, item1, it1num, item2, it2num, kloop
             )
+        parameter_name = self._new_lazy_array_parameter()
+        try:
+            output = self.starvget(
+                parameter_name,
+                entity,
+                entnum,
+                item1,
+                it1num,
+                item2,
+                it2num,
+                kloop,
+                mute=False,
+            )
+        except Exception as error:
+            try:
+                self._delete_lazy_array_parameter(parameter_name)
+            except Exception as cleanup_error:
+                raise cleanup_error from error
+            raise
+
+        if "the dimension number 1 is 0" in output:
+            self._delete_lazy_array_parameter(parameter_name)
+            return np.empty(0)
 
         return LazyArray(
             self,
-            "",
-            fetch=lambda: self._get_array_from_service(
-                entity, entnum, item1, it1num, item2, it2num, kloop
-            ),
+            parameter_name,
+            cleanup=lambda: self._delete_lazy_array_parameter(parameter_name),
+            fetch=lambda: self._read_owned_array_parameter(parameter_name),
             flatten=True,
         )
 
