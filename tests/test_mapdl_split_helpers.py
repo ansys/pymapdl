@@ -37,6 +37,7 @@ from ansys.mapdl.core._mapdl_extended.plotting_commands import (
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 from ansys.mapdl.core.plotting import picker
+from conftest import requires
 
 
 def _bare_core():
@@ -294,6 +295,7 @@ def test_wrap_xsel_function_returns_ids_or_mapdl_output():
 # --------------------------------------------------------------------------
 
 
+@requires("matplotlib")
 def test_aplot_area_colors_variants():
     anums = np.array([1, 2])
     colors = _ExtendedPlottingCommandsMixin._aplot_area_colors
@@ -308,6 +310,7 @@ def test_aplot_area_colors_variants():
         colors(anums, ["red"])
 
 
+@requires("matplotlib")
 def test_aplot_area_meshes_default_and_colored():
     surfs = ["s1", "s2"]
     anums = np.array([1, 2])
