@@ -31,7 +31,7 @@ import re
 import shutil
 import tempfile
 import time
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, call, patch
 from warnings import catch_warnings
 
 import grpc
@@ -58,6 +58,12 @@ if has_dependency("pyvista"):
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import USER_DATA_PATH
 from ansys.mapdl.core.commands import CommandListingOutput
+from ansys.mapdl.core.contexts.chain_commands import _ChainCommandsContext
+from ansys.mapdl.core.contexts.force_output import _ForceOutputContext
+from ansys.mapdl.core.contexts.muted import _MutedContext
+from ansys.mapdl.core.contexts.plotting import _InteractivePlottingContext
+from ansys.mapdl.core.contexts.run_as_routine import _RunAsRoutineContext
+from ansys.mapdl.core.contexts.save_selection import _SaveSelectionContext
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
     IncorrectWorkingDirectory,
@@ -274,9 +280,9 @@ class FakeMapdl(_MapdlExtended):
 
     It bypasses :class:`_MapdlCore.__init__ <ansys.mapdl.core.mapdl_core._MapdlCore>`
     entirely, since that requires a real (or gRPC) connection, but keeps the
-    real ``_store_commands``/``_stored_commands``/``non_interactive``
-    machinery from :class:`_MapdlCore <ansys.mapdl.core.mapdl_core._MapdlCore>`
-    so the actual buffering (and discarding) behavior is exercised.
+    real composed ``non_interactive`` context and its shared
+    ``_store_commands``/``_stored_commands`` state so the actual buffering
+    and discarding behavior is exercised.
     """
 
     def __init__(self):
@@ -287,9 +293,8 @@ class FakeMapdl(_MapdlExtended):
         # through a flush of ``_stored_commands``.
         self.sent_commands = []
         self._log = MagicMock()
-        # Avoid the ``self._parent().com(...)`` debug-only branch in
-        # ``_non_interactive.__enter__``, since ``com`` is not implemented
-        # on this fake.
+        # Avoid the debug-only ``com`` branch in the composed non-interactive
+        # context because this fake does not implement ``com``.
         self._log.logger.level = logging.WARNING
 
     def run(self, command, **kwargs):
@@ -544,13 +549,12 @@ def test_chain_commands_restores_state_on_body_error():
     parent._stored_commands = []
 
     with pytest.raises(RuntimeError, match="body failure"):
-        with _MapdlCore._chain_commands(parent):
+        with _ChainCommandsContext(parent):
             parent._stored_commands.append("incomplete command")
             raise RuntimeError("body failure")
 
     assert parent._store_commands is False
     assert parent._stored_commands == []
-    parent._chain_stored.assert_not_called()
 
 
 def test_chain_commands_preserves_nested_state():
@@ -558,12 +562,11 @@ def test_chain_commands_preserves_nested_state():
     parent._store_commands = True
     parent._stored_commands = ["outer command"]
 
-    with _MapdlCore._chain_commands(parent):
+    with _ChainCommandsContext(parent):
         parent._stored_commands.append("inner command")
 
     assert parent._store_commands is True
     assert parent._stored_commands == ["outer command", "inner command"]
-    parent._chain_stored.assert_not_called()
 
 
 def test_restore_plot_device_handles_restore_failure():
@@ -577,7 +580,7 @@ def test_restore_plot_device_handles_restore_failure():
 
 def test_save_selection_preserves_body_error_when_cleanup_fails():
     parent = MagicMock()
-    context = _MapdlCore._save_selection(parent)
+    context = _SaveSelectionContext(parent)
     context.selection = [{"cmsel": {}}]
     parent.allsel.side_effect = RuntimeError("cleanup failure")
 
@@ -589,12 +592,57 @@ def test_save_selection_preserves_body_error_when_cleanup_fails():
 def test_interactive_plotting_skips_noninteractive_mode():
     parent = MagicMock()
     parent._store_commands = True
-    context = _MapdlCore.WithInterativePlotting(parent, 1600)
+    context = _InteractivePlottingContext(parent, 1600)
 
     type(context).__enter__.__wrapped__(context)
     type(context).__exit__.__wrapped__(context, None, None, None)
 
     parent.show.assert_not_called()
+
+
+def test_muted_restores_state_on_body_error():
+    parent = MagicMock()
+    parent.mute = False
+
+    with pytest.raises(RuntimeError, match="body failure"):
+        with _MutedContext(parent):
+            assert parent.mute is True
+            raise RuntimeError("body failure")
+
+    assert parent.mute is False
+
+
+def test_force_output_restores_state_on_body_error():
+    parent = MagicMock()
+    parent._mute = True
+    parent.wrinqr.return_value = 0
+
+    with pytest.raises(RuntimeError, match="body failure"):
+        with _ForceOutputContext(parent):
+            assert parent._mute is False
+            raise RuntimeError("body failure")
+
+    assert parent._mute is True
+    assert parent._run.call_args_list == [call("/gopr"), call("/nopr")]
+
+
+def test_run_as_routine_restores_state_on_body_error():
+    parent = object.__new__(_MapdlCore)
+    parent._cached_routine = None
+    parent._parameters = MagicMock()
+    parent._parameters.routine = "PREP7"
+    parent._log = MagicMock()
+    parent.run = MagicMock()
+
+    with pytest.raises(RuntimeError, match="body failure"):
+        with _RunAsRoutineContext(parent, "POST26"):
+            raise RuntimeError("body failure")
+
+    assert parent._cached_routine is None
+    assert parent.run.call_args_list == [
+        call("/POST26", mute=True),
+        call("/PREP7", mute=True),
+    ]
 
 
 def test_error(mapdl, clear_at_end):
