@@ -215,7 +215,7 @@ def test_no_duplicate_public_callables_among_sibling_mixins():
     for siblings in sibling_groups:
         owners = {}
         for sibling in siblings:
-            for name, value in getmembers(sibling, isfunction):
+            for name, _ in getmembers(sibling, isfunction):
                 if not name.startswith("_"):
                     owners.setdefault(name, []).append(sibling.__name__)
         duplicates = {

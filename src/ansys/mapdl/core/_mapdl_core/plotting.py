@@ -179,42 +179,17 @@ class _CorePlottingMixin(_CoreMixinBase):
         >>> mapdl.amesh('all')
         >>> mapdl.eplot()
         """
-        # lazy load here to avoid circular import
-        from ansys.mapdl.core import _HAS_ATC
-
         if not self._local:
             raise MapdlRuntimeError(
                 "``open_gui`` can only be called from a local MAPDL instance."
             )
 
-        if inplace and include_result:
-            raise ValueError(
-                "'inplace' and 'include_result' kwargs are not compatible."
-            )
-
-        if inplace and include_result is None:
-            include_result = False
-
-        if include_result is None:
-            include_result = True
-
-        if not inplace:
-            inplace = False
+        include_result, inplace = self._resolve_open_gui_options(
+            include_result, inplace
+        )
 
         name = self.jobname
-
-        # specify a path for the temporary database if any.
-        if inplace:
-            run_dir = self._start_parm.get("run_location") or str(self.directory)
-
-        else:
-            temp_dir = tempfile.gettempdir()
-            run_dir = os.path.join(temp_dir, f"ansys_{random_string(10)}")
-
-            # Sanity checks
-            if os.path.isdir(run_dir):
-                rmtree(run_dir)
-            os.mkdir(run_dir)
+        run_dir = self._prepare_gui_run_dir(inplace)
 
         database_file = os.path.join(run_dir, f"{name}.db")
         if os.path.isfile(database_file) and not inplace:
@@ -238,42 +213,21 @@ class _CorePlottingMixin(_CoreMixinBase):
         self.exit()
 
         # copy result file to temp directory
-        if not inplace:
-            if include_result and self._result_file is not None:
-                if os.path.isfile(resultfile):
-                    tmp_resultfile = os.path.join(run_dir, "%s.rst" % name)
-                    copyfile(resultfile, tmp_resultfile)
+        if (
+            not inplace
+            and include_result
+            and self._result_file is not None
+            and os.path.isfile(resultfile)
+        ):
+            copyfile(resultfile, os.path.join(run_dir, "%s.rst" % name))
 
-        # write temporary input file
-        start_file = os.path.join(run_dir, f"start{version}.ans")
-        with open(start_file, "w") as f:
-            f.write("RESUME\n")
-
-        # some versions of ANSYS just look for "start.ans" when starting
-        other_start_file = os.path.join(run_dir, "start.ans")
-        with open(other_start_file, "w") as f:
-            f.write("RESUME\n")
+        start_files = self._write_gui_start_files(run_dir, version)
 
         # issue system command to run ansys in GUI mode
         cwd = os.getcwd()
         os.chdir(run_dir)
 
-        if not exec_file:
-            if _HAS_ATC:
-                from ansys.mapdl.core import get_mapdl_path
-
-                exec_file_ = get_mapdl_path(allow_input=False)
-            else:
-                exec_file_ = None
-
-            exec_file = self._start_parm.get("exec_file", exec_file_)
-
-        if not exec_file:
-            raise MapdlRuntimeError(
-                "The path to the MAPDL executable was not found. "
-                "Please set it using the 'exec_file' parameter when "
-                "launching MAPDL."
-            )
+        exec_file = self._resolve_gui_exec_file(exec_file)
 
         nproc = self._start_parm.get("nproc", 2)
         add_sw = self._start_parm.get("additional_switches", "")
@@ -312,8 +266,8 @@ class _CorePlottingMixin(_CoreMixinBase):
         os.chdir(cwd)
 
         # Clearing
-        os.remove(start_file)
-        os.remove(other_start_file)
+        for start_file in start_files:
+            os.remove(start_file)
 
         # reattach to a new session and reload database
         self._launch(self._start_parm)
@@ -321,6 +275,70 @@ class _CorePlottingMixin(_CoreMixinBase):
 
         # restore remove tmp state
         self._remove_tmp = remove_tmp
+
+    @staticmethod
+    def _resolve_open_gui_options(
+        include_result: bool | None, inplace: bool | None
+    ) -> tuple[bool, bool]:
+        """Validate and fill in the defaults of the ``open_gui`` options."""
+        if inplace and include_result:
+            raise ValueError(
+                "'inplace' and 'include_result' kwargs are not compatible."
+            )
+
+        if include_result is None:
+            include_result = not inplace
+
+        return include_result, bool(inplace)
+
+    def _prepare_gui_run_dir(self, inplace: bool) -> str:
+        """Return the directory where the MAPDL GUI is started."""
+        if inplace:
+            return self._start_parm.get("run_location") or str(self.directory)
+
+        run_dir = os.path.join(tempfile.gettempdir(), f"ansys_{random_string(10)}")
+
+        # Sanity checks
+        if os.path.isdir(run_dir):
+            rmtree(run_dir)
+        os.mkdir(run_dir)
+        return run_dir
+
+    @staticmethod
+    def _write_gui_start_files(run_dir: str, version) -> list[str]:
+        """Write the start files that make the GUI resume the database."""
+        # some versions of ANSYS just look for "start.ans" when starting
+        start_files = [
+            os.path.join(run_dir, f"start{version}.ans"),
+            os.path.join(run_dir, "start.ans"),
+        ]
+        for start_file in start_files:
+            with open(start_file, "w") as f:
+                f.write("RESUME\n")
+        return start_files
+
+    def _resolve_gui_exec_file(self, exec_file: str | None) -> str:
+        """Return the MAPDL executable used to open the GUI."""
+        # lazy load here to avoid circular import
+        from ansys.mapdl.core import _HAS_ATC
+
+        if not exec_file:
+            if _HAS_ATC:
+                from ansys.mapdl.core import get_mapdl_path
+
+                exec_file_ = get_mapdl_path(allow_input=False)
+            else:
+                exec_file_ = None
+
+            exec_file = self._start_parm.get("exec_file", exec_file_)
+
+        if not exec_file:
+            raise MapdlRuntimeError(
+                "The path to the MAPDL executable was not found. "
+                "Please set it using the 'exec_file' parameter when "
+                "launching MAPDL."
+            )
+        return exec_file
 
     @supress_logging
     def _enable_interactive_plotting(self, pixel_res: int = 1600):
@@ -462,12 +480,11 @@ class _CorePlottingMixin(_CoreMixinBase):
 
         def in_ipython():
             # from scooby.in_ipython
-            # to avoid dependency here.
-            try:
-                __IPYTHON__
-                return True
-            except NameError:  # pragma: no cover
-                return False
+            # to avoid dependency here. IPython defines ``__IPYTHON__`` as a
+            # builtin.
+            import builtins
+
+            return hasattr(builtins, "__IPYTHON__")
 
         self._log.debug("A screenshot file has been found.")
         img = mpimg.imread(filename)
@@ -518,8 +535,7 @@ class _CorePlottingMixin(_CoreMixinBase):
         while os.path.exists(plot_path_) and not provided:
             id_ += 1
             plot_path_ = os.path.join(plot_path, f"{plot_stem}_{id_}{plot_ext}")
-        else:
-            copyfile(filename, plot_path_)
+        copyfile(filename, plot_path_)
 
         self._log.debug(
             f"Copy plot file from temp directory to working directory as: {plot_path}"

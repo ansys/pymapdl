@@ -252,7 +252,7 @@ class _ExtendedArrayMixin(_ExtendedMixinBase):
             n2 = imax
             n3 = kmax
             self.vread(name, filename, n1=n1, n2=n2, n3=n3, label=label, nskip=1)
-            fmt = f"(1E25.18)"  # Adding one extra space for the sign
+            fmt = "(1E25.18)"  # Adding one extra space for the sign
             logger.info("Using *VREAD with format %s in %s", fmt, filename)
             self.run(fmt)
 

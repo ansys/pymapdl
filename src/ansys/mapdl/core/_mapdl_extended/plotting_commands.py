@@ -380,9 +380,6 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
             graphics_backend = self._graphics_backend
 
         if graphics_backend:
-            from matplotlib.colors import to_rgba
-
-            from ansys.mapdl.core.plotting.theme import get_ansys_colors
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             kwargs.setdefault("show_scalar_bar", False)
@@ -398,106 +395,20 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
                 return pl.show(**kwargs)
 
             surfs = self.geometry.get_areas(return_as_list=True, quality=quality)
-            meshes = []
             labels = []
 
             # anums = np.unique(surf["entity_num"])
             anums = self.geometry.anum  # This might need double check
 
-            # individual surface isolation is quite slow, so just
-            # color individual areas
-            if (isinstance(color_areas, np.ndarray) and len(color_areas) > 1) or (
-                not isinstance(color_areas, np.ndarray) and color_areas
-            ):
-                if isinstance(color_areas, bool):
-                    size_ = len(anums)
-                    # Because this is only going to be used for plotting
-                    # purposes, we don't need to allocate
-                    # a huge vector with random numbers (colours).
-                    # By default `pyvista.DataSetMapper.set_scalars` `n_colors`
-                    # argument is set to 256, so let do here the same.
-                    # We will limit the number of randoms values (colours)
-                    # to 256.
-                    #
-                    # Link: https://docs.pyvista.org/api/plotting/_autosummary/pyvista.DataSetMapper.set_scalars.html#pyvista.DataSetMapper.set_scalars
-                    size_ = min([256, size_])
-                    # Generating a colour array,
-                    # Size = number of areas.
-                    # Values are random between 0 and min(256, number_areas)
-                    colors = get_ansys_colors(size_)
-
-                elif isinstance(color_areas, str):
-                    # A color is provided as a string
-                    colors = np.atleast_2d(to_rgba(color_areas))
-
-                else:
-                    if len(anums) != len(color_areas):
-                        raise ValueError(
-                            "The length of the parameter array 'color_areas' "
-                            "should be the same as the number of areas."
-                            f"\nanums: {anums}"
-                            f"\ncolor_areas: {color_areas}"
-                        )
-
-                    if isinstance(color_areas[0], str):
-                        colors = [to_rgba(each) for each in color_areas]
-                    else:
-                        colors = color_areas
-
-                # Creating a mapping of colors
-                ent_num = []
-                for each_surf in surfs:
-                    ent_num.append(int(np.unique(each_surf["entity_num"])[0]))
-                ent_num.sort()
-
-                # expand color array until matching the number of areas.
-                # In this case we start to repeat colors in the same order.
-                colors = np.resize(colors, (len(ent_num), 3))
-
-                for surf, color in zip(surfs, colors):
-                    meshes.append({"mesh": surf, "color": color})
-
-            else:
-                for surf in surfs:
-                    meshes.append({"mesh": surf, "color": kwargs.get("color", "white")})
+            meshes = self._aplot_area_meshes(surfs, anums, color_areas, kwargs)
 
             if show_area_numbering:
-                centers = []
-
-                for surf in surfs:
-                    anum = np.unique(surf["entity_num"])
-                    if len(anum) != 1:
-                        raise RuntimeError(
-                            f"The pv.Unstructured from the entity {anum[0]} contains entities"
-                            f"from other entities {anum}"  # Sanity check
-                        )
-
-                    area = surf.extract_cells(surf["entity_num"] == anum)
-                    centers.append(area.center)
-
-                labels.append(
-                    {"points": np.array(centers), "labels": anums.astype(int)}
-                )
+                labels.append(self._aplot_area_labels(surfs, anums))
 
             if show_lines or show_line_numbering:
-                kwargs.setdefault("line_width", 2)
-                # subselect lines belonging to the current areas
-
-                with self.save_selection:
-                    self.lsla("S", mute=True)
-                    lines = self.geometry.get_lines()
-
-                if show_lines:
-                    meshes.append(
-                        {"mesh": lines, "color": kwargs.get("edge_color", "k")}
-                    )
-                if show_line_numbering:
-                    labels.append(
-                        {
-                            "points": lines.points[50::101],
-                            "labels": lines["entity_num"].astype(int),
-                        }
-                    )
+                self._aplot_add_lines(
+                    meshes, labels, show_lines, show_line_numbering, kwargs
+                )
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, **kwargs)
             return pl.show(**kwargs)
@@ -506,6 +417,95 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
                 return super().aplot(
                     na1=na1, na2=na2, ninc=ninc, degen=degen, scale=scale, **kwargs
                 )
+
+    @staticmethod
+    def _aplot_area_colors(anums, color_areas):
+        """Return the colors used to paint each area in ``aplot``."""
+        from matplotlib.colors import to_rgba
+
+        from ansys.mapdl.core.plotting.theme import get_ansys_colors
+
+        if isinstance(color_areas, bool):
+            # Because this is only used for plotting purposes, there is no
+            # need to allocate a huge vector with random colors. By default,
+            # the ``n_colors`` argument of ``pyvista.DataSetMapper.set_scalars``
+            # is 256, so limit the number of colors to 256 here too.
+            #
+            # Link: https://docs.pyvista.org/api/plotting/_autosummary/pyvista.DataSetMapper.set_scalars.html#pyvista.DataSetMapper.set_scalars
+            return get_ansys_colors(min([256, len(anums)]))
+
+        if isinstance(color_areas, str):
+            # A color is provided as a string
+            return np.atleast_2d(to_rgba(color_areas))
+
+        if len(anums) != len(color_areas):
+            raise ValueError(
+                "The length of the parameter array 'color_areas' "
+                "should be the same as the number of areas."
+                f"\nanums: {anums}"
+                f"\ncolor_areas: {color_areas}"
+            )
+
+        if isinstance(color_areas[0], str):
+            return [to_rgba(each) for each in color_areas]
+        return color_areas
+
+    def _aplot_area_meshes(self, surfs, anums, color_areas, kwargs) -> list:
+        """Return the area meshes to plot, colored as requested."""
+        # individual surface isolation is quite slow, so just
+        # color individual areas
+        use_area_colors = (
+            isinstance(color_areas, np.ndarray) and len(color_areas) > 1
+        ) or (not isinstance(color_areas, np.ndarray) and color_areas)
+        if not use_area_colors:
+            return [
+                {"mesh": surf, "color": kwargs.get("color", "white")} for surf in surfs
+            ]
+
+        colors = self._aplot_area_colors(anums, color_areas)
+
+        # Expand the color array until it matches the number of areas.
+        # In this case, colors are repeated in the same order.
+        colors = np.resize(colors, (len(surfs), 3))
+        return [{"mesh": surf, "color": color} for surf, color in zip(surfs, colors)]
+
+    @staticmethod
+    def _aplot_area_labels(surfs, anums) -> dict:
+        """Return the area-number labels placed at each area center."""
+        centers = []
+        for surf in surfs:
+            anum = np.unique(surf["entity_num"])
+            if len(anum) != 1:
+                raise RuntimeError(
+                    f"The pv.Unstructured from the entity {anum[0]} contains entities"
+                    f"from other entities {anum}"  # Sanity check
+                )
+
+            area = surf.extract_cells(surf["entity_num"] == anum)
+            centers.append(area.center)
+
+        return {"points": np.array(centers), "labels": anums.astype(int)}
+
+    def _aplot_add_lines(
+        self, meshes, labels, show_lines, show_line_numbering, kwargs
+    ) -> None:
+        """Add the lines of the plotted areas, and their numbers, to ``aplot``."""
+        kwargs.setdefault("line_width", 2)
+
+        # subselect lines belonging to the current areas
+        with self.save_selection:
+            self.lsla("S", mute=True)
+            lines = self.geometry.get_lines()
+
+        if show_lines:
+            meshes.append({"mesh": lines, "color": kwargs.get("edge_color", "k")})
+        if show_line_numbering:
+            labels.append(
+                {
+                    "points": lines.points[50::101],
+                    "labels": lines["entity_num"].astype(int),
+                }
+            )
 
     @check_deprecated_vtk_kwargs
     @requires_graphics
