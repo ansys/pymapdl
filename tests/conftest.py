@@ -664,6 +664,38 @@ def set_env_var_context(request, monkeypatch):
     yield request.param
 
 
+@pytest.fixture(scope="function")
+def free_port() -> int:
+    """Return a free TCP port for launching a local MAPDL instance.
+
+    Dynamically allocates an available port instead of relying on a hard-coded
+    offset from ``PYMAPDL_TEST_PORT``. This avoids flaky failures when the
+    computed port is already in use by another process or a previously launched
+    MAPDL instance on the same runner.
+
+    The search starts just above the base test port and skips any port already
+    tracked in ``VALID_PORTS`` (ports in use by MAPDL instances started by other
+    fixtures in the same session).
+
+    Returns
+    -------
+    int
+        An available port number.
+    """
+    from ansys.mapdl.core.launcher.network import find_available_port
+
+    base_port = int(os.environ.get("PYMAPDL_TEST_PORT", "50052"))
+
+    start_port = base_port + 1
+    while True:
+        port = find_available_port(start_port=start_port)
+        if port not in VALID_PORTS:
+            return port
+        # Port is free at the socket level but reserved by another instance;
+        # continue the search from the next port.
+        start_port = port + 1
+
+
 @pytest.fixture
 def path_tests(tmpdir):
     SpacedPaths = namedtuple(
@@ -720,7 +752,7 @@ def clear_at_start_and_end(mapdl):
 def mapdl_console(request):
     if os.name != "posix":
         raise MapdlRuntimeError(
-            '"--console" testing option unavailable.  ' "Only Linux is supported."
+            '"--console" testing option unavailable.  Only Linux is supported.'
         )
     console_path = find_mapdl()[0]
 
