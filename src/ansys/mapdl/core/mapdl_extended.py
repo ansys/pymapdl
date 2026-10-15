@@ -26,7 +26,7 @@ import pathlib
 import re
 import shutil
 import tempfile
-from typing import Union
+from typing import TYPE_CHECKING, Union
 import warnings
 import weakref
 
@@ -55,6 +55,9 @@ from ansys.mapdl.core.misc import (
     supress_logging,
 )
 from ansys.mapdl.core.plotting import GraphicsBackend
+
+if TYPE_CHECKING:  # pragma: no cover
+    from ansys.mapdl.core.selector import NodeSelector
 
 TMP_VAR = "__tmpvar__"
 
@@ -2899,6 +2902,38 @@ class _MapdlExtended(_MapdlCommandExtended):
     def set_graphics_backend(self, backend: GraphicsBackend):
         """Set the graphics backend to use for plotting."""
         self._graphics_backend = backend
+
+    @property
+    def selector(self) -> "NodeSelector":
+        """High-level, generic coordinate-based node selector.
+
+        Lazily created and cached on first access. Accessing this property
+        never issues any MAPDL command and never alters the existing
+        :meth:`Mapdl.nsel() <ansys.mapdl.core.Mapdl.nsel>`
+        behavior.
+
+        Use the
+        :meth:`NodeSelector.select <ansys.mapdl.core.selector.NodeSelector.select>`
+        method to apply coordinate criteria to the active node selection.
+        The same generated command sequence works for local and remote MAPDL
+        sessions and does not transfer files.
+
+        Returns
+        -------
+        ansys.mapdl.core.selector.NodeSelector
+            The node selector bound to this MAPDL instance.
+
+        Examples
+        --------
+        Select every node at ``x == 1``.
+
+        >>> mapdl.selector.select(x=1)  # doctest: +SKIP
+        """
+        if getattr(self, "_selector", None) is None:
+            from ansys.mapdl.core.selector import NodeSelector
+
+            self._selector = NodeSelector(self)
+        return self._selector
 
     def load_table(
         self, name, array, var1="", var2="", var3="", csysid="", col_header=False
