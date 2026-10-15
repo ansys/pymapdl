@@ -235,7 +235,7 @@ class MapdlConsole(MapdlBase):
                 )
                 self._log.info(response + ready_items[i].decode("utf-8"))
                 raise MapdlRuntimeError(
-                    "User input expected.  " "Try using ``with mapdl.non_interactive``"
+                    "User input expected.  Try using ``with mapdl.non_interactive``"
                 )
             else:  # continue item
                 self._log.debug(
