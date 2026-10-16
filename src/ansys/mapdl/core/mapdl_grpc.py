@@ -4675,14 +4675,8 @@ class MapdlGrpc(MapdlBase):
 
     def _cleanup_lazy_array_parameters(self) -> None:
         """Delete every unresolved lazy-result parameter."""
-        errors = []
         for parameter_name in tuple(getattr(self, "_lazy_array_parameters", ())):
-            try:
-                self._delete_lazy_array_parameter(parameter_name)
-            except Exception as error:
-                errors.append(error)
-        if errors:
-            raise errors[0]
+            self._delete_lazy_array_parameter(parameter_name)
 
     def _read_owned_array_parameter(self, parameter_name: str) -> NDArray[np.float64]:
         """Download an owned column-vector parameter without parsing ``*STATUS``.
