@@ -1,0 +1,6 @@
+update
+======
+
+.. currentmodule:: ansys.mapdl.core.information
+
+.. automethod:: UnitsDict.update

@@ -1,0 +1,6 @@
+add\_env\_vars
+==============
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.add_env_vars

@@ -1,0 +1,6 @@
+﻿eddc
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.explicit_dynamics
+
+.. automethod:: ExplicitDynamics.eddc

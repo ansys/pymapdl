@@ -1,0 +1,6 @@
+setdefault
+==========
+
+.. currentmodule:: ansys.mapdl.core.information
+
+.. automethod:: UnitsDict.setdefault

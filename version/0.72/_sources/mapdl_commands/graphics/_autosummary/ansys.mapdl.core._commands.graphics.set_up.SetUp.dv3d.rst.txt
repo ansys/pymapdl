@@ -1,0 +1,6 @@
+﻿dv3d
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.graphics.set_up
+
+.. automethod:: SetUp.dv3d

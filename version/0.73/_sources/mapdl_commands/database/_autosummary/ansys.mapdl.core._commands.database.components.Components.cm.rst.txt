@@ -1,0 +1,6 @@
+﻿cm
+==
+
+.. currentmodule:: ansys.mapdl.core._commands.database.components
+
+.. automethod:: Components.cm

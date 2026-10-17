@@ -1,0 +1,6 @@
+﻿oczone
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.ocean
+
+.. automethod:: Ocean.oczone

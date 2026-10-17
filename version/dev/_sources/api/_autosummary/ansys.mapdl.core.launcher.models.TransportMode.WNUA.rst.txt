@@ -1,0 +1,6 @@
+WNUA
+====
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: TransportMode.WNUA

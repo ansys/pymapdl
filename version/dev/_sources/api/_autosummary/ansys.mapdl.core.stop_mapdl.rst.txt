@@ -1,0 +1,6 @@
+﻿stop\_mapdl
+===========
+
+.. currentmodule:: ansys.mapdl.core
+
+.. autofunction:: stop_mapdl
