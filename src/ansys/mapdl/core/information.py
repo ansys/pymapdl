@@ -317,10 +317,12 @@ class Information:
         Returns
         -------
         str
-            The MAPDL version release.
+            The MAPDL version release, or an empty string when it is not
+            provided by MAPDL.
         """
         st = self._get_mapdl_version()
-        return self._get_between("RELEASE", "BUILD", st).strip()
+        release = self._get_between("RELEASE", "BUILD", st).strip()
+        return "" if self._is_unavailable_version_value(release) else release
 
     @property
     @update_information_first(False)
@@ -330,10 +332,12 @@ class Information:
         Returns
         -------
         str
-            The MAPDL version build.
+            The MAPDL version build, or an empty string when it is not
+            provided by MAPDL.
         """
         st = self._get_mapdl_version()
-        return self._get_between("BUILD", "UPDATE", st).strip()
+        build = self._get_between("BUILD", "UPDATE", st).strip()
+        return "" if self._is_unavailable_version_value(build) else build
 
     @property
     @update_information_first(False)
@@ -343,10 +347,13 @@ class Information:
         Returns
         -------
         str
-            The MAPDL version update.
+            The MAPDL version update, or an empty string when it is not
+            provided by MAPDL.
         """
         st = self._get_mapdl_version()
-        return self._get_between("UPDATE", "", st).strip()
+        match = re.search(r"\bUPDATE\s+(\S+)", st)
+        update = match.group(1) if match else ""
+        return "" if self._is_unavailable_version_value(update) else update
 
     @property
     @update_information_first(False)
@@ -671,6 +678,17 @@ class Information:
 
         return "\n".join(str(string[st:en]).splitlines()).strip()
 
+    @staticmethod
+    def _is_unavailable_version_value(value: str) -> bool:
+        """Return whether a MAPDL version field is unavailable."""
+        if not value:
+            return True
+
+        try:
+            return float(value) == 0.0
+        except ValueError:
+            return False
+
     def _get_product(self) -> str:
         return self._get_products().splitlines()[0]
 
@@ -678,7 +696,11 @@ class Information:
         titles_ = self._get_titles()
         st = titles_.find("RELEASE")
         en = titles_.find("INITIAL", st)
-        return titles_[st:en].split("CUSTOMER")[0].strip()
+        version = titles_[st:en]
+        customer = version.find("CUSTOMER")
+        if customer >= 0:
+            version = version[:customer]
+        return version.strip()
 
     def _get_pymapdl_version(self) -> str:
         return pymapdl.__version__
