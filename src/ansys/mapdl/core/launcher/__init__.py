@@ -50,24 +50,23 @@ from ansys.mapdl.core import LOG
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 
 from .config import LOCALHOST, MAPDL_DEFAULT_PORT, resolve_launch_config  # noqa: F401
-from .connection import close_all_local_instances  # noqa: F401
-from .connection import (
+from .connection import (  # noqa: F401
+    close_all_local_instances,
     connect_to_existing,
     create_console_client,
     create_grpc_client,
+    stop,
 )
-from .connection import stop  # noqa: F401
 from .environment import prepare_environment
 from .errors import ConfigurationError, LaunchError
 from .hpc import (
     detect_slurm_environment,
+    resolve_slurm_resources,
 )
 from .hpc import launch_on_hpc as _launch_on_hpc_fn
-from .hpc import resolve_slurm_resources
 from .models import LaunchConfig, LaunchMode, TransportMode
 from .network import get_process_at_port  # noqa: F401
-from .process import _create_queue_for_std
-from .process import check_process_is_alive  # noqa: F401
+from .process import _create_queue_for_std, check_process_is_alive  # noqa: F401
 from .process import launch_mapdl_process as _launch_mapdl_process
 from .validation import validate_config
 
