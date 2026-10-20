@@ -89,6 +89,7 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.information import Information
 from ansys.mapdl.core.inline_functions import Query
+from ansys.mapdl.core.mapdl_path import _MapdlPurePosixPath, _MapdlPureWindowsPath
 from ansys.mapdl.core.mapdl_types import MapdlFloat
 from ansys.mapdl.core.misc import (
     check_deprecated_vtk_kwargs,
@@ -114,6 +115,8 @@ if TYPE_CHECKING:  # pragma: no cover
 # from this module before the responsibility split.
 __all__ = [
     "_MapdlCore",
+    "_MapdlPurePosixPath",
+    "_MapdlPureWindowsPath",
     "_sanitize_start_parm",
     # Constants
     "_PERMITTED_ERRORS",

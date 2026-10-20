@@ -33,6 +33,7 @@ from warnings import warn
 
 from ansys.mapdl.core import _HAS_DPF
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
+from ansys.mapdl.core.mapdl_path import _MapdlPurePosixPath, _MapdlPureWindowsPath
 from ansys.mapdl.core.misc import supress_logging
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -59,11 +60,9 @@ class _CoreFileMixin(_CoreMixinBase):
             return pathlib.PurePath(path)
 
         if self.platform == "windows":
-            # Windows path
-            return pathlib.PureWindowsPath(path)
+            return _MapdlPureWindowsPath(path, mapdl=self)
         elif self.platform == "linux":
-            # Linux path
-            return pathlib.PurePosixPath(path)
+            return _MapdlPurePosixPath(path, mapdl=self)
         else:
             # Other OS path
             warn(
@@ -74,34 +73,37 @@ class _CoreFileMixin(_CoreMixinBase):
             # Default to PurePosixPath
             # This is a fallback, it should not happen.
             # If it does, it is probably a bug.
-            return pathlib.PurePosixPath(path)
+            return _MapdlPurePosixPath(path, mapdl=self)
 
     @property
     @supress_logging
     def directory(self) -> pathlib.PurePath:
-        """
-        Current MAPDL directory.
+        """Current MAPDL working directory.
+
+        Returns
+        -------
+        pathlib.PurePath
+            MAPDL-aware path using the connected MAPDL instance's path syntax.
+            Direct child paths provide an ``is_file()`` method that checks the
+            MAPDL working directory, including for remote instances.
+
+        Notes
+        -----
+        The ``is_file()`` method supports files directly in the current MAPDL
+        working directory. It raises ``ValueError`` for nested paths or paths
+        outside that directory.
 
         Examples
         --------
-        Directory on Linux
+        Join a filename and check whether it is a MAPDL file.
 
-        >>> mapdl.directory
-        '/tmp/ansys'
+        >>> result_file = mapdl.directory / "file.rst"
+        >>> result_file.is_file()
+        True
 
-        Directory on Windows
+        Change the MAPDL working directory.
 
-        >>> mapdl.directory
-        'C:/temp_directory/'
-
-        Setting the directory
-
-        >>> mapdl.directory = 'C:/temp_directory/'
-        None
-
-        In case the directory does not exist or it is not
-        accessible, ``cwd`` (:func:`MapdlBase.cwd`) will raise
-        a warning.
+        >>> mapdl.directory = "C:/temp_directory/"
         """
         # Inside inquire there is already a retry mechanisim
         path = None

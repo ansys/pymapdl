@@ -1328,7 +1328,14 @@ def test_add_mesh():
     pl3.add_mesh([cube3, sphere])
 
     assert pl1.meshes[0] == cube1
-    assert pl2.meshes[0] == cube2
+    # pyvista >= 0.49 stores a shallow copy when scalars are given, and the
+    # array order can differ, so compare the data instead of the objects.
+    mesh2 = pl2.meshes[0]
+    assert np.array_equal(mesh2.points, cube2.points)
+    assert np.array_equal(mesh2.faces, cube2.faces)
+    assert set(mesh2.array_names) == set(cube2.array_names)
+    for name in cube2.array_names:
+        assert np.array_equal(mesh2[name], cube2[name])
     assert pl3.meshes[0] == cube3
     assert pl3.meshes[1] == sphere
 
