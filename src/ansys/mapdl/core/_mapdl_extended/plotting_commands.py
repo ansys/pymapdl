@@ -39,6 +39,10 @@ from . import _ExtendedMixinBase
 class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
     """Static responsibility mixin for the extended MAPDL facade."""
 
+    def set_graphics_backend(self, backend: GraphicsBackend):
+        """Set the graphics backend to use for plotting."""
+        self._graphics_backend = backend
+
     @check_deprecated_vtk_kwargs
     @requires_graphics
     def kplot(

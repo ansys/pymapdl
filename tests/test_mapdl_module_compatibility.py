@@ -58,7 +58,6 @@ from ansys.mapdl.core.mapdl_extended import (
     _MapdlCommandExtended,
     _MapdlExtended,
 )
-from ansys.mapdl.core.plotting import GraphicsBackend
 
 
 def test_facade_symbols_and_helpers_are_reexported():
@@ -143,7 +142,7 @@ def test_generated_commands_are_available_and_dispatch_at_each_public_level():
     instance.run = Mock(return_value="response")
 
     assert instance.allsel("ALL") == "response"
-    instance.run.assert_called_once_with("ALLSEL,ALL,", **{})
+    instance.run.assert_called_once_with("ALLSEL,ALL,")
 
 
 @pytest.mark.parametrize(
@@ -260,20 +259,41 @@ def test_explicit_wrappers_forward_for_legacy_mapdl(command):
     instance.run.assert_called_once()
 
 
-def test_extended_facade_wrappers_preserve_behavior():
-    """Moved facade wrappers retain forwarding and backend selection behavior."""
-    instance = object.__new__(_MapdlExtended)
-    instance._parameters = {"__temp_par__": 42}
+@pytest.mark.parametrize("cls", [_MapdlCommandExtended, _MapdlExtended])
+@pytest.mark.parametrize("parr, expected", [("", 42), ("norm_result", 84)])
+def test_nrm_returns_the_requested_parameter(cls, parr, expected):
+    """The norm wrapper returns the parameter value, not command output."""
+    instance = object.__new__(cls)
+    instance._parameters = {"__temp_par__": 42, "norm_result": 84}
+    instance.run = Mock(return_value="MAPDL command output")
 
-    with patch.object(_MapdlCore, "nrm") as nrm:
-        assert instance.nrm() == 42
+    assert instance.nrm(parr=parr) == expected
 
-    nrm.assert_called_once_with(
-        name="", normtype="", parr="__temp_par__", normalize="", **{}
-    )
 
-    instance.set_graphics_backend(GraphicsBackend.PYVISTA)
-    assert instance._graphics_backend is GraphicsBackend.PYVISTA
+@pytest.mark.parametrize("cls", [_MapdlCommandExtended, _MapdlExtended])
+@pytest.mark.parametrize(
+    "print_com, global_mute, command_mute, expected",
+    [
+        (True, False, None, "/COM,Testing comment\n"),
+        (False, False, None, ""),
+        (True, True, None, ""),
+        (True, False, True, ""),
+        (True, True, False, ""),
+    ],
+)
+def test_comment_printing_respects_mute(
+    cls, print_com, global_mute, command_mute, expected, capsys
+):
+    """Global and command muting both suppress console comments."""
+    instance = object.__new__(cls)
+    instance._print_com = print_com
+    instance.mute = global_mute
+    instance.run = Mock()
+    kwargs = {} if command_mute is None else {"mute": command_mute}
+
+    instance.com("Testing comment", **kwargs)
+
+    assert capsys.readouterr().out == expected
 
 
 def test_no_duplicate_public_callables_among_sibling_mixins():

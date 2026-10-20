@@ -50,6 +50,19 @@ If you are going to do testing, you must install the testing dependencies with t
     pip install -e '.[tests]'
 
 
+Locate MAPDL command extensions
+==============================
+
+The ``mapdl_extended.py`` module composes the private responsibility mixins,
+initializes shared state, and preserves compatibility imports. Implement command
+overrides in ``src/ansys/mapdl/core/_mapdl_extended/``, not in the facade or the
+generated ``_commands/`` package. Match the command family where possible, such
+as ``apdl/matrix_operations.py``, ``session/list_controls.py``, or
+``solution/load_step_operations.py``. Loop context methods live in ``contexts.py``;
+plotting methods live in ``plotting_commands.py``. Users continue to access these
+methods through the :class:`ansys.mapdl.core.Mapdl` class.
+
+
 Develop PyMAPDL
 ===============
 
