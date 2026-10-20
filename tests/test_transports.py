@@ -46,11 +46,16 @@ def _make_fake_channel_ready(delay=0):
     class FakeFuture:
         def __init__(self, delay):
             self._delay = delay
+            self.cancelled = False
 
         def result(self, timeout=None):
             # If timeout shorter than delay, raise TimeoutError
             if timeout is not None and timeout < self._delay:
                 raise __import__("concurrent.futures").futures.TimeoutError()
+            return True
+
+        def cancel(self):
+            self.cancelled = True
             return True
 
     return DummyChannel(), FakeFuture(delay)
@@ -76,6 +81,7 @@ def test_wait_until_healthy_succeeds(monkeypatch):
 
     # Should not raise
     MapdlGrpc.wait_until_healthy(m, timeout=1.0)
+    assert future.cancelled
 
 
 def test_wait_until_healthy_timeout(monkeypatch):
@@ -101,6 +107,8 @@ def test_wait_until_healthy_timeout(monkeypatch):
 
     with pytest.raises(MapdlConnectionError):
         MapdlGrpc.wait_until_healthy(m, timeout=0.01)
+
+    assert future.cancelled
 
 
 def test_configure_uds_sets_socket_dir_and_id(tmp_path, monkeypatch):
