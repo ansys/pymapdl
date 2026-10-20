@@ -55,6 +55,10 @@ Develop PyMAPDL
 
 .. epigraph:: *Now it is time to develop PyMAPDL!*
 
+Context manager implementations live in
+:file:`src/ansys/mapdl/core/contexts/`. APDL do-loop implementations live in
+:file:`src/ansys/mapdl/core/contexts/loops.py`.
+
 Developing code in a repository, particularly when using version control systems
 like Git, involves a set of essential guidelines to ensure efficient
 collaboration, code management, and tracking changes. Here are the main
