@@ -25,12 +25,14 @@
 
 import os
 import tempfile
+from typing import Union
 
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.lazy_array import LazyArray
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 from ansys.mapdl.core.misc import random_string, supress_logging
 
@@ -272,12 +274,26 @@ class _ExtendedArrayMixin(_ExtendedMixinBase):
         it2num: MapdlFloat = "",
         kloop: MapdlFloat = "",
         **kwargs: KwargDict,
-    ) -> NDArray[np.float64]:
-        """Uses the ``*VGET`` command to Return an array from ANSYS as a
-        Python array.
+    ) -> Union[NDArray[np.float64], LazyArray]:
+        """Use ``*VGET`` to retrieve an array from MAPDL.
 
-        See `VGET
-        <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_VGET_st.html>`
+        On gRPC connections, the returned :class:`LazyArray
+        <ansys.mapdl.core.lazy_array.LazyArray>` downloads its values when it
+        is first used. The ``*VGET`` command itself runs immediately, so the
+        result reflects the selection at call time even if the selection
+        changes afterward. Element-table (``ETAB``) values are retrieved
+        eagerly instead. Other connection types return a
+        :class:`numpy.ndarray` immediately.
+
+
+        Selection behavior depends on the requested entity and item. For
+        example, retrieving an ``ETAB`` item for ``ELEM`` returns values at
+        sequential element-number positions, including positions for
+        unselected or undefined elements. Do not rely on an entity selection
+        to determine the length or indexing of the returned array.
+
+        See `*VGET
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v252/en/ans_cmd/Hlp_C_VGET_st.html>`
         for more details.
 
         Parameters
@@ -319,10 +335,20 @@ class _ExtendedArrayMixin(_ExtendedMixinBase):
         Please reference your Ansys help manual ``*VGET`` command tables
         for all the available ``*VGET`` values.
 
+        This method cannot be used while inside a
+        :func:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
+        context because it must retrieve the array value immediately, and
+        commands issued inside ``non_interactive`` are only sent to MAPDL
+        once the context exits. Calling it there raises a
+        :class:`MapdlRuntimeError <ansys.mapdl.core.errors.MapdlRuntimeError>`.
+        Use :func:`Mapdl.vget() <ansys.mapdl.core.Mapdl.vget>` to store the
+        result in a named MAPDL parameter instead.
+
         Returns
         -------
-        numpy.ndarray
-            Array from MAPDL.
+        numpy.ndarray or LazyArray
+            Array from MAPDL. A gRPC ``LazyArray`` transfers its values only
+            when first used.
 
         Examples
         --------
@@ -354,6 +380,9 @@ class _ExtendedArrayMixin(_ExtendedMixinBase):
         arr = self._get_array(
             entity, entnum, item1, it1num, item2, it2num, kloop, **kwargs
         )
+
+        if isinstance(arr, LazyArray):
+            return arr
 
         # edge case where corba refuses to return the array
         ntry = 0

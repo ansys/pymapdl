@@ -76,6 +76,7 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.helpers import is_installed
 from ansys.mapdl.core.launcher import launch_mapdl
+from ansys.mapdl.core.lazy_array import LazyArray
 from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME, _MapdlCore
 from ansys.mapdl.core.mapdl_extended import (
     MAX_DO_LOOP_LEVEL,
@@ -1900,7 +1901,12 @@ def test_get_variable_nsol_esol_wrappers(mapdl, coupled_example):
     assert nsol_1[1] > 0
 
     variable = mapdl.get_variable(2)
+    assert isinstance(variable, LazyArray)
+    parameter_name = variable._parameter_name
+    assert parameter_name in mapdl._lazy_array_parameters
     assert np.allclose(variable, nsol_1)
+    assert parameter_name not in mapdl._lazy_array_parameters
+    assert parameter_name not in mapdl.parameters
 
     variable = mapdl.get_nsol(1, "U", "X")
     assert np.allclose(variable, nsol_1)
@@ -1912,6 +1918,7 @@ def test_get_variable_nsol_esol_wrappers(mapdl, coupled_example):
     assert np.allclose(variable, esol_1)
 
     variable = mapdl.get_esol(1, 1, "S", "Y")
+    assert isinstance(variable, np.ndarray)
     assert np.allclose(variable, esol_1)
 
 
@@ -2338,7 +2345,6 @@ def test_save_on_exit(mapdl, cleared, save):
     assert mapdl._exited
 
     with patch.object(mapdl, "_run") as mock_run:
-
         with pytest.raises(MapdlExitedError):
             mapdl.prep7()
 
@@ -2691,7 +2697,6 @@ def test_save_selection_2(mapdl, cleared, make_block):
 
     print("Starting...")
     with mapdl.save_selection:
-
         # do something
         mapdl.allsel()
         mapdl.cmsel("NONE")
@@ -2767,6 +2772,23 @@ def test_get_array_non_interactive(mapdl, solved_box):
             mapdl.get_array("asdf", "2")
 
 
+@requires("grpc")
+def test_get_array_returns_lazy_array(mapdl, cleared):
+    mapdl.prep7()
+    mapdl.n(1, 0, 0, 0)
+
+    node_numbers = mapdl.get_array("NODE", item1="NLIST")
+
+    assert isinstance(node_numbers, LazyArray)
+    parameter_name = node_numbers._parameter_name
+    assert parameter_name in mapdl._lazy_array_parameters
+
+    np.testing.assert_array_equal(node_numbers, [1.0])
+
+    assert parameter_name not in mapdl._lazy_array_parameters
+    assert parameter_name not in mapdl.parameters
+
+
 def test_get_etable_with_explicit_label():
     mapdl = object.__new__(_MapdlExtended)
     values = np.array([1.0, 2.0])
@@ -2778,6 +2800,20 @@ def test_get_etable_with_explicit_label():
     np.testing.assert_array_equal(result, values)
     assert mapdl.etable.call_args.args == ("MOMY_I", "SMISC", 3, "MAX")
     mapdl.get_array.assert_called_once_with("ELEM", 1, "ETAB", "MOMY_I")
+
+
+def test_get_etable_materializes_lazy_array():
+    mapdl = object.__new__(_MapdlExtended)
+    lazy_mapdl = MagicMock()
+    lazy_mapdl.parameters.__getitem__.return_value = np.array([1.0, 2.0])
+    mapdl.etable = MagicMock()
+    mapdl.get_array = MagicMock(return_value=LazyArray(lazy_mapdl, "VALUES"))
+
+    result = mapdl.get_etable("SMISC", 3, "MAX", "MOMY_I")
+
+    assert isinstance(result, np.ndarray)
+    np.testing.assert_array_equal(result, [1.0, 2.0])
+    lazy_mapdl.parameters.__getitem__.assert_called_once_with("VALUES")
 
 
 def test_get_etable_with_temporary_label():
@@ -2802,6 +2838,38 @@ def test_get_etable_with_temporary_label():
     assert events == [
         ("etable", ("_ET00000", "SMISC", 3, "AVG")),
         ("get_array", ("ELEM", 1, "ETAB", "_ET00000")),
+        ("etable", ("_ET00000", "ERAS")),
+    ]
+
+
+def test_get_etable_resolves_lazy_values_before_erasing_temporary_label():
+    mapdl = object.__new__(_MapdlExtended)
+    mapdl._etable_lab_counter = 0
+    events = []
+    lazy_mapdl = MagicMock()
+
+    def resolve_parameter(name):
+        events.append(("resolve", name))
+        return np.array([1.0])
+
+    def record_etable(*args, **kwargs):
+        events.append(("etable", args))
+
+    def record_get_array(*args):
+        events.append(("get_array", args))
+        return LazyArray(lazy_mapdl, "VALUES")
+
+    lazy_mapdl.parameters.__getitem__.side_effect = resolve_parameter
+    mapdl.etable = MagicMock(side_effect=record_etable)
+    mapdl.get_array = MagicMock(side_effect=record_get_array)
+
+    result = mapdl.get_etable("SMISC", 3, "AVG")
+
+    np.testing.assert_array_equal(result, [1.0])
+    assert events == [
+        ("etable", ("_ET00000", "SMISC", 3, "AVG")),
+        ("get_array", ("ELEM", 1, "ETAB", "_ET00000")),
+        ("resolve", "VALUES"),
         ("etable", ("_ET00000", "ERAS")),
     ]
 
@@ -3015,7 +3083,6 @@ def test_not_correct_et_element(mapdl, cleared):
 
 def test_ctrl(mapdl, cleared):
     with patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.run") as mck_run:
-
         mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
         mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
 
@@ -3088,7 +3155,6 @@ def test_directory_setter(mapdl, cleared):
     with patch(
         "ansys.mapdl.core.Mapdl.inquire", side_effect=MapdlExitedError("mocked error")
     ) as mck_inquire:
-
         assert prev_path == mapdl.directory
 
         mck_inquire.assert_called_once()
@@ -3361,7 +3427,6 @@ def test_timeout_when_exiting(mapdl, is_exited):
             ) as mock_handle,
             patch.object(mapdl, "_exit_mapdl") as mock_exit_mapdl,
         ):
-
             mock_exit_mapdl.return_value = None  # Avoid exiting
             mock_is_alive.return_value = False
             mock_connect.return_value = None  # patched to avoid timeout
@@ -3411,7 +3476,6 @@ def test_none_as_argument(mapdl, cmd, arg):
         kwargs = {}
 
     with patch.object(mapdl, "_run", **kwargs) as mock_run:
-
         mock_run.assert_not_called()
 
         func = getattr(mapdl, cmd)

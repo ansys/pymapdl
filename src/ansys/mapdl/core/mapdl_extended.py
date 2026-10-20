@@ -75,6 +75,7 @@ from ansys.mapdl.core.errors import (
     MapdlDoLoopLimitError,
     MapdlRuntimeError,
 )
+from ansys.mapdl.core.lazy_array import LazyArray
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 from ansys.mapdl.core.misc import (
@@ -102,6 +103,7 @@ __all__ = [
     "GraphicsBackend",
     "IncorrectWorkingDirectory",
     "KwargDict",
+    "LazyArray",
     "MapdlCommandIgnoredError",
     "MapdlDoLoopLimitError",
     "MapdlFloat",
