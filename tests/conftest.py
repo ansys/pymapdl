@@ -22,6 +22,7 @@
 
 from collections import namedtuple
 from collections.abc import Generator
+from inspect import signature
 import os
 from pathlib import Path
 from shutil import get_terminal_size
@@ -205,6 +206,8 @@ if has_dependency("ansys-tools-common"):
 
 if has_dependency("pyvista"):
     import pyvista
+
+    _PYVISTA_SHOW_SIGNATURE = signature(pyvista.Plotter.show)
 
     # Necessary for CI plotting
     pyvista.OFF_SCREEN = True
@@ -516,7 +519,14 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: pytest.ExitCode):
 if has_dependency("pytest-pyvista"):
 
     @pytest.fixture(autouse=True)
-    def wrapped_verify_image_cache(verify_image_cache, pytestconfig):
+    def wrapped_verify_image_cache(verify_image_cache, pytestconfig, monkeypatch):
+        # The backend filters show options by signature, which the plugin hides.
+        monkeypatch.setattr(
+            pyvista.Plotter.show,
+            "__signature__",
+            _PYVISTA_SHOW_SIGNATURE,
+            raising=False,
+        )
         # Configuration
         verify_image_cache.error_value = 500.0
         verify_image_cache.warning_value = 200.0
@@ -718,7 +728,6 @@ def clear(mapdl):
         mapdl.header("DEFA")
         mapdl.format("DEFA")
         mapdl.page("DEFA")
-
         mapdl.prep7()
 
 

@@ -78,12 +78,17 @@ class _SaveSelectionContext:
                 for component_name, component_type in components.items():
                     mapdl.cmsel("a", component_name, component_type, mute=True)
 
+            selection_kwargs = {"mute": True}
+            if not mapdl.is_console:
+                # Restoration does not consume IDs or need temporary APDL arrays.
+                selection_kwargs["return_mapdl_output"] = True
+
             for entity_type, component_name in selection.items():
                 mapdl.cmsel("a", component_name, entity_type, mute=True)
                 selection_function = getattr(
                     mapdl, ENTITIES_TO_SELECTION_MAPPING[entity_type.upper()]
                 )
-                selection_function("s", vmin=component_name, mute=True)
+                selection_function("s", vmin=component_name, **selection_kwargs)
                 mapdl.cmdele(component_name, mute=True)
         except Exception:
             if args and args[0] is not None:

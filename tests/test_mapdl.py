@@ -32,7 +32,7 @@ import re
 import shutil
 import tempfile
 import time
-from unittest.mock import MagicMock, PropertyMock, call, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 from warnings import catch_warnings
 
 import grpc
@@ -235,6 +235,23 @@ def clearing_cdread_cdwrite_tests(mapdl):
         mapdl.page("DEFA")
 
         mapdl.prep7()
+
+
+@requires("grpc")
+def test_save_selection_restores_ids_without_querying_arrays(mapdl, cleared):
+    mapdl.n(1, 0, 0, 0)
+    mapdl.n(2, 1, 0, 0)
+    mapdl.nsel("S", "NODE", vmin=1)
+
+    with patch.object(
+        mapdl,
+        "get_array",
+        side_effect=AssertionError("Unexpected selection array query"),
+    ):
+        with mapdl.save_selection:
+            mapdl.allsel()
+
+    assert mapdl.mesh.nnum.tolist() == [1]
 
 
 def asserting_cdread_cdwrite_tests(mapdl):
