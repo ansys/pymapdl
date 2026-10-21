@@ -32,7 +32,7 @@ import re
 import shutil
 import tempfile
 import time
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, call, patch
 from warnings import catch_warnings
 
 import grpc
