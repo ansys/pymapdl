@@ -2333,6 +2333,8 @@ class MapdlGrpc(MapdlBase):
         in one step does not prevent the remaining resources from being freed.
         This also makes the method safe to call during interpreter shutdown,
         where module globals may already have been torn down.
+        Local garbage-collection teardown uses cached process information rather
+        than querying or commanding MAPDL, because GC can interrupt a gRPC call.
 
         Callers must set ``_exiting = True`` before invoking this method (and
         reset it once done), so that :attr:`is_alive` short-circuits instead
@@ -2364,9 +2366,16 @@ class MapdlGrpc(MapdlBase):
 
         # 1. Kill MAPDL process + remove lock file
         try:
-            self._exit_mapdl(path)
+            if exiting and self._local:
+                # GC may interrupt gRPC itself; use cached process data, not RPCs.
+                self._close_process()
+                if path:
+                    self._remove_lock_file(path, use_cached=True)
+            else:
+                self._exit_mapdl(path)
         except Exception as e:
-            self._log.debug("Error during _exit_mapdl: %s", e)
+            if not exiting:
+                self._log.debug("Error during _exit_mapdl: %s", e)
 
         # 2. Ensure PIPE-drainer threads (stdout/stderr/startup) are joined so
         # that background reader threads do not leak after teardown.
