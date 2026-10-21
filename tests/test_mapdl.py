@@ -49,6 +49,7 @@ from conftest import (
     QUICK_LAUNCH_SWITCHES,
     TEST_DPF_BACKEND,
     NullContext,
+    clear,
     has_dependency,
     requires,
 )
@@ -235,6 +236,24 @@ def clearing_cdread_cdwrite_tests(mapdl):
         mapdl.page("DEFA")
 
         mapdl.prep7()
+
+
+@requires("grpc")
+def test_clear_resets_database_and_postprocessing_state(mapdl, cleared):
+    mapdl.n(1, 0, 0, 0)
+    mapdl.parameters["RESET_MARKER"] = 1
+    mapdl.finish()
+    mapdl.post1()
+
+    with mapdl.muted:
+        clear(mapdl)
+        assert mapdl.mute is True
+
+    assert mapdl.mute is False
+    assert mapdl.parameters.routine == "PREP7"
+    assert "RESET_MARKER" not in mapdl.parameters
+    mapdl.n(2, 1, 0, 0)
+    assert mapdl.mesh.nnum.tolist() == [2]
 
 
 @requires("grpc")
