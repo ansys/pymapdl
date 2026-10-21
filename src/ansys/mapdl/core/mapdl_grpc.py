@@ -904,7 +904,10 @@ class MapdlGrpc(MapdlBase):
 
         self._start_ping_abuse_probe()
 
-    def _ping_abuse_probe_loop(self) -> None:
+    @staticmethod
+    def _ping_abuse_probe_loop(
+        mapdl_ref: weakref.ReferenceType["MapdlGrpc"], stop_event: threading.Event
+    ) -> None:
         """Periodically issue a lightweight real RPC to reset the MAPDL gRPC
         server's ping-abuse tracker.
 
@@ -924,11 +927,17 @@ class MapdlGrpc(MapdlBase):
         :meth:`_subscribe_to_channel` is the sole authority on declaring the
         channel dead and cancelling any in-flight call.
         """
-        while not self._ping_probe_stop_event.wait(PING_ABUSE_PROBE_INTERVAL_S):
+        while not stop_event.wait(PING_ABUSE_PROBE_INTERVAL_S):
+            mapdl = mapdl_ref()
+            if mapdl is None:
+                return
             try:
-                self._ctrl("VERSION", timeout=PING_ABUSE_PROBE_TIMEOUT_S)
+                mapdl._ctrl("VERSION", timeout=PING_ABUSE_PROBE_TIMEOUT_S)
             except (grpc.RpcError, MapdlRuntimeError) as exc:
-                self._log.debug(f"Ping-abuse probe RPC failed: {exc}")
+                mapdl._log.debug(f"Ping-abuse probe RPC failed: {exc}")
+            finally:
+                # Do not keep the client alive while waiting for the next probe.
+                del mapdl
 
     def _start_ping_abuse_probe(self) -> None:
         """Start the background ping-abuse probe thread, if not already running.
@@ -939,9 +948,11 @@ class MapdlGrpc(MapdlBase):
         if self._ping_probe_thread is not None and self._ping_probe_thread.is_alive():
             return
 
-        self._ping_probe_stop_event.clear()
+        # A reconnect must not clear the stop request of a worker still exiting.
+        self._ping_probe_stop_event = threading.Event()
         self._ping_probe_thread = threading.Thread(
-            target=self._ping_abuse_probe_loop,
+            target=MapdlGrpc._ping_abuse_probe_loop,
+            args=(weakref.ref(self), self._ping_probe_stop_event),
             name="pymapdl-ping-abuse-probe",
             daemon=True,
         )
@@ -5128,6 +5139,8 @@ class MapdlGrpc(MapdlBase):
         exited, because those are purely client-side resources (the
         ``_poll_connectivity`` daemon thread and the stdout/stderr/startup
         reader threads) that outlive this object otherwise.
+        The ping-abuse probe holds only a weak client reference between RPCs,
+        allowing this teardown to run when the last client reference is dropped.
         """
         # Check early exit conditions.
         if (
