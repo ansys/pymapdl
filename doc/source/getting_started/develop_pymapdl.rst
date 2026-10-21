@@ -300,6 +300,11 @@ It is executed upstream of each test and not within all tests.
 Passing the ``cleared`` fixture is also useful since it clears up the MAPDL database
 and configuration before performing the test.
 
+Selection restoration does not retrieve entity-ID arrays that it does not use.
+Plotters created for a single display are closed after rendering; plotters
+returned with ``return_plotter=True`` remain caller-managed. Close
+returned plotters with ``plotter.scene.close()`` when they are no longer needed.
+
 Running PyMAPDL tests
 ---------------------
 
