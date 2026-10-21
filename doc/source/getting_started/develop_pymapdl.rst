@@ -299,6 +299,8 @@ It is executed upstream of each test and not within all tests.
 
 Passing the ``cleared`` fixture is also useful since it clears up the MAPDL database
 and configuration before performing the test.
+Its database reset completes outside streamed input; only the formatting commands
+are batched. Keep that boundary when extending the fixture.
 
 Selection restoration does not retrieve entity-ID arrays that it does not use.
 Plotters created for a single display are closed after rendering; plotters
