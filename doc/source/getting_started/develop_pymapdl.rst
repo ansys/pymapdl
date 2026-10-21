@@ -304,6 +304,10 @@ Selection restoration does not retrieve entity-ID arrays that it does not use.
 Plotters created for a single display are closed after rendering; plotters
 returned with ``return_plotter=True`` remain caller-managed. Close
 returned plotters with ``plotter.scene.close()`` when they are no longer needed.
+The image-verification fixture closes any remaining plotters after each test,
+before the image-cache callbacks are removed.
+Local pool fixtures use available ports above the configured primary and secondary
+test endpoints so that test order does not determine who owns those endpoints.
 
 Running PyMAPDL tests
 ---------------------

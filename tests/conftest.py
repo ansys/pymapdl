@@ -537,7 +537,10 @@ if has_dependency("pytest-pyvista"):
 
         verify_image_cache.allow_useless_fixture = True
 
-        return verify_image_cache
+        try:
+            yield verify_image_cache
+        finally:
+            pyvista.close_all()
 
 
 class NullContext:

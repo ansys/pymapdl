@@ -346,14 +346,17 @@ def test_protect_grpc_translates_resource_exhausted_error(
     mock_mapdl._exited = False
     mock_mapdl.exited = False
     mock_mapdl.is_alive = True
+    attempts = []
 
     @protect_grpc
-    def raising(self, n_attempts=0):
+    def raising(self, n_attempts=2):
+        attempts.append(None)
         raise _FakeRpcError(grpc.StatusCode.RESOURCE_EXHAUSTED, details)
 
     with pytest.raises(
         MapdlgRPCError, match="Received message larger than max"
     ) as excinfo:
-        raising(mock_mapdl, n_attempts=0)
+        raising(mock_mapdl, n_attempts=2)
 
     assert f"PYMAPDL_MAX_MESSAGE_LENGTH={expected_limit}" in str(excinfo.value)
+    assert len(attempts) == 1
