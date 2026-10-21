@@ -29,8 +29,8 @@ import numpy as np
 from platformdirs import user_data_dir
 
 USER_DATA_PATH: str = user_data_dir(appname="ansys_mapdl_core", appauthor="Ansys")
+"""Per-user directory where PyMAPDL stores data such as downloaded examples."""
 
-# In descending order.
 SUPPORTED_ANSYS_VERSIONS: Dict[int, str] = {
     271: "2027R1",
     261: "2026R1",
@@ -52,8 +52,11 @@ SUPPORTED_ANSYS_VERSIONS: Dict[int, str] = {
     192: "19.2",
     191: "19.1",
 }
+"""MAPDL versions supported by PyMAPDL mapped to their release names, in descending order."""
 
-DEFAULT_CHUNKSIZE: int = 256 * 1024  # 256 kB
+DEFAULT_CHUNKSIZE: int = 256 * 1024
+"""Chunk size in bytes for gRPC array streaming (256 kB)."""
+
 ANSYS_VALUE_TYPE: Dict[int, Optional[np.typing.DTypeLike]] = {
     0: None,  # UNKNOWN
     1: np.int32,  # INTEGER
@@ -65,8 +68,19 @@ ANSYS_VALUE_TYPE: Dict[int, Optional[np.typing.DTypeLike]] = {
     7: np.complex128,  # DCPLX
     8: np.char,
 }
+"""Mapping from MAPDL gRPC value-type codes to NumPy data types."""
 
 LOCALHOST = "127.0.0.1"
+"""Default IP address for local MAPDL instances."""
+
 MAPDL_DEFAULT_PORT = 50052
+"""Default gRPC port of the MAPDL server."""
+
 MAX_PARAM_CHARS = 32
+"""Maximum number of characters in an MAPDL parameter name."""
+
 MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024**2))
+"""Maximum gRPC message size in bytes (256 MB by default).
+
+Override it with the ``PYMAPDL_MAX_MESSAGE_LENGTH`` environment variable.
+"""
