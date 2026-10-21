@@ -22,15 +22,22 @@
 
 """No-MAPDL unit tests for helpers extracted from the core mixins and picker."""
 
+from contextlib import nullcontext
+import logging
 import os
+from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock, patch
 
 import numpy as np
 import pytest
 
 from ansys.mapdl.core._mapdl_core import selection as core_selection
+from ansys.mapdl.core._mapdl_core import subsystems as core_subsystems
 from ansys.mapdl.core._mapdl_core.execution import _CoreExecutionMixin
 from ansys.mapdl.core._mapdl_core.plotting import _CorePlottingMixin
+from ansys.mapdl.core._mapdl_core.selection import _CoreSelectionMixin
+from ansys.mapdl.core._mapdl_core.subsystems import _CoreSubsystemsMixin
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 from ansys.mapdl.core.plotting import picker
@@ -357,3 +364,310 @@ def test_picker_show_picked_points():
 def test_picker_entity_number():
     mesh = Mock(cell_data={"entity_num": np.array([7, 7])})
     assert picker.MapdlPicker._entity_number(mesh) == 7
+
+
+# --------------------------------------------------------------------------
+# filesystem, result, logging, and selection behavior
+# --------------------------------------------------------------------------
+
+
+def test_list_reads_file_and_logs_only_first_ten_lines(tmp_path):
+    lines = [f"line {index}" for index in range(12)]
+    listing = tmp_path / "listing.txt"
+    listing.write_text("\n".join(lines))
+    log = Mock()
+    client = SimpleNamespace(directory=tmp_path, _log=log)
+
+    _CoreExecutionMixin._list(client, "/LIST,listing,txt")
+
+    assert client._response == "\n".join(lines)
+    log.info.assert_called_once_with("\n".join(lines[:10]))
+
+
+def test_flush_stored_writes_and_reads_real_temporary_files(tmp_path):
+    client = _bare_core()
+    client._stored_commands = ["/PREP7", "N,1,0,0,0"]
+    client._store_commands = True
+    client._response = None
+
+    def send_input(input_file, write_to_log):
+        command_file = Path(input_file)
+        commands = command_file.read_text()
+        output_file = Path(commands.splitlines()[0].split(", ", 1)[1])
+        output_file.write_text("MAPDL response\nsecond line")
+        assert write_to_log is False
+        return "input accepted"
+
+    client.input = Mock(side_effect=send_input)
+    apdl_log_path = tmp_path / "apdl.log"
+    with (
+        patch(
+            "ansys.mapdl.core._mapdl_core.execution.tempfile.gettempdir",
+            return_value=str(tmp_path),
+        ),
+        patch(
+            "ansys.mapdl.core._mapdl_core.execution.random_string",
+            side_effect=["output", "input"],
+        ),
+        patch("ansys.mapdl.core._mapdl_core.execution.time.sleep"),
+        open(apdl_log_path, "w") as apdl_log,
+    ):
+        client._apdl_log = apdl_log
+        _CoreExecutionMixin._flush_stored(client)
+
+    expected_commands = (
+        f"/OUTPUT, {tmp_path / 'tmp_output.out'}\n/PREP7\nN,1,0,0,0\n/OUTPUT"
+    )
+    assert (tmp_path / "tmp_input.inp").read_text() == expected_commands
+    assert apdl_log_path.read_text() == expected_commands + "\n"
+    assert (tmp_path / "tmp_output.out").read_text() == "MAPDL response\nsecond line"
+    assert client._response == "\nMAPDL response\nsecond line"
+    assert client._stored_commands == []
+    assert client._store_commands is False
+    client.input.assert_called_once_with(
+        str(tmp_path / "tmp_input.inp"), write_to_log=False
+    )
+
+
+def test_flush_stored_without_commands_disables_storage():
+    client = _bare_core()
+    client._stored_commands = []
+    client._store_commands = True
+
+    _CoreExecutionMixin._flush_stored(client)
+
+    assert client._store_commands is False
+
+
+@pytest.mark.parametrize("append", [False, True])
+def test_file_handler_writes_at_level_and_can_be_removed(tmp_path, append):
+    log_path = tmp_path / "mapdl.log"
+    if append:
+        log_path.write_text("existing entry\n")
+
+    logger = logging.Logger(f"mapdl-split-{append}")
+    logger.setLevel(logging.DEBUG)
+    client = _bare_core()
+    client._log = SimpleNamespace(
+        logger=logger, info=logger.info, removeHandler=logger.removeHandler
+    )
+
+    client.add_file_handler(log_path, append=append, level="INFO")
+    try:
+        logger.debug("filtered debug entry")
+        logger.info("visible info entry")
+        client.remove_file_handler()
+        logger.info("entry after removal")
+    finally:
+        client._log_filehandler.close()
+
+    contents = log_path.read_text()
+    assert ("existing entry\n" in contents) is append
+    assert "visible info entry" in contents
+    assert "filtered debug entry" not in contents
+    assert "entry after removal" not in contents
+    assert client._log_filehandler not in logger.handlers
+
+
+def test_selected_mesh_ids_are_independent_copies():
+    nodes = np.array([2, 4])
+    elements = np.array([8, 9])
+    geometry = SimpleNamespace(
+        knum=np.array([1]), lnum=np.array([2]), anum=np.array([3]), vnum=np.array([4])
+    )
+    client = SimpleNamespace(
+        mesh=SimpleNamespace(nnum=nodes, enum=elements), geometry=geometry
+    )
+
+    selected_nodes = _CoreSelectionMixin._get_selected_(client, "node")
+    selected_elements = _CoreSelectionMixin._get_selected_(client, "elem")
+    assert selected_nodes.tolist() == [2, 4]
+    assert selected_elements.tolist() == [8, 9]
+    assert selected_nodes is not nodes
+    assert selected_elements is not elements
+    selected_nodes[0] = 99
+    selected_elements[0] = 99
+    assert nodes.tolist() == [2, 4]
+    assert elements.tolist() == [8, 9]
+    assert _CoreSelectionMixin._get_selected_(client, "kp") is geometry.knum
+    assert _CoreSelectionMixin._get_selected_(client, "line") is geometry.lnum
+    assert _CoreSelectionMixin._get_selected_(client, "area") is geometry.anum
+    assert _CoreSelectionMixin._get_selected_(client, "volu") is geometry.vnum
+
+    with pytest.raises(ValueError, match="not allowed"):
+        _CoreSelectionMixin._get_selected_(client, "unknown")
+
+
+def test_entity_list_selection_appends_and_rejects_replace_mode():
+    client = SimpleNamespace()
+    select = Mock()
+
+    _CoreSelectionMixin._perform_entity_list_selection(
+        client, "NODE", select, "S", "NODE", "", [3, 7], ""
+    )
+
+    assert [call.args[1:5] for call in select.call_args_list] == [
+        ("S", "NODE", "", 3),
+        ("A", "NODE", "", 7),
+    ]
+    with pytest.raises(NotImplementedError, match="Mode R is not supported"):
+        _CoreSelectionMixin._perform_entity_list_selection(
+            client, "NODE", select, "R", "NODE", "", [3], ""
+        )
+
+
+def test_distributed_result_file_uses_numeric_suffix_and_latest_file(tmp_path):
+    thermal_file = tmp_path / "run7_0.rth"
+    structural_file = tmp_path / "run7_0.rst"
+    thermal_file.write_text("thermal results")
+    structural_file.write_text("structural results")
+    os.utime(thermal_file, (1_700_000_000, 1_700_000_000))
+    os.utime(structural_file, (1_700_000_010, 1_700_000_010))
+    inquire = Mock(return_value="run7")
+    client = SimpleNamespace(directory=tmp_path, inquire=inquire, jobname="unused")
+
+    result_file = _CoreSubsystemsMixin._distributed_result_file.fget(client)
+
+    assert result_file == structural_file
+    inquire.assert_called_once_with("", "RSTFILE")
+
+
+@pytest.mark.parametrize("inquire_raises", [False, True])
+def test_distributed_result_file_falls_back_to_jobname(tmp_path, inquire_raises):
+    result_file = tmp_path / "fallback8_0.rst"
+    result_file.write_text("result")
+    inquire = Mock(
+        side_effect=RuntimeError("inquire unavailable") if inquire_raises else None,
+        return_value=None,
+    )
+    client = SimpleNamespace(directory=tmp_path, inquire=inquire, jobname="fallback8")
+
+    assert _CoreSubsystemsMixin._distributed_result_file.fget(client) == result_file
+
+
+@pytest.mark.parametrize("extension", ["rth", "rst", None])
+def test_distributed_result_file_selects_single_existing_file(tmp_path, extension):
+    if extension:
+        (tmp_path / f"model0.{extension}").write_text("result")
+    client = SimpleNamespace(
+        directory=tmp_path, inquire=Mock(return_value="model"), jobname="model"
+    )
+
+    result_file = _CoreSubsystemsMixin._distributed_result_file.fget(client)
+
+    assert result_file == (tmp_path / f"model0.{extension}" if extension else None)
+
+
+@pytest.mark.parametrize(
+    ("prioritize_thermal", "expected"),
+    [(True, "model.rth"), (False, "model.rst")],
+)
+def test_result_file_selects_thermal_or_latest_existing_file(
+    tmp_path, prioritize_thermal, expected
+):
+    thermal_file = tmp_path / "model.rth"
+    structural_file = tmp_path / "model.rst"
+    thermal_file.write_text("thermal")
+    structural_file.write_text("structural")
+    os.utime(thermal_file, (1_700_000_000, 1_700_000_000))
+    os.utime(structural_file, (1_700_000_010, 1_700_000_010))
+    inquire = Mock(
+        side_effect=lambda _group, item: "model" if item == "RSTFILE" else ""
+    )
+    client = SimpleNamespace(
+        directory=tmp_path,
+        inquire=inquire,
+        run_as_routine=lambda _routine: nullcontext(),
+        jobname="model",
+        _local=True,
+        _prioritize_thermal=prioritize_thermal,
+    )
+
+    assert _CoreSubsystemsMixin._result_file.fget(client) == tmp_path / expected
+
+
+def test_result_file_uses_reported_extension(tmp_path):
+    result_file = tmp_path / "model.rst"
+    result_file.write_text("result")
+    inquire = Mock(
+        side_effect=lambda _group, item: "model" if item == "RSTFILE" else "rst"
+    )
+    client = SimpleNamespace(
+        directory=tmp_path,
+        inquire=inquire,
+        run_as_routine=lambda _routine: nullcontext(),
+        jobname="model",
+        _local=True,
+        _prioritize_thermal=False,
+    )
+
+    assert _CoreSubsystemsMixin._result_file.fget(client) == result_file
+
+
+@pytest.mark.parametrize(
+    ("extension", "prioritize_thermal", "expected"),
+    [("rth", True, "model.rth"), ("rst", True, "model.rst"), (None, False, None)],
+)
+def test_result_file_returns_only_available_thermal_or_structural_file(
+    tmp_path, extension, prioritize_thermal, expected
+):
+    if extension:
+        (tmp_path / f"model.{extension}").write_text("result")
+    inquire = Mock(
+        side_effect=lambda _group, item: "model" if item == "RSTFILE" else ""
+    )
+    client = SimpleNamespace(
+        directory=tmp_path,
+        inquire=inquire,
+        run_as_routine=lambda _routine: nullcontext(),
+        jobname="model",
+        _local=True,
+        _prioritize_thermal=prioritize_thermal,
+    )
+
+    result_file = _CoreSubsystemsMixin._result_file.fget(client)
+
+    assert result_file == (tmp_path / expected if expected else None)
+
+
+@pytest.mark.parametrize(
+    ("distributed", "standard", "cyclic", "expected"),
+    [
+        ("distributed.rst", "standard.rst", True, "standard.rst"),
+        ("distributed.rst", "standard.rst", False, "standard.rst"),
+        ("distributed.rst", None, False, "distributed.rst"),
+        (None, "standard.rst", False, "standard.rst"),
+        (None, None, False, None),
+    ],
+)
+def test_result_reads_selected_file_or_reports_missing_results(
+    tmp_path, monkeypatch, distributed, standard, cyclic, expected
+):
+    distributed_path = tmp_path / distributed if distributed else None
+    standard_path = tmp_path / standard if standard else None
+    for result_path in (distributed_path, standard_path):
+        if result_path is not None:
+            result_path.write_text("result")
+    if distributed_path is not None and standard_path is not None:
+        os.utime(distributed_path, (1_700_000_000, 1_700_000_000))
+        os.utime(standard_path, (1_700_000_010, 1_700_000_010))
+
+    result_constructor = Mock(return_value=SimpleNamespace(_is_cyclic=cyclic))
+    read_binary = Mock(side_effect=lambda path: f"parsed {Path(path).name}")
+    monkeypatch.setattr(core_subsystems, "_HAS_DPF", False)
+    monkeypatch.setattr("ansys.mapdl.reader.rst.Result", result_constructor)
+    monkeypatch.setattr("ansys.mapdl.reader.read_binary", read_binary)
+    client = SimpleNamespace(
+        _use_reader_backend=True,
+        _local=True,
+        _distributed_result_file=distributed_path,
+        _result_file=standard_path,
+        directory=tmp_path,
+    )
+
+    if expected is None:
+        with pytest.raises(FileNotFoundError, match="No result file"):
+            _CoreSubsystemsMixin.result.fget(client)
+    else:
+        assert _CoreSubsystemsMixin.result.fget(client) == f"parsed {expected}"
+        read_binary.assert_called_once_with(tmp_path / expected)
