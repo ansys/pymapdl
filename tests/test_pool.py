@@ -146,7 +146,8 @@ class TestMapdlPool:
                 2,
                 license_server_check=False,
                 run_location=run_path,
-                port=port,
+                # Reserve the configured primary and secondary test endpoints.
+                port=port + 2,
                 timeout=30,
                 exec_file=EXEC_FILE,
                 additional_switches=QUICK_LAUNCH_SWITCHES,
@@ -169,12 +170,10 @@ class TestMapdlPool:
             )
 
         self._pool = mapdl_pool
-        VALID_PORTS.extend(mapdl_pool._ports)
+        ports = mapdl_pool._ports
+        VALID_PORTS.extend(ports)
 
         yield mapdl_pool
-
-        for each in mapdl_pool._ports:
-            VALID_PORTS.remove(each)
 
         ##########################################################################
         # test exit
@@ -188,6 +187,8 @@ class TestMapdlPool:
                 raise TimeoutError(f"Failed to kill instance in {TWAIT} seconds")
 
         assert len(mapdl_pool) == 0
+        for each in ports:
+            VALID_PORTS.remove(each)
 
         # check it's been cleaned up
         if mapdl_pool[0] is not None:

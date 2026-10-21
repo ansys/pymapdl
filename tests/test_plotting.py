@@ -1390,6 +1390,29 @@ def test_show_closes_owned_scene_in_testing_mode(verify_image_cache):
             scene.close()
 
 
+@requires("pytest-pyvista")
+def test_image_fixture_closes_returned_plotters(
+    verify_image_cache, pytestconfig, monkeypatch
+):
+    """Returned plotters stay usable during a test but are released at teardown."""
+    from conftest import wrapped_verify_image_cache
+
+    verify_image_cache.skip = True
+    cleanup = wrapped_verify_image_cache.__wrapped__(
+        verify_image_cache, pytestconfig, monkeypatch
+    )
+    next(cleanup)
+    plotter = MapdlPlotter()
+    scene = plotter.scene
+    try:
+        assert plotter.show(return_plotter=True) is plotter
+        scene.show(auto_close=False, window_size=(120, 120))
+        assert scene.render_window is not None
+    finally:
+        cleanup.close()
+    assert scene.render_window is None
+
+
 def test_show_return_plotter_keeps_scene_usable():
     """A returned plotter remains open for its caller to use and close."""
     import pyvista as pv
