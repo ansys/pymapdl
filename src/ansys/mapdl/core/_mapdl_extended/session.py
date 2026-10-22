@@ -20,8 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
-"""The file commands MAPDL extended mixin."""
+"""Session command extensions."""
 
 from functools import wraps
 import os
@@ -35,7 +34,7 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 
-from .. import _ExtendedMixinBase
+from . import _ExtendedMixinBase
 
 
 class _ExtendedFileCommandsMixin(_ExtendedMixinBase):
@@ -407,3 +406,15 @@ class _ExtendedFileCommandsMixin(_ExtendedMixinBase):
             n3=n3,
             **kwargs,
         )
+
+
+class _ExtendedListControlsMixin(_ExtendedMixinBase):
+    """Session listing control command extensions."""
+
+    @wraps(_MapdlCore.com)
+    def com(self, comment="", **kwargs):
+        """Wraps /COM"""
+        if self.print_com and not self.mute and not kwargs.get("mute", False):
+            print("/COM,%s" % (str(comment)))
+
+        return getattr(super(), "com")(comment=comment, **kwargs)

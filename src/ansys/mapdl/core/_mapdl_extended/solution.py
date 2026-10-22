@@ -20,4 +20,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""POST1 command extensions."""
+"""Load step operation command extensions."""
+
+from functools import wraps
+
+from ansys.mapdl.core.mapdl_core import _MapdlCore
+
+from . import _ExtendedMixinBase
+
+
+class _ExtendedLoadStepCommandsMixin(_ExtendedMixinBase):
+    """Load step operation command extensions."""
+
+    @wraps(_MapdlCore.lssolve)
+    def lssolve(self, lsmin="", lsmax="", lsinc="", **kwargs):
+        """Wraps LSSOLVE"""
+        with self.non_interactive:
+            getattr(super(), "lssolve")(lsmin=lsmin, lsmax=lsmax, lsinc=lsinc, **kwargs)
+        return self.last_response

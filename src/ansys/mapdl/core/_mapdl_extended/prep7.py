@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
 """The explicit commands MAPDL extended mixin."""
 
 from functools import wraps
@@ -28,7 +27,7 @@ from functools import wraps
 from ansys.mapdl.core.errors import CommandDeprecated
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 
-from .. import _ExtendedMixinBase
+from . import _ExtendedMixinBase
 
 
 class _ExtendedExplicitCommandsMixin(_ExtendedMixinBase):

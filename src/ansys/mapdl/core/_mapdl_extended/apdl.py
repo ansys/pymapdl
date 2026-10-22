@@ -1,6 +1,6 @@
-# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
+#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,8 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
-"""The parameter commands MAPDL extended mixin."""
+"""APDL command extensions."""
 
 from functools import wraps
 from typing import Union
@@ -31,7 +30,22 @@ from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 
-from .. import _ExtendedMixinBase
+from . import _ExtendedMixinBase
+
+
+class _ExtendedMatrixCommandsMixin(_ExtendedMixinBase):
+    """Matrix operation command extensions."""
+
+    @wraps(_MapdlCore.nrm)
+    def nrm(self, name="", normtype="", parr="", normalize="", **kwargs):
+        """Wraps *NRM"""
+        if not parr:
+            parr = "__temp_par__"
+        getattr(super(), "nrm")(
+            name=name, normtype=normtype, parr=parr, normalize=normalize, **kwargs
+        )
+        return self.parameters[parr]
+
 
 TMP_VAR = "__tmpvar__"
 

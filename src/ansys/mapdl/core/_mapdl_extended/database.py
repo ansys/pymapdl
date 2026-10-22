@@ -1,6 +1,6 @@
-# Copyright (C) 2016 - 2026 ANSYS, Inc. and/or its affiliates.
 # Copyright (C) 2016 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
+#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,15 +20,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
-"""The selection commands MAPDL extended mixin."""
+"""Database command extensions."""
 
 from functools import wraps
 
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 from ansys.mapdl.core.misc import allow_iterables_vmin, allow_pickable_entities
 
-from .. import _ExtendedMixinBase
+from . import _ExtendedMixinBase
+
+
+class _ExtendedComponentMixin(_ExtendedMixinBase):
+    """Extended component commands."""
+
+    @wraps(_MapdlCore.cmlist)
+    def cmlist(self, *args, **kwargs):
+        from ansys.mapdl.core.commands import ComponentListing
+
+        return ComponentListing(super().cmlist(*args, **kwargs))
 
 
 class _ExtendedSelectionCommandsMixin(_ExtendedMixinBase):
@@ -165,3 +174,15 @@ class _ExtendedSelectionCommandsMixin(_ExtendedMixinBase):
             return sel_func(*args, **kwargs)
 
         return wrapped(self, *args, **kwargs)
+
+
+class _ExtendedDatabaseSetupMixin(_ExtendedMixinBase):
+    """Extended database setup commands."""
+
+    @wraps(_MapdlCore.clear)
+    def clear(self, read: str = "NOSTART", **kwargs):
+        """Wraps the MAPDL ``CLEAR`` command to use `NOSTART` with mute=True"""
+        if self.is_grpc:
+            self._create_session()
+        kwargs.setdefault("mute", True)
+        getattr(super(), "clear")(read=read, **kwargs)
