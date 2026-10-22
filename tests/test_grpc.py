@@ -844,7 +844,7 @@ def test_exception_message_length(mapdl, cleared):
             with pytest.raises(
                 MapdlgRPCError, match="Received message larger than max"
             ):
-                mapdl2.parameters["myarr"]
+                _ = mapdl2.parameters["myarr"]
 
             assert mapdl2.is_alive
         finally:
