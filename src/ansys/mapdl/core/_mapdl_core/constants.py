@@ -26,9 +26,6 @@
 from enum import Enum
 from typing import Literal
 
-MAX_PARAM_CHARS = 32
-
-
 SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
 
 _PERMITTED_ERRORS = [

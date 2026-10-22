@@ -47,7 +47,7 @@ import platform
 from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Tuple, Union
 
 from ansys.mapdl.core import LOG
-from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
+from ansys.mapdl.core.constants import SUPPORTED_ANSYS_VERSIONS
 
 from .config import LOCALHOST, MAPDL_DEFAULT_PORT, resolve_launch_config  # noqa: F401
 from .connection import close_all_local_instances  # noqa: F401

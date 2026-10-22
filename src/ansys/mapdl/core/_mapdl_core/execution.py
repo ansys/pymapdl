@@ -60,12 +60,9 @@ if TYPE_CHECKING:  # pragma: no cover
         pass
 
 
-from .constants import (
-    _PERMITTED_ERRORS,
-    INVAL_COMMANDS,
-    INVAL_COMMANDS_SILENT,
-    MAX_PARAM_CHARS,
-)
+from ansys.mapdl.core.constants import MAX_PARAM_CHARS
+
+from .constants import _PERMITTED_ERRORS, INVAL_COMMANDS, INVAL_COMMANDS_SILENT
 
 
 def parse_to_short_cmd(command):
