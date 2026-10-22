@@ -288,7 +288,7 @@ class MapdlPlotter(Plotter):
         self, use_trame: bool = False, theme: pv.Plotter.theme = None, **plotter_kwargs
     ):
         """Initialize the ``MapdlPlotter`` class."""
-        self._owns_scene = plotter_kwargs.get("scene") is None
+        _first_use()
         self._backend = MapdlPlotterBackend(use_trame=use_trame, **plotter_kwargs)
         super().__init__(backend=self._backend)
         self._theme = theme
@@ -990,17 +990,10 @@ class MapdlPlotter(Plotter):
             The MapdlPlotter instance.
         """
         if isinstance(pl, pv.Plotter):
-            if pl is self.scene:
-                return self
-            if self._owns_scene:
-                self._close_scene(self.scene)
             self._backend.scene = pl
-            self._owns_scene = False
             self._backend.enable_widgets()
             return self
         elif isinstance(pl, MapdlPlotter):
-            if pl is not self and self._owns_scene:
-                self._close_scene(self.scene)
             return pl
         elif pl is None:
             return self
@@ -1008,23 +1001,6 @@ class MapdlPlotter(Plotter):
             raise TypeError(
                 f"Expected a ``MapdlPlotter`` or ``pv.Plotter`` instance, but got {type(pl)}"
             )
-
-    def _close_scene(self, scene: pv.Plotter) -> None:
-        """Close the scene, retrying without a failing before-close callback."""
-        if scene.render_window is None:
-            return
-        try:
-            scene.close()
-        except Exception:
-            # PyVista invokes this callback before releasing the render window.
-            scene._before_close_callback = None
-            try:
-                scene.close()
-            except Exception:
-                logger.warning(
-                    "Failed to close the plotter after a close error.", exc_info=True
-                )
-            raise
 
     def show(
         self,
@@ -1058,44 +1034,35 @@ class MapdlPlotter(Plotter):
         if self._off_screen is not None:
             kwargs.setdefault("off_screen", self._off_screen)
 
-        savefig_mode = self._savefig or savefig
-        scene = self.scene
-        auto_close = kwargs.pop("auto_close", None)
-        if auto_close is None:
-            auto_close = self._owns_scene
-        kwargs["auto_close"] = False
-        try:
-            if savefig_mode:
-                self._backend.show(
-                    window_size=window_size,
-                    screenshot=savefig,
-                    **kwargs,
-                )
-                scene.screenshot(self._savefig)
-            elif not return_plotter:
+        # permit user to save the figure as a screenshot
+        if self._savefig or savefig:
+            self._backend.show(
+                auto_close=False,
+                window_size=window_size,
+                screenshot=savefig,
+                **kwargs,
+            )
+            self.scene.screenshot(self._savefig)
+
+            # return unclosed plotter
+            if return_plotter:
+                return self
+
+            # if plotter.scene.set_background("paraview") not returning plotter, close right away
+            self.scene.close()
+
+        else:
+            if not return_plotter:
                 if window_size is not None:
                     kwargs.setdefault("window_size", window_size)
                 self._backend.show(**kwargs)
 
-            cpos = scene.camera_position if return_cpos and not return_plotter else None
-        except Exception:
-            if self._owns_scene or auto_close:
-                try:
-                    self._close_scene(scene)
-                except Exception:
-                    logger.warning(
-                        "Failed to close the plotter after a show error.",
-                        exc_info=True,
-                    )
-            raise
-
         if return_plotter:
             return self
-
-        if (self._owns_scene and savefig_mode) or auto_close:
-            self._close_scene(scene)
-
-        return cpos if return_cpos else None
+        elif return_cpos:
+            return self.scene.camera_position
+        else:
+            return None
 
     @property
     def scene(self):
