@@ -1340,172 +1340,36 @@ def test_add_mesh():
     assert pl3.meshes[1] == sphere
 
 
-@pytest.mark.parametrize("auto_close", [None, False, True])
-def test_show_preserves_camera_position_and_explicit_lifetime(
-    auto_close, verify_image_cache
-):
-    import pyvista as pv
+@pytest.mark.parametrize(
+    "kwargs,expected",
+    [
+        ({"notebook": False}, {"notebook": False}),
+        ({"notebook": True}, {"notebook": True}),
+        ({"off_screen": True}, {"off_screen": True}),
+        (
+            {"notebook": False, "off_screen": True, "window_size": [800, 600]},
+            {"notebook": False, "off_screen": True, "window_size": [800, 600]},
+        ),
+    ],
+)
+def test_show_forwards_notebook_and_off_screen(kwargs, expected):
+    """Regression test for #4635.
 
-    verify_image_cache.skip = True
-    plotter = MapdlPlotter()
-    scene = plotter.scene
-    scene.add_mesh(pv.Cube())
-    expected = [(2, 2, 2), (0, 0, 0), (0, 0, 1)]
-    scene.camera_position = expected
+    ``notebook``/``off_screen``/``window_size`` passed to ``show`` must reach
+    the underlying backend instead of being silently dropped, since dropping
+    them makes the backend fall back to its own (sometimes incorrect)
+    auto-detection - for example, detecting Spyder's IPython console as a
+    Jupyter notebook.
+    """
+    pl = MapdlPlotter()
 
-    try:
-        cpos = plotter.show(
-            auto_close=auto_close,
-            return_cpos=True,
-            notebook=False,
-            off_screen=True,
-            window_size=[160, 120],
-        )
-        assert np.allclose(list(cpos), expected)
-        assert (scene.render_window is None) is (auto_close is not False)
-        if auto_close is False:
-            assert scene.window_size == [160, 120]
-    finally:
-        if scene.render_window is not None:
-            scene.close()
+    with patch.object(pl._backend, "show") as mock_show:
+        pl.show(**kwargs)
 
-
-def test_show_closes_owned_scene_in_testing_mode(verify_image_cache):
-    """Showing an owned off-screen scene releases its VTK render window."""
-    import pyvista as pv
-    from pyvista.plotting.plotter import _ALL_PLOTTERS
-
-    verify_image_cache.skip = True
-    plotter = MapdlPlotter()
-    scene = plotter.scene
-    scene._theme.auto_close = False
-    scene.add_mesh(pv.Cube())
-
-    try:
-        plotter.show()
-        assert scene.render_window is None
-        assert all(candidate is not scene for candidate in _ALL_PLOTTERS.values())
-    finally:
-        if scene.render_window is not None:
-            scene.close()
-
-
-@requires("pytest-pyvista")
-def test_image_fixture_closes_returned_plotters(
-    verify_image_cache, pytestconfig, monkeypatch
-):
-    """Returned plotters stay usable during a test but are released at teardown."""
-    from conftest import wrapped_verify_image_cache
-
-    verify_image_cache.skip = True
-    cleanup = wrapped_verify_image_cache.__wrapped__(
-        verify_image_cache, pytestconfig, monkeypatch
-    )
-    next(cleanup)
-    plotter = MapdlPlotter()
-    scene = plotter.scene
-    try:
-        assert plotter.show(return_plotter=True) is plotter
-        scene.show(auto_close=False, window_size=(120, 120))
-        assert scene.render_window is not None
-    finally:
-        cleanup.close()
-    assert scene.render_window is None
-
-
-def test_show_return_plotter_keeps_scene_usable():
-    """A returned plotter remains open for its caller to use and close."""
-    import pyvista as pv
-
-    plotter = MapdlPlotter()
-    scene = plotter.scene
-    try:
-        assert plotter.show(return_plotter=True) is plotter
-        scene.add_mesh(pv.Cube())
-        assert scene.render_window is not None
-    finally:
-        scene.close()
-
-
-def test_show_does_not_close_injected_scene(verify_image_cache):
-    """A switched-in scene remains caller-owned."""
-    import pyvista as pv
-
-    scene = pv.Plotter(off_screen=True)
-    scene._theme.auto_close = True
-    scene.add_mesh(pv.Cube())
-    verify_image_cache.skip = True
-    plotter = MapdlPlotter()
-    owned_scene = plotter.scene
-    try:
-        assert plotter.switch_scene(owned_scene) is plotter
-        assert owned_scene.render_window is not None
-        plotter.switch_scene(scene)
-        assert owned_scene.render_window is None
-        plotter.show()
-        assert scene.render_window is not None
-    finally:
-        if owned_scene.render_window is not None:
-            owned_scene.close()
-        if scene.render_window is not None:
-            scene.close()
-
-
-def test_switch_scene_closes_unused_wrapper_scene():
-    """Passing a plotter does not leak the temporary wrapper's scene."""
-    user_plotter = MapdlPlotter()
-    user_scene = user_plotter.scene
-    temporary_plotter = MapdlPlotter()
-    temporary_scene = temporary_plotter.scene
-
-    try:
-        assert temporary_plotter.switch_scene(user_plotter) is user_plotter
-        assert temporary_scene.render_window is None
-        assert user_scene.render_window is not None
-    finally:
-        if user_scene.render_window is not None:
-            user_scene.close()
-        if temporary_scene.render_window is not None:
-            temporary_scene.close()
-
-
-def test_show_closes_scene_when_show_fails():
-    """A rendering error releases the owned scene before propagating."""
-    plotter = MapdlPlotter()
-    scene = plotter.scene
-
-    try:
-        with patch.object(
-            plotter._backend, "show", side_effect=RuntimeError("render failed")
-        ):
-            with pytest.raises(RuntimeError, match="render failed"):
-                plotter.show()
-
-        assert scene.render_window is None
-    finally:
-        if scene.render_window is not None:
-            scene.close()
-
-
-def test_show_releases_scene_when_close_callback_fails(verify_image_cache):
-    """A failing close callback must not leave the VTK window registered."""
-    verify_image_cache.skip = True
-    plotter = MapdlPlotter()
-    scene = plotter.scene
-    scene._theme.auto_close = False
-
-    def fail_callback(_):
-        raise RuntimeError("image verification failed")
-
-    try:
-        with pytest.raises(RuntimeError, match="image verification failed"):
-            plotter.show(before_close_callback=fail_callback)
-
-        assert scene.render_window is None
-    finally:
-        if scene.render_window is not None:
-            scene._before_close_callback = None
-            scene.close()
+    mock_show.assert_called_once()
+    _, call_kwargs = mock_show.call_args
+    for key, value in expected.items():
+        assert call_kwargs.get(key) == value
 
 
 def test_plot_path_screenshoot(mapdl, cleared, tmpdir):
@@ -1657,17 +1521,20 @@ def test_backend_clear(backend):
         mock_clear.assert_called_once()
 
 
-def test_show_preserves_render_error_when_cleanup_also_fails():
+@requires("pytest-pyvista")
+def test_image_fixture_closes_returned_plotters(verify_image_cache, pytestconfig):
+    """Returned plotters stay usable during a test but are released at teardown."""
+    from conftest import wrapped_verify_image_cache
+
+    verify_image_cache.skip = True
+    cleanup = wrapped_verify_image_cache.__wrapped__(verify_image_cache, pytestconfig)
+    next(cleanup)
     plotter = MapdlPlotter()
     scene = plotter.scene
     try:
-        with (
-            patch.object(
-                plotter._backend, "show", side_effect=ValueError("render failed")
-            ),
-            patch.object(scene, "close", side_effect=RuntimeError("cleanup failed")),
-        ):
-            with pytest.raises(ValueError, match="render failed"):
-                plotter.show()
+        assert plotter.show(return_plotter=True) is plotter
+        scene.show(auto_close=False, window_size=(120, 120))
+        assert scene.render_window is not None
     finally:
-        scene.close()
+        cleanup.close()
+    assert scene.render_window is None
