@@ -1015,8 +1015,6 @@ class TestPingAbuseProbe:
 
     def test_probe_does_not_keep_client_alive(self):
         """The background worker must not prevent client resource cleanup."""
-        import gc
-
         dummy = self._Dummy()
         client_ref = weakref.ref(dummy)
         dummy._start_ping_abuse_probe()
