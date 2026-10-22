@@ -62,6 +62,7 @@ from ansys.mapdl.core import USER_DATA_PATH
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.contexts.chain_commands import _ChainCommandsContext
 from ansys.mapdl.core.contexts.force_output import _ForceOutputContext
+from ansys.mapdl.core.contexts.loops import MAX_DO_LOOP_LEVEL
 from ansys.mapdl.core.contexts.muted import _MutedContext
 from ansys.mapdl.core.contexts.plotting import _InteractivePlottingContext
 from ansys.mapdl.core.contexts.run_as_routine import _RunAsRoutineContext
@@ -79,10 +80,7 @@ from ansys.mapdl.core.helpers import is_installed
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.lazy_array import LazyArray
 from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME, _MapdlCore
-from ansys.mapdl.core.mapdl_extended import (
-    MAX_DO_LOOP_LEVEL,
-    _MapdlExtended,
-)
+from ansys.mapdl.core.mapdl_extended import _MapdlExtended
 from ansys.mapdl.core.misc import random_string, stack
 from ansys.mapdl.core.plotting import GraphicsBackend
 
@@ -2664,7 +2662,7 @@ def test_save_selection_1(mapdl, cube_solve):
 
 
 def test_save_selection_2(mapdl, cleared, make_block):
-    from ansys.mapdl.core.mapdl_core import _TMP_COMP
+    from ansys.mapdl.core.contexts.save_selection import _TMP_COMP
 
     n1 = 1
     mapdl.nsel(vmin=n1)

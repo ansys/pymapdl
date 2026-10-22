@@ -35,13 +35,8 @@ from numpy.typing import DTypeLike, NDArray
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import parse
 from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput
-from ansys.mapdl.core.contexts.loops import (  # noqa: F401  # pylint: disable=unused-import
-    MAX_DO_LOOP_LEVEL,
-    _do,
-    _DoLoopContext,
-    _dowhile,
-)
-from ansys.mapdl.core.errors import (  # noqa: F401
+from ansys.mapdl.core.contexts.loops import _do, _DoLoopContext, _dowhile
+from ansys.mapdl.core.errors import (
     CommandDeprecated,
     ComponentDoesNotExits,
     IncorrectWorkingDirectory,

@@ -109,7 +109,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.xpl import ansXpl
 
     if _HAS_DPF:
-        from ansys.mapdl.core.reader import DPFResult  # noqa: F401
+        from ansys.mapdl.core.reader import DPFResult
 
 # Names re-exported for backward compatibility with code that imported them
 # from this module before the responsibility split.
