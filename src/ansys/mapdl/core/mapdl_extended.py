@@ -62,7 +62,6 @@ from ansys.mapdl.core.errors import (
     ComponentDoesNotExits,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
-    MapdlDoLoopLimitError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.lazy_array import LazyArray

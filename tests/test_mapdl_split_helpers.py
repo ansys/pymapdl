@@ -41,6 +41,7 @@ from ansys.mapdl.core._mapdl_core.subsystems import _CoreSubsystemsMixin
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 from ansys.mapdl.core.plotting import picker
+from conftest import requires
 
 
 def _bare_core():
@@ -630,6 +631,7 @@ def test_result_file_returns_only_available_thermal_or_structural_file(
     assert result_file == (tmp_path / expected if expected else None)
 
 
+@requires("ansys-mapdl-reader")
 @pytest.mark.parametrize(
     ("distributed", "standard", "cyclic", "expected"),
     [
