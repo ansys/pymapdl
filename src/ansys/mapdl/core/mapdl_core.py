@@ -32,7 +32,6 @@ from ansys.mapdl.core._mapdl_core.constants import (
     GUI_FONT_SIZE,
     INVAL_COMMANDS,
     INVAL_COMMANDS_SILENT,
-    MAX_PARAM_CHARS,
     SESSION_ID_NAME,
     STATUS,
     VALID_SELECTION_ENTITY_TP,
@@ -73,6 +72,7 @@ from ansys.mapdl.core.commands import (
     StringWithLiteralRepr,
     inject_docs,
 )
+from ansys.mapdl.core.constants import MAX_PARAM_CHARS
 from ansys.mapdl.core.contexts.chain_commands import MAX_COMMAND_LENGTH
 from ansys.mapdl.core.contexts.command_contexts import _CoreCommandContextMixin
 from ansys.mapdl.core.contexts.save_selection import (
@@ -109,7 +109,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.xpl import ansXpl
 
     if _HAS_DPF:
-        from ansys.mapdl.core.reader import DPFResult  # noqa: F401
+        from ansys.mapdl.core.reader import DPFResult
 
 # Names re-exported for backward compatibility with code that imported them
 # from this module before the responsibility split.
