@@ -67,31 +67,19 @@ def _make_mock_process(poll_return=None):
 
 def test_gc_cleanup_releases_local_process_without_server_rpc():
     """An unavailable server must not prevent GC from releasing its process."""
-    import sys
+    client = _make_mock_mapdl()
+    client._exited = False
+    client._exiting = True
+    client._local = True
+    client._mapdl_on_hpc = False
+    client._remote_instance = None
+    client.transport_mode = "insecure"
+    client._exit_mapdl.side_effect = AssertionError("RPC unavailable during GC")
 
-    process = subprocess.Popen(  # nosec B603
-        [sys.executable, "-c", "import time; time.sleep(60)"]
-    )
-    try:
-        client = _make_mock_mapdl()
-        client._exited = False
-        client._exiting = True
-        client._local = True
-        client._mapdl_on_hpc = False
-        client._remote_instance = None
-        client.transport_mode = "insecure"
-        client._exit_mapdl.side_effect = AssertionError("RPC unavailable during GC")
-        client._close_process.side_effect = process.terminate
+    MapdlGrpc._release_resources(client, cleanup_loggers=False)
 
-        MapdlGrpc._release_resources(client, cleanup_loggers=False)
-
-        process.wait(timeout=2)
-        assert process.poll() is not None
-        assert client._exited is True
-    finally:
-        if process.poll() is None:
-            process.kill()
-        process.wait(timeout=5)
+    client._close_process.assert_called_once()
+    assert client._exited is True
 
 
 def test_get_float(mapdl):

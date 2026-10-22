@@ -69,10 +69,9 @@ from ansys.mapdl.core.commands import (
     inject_docs,
 )
 from ansys.mapdl.core.constants import MAX_PARAM_CHARS
-from ansys.mapdl.core.contexts.chain_commands import (  # noqa: F401  # pylint: disable=unused-import
-    MAX_COMMAND_LENGTH,
-    _ChainCommandsContext,
-)
+from ansys.mapdl.core.contexts import chain_commands as _chain_commands
+from ansys.mapdl.core.contexts import save_selection as _save_selection
+from ansys.mapdl.core.contexts.chain_commands import _ChainCommandsContext
 from ansys.mapdl.core.contexts.force_output import _ForceOutputContext
 from ansys.mapdl.core.contexts.muted import _MutedContext
 from ansys.mapdl.core.contexts.non_interactive import _NonInteractiveContext
@@ -92,11 +91,7 @@ from ansys.mapdl.core.contexts.run_as_routine import (
 from ansys.mapdl.core.contexts.run_as_routine import (
     _resume_routine as _resume_routine_context,
 )
-from ansys.mapdl.core.contexts.save_selection import (  # noqa: F401  # pylint: disable=unused-import
-    _TMP_COMP,
-    ENTITIES_TO_SELECTION_MAPPING,
-    _SaveSelectionContext,
-)
+from ansys.mapdl.core.contexts.save_selection import _SaveSelectionContext
 from ansys.mapdl.core.errors import (
     ComponentNoData,
     MapdlCommandIgnoredError,
@@ -133,6 +128,10 @@ if TYPE_CHECKING:  # pragma: no cover
         from ansys.mapdl.core.reader import DPFResult
 
 from ansys.mapdl.core.post import PostProcessing
+
+# Kept importable from this module for backward compatibility.
+MAX_COMMAND_LENGTH = _chain_commands.MAX_COMMAND_LENGTH
+ENTITIES_TO_SELECTION_MAPPING = _save_selection.ENTITIES_TO_SELECTION_MAPPING
 
 SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
 
