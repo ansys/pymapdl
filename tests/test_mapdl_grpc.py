@@ -69,7 +69,9 @@ def test_gc_cleanup_releases_local_process_without_server_rpc():
     """An unavailable server must not prevent GC from releasing its process."""
     import sys
 
-    process = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+    process = subprocess.Popen(  # nosec B603
+        [sys.executable, "-c", "import time; time.sleep(60)"]
+    )
     try:
         client = _make_mock_mapdl()
         client._exited = False

@@ -68,7 +68,7 @@ from ansys.mapdl.core.commands import (
     StringWithLiteralRepr,
     inject_docs,
 )
-from ansys.mapdl.core.contexts.chain_commands import (  # noqa: F401
+from ansys.mapdl.core.contexts.chain_commands import (  # noqa: F401  # pylint: disable=unused-import
     MAX_COMMAND_LENGTH,
     _ChainCommandsContext,
 )
@@ -91,7 +91,7 @@ from ansys.mapdl.core.contexts.run_as_routine import (
 from ansys.mapdl.core.contexts.run_as_routine import (
     _resume_routine as _resume_routine_context,
 )
-from ansys.mapdl.core.contexts.save_selection import (  # noqa: F401
+from ansys.mapdl.core.contexts.save_selection import (  # noqa: F401  # pylint: disable=unused-import
     _TMP_COMP,
     ENTITIES_TO_SELECTION_MAPPING,
     _SaveSelectionContext,
