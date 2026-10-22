@@ -68,6 +68,7 @@ from ansys.mapdl.core.commands import (
     StringWithLiteralRepr,
     inject_docs,
 )
+from ansys.mapdl.core.constants import MAX_PARAM_CHARS
 from ansys.mapdl.core.contexts.chain_commands import (  # noqa: F401  # pylint: disable=unused-import
     MAX_COMMAND_LENGTH,
     _ChainCommandsContext,
@@ -133,7 +134,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
 from ansys.mapdl.core.post import PostProcessing
 
-MAX_PARAM_CHARS = 32
 SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
