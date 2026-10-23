@@ -50,6 +50,15 @@ If you are going to do testing, you must install the testing dependencies with t
     pip install -e '.[tests]'
 
 
+Locate MAPDL core behavior
+=========================
+
+The ``mapdl_core.py`` module composes the core responsibility mixins in
+``src/ansys/mapdl/core/_mapdl_core/`` and preserves compatibility imports. Add
+core behavior to the mixin for its responsibility rather than expanding the
+facade.
+
+
 Develop PyMAPDL
 ===============
 
