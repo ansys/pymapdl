@@ -59,6 +59,20 @@ core behavior to the mixin for its responsibility rather than expanding the
 facade.
 
 
+Locate MAPDL command extensions
+==============================
+
+The ``mapdl_extended.py`` module composes the private responsibility mixins,
+initializes shared state, and preserves compatibility imports. Implement command
+overrides in ``src/ansys/mapdl/core/_mapdl_extended/``, not in the facade or the
+generated ``_commands/`` package. Use one module per command family, matching
+the ``_commands/`` family name, such as ``apdl.py``, ``session.py``, or
+``solution.py``. Plotting methods live in
+``plotting_commands.py``; APDL loop implementations remain in
+``contexts/loops.py``. Users continue to access these methods through the
+:class:`ansys.mapdl.core.Mapdl` class.
+
+
 Develop PyMAPDL
 ===============
 
