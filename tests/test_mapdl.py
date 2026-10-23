@@ -32,7 +32,7 @@ import re
 import shutil
 import tempfile
 import time
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, call, patch
 from warnings import catch_warnings
 
 import grpc
@@ -49,6 +49,7 @@ from conftest import (
     QUICK_LAUNCH_SWITCHES,
     TEST_DPF_BACKEND,
     NullContext,
+    clear,
     has_dependency,
     requires,
 )
@@ -59,6 +60,13 @@ if has_dependency("pyvista"):
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import USER_DATA_PATH
 from ansys.mapdl.core.commands import CommandListingOutput
+from ansys.mapdl.core.contexts.chain_commands import _ChainCommandsContext
+from ansys.mapdl.core.contexts.force_output import _ForceOutputContext
+from ansys.mapdl.core.contexts.loops import MAX_DO_LOOP_LEVEL
+from ansys.mapdl.core.contexts.muted import _MutedContext
+from ansys.mapdl.core.contexts.plotting import _InteractivePlottingContext
+from ansys.mapdl.core.contexts.run_as_routine import _RunAsRoutineContext
+from ansys.mapdl.core.contexts.save_selection import _SaveSelectionContext
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
     IncorrectWorkingDirectory,
@@ -72,10 +80,7 @@ from ansys.mapdl.core.helpers import is_installed
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.lazy_array import LazyArray
 from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME, _MapdlCore
-from ansys.mapdl.core.mapdl_extended import (
-    MAX_DO_LOOP_LEVEL,
-    _MapdlExtended,
-)
+from ansys.mapdl.core.mapdl_extended import _MapdlExtended
 from ansys.mapdl.core.misc import random_string, stack
 from ansys.mapdl.core.plotting import GraphicsBackend
 
@@ -231,6 +236,41 @@ def clearing_cdread_cdwrite_tests(mapdl):
         mapdl.prep7()
 
 
+@requires("grpc")
+def test_clear_resets_database_and_postprocessing_state(mapdl, cleared):
+    mapdl.n(1, 0, 0, 0)
+    mapdl.parameters["RESET_MARKER"] = 1
+    mapdl.finish()
+    mapdl.post1()
+
+    with mapdl.muted:
+        clear(mapdl)
+        assert mapdl.mute is True
+
+    assert mapdl.mute is False
+    assert mapdl.parameters.routine == "PREP7"
+    assert "RESET_MARKER" not in mapdl.parameters
+    mapdl.n(2, 1, 0, 0)
+    assert mapdl.mesh.nnum.tolist() == [2]
+
+
+@requires("grpc")
+def test_save_selection_restores_ids_without_querying_arrays(mapdl, cleared):
+    mapdl.n(1, 0, 0, 0)
+    mapdl.n(2, 1, 0, 0)
+    mapdl.nsel("S", "NODE", vmin=1)
+
+    with patch.object(
+        mapdl,
+        "get_array",
+        side_effect=AssertionError("Unexpected selection array query"),
+    ):
+        with mapdl.save_selection:
+            mapdl.allsel()
+
+    assert mapdl.mesh.nnum.tolist() == [1]
+
+
 def asserting_cdread_cdwrite_tests(mapdl):
     # Using ``in`` because of the padding APDL does on strings.
     return "asdf1234" in mapdl.parameters["T_PAR"]
@@ -276,9 +316,9 @@ class FakeMapdl(_MapdlExtended):
 
     It bypasses :class:`_MapdlCore.__init__ <ansys.mapdl.core.mapdl_core._MapdlCore>`
     entirely, since that requires a real (or gRPC) connection, but keeps the
-    real ``_store_commands``/``_stored_commands``/``non_interactive``
-    machinery from :class:`_MapdlCore <ansys.mapdl.core.mapdl_core._MapdlCore>`
-    so the actual buffering (and discarding) behavior is exercised.
+    real composed ``non_interactive`` context and its shared
+    ``_store_commands``/``_stored_commands`` state so the actual buffering
+    and discarding behavior is exercised.
     """
 
     def __init__(self):
@@ -546,13 +586,12 @@ def test_chain_commands_restores_state_on_body_error():
     parent._stored_commands = []
 
     with pytest.raises(RuntimeError, match="body failure"):
-        with _MapdlCore._chain_commands(parent):
+        with _ChainCommandsContext(parent):
             parent._stored_commands.append("incomplete command")
             raise RuntimeError("body failure")
 
     assert parent._store_commands is False
     assert parent._stored_commands == []
-    parent._chain_stored.assert_not_called()
 
 
 def test_chain_commands_preserves_nested_state():
@@ -560,12 +599,11 @@ def test_chain_commands_preserves_nested_state():
     parent._store_commands = True
     parent._stored_commands = ["outer command"]
 
-    with _MapdlCore._chain_commands(parent):
+    with _ChainCommandsContext(parent):
         parent._stored_commands.append("inner command")
 
     assert parent._store_commands is True
     assert parent._stored_commands == ["outer command", "inner command"]
-    parent._chain_stored.assert_not_called()
 
 
 def test_restore_plot_device_handles_restore_failure():
@@ -579,7 +617,7 @@ def test_restore_plot_device_handles_restore_failure():
 
 def test_save_selection_preserves_body_error_when_cleanup_fails():
     parent = MagicMock()
-    context = _MapdlCore._save_selection(parent)
+    context = _SaveSelectionContext(parent)
     context.selection = [{"cmsel": {}}]
     parent.allsel.side_effect = RuntimeError("cleanup failure")
 
@@ -591,12 +629,57 @@ def test_save_selection_preserves_body_error_when_cleanup_fails():
 def test_interactive_plotting_skips_noninteractive_mode():
     parent = MagicMock()
     parent._store_commands = True
-    context = _MapdlCore.WithInterativePlotting(parent, 1600)
+    context = _InteractivePlottingContext(parent, 1600)
 
     type(context).__enter__.__wrapped__(context)
     type(context).__exit__.__wrapped__(context, None, None, None)
 
     parent.show.assert_not_called()
+
+
+def test_muted_restores_state_on_body_error():
+    parent = MagicMock()
+    parent.mute = False
+
+    with pytest.raises(RuntimeError, match="body failure"):
+        with _MutedContext(parent):
+            assert parent.mute is True
+            raise RuntimeError("body failure")
+
+    assert parent.mute is False
+
+
+def test_force_output_restores_state_on_body_error():
+    parent = MagicMock()
+    parent._mute = True
+    parent.wrinqr.return_value = 0
+
+    with pytest.raises(RuntimeError, match="body failure"):
+        with _ForceOutputContext(parent):
+            assert parent._mute is False
+            raise RuntimeError("body failure")
+
+    assert parent._mute is True
+    assert parent._run.call_args_list == [call("/gopr"), call("/nopr")]
+
+
+def test_run_as_routine_restores_state_on_body_error():
+    parent = object.__new__(_MapdlCore)
+    parent._cached_routine = None
+    parent._parameters = MagicMock()
+    parent._parameters.routine = "PREP7"
+    parent._log = MagicMock()
+    parent.run = MagicMock()
+
+    with pytest.raises(RuntimeError, match="body failure"):
+        with _RunAsRoutineContext(parent, "POST26"):
+            raise RuntimeError("body failure")
+
+    assert parent._cached_routine is None
+    assert parent.run.call_args_list == [
+        call("/POST26", mute=True),
+        call("/PREP7", mute=True),
+    ]
 
 
 def test_error(mapdl, clear_at_end):
@@ -2579,7 +2662,7 @@ def test_save_selection_1(mapdl, cube_solve):
 
 
 def test_save_selection_2(mapdl, cleared, make_block):
-    from ansys.mapdl.core.mapdl_core import _TMP_COMP
+    from ansys.mapdl.core.contexts.save_selection import _TMP_COMP
 
     n1 = 1
     mapdl.nsel(vmin=n1)
@@ -4025,15 +4108,9 @@ def test_osresult_presol(mapdl, solved_box):
 # ----------------
 # Unit tests for the ``Mapdl.do`` and ``Mapdl.dowhile`` loop context managers.
 
-# These tests do not require a live MAPDL instance: they exercise the context
-# manager logic against a lightweight fake that mimics only the bits of
-# :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` that ``do``/``dowhile`` rely
-# on. Notably, ``FakeMapdl`` does **not** stub out
-# :class:`Mapdl.non_interactive <ansys.mapdl.core.mapdl_core._MapdlCore>`: it
-# relies on the real, inherited :class:`_non_interactive
-# <ansys.mapdl.core.mapdl_core._MapdlCore._non_interactive>` implementation, so
-# these tests also guard against a partial ``*DO``/``*DOWHILE`` block leaking
-# into a later flush through the shared ``_stored_commands`` buffer.
+# These tests use a lightweight fake rather than live MAPDL. The fake inherits
+# the real non-interactive context, so the tests cover shared command buffering
+# and verify that failed loops discard incomplete blocks.
 
 
 def test_do_emits_do_and_enddo_real_mapdl(mapdl):

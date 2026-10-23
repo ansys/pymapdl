@@ -55,6 +55,10 @@ Develop PyMAPDL
 
 .. epigraph:: *Now it is time to develop PyMAPDL!*
 
+Context manager implementations live in
+:file:`src/ansys/mapdl/core/contexts/`. APDL do-loop implementations live in
+:file:`src/ansys/mapdl/core/contexts/loops.py`.
+
 Developing code in a repository, particularly when using version control systems
 like Git, involves a set of essential guidelines to ensure efficient
 collaboration, code management, and tracking changes. Here are the main
@@ -295,6 +299,14 @@ It is executed upstream of each test and not within all tests.
 
 Passing the ``cleared`` fixture is also useful since it clears up the MAPDL database
 and configuration before performing the test.
+Its database reset completes outside streamed input; only the formatting commands
+are batched. Keep that boundary when extending the fixture.
+
+Selection restoration does not retrieve entity-ID arrays that it does not use.
+The image-verification fixture closes any remaining plotters after each test,
+before the image-cache callbacks are removed.
+Local pool fixtures use available ports above the configured primary and secondary
+test endpoints so that test order does not determine who owns those endpoints.
 
 Running PyMAPDL tests
 ---------------------

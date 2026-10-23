@@ -51,7 +51,6 @@ from typing import (
 )
 from uuid import uuid4
 from warnings import warn
-import weakref
 
 import numpy as np
 
@@ -70,6 +69,29 @@ from ansys.mapdl.core.commands import (
     inject_docs,
 )
 from ansys.mapdl.core.constants import MAX_PARAM_CHARS
+from ansys.mapdl.core.contexts import chain_commands as _chain_commands
+from ansys.mapdl.core.contexts import save_selection as _save_selection
+from ansys.mapdl.core.contexts.chain_commands import _ChainCommandsContext
+from ansys.mapdl.core.contexts.force_output import _ForceOutputContext
+from ansys.mapdl.core.contexts.muted import _MutedContext
+from ansys.mapdl.core.contexts.non_interactive import _NonInteractiveContext
+from ansys.mapdl.core.contexts.plotting import (
+    _InteractivePlottingContext,
+)
+from ansys.mapdl.core.contexts.plotting import (
+    _restore_plot_device as _restore_plot_device_context,
+)
+from ansys.mapdl.core.contexts.run_as_routine import _RunAsRoutineContext
+from ansys.mapdl.core.contexts.run_as_routine import (
+    _cache_routine as _cache_routine_context,
+)
+from ansys.mapdl.core.contexts.run_as_routine import (
+    _enter_routine as _enter_routine_context,
+)
+from ansys.mapdl.core.contexts.run_as_routine import (
+    _resume_routine as _resume_routine_context,
+)
+from ansys.mapdl.core.contexts.save_selection import _SaveSelectionContext
 from ansys.mapdl.core.errors import (
     ComponentNoData,
     MapdlCommandIgnoredError,
@@ -84,10 +106,8 @@ from ansys.mapdl.core.mapdl_path import _MapdlPurePosixPath, _MapdlPureWindowsPa
 from ansys.mapdl.core.mapdl_types import MapdlFloat
 from ansys.mapdl.core.misc import (
     check_deprecated_vtk_kwargs,
-    check_valid_routine,
     last_created,
     random_string,
-    requires_graphics,
     requires_package,
     run_as,
     supress_logging,
@@ -98,7 +118,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.reader import Archive
 
     from ansys.mapdl.core.component import ComponentManager
-    from ansys.mapdl.core.mapdl import MapdlBase
     from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
     from ansys.mapdl.core.parameters import Parameters
     from ansys.mapdl.core.plugin import ansPlugin
@@ -109,6 +128,10 @@ if TYPE_CHECKING:  # pragma: no cover
         from ansys.mapdl.core.reader import DPFResult
 
 from ansys.mapdl.core.post import PostProcessing
+
+# Kept importable from this module for backward compatibility.
+MAX_COMMAND_LENGTH = _chain_commands.MAX_COMMAND_LENGTH
+ENTITIES_TO_SELECTION_MAPPING = _save_selection.ENTITIES_TO_SELECTION_MAPPING
 
 SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
 
@@ -129,23 +152,6 @@ _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*The distributed memory parallel solution does not support KRYLOV method",
 ]
 
-_TMP_COMP = {
-    "KP": "cmp_kp",
-    "LINE": "cmp_line",
-    "AREA": "cmp_area",
-    "VOLU": "cmp_volu",
-    "NODE": "cmp_node",
-    "ELEM": "cmp_elem",
-}
-
-ENTITIES_TO_SELECTION_MAPPING = {
-    "KP": "ksel",
-    "LINE": "lsel",
-    "AREA": "asel",
-    "VOLU": "vsel",
-    "NODE": "nsel",
-    "ELEM": "esel",
-}
 
 # test for png file
 PNG_IS_WRITTEN_TO_FILE = re.compile(
@@ -215,7 +221,6 @@ PLOT_COMMANDS = [
     "TBPL",
     "VPLO",
 ]
-MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
 
 VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
 VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
@@ -503,7 +508,7 @@ class _MapdlCore(Commands):
             raise MapdlRuntimeError(
                 "Chained commands are not permitted in distributed ansys."
             )
-        return self._chain_commands(self)
+        return _ChainCommandsContext(self)
 
     @property
     def check_status(self) -> STATUS:
@@ -679,7 +684,7 @@ class _MapdlCore(Commands):
 
         You can still do changes to those inside this context.
         """
-        return self._force_output(self)
+        return _ForceOutputContext(self)
 
     @property
     def geometry(self) -> "Geometry":
@@ -927,7 +932,7 @@ class _MapdlCore(Commands):
         ...    mapdl.run("(1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)")
         >>> mapdl.last_response
         """
-        return self._non_interactive(self)
+        return _NonInteractiveContext(self)
 
     @property
     def muted(self):
@@ -941,7 +946,7 @@ class _MapdlCore(Commands):
         >>> with mapdl.muted:
         ...    mapdl.run("/SOLU") # This call is muted
         """
-        return self._muted(self)
+        return _MutedContext(self)
 
     @property
     def parameters(self) -> "Parameters":
@@ -1112,7 +1117,7 @@ class _MapdlCore(Commands):
         when exit returns to that selection.
         """
         if self._save_selection_obj is None:
-            self._save_selection_obj = self._save_selection(self)
+            self._save_selection_obj = _SaveSelectionContext(self)
         return self._save_selection_obj
 
     @property
@@ -1536,186 +1541,6 @@ class _MapdlCore(Commands):
                 method = self.__getattribute__(name)
                 setattr(self, name, wrap_xsel_function(method))
 
-    def _chain_stored(self):
-        """Send a series of commands to MAPDL"""
-        # there's to be an limit to 640 characters per command, so
-        # when chaining commands they must be shorter than 640 (minus
-        # some overhead).
-        c = 0
-        chained_commands = []
-        chunk = []
-        for command in self._stored_commands:
-            len_command = len(command) + 1  # include sep var
-            if len_command + c > MAX_COMMAND_LENGTH:
-                chained_commands.append("$".join(chunk))
-                chunk = [command]
-                c = 0
-            else:
-                chunk.append(command)
-                c += len_command
-
-        # join the last
-        chained_commands.append("$".join(chunk))
-        self._stored_commands = []
-
-        responses = [self._run(command) for command in chained_commands]
-        self._response = "\n".join(responses)
-
-    class _non_interactive:
-        """Allows user to enter commands that need to run non-interactively."""
-
-        def __init__(self, parent):
-            self._parent = weakref.ref(parent)
-
-        def __enter__(self):
-            self._parent()._log.debug("Entering in non-interactive mode")
-            if self._parent().logger.logger.level <= logging.DEBUG:
-                # only commenting if on debug mode
-                self._parent().com("Entering in non_interactive mode")
-            self._parent()._store_commands = True
-
-        def __exit__(self, *args):
-            self._parent()._store_commands = False
-
-            if args[0] is not None:
-                # An exception was raised, let's exit now without flushing.
-                # Discard whatever was buffered so an incomplete (and
-                # potentially invalid, for example a '*DO' missing its
-                # '*ENDDO') block cannot leak into a later flush.
-                self._parent()._log.debug(
-                    "An exception was found in the `non_interactive` environment. "
-                    "Hence the commands are not flushed and are discarded."
-                )
-                self._parent()._stored_commands = []
-                return None
-            else:
-                # No exception so let's flush.
-                self._parent()._log.debug("Exiting non-interactive mode")
-                self._parent()._flush_stored()
-
-    class _save_selection:
-        """Save the selection and returns to it when exiting"""
-
-        def __init__(self, parent):
-            self._parent = weakref.ref(parent)
-            self.selection = []
-
-        def __enter__(self):
-            self._parent()._log.debug("Entering saving selection context")
-            mapdl = self._parent()
-
-            # Storing components
-            selection = {
-                "cmsel": mapdl.components._comp,
-            }
-            id_ = random_string(5)
-            for each_type, each_name in _TMP_COMP.items():
-                each_name = f"__{each_name}{id_}__"
-                selection[each_type] = each_name
-                mapdl.cm(
-                    each_name, each_type, mute=True
-                )  # to hide ComponentNoData error
-
-            self.selection.append(selection)
-
-        def __exit__(self, *args):
-            self._parent()._log.debug("Exiting saving selection context")
-
-            mapdl = self._parent()
-            selection = self.selection.pop()
-            cmps = selection.pop("cmsel")
-
-            try:
-                mapdl.allsel()
-                mapdl.cmsel("None")
-
-                if cmps:
-                    for each_name, each_value in cmps.items():
-                        mapdl.cmsel("a", each_name, each_value, mute=True)
-
-                for each_type, each_name in selection.items():
-                    mapdl.cmsel("a", each_name, each_type, mute=True)
-
-                    selfun = getattr(
-                        mapdl, ENTITIES_TO_SELECTION_MAPPING[each_type.upper()]
-                    )
-                    selfun("s", vmin=each_name, mute=True)
-
-                    mapdl.cmdele(each_name, mute=True)
-            except Exception:
-                if args and args[0] is not None:
-                    mapdl._log.exception("Unable to restore the saved selection.")
-                    return None
-                raise
-
-    class _chain_commands:
-        """Store MAPDL commands and send one chained command."""
-
-        def __init__(self, parent):
-            self._parent = weakref.ref(parent)
-            self._previous_store_commands = False
-            self._stored_commands_len = 0
-
-        def __enter__(self):
-            parent = self._parent()
-            parent._log.debug("Entering chained command mode")
-            self._previous_store_commands = parent._store_commands
-            self._stored_commands_len = len(parent._stored_commands)
-            parent._store_commands = True
-
-        def __exit__(self, *args):
-            parent = self._parent()
-            parent._log.debug("Exiting chained command mode")
-            try:
-                if args[0] is not None:
-                    parent._stored_commands = parent._stored_commands[
-                        : self._stored_commands_len
-                    ]
-                elif not self._previous_store_commands:
-                    parent._chain_stored()
-            finally:
-                parent._store_commands = self._previous_store_commands
-
-    class _RetainRoutine:
-        """Store MAPDL's routine when entering and reverts it when exiting."""
-
-        def __init__(self, parent, routine):
-            self._parent = weakref.ref(parent)
-            self._requested_routine = routine
-
-        def __enter__(self):
-            """Store the current routine and enter the requested routine."""
-            self._parent()._cache_routine()
-            self._parent()._log.debug(f"Caching routine {self._cached_routine}")
-
-            if (
-                self._requested_routine.lower().strip()
-                != self._cached_routine.lower().strip()
-            ):
-                self._parent()._enter_routine(self._requested_routine)
-
-        def __exit__(self, *args):
-            """Restore the original routine."""
-            self._parent()._log.debug(f"Restoring routine '{self._cached_routine}'")
-            self._parent()._resume_routine()
-
-        @property
-        def _cached_routine(self):
-            return self._parent()._cached_routine
-
-    class _muted:
-        def __init__(self, parent):
-            self._parent = weakref.ref(parent)
-            self.old_value = None
-
-        def __enter__(self):
-            self.old_value = self._parent().mute
-            self._parent().mute = True
-
-        def __exit__(self, *args):
-            self._parent().mute = self.old_value
-            self.old_value = None
-
     def run_as_routine(self, routine):
         """
         Runs a command or commands at a routine and then revert to the prior routine.
@@ -1740,7 +1565,7 @@ class _MapdlCore(Commands):
         >>> mapdl.parameters.routine
         'PREP7'
         """
-        return self._RetainRoutine(self, routine)
+        return _RunAsRoutineContext(self, routine)
 
     @supress_logging
     def __str__(self):
@@ -2004,26 +1829,13 @@ class _MapdlCore(Commands):
         self._remove_tmp = remove_tmp
 
     def _enter_routine(self, routine):
-        # check the routine is valid since we're muting the output
-        check_valid_routine(routine)
-
-        if routine.lower() in ["begin level", "finish"]:
-            self.finish(mute=True)
-        else:
-            if not routine.startswith("/"):
-                routine = f"/{routine}"
-
-            self.run(f"{routine}", mute=True)
+        return _enter_routine_context(self, routine)
 
     def _cache_routine(self):
-        """Cache the current routine."""
-        self._cached_routine = self.parameters.routine
+        return _cache_routine_context(self)
 
     def _resume_routine(self):
-        """Resume the cached routine."""
-        if self._cached_routine is not None:
-            self._enter_routine(self._cached_routine)
-            self._cached_routine = None
+        return _resume_routine_context(self)
 
     def _launch(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError("Implemented by child class")
@@ -2046,73 +1858,7 @@ class _MapdlCore(Commands):
             Increasing the resolution produces a "sharper" image but
             takes longer to render.
         """
-        return self.WithInterativePlotting(self, pixel_res)
-
-    class WithInterativePlotting:
-        """Allows to redirect plots to MAPDL plots."""
-
-        def __init__(self, parent: "MapdlBase", pixel_res: int) -> None:
-            self._parent = weakref.ref(parent)
-            self._pixel_res = pixel_res
-
-        @requires_graphics
-        def __enter__(self) -> None:
-            parent = self._parent()
-            if parent is None:
-                raise MapdlRuntimeError("Parent reference is None")
-
-            parent._log.debug("Entering in 'WithInterativePlotting' mode")
-
-            self._active = not parent._store_commands
-            if not self._active:
-                return
-
-            self.previous_device = parent.file_type_for_plots
-            entered = False
-            try:
-                if not parent._png_mode:
-                    parent.show("PNG", mute=True)
-                    parent.gfile(self._pixel_res, mute=True)
-
-                if parent.file_type_for_plots not in [
-                    "PNG",
-                    "TIFF",
-                    "PNG",
-                    "VRML",
-                ]:
-                    parent.show(parent.default_file_type_for_plots)
-                entered = True
-            finally:
-                if not entered:
-                    parent._restore_plot_device(
-                        self.previous_device,
-                        primary_exception=sys.exc_info()[1],
-                        use_property=True,
-                    )
-
-        @requires_graphics
-        def __exit__(self, *args) -> None:
-            parent = self._parent()
-            if parent is None:
-                raise MapdlRuntimeError("Parent reference is None")
-
-            parent._log.debug("Exiting in 'WithInterativePlotting' mode")
-            if not self._active:
-                return
-
-            try:
-                parent.show("close", mute=True)
-
-                if not parent._store_commands:
-                    if not parent._png_mode:
-                        parent.show("PNG", mute=True)
-                        parent.gfile(self._pixel_res, mute=True)
-            finally:
-                parent._restore_plot_device(
-                    self.previous_device,
-                    primary_exception=sys.exc_info()[1],
-                    use_property=True,
-                )
+        return _InteractivePlottingContext(self, pixel_res)
 
     def set_log_level(self, loglevel: DEBUG_LEVELS) -> None:
         """Sets log level
@@ -2627,15 +2373,9 @@ class _MapdlCore(Commands):
         *,
         use_property: bool = False,
     ) -> None:
-        try:
-            if use_property:
-                self.file_type_for_plots = previous_device
-            else:
-                self.show(previous_device)
-        except Exception:
-            if primary_exception is None:
-                raise
-            self._log.exception("Unable to restore the previous plotting device.")
+        return _restore_plot_device_context(
+            self, previous_device, primary_exception, use_property=use_property
+        )
 
     def _get_plot_name(self, text: str) -> str:
         """Obtain the plot filename."""
@@ -3245,30 +2985,6 @@ class _MapdlCore(Commands):
         """
         fname_path = pathlib.Path(fname)
         return (fname_path.stem, fname_path.suffix.replace(".", ""), fname_path.parent)
-
-    class _force_output:
-        """Allows user to enter commands that need to run with forced text output."""
-
-        def __init__(self, parent: "MapdlBase"):
-            self._parent: "MapdlBase" = weakref.ref(parent)
-
-        def __enter__(self):
-            self._parent()._log.debug("Entering force-output mode")
-            if self._parent().wrinqr(1) == 0:  # using wrinqr is more reliable than *get
-                self._in_nopr = True
-                self._parent()._run("/gopr")  # Going to PR mode
-            else:
-                self._in_nopr = False
-
-            self._previous_mute, self._parent()._mute = self._parent()._mute, False
-
-        def __exit__(self, *args):
-            self._parent()._log.debug("Exiting force-output mode")
-            try:
-                if self._in_nopr:
-                    self._parent()._run("/nopr")
-            finally:
-                self._parent()._mute = self._previous_mute
 
     def _parse_cmlist(
         self, cmlist: Optional[str] = None

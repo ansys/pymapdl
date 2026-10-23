@@ -1519,3 +1519,22 @@ def test_backend_clear(backend):
     with patch.object(backend._pl.scene, "clear") as mock_clear:
         backend.clear()
         mock_clear.assert_called_once()
+
+
+@requires("pytest-pyvista")
+def test_image_fixture_closes_returned_plotters(verify_image_cache, pytestconfig):
+    """Returned plotters stay usable during a test but are released at teardown."""
+    from conftest import wrapped_verify_image_cache
+
+    verify_image_cache.skip = True
+    cleanup = wrapped_verify_image_cache.__wrapped__(verify_image_cache, pytestconfig)
+    next(cleanup)
+    plotter = MapdlPlotter()
+    scene = plotter.scene
+    try:
+        assert plotter.show(return_plotter=True) is plotter
+        scene.show(auto_close=False, window_size=(120, 120))
+        assert scene.render_window is not None
+    finally:
+        cleanup.close()
+    assert scene.render_window is None

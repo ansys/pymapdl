@@ -28,7 +28,6 @@ import shutil
 import tempfile
 from typing import Union
 import warnings
-import weakref
 
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
@@ -36,12 +35,12 @@ from numpy.typing import DTypeLike, NDArray
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import parse
 from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput
+from ansys.mapdl.core.contexts.loops import _do, _DoLoopContext, _dowhile
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
     ComponentDoesNotExits,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
-    MapdlDoLoopLimitError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.lazy_array import LazyArray
@@ -58,12 +57,6 @@ from ansys.mapdl.core.misc import (
 from ansys.mapdl.core.plotting import GraphicsBackend
 
 TMP_VAR = "__tmpvar__"
-
-# MAPDL only allows a limited number of nested do-loops (``*DO``/``*DOWHILE``).
-# One level of internal file switching is used for each nested loop, and
-# MAPDL supports twenty levels of nested file switching. See the ``*DO``
-# command documentation for more details.
-MAX_DO_LOOP_LEVEL = 20
 
 
 class _MapdlCommandExtended(_MapdlCore):
@@ -3743,81 +3736,6 @@ class _MapdlExtended(_MapdlCommandExtended):
             **kwargs,
         )
 
-    class _DoLoop:
-        """Context manager backing :meth:`Mapdl.do` and :meth:`Mapdl.dowhile`.
-
-        It opens the loop (``*DO`` or ``*DOWHILE``) on ``__enter__`` and
-        closes it (``*ENDDO``) on ``__exit__``, automatically entering
-        :attr:`Mapdl.non_interactive` (unless it is already active) so the
-        whole loop is sent to MAPDL as a single block. It also keeps track
-        of how many loops are currently nested so the
-        :data:`MAX_DO_LOOP_LEVEL` limit imposed by MAPDL can be enforced.
-
-        On ``__enter__``, the number of commands already buffered in
-        ``mapdl._stored_commands`` is recorded in ``_stored_commands_len``.
-        If an exception is raised inside the ``with`` block, ``__exit__``
-        truncates ``mapdl._stored_commands`` back to that length instead of
-        emitting ``*ENDDO``. This discards only the (incomplete, and
-        potentially invalid since it is missing its ``*ENDDO``) commands
-        buffered by this loop, without erasing commands legitimately
-        buffered before it, which matters when this loop is nested inside
-        an outer ``non_interactive`` block or an outer ``do``/``dowhile``
-        loop that did not fail and whose buffered commands must be
-        preserved.
-        """
-
-        def __init__(self, parent: "_MapdlExtended", command: str, **kwargs):
-            self._parent = weakref.ref(parent)
-            self._command = command
-            self._kwargs = kwargs
-            self._non_interactive_cm = None
-            self._stored_commands_len = 0
-
-        def __enter__(self):
-            mapdl = self._parent()
-
-            if mapdl._do_loop_level >= MAX_DO_LOOP_LEVEL:
-                raise MapdlDoLoopLimitError(
-                    "Cannot open another APDL do-loop: MAPDL only supports "
-                    f"{MAX_DO_LOOP_LEVEL} levels of nested '*DO'/'*DOWHILE' "
-                    "loops. Reduce the number of nested 'mapdl.do' or "
-                    "'mapdl.dowhile' context managers."
-                )
-
-            mapdl._do_loop_level += 1
-            mapdl._log.debug(
-                f"Entering do-loop level {mapdl._do_loop_level}: {self._command}"
-            )
-
-            if not mapdl._store_commands:
-                self._non_interactive_cm = mapdl.non_interactive
-                self._non_interactive_cm.__enter__()
-
-            self._stored_commands_len = len(mapdl._stored_commands)
-
-            mapdl.run(self._command, **self._kwargs)
-            return self
-
-        def __exit__(self, *args):
-            mapdl = self._parent()
-            mapdl._do_loop_level -= 1
-            mapdl._log.debug(f"Exiting do-loop level {mapdl._do_loop_level + 1}")
-
-            try:
-                if args[0] is None:
-                    mapdl.run("*ENDDO")
-                else:
-                    # An exception was raised: discard only the commands
-                    # buffered by this loop (which are incomplete since
-                    # they are missing their '*ENDDO'), keeping whatever
-                    # was legitimately buffered before it.
-                    mapdl._stored_commands = mapdl._stored_commands[
-                        : self._stored_commands_len
-                    ]
-            finally:
-                if self._non_interactive_cm is not None:
-                    self._non_interactive_cm.__exit__(*args)
-
     def do(
         self,
         par: str,
@@ -3825,7 +3743,7 @@ class _MapdlExtended(_MapdlCommandExtended):
         fval: MapdlFloat = "",
         inc: MapdlFloat = "",
         **kwargs: KwargDict,
-    ) -> "_MapdlExtended._DoLoop":
+    ) -> _DoLoopContext:
         r"""Context manager for an APDL ``*DO`` loop.
 
         Mechanical APDL Command: `\*DO <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DO.html>`_
@@ -3886,14 +3804,13 @@ class _MapdlExtended(_MapdlCommandExtended):
         ...     mapdl.n("i", "i", 0, 0)
 
         """
-        command = f"*DO,{par},{ival},{fval},{inc}"
-        return self._DoLoop(self, command, **kwargs)
+        return _do(self, par, ival, fval, inc, **kwargs)
 
     def dowhile(
         self,
         par: str,
         **kwargs: KwargDict,
-    ) -> "_MapdlExtended._DoLoop":
+    ) -> _DoLoopContext:
         r"""Context manager for an APDL ``*DOWHILE`` loop.
 
         Mechanical APDL Command: `\*DOWHILE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DOWHILE.html>`_
@@ -3944,5 +3861,4 @@ class _MapdlExtended(_MapdlCommandExtended):
         ...     mapdl.run("cont = cont - 1")
 
         """
-        command = f"*DOWHILE,{par}"
-        return self._DoLoop(self, command, **kwargs)
+        return _dowhile(self, par, **kwargs)

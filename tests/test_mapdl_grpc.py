@@ -65,6 +65,23 @@ def _make_mock_process(poll_return=None):
     return proc
 
 
+def test_gc_cleanup_releases_local_process_without_server_rpc():
+    """An unavailable server must not prevent GC from releasing its process."""
+    client = _make_mock_mapdl()
+    client._exited = False
+    client._exiting = True
+    client._local = True
+    client._mapdl_on_hpc = False
+    client._remote_instance = None
+    client.transport_mode = "insecure"
+    client._exit_mapdl.side_effect = AssertionError("RPC unavailable during GC")
+
+    MapdlGrpc._release_resources(client, cleanup_loggers=False)
+
+    client._close_process.assert_called_once()
+    assert client._exited is True
+
+
 def test_get_float(mapdl):
     response = pb_types.GetResponse(type=1, dval=123.456)
 
@@ -939,7 +956,6 @@ class TestPingAbuseProbe:
             self._ping_probe_thread = None
             self._ctrl = MagicMock()
 
-        _ping_abuse_probe_loop = MapdlGrpc._ping_abuse_probe_loop
         _start_ping_abuse_probe = MapdlGrpc._start_ping_abuse_probe
         _stop_ping_abuse_probe = MapdlGrpc._stop_ping_abuse_probe
 
@@ -985,28 +1001,68 @@ class TestPingAbuseProbe:
 
         assert dummy._ping_probe_thread is None
 
-    def test_loop_probes_with_ctrl_version_and_survives_rpc_errors(self):
-        """Each wake-up issues a bounded ``Ctrl("VERSION")`` probe; a failure
-        is logged, not raised, so the loop keeps running."""
+    def test_probe_does_not_keep_client_alive(self):
+        """The background worker must not prevent client resource cleanup."""
         dummy = self._Dummy()
-        dummy._ctrl.side_effect = grpc.RpcError("boom")
+        client_ref = weakref.ref(dummy)
+        dummy._start_ping_abuse_probe()
+        thread = dummy._ping_probe_thread
+        stop_event = dummy._ping_probe_stop_event
+        try:
+            del dummy
+            gc.collect()
+            assert client_ref() is None
+        finally:
+            stop_event.set()
+            thread.join(timeout=1)
 
-        # Make the stop event "time out" exactly once, then report a stop
-        # request, so the loop body runs exactly one iteration.
+    def test_restart_does_not_revive_stopping_probe(self, monkeypatch):
+        """A timed-out shutdown must not give the old worker a new stop event."""
+        monkeypatch.setattr(
+            "ansys.mapdl.core.mapdl_grpc.PING_ABUSE_PROBE_INTERVAL_S", 0.01
+        )
+        monkeypatch.setattr(
+            "ansys.mapdl.core.mapdl_grpc.PING_ABUSE_PROBE_TIMEOUT_S", 0.01
+        )
+        entered = threading.Event()
+        release = threading.Event()
+        dummy = self._Dummy()
+
+        def blocking_probe(*args, **kwargs):
+            entered.set()
+            release.wait(timeout=5)
+
+        dummy._ctrl = blocking_probe
+        dummy._start_ping_abuse_probe()
+        old_thread = dummy._ping_probe_thread
+        try:
+            assert entered.wait(timeout=5)
+            dummy._stop_ping_abuse_probe()
+            dummy._start_ping_abuse_probe()
+            release.set()
+            old_thread.join(timeout=1)
+            assert not old_thread.is_alive()
+        finally:
+            release.set()
+            dummy._stop_ping_abuse_probe()
+            old_thread.join(timeout=1)
+
+    def test_loop_continues_after_rpc_error(self):
+        """A failed control RPC does not stop subsequent probes."""
+        dummy = self._Dummy()
+        dummy._ctrl.side_effect = [grpc.RpcError("boom"), None]
         wait_calls = []
 
         def fake_wait(timeout):
             wait_calls.append(timeout)
-            return len(wait_calls) > 1
+            return len(wait_calls) > 2
 
         dummy._ping_probe_stop_event.wait = fake_wait
+        MapdlGrpc._ping_abuse_probe_loop(
+            weakref.ref(dummy), dummy._ping_probe_stop_event
+        )
 
-        dummy._ping_abuse_probe_loop()
-
-        dummy._ctrl.assert_called_once()
-        assert dummy._ctrl.call_args[0][0] == "VERSION"
-        assert "timeout" in dummy._ctrl.call_args[1]
-        assert dummy._log.debug.called
+        assert dummy._ctrl.call_count == 2
 
 
 class TestDisconnectButLeaveMapdlRunning:
