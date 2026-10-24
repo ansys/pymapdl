@@ -1,0 +1,6 @@
+﻿acel
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.inertia
+
+.. automethod:: Inertia.acel

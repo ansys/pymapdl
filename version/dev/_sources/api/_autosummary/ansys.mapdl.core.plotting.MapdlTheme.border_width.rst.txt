@@ -1,0 +1,6 @@
+border\_width
+=============
+
+.. currentmodule:: ansys.mapdl.core.plotting
+
+.. autoproperty:: MapdlTheme.border_width

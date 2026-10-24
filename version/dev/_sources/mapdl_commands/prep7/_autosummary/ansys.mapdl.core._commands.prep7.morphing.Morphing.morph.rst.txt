@@ -1,0 +1,6 @@
+﻿morph
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.morphing
+
+.. automethod:: Morphing.morph

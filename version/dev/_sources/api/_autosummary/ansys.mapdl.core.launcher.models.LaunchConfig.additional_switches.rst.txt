@@ -1,0 +1,6 @@
+additional\_switches
+====================
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.additional_switches

@@ -1,0 +1,6 @@
+popitem
+=======
+
+.. currentmodule:: ansys.mapdl.core.information
+
+.. automethod:: UnitsDict.popitem

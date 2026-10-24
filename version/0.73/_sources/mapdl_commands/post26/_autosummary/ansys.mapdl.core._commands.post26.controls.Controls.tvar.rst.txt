@@ -1,0 +1,6 @@
+﻿tvar
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.post26.controls
+
+.. automethod:: Controls.tvar

@@ -1,0 +1,6 @@
+process
+=======
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: ProcessInfo.process

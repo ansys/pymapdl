@@ -1,0 +1,6 @@
+﻿axlab
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.graphics.graphs
+
+.. automethod:: Graphs.axlab

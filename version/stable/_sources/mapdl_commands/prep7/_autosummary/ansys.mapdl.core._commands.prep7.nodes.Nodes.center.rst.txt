@@ -1,0 +1,6 @@
+﻿center
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.nodes
+
+.. automethod:: Nodes.center

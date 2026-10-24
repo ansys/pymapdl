@@ -1,0 +1,6 @@
+state
+=====
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: HPCJobInfo.state

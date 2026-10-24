@@ -1,0 +1,6 @@
+run\_location
+=============
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.run_location

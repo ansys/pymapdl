@@ -1,0 +1,6 @@
+﻿mlist
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.master_dof
+
+.. automethod:: MasterDof.mlist

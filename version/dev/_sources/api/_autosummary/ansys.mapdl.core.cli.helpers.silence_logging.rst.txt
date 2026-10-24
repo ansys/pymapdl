@@ -1,0 +1,6 @@
+﻿silence\_logging
+================
+
+.. currentmodule:: ansys.mapdl.core.cli.helpers
+
+.. autofunction:: silence_logging

@@ -1,0 +1,6 @@
+﻿list\_instances
+===============
+
+.. currentmodule:: ansys.mapdl.core.cli.list_instances
+
+.. autofunction:: list_instances
