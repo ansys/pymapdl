@@ -83,6 +83,7 @@ from ansys.mapdl.core.plotting import GraphicsBackend
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEST_FILES = os.path.join(PATH, "test_files")
 FIRST_TIME_FILE = os.path.join(USER_DATA_PATH, ".firstime")
+VERIFICATION_BANNER = "MAPDL VERIFICATION RUN ONLY"
 
 DEPRECATED_COMMANDS = [
     "edadapt",
@@ -3033,15 +3034,56 @@ def test_not_correct_et_element(mapdl, cleared):
         mapdl.keyopt(1, 222)
 
 
-def test_ctrl(mapdl, cleared):
-    with patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.run") as mck_run:
-        mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
-        mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
-
-        assert "/verify" in mck_run.call_args_list[0].args[0]
-
+def _build_model(mapdl):
+    mapdl.prep7()
+    mapdl.et(1, "LINK180")
+    mapdl.sectype(1, "LINK")
+    mapdl.secdata(1)
+    mapdl.mp("EX", 1, 1000)
+    mapdl.n(1, 0, 0, 0)
+    mapdl.n(2, 1, 0, 0)
+    mapdl.e(1, 2)
+    mapdl.d(1, "ALL", 0)
+    mapdl.d(2, "UY", 0)
+    mapdl.d(2, "UZ", 0)
+    mapdl.f(2, "FX", 1)
     mapdl.finish()
-    mapdl.run("/verify")  # mocking might skip running this inside mapdl._ctrl
+
+
+def _solve_model(mapdl):
+    mapdl.finish()
+    mapdl.slashsolu()
+    response = mapdl.solve(mute=False)
+    mapdl.finish()
+    return response
+
+
+def test_ctrl(mapdl, cleared):
+    mapdl.finish()
+    mapdl.verify("OFF")
+    mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
+    mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
+    _build_model(mapdl)
+    output = _solve_model(mapdl)
+    assert VERIFICATION_BANNER not in output
+
+
+def test_run_at_connect_does_not_enable_verification_mode(mapdl, cleared):
+    mapdl.finish()
+    mapdl.verify("OFF")
+    try:
+        mapdl._run_at_connect()
+        _build_model(mapdl)
+        output = _solve_model(mapdl)
+        assert VERIFICATION_BANNER not in output
+
+        mapdl.finish()
+        mapdl.verify()
+        output = _solve_model(mapdl)
+        assert VERIFICATION_BANNER in output
+    finally:
+        mapdl.finish()
+        mapdl.verify("OFF")
 
 
 @pytest.mark.skip("This test is removing all loggers, which is not desired")
