@@ -2915,7 +2915,8 @@ class _MapdlExtended(_MapdlCommandExtended):
 
         Use the
         :meth:`NodeSelector.select <ansys.mapdl.core.selector.NodeSelector.select>`
-        method to apply coordinate criteria to the active node selection.
+        method to evaluate coordinate criteria against the whole model. It returns
+        the matching node IDs and leaves the active selection unchanged.
         The same generated command sequence works for local and remote MAPDL
         sessions and does not transfer files.
 

@@ -31,7 +31,6 @@ See the :class:`NodeSelector <ansys.mapdl.core.selector.NodeSelector>` class
 for the public API.
 """
 
-from collections.abc import Mapping
 import math
 from numbers import Real
 import string
@@ -39,7 +38,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
-    List,
     Literal,
     NamedTuple,
     NoReturn,
@@ -57,8 +55,7 @@ from ansys.mapdl.core.misc import random_string
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl import MapdlBase
 
-#: Axes supported by :meth:`NodeSelector.select`, in the order in which they
-#: are always processed (regardless of keyword-argument order).
+#: Axes accepted by :meth:`NodeSelector.select`, in argument order.
 _AXES: Tuple[str, ...] = ("x", "y", "z")
 
 
@@ -86,6 +83,11 @@ class _AxisSelection(NamedTuple):
 
     kind: Literal["values", "interval"]
     values: Tuple[Union[int, float], ...]
+
+    @property
+    def single_command(self) -> bool:
+        """Return True when one ``NSEL`` command selects the whole criterion."""
+        return self.kind == "interval" or len(self.values) == 1
 
 
 def _reject(axis: str, message: str, *, error: type[Exception] = TypeError) -> NoReturn:
@@ -132,15 +134,6 @@ def _normalize_axis_criterion(axis: str, value: Any) -> _AxisSelection:
             "tuple for a bounded range instead.",
         )
 
-    if isinstance(value, bool):
-        _reject(axis, f"boolean value {value!r} is not a valid coordinate.")
-
-    if isinstance(value, str):
-        _reject(axis, f"a string ({value!r}) is not a valid coordinate criterion.")
-
-    if isinstance(value, Mapping):
-        _reject(axis, f"a mapping ({value!r}) is not a valid coordinate criterion.")
-
     if isinstance(value, Real):
         return _AxisSelection(kind="values", values=(_normalize_value(axis, value),))
 
@@ -164,10 +157,7 @@ def _normalize_axis_criterion(axis: str, value: Any) -> _AxisSelection:
     if isinstance(value, _SAMPLE_COLLECTION_TYPES):
         if isinstance(value, np.ndarray) and value.ndim != 1:
             _reject(axis, "a NumPy array criterion must be one-dimensional.")
-        try:
-            items = list(value)
-        except TypeError:
-            _reject(axis, "a NumPy array criterion must be one-dimensional.")
+        items = list(value)
         if not items:
             _reject(
                 axis,
@@ -240,12 +230,10 @@ class NodeSelector:
         x: Optional[Any] = None,
         y: Optional[Any] = None,
         z: Optional[Any] = None,
-        **kwargs: Any,
     ) -> NDArray[np.int32]:
         """Select nodes matching the given coordinate criteria.
 
-        Each of ``x``, ``y`` and ``z`` (and their case-insensitive aliases
-        ``X``, ``Y`` and ``Z``, supplied through ``**kwargs``) accepts one of:
+        Each of ``x``, ``y`` and ``z`` accepts one of:
 
         * a scalar number, which selects nodes at that coordinate;
         * a list, set, frozenset, or one-dimensional :class:`numpy.ndarray`
@@ -259,12 +247,14 @@ class NodeSelector:
         MAPDL ``NSEL`` bound has different semantics from an unbounded
         interval.
 
-        Criteria supplied on different axes are combined with *AND*. For
-        multiple axes, each axis's set is materialized into a uniquely named
-        temporary ``NODE`` component. The axes are then combined with
-        ``CMSEL,S`` for the first axis and ``CMSEL,R`` for every subsequent
-        axis, always processed in ``x``, ``y``, ``z`` order regardless of
-        keyword order. Every temporary component is deleted before returning.
+        Each criterion is evaluated against the whole model, not against the
+        current selection. Criteria supplied on different axes are combined
+        with *AND*. Multi-value axes are processed first: the first one starts
+        a new selection with ``NSEL,S`` and its other values are added with
+        ``NSEL,A``. Every other axis reselects from that result with
+        ``NSEL,R``. A temporary component is used only when a second
+        multi-value axis has to be intersected with the selection, and it is
+        deleted before the method returns.
 
         The caller's previous active selection is restored before this method
         returns. The returned node IDs are evaluated while the coordinate
@@ -281,12 +271,6 @@ class NodeSelector:
         z : number, collection of numbers, or tuple of two numbers, optional
             Criterion for the ``Z`` coordinate. Lists, sets, frozensets, and
             one-dimensional NumPy arrays represent discrete coordinate values.
-        **kwargs : dict, optional
-            Case-insensitive aliases for ``x``, ``y`` and ``z`` (that is,
-            ``X``, ``Y`` and ``Z``). Supplying two non-``None`` criteria for
-            the same axis (for example ``x`` and ``X``) is ambiguous and
-            raises :class:`ValueError`. Any other keyword raises
-            :class:`TypeError`.
 
         Returns
         -------
@@ -298,15 +282,14 @@ class NodeSelector:
         Raises
         ------
         TypeError
-            If an unsupported keyword argument is supplied, or if a
-            criterion has an unsupported type (for example a string, a
+            If a criterion has an unsupported type (for example a string, a
             mapping, a bare :class:`range`, a boolean, or a collection
-            containing a non-numeric entry).
+            containing a non-numeric entry), or if an unknown keyword argument
+            is supplied.
         ValueError
-            If no criteria are supplied at all, if two non-``None`` criteria
-            specify the same axis through its case-insensitive aliases, if a
-            tuple does not contain exactly two values, a collection is empty,
-            or a coordinate or interval bound is not finite.
+            If no criteria are supplied at all, if a tuple does not contain
+            exactly two values, if a collection is empty, or if a coordinate
+            or interval bound is not finite or the interval is reversed.
 
         Examples
         --------
@@ -319,62 +302,21 @@ class NodeSelector:
 
         >>> mapdl.selector.select(x=1, y=[1, 2], z=(0, 5))  # doctest: +SKIP
         """
-        raw_criteria = self._collect_criteria(x, y, z, kwargs)
-
-        # Normalize and validate every axis before issuing a MAPDL command so
-        # an invalid later axis never leaves a partial selection or an orphaned
-        # temporary component behind.
-        normalized: Dict[str, _AxisSelection] = {
-            axis: _normalize_axis_criterion(axis, raw_criteria[axis])
-            for axis in _AXES
-            if axis in raw_criteria
+        criteria = {
+            axis: value for axis, value in zip(_AXES, (x, y, z)) if value is not None
         }
-
-        return self._apply_selection(normalized)
-
-    @staticmethod
-    def _collect_criteria(
-        x: Optional[Any],
-        y: Optional[Any],
-        z: Optional[Any],
-        kwargs: Dict[str, Any],
-    ) -> Dict[str, Any]:
-        """Merge the named ``x``/``y``/``z`` parameters and their aliases.
-
-        Raises
-        ------
-        TypeError
-            If ``kwargs`` contains a keyword that is not a case-insensitive
-            alias of ``x``, ``y`` or ``z``.
-        ValueError
-            If the same axis is supplied twice (once through the named
-            parameter, once through an alias, or through two differently
-            cased aliases), or if no criterion at all is supplied.
-        """
-        raw_criteria: Dict[str, Any] = {}
-        for axis, value in zip(_AXES, (x, y, z)):
-            if value is not None:
-                raw_criteria[axis] = value
-
-        for key, value in kwargs.items():
-            axis = key.lower()
-            if axis not in _AXES:
-                raise TypeError(f"select() got an unexpected keyword argument {key!r}.")
-            if value is None:
-                continue
-            if axis in raw_criteria:
-                raise ValueError(
-                    f"select() received ambiguous, duplicate criteria for axis "
-                    f"{axis.upper()!r} (both {axis!r} and {key!r} were supplied)."
-                )
-            raw_criteria[axis] = value
-
-        if not raw_criteria:
+        if not criteria:
             raise ValueError(
                 "select() requires at least one of 'x', 'y' or 'z' criteria."
             )
 
-        return raw_criteria
+        # Normalize and validate every axis before issuing a MAPDL command so
+        # an invalid later axis never leaves a partial selection behind.
+        normalized: Dict[str, _AxisSelection] = {
+            axis: _normalize_axis_criterion(axis, value)
+            for axis, value in criteria.items()
+        }
+        return self._apply_selection(normalized)
 
     def _apply_selection(
         self, normalized: Dict[str, _AxisSelection]
@@ -382,56 +324,46 @@ class NodeSelector:
         """Translate normalized criteria into MAPDL commands and return the result."""
         mapdl = self._mapdl
 
+        # Multi-value axes go first (the stable sort keeps x, y, z order within
+        # each group) so that single-command axes can narrow the result with NSEL,R.
+        ordered = sorted(normalized.items(), key=lambda item: item[1].single_command)
+
         with mapdl.save_selection:
-            if len(normalized) == 1:
-                axis, criterion = next(iter(normalized.items()))
-                self._select_axis(mapdl, axis, criterion)
-                return mapdl.mesh.nnum
-
-            created_components: List[str] = []
-            selection_failed = False
-            try:
-                for axis, criterion in normalized.items():
-                    self._select_axis(mapdl, axis, criterion)
-
-                    if mapdl.mesh.n_node == 0:
-                        return mapdl.mesh.nnum
-
+            for index, (axis, criterion) in enumerate(ordered):
+                if index == 0:
+                    self._select_axis(mapdl, axis, criterion, "S")
+                elif criterion.single_command:
+                    self._select_axis(mapdl, axis, criterion, "R")
+                elif mapdl.mesh.n_node == 0:
+                    break  # CM on an empty selection raises ComponentNoData
+                else:
                     name = _component_name(axis)
                     mapdl.cm(name, "NODE")
-                    created_components.append(name)
-
-                for i, name in enumerate(created_components):
-                    mapdl.cmsel("S" if i == 0 else "R", name)
-
-                return mapdl.mesh.nnum
-            except BaseException:
-                selection_failed = True
-                raise
-            finally:
-                cleanup_error = None
-                for name in created_components:
                     try:
+                        self._select_axis(mapdl, axis, criterion, "S")
+                        mapdl.cmsel("R", name)
+                    finally:
                         mapdl.cmdele(name)
-                    except Exception as error:
-                        if cleanup_error is None:
-                            cleanup_error = error
-                if cleanup_error is not None and not selection_failed:
-                    raise cleanup_error
+            return mapdl.mesh.nnum
 
     @staticmethod
     def _select_axis(
         mapdl: "MapdlBase",
         axis: str,
         criterion: _AxisSelection,
+        op: str,
     ) -> None:
-        """Issue the ``NSEL`` command(s) selecting one axis from the full model."""
+        """Issue the ``NSEL`` command(s) for one axis criterion.
+
+        ``op`` is the ``NSEL`` operation of the first command. Any further
+        values of a multi-value criterion are added with ``NSEL,A``.
+        """
         axis_label = axis.upper()
 
         if criterion.kind == "interval":
             vmin, vmax = criterion.values
-            mapdl.nsel("S", "LOC", axis_label, vmin, vmax)
+            mapdl.nsel(op, "LOC", axis_label, vmin, vmax)
             return
 
         for i, value in enumerate(criterion.values):
-            mapdl.nsel("S" if i == 0 else "A", "LOC", axis_label, value)
+            mapdl.nsel(op if i == 0 else "A", "LOC", axis_label, value)

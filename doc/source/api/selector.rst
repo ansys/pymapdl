@@ -23,17 +23,18 @@ method accepts any subset of the ``x``, ``y`` and ``z`` coordinates. A scalar
 selects nodes at one coordinate. A list, set, frozenset, or one-dimensional
 NumPy array selects nodes at any of its supplied coordinates. A tuple
 containing exactly two finite numbers selects nodes in the inclusive coordinate
-interval bounded by those numbers. Axis names are case-insensitive, so ``X``,
-``Y`` and ``Z`` are also accepted. Interval bounds must be in ascending order.
+interval bounded by those numbers. Interval bounds must be in ascending order.
 A bare Python :class:`range` is not accepted because its exclusive stop value
 does not match MAPDL's inclusive range semantics. Coordinate matching uses
 MAPDL's existing ``SELTOL`` tolerance rather than an exact Python comparison.
 
 Criteria on different axes are intersected, so every selected node must
-satisfy all supplied axes. To preserve the intersection when an axis contains
-multiple discrete values, the selector materializes every axis set into a
-temporary MAPDL component, then combines them with ``CMSEL,S`` and ``CMSEL,R``.
-Temporary components are deleted before the method returns.
+satisfy all supplied axes. Each criterion is evaluated against the whole model.
+Multi-value axes are processed first: the first one starts the selection with
+``NSEL,S`` and its other values are added with ``NSEL,A``. Other axes reselect
+from that result with ``NSEL,R``. A temporary component is used only when a
+second multi-value axis has to be intersected with the selection, and it is
+deleted before the method returns.
 
 Selection state
 ---------------
