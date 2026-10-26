@@ -1425,4 +1425,5 @@ def common_functions_and_classes():
 def psd_analysis(mapdl, cleared):
     from ansys.mapdl.core.examples import vmfiles
 
+    mapdl.finish()
     mapdl.input(vmfiles["vm203"])

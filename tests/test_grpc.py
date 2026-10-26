@@ -266,6 +266,7 @@ def test_cmatrix(mapdl, setup_for_cmatrix):
 
 def test_read_input_file_verbose(mapdl, cleared):
     test_file = examples.vmfiles["vm153"]
+    mapdl.finish()
     response = mapdl.input(test_file, verbose=True)
     assert re.search(
         r"\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response
