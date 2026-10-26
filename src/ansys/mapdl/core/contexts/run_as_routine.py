@@ -24,6 +24,7 @@
 
 import weakref
 
+from ansys.mapdl.core._mapdl_core import _CoreMixinBase
 from ansys.mapdl.core.misc import check_valid_routine
 
 
@@ -76,3 +77,39 @@ def _resume_routine(mapdl):
     if mapdl._cached_routine is not None:
         mapdl._enter_routine(mapdl._cached_routine)
         mapdl._cached_routine = None
+
+
+class _RunAsRoutineMixin(_CoreMixinBase):
+    """Expose the ``run_as_routine`` context and routine helpers."""
+
+    def run_as_routine(self, routine):
+        """Run commands at a routine and then revert to the prior routine.
+
+        Parameters
+        ----------
+        routine : str
+            A MAPDL routine. For example, ``"PREP7"`` or ``"POST1"``.
+
+        Examples
+        --------
+        Enter ``PREP7`` and run ``numvar``, which requires ``POST26``, and
+        revert to the prior routine.
+
+        >>> mapdl.prep7()
+        >>> mapdl.parameters.routine
+        'PREP7'
+        >>> with mapdl.run_as_routine('POST26'):
+        ...     mapdl.numvar(200)
+        >>> mapdl.parameters.routine
+        'PREP7'
+        """
+        return _RunAsRoutineContext(self, routine)
+
+    def _enter_routine(self, routine):
+        return _enter_routine(self, routine)
+
+    def _cache_routine(self):
+        return _cache_routine(self)
+
+    def _resume_routine(self):
+        return _resume_routine(self)

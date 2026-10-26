@@ -24,6 +24,8 @@
 
 import weakref
 
+from ansys.mapdl.core._mapdl_core import _CoreMixinBase
+
 
 class _MutedContext:
     """Temporarily suppress MAPDL output."""
@@ -39,3 +41,21 @@ class _MutedContext:
     def __exit__(self, *args):
         self._parent().mute = self.old_value
         self.old_value = None
+
+
+class _MutedMixin(_CoreMixinBase):
+    """Expose the ``muted`` context."""
+
+    @property
+    def muted(self):
+        """Context manager that suppress all output from MAPDL
+
+        Use the `muted` context manager to suppress all the output. Similar to
+        setting `mapdl.mute = True` but only for the context manager.
+
+        Examples
+        --------
+        >>> with mapdl.muted:
+        ...    mapdl.run("/SOLU") # This call is muted
+        """
+        return _MutedContext(self)
