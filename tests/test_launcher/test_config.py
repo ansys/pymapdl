@@ -55,6 +55,12 @@ from ansys.mapdl.core.launcher.models import TransportMode
 # ============================================================================
 
 
+@pytest.fixture(autouse=True)
+def clear_additional_switches_env_var(monkeypatch):
+    """Isolate tests from a ``PYMAPDL_ADDITIONAL_SWITCHES`` value set by CI."""
+    monkeypatch.delenv("PYMAPDL_ADDITIONAL_SWITCHES", raising=False)
+
+
 @pytest.fixture
 def patch_get_mapdl_path():
     """Patch get_mapdl_path when not ON_LOCAL to avoid finding docker containers."""
@@ -1163,17 +1169,38 @@ class TestResolveAdditionalSwitches:
         result = resolve_additional_switches("")
         assert result == "-dyn"
 
-    def test_resolve_additional_switches_explicit_overrides_env_var(self, monkeypatch):
-        """Test that explicit arg takes precedence over env var with exactly one warning.
+    def test_resolve_additional_switches_explicit_and_env_var_are_merged(
+        self, monkeypatch
+    ):
+        """Test that env var switches are appended to the explicit argument.
 
-        ``-explicit`` and ``-from-env`` share no 4-char substring, so only the
-        skip-env-var warning should fire (not the duplicate-substring warning).
+        Regression test: the env var used to be dropped whenever the
+        ``additional_switches`` argument was set.
         """
-        monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", "-from-env")
+        monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", "-mpi openmpi")
         with patch("ansys.mapdl.core.launcher.config.LOG") as mock_log:
-            result = resolve_additional_switches("-explicit")
-            assert result == "-explicit"
-            assert mock_log.warning.call_count == 1
+            result = resolve_additional_switches("-smp")
+            assert result == "-smp -mpi openmpi"
+            mock_log.warning.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "explicit,env_value,expected",
+        [
+            ("-smp", "", "-smp"),
+            ("-smp", "   ", "-smp"),
+            ("", "  -dyn  ", "-dyn"),
+            ("   ", "-dyn", "-dyn"),
+            ("-smp ", " -mpi openmpi ", "-smp -mpi openmpi"),
+        ],
+    )
+    def test_resolve_additional_switches_whitespace_handling(
+        self, monkeypatch, explicit, env_value, expected
+    ):
+        """Test that empty or whitespace-only values do not add stray spaces."""
+        monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", env_value)
+        with patch("ansys.mapdl.core.launcher.config.LOG") as mock_log:
+            assert resolve_additional_switches(explicit) == expected
+            mock_log.warning.assert_not_called()
 
     def test_resolve_additional_switches_no_env_var_returns_empty(self, monkeypatch):
         """Test that empty arg with no env var returns empty string."""
@@ -1186,23 +1213,19 @@ class TestResolveAdditionalSwitches:
         monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", "-noinfo")
         with patch("ansys.mapdl.core.launcher.config.LOG") as mock_log:
             result = resolve_additional_switches("-noinfo -nointel")
-            assert result == "-noinfo -nointel"
-            # Expect two warnings: skip-env-var + duplicate-substring
-            assert mock_log.warning.call_count == 2
-            messages = " ".join(
-                str(call.args[0]) for call in mock_log.warning.call_args_list
-            )
-            assert "duplicated" in messages or "contradicting" in messages
+            assert result == "-noinfo -nointel -noinfo"
+            mock_log.warning.assert_called_once()
+            message = str(mock_log.warning.call_args.args[0])
+            assert "duplicated" in message and "contradicting" in message
 
-    def test_resolve_additional_switches_no_duplicate_substring_no_extra_warn(
+    def test_resolve_additional_switches_no_duplicate_substring_no_warn(
         self, monkeypatch
     ):
-        """Test that no shared 4-char substring yields only the skip warning."""
+        """Test that no shared 4-char substring yields no warning."""
         monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", "-abc")
         with patch("ansys.mapdl.core.launcher.config.LOG") as mock_log:
-            resolve_additional_switches("-xyz")
-            # Only the skip-env-var warning, no duplicate warning
-            assert mock_log.warning.call_count == 1
+            assert resolve_additional_switches("-xyz") == "-xyz -abc"
+            mock_log.warning.assert_not_called()
 
     def test_resolve_launch_config_injects_env_var_switches(self, monkeypatch):
         """Test that resolve_launch_config picks up PYMAPDL_ADDITIONAL_SWITCHES."""
@@ -1210,14 +1233,27 @@ class TestResolveAdditionalSwitches:
         config = resolve_launch_config(start_instance=False)
         assert config.additional_switches == "-myswitch"
 
-    def test_resolve_launch_config_explicit_switches_skip_env_var(self, monkeypatch):
-        """Test that explicit additional_switches skips the env var."""
+    def test_resolve_launch_config_merges_explicit_and_env_var(self, monkeypatch):
+        """Test that resolve_launch_config merges explicit and env var switches."""
         monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", "-from-env")
-        with patch("ansys.mapdl.core.launcher.config.LOG"):
-            config = resolve_launch_config(
-                additional_switches="-explicit", start_instance=False
-            )
-            assert config.additional_switches == "-explicit"
+        config = resolve_launch_config(
+            additional_switches="-explicit", start_instance=False
+        )
+        assert config.additional_switches == "-explicit -from-env"
+
+    def test_env_var_switches_reach_launch_command(self, monkeypatch):
+        """Test end to end that env var switches end up in the MAPDL command."""
+        from ansys.mapdl.core.launcher.process import _generate_launch_command
+
+        monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", "-mpi openmpi")
+        config = resolve_launch_config(
+            exec_file="/fake/mapdl",
+            additional_switches="-smp",
+            start_instance=False,
+        )
+        cmd = _generate_launch_command(config)
+        idx = cmd.index("-smp")
+        assert cmd[idx : idx + 3] == ["-smp", "-mpi", "openmpi"]
 
     def test_resolve_launch_config_no_env_var_empty_switches(self, monkeypatch):
         """Test that with no env var and no arg, additional_switches is empty."""
