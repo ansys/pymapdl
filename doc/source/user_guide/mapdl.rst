@@ -366,6 +366,30 @@ Run a command and stream its output while it is being run:
     running MAPDL in gRPC mode.
 
 
+Blocking selected commands
+--------------------------
+Set ``blocked_commands`` to refuse selected APDL commands before PyMAPDL
+sends them to MAPDL. Use it when the command text comes from an untrusted
+source, such as an AI agent. Commands sent through
+:meth:`run() <ansys.mapdl.core.Mapdl.run>` and
+:meth:`input_strings() <ansys.mapdl.core.Mapdl.input_strings>` are checked,
+and a blocked command raises ``MapdlCommandBlockedError`` with nothing sent.
+
+.. code:: pycon
+
+    >>> mapdl.blocked_commands = ["/SYS", "/SYP", "/INPUT"]
+    >>> mapdl.run("/SYS,ls")  # raises MapdlCommandBlockedError
+    >>> mapdl.blocked_commands = []  # the default blocks nothing
+
+Names match on their first four characters, as MAPDL does, so ``/INPUT``
+blocks ``/INP``. The check reads command text as MAPDL does: ``!`` starts a
+comment, ``$`` chains commands, and a ``/COM`` line is data.
+
+.. note::
+    Files run with ``input()``, macros, and direct calls to ``_run`` are not
+    inspected. This guards against untrusted command text. It is not a sandbox
+    for untrusted Python.
+
 Running several commands or an input file
 -----------------------------------------
 You can run several MAPDL commands as a unified block using the
@@ -644,6 +668,7 @@ types of errors appropriately. All PyMAPDL exceptions inherit from :class:`Mapdl
 
 * :class:`MapdlInvalidRoutineError <ansys.mapdl.core.errors.MapdlInvalidRoutineError>` - Command run in wrong routine
 * :class:`MapdlCommandIgnoredError <ansys.mapdl.core.errors.MapdlCommandIgnoredError>` - Commands ignored by MAPDL
+* :class:`MapdlCommandBlockedError <ansys.mapdl.core.errors.MapdlCommandBlockedError>` - Command matches ``blocked_commands``
 * :class:`MapdlExitedError <ansys.mapdl.core.errors.MapdlExitedError>` - MAPDL process has exited
 * :class:`MapdlConnectionError <ansys.mapdl.core.errors.MapdlConnectionError>` - Connection issues
 * :class:`LockFileException <ansys.mapdl.core.errors.LockFileException>` - Lock file conflicts
