@@ -389,8 +389,8 @@ comment, ``$`` chains commands, and a ``/COM`` line is data.
 
 .. note::
     The contents of files run with ``input()``, macros, and direct calls to
-    ``_run`` are not inspected. The in-process backend's ``input()`` is not
-    checked. This guards against untrusted command text. It is not a sandbox
+    ``_run`` are not inspected. The in-process ``input()`` is not checked.
+    This guards against untrusted command text. It is not a sandbox
     for untrusted Python.
 
 Running several commands or an input file
