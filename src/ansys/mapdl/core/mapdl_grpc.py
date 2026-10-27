@@ -3113,7 +3113,6 @@ class MapdlGrpc(MapdlBase):
             **kwargs,
         )
 
-    @protect_grpc
     def input(
         self,
         fname="",
@@ -3239,6 +3238,39 @@ class MapdlGrpc(MapdlBase):
         >>> from ansys.mapdl.core import mapdl_grpc
         >>> mapdl_grpc.DEFAULT_TIME_STEP_STREAM=100 # in milliseconds
         """
+        self._check_blocked_commands(orig_cmd)
+        return self._stream_input(
+            fname,
+            ext,
+            dir_,
+            line,
+            log,
+            verbose=verbose,
+            progress_bar=progress_bar,
+            time_step_stream=time_step_stream,
+            chunk_size=chunk_size,
+            orig_cmd=orig_cmd,
+            write_to_log=write_to_log,
+            **kwargs,
+        )
+
+    @protect_grpc
+    def _stream_input(
+        self,
+        fname="",
+        ext="",
+        dir_="",
+        line="",
+        log="",
+        *,
+        verbose=False,
+        progress_bar=False,
+        time_step_stream=None,
+        chunk_size=512,
+        orig_cmd="/INP",
+        write_to_log=True,
+        **kwargs,
+    ):
         # Checking compatibility
         # Checking the user is not reusing old api:
         #
@@ -3530,7 +3562,8 @@ class MapdlGrpc(MapdlBase):
         self._stored_commands = []
 
         # run the stored commands
-        out = self.input(
+        # already checked by run() and input_strings() when stored
+        out = self._stream_input(
             tmp_filename,
             write_to_log=False,
             verbose=False,

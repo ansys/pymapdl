@@ -691,18 +691,21 @@ class _MapdlCore(Commands):
 
         A blocked command raises
         :class:`~ansys.mapdl.core.errors.MapdlCommandBlockedError` before
-        anything is sent to MAPDL. Only commands passed to
-        :meth:`run() <ansys.mapdl.core.Mapdl.run>` and
+        anything is sent to MAPDL.
+        Commands passed to :meth:`run() <ansys.mapdl.core.Mapdl.run>` and
         :meth:`input_strings() <ansys.mapdl.core.Mapdl.input_strings>` are
         checked, which covers PyMAPDL methods built on them, such as
-        ``resume`` and ``com``. The check reads each line as MAPDL does:
+        ``resume`` and ``com``. On the gRPC backend, ``input()`` is checked
+        against the command it sends: ``/INPUT`` for ``input()`` and
+        ``parres``, ``CDREAD`` for ``cdread``. The in-process backend's
+        ``input()`` is not checked. The check reads each line as MAPDL does:
         ``!`` starts a comment, ``$`` chains commands, and a ``/COM`` line
         is data. Spaces, tabs, and surrounding quotes in a command name are
         ignored.
 
         This is a guard against untrusted command text, not a sandbox for
-        untrusted Python. Files run with ``input()``, macros, and direct
-        calls to ``_run`` are not inspected.
+        untrusted Python. The contents of files run with ``input()``, macros,
+        and direct calls to ``_run`` are not inspected.
 
         Parameters
         ----------

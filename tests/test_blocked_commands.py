@@ -24,7 +24,9 @@
 
 import pytest
 
+from ansys.mapdl.core.errors import MapdlCommandBlockedError
 from ansys.mapdl.core.mapdl_core import _find_blocked_command, _MapdlCore
+from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
 BLOCKED = frozenset({"/SYS", "/SYP", "/INP"})
 
@@ -113,3 +115,10 @@ def test_blocked_commands_rejects_bare_string(core):
 def test_blocked_commands_rejects_empty_name(core, names):
     with pytest.raises(ValueError, match="Invalid blocked command name"):
         core.blocked_commands = names
+
+
+def test_blocked_grpc_input_raises_before_touching_file():
+    mapdl = MapdlGrpc.__new__(MapdlGrpc)
+    mapdl.blocked_commands = ["/INPUT"]
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/INP'"):
+        mapdl.input("missing.inp")

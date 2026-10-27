@@ -4273,6 +4273,20 @@ def test_blocked_command_text_inside_com_is_allowed(blocked_mapdl):
     assert "note $/SYS" in response
 
 
+def test_blocked_input_file_raises(blocked_mapdl, tmp_path):
+    path = tmp_path / "blocked_input.inp"
+    path.write_text("*SET,BLKINPUT,1\n")
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/INP'"):
+        blocked_mapdl.input(str(path))
+    assert "BLKINPUT" not in blocked_mapdl.parameters
+
+
+def test_blocked_input_does_not_block_non_interactive_flush(blocked_mapdl, cleared):
+    with blocked_mapdl.non_interactive:
+        blocked_mapdl.run("*SET,BLKFLUSH,5")
+    assert blocked_mapdl.parameters["BLKFLUSH"] == 5
+
+
 def test_unrelated_commands_run_with_commands_blocked(blocked_mapdl, cleared):
     blocked_mapdl.prep7()
     blocked_mapdl.input_strings(["/PREP7"])

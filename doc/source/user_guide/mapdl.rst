@@ -372,8 +372,10 @@ Set ``blocked_commands`` to refuse selected APDL commands before PyMAPDL
 sends them to MAPDL. Use it when the command text comes from an untrusted
 source, such as an AI agent. Commands sent through
 :meth:`run() <ansys.mapdl.core.Mapdl.run>` and
-:meth:`input_strings() <ansys.mapdl.core.Mapdl.input_strings>` are checked,
-and a blocked command raises ``MapdlCommandBlockedError`` with nothing sent.
+:meth:`input_strings() <ansys.mapdl.core.Mapdl.input_strings>` are checked.
+On the gRPC backend, :meth:`input() <ansys.mapdl.core.Mapdl.input>` is checked
+against the command it sends: ``/INPUT``, or ``CDREAD`` for ``cdread``.
+A blocked command raises ``MapdlCommandBlockedError`` with nothing sent.
 
 .. code:: pycon
 
@@ -386,8 +388,9 @@ blocks ``/INP``. The check reads command text as MAPDL does: ``!`` starts a
 comment, ``$`` chains commands, and a ``/COM`` line is data.
 
 .. note::
-    Files run with ``input()``, macros, and direct calls to ``_run`` are not
-    inspected. This guards against untrusted command text. It is not a sandbox
+    The contents of files run with ``input()``, macros, and direct calls to
+    ``_run`` are not inspected. The in-process backend's ``input()`` is not
+    checked. This guards against untrusted command text. It is not a sandbox
     for untrusted Python.
 
 Running several commands or an input file
