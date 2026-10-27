@@ -295,6 +295,13 @@ jobs:
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml
 
+      - name: "Strip captured output from pytest report"
+        if: always()
+        shell: bash
+        env:
+          FILE_NAME: ${{ inputs.file-name }}
+        run: python .ci/strip_report_sections.py "./${FILE_NAME}.jsonl"
+
       - name: "Upload pytest reports to GitHub"
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
