@@ -172,6 +172,10 @@ class MapdlInvalidRoutineError(MapdlRuntimeError):
     pass
 
 
+class MapdlCommandBlockedError(MapdlRuntimeError):
+    """Raised when a command matches an entry in ``blocked_commands``."""
+
+
 class MapdlCommandIgnoredError(MapdlRuntimeError):
     """Raised when MAPDL ignores a command."""
 

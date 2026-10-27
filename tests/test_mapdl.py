@@ -62,6 +62,7 @@ from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
     IncorrectWorkingDirectory,
+    MapdlCommandBlockedError,
     MapdlCommandIgnoredError,
     MapdlConnectionError,
     MapdlDoLoopLimitError,
@@ -4231,3 +4232,70 @@ def test_exception_in_nested_do_loop_preserves_prior_buffered_commands(fake_mapd
 
     assert fake_mapdl.sent_commands == ["earlier command", "later command"]
     assert fake_mapdl._stored_commands == []
+
+
+@pytest.fixture
+def blocked_mapdl(mapdl):
+    mapdl.blocked_commands = ["/SYS", "/SYP", "/INPUT"]
+    yield mapdl
+    mapdl.blocked_commands = []
+
+
+def test_blocked_commands_default_is_empty(mapdl):
+    assert mapdl.blocked_commands == frozenset()
+
+
+def test_blocked_command_run_raises(blocked_mapdl):
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/SYS'"):
+        blocked_mapdl.run("/SYS,echo x")
+
+
+def test_blocked_sys_does_not_block_internal_file_listing(blocked_mapdl):
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/SYS'"):
+        blocked_mapdl.sys("echo x")
+    # list_files() and the remote input/flush paths use '/SYS' internally.
+    assert "hi" in blocked_mapdl._sys("echo hi")
+    assert isinstance(blocked_mapdl.list_files(), list)
+
+
+def test_blocked_command_batch_sends_nothing(blocked_mapdl, cleared):
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/SYP'"):
+        blocked_mapdl.input_strings(["*SET,BLKTEST,1", "/SYP,echo x"])
+    assert "BLKTEST" not in blocked_mapdl.parameters
+
+    # The same command runs unblocked, so the absence above is the block.
+    blocked_mapdl.blocked_commands = []
+    blocked_mapdl.input_strings("*SET,BLKTEST,1")
+    assert "BLKTEST" in blocked_mapdl.parameters
+    assert blocked_mapdl.parameters["BLKTEST"] == 1
+
+
+def test_blocked_command_non_interactive_raises_at_call(blocked_mapdl, cleared):
+    with blocked_mapdl.non_interactive:
+        with pytest.raises(MapdlCommandBlockedError, match="matched '/SYS'"):
+            blocked_mapdl.run("/SYS,echo x")
+
+
+def test_blocked_command_text_inside_com_is_allowed(blocked_mapdl):
+    response = blocked_mapdl.com("note $/SYS")
+    assert "note $/SYS" in response
+
+
+def test_blocked_input_file_raises(blocked_mapdl, tmp_path):
+    path = tmp_path / "blocked_input.inp"
+    path.write_text("*SET,BLKINPUT,1\n")
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/INP'"):
+        blocked_mapdl.input(str(path))
+    assert "BLKINPUT" not in blocked_mapdl.parameters
+
+
+def test_blocked_input_does_not_block_non_interactive_flush(blocked_mapdl, cleared):
+    with blocked_mapdl.non_interactive:
+        blocked_mapdl.run("*SET,BLKFLUSH,5")
+    assert blocked_mapdl.parameters["BLKFLUSH"] == 5
+
+
+def test_unrelated_commands_run_with_commands_blocked(blocked_mapdl, cleared):
+    blocked_mapdl.prep7()
+    blocked_mapdl.input_strings(["/PREP7"])
+    assert blocked_mapdl.parameters.routine == "PREP7"
