@@ -705,7 +705,8 @@ class _MapdlCore(Commands):
 
         This is a guard against untrusted command text, not a sandbox for
         untrusted Python. The contents of files run with ``input()``, macros,
-        and direct calls to ``_run`` are not inspected.
+        and direct calls to ``_run`` are not inspected. The ``/SYS`` calls
+        PyMAPDL makes itself, such as listing remote files, are not blocked.
 
         Parameters
         ----------
@@ -2689,6 +2690,9 @@ class _MapdlCore(Commands):
     def _run(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError("Implemented by child class")
 
+    def _sys(self, cmd: str) -> str:  # pragma: no cover
+        raise NotImplementedError("Implemented by child class")
+
     def exit(self):  # pragma: no cover
         """Exit from MAPDL"""
         raise NotImplementedError("Implemented by child class")
@@ -3310,7 +3314,7 @@ class _MapdlCore(Commands):
             return False
 
         if self.platform == "linux":
-            self.sys(
+            self._sys(
                 r"if grep -sq 'docker\|lxc' /proc/1/cgroup; then echo 'true' > __outputcmd__.txt; else echo 'false' > __outputcmd__.txt;fi;"
             )
         elif self.platform == "windows":  # pragma: no cover
@@ -3550,7 +3554,7 @@ class _MapdlCore(Commands):
         else:
             cmd = "dir /b /a"
 
-        files = self.sys(cmd).splitlines()
+        files = self._sys(cmd).splitlines()
         if not files:
             warn("No files listed")
         return files

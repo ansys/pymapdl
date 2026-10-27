@@ -390,6 +390,8 @@ comment, ``$`` chains commands, and a ``/COM`` line is data.
 .. note::
     The contents of files run with ``input()``, macros, and direct calls to
     ``_run`` are not inspected. The in-process ``input()`` is not checked.
+    The ``/SYS`` calls PyMAPDL makes itself, such as listing remote files,
+    are not blocked.
     This guards against untrusted command text. It is not a sandbox
     for untrusted Python.
 

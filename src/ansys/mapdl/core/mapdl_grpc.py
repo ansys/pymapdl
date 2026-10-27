@@ -2823,9 +2823,21 @@ class MapdlGrpc(MapdlBase):
         --------
         >>> mapdl.sys('ls')
         """
+        return self._sys(cmd, check_blocked=True, **kwargs)
+
+    @supress_logging
+    def _sys(self, cmd: str, check_blocked: bool = False, **kwargs) -> str:
+        """Run ``/SYS`` and return its output.
+
+        PyMAPDL internals call this directly so that they keep working when
+        ``/SYS`` is in ``blocked_commands``. Only ``sys()`` checks the block.
+        """
         # always redirect system output to a temporary file
         tmp_file = f"__tmp_sys_out_{random_string()}__"
-        super().sys(f"{cmd} > {tmp_file}", **kwargs)
+        if check_blocked:
+            super().sys(f"{cmd} > {tmp_file}", **kwargs)
+        else:
+            self._run(f"/SYS,{cmd} > {tmp_file}")
         if self._local:  # no need to download when local
             with open(self.directory / tmp_file) as fobj:
                 obj = fobj.read()

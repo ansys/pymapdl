@@ -4250,6 +4250,14 @@ def test_blocked_command_run_raises(blocked_mapdl):
         blocked_mapdl.run("/SYS,echo x")
 
 
+def test_blocked_sys_does_not_block_internal_file_listing(blocked_mapdl):
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/SYS'"):
+        blocked_mapdl.sys("echo x")
+    # list_files() and the remote input/flush paths use '/SYS' internally.
+    assert "hi" in blocked_mapdl._sys("echo hi")
+    assert isinstance(blocked_mapdl.list_files(), list)
+
+
 def test_blocked_command_batch_sends_nothing(blocked_mapdl, cleared):
     with pytest.raises(MapdlCommandBlockedError, match="matched '/SYP'"):
         blocked_mapdl.input_strings(["*SET,BLKTEST,1", "/SYP,echo x"])
