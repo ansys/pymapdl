@@ -2503,17 +2503,9 @@ class MapdlGrpc(MapdlBase):
         if self._exited:
             return
 
-        # Default
-        if self._version is None or self._version < 24.1:
-            self._ctrl("EXIT")
-
-        elif self._version >= 24.1:
-            # We can't use the non-cached version because of recursion error.
-            # self.run("/EXIT,NOSAVE,,,,,SERVER")
-            self.finish()
-            self._ctrl("EXIT")
-
-        return
+        # MAPDL ignores EXIT unless it is at the Begin level.
+        self.finish()
+        self._ctrl("EXIT")
 
     def _close_process_pipes(self, process: subprocess.Popen) -> None:  # type: ignore[type-arg]
         """Close all open I/O streams attached to *process*.
