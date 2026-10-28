@@ -2944,7 +2944,6 @@ def test_exit_stops_server_left_in_post1(tmpdir, monkeypatch):
         pytest.fail("MAPDL kept running after exit() from POST1")
 
 
-
 def test_sys(mapdl, cleared):
     assert "hi" in mapdl.sys("echo 'hi'")
 
