@@ -635,11 +635,8 @@ class PostProcessing:
 
         with self._mapdl.save_selection:
             mask = self.selected_nodes
+            nodes_ids = self._mapdl.get_array("NODE", item1="NLIST")
             nodes_loc = self._mapdl.mesh.nodes
-            labels = []
-            if show_node_numbering:
-                nodes_ids = self._mapdl.get_array("NODE", item1="NLIST")
-                labels = [{"points": nodes_loc, "labels": nodes_ids}]
 
             self._mapdl.esln("S", 0)  # selecting elements associated with those nodes
             self._mapdl.nsle(
@@ -662,6 +659,10 @@ class PostProcessing:
                     "scalars": all_scalars,
                 }
             ]
+
+            labels = []
+            if show_node_numbering:
+                labels = [{"points": nodes_loc, "labels": nodes_ids}]
 
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, mapdl=self, **kwargs)

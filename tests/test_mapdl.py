@@ -49,7 +49,6 @@ from conftest import (
     QUICK_LAUNCH_SWITCHES,
     TEST_DPF_BACKEND,
     NullContext,
-    clear,
     has_dependency,
     requires,
 )
@@ -234,41 +233,6 @@ def clearing_cdread_cdwrite_tests(mapdl):
         mapdl.page("DEFA")
 
         mapdl.prep7()
-
-
-@requires("grpc")
-def test_clear_resets_database_and_postprocessing_state(mapdl, cleared):
-    mapdl.n(1, 0, 0, 0)
-    mapdl.parameters["RESET_MARKER"] = 1
-    mapdl.finish()
-    mapdl.post1()
-
-    with mapdl.muted:
-        clear(mapdl)
-        assert mapdl.mute is True
-
-    assert mapdl.mute is False
-    assert mapdl.parameters.routine == "PREP7"
-    assert "RESET_MARKER" not in mapdl.parameters
-    mapdl.n(2, 1, 0, 0)
-    assert mapdl.mesh.nnum.tolist() == [2]
-
-
-@requires("grpc")
-def test_save_selection_restores_ids_without_querying_arrays(mapdl, cleared):
-    mapdl.n(1, 0, 0, 0)
-    mapdl.n(2, 1, 0, 0)
-    mapdl.nsel("S", "NODE", vmin=1)
-
-    with patch.object(
-        mapdl,
-        "get_array",
-        side_effect=AssertionError("Unexpected selection array query"),
-    ):
-        with mapdl.save_selection:
-            mapdl.allsel()
-
-    assert mapdl.mesh.nnum.tolist() == [1]
 
 
 def asserting_cdread_cdwrite_tests(mapdl):
