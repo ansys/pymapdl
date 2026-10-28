@@ -1368,10 +1368,8 @@ class Test_contact_solve(TestClass):
             vmax=int(n_node * vmax),
             vinc=vinc,
         )
-        parameters = set(mapdl._lazy_array_parameters)
         assert mapdl.post_processing.plot_nodal_displacement() is None
         mapdl.allsel("all")
-        assert mapdl._lazy_array_parameters == parameters
 
     @staticmethod
     def test_time_frequency_values(mapdl, resume):

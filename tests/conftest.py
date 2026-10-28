@@ -527,10 +527,7 @@ if has_dependency("pytest-pyvista"):
 
         verify_image_cache.allow_useless_fixture = True
 
-        try:
-            yield verify_image_cache
-        finally:
-            pyvista.close_all()
+        return verify_image_cache
 
 
 class NullContext:
@@ -713,15 +710,15 @@ def path_tests(tmpdir):
 
 
 def clear(mapdl):
-    # Finish the database reset before opening a streamed input file.
-    mapdl.finish()
-    # *MUST* be NOSTART.  With START fails after 20 calls...
-    # this has been fixed in later pymapdl and MAPDL releases
-    mapdl.clear("NOSTART")
     with mapdl.non_interactive:
+        mapdl.finish()
+        # *MUST* be NOSTART.  With START fails after 20 calls...
+        # this has been fixed in later pymapdl and MAPDL releases
+        mapdl.clear("NOSTART")
         mapdl.header("DEFA")
         mapdl.format("DEFA")
         mapdl.page("DEFA")
+
         mapdl.prep7()
 
 

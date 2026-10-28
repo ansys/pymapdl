@@ -900,10 +900,7 @@ class MapdlGrpc(MapdlBase):
 
         self._start_ping_abuse_probe()
 
-    @staticmethod
-    def _ping_abuse_probe_loop(
-        mapdl_ref: weakref.ReferenceType["MapdlGrpc"], stop_event: threading.Event
-    ) -> None:
+    def _ping_abuse_probe_loop(self) -> None:
         """Periodically issue a lightweight real RPC to reset the MAPDL gRPC
         server's ping-abuse tracker.
 
@@ -923,17 +920,11 @@ class MapdlGrpc(MapdlBase):
         :meth:`_subscribe_to_channel` is the sole authority on declaring the
         channel dead and cancelling any in-flight call.
         """
-        while not stop_event.wait(PING_ABUSE_PROBE_INTERVAL_S):
-            mapdl = mapdl_ref()
-            if mapdl is None:
-                return
+        while not self._ping_probe_stop_event.wait(PING_ABUSE_PROBE_INTERVAL_S):
             try:
-                mapdl._ctrl("VERSION", timeout=PING_ABUSE_PROBE_TIMEOUT_S)
+                self._ctrl("VERSION", timeout=PING_ABUSE_PROBE_TIMEOUT_S)
             except (grpc.RpcError, MapdlRuntimeError) as exc:
-                mapdl._log.debug(f"Ping-abuse probe RPC failed: {exc}")
-            finally:
-                # Do not keep the client alive while waiting for the next probe.
-                del mapdl
+                self._log.debug(f"Ping-abuse probe RPC failed: {exc}")
 
     def _start_ping_abuse_probe(self) -> None:
         """Start the background ping-abuse probe thread, if not already running.
@@ -944,11 +935,9 @@ class MapdlGrpc(MapdlBase):
         if self._ping_probe_thread is not None and self._ping_probe_thread.is_alive():
             return
 
-        # A reconnect must not clear the stop request of a worker still exiting.
-        self._ping_probe_stop_event = threading.Event()
+        self._ping_probe_stop_event.clear()
         self._ping_probe_thread = threading.Thread(
-            target=MapdlGrpc._ping_abuse_probe_loop,
-            args=(weakref.ref(self), self._ping_probe_stop_event),
+            target=self._ping_abuse_probe_loop,
             name="pymapdl-ping-abuse-probe",
             daemon=True,
         )
@@ -2329,8 +2318,6 @@ class MapdlGrpc(MapdlBase):
         in one step does not prevent the remaining resources from being freed.
         This also makes the method safe to call during interpreter shutdown,
         where module globals may already have been torn down.
-        Local garbage-collection teardown uses cached process information rather
-        than querying or commanding MAPDL, because GC can interrupt a gRPC call.
 
         Callers must set ``_exiting = True`` before invoking this method (and
         reset it once done), so that :attr:`is_alive` short-circuits instead
@@ -2362,16 +2349,9 @@ class MapdlGrpc(MapdlBase):
 
         # 1. Kill MAPDL process + remove lock file
         try:
-            if exiting and self._local:
-                # GC may interrupt gRPC itself; use cached process data, not RPCs.
-                self._close_process()
-                if path:
-                    self._remove_lock_file(path, use_cached=True)
-            else:
-                self._exit_mapdl(path)
+            self._exit_mapdl(path)
         except Exception as e:
-            if not exiting:
-                self._log.debug("Error during _exit_mapdl: %s", e)
+            self._log.debug("Error during _exit_mapdl: %s", e)
 
         # 2. Ensure PIPE-drainer threads (stdout/stderr/startup) are joined so
         # that background reader threads do not leak after teardown.
@@ -5144,8 +5124,6 @@ class MapdlGrpc(MapdlBase):
         exited, because those are purely client-side resources (the
         ``_poll_connectivity`` daemon thread and the stdout/stderr/startup
         reader threads) that outlive this object otherwise.
-        The ping-abuse probe holds only a weak client reference between RPCs,
-        allowing this teardown to run when the last client reference is dropped.
         """
         # Check early exit conditions.
         if (

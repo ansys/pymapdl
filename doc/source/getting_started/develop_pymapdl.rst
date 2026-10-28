@@ -299,14 +299,6 @@ It is executed upstream of each test and not within all tests.
 
 Passing the ``cleared`` fixture is also useful since it clears up the MAPDL database
 and configuration before performing the test.
-Its database reset completes outside streamed input; only the formatting commands
-are batched. Keep that boundary when extending the fixture.
-
-Selection restoration does not retrieve entity-ID arrays that it does not use.
-The image-verification fixture closes any remaining plotters after each test,
-before the image-cache callbacks are removed.
-Local pool fixtures use available ports above the configured primary and secondary
-test endpoints so that test order does not determine who owns those endpoints.
 
 Running PyMAPDL tests
 ---------------------
