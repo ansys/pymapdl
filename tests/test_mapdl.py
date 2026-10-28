@@ -71,7 +71,7 @@ from ansys.mapdl.core.errors import (
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.helpers import is_installed
-from ansys.mapdl.core.launcher import launch_mapdl
+from ansys.mapdl.core.launcher import launch_mapdl, launch_mapdl_process
 from ansys.mapdl.core.lazy_array import LazyArray
 from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME, _MapdlCore
 from ansys.mapdl.core.mapdl_extended import (
@@ -2938,6 +2938,29 @@ def test_remove_temp_dir_on_exit_with_launch_mapdl(mapdl, cleared, monkeypatch):
 
     assert not os.path.exists(path_)
     assert not all([psutil.pid_exists(pid) for pid in pids])
+
+
+@requires("local")
+def test_exit_stops_server_left_in_post1(tmpdir, monkeypatch):
+    """Regression test for https://github.com/ansys/pymapdl/issues/4851."""
+    monkeypatch.delenv("PYMAPDL_PORT", raising=False)
+    ip, port, pid = launch_mapdl_process(
+        run_location=str(tmpdir), nproc=1, cleanup_on_exit=False
+    )
+    server = psutil.Process(pid)
+
+    mapdl_2 = pymapdl.Mapdl(
+        ip=ip, port=port, cleanup_on_exit=False, disable_run_at_connect=True
+    )
+    mapdl_2.post1()
+    mapdl_2.exit(save=False, force=True)
+
+    try:
+        server.wait(timeout=30)
+    except psutil.TimeoutExpired:
+        for proc in [*server.children(recursive=True), server]:
+            proc.kill()
+        pytest.fail("MAPDL kept running after exit() from POST1")
 
 
 def test_sys(mapdl, cleared):
