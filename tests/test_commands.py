@@ -146,6 +146,7 @@ CMD_DOC_STRING_INJECTOR.extend(CMD_BC_LISTING)
 @pytest.fixture()
 def beam_solve(mapdl, cleared):
     with mapdl.muted:
+        mapdl.finish()
         mapdl.input(vmfiles["vm10"])
 
         mapdl.post1()
@@ -728,6 +729,7 @@ class Test_output_listing(TestClass):
     @pytest.fixture(scope="class")
     def plastic_solve_output(mapdl):
         with mapdl.muted:
+            mapdl.finish()
             mapdl.input(vmfiles["vm273"])
 
             mapdl.post1()
