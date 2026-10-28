@@ -305,7 +305,7 @@ class _CoreStateMixin(_CoreMixinBase):
             return False
 
         if self.platform == "linux":
-            self.sys(
+            self._sys(
                 r"if grep -sq 'docker\|lxc' /proc/1/cgroup; then echo 'true' > __outputcmd__.txt; else echo 'false' > __outputcmd__.txt;fi;"
             )
         elif self.platform == "windows":  # pragma: no cover

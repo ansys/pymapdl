@@ -31,7 +31,7 @@ import re
 # the input is controlled by the library. Excluding bandit check.
 import tempfile
 import time
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Iterable, Optional
 from warnings import warn
 
 from ansys.mapdl.core import _HAS_DPF
@@ -46,6 +46,7 @@ from ansys.mapdl.core.commands import (
 )
 from ansys.mapdl.core.errors import (
     ComponentNoData,
+    MapdlCommandBlockedError,
     MapdlCommandIgnoredError,
     MapdlExitedError,
     MapdlFileNotFoundError,
@@ -84,11 +85,110 @@ def parse_to_short_cmd(command):
         return
 
 
+def _find_blocked_command(text: str, blocked: frozenset[str]) -> str | None:
+    """Return the blocked prefix that an APDL command in ``text`` matches.
+
+    Splits the text as MAPDL reads it: lines, ``!`` comments, ``$``
+    chaining, and the first comma field as the command name. A ``/COM``
+    first segment is checked, then the rest of its line is skipped.
+    Returns ``None`` when nothing matches.
+    """
+    if not blocked:
+        return None
+
+    for line in text.splitlines():
+        line = line.split("!", 1)[0]
+        for position, segment in enumerate(line.split("$")):
+            head = segment.split(",", 1)[0].strip().strip("'\"")
+            head = head.replace(" ", "").replace("\t", "").upper()[:4]
+            if head in blocked:
+                return head
+            if position == 0 and head == "/COM":
+                break
+    return None
+
+
 from . import _CoreMixinBase, plotting
 
 
 class _CoreExecutionMixin(_CoreMixinBase):
     """Static responsibility mixin for the MAPDL core facade."""
+
+    _blocked_commands: frozenset[str] = frozenset()
+
+    @property
+    def blocked_commands(self) -> frozenset[str]:
+        """Command names that PyMAPDL refuses to send to MAPDL.
+
+        Assign an iterable of command names to block them. Each name is
+        stored as its first four characters in upper case, the part MAPDL
+        matches on, so ``"/INPUT"`` is stored as ``"/INP"``. The default
+        is an empty set, which blocks nothing.
+
+        A blocked command raises
+        :class:`~ansys.mapdl.core.errors.MapdlCommandBlockedError` before
+        anything is sent to MAPDL.
+        Commands passed to :meth:`run() <ansys.mapdl.core.Mapdl.run>` and
+        :meth:`input_strings() <ansys.mapdl.core.Mapdl.input_strings>` are
+        checked, which covers PyMAPDL methods built on them, such as
+        ``resume`` and ``com``. On the gRPC backend, ``input()`` is checked
+        against the command it sends: ``/INPUT`` for ``input()`` and
+        ``parres``, ``CDREAD`` for ``cdread``. The in-process backend's
+        ``input()`` is not checked. The check reads each line as MAPDL does:
+        ``!`` starts a comment, ``$`` chains commands, and a ``/COM`` line
+        is data. Spaces, tabs, and surrounding quotes in a command name are
+        ignored.
+
+        This is a guard against untrusted command text, not a sandbox for
+        untrusted Python. The contents of files run with ``input()``, macros,
+        and direct calls to ``_run`` are not inspected. The ``/SYS`` calls
+        PyMAPDL makes itself, such as listing remote files, are not blocked.
+
+        Parameters
+        ----------
+        names : iterable of str
+            Command names to block, such as ``["/SYS", "/INPUT"]``. A bare
+            string is rejected because it would iterate over characters.
+
+        Returns
+        -------
+        frozenset of str
+            Normalized command prefixes currently blocked.
+
+        Raises
+        ------
+        ValueError
+            If ``names`` is a string, or a name is empty or only whitespace.
+
+        Examples
+        --------
+        >>> mapdl.blocked_commands = ["/SYS", "/SYP", "/INPUT"]
+        >>> mapdl.run("/SYS,ls")  # raises MapdlCommandBlockedError
+        >>> mapdl.blocked_commands = []  # restore the default
+        """
+        return self._blocked_commands
+
+    @blocked_commands.setter
+    def blocked_commands(self, names: Iterable[str]) -> None:
+        if isinstance(names, str):
+            raise ValueError(
+                "'blocked_commands' takes an iterable of command names, not a single string."
+            )
+        normalized = set()
+        for name in names:
+            if not isinstance(name, str) or not name.strip():
+                raise ValueError(f"Invalid blocked command name: {name!r}.")
+            normalized.add(name.strip().upper()[:4])
+        self._blocked_commands = frozenset(normalized)
+
+    def _check_blocked_commands(self, text: str) -> None:
+        """Raise ``MapdlCommandBlockedError`` if ``text`` runs a blocked command."""
+        blocked = _find_blocked_command(text, self._blocked_commands)
+        if blocked is not None:
+            raise MapdlCommandBlockedError(
+                f"Command '{text.strip()}' is blocked by 'blocked_commands' "
+                f"(matched '{blocked}')."
+            )
 
     def _wrap_listing_functions(self):
         # Wrapping LISTING FUNCTIONS.
@@ -312,6 +412,10 @@ class _CoreExecutionMixin(_CoreMixinBase):
         if isinstance(commands, str):
             commands = commands.splitlines()
 
+        commands = list(commands)
+        for command in commands:
+            self._check_blocked_commands(command)
+
         self._stored_commands.extend(commands)
         if self._store_commands:
             return None
@@ -392,6 +496,8 @@ class _CoreExecutionMixin(_CoreMixinBase):
         # check if multiline
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
+
+        self._check_blocked_commands(command)
 
         if len(command) > 639:  # CMD_MAX_LENGTH
             # If using mapdl_grpc, this check is redundant on purpose.
@@ -533,6 +639,9 @@ class _CoreExecutionMixin(_CoreMixinBase):
         return self._response
 
     def _run(self, *args, **kwargs):  # pragma: no cover
+        raise NotImplementedError("Implemented by child class")
+
+    def _sys(self, cmd: str) -> str:  # pragma: no cover
         raise NotImplementedError("Implemented by child class")
 
     def exit(self):  # pragma: no cover
