@@ -311,7 +311,7 @@ class _CoreFileMixin(_CoreMixinBase):
         else:
             cmd = "dir /b /a"
 
-        files = self.sys(cmd).splitlines()
+        files = self._sys(cmd).splitlines()
         if not files:
             warn("No files listed")
         return files

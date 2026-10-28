@@ -40,6 +40,7 @@ from ansys.mapdl.core._mapdl_core.constants import (
 )
 from ansys.mapdl.core._mapdl_core.execution import (
     _CoreExecutionMixin,
+    _find_blocked_command,
     parse_to_short_cmd,
 )
 from ansys.mapdl.core._mapdl_core.files import _CoreFileMixin
@@ -81,6 +82,7 @@ from ansys.mapdl.core.contexts.save_selection import (
 )
 from ansys.mapdl.core.errors import (
     ComponentNoData,
+    MapdlCommandBlockedError,
     MapdlCommandIgnoredError,
     MapdlExitedError,
     MapdlFileNotFoundError,
@@ -141,6 +143,7 @@ __all__ = [
     "VALID_SELECTION_TYPE_TP",
     "VWRITE_MWRITE_REPLACEMENT",
     # Helpers
+    "_find_blocked_command",
     "parse_to_short_cmd",
     "setup_logger",
     # Commands
@@ -155,6 +158,7 @@ __all__ = [
     "inject_docs",
     # Errors
     "ComponentNoData",
+    "MapdlCommandBlockedError",
     "MapdlCommandIgnoredError",
     "MapdlExitedError",
     "MapdlFileNotFoundError",
