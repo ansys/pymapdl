@@ -710,15 +710,16 @@ def path_tests(tmpdir):
 
 
 def clear(mapdl):
+    # Run /CLEAR as a direct command: inside the input file streamed by
+    # non_interactive, it can crash MAPDL 25.1 (segmentation fault).
+    mapdl.finish()
+    # *MUST* be NOSTART.  With START fails after 20 calls...
+    # this has been fixed in later pymapdl and MAPDL releases
+    mapdl.clear("NOSTART")
     with mapdl.non_interactive:
-        mapdl.finish()
-        # *MUST* be NOSTART.  With START fails after 20 calls...
-        # this has been fixed in later pymapdl and MAPDL releases
-        mapdl.clear("NOSTART")
         mapdl.header("DEFA")
         mapdl.format("DEFA")
         mapdl.page("DEFA")
-
         mapdl.prep7()
 
 
