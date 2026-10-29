@@ -172,6 +172,10 @@ class MapdlInvalidRoutineError(MapdlRuntimeError):
     pass
 
 
+class MapdlCommandBlockedError(MapdlRuntimeError):
+    """Raised when a command matches an entry in ``blocked_commands``."""
+
+
 class MapdlCommandIgnoredError(MapdlRuntimeError):
     """Raised when MAPDL ignores a command."""
 
@@ -417,6 +421,7 @@ def protect_grpc(func: Callable) -> Callable:
     """Capture gRPC exceptions and return a more succinct error message
 
     Capture KeyboardInterrupt to avoid segfaulting MAPDL.
+    Responses exceeding the configured message size are not retried.
 
     This works some of the time, but not all the time.  For some
     reason gRPC still captures SIGINT.
@@ -479,6 +484,27 @@ def protect_grpc(func: Callable) -> Callable:
 
                 mapdl._log.debug("A gRPC error has been detected.")
 
+                # A response-size limit cannot be repaired by replaying the command.
+                if error.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:
+                    if "Received message larger than max" in error.details():
+                        # Some gRPC versions wrap the message as
+                        # "Stream removed (CLIENT: Received message larger
+                        # than max (<received> vs. <limit>))", so the
+                        # received size is matched with a regex instead of
+                        # blindly splitting on "(".
+                        match = re.search(r"\((\d+)\s*vs\.?\s*\d+\)", error.details())
+                        if match:
+                            lim_ = int(match.group(1))
+                        else:
+                            lim_ = int(512 * 1024**2)
+
+                        raise MapdlgRPCError(
+                            f"RESOURCE_EXHAUSTED: {error.details()}. "
+                            "You can try to increase the gRPC message length size using 'PYMAPDL_MAX_MESSAGE_LENGTH'"
+                            " environment variable. For instance:\n\n"
+                            f"$ export PYMAPDL_MAX_MESSAGE_LENGTH={lim_}"
+                        )
+
                 if not mapdl.exited:
                     i_attemps += 1
                     if i_attemps <= n_attempts:
@@ -503,26 +529,6 @@ def protect_grpc(func: Callable) -> Callable:
                 # Custom errors
                 reason = ""
                 suggestion = ""
-
-                if error.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:
-                    if "Received message larger than max" in error.details():
-                        # Some gRPC versions wrap the message as
-                        # "Stream removed (CLIENT: Received message larger
-                        # than max (<received> vs. <limit>))", so the
-                        # received size is matched with a regex instead of
-                        # blindly splitting on "(".
-                        match = re.search(r"\((\d+)\s*vs\.?\s*\d+\)", error.details())
-                        if match:
-                            lim_ = int(match.group(1))
-                        else:
-                            lim_ = int(512 * 1024**2)
-
-                        raise MapdlgRPCError(
-                            f"RESOURCE_EXHAUSTED: {error.details()}. "
-                            "You can try to increase the gRPC message length size using 'PYMAPDL_MAX_MESSAGE_LENGTH'"
-                            " environment variable. For instance:\n\n"
-                            f"$ export PYMAPDL_MAX_MESSAGE_LENGTH={lim_}"
-                        )
 
                 # Every try to reconnecto to MAPDL failed
                 # So let's avoid execution from now on.

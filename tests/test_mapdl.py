@@ -32,7 +32,7 @@ import re
 import shutil
 import tempfile
 import time
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, call, patch
 from warnings import catch_warnings
 
 import grpc
@@ -49,6 +49,7 @@ from conftest import (
     QUICK_LAUNCH_SWITCHES,
     TEST_DPF_BACKEND,
     NullContext,
+    clear,
     has_dependency,
     requires,
 )
@@ -59,9 +60,17 @@ if has_dependency("pyvista"):
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import USER_DATA_PATH
 from ansys.mapdl.core.commands import CommandListingOutput
+from ansys.mapdl.core.contexts.chain_commands import _ChainCommandsContext
+from ansys.mapdl.core.contexts.force_output import _ForceOutputContext
+from ansys.mapdl.core.contexts.loops import MAX_DO_LOOP_LEVEL
+from ansys.mapdl.core.contexts.muted import _MutedContext
+from ansys.mapdl.core.contexts.plotting import _InteractivePlottingContext
+from ansys.mapdl.core.contexts.run_as_routine import _RunAsRoutineContext
+from ansys.mapdl.core.contexts.save_selection import _SaveSelectionContext
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
     IncorrectWorkingDirectory,
+    MapdlCommandBlockedError,
     MapdlCommandIgnoredError,
     MapdlConnectionError,
     MapdlDoLoopLimitError,
@@ -69,13 +78,10 @@ from ansys.mapdl.core.errors import (
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.helpers import is_installed
-from ansys.mapdl.core.launcher import launch_mapdl
+from ansys.mapdl.core.launcher import launch_mapdl, launch_mapdl_process
 from ansys.mapdl.core.lazy_array import LazyArray
 from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME, _MapdlCore
-from ansys.mapdl.core.mapdl_extended import (
-    MAX_DO_LOOP_LEVEL,
-    _MapdlExtended,
-)
+from ansys.mapdl.core.mapdl_extended import _MapdlExtended
 from ansys.mapdl.core.misc import random_string, stack
 from ansys.mapdl.core.plotting import GraphicsBackend
 
@@ -83,6 +89,7 @@ from ansys.mapdl.core.plotting import GraphicsBackend
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEST_FILES = os.path.join(PATH, "test_files")
 FIRST_TIME_FILE = os.path.join(USER_DATA_PATH, ".firstime")
+VERIFICATION_BANNER = "MAPDL VERIFICATION RUN ONLY"
 
 DEPRECATED_COMMANDS = [
     "edadapt",
@@ -231,6 +238,24 @@ def clearing_cdread_cdwrite_tests(mapdl):
         mapdl.prep7()
 
 
+@requires("grpc")
+def test_clear_resets_database_and_postprocessing_state(mapdl, cleared):
+    mapdl.n(1, 0, 0, 0)
+    mapdl.parameters["RESET_MARKER"] = 1
+    mapdl.finish()
+    mapdl.post1()
+
+    with mapdl.muted:
+        clear(mapdl)
+        assert mapdl.mute is True
+
+    assert mapdl.mute is False
+    assert mapdl.parameters.routine == "PREP7"
+    assert "RESET_MARKER" not in mapdl.parameters
+    mapdl.n(2, 1, 0, 0)
+    assert mapdl.mesh.nnum.tolist() == [2]
+
+
 def asserting_cdread_cdwrite_tests(mapdl):
     # Using ``in`` because of the padding APDL does on strings.
     return "asdf1234" in mapdl.parameters["T_PAR"]
@@ -276,9 +301,9 @@ class FakeMapdl(_MapdlExtended):
 
     It bypasses :class:`_MapdlCore.__init__ <ansys.mapdl.core.mapdl_core._MapdlCore>`
     entirely, since that requires a real (or gRPC) connection, but keeps the
-    real ``_store_commands``/``_stored_commands``/``non_interactive``
-    machinery from :class:`_MapdlCore <ansys.mapdl.core.mapdl_core._MapdlCore>`
-    so the actual buffering (and discarding) behavior is exercised.
+    real composed ``non_interactive`` context and its shared
+    ``_store_commands``/``_stored_commands`` state so the actual buffering
+    and discarding behavior is exercised.
     """
 
     def __init__(self):
@@ -546,13 +571,12 @@ def test_chain_commands_restores_state_on_body_error():
     parent._stored_commands = []
 
     with pytest.raises(RuntimeError, match="body failure"):
-        with _MapdlCore._chain_commands(parent):
+        with _ChainCommandsContext(parent):
             parent._stored_commands.append("incomplete command")
             raise RuntimeError("body failure")
 
     assert parent._store_commands is False
     assert parent._stored_commands == []
-    parent._chain_stored.assert_not_called()
 
 
 def test_chain_commands_preserves_nested_state():
@@ -560,12 +584,11 @@ def test_chain_commands_preserves_nested_state():
     parent._store_commands = True
     parent._stored_commands = ["outer command"]
 
-    with _MapdlCore._chain_commands(parent):
+    with _ChainCommandsContext(parent):
         parent._stored_commands.append("inner command")
 
     assert parent._store_commands is True
     assert parent._stored_commands == ["outer command", "inner command"]
-    parent._chain_stored.assert_not_called()
 
 
 def test_restore_plot_device_handles_restore_failure():
@@ -579,7 +602,7 @@ def test_restore_plot_device_handles_restore_failure():
 
 def test_save_selection_preserves_body_error_when_cleanup_fails():
     parent = MagicMock()
-    context = _MapdlCore._save_selection(parent)
+    context = _SaveSelectionContext(parent)
     context.selection = [{"cmsel": {}}]
     parent.allsel.side_effect = RuntimeError("cleanup failure")
 
@@ -591,12 +614,57 @@ def test_save_selection_preserves_body_error_when_cleanup_fails():
 def test_interactive_plotting_skips_noninteractive_mode():
     parent = MagicMock()
     parent._store_commands = True
-    context = _MapdlCore.WithInterativePlotting(parent, 1600)
+    context = _InteractivePlottingContext(parent, 1600)
 
     type(context).__enter__.__wrapped__(context)
     type(context).__exit__.__wrapped__(context, None, None, None)
 
     parent.show.assert_not_called()
+
+
+def test_muted_restores_state_on_body_error():
+    parent = MagicMock()
+    parent.mute = False
+
+    with pytest.raises(RuntimeError, match="body failure"):
+        with _MutedContext(parent):
+            assert parent.mute is True
+            raise RuntimeError("body failure")
+
+    assert parent.mute is False
+
+
+def test_force_output_restores_state_on_body_error():
+    parent = MagicMock()
+    parent._mute = True
+    parent.wrinqr.return_value = 0
+
+    with pytest.raises(RuntimeError, match="body failure"):
+        with _ForceOutputContext(parent):
+            assert parent._mute is False
+            raise RuntimeError("body failure")
+
+    assert parent._mute is True
+    assert parent._run.call_args_list == [call("/gopr"), call("/nopr")]
+
+
+def test_run_as_routine_restores_state_on_body_error():
+    parent = object.__new__(_MapdlCore)
+    parent._cached_routine = None
+    parent._parameters = MagicMock()
+    parent._parameters.routine = "PREP7"
+    parent._log = MagicMock()
+    parent.run = MagicMock()
+
+    with pytest.raises(RuntimeError, match="body failure"):
+        with _RunAsRoutineContext(parent, "POST26"):
+            raise RuntimeError("body failure")
+
+    assert parent._cached_routine is None
+    assert parent.run.call_args_list == [
+        call("/POST26", mute=True),
+        call("/PREP7", mute=True),
+    ]
 
 
 def test_error(mapdl, clear_at_end):
@@ -2579,7 +2647,7 @@ def test_save_selection_1(mapdl, cube_solve):
 
 
 def test_save_selection_2(mapdl, cleared, make_block):
-    from ansys.mapdl.core.mapdl_core import _TMP_COMP
+    from ansys.mapdl.core.contexts.save_selection import _TMP_COMP
 
     n1 = 1
     mapdl.nsel(vmin=n1)
@@ -2920,6 +2988,29 @@ def test_remove_temp_dir_on_exit_with_launch_mapdl(mapdl, cleared, monkeypatch):
     assert not all([psutil.pid_exists(pid) for pid in pids])
 
 
+@requires("local")
+def test_exit_stops_server_left_in_post1(tmpdir, monkeypatch):
+    """Regression test for https://github.com/ansys/pymapdl/issues/4851."""
+    monkeypatch.delenv("PYMAPDL_PORT", raising=False)
+    ip, port, pid = launch_mapdl_process(
+        run_location=str(tmpdir), nproc=1, cleanup_on_exit=False
+    )
+    server = psutil.Process(pid)
+
+    mapdl_2 = pymapdl.Mapdl(
+        ip=ip, port=port, cleanup_on_exit=False, disable_run_at_connect=True
+    )
+    mapdl_2.post1()
+    mapdl_2.exit(save=False, force=True)
+
+    try:
+        server.wait(timeout=30)
+    except psutil.TimeoutExpired:
+        for proc in [*server.children(recursive=True), server]:
+            proc.kill()
+        pytest.fail("MAPDL kept running after exit() from POST1")
+
+
 def test_sys(mapdl, cleared):
     assert "hi" in mapdl.sys("echo 'hi'")
 
@@ -3033,15 +3124,56 @@ def test_not_correct_et_element(mapdl, cleared):
         mapdl.keyopt(1, 222)
 
 
-def test_ctrl(mapdl, cleared):
-    with patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.run") as mck_run:
-        mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
-        mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
-
-        assert "/verify" in mck_run.call_args_list[0].args[0]
-
+def _build_model(mapdl):
+    mapdl.prep7()
+    mapdl.et(1, "LINK180")
+    mapdl.sectype(1, "LINK")
+    mapdl.secdata(1)
+    mapdl.mp("EX", 1, 1000)
+    mapdl.n(1, 0, 0, 0)
+    mapdl.n(2, 1, 0, 0)
+    mapdl.e(1, 2)
+    mapdl.d(1, "ALL", 0)
+    mapdl.d(2, "UY", 0)
+    mapdl.d(2, "UZ", 0)
+    mapdl.f(2, "FX", 1)
     mapdl.finish()
-    mapdl.run("/verify")  # mocking might skip running this inside mapdl._ctrl
+
+
+def _solve_model(mapdl):
+    mapdl.finish()
+    mapdl.slashsolu()
+    response = mapdl.solve(mute=False)
+    mapdl.finish()
+    return response
+
+
+def test_ctrl(mapdl, cleared):
+    mapdl.finish()
+    mapdl.verify("OFF")
+    mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
+    mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
+    _build_model(mapdl)
+    output = _solve_model(mapdl)
+    assert VERIFICATION_BANNER not in output
+
+
+def test_run_at_connect_does_not_enable_verification_mode(mapdl, cleared):
+    mapdl.finish()
+    mapdl.verify("OFF")
+    try:
+        mapdl._run_at_connect()
+        _build_model(mapdl)
+        output = _solve_model(mapdl)
+        assert VERIFICATION_BANNER not in output
+
+        mapdl.finish()
+        mapdl.verify()
+        output = _solve_model(mapdl)
+        assert VERIFICATION_BANNER in output
+    finally:
+        mapdl.finish()
+        mapdl.verify("OFF")
 
 
 @pytest.mark.skip("This test is removing all loggers, which is not desired")
@@ -4025,15 +4157,9 @@ def test_osresult_presol(mapdl, solved_box):
 # ----------------
 # Unit tests for the ``Mapdl.do`` and ``Mapdl.dowhile`` loop context managers.
 
-# These tests do not require a live MAPDL instance: they exercise the context
-# manager logic against a lightweight fake that mimics only the bits of
-# :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` that ``do``/``dowhile`` rely
-# on. Notably, ``FakeMapdl`` does **not** stub out
-# :class:`Mapdl.non_interactive <ansys.mapdl.core.mapdl_core._MapdlCore>`: it
-# relies on the real, inherited :class:`_non_interactive
-# <ansys.mapdl.core.mapdl_core._MapdlCore._non_interactive>` implementation, so
-# these tests also guard against a partial ``*DO``/``*DOWHILE`` block leaking
-# into a later flush through the shared ``_stored_commands`` buffer.
+# These tests use a lightweight fake rather than live MAPDL. The fake inherits
+# the real non-interactive context, so the tests cover shared command buffering
+# and verify that failed loops discard incomplete blocks.
 
 
 def test_do_emits_do_and_enddo_real_mapdl(mapdl):
@@ -4231,3 +4357,70 @@ def test_exception_in_nested_do_loop_preserves_prior_buffered_commands(fake_mapd
 
     assert fake_mapdl.sent_commands == ["earlier command", "later command"]
     assert fake_mapdl._stored_commands == []
+
+
+@pytest.fixture
+def blocked_mapdl(mapdl):
+    mapdl.blocked_commands = ["/SYS", "/SYP", "/INPUT"]
+    yield mapdl
+    mapdl.blocked_commands = []
+
+
+def test_blocked_commands_default_is_empty(mapdl):
+    assert mapdl.blocked_commands == frozenset()
+
+
+def test_blocked_command_run_raises(blocked_mapdl):
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/SYS'"):
+        blocked_mapdl.run("/SYS,echo x")
+
+
+def test_blocked_sys_does_not_block_internal_file_listing(blocked_mapdl):
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/SYS'"):
+        blocked_mapdl.sys("echo x")
+    # list_files() and the remote input/flush paths use '/SYS' internally.
+    assert "hi" in blocked_mapdl._sys("echo hi")
+    assert isinstance(blocked_mapdl.list_files(), list)
+
+
+def test_blocked_command_batch_sends_nothing(blocked_mapdl, cleared):
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/SYP'"):
+        blocked_mapdl.input_strings(["*SET,BLKTEST,1", "/SYP,echo x"])
+    assert "BLKTEST" not in blocked_mapdl.parameters
+
+    # The same command runs unblocked, so the absence above is the block.
+    blocked_mapdl.blocked_commands = []
+    blocked_mapdl.input_strings("*SET,BLKTEST,1")
+    assert "BLKTEST" in blocked_mapdl.parameters
+    assert blocked_mapdl.parameters["BLKTEST"] == 1
+
+
+def test_blocked_command_non_interactive_raises_at_call(blocked_mapdl, cleared):
+    with blocked_mapdl.non_interactive:
+        with pytest.raises(MapdlCommandBlockedError, match="matched '/SYS'"):
+            blocked_mapdl.run("/SYS,echo x")
+
+
+def test_blocked_command_text_inside_com_is_allowed(blocked_mapdl):
+    response = blocked_mapdl.com("note $/SYS")
+    assert "note $/SYS" in response
+
+
+def test_blocked_input_file_raises(blocked_mapdl, tmp_path):
+    path = tmp_path / "blocked_input.inp"
+    path.write_text("*SET,BLKINPUT,1\n")
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/INP'"):
+        blocked_mapdl.input(str(path))
+    assert "BLKINPUT" not in blocked_mapdl.parameters
+
+
+def test_blocked_input_does_not_block_non_interactive_flush(blocked_mapdl, cleared):
+    with blocked_mapdl.non_interactive:
+        blocked_mapdl.run("*SET,BLKFLUSH,5")
+    assert blocked_mapdl.parameters["BLKFLUSH"] == 5
+
+
+def test_unrelated_commands_run_with_commands_blocked(blocked_mapdl, cleared):
+    blocked_mapdl.prep7()
+    blocked_mapdl.input_strings(["/PREP7"])
+    assert blocked_mapdl.parameters.routine == "PREP7"

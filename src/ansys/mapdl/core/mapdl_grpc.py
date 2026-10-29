@@ -367,7 +367,9 @@ class MapdlGrpc(MapdlBase):
         The default is ``False``.
 
     disable_run_at_connect: bool, optional
-        Whether to disable the housekeeping commands when connecting.
+        Whether to skip the connection-time setup: it sets the POST26 variable
+        limit (``NUMVAR,200``), sets the ``/SHOW`` plot file type, and caches the
+        working directory and the MAPDL version.
         The default is ``False``.
 
     channel : grpc.Channel, optional
@@ -900,7 +902,10 @@ class MapdlGrpc(MapdlBase):
 
         self._start_ping_abuse_probe()
 
-    def _ping_abuse_probe_loop(self) -> None:
+    @staticmethod
+    def _ping_abuse_probe_loop(
+        mapdl_ref: weakref.ReferenceType["MapdlGrpc"], stop_event: threading.Event
+    ) -> None:
         """Periodically issue a lightweight real RPC to reset the MAPDL gRPC
         server's ping-abuse tracker.
 
@@ -920,11 +925,17 @@ class MapdlGrpc(MapdlBase):
         :meth:`_subscribe_to_channel` is the sole authority on declaring the
         channel dead and cancelling any in-flight call.
         """
-        while not self._ping_probe_stop_event.wait(PING_ABUSE_PROBE_INTERVAL_S):
+        while not stop_event.wait(PING_ABUSE_PROBE_INTERVAL_S):
+            mapdl = mapdl_ref()
+            if mapdl is None:
+                return
             try:
-                self._ctrl("VERSION", timeout=PING_ABUSE_PROBE_TIMEOUT_S)
+                mapdl._ctrl("VERSION", timeout=PING_ABUSE_PROBE_TIMEOUT_S)
             except (grpc.RpcError, MapdlRuntimeError) as exc:
-                self._log.debug(f"Ping-abuse probe RPC failed: {exc}")
+                mapdl._log.debug(f"Ping-abuse probe RPC failed: {exc}")
+            finally:
+                # Do not keep the client alive while waiting for the next probe.
+                del mapdl
 
     def _start_ping_abuse_probe(self) -> None:
         """Start the background ping-abuse probe thread, if not already running.
@@ -935,9 +946,11 @@ class MapdlGrpc(MapdlBase):
         if self._ping_probe_thread is not None and self._ping_probe_thread.is_alive():
             return
 
-        self._ping_probe_stop_event.clear()
+        # A reconnect must not clear the stop request of a worker still exiting.
+        self._ping_probe_stop_event = threading.Event()
         self._ping_probe_thread = threading.Thread(
-            target=self._ping_abuse_probe_loop,
+            target=MapdlGrpc._ping_abuse_probe_loop,
+            args=(weakref.ref(self), self._ping_probe_stop_event),
             name="pymapdl-ping-abuse-probe",
             daemon=True,
         )
@@ -1855,9 +1868,6 @@ class MapdlGrpc(MapdlBase):
     def _run_at_connect(self):
         """Run house-keeping commands when initially connecting to MAPDL."""
         # increase the number of variables allowed in POST26 to the maximum
-        with self.run_as_routine("Begin level"):
-            self._run("/verify", mute=False)
-
         with self.run_as_routine("POST26"):
             self.numvar(200, mute=True)
 
@@ -2318,6 +2328,8 @@ class MapdlGrpc(MapdlBase):
         in one step does not prevent the remaining resources from being freed.
         This also makes the method safe to call during interpreter shutdown,
         where module globals may already have been torn down.
+        Local garbage-collection teardown uses cached process information rather
+        than querying or commanding MAPDL, because GC can interrupt a gRPC call.
 
         Callers must set ``_exiting = True`` before invoking this method (and
         reset it once done), so that :attr:`is_alive` short-circuits instead
@@ -2349,9 +2361,16 @@ class MapdlGrpc(MapdlBase):
 
         # 1. Kill MAPDL process + remove lock file
         try:
-            self._exit_mapdl(path)
+            if exiting and self._local:
+                # GC may interrupt gRPC itself; use cached process data, not RPCs.
+                self._close_process()
+                if path:
+                    self._remove_lock_file(path, use_cached=True)
+            else:
+                self._exit_mapdl(path)
         except Exception as e:
-            self._log.debug("Error during _exit_mapdl: %s", e)
+            if not exiting:
+                self._log.debug("Error during _exit_mapdl: %s", e)
 
         # 2. Ensure PIPE-drainer threads (stdout/stderr/startup) are joined so
         # that background reader threads do not leak after teardown.
@@ -2503,17 +2522,9 @@ class MapdlGrpc(MapdlBase):
         if self._exited:
             return
 
-        # Default
-        if self._version is None or self._version < 24.1:
-            self._ctrl("EXIT")
-
-        elif self._version >= 24.1:
-            # We can't use the non-cached version because of recursion error.
-            # self.run("/EXIT,NOSAVE,,,,,SERVER")
-            self.finish()
-            self._ctrl("EXIT")
-
-        return
+        # MAPDL ignores EXIT unless it is at the Begin level.
+        self.finish()
+        self._ctrl("EXIT")
 
     def _close_process_pipes(self, process: subprocess.Popen) -> None:  # type: ignore[type-arg]
         """Close all open I/O streams attached to *process*.
@@ -2823,9 +2834,21 @@ class MapdlGrpc(MapdlBase):
         --------
         >>> mapdl.sys('ls')
         """
+        return self._sys(cmd, check_blocked=True, **kwargs)
+
+    @supress_logging
+    def _sys(self, cmd: str, check_blocked: bool = False, **kwargs) -> str:
+        """Run ``/SYS`` and return its output.
+
+        PyMAPDL internals call this directly so that they keep working when
+        ``/SYS`` is in ``blocked_commands``. Only ``sys()`` checks the block.
+        """
         # always redirect system output to a temporary file
         tmp_file = f"__tmp_sys_out_{random_string()}__"
-        super().sys(f"{cmd} > {tmp_file}", **kwargs)
+        if check_blocked:
+            super().sys(f"{cmd} > {tmp_file}", **kwargs)
+        else:
+            self._run(f"/SYS,{cmd} > {tmp_file}")
         if self._local:  # no need to download when local
             with open(self.directory / tmp_file) as fobj:
                 obj = fobj.read()
@@ -3019,10 +3042,6 @@ class MapdlGrpc(MapdlBase):
 
         resp = self._stub.Ctrl(request, timeout=timeout)
 
-        if cmd.lower() == "set_verb" and str(opt1) == "0":
-            warn("Disabling gRPC verbose ('_ctr') by issuing also '/VERIFY' command.")
-            self.run("/verify")
-
         if hasattr(resp, "response"):
             return resp.response
 
@@ -3113,7 +3132,6 @@ class MapdlGrpc(MapdlBase):
             **kwargs,
         )
 
-    @protect_grpc
     def input(
         self,
         fname="",
@@ -3239,6 +3257,39 @@ class MapdlGrpc(MapdlBase):
         >>> from ansys.mapdl.core import mapdl_grpc
         >>> mapdl_grpc.DEFAULT_TIME_STEP_STREAM=100 # in milliseconds
         """
+        self._check_blocked_commands(orig_cmd)
+        return self._stream_input(
+            fname,
+            ext,
+            dir_,
+            line,
+            log,
+            verbose=verbose,
+            progress_bar=progress_bar,
+            time_step_stream=time_step_stream,
+            chunk_size=chunk_size,
+            orig_cmd=orig_cmd,
+            write_to_log=write_to_log,
+            **kwargs,
+        )
+
+    @protect_grpc
+    def _stream_input(
+        self,
+        fname="",
+        ext="",
+        dir_="",
+        line="",
+        log="",
+        *,
+        verbose=False,
+        progress_bar=False,
+        time_step_stream=None,
+        chunk_size=512,
+        orig_cmd="/INP",
+        write_to_log=True,
+        **kwargs,
+    ):
         # Checking compatibility
         # Checking the user is not reusing old api:
         #
@@ -3530,7 +3581,8 @@ class MapdlGrpc(MapdlBase):
         self._stored_commands = []
 
         # run the stored commands
-        out = self.input(
+        # already checked by run() and input_strings() when stored
+        out = self._stream_input(
             tmp_filename,
             write_to_log=False,
             verbose=False,
@@ -5124,6 +5176,8 @@ class MapdlGrpc(MapdlBase):
         exited, because those are purely client-side resources (the
         ``_poll_connectivity`` daemon thread and the stdout/stderr/startup
         reader threads) that outlive this object otherwise.
+        The ping-abuse probe holds only a weak client reference between RPCs,
+        allowing this teardown to run when the last client reference is dropped.
         """
         # Check early exit conditions.
         if (

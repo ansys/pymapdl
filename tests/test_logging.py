@@ -28,8 +28,7 @@ import re
 
 import pytest
 
-from ansys.mapdl.core import LOG  # Global logger
-from ansys.mapdl.core import logging
+from ansys.mapdl.core import LOG, logging  # Global logger
 from conftest import requires
 
 ## Notes

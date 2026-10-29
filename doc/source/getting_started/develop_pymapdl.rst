@@ -50,10 +50,37 @@ If you are going to do testing, you must install the testing dependencies with t
     pip install -e '.[tests]'
 
 
+Locate MAPDL core behavior
+=========================
+
+The ``mapdl_core.py`` module composes the core responsibility mixins in
+``src/ansys/mapdl/core/_mapdl_core/`` and preserves compatibility imports. Add
+core behavior to the mixin for its responsibility rather than expanding the
+facade.
+
+
+Locate MAPDL command extensions
+==============================
+
+The ``mapdl_extended.py`` module composes the private responsibility mixins,
+initializes shared state, and preserves compatibility imports. Implement command
+overrides in ``src/ansys/mapdl/core/_mapdl_extended/``, not in the facade or the
+generated ``_commands/`` package. Use one module per command family, matching
+the ``_commands/`` family name, such as ``apdl.py``, ``session.py``, or
+``solution.py``. Plotting methods live in
+``plotting_commands.py``; APDL loop implementations remain in
+``contexts/loops.py``. Users continue to access these methods through the
+:class:`ansys.mapdl.core.Mapdl` class.
+
+
 Develop PyMAPDL
 ===============
 
 .. epigraph:: *Now it is time to develop PyMAPDL!*
+
+Context manager implementations live in
+:file:`src/ansys/mapdl/core/contexts/`. APDL do-loop implementations live in
+:file:`src/ansys/mapdl/core/contexts/loops.py`.
 
 Developing code in a repository, particularly when using version control systems
 like Git, involves a set of essential guidelines to ensure efficient
@@ -295,6 +322,9 @@ It is executed upstream of each test and not within all tests.
 
 Passing the ``cleared`` fixture is also useful since it clears up the MAPDL database
 and configuration before performing the test.
+The fixture runs ``FINISH`` and ``/CLEAR`` as direct commands and only batches the
+formatting commands in ``non_interactive``. Running ``/CLEAR`` inside the input file
+streamed by ``non_interactive`` can crash MAPDL 25.1, so keep it outside that block.
 
 Running PyMAPDL tests
 ---------------------

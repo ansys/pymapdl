@@ -146,6 +146,7 @@ CMD_DOC_STRING_INJECTOR.extend(CMD_BC_LISTING)
 @pytest.fixture()
 def beam_solve(mapdl, cleared):
     with mapdl.muted:
+        mapdl.finish()
         mapdl.input(vmfiles["vm10"])
 
         mapdl.post1()
@@ -656,7 +657,7 @@ class Test_MAPDL_commands(TestClass):
     @pytest.mark.parametrize("cmd", MAPDL_cmds)
     @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._send_command", fake_wrap)
     # Skip post processing the plot in PLESOL commands like.
-    @patch("ansys.mapdl.core.mapdl_core.PLOT_COMMANDS", [])
+    @patch("ansys.mapdl.core._mapdl_core.plotting.PLOT_COMMANDS", [])
     # skip retrieving value
     @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.scalar_param", fake_wrap)
     # Skip output the entity id after geometry manipulation
@@ -728,6 +729,7 @@ class Test_output_listing(TestClass):
     @pytest.fixture(scope="class")
     def plastic_solve_output(mapdl):
         with mapdl.muted:
+            mapdl.finish()
             mapdl.input(vmfiles["vm273"])
 
             mapdl.post1()

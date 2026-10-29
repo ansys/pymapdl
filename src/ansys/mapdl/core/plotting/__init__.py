@@ -24,8 +24,8 @@ from enum import Enum
 from typing import Any
 
 from ansys.mapdl.core import _HAS_VISUALIZER
-from ansys.mapdl.core.plotting.consts import ALLOWED_TARGETS  # noqa: F401
-from ansys.mapdl.core.plotting.consts import (
+from ansys.mapdl.core.plotting.consts import (  # noqa: F401
+    ALLOWED_TARGETS,
     BC_D,
     BC_F,
     BCS,

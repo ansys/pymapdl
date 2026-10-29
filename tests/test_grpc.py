@@ -266,6 +266,7 @@ def test_cmatrix(mapdl, setup_for_cmatrix):
 
 def test_read_input_file_verbose(mapdl, cleared):
     test_file = examples.vmfiles["vm153"]
+    mapdl.finish()
     response = mapdl.input(test_file, verbose=True)
     assert re.search(
         r"\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response
@@ -829,38 +830,26 @@ def test_subscribe_to_channel(mapdl, cleared):
 
 
 @requires("remote")
-def test_exception_message_length(mapdl, cleared, monkeypatch):
-    # This test does not fail if running on local
-    channel = grpc.insecure_channel(
+def test_exception_message_length(mapdl, cleared):
+    with grpc.insecure_channel(
         mapdl._channel_str,
-        options=[
-            ("grpc.max_receive_message_length", int(1024)),
-        ],
-    )
-    mapdl2 = MapdlGrpc(channel=channel)
-    assert mapdl2.is_alive
+        options=[("grpc.max_receive_message_length", 1024)],
+    ) as channel:
+        mapdl2 = MapdlGrpc(channel=channel, local=False)
+        try:
+            assert mapdl2.is_alive
+            mapdl2.prep7()
+            mapdl2.dim("myarr", "", 1e5)
+            mapdl2.vfill("myarr", "rand", 0, 1)
 
-    mapdl2.prep7()
-    mapdl2.dim("myarr", "", 1e5)
-    mapdl2.vfill("myarr", "rand", 0, 1)  # filling array with random numbers
+            with pytest.raises(
+                MapdlgRPCError, match="Received message larger than max"
+            ):
+                _ = mapdl2.parameters["myarr"]
 
-    # 'protect_grpc' retries any 'grpc.RpcError' (including
-    # 'RESOURCE_EXHAUSTED', triggered below) up to 'N_ATTEMPTS' times with
-    # exponential backoff before it inspects the error code and raises.
-    # That backoff sums to several real seconds and is not what this test
-    # verifies, so it's skipped here.
-    monkeypatch.setattr(errors, "sleep", lambda *args, **kwargs: None)
-
-    # Retrieving
-    with pytest.raises(MapdlgRPCError, match="Received message larger than max"):
-        values = mapdl2.parameters["myarr"]
-
-    assert mapdl2.is_alive
-
-    # Deleting generated mapdl instance and channel.
-    channel.close()
-    mapdl2._exited = True  # To avoid side effects.
-    mapdl2.exit()
+            assert mapdl2.is_alive
+        finally:
+            mapdl2.exit()
 
 
 def test_generic_grpc_exception(monkeypatch, grpc_channel):

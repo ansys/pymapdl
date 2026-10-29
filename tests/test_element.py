@@ -32,6 +32,7 @@ from conftest import TestClass, requires
 
 @pytest.fixture
 def vm6(mapdl, cleared):
+    mapdl.finish()
     mapdl.input(examples.vmfiles["vm6"])
 
 
