@@ -26,14 +26,23 @@ def find_json_files(base_dir: str) -> list[str]:
 
 
 def read_json_file(file_path: str) -> list[dict[str, str]]:
-    """Read a JSON file and return its content as a list of test configurations."""
+    """Read a JSON file and return its content as a list of test configurations.
+
+    The file is streamed line by line and only the fields used downstream are
+    kept, because report logs can be several GB (captured output in ``sections``).
+    """
+    keep = ("nodeid", "outcome", "when", "duration")
+    data: list[dict[str, str]] = []
     with open(file_path, "r", encoding="utf-8") as f:
         try:
-            data = [json.loads(line) for line in f]
-            return data
+            for line in f:
+                rec = json.loads(line)
+                if rec.get("outcome", "").lower() == "passed" and rec.get("duration"):
+                    data.append({k: rec[k] for k in keep if k in rec})
         except json.JSONDecodeError as e:
             print(f"Error reading {file_path}: {e}")
             return []
+    return data
 
 
 def extract_tests_with_tags(json_files: list[str]) -> list[dict[str, str | list[str]]]:

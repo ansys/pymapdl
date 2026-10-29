@@ -308,6 +308,9 @@ It is executed upstream of each test and not within all tests.
 
 Passing the ``cleared`` fixture is also useful since it clears up the MAPDL database
 and configuration before performing the test.
+The fixture runs ``FINISH`` and ``/CLEAR`` as direct commands and only batches the
+formatting commands in ``non_interactive``. Running ``/CLEAR`` inside the input file
+streamed by ``non_interactive`` can crash MAPDL 25.1, so keep it outside that block.
 
 Running PyMAPDL tests
 ---------------------
