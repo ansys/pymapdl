@@ -170,12 +170,17 @@ mapdl.mp("NUXY", 1, 0.3)  # Poisson's Ratio
 mapdl.nsel("S", "LOC", "X", 0)
 mapdl.d("ALL", "UX")
 
-# Fix a few nodes on the left-hand side of the plate in the Y and Z
-# direction.  Otherwise, the mesh would be allowed to move in the y
-# direction and would be an improperly constrained mesh.
-mapdl.nsel("R", "LOC", "Y", width / 2)
-mapdl.d("ALL", "UY")
-mapdl.d("ALL", "UZ")
+# Fix the nodes along the middle line of the left-hand side of the plate
+# in the Y and Z direction.  Otherwise, the mesh would be allowed to move
+# in the y direction and would be an improperly constrained mesh.
+#
+# :attr:`Mapdl.selector <ansys.mapdl.core.Mapdl.selector>` returns the
+# numbers of the nodes matching all the given coordinates, without
+# changing the active selection.
+nodes = mapdl.selector.select(x=0, y=width / 2)
+for node in nodes:
+    mapdl.d(node, "UY")
+    mapdl.d(node, "UZ")
 
 # Apply a force on the right-hand side of the plate.  For this
 # example, we select the nodes at the right-most side of the plate.
@@ -189,12 +194,11 @@ mapdl.nsel("S", "LOC", "X", length)
 # set.
 mapdl.cp(5, "UX", "ALL")
 
-# Select a single node in this set and apply a force to it
-# We use "R" to re-select from the current node group
-mapdl.nsel("R", "LOC", "Y", width / 2)  # selects more than one
-single_node = mapdl.mesh.nnum[0]
-mapdl.nsel("S", "NODE", vmin=single_node, vmax=single_node)
-mapdl.f("ALL", "FX", 1000)
+# Apply the force to a single node of the middle line of the right-hand
+# side. The selector returns several nodes (one per node through the
+# thickness), so we take the first one.
+nodes = mapdl.selector.select(x=length, y=width / 2)
+mapdl.f(nodes[0], "FX", 1000)
 
 # finally, be sure to select all nodes again to solve the entire solution
 mapdl.allsel(mute=True)
