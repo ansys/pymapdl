@@ -857,6 +857,7 @@ class Test_plastic_solve(TestClass):
     def plastic_solve(mapdl):
         clear(mapdl)
         with mapdl.muted:
+            mapdl.finish()
             mapdl.input(examples.verif_files.vmfiles["vm273"])
 
         mapdl.save("plastic_solve", slab="all")

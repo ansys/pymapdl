@@ -367,7 +367,9 @@ class MapdlGrpc(MapdlBase):
         The default is ``False``.
 
     disable_run_at_connect: bool, optional
-        Whether to disable the housekeeping commands when connecting.
+        Whether to skip the connection-time setup: it sets the POST26 variable
+        limit (``NUMVAR,200``), sets the ``/SHOW`` plot file type, and caches the
+        working directory and the MAPDL version.
         The default is ``False``.
 
     channel : grpc.Channel, optional
@@ -1855,9 +1857,6 @@ class MapdlGrpc(MapdlBase):
     def _run_at_connect(self):
         """Run house-keeping commands when initially connecting to MAPDL."""
         # increase the number of variables allowed in POST26 to the maximum
-        with self.run_as_routine("Begin level"):
-            self._run("/verify", mute=False)
-
         with self.run_as_routine("POST26"):
             self.numvar(200, mute=True)
 
@@ -2503,17 +2502,9 @@ class MapdlGrpc(MapdlBase):
         if self._exited:
             return
 
-        # Default
-        if self._version is None or self._version < 24.1:
-            self._ctrl("EXIT")
-
-        elif self._version >= 24.1:
-            # We can't use the non-cached version because of recursion error.
-            # self.run("/EXIT,NOSAVE,,,,,SERVER")
-            self.finish()
-            self._ctrl("EXIT")
-
-        return
+        # MAPDL ignores EXIT unless it is at the Begin level.
+        self.finish()
+        self._ctrl("EXIT")
 
     def _close_process_pipes(self, process: subprocess.Popen) -> None:  # type: ignore[type-arg]
         """Close all open I/O streams attached to *process*.
@@ -3030,10 +3021,6 @@ class MapdlGrpc(MapdlBase):
             return
 
         resp = self._stub.Ctrl(request, timeout=timeout)
-
-        if cmd.lower() == "set_verb" and str(opt1) == "0":
-            warn("Disabling gRPC verbose ('_ctr') by issuing also '/VERIFY' command.")
-            self.run("/verify")
 
         if hasattr(resp, "response"):
             return resp.response

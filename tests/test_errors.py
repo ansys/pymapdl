@@ -25,7 +25,6 @@ from unittest.mock import MagicMock
 import grpc
 import pytest
 
-from ansys.mapdl.core import errors as errors_module
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
     MapdlConnectionError,
@@ -330,30 +329,33 @@ class _FakeRpcError(grpc.RpcError):
         ),
         # Message format seen with unary RPCs.
         ("Received message larger than max (512 vs. 100)", 512),
+        # No sizes in the details: suggest the 512 MB fallback.
+        ("Received message larger than max", 512 * 1024**2),
     ],
 )
-def test_protect_grpc_translates_resource_exhausted_error(
-    monkeypatch, details, expected_limit
-):
+def test_protect_grpc_translates_resource_exhausted_error(details, expected_limit):
     """A 'RESOURCE_EXHAUSTED' error whose details report a message that is
-    too large becomes a 'MapdlgRPCError' suggesting
-    'PYMAPDL_MAX_MESSAGE_LENGTH' set to the received message size, regardless
-    of whether gRPC wraps the details with a 'Stream removed' prefix."""
-    monkeypatch.setattr(errors_module, "sleep", lambda *args, **kwargs: None)
+    too large becomes a 'MapdlgRPCError' on the first attempt, suggesting
+    'PYMAPDL_MAX_MESSAGE_LENGTH' set to the received message size (or a 512 MB
+    fallback when the size is not reported), regardless of whether gRPC wraps
+    the details with a 'Stream removed' prefix."""
 
     mock_mapdl = MagicMock(spec=MapdlGrpc)
     mock_mapdl._log = MagicMock()
     mock_mapdl._exited = False
     mock_mapdl.exited = False
     mock_mapdl.is_alive = True
+    attempts = []
 
     @protect_grpc
-    def raising(self, n_attempts=0):
+    def raising(self, n_attempts=2):
+        attempts.append(None)
         raise _FakeRpcError(grpc.StatusCode.RESOURCE_EXHAUSTED, details)
 
     with pytest.raises(
         MapdlgRPCError, match="Received message larger than max"
     ) as excinfo:
-        raising(mock_mapdl, n_attempts=0)
+        raising(mock_mapdl, n_attempts=2)
 
     assert f"PYMAPDL_MAX_MESSAGE_LENGTH={expected_limit}" in str(excinfo.value)
+    assert len(attempts) == 1

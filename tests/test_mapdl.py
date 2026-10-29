@@ -49,6 +49,7 @@ from conftest import (
     QUICK_LAUNCH_SWITCHES,
     TEST_DPF_BACKEND,
     NullContext,
+    clear,
     has_dependency,
     requires,
 )
@@ -77,7 +78,7 @@ from ansys.mapdl.core.errors import (
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.helpers import is_installed
-from ansys.mapdl.core.launcher import launch_mapdl
+from ansys.mapdl.core.launcher import launch_mapdl, launch_mapdl_process
 from ansys.mapdl.core.lazy_array import LazyArray
 from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME, _MapdlCore
 from ansys.mapdl.core.mapdl_extended import _MapdlExtended
@@ -88,6 +89,7 @@ from ansys.mapdl.core.plotting import GraphicsBackend
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEST_FILES = os.path.join(PATH, "test_files")
 FIRST_TIME_FILE = os.path.join(USER_DATA_PATH, ".firstime")
+VERIFICATION_BANNER = "MAPDL VERIFICATION RUN ONLY"
 
 DEPRECATED_COMMANDS = [
     "edadapt",
@@ -234,6 +236,24 @@ def clearing_cdread_cdwrite_tests(mapdl):
         mapdl.page("DEFA")
 
         mapdl.prep7()
+
+
+@requires("grpc")
+def test_clear_resets_database_and_postprocessing_state(mapdl, cleared):
+    mapdl.n(1, 0, 0, 0)
+    mapdl.parameters["RESET_MARKER"] = 1
+    mapdl.finish()
+    mapdl.post1()
+
+    with mapdl.muted:
+        clear(mapdl)
+        assert mapdl.mute is True
+
+    assert mapdl.mute is False
+    assert mapdl.parameters.routine == "PREP7"
+    assert "RESET_MARKER" not in mapdl.parameters
+    mapdl.n(2, 1, 0, 0)
+    assert mapdl.mesh.nnum.tolist() == [2]
 
 
 def asserting_cdread_cdwrite_tests(mapdl):
@@ -2968,6 +2988,29 @@ def test_remove_temp_dir_on_exit_with_launch_mapdl(mapdl, cleared, monkeypatch):
     assert not all([psutil.pid_exists(pid) for pid in pids])
 
 
+@requires("local")
+def test_exit_stops_server_left_in_post1(tmpdir, monkeypatch):
+    """Regression test for https://github.com/ansys/pymapdl/issues/4851."""
+    monkeypatch.delenv("PYMAPDL_PORT", raising=False)
+    ip, port, pid = launch_mapdl_process(
+        run_location=str(tmpdir), nproc=1, cleanup_on_exit=False
+    )
+    server = psutil.Process(pid)
+
+    mapdl_2 = pymapdl.Mapdl(
+        ip=ip, port=port, cleanup_on_exit=False, disable_run_at_connect=True
+    )
+    mapdl_2.post1()
+    mapdl_2.exit(save=False, force=True)
+
+    try:
+        server.wait(timeout=30)
+    except psutil.TimeoutExpired:
+        for proc in [*server.children(recursive=True), server]:
+            proc.kill()
+        pytest.fail("MAPDL kept running after exit() from POST1")
+
+
 def test_sys(mapdl, cleared):
     assert "hi" in mapdl.sys("echo 'hi'")
 
@@ -3081,15 +3124,56 @@ def test_not_correct_et_element(mapdl, cleared):
         mapdl.keyopt(1, 222)
 
 
-def test_ctrl(mapdl, cleared):
-    with patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.run") as mck_run:
-        mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
-        mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
-
-        assert "/verify" in mck_run.call_args_list[0].args[0]
-
+def _build_model(mapdl):
+    mapdl.prep7()
+    mapdl.et(1, "LINK180")
+    mapdl.sectype(1, "LINK")
+    mapdl.secdata(1)
+    mapdl.mp("EX", 1, 1000)
+    mapdl.n(1, 0, 0, 0)
+    mapdl.n(2, 1, 0, 0)
+    mapdl.e(1, 2)
+    mapdl.d(1, "ALL", 0)
+    mapdl.d(2, "UY", 0)
+    mapdl.d(2, "UZ", 0)
+    mapdl.f(2, "FX", 1)
     mapdl.finish()
-    mapdl.run("/verify")  # mocking might skip running this inside mapdl._ctrl
+
+
+def _solve_model(mapdl):
+    mapdl.finish()
+    mapdl.slashsolu()
+    response = mapdl.solve(mute=False)
+    mapdl.finish()
+    return response
+
+
+def test_ctrl(mapdl, cleared):
+    mapdl.finish()
+    mapdl.verify("OFF")
+    mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
+    mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
+    _build_model(mapdl)
+    output = _solve_model(mapdl)
+    assert VERIFICATION_BANNER not in output
+
+
+def test_run_at_connect_does_not_enable_verification_mode(mapdl, cleared):
+    mapdl.finish()
+    mapdl.verify("OFF")
+    try:
+        mapdl._run_at_connect()
+        _build_model(mapdl)
+        output = _solve_model(mapdl)
+        assert VERIFICATION_BANNER not in output
+
+        mapdl.finish()
+        mapdl.verify()
+        output = _solve_model(mapdl)
+        assert VERIFICATION_BANNER in output
+    finally:
+        mapdl.finish()
+        mapdl.verify("OFF")
 
 
 @pytest.mark.skip("This test is removing all loggers, which is not desired")
