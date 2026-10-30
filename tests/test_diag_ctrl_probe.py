@@ -22,6 +22,7 @@
 
 # TEMPORARY diagnostic probe for Remote v25.2.0 is_alive failures. Do not merge.
 """Does Ctrl("VERSION") fail on fresh channels while RunCmd succeeds?"""
+
 from collections import Counter
 import threading
 
@@ -51,8 +52,12 @@ def test_probe_ctrl_on_fresh_channels(mapdl, cleared):
         with grpc.insecure_channel(mapdl._channel_str) as channel:
             grpc.channel_ready_future(channel).result(timeout=10)
             stub = mapdl_grpc.MapdlServiceStub(channel)
-            version = lambda: stub.Ctrl(anskernel.CtrlRequest(ctrl="VERSION"), timeout=5)
-            run = lambda: stub.SendCommand(pb_types.CmdRequest(command="/COM,probe"), timeout=5)
+            version = lambda: stub.Ctrl(
+                anskernel.CtrlRequest(ctrl="VERSION"), timeout=5
+            )
+            run = lambda: stub.SendCommand(
+                pb_types.CmdRequest(command="/COM,probe"), timeout=5
+            )
 
             for step, fn in (("ctrl-1", version), ("run", run), ("ctrl-2", version)):
                 results.append((i, step, _call(fn)))
@@ -75,7 +80,9 @@ def test_probe_ctrl_after_channel_rebuild(mapdl, cleared):
         mapdl._exited = False
         restore_connection(mapdl)
         mapdl.prep7()
-        version = lambda: mapdl._stub.Ctrl(anskernel.CtrlRequest(ctrl="VERSION"), timeout=5)
+        version = lambda: mapdl._stub.Ctrl(
+            anskernel.CtrlRequest(ctrl="VERSION"), timeout=5
+        )
         results.append((i, _call(version)))
 
     failures = [r for r in results if r[1] != "OK"]
@@ -96,7 +103,9 @@ def test_probe_concurrent_ctrl_and_status(mapdl, cleared):
         grpc.channel_ready_future(channel).result(timeout=10)
         stub = mapdl_grpc.MapdlServiceStub(channel)
         version = lambda: stub.Ctrl(anskernel.CtrlRequest(ctrl="VERSION"), timeout=5)
-        status = lambda: stub.SendCommand(pb_types.CmdRequest(command="*STATUS"), timeout=5)
+        status = lambda: stub.SendCommand(
+            pb_types.CmdRequest(command="*STATUS"), timeout=5
+        )
 
         stub.SendCommand(pb_types.CmdRequest(command="PRBPARM=1"), timeout=5)
         ref_version = version().response.strip()
@@ -138,7 +147,9 @@ def test_probe_concurrent_ctrl_and_status(mapdl, cleared):
     with grpc.insecure_channel(mapdl._channel_str) as channel:
         grpc.channel_ready_future(channel).result(timeout=10)
         stub = mapdl_grpc.MapdlServiceStub(channel)
-        after = _call(lambda: stub.Ctrl(anskernel.CtrlRequest(ctrl="VERSION"), timeout=5))
+        after = _call(
+            lambda: stub.Ctrl(anskernel.CtrlRequest(ctrl="VERSION"), timeout=5)
+        )
 
     print(f"ref_version={ref_version!r} fresh-channel VERSION after: {after}")
     for name, res in results.items():
