@@ -24,6 +24,9 @@
 
 import weakref
 
+from ansys.mapdl.core._mapdl_core import _CoreMixinBase
+from ansys.mapdl.core.errors import MapdlRuntimeError
+
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
 
 
@@ -76,3 +79,40 @@ class _ChainCommandsContext:
 
         responses = [parent._run(command) for command in chained_commands]
         parent._response = "\n".join(responses)
+
+
+class _ChainCommandsMixin(_CoreMixinBase):
+    """Expose the ``chain_commands`` context."""
+
+    @property
+    def chain_commands(self):
+        """Chain several mapdl commands.
+
+        Commands can be separated with ``"$"`` in MAPDL rather than
+        with a line break, so you could send multiple commands to
+        MAPDL with:
+
+        ``mapdl.run("/PREP7$K,1,1,2,3")``
+
+        This method is merely a convenience context manager to allow
+        for easy chaining of PyMAPDL commands to speed up sending
+        commands to MAPDL.
+
+        View the response from MAPDL with :attr:`Mapdl.last_response`.
+
+        Notes
+        -----
+        Distributed Ansys cannot properly handle condensed data input
+        and chained commands are not permitted in distributed ansys.
+
+        Examples
+        --------
+        >>> with mapdl.chain_commands:
+            mapdl.prep7()
+            mapdl.k(1, 1, 2, 3)
+        """
+        if self._distributed:
+            raise MapdlRuntimeError(
+                "Chained commands are not permitted in distributed ansys."
+            )
+        return _ChainCommandsContext(self)

@@ -74,8 +74,8 @@ from ansys.mapdl.core.commands import (
     inject_docs,
 )
 from ansys.mapdl.core.constants import MAX_PARAM_CHARS
+from ansys.mapdl.core.contexts import _CoreCommandContextMixin
 from ansys.mapdl.core.contexts.chain_commands import MAX_COMMAND_LENGTH
-from ansys.mapdl.core.contexts.command_contexts import _CoreCommandContextMixin
 from ansys.mapdl.core.contexts.save_selection import (
     _TMP_COMP,
     ENTITIES_TO_SELECTION_MAPPING,
