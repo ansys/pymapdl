@@ -605,7 +605,7 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
                 return pl.show(**kwargs)
 
             # Storing entities selection
-            with self.save_selection:
+            with self.save_selection, self._skip_xsel_ids():
                 volumes = self.geometry.vnum
                 meshes = []
                 points = []

@@ -172,7 +172,7 @@ class MeshGrpc:
             self.logger.debug("Updating cache")
             # elements must have their underlying nodes selected to avoid
             # VTK segfaul
-            with self._mapdl.save_selection:
+            with self._mapdl.save_selection, self._mapdl._skip_xsel_ids():
                 self._mapdl.nsle("S", mute=True)
 
                 # '_update_cache_elem' runs first and alone: it is not

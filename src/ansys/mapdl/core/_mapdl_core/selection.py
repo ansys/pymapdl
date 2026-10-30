@@ -23,6 +23,7 @@
 
 """The selection MAPDL core responsibility mixin."""
 
+from contextlib import contextmanager
 from functools import wraps
 
 from ansys.mapdl.core.commands import (
@@ -71,6 +72,15 @@ class _CoreSelectionMixin(_CoreMixinBase):
 
             self._save_selection_obj = _SaveSelectionContext(self)
         return self._save_selection_obj
+
+    @contextmanager
+    def _skip_xsel_ids(self):
+        """Run internal XSEL calls without retrieving the selected IDs they discard."""
+        previous, self._xsel_mapdl_output = self._xsel_mapdl_output, True
+        try:
+            yield
+        finally:
+            self._xsel_mapdl_output = previous
 
     def _wrap_xsel_commands(self):
         # Wrapping XSEL commands.
