@@ -23,11 +23,15 @@
 """Database command extensions."""
 
 from functools import wraps
+from typing import TYPE_CHECKING
 
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 from ansys.mapdl.core.misc import allow_iterables_vmin, allow_pickable_entities
 
 from . import _ExtendedMixinBase
+
+if TYPE_CHECKING:  # pragma: no cover
+    from ansys.mapdl.core.selector import NodeSelector
 
 
 class _ExtendedComponentMixin(_ExtendedMixinBase):
@@ -174,6 +178,39 @@ class _ExtendedSelectionCommandsMixin(_ExtendedMixinBase):
             return sel_func(*args, **kwargs)
 
         return wrapped(self, *args, **kwargs)
+
+    @property
+    def selector(self) -> "NodeSelector":
+        """High-level, generic coordinate-based node selector.
+
+        Lazily created and cached on first access. Accessing this property
+        never issues any MAPDL command and never alters the existing
+        :meth:`Mapdl.nsel() <ansys.mapdl.core.Mapdl.nsel>`
+        behavior.
+
+        Use the
+        :meth:`NodeSelector.select <ansys.mapdl.core.selector.NodeSelector.select>`
+        method to evaluate coordinate criteria against the whole model. It returns
+        the matching node IDs and leaves the active selection unchanged.
+        The same generated command sequence works for local and remote MAPDL
+        sessions and does not transfer files.
+
+        Returns
+        -------
+        ansys.mapdl.core.selector.NodeSelector
+            The node selector bound to this MAPDL instance.
+
+        Examples
+        --------
+        Select every node at ``x == 1``.
+
+        >>> mapdl.selector.select(x=1)  # doctest: +SKIP
+        """
+        if getattr(self, "_selector", None) is None:
+            from ansys.mapdl.core.selector import NodeSelector
+
+            self._selector = NodeSelector(self)
+        return self._selector
 
 
 class _ExtendedDatabaseSetupMixin(_ExtendedMixinBase):

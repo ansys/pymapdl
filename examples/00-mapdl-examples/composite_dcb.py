@@ -238,18 +238,18 @@ mapdl.esurf()
 # Two different components are assigned to these sets of nodes for a faster
 # identification of the nodes bearing reaction forces.
 
-# Apply the two displacement conditions
+# Apply the two displacement conditions.
+#
+# :attr:`Mapdl.selector <ansys.mapdl.core.Mapdl.selector>` returns the
+# numbers of the nodes matching all the given coordinates, without
+# changing the active selection. These numbers define each component, and
+# the displacement is applied to the component.
 mapdl.allsel()
-mapdl.nsel(type_="s", item="loc", comp="x", vmin=0.0, vmax=0.0)
-mapdl.nsel(type_="r", item="loc", comp="z", vmin=2 * height, vmax=2 * height)
-mapdl.d(node="all", lab="uz", value=d)
-mapdl.components["top_nod"] = "node"
+mapdl.components["top_nod"] = "NODE", mapdl.selector.select(x=0.0, z=2 * height)
+mapdl.d(node="top_nod", lab="uz", value=d)
 
-mapdl.allsel()
-mapdl.nsel(type_="s", item="loc", comp="x", vmin=0.0, vmax=0.0)
-mapdl.nsel(type_="r", item="loc", comp="z", vmin=0.0, vmax=0.0)
-mapdl.d(node="all", lab="uz", value=-10)
-mapdl.components["bot_nod"] = "node"
+mapdl.components["bot_nod"] = "NODE", mapdl.selector.select(x=0.0, z=0.0)
+mapdl.d(node="bot_nod", lab="uz", value=-10)
 
 mapdl.allsel()
 mapdl.eplot(

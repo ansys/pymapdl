@@ -78,8 +78,12 @@ mapdl.d("all", "uz", 0)
 mapdl.nsel("s", "loc", "z", length_)
 mapdl.f("all", "fz", 1)
 mapdl.f("all", "fy", 10)
-mapdl.nsel("r", "loc", "y", 0)
-mapdl.f("all", "fx", 10)
+# Apply an extra force only on the nodes of the loaded end at y=0.
+# :attr:`Mapdl.selector <ansys.mapdl.core.Mapdl.selector>` returns the
+# numbers of the nodes matching all the given coordinates, without
+# changing the active selection.
+for node in mapdl.selector.select(y=0, z=length_):
+    mapdl.f(node, "FX", 10)
 mapdl.allsel()
 mapdl.run("/solu")
 sol_output = mapdl.solve()
