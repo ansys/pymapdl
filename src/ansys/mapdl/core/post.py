@@ -633,7 +633,7 @@ class PostProcessing:
 
         from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
-        with self._mapdl.save_selection:
+        with self._mapdl.save_selection, self._mapdl._skip_xsel_ids():
             mask = self.selected_nodes
             nodes_ids = self._mapdl.get_array("NODE", item1="NLIST")
             nodes_loc = self._mapdl.mesh.nodes

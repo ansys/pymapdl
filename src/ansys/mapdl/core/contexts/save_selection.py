@@ -78,13 +78,14 @@ class _SaveSelectionContext:
                 for component_name, component_type in components.items():
                     mapdl.cmsel("a", component_name, component_type, mute=True)
 
-            for entity_type, component_name in selection.items():
-                mapdl.cmsel("a", component_name, entity_type, mute=True)
-                selection_function = getattr(
-                    mapdl, ENTITIES_TO_SELECTION_MAPPING[entity_type.upper()]
-                )
-                selection_function("s", vmin=component_name, mute=True)
-                mapdl.cmdele(component_name, mute=True)
+            with mapdl._skip_xsel_ids():
+                for entity_type, component_name in selection.items():
+                    mapdl.cmsel("a", component_name, entity_type, mute=True)
+                    selection_function = getattr(
+                        mapdl, ENTITIES_TO_SELECTION_MAPPING[entity_type.upper()]
+                    )
+                    selection_function("s", vmin=component_name, mute=True)
+                    mapdl.cmdele(component_name, mute=True)
         except Exception:
             if args and args[0] is not None:
                 mapdl._log.exception("Unable to restore the saved selection.")

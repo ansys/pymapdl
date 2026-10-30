@@ -294,6 +294,26 @@ def test_wrap_xsel_function_returns_ids_or_mapdl_output():
     assert wrapped("S", "NODE") == "MAPDL output"
 
 
+def test_skip_xsel_ids_is_scoped_and_restored_after_error():
+    core = object.__new__(_MapdlCore)
+    core._store_commands = False
+    core._xsel_mapdl_output = False
+    core._xsel_selected_ids = Mock(return_value=[1])
+
+    def nsel(*args, **kwargs):
+        """Select nodes."""
+
+    wrapped = core._wrap_xsel_function(nsel)
+
+    with pytest.raises(RuntimeError, match="body failed"):
+        with core._skip_xsel_ids():
+            assert wrapped("S", "NODE", mute=True) is None
+            raise RuntimeError("body failed")
+
+    core._xsel_selected_ids.assert_not_called()
+    assert wrapped("S", "NODE") == [1]
+
+
 # --------------------------------------------------------------------------
 # picker helpers
 # --------------------------------------------------------------------------

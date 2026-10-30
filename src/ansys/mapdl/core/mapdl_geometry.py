@@ -638,7 +638,7 @@ class Geometry:
         ninc : int, optional
             Steps to between amin and amax.
         """
-        with self._mapdl.save_selection:
+        with self._mapdl.save_selection, self._mapdl._skip_xsel_ids():
             orig_anum = self.anum
 
             # reselect from existing selection to mimic APDL behavior
@@ -907,7 +907,7 @@ class Geometry:
     def _load_lines(self) -> List["pv.PolyData"]:
         """Load lines from MAPDL using IGES"""
         # ignore volumes
-        with self._mapdl.save_selection:
+        with self._mapdl.save_selection, self._mapdl._skip_xsel_ids():
             self._mapdl.ksel("ALL", mute=True)
             self._mapdl.lsel("ALL", mute=True)
             self._mapdl.asel("ALL", mute=True)
@@ -968,7 +968,7 @@ class Geometry:
     def _load_keypoints(self) -> Tuple[NDArray, NDArray]:
         """Load keypoints from MAPDL using IGES."""
         # write only keypoints
-        with self._mapdl.save_selection:
+        with self._mapdl.save_selection, self._mapdl._skip_xsel_ids():
             self._mapdl.vsel("NONE", mute=True)
             self._mapdl.asel("NONE", mute=True)
             self._mapdl.lsel("NONE", mute=True)
