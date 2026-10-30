@@ -29,9 +29,10 @@ import grpc
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
 from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
-from conftest import requires
+from conftest import requires, restore_connection
 
 N_CHANNELS = 100
+N_REBUILDS = 50
 
 
 def _call(fn):
@@ -60,3 +61,24 @@ def test_probe_ctrl_on_fresh_channels(mapdl, cleared):
     for r in failures[:20]:
         print(r)
     assert not failures, f"{len(failures)} failed calls out of {len(results)}"
+
+
+@requires("remote")
+def test_probe_ctrl_after_channel_rebuild(mapdl, cleared):
+    """Replay the captured failure: exit() on an exited instance closes the
+    channel, teardown reconnects, /PREP7 works, then the first VERSION fails."""
+    results = []
+    for i in range(N_REBUILDS):
+        mapdl._exited = True
+        mapdl.exit()  # 'Already exited' path: closes the channel, MAPDL keeps running
+        mapdl._exited = False
+        restore_connection(mapdl)
+        mapdl.prep7()
+        version = lambda: mapdl._stub.Ctrl(anskernel.CtrlRequest(ctrl="VERSION"), timeout=5)
+        results.append((i, _call(version)))
+
+    failures = [r for r in results if r[1] != "OK"]
+    print(Counter(out.split(" | ")[0] for _, out in results))
+    for r in failures[:20]:
+        print(r)
+    assert not failures, f"{len(failures)} failed VERSION calls out of {len(results)}"
