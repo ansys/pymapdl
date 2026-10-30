@@ -1,5 +1,5 @@
-# TEMPORARY: diagnostics for flaky is_alive failures on Remote v25.2.0. Do not merge.
-name: "Diag: Remote v25.2.0"
+# TEMPORARY: diagnostics for concurrent Ctrl/command reply swaps. Do not merge.
+name: "Diag: Remote ctrl concurrency"
 
 on:
   push:
@@ -9,12 +9,13 @@ on:
 permissions: {}
 
 jobs:
-  remote-v252:
-    name: "Remote: v25.2.0 (sample ${{ matrix.sample }})"
+  remote:
+    name: "Remote: ${{ matrix.mapdl-version }} (sample ${{ matrix.sample }})"
     strategy:
       fail-fast: false
       matrix:
-        sample: [1, 2, 3, 4]
+        mapdl-version: ["v25.2.0", "v26.1.0"]
+        sample: [1, 2]
     permissions:
       contents: read  # Needed to read repository contents for tests
       packages: read  # Needed to pull Docker images from GitHub packages
@@ -26,7 +27,7 @@ jobs:
       username: ${{ github.actor }}
       log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
-      mapdl-version: "v25.2.0"
-      file-name: "diag-remote-v25.2.0-${{ matrix.sample }}"
+      mapdl-version: ${{ matrix.mapdl-version }}
+      file-name: "diag-remote-${{ matrix.mapdl-version }}-${{ matrix.sample }}"
       upload-logs: true
-      pytest-arguments: "-s --reruns=0 -o log_cli=true --log-cli-level=WARNING"
+      pytest-arguments: "tests/test_diag_ctrl_probe.py::test_probe_concurrent_ctrl_and_status -s --reruns=0 -o log_cli=true --log-cli-level=WARNING"

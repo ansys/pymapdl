@@ -23,6 +23,7 @@
 # TEMPORARY diagnostic probe for Remote v25.2.0 is_alive failures. Do not merge.
 """Does Ctrl("VERSION") fail on fresh channels while RunCmd succeeds?"""
 from collections import Counter
+import threading
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
@@ -82,3 +83,67 @@ def test_probe_ctrl_after_channel_rebuild(mapdl, cleared):
     for r in failures[:20]:
         print(r)
     assert not failures, f"{len(failures)} failed VERSION calls out of {len(results)}"
+
+
+N_CONCURRENT = 2000
+
+
+@requires("remote")
+def test_probe_concurrent_ctrl_and_status(mapdl, cleared):
+    """Two threads share one raw channel: one loops Ctrl(VERSION), the other
+    loops *STATUS. Any reply carrying the other call's payload is a swap."""
+    with grpc.insecure_channel(mapdl._channel_str) as channel:
+        grpc.channel_ready_future(channel).result(timeout=10)
+        stub = mapdl_grpc.MapdlServiceStub(channel)
+        version = lambda: stub.Ctrl(anskernel.CtrlRequest(ctrl="VERSION"), timeout=5)
+        status = lambda: stub.SendCommand(pb_types.CmdRequest(command="*STATUS"), timeout=5)
+
+        stub.SendCommand(pb_types.CmdRequest(command="PRBPARM=1"), timeout=5)
+        ref_version = version().response.strip()
+        assert ref_version and "PARAMETER STATUS" in status().response
+
+        def classify_version():
+            out = version().response.strip()
+            if out == ref_version:
+                return "OK"
+            return "SWAP" if "PARAMETER STATUS" in out else f"OTHER {out[:80]!r}"
+
+        def classify_status():
+            out = status().response
+            if "PARAMETER STATUS" in out:
+                return "OK"
+            return "SWAP" if out.strip() == ref_version else f"OTHER {out[:80]!r}"
+
+        results = {"version": [], "status": []}
+        barrier = threading.Barrier(2)
+
+        def loop(name, fn):
+            barrier.wait()
+            for i in range(N_CONCURRENT):
+                try:
+                    results[name].append((i, fn()))
+                except grpc.RpcError as e:
+                    results[name].append((i, f"{e.code().name} | {e.details()!r}"))
+
+        threads = [
+            threading.Thread(target=loop, args=("version", classify_version)),
+            threading.Thread(target=loop, args=("status", classify_status)),
+        ]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+    # Does the server reject Ctrl on connections opened afterwards (sample 2 state)?
+    with grpc.insecure_channel(mapdl._channel_str) as channel:
+        grpc.channel_ready_future(channel).result(timeout=10)
+        stub = mapdl_grpc.MapdlServiceStub(channel)
+        after = _call(lambda: stub.Ctrl(anskernel.CtrlRequest(ctrl="VERSION"), timeout=5))
+
+    print(f"ref_version={ref_version!r} fresh-channel VERSION after: {after}")
+    for name, res in results.items():
+        print(name, Counter(out.split(" | ")[0].split(" ")[0] for _, out in res))
+        for r in [r for r in res if r[1] != "OK"][:10]:
+            print(" ", name, r)
+    bad = sum(out != "OK" for res in results.values() for _, out in res)
+    assert not bad and after == "OK", f"{bad} bad replies; fresh VERSION after: {after}"
