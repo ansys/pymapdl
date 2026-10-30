@@ -24,11 +24,11 @@
 """Does Ctrl("VERSION") fail on fresh channels while RunCmd succeeds?"""
 from collections import Counter
 
-import grpc
-
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
 from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
+import grpc
+
 from conftest import requires, restore_connection
 
 N_CHANNELS = 100
