@@ -1,0 +1,32 @@
+# TEMPORARY: diagnostics for flaky is_alive failures on Remote v25.2.0. Do not merge.
+name: "Diag: Remote v25.2.0"
+
+on:
+  push:
+    branches:
+      - diag/remote-v252-is-alive
+
+permissions: {}
+
+jobs:
+  remote-v252:
+    name: "Remote: v25.2.0 (sample ${{ matrix.sample }})"
+    strategy:
+      fail-fast: false
+      matrix:
+        sample: [1, 2, 3, 4]
+    permissions:
+      contents: read  # Needed to read repository contents for tests
+      packages: read  # Needed to pull Docker images from GitHub packages
+    uses: ./.github/workflows/test-remote.yml
+    secrets:
+      license-server: ${{ secrets.LICENSE_SERVER }}
+      codecov-token: ${{ secrets.CODECOV_TOKEN }}
+      token: ${{ secrets.GITHUB_TOKEN }}
+      username: ${{ github.actor }}
+      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
+    with:
+      mapdl-version: "v25.2.0"
+      file-name: "diag-remote-v25.2.0-${{ matrix.sample }}"
+      upload-logs: true
+      pytest-arguments: "tests/test_grpc.py --reruns=0 -o log_cli=true --log-cli-level=WARNING"

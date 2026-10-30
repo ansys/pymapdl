@@ -4297,11 +4297,16 @@ class MapdlGrpc(MapdlBase):
             return check
 
         except Exception as error:
-            if self._exited:
-                return False
+            # 'protect_grpc' marks the instance as exited and re-raises a MAPDL
+            # error, so log before any early return and dig out the gRPC status.
+            rpc_error = error if isinstance(error, grpc.Call) else error.__context__
+            status = ""
+            if isinstance(rpc_error, grpc.Call):
+                status = f" (gRPC status: {rpc_error.code()}, details: {rpc_error.details()})"
 
-            self._log.debug(
-                f"MAPDL instance is not alive because retrieving version failed with:\n{error}"
+            self._log.warning(
+                "MAPDL instance is not alive because retrieving version failed with "
+                f"{type(error).__name__}{status}:\n{error}"
             )
             return False
 
