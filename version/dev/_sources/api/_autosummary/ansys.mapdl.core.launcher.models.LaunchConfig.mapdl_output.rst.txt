@@ -1,0 +1,6 @@
+mapdl\_output
+=============
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.mapdl_output

@@ -1,0 +1,6 @@
+﻿selector
+========
+
+.. currentmodule:: ansys.mapdl.core
+
+.. autoproperty:: Mapdl.selector

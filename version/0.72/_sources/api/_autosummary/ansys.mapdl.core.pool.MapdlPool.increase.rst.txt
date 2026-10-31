@@ -1,0 +1,6 @@
+increase
+========
+
+.. currentmodule:: ansys.mapdl.core.pool
+
+.. automethod:: MapdlPool.increase

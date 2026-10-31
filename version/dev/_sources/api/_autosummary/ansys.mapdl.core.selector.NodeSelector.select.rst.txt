@@ -1,0 +1,6 @@
+select
+======
+
+.. currentmodule:: ansys.mapdl.core.selector
+
+.. automethod:: NodeSelector.select

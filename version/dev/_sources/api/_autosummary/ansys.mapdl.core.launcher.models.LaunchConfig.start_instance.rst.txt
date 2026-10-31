@@ -1,0 +1,6 @@
+start\_instance
+===============
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.start_instance

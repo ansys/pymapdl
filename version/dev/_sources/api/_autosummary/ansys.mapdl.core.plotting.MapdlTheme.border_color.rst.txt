@@ -1,0 +1,6 @@
+border\_color
+=============
+
+.. currentmodule:: ansys.mapdl.core.plotting
+
+.. autoproperty:: MapdlTheme.border_color

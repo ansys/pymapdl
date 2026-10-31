@@ -1,0 +1,6 @@
+set\_no\_abort
+==============
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.set_no_abort
