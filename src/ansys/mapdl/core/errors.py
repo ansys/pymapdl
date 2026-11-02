@@ -482,7 +482,9 @@ def protect_grpc(func: Callable) -> Callable:
             except grpc.RpcError as error:
                 mapdl = retrieve_mapdl_from_args(args)
 
-                mapdl._log.debug("A gRPC error has been detected.")
+                mapdl._log.debug(
+                    f"A gRPC error has been detected: {error.code()}: {error.details()}"
+                )
 
                 # A response-size limit cannot be repaired by replaying the command.
                 if error.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:

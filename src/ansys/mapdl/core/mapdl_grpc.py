@@ -4284,8 +4284,15 @@ class MapdlGrpc(MapdlBase):
             self._log.debug("MAPDL instance is expected to be exiting")
             return False
 
+        if self._stub is None:
+            self._log.debug("MAPDL instance is not alive because it is not connected.")
+            return False
+
         try:
-            check = bool(self._ctrl("VERSION"))
+            # Bypass '_ctrl': 'protect_grpc' calls 'is_alive' while retrying, so a
+            # retried probe would recurse until 'RecursionError'.
+            resp = self._stub.Ctrl(anskernel.CtrlRequest(ctrl="VERSION"), timeout=1.0)
+            check = bool(getattr(resp, "response", None))
             if check:
                 self._log.debug(
                     "MAPDL instance is alive because version was retrieved."
