@@ -135,7 +135,7 @@ def grpc_channel(mapdl, cleared):
 
 def test_connect_via_channel(grpc_channel):
     """Validate MapdlGrpc can be created directly from a channel."""
-    mapdl = MapdlGrpc(channel=grpc_channel)
+    mapdl = MapdlGrpc(channel=grpc_channel, loglevel="DEBUG")
     assert mapdl.is_alive
 
 
@@ -835,7 +835,7 @@ def test_exception_message_length(mapdl, cleared):
         mapdl._channel_str,
         options=[("grpc.max_receive_message_length", 1024)],
     ) as channel:
-        mapdl2 = MapdlGrpc(channel=channel, local=False)
+        mapdl2 = MapdlGrpc(channel=channel, local=False, loglevel="DEBUG")
         try:
             assert mapdl2.is_alive
             mapdl2.prep7()
@@ -853,7 +853,7 @@ def test_exception_message_length(mapdl, cleared):
 
 
 def test_generic_grpc_exception(monkeypatch, grpc_channel):
-    mapdl = MapdlGrpc(channel=grpc_channel)
+    mapdl = MapdlGrpc(channel=grpc_channel, loglevel="DEBUG")
     assert mapdl.is_alive
 
     @protect_grpc
