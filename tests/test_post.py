@@ -33,6 +33,7 @@ from conftest import NullContext, TestClass, clear, has_dependency, requires
 
 if has_dependency("ansys-tools-visualization_interface"):
     from pyvista.plotting.renderer import CameraPosition
+
     from ansys.mapdl.core.plotting.theme import PyMAPDL_cmap
     from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
