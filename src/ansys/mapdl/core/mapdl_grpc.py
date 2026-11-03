@@ -4303,10 +4303,25 @@ class MapdlGrpc(MapdlBase):
                 )
             return check
 
+        except grpc.RpcError as error:
+            if self._exited:
+                return False
+            # MAPDL on v25.2 can answer 'Ctrl' with UNIMPLEMENTED on a new channel -> so a failed version check isn't proof that MAPDL is not alive.
+            if error.code() == grpc.StatusCode.UNIMPLEMENTED:
+                try:
+                    self._stub.SendCommand(pb_types.CmdRequest(command="/COM"), timeout=1.0)
+                except Exception as cmd_error:
+                    self._log.debug(
+                        f"MAPDL instance is not alive because '/COM' also failed with:\n{cmd_error}"
+                    )
+                    return False
+            self._log.debug(
+                f"MAPDL instance is not alive because retrieving version failed with:\n{error}"
+            )
+            return False
         except Exception as error:
             if self._exited:
                 return False
-
             self._log.debug(
                 f"MAPDL instance is not alive because retrieving version failed with:\n{error}"
             )
