@@ -4317,6 +4317,10 @@ class MapdlGrpc(MapdlBase):
                         f"MAPDL instance is not alive because '/COM' also failed with:\n{cmd_error}"
                     )
                     return False
+                self._log.debug(
+                    "MAPDL instance is alive because '/COM' succeeded after 'Ctrl' returned UNIMPLEMENTED."
+                )
+                return True
             self._log.debug(
                 f"MAPDL instance is not alive because retrieving version failed with:\n{error}"
             )

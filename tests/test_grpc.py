@@ -904,6 +904,25 @@ def test_failing_ctrl_does_not_recurse_through_is_alive(monkeypatch, grpc_channe
     assert stub.Ctrl.call_count == 2 * errors.N_ATTEMPTS + 1
 
 
+def test_is_alive_falls_back_to_command_on_ctrl_unimplemented(
+    monkeypatch, grpc_channel
+):
+    """v25.2 can refuse 'Ctrl' with UNIMPLEMENTED on a new channel while serving commands."""
+    mapdl = MapdlGrpc(channel=grpc_channel)
+
+    unimplemented = UnavailableError()
+    unimplemented._code = grpc.StatusCode.UNIMPLEMENTED
+    stub = MagicMock()
+    stub.Ctrl.side_effect = unimplemented
+    monkeypatch.setattr(mapdl, "_stub", stub)
+
+    assert mapdl.is_alive  # '/COM' answers
+    stub.SendCommand.assert_called_once()
+
+    stub.SendCommand.side_effect = UnavailableError()
+    assert not mapdl.is_alive  # neither RPC works
+
+
 def test_generic_grpc_exception_exited(monkeypatch, grpc_channel):
     mapdl = MapdlGrpc(channel=grpc_channel)
     assert mapdl.is_alive
