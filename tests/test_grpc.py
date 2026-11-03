@@ -28,7 +28,7 @@ import shutil
 import subprocess
 import sys
 import time
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import grpc
 import pytest
@@ -877,6 +877,67 @@ def test_generic_grpc_exception(monkeypatch, grpc_channel):
 
     assert not mapdl.is_alive
     mapdl._exited = False
+
+
+def test_failing_ctrl_does_not_recurse_through_is_alive(monkeypatch, grpc_channel):
+    """A failing 'Ctrl' retries 'N_ATTEMPTS' times, then marks MAPDL exited.
+
+    Regression: 'protect_grpc' calls 'is_alive' on retry, which used to call the
+    protected '_ctrl' again, nesting retries until 'RecursionError'.
+    """
+    mapdl = MapdlGrpc(channel=grpc_channel)
+    assert mapdl.is_alive
+
+    stub = MagicMock()
+    stub.Ctrl.side_effect = UnavailableError()
+    monkeypatch.setattr(mapdl, "_stub", stub)
+    # '_connect' would replace the patched stub; 'exit' would issue more RPCs.
+    monkeypatch.setattr(mapdl, "_connect", lambda *args, **kwargs: False)
+    monkeypatch.setattr(mapdl, "exit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(errors, "sleep", lambda *args, **kwargs: None)
+
+    with pytest.raises(MapdlExitedError):
+        mapdl._ctrl("VERSION")
+
+    assert mapdl._exited
+    # 1 + N_ATTEMPTS '_ctrl' calls, plus one 'is_alive' probe per retry.
+    assert stub.Ctrl.call_count == 2 * errors.N_ATTEMPTS + 1
+
+
+def test_is_alive_falls_back_to_command_on_ctrl_unimplemented(
+    monkeypatch, grpc_channel
+):
+    """v25.2 can refuse 'Ctrl' with UNIMPLEMENTED on a new channel while serving commands."""
+    mapdl = MapdlGrpc(channel=grpc_channel)
+
+    unimplemented = UnavailableError()
+    unimplemented._code = grpc.StatusCode.UNIMPLEMENTED
+    stub = MagicMock()
+    stub.Ctrl.side_effect = unimplemented
+    monkeypatch.setattr(mapdl, "_stub", stub)
+
+    assert mapdl.is_alive  # '/COM' answers
+    stub.SendCommand.assert_called_once()
+
+    stub.SendCommand.side_effect = UnavailableError()
+    assert not mapdl.is_alive  # neither RPC works
+
+
+def test_unimplemented_is_not_retried_nor_marks_exited(monkeypatch, grpc_channel):
+    """UNIMPLEMENTED never recovers on retry, and MAPDL is still alive."""
+    mapdl = MapdlGrpc(channel=grpc_channel)
+
+    unimplemented = UnavailableError()
+    unimplemented._code = grpc.StatusCode.UNIMPLEMENTED
+    stub = MagicMock()
+    stub.Ctrl.side_effect = unimplemented
+    monkeypatch.setattr(mapdl, "_stub", stub)
+
+    with pytest.raises(MapdlgRPCError, match="UNIMPLEMENTED"):
+        mapdl._ctrl("VERSION")
+
+    assert stub.Ctrl.call_count == 1
+    assert not mapdl._exited
 
 
 def test_generic_grpc_exception_exited(monkeypatch, grpc_channel):
