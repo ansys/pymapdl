@@ -940,6 +940,37 @@ def test_unimplemented_is_not_retried_nor_marks_exited(monkeypatch, grpc_channel
     assert not mapdl._exited
 
 
+def test_is_alive_false_paths(monkeypatch, grpc_channel):
+    """'is_alive' returns False without a stub, on an empty version or on any error."""
+    mapdl = MapdlGrpc(channel=grpc_channel)
+    stub = MagicMock()
+    monkeypatch.setattr(mapdl, "_stub", stub)
+
+    stub.Ctrl.return_value = MagicMock(response="")
+    assert not mapdl.is_alive  # empty version
+
+    def exit_then_raise(error):
+        def _side_effect(*args, **kwargs):
+            mapdl._exited = True  # MAPDL exits while the probe is in flight
+            raise error
+
+        return _side_effect
+
+    try:
+        for error in (UnavailableError(), RuntimeError("boom")):
+            stub.Ctrl.side_effect = exit_then_raise(error)
+            assert not mapdl.is_alive
+            mapdl._exited = False
+
+        stub.Ctrl.side_effect = RuntimeError("boom")
+        assert not mapdl.is_alive  # non-gRPC error
+
+        monkeypatch.setattr(mapdl, "_stub", None)
+        assert not mapdl.is_alive  # not connected
+    finally:
+        mapdl._exited = False
+
+
 def test_generic_grpc_exception_exited(monkeypatch, grpc_channel):
     mapdl = MapdlGrpc(channel=grpc_channel)
     assert mapdl.is_alive
