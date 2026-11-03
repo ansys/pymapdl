@@ -537,6 +537,13 @@ def protect_grpc(func: Callable) -> Callable:
                             f"$ export PYMAPDL_MAX_MESSAGE_LENGTH={lim_}"
                         )
 
+                # A method the server refuses is not repaired by replaying the call,
+                # and MAPDL is still alive (commands keep working), so don't mark it exited.
+                if error.code() == grpc.StatusCode.UNIMPLEMENTED:
+                    raise MapdlgRPCError(
+                        f"UNIMPLEMENTED: '{func.__name__}' was refused by the MAPDL server."
+                    )
+
                 if not mapdl.exited:
                     i_attemps += 1
                     if i_attemps <= n_attempts:
