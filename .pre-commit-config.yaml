@@ -19,7 +19,7 @@ repos:
       args: [ "-x"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: 2834ec6639549dd6796205c8f011dedcd587288b  # frozen: v2.4.0
+  rev: ad26ebfa797fcb9b8f83275937c1c1d6e126719c  # frozen: v2.4.1
   hooks:
     - id: mypy
       args: [ --follow-imports=silent, --config-file=pyproject.toml]
@@ -33,7 +33,7 @@ repos:
     - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
-  rev: f97a190a40acf1ccdce6689df518a0321d41c1a3  # frozen: 10.0.0b1
+  rev: 5d9c96196def28a1819b6a755a669ec0a3add6aa  # frozen: 10.0.0b2
   hooks:
   - id: isort
 
@@ -64,7 +64,7 @@ repos:
       - --line-length=88
 
 - repo: https://github.com/PyCQA/flake8
-  rev: cfbbfdeb2391c14a37e101e92a77f54f329e1726  # frozen: 7.4.1
+  rev: 960c1d286190804104f7255b97da034446fdaac3  # frozen: 7.5.0
   hooks:
   - id: flake8
 

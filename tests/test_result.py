@@ -72,6 +72,7 @@ elif not TEST_DPF_BACKEND:
 else:
     from ansys.dpf import core as dpf_core
     from ansys.dpf.gate.errors import DPFServerException
+
     from ansys.mapdl.core.reader.constants import COMPONENTS
 
 from ansys.mapdl.reader import read_binary
