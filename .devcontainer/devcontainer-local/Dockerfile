@@ -3,6 +3,8 @@ FROM ghcr.io/ansys/mapdl:v25.2-ubuntu-cicd
 ENV USERNAME=mapdl
 USER root
 
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+
 # General libraries
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ON_CODESPACES=false
@@ -19,7 +21,6 @@ RUN apt-get -qq update && apt-get install -qq -y \
     libgomp1 \
     pandoc \
     python3-pip \
-    python3.11-venv \
     texlive-latex-extra \
     texlive-xetex \
     xvfb \
@@ -47,11 +48,11 @@ USER $USERNAME
 COPY requirements.txt requirements.txt
 
 # Installing Python environment
-RUN python3.11 -m venv ./.venv && \
+RUN uv venv --python 3.12 ./.venv && \
     . ./.venv/bin/activate && \
-    pip install pre-commit && \
-    pip install ansys-mapdl-core && \
-    pip install -r requirements.txt && \
+    uv pip install pre-commit && \
+    uv pip install ansys-mapdl-core && \
+    uv pip install -r requirements.txt && \
     echo 'source /home/mapdl/.venv/bin/activate' >> ~/.bashrc && \
     rm requirements.txt
 
