@@ -1,16 +1,5 @@
 fail_fast: True
 
-ci:
-  # Commit name when auto fixing PRs.
-  autofix_commit_msg: |
-    ci: auto fixes from pre-commit.com hooks.
-
-    for more information, see https://pre-commit.ci
-
-  # PR name when autoupdate
-  autoupdate_commit_msg: 'ci: pre-commit autoupdate'
-
-
 repos:
 - repo: https://github.com/shellcheck-py/shellcheck-py
   rev: a6564f5d57444e123433a5c9af733e3975c77229  # frozen: v0.11.0.1-1
