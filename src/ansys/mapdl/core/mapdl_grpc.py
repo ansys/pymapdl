@@ -2976,7 +2976,34 @@ class MapdlGrpc(MapdlBase):
     def _ctrl(
         self, cmd: str, opt1: str = "", timeout: Optional[float] = 1.0
     ):  # numpydoc ignore=RT01
-        """Issue control command to the MAPDL server.
+        """Issue control command to the MAPDL server, with gRPC error handling.
+
+        See :meth:`_ctrl_raw` for the available commands.
+
+        Parameters
+        ----------
+        cmd : str
+            Control command to send.
+        opt1 : str, optional
+            Option accompanying ``cmd``. The default is ``""``.
+        timeout : float, optional
+            Maximum time in seconds to wait for the server to respond.
+            The default is ``1.0``. Use ``None`` to wait indefinitely.
+
+        Returns
+        -------
+        str or None
+            The server response, if any.
+        """
+        return self._ctrl_raw(cmd, opt1, timeout)
+
+    def _ctrl_raw(
+        self, cmd: str, opt1: str = "", timeout: Optional[float] = 1.0
+    ):  # numpydoc ignore=RT01
+        """Issue control command to the MAPDL server, without retries.
+
+        Unlike :meth:`_ctrl`, gRPC errors are raised as is and MAPDL is never
+        marked as exited, so this is safe to call from ``is_alive``.
 
         Available commands:
 
@@ -4284,8 +4311,14 @@ class MapdlGrpc(MapdlBase):
             self._log.debug("MAPDL instance is expected to be exiting")
             return False
 
+        if self._stub is None:
+            self._log.debug("MAPDL instance is not alive because it is not connected.")
+            return False
+
         try:
-            check = bool(self._ctrl("VERSION"))
+            # Not '_ctrl': 'protect_grpc' calls 'is_alive' while retrying, so a
+            # retried probe would recurse until 'RecursionError'.
+            check = bool(self._ctrl_raw("VERSION"))
             if check:
                 self._log.debug(
                     "MAPDL instance is alive because version was retrieved."
@@ -4296,10 +4329,31 @@ class MapdlGrpc(MapdlBase):
                 )
             return check
 
+        except grpc.RpcError as error:
+            if self._exited:
+                return False
+            # MAPDL on v25.2 can answer 'Ctrl' with UNIMPLEMENTED on a new channel -> so a failed version check isn't proof that MAPDL is not alive.
+            if error.code() == grpc.StatusCode.UNIMPLEMENTED:
+                try:
+                    self._stub.SendCommand(
+                        pb_types.CmdRequest(command="/COM"), timeout=1.0
+                    )
+                except Exception as cmd_error:
+                    self._log.debug(
+                        f"MAPDL instance is not alive because '/COM' also failed with:\n{cmd_error}"
+                    )
+                    return False
+                self._log.debug(
+                    "MAPDL instance is alive because '/COM' succeeded after 'Ctrl' returned UNIMPLEMENTED."
+                )
+                return True
+            self._log.debug(
+                f"MAPDL instance is not alive because retrieving version failed with:\n{error}"
+            )
+            return False
         except Exception as error:
             if self._exited:
                 return False
-
             self._log.debug(
                 f"MAPDL instance is not alive because retrieving version failed with:\n{error}"
             )
