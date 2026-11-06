@@ -196,7 +196,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        python-version: ['3.12', '3.13', '3.14']
         # Only perform wheelhouse builds for macOS when releasing
         should-release:
           - ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
@@ -588,7 +588,7 @@ jobs:
         run: ls -Rla
 
       - name: "Release to PyPI using trusted publisher"
-        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
         with:
           repository-url: "https://upload.pypi.org/legacy/"
           print-hash: true

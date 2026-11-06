@@ -28,6 +28,7 @@
 * [jleonatti](https://github.com/jleonatti)
 * [Jorge Martínez](https://github.com/jorgepiloto)
 * [Kathy Pippert](https://github.com/PipKat)
+* [Kerry McAdams](https://github.com/klmcadams)
 * [Kevin Koshy](https://github.com/kmkoshy)
 * [kmahajan-cadfem](https://github.com/kmahajan-cadfem)
 * [longzhenW](https://github.com/longzhenW)

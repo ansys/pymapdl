@@ -108,6 +108,34 @@ def _find_blocked_command(text: str, blocked: frozenset[str]) -> str | None:
     return None
 
 
+# MAPDL crashes or writes to a mangled path past this length (issue #4849).
+MAX_FNAME_LENGTH = 248
+# Command prefix -> indexes of its comma fields that hold a file name or directory.
+_FNAME_FIELDS = {
+    "SAVE": (1,),
+    "RESU": (1,),
+    "/OUT": (1,),
+    "/INP": (1, 3),
+    "*CFO": (1,),
+    "CDWR": (2, 5),
+    "/COP": (1, 4),
+}
+
+
+def _check_fname_length(command: str) -> None:
+    """Raise ``ValueError`` if a file name field in ``command`` is too long for MAPDL."""
+    fields = command.split(",")
+    name = fields[0].strip()
+    for idx in _FNAME_FIELDS.get(name.upper()[:4], ()):
+        if idx < len(fields):
+            fname = fields[idx].strip().strip("'\"")
+            if len(fname) > MAX_FNAME_LENGTH:
+                raise ValueError(
+                    f"File name in '{name}' is {len(fname)} characters long. "
+                    f"MAPDL supports at most {MAX_FNAME_LENGTH}, path included."
+                )
+
+
 from . import _CoreMixinBase, plotting
 
 
@@ -415,6 +443,7 @@ class _CoreExecutionMixin(_CoreMixinBase):
         commands = list(commands)
         for command in commands:
             self._check_blocked_commands(command)
+            _check_fname_length(command)
 
         self._stored_commands.extend(commands)
         if self._store_commands:
@@ -498,6 +527,7 @@ class _CoreExecutionMixin(_CoreMixinBase):
             raise ValueError("Use ``input_strings`` for multi-line commands")
 
         self._check_blocked_commands(command)
+        _check_fname_length(command)
 
         if len(command) > 639:  # CMD_MAX_LENGTH
             # If using mapdl_grpc, this check is redundant on purpose.

@@ -24,6 +24,8 @@
 
 import weakref
 
+from ansys.mapdl.core._mapdl_core import _CoreMixinBase
+
 
 class _ForceOutputContext:
     """Temporarily force MAPDL text output."""
@@ -50,3 +52,16 @@ class _ForceOutputContext:
                 parent._run("/nopr")
         finally:
             parent._mute = self._previous_mute
+
+
+class _ForceOutputMixin(_CoreMixinBase):
+    """Expose the ``force_output`` context."""
+
+    @property
+    def force_output(self):
+        """Force text output globally by turning the ``Mapdl.mute`` attribute to False
+        and activating text output (``/GOPR``)
+
+        You can still do changes to those inside this context.
+        """
+        return _ForceOutputContext(self)
