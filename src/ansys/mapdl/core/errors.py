@@ -417,6 +417,29 @@ def handler(sig, frame):  # pragma: no cover
     SIGINT_TRACKER.append(True)
 
 
+def _diag_probe_fresh_channel(mapdl: "MapdlGrpc") -> None:
+    """Send one 'Ctrl(VERSION)' on a clean channel and log the result."""
+    # shortcut: diagnostics for #4874 only, remove before merge
+    from ansys.api.mapdl.v0 import ansys_kernel_pb2, mapdl_pb2_grpc
+
+    target = mapdl._channel_str
+    try:
+        with grpc.insecure_channel(target) as channel:
+            stub = mapdl_pb2_grpc.MapdlServiceStub(channel)
+            resp = stub.Ctrl(ansys_kernel_pb2.CtrlRequest(ctrl="VERSION"), timeout=5)
+        mapdl._log.debug(
+            f"DIAG fresh channel {target}: Ctrl VERSION OK -> {resp.response!r}"
+        )
+    except grpc.RpcError as e:
+        mapdl._log.debug(
+            f"DIAG fresh channel {target}: Ctrl VERSION FAILED -> {e.code()}: {e.details()}"
+        )
+    mapdl._log.debug(
+        f"DIAG current channel: transport_mode={mapdl.transport_mode} "
+        f"options={mapdl.grpc_options}"
+    )
+
+
 def protect_grpc(func: Callable) -> Callable:
     """Capture gRPC exceptions and return a more succinct error message
 
@@ -482,7 +505,16 @@ def protect_grpc(func: Callable) -> Callable:
             except grpc.RpcError as error:
                 mapdl = retrieve_mapdl_from_args(args)
 
-                mapdl._log.debug("A gRPC error has been detected.")
+                mapdl._log.debug(
+                    f"A gRPC error has been detected: {error.code()}: {error.details()}"
+                )
+
+                if error.code() == grpc.StatusCode.UNIMPLEMENTED and not getattr(
+                    mapdl, "_diag_probed", False
+                ):
+                    # once per instance: a failing run logs thousands of these
+                    mapdl._diag_probed = True
+                    _diag_probe_fresh_channel(mapdl)
 
                 # A response-size limit cannot be repaired by replaying the command.
                 if error.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:
@@ -504,6 +536,13 @@ def protect_grpc(func: Callable) -> Callable:
                             " environment variable. For instance:\n\n"
                             f"$ export PYMAPDL_MAX_MESSAGE_LENGTH={lim_}"
                         )
+
+                # A method the server refuses is not repaired by replaying the call,
+                # and MAPDL is still alive (commands keep working), so don't mark it exited.
+                if error.code() == grpc.StatusCode.UNIMPLEMENTED:
+                    raise MapdlgRPCError(
+                        f"UNIMPLEMENTED: '{func.__name__}' was refused by the MAPDL server."
+                    )
 
                 if not mapdl.exited:
                     i_attemps += 1
