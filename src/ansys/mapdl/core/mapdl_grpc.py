@@ -2976,7 +2976,34 @@ class MapdlGrpc(MapdlBase):
     def _ctrl(
         self, cmd: str, opt1: str = "", timeout: Optional[float] = 1.0
     ):  # numpydoc ignore=RT01
-        """Issue control command to the MAPDL server.
+        """Issue control command to the MAPDL server, with gRPC error handling.
+
+        See :meth:`_ctrl_raw` for the available commands.
+
+        Parameters
+        ----------
+        cmd : str
+            Control command to send.
+        opt1 : str, optional
+            Option accompanying ``cmd``. The default is ``""``.
+        timeout : float, optional
+            Maximum time in seconds to wait for the server to respond.
+            The default is ``1.0``. Use ``None`` to wait indefinitely.
+
+        Returns
+        -------
+        str or None
+            The server response, if any.
+        """
+        return self._ctrl_raw(cmd, opt1, timeout)
+
+    def _ctrl_raw(
+        self, cmd: str, opt1: str = "", timeout: Optional[float] = 1.0
+    ):  # numpydoc ignore=RT01
+        """Issue control command to the MAPDL server, without retries.
+
+        Unlike :meth:`_ctrl`, gRPC errors are raised as is and MAPDL is never
+        marked as exited, so this is safe to call from ``is_alive``.
 
         Available commands:
 
@@ -4289,10 +4316,9 @@ class MapdlGrpc(MapdlBase):
             return False
 
         try:
-            # Bypass '_ctrl': 'protect_grpc' calls 'is_alive' while retrying, so a
+            # Not '_ctrl': 'protect_grpc' calls 'is_alive' while retrying, so a
             # retried probe would recurse until 'RecursionError'.
-            resp = self._stub.Ctrl(anskernel.CtrlRequest(ctrl="VERSION"), timeout=1.0)
-            check = bool(getattr(resp, "response", None))
+            check = bool(self._ctrl_raw("VERSION"))
             if check:
                 self._log.debug(
                     "MAPDL instance is alive because version was retrieved."
