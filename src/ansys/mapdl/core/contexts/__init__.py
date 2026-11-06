@@ -21,3 +21,19 @@
 # SOFTWARE.
 
 """Context manager implementations for the MAPDL facade."""
+
+from .chain_commands import _ChainCommandsMixin
+from .force_output import _ForceOutputMixin
+from .muted import _MutedMixin
+from .non_interactive import _NonInteractiveMixin
+from .run_as_routine import _RunAsRoutineMixin
+
+
+class _CoreCommandContextMixin(
+    _ChainCommandsMixin,
+    _ForceOutputMixin,
+    _MutedMixin,
+    _NonInteractiveMixin,
+    _RunAsRoutineMixin,
+):
+    """Expose command-wide contexts while implementations remain composed."""
