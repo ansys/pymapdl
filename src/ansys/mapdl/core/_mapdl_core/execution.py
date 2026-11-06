@@ -554,6 +554,9 @@ class _CoreExecutionMixin(_CoreMixinBase):
         # Check if you want to avoid the current non-interactive context.
         avoid_non_interactive = kwargs.pop("avoid_non_interactive", False)
 
+        # XSEL wrapper option; reaches here unwrapped on console and non-interactive.
+        kwargs.pop("return_mapdl_output", None)
+
         # Check if there is an unused keyword argument. If there is, it
         # might be because you wrote a wrong argument name.
         #

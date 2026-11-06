@@ -144,7 +144,7 @@ class Geometry:
             from pyiges import Iges
         except ImportError:
             raise ImportError(
-                "Please install pyiges to use this feature with:\n" "pip install pyiges"
+                "Please install pyiges to use this feature with:\npip install pyiges"
             )
         return Iges(self._mapdl._generate_iges())
 
@@ -638,7 +638,7 @@ class Geometry:
         ninc : int, optional
             Steps to between amin and amax.
         """
-        with self._mapdl.save_selection, self._mapdl._skip_xsel_ids():
+        with self._mapdl.save_selection:
             orig_anum = self.anum
 
             # reselect from existing selection to mimic APDL behavior
@@ -647,7 +647,14 @@ class Geometry:
                 amin = amin or 1
                 ninc = ninc or ""  # type: ignore[assignment]
 
-                self._mapdl.asel("R", "AREA", vmin=amin, vmax=amax, vinc=ninc)
+                self._mapdl.asel(
+                    "R",
+                    "AREA",
+                    vmin=amin,
+                    vmax=amax,
+                    vinc=ninc,
+                    return_mapdl_output=True,
+                )
 
             ## Duplication
             # duplicate areas to avoid affecting existing areas
@@ -675,7 +682,14 @@ class Geometry:
 
                 # Getting the new maximum area ID
                 a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
-                self._mapdl.asel("S", "AREA", vmin=a_num + 1, vmax=a_max, mute=True)
+                self._mapdl.asel(
+                    "S",
+                    "AREA",
+                    vmin=a_num + 1,
+                    vmax=a_max,
+                    mute=True,
+                    return_mapdl_output=True,
+                )
 
                 # necessary to reset element/area meshing association
                 self._mapdl.aatt(mute=True)
@@ -907,11 +921,11 @@ class Geometry:
     def _load_lines(self) -> List["pv.PolyData"]:
         """Load lines from MAPDL using IGES"""
         # ignore volumes
-        with self._mapdl.save_selection, self._mapdl._skip_xsel_ids():
-            self._mapdl.ksel("ALL", mute=True)
-            self._mapdl.lsel("ALL", mute=True)
-            self._mapdl.asel("ALL", mute=True)
-            self._mapdl.vsel("NONE", mute=True)
+        with self._mapdl.save_selection:
+            self._mapdl.ksel("ALL", mute=True, return_mapdl_output=True)
+            self._mapdl.lsel("ALL", mute=True, return_mapdl_output=True)
+            self._mapdl.asel("ALL", mute=True, return_mapdl_output=True)
+            self._mapdl.vsel("NONE", mute=True, return_mapdl_output=True)
 
             iges = self._load_iges()
 
@@ -968,10 +982,10 @@ class Geometry:
     def _load_keypoints(self) -> Tuple[NDArray, NDArray]:
         """Load keypoints from MAPDL using IGES."""
         # write only keypoints
-        with self._mapdl.save_selection, self._mapdl._skip_xsel_ids():
-            self._mapdl.vsel("NONE", mute=True)
-            self._mapdl.asel("NONE", mute=True)
-            self._mapdl.lsel("NONE", mute=True)
+        with self._mapdl.save_selection:
+            self._mapdl.vsel("NONE", mute=True, return_mapdl_output=True)
+            self._mapdl.asel("NONE", mute=True, return_mapdl_output=True)
+            self._mapdl.lsel("NONE", mute=True, return_mapdl_output=True)
             iges = self._load_iges()
 
         keypoints = []

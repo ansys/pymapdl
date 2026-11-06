@@ -38,6 +38,11 @@ from ansys.mapdl.core._mapdl_core.execution import _CoreExecutionMixin
 from ansys.mapdl.core._mapdl_core.plotting import _CorePlottingMixin
 from ansys.mapdl.core._mapdl_core.selection import _CoreSelectionMixin
 from ansys.mapdl.core._mapdl_core.subsystems import _CoreSubsystemsMixin
+from ansys.mapdl.core.contexts.save_selection import (
+    _TMP_COMP,
+    ENTITIES_TO_SELECTION_MAPPING,
+    _SaveSelectionContext,
+)
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 from ansys.mapdl.core.plotting import picker
@@ -59,7 +64,7 @@ def _bare_core():
 
 
 def test_pop_run_kwargs_defaults_and_drops_empty_values():
-    kwargs = {"empty": ""}
+    kwargs = {"empty": "", "return_mapdl_output": True}
     assert _CoreExecutionMixin._pop_run_kwargs(kwargs) == (False, False, False)
     assert kwargs == {}
 
@@ -294,24 +299,26 @@ def test_wrap_xsel_function_returns_ids_or_mapdl_output():
     assert wrapped("S", "NODE") == "MAPDL output"
 
 
-def test_skip_xsel_ids_is_scoped_and_restored_after_error():
+def test_save_selection_exit_skips_xsel_ids():
     core = object.__new__(_MapdlCore)
     core._store_commands = False
     core._xsel_mapdl_output = False
     core._xsel_selected_ids = Mock(return_value=[1])
+    for name in ("allsel", "cmsel", "cmdele", "_log"):
+        setattr(core, name, Mock())
+    for name in ENTITIES_TO_SELECTION_MAPPING.values():
 
-    def nsel(*args, **kwargs):
-        """Select nodes."""
+        def xsel(*args, **kwargs):
+            """Select entities."""
 
-    wrapped = core._wrap_xsel_function(nsel)
+        setattr(core, name, core._wrap_xsel_function(xsel))
 
-    with pytest.raises(RuntimeError, match="body failed"):
-        with core._skip_xsel_ids():
-            assert wrapped("S", "NODE", mute=True) is None
-            raise RuntimeError("body failed")
+    context = _SaveSelectionContext(core)
+    context.selection = [{"cmsel": {}, **{k: f"__{k}__" for k in _TMP_COMP}}]
+    context.__exit__(None, None, None)
 
+    assert core.cmdele.call_count == len(_TMP_COMP)
     core._xsel_selected_ids.assert_not_called()
-    assert wrapped("S", "NODE") == [1]
 
 
 # --------------------------------------------------------------------------
