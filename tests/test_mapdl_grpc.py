@@ -720,7 +720,6 @@ class TestConnectivityCallbackDoesNotLeakInstance:
                 self._channel = channel
                 self._channel_state = None
                 self._connectivity_callback = None
-                self._start_ping_abuse_probe = MagicMock()
 
             _subscribe_to_channel = MapdlGrpc._subscribe_to_channel
 
@@ -749,7 +748,6 @@ class TestConnectivityCallbackDoesNotLeakInstance:
                 self._channel = channel
                 self._channel_state = None
                 self._connectivity_callback = None
-                self._start_ping_abuse_probe = MagicMock()
 
             _subscribe_to_channel = MapdlGrpc._subscribe_to_channel
 
@@ -778,7 +776,6 @@ class TestConnectivityCancelsInFlightCall:
             self._connectivity_callback = None
             self._current_call = None
             self._current_call_lock = threading.Lock()
-            self._start_ping_abuse_probe = MagicMock()
 
         _subscribe_to_channel = MapdlGrpc._subscribe_to_channel
         _cancel_call_if_pending = MapdlGrpc._cancel_call_if_pending
@@ -940,134 +937,6 @@ class TestWatchedCall:
             dummy._current_call = call_b
 
         assert dummy._current_call is call_b
-
-
-class TestPingAbuseProbe:
-    """The background probe thread keeps long-running calls from tripping the
-    MAPDL gRPC server's ping-abuse protection (see ``PING_ABUSE_INTERVAL_S``).
-    """
-
-    class _Dummy:
-        """Minimal stand-in exposing what the probe methods touch."""
-
-        def __init__(self):
-            self._log = MagicMock()
-            self._ping_probe_stop_event = threading.Event()
-            self._ping_probe_thread = None
-            self._ctrl = MagicMock()
-
-        _start_ping_abuse_probe = MapdlGrpc._start_ping_abuse_probe
-        _stop_ping_abuse_probe = MapdlGrpc._stop_ping_abuse_probe
-
-    def test_start_spawns_a_daemon_thread(self):
-        """Starting the probe creates a running daemon thread."""
-        dummy = self._Dummy()
-
-        dummy._start_ping_abuse_probe()
-
-        assert dummy._ping_probe_thread is not None
-        assert dummy._ping_probe_thread.is_alive()
-        assert dummy._ping_probe_thread.daemon
-
-        dummy._stop_ping_abuse_probe()
-
-    def test_start_is_a_noop_when_already_running(self):
-        """Calling start twice does not replace a live thread."""
-        dummy = self._Dummy()
-        dummy._start_ping_abuse_probe()
-        first_thread = dummy._ping_probe_thread
-
-        dummy._start_ping_abuse_probe()
-
-        assert dummy._ping_probe_thread is first_thread
-
-        dummy._stop_ping_abuse_probe()
-
-    def test_stop_joins_and_clears_the_thread(self):
-        """Stopping the probe joins the thread and clears the reference."""
-        dummy = self._Dummy()
-        dummy._start_ping_abuse_probe()
-
-        dummy._stop_ping_abuse_probe()
-
-        assert dummy._ping_probe_thread is None
-        assert dummy._ping_probe_stop_event.is_set()
-
-    def test_stop_is_a_noop_when_never_started(self):
-        """Stopping a probe that was never started must not raise."""
-        dummy = self._Dummy()
-
-        dummy._stop_ping_abuse_probe()  # must not raise
-
-        assert dummy._ping_probe_thread is None
-
-    def test_probe_does_not_keep_client_alive(self):
-        """The background worker must not prevent client resource cleanup."""
-        dummy = self._Dummy()
-        client_ref = weakref.ref(dummy)
-        dummy._start_ping_abuse_probe()
-        thread = dummy._ping_probe_thread
-        stop_event = dummy._ping_probe_stop_event
-        try:
-            del dummy
-            gc.collect()
-            assert client_ref() is None
-        finally:
-            stop_event.set()
-            thread.join(timeout=1)
-
-    def test_restart_does_not_revive_stopping_probe(self, monkeypatch):
-        """A timed-out shutdown must not give the old worker a new stop event."""
-        monkeypatch.setattr(
-            "ansys.mapdl.core.mapdl_grpc.PING_ABUSE_PROBE_INTERVAL_S", 0.01
-        )
-        monkeypatch.setattr(
-            "ansys.mapdl.core.mapdl_grpc.PING_ABUSE_PROBE_TIMEOUT_S", 0.01
-        )
-        entered = threading.Event()
-        release = threading.Event()
-        dummy = self._Dummy()
-
-        def blocking_probe(*args, **kwargs):
-            entered.set()
-            release.wait(timeout=5)
-
-        dummy._ctrl = blocking_probe
-        dummy._start_ping_abuse_probe()
-        old_thread = dummy._ping_probe_thread
-        try:
-            assert entered.wait(timeout=5)
-            dummy._stop_ping_abuse_probe()
-            dummy._start_ping_abuse_probe()
-            release.set()
-            old_thread.join(timeout=1)
-            assert not old_thread.is_alive()
-        finally:
-            release.set()
-            dummy._stop_ping_abuse_probe()
-            old_thread.join(timeout=1)
-
-    def test_loop_probes_with_ctrl_version_and_survives_rpc_errors(self):
-        """Each wake-up issues a bounded ``Ctrl("VERSION")`` probe; a failure
-        is logged, not raised, so the loop keeps running."""
-        dummy = self._Dummy()
-        dummy._ctrl.side_effect = [grpc.RpcError("boom"), None]
-        wait_calls = []
-
-        def fake_wait(timeout):
-            wait_calls.append(timeout)
-            return len(wait_calls) > 2
-
-        dummy._ping_probe_stop_event.wait = fake_wait
-        MapdlGrpc._ping_abuse_probe_loop(
-            weakref.ref(dummy), dummy._ping_probe_stop_event
-        )
-
-        assert dummy._ctrl.call_count == 2
-        for probe_call in dummy._ctrl.call_args_list:
-            assert probe_call.args == ("VERSION",)
-            assert "timeout" in probe_call.kwargs
-        dummy._log.debug.assert_called_once()
 
 
 class TestDisconnectButLeaveMapdlRunning:
