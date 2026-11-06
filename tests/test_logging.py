@@ -374,3 +374,118 @@ def test_lowercases():
 
         for each_logger in LOG._instances.values():
             each_logger.setLevel(each_loglevel.lower())
+
+
+class _FakeMapdl:
+    name = "GRPC_127.0.0.1:50052"
+
+
+def test_instance_exit_does_not_close_global_file_handler(tmp_path, capsys):
+    """Closing an instance logger file handler keeps the parent one working.
+
+    Instance loggers copy the handlers of the global logger. A plain
+    ``copy`` of a ``FileHandler`` shares its open stream, so the cleanup run
+    by ``Mapdl.exit()`` closed the global stream too. Every later record then
+    printed a ``--- Logging error ---`` traceback to stderr (see issue #4859).
+    This test does not need MAPDL.
+    """
+    from types import SimpleNamespace
+
+    from ansys.mapdl.core.mapdl_core import _MapdlCore
+
+    log_file = tmp_path / "pymapdl.log"
+
+    # Isolated stand-in for the global ``LOG``, so ``LOG`` itself is untouched.
+    parent = object.__new__(logging.Logger)
+    parent.logger = deflogging.getLogger(f"pymapdl_test_{tmp_path.name}")
+    parent.logger.addFilter(logging.InstanceFilter())
+    parent.logger.setLevel(deflogging.DEBUG)
+    parent.logger.propagate = False
+    parent.file_handler = None
+    parent.std_out_handler = None
+    logging.addfile_handler(parent, filename=str(log_file), level=deflogging.DEBUG)
+
+    fake_mapdl = _FakeMapdl()  # weak-referenceable, as required by the adapter
+    child_name = f"{parent.logger.name}_instance"
+    instance_log = logging.PymapdlCustomAdapter(
+        parent._make_child_logger(child_name, deflogging.DEBUG), fake_mapdl
+    )
+    try:
+        parent.logger.debug("Message before the instance exits")
+        instance_log.debug("Message from the instance")
+
+        # What ``Mapdl.exit()`` does through ``_release_resources``.
+        _MapdlCore._cleanup_loggers(SimpleNamespace(_log=instance_log))
+
+        parent.logger.debug("Message after the instance exits")
+        assert "Logging error" not in capsys.readouterr().err
+        assert not parent.file_handler.stream.closed
+        parent.file_handler.flush()
+    finally:
+        parent.file_handler.close()
+        parent.logger.removeHandler(parent.file_handler)
+        deflogging.getLogger(child_name).handlers.clear()
+
+    text = log_file.read_text()
+    assert "Message before the instance exits" in text
+    assert "Message from the instance" in text
+    assert "Message after the instance exits" in text
+
+
+@pytest.mark.parametrize("delay", [False, True])
+def test_copy_handler_file_handler_has_own_stream(tmp_path, delay):
+    """``_copy_handler`` gives each file handler copy its own stream and lock."""
+    log_file = tmp_path / "copy.log"
+    original = deflogging.FileHandler(str(log_file), delay=delay)
+    original.setLevel(deflogging.INFO)
+    original.setFormatter(deflogging.Formatter("%(message)s"))
+    copied = logging._copy_handler(original)
+    try:
+        assert copied is not original
+        assert copied.level == original.level
+        assert copied.formatter is original.formatter
+        assert copied.baseFilename == original.baseFilename
+        assert copied.lock is not original.lock
+        if delay:
+            assert original.stream is None and copied.stream is None
+        else:
+            assert copied.stream is not original.stream
+
+        copied.emit(deflogging.makeLogRecord({"msg": "from copy"}))
+        copied.close()
+
+        original.emit(deflogging.makeLogRecord({"msg": "from original"}))
+        original.flush()
+    finally:
+        copied.close()
+        original.close()
+
+    text = log_file.read_text()
+    assert "from copy" in text
+    assert "from original" in text
+
+
+def test_copy_handler_never_truncates(tmp_path):
+    """A copy of a ``"w"`` file handler appends instead of truncating."""
+    log_file = tmp_path / "copy.log"
+    original = deflogging.FileHandler(str(log_file), mode="w")
+    original.setFormatter(deflogging.Formatter("%(message)s"))
+    original.emit(deflogging.makeLogRecord({"msg": "kept"}))
+    original.flush()
+
+    copied = logging._copy_handler(original)
+    copied.close()
+    original.close()
+
+    assert copied.mode == "a"
+    assert original.mode == "w"
+    assert "kept" in log_file.read_text()
+
+
+def test_copy_handler_stream_handler_keeps_stream():
+    """Non-file handlers keep being shallow copies."""
+    original = deflogging.StreamHandler()
+    copied = logging._copy_handler(original)
+
+    assert copied is not original
+    assert copied.stream is original.stream
