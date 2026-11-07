@@ -1,0 +1,6 @@
+﻿setfgap
+=======
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.real_constants
+
+.. automethod:: RealConstants.setfgap

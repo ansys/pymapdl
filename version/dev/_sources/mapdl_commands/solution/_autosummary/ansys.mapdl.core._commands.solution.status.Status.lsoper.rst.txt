@@ -1,0 +1,6 @@
+﻿lsoper
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.status
+
+.. automethod:: Status.lsoper

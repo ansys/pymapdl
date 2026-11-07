@@ -1,0 +1,6 @@
+﻿slashlarc
+=========
+
+.. currentmodule:: ansys.mapdl.core._commands.graphics.annotation
+
+.. automethod:: Annotation.slashlarc

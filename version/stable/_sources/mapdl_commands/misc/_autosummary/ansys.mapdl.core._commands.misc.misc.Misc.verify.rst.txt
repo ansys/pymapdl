@@ -1,0 +1,6 @@
+﻿verify
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.misc.misc
+
+.. automethod:: Misc.verify

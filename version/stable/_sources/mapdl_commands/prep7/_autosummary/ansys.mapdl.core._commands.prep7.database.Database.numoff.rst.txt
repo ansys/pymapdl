@@ -1,0 +1,6 @@
+﻿numoff
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.database
+
+.. automethod:: Database.numoff

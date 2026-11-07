@@ -1,0 +1,6 @@
+available
+=========
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: PortStatus.available

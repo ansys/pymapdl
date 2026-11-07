@@ -1,0 +1,6 @@
+﻿lgwrite
+=======
+
+.. currentmodule:: ansys.mapdl.core._commands.session.files
+
+.. automethod:: Files.lgwrite

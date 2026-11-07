@@ -1,0 +1,6 @@
+﻿point
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.status
+
+.. automethod:: Status.point

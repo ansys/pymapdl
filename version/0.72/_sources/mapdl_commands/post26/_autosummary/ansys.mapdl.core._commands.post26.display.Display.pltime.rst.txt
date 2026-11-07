@@ -1,0 +1,6 @@
+﻿pltime
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.post26.display
+
+.. automethod:: Display.pltime

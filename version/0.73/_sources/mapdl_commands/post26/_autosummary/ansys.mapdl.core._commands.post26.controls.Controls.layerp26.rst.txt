@@ -1,0 +1,6 @@
+﻿layerp26
+========
+
+.. currentmodule:: ansys.mapdl.core._commands.post26.controls
+
+.. automethod:: Controls.layerp26
