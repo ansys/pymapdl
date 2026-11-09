@@ -258,6 +258,32 @@ def test_aplot(cleared, mapdl):
 
 
 @pytest.mark.parametrize(
+    "backend",
+    [
+        GraphicsBackend.PYVISTA,
+        pytest.param(
+            GraphicsBackend.MAPDL,
+            marks=pytest.mark.xfail(
+                reason="aplot checks 'if graphics_backend:', which every enum member passes",
+                strict=True,
+            ),
+        ),
+        None,
+    ],
+)
+def test_aplot_backend(cleared, mapdl, backend):
+    with (
+        patch("ansys.mapdl.core.plotting.visualizer.MapdlPlotter") as pv_plotter,
+        patch.object(mapdl, "screenshot") as mapdl_plot,
+    ):
+        mapdl.aplot(graphics_backend=backend)
+
+    uses_mapdl = backend is GraphicsBackend.MAPDL
+    assert mapdl_plot.called is uses_mapdl
+    assert pv_plotter.called is not uses_mapdl
+
+
+@pytest.mark.parametrize(
     "backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL, None]
 )
 def test_vplot(cleared, mapdl, backend):
@@ -587,9 +613,9 @@ def test_pick_nodes(mapdl, make_block, selection, verify_image_cache):
     assert len(selected) > 0, "The result has length zero"
 
     if selection != "U":
-        assert sorted(selected) == sorted(
-            mapdl._get_selected_("node")
-        ), "Order does not match"
+        assert sorted(selected) == sorted(mapdl._get_selected_("node")), (
+            "Order does not match"
+        )
 
     if selection in ["S", "R"]:
         assert selected == [2], "Second node is not selected, nor the only one"
