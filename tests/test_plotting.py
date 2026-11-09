@@ -634,9 +634,9 @@ def test_pick_nodes(mapdl, make_block, selection, verify_image_cache):
     assert len(selected) > 0, "The result has length zero"
 
     if selection != "U":
-        assert sorted(selected) == sorted(mapdl._get_selected_("node")), (
-            "Order does not match"
-        )
+        assert sorted(selected) == sorted(
+            mapdl._get_selected_("node")
+        ), "Order does not match"
 
     if selection in ["S", "R"]:
         assert selected == [2], "Second node is not selected, nor the only one"
