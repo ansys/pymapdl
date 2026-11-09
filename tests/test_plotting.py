@@ -258,20 +258,10 @@ def test_aplot(cleared, mapdl):
 
 
 @pytest.mark.parametrize(
-    "backend",
-    [
-        GraphicsBackend.PYVISTA,
-        pytest.param(
-            GraphicsBackend.MAPDL,
-            marks=pytest.mark.xfail(
-                reason="aplot checks 'if graphics_backend:', which every enum member passes",
-                strict=True,
-            ),
-        ),
-        None,
-    ],
+    "backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL, None]
 )
 def test_aplot_backend(cleared, mapdl, backend):
+    mapdl.rectng(0, 1, 0, 1)
     with (
         patch("ansys.mapdl.core.plotting.visualizer.MapdlPlotter") as pv_plotter,
         patch.object(mapdl, "screenshot") as mapdl_plot,
