@@ -292,11 +292,23 @@ def test_nplot(cleared, mapdl, nnum, backend):
     mapdl.nplot(graphics_backend=backend, nnum=nnum, background="w", color="k")
 
 
-@pytest.mark.parametrize("backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL])
-def test_eplot(mapdl, make_block, backend):
-    mapdl.eplot(
-        graphics_backend=backend, show_node_numbering=True, background="w", color="b"
-    )
+def test_eplot(mapdl, make_block):
+    mapdl.eplot(show_node_numbering=True, background="w", color="b")
+
+
+@pytest.mark.parametrize(
+    "backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL, None]
+)
+def test_eplot_backend(mapdl, make_block, backend):
+    with (
+        patch("ansys.mapdl.core.plotting.visualizer.MapdlPlotter") as pv_plotter,
+        patch.object(mapdl, "screenshot") as mapdl_plot,
+    ):
+        mapdl.eplot(graphics_backend=backend)
+
+    uses_mapdl = backend is GraphicsBackend.MAPDL
+    assert mapdl_plot.called is uses_mapdl
+    assert pv_plotter.called is not uses_mapdl
 
 
 def test_aplot_keeps_mesh(mapdl, make_block):
