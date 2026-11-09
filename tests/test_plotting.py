@@ -235,9 +235,28 @@ def test_lplot(cleared, mapdl, tmpdir, backend):
     cpos = mapdl.lplot(
         graphics_backend=backend, show_keypoint_numbering=True, savefig=filename
     )
-    assert cpos is None
-    if backend:
-        assert os.path.isfile(filename)
+    if backend == GraphicsBackend.MAPDL:
+        assert isinstance(cpos, str)
+    else:
+        assert cpos is None
+
+    assert os.path.isfile(filename)
+
+
+@pytest.mark.parametrize(
+    "backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL, None]
+)
+def test_lplot_backend(cleared, mapdl, backend):
+    mapdl.l(mapdl.k("", 0, 0, 0), mapdl.k("", 1, 0, 0))
+    with (
+        patch("ansys.mapdl.core.plotting.visualizer.MapdlPlotter") as pv_plotter,
+        patch.object(mapdl, "screenshot") as mapdl_plot,
+    ):
+        mapdl.lplot(graphics_backend=backend)
+
+    uses_mapdl = backend is GraphicsBackend.MAPDL
+    assert mapdl_plot.called is uses_mapdl
+    assert pv_plotter.called is not uses_mapdl
 
 
 def test_aplot(cleared, mapdl):
