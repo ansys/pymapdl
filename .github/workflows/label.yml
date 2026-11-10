@@ -8,7 +8,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '../labels.yml'
+      - '.github/labels.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,6 +21,8 @@ jobs:
   label-syncer:
     # Sync the labels name, colours with the file ``labels.yml``
     name: Syncer
+    # Only trusted content from main may rewrite repository labels.
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       issues: write  # Needed to sync label names and colors
@@ -34,7 +36,7 @@ jobs:
 
   labeler:
     name: Set labels
-    needs: [label-syncer]
+    if: github.event_name == 'pull_request'
     permissions:
       contents: read  # Needed to read labeler configuration
       pull-requests: write  # Needed to add labels to pull requests
