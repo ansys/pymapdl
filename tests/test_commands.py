@@ -146,6 +146,7 @@ CMD_DOC_STRING_INJECTOR.extend(CMD_BC_LISTING)
 @pytest.fixture()
 def beam_solve(mapdl, cleared):
     with mapdl.muted:
+        mapdl.finish()
         mapdl.input(vmfiles["vm10"])
 
         mapdl.post1()
@@ -230,6 +231,30 @@ def test_cmd_class_dlist_vm(mapdl, cleared):
     assert isinstance(out_list, list)
     assert out_list
     assert are_the_same_result(out_list, DLIST_RESULT)
+
+
+def test_boundary_conditions_listing_output_numeric_formats():
+    output = BoundaryConditionsListingOutput(
+        "\n".join(
+            (
+                "1 UX 10 .5 0.25",
+                "2 TEMP 001 1.0",
+                "3 UZ 0.",
+            )
+        )
+    )
+
+    assert output.to_list() == [
+        ["1", "UX", "10", ".5", "0.25"],
+        ["2", "TEMP", "001", "1.0"],
+    ]
+
+
+@pytest.mark.timeout(10)
+def test_boundary_conditions_listing_output_long_invalid_number():
+    output = BoundaryConditionsListingOutput("1 UX " + "9" * 100_000 + "!\n2 TEMP 1.0")
+
+    assert output.to_list() == [["2", "TEMP", "1.0"]]
 
 
 @pytest.mark.parametrize("func", LIST_OF_INQUIRE_FUNCTIONS)
@@ -632,7 +657,7 @@ class Test_MAPDL_commands(TestClass):
     @pytest.mark.parametrize("cmd", MAPDL_cmds)
     @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._send_command", fake_wrap)
     # Skip post processing the plot in PLESOL commands like.
-    @patch("ansys.mapdl.core.mapdl_core.PLOT_COMMANDS", [])
+    @patch("ansys.mapdl.core._mapdl_core.plotting.PLOT_COMMANDS", [])
     # skip retrieving value
     @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.scalar_param", fake_wrap)
     # Skip output the entity id after geometry manipulation
@@ -704,6 +729,7 @@ class Test_output_listing(TestClass):
     @pytest.fixture(scope="class")
     def plastic_solve_output(mapdl):
         with mapdl.muted:
+            mapdl.finish()
             mapdl.input(vmfiles["vm273"])
 
             mapdl.post1()

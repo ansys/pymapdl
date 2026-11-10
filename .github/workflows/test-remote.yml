@@ -122,7 +122,7 @@ jobs:
           persist-credentials: false
 
       - name: "Login in Github container registry"
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f #v4.6.0
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 #v4.7.0
         with:
           registry: ghcr.io
           username: ${{ secrets.username }}
@@ -221,14 +221,14 @@ jobs:
               - '.github/workflows/**'
 
       - name: "Setup Python with cache"
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 #v7.0.0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 #v7.1.0
         if:  steps.changes.outputs.workflows != 'true'
         with:
           cache: 'pip'
           python-version: ${{ inputs.python-version }}
 
       - name: "Setup Python without cache"
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 #v7.0.0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 #v7.1.0
         if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ inputs.python-version }}
@@ -260,18 +260,11 @@ jobs:
           python -m pip install .[tests]
 
       - name: "Unit testing"
-        # Hard backstop for the phase that the in-process shutdown watchdog
-        # ('pytest_unconfigure' in 'tests/conftest.py') cannot cover, such as
-        # an orphaned child process keeping the step's stdout pipe open after
-        # pytest exited. Failing the step (instead of stalling until the job
-        # timeout) leaves time for the 'if: always()' log-collection steps.
-        timeout-minutes: 45
         env:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
           ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
           file_name: "${{ inputs.file-name }}"
           MAPDL_VERSION: "${{ inputs.mapdl-version }}"
-          PYMAPDL_SHUTDOWN_TIMEOUT: 300
           PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
           PYMAPDL_DEBUG_TESTING: ${{ runner.debug == '1' }}
         shell: bash
@@ -325,8 +318,14 @@ jobs:
           (dmesg 2>/dev/null | grep -i -E "killed process|out of memory|oom" ) || echo "No OOM entries found in dmesg (or dmesg unavailable)."
           (sudo -n journalctl -k --since "-30 min" 2>/dev/null | grep -i -E "killed process|out of memory|oom" ) || echo "No OOM entries found in journalctl (or journalctl unavailable)."
 
+      - name: "Strip captured output from pytest report"
+        shell: bash
+        env:
+          FILE_NAME: ${{ inputs.file-name }}
+        run: python .ci/strip_report_sections.py "./${FILE_NAME}.jsonl"
+
       - name: "Upload pytest reports to GitHub"
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: "reports-${{ inputs.file-name }}"
           path: ./${{ inputs.file-name }}.jsonl
@@ -339,7 +338,7 @@ jobs:
           flags: remote-${{ steps.ubuntu_check.outputs.TAG_UBUNTU }}-${{ inputs.mapdl-version }}-${{ steps.distributed_mode.outputs.distributed_mode }}
 
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: "${{ inputs.file-name }}.xml"
           path: "./${{ inputs.file-name }}.xml"
@@ -351,7 +350,7 @@ jobs:
           twine check dist/*
 
       - name: "Upload wheel and binaries"
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: PyMAPDL-packages-${{ inputs.mapdl-version }}
           path: dist/
@@ -393,7 +392,7 @@ jobs:
 
       - name: "Upload encrypted logs to GitHub"
         if: always() && inputs.upload-logs == true
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: logs-${{ inputs.file-name }}-encrypted
           path: ./logs-${{ inputs.file-name }}.tgz.enc

@@ -142,9 +142,13 @@ mapdl.d("ALL", "UX")
 # Fix a single node on the left-hand side of the plate in the Y
 # direction.  Otherwise, the mesh would be allowed to move in the y
 # direction and would be an improperly constrained mesh.
-mapdl.nsel("R", "LOC", "Y", width / 2)
-assert mapdl.mesh.n_node == 1
-mapdl.d("ALL", "UY")
+#
+# :attr:`Mapdl.selector <ansys.mapdl.core.Mapdl.selector>` returns the
+# numbers of the nodes matching all the given coordinates, without
+# changing the active selection.
+node = mapdl.selector.select(x=0, y=width / 2)
+assert node.size == 1
+mapdl.d(node[0], "UY")
 
 # Apply a force on the right-hand side of the plate.  For this
 # example, we select the nodes at the right-most side of the plate.
@@ -158,10 +162,9 @@ assert np.allclose(mapdl.mesh.nodes[:, 0], length)
 # set.
 mapdl.cp(5, "UX", "ALL")
 
-# Select a single node in this set and apply a force to it
-# We use "R" to re-select from the current node group
-mapdl.nsel("R", "LOC", "Y", width / 2)
-mapdl.f("ALL", "FX", 1000)
+# Apply the force to the single node at the middle of the right-hand side.
+node = mapdl.selector.select(x=length, y=width / 2)
+mapdl.f(node[0], "FX", 1000)
 
 # finally, be sure to select all nodes again to solve the entire solution
 mapdl.allsel(mute=True)

@@ -23,6 +23,7 @@
 """Test MAPDL interface"""
 
 from datetime import datetime
+import gc
 from importlib import reload
 import logging
 import os
@@ -31,7 +32,7 @@ import re
 import shutil
 import tempfile
 import time
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, call, patch
 from warnings import catch_warnings
 
 import grpc
@@ -48,6 +49,7 @@ from conftest import (
     QUICK_LAUNCH_SWITCHES,
     TEST_DPF_BACKEND,
     NullContext,
+    clear,
     has_dependency,
     requires,
 )
@@ -58,22 +60,29 @@ if has_dependency("pyvista"):
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import USER_DATA_PATH
 from ansys.mapdl.core.commands import CommandListingOutput
+from ansys.mapdl.core.contexts.chain_commands import _ChainCommandsContext
+from ansys.mapdl.core.contexts.force_output import _ForceOutputContext
+from ansys.mapdl.core.contexts.loops import MAX_DO_LOOP_LEVEL
+from ansys.mapdl.core.contexts.muted import _MutedContext
+from ansys.mapdl.core.contexts.plotting import _InteractivePlottingContext
+from ansys.mapdl.core.contexts.run_as_routine import _RunAsRoutineContext
+from ansys.mapdl.core.contexts.save_selection import _SaveSelectionContext
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
     IncorrectWorkingDirectory,
+    MapdlCommandBlockedError,
     MapdlCommandIgnoredError,
     MapdlConnectionError,
     MapdlDoLoopLimitError,
     MapdlExitedError,
+    MapdlgRPCError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.helpers import is_installed
-from ansys.mapdl.core.launcher import launch_mapdl
+from ansys.mapdl.core.launcher import launch_mapdl, launch_mapdl_process
+from ansys.mapdl.core.lazy_array import LazyArray
 from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME, _MapdlCore
-from ansys.mapdl.core.mapdl_extended import (
-    MAX_DO_LOOP_LEVEL,
-    _MapdlExtended,
-)
+from ansys.mapdl.core.mapdl_extended import _MapdlExtended
 from ansys.mapdl.core.misc import random_string, stack
 from ansys.mapdl.core.plotting import GraphicsBackend
 
@@ -81,6 +90,7 @@ from ansys.mapdl.core.plotting import GraphicsBackend
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEST_FILES = os.path.join(PATH, "test_files")
 FIRST_TIME_FILE = os.path.join(USER_DATA_PATH, ".firstime")
+VERIFICATION_BANNER = "MAPDL VERIFICATION RUN ONLY"
 
 DEPRECATED_COMMANDS = [
     "edadapt",
@@ -229,6 +239,24 @@ def clearing_cdread_cdwrite_tests(mapdl):
         mapdl.prep7()
 
 
+@requires("grpc")
+def test_clear_resets_database_and_postprocessing_state(mapdl, cleared):
+    mapdl.n(1, 0, 0, 0)
+    mapdl.parameters["RESET_MARKER"] = 1
+    mapdl.finish()
+    mapdl.post1()
+
+    with mapdl.muted:
+        clear(mapdl)
+        assert mapdl.mute is True
+
+    assert mapdl.mute is False
+    assert mapdl.parameters.routine == "PREP7"
+    assert "RESET_MARKER" not in mapdl.parameters
+    mapdl.n(2, 1, 0, 0)
+    assert mapdl.mesh.nnum.tolist() == [2]
+
+
 def asserting_cdread_cdwrite_tests(mapdl):
     # Using ``in`` because of the padding APDL does on strings.
     return "asdf1234" in mapdl.parameters["T_PAR"]
@@ -274,9 +302,9 @@ class FakeMapdl(_MapdlExtended):
 
     It bypasses :class:`_MapdlCore.__init__ <ansys.mapdl.core.mapdl_core._MapdlCore>`
     entirely, since that requires a real (or gRPC) connection, but keeps the
-    real ``_store_commands``/``_stored_commands``/``non_interactive``
-    machinery from :class:`_MapdlCore <ansys.mapdl.core.mapdl_core._MapdlCore>`
-    so the actual buffering (and discarding) behavior is exercised.
+    real composed ``non_interactive`` context and its shared
+    ``_store_commands``/``_stored_commands`` state so the actual buffering
+    and discarding behavior is exercised.
     """
 
     def __init__(self):
@@ -544,13 +572,12 @@ def test_chain_commands_restores_state_on_body_error():
     parent._stored_commands = []
 
     with pytest.raises(RuntimeError, match="body failure"):
-        with _MapdlCore._chain_commands(parent):
+        with _ChainCommandsContext(parent):
             parent._stored_commands.append("incomplete command")
             raise RuntimeError("body failure")
 
     assert parent._store_commands is False
     assert parent._stored_commands == []
-    parent._chain_stored.assert_not_called()
 
 
 def test_chain_commands_preserves_nested_state():
@@ -558,12 +585,11 @@ def test_chain_commands_preserves_nested_state():
     parent._store_commands = True
     parent._stored_commands = ["outer command"]
 
-    with _MapdlCore._chain_commands(parent):
+    with _ChainCommandsContext(parent):
         parent._stored_commands.append("inner command")
 
     assert parent._store_commands is True
     assert parent._stored_commands == ["outer command", "inner command"]
-    parent._chain_stored.assert_not_called()
 
 
 def test_restore_plot_device_handles_restore_failure():
@@ -577,7 +603,7 @@ def test_restore_plot_device_handles_restore_failure():
 
 def test_save_selection_preserves_body_error_when_cleanup_fails():
     parent = MagicMock()
-    context = _MapdlCore._save_selection(parent)
+    context = _SaveSelectionContext(parent)
     context.selection = [{"cmsel": {}}]
     parent.allsel.side_effect = RuntimeError("cleanup failure")
 
@@ -589,12 +615,57 @@ def test_save_selection_preserves_body_error_when_cleanup_fails():
 def test_interactive_plotting_skips_noninteractive_mode():
     parent = MagicMock()
     parent._store_commands = True
-    context = _MapdlCore.WithInterativePlotting(parent, 1600)
+    context = _InteractivePlottingContext(parent, 1600)
 
     type(context).__enter__.__wrapped__(context)
     type(context).__exit__.__wrapped__(context, None, None, None)
 
     parent.show.assert_not_called()
+
+
+def test_muted_restores_state_on_body_error():
+    parent = MagicMock()
+    parent.mute = False
+
+    with pytest.raises(RuntimeError, match="body failure"):
+        with _MutedContext(parent):
+            assert parent.mute is True
+            raise RuntimeError("body failure")
+
+    assert parent.mute is False
+
+
+def test_force_output_restores_state_on_body_error():
+    parent = MagicMock()
+    parent._mute = True
+    parent.wrinqr.return_value = 0
+
+    with pytest.raises(RuntimeError, match="body failure"):
+        with _ForceOutputContext(parent):
+            assert parent._mute is False
+            raise RuntimeError("body failure")
+
+    assert parent._mute is True
+    assert parent._run.call_args_list == [call("/gopr"), call("/nopr")]
+
+
+def test_run_as_routine_restores_state_on_body_error():
+    parent = object.__new__(_MapdlCore)
+    parent._cached_routine = None
+    parent._parameters = MagicMock()
+    parent._parameters.routine = "PREP7"
+    parent._log = MagicMock()
+    parent.run = MagicMock()
+
+    with pytest.raises(RuntimeError, match="body failure"):
+        with _RunAsRoutineContext(parent, "POST26"):
+            raise RuntimeError("body failure")
+
+    assert parent._cached_routine is None
+    assert parent.run.call_args_list == [
+        call("/POST26", mute=True),
+        call("/PREP7", mute=True),
+    ]
 
 
 def test_error(mapdl, clear_at_end):
@@ -1851,7 +1922,12 @@ def test_get_variable_nsol_esol_wrappers(mapdl, coupled_example):
     assert nsol_1[1] > 0
 
     variable = mapdl.get_variable(2)
+    assert isinstance(variable, LazyArray)
+    parameter_name = variable._parameter_name
+    assert parameter_name in mapdl._lazy_array_parameters
     assert np.allclose(variable, nsol_1)
+    assert parameter_name not in mapdl._lazy_array_parameters
+    assert parameter_name not in mapdl.parameters
 
     variable = mapdl.get_nsol(1, "U", "X")
     assert np.allclose(variable, nsol_1)
@@ -1863,6 +1939,7 @@ def test_get_variable_nsol_esol_wrappers(mapdl, coupled_example):
     assert np.allclose(variable, esol_1)
 
     variable = mapdl.get_esol(1, 1, "S", "Y")
+    assert isinstance(variable, np.ndarray)
     assert np.allclose(variable, esol_1)
 
 
@@ -2289,7 +2366,6 @@ def test_save_on_exit(mapdl, cleared, save):
     assert mapdl._exited
 
     with patch.object(mapdl, "_run") as mock_run:
-
         with pytest.raises(MapdlExitedError):
             mapdl.prep7()
 
@@ -2572,7 +2648,7 @@ def test_save_selection_1(mapdl, cube_solve):
 
 
 def test_save_selection_2(mapdl, cleared, make_block):
-    from ansys.mapdl.core.mapdl_core import _TMP_COMP
+    from ansys.mapdl.core.contexts.save_selection import _TMP_COMP
 
     n1 = 1
     mapdl.nsel(vmin=n1)
@@ -2642,7 +2718,6 @@ def test_save_selection_2(mapdl, cleared, make_block):
 
     print("Starting...")
     with mapdl.save_selection:
-
         # do something
         mapdl.allsel()
         mapdl.cmsel("NONE")
@@ -2718,6 +2793,23 @@ def test_get_array_non_interactive(mapdl, solved_box):
             mapdl.get_array("asdf", "2")
 
 
+@requires("grpc")
+def test_get_array_returns_lazy_array(mapdl, cleared):
+    mapdl.prep7()
+    mapdl.n(1, 0, 0, 0)
+
+    node_numbers = mapdl.get_array("NODE", item1="NLIST")
+
+    assert isinstance(node_numbers, LazyArray)
+    parameter_name = node_numbers._parameter_name
+    assert parameter_name in mapdl._lazy_array_parameters
+
+    np.testing.assert_array_equal(node_numbers, [1.0])
+
+    assert parameter_name not in mapdl._lazy_array_parameters
+    assert parameter_name not in mapdl.parameters
+
+
 def test_get_etable_with_explicit_label():
     mapdl = object.__new__(_MapdlExtended)
     values = np.array([1.0, 2.0])
@@ -2729,6 +2821,20 @@ def test_get_etable_with_explicit_label():
     np.testing.assert_array_equal(result, values)
     assert mapdl.etable.call_args.args == ("MOMY_I", "SMISC", 3, "MAX")
     mapdl.get_array.assert_called_once_with("ELEM", 1, "ETAB", "MOMY_I")
+
+
+def test_get_etable_materializes_lazy_array():
+    mapdl = object.__new__(_MapdlExtended)
+    lazy_mapdl = MagicMock()
+    lazy_mapdl.parameters.__getitem__.return_value = np.array([1.0, 2.0])
+    mapdl.etable = MagicMock()
+    mapdl.get_array = MagicMock(return_value=LazyArray(lazy_mapdl, "VALUES"))
+
+    result = mapdl.get_etable("SMISC", 3, "MAX", "MOMY_I")
+
+    assert isinstance(result, np.ndarray)
+    np.testing.assert_array_equal(result, [1.0, 2.0])
+    lazy_mapdl.parameters.__getitem__.assert_called_once_with("VALUES")
 
 
 def test_get_etable_with_temporary_label():
@@ -2753,6 +2859,38 @@ def test_get_etable_with_temporary_label():
     assert events == [
         ("etable", ("_ET00000", "SMISC", 3, "AVG")),
         ("get_array", ("ELEM", 1, "ETAB", "_ET00000")),
+        ("etable", ("_ET00000", "ERAS")),
+    ]
+
+
+def test_get_etable_resolves_lazy_values_before_erasing_temporary_label():
+    mapdl = object.__new__(_MapdlExtended)
+    mapdl._etable_lab_counter = 0
+    events = []
+    lazy_mapdl = MagicMock()
+
+    def resolve_parameter(name):
+        events.append(("resolve", name))
+        return np.array([1.0])
+
+    def record_etable(*args, **kwargs):
+        events.append(("etable", args))
+
+    def record_get_array(*args):
+        events.append(("get_array", args))
+        return LazyArray(lazy_mapdl, "VALUES")
+
+    lazy_mapdl.parameters.__getitem__.side_effect = resolve_parameter
+    mapdl.etable = MagicMock(side_effect=record_etable)
+    mapdl.get_array = MagicMock(side_effect=record_get_array)
+
+    result = mapdl.get_etable("SMISC", 3, "AVG")
+
+    np.testing.assert_array_equal(result, [1.0])
+    assert events == [
+        ("etable", ("_ET00000", "SMISC", 3, "AVG")),
+        ("get_array", ("ELEM", 1, "ETAB", "_ET00000")),
+        ("resolve", "VALUES"),
         ("etable", ("_ET00000", "ERAS")),
     ]
 
@@ -2849,6 +2987,29 @@ def test_remove_temp_dir_on_exit_with_launch_mapdl(mapdl, cleared, monkeypatch):
 
     assert not os.path.exists(path_)
     assert not all([psutil.pid_exists(pid) for pid in pids])
+
+
+@requires("local")
+def test_exit_stops_server_left_in_post1(tmpdir, monkeypatch):
+    """Regression test for https://github.com/ansys/pymapdl/issues/4851."""
+    monkeypatch.delenv("PYMAPDL_PORT", raising=False)
+    ip, port, pid = launch_mapdl_process(
+        run_location=str(tmpdir), nproc=1, cleanup_on_exit=False
+    )
+    server = psutil.Process(pid)
+
+    mapdl_2 = pymapdl.Mapdl(
+        ip=ip, port=port, cleanup_on_exit=False, disable_run_at_connect=True
+    )
+    mapdl_2.post1()
+    mapdl_2.exit(save=False, force=True)
+
+    try:
+        server.wait(timeout=30)
+    except psutil.TimeoutExpired:
+        for proc in [*server.children(recursive=True), server]:
+            proc.kill()
+        pytest.fail("MAPDL kept running after exit() from POST1")
 
 
 def test_sys(mapdl, cleared):
@@ -2964,16 +3125,61 @@ def test_not_correct_et_element(mapdl, cleared):
         mapdl.keyopt(1, 222)
 
 
-def test_ctrl(mapdl, cleared):
-    with patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.run") as mck_run:
-
-        mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
-        mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
-
-        assert "/verify" in mck_run.call_args_list[0].args[0]
-
+def _build_model(mapdl):
+    mapdl.prep7()
+    mapdl.et(1, "LINK180")
+    mapdl.sectype(1, "LINK")
+    mapdl.secdata(1)
+    mapdl.mp("EX", 1, 1000)
+    mapdl.n(1, 0, 0, 0)
+    mapdl.n(2, 1, 0, 0)
+    mapdl.e(1, 2)
+    mapdl.d(1, "ALL", 0)
+    mapdl.d(2, "UY", 0)
+    mapdl.d(2, "UZ", 0)
+    mapdl.f(2, "FX", 1)
     mapdl.finish()
-    mapdl.run("/verify")  # mocking might skip running this inside mapdl._ctrl
+
+
+def _solve_model(mapdl):
+    mapdl.finish()
+    mapdl.slashsolu()
+    response = mapdl.solve(mute=False)
+    mapdl.finish()
+    return response
+
+
+@pytest.mark.xfail(
+    raises=MapdlgRPCError,
+    strict=False,
+    reason="MAPDL 25.2 gRPC server can refuse 'Ctrl' with UNIMPLEMENTED on a new connection.",
+)
+def test_ctrl(mapdl, cleared):
+    mapdl.finish()
+    mapdl.verify("OFF")
+    mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
+    mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
+    _build_model(mapdl)
+    output = _solve_model(mapdl)
+    assert VERIFICATION_BANNER not in output
+
+
+def test_run_at_connect_does_not_enable_verification_mode(mapdl, cleared):
+    mapdl.finish()
+    mapdl.verify("OFF")
+    try:
+        mapdl._run_at_connect()
+        _build_model(mapdl)
+        output = _solve_model(mapdl)
+        assert VERIFICATION_BANNER not in output
+
+        mapdl.finish()
+        mapdl.verify()
+        output = _solve_model(mapdl)
+        assert VERIFICATION_BANNER in output
+    finally:
+        mapdl.finish()
+        mapdl.verify("OFF")
 
 
 @pytest.mark.skip("This test is removing all loggers, which is not desired")
@@ -3039,7 +3245,6 @@ def test_directory_setter(mapdl, cleared):
     with patch(
         "ansys.mapdl.core.Mapdl.inquire", side_effect=MapdlExitedError("mocked error")
     ) as mck_inquire:
-
         assert prev_path == mapdl.directory
 
         mck_inquire.assert_called_once()
@@ -3092,6 +3297,99 @@ def test_directory_pathlib_value(mapdl, cleared):
         path_rst = f"{mapdl.directory}/{mapdl.jobname}.rst"
 
     assert str(mapdl.directory / f"{mapdl.jobname}.rst") == path_rst
+
+
+def _make_mapdl_directory(path, files, *, platform="linux", local=False):
+    mapdl = object.__new__(_MapdlCore)
+    mapdl._platform = platform
+    mapdl._local = local
+    mapdl.list_files = MagicMock(return_value=files)
+    return mapdl, mapdl._wrap_directory(path)
+
+
+def test_mapdl_directory_is_file_checks_owning_mapdl():
+    first = _make_mapdl_directory("/mapdl/first", ["first.rst"])
+    second = _make_mapdl_directory("/mapdl/second", ["second.rst"])
+    first_directory = first[1]
+    second_directory = second[1]
+
+    assert (first_directory / "first.rst").is_file()
+    assert not (first_directory / "second.rst").is_file()
+    assert (second_directory / "second.rst").is_file()
+    assert not (second_directory / "first.rst").is_file()
+
+
+def test_mapdl_directory_is_file_survives_path_derivation():
+    _, directory = _make_mapdl_directory("/mapdl/run", ["result.rst"])
+
+    joined_with_operator = directory / "result.rst"
+    joined_with_method = directory.joinpath("result.rst")
+    changed_suffix = (directory / "result.out").with_suffix(".rst")
+    changed_name = (directory / "other.rst").with_name("result.rst")
+    joined_to_parent = (directory / "nested").parent / "result.rst"
+
+    assert joined_with_operator.is_file()
+    assert joined_with_method.is_file()
+    assert changed_suffix.is_file()
+    assert changed_name.is_file()
+    assert joined_to_parent.is_file()
+
+
+def test_remote_mapdl_directory_is_file_ignores_client_filesystem(tmp_path):
+    client_file = tmp_path / "client-only.rst"
+    client_file.touch()
+    platform = {"nt": "windows", "posix": "linux"}[os.name]
+    _, directory = _make_mapdl_directory(tmp_path, [], platform=platform)
+
+    assert not (directory / client_file.name).is_file()
+
+
+def test_local_mapdl_directory_does_not_report_directory_as_file(tmp_path):
+    child_directory = tmp_path / "child"
+    child_directory.mkdir()
+    platform = {"nt": "windows", "posix": "linux"}[os.name]
+    _, directory = _make_mapdl_directory(
+        tmp_path, [child_directory.name], platform=platform, local=True
+    )
+
+    assert not (directory / child_directory.name).is_file()
+
+
+def test_mapdl_directory_is_file_rejects_nested_path():
+    _, directory = _make_mapdl_directory("/mapdl/run", ["result.rst"])
+
+    with pytest.raises(ValueError, match="direct children"):
+        (directory / "nested" / "result.rst").is_file()
+
+
+def test_mapdl_directory_is_file_raises_when_mapdl_no_longer_exists():
+    mapdl, directory = _make_mapdl_directory("/mapdl/run", ["result.rst"])
+    result_file = directory / "result.rst"
+    del mapdl
+    gc.collect()
+
+    with pytest.raises(ReferenceError, match="no longer exists"):
+        result_file.is_file()
+
+
+def test_windows_mapdl_directory_is_file_is_case_insensitive():
+    _, directory = _make_mapdl_directory(
+        "C:/mapdl/run", ["RESULT.RST"], platform="windows"
+    )
+
+    assert (directory / "result.rst").is_file()
+
+
+def test_mapdl_directory_is_file_with_mapdl(mapdl, cleared, tmp_path):
+    filename = "pymapdl_directory_is_file.txt"
+    source = tmp_path / filename
+    source.write_text("MAPDL-aware path", encoding="utf-8")
+    mapdl.upload(source)
+
+    try:
+        assert (mapdl.directory / filename).is_file()
+    finally:
+        mapdl.slashdelete(filename)
 
 
 def test_load_not_raising_warning():
@@ -3219,7 +3517,6 @@ def test_timeout_when_exiting(mapdl, is_exited):
             ) as mock_handle,
             patch.object(mapdl, "_exit_mapdl") as mock_exit_mapdl,
         ):
-
             mock_exit_mapdl.return_value = None  # Avoid exiting
             mock_is_alive.return_value = False
             mock_connect.return_value = None  # patched to avoid timeout
@@ -3269,7 +3566,6 @@ def test_none_as_argument(mapdl, cmd, arg):
         kwargs = {}
 
     with patch.object(mapdl, "_run", **kwargs) as mock_run:
-
         mock_run.assert_not_called()
 
         func = getattr(mapdl, cmd)
@@ -3867,15 +4163,9 @@ def test_osresult_presol(mapdl, solved_box):
 # ----------------
 # Unit tests for the ``Mapdl.do`` and ``Mapdl.dowhile`` loop context managers.
 
-# These tests do not require a live MAPDL instance: they exercise the context
-# manager logic against a lightweight fake that mimics only the bits of
-# :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` that ``do``/``dowhile`` rely
-# on. Notably, ``FakeMapdl`` does **not** stub out
-# :class:`Mapdl.non_interactive <ansys.mapdl.core.mapdl_core._MapdlCore>`: it
-# relies on the real, inherited :class:`_non_interactive
-# <ansys.mapdl.core.mapdl_core._MapdlCore._non_interactive>` implementation, so
-# these tests also guard against a partial ``*DO``/``*DOWHILE`` block leaking
-# into a later flush through the shared ``_stored_commands`` buffer.
+# These tests use a lightweight fake rather than live MAPDL. The fake inherits
+# the real non-interactive context, so the tests cover shared command buffering
+# and verify that failed loops discard incomplete blocks.
 
 
 def test_do_emits_do_and_enddo_real_mapdl(mapdl):
@@ -4073,3 +4363,70 @@ def test_exception_in_nested_do_loop_preserves_prior_buffered_commands(fake_mapd
 
     assert fake_mapdl.sent_commands == ["earlier command", "later command"]
     assert fake_mapdl._stored_commands == []
+
+
+@pytest.fixture
+def blocked_mapdl(mapdl):
+    mapdl.blocked_commands = ["/SYS", "/SYP", "/INPUT"]
+    yield mapdl
+    mapdl.blocked_commands = []
+
+
+def test_blocked_commands_default_is_empty(mapdl):
+    assert mapdl.blocked_commands == frozenset()
+
+
+def test_blocked_command_run_raises(blocked_mapdl):
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/SYS'"):
+        blocked_mapdl.run("/SYS,echo x")
+
+
+def test_blocked_sys_does_not_block_internal_file_listing(blocked_mapdl):
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/SYS'"):
+        blocked_mapdl.sys("echo x")
+    # list_files() and the remote input/flush paths use '/SYS' internally.
+    assert "hi" in blocked_mapdl._sys("echo hi")
+    assert isinstance(blocked_mapdl.list_files(), list)
+
+
+def test_blocked_command_batch_sends_nothing(blocked_mapdl, cleared):
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/SYP'"):
+        blocked_mapdl.input_strings(["*SET,BLKTEST,1", "/SYP,echo x"])
+    assert "BLKTEST" not in blocked_mapdl.parameters
+
+    # The same command runs unblocked, so the absence above is the block.
+    blocked_mapdl.blocked_commands = []
+    blocked_mapdl.input_strings("*SET,BLKTEST,1")
+    assert "BLKTEST" in blocked_mapdl.parameters
+    assert blocked_mapdl.parameters["BLKTEST"] == 1
+
+
+def test_blocked_command_non_interactive_raises_at_call(blocked_mapdl, cleared):
+    with blocked_mapdl.non_interactive:
+        with pytest.raises(MapdlCommandBlockedError, match="matched '/SYS'"):
+            blocked_mapdl.run("/SYS,echo x")
+
+
+def test_blocked_command_text_inside_com_is_allowed(blocked_mapdl):
+    response = blocked_mapdl.com("note $/SYS")
+    assert "note $/SYS" in response
+
+
+def test_blocked_input_file_raises(blocked_mapdl, tmp_path):
+    path = tmp_path / "blocked_input.inp"
+    path.write_text("*SET,BLKINPUT,1\n")
+    with pytest.raises(MapdlCommandBlockedError, match="matched '/INP'"):
+        blocked_mapdl.input(str(path))
+    assert "BLKINPUT" not in blocked_mapdl.parameters
+
+
+def test_blocked_input_does_not_block_non_interactive_flush(blocked_mapdl, cleared):
+    with blocked_mapdl.non_interactive:
+        blocked_mapdl.run("*SET,BLKFLUSH,5")
+    assert blocked_mapdl.parameters["BLKFLUSH"] == 5
+
+
+def test_unrelated_commands_run_with_commands_blocked(blocked_mapdl, cleared):
+    blocked_mapdl.prep7()
+    blocked_mapdl.input_strings(["/PREP7"])
+    assert blocked_mapdl.parameters.routine == "PREP7"

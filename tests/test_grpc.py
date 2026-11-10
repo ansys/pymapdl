@@ -28,7 +28,7 @@ import shutil
 import subprocess
 import sys
 import time
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import grpc
 import pytest
@@ -266,6 +266,7 @@ def test_cmatrix(mapdl, setup_for_cmatrix):
 
 def test_read_input_file_verbose(mapdl, cleared):
     test_file = examples.vmfiles["vm153"]
+    mapdl.finish()
     response = mapdl.input(test_file, verbose=True)
     assert re.search(
         r"\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response
@@ -829,38 +830,26 @@ def test_subscribe_to_channel(mapdl, cleared):
 
 
 @requires("remote")
-def test_exception_message_length(mapdl, cleared, monkeypatch):
-    # This test does not fail if running on local
-    channel = grpc.insecure_channel(
+def test_exception_message_length(mapdl, cleared):
+    with grpc.insecure_channel(
         mapdl._channel_str,
-        options=[
-            ("grpc.max_receive_message_length", int(1024)),
-        ],
-    )
-    mapdl2 = MapdlGrpc(channel=channel)
-    assert mapdl2.is_alive
+        options=[("grpc.max_receive_message_length", 1024)],
+    ) as channel:
+        mapdl2 = MapdlGrpc(channel=channel, local=False)
+        try:
+            assert mapdl2.is_alive
+            mapdl2.prep7()
+            mapdl2.dim("myarr", "", 1e5)
+            mapdl2.vfill("myarr", "rand", 0, 1)
 
-    mapdl2.prep7()
-    mapdl2.dim("myarr", "", 1e5)
-    mapdl2.vfill("myarr", "rand", 0, 1)  # filling array with random numbers
+            with pytest.raises(
+                MapdlgRPCError, match="Received message larger than max"
+            ):
+                _ = mapdl2.parameters["myarr"]
 
-    # 'protect_grpc' retries any 'grpc.RpcError' (including
-    # 'RESOURCE_EXHAUSTED', triggered below) up to 'N_ATTEMPTS' times with
-    # exponential backoff before it inspects the error code and raises.
-    # That backoff sums to several real seconds and is not what this test
-    # verifies, so it's skipped here.
-    monkeypatch.setattr(errors, "sleep", lambda *args, **kwargs: None)
-
-    # Retrieving
-    with pytest.raises(MapdlgRPCError, match="Received message larger than max"):
-        values = mapdl2.parameters["myarr"]
-
-    assert mapdl2.is_alive
-
-    # Deleting generated mapdl instance and channel.
-    channel.close()
-    mapdl2._exited = True  # To avoid side effects.
-    mapdl2.exit()
+            assert mapdl2.is_alive
+        finally:
+            mapdl2.exit()
 
 
 def test_generic_grpc_exception(monkeypatch, grpc_channel):
@@ -888,6 +877,98 @@ def test_generic_grpc_exception(monkeypatch, grpc_channel):
 
     assert not mapdl.is_alive
     mapdl._exited = False
+
+
+def test_failing_ctrl_does_not_recurse_through_is_alive(monkeypatch, grpc_channel):
+    """A failing 'Ctrl' retries 'N_ATTEMPTS' times, then marks MAPDL exited.
+
+    Regression: 'protect_grpc' calls 'is_alive' on retry, which used to call the
+    protected '_ctrl' again, nesting retries until 'RecursionError'.
+    """
+    mapdl = MapdlGrpc(channel=grpc_channel)
+    assert mapdl.is_alive
+
+    stub = MagicMock()
+    stub.Ctrl.side_effect = UnavailableError()
+    monkeypatch.setattr(mapdl, "_stub", stub)
+    # '_connect' would replace the patched stub; 'exit' would issue more RPCs.
+    monkeypatch.setattr(mapdl, "_connect", lambda *args, **kwargs: False)
+    monkeypatch.setattr(mapdl, "exit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(errors, "sleep", lambda *args, **kwargs: None)
+
+    with pytest.raises(MapdlExitedError):
+        mapdl._ctrl("VERSION")
+
+    assert mapdl._exited
+    # 1 + N_ATTEMPTS '_ctrl' calls, plus one 'is_alive' probe per retry.
+    assert stub.Ctrl.call_count == 2 * errors.N_ATTEMPTS + 1
+
+
+def test_is_alive_falls_back_to_command_on_ctrl_unimplemented(
+    monkeypatch, grpc_channel
+):
+    """v25.2 can refuse 'Ctrl' with UNIMPLEMENTED on a new channel while serving commands."""
+    mapdl = MapdlGrpc(channel=grpc_channel)
+
+    unimplemented = UnavailableError()
+    unimplemented._code = grpc.StatusCode.UNIMPLEMENTED
+    stub = MagicMock()
+    stub.Ctrl.side_effect = unimplemented
+    monkeypatch.setattr(mapdl, "_stub", stub)
+
+    assert mapdl.is_alive  # '/COM' answers
+    stub.SendCommand.assert_called_once()
+
+    stub.SendCommand.side_effect = UnavailableError()
+    assert not mapdl.is_alive  # neither RPC works
+
+
+def test_unimplemented_is_not_retried_nor_marks_exited(monkeypatch, grpc_channel):
+    """UNIMPLEMENTED never recovers on retry, and MAPDL is still alive."""
+    mapdl = MapdlGrpc(channel=grpc_channel)
+
+    unimplemented = UnavailableError()
+    unimplemented._code = grpc.StatusCode.UNIMPLEMENTED
+    stub = MagicMock()
+    stub.Ctrl.side_effect = unimplemented
+    monkeypatch.setattr(mapdl, "_stub", stub)
+
+    with pytest.raises(MapdlgRPCError, match="UNIMPLEMENTED"):
+        mapdl._ctrl("VERSION")
+
+    assert stub.Ctrl.call_count == 1
+    assert not mapdl._exited
+
+
+def test_is_alive_false_paths(monkeypatch, grpc_channel):
+    """'is_alive' returns False without a stub, on an empty version or on any error."""
+    mapdl = MapdlGrpc(channel=grpc_channel)
+    stub = MagicMock()
+    monkeypatch.setattr(mapdl, "_stub", stub)
+
+    stub.Ctrl.return_value = MagicMock(response="")
+    assert not mapdl.is_alive  # empty version
+
+    def exit_then_raise(error):
+        def _side_effect(*args, **kwargs):
+            mapdl._exited = True  # MAPDL exits while the probe is in flight
+            raise error
+
+        return _side_effect
+
+    try:
+        for error in (UnavailableError(), RuntimeError("boom")):
+            stub.Ctrl.side_effect = exit_then_raise(error)
+            assert not mapdl.is_alive
+            mapdl._exited = False
+
+        stub.Ctrl.side_effect = RuntimeError("boom")
+        assert not mapdl.is_alive  # non-gRPC error
+
+        monkeypatch.setattr(mapdl, "_stub", None)
+        assert not mapdl.is_alive  # not connected
+    finally:
+        mapdl._exited = False
 
 
 def test_generic_grpc_exception_exited(monkeypatch, grpc_channel):

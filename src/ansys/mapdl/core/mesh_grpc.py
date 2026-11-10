@@ -32,7 +32,8 @@ import weakref
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 import numpy as np
 
-from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE, parse_chunks
+from ansys.mapdl.core.common_grpc import parse_chunks
+from ansys.mapdl.core.constants import DEFAULT_CHUNKSIZE
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from ansys.mapdl.core.misc import requires_package, supress_logging
 
@@ -172,7 +173,7 @@ class MeshGrpc:
             # elements must have their underlying nodes selected to avoid
             # VTK segfaul
             with self._mapdl.save_selection:
-                self._mapdl.nsle("S", mute=True)
+                self._mapdl.nsle("S", mute=True, return_mapdl_output=True)
 
                 # '_update_cache_elem' runs first and alone: it is not
                 # guarded by '_thread_lock_grpc' and must finish before the

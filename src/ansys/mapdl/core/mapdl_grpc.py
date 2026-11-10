@@ -77,11 +77,12 @@ except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
 
 from ansys.mapdl.core import _HAS_TQDM, __version__
-from ansys.mapdl.core.common_grpc import (
+from ansys.mapdl.core.common_grpc import DEFAULT_FILE_CHUNK_SIZE, parse_chunks
+from ansys.mapdl.core.constants import (
     ANSYS_VALUE_TYPE,
     DEFAULT_CHUNKSIZE,
-    DEFAULT_FILE_CHUNK_SIZE,
-    parse_chunks,
+    MAPDL_DEFAULT_PORT,
+    MAX_MESSAGE_LENGTH,
 )
 from ansys.mapdl.core.errors import (
     MapdlConnectionError,
@@ -92,7 +93,9 @@ from ansys.mapdl.core.errors import (
     protect_from,
     protect_grpc,
 )
+from ansys.mapdl.core.lazy_array import LazyArray
 from ansys.mapdl.core.mapdl import MapdlBase
+from ansys.mapdl.core.mapdl_core import MAX_PARAM_CHARS
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat, MapdlInt
 from ansys.mapdl.core.misc import (
     check_valid_ip,
@@ -117,9 +120,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.xpl import ansXpl
 
 VOID_REQUEST = anskernel.EmptyRequest()
-
-# Default 256 MB message length
-MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024**2))
 
 
 def _drain_queue(queue) -> str:
@@ -154,6 +154,10 @@ DEFAULT_TIME_STEP_STREAM = None
 DEFAULT_TIME_STEP_STREAM_NT = 500
 DEFAULT_TIME_STEP_STREAM_POSIX = 100
 
+# Seconds added to the gRPC deadline of 'Ctrl("EXIT")' to get the wall-clock
+# bound enforced by 'MapdlGrpc._ctrl_exit'.
+CTRL_EXIT_HARD_TIMEOUT_BUFFER_S = 3.0
+
 # Retry policy for gRPC calls.
 SERVICE_DEFAULT_CONFIG = {
     # see https://github.com/grpc/proposal/blob/master/A6-client-retries.md#retry-policy-capabilities
@@ -173,40 +177,15 @@ SERVICE_DEFAULT_CONFIG = {
     ]
 }
 
-# Cadence for the HTTP/2 keepalive pings and the ping-abuse probe (see
-# '_ping_abuse_probe_loop' and 'DEFAULT_GRPC_OPTIONS' below). Empirically
-# verified against a live MAPDL gRPC server (docker image
-# 'ghcr.io/ansys/mapdl:v26.1.0-ubuntu-cicd') while a genuinely long call
-# ('SOLVE' and '/WAIT') was in flight:
-#
-# * grpc-core's default server-side ping-abuse policy requires at least 5
-#   minutes between two consecutive "no data" HTTP/2 pings while a call is
-#   in flight, tolerates up to 2 "strikes" (closer-than-allowed pings), and
-#   sends a 'GOAWAY' ('too_many_pings') on the 3rd strike.
-# * Two pings spaced 'PING_ABUSE_INTERVAL_S' apart never accumulate more
-#   than 1 strike (the very first ping received on a fresh tracker is
-#   always free), so pinging twice in a row is safe.
-# * A 3rd, real (non-ping) RPC call resets the strikes counter to 0, because
-#   the server also resets its ping-abuse tracker whenever it sends back
-#   real application data, not just a ping ACK. So replacing every 3rd
-#   keepalive ping with one cheap real RPC (see '_ping_abuse_probe_loop')
-#   lets the ping/ping/probe cycle repeat indefinitely without ever
-#   tripping the abuse policy, confirmed over multiple repeated cycles
-#   against the live server.
-PING_ABUSE_INTERVAL_S = 24
-# Replace every 3rd keepalive ping with a real probe RPC, before a 3rd
-# un-reset ping would trip the server's abuse policy.
-PING_ABUSE_PROBE_EVERY_N_PINGS = 3
-PING_ABUSE_PROBE_INTERVAL_S = PING_ABUSE_INTERVAL_S * PING_ABUSE_PROBE_EVERY_N_PINGS
-# Bounded timeout for the probe RPC itself, so a truly unresponsive server
-# cannot make the probe thread hang.
-PING_ABUSE_PROBE_TIMEOUT_S = 5.0
-
-# Hard wall-clock bound for closing the gRPC channel. ``grpc.Channel.close``
-# waits on condition variables that are only notified by gRPC's own
-# channel-spin thread, with no timeout of its own, so a wedged call or a
-# stalled spin thread would otherwise block the caller forever.
-CHANNEL_CLOSE_TIMEOUT_S = 10.0
+# Interval between HTTP/2 keepalive pings. grpc-core's default server-side
+# ping-abuse policy requires at least 5 minutes between two "no data" pings
+# while a call is in flight and sends a 'GOAWAY' ('too_many_pings') on the
+# 3rd closer ping, so a shorter interval drops long calls such as 'SOLVE'.
+# The ping strike counter must not be reset with a background RPC instead:
+# MAPDL mixes up the replies of concurrent calls (a 'Ctrl' reply replaces the
+# output of a running command) and can crash under such load. The extra 10%
+# keeps timer jitter from landing a ping just inside the 5-minute window.
+KEEPALIVE_TIME_MS = 330_000
 
 DEFAULT_GRPC_OPTIONS = [
     ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
@@ -217,13 +196,11 @@ DEFAULT_GRPC_OPTIONS = [
     # 'SOLVE') is allowed to run. A dead peer flips 'channel_state' to
     # 'TRANSIENT_FAILURE' within roughly 'keepalive_time_ms' +
     # 'keepalive_timeout_ms', instead of relying on the OS to eventually
-    # notice the broken TCP connection. The interval is paired with the
-    # ping-abuse probe (see 'PING_ABUSE_INTERVAL_S' above) so consecutive
-    # pings never trip the MAPDL gRPC server's ping-abuse protection.
-    ("grpc.keepalive_time_ms", PING_ABUSE_INTERVAL_S * 1000),
+    # notice the broken TCP connection.
+    ("grpc.keepalive_time_ms", KEEPALIVE_TIME_MS),
     ("grpc.keepalive_timeout_ms", 10_000),
     ("grpc.keepalive_permit_without_calls", 1),
-    ("grpc.http2.min_time_between_pings_ms", PING_ABUSE_INTERVAL_S * 1000),
+    ("grpc.http2.min_time_between_pings_ms", KEEPALIVE_TIME_MS),
     ("grpc.http2.max_pings_without_data", 0),
 ]
 
@@ -331,178 +308,6 @@ def save_chunks_to_file(
     return file_size
 
 
-def _track_background_thread(instance: Any, thread: threading.Thread) -> None:
-    """Register *thread* on *instance* for a later, bounded cleanup retry.
-
-    Threads that bound an otherwise-uncancellable blocking gRPC call (the
-    ping-abuse probe, the ``Ctrl("EXIT")`` call, and the gRPC channel close)
-    are abandoned rather than joined indefinitely when they do not finish
-    within their own hard wall-clock timeout. Registering them here lets
-    :func:`_join_background_threads` retry joining them later -- typically
-    once the MAPDL process has been killed and the call they were blocked
-    on unblocks -- instead of leaking them for the remaining lifetime of the
-    process.
-
-    A plain module-level function rather than a :class:`MapdlGrpc` method so
-    it works through pure duck-typing on *any* object exposing (or able to
-    receive) a ``_background_threads`` attribute -- including the minimal,
-    partially constructed stand-ins some unit tests use in place of a full
-    :class:`MapdlGrpc` instance, which may not implement every method on the
-    class. Creates the tracking list on *instance* on first use rather than
-    requiring ``__init__`` to have set it up.
-
-    Parameters
-    ----------
-    instance : Any
-        The object to track *thread* against. Typically a :class:`MapdlGrpc`
-        instance, but any object supporting attribute assignment works.
-    thread : threading.Thread
-        The background daemon thread to track.
-
-    Returns
-    -------
-    None
-    """
-    threads = getattr(instance, "_background_threads", None)
-    if threads is None:
-        threads = []
-        try:
-            instance._background_threads = threads
-        except AttributeError:  # pragma: no cover - read-only test double
-            return
-    threads.append(thread)
-
-
-def _join_background_threads(
-    instance: Any, timeout: float = 2.0, exiting: bool = False
-) -> None:
-    """Give background threads tracked on *instance* one more chance to exit.
-
-    Threads tracked by :func:`_track_background_thread` were abandoned
-    because they did not finish within their own hard wall-clock timeout
-    while blocked on a gRPC call that cannot be cancelled. By the time this
-    runs -- late in teardown, after the MAPDL process has been killed and
-    the gRPC channel closed -- the peer any such thread was waiting on is
-    gone, so the call it is blocked on typically unblocks quickly. Threads
-    still alive after their own bounded ``join`` are left tracked so a
-    still-later call (for example, a second teardown attempt) can retry them
-    again.
-
-    A plain module-level function rather than a :class:`MapdlGrpc` method
-    for the same reason as :func:`_track_background_thread`: it must remain
-    usable on minimal test doubles that do not implement every method on the
-    class. Safe to call on an *instance* with no tracked threads (a no-op)
-    and safe to call multiple times.
-
-    Parameters
-    ----------
-    instance : Any
-        The object whose tracked threads (in its ``_background_threads``
-        attribute, if any) should be retried.
-    timeout : float, optional
-        Seconds to wait for each still-running thread. The default is
-        ``2.0``.
-    exiting : bool, optional
-        Whether this is being called from best-effort, garbage-collection
-        driven teardown (:meth:`MapdlGrpc.__del__`). If ``True``, suppresses
-        the debug log emitted for threads that are still running afterward,
-        since logging is unreliable during interpreter shutdown. The
-        default is ``False``.
-
-    Returns
-    -------
-    None
-    """
-    threads = getattr(instance, "_background_threads", None)
-    if not threads:
-        return
-
-    still_running = []
-    for thread in threads:
-        if thread.is_alive():
-            thread.join(timeout=timeout)
-        if thread.is_alive():
-            still_running.append(thread)
-            if not exiting:
-                log = getattr(instance, "_log", None)
-                if log is not None:
-                    log.debug(
-                        f"Background thread {thread.name!r} is still "
-                        "running; leaving it as a daemon thread."
-                    )
-
-    try:
-        instance._background_threads = still_running
-    except AttributeError:  # pragma: no cover - read-only test double
-        pass
-
-
-def _run_with_hard_timeout(
-    instance: Any,
-    fn: Callable[[], None],
-    timeout: float,
-    thread_name: str,
-) -> Tuple[bool, Optional[BaseException]]:
-    """Run *fn* in a daemon thread bounded by a hard wall-clock timeout.
-
-    Factors out the "spawn a daemon thread, join it with our own timeout,
-    and abandon it (tracked for a later retry) if it is still running
-    afterward" pattern shared by every uncancellable blocking gRPC call in
-    this module (the ``Ctrl("EXIT")`` call and the gRPC channel close).
-    ``Thread.join`` does not depend on gRPC's completion queue or deadline
-    machinery at all, so it bounds the wait even when the underlying
-    transport never reports the call as terminated -- see
-    :func:`_track_background_thread` for why the thread cannot simply be
-    killed instead.
-
-    Parameters
-    ----------
-    instance : Any
-        The object to track the thread against (via
-        :func:`_track_background_thread`) if it does not finish in time.
-        Typically a :class:`MapdlGrpc` instance.
-    fn : Callable[[], None]
-        The blocking, no-argument callable to run in the background thread.
-        Any exception it raises is captured and returned rather than
-        propagated from the background thread.
-    timeout : float
-        Seconds to wait for *fn* to finish before abandoning it.
-    thread_name : str
-        Name given to the background thread, surfaced in stack dumps and
-        thread listings to help identify abandoned threads.
-
-    Returns
-    -------
-    Tuple[bool, Optional[BaseException]]
-        ``(timed_out, error)``. ``timed_out`` is ``True`` if *fn* did not
-        finish within *timeout*, in which case the thread has already been
-        registered via :func:`_track_background_thread` and *error* is
-        always ``None`` (whatever *fn* would have raised is unknown, since it
-        never finished). Otherwise ``timed_out`` is ``False`` and *error* is
-        the exception *fn* raised, if any, or ``None`` if it returned
-        normally.
-    """
-    result: Dict[str, BaseException] = {}
-
-    def _target() -> None:
-        try:
-            fn()
-        except BaseException as exc:  # noqa: BLE001 - captured, handled by caller
-            result["error"] = exc
-
-    thread = threading.Thread(target=_target, name=thread_name, daemon=True)
-    thread.start()
-    thread.join(timeout)
-
-    if thread.is_alive():
-        # Give '_join_background_threads' a later, bounded chance to reclaim
-        # this thread instead of leaking it for good.
-        _track_background_thread(instance, thread)
-        return True, None
-
-    return False, result.get("error")
-
-
 class MapdlGrpc(MapdlBase):
     """This class connects to a GRPC MAPDL server and allows commands
     to be passed to a persistent session.
@@ -546,7 +351,9 @@ class MapdlGrpc(MapdlBase):
         The default is ``False``.
 
     disable_run_at_connect: bool, optional
-        Whether to disable the housekeeping commands when connecting.
+        Whether to skip the connection-time setup: it sets the POST26 variable
+        limit (``NUMVAR,200``), sets the ``/SHOW`` plot file type, and caches the
+        working directory and the MAPDL version.
         The default is ``False``.
 
     channel : grpc.Channel, optional
@@ -606,6 +413,7 @@ class MapdlGrpc(MapdlBase):
     # Required by `_name` method to be defined before __init__ be
     _ip: Optional[str] = None
     _port: Optional[int] = None
+    _lazy_array_prefix = "PYMAPDL_LAZY_"
 
     def __init__(
         self,
@@ -668,8 +476,6 @@ class MapdlGrpc(MapdlBase):
 
         # port and ip are needed to setup the log
         if port is None:
-            from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
-
             port = MAPDL_DEFAULT_PORT
 
         self._port: int = int(port)
@@ -687,9 +493,11 @@ class MapdlGrpc(MapdlBase):
         self._configure_transport(ip=ip, port=port)
         self._mode: Literal["grpc"] = "grpc"
 
-        # gRPC request specific locks as these gRPC request are not thread safe
-        self._vget_lock: bool = False
+        # gRPC request locks and lazy result bookkeeping.
         self._get_lock: bool = False
+        self._vget_lock: bool = False
+        self._lazy_array_counter: int = 0
+        self._lazy_array_parameters: set[str] = set()
 
         self._prioritize_thermal: bool = False
         self._locked: bool = False  # being used within MapdlPool
@@ -730,18 +538,6 @@ class MapdlGrpc(MapdlBase):
         # connectivity callback thread.
         self._current_call: Optional[grpc.Future] = None
         self._current_call_lock: threading.Lock = threading.Lock()
-        # Background thread that periodically issues a lightweight real RPC
-        # (see '_ping_abuse_probe_loop') to keep the MAPDL gRPC server's
-        # ping-abuse protection from tripping during long calls. Started by
-        # '_subscribe_to_channel' and stopped by '_close_grpc_channel'.
-        self._ping_probe_stop_event: threading.Event = threading.Event()
-        self._ping_probe_thread: Optional[threading.Thread] = None
-        # Daemon threads abandoned because they did not finish within their
-        # own hard wall-clock timeout (the ping-abuse probe, the Ctrl("EXIT")
-        # call, and the gRPC channel close all follow this pattern -- see
-        # '_track_background_thread'). Given a second, bounded chance to
-        # finish once the MAPDL process is dead, in '_join_background_threads'.
-        self._background_threads: List[threading.Thread] = []
 
         if channel is None:
             self._log.debug("Creating channel to %s:%s", ip, port)
@@ -754,7 +550,9 @@ class MapdlGrpc(MapdlBase):
         self._subscribe_to_channel()
 
         # connect and validate to the channel
-        self._mapdl_process: Optional[subprocess.Popen] = start_parm.pop("process", None)  # type: ignore[assignment]
+        self._mapdl_process: Optional[subprocess.Popen] = start_parm.pop(
+            "process", None
+        )  # type: ignore[assignment]
 
         # saving for later use (for example open_gui)
         self._start_parm: Dict[str, Any] = start_parm
@@ -1079,76 +877,6 @@ class MapdlGrpc(MapdlBase):
 
         # Subscribe to channel state changes
         self._channel.subscribe(connectivity_callback, try_to_connect=True)
-
-        self._start_ping_abuse_probe()
-
-    def _ping_abuse_probe_loop(self) -> None:
-        """Periodically issue a lightweight real RPC to reset the MAPDL gRPC
-        server's ping-abuse tracker.
-
-        Runs on its own daemon thread, started by :meth:`_subscribe_to_channel`
-        and stopped by :meth:`_close_grpc_channel`. Every
-        ``PING_ABUSE_PROBE_INTERVAL_S`` seconds it calls
-        ``self._ctrl("VERSION", ...)``, a cheap, already-bounded RPC. This is
-        real application data, not an HTTP/2 ping, so it resets the server's
-        ping-abuse strike counter (see the comment above
-        ``PING_ABUSE_INTERVAL_S``), preventing the HTTP/2 keepalive pings
-        configured in ``DEFAULT_GRPC_OPTIONS`` from ever accumulating a 3rd,
-        connection-ending strike while a long call (such as ``SOLVE``) keeps
-        the channel busy for longer than a few ping intervals.
-
-        Failures (for example, MAPDL is genuinely unresponsive) are only
-        logged: the connectivity-state watchdog set up in
-        :meth:`_subscribe_to_channel` is the sole authority on declaring the
-        channel dead and cancelling any in-flight call.
-        """
-        while not self._ping_probe_stop_event.wait(PING_ABUSE_PROBE_INTERVAL_S):
-            try:
-                self._ctrl("VERSION", timeout=PING_ABUSE_PROBE_TIMEOUT_S)
-            except (grpc.RpcError, MapdlRuntimeError) as exc:
-                self._log.debug(f"Ping-abuse probe RPC failed: {exc}")
-
-    def _start_ping_abuse_probe(self) -> None:
-        """Start the background ping-abuse probe thread, if not already running.
-
-        Safe to call more than once (for example, on reconnect): a thread
-        already running is left untouched.
-        """
-        if self._ping_probe_thread is not None and self._ping_probe_thread.is_alive():
-            return
-
-        self._ping_probe_stop_event.clear()
-        self._ping_probe_thread = threading.Thread(
-            target=self._ping_abuse_probe_loop,
-            name="pymapdl-ping-abuse-probe",
-            daemon=True,
-        )
-        self._ping_probe_thread.start()
-
-    def _stop_ping_abuse_probe(self) -> None:
-        """Stop the background ping-abuse probe thread, if running.
-
-        Safe to call multiple times; subsequent calls are no-ops.
-        """
-        stop_event = getattr(self, "_ping_probe_stop_event", None)
-        if stop_event is not None:
-            stop_event.set()
-
-        thread = getattr(self, "_ping_probe_thread", None)
-        self._ping_probe_thread = None
-        if (
-            thread is not None
-            and thread.is_alive()
-            and thread is not threading.current_thread()
-        ):
-            thread.join(timeout=PING_ABUSE_PROBE_TIMEOUT_S)
-            if thread.is_alive():
-                # Blocked inside the RPC issued by '_ping_abuse_probe_loop'
-                # (for example, a dead peer that never reports the call as
-                # terminated). Rather than leaking it silently, register it
-                # so '_join_background_threads' gets one more, later chance
-                # to reclaim it once the MAPDL process is actually dead.
-                _track_background_thread(self, thread)
 
     def _track_call(self, call: grpc.Future) -> None:
         """Record ``call`` as the in-flight gRPC call.
@@ -1894,19 +1622,6 @@ class MapdlGrpc(MapdlBase):
             return False
         self._log.debug("Established connection to MAPDL gRPC")
 
-        # keeps mapdl session alive
-        self._timer = None
-        if not self._local:
-            self._initialised = threading.Event()
-            self._t_trigger = time.time()
-            self._t_delay = 30
-            self._timer = threading.Thread(
-                target=MapdlGrpc._threaded_heartbeat,
-                args=(weakref.proxy(self),),
-            )
-            self._timer.daemon = True
-            self._timer.start()
-
         return True
 
     @property
@@ -2044,9 +1759,6 @@ class MapdlGrpc(MapdlBase):
     def _run_at_connect(self):
         """Run house-keeping commands when initially connecting to MAPDL."""
         # increase the number of variables allowed in POST26 to the maximum
-        with self.run_as_routine("Begin level"):
-            self._run("/verify", mute=False)
-
         with self.run_as_routine("POST26"):
             self.numvar(200, mute=True)
 
@@ -2268,22 +1980,6 @@ class MapdlGrpc(MapdlBase):
 
         return "".join(response)
 
-    def _threaded_heartbeat(self):
-        """To be called from a thread to verify MAPDL instance is alive"""
-        self._initialised.set()
-        while True:
-            if self._exited:
-                break
-
-            try:
-                time.sleep(self._t_delay)
-                if not self.is_alive:
-                    break
-            except ReferenceError:
-                break
-            except Exception:
-                self._log.debug("Checking if MAPDL instance is still alive.")
-
     # Placing logging in the exit method raises exceptions when
     # this is triggered by "__del__"
     @protect_from(ValueError, "I/O operation on closed file.")
@@ -2342,6 +2038,14 @@ class MapdlGrpc(MapdlBase):
                 self._disconnect_but_leave_mapdl_running()
                 return
 
+            cleanup_error = None
+            try:
+                self._cleanup_lazy_array_parameters()
+            except Exception as error:
+                # Continue tearing down the connection, then report the
+                # cleanup failure to the caller.
+                cleanup_error = error
+
             if save:
                 self._log.debug("Saving MAPDL database")
                 self.save()
@@ -2353,16 +2057,22 @@ class MapdlGrpc(MapdlBase):
                         "Ignoring exit due to PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't launch the instance."
                     )
                     self._disconnect_but_leave_mapdl_running()
+                    if cleanup_error is not None:
+                        raise cleanup_error
                     return
 
                 # or building the gallery
                 if pymapdl.BUILDING_GALLERY:
                     self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
                     self._disconnect_but_leave_mapdl_running()
+                    if cleanup_error is not None:
+                        raise cleanup_error
                     return
 
             # Step 3 of '_release_resources' closes the gRPC channel.
             self._release_resources(path=self._path)
+            if cleanup_error is not None:
+                raise cleanup_error
 
         finally:
             self._exiting = False
@@ -2374,11 +2084,7 @@ class MapdlGrpc(MapdlBase):
         pending RPCs and releases the socket, but it does not stop the MAPDL
         server. This is what :meth:`exit` performs on the paths where MAPDL
         itself must survive, so that the ``_poll_connectivity`` daemon thread
-        and the PIPE-drainer threads do not outlive this object. Any
-        background thread abandoned earlier (the ping-abuse probe, the
-        ``Ctrl("EXIT")`` call, or the gRPC channel close itself) also gets one
-        more bounded chance to exit here, via
-        :meth:`_join_background_threads`.
+        and the PIPE-drainer threads do not outlive this object.
 
         The instance is marked as exited because the channel is gone. Use
         :meth:`reconnect_to_mapdl` to build a fresh channel and resume driving
@@ -2390,9 +2096,8 @@ class MapdlGrpc(MapdlBase):
             Whether this is being called from best-effort, garbage-collection
             driven teardown (:meth:`__del__`) rather than the deterministic
             :meth:`exit` path. If ``True``, this suppresses this method's own
-            debug logging, and is forwarded to :meth:`_close_grpc_channel`,
-            :meth:`_join_pipe_drainer_threads`, and
-            :meth:`_join_background_threads` to suppress theirs, since
+            debug logging, and is forwarded to :meth:`_close_grpc_channel` and
+            :meth:`_join_pipe_drainer_threads` to suppress theirs, since
             logging is unreliable during interpreter shutdown. The default is
             ``False``.
 
@@ -2421,12 +2126,6 @@ class MapdlGrpc(MapdlBase):
             if not exiting:
                 self._log.debug("Error joining pipe-drainer threads: %s", e)
 
-        try:
-            _join_background_threads(self, exiting=exiting)
-        except Exception as e:
-            if not exiting:
-                self._log.debug("Error joining background threads: %s", e)
-
         self._exited = True
 
     def _exit_mapdl(self, path: Optional[str] = None) -> None:
@@ -2435,13 +2134,8 @@ class MapdlGrpc(MapdlBase):
         if self._local:
             self._cache_pids()  # Recache processes
 
-            # ``_exit_mapdl_server`` (and the ``Ctrl("EXIT")`` call it
-            # issues) can raise - for instance ``RuntimeError: can't create
-            # new thread at interpreter shutdown`` when this runs from
-            # ``__del__`` during interpreter finalization. The PID-based
-            # ``_close_process``/``_remove_lock_file`` cleanup below does not
-            # depend on the server having been asked to exit cleanly, so it
-            # must still run in that case rather than being skipped.
+            # The PID-based cleanup must run even if asking the server to exit
+            # fails.
             try:
                 self._exit_mapdl_server()
             except Exception as e:
@@ -2467,16 +2161,13 @@ class MapdlGrpc(MapdlBase):
         1. Kill the MAPDL server process and remove the lock file.
         2. Join the stdout, stderr, and startup PIPE-drainer threads.
         3. Close the gRPC channel.
-        4. Give any background threads abandoned earlier (the ping-abuse
-           probe, the ``Ctrl("EXIT")`` call, and the gRPC channel close) one
-           more bounded chance to exit, now that the MAPDL process is dead.
-        5. Remove the UDS socket file (Unix Domain Socket transport only).
-        6. Remove the port from the global ``_LOCAL_PORTS`` registry.
-        7. Cancel the SLURM/HPC job (if applicable).
-        8. Delete the remote PyMAPDL server instance (if applicable).
-        9. Mark the instance as exited (``_exited = True``).
-        10. Remove the temporary working directory (if ``remove_temp_dir_on_exit``).
-        11. Clean up logger handlers (only when ``cleanup_loggers`` is ``True``).
+        4. Remove the UDS socket file (Unix Domain Socket transport only).
+        5. Remove the port from the global ``_LOCAL_PORTS`` registry.
+        6. Cancel the SLURM/HPC job (if applicable).
+        7. Delete the remote PyMAPDL server instance (if applicable).
+        8. Mark the instance as exited (``_exited = True``).
+        9. Remove the temporary working directory (if ``remove_temp_dir_on_exit``).
+        10. Clean up logger handlers (only when ``cleanup_loggers`` is ``True``).
 
         Parameters
         ----------
@@ -2505,8 +2196,8 @@ class MapdlGrpc(MapdlBase):
 
         Notes
         -----
-        Steps 1 to 8 run while ``_exited`` is still ``False`` so that they can
-        reach the server and emit log records. Step 9 flips the flag *before*
+        Steps 1 to 7 run while ``_exited`` is still ``False`` so that they can
+        reach the server and emit log records. Step 8 flips the flag *before*
         the temporary directory is removed, because
         :meth:`_remove_temp_dir_on_exit` falls back to the ``directory``
         property, which would otherwise issue an ``/INQUIRE`` command against
@@ -2517,6 +2208,8 @@ class MapdlGrpc(MapdlBase):
         in one step does not prevent the remaining resources from being freed.
         This also makes the method safe to call during interpreter shutdown,
         where module globals may already have been torn down.
+        Local garbage-collection teardown uses cached process information rather
+        than querying or commanding MAPDL, because GC can interrupt a gRPC call.
 
         Callers must set ``_exiting = True`` before invoking this method (and
         reset it once done), so that :attr:`is_alive` short-circuits instead
@@ -2548,9 +2241,16 @@ class MapdlGrpc(MapdlBase):
 
         # 1. Kill MAPDL process + remove lock file
         try:
-            self._exit_mapdl(path)
+            if exiting and self._local:
+                # GC may interrupt gRPC itself; use cached process data, not RPCs.
+                self._close_process()
+                if path:
+                    self._remove_lock_file(path, use_cached=True)
+            else:
+                self._exit_mapdl(path)
         except Exception as e:
-            self._log.debug("Error during _exit_mapdl: %s", e)
+            if not exiting:
+                self._log.debug("Error during _exit_mapdl: %s", e)
 
         # 2. Ensure PIPE-drainer threads (stdout/stderr/startup) are joined so
         # that background reader threads do not leak after teardown.
@@ -2567,19 +2267,7 @@ class MapdlGrpc(MapdlBase):
             if not exiting:
                 self._log.debug("Error closing gRPC channel: %s", e)
 
-        # 4. Give any background threads abandoned earlier (the ping-abuse
-        # probe, the Ctrl("EXIT") call, and the gRPC channel close) one more
-        # bounded chance to exit. The MAPDL process is dead and the channel
-        # is closed by this point, so a call any of them were blocked on
-        # typically unblocks quickly, letting most abandoned threads be
-        # reclaimed here instead of leaking for the remaining process life.
-        try:
-            _join_background_threads(self, exiting=exiting)
-        except Exception as e:
-            if not exiting:
-                self._log.debug("Error joining background threads: %s", e)
-
-        # 5. Remove UDS socket file
+        # 4. Remove UDS socket file
         try:
             if getattr(self, "transport_mode", None) == "uds":
                 socket_path = os.path.join(self.uds_dir, f"mapdl-{self.port}.sock")
@@ -2589,7 +2277,7 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error removing UDS socket: %s", e)
 
-        # 6. Deregister port from global registry
+        # 5. Deregister port from global registry
         try:
             from ansys.mapdl import core as pymapdl
 
@@ -2598,7 +2286,7 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error removing port from _LOCAL_PORTS: %s", e)
 
-        # 7. Cancel HPC job
+        # 6. Cancel HPC job
         try:
             if self._mapdl_on_hpc and self.finish_job_on_exit:
                 self.kill_job(self.jobid)
@@ -2606,24 +2294,24 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error cancelling HPC job: %s", e)
 
-        # 8. Delete remote PyMAPDL server instance
+        # 7. Delete remote PyMAPDL server instance
         try:
             if self._remote_instance:  # pragma: no cover
                 self._remote_instance.delete()
         except Exception as e:
             self._log.debug("Error deleting remote instance: %s", e)
 
-        # 9. Mark exited — before the temp dir removal, so that the 'directory'
+        # 8. Mark exited — before the temp dir removal, so that the 'directory'
         # fallback in '_remove_temp_dir_on_exit' cannot query the dead server
         self._exited = True
 
-        # 10. Remove temporary working directory
+        # 9. Remove temporary working directory
         try:
             self._remove_temp_dir_on_exit(path)
         except Exception as e:
             self._log.debug("Error removing temp dir: %s", e)
 
-        # 11. Clean up logger handlers.
+        # 10. Clean up logger handlers.
         # Skipped when called from ``__del__`` (``cleanup_loggers=False``):
         # the logger and its handlers are shared, process-wide state, and
         # tearing them down from non-deterministic, GC-driven code can race
@@ -2649,21 +2337,12 @@ class MapdlGrpc(MapdlBase):
         precisely the case that used to leak, because ``exit()`` returns early
         for such instances.
 
-        The close is never allowed to block indefinitely. It is skipped
-        entirely once the interpreter is finalizing, and bounded by
-        ``CHANNEL_CLOSE_TIMEOUT_S`` otherwise, because ``grpc.Channel.close``
-        waits without a timeout for gRPC's channel-spin thread to drain the
-        remaining calls and connectivity events. When that thread cannot run,
-        the wait never ends and the calling thread deadlocks.
-
         Parameters
         ----------
         exiting : bool, optional
             Whether this is being called during the exit process. If True, it
             will suppress logging of errors during channel closure. Default is False.
         """
-        self._stop_ping_abuse_probe()
-
         channel = getattr(self, "_channel", None)
         callback = getattr(self, "_connectivity_callback", None)
 
@@ -2673,54 +2352,20 @@ class MapdlGrpc(MapdlBase):
         if channel is None:
             return
 
-        if sys.is_finalizing():
-            # During interpreter finalization CPython parks every daemon
-            # thread the moment it next tries to reacquire the GIL, and that
-            # includes gRPC's channel-spin thread. Both ``unsubscribe`` and
-            # ``close`` wait on condition variables that only that thread can
-            # notify (``_cygrpc._close`` loops on ``integrated_call_states``
-            # and ``connectivity_due`` with no timeout of its own), so calling
-            # them here deadlocks the main thread forever rather than raising.
-            # The process is exiting and the OS reclaims the sockets anyway,
-            # so dropping the reference is enough.
-            return
-
-        def _unsubscribe_and_close() -> None:
-            if callback is not None:
-                try:
-                    channel.unsubscribe(callback)
-                except Exception as e:
-                    if not exiting:
-                        self._log.debug(f"Error unsubscribing from gRPC channel: {e}")
-
+        if callback is not None:
             try:
-                channel.close()
+                channel.unsubscribe(callback)
             except Exception as e:
                 if not exiting:
-                    self._log.debug(f"Error closing gRPC channel: {e}")
+                    self._log.debug(f"Error unsubscribing from gRPC channel: {e}")
 
-        # Outside of finalization the spin thread is normally alive, but the
-        # same wait can still stall (for example on a call that never reports
-        # termination after the peer was killed). Bound it from this thread
-        # with ``Thread.join``, which does not depend on gRPC machinery. If it
-        # expires we abandon the daemon thread: gRPC offers no way to cancel an
-        # in-flight blocking close.
-        timed_out, _ = _run_with_hard_timeout(
-            self,
-            _unsubscribe_and_close,
-            CHANNEL_CLOSE_TIMEOUT_S,
-            thread_name="pymapdl-close-grpc-channel",
-        )
-
-        if timed_out:
+        try:
+            channel.close()
             if not exiting:
-                self._log.debug(
-                    "Timed out after %s s while closing the gRPC channel. "
-                    "Abandoning the close call.",
-                    CHANNEL_CLOSE_TIMEOUT_S,
-                )
-        elif not exiting:
-            self._log.debug("gRPC channel closed")
+                self._log.debug("gRPC channel closed")
+        except Exception as e:
+            if not exiting:
+                self._log.debug(f"Error closing gRPC channel: {e}")
 
     def _remove_temp_dir_on_exit(self, path=None):
         """Removes the temporary directory created by the launcher.
@@ -2755,17 +2400,9 @@ class MapdlGrpc(MapdlBase):
         if self._exited:
             return
 
-        # Default
-        if self._version is None or self._version < 24.1:
-            self._ctrl("EXIT")
-
-        elif self._version >= 24.1:
-            # We can't use the non-cached version because of recursion error.
-            # self.run("/EXIT,NOSAVE,,,,,SERVER")
-            self.finish()
-            self._ctrl("EXIT")
-
-        return
+        # MAPDL ignores EXIT unless it is at the Begin level.
+        self.finish()
+        self._ctrl("EXIT")
 
     def _close_process_pipes(self, process: subprocess.Popen) -> None:  # type: ignore[type-arg]
         """Close all open I/O streams attached to *process*.
@@ -3075,9 +2712,21 @@ class MapdlGrpc(MapdlBase):
         --------
         >>> mapdl.sys('ls')
         """
+        return self._sys(cmd, check_blocked=True, **kwargs)
+
+    @supress_logging
+    def _sys(self, cmd: str, check_blocked: bool = False, **kwargs) -> str:
+        """Run ``/SYS`` and return its output.
+
+        PyMAPDL internals call this directly so that they keep working when
+        ``/SYS`` is in ``blocked_commands``. Only ``sys()`` checks the block.
+        """
         # always redirect system output to a temporary file
         tmp_file = f"__tmp_sys_out_{random_string()}__"
-        super().sys(f"{cmd} > {tmp_file}", **kwargs)
+        if check_blocked:
+            super().sys(f"{cmd} > {tmp_file}", **kwargs)
+        else:
+            self._run(f"/SYS,{cmd} > {tmp_file}")
         if self._local:  # no need to download when local
             with open(self.directory / tmp_file) as fobj:
                 obj = fobj.read()
@@ -3205,7 +2854,34 @@ class MapdlGrpc(MapdlBase):
     def _ctrl(
         self, cmd: str, opt1: str = "", timeout: Optional[float] = 1.0
     ):  # numpydoc ignore=RT01
-        """Issue control command to the MAPDL server.
+        """Issue control command to the MAPDL server, with gRPC error handling.
+
+        See :meth:`_ctrl_raw` for the available commands.
+
+        Parameters
+        ----------
+        cmd : str
+            Control command to send.
+        opt1 : str, optional
+            Option accompanying ``cmd``. The default is ``""``.
+        timeout : float, optional
+            Maximum time in seconds to wait for the server to respond.
+            The default is ``1.0``. Use ``None`` to wait indefinitely.
+
+        Returns
+        -------
+        str or None
+            The server response, if any.
+        """
+        return self._ctrl_raw(cmd, opt1, timeout)
+
+    def _ctrl_raw(
+        self, cmd: str, opt1: str = "", timeout: Optional[float] = 1.0
+    ):  # numpydoc ignore=RT01
+        """Issue control command to the MAPDL server, without retries.
+
+        Unlike :meth:`_ctrl`, gRPC errors are raised as is and MAPDL is never
+        marked as exited, so this is safe to call from ``is_alive``.
 
         Available commands:
 
@@ -3259,117 +2935,85 @@ class MapdlGrpc(MapdlBase):
 
         if self._stub is None:
             raise MapdlRuntimeError("MAPDL stub not initialized")
-        stub = self._stub
 
         # handle socket closing upon exit
         if cmd.lower() == "exit":
-            # The server process is expected to die (almost) immediately
-            # after receiving this command, and the blocking Ctrl("EXIT")
-            # call is expected to fail once the connection is severed.
-            #
-            # However, on at least some local transports (observed with
-            # WNUA on Windows, but WNUA itself is just a plain
-            # 'grpc.insecure_channel' under the hood - see
-            # 'ansys.tools.common.cyberchannel.create_wnua_channel' - so
-            # this is not believed to be WNUA-specific), gRPC's own
-            # per-call deadline (``timeout``) and connectivity-state
-            # callbacks are not reliably honored once the peer process is
-            # killed abruptly: the call can block in
-            # 'grpc._channel._Rendezvous._blocking' -> 'call.next_event()'
-            # indefinitely, well past ``timeout``, hanging the caller
-            # forever.
-            #
-            # To guard against that, run the blocking call in a background
-            # thread and enforce our own hard wall-clock timeout from this
-            # (calling) thread via 'Thread.join'. That join does not depend
-            # on gRPC's completion queue or deadline machinery at all, so
-            # it bounds the wait even if the underlying transport never
-            # reports the connection as dead. If the call does not return
-            # in time we abandon the wait: the background thread is left
-            # running as a daemon (gRPC gives no safe way to cancel/abort
-            # an in-flight blocking call), and process-based cleanup
-            # (``_close_process`` / PID-based killing) takes over instead.
-            self._log.debug(
-                f"transport_mode={getattr(self, 'transport_mode', None)!r} "
-                f"ctrl_timeout={timeout!r}"
-            )
-
-            if sys.is_finalizing():
-                # CPython refuses to start new threads once the interpreter
-                # is finalizing (``RuntimeError: can't create new thread at
-                # interpreter shutdown``), which is exactly the situation
-                # ``__del__`` can run in. Fall back to a direct, untracked
-                # call bounded only by gRPC's own ``timeout``: it may not be
-                # reliably honored on every transport (see above), but
-                # spawning a thread here is not an option, and the
-                # PID-based ``_close_process`` cleanup that follows does not
-                # depend on this call succeeding or even returning.
-                try:
-                    stub.Ctrl(request, timeout=timeout)
-                except (_InactiveRpcError, _MultiThreadedRendezvous):
-                    pass
-                return
-
-            def _call_ctrl_exit() -> None:
-                # this always returns an error as the connection is closed
-                stub.Ctrl(request, timeout=timeout)
-
-            # extra slack on top of the gRPC-level timeout to allow for
-            # normal call/response overhead before we give up waiting
-            hard_timeout_buffer = 3.0
-            hard_timeout = timeout + hard_timeout_buffer if timeout is not None else 5.0
-            t_start = time.time()
-            timed_out, error = _run_with_hard_timeout(
-                self,
-                _call_ctrl_exit,
-                hard_timeout,
-                thread_name="pymapdl-ctrl-exit",
-            )
-
-            if timed_out:
-                # The background thread issuing the call keeps running
-                # (typically until the MAPDL process has actually been
-                # killed and the call unblocks); '_join_background_threads'
-                # gets a later, bounded chance to reclaim it instead of
-                # leaking it for the remaining lifetime of the process.
-                self._log.warning(
-                    f"Ctrl('EXIT') call did not return within "
-                    f"{hard_timeout:.1f}s (hard wall-clock timeout); "
-                    "abandoning the wait since the underlying transport "
-                    "did not honor the per-call deadline. Proceeding with "
-                    "process-based cleanup instead. The background thread "
-                    "issuing the call will keep running until the "
-                    "connection is eventually closed."
-                )
-                return
-
-            elapsed = time.time() - t_start
-            if error is None:
-                self._log.debug(
-                    f"Ctrl('EXIT') returned normally after {elapsed:.2f}s "
-                    "(unexpected: usually errors)"
-                )
-            elif isinstance(error, (_InactiveRpcError, _MultiThreadedRendezvous)):
-                self._log.debug(
-                    f"Ctrl('EXIT') raised expected {type(error).__name__} "
-                    f"after {elapsed:.2f}s: {error}"
-                )
-            else:
-                self._log.debug(
-                    f"Ctrl('EXIT') raised unexpected {type(error).__name__} "
-                    f"after {elapsed:.2f}s: {error}"
-                )
-                raise error
+            self._ctrl_exit(request, timeout)
             return
 
         resp = self._stub.Ctrl(request, timeout=timeout)
 
-        if cmd.lower() == "set_verb" and str(opt1) == "0":
-            warn("Disabling gRPC verbose ('_ctr') by issuing also '/VERIFY' command.")
-            self.run("/verify")
-
         if hasattr(resp, "response"):
             return resp.response
+
+    def _ctrl_exit(self, request: Any, timeout: Optional[float]) -> None:
+        """Send ``Ctrl("EXIT")`` without letting a dead server hang the caller.
+
+        The server dies while handling this request, so the call is expected
+        to fail with a gRPC error, which is ignored. On some local transports
+        (observed with WNUA on Windows), gRPC does not honor the per-call
+        ``timeout`` once the server process dies, and the blocking call never
+        returns. To bound the wait, the call runs in a daemon thread that is
+        joined with a wall-clock timeout. If the thread is still running
+        afterward, it is abandoned and the PID-based process cleanup takes
+        over.
+
+        Parameters
+        ----------
+        request : CtrlRequest
+            The ``EXIT`` control request.
+        timeout : float, optional
+            gRPC deadline for the call. The wall-clock bound is this value
+            plus ``CTRL_EXIT_HARD_TIMEOUT_BUFFER_S``, or
+            ``CTRL_EXIT_HARD_TIMEOUT_BUFFER_S`` when ``None``.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        Exception
+            Any error from the call other than the expected gRPC errors.
+        """
+        stub = self._stub
+        if stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
+
+        if sys.is_finalizing():
+            # New threads cannot be started during interpreter shutdown, which
+            # is when '__del__' may run. Fall back to the direct call.
+            try:
+                stub.Ctrl(request, timeout=timeout)
+            except (_InactiveRpcError, _MultiThreadedRendezvous):
+                pass
+            return
+
+        errors: List[BaseException] = []
+
+        def _call() -> None:
+            try:
+                stub.Ctrl(request, timeout=timeout)
+            except (_InactiveRpcError, _MultiThreadedRendezvous):
+                pass
+            except BaseException as exc:  # re-raised in the calling thread
+                errors.append(exc)
+
+        hard_timeout = (timeout or 0.0) + CTRL_EXIT_HARD_TIMEOUT_BUFFER_S
+        thread = threading.Thread(target=_call, name="pymapdl-ctrl-exit", daemon=True)
+        thread.start()
+        thread.join(hard_timeout)
+
+        if thread.is_alive():
+            self._log.warning(
+                "Ctrl('EXIT') did not return within %.1f s. Abandoning the "
+                "call and continuing with process cleanup.",
+                hard_timeout,
+            )
+            return
+
+        if errors:
+            raise errors[0]
 
     @wraps(MapdlBase.cdread)
     def cdread(
@@ -3458,7 +3102,6 @@ class MapdlGrpc(MapdlBase):
             **kwargs,
         )
 
-    @protect_grpc
     def input(
         self,
         fname="",
@@ -3584,6 +3227,39 @@ class MapdlGrpc(MapdlBase):
         >>> from ansys.mapdl.core import mapdl_grpc
         >>> mapdl_grpc.DEFAULT_TIME_STEP_STREAM=100 # in milliseconds
         """
+        self._check_blocked_commands(orig_cmd)
+        return self._stream_input(
+            fname,
+            ext,
+            dir_,
+            line,
+            log,
+            verbose=verbose,
+            progress_bar=progress_bar,
+            time_step_stream=time_step_stream,
+            chunk_size=chunk_size,
+            orig_cmd=orig_cmd,
+            write_to_log=write_to_log,
+            **kwargs,
+        )
+
+    @protect_grpc
+    def _stream_input(
+        self,
+        fname="",
+        ext="",
+        dir_="",
+        line="",
+        log="",
+        *,
+        verbose=False,
+        progress_bar=False,
+        time_step_stream=None,
+        chunk_size=512,
+        orig_cmd="/INP",
+        write_to_log=True,
+        **kwargs,
+    ):
         # Checking compatibility
         # Checking the user is not reusing old api:
         #
@@ -3855,7 +3531,7 @@ class MapdlGrpc(MapdlBase):
             self._apdl_log.write(commands + "\n")
 
         self._log.debug(
-            "Writing the following commands to a temporary " "apdl input file:\n%s",
+            "Writing the following commands to a temporary apdl input file:\n%s",
             commands,
         )
 
@@ -3875,7 +3551,8 @@ class MapdlGrpc(MapdlBase):
         self._stored_commands = []
 
         # run the stored commands
-        out = self.input(
+        # already checked by run() and input_strings() when stored
+        out = self._stream_input(
             tmp_filename,
             write_to_log=False,
             verbose=False,
@@ -4434,6 +4111,30 @@ class MapdlGrpc(MapdlBase):
             raise IOError("File failed to upload")
         return os.path.basename(file_name)
 
+    def _get_array_from_service(
+        self,
+        entity,
+        entnum,
+        item1,
+        it1num,
+        item2,
+        it2num,
+        kloop,
+    ) -> NDArray[np.float64]:
+        """Return an eager ``*VGET`` result through the gRPC service."""
+        while self._vget_lock:
+            time.sleep(0.001)
+        self._vget_lock = True
+
+        cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
+        try:
+            if self._stub is None:
+                raise MapdlRuntimeError("MAPDL stub not initialized")
+            chunks = self._stub.VGet2(pb_types.GetRequest(getcmd=cmd))
+            return parse_chunks(chunks)
+        finally:
+            self._vget_lock = False
+
     @protect_grpc
     def _get_array(
         self,
@@ -4445,35 +4146,52 @@ class MapdlGrpc(MapdlBase):
         it2num="",
         kloop="",
         **kwargs,
-    ):
-        """Do a gRPC VGET request.
+    ) -> Union[NDArray[np.float64], LazyArray]:
+        """Populate a private MAPDL parameter and return it lazily.
 
-        Send a vget request, receive a bytes stream, and return it as
-        a numpy array.
-
-        Not thread safe as it uses a constant internal temporary
-        parameter name.  This method uses _vget_lock to ensure
-        multiple simultaneous request fail.
-
-        Returns
-        -------
-        values : np.ndarray
-            Numpy 1D array containing the requested *VGET item and entity.
+        The ``*VGET`` command is issued immediately so the result reflects the
+        selection at call time, even if the selection changes before the values
+        are used. Only the download is deferred. On first use, the values are
+        read with a binary ``*GET`` plus ``mwrite`` rather than by parsing
+        ``*STATUS,PRM_`` output.
         """
         if "parm" in kwargs:
             raise ValueError("Parameter name `parm` not supported with gRPC")
-
-        while self._vget_lock:
-            time.sleep(0.001)
-        self._vget_lock = True
-
-        cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
+        if str(item1).strip().upper() == "ETAB":
+            return self._get_array_from_service(
+                entity, entnum, item1, it1num, item2, it2num, kloop
+            )
+        parameter_name = self._new_lazy_array_parameter()
         try:
-            chunks = self._stub.VGet2(pb_types.GetRequest(getcmd=cmd))
-            values = parse_chunks(chunks)
-        finally:
-            self._vget_lock = False
-        return values
+            output = self.starvget(
+                parameter_name,
+                entity,
+                entnum,
+                item1,
+                it1num,
+                item2,
+                it2num,
+                kloop,
+                mute=False,
+            )
+        except Exception as error:
+            try:
+                self._delete_lazy_array_parameter(parameter_name)
+            except Exception as cleanup_error:
+                raise cleanup_error from error
+            raise
+
+        if "the dimension number 1 is 0" in output:
+            self._delete_lazy_array_parameter(parameter_name)
+            return np.empty(0)
+
+        return LazyArray(
+            self,
+            parameter_name,
+            cleanup=lambda: self._delete_lazy_array_parameter(parameter_name),
+            fetch=lambda: self._read_owned_array_parameter(parameter_name),
+            flatten=True,
+        )
 
     def _screenshot_path(self):  # numpydoc ignore=RT01
         """Returns the local path of the MAPDL generated screenshot.
@@ -4536,8 +4254,14 @@ class MapdlGrpc(MapdlBase):
             self._log.debug("MAPDL instance is expected to be exiting")
             return False
 
+        if self._stub is None:
+            self._log.debug("MAPDL instance is not alive because it is not connected.")
+            return False
+
         try:
-            check = bool(self._ctrl("VERSION"))
+            # Not '_ctrl': 'protect_grpc' calls 'is_alive' while retrying, so a
+            # retried probe would recurse until 'RecursionError'.
+            check = bool(self._ctrl_raw("VERSION"))
             if check:
                 self._log.debug(
                     "MAPDL instance is alive because version was retrieved."
@@ -4548,10 +4272,31 @@ class MapdlGrpc(MapdlBase):
                 )
             return check
 
+        except grpc.RpcError as error:
+            if self._exited:
+                return False
+            # MAPDL on v25.2 can answer 'Ctrl' with UNIMPLEMENTED on a new channel -> so a failed version check isn't proof that MAPDL is not alive.
+            if error.code() == grpc.StatusCode.UNIMPLEMENTED:
+                try:
+                    self._stub.SendCommand(
+                        pb_types.CmdRequest(command="/COM"), timeout=1.0
+                    )
+                except Exception as cmd_error:
+                    self._log.debug(
+                        f"MAPDL instance is not alive because '/COM' also failed with:\n{cmd_error}"
+                    )
+                    return False
+                self._log.debug(
+                    "MAPDL instance is alive because '/COM' succeeded after 'Ctrl' returned UNIMPLEMENTED."
+                )
+                return True
+            self._log.debug(
+                f"MAPDL instance is not alive because retrieving version failed with:\n{error}"
+            )
+            return False
         except Exception as error:
             if self._exited:
                 return False
-
             self._log.debug(
                 f"MAPDL instance is not alive because retrieving version failed with:\n{error}"
             )
@@ -4952,6 +4697,50 @@ class MapdlGrpc(MapdlBase):
             self.__distributed = self.parameters.numcpu > 1
         return self.__distributed
 
+    def _new_lazy_array_parameter(self) -> str:
+        """Reserve an unused, valid MAPDL parameter name for a lazy result."""
+        prefix = self._lazy_array_prefix
+        while True:
+            self._lazy_array_counter += 1
+            candidate = f"{prefix}{self._lazy_array_counter:016X}"
+            if len(candidate) > MAX_PARAM_CHARS:  # pragma: no cover
+                raise MapdlRuntimeError("Unable to generate a valid lazy-array name.")
+
+            # Include parameters hidden by display settings while checking so
+            # a user parameter cannot be overwritten.
+            with self.parameters.full_parameters_output:
+                if candidate not in self.parameters:
+                    self._lazy_array_parameters.add(candidate)
+                    return candidate
+
+    def _delete_lazy_array_parameter(self, parameter_name: str) -> None:
+        """Delete an owned lazy-result parameter and unregister it."""
+        self.run(f"{parameter_name}=", mute=True)
+        self._lazy_array_parameters.remove(parameter_name)
+
+    def _cleanup_lazy_array_parameters(self) -> None:
+        """Delete every unresolved lazy-result parameter."""
+        for parameter_name in tuple(getattr(self, "_lazy_array_parameters", ())):
+            self._delete_lazy_array_parameter(parameter_name)
+
+    def _read_owned_array_parameter(self, parameter_name: str) -> NDArray[np.float64]:
+        """Download an owned column-vector parameter without parsing ``*STATUS``.
+
+        The row count is read with a binary ``*GET`` query and the values are
+        streamed with ``mwrite``, so this avoids the version-fragile
+        ``*STATUS,PRM_`` listing that
+        :meth:`Parameters.__getitem__ <ansys.mapdl.core.parameters.Parameters.__getitem__>`
+        performs to discover the array shape.
+
+        The result keeps the ``(rows, 1)`` shape that ``Parameters`` returns for
+        ``*VGET`` parameters, so ``get_variable`` results are unchanged.
+        ``get_array`` flattens it through ``LazyArray(flatten=True)``.
+        """
+        rows = int(self.get_value("PARM", parameter_name, "DIM", 1))
+        if rows == 0:
+            return np.empty(0)
+        return self.parameters._get_parameter_array(parameter_name, (rows, 1))
+
     @wraps(MapdlBase.vget)
     def vget(  # numpydoc ignore=RT01
         self,
@@ -4961,10 +4750,11 @@ class MapdlGrpc(MapdlBase):
         kcplx: MapdlInt = "",
         **kwargs: KwargDict,
     ) -> NDArray[np.float64]:
-        """Wraps VGET"""
+        """Wraps VGET and returns its values eagerly."""
         super().vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
-        if not self._store_commands:
-            return self.parameters[par]
+        if self._store_commands:
+            return None
+        return self.parameters[par]
 
     def get_variable(
         self,
@@ -4972,16 +4762,18 @@ class MapdlGrpc(MapdlBase):
         tstrt: MapdlFloat = "",
         kcplx: MapdlInt = "",
         **kwargs: KwargDict,
-    ) -> NDArray[np.float64]:
+    ) -> LazyArray:
         """
-        Obtain the POST26 time-history variable values as an array.
+        Obtain the POST26 time-history variable values lazily.
 
         This method uses the ``VGET`` command to copy a POST26 variable
         (for example, one created with
         :func:`Mapdl.nsol() <ansys.mapdl.core.Mapdl.nsol>` or
-        :func:`Mapdl.esol() <ansys.mapdl.core.Mapdl.esol>`) into a temporary
-        MAPDL array parameter. It returns that parameter as a NumPy array and
-        then deletes the temporary parameter.
+        :func:`Mapdl.esol() <ansys.mapdl.core.Mapdl.esol>`) into a private
+        MAPDL array parameter. On gRPC connections, the returned
+        :class:`LazyArray <ansys.mapdl.core.lazy_array.LazyArray>` downloads
+        its values, and releases that private parameter, only when it is
+        first used.
 
         Parameters
         ----------
@@ -5006,8 +4798,10 @@ class MapdlGrpc(MapdlBase):
 
         Returns
         -------
-        np.array
-            Variable values as array.
+        LazyArray
+            Variable values downloaded from MAPDL when first used. Use
+            :func:`numpy.asarray` or :meth:`LazyArray.resolve` to materialize
+            the values explicitly.
 
         Examples
         --------
@@ -5018,7 +4812,7 @@ class MapdlGrpc(MapdlBase):
 
         >>> mapdl.post26()
         >>> mapdl.nsol(2, 1, "U", "X")
-        >>> mapdl.get_variable(2)
+        >>> np.asarray(mapdl.get_variable(2))
         array([0.        , 0.00108135, 0.00300901, ..., 0.03407310])
 
         The same works for element results defined with
@@ -5026,13 +4820,31 @@ class MapdlGrpc(MapdlBase):
         ``tstrt`` to skip the initial time (or frequency) values.
 
         >>> mapdl.esol(3, 1, 1, "S", "Y")
-        >>> mapdl.get_variable(3, tstrt=1.0)
+        >>> np.asarray(mapdl.get_variable(3, tstrt=1.0))
         array([0.34632451, 0.36126732, ..., 0.38041256])
         """
-        par = "temp_var"
-        variable = self.vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
-        del self.parameters[par]
-        return variable
+        parameter_name = self._new_lazy_array_parameter()
+        try:
+            super().vget(
+                par=parameter_name,
+                ir=ir,
+                tstrt=tstrt,
+                kcplx=kcplx,
+                **kwargs,
+            )
+        except Exception as error:
+            try:
+                self._delete_lazy_array_parameter(parameter_name)
+            except Exception as cleanup_error:
+                raise cleanup_error from error
+            raise
+
+        return LazyArray(
+            self,
+            parameter_name,
+            cleanup=lambda: self._delete_lazy_array_parameter(parameter_name),
+            fetch=lambda: self._read_owned_array_parameter(parameter_name),
+        )
 
     @wraps(MapdlBase.nsol)
     def nsol(  # numpydoc ignore=RT01
@@ -5044,7 +4856,7 @@ class MapdlGrpc(MapdlBase):
         name: str = "",
         sector: MapdlInt = "",
         **kwargs: KwargDict,
-    ):
+    ) -> NDArray[np.float64]:
         """Wraps NSOL to return the variable as an array."""
         super().nsol(
             nvar=nvar,  # type: ignore[arg-type]
@@ -5141,7 +4953,7 @@ class MapdlGrpc(MapdlBase):
 
         Returns
         -------
-        np.array
+        numpy.ndarray
             Variable values
 
         Notes
@@ -5225,7 +5037,7 @@ class MapdlGrpc(MapdlBase):
 
         Returns
         -------
-        np.array
+        numpy.ndarray
             Variable values
 
         Notes
@@ -5279,8 +5091,8 @@ class MapdlGrpc(MapdlBase):
             sector=sector,
             **kwargs,
         )
-        # Using get_variable because it deletes the intermediate parameter after using it.
-        return self.get_variable(VAR_IR, tstrt=tstrt, kcplx=kcplx)
+        # Materialize the private result to preserve this method's ndarray API.
+        return self.get_variable(VAR_IR, tstrt=tstrt, kcplx=kcplx).resolve()
 
     def kill_job(self, jobid: int) -> None:
         """Kill an HPC job
@@ -5357,12 +5169,10 @@ class MapdlGrpc(MapdlBase):
         teardown in :meth:`_release_resources` is skipped (it would either be
         a no-op or kill a server this instance does not own). Even then,
         :meth:`_disconnect_but_leave_mapdl_running` still closes the gRPC
-        channel, joins the PIPE-drainer threads, retries any background
-        threads abandoned earlier, and marks the instance as exited, because
-        those are purely client-side resources (the ``_poll_connectivity``
-        daemon thread, the stdout/stderr/startup reader threads, and the
-        ping-abuse-probe/``Ctrl("EXIT")``/channel-close threads tracked by
-        :meth:`_track_background_thread`) that outlive this object otherwise.
+        channel, joins the PIPE-drainer threads, and marks the instance as
+        exited, because those are purely client-side resources (the
+        ``_poll_connectivity`` daemon thread and the stdout/stderr/startup
+        reader threads) that outlive this object otherwise.
         """
         # Check early exit conditions.
         if (
@@ -5371,7 +5181,6 @@ class MapdlGrpc(MapdlBase):
             or not getattr(self, "_start_instance", True)
             or not getattr(self, "_launched", False)
         ):
-
             try:
                 self._exiting = True
                 self._disconnect_but_leave_mapdl_running(exiting=True)

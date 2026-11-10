@@ -41,9 +41,9 @@ except ModuleNotFoundError:  # pragma: no cover
 
 import numpy as np
 
+from ansys.mapdl.core.constants import MAX_PARAM_CHARS
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl import MapdlBase
-from ansys.mapdl.core.mapdl_core import MAX_PARAM_CHARS
 from ansys.mapdl.core.misc import supress_logging
 
 ROUTINE_MAP = {

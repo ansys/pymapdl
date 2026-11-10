@@ -10,6 +10,7 @@
 [Hh]yperelasticity
 [Kk]eypoints
 [Mm]atplotlib
+[Mm]ixins?
 [Mm]ulti-[Ff]ield
 [Nn]umpy
 [Pp]ostprocess
@@ -83,6 +84,7 @@ extrem
 FEMs
 filname
 Fortran
+frozenset
 FSW
 Giovanis
 GitHub

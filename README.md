@@ -65,7 +65,7 @@ or the  [Discussions](https://discuss.ansys.com/) page on the
 [Ansys Developer portal](https://developer.ansys.com),
 you can post questions, share ideas, and get community feedback.
 
-To reach the project support team, email [PyAnsys Core team](pyansys.core@ansys.com).
+To reach the project support team, email [PyAnsys Core team](mailto:pyansys-core@synopsys.com).
 Unfortunately, this team cannot answer specific library questions or issues. You must
 use the [PyMAPDL Issues](https://github.com/ansys/pymapdl/issues)
 and [PyMAPDL Discussions](https://github.com/ansys/pymapdl/discussions) pages

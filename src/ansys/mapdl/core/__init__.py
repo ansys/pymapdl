@@ -24,10 +24,9 @@ import logging
 import os
 from typing import Dict, List, Tuple
 
-from platformdirs import user_data_dir
-
 # Apply NumPy compatibility patches for dependencies
 from ansys.mapdl.core import _numpy_compat  # noqa: F401
+from ansys.mapdl.core.constants import SUPPORTED_ANSYS_VERSIONS, USER_DATA_PATH
 
 ###############################################################################
 # Logging
@@ -58,7 +57,7 @@ VERSION_MAP: Dict[Tuple[int, int, int], str] = {
 BUILDING_GALLERY: bool = False
 
 DEPRECATING_MINIMUM_PYTHON_VERSION: bool = False
-MINIMUM_PYTHON_VERSION: Tuple[int, int] = (3, 10)
+MINIMUM_PYTHON_VERSION: Tuple[int, int] = (3, 12)
 
 # Import related globals
 _HAS_ATC: bool = is_installed("ansys.tools.common")
@@ -78,7 +77,6 @@ _HAS_VISUALIZER: bool = (
 
 
 # Setup directories
-USER_DATA_PATH: str = user_data_dir(appname="ansys_mapdl_core", appauthor="Ansys")
 EXAMPLES_PATH: str = os.path.join(USER_DATA_PATH, "examples")
 
 # Store ports occupied by local instances
@@ -105,7 +103,6 @@ run_every_import()
 # Library imports
 # ===============
 #
-from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
 from ansys.mapdl.core.launcher import close_all_local_instances
 from ansys.mapdl.core.launcher import stop as stop_mapdl

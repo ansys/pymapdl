@@ -340,7 +340,7 @@ class DPFResultCore:
         ]
         mapdl_ip = None
         for cmd in cmds:
-            if output := mapdl.sys(cmd):
+            if output := mapdl._sys(cmd):
                 # If the command returns an IP address, it means MAPDL is running on a local machine.
                 mapdl_ip = parse_ip_route(output)
                 if check_valid_ip(mapdl_ip):

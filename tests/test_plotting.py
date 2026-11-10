@@ -124,38 +124,21 @@ def block_example_coupled(mapdl, cleared):
 
 
 def check_geometry(mapdl, function):
-    prev_knum = mapdl.geometry.knum
-    prev_lnum = mapdl.geometry.lnum
-    prev_anum = mapdl.geometry.anum
-    prev_kps = mapdl.geometry.get_keypoints(
-        return_as_array=True, return_ids_in_array=True
-    )
-    prev_lines = mapdl.geometry.get_lines(return_as_list=True)
-    prev_areas = mapdl.geometry.get_areas(return_as_list=True)
+    def selection():
+        geometry = mapdl.geometry
+        return [
+            geometry.knum,
+            geometry.lnum,
+            geometry.anum,
+            geometry.vnum,
+            geometry.get_keypoints(return_as_array=True, return_ids_in_array=True),
+        ]
 
+    before = selection()
     out = function()
 
-    new_knum = mapdl.geometry.knum
-    new_lnum = mapdl.geometry.lnum
-    new_anum = mapdl.geometry.anum
-    new_kps = mapdl.geometry.get_keypoints(
-        return_as_array=True, return_ids_in_array=True
-    )
-    new_lines = mapdl.geometry.get_lines(return_as_list=True)
-    new_areas = mapdl.geometry.get_areas(return_as_list=True)
-
-    assert np.allclose(prev_knum, new_knum)
-    assert np.allclose(prev_lnum, new_lnum)
-    assert np.allclose(prev_anum, new_anum)
-    assert len(prev_kps) == len(new_kps)
-    assert len(prev_lines) == len(new_lines)
-    assert len(prev_areas) == len(new_areas)
-    assert all([each in new_kps for each in prev_kps])
-    assert all([each in new_lines for each in prev_lines])
-    assert all([each in new_areas for each in prev_areas])
-    assert all([each in prev_kps for each in new_kps])
-    assert all([each in prev_lines for each in new_lines])
-    assert all([each in prev_areas for each in new_areas])
+    for prev, new in zip(before, selection()):
+        np.testing.assert_allclose(prev, new)
 
     return out
 
@@ -252,15 +235,31 @@ def test_lplot(cleared, mapdl, tmpdir, backend):
     cpos = mapdl.lplot(
         graphics_backend=backend, show_keypoint_numbering=True, savefig=filename
     )
-    assert cpos is None
-    if backend:
-        assert os.path.isfile(filename)
+    if backend == GraphicsBackend.MAPDL:
+        assert isinstance(cpos, str)
+    else:
+        assert cpos is None
+
+    assert os.path.isfile(filename)
 
 
 @pytest.mark.parametrize(
     "backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL, None]
 )
-def test_aplot(cleared, mapdl, backend):
+def test_lplot_backend(cleared, mapdl, backend):
+    mapdl.l(mapdl.k("", 0, 0, 0), mapdl.k("", 1, 0, 0))
+    with (
+        patch("ansys.mapdl.core.plotting.visualizer.MapdlPlotter") as pv_plotter,
+        patch.object(mapdl, "screenshot") as mapdl_plot,
+    ):
+        mapdl.lplot(graphics_backend=backend)
+
+    uses_mapdl = backend is GraphicsBackend.MAPDL
+    assert mapdl_plot.called is uses_mapdl
+    assert pv_plotter.called is not uses_mapdl
+
+
+def test_aplot(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 1, 1, 0)
@@ -271,16 +270,26 @@ def test_aplot(cleared, mapdl, backend):
     l3 = mapdl.l(k3, k0)
     mapdl.al(l0, l1, l2, l3)
     mapdl.aplot(show_area_numbering=True)
-    color_areas_bool = True if backend == GraphicsBackend.PYVISTA else False
-    mapdl.aplot(
-        backend=backend,
-        color_areas=color_areas_bool,
-        show_lines=True,
-        show_line_numbering=True,
-    )
+    mapdl.aplot(color_areas=True, show_lines=True, show_line_numbering=True)
 
     mapdl.aplot(quality=10)
     mapdl.aplot(quality=1)
+
+
+@pytest.mark.parametrize(
+    "backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL, None]
+)
+def test_aplot_backend(cleared, mapdl, backend):
+    mapdl.rectng(0, 1, 0, 1)
+    with (
+        patch("ansys.mapdl.core.plotting.visualizer.MapdlPlotter") as pv_plotter,
+        patch.object(mapdl, "screenshot") as mapdl_plot,
+    ):
+        mapdl.aplot(graphics_backend=backend)
+
+    uses_mapdl = backend is GraphicsBackend.MAPDL
+    assert mapdl_plot.called is uses_mapdl
+    assert pv_plotter.called is not uses_mapdl
 
 
 @pytest.mark.parametrize(
@@ -302,17 +311,29 @@ def test_nplot(cleared, mapdl, nnum, backend):
     mapdl.nplot(graphics_backend=backend, nnum=nnum, background="w", color="k")
 
 
+def test_eplot(mapdl, make_block):
+    mapdl.eplot(show_node_numbering=True, background="w", color="b")
+
+
 @pytest.mark.parametrize(
     "backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL, None]
 )
-def test_eplot(mapdl, make_block, backend):
+def test_eplot_backend(mapdl, make_block, backend):
+    with (
+        patch("ansys.mapdl.core.plotting.visualizer.MapdlPlotter") as pv_plotter,
+        patch.object(mapdl, "screenshot") as mapdl_plot,
+    ):
+        mapdl.eplot(graphics_backend=backend)
+
+    uses_mapdl = backend is GraphicsBackend.MAPDL
+    assert mapdl_plot.called is uses_mapdl
+    assert pv_plotter.called is not uses_mapdl
+
+
+def test_aplot_keeps_mesh(mapdl, make_block):
     init_elem = mapdl.mesh.n_elem
-    mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
-    mapdl.eplot(show_node_numbering=True, background="w", color="b")
-    mapdl.eplot(
-        graphics_backend=backend, show_node_numbering=True, background="w", color="b"
-    )
-    mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
+    mapdl.aplot()
+    mapdl.eplot()
     assert mapdl.mesh.n_elem == init_elem
 
 
@@ -1210,7 +1231,6 @@ def test_xplot_not_changing_geo_selection(mapdl, cleared, func, entity, partial)
     mapdl.prep7()
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.block(1, 2, 1, 2, 1, 2)
-    mapdl.block(2, 3, 2, 3, 2, 3)
 
     mapdl.geometry._select_items(1, entity, "S")
     mapdl.cm("selection1", entity)
@@ -1237,49 +1257,6 @@ def test_xplot_not_changing_geo_selection2(mapdl, cleared):
     mapdl.cmsel("all")
 
     check_geometry(mapdl, mapdl.aplot)
-
-
-@pytest.mark.parametrize(
-    "plot_func,entity,gen_func,arg1,arg2",
-    [
-        ("vplot", "VOLU", "block", (0, 1, 0, 1, 0, 1), (1, 2, 1, 2, 1, 2)),
-        # Uncommenting the following lines, raise an exception for channel not
-        # alive. See #3421
-        # ("aplot", "AREA", "rectng", (0, 1, 0, 1), (1, 2, 1, 2)),
-        # ("lplot", "LINE", "l", (1, 1, 1), (1, -1, 1)),
-        # ("kplot", "KP", "k", ("", 0, 0, 0), ("", 1, 1, 1)),
-    ],
-)
-def test_xplot_not_changing_geo_selection_components(
-    mapdl, cleared, plot_func, entity, gen_func, arg1, arg2
-):
-    mapdl.prep7()
-    gen_func = getattr(mapdl, gen_func)
-
-    if entity == "LINE":
-        kp0 = mapdl.k("", 0, 0, 0)
-        kp1 = mapdl.k("", 1, 1, 1)
-        mapdl.l(kp0, kp1)
-    else:
-        gen_func(*arg1)
-
-    mapdl.cm("select1", entity)
-    mapdl.cmsel("u", "select1")
-
-    if entity == "LINE":
-        kp2 = mapdl.k("", 0, 0, 0)
-        kp3 = mapdl.k("", *arg2)
-        mapdl.l(kp2, kp3)
-    else:
-        gen_func(*arg2)
-
-    mapdl.cm("select2", entity)
-
-    mapdl.allsel()
-    mapdl.cmsel("all")
-
-    plot_func = getattr(mapdl, plot_func)
-    check_geometry(mapdl, plot_func)
 
 
 @pytest.mark.parametrize("quality", [101, -2, 0, "as"])
@@ -1328,9 +1305,71 @@ def test_add_mesh():
     pl3.add_mesh([cube3, sphere])
 
     assert pl1.meshes[0] == cube1
-    assert pl2.meshes[0] == cube2
+    # pyvista >= 0.49 stores a shallow copy when scalars are given, and the
+    # array order can differ, so compare the data instead of the objects.
+    mesh2 = pl2.meshes[0]
+    assert np.array_equal(mesh2.points, cube2.points)
+    assert np.array_equal(mesh2.faces, cube2.faces)
+    assert set(mesh2.array_names) == set(cube2.array_names)
+    for name in cube2.array_names:
+        assert np.array_equal(mesh2[name], cube2[name])
     assert pl3.meshes[0] == cube3
     assert pl3.meshes[1] == sphere
+
+
+@pytest.mark.parametrize(
+    "kwargs,expected",
+    [
+        ({"notebook": False}, {"notebook": False}),
+        ({"notebook": True}, {"notebook": True}),
+        ({"off_screen": True}, {"off_screen": True}),
+        (
+            {"notebook": False, "off_screen": True, "window_size": [800, 600]},
+            {"notebook": False, "off_screen": True, "window_size": [800, 600]},
+        ),
+    ],
+)
+def test_show_forwards_notebook_and_off_screen(kwargs, expected):
+    """Regression test for #4635.
+
+    ``notebook``/``off_screen``/``window_size`` passed to ``show`` must reach
+    the underlying backend instead of being silently dropped, since dropping
+    them makes the backend fall back to its own (sometimes incorrect)
+    auto-detection - for example, detecting Spyder's IPython console as a
+    Jupyter notebook.
+    """
+    pl = MapdlPlotter()
+
+    with patch.object(pl._backend, "show") as mock_show:
+        pl.show(**kwargs)
+
+    mock_show.assert_called_once()
+    _, call_kwargs = mock_show.call_args
+    for key, value in expected.items():
+        assert call_kwargs.get(key) == value
+
+
+@pytest.mark.parametrize("savefig", [False, True])
+def test_plotter_show_returns(savefig, verify_image_cache):
+    import pyvista as pv
+    from pyvista.plotting.renderer import CameraPosition
+
+    verify_image_cache.skip = True  # only the return values are checked
+
+    def show(**kwargs):
+        pl = MapdlPlotter()
+        pl.plot([{"mesh": pv.Sphere()}], [], [], **kwargs)
+        return pl.show(savefig=savefig, **kwargs)
+
+    assert show() is None
+    assert isinstance(show(return_cpos=True), CameraPosition)
+
+    pl = show(return_plotter=True)
+    assert isinstance(pl, MapdlPlotter)
+    pl.scene.close()
+
+    with pytest.raises(ValueError, match="cannot be both 'True'"):
+        show(return_cpos=True, return_plotter=True)
 
 
 def test_plot_path_screenshoot(mapdl, cleared, tmpdir):

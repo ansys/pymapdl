@@ -33,8 +33,8 @@ from conftest import NullContext, TestClass, clear, has_dependency, requires
 
 if has_dependency("ansys-tools-visualization_interface"):
     from pyvista.plotting.renderer import CameraPosition
+
     from ansys.mapdl.core.plotting.theme import PyMAPDL_cmap
-    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.errors import MapdlRuntimeError
@@ -791,60 +791,13 @@ class Test_static_solve(TestClass):
     def test_general_plotter_returns(mapdl, resume, verify_image_cache):
         verify_image_cache.skip = True  # skipping image verification
 
-        # Returns
-
-        assert (
-            mapdl.post_processing.plot_nodal_displacement("X", smooth_shading=True)
-            is None
-        )
+        # Each return combination is covered by test_plotter_show_returns.
         assert isinstance(
             mapdl.post_processing.plot_nodal_displacement(
                 "X", smooth_shading=True, return_cpos=True
             ),
             CameraPosition,
         )
-
-        p = mapdl.post_processing.plot_nodal_displacement(
-            "X", smooth_shading=True, return_plotter=True
-        )
-        assert isinstance(p, MapdlPlotter)
-        p.show()
-
-        with pytest.raises(ValueError):
-            mapdl.post_processing.plot_nodal_displacement(
-                "X", smooth_shading=True, return_cpos=True, return_plotter=True
-            )
-
-        # Returns + Save figure.
-        assert (
-            mapdl.post_processing.plot_nodal_displacement(
-                "X",
-                smooth_shading=True,
-                savefig=True,
-                return_cpos=False,
-                return_plotter=False,
-            )
-            is None
-        )
-        assert isinstance(
-            mapdl.post_processing.plot_nodal_displacement(
-                "X",
-                smooth_shading=True,
-                savefig=True,
-                return_cpos=True,
-                return_plotter=False,
-            ),
-            CameraPosition,
-        )
-
-        p = mapdl.post_processing.plot_nodal_displacement(
-            "X",
-            smooth_shading=True,
-            savefig=True,
-            return_cpos=False,
-            return_plotter=True,
-        )
-        assert isinstance(p, MapdlPlotter)
 
 
 ###############################################################################
@@ -857,6 +810,7 @@ class Test_plastic_solve(TestClass):
     def plastic_solve(mapdl):
         clear(mapdl)
         with mapdl.muted:
+            mapdl.finish()
             mapdl.input(examples.verif_files.vmfiles["vm273"])
 
         mapdl.save("plastic_solve", slab="all")

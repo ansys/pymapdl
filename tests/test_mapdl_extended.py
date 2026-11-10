@@ -20,23 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Unit tests for helpers implemented in ``mapdl_extended.py``.
+"""Exercise extended MAPDL behavior without a live solver."""
 
-These tests exercise the label-generation and cleanup logic of
-``Mapdl.get_etable`` without needing a live MAPDL instance. Following the
-pattern used in ``test_mapdl_grpc.py``, a ``MagicMock(spec=...)`` is used as
-the ``self`` argument so that calling
-``_MapdlExtended.get_etable(mock, ...)`` runs the real method body
-while recording every call made to ``etable``/``get_array``.
-"""
-
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import numpy as np
 import pytest
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.mapdl_extended import _MapdlExtended
+from ansys.mapdl.core.mapdl_extended import _MapdlCommandExtended, _MapdlExtended
+from conftest import requires
 
 
 def _make_mock_mapdl(get_array_return=None):
@@ -155,3 +148,77 @@ def test_get_etable_temp_labels_are_unique_across_calls():
 
     assert labels[0] != labels[1]
     assert all(len(lab) <= 8 for lab in labels)
+
+
+@pytest.mark.parametrize("cls", [_MapdlCommandExtended, _MapdlExtended])
+@pytest.mark.parametrize("parr, expected", [("", 42), ("norm_result", 84)])
+def test_nrm_returns_the_requested_parameter(cls, parr, expected):
+    """Return the computed norm rather than the MAPDL command output."""
+    instance = object.__new__(cls)
+    instance._parameters = {"__temp_par__": 42, "norm_result": 84}
+    instance.run = Mock(return_value="MAPDL command output")
+
+    assert instance.nrm(parr=parr) == expected
+
+
+@pytest.mark.parametrize("cls", [_MapdlCommandExtended, _MapdlExtended])
+@pytest.mark.parametrize(
+    "print_com, global_mute, command_mute, expected",
+    [
+        (True, False, None, "/COM,Testing comment\n"),
+        (False, False, None, ""),
+        (True, True, None, ""),
+        (True, False, True, ""),
+        (True, True, False, ""),
+    ],
+)
+def test_comment_printing_respects_mute(
+    cls, print_com, global_mute, command_mute, expected, capsys
+):
+    """Global and command muting both suppress printed comments."""
+    instance = object.__new__(cls)
+    instance._print_com = print_com
+    instance.mute = global_mute
+    instance.run = Mock()
+    kwargs = {} if command_mute is None else {"mute": command_mute}
+
+    instance.com("Testing comment", **kwargs)
+
+    assert capsys.readouterr().out == expected
+
+
+def test_aplot_area_labels_reject_mixed_entities():
+    """Reject surfaces that cannot be assigned one unambiguous area label."""
+    from ansys.mapdl.core._mapdl_extended.plotting_commands import (
+        _ExtendedPlottingCommandsMixin,
+    )
+
+    surface = MagicMock()
+    surface.__getitem__.return_value = np.array([3, 3])
+    surface.extract_cells.return_value = Mock(center=(0.5, 0.5, 0.0))
+
+    labels = _ExtendedPlottingCommandsMixin._aplot_area_labels([surface], np.array([3]))
+    assert labels["labels"].tolist() == [3]
+    assert labels["points"].tolist() == [[0.5, 0.5, 0.0]]
+
+    surface.__getitem__.return_value = np.array([3, 4])
+    with pytest.raises(RuntimeError, match="contains entities"):
+        _ExtendedPlottingCommandsMixin._aplot_area_labels([surface], np.array([3]))
+
+
+@requires("matplotlib")
+def test_aplot_area_colors_validate_per_area_values():
+    """Normalize named colors and reject incomplete per-area colors."""
+    from ansys.mapdl.core._mapdl_extended.plotting_commands import (
+        _ExtendedPlottingCommandsMixin,
+    )
+
+    colors = _ExtendedPlottingCommandsMixin._aplot_area_colors
+    areas = np.array([1, 2])
+
+    np.testing.assert_array_equal(colors(areas, "red"), [[1, 0, 0, 1]])
+    np.testing.assert_array_equal(
+        colors(areas, ["red", "blue"]), [[1, 0, 0, 1], [0, 0, 1, 1]]
+    )
+    with pytest.raises(ValueError, match="should be the same"):
+        colors(areas, ["red"])

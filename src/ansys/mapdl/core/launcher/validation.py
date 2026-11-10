@@ -31,7 +31,7 @@ import os
 import psutil
 
 from ansys.mapdl.core import LOG
-from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
+from ansys.mapdl.core.constants import SUPPORTED_ANSYS_VERSIONS
 
 from .environment import is_wsl
 from .models import LaunchConfig, LaunchMode, ValidationResult

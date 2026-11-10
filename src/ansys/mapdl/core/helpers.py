@@ -64,8 +64,8 @@ def run_first_time() -> None:
     from ansys.mapdl.core import (
         DEPRECATING_MINIMUM_PYTHON_VERSION,
         MINIMUM_PYTHON_VERSION,
-        USER_DATA_PATH,
     )
+    from ansys.mapdl.core.constants import USER_DATA_PATH
 
     first_time_file: str = os.path.join(USER_DATA_PATH, ".firstime")
 

@@ -2,10 +2,6 @@ name: Approve PRs
 on:
   workflow_dispatch:
     inputs:
-      user:
-        description: 'Username'
-        required: true
-        type: string
       html_url:
         description: 'URL to the comment'
         required: true
@@ -19,7 +15,7 @@ on:
         type: number
         required: true
 
-  issue_comment:
+  issue_comment: # zizmor: ignore[dangerous-triggers]
     types: [created, edited]
 
   pull_request_review:
@@ -40,7 +36,9 @@ jobs:
     # that stand a chance of passing validation. The script still performs
     # the full validation and logging; this is defense-in-depth to avoid
     # burning runner minutes and exposing the token on every repo comment.
-    if: (github.event_name == 'workflow_dispatch') ||
+    if: (github.event_name == 'workflow_dispatch' &&
+        github.triggering_actor == 'germa89'
+        ) ||
         (github.event_name == 'issue_comment' &&
         github.event.issue.pull_request &&
         contains(github.event.comment.body, '@pyansys-ci-bot LGTM') &&
@@ -94,7 +92,7 @@ jobs:
             core.startGroup('1. Determine trigger context');
             if (eventName === 'workflow_dispatch') {
               const inputs = JSON.parse(process.env.INPUTS || '{}');
-              user = inputs.user;
+              user = process.env.GITHUB_TRIGGERING_ACTOR;
               htmlUrl = inputs.html_url;
               pullRequest = Number(inputs.pr);
               commentId = Number(inputs.commentid);
@@ -158,22 +156,17 @@ jobs:
               return;
             }
 
-            if (eventName === 'workflow_dispatch') {
-              // Manual dispatch is trusted implicitly: only users with write
-              // access to the repository can trigger `workflow_dispatch`.
-              core.info('Manual workflow_dispatch trigger: skipping author/phrase checks.');
-            } else {
-              if (user !== TRUSTED_USER) {
-                core.info(`Author "${user}" is not the trusted user "${TRUSTED_USER}". Skipping.`);
-                core.endGroup();
-                return;
-              }
+            if (user !== TRUSTED_USER) {
+              core.info(`Author "${user}" is not the trusted user "${TRUSTED_USER}". Skipping.`);
+              core.endGroup();
+              return;
+            }
 
-              if (!body.includes(TRIGGER_PHRASE)) {
-                core.info(`Body does not contain the trigger phrase "${TRIGGER_PHRASE}". Skipping.`);
-                core.endGroup();
-                return;
-              }
+            // A manual dispatch is itself the trusted user's intent, so it carries no phrase.
+            if (eventName !== 'workflow_dispatch' && !body.includes(TRIGGER_PHRASE)) {
+              core.info(`Body does not contain the trigger phrase "${TRIGGER_PHRASE}". Skipping.`);
+              core.endGroup();
+              return;
             }
 
             core.info(`Trigger accepted: "${user}" approved PR #${pullRequest} via ${eventName}.`);

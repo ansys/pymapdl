@@ -334,7 +334,7 @@ def stop(
     [23644, 23645]
 
     """
-    from .config import MAPDL_DEFAULT_PORT
+    from ansys.mapdl.core.constants import MAPDL_DEFAULT_PORT
 
     if all:
         return _stop_all_instances()

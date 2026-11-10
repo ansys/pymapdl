@@ -213,7 +213,7 @@ jobs:
           apt-get update && apt install -y libgl1 libglx-mesa0 xvfb libgomp1 graphviz curl git && apt-get clean
 
       - name: "Setup Python"
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 #v7.0.0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 #v7.1.0
         with:
           python-version: ${{ inputs.python-version }}
 
@@ -253,12 +253,6 @@ jobs:
           python -m pip install -r .ci/requirements_testing_minimal.txt
 
       - name: "Unit testing"
-        # Hard backstop for the phase that the in-process shutdown watchdog
-        # ('pytest_unconfigure' in 'tests/conftest.py') cannot cover, such as
-        # an orphaned MAPDL/MPI child keeping the step's stdout pipe open after
-        # pytest exited. Failing the step (instead of stalling until the job
-        # timeout) leaves time for the 'if: always()' log-collection steps.
-        timeout-minutes: 45
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
           file_name: ${{ inputs.file-name }}
@@ -267,7 +261,6 @@ jobs:
           ON_CONSOLE: ${{ inputs.on-console }}
           ON_MINIMAL: ${{ inputs.testing-minimal }}
           PYMAPDL_NPROC: 2
-          PYMAPDL_SHUTDOWN_TIMEOUT: 300
           PYTEST_ARGUMENTS: "${{ env.PYTEST_ARGUMENTS }}"
           PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
           PYMAPDL_DEBUG_TESTING: ${{ runner.debug == '1' }}
@@ -302,9 +295,16 @@ jobs:
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml
 
+      - name: "Strip captured output from pytest report"
+        if: always()
+        shell: bash
+        env:
+          FILE_NAME: ${{ inputs.file-name }}
+        run: python .ci/strip_report_sections.py "./${FILE_NAME}.jsonl"
+
       - name: "Upload pytest reports to GitHub"
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: "reports-${{ inputs.file-name }}"
           path: ./${{ inputs.file-name }}.jsonl
@@ -351,7 +351,7 @@ jobs:
 
       - name: "Upload encrypted logs to GitHub"
         if: always() && inputs.upload-logs == true
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: logs-${{ inputs.file-name }}-encrypted
           path: ./logs-${{ inputs.file-name }}.tgz.enc
@@ -367,7 +367,7 @@ jobs:
           flags: local-ubuntu-${{ inputs.mapdl-version }}-dmp-${{ inputs.tags }}
 
       - name: "Upload coverage artifacts"
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         if: inputs.codecov-report == true
         with:
           name: ${{ inputs.file-name }}.xml

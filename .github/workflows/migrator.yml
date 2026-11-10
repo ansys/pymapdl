@@ -26,7 +26,7 @@
 name: Fork PR Handler
 
 on:
-  issue_comment:
+  issue_comment:  # zizmor: ignore[dangerous-triggers]
     types: [created]
 
   workflow_dispatch:
@@ -46,11 +46,6 @@ on:
         description: 'Comment ID'
         required: true
         type: number
-
-      actor:
-        description: 'Actor triggering the workflow'
-        required: true
-        type: string
 
 permissions: {}
 
@@ -78,12 +73,10 @@ jobs:
         env:
           EVENTNAME: ${{ github.event_name }}
           DISPATCH_PR_NUMBER: ${{ github.event.inputs.issue_number }}
-          DISPATCH_USER: ${{ github.event.inputs.actor }}
           DISPATCH_COMMENT_BODY: ${{ github.event.inputs.comment_body }}
           DISPATCH_COMMENT_ID: ${{ github.event.inputs.comment_id }}
           #
           COMMENT_PR_NUMBER: ${{ github.event.issue.number }}
-          COMMENT_USER: ${{ github.event.comment.user.login }}
           COMMENT_BODY: ${{ github.event.comment.body }}
           COMMENT_ID: ${{ github.event.comment.id }}
         with:
@@ -92,13 +85,14 @@ jobs:
             const eventName = process.env.EVENTNAME
             core.debug(`Event name: ${eventName}`);
 
-            let prNumber, userTriggering, commentBody, commentId;
+            // Authorize whoever really started this run or rerun, never an input.
+            const userTriggering = process.env.GITHUB_TRIGGERING_ACTOR;
+            let prNumber, commentBody, commentId;
 
             if (eventName === "workflow_dispatch") {
               core.info('Running in "workflow_dispatch" mode');
 
               prNumber = process.env.DISPATCH_PR_NUMBER;
-              userTriggering = process.env.DISPATCH_USER;
               commentBody = process.env.DISPATCH_COMMENT_BODY;
               commentId = process.env.DISPATCH_COMMENT_ID;
 
@@ -106,7 +100,6 @@ jobs:
               core.info('Running in "issue_comment" mode');
 
               prNumber = process.env.COMMENT_PR_NUMBER;
-              userTriggering = process.env.COMMENT_USER;
               commentBody = process.env.COMMENT_BODY;
               commentId = process.env.COMMENT_ID;
             }
