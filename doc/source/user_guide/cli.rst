@@ -38,7 +38,7 @@ To start MAPDL, just type on your activated virtual environment:
             Success: Launched an MAPDL instance (PID=23644) at 127.0.0.1:50052
 
 If you want to specify an argument, for instance the port, then you need to call
-`launch_mapdl start`:
+``launch_mapdl start``:
 
 
 .. tab-set::
