@@ -368,6 +368,27 @@ a container), you must install ``xvfb`` OS library and run the preceding command
    (.venv) mapdl@machine:~/pymapdl$ xvfb-run pytest
 
 
+Updating plot reference images
+------------------------------
+
+Plotting tests compare each plot with a reference image in the
+``tests/.image_cache`` directory. A plot that differs from its reference, or a
+plot without a reference, fails the test. When a test fails this way in CI, the
+images from the comparison are attached to the run as a ``failed-images-*``
+artifact.
+
+If the change to the plot is intended, regenerate the reference locally and
+commit the new image in your pull request so that reviewers can check it:
+
+.. code:: console
+
+   (.venv) mapdl@machine:~/pymapdl$ pytest tests/test_plotting.py --reset_only_failed --add_missing_images
+
+If a plot renders differently on each MAPDL version, replace its image with a
+directory of the same name that holds one image per version. The test passes
+when the plot matches any image in that directory.
+
+
 Configuring the test suite
 --------------------------
 
