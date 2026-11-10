@@ -76,7 +76,7 @@ the ``_commands/`` family name, such as ``apdl.py``, ``session.py``, or
 Develop PyMAPDL
 ===============
 
-.. epigraph:: *Now it is time to develop PyMAPDL!*
+.. epigraph:: *Now it is time to develop PyMAPDL.*
 
 Context manager implementations live in
 :file:`src/ansys/mapdl/core/contexts/`. APDL do-loop implementations live in
@@ -187,7 +187,7 @@ guidelines for developing code in a repository:
 #. **Ask for help**: To ensure code quality, identify issues, and share knowledge,
    ask PyMAPDL developers to assist you and review your code.
    If you need help or guidance, mention ``@ansys/pymapdl-maintainers`` in a comment
-   so they they are notified.
+   so they are notified.
 
 By following these guidelines, you can ensure smooth and organized code
 development within a repository, fostering collaboration, code quality, and feature enhancement.
@@ -385,7 +385,7 @@ The list of environment variables that can be set includes:
 +-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | :envvar:`ON_UBUNTU`               | `True`/`False`   | Detected        |  Tell Pytest that PyMAPDL is running on Ubuntu, and the test should match that.                                                                                                                                                                               |
 +-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| :envvar:`TESTING_MINIMAL`         | `True`/`False`   | `False`         |  Tell Pytest that PyMAPDL is installed with the minimal requirements, hence it won't run tests that requires libraries like Pyvista, DPF, etc.                                                                                                                |
+| :envvar:`TESTING_MINIMAL`         | `True`/`False`   | `False`         |  Tell Pytest that PyMAPDL is installed with the minimal requirements, hence it won't run tests that requires libraries like PyVista, DPF, etc.                                                                                                                |
 +-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | :envvar:`PYMAPDL_DEBUG_TESTING`   | `True`/`False`   | `False`         |  Tell PyMAPDL to enable debug while testing. This means that the APDL commands are recorded to the file `pymapdl.apdl` and the debug calls are logged into the file `pymapdl.log`.                                                                            |
 +-----------------------------------+------------------+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -418,7 +418,7 @@ Common tox envs and quick explanation:
 
 - ``docker-run-mapdl``:
   Start a MAPDL Docker container (background). Useful to start MAPDL and connect local services
-  to it (i.e. ``pytest`` which requires a running container).
+  to it (that is, ``pytest`` which requires a running container).
 - ``docker-run-mapdl-dpf``:
   Start MAPDL and DPF containers required for DPF-enabled tests.
 - ``docker-stop-mapdl``:
