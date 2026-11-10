@@ -197,7 +197,7 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
         if graphics_backend is None:
             graphics_backend = self._graphics_backend
 
-        if graphics_backend:
+        if graphics_backend is GraphicsBackend.PYVISTA:
             from ansys.mapdl.core.plotting.theme import get_ansys_colors
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
@@ -383,7 +383,7 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
         if graphics_backend is None:
             graphics_backend = self._graphics_backend
 
-        if graphics_backend:
+        if graphics_backend is GraphicsBackend.PYVISTA:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             kwargs.setdefault("show_scalar_bar", False)
