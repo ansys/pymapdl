@@ -317,6 +317,14 @@ jobs:
           path: ./failed_images
           if-no-files-found: ignore
 
+      - name: "Upload regenerated image cache (survey only)"
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+        with:
+          name: "image-cache-${{ inputs.file-name }}"
+          path: ./tests/.image_cache
+          include-hidden-files: true
+
       - name: "Collect logs"
         if: always()
         env:
