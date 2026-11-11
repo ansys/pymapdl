@@ -309,23 +309,75 @@ Check that:
   :envvar:`PYMAPDL_ADDITIONAL_SWITCHES` environment variable are correct and do
   not conflict.
 
-To reproduce the issue outside PyMAPDL, copy this command, open a terminal in
-the working directory, and run it there. For more information, see
-`Testing MAPDL launching`_.
+To reproduce the issue outside PyMAPDL, open a terminal in the working
+directory and run the command there. The log shows the command arguments
+joined by spaces, without any shell quoting. If the executable path or any
+argument contains spaces, such as ``C:\Program Files\ANSYS Inc``, you must
+quote it before running the command:
+
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: oskey
+
+        In PowerShell, quote the executable path and use the call operator
+        (``&``) to run it:
+
+        .. code:: pwsh-session
+
+            PS C:\Users\user\AppData\Local\Temp\ansys_ymjqvmeyww> & "C:\Program Files\ANSYS Inc\v242\ansys\bin\winx64\ansys242.exe" -j file -np 2 -port 50052 -grpc -b -i .__tmp__.inp -o .__tmp__.out
+
+        In the Command Prompt (``cmd.exe``), quote the executable path only:
+
+        .. code:: text
+
+            C:\Users\user\AppData\Local\Temp\ansys_ymjqvmeyww> "C:\Program Files\ANSYS Inc\v242\ansys\bin\winx64\ansys242.exe" -j file -np 2 -port 50052 -grpc -b -i .__tmp__.inp -o .__tmp__.out
+
+        The ``-i .__tmp__.inp`` argument requires the ``.__tmp__.inp`` file
+        in the working directory. If the file does not exist, create it with
+        a single ``FINISH`` line.
+
+    .. tab-item:: Linux
+        :sync: oskey
+
+        .. code:: console
+
+            user@machine:/tmp/ansys_ymjqvmeyww$ /usr/ansys_inc/v242/ansys/bin/ansys242 -j file -np 2 -port 50052 -grpc
+
+        If the path contains spaces, enclose it in quotes.
+
+For more information, see `Testing MAPDL launching`_.
 
 **Step 5: Inspect the environment variables**
 
 PyMAPDL does not write the environment variables to the log because they
-might contain sensitive information. MAPDL inherits the environment of the
-Python process, with these changes:
+might contain sensitive information. PyMAPDL builds the MAPDL environment
+in one of these ways, depending on the arguments of the
+:func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function:
 
-* ``ANS_CMD_NODIAG`` is always set to ``TRUE``.
-* On Ubuntu, ``I_MPI_SHM_LMT`` is set to ``shm``.
-* The variables in the ``add_env_vars`` argument are added to the environment,
-  overriding existing ones.
-* If you use the ``replace_env_vars`` argument, its variables **replace** the
-  whole environment. In this case, you must provide all the variables that
-  MAPDL needs, such as ``PATH`` and the license server variables.
+* **Default, or with the** ``add_env_vars`` **argument:** MAPDL inherits the
+  environment of the Python process. PyMAPDL then applies these changes in
+  order, so later changes override earlier ones:
+
+  #. On Ubuntu, sets ``I_MPI_SHM_LMT`` to ``shm``.
+  #. Sets ``ANS_CMD_NODIAG`` to ``TRUE``.
+  #. Adds the variables in the ``add_env_vars`` argument. These variables
+     override any existing variables with the same name, including
+     ``I_MPI_SHM_LMT`` and ``ANS_CMD_NODIAG``.
+  #. With the ``mtls`` transport mode, sets ``ANSYS_GRPC_CERTIFICATES`` to the
+     ``certs_dir`` argument. If you do not provide the ``certs_dir`` argument,
+     PyMAPDL keeps the existing value or defaults it to the ``certs`` directory
+     in the current directory.
+
+* **With the** ``replace_env_vars`` **argument:** MAPDL receives *only* the
+  variables in this argument. PyMAPDL does not inherit the environment of the
+  Python process and does not set ``I_MPI_SHM_LMT``, ``ANS_CMD_NODIAG``, or
+  ``ANSYS_GRPC_CERTIFICATES``. You must provide all the variables that MAPDL
+  needs, such as ``PATH`` and the license server variables.
+
+In both cases, if you use the ``uds`` transport mode on Linux and provide the
+``uds_dir`` argument, PyMAPDL sets :envvar:`ANSYS_MAPDL_UDS_PATH` to that
+directory unless the variable is already set.
 
 To inspect the environment variables that MAPDL receives, together with the
 working directory and the launch command, run the following code. It
