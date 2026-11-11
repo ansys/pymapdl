@@ -49,8 +49,7 @@ as the first parameter of the :func:`launch_mapdl() <ansys.mapdl.core.launcher.l
 If you do not specify the location of the executable file, PyMAPDL uses the default location.
 
 .. note:: If MAPDL launches when you specify the location of the executable file but not when you don't specify it,
-   the cached executable location is likely outdated. To update it, see
-:ref:`ref_updating_mapdl_location`.
+   the cached executable location is likely outdated. To update it, see :ref:`ref_updating_mapdl_location`.
 
 If MAPDL is not launching, check the content of log files in the current directory
 (specified using ``run_location``) for more information on the issue.
@@ -92,27 +91,23 @@ Here is an extract:
 
 .. code-block:: text
 
-   DEBUG - pymapdl_global -  launcher - launch_mapdl - Starting MAPDL
-   DEBUG - pymapdl_global -  launcher - generate_mapdl_launch_command - Generated command: C:\Program Files\ANSYS Inc\v242\ansys\bin\winx64\ansys242.exe -j file -np 2 -b -i .__tmp__.inp -o .__tmp__.out -port 50055 -grpc
-   INFO - pymapdl_global -  launcher - launch_grpc -
+   DEBUG - pymapdl_global -  config - resolve_run_location - Created temporary run location: C:\Users\user\AppData\Local\Temp\ansys_ymjqvmeyww
+   DEBUG - pymapdl_global -  config - resolve_port - Using default port: 50052
+   INFO - pymapdl_global -  __init__ - _launch_mapdl_common - Launching MAPDL locally...
+   DEBUG - pymapdl_global -  process - _generate_launch_command - Generated MAPDL command: C:\Program Files\ANSYS Inc\v242\ansys\bin\winx64\ansys242.exe -j file -np 2 -port 50052 -grpc -b -i .__tmp__.inp -o .__tmp__.out
+   DEBUG - pymapdl_global -  process - _create_temp_input_file - Created temporary input file: C:\Users\user\AppData\Local\Temp\ansys_ymjqvmeyww\.__tmp__.inp
+   INFO - pymapdl_global -  process - _start_subprocess -
    ============
+   Running MAPDL instance
+   Location: C:\Users\user\AppData\Local\Temp\ansys_ymjqvmeyww
+   Command: C:\Program Files\ANSYS Inc\v242\ansys\bin\winx64\ansys242.exe -j file -np 2 -port 50052 -grpc -b -i .__tmp__.inp -o .__tmp__.out
    ============
-   Running an MAPDL instance
-   Location:
-   C:\Users\user\AppData\Local\Temp\ansys_ymjqvmeyww
-   Command:
-   C:\Program Files\ANSYS Inc\v242\ansys\bin\winx64\ansys242.exe -j file -np 2 -b -i .__tmp__.inp -o .__tmp__.out -port 50055 -grpc
-   Env vars:
-   {'ANSYS242_DIR': 'C:\\Program Files\\ANSYS Inc\\v242\\ANSYS', 'AWP_ROOT242': 'C:\\Program Files\\ANSYS Inc\\v242\\ANSYS',  ... }
-   ============
-   ============
-   DEBUG - pymapdl_global -  launcher - launch_grpc - Writing temporary input file: .__tmp__.inp with 'FINISH' command.
-   DEBUG - pymapdl_global -  launcher - launch_grpc - MAPDL starting in background.
+   DEBUG - pymapdl_global -  process - _start_subprocess - MAPDL process started with PID: 12345
 
-From the preceding information, you can also extract the launch location (``C:\Users\user\AppData\Local\Temp\ansys_ymjqvmeyww``),
-the command used (``C:\Program Files\ANSYS Inc\v242\ansys\bin\winx64\ansys242.exe -j file -np 2 -b -i .__tmp__.inp -o .__tmp__.out -port 50055 -grpc``),
-and the environment variables (such as ``ANSYS242_DIR`` and ``AWP_ROOT242``).
+From the preceding information, you can extract the launch location (``C:\Users\user\AppData\Local\Temp\ansys_ymjqvmeyww``)
+and the command used (``C:\Program Files\ANSYS Inc\v242\ansys\bin\winx64\ansys242.exe -j file -np 2 -port 50052 -grpc -b -i .__tmp__.inp -o .__tmp__.out``).
 This information can also help you find the MAPDL logs or the cause of the issue.
+For a step-by-step procedure, see :ref:`ref_debug_launching_issues`.
 
 If MAPDL still does not launch, see `Launching issues`_ for more information on
 common issues and their solutions.
@@ -130,6 +125,7 @@ Launching issues
 
 There are several issues that can cause MAPDL not to launch, including:
 
+- `Debug launching issues`_
 - `Connection timeout`_
 - `Testing MAPDL launching`_
 - `Licensing issues`_
@@ -141,6 +137,245 @@ There are several issues that can cause MAPDL not to launch, including:
 - `Firewall settings`_
 
 If you cannot find your issue, see `More help needed?`_.
+
+
+.. _ref_debug_launching_issues:
+
+Debug launching issues
+~~~~~~~~~~~~~~~~~~~~~~
+
+When MAPDL fails to launch, PyMAPDL usually raises a generic error such as
+``MapdlDidNotStart`` or ``LaunchError``. The actual cause is normally recorded
+in the PyMAPDL log and in the files that MAPDL writes to its working directory.
+To find it, follow these steps.
+
+**Step 1: Record the PyMAPDL log**
+
+Enable the global logger at the ``DEBUG`` level and write it to a file
+*before* calling the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
+function:
+
+.. code:: python
+
+    from ansys.mapdl.core import LOG
+
+    LOG.setLevel("DEBUG")
+    LOG.log_to_file("pymapdl_launch.log")  # Write log to a file
+    LOG.log_to_stdout()  # Optional: also print the log to the console
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(loglevel="DEBUG")
+
+The ``pymapdl_launch.log`` file contains, among other information, the
+resolved configuration (executable file, version, port, IP address, and
+number of processors), the working directory, and the exact command used to
+start MAPDL.
+
+**Step 2: Get the MAPDL working directory**
+
+MAPDL writes all its files, including the error and output files, to its
+working directory. By default, PyMAPDL creates a new temporary directory
+for each launch. This directory is located in the system temporary directory
+and its name starts with ``ansys_`` followed by a random string, for example
+``C:\Users\user\AppData\Local\Temp\ansys_ymjqvmeyww`` on Windows or
+``/tmp/ansys_ymjqvmeyww`` on Linux.
+
+You can get the working directory in several ways:
+
+* **Set it yourself.** This is the easiest approach. Use the ``run_location``
+  argument to launch MAPDL in a known directory. If the directory doesn't
+  exist, PyMAPDL creates it.
+
+  .. code:: python
+
+      import os
+      from ansys.mapdl.core import launch_mapdl
+
+      run_location = os.path.join(os.getcwd(), "mapdl_debug")
+      mapdl = launch_mapdl(run_location=run_location, loglevel="DEBUG")
+
+  .. note::
+     If a previous MAPDL session in the same directory ended abnormally, a
+     ``file.lock`` file might block the new launch. Delete it, use a new
+     directory, or pass ``override=True`` to the
+     :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function.
+
+* **Read it from the PyMAPDL log.** Search the log file for the
+  ``Created temporary run location`` or ``Location:`` entries:
+
+  .. code-block:: text
+
+     DEBUG - pymapdl_global -  config - resolve_run_location - Created temporary run location: C:\Users\user\AppData\Local\Temp\ansys_ymjqvmeyww
+     ...
+     INFO - pymapdl_global -  process - _start_subprocess -
+     ============
+     Running MAPDL instance
+     Location: C:\Users\user\AppData\Local\Temp\ansys_ymjqvmeyww
+     Command: C:\Program Files\ANSYS Inc\v242\ansys\bin\winx64\ansys242.exe -j file -np 2 -port 50052 -grpc -b -i .__tmp__.inp -o .__tmp__.out
+     ============
+
+* **Query it from a running session.** If MAPDL launches but misbehaves
+  afterwards, use the :attr:`Mapdl.directory <ansys.mapdl.core.Mapdl.directory>`
+  property:
+
+  .. code:: pycon
+
+      >>> print(mapdl.directory)
+      C:\Users\user\AppData\Local\Temp\ansys_ymjqvmeyww
+
+* **Look in the system temporary directory.** If you did not record the log,
+  find the most recently modified ``ansys_*`` directory in the system
+  temporary directory:
+
+  .. code:: python
+
+      import glob
+      import os
+      import tempfile
+
+      dirs = glob.glob(os.path.join(tempfile.gettempdir(), "ansys_*"))
+      print(max(dirs, key=os.path.getmtime))
+
+By default, PyMAPDL does not delete the temporary working directory when
+MAPDL exits (``remove_temp_dir_on_exit=False``), so its content is still
+available after a failed launch.
+
+**Step 3: Inspect the files in the working directory**
+
+Open the working directory with your file explorer (File Explorer on Windows
+or your file manager on Linux) or a terminal.
+Some of the files start with a dot (``.``), so they might be hidden.
+On Linux, press :kbd:`Ctrl+H` in most file managers or use ``ls -a`` in a
+terminal to show them.
+
+These files are the most useful ones for debugging. The ``file`` prefix is the
+job name, which you can change with the ``jobname`` argument.
+
+* ``.__tmp__.out`` (Windows only): MAPDL console output. If the launch is
+  successful, it contains the ``START GRPC SERVER`` banner described in
+  :ref:`ref_debug_pymapdl`. Otherwise, it usually contains the reason for the
+  failure, such as licensing or MPI errors.
+* ``.__tmp__.inp`` (Windows only): Temporary input file that PyMAPDL creates
+  to start MAPDL in batch mode. It contains only the ``FINISH`` command.
+* ``file.err`` and ``file0.err``: MAPDL error and warning messages. In
+  distributed memory parallel (DMP) mode, each process writes its own file
+  (``file0.err``, ``file1.err``, and so on).
+* ``file.out`` and ``file0.out``: MAPDL output files.
+* ``file.log``: APDL commands that MAPDL has run.
+* ``file.lock``: Lock file that MAPDL creates while it is running. If MAPDL
+  is not running and this file is still present, the previous session ended
+  abnormally.
+
+On Linux, PyMAPDL does not write the MAPDL console output to a file by
+default. To capture it, use the ``mapdl_output`` argument:
+
+.. code:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(
+        run_location="mapdl_debug",
+        mapdl_output="mapdl_console_output.txt",
+        loglevel="DEBUG",
+    )
+
+If the working directory is empty or does not exist, MAPDL probably failed
+before it could start. In this case, check the executable path and the
+launch command, as described in the following step.
+
+**Step 4: Inspect the launch command**
+
+The PyMAPDL log shows the exact command that PyMAPDL uses to start MAPDL in the
+``Generated MAPDL command`` and ``Command:`` entries:
+
+.. code-block:: text
+
+   DEBUG - pymapdl_global -  process - _generate_launch_command - Generated MAPDL command: /usr/ansys_inc/v242/ansys/bin/ansys242 -j file -np 2 -port 50052 -grpc
+
+Check that:
+
+* The executable path exists and points to the expected MAPDL version.
+  If it does not, see :ref:`ref_updating_mapdl_installation`.
+* The number of processors (``-np``), memory (``-m``), and license type
+  (``-p``) are correct.
+* The port (``-port``) is not used by another process.
+* The switches from the ``additional_switches`` argument and from the
+  :envvar:`PYMAPDL_ADDITIONAL_SWITCHES` environment variable are correct and do
+  not conflict.
+
+To reproduce the issue outside PyMAPDL, copy this command, open a terminal in
+the working directory, and run it there. For more information, see
+`Testing MAPDL launching`_.
+
+**Step 5: Inspect the environment variables**
+
+PyMAPDL does not write the environment variables to the log because they
+might contain sensitive information. MAPDL inherits the environment of the
+Python process, with these changes:
+
+* ``ANS_CMD_NODIAG`` is always set to ``TRUE``.
+* On Ubuntu, ``I_MPI_SHM_LMT`` is set to ``shm``.
+* The variables in the ``add_env_vars`` argument are added to the environment,
+  overriding existing ones.
+* If you use the ``replace_env_vars`` argument, its variables **replace** the
+  whole environment. In this case, you must provide all the variables that
+  MAPDL needs, such as ``PATH`` and the license server variables.
+
+To inspect the environment variables that MAPDL receives, together with the
+working directory and the launch command, run the following code. It
+reproduces the configuration steps of the
+:func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function
+without starting MAPDL. Pass the same arguments that you pass to the
+:func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function.
+
+.. code:: python
+
+    from ansys.mapdl.core.launcher.config import resolve_launch_config
+    from ansys.mapdl.core.launcher.environment import prepare_environment
+    from ansys.mapdl.core.launcher.process import _generate_launch_command
+
+    # Use the same arguments as in ``launch_mapdl()``
+    config = resolve_launch_config(nproc=2)
+
+    print("Working directory:", config.run_location)
+    print("Command:", " ".join(_generate_launch_command(config)))
+
+    env = prepare_environment(config).variables
+    for key, value in sorted(env.items()):
+        if key.startswith(("ANS", "AWP", "PYMAPDL", "I_MPI")):
+            print(f"{key}={value}")
+
+.. warning::
+   These functions are internal to PyMAPDL and might change without notice.
+   Use them only for debugging.
+
+Check, in particular, these variables:
+
+* ``ANSYSLMD_LICENSE_FILE`` and ``ANSYSLI_SERVERS``: License server
+  configuration. See `Licensing issues`_.
+* ``AWP_ROOT<version>`` and ``ANSYS<version>_DIR``: Ansys installation
+  directories, for example ``AWP_ROOT242`` and ``ANSYS242_DIR``.
+* ``ANSYS_LOCK``: Lock file behavior.
+* ``PYMAPDL_*`` variables, such as :envvar:`PYMAPDL_START_INSTANCE`,
+  :envvar:`PYMAPDL_PORT`, :envvar:`PYMAPDL_IP`, and
+  :envvar:`PYMAPDL_MAPDL_EXEC`, which change the default launch configuration.
+* MPI-related variables, such as ``I_MPI_*``. See
+  `Message Passing Interface (MPI) issues`_.
+
+For more information, see `Incorrect environment variables`_.
+
+**Step 6: Share the information**
+
+If you still cannot identify the issue, open a discussion on the
+`PyMAPDL Discussions <pymapdl_discussions_>`_ page or an issue on the
+`PyMAPDL Issues <pymapdl_issues_>`_ page. Attach the PyMAPDL log file
+and the ``.__tmp__.out``, ``file*.err``, and ``file*.out`` files from the
+working directory.
+
+.. warning::
+   Before sharing these files, remove any sensitive information, such as
+   license server addresses, usernames, and paths.
 
 
 .. _ref_updating_mapdl_installation:
