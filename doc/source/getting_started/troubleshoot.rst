@@ -126,6 +126,7 @@ Launching issues
 There are several issues that can cause MAPDL not to launch, including:
 
 - `Debug launching issues`_
+- `Error: UDS socket file already exists`_
 - `Connection timeout`_
 - `Testing MAPDL launching`_
 - `Licensing issues`_
@@ -267,6 +268,10 @@ job name, which you can change with the ``jobname`` argument.
   is not running and this file is still present, the previous session ended
   abnormally.
 
+Search these files for ``*** ERROR ***`` messages. For example, if the output
+files contain ``UDS socket file already exists``, see
+:ref:`ref_uds_socket_file_exists`.
+
 On Linux, PyMAPDL does not write the MAPDL console output to a file by
 default. To capture it, use the ``mapdl_output`` argument:
 
@@ -376,6 +381,66 @@ working directory.
 .. warning::
    Before sharing these files, remove any sensitive information, such as
    license server addresses, usernames, and paths.
+
+
+.. _ref_uds_socket_file_exists:
+
+Error: UDS socket file already exists
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+On Linux, MAPDL can use a Unix Domain Socket (UDS) file instead of a TCP
+port to communicate with PyMAPDL. MAPDL creates this file in the UDS directory
+and names it ``mapdl-<PORT>.sock``, where ``<PORT>`` is the port number. The
+default UDS directory is ``~/.conn``. To change the UDS directory, use the
+``uds_dir`` argument of the
+:func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function or the
+:envvar:`ANSYS_MAPDL_UDS_PATH` environment variable.
+
+If MAPDL does not launch and its output files (``.__tmp__.out``, ``file*.out``,
+or the file set with the ``mapdl_output`` argument) contain an error like
+this one:
+
+.. code-block:: text
+
+   *** ERROR ***                           ELAPSED TIME =       8.394   TIME= 11:01:03
+   UDS socket file already exists at /home/user/.conn/mapdl-50052.sock.
+      Another server may already be running on this socket.  Please try
+   again to start the server with a different file name by changing the
+   port option.
+
+The socket file for that port already exists in the UDS directory. This
+happens when either of these conditions is true:
+
+* Another MAPDL instance is running and using that socket file.
+* A previous MAPDL instance crashed or was terminated abnormally and left the
+  socket file behind.
+
+To check whether a process is using the socket file, run this command:
+
+.. code:: console
+
+    user@machine:~$ lsof ~/.conn/mapdl-50052.sock
+
+If the command does not print anything, no process is using the file.
+
+To solve the issue, use one of these approaches:
+
+* **Delete the socket file.** Do this only if you are certain that no MAPDL
+  instance is running or using that file:
+
+  .. code:: console
+
+      user@machine:~$ rm ~/.conn/mapdl-50052.sock
+
+* **Use a different port.** Because the socket filename includes the port
+  number, MAPDL creates a new socket file, ``mapdl-<PORT>.sock``, that does not
+  conflict with the existing one:
+
+  .. code:: python
+
+      from ansys.mapdl.core import launch_mapdl
+
+      mapdl = launch_mapdl(port=50053)  # Uses ``~/.conn/mapdl-50053.sock``
 
 
 .. _ref_updating_mapdl_installation:
