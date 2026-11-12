@@ -389,7 +389,7 @@ jobs:
             const existingPrs = await github.rest.pulls.list({
               owner: 'ansys',
               repo: 'pymapdl',
-              base: `${prBaseBranch}`,
+              base: `ansys:${prBaseBranch}`,
               state: 'open',
             });
 
