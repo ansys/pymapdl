@@ -20,11 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import signal
 from unittest.mock import MagicMock
 
 import grpc
 import pytest
 
+from ansys.mapdl.core import errors
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
     MapdlConnectionError,
@@ -274,6 +276,12 @@ class TestBuildUnavailableSuggestion:
         suggestion = _build_unavailable_suggestion(mock_mapdl)
 
         assert "might* have died" in suggestion
+
+    def test_sigkill_value_does_not_depend_on_the_platform(self):
+        """The SIGKILL number is defined even where ``signal.SIGKILL`` is not (Windows)."""
+        assert errors._SIGKILL == 9
+        if hasattr(signal, "SIGKILL"):
+            assert errors._SIGKILL == signal.SIGKILL
 
     def test_missing_helper_falls_back_to_generic_message(self):
         """MAPDL objects without the helper (e.g. older mocks) still work."""

@@ -40,6 +40,9 @@ from ansys.mapdl.core import LOG as logger
 
 SIGINT_TRACKER: List[bool] = []
 
+# 'signal.SIGKILL' does not exist on Windows. Its value is 9 on every POSIX platform.
+_SIGKILL: int = getattr(signal, "SIGKILL", 9)
+
 # Configuration of 'protect_grpc' wrapper
 N_ATTEMPTS = 5
 INITIAL_BACKOFF = 0.1
@@ -598,7 +601,7 @@ def _build_unavailable_suggestion(mapdl: "MapdlGrpc") -> str:
     if callable(get_exit_signal):
         exit_signal = get_exit_signal()
 
-    if exit_signal == signal.SIGKILL:
+    if exit_signal == _SIGKILL:
         return (
             "  MAPDL process was terminated with SIGKILL (signal 9).\n"
             "  This is commonly caused by the operating system's Out-Of-Memory (OOM) killer forcibly terminating the process,\n"
