@@ -26,10 +26,6 @@ on:
 
 permissions: {}
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   autoapprove:
     # Cheap pre-filter so the job (and the bot token) only runs for events
@@ -51,6 +47,10 @@ jobs:
         github.event.comment.user.login == 'germa89'
         )
     name: PR comment
+    concurrency:
+      # Per PR and job-level, so comments on other PRs (or skipped runs) can't cancel an approval.
+      group: ${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number || inputs.pr }}
+      cancel-in-progress: false
     permissions:
       # Note: this only scopes the auto-generated `GITHUB_TOKEN`. All API
       # calls below explicitly use `secrets.PYANSYS_CI_BOT_TOKEN` (a bot
