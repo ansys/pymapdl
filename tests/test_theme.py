@@ -59,7 +59,12 @@ def test_plotter_keeps_font_when_global_font_changes(monkeypatch):
     # ansys-mapdl-reader and ansys-dpf-core do this when imported
     monkeypatch.setattr(pv.global_theme.font, "family", "courier")
 
-    assert MapdlPlotter().scene.theme.font.family == "arial"
+    pl = MapdlPlotter()
+    assert pl.scene.theme.font.family == "arial"
+    # pyvista text actors read the global theme, not the plotter theme
+    pl.plot([], [{"points": pv.PolyData([0.0, 0.0, 0.0])}], [], title="title")
+    assert pl.scene.actors["title"].prop.font_family == "arial"
+    assert pl.add_text("text", "upper_left").prop.font_family == "arial"
 
 
 def test_get_ansys_cmap():
