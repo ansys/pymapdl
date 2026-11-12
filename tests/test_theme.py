@@ -50,13 +50,16 @@ def test_apply_default_theme():
     _apply_default_theme()
 
 
-def test_apply_default_theme_survives_reader_import():
+def test_plotter_keeps_font_when_global_font_changes(monkeypatch):
     import pyvista as pv
 
-    _apply_default_theme()
-    import ansys.mapdl.reader  # noqa: F401
+    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
-    assert pv.global_theme.font.family == "arial"
+    MapdlPlotter()  # first use resets the global theme
+    # ansys-mapdl-reader and ansys-dpf-core do this when imported
+    monkeypatch.setattr(pv.global_theme.font, "family", "courier")
+
+    assert MapdlPlotter().scene.theme.font.family == "arial"
 
 
 def test_get_ansys_cmap():

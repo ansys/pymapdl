@@ -289,11 +289,14 @@ class MapdlPlotter(Plotter):
     ):
         """Initialize the ``MapdlPlotter`` class."""
         _first_use()
-        self._backend = MapdlPlotterBackend(use_trame=use_trame, **plotter_kwargs)
+        if theme is None:
+            theme = MapdlTheme()
+        # Pass the theme explicitly: other packages (ansys-mapdl-reader, ansys-dpf-core) change the global font on import.
+        self._backend = MapdlPlotterBackend(
+            use_trame=use_trame, theme=theme, **plotter_kwargs
+        )
         super().__init__(backend=self._backend)
         self._theme = theme
-        if theme is None:
-            self._theme = MapdlTheme()
         self._off_screen: Optional[bool] = None
         self._notebook: Optional[bool] = None
         self._savefig = None
