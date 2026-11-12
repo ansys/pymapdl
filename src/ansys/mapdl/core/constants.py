@@ -32,6 +32,7 @@ USER_DATA_PATH: str = user_data_dir(appname="ansys_mapdl_core", appauthor="Ansys
 
 # In descending order.
 SUPPORTED_ANSYS_VERSIONS: Dict[int, str] = {
+    272: "2027R2",
     271: "2027R1",
     261: "2026R1",
     252: "2025R2",
