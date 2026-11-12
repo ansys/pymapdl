@@ -65,8 +65,8 @@ if [ -n "${PYMAPDL_BRANCH}" ]; then
     echo "PYMAPDL_BRANCH is set to '${PYMAPDL_BRANCH}'. Current branch: '${CURRENT_BRANCH}'. Checking out..."
 
     # Use shallow fetch to reduce git overhead
-    git fetch --depth 1 origin "${PYMAPDL_BRANCH}"
-    git checkout FETCH_HEAD
+    git fetch --depth 1 origin "${PYMAPDL_BRANCH}" || exit 1
+    git checkout FETCH_HEAD || exit 1
   else
     echo "Already on branch '${PYMAPDL_BRANCH}'. Skipping checkout."
   fi
@@ -104,7 +104,7 @@ echo "Starting pytest at: $(date +%H:%M:%S)"
 # Install the package in editable mode. Test dependencies are pre-installed in
 # the image layer so uv only needs to install/update the delta (typically just
 # the editable link for the project itself, making this near-instant).
-uv pip install --python "${VENV_PATH}" -e ".[tests]"
+uv pip install --python "${VENV_PATH}" -e ".[tests]" || exit 1
 
 # shellcheck disable=SC2086
 time xvfb-run -a "${VENV_PATH}/bin/pytest" \
