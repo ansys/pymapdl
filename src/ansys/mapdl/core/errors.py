@@ -483,11 +483,16 @@ def protect_grpc(func: Callable) -> Callable:
                     "The in-flight gRPC call was cancelled because the "
                     f"channel became '{channel_state}'."
                 )
-                raise MapdlConnectionError(
+                msg = (
                     "The in-flight gRPC call was cancelled because the channel "
                     f"connectivity became '{channel_state}'. MAPDL might have died "
                     "or stopped answering."
-                ) from error
+                )
+                # If MAPDL died, the reason is often only in its error file.
+                error_file_tail = _get_error_file_tail(mapdl)
+                if error_file_tail:
+                    msg = f"{msg}\n{error_file_tail}"
+                raise MapdlConnectionError(msg) from error
 
             except grpc.RpcError as error:
                 mapdl = retrieve_mapdl_from_args(args)

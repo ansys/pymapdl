@@ -314,6 +314,27 @@ def test_protect_grpc_translates_future_cancelled_error():
         raising(mock_mapdl)
 
 
+def test_protect_grpc_future_cancelled_error_adds_error_file(tmp_path):
+    """When the channel dies during a call, the end of the MAPDL error file is
+    added to the 'MapdlConnectionError' message (local instances only)."""
+    (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+    mock_mapdl = _dead_mapdl(tmp_path)
+    mock_mapdl._log = MagicMock()
+    mock_mapdl._exited = False
+    mock_mapdl.exited = False
+    mock_mapdl.channel_state = "TRANSIENT_FAILURE"
+
+    @protect_grpc
+    def raising(self):
+        raise grpc.FutureCancelledError()
+
+    with pytest.raises(MapdlConnectionError) as excinfo:
+        raising(mock_mapdl)
+
+    assert "TRANSIENT_FAILURE" in str(excinfo.value)
+    assert "supports (128000) has been exceeded." in str(excinfo.value)
+
+
 class _FakeRpcError(grpc.RpcError):
     """Minimal 'grpc.RpcError' double exposing 'code()'/'details()'."""
 
