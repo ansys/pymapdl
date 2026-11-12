@@ -246,6 +246,8 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
             Additional keyword arguments passed to
             :meth:`pyvista.Plotter.add_text`.
         """
+        # pyvista text actors use the global theme font, not the plotter theme
+        kwargs.setdefault("font", self.scene.theme.font.family)
         return self.scene.add_text(
             text, position=position, font_size=font_size, color=color, **kwargs
         )
@@ -972,7 +974,9 @@ class MapdlPlotter(Plotter):
             )
 
         if title:  # Added here to avoid labels overlapping title
-            self.scene.add_title(title, color=text_color)
+            self.scene.add_title(
+                title, color=text_color, font=self.scene.theme.font.family
+            )
 
         if return_cpos and return_plotter:
             raise ValueError(
