@@ -115,8 +115,8 @@ jobs:
 
             // Three modes of operation:
             // 1. auto - automatically resolves conflicts if possible, otherwise exits
-            // 2. theirs - resolves conflicts by taking changes from the head branch
-            // 3. ours - resolves conflicts by taking changes from the base branch
+            // 2. theirs - resolves conflicts by taking changes from 'main'
+            // 3. ours - resolves conflicts by taking changes from the PR branch
             let mode = '';
             if (
               commentBody.includes('pyansys-ci-bot sync theirs') ||
@@ -323,7 +323,8 @@ jobs:
           git pull head_repo ${PR_HEAD_BRANCH}
 
           echo "\033[1;92m[INFO] Merging 'main' branch into \"${PR_BASE_BRANCH}\" \033[0m"
-          git merge origin/main
+          # A conflicting merge exits non-zero; '|| true' lets the conflict handler run under 'bash -e'.
+          git merge origin/main || true
 
           # Check for merge conflicts
           CONFLICTS=$(git ls-files -u | wc -l)
@@ -338,8 +339,8 @@ jobs:
             git status
             echo ""
 
-            # Resolve conflicts by taking "theirs" changes (optional, depending on your strategy)
-            echo "Resolving conflicts by taking 'theirs' changes"
+            # '--ours' keeps the PR branch (HEAD) side, '--theirs' keeps the 'main' side.
+            echo "Resolving conflicts with 'git checkout ${MODE}'"
             git checkout ${MODE} .
             git add .
 
@@ -350,18 +351,22 @@ jobs:
               exit 1
             fi
 
-            # Continue the merge
-            git merge --continue || { echo "::error:: Merge failed. Aborting."; exit 1; }
+            # Conclude the merge without opening an editor (no TTY on the runner)
+            git commit --no-edit || { echo "::error:: Merge failed. Aborting."; exit 1; }
+          elif [[ "$CONFLICTS" -gt 0 ]]; then
+            git status
+            echo "::error:: Merge conflicts with 'main'. Use 'sync ours' or 'sync theirs' to resolve them."
+            exit 1
           else
             echo "No merge conflicts detected."
           fi
 
           echo "Pushing changes to \"${PR_BASE_REPO}\" repo"
-          git push origin ${PR_BASE_BRANCH} --force-with-lease || git fetch --all && git push origin ${PR_BASE_BRANCH} --force-with-lease || { echo "::error:: Push failed. Aborting."; exit 1; }
+          git push origin ${PR_BASE_BRANCH} --force-with-lease || { echo "::error:: Push failed. Aborting."; exit 1; }
 
           if [[ "${MODE}" == "--ours" ]]; then
-            echo "Sync mode is 'ours'. Pushing to head_repo/${PR_HEAD_BRANCH} with 'ours' changes"
-            git push origin head_repo/${PR_HEAD_BRANCH} --force-with-lease || { echo "::error:: Push to head_repo/${PR_HEAD_BRANCH} failed. Aborting."; exit 1; }
+            echo "Sync mode is 'ours'. Pushing the merged result to ${PR_HEAD_REPO}:${PR_HEAD_BRANCH}"
+            git push head_repo HEAD:${PR_HEAD_BRANCH} || { echo "::error:: Push to ${PR_HEAD_REPO}:${PR_HEAD_BRANCH} failed. Aborting."; exit 1; }
           fi
 
       - name: Opening PR if needed.
