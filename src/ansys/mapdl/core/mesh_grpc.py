@@ -173,7 +173,7 @@ class MeshGrpc:
             # elements must have their underlying nodes selected to avoid
             # VTK segfaul
             with self._mapdl.save_selection:
-                self._mapdl.nsle("S", mute=True)
+                self._mapdl.nsle("S", mute=True, return_mapdl_output=True)
 
                 # '_update_cache_elem' runs first and alone: it is not
                 # guarded by '_thread_lock_grpc' and must finish before the

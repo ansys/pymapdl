@@ -71,8 +71,8 @@ tests = [
   "ansys-tools-common[other]==0.5.3",
   "ansys-tools-visualization-interface==0.14.1",
   "autopep8==2.3.2",
-  "matplotlib==3.10.9",
-  "pandas==2.3.3",
+  "matplotlib==3.11.2",
+  "pandas==3.1.0",
   "pyansys-tools-report==0.9.0",
   "pyfakefs==6.2.0",
   "pyiges[full]==0.3.4",
@@ -84,39 +84,39 @@ tests = [
   "pytest-rerunfailures==16.7",
   "pytest-timeout==2.4.0",
   "pytest==9.1.1",
-  "scipy==1.15.3",
+  "scipy==1.18.1",
   "vtk==9.5.2",
 ]
 
 doc = [
   "ansys-dpf-core[graphics]==0.13.6",
   "ansys-mapdl-reader==0.56.0",
-  "ansys-sphinx-theme==1.11.0",
+  "ansys-sphinx-theme==1.12.1",
   "ansys-tools-visualization-interface==0.14.1",
-  "grpcio==1.84.1",
+  "grpcio==1.85.0",
   "imageio-ffmpeg==0.6.0",
-  "imageio==2.38.0",
+  "imageio==2.38.1",
   "jupyter==1.1.1",
   "jupyter_sphinx==0.5.3",
   "jupyterlab>=3.2.8",
   "linuxdoc==20260504",
-  "matplotlib==3.10.9",
+  "matplotlib==3.11.2",
   "nbformat==5.11.1",
   "numpydoc==1.11.0",
-  "pandas==2.3.3",
+  "pandas==3.1.0",
   "plotly==7.1.0",
   "pyiges[full]==0.3.4",
   "pypandoc==1.17",
   "pytest-sphinx==0.7.1",
   "pythreejs==2.4.2",
-  "sphinx-autobuild==2024.10.3",
+  "sphinx-autobuild==2025.8.25",
   "sphinx-autodoc-typehints==3.1.0",
   "sphinx-copybutton==0.5.2",
-  "sphinx-design==0.6.1",
+  "sphinx-design==0.7.0",
   "sphinx-gallery==0.22.1",
   "sphinx-jinja==2.0.2",
   "sphinx-notfound-page==1.1.0",
-  "sphinx==8.2.3",
+  "sphinx==9.1.1",
   "sphinxcontrib-svg2pdfconverter==2.1.0",
   "sphinxcontrib-websupport==2.0.0",
   "sphinxemoji==0.3.2",
@@ -125,7 +125,7 @@ doc = [
 
 [dependency-groups]
 
-tox = ["tox==4.65.0"]
+tox = ["tox==4.67.2"]
 
 [tool.flit.module]
 name = "ansys.mapdl.core"

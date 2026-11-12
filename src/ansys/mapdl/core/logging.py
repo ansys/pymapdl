@@ -474,7 +474,7 @@ class Logger:
 
         if self.logger.hasHandlers():
             for each_handler in self.logger.handlers:
-                new_handler = copy(each_handler)
+                new_handler = _copy_handler(each_handler)
                 if each_handler == self.file_handler:
                     logger.file_handler = new_handler  # type: ignore[attr-defined]
                 elif each_handler == self.std_out_handler:
@@ -619,6 +619,43 @@ class Logger:
             )
 
         sys.excepthook = handle_exception
+
+
+def _copy_handler(handler: logging.Handler) -> logging.Handler:
+    """Copy a handler so that closing the copy leaves the original usable.
+
+    A shallow copy of a :class:`logging.FileHandler` shares the open file
+    object with the original handler. Closing the copy (for example when a
+    MAPDL instance exits and cleans up its logger) would then also close the
+    stream of the global logger and of every other instance logger, and any
+    later record raises ``ValueError: I/O operation on closed file``.
+
+    Each file handler copy therefore opens its own stream on the same file
+    (only if the original one is open) and gets its own lock. The copy always
+    appends, so it never truncates the file that the original handler is
+    writing to.
+
+    Parameters
+    ----------
+    handler : logging.Handler
+        Handler to copy.
+
+    Returns
+    -------
+    logging.Handler
+        Copy of ``handler``. If ``handler`` is a :class:`logging.FileHandler`,
+        the copy does not share its stream.
+    """
+    new_handler = copy(handler)
+    if isinstance(new_handler, logging.FileHandler):
+        new_handler.createLock()
+        new_handler.mode = new_handler.mode.replace("w", "a")
+        if handler.stream is None:  # type: ignore[attr-defined]
+            # Delayed handler: let ``logging`` open the stream when needed.
+            new_handler.stream = None  # type: ignore[assignment]
+        else:
+            new_handler.stream = new_handler._open()
+    return new_handler
 
 
 def addfile_handler(
