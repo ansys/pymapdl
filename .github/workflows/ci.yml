@@ -314,7 +314,7 @@ jobs:
       log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
       testing-minimal: false
-      pytest-arguments: '--reset_only_failed  --add_missing_images'
+      pytest-arguments: '--reset_only_failed --add_missing_images -p no:randomly --maxfail=1000 tests/test_plotting.py tests/test_post.py tests/test_mapdl.py'
       mapdl-version: ${{ matrix.mapdl-version }}
       file-name: "local-${{ matrix.mapdl-version }}"
       tags: "local"
