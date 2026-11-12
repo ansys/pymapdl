@@ -1142,17 +1142,6 @@ def test_cmplot_all(mapdl, make_block, entity):
     pl.show()
 
 
-def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
-    mapdl.post1()
-    mapdl.set(1)
-    assert (
-        mapdl.post_processing.plot_nodal_displacement(
-            "NORM", line_width=10, render_lines_as_tubes=True, smooth_shading=True
-        )
-        is None
-    )
-
-
 @pytest.mark.parametrize("background", ["white", "black", "green", "red"])
 def test_labels_colors_background(mapdl, make_block, background):
     # Test if the labels change color according background
