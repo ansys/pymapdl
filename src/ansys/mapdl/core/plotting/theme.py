@@ -254,6 +254,8 @@ class MapdlTheme(Theme):  # type: ignore
 
 
 def _apply_default_theme() -> None:
+    # Importing ansys-mapdl-reader sets the global font to courier, so import it first.
+    import ansys.mapdl.reader  # noqa: F401
     import pyvista as pv
 
     pv.global_theme = MapdlTheme()

@@ -50,6 +50,15 @@ def test_apply_default_theme():
     _apply_default_theme()
 
 
+def test_apply_default_theme_survives_reader_import():
+    import pyvista as pv
+
+    _apply_default_theme()
+    import ansys.mapdl.reader  # noqa: F401
+
+    assert pv.global_theme.font.family == "arial"
+
+
 def test_get_ansys_cmap():
     assert isinstance(get_ansys_cmap(11), matplotlib.colors.LinearSegmentedColormap)
 
