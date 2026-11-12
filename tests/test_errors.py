@@ -20,8 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os
 import signal
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import grpc
 import pytest
@@ -36,6 +37,8 @@ from ansys.mapdl.core.errors import (
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
     _build_unavailable_suggestion,
+    _get_error_file_tail,
+    handle_generic_grpc_error,
     protect_from,
     protect_grpc,
 )
@@ -367,3 +370,156 @@ def test_protect_grpc_translates_resource_exhausted_error(details, expected_limi
 
     assert f"PYMAPDL_MAX_MESSAGE_LENGTH={expected_limit}" in str(excinfo.value)
     assert len(attempts) == 1
+
+
+# The error that Ansys Student writes to 'file.err' before aborting when a mesh
+# exceeds its node limit. PyMAPDL only sees the gRPC connection closing.
+NODE_LIMIT_ERROR = (
+    " *** FATAL ***                           CP =      43.375   TIME= 23:25:01\n"
+    " The maximum number of nodes that this version of Mechanical APDL\n"
+    " supports (128000) has been exceeded.\n"
+)
+
+
+def _dead_mapdl(path, local=True, jobname="file"):
+    """Mock of a MAPDL instance whose process has died."""
+    mapdl = MagicMock(spec=MapdlGrpc)
+    mapdl._local = local
+    mapdl._path = path
+    mapdl._jobname = jobname
+    mapdl._start_parm = {}
+    mapdl.is_alive = False
+    mapdl.ip = "127.0.0.1"
+    mapdl.port = 50052
+    return mapdl
+
+
+class TestGetErrorFileTail:
+    """Tests for _get_error_file_tail."""
+
+    def test_reads_only_the_end_of_a_large_file(self, tmp_path):
+        """Only the last lines of a large error file are returned."""
+        content = b" old warning\n" * 50_000 + NODE_LIMIT_ERROR.encode("latin-1")
+        (tmp_path / "file.err").write_bytes(content)
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path))
+
+        assert "supports (128000) has been exceeded." in tail
+        assert "file.err" in tail
+        body = tail.splitlines()[1:]
+        assert len(body) == errors.ERROR_FILE_TAIL_LINES
+        assert body[-1].strip() == "supports (128000) has been exceeded."
+
+    def test_short_file_is_returned_whole(self, tmp_path):
+        """A file shorter than the limit is returned without dropping its first line."""
+        (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path))
+
+        assert "*** FATAL ***" in tail
+
+    def test_remote_instance_returns_empty_string(self, tmp_path):
+        """The file system of a remote instance is not accessible."""
+        (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        assert _get_error_file_tail(_dead_mapdl(tmp_path, local=False)) == ""
+
+    def test_missing_file_returns_empty_string(self, tmp_path):
+        """No error file, no message."""
+        assert _get_error_file_tail(_dead_mapdl(tmp_path)) == ""
+
+    def test_empty_file_returns_empty_string(self, tmp_path):
+        """An error file with only blank lines adds nothing."""
+        (tmp_path / "file.err").write_text("\n \n", encoding="latin-1")
+
+        assert _get_error_file_tail(_dead_mapdl(tmp_path)) == ""
+
+    def test_most_recent_file_is_used_in_distributed_mode(self, tmp_path):
+        """With 'file.err' and 'file0.err', the most recently modified one is read."""
+        old = tmp_path / "file.err"
+        old.write_text(" old run\n", encoding="latin-1")
+        os.utime(old, (1_000_000, 1_000_000))
+        (tmp_path / "file0.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path))
+
+        assert "file0.err" in tail
+        assert "old run" not in tail
+
+    def test_custom_jobname(self, tmp_path):
+        """The cached jobname is used to find the file."""
+        (tmp_path / "myjob.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path, jobname="myjob"))
+
+        assert "myjob.err" in tail
+
+    def test_run_location_is_used_when_directory_is_not_cached(self, tmp_path):
+        """Without a cached directory, the launch 'run_location' is used."""
+        (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+        mapdl = _dead_mapdl(None)
+        mapdl._start_parm = {"run_location": str(tmp_path)}
+
+        assert "128000" in _get_error_file_tail(mapdl)
+
+    def test_no_directory_returns_empty_string(self):
+        """Without a cached directory or run location, nothing is read."""
+        assert _get_error_file_tail(_dead_mapdl(None)) == ""
+
+    def test_unreadable_file_returns_empty_string(self, tmp_path):
+        """An OSError while reading the file does not hide the original error."""
+        (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        with patch("builtins.open", side_effect=PermissionError("locked")):
+            assert _get_error_file_tail(_dead_mapdl(tmp_path)) == ""
+
+
+def _grpc_error():
+    error = MagicMock()
+    error.details.return_value = "Socket closed"
+    return error
+
+
+def test_handle_generic_grpc_error_adds_error_file_when_mapdl_died(tmp_path):
+    """If MAPDL died, the end of its error file is part of the exception message."""
+    (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+    mapdl = _dead_mapdl(tmp_path)
+
+    def run():
+        """Function that raised the gRPC error."""
+
+    with pytest.raises(MapdlExitedError) as excinfo:
+        handle_generic_grpc_error(_grpc_error(), run, (mapdl, "VSWEEP,3"), {})
+
+    assert "supports (128000) has been exceeded." in str(excinfo.value)
+    assert "VSWEEP,3" in str(excinfo.value)
+    mapdl.exit.assert_called_once()
+
+
+def test_handle_generic_grpc_error_without_error_file_keeps_message(tmp_path):
+    """Without an error file, the message is the same as before."""
+    mapdl = _dead_mapdl(tmp_path)
+
+    def run():
+        """Function that raised the gRPC error."""
+
+    with pytest.raises(MapdlExitedError) as excinfo:
+        handle_generic_grpc_error(_grpc_error(), run, (mapdl, "VSWEEP,3"), {})
+
+    assert "error file" not in str(excinfo.value)
+
+
+def test_handle_generic_grpc_error_alive_mapdl_does_not_read_error_file(tmp_path):
+    """While MAPDL is alive, the error file is not read."""
+    (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+    mapdl = _dead_mapdl(tmp_path)
+    mapdl.is_alive = True
+
+    def run():
+        """Function that raised the gRPC error."""
+
+    with pytest.raises(MapdlRuntimeError) as excinfo:
+        handle_generic_grpc_error(_grpc_error(), run, (mapdl, "VSWEEP,3"), {})
+
+    assert "128000" not in str(excinfo.value)
+    mapdl.exit.assert_not_called()

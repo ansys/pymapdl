@@ -24,6 +24,8 @@
 
 from enum import Enum
 from functools import cache, wraps
+import os
+import pathlib
 import re
 import signal
 import sys
@@ -47,6 +49,11 @@ _SIGKILL: int = getattr(signal, "SIGKILL", 9)
 N_ATTEMPTS = 5
 INITIAL_BACKOFF = 0.1
 MULTIPLIER_BACKOFF = 2
+
+# How much of the MAPDL error file is shown when the MAPDL process dies. The file
+# can grow to tens of megabytes, so only its end is read.
+ERROR_FILE_TAIL_BYTES = 4096
+ERROR_FILE_TAIL_LINES = 20
 
 
 LOCKFILE_MSG: str = """
@@ -651,6 +658,83 @@ def retrieve_mapdl_from_args(args: tuple[Any, ...]) -> "MapdlGrpc":
     return mapdl
 
 
+def _get_error_file_tail(
+    mapdl: "MapdlGrpc",
+    max_bytes: int = ERROR_FILE_TAIL_BYTES,
+    max_lines: int = ERROR_FILE_TAIL_LINES,
+) -> str:
+    """Return the last lines of the MAPDL error file of a local instance.
+
+    When the MAPDL process dies, the reason is often written only to its error
+    file (``JOBNAME.err`` or ``JOBNAME0.err`` in distributed mode), for example
+    a license limit exceeded while meshing. This function reads the end of that
+    file so the reason can be added to the exception message.
+
+    Only cached attributes of the instance are used, because the MAPDL process
+    cannot be queried once it has died.
+
+    Parameters
+    ----------
+    mapdl : MapdlGrpc
+        MAPDL instance whose process has died.
+    max_bytes : int, default: 4096
+        Number of bytes read from the end of the error file.
+    max_lines : int, default: 20
+        Maximum number of non-empty lines returned.
+
+    Returns
+    -------
+    str
+        A message with the last lines of the error file, or an empty string
+        if the instance is remote or the error file cannot be read.
+
+    Examples
+    --------
+    >>> from ansys.mapdl.core.errors import _get_error_file_tail
+    >>> print(_get_error_file_tail(mapdl))
+    Last lines of the MAPDL error file 'C:/work/file.err':
+      *** FATAL ***
+      ...
+    """
+    if not getattr(mapdl, "_local", False):
+        return ""
+
+    directory = getattr(mapdl, "_path", None)
+    if not directory:
+        start_parm = getattr(mapdl, "_start_parm", None) or {}
+        directory = start_parm.get("run_location")
+    if not directory:
+        return ""
+
+    jobname = getattr(mapdl, "_jobname", None) or "file"
+    candidates = [
+        pathlib.Path(str(directory)) / f"{jobname}{suffix}.err" for suffix in ("", "0")
+    ]
+    try:
+        existing = [path for path in candidates if path.is_file()]
+        if not existing:
+            return ""
+        # In distributed mode both files can exist; the most recent one is the relevant one.
+        error_file = max(existing, key=lambda path: path.stat().st_mtime)
+        with open(error_file, "rb") as fid:
+            fid.seek(0, os.SEEK_END)
+            size = fid.tell()
+            fid.seek(max(0, size - max_bytes))
+            content = fid.read()
+    except OSError:
+        return ""
+
+    lines = content.decode("latin-1").splitlines()
+    if size > max_bytes and lines:
+        lines = lines[1:]  # The first line is probably incomplete.
+    lines = [line.rstrip() for line in lines if line.strip()][-max_lines:]
+    if not lines:
+        return ""
+
+    body = "\n".join(f"  {line}" for line in lines)
+    return f"Last lines of the MAPDL error file '{error_file.as_posix()}':\n{body}\n"
+
+
 def handle_generic_grpc_error(
     error: grpc.RpcError,
     func: Callable[..., Any],
@@ -698,6 +782,12 @@ def handle_generic_grpc_error(
         raise MapdlRuntimeError(msg)
 
     else:
+        # The reason why MAPDL died is often only in its error file. Read it
+        # before exiting, which might remove the working directory.
+        error_file_tail = _get_error_file_tail(mapdl)
+        if error_file_tail:
+            msg = f"{msg}\n{error_file_tail}"
+
         # Making sure we do not keep executing gRPC calls.
         # Must close unfinished processes
         mapdl.exit()
