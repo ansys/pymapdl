@@ -31,10 +31,11 @@ RUN apt-get update && \
     openssh-client \
     curl && \
     update-ca-certificates && \
-    # Installing uv
-    curl -LsSf https://astral.sh/uv/install.sh | sh \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=ghcr.io/astral-sh/uv:0.13.8 /uv /uvx /usr/local/bin/
+
 
 # Set PATH to include uv and pre-install Python interpreter.
 # Both must happen before the dep pre-install step below.
@@ -130,11 +131,12 @@ RUN apt-get update && \
     git \
     openssh-client \
     curl && \
-    # Installing uv
     update-ca-certificates && \
-    curl -LsSf https://astral.sh/uv/install.sh | sh \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=ghcr.io/astral-sh/uv:0.13.8 /uv /uvx /usr/local/bin/
+
 
 # Set PATH to include uv for root user
 ENV PATH="/root/.local/bin:$PATH"

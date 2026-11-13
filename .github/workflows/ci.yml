@@ -349,13 +349,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 #v10.3.3
+        with:
+          version: "0.13.8"
+
       - name: "Run docker compose tests (remote-host profile)"
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
           FILE_NAME: ${{ env.file_name }}
         run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
           uvx tox -e docker-test-remote
 
       - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 #v7.1.1
@@ -419,13 +423,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 #v10.3.3
+        with:
+          version: "0.13.8"
+
       - name: "Run docker compose tests (local-host profile)"
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
           FILE_NAME: ${{ env.file_name }}
         run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
           uvx tox -e docker-test-local
 
       - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 #v7.1.1
