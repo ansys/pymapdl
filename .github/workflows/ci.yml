@@ -104,6 +104,7 @@ jobs:
             echo "Please add a changelog fragment named '${PR_NUMBER}.<category>.md' to doc/changelog.d."
             gh run cancel "${RUN_ID}"
             sleep 60  # Give GitHub time to process the cancellation before the job exits
+            exit 1  # Cancellation did not land in time; fail instead of passing
           fi
 
           echo "Found changelog fragment: $file"
