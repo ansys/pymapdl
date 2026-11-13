@@ -145,6 +145,7 @@ jobs:
       ANS_DEBUG_CRASH: 1
       DATAPROCESSING_DEBUG: /home/mapdl/dpf_logs
       HAS_DPF: ${{ inputs.test_dpf }}
+      TEST_DPF_BACKEND: ${{ inputs.test_dpf }}
       OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
       OMPI_ALLOW_RUN_AS_ROOT: 1
       ON_CI: True
@@ -189,8 +190,7 @@ jobs:
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
         run: |
           if [[ "${MAPDL_VERSION}" == *"cicd"* ]]; then
-            echo "CICD MAPDL version detected, testing DPF backend for results module.";
-            echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
+            echo "CICD MAPDL version detected.";
             echo "PYMAPDL_ADDITIONAL_SWITCHES=-mpi openmpi" >> $GITHUB_ENV;
           fi
 
