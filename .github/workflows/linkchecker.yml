@@ -20,6 +20,7 @@ jobs:
       packages: read  # Needed to pull Docker images from GitHub packages
     with:
       builder: linkcheck
+      upload-logs: true
       build_pdf: false
       build_cheatsheet: false
       use_cache_examples: false
@@ -29,6 +30,7 @@ jobs:
       license-server: ${{ secrets.LICENSE_SERVER }}
       username: ${{ github.actor }}
       password: ${{ secrets.GITHUB_TOKEN }}
+      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
 
   notify:
     name: "Notify failed build"

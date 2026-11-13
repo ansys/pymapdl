@@ -262,11 +262,13 @@ jobs:
             | tee doc_build.log
 
       - name: "Substitute defective GIF"
+        if: ${{ inputs.builder == 'html' }}
         shell: bash
         run: |
           .ci/substitute_defective_gif.sh
 
       - name: "Upload HTML Documentation"
+        if: ${{ inputs.builder == 'html' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: documentation-html
