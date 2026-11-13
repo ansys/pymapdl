@@ -125,7 +125,7 @@ jobs:
         env:
           LICENSE_SERVER: ${{ secrets.license-server }}
         run: |
-          $(docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y --env ANSYSLMD_LICENSE_FILE="1055@${LICENSE_SERVER}" -p ${DPF_PORT}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${DPF_PORT}.") &
+          docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y --env ANSYSLMD_LICENSE_FILE="1055@${LICENSE_SERVER}" -p ${DPF_PORT}:50052 "$DPF_DOCKER_IMAGE"
 
       - name: "Getting files change filters"
         uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d #v4.0.3
@@ -214,6 +214,8 @@ jobs:
 
       - name: "Waiting for the services to be up"
         shell: bash
+        env:
+          TEST_DPF_BACKEND: "true"
         run: |
           .ci/waiting_services.sh
 
