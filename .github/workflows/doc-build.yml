@@ -91,7 +91,7 @@ jobs:
       DPF_START_SERVER: False
       GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
       MAIN_PYTHON_VERSION: "3.12"
-      NOT_ON_RELEASE: ${{ github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags') }}
+      ON_MAIN: ${{ github.ref == 'refs/heads/main' }}
 
     steps:
       - name: "Install Git and checkout project"
@@ -182,7 +182,7 @@ jobs:
 
       - name: "Cache examples"
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
-        if: ${{ inputs.use_cache_examples && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
+        if: ${{ inputs.use_cache_examples && (steps.changes.outputs.documentation != 'true' || env.ON_MAIN == 'true') }}
         with:
           path: doc/source/examples
           key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -191,7 +191,7 @@ jobs:
 
       - name: "Cache docs build directory"
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
-        if: ${{ inputs.use_cache_doc_build && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
+        if: ${{ inputs.use_cache_doc_build && (steps.changes.outputs.documentation != 'true' || env.ON_MAIN == 'true') }}
         with:
           path: doc/_build
           key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -200,7 +200,7 @@ jobs:
 
       - name: "Cache autosummary"
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
-        if: ${{ inputs.use_cache_autosummary && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
+        if: ${{ inputs.use_cache_autosummary && (steps.changes.outputs.documentation != 'true' || env.ON_MAIN == 'true') }}
         with:
           path: doc/source/**/_autosummary/*.rst
           key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
