@@ -46,6 +46,13 @@ on:
         default: true
         type: boolean
 
+      upload-logs:
+        description: |
+          If true, logs will be uploaded encrypted. Set to false to disable log upload (for security).
+        required: false
+        type: boolean
+        default: false
+
     # Secrets
     secrets:
       license-server:
@@ -62,6 +69,11 @@ on:
         description: |
           Password for the GitHub container registry.
         required: true
+
+      log-encryption-key:
+        description: |
+          Encryption key for sensitive log files.
+        required: false
 
 # zizmor: ignore[concurrency-limits]
 # Concurrency is controlled by the parent workflow (ci.yml)
@@ -309,3 +321,35 @@ jobs:
         shell: bash
         run: |
           .ci/collect_mapdl_logs_remote.sh
+
+      - name: "Encrypt and upload logs to GitHub"
+        if: always() && inputs.upload-logs == true
+        env:
+          ENCRYPTION_KEY: ${{ secrets.log-encryption-key }}
+          FILE_NAME: build-docs
+        shell: bash
+        run: |
+          # Check if logs exist
+          if [ -f "./logs-${FILE_NAME}.tgz" ]; then
+            echo "Encrypting logs..."
+
+            # Encrypt using OpenSSL
+            openssl enc -aes-256-cbc -salt -pbkdf2 \
+              -in ./logs-${FILE_NAME}.tgz \
+              -out ./logs-${FILE_NAME}.tgz.enc \
+              -pass env:ENCRYPTION_KEY
+
+            echo "Logs encrypted successfully"
+            echo "To decrypt locally, use:"
+            echo "openssl enc -aes-256-cbc -d -pbkdf2 -in logs-${FILE_NAME}.tgz.enc -out logs-${FILE_NAME}.tgz -pass pass:YOUR_KEY"
+          else
+            echo "No log file found to encrypt"
+          fi
+
+      - name: "Upload encrypted logs to GitHub"
+        if: always() && inputs.upload-logs == true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+        with:
+          name: logs-build-docs-encrypted
+          path: ./logs-build-docs.tgz.enc
+          retention-days: 3

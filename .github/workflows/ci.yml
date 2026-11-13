@@ -146,10 +146,13 @@ jobs:
     permissions:
       contents: read  # Needed to read repository contents for documentation build
       packages: read  # Needed to pull Docker images from GitHub packages
+    with:
+      upload-logs: true
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
       username: ${{ github.actor }}
       password: ${{ secrets.GITHUB_TOKEN }}
+      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
 
   doc-deploy-pr:
     name: "Deploy PR documentation"

@@ -319,12 +319,14 @@ jobs:
           (sudo -n journalctl -k --since "-30 min" 2>/dev/null | grep -i -E "killed process|out of memory|oom" ) || echo "No OOM entries found in journalctl (or journalctl unavailable)."
 
       - name: "Strip captured output from pytest report"
+        if: always()
         shell: bash
         env:
           FILE_NAME: ${{ inputs.file-name }}
         run: python .ci/strip_report_sections.py "./${FILE_NAME}.jsonl"
 
       - name: "Upload pytest reports to GitHub"
+        if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: "reports-${{ inputs.file-name }}"
@@ -332,12 +334,14 @@ jobs:
 
       - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 #v7.1.1
         name: "Upload coverage to Codecov"
+        if: always()
         with:
           token: ${{ secrets.codecov-token }} # required
           name: "${{ inputs.file-name }}.xml"
           flags: remote-${{ steps.ubuntu_check.outputs.TAG_UBUNTU }}-${{ inputs.mapdl-version }}-${{ steps.distributed_mode.outputs.distributed_mode }}
 
       - name: Upload coverage artifacts
+        if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: "${{ inputs.file-name }}.xml"
