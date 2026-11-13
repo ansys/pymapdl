@@ -187,10 +187,11 @@ jobs:
         shell: bash
         env:
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
+          TEST_DPF: ${{ inputs.test_dpf }}
         run: |
           if [[ "${MAPDL_VERSION}" == *"cicd"* ]]; then
-            echo "CICD MAPDL version detected, testing DPF backend for results module.";
-            echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
+            echo "CICD MAPDL version detected, TEST_DPF_BACKEND=${TEST_DPF}.";
+            echo "TEST_DPF_BACKEND=${TEST_DPF}" >> $GITHUB_ENV;
             echo "PYMAPDL_ADDITIONAL_SWITCHES=-mpi openmpi" >> $GITHUB_ENV;
           fi
 
