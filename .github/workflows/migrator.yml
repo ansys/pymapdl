@@ -413,7 +413,8 @@ jobs:
               debug: true,
               head: prBaseBranch,  // This is the branch we just created which becomes now the head of the PR, and the base (target) branch is the main branch.
               base: 'main',
-              title: `migrated (PR ${prNumber}): ${originalPR.title}`,
+              // Keep the original conventional-commit prefix first so check-pr-title passes.
+              title: `${originalPR.title} (migrated PR #${prNumber})`,
               body: `This PR is a mirror pull request created from [${originalPR.title}](https://github.com/ansys/pymapdl/pull/${originalPR.number}) to allow the code to access PyMAPDL CICD secrets.
 
             Check the [original PR](https://github.com/ansys/pymapdl/pull/${originalPR.number}) made by @${originalPR.user.login} for more details.
