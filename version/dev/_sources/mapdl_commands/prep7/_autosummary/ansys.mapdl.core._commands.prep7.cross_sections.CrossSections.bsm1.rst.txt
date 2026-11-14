@@ -1,0 +1,6 @@
+﻿bsm1
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.cross_sections
+
+.. automethod:: CrossSections.bsm1

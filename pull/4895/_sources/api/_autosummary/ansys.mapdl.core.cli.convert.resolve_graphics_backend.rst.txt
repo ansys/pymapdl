@@ -1,0 +1,6 @@
+﻿resolve\_graphics\_backend
+==========================
+
+.. currentmodule:: ansys.mapdl.core.cli.convert
+
+.. autofunction:: resolve_graphics_backend

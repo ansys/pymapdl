@@ -1,0 +1,6 @@
+copy
+====
+
+.. currentmodule:: ansys.mapdl.core.information
+
+.. automethod:: UnitsDict.copy

@@ -1,0 +1,6 @@
+﻿eembed
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.elements
+
+.. automethod:: Elements.eembed

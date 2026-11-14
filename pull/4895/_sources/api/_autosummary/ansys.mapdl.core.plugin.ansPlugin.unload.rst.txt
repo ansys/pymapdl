@@ -1,0 +1,6 @@
+unload
+======
+
+.. currentmodule:: ansys.mapdl.core.plugin
+
+.. automethod:: ansPlugin.unload

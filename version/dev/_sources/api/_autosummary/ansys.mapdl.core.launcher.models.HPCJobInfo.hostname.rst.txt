@@ -1,0 +1,6 @@
+hostname
+========
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: HPCJobInfo.hostname

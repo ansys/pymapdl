@@ -1,0 +1,6 @@
+﻿psymb
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.graphics.labeling
+
+.. automethod:: Labeling.psymb

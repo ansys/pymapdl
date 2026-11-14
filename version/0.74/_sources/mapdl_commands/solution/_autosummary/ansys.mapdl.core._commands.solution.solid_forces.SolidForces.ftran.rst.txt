@@ -1,0 +1,6 @@
+﻿ftran
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.solid_forces
+
+.. automethod:: SolidForces.ftran

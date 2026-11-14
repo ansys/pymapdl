@@ -1,0 +1,6 @@
+﻿gap
+===
+
+.. currentmodule:: ansys.mapdl.core._commands.solution._status
+
+.. automethod:: Status.gap

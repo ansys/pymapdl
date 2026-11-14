@@ -1,0 +1,6 @@
+﻿ealive
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.birth_and_death
+
+.. automethod:: BirthAndDeath.ealive

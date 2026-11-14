@@ -1,0 +1,6 @@
+add\_lines
+==========
+
+.. currentmodule:: ansys.mapdl.core.plotting.visualizer
+
+.. automethod:: MapdlPlotter.add_lines

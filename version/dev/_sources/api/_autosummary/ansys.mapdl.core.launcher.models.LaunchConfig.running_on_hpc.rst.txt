@@ -1,0 +1,6 @@
+running\_on\_hpc
+================
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.running_on_hpc

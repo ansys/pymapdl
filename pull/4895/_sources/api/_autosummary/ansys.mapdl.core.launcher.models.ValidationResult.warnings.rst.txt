@@ -1,0 +1,6 @@
+warnings
+========
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: ValidationResult.warnings

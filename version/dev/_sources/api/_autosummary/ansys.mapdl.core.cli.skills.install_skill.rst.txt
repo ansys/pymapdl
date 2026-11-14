@@ -1,0 +1,6 @@
+﻿install\_skill
+==============
+
+.. currentmodule:: ansys.mapdl.core.cli.skills
+
+.. autofunction:: install_skill

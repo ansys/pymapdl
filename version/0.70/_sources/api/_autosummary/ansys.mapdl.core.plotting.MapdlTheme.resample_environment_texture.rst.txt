@@ -1,0 +1,6 @@
+resample\_environment\_texture
+==============================
+
+.. currentmodule:: ansys.mapdl.core.plotting
+
+.. autoproperty:: MapdlTheme.resample_environment_texture

@@ -1,0 +1,6 @@
+ip
+==
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: ProcessInfo.ip

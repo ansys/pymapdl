@@ -1,0 +1,6 @@
+﻿graphics\_backend
+=================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. autoproperty:: Mapdl.graphics_backend

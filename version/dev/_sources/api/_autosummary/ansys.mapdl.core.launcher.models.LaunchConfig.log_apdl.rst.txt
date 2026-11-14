@@ -1,0 +1,6 @@
+log\_apdl
+=========
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.log_apdl
