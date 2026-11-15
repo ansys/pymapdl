@@ -22,6 +22,7 @@
 * [Guillem Barroso](https://github.com/GuillemBarroso)
 * [JackGuyver](https://github.com/JackGuyver)
 * [James Derrick](https://github.com/jgd10)
+* [Jamil Hajjar](https://github.com/aliocat)
 * [Jamil Hajjar](https://github.com/Gryfenfer97)
 * [jazztekk](https://github.com/jazztekk)
 * [jkbgbr](https://github.com/jkbgbr)
