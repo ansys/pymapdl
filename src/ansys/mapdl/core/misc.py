@@ -367,7 +367,7 @@ def last_created(filenames: List[str]) -> str:
     """
     ctimes = [creation_time(filename) for filename in filenames]
     idx = np.argmax(ctimes)
-    if len(set(ctimes)):
+    if len(set(ctimes)) == 1:
         return filenames[-1]
 
     return filenames[idx]
