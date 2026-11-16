@@ -567,8 +567,10 @@ jobs:
           bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
           bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
 
-  release:
-    name: "Release project"
+  # PyPI and GitHub releases are separate jobs so a failed GitHub release can be
+  # rerun alone: PyPI rejects re-uploading files that already exist.
+  release-pypi:
+    name: "Release to PyPI"
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     needs: [package]
     runs-on: ubuntu-latest
@@ -576,7 +578,6 @@ jobs:
     environment: release
     permissions:
       id-token: write  # Required for trusted publishing to PyPI
-      contents: write  # Needed to create GitHub releases
     steps:
       - name: "Download the library artifacts from build-library step"
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -595,6 +596,14 @@ jobs:
           packages-dir: ${{ env.PACKAGE_NAME }}-artifacts
           skip-existing: false
 
+  release-github:
+    name: "Release to GitHub"
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    needs: [release-pypi]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Needed to create GitHub releases
+    steps:
       - name: "Release to GitHub"
         uses: ansys/actions/release-github@87ff2e65e8884121f9afc97728ca9f213228ecc2 # v11.1.4
         with:
@@ -608,7 +617,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Needed to push documentation to gh-pages branch
-    needs: [release, update-changelog]
+    needs: [release-github, update-changelog]
     steps:
       - name: "Deploy the stable documentation"
         uses: ansys/actions/doc-deploy-stable@87ff2e65e8884121f9afc97728ca9f213228ecc2 # v11.1.4
