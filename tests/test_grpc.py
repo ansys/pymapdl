@@ -354,6 +354,64 @@ def test_screenshot_path_filters_by_jobname(tmp_path):
     os.remove(screenshot_path)
 
 
+def _upload_recorder():
+    """Return a bare MapdlGrpc whose ``upload`` records local paths instead of sending them."""
+    mapdl = MapdlGrpc.__new__(MapdlGrpc)
+    mapdl._log = MagicMock()
+    mapdl.uploaded = []
+
+    def fake_upload(file_name, progress_bar=False):
+        mapdl.uploaded.append(os.path.relpath(file_name))
+        return os.path.basename(file_name)
+
+    mapdl.upload = fake_upload
+    return mapdl
+
+
+@pytest.fixture
+def project(tmp_path, monkeypatch):
+    for name in ["geom.cdb", "loads.inp", "notes.txt", "sub/mats.inp"]:
+        (tmp_path / name).parent.mkdir(exist_ok=True)
+        (tmp_path / name).write_text(name)
+    monkeypatch.chdir(tmp_path)
+    return tmp_path
+
+
+@pytest.mark.parametrize(
+    "path,kwargs,expected",
+    [
+        (".", {}, ["geom.cdb", "loads.inp", "notes.txt"]),
+        (".", {"recursive": True}, ["geom.cdb", "loads.inp", "notes.txt", "mats.inp"]),
+        (".", {"extensions": ["inp", ".cdb"]}, ["geom.cdb", "loads.inp"]),
+        ("*.inp", {}, ["loads.inp"]),
+        (["notes.txt", "sub/mats.inp"], {}, ["notes.txt", "mats.inp"]),
+    ],
+)
+def test_upload_project_selects_files(project, path, kwargs, expected):
+    mapdl = _upload_recorder()
+
+    assert mapdl.upload_project(path, progress_bar=False, **kwargs) == expected
+    assert [os.path.basename(f) for f in mapdl.uploaded] == expected
+
+
+def test_upload_project_rejects_name_clash_before_uploading(project):
+    (project / "sub" / "geom.cdb").write_text("other")
+    mapdl = _upload_recorder()
+
+    with pytest.raises(ValueError, match="geom.cdb"):
+        mapdl.upload_project(".", recursive=True, progress_bar=False)
+    assert mapdl.uploaded == []
+
+
+@pytest.mark.parametrize("path", ["missing_dir", "*.rst", ["geom.cdb", "nope.inp"]])
+def test_upload_project_rejects_missing_files_before_uploading(project, path):
+    mapdl = _upload_recorder()
+
+    with pytest.raises(FileNotFoundError):
+        mapdl.upload_project(path, progress_bar=False)
+    assert mapdl.uploaded == []
+
+
 def test_validate_files_remote_subdirectory():
     """A literal path inside a subdirectory should be trusted as-is,
     since ``list_files`` only returns the top level of the working
