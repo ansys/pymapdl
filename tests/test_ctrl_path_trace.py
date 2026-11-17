@@ -280,6 +280,8 @@ def complete_hook(hook, result=None):
 
 def test_configuration_and_phase_hooks(tmp_path, monkeypatch):
     monkeypatch.delenv("CTRL_SUBJECT_ROOT", raising=False)
+    monkeypatch.delenv("CTRL_TEST_ROOT", raising=False)
+    monkeypatch.delenv("CTRL_TEST_REF", raising=False)
     monkeypatch.delenv("CTRL_CONSTRAINTS", raising=False)
     config = configuration(tmp_path, 2)
     parser = Mock()
@@ -341,6 +343,7 @@ def test_configuration_and_phase_hooks(tmp_path, monkeypatch):
     )
     assert observed[0]["constraints_sha256"] is None
     assert observed[0]["test_source_sha256"] is None
+    assert observed[0]["test_ref"] is None
     assert set(observed[0]["library_sha256"]) == {"mapdl_grpc.py", "errors.py"}
     assert observed[-1]["exitstatus"] == 0
 
@@ -496,6 +499,8 @@ def synthetic_project(pytester, monkeypatch, expected):
         "COVERAGE_PROCESS_START",
         "ALLOW_FAILURE_RATE",
         "CTRL_SUBJECT_ROOT",
+        "CTRL_TEST_ROOT",
+        "CTRL_TEST_REF",
         "CTRL_CONSTRAINTS",
         "FAIL_ORIGINAL",
     ):
@@ -650,6 +655,8 @@ def test_generation_does_not_repeat_same_name_in_other_module(tmp_path):
 
 @pytest.mark.parametrize("matching", [True, False])
 def test_sessionstart_checks_installed_source_hashes(tmp_path, monkeypatch, matching):
+    monkeypatch.delenv("CTRL_TEST_ROOT", raising=False)
+    monkeypatch.delenv("CTRL_TEST_REF", raising=False)
     installed = tmp_path / "installed"
     installed.mkdir()
     subject = tmp_path / "subject"
@@ -879,3 +886,55 @@ def test_snapshot_reads_real_exited_property_backing(recorder, monkeypatch):
             assert recorder._snapshot(client)["exited"] is exited
     finally:
         del client
+
+
+def test_sessionstart_hashes_separate_library_and_test_roots(tmp_path, monkeypatch):
+    subject = tmp_path / "client"
+    test_root = tmp_path / "historical-tests"
+    installed = tmp_path / "installed"
+    installed.mkdir()
+    library_files = ("mapdl_grpc.py", "errors.py")
+    for checkout in (subject, test_root):
+        (checkout / "src/ansys/mapdl/core").mkdir(parents=True)
+        (checkout / "tests").mkdir()
+    for name in library_files:
+        data = f"# client library {name}\n"
+        (subject / "src/ansys/mapdl/core" / name).write_text(data, encoding="utf-8")
+        (installed / name).write_text(data, encoding="utf-8")
+        (test_root / "src/ansys/mapdl/core" / name).write_text(
+            "# different historical library\n", encoding="utf-8"
+        )
+    test_files = ("tests/test_grpc.py", "tests/conftest.py")
+    for name in test_files:
+        (subject / name).write_text("# unused current tests\n", encoding="utf-8")
+        (test_root / name).write_text(f"# actual historical {name}\n", encoding="utf-8")
+    fake_mapdl = ModuleType("ansys.mapdl")
+    fake_mapdl.core = SimpleNamespace(__file__=str(installed / "__init__.py"))
+    monkeypatch.setitem(sys.modules, "ansys.mapdl", fake_mapdl)
+    monkeypatch.setattr(trace_plugin.metadata, "distributions", lambda: [])
+    monkeypatch.setenv("CTRL_SUBJECT_ROOT", str(subject))
+    monkeypatch.setenv("CTRL_TEST_ROOT", str(test_root))
+    test_ref = "94466b37e4af1b6d82c8ff782ad83659d2f753fa"
+    monkeypatch.setenv("CTRL_TEST_REF", test_ref)
+    monkeypatch.delenv("CTRL_CONSTRAINTS", raising=False)
+    config = configuration(tmp_path, 2)
+    trace_plugin.pytest_configure(config)
+    observer = config._ctrl_path_trace
+    monkeypatch.setattr(observer, "start", Mock())
+    try:
+        trace_plugin.pytest_sessionstart(SimpleNamespace(config=config))
+        observer.start.assert_called_once_with()
+        metadata = records(tmp_path / "trace.jsonl")[0]
+        assert metadata["test_ref"] == test_ref
+        assert metadata["test_source_sha256"] == {
+            name: hashlib.sha256((test_root / name).read_bytes()).hexdigest()
+            for name in test_files
+        }
+        assert metadata["library_sha256"] == {
+            name: hashlib.sha256(
+                (subject / "src/ansys/mapdl/core" / name).read_bytes()
+            ).hexdigest()
+            for name in library_files
+        }
+    finally:
+        trace_plugin.pytest_unconfigure(config)

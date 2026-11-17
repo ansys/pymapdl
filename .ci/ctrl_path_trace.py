@@ -268,6 +268,7 @@ def pytest_sessionstart(session):
                 raise pytest.UsageError(
                     "Installed library differs from the selected client source"
                 )
+    test_root = os.environ.get("CTRL_TEST_ROOT", subject)
     constraints = os.environ.get("CTRL_CONSTRAINTS")
     recorder.emit(
         "session_start",
@@ -280,12 +281,13 @@ def pytest_sessionstart(session):
         ),
         test_source_sha256=(
             {
-                name: hashlib.sha256((Path(subject) / name).read_bytes()).hexdigest()
+                name: hashlib.sha256((Path(test_root) / name).read_bytes()).hexdigest()
                 for name in ("tests/test_grpc.py", "tests/conftest.py")
             }
-            if subject
+            if test_root
             else None
         ),
+        test_ref=os.environ.get("CTRL_TEST_REF"),
         subject_ref=os.environ.get("CTRL_SUBJECT_REF"),
         diagnostic_ref=os.environ.get("GITHUB_SHA"),
         debug_testing=os.environ.get("PYMAPDL_DEBUG_TESTING"),

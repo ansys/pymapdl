@@ -37,6 +37,11 @@ on:
         required: true
         type: string
 
+      test-source-ref:
+        description: Immutable original tests held fixed across client libraries
+        required: true
+        type: string
+
       test-selection-file:
         description: Fixed controller argument file containing the recorded test order
         required: true
@@ -148,6 +153,13 @@ jobs:
         with:
           ref: ${{ inputs.client-source-ref }}
           path: _client_source
+          persist-credentials: false
+
+      - name: "Checkout the identical historical tests"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+        with:
+          ref: ${{ inputs.test-source-ref }}
+          path: _test_source
           persist-credentials: false
 
       - name: "Login in Github container registry"
@@ -291,7 +303,7 @@ jobs:
           python -m pip check
 
       - name: "Unit testing"
-        working-directory: _client_source
+        working-directory: _test_source
         env:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
           ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
@@ -299,6 +311,8 @@ jobs:
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
           CTRL_SUBJECT_REF: ${{ inputs.client-source-ref }}
           CTRL_SUBJECT_ROOT: ${{ github.workspace }}/_client_source
+          CTRL_TEST_ROOT: ${{ github.workspace }}/_test_source
+          CTRL_TEST_REF: ${{ inputs.test-source-ref }}
           CTRL_CONSTRAINTS: ${{ github.workspace }}/_ctrl_dependencies/ctrl-path-constraints.txt
           CTRL_REPETITIONS: ${{ inputs.ctrl-path-repetitions }}
           CTRL_SELECTION_FILE: ${{ inputs.test-selection-file }}
@@ -313,6 +327,7 @@ jobs:
             --ctrl-path-log="${GITHUB_WORKSPACE}/ctrl-path.jsonl" \
             --random-order-bucket=none --reruns=0 --maxfail=1 \
             --strict-markers --timeout=180 --timeout-method=thread -vv -ra \
+            --ignore_image_cache \
             --report-log="${GITHUB_WORKSPACE}/${FILE_NAME}.jsonl" \
             --report-log-exclude-logs-on-passed-tests \
             "@${GITHUB_WORKSPACE}/.ci/${CTRL_SELECTION_FILE}"

@@ -99,3 +99,47 @@ against the real class property without running its constructor. This is a
 telemetry-only correction, not a library/liveness change. The observer hash
 therefore changes between the initial comparison and the replay; all four
 replay arms still share identical observer bytes.
+
+
+## Final larger comparison in this pass
+
+The four bounded replays in run 44108874952 all passed: 152 collected items,
+146 passed calls, six skipped items, eight initial liveness returns True, and
+no raw Ctrl error. Corrected exit-state snapshots were False at all eight
+initial checks. Shared constraints and all 169 non-project packages matched
+the initial comparison.
+
+The final planned comparison replays the complete November 9 recorded prefix:
+3,939 unique completed predecessors plus the first generic-exception target,
+once on each pinned client source (3,940 planned items per arm). The historical
+predecessors were 3,795 passed, 140 skipped and four xfailed items, with no
+prior failed or rerun attempt. Retain all selectors and their recorded order;
+repeat neither historical retries nor the later connect failure.
+
+The RPC observer logic, shared frozen dependencies, image, DEBUG mode and
+no-retry/first-failure rules are unchanged from the bounded replay.
+This reproduces recorded item order, not original random data, CPU scheduling,
+wall time or every external condition. It is not a claim of bit-for-bit process
+reproduction. If no failure is captured, do not launch more CI blindly: report
+the negative results and remaining uncertainty for a next diagnostic decision.
+
+
+### Hold the original test tree fixed for the full prefix
+
+Current tests renamed seven plotting selectors present in the historical log;
+a current-tree collect-only check correctly rejected those selectors. None
+was silently dropped or renamed. For the final pair, both arms therefore run
+the entire original historical test tree at `94466b37...`; only the complete
+installed library changes between the two pinned revisions. This also holds
+the original DEBUG fixture/restart helper fixed, unlike earlier phases which
+used each revision's own tests. The metadata separately records library source,
+actual test source, and their hashes. No old test body is edited or copied into
+a current test module. The observer's RPC/return tracing is unchanged; only its
+provenance header is extended to describe the separate test tree.
+
+
+The full-prefix command also explicitly retains the original remote CI's
+`--ignore_image_cache` flag. This replay is not an image-regression experiment.
+Coverage remains disabled because it conflicts with Python tracing; the
+original jobs had coverage enabled, so instrumentation/performance is still
+an explicit difference from their execution.
