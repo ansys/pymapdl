@@ -560,6 +560,29 @@ def test_distributed_result_file_uses_numeric_suffix_and_latest_file(tmp_path):
     inquire.assert_called_once_with("", "RSTFILE")
 
 
+@pytest.mark.parametrize("thermal_exists", [True, False])
+def test_distributed_result_file_prioritizes_thermal(tmp_path, thermal_exists):
+    structural_file = tmp_path / "run_0.rst"
+    structural_file.write_text("structural results")
+    thermal_file = tmp_path / "run_0.rth"
+    if thermal_exists:
+        thermal_file.write_text("thermal results")
+    client = SimpleNamespace(
+        directory=tmp_path,
+        inquire=Mock(return_value="run_"),
+        jobname="unused",
+        _prioritize_thermal=True,
+    )
+
+    if thermal_exists:
+        assert (
+            _CoreSubsystemsMixin._distributed_result_file.fget(client) == thermal_file
+        )
+    else:
+        with pytest.raises(FileNotFoundError, match="Thermal Result not available"):
+            _CoreSubsystemsMixin._distributed_result_file.fget(client)
+
+
 @pytest.mark.parametrize("inquire_raises", [False, True])
 def test_distributed_result_file_falls_back_to_jobname(tmp_path, inquire_raises):
     result_file = tmp_path / "fallback8_0.rst"
