@@ -29,6 +29,7 @@ from typing import (
     Iterator,
     Union,
 )
+from warnings import warn
 
 from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
 import numpy as np
@@ -208,17 +209,35 @@ class _GrpcQueryMixin(_GrpcMixinBase):
         if presponse.val:
             return float(presponse.val[0])
 
-    # TODO: not fully tested/implemented
     @protect_grpc
-    def Param(self, pname):
+    def Param(self, pname):  # numpydoc ignore=RT01
+        """Return the raw values of a MAPDL parameter.
+
+        .. deprecated:: 0.74.0
+           Use :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>` instead.
+        """
+        warn(
+            "'Param' is deprecated and will be removed in a future version. "
+            "Use 'mapdl.parameters' instead.",
+            DeprecationWarning,
+        )
         presponse = self._connected_stub.GetParameter(
             pb_types.ParameterRequest(name=pname)
         )
         return presponse.val
 
-    # TODO: not fully tested/implemented
     @protect_grpc
-    def Var(self, num):
+    def Var(self, num):  # numpydoc ignore=RT01
+        """Return the raw values of a POST26 variable.
+
+        .. deprecated:: 0.74.0
+           Use :meth:`Mapdl.get_variable <ansys.mapdl.core.Mapdl.get_variable>` instead.
+        """
+        warn(
+            "'Var' is deprecated and will be removed in a future version. "
+            "Use 'mapdl.get_variable' instead.",
+            DeprecationWarning,
+        )
         presponse = self._connected_stub.GetVariable(pb_types.VariableRequest(inum=num))
         return presponse.val
 

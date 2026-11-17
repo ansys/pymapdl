@@ -1168,6 +1168,19 @@ def test_thermal_result_resets_priority_when_loading_fails():
     assert mapdl._prioritize_thermal is False
 
 
+@pytest.mark.parametrize(
+    "method,rpc,arg",
+    [("Param", "GetParameter", "ARG"), ("Var", "GetVariable", 2)],
+)
+def test_param_and_var_are_deprecated_but_still_work(method, rpc, arg):
+    mapdl = object.__new__(MapdlGrpc)
+    mapdl._stub = MagicMock()
+    getattr(mapdl._stub, rpc).return_value.val = [1.5]
+
+    with pytest.warns(DeprecationWarning, match=f"'{method}' is deprecated"):
+        assert getattr(mapdl, method)(arg) == [1.5]
+
+
 # `MapdlGrpc.get_variable` now returns a `LazyArray` backed by a private,
 # per-call parameter name instead of eagerly downloading through a shared
 # "temp_var" parameter. See `tests/test_lazy_array.py` for its coverage
