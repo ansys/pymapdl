@@ -23,6 +23,7 @@
 """POST26 time-history variables returned as arrays."""
 
 from functools import wraps
+from warnings import warn
 
 import numpy as np
 from numpy.typing import NDArray
@@ -310,6 +311,10 @@ class _GrpcPost26Mixin(_GrpcMixinBase):
             concatenating the first four characters of the ``item`` and
             ``comp`` labels.
 
+        sector : int, optional
+            Deprecated and ignored. The ``ESOL`` command has no ``SECTOR``
+            field.
+
         tstrt : str, optional
             Time (or frequency) corresponding to start of IR data.  If between
             values, the nearer value is used. By default it is the first value.
@@ -367,6 +372,13 @@ class _GrpcPost26Mixin(_GrpcMixinBase):
         possible values, see Reviewing Results in ``POST1`` in the Contact
         Technology Guide.
         """
+        if sector != "":
+            warn(
+                "The 'sector' parameter of 'get_esol' is deprecated and ignored "
+                "because the ESOL command has no SECTOR field. It will be "
+                "removed in a future version.",
+                DeprecationWarning,
+            )
         self.esol(
             VAR_IR,  # type: ignore[arg-type]
             elem=elem,
@@ -374,7 +386,6 @@ class _GrpcPost26Mixin(_GrpcMixinBase):
             item=item,
             comp=comp,
             name=name,
-            sector=sector,
             **kwargs,
         )
         # Materialize the private result to preserve this method's ndarray API.
