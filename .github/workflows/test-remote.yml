@@ -32,6 +32,12 @@ on:
         type: string
         default: "3.12"
 
+      test-source-ref:
+        description: Immutable test-only source for controlled state-isolation validation
+        required: false
+        type: string
+        default: ""
+
       ctrl-probe:
         description: Open a raw Ctrl connection after each test (diagnostic branch only)
         required: false
@@ -265,6 +271,19 @@ jobs:
         run: |
           python -m pip install .[tests]
 
+      - name: "Checkout the isolated test fix for the patched control"
+        if: inputs.test-source-ref != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+        with:
+          ref: ${{ inputs.test-source-ref }}
+          path: _state_source
+          persist-credentials: false
+
+      - name: "Use the four-line test isolation fix"
+        if: inputs.test-source-ref != ''
+        shell: bash
+        run: cp _state_source/tests/test_mapdl.py tests/test_mapdl.py
+
       - name: "Unit testing"
         env:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
@@ -383,7 +402,7 @@ jobs:
       - name: "Upload wheel and binaries"
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
-          name: PyMAPDL-packages-${{ inputs.mapdl-version }}
+          name: PyMAPDL-packages-${{ inputs.file-name }}
           path: dist/
           retention-days: 7
 

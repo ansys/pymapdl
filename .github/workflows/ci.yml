@@ -1,27 +1,26 @@
 name: CI
-run-name: "Ctrl diagnostic v25.2.0 (probe=${{ inputs.ctrl_probe }})"
+run-name: State isolation baseline versus patched (three MAPDL images)
 
 on:
   workflow_dispatch:
-    inputs:
-      ctrl_probe:
-        description: Open a fresh Ctrl connection after every test
-        required: true
-        type: boolean
-        default: true
 
 permissions: {}
 
-# Keep independent dispatches; the normal CI group cancels earlier runs.
 concurrency:
-  group: ctrl-diagnostic-${{ github.run_id }}
+  group: state-isolation-${{ github.run_id }}
   cancel-in-progress: false
 
 jobs:
-  remote:
-    name: "Remote: v25.2.0"
+  state-isolation:
+    name: "State isolation: ${{ matrix.image }} / ${{ matrix.source }}"
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        image: [v25.2.0, v25.2-ubuntu-cicd, v25.1.0]
+        source: [baseline, patched]
     permissions:
-      contents: read  # Checkout the diagnostic branch
+      contents: read  # Checkout baseline and the immutable four-line test fix
       packages: read  # Pull the private MAPDL images
     uses: $/.github/workflows/test-remote.yml
     secrets:
@@ -31,7 +30,10 @@ jobs:
       username: ${{ github.actor }}
       log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
-      mapdl-version: v25.2.0
-      file-name: remote-v25.2.0
+      mapdl-version: ${{ matrix.image }}
+      file-name: state-${{ matrix.image }}-${{ matrix.source }}
       upload-logs: true
-      ctrl-probe: ${{ inputs.ctrl_probe }}
+      ctrl-probe: false
+      test-source-ref: ${{ matrix.source == 'patched' && '9ecdd14c8f942c25962e19b610d4ce1ecc91eb35' || '' }}
+      pytest-arguments: >-
+        --random-order-bucket=none --reruns=0 --maxfail=0 tests/test_mapdl.py::test_non_interactive tests/test_mapdl.py::test_allow_ignore tests/test_mapdl.py::test_save_selection_2 tests/test_mapdl.py::test_nodes tests/test_mapdl.py::test_lssolve tests/test_mapdl.py::test_input_strings tests/test_mapdl.py::test_lsread tests/test_mapdl.py::test_input_strings_fail
