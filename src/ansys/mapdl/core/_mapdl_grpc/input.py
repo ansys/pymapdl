@@ -588,5 +588,5 @@ class _GrpcInputMixin(_GrpcMixinBase):
         # try/except here because MAPDL might have not closed the temp file
         try:
             os.remove(tmp_filename)
-        except:
+        except OSError:
             self._log.warning("Unable to remove temporary file %s", tmp_filename)

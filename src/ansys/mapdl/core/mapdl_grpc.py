@@ -907,7 +907,7 @@ class MapdlGrpc(
             if self._exited:
                 return "MAPDL exited"
             stats = self.slashstatus("PROD", mute=False)
-        except:  # pragma: no cover
+        except Exception:  # pragma: no cover
             return "MAPDL exited"
 
         st = stats.find("*** Products ***")
