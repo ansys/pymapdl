@@ -129,14 +129,44 @@ def test_get_fallback_string(mapdl):
 
 
 def test_get_lock(mapdl):
-    previous_get_lock = mapdl._get_lock
-    try:
-        mapdl._get_lock = True
-
-        with pytest.raises(MapdlRuntimeError):
+    with mapdl._get_lock:
+        with pytest.raises(MapdlRuntimeError, match="get_lock"):
             mapdl._get(entity="NODE", entnum="1", item1="U", it1num=1, timeout=0.5)
-    finally:
-        mapdl._get_lock = previous_get_lock
+
+
+def test_vget_service_calls_never_overlap():
+    """Concurrent eager *VGET requests must reach the stub one at a time."""
+    mapdl = object.__new__(MapdlGrpc)
+    mapdl._vget_lock = threading.Lock()
+    in_flight, peak = [0], [0]
+    counter_lock = threading.Lock()
+
+    def vget2(_request):
+        with counter_lock:
+            in_flight[0] += 1
+            peak[0] = max(peak[0], in_flight[0])
+        threading.Event().wait(0.05)
+        with counter_lock:
+            in_flight[0] -= 1
+        return []
+
+    mapdl._stub = MagicMock()
+    mapdl._stub.VGet2.side_effect = vget2
+    with patch("ansys.mapdl.core._mapdl_grpc.queries.parse_chunks", return_value=[]):
+        threads = [
+            threading.Thread(
+                target=mapdl._get_array_from_service,
+                args=("NODE", 1, "U", "X", "", "", ""),
+            )
+            for _ in range(4)
+        ]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+    assert mapdl._stub.VGet2.call_count == 4
+    assert peak[0] == 1
 
 
 def test_get_invalid_response_type(mapdl):
@@ -588,15 +618,16 @@ class TestSendCommand:
         """The command reaches the stub and the response is returned."""
         mock = _make_mock_mapdl()
         mock._exited = False
-        mock._stub = MagicMock()
+        # A spec'd MagicMock auto-mocks properties, so set the one _send_command reads.
+        mock._connected_stub = MagicMock()
         resp = MagicMock()
         resp.response = "OK"
-        mock._stub.SendCommand.future.return_value.result.return_value = resp
+        mock._connected_stub.SendCommand.future.return_value.result.return_value = resp
 
         result = MapdlGrpc._send_command(mock, "/PREP7")
 
         assert result == "OK"
-        mock._stub.SendCommand.future.assert_called_once()
+        mock._connected_stub.SendCommand.future.assert_called_once()
 
 
 class TestCloseGrpcChannel:

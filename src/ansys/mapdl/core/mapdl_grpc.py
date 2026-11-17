@@ -334,8 +334,8 @@ class MapdlGrpc(
         self._mode: Literal["grpc"] = "grpc"
 
         # gRPC request locks and lazy result bookkeeping.
-        self._get_lock: bool = False
-        self._vget_lock: bool = False
+        self._get_lock = threading.Lock()
+        self._vget_lock = threading.Lock()
         self._lazy_array_counter: int = 0
         self._lazy_array_parameters: set[str] = set()
 
@@ -774,9 +774,7 @@ class MapdlGrpc(
 
         request = pb_types.CmdRequest(command=cmd, opt=opt)
         # TODO: Capture keyboard exception and place this in a thread
-        if self._stub is None:
-            raise MapdlRuntimeError("MAPDL stub not initialized")
-        future = self._stub.SendCommand.future(request)
+        future = self._connected_stub.SendCommand.future(request)
         with self._watched_call(future):
             grpc_response = future.result()
 
@@ -791,9 +789,7 @@ class MapdlGrpc(
         request = pb_types.CmdRequest(command=cmd)
         time_step = self._get_time_step_stream()
         metadata = [("time_step_stream", str(time_step))]
-        if self._stub is None:
-            raise MapdlRuntimeError("MAPDL stub not initialized")
-        stream = self._stub.SendCommandS(request, metadata=metadata)
+        stream = self._connected_stub.SendCommandS(request, metadata=metadata)
         response = []
         with self._watched_call(stream):
             for item in stream:

@@ -22,6 +22,7 @@
 
 """Unit tests for lazy MAPDL array retrieval without a MAPDL instance."""
 
+import threading
 from unittest.mock import MagicMock, call
 
 import numpy as np
@@ -197,7 +198,7 @@ def _mock_grpc_mapdl():
     mapdl._log.level = "WARNING"
     mapdl._set_log_level = MagicMock()
     mapdl._store_commands = False
-    mapdl._vget_lock = False
+    mapdl._vget_lock = threading.Lock()
     mapdl._lazy_array_counter = 0
     mapdl._lazy_array_parameters = set()
     mapdl._parameters = MagicMock()

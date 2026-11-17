@@ -46,6 +46,13 @@ from . import _GrpcMixinBase
 class _GrpcConnectionMixin(_GrpcMixinBase):
     """Channel creation, transport configuration and connection attempts."""
 
+    @property
+    def _connected_stub(self) -> mapdl_grpc.MapdlServiceStub:
+        """Return the gRPC stub, raising if :meth:`_connect` has not created it yet."""
+        if self._stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
+        return self._stub
+
     def _configure_transport(self, *, ip: str, port: int) -> None:
         """Configure transport-related defaults, validate mode, and resolve UDS conflicts.
 

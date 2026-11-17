@@ -294,7 +294,7 @@ class _GrpcInputMixin(_GrpcMixinBase):
             # archive imported through '/AUX15' before the CDB file is read,
             # so it always goes through the multi-command driver file below.
             request = pb_types.InputFileRequest(filename=filename)
-            strouts = self._stub.InputFileS(request, metadata=metadata)
+            strouts = self._connected_stub.InputFileS(request, metadata=metadata)
             responses = []
             for strout in strouts:
                 lines = strout.cmdout
@@ -385,7 +385,7 @@ class _GrpcInputMixin(_GrpcMixinBase):
         # even though we don't care about the output, we still
         # need to check.  otherwise, since inputfile is
         # non-blocking, we could corrupt the service
-        chunks = self._stub.InputFileS(request, metadata=metadata)
+        chunks = self._connected_stub.InputFileS(request, metadata=metadata)
         _ = [chunk.cmdout for chunk in chunks]  # unstable
 
         # all output (unless redirected) has been written to a temp output
