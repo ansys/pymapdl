@@ -58,3 +58,44 @@ a separate diagnostic error exit code. Original test failures remain failures.
 
 No production fix or PR is part of this branch. Negative results do not prove
 that the historical failure cannot recur.
+
+
+## Historical-order replay after isolated checks passed
+
+Run 44103847097 passed all 40 original test items on both historical and
+current source, with all 80 initial liveness assertions True. Each arm made
+180 existing VERSION calls, with no raw Ctrl exception. The matched dependency
+snapshot from that run is committed in `ctrl-path-constraints.txt` for this
+throwaway replay only; it is not a change to normal project requirements.
+
+The second workflow replays two bounded historical sequences on both client
+revisions, at most two remote jobs at once:
+
+- November 9: the last 20 unique completed predecessors before the first
+  generic-exception failure, that generic test once, all 21 intervening items,
+  and the connect-via-channel test once: 43 items.
+- November 10: the corresponding 20 predecessors, generic test once, all 11
+  intervening items, and connect test once: 33 items.
+
+This is 152 planned items over four arms, unless an earlier failure stops an
+arm. Original retry attempts are not replayed; pytest retries remain disabled.
+The two target IDs receive one diagnostic parameter; all other original item
+IDs and the recorded relative order are retained. The trace collection event
+and pytest reports must confirm this order. A historical skipped body may
+remain skipped; a collected item is not necessarily an executed test body.
+
+This is not a replay of the preceding 3,000-4,000 full-suite items. Passing a
+bounded sequence cannot rule out a longer-lived state or resource dependency.
+
+
+### Corrected exit-state telemetry
+
+Independent raw-data QA found that the first 80-item run recorded `exited=null`:
+`_exited` is an inherited property backed by `_MapdlCore__exited`, not a direct
+`_exited` dict entry. Its raw RPC and actual initial `is_alive=True` return
+observations remain valid, but the missing flag must not be interpreted as
+False. The ordering observer reads the real backing key directly and is tested
+against the real class property without running its constructor. This is a
+telemetry-only correction, not a library/liveness change. The observer hash
+therefore changes between the initial comparison and the replay; all four
+replay arms still share identical observer bytes.

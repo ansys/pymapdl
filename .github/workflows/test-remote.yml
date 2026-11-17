@@ -37,6 +37,11 @@ on:
         required: true
         type: string
 
+      test-selection-file:
+        description: Fixed controller argument file containing the recorded test order
+        required: true
+        type: string
+
       ctrl-path-repetitions:
         description: Number of executions per original test in one session
         required: false
@@ -296,6 +301,7 @@ jobs:
           CTRL_SUBJECT_ROOT: ${{ github.workspace }}/_client_source
           CTRL_CONSTRAINTS: ${{ github.workspace }}/_ctrl_dependencies/ctrl-path-constraints.txt
           CTRL_REPETITIONS: ${{ inputs.ctrl-path-repetitions }}
+          CTRL_SELECTION_FILE: ${{ inputs.test-selection-file }}
           PYTHONPATH: ${{ github.workspace }}/.ci
           PYMAPDL_CTRL_PROBE: "0"
           PYMAPDL_DEBUG_TESTING: "True"
@@ -309,8 +315,7 @@ jobs:
             --strict-markers --timeout=180 --timeout-method=thread -vv -ra \
             --report-log="${GITHUB_WORKSPACE}/${FILE_NAME}.jsonl" \
             --report-log-exclude-logs-on-passed-tests \
-            tests/test_grpc.py::test_connect_via_channel \
-            tests/test_grpc.py::test_generic_grpc_exception
+            "@${GITHUB_WORKSPACE}/.ci/${CTRL_SELECTION_FILE}"
 
       - name: "Print amount of restarts"
         if: always()

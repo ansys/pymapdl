@@ -96,7 +96,7 @@ class _Trace:
             "channel_state": (
                 state.name if isinstance(state, grpc.ChannelConnectivity) else None
             ),
-            "exited": values.get("_exited"),
+            "exited": values.get("_MapdlCore__exited"),
             "exiting": values.get("_exiting"),
             "busy": values.get("_busy"),
             "has_stub": values.get("_stub") is not None,

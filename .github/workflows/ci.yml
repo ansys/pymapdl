@@ -1,5 +1,5 @@
 name: CI
-run-name: Targeted historical versus current client liveness
+run-name: Historical-order client liveness replay
 
 on:
   workflow_dispatch:
@@ -12,40 +12,46 @@ concurrency:
 
 jobs:
   dependencies:
-    name: Resolve shared test dependencies
+    name: Reuse the verified shared test dependencies
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: read  # Checkout the fixed diagnostic controller
+      contents: read  # Checkout the fixed diagnostic constraints
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 #v7.1.0
-        with:
-          python-version: "3.12"
-      - name: Resolve once, without launching MAPDL
-        run: |
-          python -m pip install build "flit_core>=3.11,<5" ".[tests]"
-          python -m pip list --format=freeze --exclude ansys-mapdl-core > ctrl-path-constraints.txt
-          sha256sum ctrl-path-constraints.txt
+      - name: Record unchanged constraints identity
+        run: sha256sum .ci/ctrl-path-constraints.txt
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: ctrl-path-constraints
-          path: ctrl-path-constraints.txt
+          path: .ci/ctrl-path-constraints.txt
           retention-days: 7
 
   liveness:
-    name: "Liveness path: ${{ matrix.client }}"
+    name: "Liveness order: ${{ matrix.client }} / ${{ matrix.order }}"
     needs: dependencies
     strategy:
       fail-fast: false
-      max-parallel: 1
+      max-parallel: 2
       matrix:
         include:
           - client: historical
+            order: nov9
+            selection: ctrl-order-42562259659.txt
             ref: 94466b37e4af1b6d82c8ff782ad83659d2f753fa
           - client: current
+            order: nov9
+            selection: ctrl-order-42562259659.txt
+            ref: 154828f5ddff2a849b52bd3ed385a25db6188b02
+          - client: historical
+            order: nov10
+            selection: ctrl-order-42756330406.txt
+            ref: 94466b37e4af1b6d82c8ff782ad83659d2f753fa
+          - client: current
+            order: nov10
+            selection: ctrl-order-42756330406.txt
             ref: 154828f5ddff2a849b52bd3ed385a25db6188b02
     permissions:
       contents: read  # Checkout the exact client revision and original tests
@@ -59,7 +65,8 @@ jobs:
       log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
       mapdl-version: v25.2.0
-      file-name: ctrl-path-${{ matrix.client }}
+      file-name: ctrl-order-${{ matrix.client }}-${{ matrix.order }}
       upload-logs: true
       client-source-ref: ${{ matrix.ref }}
-      ctrl-path-repetitions: 20
+      ctrl-path-repetitions: 1
+      test-selection-file: ${{ matrix.selection }}

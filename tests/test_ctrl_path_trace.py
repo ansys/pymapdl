@@ -99,7 +99,7 @@ def test_snapshot_reads_only_stored_safe_state(recorder):
 
     client = Client()
     client._channel_state = grpc.ChannelConnectivity.READY
-    client._exited = False
+    client._MapdlCore__exited = False
     client._exiting = False
     client._busy = True
     client._stub = object()
@@ -133,7 +133,7 @@ def test_trace_status_and_returns_do_not_publish_payloads(recorder, tmp_path, co
         def __str__(self):
             pytest.fail("Diagnostics must not stringify server exceptions")
 
-    client = SimpleNamespace(_stub=object(), _exited=False)
+    client = SimpleNamespace(_stub=object(), _MapdlCore__exited=False)
     recorder._active = True
     recorder.trace(frame("__init__", client), "call", None)
     ctrl_frame = frame("_ctrl_raw", client, cmd=command)
@@ -414,6 +414,12 @@ class MapdlGrpc:
         self._busy = False
         self._fallback = fallback
         self._connect()
+    @property
+    def _exited(self):
+        return self._MapdlCore__exited
+    @_exited.setter
+    def _exited(self, value):
+        self._MapdlCore__exited = value
     def _connect(self):
         return True
     def _ctrl_raw(self, cmd):
@@ -423,6 +429,8 @@ class MapdlGrpc:
         return self._ctrl_raw(cmd)
     @property
     def is_alive(self):
+        if self._exited:
+            return False
         try:
             return bool(self._ctrl("VERSION"))
         except grpc.RpcError:
@@ -563,6 +571,7 @@ def test_real_trace_repetitions_preserve_fixtures_and_expected_false(
         assert raw_error["grpc_status"] == "UNIMPLEMENTED"
         assert raw_error["sequence"] < alive_return["sequence"]
         assert alive_return["result"] is ("test_connect_via_channel" in start["nodeid"])
+        assert alive_return["exited"] is False
         assert any(
             row["event"] == "line" and row.get("function") == "is_alive"
             for row in events
@@ -849,3 +858,24 @@ def pytest_sessionstart(session):
     counts = json.loads((pytester.path / "fixture-counts.json").read_text())
     assert counts["session_teardown"] == 1
     assert counts["function_teardown"] == expected
+
+
+def test_snapshot_reads_real_exited_property_backing(recorder, monkeypatch):
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("The backing-property test must not initialize or connect MAPDL")
+
+    monkeypatch.setattr(MapdlGrpc, "__init__", forbidden)
+    monkeypatch.setattr(grpc, "insecure_channel", forbidden)
+    # The uninitialized object owns no resources for the destructor to release.
+    monkeypatch.setattr(MapdlGrpc, "__del__", lambda self: None)
+    client = MapdlGrpc.__new__(MapdlGrpc)
+    try:
+        for exited in (True, False):
+            client._exited = exited
+            assert vars(client)["_MapdlCore__exited"] is exited
+            assert "_exited" not in vars(client)
+            assert recorder._snapshot(client)["exited"] is exited
+    finally:
+        del client
