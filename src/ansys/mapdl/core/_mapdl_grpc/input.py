@@ -36,6 +36,38 @@ from ansys.mapdl.core.misc import random_string
 from . import _GrpcMixinBase
 
 
+def _driver_commands(
+    orig_cmd: str, filename: str, cd_read_option: str | None, kwargs: dict
+) -> list[str]:
+    """Return the APDL commands the temporary driver file runs to read ``filename``.
+
+    ``cd_read_option`` is ``None`` for a plain ``/INPUT``.
+    """
+    if cd_read_option is None:
+        return [f"{orig_cmd},'{filename}'"]
+    if cd_read_option != "ALL":
+        return [f"{orig_cmd},'{cd_read_option}','{filename}'"]
+
+    # 'CDREAD,ALL' restores two archives: the solid-model geometry and loads
+    # (IGES) and the rest of the database (CDB). MAPDL itself runs this as a
+    # command sequence, replicated here because the gRPC client uploads and
+    # locates both archives. CDREAD leaves the user in /PREP7.
+    fnamei = kwargs.get("fnamei")
+    if not fnamei:
+        raise ValueError(
+            "The 'fnamei' argument (the IGES archive) must be "
+            "supplied when using 'CDREAD' with the 'ALL' option."
+        )
+    return [
+        "/AUX15",
+        f"IGESIN,'{fnamei}'",
+        "FINISH",
+        f"/INPUT,'{filename}'",
+        "/PREP7",
+        "/RMTMP",
+    ]
+
+
 class _GrpcInputMixin(_GrpcMixinBase):
     """Input-file streaming and the commands that run through it."""
 
@@ -314,49 +346,11 @@ class _GrpcInputMixin(_GrpcMixinBase):
         id_ = random_string()
         tmp_name = f"_input_tmp_{id_}_.inp"
         tmp_out = f"_input_tmp_{id_}_.out"
-
-        if is_cdread_all:
-            # 'CDREAD,ALL' restores two archives: the solid-model geometry
-            # and loads (IGES format) and the rest of the database (CDB
-            # format).  MAPDL itself performs this as a sequence of
-            # commands, so we replicate it explicitly here instead of
-            # relying on 'CDREAD' to locate the second file, since the gRPC
-            # implementation is the one responsible for uploading and
-            # locating both archives:
-            #   /AUX15            (enter the IGES file-transfer processor)
-            #   IGESIN            (import the solid-model/loads archive)
-            #   FINISH            (leave /AUX15)
-            #   /INPUT            (read the CDB database archive)
-            #   /PREP7            (CDREAD leaves the user in /PREP7)
-            fnamei = kwargs.get("fnamei")
-            if not fnamei:
-                raise ValueError(
-                    "The 'fnamei' argument (the IGES archive) must be "
-                    "supplied when using 'CDREAD' with the 'ALL' option."
-                )
-            tmp_dat = (
-                f"/OUT,{tmp_out}\n"
-                "/AUX15\n"
-                f"IGESIN,'{fnamei}'\n"
-                "FINISH\n"
-                f"/INPUT,'{filename}'\n"
-                "/PREP7\n"
-                "/RMTMP\n"
-                "/OUT,"
-            )
-            delete_uploaded_files = False
-
-        elif is_cdread:
-            # Using CDREAD
-            tmp_dat = (
-                f"/OUT,{tmp_out}\n{orig_cmd},'{cd_read_option}','{filename}'\n/OUT,"
-            )
-            delete_uploaded_files = False
-
-        else:
-            # Using default INPUT
-            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n/OUT,"
-            delete_uploaded_files = True
+        commands = _driver_commands(
+            orig_cmd, filename, cd_read_option if is_cdread else None, kwargs
+        )
+        tmp_dat = "\n".join([f"/OUT,{tmp_out}", *commands, "/OUT,"])
+        delete_uploaded_files = not is_cdread
 
         if write_to_log and self._apdl_log is not None:
             if not self._apdl_log.closed:

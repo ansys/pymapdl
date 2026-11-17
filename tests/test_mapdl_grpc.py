@@ -256,6 +256,50 @@ def test_cdread_rejects_unknown_option():
         MapdlGrpc.cdread(mock_mapdl, "unknown", "model", "cdb")
 
 
+@pytest.mark.parametrize(
+    "orig_cmd,kwargs,expected",
+    [
+        ("/INP", {}, ["/INP,'model.inp'"]),
+        ("CDREAD", {"cd_read_option": "db"}, ["CDREAD,'DB','model.inp'"]),
+        (
+            "CDREAD",
+            {"cd_read_option": "all", "fnamei": "geo.iges"},
+            [
+                "/AUX15",
+                "IGESIN,'geo.iges'",
+                "FINISH",
+                "/INPUT,'model.inp'",
+                "/PREP7",
+                "/RMTMP",
+            ],
+        ),
+    ],
+)
+def test_input_queues_driver_commands_in_non_interactive(orig_cmd, kwargs, expected):
+    """In non_interactive, input queues the driver commands without the /OUT wrapper."""
+    mapdl = object.__new__(MapdlGrpc)
+    mapdl._log = MagicMock()
+    mapdl._apdl_log = None
+    mapdl._store_commands = True
+    mapdl._stored_commands = []
+    mapdl._get_file_name = lambda fname, ext: fname
+    mapdl._get_file_path = lambda fname, progress_bar: "model.inp"
+    mapdl._get_time_step_stream = lambda time_step: 100
+
+    assert mapdl._stream_input("model.inp", orig_cmd=orig_cmd, **kwargs) is None
+    assert mapdl._stored_commands == expected
+
+
+def test_input_cdread_all_requires_iges_archive():
+    mapdl = object.__new__(MapdlGrpc)
+    mapdl._log = MagicMock()
+    mapdl._get_file_name = lambda fname, ext: fname
+    mapdl._get_time_step_stream = lambda time_step: 100
+
+    with pytest.raises(ValueError, match="'fnamei'"):
+        mapdl._stream_input("model.inp", orig_cmd="CDREAD", cd_read_option="ALL")
+
+
 class TestCloseProcessPipes:
     """Tests for MapdlGrpc._close_process_pipes."""
 
