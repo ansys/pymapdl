@@ -808,6 +808,30 @@ changes made in the GUI affect the script. You can experiment in
 the GUI, and the script is left unaffected.
 
 
+Exit MAPDL automatically
+========================
+Use the ``Mapdl`` instance in a ``with`` statement to call
+:meth:`Mapdl.exit() <ansys.mapdl.core.Mapdl.exit>` when the block ends, even
+if the block raises an exception. This prevents a failed script from leaving
+MAPDL running and holding a license.
+
+.. code:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    with launch_mapdl() as mapdl:
+        mapdl.prep7()
+        mapdl.solve()
+
+The ``exit()`` method keeps its usual rules. If PyMAPDL did not launch the
+instance, for example when you connect with ``start_instance=False``, the
+block only closes the connection and leaves MAPDL running.
+
+Do not use an instance from a :class:`MapdlPool <ansys.mapdl.core.pool.MapdlPool>`
+in a ``with`` statement, because the block would exit an instance that the pool
+owns.
+
+
 Run a batch job
 ===============
 Instead of running a MAPDL batch by calling MAPDL with an input file,
