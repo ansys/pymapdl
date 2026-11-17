@@ -934,9 +934,10 @@ class MapdlGrpc(
             The thermal result object.
         """
         self._prioritize_thermal = True
-        result = self.result
-        self._prioritize_thermal = False
-        return result
+        try:
+            return self.result
+        finally:
+            self._prioritize_thermal = False
 
     @MapdlBase.name.getter
     def name(self) -> str:

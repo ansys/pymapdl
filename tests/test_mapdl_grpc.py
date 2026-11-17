@@ -1152,6 +1152,22 @@ class TestEnsureChannel:
         mock._multi_connect.assert_called_once_with(timeout=5)
 
 
+def test_thermal_result_resets_priority_when_loading_fails():
+    """A failed thermal result load must not make later 'result' calls thermal."""
+    mapdl = object.__new__(MapdlGrpc)
+    mapdl._prioritize_thermal = False
+
+    with (
+        patch.object(
+            MapdlGrpc, "result", property(Mock(side_effect=FileNotFoundError))
+        ),
+        pytest.raises(FileNotFoundError),
+    ):
+        mapdl.thermal_result
+
+    assert mapdl._prioritize_thermal is False
+
+
 # `MapdlGrpc.get_variable` now returns a `LazyArray` backed by a private,
 # per-call parameter name instead of eagerly downloading through a shared
 # "temp_var" parameter. See `tests/test_lazy_array.py` for its coverage
