@@ -32,6 +32,12 @@ on:
         type: string
         default: "3.12"
 
+      ctrl-probe:
+        description: Open a raw Ctrl connection after each test (diagnostic branch only)
+        required: false
+        type: boolean
+        default: false
+
       pytest-arguments:
         description: |
           Arguments to pass to pytest, additionally to the ones in the pyproject.toml file.
@@ -265,6 +271,7 @@ jobs:
           ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
           file_name: "${{ inputs.file-name }}"
           MAPDL_VERSION: "${{ inputs.mapdl-version }}"
+          PYMAPDL_CTRL_PROBE: ${{ inputs.ctrl-probe && '1' || '0' }}
           PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
           PYMAPDL_DEBUG_TESTING: ${{ runner.debug == '1' }}
         shell: bash
@@ -310,6 +317,30 @@ jobs:
               && echo "Successfully captured docker logs for ${CONTAINER}" \
               || echo "Failed to capture docker logs for ${CONTAINER}"
           done
+
+      - name: "Capture container connections and file counts"
+        if: always()
+        env:
+          MAPDL_0: ${{ steps.mapdl_0.outputs.container-name }}
+          MAPDL_1: ${{ steps.mapdl_1.outputs.container-name }}
+        shell: bash
+        run: |
+          mkdir -p ctrl-diagnostics
+          for CONTAINER in "${MAPDL_0}" "${MAPDL_1}"; do
+            [ -z "${CONTAINER}" ] && continue
+            docker exec --user 0 -i "${CONTAINER}" sh < .ci/ctrl_probe_counts.sh \
+              > "ctrl-diagnostics/${CONTAINER}.counts.txt" 2>&1 || true
+          done
+
+      - name: "Upload Ctrl probe and numeric container diagnostics"
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+        with:
+          name: ctrl-diagnostics-${{ inputs.file-name }}
+          path: |
+            ctrl-probe.jsonl
+            ctrl-diagnostics/*.counts.txt
+          retention-days: 7
 
       - name: "Check for OOM kills in the kernel log"
         if: always()

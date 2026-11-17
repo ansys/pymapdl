@@ -22,10 +22,12 @@
 
 from collections import namedtuple
 from collections.abc import Generator
+import json
 import os
 from pathlib import Path
 from shutil import get_terminal_size
 from sys import platform
+import time
 from typing import Any
 from unittest.mock import patch
 
@@ -439,6 +441,70 @@ def pytest_configure(config):
     my_reporter._tw.fullwidth = 160
     config.pluginmanager.unregister(vanilla_reporter)
     config.pluginmanager.register(my_reporter, "terminalreporter")
+
+
+def _probe_ctrl(config, nodeid, when, attempt=0):
+    """Record one raw Ctrl RPC on a new, independently pooled connection."""
+    from ansys.api.mapdl.v0 import ansys_kernel_pb2, mapdl_pb2_grpc
+    import grpc
+
+    started = time.time_ns()
+    endpoint = "{}:{}".format(
+        os.environ.get("PYMAPDL_IP", "127.0.0.1"),
+        os.environ.get("PYMAPDL_PORT", "50052"),
+    )
+    status = "OK"
+    try:
+        # gRPC otherwise shares subchannels with existing clients to this endpoint.
+        with grpc.insecure_channel(
+            endpoint, options=(("grpc.use_local_subchannel_pool", 1),)
+        ) as channel:
+            stub = mapdl_pb2_grpc.MapdlServiceStub(channel)
+            stub.Ctrl(ansys_kernel_pb2.CtrlRequest(ctrl="VERSION"), timeout=2.0)
+    except grpc.RpcError as error:
+        status = error.code().name
+
+    first_unimplemented = status == "UNIMPLEMENTED" and not getattr(
+        config, "_ctrl_probe_saw_unimplemented", False
+    )
+    if first_unimplemented:
+        config._ctrl_probe_saw_unimplemented = True
+    config._ctrl_probe_sequence = getattr(config, "_ctrl_probe_sequence", 0) + 1
+    record = {
+        "sequence": config._ctrl_probe_sequence,
+        "started_unix_ns": started,
+        "duration_s": (time.time_ns() - started) / 1e9,
+        "nodeid": nodeid,
+        "when": when,
+        "attempt": attempt,
+        "status": status,
+        "first_unimplemented": first_unimplemented,
+        "worker_id": os.environ.get("PYTEST_XDIST_WORKER", "master"),
+        "run_id": os.environ.get("GITHUB_RUN_ID"),
+        "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
+    }
+    # No RPC payloads, endpoints, credentials or server error details are published.
+    output = Path(os.environ.get("PYMAPDL_CTRL_PROBE_FILE", "ctrl-probe.jsonl"))
+    with output.open("a", encoding="utf-8") as stream:
+        stream.write(json.dumps(record) + "\n")
+    return record
+
+
+def pytest_sessionstart(session):
+    if os.environ.get("PYMAPDL_CTRL_PROBE") == "1":
+        _probe_ctrl(session.config, None, "session_start")
+
+
+@pytest.hookimpl(hookwrapper=True, tryfirst=True)
+def pytest_runtest_makereport(item, call):
+    yield
+    if call.when == "teardown" and os.environ.get("PYMAPDL_CTRL_PROBE") == "1":
+        _probe_ctrl(
+            item.config,
+            item.nodeid,
+            "after_teardown",
+            getattr(item, "execution_count", 1),
+        )
 
 
 def pytest_addoption(parser):
