@@ -49,7 +49,6 @@ from ansys.mapdl.core._mapdl_grpc.transport import (
 from ansys.mapdl.core.constants import DEFAULT_CHUNKSIZE
 from ansys.mapdl.core.errors import (
     MapdlExitedError,
-    MapdlRuntimeError,
     protect_grpc,
 )
 from ansys.mapdl.core.misc import (
@@ -579,9 +578,7 @@ class _GrpcFileMixin(_GrpcMixinBase):
             ("time_step_stream", "200"),
             ("chunk_size", str(chunk_size)),
         ]
-        if self._stub is None:
-            raise MapdlRuntimeError("MAPDL stub not initialized")
-        chunks = self._stub.DownloadFile(request, metadata=metadata)
+        chunks = self._connected_stub.DownloadFile(request, metadata=metadata)
         file_size = save_chunks_to_file(
             chunks,
             out_file_name,
@@ -623,9 +620,7 @@ class _GrpcFileMixin(_GrpcMixinBase):
         self._log.debug(f"Uploading file '{file_name}' to the MAPDL instance.")
 
         chunks_generator = get_file_chunks(file_name, progress_bar=progress_bar)
-        if self._stub is None:
-            raise MapdlRuntimeError("MAPDL stub not initialized")
-        response = self._stub.UploadFile(chunks_generator)
+        response = self._connected_stub.UploadFile(chunks_generator)
 
         if not response.length:
             raise IOError("File failed to upload")
@@ -637,16 +632,14 @@ class _GrpcFileMixin(_GrpcMixinBase):
         string without saving it to disk.
         """
         request = pb_types.DownloadFileRequest(name=target_name)
-        if self._stub is None:
-            raise MapdlRuntimeError("MAPDL stub not initialized")
-        chunks = self._stub.DownloadFile(request)
+        chunks = self._connected_stub.DownloadFile(request)
         return b"".join([chunk.payload for chunk in chunks])
 
     @protect_grpc
     def _upload_raw(self, raw, save_as):  # consider private
         """Upload a binary string as a file"""
         chunks = chunk_raw(raw, save_as)
-        response = self._stub.UploadFile(chunks)
+        response = self._connected_stub.UploadFile(chunks)
         if response.length != len(raw):
             raise IOError("Raw Bytes failed to upload")
 

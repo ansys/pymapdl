@@ -32,7 +32,6 @@ from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 
 from ansys.mapdl.core.errors import (
     MapdlConnectionError,
-    MapdlRuntimeError,
     protect_grpc,
 )
 
@@ -234,7 +233,7 @@ class _GrpcHealthMixin(_GrpcMixinBase):
             # MAPDL on v25.2 can answer 'Ctrl' with UNIMPLEMENTED on a new channel -> so a failed version check isn't proof that MAPDL is not alive.
             if error.code() == grpc.StatusCode.UNIMPLEMENTED:
                 try:
-                    self._stub.SendCommand(
+                    self._connected_stub.SendCommand(
                         pb_types.CmdRequest(command="/COM"), timeout=1.0
                     )
                 except Exception as cmd_error:
@@ -341,19 +340,16 @@ class _GrpcHealthMixin(_GrpcMixinBase):
         self._log.debug(f'Issuing CtrlRequest "{cmd}" with option "{opt1}".')
         request = anskernel.CtrlRequest(ctrl=str(cmd), opt1=str(opt1))
 
-        if self._stub is None:
-            raise MapdlRuntimeError("MAPDL stub not initialized")
-
         # handle socket closing upon exit
         if cmd.lower() == "exit":
             try:
                 # this always returns an error as the connection is closed
-                self._stub.Ctrl(request, timeout=timeout)
+                self._connected_stub.Ctrl(request, timeout=timeout)
             except (_InactiveRpcError, _MultiThreadedRendezvous):
                 pass
             return
 
-        resp = self._stub.Ctrl(request, timeout=timeout)
+        resp = self._connected_stub.Ctrl(request, timeout=timeout)
 
         if hasattr(resp, "response"):
             return resp.response

@@ -22,7 +22,7 @@
 
 """Value queries, parameter arrays and lazy array lifetimes."""
 
-import time
+import threading
 from typing import (
     TYPE_CHECKING,
     Union,
@@ -44,7 +44,6 @@ from ansys.mapdl.core.mapdl_core import MAX_PARAM_CHARS
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 
 if TYPE_CHECKING:  # pragma: no cover
-
     from ansys.mapdl.core.xpl import ansXpl
 
 from . import _GrpcMixinBase
@@ -89,22 +88,15 @@ class _GrpcQueryMixin(_GrpcMixinBase):
 
         # not threadsafe; don't allow multiple get commands
         timeout_ = kwargs.pop("timeout", 2)
-        timeout = time.time() + timeout_
-        while self._get_lock:
-            time.sleep(0.001)
-            if time.time() > timeout:
-                raise MapdlRuntimeError(
-                    f"PyMAPDL couldn't obtain 'get_lock' in {timeout_} seconds "
-                    "and PyMAPDL cannot issue multiple get commands simultaneously."
-                )
-
-        self._get_lock = True
+        if not self._get_lock.acquire(timeout=timeout_):
+            raise MapdlRuntimeError(
+                f"PyMAPDL couldn't obtain 'get_lock' in {timeout_} seconds "
+                "and PyMAPDL cannot issue multiple get commands simultaneously."
+            )
         try:
-            if self._stub is None:
-                raise MapdlRuntimeError("MAPDL stub not initialized")
-            response = self._stub.Get(pb_types.GetRequest(getcmd=cmd))
+            response = self._connected_stub.Get(pb_types.GetRequest(getcmd=cmd))
         finally:
-            self._get_lock = False
+            self._get_lock.release()
 
         if response.type == 0:
             self._log.debug(
@@ -147,18 +139,10 @@ class _GrpcQueryMixin(_GrpcMixinBase):
         kloop,
     ) -> NDArray[np.float64]:
         """Return an eager ``*VGET`` result through the gRPC service."""
-        while self._vget_lock:
-            time.sleep(0.001)
-        self._vget_lock = True
-
         cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{kloop}"
-        try:
-            if self._stub is None:
-                raise MapdlRuntimeError("MAPDL stub not initialized")
-            chunks = self._stub.VGet2(pb_types.GetRequest(getcmd=cmd))
+        with self._vget_lock:
+            chunks = self._connected_stub.VGet2(pb_types.GetRequest(getcmd=cmd))
             return parse_chunks(chunks)
-        finally:
-            self._vget_lock = False
 
     @protect_grpc
     def _get_array(
@@ -231,22 +215,22 @@ class _GrpcQueryMixin(_GrpcMixinBase):
             parameter does not exist.
         """
         request = pb_types.ParameterRequest(name=pname, array=False)
-        if self._stub is None:
-            raise MapdlRuntimeError("MAPDL stub not initialized")
-        presponse = self._stub.GetParameter(request)
+        presponse = self._connected_stub.GetParameter(request)
         if presponse.val:
             return float(presponse.val[0])
 
     # TODO: not fully tested/implemented
     @protect_grpc
     def Param(self, pname):
-        presponse = self._stub.GetParameter(pb_types.ParameterRequest(name=pname))
+        presponse = self._connected_stub.GetParameter(
+            pb_types.ParameterRequest(name=pname)
+        )
         return presponse.val
 
     # TODO: not fully tested/implemented
     @protect_grpc
     def Var(self, num):
-        presponse = self._stub.GetVariable(pb_types.VariableRequest(inum=num))
+        presponse = self._connected_stub.GetVariable(pb_types.VariableRequest(inum=num))
         return presponse.val
 
     @property
@@ -382,14 +366,14 @@ class _GrpcQueryMixin(_GrpcMixinBase):
         APDLMATH vectors only.
         """
         request = pb_types.ParameterRequest(name=pname)
-        return self._stub.GetDataInfo(request)
+        return self._connected_stub.GetDataInfo(request)
 
     @protect_grpc
     def _vec_data(self, pname):  # numpydoc ignore=RT01
         """Downloads vector data from a MAPDL MATH parameter"""
         dtype = ANSYS_VALUE_TYPE[self._data_info(pname).stype]
         request = pb_types.ParameterRequest(name=pname)
-        chunks = self._stub.GetVecData(request)
+        chunks = self._connected_stub.GetVecData(request)
         return parse_chunks(chunks, dtype)
 
     @protect_grpc
@@ -407,7 +391,7 @@ class _GrpcQueryMixin(_GrpcMixinBase):
 
         if mtype == 2:  # dense
             request = pb_types.ParameterRequest(name=pname)
-            chunks = self._stub.GetMatData(request)
+            chunks = self._connected_stub.GetMatData(request)
             values = parse_chunks(chunks, stype)
             return np.transpose(np.reshape(values, shape[::-1]))
         elif mtype == 3:  # sparse
