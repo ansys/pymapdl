@@ -435,7 +435,7 @@ class MapdlGrpc(MapdlBase):
         self._name: Optional[str] = None
         self._session_id_: Optional[str] = None
         self._checking_session_id_: bool = False
-        self.__distributed: Optional[bool] = None
+        self._distributed_cache: Optional[bool] = None
         self._remote_instance: Optional["PIM_Instance"] = remote_instance
         self._strict_session_id_check: bool = (
             False  # bool to force to check the session id matches in client and server
@@ -515,7 +515,7 @@ class MapdlGrpc(MapdlBase):
         self._exited: Optional[bool] = None
         self._process_close_lock: threading.Lock = threading.Lock()
         self._db: Optional[MapdlDb] = None
-        self.__server_version: Optional[str] = None
+        self._server_version_cache: Optional[tuple[int, int, int]] = None
         self._state: Optional[grpc.Future] = None
         self._timeout: int = timeout
         self._env_vars: Dict[str, str] = start_parm.get("env_vars", {})
@@ -1633,12 +1633,12 @@ class MapdlGrpc(MapdlBase):
         >>> mapdl._server_version
         (0, 3, 0)
 
-        Uses cached ``__server_version`` to avoid unnecessary communication.
+        Uses cached ``_server_version_cache`` to avoid unnecessary communication.
         """
         # check cache
-        if self.__server_version is None:
-            self.__server_version = self._get_server_version()  # type: ignore[assignment]
-        return self.__server_version
+        if self._server_version_cache is None:
+            self._server_version_cache = self._get_server_version()
+        return self._server_version_cache
 
     def _get_server_version(self) -> tuple[int, int, int]:
         """Request version from gRPC server.
@@ -4618,9 +4618,9 @@ class MapdlGrpc(MapdlBase):
     @property
     def _distributed(self) -> bool:  # numpydoc ignore=RT01
         """MAPDL is running in distributed mode."""
-        if self.__distributed is None:
-            self.__distributed = self.parameters.numcpu > 1
-        return self.__distributed
+        if self._distributed_cache is None:
+            self._distributed_cache = self.parameters.numcpu > 1
+        return self._distributed_cache
 
     def _new_lazy_array_parameter(self) -> str:
         """Reserve an unused, valid MAPDL parameter name for a lazy result."""

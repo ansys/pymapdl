@@ -171,16 +171,16 @@ def test_off_db(mapdl, cleared, db):
 
 def test_wrong_api_version(mapdl, cleared, db):
     mapdl.db.stop()
-    previous_server_version = mapdl._MapdlGrpc__server_version
+    previous_server_version = mapdl._server_version_cache
     try:
-        mapdl._MapdlGrpc__server_version = (0, 1, 1)
+        mapdl._server_version_cache = (0, 1, 1)
 
         from ansys.mapdl.core.errors import MapdlVersionError
 
         with pytest.raises(MapdlVersionError):
             mapdl.db.start()
     finally:
-        mapdl._MapdlGrpc__server_version = previous_server_version
+        mapdl._server_version_cache = previous_server_version
 
     mapdl._server_version  # resetting
     mapdl.db.start()
