@@ -110,27 +110,25 @@ class _GrpcLifecycleMixin(_GrpcMixinBase):
                 self._log.debug("Saving MAPDL database")
                 self.save()
 
-            if not force:
-                # Ignore this method if PYMAPDL_START_INSTANCE=False
-                if not self._start_instance or not self._launched:
-                    self._log.info(
-                        "Ignoring exit due to PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't launch the instance."
-                    )
-                    self._disconnect_but_leave_mapdl_running()
-                    if cleanup_error is not None:
-                        raise cleanup_error
-                    return
+            if force:
+                keep_running_reason = None
+            elif not self._start_instance or not self._launched:
+                keep_running_reason = (
+                    "PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't "
+                    "launch the instance."
+                )
+            elif pymapdl.BUILDING_GALLERY:
+                keep_running_reason = "BUILDING_GALLERY=True"
+            else:
+                keep_running_reason = None
 
-                # or building the gallery
-                if pymapdl.BUILDING_GALLERY:
-                    self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
-                    self._disconnect_but_leave_mapdl_running()
-                    if cleanup_error is not None:
-                        raise cleanup_error
-                    return
+            if keep_running_reason:
+                self._log.info(f"Ignoring exit due to {keep_running_reason}")
+                self._disconnect_but_leave_mapdl_running()
+            else:
+                # Step 3 of '_release_resources' closes the gRPC channel.
+                self._release_resources(path=self._path)
 
-            # Step 3 of '_release_resources' closes the gRPC channel.
-            self._release_resources(path=self._path)
             if cleanup_error is not None:
                 raise cleanup_error
 
