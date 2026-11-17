@@ -22,9 +22,11 @@
 
 """Value queries, parameter arrays and lazy array lifetimes."""
 
+from contextlib import contextmanager
 import threading
 from typing import (
     TYPE_CHECKING,
+    Iterator,
     Union,
 )
 
@@ -170,8 +172,7 @@ class _GrpcQueryMixin(_GrpcMixinBase):
             return self._get_array_from_service(
                 entity, entnum, item1, it1num, item2, it2num, kloop
             )
-        parameter_name = self._new_lazy_array_parameter()
-        try:
+        with self._reserved_lazy_array_parameter() as parameter_name:
             output = self.starvget(
                 parameter_name,
                 entity,
@@ -183,24 +184,12 @@ class _GrpcQueryMixin(_GrpcMixinBase):
                 kloop,
                 mute=False,
             )
-        except Exception as error:
-            try:
-                self._delete_lazy_array_parameter(parameter_name)
-            except Exception as cleanup_error:
-                raise cleanup_error from error
-            raise
 
         if "the dimension number 1 is 0" in output:
             self._delete_lazy_array_parameter(parameter_name)
             return np.empty(0)
 
-        return LazyArray(
-            self,
-            parameter_name,
-            cleanup=lambda: self._delete_lazy_array_parameter(parameter_name),
-            fetch=lambda: self._read_owned_array_parameter(parameter_name),
-            flatten=True,
-        )
+        return self._lazy_array(parameter_name, flatten=True)
 
     @protect_grpc
     def scalar_param(self, pname: str) -> float:
@@ -406,6 +395,29 @@ class _GrpcQueryMixin(_GrpcMixinBase):
                 )
 
         raise ValueError(f'Invalid matrix type "{mtype}"')
+
+    @contextmanager
+    def _reserved_lazy_array_parameter(self) -> Iterator[str]:
+        """Reserve a lazy-result parameter name, deleting it if populating it fails."""
+        parameter_name = self._new_lazy_array_parameter()
+        try:
+            yield parameter_name
+        except Exception as error:
+            try:
+                self._delete_lazy_array_parameter(parameter_name)
+            except Exception as cleanup_error:
+                raise cleanup_error from error
+            raise
+
+    def _lazy_array(self, parameter_name: str, flatten: bool = False) -> LazyArray:
+        """Wrap an owned parameter in a :class:`LazyArray` that deletes it once used."""
+        return LazyArray(
+            self,
+            parameter_name,
+            cleanup=lambda: self._delete_lazy_array_parameter(parameter_name),
+            fetch=lambda: self._read_owned_array_parameter(parameter_name),
+            flatten=flatten,
+        )
 
     def _new_lazy_array_parameter(self) -> str:
         """Reserve an unused, valid MAPDL parameter name for a lazy result."""

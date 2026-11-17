@@ -121,8 +121,7 @@ class _GrpcPost26Mixin(_GrpcMixinBase):
         >>> np.asarray(mapdl.get_variable(3, tstrt=1.0))
         array([0.34632451, 0.36126732, ..., 0.38041256])
         """
-        parameter_name = self._new_lazy_array_parameter()
-        try:
+        with self._reserved_lazy_array_parameter() as parameter_name:
             super().vget(  # type: ignore[misc]  # Resolved through MapdlGrpc's MRO.
                 par=parameter_name,
                 ir=ir,
@@ -130,19 +129,8 @@ class _GrpcPost26Mixin(_GrpcMixinBase):
                 kcplx=kcplx,
                 **kwargs,
             )
-        except Exception as error:
-            try:
-                self._delete_lazy_array_parameter(parameter_name)
-            except Exception as cleanup_error:
-                raise cleanup_error from error
-            raise
 
-        return LazyArray(
-            self,
-            parameter_name,
-            cleanup=lambda: self._delete_lazy_array_parameter(parameter_name),
-            fetch=lambda: self._read_owned_array_parameter(parameter_name),
-        )
+        return self._lazy_array(parameter_name)
 
     @wraps(MapdlBase.nsol)
     def nsol(  # numpydoc ignore=RT01
