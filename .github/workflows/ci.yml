@@ -1,28 +1,55 @@
 name: CI
-run-name: "Ctrl diagnostic v25.2.0 (probe=${{ inputs.ctrl_probe }})"
+run-name: Targeted historical versus current client liveness
 
 on:
   workflow_dispatch:
-    inputs:
-      ctrl_probe:
-        description: Open a fresh Ctrl connection after every test
-        required: true
-        type: boolean
-        default: true
 
 permissions: {}
 
-# Keep independent dispatches; the normal CI group cancels earlier runs.
 concurrency:
-  group: ctrl-diagnostic-${{ github.run_id }}
+  group: ctrl-liveness-path-${{ github.run_id }}
   cancel-in-progress: false
 
 jobs:
-  remote:
-    name: "Remote: v25.2.0"
+  dependencies:
+    name: Resolve shared test dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
-      contents: read  # Checkout the diagnostic branch
-      packages: read  # Pull the private MAPDL images
+      contents: read  # Checkout the fixed diagnostic controller
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 #v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Resolve once, without launching MAPDL
+        run: |
+          python -m pip install build "flit_core>=3.11,<5" ".[tests]"
+          python -m pip list --format=freeze --exclude ansys-mapdl-core > ctrl-path-constraints.txt
+          sha256sum ctrl-path-constraints.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+        with:
+          name: ctrl-path-constraints
+          path: ctrl-path-constraints.txt
+          retention-days: 7
+
+  liveness:
+    name: "Liveness path: ${{ matrix.client }}"
+    needs: dependencies
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - client: historical
+            ref: 94466b37e4af1b6d82c8ff782ad83659d2f753fa
+          - client: current
+            ref: 154828f5ddff2a849b52bd3ed385a25db6188b02
+    permissions:
+      contents: read  # Checkout the exact client revision and original tests
+      packages: read  # Pull the private immutable MAPDL image
     uses: $/.github/workflows/test-remote.yml
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
@@ -32,6 +59,7 @@ jobs:
       log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
       mapdl-version: v25.2.0
-      file-name: remote-v25.2.0
+      file-name: ctrl-path-${{ matrix.client }}
       upload-logs: true
-      ctrl-probe: ${{ inputs.ctrl_probe }}
+      client-source-ref: ${{ matrix.ref }}
+      ctrl-path-repetitions: 20

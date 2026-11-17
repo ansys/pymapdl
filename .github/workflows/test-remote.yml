@@ -32,6 +32,17 @@ on:
         type: string
         default: "3.12"
 
+      client-source-ref:
+        description: Immutable full client and original test source
+        required: true
+        type: string
+
+      ctrl-path-repetitions:
+        description: Number of executions per original test in one session
+        required: false
+        type: number
+        default: 20
+
       ctrl-probe:
         description: Open a raw Ctrl connection after each test (diagnostic branch only)
         required: false
@@ -127,6 +138,13 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: "Checkout the complete immutable client source"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+        with:
+          ref: ${{ inputs.client-source-ref }}
+          path: _client_source
+          persist-credentials: false
+
       - name: "Login in Github container registry"
         uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 #v4.7.0
         with:
@@ -187,7 +205,7 @@ jobs:
         id: mapdl_0
         uses: $/.github/actions/launch-mapdl-docker
         with:
-          mapdl-image: ${{ env.MAPDL_PACKAGE }}:${{ inputs.mapdl-version }}
+          mapdl-image: ghcr.io/ansys/mapdl:v25.2.0@sha256:c3ce3fa6a49304fd4e083ba2e0b3bc6c32cbb4b91673cfee2775a79c14b84b4c
           instance-name: 'MAPDL_0'
           license-server: ${{ secrets.license-server }}
           pymapdl-port: ${{ env.PYMAPDL_PORT }}
@@ -201,7 +219,7 @@ jobs:
         id: mapdl_1
         uses: $/.github/actions/launch-mapdl-docker
         with:
-          mapdl-image: ${{ env.MAPDL_PACKAGE }}:${{ inputs.mapdl-version }}
+          mapdl-image: ghcr.io/ansys/mapdl:v25.2.0@sha256:c3ce3fa6a49304fd4e083ba2e0b3bc6c32cbb4b91673cfee2775a79c14b84b4c
           instance-name: 'MAPDL_1'
           license-server: ${{ secrets.license-server }}
           pymapdl-port: ${{ env.PYMAPDL_PORT2 }}
@@ -252,36 +270,47 @@ jobs:
           pip install -r .ci/requirements_test_xvfb.txt
           xvfb-run python .ci/display_test.py
 
-      - name: Install ansys-mapdl-core
-        shell: bash
-        run: |
-          python -m pip install build
-          python -m build
-          python -m pip install dist/*.whl
-          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+      - name: "Download the shared exact dependency constraints"
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 #v5.0.0
+        with:
+          name: ctrl-path-constraints
+          path: _ctrl_dependencies
 
-      - name: "Unit testing requirements installation"
+      - name: "Install the selected client and identical test dependencies"
         shell: bash
         run: |
-          python -m pip install .[tests]
+          sha256sum _ctrl_dependencies/ctrl-path-constraints.txt
+          python -m pip install -r _ctrl_dependencies/ctrl-path-constraints.txt
+          python -m build --no-isolation --outdir dist _client_source
+          python -m pip install --constraint _ctrl_dependencies/ctrl-path-constraints.txt dist/*.whl
+          python -m pip check
 
       - name: "Unit testing"
+        working-directory: _client_source
         env:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
           ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
-          file_name: "${{ inputs.file-name }}"
-          MAPDL_VERSION: "${{ inputs.mapdl-version }}"
-          PYMAPDL_CTRL_PROBE: ${{ inputs.ctrl-probe && '1' || '0' }}
-          PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
-          PYMAPDL_DEBUG_TESTING: ${{ runner.debug == '1' }}
+          FILE_NAME: ${{ inputs.file-name }}
+          MAPDL_VERSION: ${{ inputs.mapdl-version }}
+          CTRL_SUBJECT_REF: ${{ inputs.client-source-ref }}
+          CTRL_SUBJECT_ROOT: ${{ github.workspace }}/_client_source
+          CTRL_CONSTRAINTS: ${{ github.workspace }}/_ctrl_dependencies/ctrl-path-constraints.txt
+          CTRL_REPETITIONS: ${{ inputs.ctrl-path-repetitions }}
+          PYTHONPATH: ${{ github.workspace }}/.ci
+          PYMAPDL_CTRL_PROBE: "0"
+          PYMAPDL_DEBUG_TESTING: "True"
         shell: bash
         run: |
-          echo "ON_UBUNTU: $ON_UBUNTU"
-          xvfb-run pytest \
-            ${PYTEST_INPUT_ARGUMENTS} \
-            ${PYTEST_ARGUMENTS} \
-            --report-log=$file_name.jsonl \
-            --cov-report=xml:$file_name.xml
+          unset ALLOW_FAILURE_RATE
+          xvfb-run pytest -o addopts= --no-cov -p ctrl_path_trace \
+            --ctrl-path-repetitions="${CTRL_REPETITIONS}" \
+            --ctrl-path-log="${GITHUB_WORKSPACE}/ctrl-path.jsonl" \
+            --random-order-bucket=none --reruns=0 --maxfail=1 \
+            --strict-markers --timeout=180 --timeout-method=thread -vv -ra \
+            --report-log="${GITHUB_WORKSPACE}/${FILE_NAME}.jsonl" \
+            --report-log-exclude-logs-on-passed-tests \
+            tests/test_grpc.py::test_connect_via_channel \
+            tests/test_grpc.py::test_generic_grpc_exception
 
       - name: "Print amount of restarts"
         if: always()
@@ -338,7 +367,8 @@ jobs:
         with:
           name: ctrl-diagnostics-${{ inputs.file-name }}
           path: |
-            ctrl-probe.jsonl
+            ctrl-path.jsonl
+            _ctrl_dependencies/ctrl-path-constraints.txt
             ctrl-diagnostics/*.counts.txt
           retention-days: 7
 
@@ -360,19 +390,6 @@ jobs:
         with:
           name: "reports-${{ inputs.file-name }}"
           path: ./${{ inputs.file-name }}.jsonl
-
-      - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 #v7.1.1
-        name: "Upload coverage to Codecov"
-        with:
-          token: ${{ secrets.codecov-token }} # required
-          name: "${{ inputs.file-name }}.xml"
-          flags: remote-${{ steps.ubuntu_check.outputs.TAG_UBUNTU }}-${{ inputs.mapdl-version }}-${{ steps.distributed_mode.outputs.distributed_mode }}
-
-      - name: Upload coverage artifacts
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
-        with:
-          name: "${{ inputs.file-name }}.xml"
-          path: "./${{ inputs.file-name }}.xml"
 
       - name: "Check package"
         shell: bash
