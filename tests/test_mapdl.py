@@ -551,7 +551,7 @@ def test_allow_ignore(mapdl, clear_at_start_and_end):
         mapdl.ignore_errors = previous_ignore_errors
 
 
-def test_chaining(mapdl, clear_at_end):
+def test_chaining(mapdl, clear_at_start_and_end):
     # test chaining with distributed only
     if mapdl._distributed:
         with pytest.raises(MapdlRuntimeError):
