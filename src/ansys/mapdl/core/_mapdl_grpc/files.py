@@ -417,7 +417,7 @@ class _GrpcFileMixin(_GrpcMixinBase):
         if isinstance(files, str):
             list_files = self._validate_files(files, extension=extension)
 
-        elif isinstance(files, list):
+        elif isinstance(files, (list, tuple)):
             if not all([isinstance(each, str) for each in files]):
                 raise ValueError(
                     "The parameter `'files'` can be a list or tuple, but it should only contain strings."
