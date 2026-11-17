@@ -51,11 +51,7 @@ from ansys.mapdl.core.errors import (
     MapdlExitedError,
     protect_grpc,
 )
-from ansys.mapdl.core.misc import (
-    last_created,
-    run_as,
-    supress_logging,
-)
+from ansys.mapdl.core.misc import run_as, supress_logging
 
 from . import _GrpcMixinBase
 
@@ -715,35 +711,7 @@ class _GrpcFileMixin(_GrpcMixinBase):
 
     @property
     def _distributed_result_file(self):  # numpydoc ignore=RT01
-        """Path of the distributed result file."""
+        """Path of the distributed result file, or ``None`` when not distributed."""
         if not self._distributed:
             return
-
-        try:
-            filename = self.inquire("", "RSTFILE")
-            if not filename:
-                filename = self.jobname
-        except:
-            filename = self.jobname
-
-        # ansys decided that a jobname ended in a number needs a bonus "_"
-        if filename[-1].isnumeric():
-            filename += "_"
-
-        rth_basename = "%s0.%s" % (filename, "rth")
-        rst_basename = "%s0.%s" % (filename, "rst")
-
-        rth_file = self.directory / rth_basename
-        rst_file = self.directory / rst_basename
-
-        if self._prioritize_thermal:
-            if not os.path.isfile(rth_file):
-                raise FileNotFoundError("Thermal Result not available")
-            return rth_file
-
-        if os.path.isfile(rth_file) and os.path.isfile(rst_file):
-            return last_created([rth_file, rst_file])
-        elif os.path.isfile(rth_file):
-            return rth_file
-        elif os.path.isfile(rst_file):
-            return rst_file
+        return super()._distributed_result_file  # type: ignore[misc]  # Resolved through MapdlGrpc's MRO.

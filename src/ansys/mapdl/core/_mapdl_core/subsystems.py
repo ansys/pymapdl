@@ -252,7 +252,7 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
         """
         if self.exited:
             raise MapdlRuntimeError(
-                "MAPDL exited.\n\nCan only postprocess a live " "MAPDL instance."
+                "MAPDL exited.\n\nCan only postprocess a live MAPDL instance."
             )
 
         if self._post_object is None:  # type: ignore[has-type]  # Set by _MapdlCore.__init__.
@@ -491,6 +491,11 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
 
         rth_file = self.directory / rth_basename
         rst_file = self.directory / rst_basename
+
+        if getattr(self, "_prioritize_thermal", False):
+            if not os.path.isfile(rth_file):
+                raise FileNotFoundError("Thermal Result not available")
+            return rth_file
 
         if os.path.isfile(rth_file) and os.path.isfile(rst_file):
             return last_created([rth_file, rst_file])
