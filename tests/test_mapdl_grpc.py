@@ -1022,6 +1022,27 @@ class TestDisconnectButLeaveMapdlRunning:
         mock._release_resources.assert_called_once()
         mock._disconnect_but_leave_mapdl_running.assert_not_called()
 
+    @pytest.mark.parametrize(
+        "start_instance,force,teardown",
+        [
+            (True, False, "_release_resources"),
+            (False, False, "_disconnect_but_leave_mapdl_running"),
+            (False, True, "_release_resources"),
+        ],
+    )
+    def test_lazy_array_cleanup_error_is_raised_after_teardown(
+        self, start_instance, force, teardown
+    ):
+        """A failed lazy-array cleanup must not skip teardown, then must surface."""
+        mock = self._mock_for_exit(start_instance=start_instance)
+        mock._cleanup_lazy_array_parameters.side_effect = RuntimeError("delete failed")
+
+        with pytest.raises(RuntimeError, match="delete failed"):
+            MapdlGrpc.exit(mock, force=force)
+
+        getattr(mock, teardown).assert_called_once()
+        assert mock._exiting is False
+
     def test_closes_channel_joins_threads_and_marks_exited(self):
         """The helper releases both resources and reports the instance dead."""
         mock = _make_mock_mapdl()
