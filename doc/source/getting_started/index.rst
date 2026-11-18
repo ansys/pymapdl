@@ -15,6 +15,18 @@ Getting started
    install_pymapdl
    launcher
 
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Troubleshooting
+
+   troubleshoot
+   troubleshoot_before_launch
+   troubleshoot_launch
+   troubleshoot_runtime
+
+
 .. toctree::
    :maxdepth: 1
    :hidden:
