@@ -155,17 +155,10 @@ jobs:
               - 'doc/source/**'
               - 'pyproject.toml'
 
-      - name: "Setup Python with cache"
+      - name: "Setup Python"
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 #v7.1.0
-        if:  steps.changes.outputs.workflows != 'true'
         with:
-          cache: 'pip'
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-
-      - name: "Setup Python without cache"
-        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 #v7.1.0
-        if: steps.changes.outputs.workflows == 'true'
-        with:
+          cache: ${{ steps.changes.outputs.workflows != 'true' && 'pip' || '' }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Install OS packages"
@@ -197,27 +190,27 @@ jobs:
         if: ${{ inputs.use_cache_examples && (steps.changes.outputs.documentation != 'true' || env.ON_MAIN == 'true') }}
         with:
           path: doc/source/examples
-          key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          key: Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
-            Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+            Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Cache docs build directory"
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
         if: ${{ inputs.use_cache_doc_build && (steps.changes.outputs.documentation != 'true' || env.ON_MAIN == 'true') }}
         with:
           path: doc/_build
-          key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          key: doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
-            doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+            doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Cache autosummary"
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
         if: ${{ inputs.use_cache_autosummary && (steps.changes.outputs.documentation != 'true' || env.ON_MAIN == 'true') }}
         with:
           path: doc/source/**/_autosummary/*.rst
-          key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          key: autosummary-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
-            autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+            autosummary-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Install docs build requirements"
         shell: bash

@@ -174,7 +174,7 @@ jobs:
 
   upload-dev-docs:
     name: "Upload dev documentation"
-    if: github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags')
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Needed to push documentation to gh-pages branch
