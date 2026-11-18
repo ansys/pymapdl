@@ -23,7 +23,6 @@ Getting started
    learning
    faq
    troubleshoot
-   debug_launch
    versioning
 
 
