@@ -43,6 +43,10 @@ from ansys.mapdl.core import LOG as logger
 SIGINT_TRACKER: List[bool] = []
 
 # 'signal.SIGKILL' does not exist on Windows. Its value is 9 on every POSIX platform.
+# On Windows the fallback only avoids an AttributeError: the return code of a
+# process is never negative there, so the exit signal is always None and this
+# value is never matched. 'None' is not used as the fallback because then
+# 'exit_signal == _SIGKILL' would be true when the exit signal is unknown.
 _SIGKILL: int = getattr(signal, "SIGKILL", 9)
 
 # Configuration of 'protect_grpc' wrapper
