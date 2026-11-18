@@ -615,7 +615,7 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
                 color_areas = True
 
                 for each_volu in volumes:
-                    self.vsel("S", vmin=each_volu)
+                    self.vsel("S", vmin=each_volu, return_mapdl_output=True)
                     self.aslv("S", mute=True)  # select areas attached to active volumes
 
                     pl_aplot = self.aplot(

@@ -638,12 +638,11 @@ class PostProcessing:
             nodes_ids = self._mapdl.get_array("NODE", item1="NLIST")
             nodes_loc = self._mapdl.mesh.nodes
 
-            self._mapdl.esln("S", 0)  # selecting elements associated with those nodes
-            self._mapdl.nsle(
-                "A", "all"
-            )  # selecting nodes associated with those elements to avoid segfault
+            # select elements of those nodes, then their nodes to avoid a segfault
+            self._mapdl.esln("S", 0, return_mapdl_output=True)
+            self._mapdl.nsle("A", "all", return_mapdl_output=True)
 
-            all_scalars = np.empty(mask.size)
+            all_scalars = np.zeros(mask.size)
             all_scalars[mask] = scalars
 
             # we can directly the node numbers as the array of selected

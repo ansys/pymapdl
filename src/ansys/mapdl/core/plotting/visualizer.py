@@ -246,6 +246,8 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
             Additional keyword arguments passed to
             :meth:`pyvista.Plotter.add_text`.
         """
+        # pyvista text actors use the global theme font, not the plotter theme
+        kwargs.setdefault("font", self.scene.theme.font.family)
         return self.scene.add_text(
             text, position=position, font_size=font_size, color=color, **kwargs
         )
@@ -289,11 +291,14 @@ class MapdlPlotter(Plotter):
     ):
         """Initialize the ``MapdlPlotter`` class."""
         _first_use()
-        self._backend = MapdlPlotterBackend(use_trame=use_trame, **plotter_kwargs)
+        if theme is None:
+            theme = MapdlTheme()
+        # Pass the theme explicitly: other packages (ansys-mapdl-reader, ansys-dpf-core) change the global font on import.
+        self._backend = MapdlPlotterBackend(
+            use_trame=use_trame, theme=theme, **plotter_kwargs
+        )
         super().__init__(backend=self._backend)
         self._theme = theme
-        if theme is None:
-            self._theme = MapdlTheme()
         self._off_screen: Optional[bool] = None
         self._notebook: Optional[bool] = None
         self._savefig = None
@@ -969,7 +974,9 @@ class MapdlPlotter(Plotter):
             )
 
         if title:  # Added here to avoid labels overlapping title
-            self.scene.add_title(title, color=text_color)
+            self.scene.add_title(
+                title, color=text_color, font=self.scene.theme.font.family
+            )
 
         if return_cpos and return_plotter:
             raise ValueError(
