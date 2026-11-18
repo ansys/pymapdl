@@ -482,7 +482,9 @@ def protect_grpc(func: Callable) -> Callable:
             except grpc.RpcError as error:
                 mapdl = retrieve_mapdl_from_args(args)
 
-                mapdl._log.debug("A gRPC error has been detected.")
+                mapdl._log.debug(
+                    f"A gRPC error has been detected: {error.code()}: {error.details()}"
+                )
 
                 # A response-size limit cannot be repaired by replaying the command.
                 if error.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:
@@ -504,6 +506,13 @@ def protect_grpc(func: Callable) -> Callable:
                             " environment variable. For instance:\n\n"
                             f"$ export PYMAPDL_MAX_MESSAGE_LENGTH={lim_}"
                         )
+
+                # A method the server refuses is not repaired by replaying the call,
+                # and MAPDL is still alive (commands keep working), so don't mark it exited.
+                if error.code() == grpc.StatusCode.UNIMPLEMENTED:
+                    raise MapdlgRPCError(
+                        f"UNIMPLEMENTED: '{func.__name__}' was refused by the MAPDL server."
+                    )
 
                 if not mapdl.exited:
                     i_attemps += 1
