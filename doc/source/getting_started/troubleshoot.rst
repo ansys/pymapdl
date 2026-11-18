@@ -203,9 +203,10 @@ In some cases, it may be necessary to run the launch command manually from the c
 
         .. code:: pwsh-session
 
-            (.venv) PS C:\Users\user\pymapdl> "C:\Program Files\ANSYS Inc\v241\ansys\bin\winx64\ANSYS241.exe"
+            (.venv) PS C:\Users\user\pymapdl> & "C:\Program Files\ANSYS Inc\v241\ansys\bin\winx64\ANSYS241.exe"
 
-        .. note:: PowerShell users can run the preceding command without quotes.
+        .. note:: In PowerShell, use the call operator (``&``) to run a quoted
+           executable path. Keep the path in quotes when it contains spaces.
 
     .. tab-item:: Linux
         :sync: oskey
