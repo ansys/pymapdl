@@ -27,6 +27,7 @@ from unittest.mock import MagicMock, patch
 import grpc
 import pytest
 
+from ansys.mapdl.core import errors
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
     MapdlConnectionError,
@@ -549,9 +550,35 @@ class TestGetErrorFileTail:
         assert tail.count("Last lines of the MAPDL error file") == 2
         assert "file1.err':" in tail
         assert "file2.err':" in tail
-        assert (
-            "Other MAPDL error files with a fatal error: file10.err, file11.err" in tail
+        assert "Other MAPDL error files with errors: file10.err, file11.err" in tail
+
+    def test_worker_file_with_error_is_shown(self, tmp_path):
+        """A worker file with an error, but no fatal error, is shown too."""
+        (tmp_path / "file1.err").write_text(
+            " *** ERROR ***                           CP =       1.000\n"
+            " Element 12 has a negative Jacobian.\n",
+            encoding="latin-1",
         )
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path))
+
+        assert "file1.err" in tail
+        assert "negative Jacobian" in tail
+
+    def test_worker_files_with_fatal_error_are_shown_first(self, tmp_path):
+        """When the number of files is limited, those with a fatal error are kept."""
+        for rank in (1, 2):
+            (tmp_path / f"file{rank}.err").write_text(
+                " *** ERROR ***\n The VSWE command is ignored.\n", encoding="latin-1"
+            )
+        (tmp_path / "file7.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path), max_worker_files=2)
+
+        assert "file7.err':" in tail
+        assert "file1.err':" in tail
+        assert tail.index("file7.err") < tail.index("file1.err")
+        assert "Other MAPDL error files with errors: file2.err" in tail
 
     def test_other_jobnames_are_ignored(self, tmp_path):
         """Files of other jobs in the same directory are not read."""

@@ -60,6 +60,8 @@ ERROR_FILE_TAIL_BYTES = 4096
 ERROR_FILE_TAIL_LINES = 20
 # In distributed mode, at most this many 'JOBNAMEx.err' files (x > 0) are shown.
 ERROR_FILE_MAX_WORKER_FILES = 3
+# Headers of the messages that make a 'JOBNAMEx.err' file (x > 0) worth showing.
+ERROR_FILE_HEADERS = ("*** FATAL ***", "*** ERROR ***")
 
 
 LOCKFILE_MSG: str = """
@@ -704,8 +706,9 @@ def _get_error_file_tail(
     The main error file is ``JOBNAME.err``, or ``JOBNAME0.err`` in distributed
     mode (the most recent one if both exist). In distributed mode, each process
     also writes its own ``JOBNAMEx.err`` file, where ``x`` is the process
-    number, and a fatal error in one of them might not reach ``JOBNAME0.err``.
-    Those files are shown too, but only if their end contains a fatal error.
+    number, and an error in one of them might not reach ``JOBNAME0.err``.
+    Those files are shown too, but only if their end contains an error or a
+    fatal error. Files with a fatal error are shown first.
 
     Only cached attributes of the instance are used, because the MAPDL process
     cannot be queried once it has died.
@@ -720,7 +723,7 @@ def _get_error_file_tail(
         Maximum number of non-empty lines shown from each error file.
     max_worker_files : int, default: 3
         Maximum number of ``JOBNAMEx.err`` files (``x`` > 0) shown. The names of
-        the remaining files with a fatal error are listed.
+        the remaining files with errors are listed.
 
     Returns
     -------
@@ -771,23 +774,28 @@ def _get_error_file_tail(
         if lines:
             sections.append((main_file, lines))
 
-    fatal_workers = []
-    for _, path in sorted(worker_files):
+    failed_workers = []
+    for rank, path in worker_files:
         lines = _read_error_file_tail(path, max_bytes, max_lines)
-        if any("*** FATAL ***" in line for line in lines):
-            fatal_workers.append((path, lines))
-    sections.extend(fatal_workers[:max_worker_files])
+        has_fatal = any("*** FATAL ***" in line for line in lines)
+        if has_fatal or any(
+            header in line for line in lines for header in ERROR_FILE_HEADERS
+        ):
+            failed_workers.append((not has_fatal, rank, path, lines))
+    # Fatal errors first, then by process number.
+    failed_workers.sort(key=lambda item: item[:2])
+    sections.extend(
+        (path, lines) for _, _, path, lines in failed_workers[:max_worker_files]
+    )
 
     message = ""
     for path, lines in sections:
         body = "\n".join(f"  {line}" for line in lines)
         message += f"Last lines of the MAPDL error file '{path.as_posix()}':\n{body}\n"
 
-    not_shown = [path.name for path, _ in fatal_workers[max_worker_files:]]
+    not_shown = [path.name for _, _, path, _ in failed_workers[max_worker_files:]]
     if not_shown:
-        message += (
-            "Other MAPDL error files with a fatal error: " + ", ".join(not_shown) + "\n"
-        )
+        message += "Other MAPDL error files with errors: " + ", ".join(not_shown) + "\n"
     return message
 
 
