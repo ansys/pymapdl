@@ -64,20 +64,17 @@ def _select_upload_files(
     """Expand an ``upload_project`` selection into sorted local file paths."""
     if isinstance(path, (list, tuple)):
         files = [os.fspath(p) for p in path]
-    elif os.path.isdir(path):
-        pattern = "**/*" if recursive else "*"
-        files = sorted(
-            glob.glob(os.path.join(os.fspath(path), pattern), recursive=recursive)
-        )
-        files = [os.path.relpath(f) for f in files if os.path.isfile(f)]
-    elif glob.has_magic(os.fspath(path)):
-        files = sorted(
-            f
-            for f in glob.glob(os.fspath(path), recursive=recursive)
-            if os.path.isfile(f)
-        )
     else:
-        files = [os.fspath(path)]
+        path = os.fspath(path)
+        if os.path.isdir(path):
+            pattern = os.path.join(glob.escape(path), "**/*" if recursive else "*")
+        elif os.path.isfile(path):
+            pattern = glob.escape(path)
+        else:
+            pattern = path
+        files = sorted(
+            f for f in glob.glob(pattern, recursive=recursive) if os.path.isfile(f)
+        )
 
     if extensions:
         suffixes = tuple("." + ext.lstrip(".").lower() for ext in extensions)
@@ -286,8 +283,10 @@ class _GrpcFileMixin(_GrpcMixinBase):
         FileNotFoundError
             If ``path`` matches no file, or a listed file does not exist.
         ValueError
-            If two selected files share a name, since one would overwrite
-            the other. Nothing is uploaded in that case.
+            If two selected files share a name (compared case-insensitively),
+            since one would overwrite the other, or if a selected file is
+            empty, since empty files cannot be uploaded. Both are checked
+            before anything is uploaded.
 
         Examples
         --------
@@ -302,7 +301,7 @@ class _GrpcFileMixin(_GrpcMixinBase):
         ['geom.cdb', 'loads.inp']
         """
         files = _select_upload_files(path, extensions, recursive)
-        # Validate everything first, so a bad selection never leaves a partial upload.
+        # Validate before transferring; transfer failures can still leave partial uploads.
         missing = [f for f in files if not os.path.isfile(f)]
         if not files or missing:
             raise FileNotFoundError(
@@ -312,13 +311,16 @@ class _GrpcFileMixin(_GrpcMixinBase):
             )
         by_name: dict[str, list[str]] = {}
         for file in files:
-            by_name.setdefault(os.path.basename(file), []).append(file)
-        clashes = {name: paths for name, paths in by_name.items() if len(paths) > 1}
+            by_name.setdefault(os.path.basename(file).casefold(), []).append(file)
+        clashes = [paths for paths in by_name.values() if len(paths) > 1]
         if clashes:
             raise ValueError(
                 "These files would overwrite each other in the MAPDL working "
                 f"directory: {clashes}. Upload them separately or rename them."
             )
+        empty = [f for f in files if os.path.getsize(f) == 0]
+        if empty:
+            raise ValueError(f"Unable to upload empty files: {', '.join(empty)}.")
 
         return [self.upload(file, progress_bar=progress_bar) for file in files]
 

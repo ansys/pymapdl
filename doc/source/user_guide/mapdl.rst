@@ -1113,8 +1113,9 @@ method:
     mapdl.upload_project(["geom.cdb", "inputs/loads.inp"])
 
 Files land in the top level of the MAPDL working directory. If two selected
-files have the same name, the method raises an error before uploading
-anything, because one file would overwrite the other.
+files have the same name (ignoring case) or a selected file is empty, the
+method raises an error before uploading anything. If a transfer fails midway,
+files sent earlier remain uploaded.
 
 
 Unsupported MAPDL commands and other considerations

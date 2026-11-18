@@ -361,7 +361,7 @@ def _upload_recorder():
     mapdl.uploaded = []
 
     def fake_upload(file_name, progress_bar=False):
-        mapdl.uploaded.append(os.path.relpath(file_name))
+        mapdl.uploaded.append(os.fspath(file_name))
         return os.path.basename(file_name)
 
     mapdl.upload = fake_upload
@@ -384,6 +384,7 @@ def project(tmp_path, monkeypatch):
         (".", {"recursive": True}, ["geom.cdb", "loads.inp", "notes.txt", "mats.inp"]),
         (".", {"extensions": ["inp", ".cdb"]}, ["geom.cdb", "loads.inp"]),
         ("*.inp", {}, ["loads.inp"]),
+        ("**/*.inp", {"recursive": True}, ["loads.inp", "mats.inp"]),
         (["notes.txt", "sub/mats.inp"], {}, ["notes.txt", "mats.inp"]),
     ],
 )
@@ -401,6 +402,43 @@ def test_upload_project_rejects_name_clash_before_uploading(project):
     with pytest.raises(ValueError, match="geom.cdb"):
         mapdl.upload_project(".", recursive=True, progress_bar=False)
     assert mapdl.uploaded == []
+
+
+def test_upload_project_rejects_case_only_name_clash_before_uploading(project):
+    (project / "sub" / "GEOM.CDB").write_text("other")
+    mapdl = _upload_recorder()
+
+    with pytest.raises(ValueError, match="GEOM.CDB"):
+        mapdl.upload_project(".", recursive=True, progress_bar=False)
+    assert mapdl.uploaded == []
+
+
+def test_upload_project_rejects_empty_file_before_uploading(project):
+    (project / "z_empty.inp").write_text("")
+    mapdl = _upload_recorder()
+
+    with pytest.raises(ValueError, match="z_empty.inp"):
+        mapdl.upload_project(".", progress_bar=False)
+    assert mapdl.uploaded == []
+
+
+def test_upload_project_preserves_absolute_paths(project):
+    mapdl = _upload_recorder()
+
+    mapdl.upload_project(str(project), progress_bar=False)
+    assert mapdl.uploaded == [
+        str(project / name) for name in ["geom.cdb", "loads.inp", "notes.txt"]
+    ]
+
+
+def test_upload_project_bracketed_names(project):
+    (project / "[run]").mkdir()
+    (project / "[run]" / "a.inp").write_text("a")
+    (project / "[b].inp").write_text("b")
+    mapdl = _upload_recorder()
+
+    assert mapdl.upload_project("[run]", progress_bar=False) == ["a.inp"]
+    assert mapdl.upload_project("[b].inp", progress_bar=False) == ["[b].inp"]
 
 
 @pytest.mark.parametrize("path", ["missing_dir", "*.rst", ["geom.cdb", "nope.inp"]])
