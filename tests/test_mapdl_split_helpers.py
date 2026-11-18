@@ -739,6 +739,7 @@ def test_every_backend_is_a_context_manager_that_exits(backend):
     module_name, class_name = backend.rsplit(".", 1)
     cls = getattr(pytest.importorskip(module_name), class_name)
     mapdl = object.__new__(cls)
+    mapdl._process = None  # MapdlConsole.__del__ reads this.
 
     with patch.object(cls, "exit") as exit_:
         with mapdl as entered:
