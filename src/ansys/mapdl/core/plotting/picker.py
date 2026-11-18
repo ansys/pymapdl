@@ -118,6 +118,7 @@ class MapdlPicker:
             pl.scene._picking_text = pl.scene.add_text(
                 gen_text(picked_entities),
                 font_size=GUI_FONT_SIZE,
+                font=pl.scene.theme.font.family,
                 name="_entity_picking_message",
             )
             self._show_picked_points(pl, mesh, picked_ids)
