@@ -198,19 +198,19 @@ jobs:
         shell: bash
         if: ${{ contains(inputs.mapdl-version, 'cicd') }}
         run: |
-          apt-get update && apt-get -y install gcc mono-mcs g++
+          apt-get -o Acquire::Retries=3 update && apt-get -y install gcc mono-mcs g++
 
       - name: "Installing minimal OS packages"
         shell: bash
         if: inputs.testing-minimal == true
         run: |
-          apt-get update && apt install -y libgomp1 graphviz curl git && apt-get clean
+          apt-get -o Acquire::Retries=3 update && apt install -y libgomp1 graphviz curl git && apt-get clean
 
       - name: "Installing OS packages"
         shell: bash
         if: inputs.testing-minimal == false
         run: |
-          apt-get update && apt install -y libgl1 libglx-mesa0 xvfb libgomp1 graphviz curl git && apt-get clean
+          apt-get -o Acquire::Retries=3 update && apt install -y libgl1 libglx-mesa0 xvfb libgomp1 graphviz curl git && apt-get clean
 
       - name: "Setup Python"
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 #v7.1.0
@@ -253,6 +253,7 @@ jobs:
           python -m pip install -r .ci/requirements_testing_minimal.txt
 
       - name: "Unit testing"
+        id: unit-testing
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
           file_name: ${{ inputs.file-name }}
@@ -296,7 +297,7 @@ jobs:
             --cov-report=xml:$file_name.xml
 
       - name: "Strip captured output from pytest report"
-        if: always()
+        if: always() && steps.unit-testing.outcome != 'skipped'
         shell: bash
         env:
           FILE_NAME: ${{ inputs.file-name }}
