@@ -174,7 +174,7 @@ jobs:
 
   upload-dev-docs:
     name: "Upload dev documentation"
-    if: github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags')
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Needed to push documentation to gh-pages branch
@@ -370,7 +370,7 @@ jobs:
           root_dir: ${{ github.workspace }}
           name: ${{ env.file_name }}
           files: ${{ env.file_name }}.xml
-          flags: local,ubuntu,${{ matrix.mapdl-version }},dmp,docker
+          flags: remote,ubuntu,${{ matrix.mapdl-version }},dmp,docker
           verbose: true
 
       - name: "Upload coverage artifacts"
