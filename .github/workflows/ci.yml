@@ -146,10 +146,13 @@ jobs:
     permissions:
       contents: read  # Needed to read repository contents for documentation build
       packages: read  # Needed to pull Docker images from GitHub packages
+    with:
+      upload-logs: true
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
       username: ${{ github.actor }}
       password: ${{ secrets.GITHUB_TOKEN }}
+      log-encryption-key: ${{ secrets.LOG_ENCRYPTION_KEY }}
 
   doc-deploy-pr:
     name: "Deploy PR documentation"
@@ -469,7 +472,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        julia-version: ['1.10.3', '1.10.4']
+        julia-version: ['1.10.12', '1.10.13']
         os: [ubuntu-latest, windows-latest]
 
     steps:
