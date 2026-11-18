@@ -26,7 +26,6 @@ from unittest.mock import MagicMock
 import grpc
 import pytest
 
-from ansys.mapdl.core import errors
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
     MapdlConnectionError,
@@ -277,11 +276,22 @@ class TestBuildUnavailableSuggestion:
 
         assert "might* have died" in suggestion
 
-    def test_sigkill_value_does_not_depend_on_the_platform(self):
-        """The SIGKILL number is defined even where ``signal.SIGKILL`` is not (Windows)."""
-        assert errors._SIGKILL == 9
-        if hasattr(signal, "SIGKILL"):
-            assert errors._SIGKILL == signal.SIGKILL
+    @pytest.mark.parametrize("exit_signal", [None, 9, 11])
+    def test_suggestion_works_without_signal_sigkill(self, monkeypatch, exit_signal):
+        """Without ``signal.SIGKILL``, as on Windows, the suggestion is still built.
+
+        Removing the attribute reproduces the Windows failure on any platform.
+        """
+        monkeypatch.delattr(signal, "SIGKILL", raising=False)
+        mock_mapdl = MagicMock(spec=MapdlGrpc)
+        mock_mapdl._get_process_exit_signal.return_value = exit_signal
+
+        suggestion = _build_unavailable_suggestion(mock_mapdl)
+
+        if exit_signal is None:
+            assert "might* have died" in suggestion
+        else:
+            assert f"signal {exit_signal}" in suggestion
 
     def test_missing_helper_falls_back_to_generic_message(self):
         """MAPDL objects without the helper (e.g. older mocks) still work."""
