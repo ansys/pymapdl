@@ -324,6 +324,7 @@ jobs:
       tags: "local"
       latest-version: "261"
       test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') && !contains(matrix.mapdl-version, '24') }}
+      test_dpf_backend: ${{ contains(matrix.mapdl-version, 'cicd') && !contains(matrix.mapdl-version, '24') }}
       upload-logs: true
 
   docker-compose-test-remote:
