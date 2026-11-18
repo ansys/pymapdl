@@ -34,6 +34,9 @@ if TYPE_CHECKING:
     from ansys.platform.instancemanagement import Instance as PIM_Instance
     import grpc
 
+    from ansys.mapdl.core.database import MapdlDb
+    from ansys.mapdl.core.xpl import ansXpl
+
     class _GrpcMixinBase:
         """Type-only base for cooperative gRPC MAPDL mixins.
 
@@ -76,6 +79,16 @@ if TYPE_CHECKING:
         _start_instance: str | None
         finish_job_on_exit: bool
         remove_temp_dir_on_exit: bool
+
+        # Queries, file transfer and lazily built accessors.
+        _db: MapdlDb | None
+        _get_lock: bool
+        _lazy_array_counter: int
+        _lazy_array_parameters: set[str]
+        _lazy_array_prefix: str
+        _prioritize_thermal: bool
+        _vget_lock: bool
+        _xpl: ansXpl | None
 
         def __getattr__(self, name: str) -> Any: ...
 
