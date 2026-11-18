@@ -60,6 +60,9 @@ if TYPE_CHECKING:
         transport_mode: str | None
         uds_dir: Path
 
+        @property
+        def _connected_stub(self) -> mapdl_grpc.MapdlServiceStub: ...
+
         # In-flight call tracking and liveness.
         _current_call: grpc.Future | None
         _current_call_lock: threading.Lock
@@ -82,12 +85,12 @@ if TYPE_CHECKING:
 
         # Queries, file transfer and lazily built accessors.
         _db: MapdlDb | None
-        _get_lock: bool
+        _get_lock: threading.Lock
         _lazy_array_counter: int
         _lazy_array_parameters: set[str]
         _lazy_array_prefix: str
         _prioritize_thermal: bool
-        _vget_lock: bool
+        _vget_lock: threading.Lock
         _xpl: ansXpl | None
 
         def __getattr__(self, name: str) -> Any: ...

@@ -23,7 +23,6 @@
 """Value queries, parameter arrays and lazy array lifetimes."""
 
 from contextlib import contextmanager
-import threading
 from typing import (
     TYPE_CHECKING,
     Iterator,
