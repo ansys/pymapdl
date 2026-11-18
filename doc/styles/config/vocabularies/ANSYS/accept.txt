@@ -59,12 +59,14 @@ Chao
 ci
 container_layout
 CPUs
+CPython
 datas
 delet
 Dependabot
 Dev
 devcontainer
 DevContainer
+developing_pymapdl
 Dimitris
 discretisation
 DMP
@@ -78,11 +80,13 @@ eigensolvers
 elastoplastic
 emiss
 env
+envs
 Eser
 ethernet
 extrem
 FEMs
 filname
+flexural
 Fortran
 frozenset
 FSW
@@ -122,6 +126,7 @@ MATLAB
 matricies
 Mc
 mesher
+meshers
 midside
 Mises
 mkdir
@@ -136,6 +141,7 @@ NORML
 NumPy
 onefile
 optiSLang
+oskey
 Papadopoulos
 parm
 perf
@@ -161,6 +167,7 @@ Python
 QRDAMP
 Radiosity
 Rao
+ref_\w+
 righ
 RNNN
 Roark
@@ -179,6 +186,7 @@ stationarity
 stderr
 stdin
 stdout
+stochasticity
 struc
 subselected
 substep
@@ -214,6 +222,7 @@ WAN
 WHIT
 Windows Subsystem
 Windows Subsystem for Linux
+write_documentation
 wsl
 WSL
 Zhu
