@@ -25,10 +25,57 @@
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from typing import Protocol
+    from pathlib import Path
+    import subprocess  # nosec B404
+    import threading
+    from typing import Callable
 
-    class _GrpcMixinBase(Protocol):
-        """Type-only base for cooperative gRPC MAPDL mixins."""
+    from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
+    from ansys.platform.instancemanagement import Instance as PIM_Instance
+    import grpc
+
+    class _GrpcMixinBase:
+        """Type-only base for cooperative gRPC MAPDL mixins.
+
+        Declares state assigned by ``MapdlGrpc`` for sibling mixins. This is
+        a nominal type-only base: Protocol subclasses infer new member types
+        from assignments instead of retaining the inherited declarations.
+        Methods and state owned by ``MapdlBase`` remain late-bound.
+        """
+
+        # Connection and transport.
+        _channel: grpc.Channel | None
+        _channel_state: grpc.ChannelConnectivity
+        _connectivity_callback: Callable[[Any], None] | None
+        _ip: str | None
+        _port: int | None
+        _server_version_cache: tuple[int, int, int] | None
+        _state: grpc.Future | None
+        _stub: mapdl_grpc.MapdlServiceStub | None
+        _timeout: int
+        certs_dir: Path | None
+        transport_mode: str | None
+        uds_dir: Path
+
+        # In-flight call tracking and liveness.
+        _current_call: grpc.Future | None
+        _current_call_lock: threading.Lock
+        _exited: bool | None
+        _exiting: bool
+
+        # Local process, working directory and teardown.
+        _jobname: str
+        _launched: bool
+        _local: bool
+        _mapdl_on_hpc: bool
+        _mapdl_process: subprocess.Popen | None
+        _path: str | None
+        _pids: list[int | None]
+        _process_close_lock: threading.Lock
+        _remote_instance: PIM_Instance | None
+        _start_instance: str | None
+        finish_job_on_exit: bool
+        remove_temp_dir_on_exit: bool
 
         def __getattr__(self, name: str) -> Any: ...
 

@@ -46,11 +46,6 @@ from . import _GrpcMixinBase
 class _GrpcConnectionMixin(_GrpcMixinBase):
     """Channel creation, transport configuration and connection attempts."""
 
-    _channel: "grpc.Channel | None"
-    _server_version_cache: tuple[int, int, int] | None
-    certs_dir: Path | None
-    transport_mode: str | None
-
     def _configure_transport(self, *, ip: str, port: int) -> None:
         """Configure transport-related defaults, validate mode, and resolve UDS conflicts.
 
