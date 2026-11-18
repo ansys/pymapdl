@@ -570,12 +570,28 @@ jobs:
           bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
           bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
 
-  # PyPI and GitHub releases are separate jobs so a failed GitHub release can be
-  # rerun alone: PyPI rejects re-uploading files that already exist.
+  # PyPI and GitHub releases are separate jobs, with PyPI last: a PyPI upload
+  # cannot be redone (it rejects existing files), while a GitHub release can be
+  # deleted to retrigger the workflow.
+  release-github:
+    name: "Release to GitHub"
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    needs: [package]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Needed to create GitHub releases
+    steps:
+      - name: "Release to GitHub"
+        uses: ansys/actions/release-github@87ff2e65e8884121f9afc97728ca9f213228ecc2 # v11.1.4
+        with:
+          library-name: ${{ env.PACKAGE_NAME }}
+          additional-artifacts: "minimum_requirements.txt"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   release-pypi:
     name: "Release to PyPI"
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    needs: [package]
+    needs: [release-github]
     runs-on: ubuntu-latest
     # Specifying a GitHub environment is optional, but strongly encouraged
     environment: release
@@ -599,28 +615,13 @@ jobs:
           packages-dir: ${{ env.PACKAGE_NAME }}-artifacts
           skip-existing: false
 
-  release-github:
-    name: "Release to GitHub"
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    needs: [release-pypi]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write  # Needed to create GitHub releases
-    steps:
-      - name: "Release to GitHub"
-        uses: ansys/actions/release-github@87ff2e65e8884121f9afc97728ca9f213228ecc2 # v11.1.4
-        with:
-          library-name: ${{ env.PACKAGE_NAME }}
-          additional-artifacts: "minimum_requirements.txt"
-          token: ${{ secrets.GITHUB_TOKEN }}
-
   upload-docs-release:
     name: "Upload release documentation"
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Needed to push documentation to gh-pages branch
-    needs: [release-github, update-changelog]
+    needs: [release-pypi, update-changelog]
     steps:
       - name: "Deploy the stable documentation"
         uses: ansys/actions/doc-deploy-stable@87ff2e65e8884121f9afc97728ca9f213228ecc2 # v11.1.4
