@@ -53,11 +53,6 @@ from . import _GrpcMixinBase
 class _GrpcQueryMixin(_GrpcMixinBase):
     """Value queries, parameter arrays and lazy array lifetimes."""
 
-    _get_lock: bool
-    _vget_lock: bool
-    _xpl: "ansXpl | None"
-    _lazy_array_counter: int
-
     @protect_grpc
     def _get(  # numpydoc ignore=RT01
         self,
