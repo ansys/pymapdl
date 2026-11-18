@@ -75,6 +75,7 @@ from ansys.mapdl.core.errors import (
     MapdlConnectionError,
     MapdlDoLoopLimitError,
     MapdlExitedError,
+    MapdlgRPCError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.helpers import is_installed
@@ -3148,6 +3149,11 @@ def _solve_model(mapdl):
     return response
 
 
+@pytest.mark.xfail(
+    raises=MapdlgRPCError,
+    strict=False,
+    reason="MAPDL 25.2 gRPC server can refuse 'Ctrl' with UNIMPLEMENTED on a new connection.",
+)
 def test_ctrl(mapdl, cleared):
     mapdl.finish()
     mapdl.verify("OFF")

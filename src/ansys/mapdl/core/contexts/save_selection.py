@@ -83,7 +83,9 @@ class _SaveSelectionContext:
                 selection_function = getattr(
                     mapdl, ENTITIES_TO_SELECTION_MAPPING[entity_type.upper()]
                 )
-                selection_function("s", vmin=component_name, mute=True)
+                selection_function(
+                    "s", vmin=component_name, mute=True, return_mapdl_output=True
+                )
                 mapdl.cmdele(component_name, mute=True)
         except Exception:
             if args and args[0] is not None:

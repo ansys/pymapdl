@@ -30,7 +30,7 @@ uv run pre-commit install     # install hooks (once)
 uv run pre-commit run --all-files
 ```
 
-Supported Python: 3.10 - 3.14.
+Supported Python: 3.12 - 3.14.
 
 ## Hard constraints
 
