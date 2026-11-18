@@ -107,7 +107,10 @@ Here is an extract:
 From the preceding information, you can extract the launch location (``C:\Users\user\AppData\Local\Temp\ansys_ymjqvmeyww``)
 and the command used (``C:\Program Files\ANSYS Inc\v242\ansys\bin\winx64\ansys242.exe -j file -np 2 -port 50052 -grpc -b -i .__tmp__.inp -o .__tmp__.out``).
 This information can also help you find the MAPDL logs or the cause of the issue.
-For a step-by-step procedure, see :ref:`ref_debug_launching_issues`.
+
+.. note::
+   To debug launching issues, follow the step-by-step guide in
+   :ref:`ref_debug_launching_issues`.
 
 If MAPDL still does not launch, see `Launching issues`_ for more information on
 common issues and their solutions.
@@ -123,9 +126,14 @@ You can attach the log file to the bug report for further investigation.
 Launching issues
 ----------------
 
-There are several issues that can cause MAPDL not to launch, including:
+There are several issues that can cause MAPDL not to launch.
 
-- :ref:`Debug launching issues <ref_debug_launching_issues>`
+.. note::
+   If you do not know the cause, start with the step-by-step guide in
+   :ref:`ref_debug_launching_issues`.
+
+Common issues include:
+
 - `Error: UDS socket file already exists`_
 - `Connection timeout`_
 - `Testing MAPDL launching`_
