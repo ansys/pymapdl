@@ -16,7 +16,7 @@ runs:
     - name: "Set up Julia"
       uses: julia-actions/setup-julia@5c9647d97b78a5debe5164e9eec09d653d29bd71 #v2.6.1
       with:
-        version: ${{ matrix.julia-version }}
+        version: ${{ inputs.julia-version }}
 
     - name: "Getting python interpreter"
       id: get_python
