@@ -54,6 +54,8 @@ MULTIPLIER_BACKOFF = 2
 # can grow to tens of megabytes, so only its end is read.
 ERROR_FILE_TAIL_BYTES = 4096
 ERROR_FILE_TAIL_LINES = 20
+# In distributed mode, at most this many 'JOBNAMEx.err' files (x > 0) are shown.
+ERROR_FILE_MAX_WORKER_FILES = 3
 
 
 LOCKFILE_MSG: str = """
@@ -663,17 +665,43 @@ def retrieve_mapdl_from_args(args: tuple[Any, ...]) -> "MapdlGrpc":
     return mapdl
 
 
+def _read_error_file_tail(
+    path: pathlib.Path, max_bytes: int, max_lines: int
+) -> List[str]:
+    """Return the last non-empty lines of an error file, or an empty list if it cannot be read."""
+    try:
+        with open(path, "rb") as fid:
+            fid.seek(0, os.SEEK_END)
+            size = fid.tell()
+            fid.seek(max(0, size - max_bytes))
+            content = fid.read()
+    except OSError:
+        return []
+
+    lines = content.decode("latin-1").splitlines()
+    if size > max_bytes and lines:
+        lines = lines[1:]  # The first line is probably incomplete.
+    return [line.rstrip() for line in lines if line.strip()][-max_lines:]
+
+
 def _get_error_file_tail(
     mapdl: "MapdlGrpc",
     max_bytes: int = ERROR_FILE_TAIL_BYTES,
     max_lines: int = ERROR_FILE_TAIL_LINES,
+    max_worker_files: int = ERROR_FILE_MAX_WORKER_FILES,
 ) -> str:
-    """Return the last lines of the MAPDL error file of a local instance.
+    """Return the last lines of the MAPDL error files of a local instance.
 
     When the MAPDL process dies, the reason is often written only to its error
-    file (``JOBNAME.err`` or ``JOBNAME0.err`` in distributed mode), for example
-    a license limit exceeded while meshing. This function reads the end of that
-    file so the reason can be added to the exception message.
+    file, for example a license limit exceeded while meshing. This function
+    reads the end of that file so the reason can be added to the exception
+    message.
+
+    The main error file is ``JOBNAME.err``, or ``JOBNAME0.err`` in distributed
+    mode (the most recent one if both exist). In distributed mode, each process
+    also writes its own ``JOBNAMEx.err`` file, where ``x`` is the process
+    number, and a fatal error in one of them might not reach ``JOBNAME0.err``.
+    Those files are shown too, but only if their end contains a fatal error.
 
     Only cached attributes of the instance are used, because the MAPDL process
     cannot be queried once it has died.
@@ -683,15 +711,18 @@ def _get_error_file_tail(
     mapdl : MapdlGrpc
         MAPDL instance whose process has died.
     max_bytes : int, default: 4096
-        Number of bytes read from the end of the error file.
+        Number of bytes read from the end of each error file.
     max_lines : int, default: 20
-        Maximum number of non-empty lines returned.
+        Maximum number of non-empty lines shown from each error file.
+    max_worker_files : int, default: 3
+        Maximum number of ``JOBNAMEx.err`` files (``x`` > 0) shown. The names of
+        the remaining files with a fatal error are listed.
 
     Returns
     -------
     str
-        A message with the last lines of the error file, or an empty string
-        if the instance is remote or the error file cannot be read.
+        A message with the last lines of the error files, or an empty string
+        if the instance is remote or no error file can be read.
 
     Examples
     --------
@@ -712,32 +743,48 @@ def _get_error_file_tail(
         return ""
 
     jobname = getattr(mapdl, "_jobname", None) or "file"
-    candidates = [
-        pathlib.Path(str(directory)) / f"{jobname}{suffix}.err" for suffix in ("", "0")
-    ]
+    pattern = re.compile(rf"{re.escape(jobname)}(\d*)\.err")
+    main_files: List[pathlib.Path] = []
+    worker_files: List[Tuple[int, pathlib.Path]] = []
     try:
-        existing = [path for path in candidates if path.is_file()]
-        if not existing:
-            return ""
-        # In distributed mode both files can exist; the most recent one is the relevant one.
-        error_file = max(existing, key=lambda path: path.stat().st_mtime)
-        with open(error_file, "rb") as fid:
-            fid.seek(0, os.SEEK_END)
-            size = fid.tell()
-            fid.seek(max(0, size - max_bytes))
-            content = fid.read()
+        for path in pathlib.Path(str(directory)).iterdir():
+            match = pattern.fullmatch(path.name)
+            if not match or not path.is_file():
+                continue
+            rank = int(match.group(1) or 0)
+            if rank == 0:
+                main_files.append(path)
+            else:
+                worker_files.append((rank, path))
+        # 'JOBNAME.err' and 'JOBNAME0.err' can both exist; the most recent one is the relevant one.
+        main_file = max(main_files, key=lambda path: path.stat().st_mtime, default=None)
     except OSError:
         return ""
 
-    lines = content.decode("latin-1").splitlines()
-    if size > max_bytes and lines:
-        lines = lines[1:]  # The first line is probably incomplete.
-    lines = [line.rstrip() for line in lines if line.strip()][-max_lines:]
-    if not lines:
-        return ""
+    sections = []
+    if main_file is not None:
+        lines = _read_error_file_tail(main_file, max_bytes, max_lines)
+        if lines:
+            sections.append((main_file, lines))
 
-    body = "\n".join(f"  {line}" for line in lines)
-    return f"Last lines of the MAPDL error file '{error_file.as_posix()}':\n{body}\n"
+    fatal_workers = []
+    for _, path in sorted(worker_files):
+        lines = _read_error_file_tail(path, max_bytes, max_lines)
+        if any("*** FATAL ***" in line for line in lines):
+            fatal_workers.append((path, lines))
+    sections.extend(fatal_workers[:max_worker_files])
+
+    message = ""
+    for path, lines in sections:
+        body = "\n".join(f"  {line}" for line in lines)
+        message += f"Last lines of the MAPDL error file '{path.as_posix()}':\n{body}\n"
+
+    not_shown = [path.name for path, _ in fatal_workers[max_worker_files:]]
+    if not_shown:
+        message += (
+            "Other MAPDL error files with a fatal error: " + ", ".join(not_shown) + "\n"
+        )
+    return message
 
 
 def handle_generic_grpc_error(

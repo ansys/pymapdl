@@ -494,6 +494,62 @@ class TestGetErrorFileTail:
         with patch("builtins.open", side_effect=PermissionError("locked")):
             assert _get_error_file_tail(_dead_mapdl(tmp_path)) == ""
 
+    def test_unreadable_directory_returns_empty_string(self, tmp_path):
+        """An OSError while listing the directory does not hide the original error."""
+        (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        with patch("pathlib.Path.iterdir", side_effect=PermissionError("denied")):
+            assert _get_error_file_tail(_dead_mapdl(tmp_path)) == ""
+
+    def test_worker_file_with_fatal_error_is_shown(self, tmp_path):
+        """In distributed mode, a fatal error written only by another process is shown."""
+        (tmp_path / "file0.err").write_text(
+            " *** WARNING ***\n note\n", encoding="latin-1"
+        )
+        (tmp_path / "file1.err").write_text(" nothing to report\n", encoding="latin-1")
+        (tmp_path / "file2.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path))
+
+        assert "file0.err" in tail
+        assert "file2.err" in tail
+        assert "supports (128000) has been exceeded." in tail
+        assert "file1.err" not in tail
+        assert "nothing to report" not in tail
+        assert tail.index("file0.err") < tail.index("file2.err")
+
+    def test_worker_file_without_main_file(self, tmp_path):
+        """A fatal error in a worker file is shown even without 'JOBNAME0.err'."""
+        (tmp_path / "file3.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path))
+
+        assert "file3.err" in tail
+        assert "128000" in tail
+
+    def test_number_of_worker_files_is_limited(self, tmp_path):
+        """Only the first worker files are shown; the others are listed by name."""
+        for rank in (1, 2, 10, 11):
+            (tmp_path / f"file{rank}.err").write_text(
+                NODE_LIMIT_ERROR, encoding="latin-1"
+            )
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path), max_worker_files=2)
+
+        assert tail.count("Last lines of the MAPDL error file") == 2
+        assert "file1.err':" in tail
+        assert "file2.err':" in tail
+        assert (
+            "Other MAPDL error files with a fatal error: file10.err, file11.err" in tail
+        )
+
+    def test_other_jobnames_are_ignored(self, tmp_path):
+        """Files of other jobs in the same directory are not read."""
+        for name in ("file_old.err", "other0.err", "file1.err.bak"):
+            (tmp_path / name).write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        assert _get_error_file_tail(_dead_mapdl(tmp_path)) == ""
+
 
 def _grpc_error():
     error = MagicMock()
