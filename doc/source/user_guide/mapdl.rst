@@ -821,7 +821,6 @@ MAPDL running and holding a license.
 
     with launch_mapdl() as mapdl:
         mapdl.prep7()
-        mapdl.solve()
 
 The ``exit()`` method keeps its usual rules. If PyMAPDL did not launch the
 instance, for example when you connect with ``start_instance=False``, the
