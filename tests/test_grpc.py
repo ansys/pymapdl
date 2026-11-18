@@ -354,6 +354,102 @@ def test_screenshot_path_filters_by_jobname(tmp_path):
     os.remove(screenshot_path)
 
 
+def _upload_recorder():
+    """Return a bare MapdlGrpc whose ``upload`` records local paths instead of sending them."""
+    mapdl = MapdlGrpc.__new__(MapdlGrpc)
+    mapdl._log = MagicMock()
+    mapdl.uploaded = []
+
+    def fake_upload(file_name, progress_bar=False):
+        mapdl.uploaded.append(os.fspath(file_name))
+        return os.path.basename(file_name)
+
+    mapdl.upload = fake_upload
+    return mapdl
+
+
+@pytest.fixture
+def project(tmp_path, monkeypatch):
+    for name in ["geom.cdb", "loads.inp", "notes.txt", "sub/mats.inp"]:
+        (tmp_path / name).parent.mkdir(exist_ok=True)
+        (tmp_path / name).write_text(name)
+    monkeypatch.chdir(tmp_path)
+    return tmp_path
+
+
+@pytest.mark.parametrize(
+    "path,kwargs,expected",
+    [
+        (".", {}, ["geom.cdb", "loads.inp", "notes.txt"]),
+        (".", {"recursive": True}, ["geom.cdb", "loads.inp", "notes.txt", "mats.inp"]),
+        (".", {"extensions": ["inp", ".cdb"]}, ["geom.cdb", "loads.inp"]),
+        ("*.inp", {}, ["loads.inp"]),
+        ("**/*.inp", {"recursive": True}, ["loads.inp", "mats.inp"]),
+        (["notes.txt", "sub/mats.inp"], {}, ["notes.txt", "mats.inp"]),
+    ],
+)
+def test_upload_project_selects_files(project, path, kwargs, expected):
+    mapdl = _upload_recorder()
+
+    assert mapdl.upload_project(path, progress_bar=False, **kwargs) == expected
+    assert [os.path.basename(f) for f in mapdl.uploaded] == expected
+
+
+def test_upload_project_rejects_name_clash_before_uploading(project):
+    (project / "sub" / "geom.cdb").write_text("other")
+    mapdl = _upload_recorder()
+
+    with pytest.raises(ValueError, match="geom.cdb"):
+        mapdl.upload_project(".", recursive=True, progress_bar=False)
+    assert mapdl.uploaded == []
+
+
+def test_upload_project_rejects_case_only_name_clash_before_uploading(project):
+    (project / "sub" / "GEOM.CDB").write_text("other")
+    mapdl = _upload_recorder()
+
+    with pytest.raises(ValueError, match="GEOM.CDB"):
+        mapdl.upload_project(".", recursive=True, progress_bar=False)
+    assert mapdl.uploaded == []
+
+
+def test_upload_project_rejects_empty_file_before_uploading(project):
+    (project / "z_empty.inp").write_text("")
+    mapdl = _upload_recorder()
+
+    with pytest.raises(ValueError, match="z_empty.inp"):
+        mapdl.upload_project(".", progress_bar=False)
+    assert mapdl.uploaded == []
+
+
+def test_upload_project_preserves_absolute_paths(project):
+    mapdl = _upload_recorder()
+
+    mapdl.upload_project(str(project), progress_bar=False)
+    assert mapdl.uploaded == [
+        str(project / name) for name in ["geom.cdb", "loads.inp", "notes.txt"]
+    ]
+
+
+def test_upload_project_bracketed_names(project):
+    (project / "[run]").mkdir()
+    (project / "[run]" / "a.inp").write_text("a")
+    (project / "[b].inp").write_text("b")
+    mapdl = _upload_recorder()
+
+    assert mapdl.upload_project("[run]", progress_bar=False) == ["a.inp"]
+    assert mapdl.upload_project("[b].inp", progress_bar=False) == ["[b].inp"]
+
+
+@pytest.mark.parametrize("path", ["missing_dir", "*.rst", ["geom.cdb", "nope.inp"]])
+def test_upload_project_rejects_missing_files_before_uploading(project, path):
+    mapdl = _upload_recorder()
+
+    with pytest.raises(FileNotFoundError):
+        mapdl.upload_project(path, progress_bar=False)
+    assert mapdl.uploaded == []
+
+
 def test_validate_files_remote_subdirectory():
     """A literal path inside a subdirectory should be trusted as-is,
     since ``list_files`` only returns the top level of the working

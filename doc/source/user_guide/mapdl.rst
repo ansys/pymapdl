@@ -1099,6 +1099,24 @@ You can upload a local MAPDL file as the remote MAPDL instance with the
 
    This feature is only available in MAPDL 2021 R1 and later.
 
+To upload several files at once, pass a directory, a glob pattern, or a list
+of files to the
+:func:`Mapdl.upload_project() <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.upload_project>`
+method:
+
+.. code:: python
+
+    # every input and CDB file in a local folder
+    mapdl.upload_project("model_inputs", extensions=["inp", "cdb"])
+
+    # an explicit list of files
+    mapdl.upload_project(["geom.cdb", "inputs/loads.inp"])
+
+Files land in the top level of the MAPDL working directory. If two selected
+files have the same name (ignoring case) or a selected file is empty, the
+method raises an error before uploading anything. If a transfer fails midway,
+files sent earlier remain uploaded.
+
 
 Unsupported MAPDL commands and other considerations
 ===================================================

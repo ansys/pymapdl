@@ -56,6 +56,32 @@ from ansys.mapdl.core.misc import run_as, supress_logging
 from . import _GrpcMixinBase
 
 
+def _select_upload_files(
+    path: str | os.PathLike | list[str | os.PathLike],
+    extensions: list[str] | None,
+    recursive: bool,
+) -> list[str]:
+    """Expand an ``upload_project`` selection into sorted local file paths."""
+    if isinstance(path, (list, tuple)):
+        files = [os.fspath(p) for p in path]
+    else:
+        path = os.fspath(path)
+        if os.path.isdir(path):
+            pattern = os.path.join(glob.escape(path), "**/*" if recursive else "*")
+        elif os.path.isfile(path):
+            pattern = glob.escape(path)
+        else:
+            pattern = path
+        files = sorted(
+            f for f in glob.glob(pattern, recursive=recursive) if os.path.isfile(f)
+        )
+
+    if extensions:
+        suffixes = tuple("." + ext.lstrip(".").lower() for ext in extensions)
+        files = [f for f in files if f.lower().endswith(suffixes)]
+    return files
+
+
 class _GrpcFileMixin(_GrpcMixinBase):
     """File transfer between the client and the MAPDL working directory."""
 
@@ -216,6 +242,87 @@ class _GrpcFileMixin(_GrpcMixinBase):
                 )
 
         return list_of_files
+
+    def upload_project(
+        self,
+        path: str | os.PathLike | list[str | os.PathLike] = ".",
+        extensions: list[str] | None = None,
+        recursive: bool = False,
+        progress_bar: bool = _HAS_TQDM,
+    ) -> list[str]:
+        """Upload several local files to the MAPDL working directory.
+
+        This is the counterpart of :meth:`download_project`. Files land in
+        the top level of the MAPDL working directory, so subdirectories are
+        not recreated.
+
+        Parameters
+        ----------
+        path : str, os.PathLike, or list, optional
+            A local directory, a glob pattern such as ``"inputs/*.inp"``, or a
+            list of file paths. The default is ``"."``, the Python working
+            directory.
+        extensions : list[str], optional
+            Upload only files with these extensions, with or without the
+            leading dot. The default is ``None``, which uploads every file.
+        recursive : bool, optional
+            Whether to include files in subdirectories of a directory, or to
+            let ``**`` in a glob pattern match subdirectories. The default is
+            ``False``.
+        progress_bar : bool, optional
+            Whether to display a ``tqdm`` progress bar for each file. The
+            default is ``True`` when ``tqdm`` is installed.
+
+        Returns
+        -------
+        list[str]
+            Names of the uploaded files in the MAPDL working directory.
+
+        Raises
+        ------
+        FileNotFoundError
+            If ``path`` matches no file, or a listed file does not exist.
+        ValueError
+            If two selected files share a name (compared case-insensitively),
+            since one would overwrite the other, or if a selected file is
+            empty, since empty files cannot be uploaded. Both are checked
+            before anything is uploaded.
+
+        Examples
+        --------
+        Upload every input and CDB file of a local folder.
+
+        >>> mapdl.upload_project("model_inputs", extensions=["inp", "cdb"])
+        ['geom.cdb', 'loads.inp', 'mats.inp']
+
+        Upload an explicit list of files.
+
+        >>> mapdl.upload_project(["geom.cdb", "inputs/loads.inp"])
+        ['geom.cdb', 'loads.inp']
+        """
+        files = _select_upload_files(path, extensions, recursive)
+        # Validate before transferring; transfer failures can still leave partial uploads.
+        missing = [f for f in files if not os.path.isfile(f)]
+        if not files or missing:
+            raise FileNotFoundError(
+                f"No file to upload from {path!r}."
+                if not files
+                else f"Unable to locate {', '.join(missing)}."
+            )
+        by_name: dict[str, list[str]] = {}
+        for file in files:
+            by_name.setdefault(os.path.basename(file).casefold(), []).append(file)
+        clashes = [paths for paths in by_name.values() if len(paths) > 1]
+        if clashes:
+            raise ValueError(
+                "These files would overwrite each other in the MAPDL working "
+                f"directory: {clashes}. Upload them separately or rename them."
+            )
+        empty = [f for f in files if os.path.getsize(f) == 0]
+        if empty:
+            raise ValueError(f"Unable to upload empty files: {', '.join(empty)}.")
+
+        return [self.upload(file, progress_bar=progress_bar) for file in files]
 
     def download(
         self,

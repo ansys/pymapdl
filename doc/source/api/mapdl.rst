@@ -118,6 +118,8 @@ Constants
    mapdl_grpc.MapdlGrpc.mute
    mapdl_grpc.MapdlGrpc.port
    mapdl_grpc.MapdlGrpc.upload
+   mapdl_grpc.MapdlGrpc.upload_project
+
 
 
 Session management and launcher
