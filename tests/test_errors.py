@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import signal
 from unittest.mock import MagicMock
 
 import grpc
@@ -274,6 +275,23 @@ class TestBuildUnavailableSuggestion:
         suggestion = _build_unavailable_suggestion(mock_mapdl)
 
         assert "might* have died" in suggestion
+
+    @pytest.mark.parametrize("exit_signal", [None, 9, 11])
+    def test_suggestion_works_without_signal_sigkill(self, monkeypatch, exit_signal):
+        """Without ``signal.SIGKILL``, as on Windows, the suggestion is still built.
+
+        Removing the attribute reproduces the Windows failure on any platform.
+        """
+        monkeypatch.delattr(signal, "SIGKILL", raising=False)
+        mock_mapdl = MagicMock(spec=MapdlGrpc)
+        mock_mapdl._get_process_exit_signal.return_value = exit_signal
+
+        suggestion = _build_unavailable_suggestion(mock_mapdl)
+
+        if exit_signal is None:
+            assert "might* have died" in suggestion
+        else:
+            assert f"signal {exit_signal}" in suggestion
 
     def test_missing_helper_falls_back_to_generic_message(self):
         """MAPDL objects without the helper (e.g. older mocks) still work."""
