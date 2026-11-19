@@ -512,6 +512,7 @@ class MapdlGrpc(MapdlBase):
         self._launched: bool = start_parm.get("launched", False)  # type: ignore[assignment]
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
+        self._ctrl_unimplemented_warned: bool = False
         self._exited: Optional[bool] = None
         self._process_close_lock: threading.Lock = threading.Lock()
         self._db: Optional[MapdlDb] = None
@@ -2129,11 +2130,12 @@ class MapdlGrpc(MapdlBase):
         if self._local:
             self._cache_pids()  # Recache processes
 
-            self._exit_mapdl_server()
-
-            self._close_process()
-
-            self._remove_lock_file(path, use_cached=True)
+            try:
+                self._exit_mapdl_server()
+            finally:
+                # Kill the local process even if the server refused 'EXIT'.
+                self._close_process()
+                self._remove_lock_file(path, use_cached=True)
         else:
             self._exit_mapdl_server()
 
@@ -2239,8 +2241,12 @@ class MapdlGrpc(MapdlBase):
             else:
                 self._exit_mapdl(path)
         except Exception as e:
-            if not exiting:
+            if exiting:
+                pass
+            elif self._local:  # '_exit_mapdl' kills the local process regardless
                 self._log.debug("Error during _exit_mapdl: %s", e)
+            else:
+                warn(f"MAPDL may still be running because exiting it failed: {e}")
 
         # 2. Ensure PIPE-drainer threads (stdout/stderr/startup) are joined so
         # that background reader threads do not leak after teardown.
@@ -2931,8 +2937,10 @@ class MapdlGrpc(MapdlBase):
             try:
                 # this always returns an error as the connection is closed
                 self._stub.Ctrl(request, timeout=timeout)
-            except (_InactiveRpcError, _MultiThreadedRendezvous):
-                pass
+            except (_InactiveRpcError, _MultiThreadedRendezvous) as error:
+                # A refused EXIT leaves the server running; only a dropped connection means it exited.
+                if error.code() == grpc.StatusCode.UNIMPLEMENTED:
+                    raise
             return
 
         resp = self._stub.Ctrl(request, timeout=timeout)
@@ -4211,6 +4219,13 @@ class MapdlGrpc(MapdlBase):
                         f"MAPDL instance is not alive because '/COM' also failed with:\n{cmd_error}"
                     )
                     return False
+                if not self._ctrl_unimplemented_warned:
+                    self._ctrl_unimplemented_warned = True
+                    warn(
+                        "The MAPDL server refused 'Ctrl' with UNIMPLEMENTED while still "
+                        "running commands. Control requests such as 'EXIT' may fail. "
+                        "See https://github.com/ansys/pymapdl/issues/4879"
+                    )
                 self._log.debug(
                     "MAPDL instance is alive because '/COM' succeeded after 'Ctrl' returned UNIMPLEMENTED."
                 )

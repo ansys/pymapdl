@@ -82,6 +82,75 @@ def test_gc_cleanup_releases_local_process_without_server_rpc():
     assert client._exited is True
 
 
+def _inactive_rpc_error(code):
+    return grpc._channel._InactiveRpcError(
+        grpc._channel._RPCState((), None, None, code, "")
+    )
+
+
+@pytest.mark.parametrize(
+    "code, refused",
+    [(grpc.StatusCode.UNIMPLEMENTED, True), (grpc.StatusCode.UNAVAILABLE, False)],
+)
+def test_ctrl_exit_raises_only_when_refused(code, refused):
+    """A dropped connection means MAPDL exited; UNIMPLEMENTED means it refused (#4879)."""
+    client = _make_mock_mapdl()
+    client._stub = MagicMock()
+    client._stub.Ctrl.side_effect = _inactive_rpc_error(code)
+
+    if refused:
+        with pytest.raises(grpc.RpcError):
+            MapdlGrpc._ctrl_raw(client, "EXIT")
+    else:
+        assert MapdlGrpc._ctrl_raw(client, "EXIT") is None
+
+
+def test_local_exit_kills_process_when_server_refuses_exit():
+    client = _make_mock_mapdl()
+    client._local = True
+    client._exit_mapdl_server.side_effect = _inactive_rpc_error(
+        grpc.StatusCode.UNIMPLEMENTED
+    )
+
+    with pytest.raises(grpc.RpcError):
+        MapdlGrpc._exit_mapdl(client, "path")
+
+    client._close_process.assert_called_once()
+    client._remove_lock_file.assert_called_once_with("path", use_cached=True)
+
+
+def test_remote_release_warns_when_exit_fails():
+    client = _make_mock_mapdl()
+    client._exited = False
+    client._local = False
+    client._mapdl_on_hpc = False
+    client._remote_instance = None
+    client.transport_mode = "insecure"
+    client._exit_mapdl.side_effect = _inactive_rpc_error(grpc.StatusCode.UNIMPLEMENTED)
+
+    with pytest.warns(UserWarning, match="MAPDL may still be running"):
+        MapdlGrpc._release_resources(client)
+
+    assert client._exited is True
+
+
+def test_is_alive_warns_once_when_ctrl_is_refused():
+    client = _make_mock_mapdl()
+    client.channel_state = "READY"
+    client._exited = False
+    client.busy = False
+    client._exiting = False
+    client._ctrl_unimplemented_warned = False
+    client._stub = MagicMock()
+    client._ctrl_raw.side_effect = _inactive_rpc_error(grpc.StatusCode.UNIMPLEMENTED)
+
+    with pytest.warns(UserWarning, match="refused 'Ctrl'") as record:
+        assert MapdlGrpc.is_alive.fget(client)
+        assert MapdlGrpc.is_alive.fget(client)
+
+    assert len(record) == 1
+
+
 def test_get_float(mapdl):
     response = pb_types.GetResponse(type=1, dval=123.456)
 
