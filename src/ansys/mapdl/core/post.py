@@ -642,7 +642,7 @@ class PostProcessing:
             self._mapdl.esln("S", 0, return_mapdl_output=True)
             self._mapdl.nsle("A", "all", return_mapdl_output=True)
 
-            all_scalars = np.empty(mask.size)
+            all_scalars = np.zeros(mask.size)
             all_scalars[mask] = scalars
 
             # we can directly the node numbers as the array of selected

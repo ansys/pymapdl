@@ -13,7 +13,7 @@ on:
 
       build_pdf:
         description: |
-          Whether to build the PDF documentation. Default is "false".
+          Whether to build the PDF documentation. Default is "true".
         required: false
         default: true
         type: boolean
@@ -46,6 +46,13 @@ on:
         default: true
         type: boolean
 
+      upload-logs:
+        description: |
+          If true, logs will be uploaded encrypted. Set to false to disable log upload (for security).
+        required: false
+        type: boolean
+        default: false
+
     # Secrets
     secrets:
       license-server:
@@ -62,6 +69,11 @@ on:
         description: |
           Password for the GitHub container registry.
         required: true
+
+      log-encryption-key:
+        description: |
+          Encryption key for sensitive log files.
+        required: false
 
 # zizmor: ignore[concurrency-limits]
 # Concurrency is controlled by the parent workflow (ci.yml)
@@ -91,7 +103,7 @@ jobs:
       DPF_START_SERVER: False
       GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
       MAIN_PYTHON_VERSION: "3.12"
-      NOT_ON_RELEASE: ${{ github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags') }}
+      ON_MAIN: ${{ github.ref == 'refs/heads/main' }}
 
     steps:
       - name: "Install Git and checkout project"
@@ -100,7 +112,7 @@ jobs:
           persist-credentials: false
 
       - name: "Login in Github container registry"
-        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 #v4.7.0
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 #v4.8.0
         with:
           registry: ghcr.io
           username: ${{ secrets.username }}
@@ -125,7 +137,7 @@ jobs:
         env:
           LICENSE_SERVER: ${{ secrets.license-server }}
         run: |
-          $(docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y --env ANSYSLMD_LICENSE_FILE="1055@${LICENSE_SERVER}" -p ${DPF_PORT}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${DPF_PORT}.") &
+          docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y --env ANSYSLMD_LICENSE_FILE="1055@${LICENSE_SERVER}" -p ${DPF_PORT}:50052 "$DPF_DOCKER_IMAGE"
 
       - name: "Getting files change filters"
         uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d #v4.0.3
@@ -143,17 +155,10 @@ jobs:
               - 'doc/source/**'
               - 'pyproject.toml'
 
-      - name: "Setup Python with cache"
+      - name: "Setup Python"
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 #v7.1.0
-        if:  steps.changes.outputs.workflows != 'true'
         with:
-          cache: 'pip'
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-
-      - name: "Setup Python without cache"
-        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 #v7.1.0
-        if: steps.changes.outputs.workflows == 'true'
-        with:
+          cache: ${{ steps.changes.outputs.workflows != 'true' && 'pip' || '' }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Install OS packages"
@@ -182,30 +187,30 @@ jobs:
 
       - name: "Cache examples"
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
-        if: ${{ inputs.use_cache_examples && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
+        if: ${{ inputs.use_cache_examples && (steps.changes.outputs.documentation != 'true' || env.ON_MAIN == 'true') }}
         with:
           path: doc/source/examples
-          key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          key: Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
-            Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+            Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Cache docs build directory"
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
-        if: ${{ inputs.use_cache_doc_build && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
+        if: ${{ inputs.use_cache_doc_build && (steps.changes.outputs.documentation != 'true' || env.ON_MAIN == 'true') }}
         with:
           path: doc/_build
-          key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          key: doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
-            doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+            doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Cache autosummary"
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
-        if: ${{ inputs.use_cache_autosummary && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
+        if: ${{ inputs.use_cache_autosummary && (steps.changes.outputs.documentation != 'true' || env.ON_MAIN == 'true') }}
         with:
           path: doc/source/**/_autosummary/*.rst
-          key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          key: autosummary-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
-            autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+            autosummary-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Install docs build requirements"
         shell: bash
@@ -214,6 +219,8 @@ jobs:
 
       - name: "Waiting for the services to be up"
         shell: bash
+        env:
+          TEST_DPF_BACKEND: "true"
         run: |
           .ci/waiting_services.sh
 
@@ -262,11 +269,13 @@ jobs:
             | tee doc_build.log
 
       - name: "Substitute defective GIF"
+        if: ${{ inputs.builder == 'html' }}
         shell: bash
         run: |
           .ci/substitute_defective_gif.sh
 
       - name: "Upload HTML Documentation"
+        if: ${{ inputs.builder == 'html' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: documentation-html
@@ -309,3 +318,35 @@ jobs:
         shell: bash
         run: |
           .ci/collect_mapdl_logs_remote.sh
+
+      - name: "Encrypt and upload logs to GitHub"
+        if: always() && inputs.upload-logs == true
+        env:
+          ENCRYPTION_KEY: ${{ secrets.log-encryption-key }}
+          FILE_NAME: build-docs
+        shell: bash
+        run: |
+          # Check if logs exist
+          if [ -f "./logs-${FILE_NAME}.tgz" ]; then
+            echo "Encrypting logs..."
+
+            # Encrypt using OpenSSL
+            openssl enc -aes-256-cbc -salt -pbkdf2 \
+              -in ./logs-${FILE_NAME}.tgz \
+              -out ./logs-${FILE_NAME}.tgz.enc \
+              -pass env:ENCRYPTION_KEY
+
+            echo "Logs encrypted successfully"
+            echo "To decrypt locally, use:"
+            echo "openssl enc -aes-256-cbc -d -pbkdf2 -in logs-${FILE_NAME}.tgz.enc -out logs-${FILE_NAME}.tgz -pass pass:YOUR_KEY"
+          else
+            echo "No log file found to encrypt"
+          fi
+
+      - name: "Upload encrypted logs to GitHub"
+        if: always() && inputs.upload-logs == true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+        with:
+          name: logs-build-docs-encrypted
+          path: ./logs-build-docs.tgz.enc
+          retention-days: 3
