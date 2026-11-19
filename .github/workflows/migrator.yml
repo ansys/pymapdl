@@ -295,6 +295,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
         with:
           ref: main
+          fetch-depth: 0
           persist-credentials: true # zizmor: ignore[artipacked]
 
       - name: Clone head repo and checkout branch. Resolve conflicts if needed.
@@ -323,13 +324,19 @@ jobs:
           git pull head_repo ${PR_HEAD_BRANCH}
 
           echo "\033[1;92m[INFO] Merging 'main' branch into \"${PR_BASE_BRANCH}\" \033[0m"
-          # A conflicting merge exits non-zero; '|| true' lets the conflict handler run under 'bash -e'.
-          git merge origin/main || true
+          # A conflicting merge exits non-zero; capture it so the conflict handler can run under 'bash -e'.
+          MERGE_STATUS=0
+          git merge origin/main || MERGE_STATUS=$?
 
           # Check for merge conflicts
           CONFLICTS=$(git ls-files -u | wc -l)
           echo "Merge conflicts:"
           echo "${CONFLICTS}"
+
+          if [[ "${MERGE_STATUS}" -ne 0 && "$CONFLICTS" -eq 0 ]]; then
+            echo "::error:: Merge failed without conflicts. Aborting."
+            exit 1
+          fi
 
           if [[ "$CONFLICTS" -gt 0 && -n "${MODE}" ]]; then
             echo "::warning:: Conflicts trying to solve using mode ${MODE}."
