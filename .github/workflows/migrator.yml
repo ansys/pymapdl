@@ -9,7 +9,9 @@
 #
 # Usage:
 #   - Comment "@pyansys-ci-bot migrate" or "@pyansys-ci-bot sync" on a forked PR.
-#   - Optionally specify "theirs" or "ours" to resolve merge conflicts automatically.
+#   - Optionally specify "ours" (keep the changes from 'main') or "theirs" (keep the changes
+#     from the fork branch) to resolve merge conflicts automatically. The fork branch is
+#     never modified.
 #   - Can also be triggered manually from the Actions tab with required inputs.
 #
 # Intended Output:
@@ -115,21 +117,23 @@ jobs:
 
             // Three modes of operation:
             // 1. auto - automatically resolves conflicts if possible, otherwise exits
-            // 2. theirs - resolves conflicts by taking changes from the head branch
-            // 3. ours - resolves conflicts by taking changes from the base branch
+            // 2. theirs - resolves conflicts by taking changes from the fork branch
+            // 3. ours - resolves conflicts by taking changes from 'main'
+            // MODE holds the git checkout flag for the merge of 'main' into the PR branch,
+            // where '--ours' is the PR branch and '--theirs' is 'main'.
             let mode = '';
             if (
               commentBody.includes('pyansys-ci-bot sync theirs') ||
               commentBody.includes('pyansys-ci-bot migrate theirs')
             ) {
-              core.info("Resolving conflicts by taking 'theirs' changes");
-              mode = '--theirs';
+              core.info("Resolving conflicts by taking the changes from the fork branch");
+              mode = '--ours';
             } else if (
               commentBody.includes('pyansys-ci-bot sync ours') ||
               commentBody.includes('pyansys-ci-bot migrate ours')
             ) {
-              core.info("Resolving conflicts by taking 'ours' changes");
-              mode = '--ours';
+              core.info("Resolving conflicts by taking the changes from 'main'");
+              mode = '--theirs';
             } else {
               core.info("No specific sync mode provided, defaulting to 'auto' which will exit if there are conflicts.");
             }
@@ -295,6 +299,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
         with:
           ref: main
+          fetch-depth: 0
           persist-credentials: true # zizmor: ignore[artipacked]
 
       - name: Clone head repo and checkout branch. Resolve conflicts if needed.
@@ -323,12 +328,19 @@ jobs:
           git pull head_repo ${PR_HEAD_BRANCH}
 
           echo "\033[1;92m[INFO] Merging 'main' branch into \"${PR_BASE_BRANCH}\" \033[0m"
-          git merge origin/main
+          # A conflicting merge exits non-zero; capture it so the conflict handler can run under 'bash -e'.
+          MERGE_STATUS=0
+          git merge origin/main || MERGE_STATUS=$?
 
           # Check for merge conflicts
           CONFLICTS=$(git ls-files -u | wc -l)
           echo "Merge conflicts:"
           echo "${CONFLICTS}"
+
+          if [[ "${MERGE_STATUS}" -ne 0 && "$CONFLICTS" -eq 0 ]]; then
+            echo "::error:: Merge failed without conflicts. Aborting."
+            exit 1
+          fi
 
           if [[ "$CONFLICTS" -gt 0 && -n "${MODE}" ]]; then
             echo "::warning:: Conflicts trying to solve using mode ${MODE}."
@@ -338,8 +350,8 @@ jobs:
             git status
             echo ""
 
-            # Resolve conflicts by taking "theirs" changes (optional, depending on your strategy)
-            echo "Resolving conflicts by taking 'theirs' changes"
+            # '--ours' keeps the fork branch (HEAD) side, '--theirs' keeps the 'main' side.
+            echo "Resolving conflicts with 'git checkout ${MODE}'"
             git checkout ${MODE} .
             git add .
 
@@ -350,19 +362,18 @@ jobs:
               exit 1
             fi
 
-            # Continue the merge
-            git merge --continue || { echo "::error:: Merge failed. Aborting."; exit 1; }
+            # Conclude the merge without opening an editor (no TTY on the runner)
+            git commit --no-edit || { echo "::error:: Merge failed. Aborting."; exit 1; }
+          elif [[ "$CONFLICTS" -gt 0 ]]; then
+            git status
+            echo "::error:: Merge conflicts with 'main'. Use 'sync ours' (keep 'main' changes) or 'sync theirs' (keep fork changes) to resolve them."
+            exit 1
           else
             echo "No merge conflicts detected."
           fi
 
           echo "Pushing changes to \"${PR_BASE_REPO}\" repo"
-          git push origin ${PR_BASE_BRANCH} --force-with-lease || git fetch --all && git push origin ${PR_BASE_BRANCH} --force-with-lease || { echo "::error:: Push failed. Aborting."; exit 1; }
-
-          if [[ "${MODE}" == "--ours" ]]; then
-            echo "Sync mode is 'ours'. Pushing to head_repo/${PR_HEAD_BRANCH} with 'ours' changes"
-            git push origin head_repo/${PR_HEAD_BRANCH} --force-with-lease || { echo "::error:: Push to head_repo/${PR_HEAD_BRANCH} failed. Aborting."; exit 1; }
-          fi
+          git push origin ${PR_BASE_BRANCH} --force-with-lease || { echo "::error:: Push failed. Aborting."; exit 1; }
 
       - name: Opening PR if needed.
         if : ${{ env.CONTINUE == 'true' }}
@@ -382,7 +393,7 @@ jobs:
             const existingPrs = await github.rest.pulls.list({
               owner: 'ansys',
               repo: 'pymapdl',
-              base: `${prBaseBranch}`,
+              head: `ansys:${prBaseBranch}`,
               state: 'open',
             });
 
@@ -408,7 +419,8 @@ jobs:
               debug: true,
               head: prBaseBranch,  // This is the branch we just created which becomes now the head of the PR, and the base (target) branch is the main branch.
               base: 'main',
-              title: `migrated (PR ${prNumber}): ${originalPR.title}`,
+              // Keep the original conventional-commit prefix first so check-pr-title passes.
+              title: `${originalPR.title} (migrated PR #${prNumber})`,
               body: `This PR is a mirror pull request created from [${originalPR.title}](https://github.com/ansys/pymapdl/pull/${originalPR.number}) to allow the code to access PyMAPDL CICD secrets.
 
             Check the [original PR](https://github.com/ansys/pymapdl/pull/${originalPR.number}) made by @${originalPR.user.login} for more details.
