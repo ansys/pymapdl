@@ -343,7 +343,8 @@ def test_screenshot_path_filters_by_jobname(tmp_path):
     mapdl._download = fake_download
 
     with patch(
-        "ansys.mapdl.core.mapdl_grpc.tempfile.gettempdir", return_value=str(tmp_path)
+        "ansys.mapdl.core._mapdl_grpc.files.tempfile.gettempdir",
+        return_value=str(tmp_path),
     ):
         screenshot_path = mapdl._screenshot_path()
 
@@ -730,7 +731,6 @@ def test__check_stds(mapdl):
             "ansys.mapdl.core.launcher._get_std_output", autospec=True
         ) as mock_get_std_output,
     ):
-
         mock_get_std_output.side_effect = _get_std_output
 
         mapdl._mapdl_process = process
@@ -795,7 +795,6 @@ done
         patch.object(mapdl, "_stdout_thread"),
         patch.object(mapdl, "_mapdl_process"),
     ):
-
         mapdl._mapdl_process = process
         mapdl._create_process_stds_queue(process)
 
