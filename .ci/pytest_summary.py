@@ -177,7 +177,6 @@ def print_table(
     for test in data:
         s: list[str] = []
         for i, each_key in enumerate(keys):
-
             if i == 0:
                 id_ = test[each_key]  # type: ignore[assignment]
 
@@ -271,9 +270,8 @@ def analyze_tests(directory: str, num: int, save_file: str):
     tests = extract_tests_with_tags(json_files)
 
     if save_file:
-        with open(save_file, "a+") as f:
-            for each_line in tests:
-                json.dump(each_line, f, indent=2)
+        with open(save_file, "w") as f:
+            json.dump(tests, f, indent=2)
 
     summary = compute_statistics(tests)
     print_summary(summary, num=num)
