@@ -723,3 +723,40 @@ def test_result_reads_selected_file_or_reports_missing_results(
     else:
         assert _CoreSubsystemsMixin.result.fget(client) == f"parsed {expected}"
         read_binary.assert_called_once_with(tmp_path / expected)
+
+
+@pytest.mark.parametrize(
+    "backend",
+    [
+        "ansys.mapdl.core.mapdl_grpc.MapdlGrpc",
+        "ansys.mapdl.core.mapdl_console.MapdlConsole",
+        "ansys.mapdl.core.mapdl_inprocess.MapdlInProcess",
+    ],
+    # Plain ids: conftest skips any test whose keywords contain "console".
+    ids=["grpc", "pexpect", "in_process"],
+)
+def test_every_backend_is_a_context_manager_that_exits(backend):
+    module_name, class_name = backend.rsplit(".", 1)
+    cls = getattr(pytest.importorskip(module_name), class_name)
+    mapdl = object.__new__(cls)
+    mapdl._process = None  # MapdlConsole.__del__ reads this.
+
+    with patch.object(cls, "exit") as exit_:
+        with mapdl as entered:
+            assert entered is mapdl
+            exit_.assert_not_called()
+
+    exit_.assert_called_once_with()
+
+
+def test_context_manager_exits_and_reraises_on_error():
+    mapdl = object.__new__(_MapdlCore)
+
+    with (
+        patch.object(_MapdlCore, "exit") as exit_,
+        pytest.raises(ZeroDivisionError),
+    ):
+        with mapdl:
+            1 / 0
+
+    exit_.assert_called_once_with()

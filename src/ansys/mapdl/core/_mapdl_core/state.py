@@ -45,6 +45,50 @@ from .constants import SESSION_ID_NAME, STATUS
 class _CoreStateMixin(_CoreMixinBase):
     """Static responsibility mixin for the MAPDL core facade."""
 
+    def __enter__(self):
+        """Return this instance so it can be used in a ``with`` statement.
+
+        Returns
+        -------
+        Mapdl
+            This instance.
+
+        Examples
+        --------
+        Exit MAPDL when the block ends, even if an exception is raised.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> with launch_mapdl() as mapdl:
+        ...     mapdl.prep7()
+        """
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        """Call :meth:`exit() <ansys.mapdl.core.Mapdl.exit>` when the ``with`` block ends.
+
+        ``exit()`` keeps its usual rules, so an instance that PyMAPDL did not
+        launch is disconnected but left running. An exception raised in the
+        block is not suppressed.
+
+        Parameters
+        ----------
+        exc_type : type or None
+            Type of the exception raised in the block, if any.
+        exc_value : BaseException or None
+            Exception raised in the block, if any.
+        traceback : types.TracebackType or None
+            Traceback of the exception raised in the block, if any.
+
+        Examples
+        --------
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> with launch_mapdl() as mapdl:
+        ...     mapdl.prep7()
+        >>> mapdl.exited
+        True
+        """
+        self.exit()
+
     def _after_run(self, _command: str) -> None:
         pass
 
