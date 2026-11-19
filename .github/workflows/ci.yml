@@ -324,6 +324,7 @@ jobs:
       tags: "local"
       latest-version: "261"
       test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') && !contains(matrix.mapdl-version, '24') }}
+      test_dpf_backend: ${{ contains(matrix.mapdl-version, 'cicd') && !contains(matrix.mapdl-version, '24') }}
       upload-logs: true
 
   docker-compose-test-remote:
@@ -353,13 +354,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 #v10.3.3
+        with:
+          version: "0.13.8"
+
       - name: "Run docker compose tests (remote-host profile)"
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
           FILE_NAME: ${{ env.file_name }}
         run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
           uvx tox -e docker-test-remote
 
       - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 #v7.1.1
@@ -423,13 +428,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 #v10.3.3
+        with:
+          version: "0.13.8"
+
       - name: "Run docker compose tests (local-host profile)"
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           DOCKER_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
           FILE_NAME: ${{ env.file_name }}
         run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
           uvx tox -e docker-test-local
 
       - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 #v7.1.1
@@ -571,16 +580,33 @@ jobs:
           bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
           bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
 
-  release:
-    name: "Release project"
+  # PyPI and GitHub releases are separate jobs, with PyPI last: a PyPI upload
+  # cannot be redone (it rejects existing files), while a GitHub release can be
+  # deleted to retrigger the workflow.
+  release-github:
+    name: "Release to GitHub"
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     needs: [package]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Needed to create GitHub releases
+    steps:
+      - name: "Release to GitHub"
+        uses: ansys/actions/release-github@f5e1481b9c128197a30d1dc1dfc52b8cd6865555 # v11.1.5
+        with:
+          library-name: ${{ env.PACKAGE_NAME }}
+          additional-artifacts: "minimum_requirements.txt"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  release-pypi:
+    name: "Release to PyPI"
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    needs: [release-github]
     runs-on: ubuntu-latest
     # Specifying a GitHub environment is optional, but strongly encouraged
     environment: release
     permissions:
       id-token: write  # Required for trusted publishing to PyPI
-      contents: write  # Needed to create GitHub releases
     steps:
       - name: "Download the library artifacts from build-library step"
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -599,20 +625,13 @@ jobs:
           packages-dir: ${{ env.PACKAGE_NAME }}-artifacts
           skip-existing: false
 
-      - name: "Release to GitHub"
-        uses: ansys/actions/release-github@f5e1481b9c128197a30d1dc1dfc52b8cd6865555 # v11.1.5
-        with:
-          library-name: ${{ env.PACKAGE_NAME }}
-          additional-artifacts: "minimum_requirements.txt"
-          token: ${{ secrets.GITHUB_TOKEN }}
-
   upload-docs-release:
     name: "Upload release documentation"
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Needed to push documentation to gh-pages branch
-    needs: [release, update-changelog]
+    needs: [release-pypi, update-changelog]
     steps:
       - name: "Deploy the stable documentation"
         uses: ansys/actions/doc-deploy-stable@f5e1481b9c128197a30d1dc1dfc52b8cd6865555 # v11.1.5
