@@ -2132,10 +2132,13 @@ class MapdlGrpc(MapdlBase):
         """Exit MAPDL and remove the lock file in `path`"""
         # This cannot/should not be faked
         if self._local:
-            self._cache_pids()  # Recache processes
+            # The PID-based cleanup must run even if refreshing the PIDs or
+            # asking the server to exit fails.
+            try:
+                self._cache_pids()  # Recache processes
+            except Exception as e:
+                self._log.debug("Error during _cache_pids: %s", e)
 
-            # The PID-based cleanup must run even if asking the server to exit
-            # fails.
             try:
                 self._exit_mapdl_server()
             except Exception as e:
@@ -2956,7 +2959,11 @@ class MapdlGrpc(MapdlBase):
         returns. To bound the wait, the call runs in a daemon thread that is
         joined with a wall-clock timeout. If the thread is still running
         afterward, it is abandoned and the PID-based process cleanup takes
-        over.
+        over. For a remote instance there is no PID-based cleanup, so the
+        remote server might still be running.
+
+        During interpreter finalization, new threads cannot be started, so the
+        call is sent directly and is only bounded by the gRPC ``timeout``.
 
         Parameters
         ----------
@@ -3005,10 +3012,15 @@ class MapdlGrpc(MapdlBase):
         thread.join(hard_timeout)
 
         if thread.is_alive():
+            if self._local:
+                consequence = "continuing with process cleanup"
+            else:
+                consequence = "the remote MAPDL server might still be running"
             self._log.warning(
                 "Ctrl('EXIT') did not return within %.1f s. Abandoning the "
-                "call and continuing with process cleanup.",
+                "call; %s.",
                 hard_timeout,
+                consequence,
             )
             return
 

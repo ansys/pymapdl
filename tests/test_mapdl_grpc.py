@@ -944,9 +944,10 @@ class TestCtrlExitHardTimeout:
     """``_ctrl("exit")`` must not hang when gRPC ignores its own deadline."""
 
     class _Dummy:
-        def __init__(self, stub):
+        def __init__(self, stub, local=True):
             self._log = MagicMock()
             self._stub = stub
+            self._local = local
 
         _ctrl = MapdlGrpc._ctrl
         _ctrl_raw = MapdlGrpc._ctrl_raw
@@ -981,11 +982,15 @@ class TestCtrlExitHardTimeout:
         ):
             dummy._ctrl("exit")
 
-    def test_does_not_hang_when_the_call_never_returns(self):
+    @pytest.mark.parametrize(
+        "local,expected",
+        [(True, "process cleanup"), (False, "remote MAPDL server might still")],
+    )
+    def test_does_not_hang_when_the_call_never_returns(self, local, expected):
         release = threading.Event()
         stub = Mock()
         stub.Ctrl.side_effect = lambda *args, **kwargs: release.wait(30)
-        dummy = self._Dummy(stub)
+        dummy = self._Dummy(stub, local=local)
 
         try:
             with patch(
@@ -999,6 +1004,7 @@ class TestCtrlExitHardTimeout:
 
         assert elapsed < 5
         dummy._log.warning.assert_called_once()
+        assert expected in dummy._log.warning.call_args.args[-1]
 
     def test_does_not_start_a_thread_when_finalizing(self):
         stub = Mock()
@@ -1017,14 +1023,16 @@ class TestCtrlExitHardTimeout:
 class TestExitMapdlRunsCloseProcessDespiteServerErrors:
     """``_exit_mapdl`` must still kill the process if asking it to exit fails."""
 
-    def test_close_process_runs_when_exit_mapdl_server_raises(self):
+    @pytest.mark.parametrize("failing", ["_cache_pids", "_exit_mapdl_server"])
+    def test_close_process_runs_when_a_previous_step_raises(self, failing):
         dummy = MagicMock(spec=MapdlGrpc)
         dummy._log = MagicMock()
         dummy._local = True
-        dummy._exit_mapdl_server.side_effect = RuntimeError("boom")
+        getattr(dummy, failing).side_effect = RuntimeError("boom")
 
         MapdlGrpc._exit_mapdl(dummy, "/some/path")
 
+        dummy._exit_mapdl_server.assert_called_once()
         dummy._close_process.assert_called_once()
         dummy._remove_lock_file.assert_called_once()
 
