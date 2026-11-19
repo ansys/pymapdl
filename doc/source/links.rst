@@ -4,8 +4,8 @@
 
 .. #Pyansys
 .. _pyansys: https://docs.pyansys.com/version/dev/
-.. _pyansys_support: pyansys.core@ansys.com
-.. _pyansys_core: pyansys.core@ansys.com
+.. _pyansys_support: pyansys-core@synopsys.com
+.. _pyansys_core: pyansys-core@synopsys.com
 
 .. #Other projects
 .. _dpf_core_gh: https://github.com/ansys/pydpf-core

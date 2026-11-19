@@ -11,7 +11,7 @@ FROM ubuntu:22.04 AS python-container
 
 
 ARG USE_LOCAL_REPO
-ARG PYTHON_VERSION=3.11
+ARG PYTHON_VERSION=3.12
 
 ENV USE_LOCAL_REPO=${USE_LOCAL_REPO}
 ENV UV_PYTHON=${PYTHON_VERSION}
@@ -31,10 +31,11 @@ RUN apt-get update && \
     openssh-client \
     curl && \
     update-ca-certificates && \
-    # Installing uv
-    curl -LsSf https://astral.sh/uv/install.sh | sh \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=ghcr.io/astral-sh/uv:0.13.8 /uv /uvx /usr/local/bin/
+
 
 # Set PATH to include uv and pre-install Python interpreter.
 # Both must happen before the dep pre-install step below.
@@ -106,7 +107,7 @@ FROM ${DOCKER_IMAGE} AS mapdl-container
 # WARNING: This container is designed to work using an Ubuntu base image.
 #
 ARG USE_LOCAL_REPO
-ARG PYTHON_VERSION=3.11
+ARG PYTHON_VERSION=3.12
 
 ENV UV_PYTHON=${PYTHON_VERSION}
 ENV USE_LOCAL_REPO=${USE_LOCAL_REPO}
@@ -130,11 +131,12 @@ RUN apt-get update && \
     git \
     openssh-client \
     curl && \
-    # Installing uv
     update-ca-certificates && \
-    curl -LsSf https://astral.sh/uv/install.sh | sh \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=ghcr.io/astral-sh/uv:0.13.8 /uv /uvx /usr/local/bin/
+
 
 # Set PATH to include uv for root user
 ENV PATH="/root/.local/bin:$PATH"

@@ -2,7 +2,9 @@ version: 2
 updates:
 
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directories:
+      - "/"
+      - "/.github/actions/*"
     schedule:
       interval: "weekly"
     labels:
@@ -139,3 +141,22 @@ updates:
       semver-patch-days: 3
       include:
         - "*"  # Include all dependencies in cooldown
+
+  - package-ecosystem: "pre-commit"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+      exclude:
+        - "ansys/pre-commit-hooks/*"
+    labels:
+      - "maintenance"
+    commit-message:
+      prefix: "ci"
+    groups:
+      pre-commit-hooks:
+        patterns:
+          - "*"
+    assignees:
+      - "germa89"

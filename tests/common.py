@@ -31,7 +31,7 @@ from typing import Dict, List
 import psutil
 
 from ansys.mapdl.core import LOG, Mapdl
-from ansys.mapdl.core.errors import MapdlConnectionError, MapdlExitedError
+from ansys.mapdl.core.errors import MapdlConnectionError
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.launcher.environment import is_ubuntu as _is_ubuntu
 from ansys.mapdl.core.launcher.network import _is_mapdl_process as is_ansys_process
@@ -250,11 +250,7 @@ def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
     from conftest import ON_LOCAL
 
     def is_exited(mapdl: Mapdl):
-        try:
-            _ = mapdl._ctrl("VERSION")
-            return False
-        except MapdlExitedError:
-            return True
+        return not mapdl.is_alive
 
     LOG.debug("Checking if MAPDL is exited...")
     if mapdl.exited or is_exited(mapdl):

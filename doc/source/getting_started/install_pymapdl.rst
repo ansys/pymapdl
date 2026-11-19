@@ -15,8 +15,8 @@ Python module
    the `Python Packaging User Guide Tutorial on pip <python_installing_packages>`
    before proceeding.
 
-The ``ansys.mapdl.core`` package currently supports Python 3.10 through
-Python 3.13 on Windows, macOS, and Linux.
+The ``ansys.mapdl.core`` package currently supports Python 3.12 through
+Python 3.14 on Windows, macOS, and Linux.
 
 Install the latest release from `PyPi <pymapdl_pypi_>`_ with this command on
 the command line, terminal, or in PowerShell:

@@ -1,16 +1,5 @@
 fail_fast: True
 
-ci:
-  # Commit name when auto fixing PRs.
-  autofix_commit_msg: |
-    ci: auto fixes from pre-commit.com hooks.
-
-    for more information, see https://pre-commit.ci
-
-  # PR name when autoupdate
-  autoupdate_commit_msg: 'ci: pre-commit autoupdate'
-
-
 repos:
 - repo: https://github.com/shellcheck-py/shellcheck-py
   rev: a6564f5d57444e123433a5c9af733e3975c77229  # frozen: v0.11.0.1-1
@@ -26,7 +15,7 @@ repos:
       exclude: ^(doc/|examples/)
 
 - repo: https://github.com/ansys/pre-commit-hooks
-  rev: 55c5b6a5439abd847613579c6924da750e8b78b2  # frozen: v0.8.0
+  rev: dbcd0a4ad0060f78ac3c7d53d342f510edc48eab  # frozen: v0.8.1
   hooks:
   - id: add-license-headers
     args:
@@ -54,7 +43,7 @@ repos:
   rev: dda8db18cfc68df532abf33b185ecd12d5b7b326  # frozen: 1.20.0
   hooks:
   - id: blacken-docs
-    additional_dependencies: [black==25.12.0]
+    additional_dependencies: [black==26.10.1]
 
 - repo: https://github.com/psf/black-pre-commit-mirror
   rev: a5439e9af2ff9371297bb1a76a01b8ad17989b88  # frozen: 26.10.1
@@ -109,7 +98,7 @@ repos:
       args: [--option, "reorder_arrays=true", --option, "reorder_keys=true"]
 
 - repo: https://github.com/zizmorcore/zizmor-pre-commit
-  rev: c92afdf2c6ca336aaa8f39e2bd8d48f62dbd8e1f  # frozen: v1.31.1
+  rev: 06a39750ec31860bb44f2acf67182c40016cd1e7  # frozen: v1.32.0
   hooks:
     - id: zizmor
       args: ["--pedantic"]
