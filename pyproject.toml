@@ -94,7 +94,7 @@ doc = [
   "ansys-sphinx-theme==1.12.1",
   "ansys-tools-visualization-interface==0.14.1",
   "grpcio==1.85.0",
-  "imageio-ffmpeg==0.8.0",
+  "imageio-ffmpeg==0.8.1",
   "imageio==2.38.1",
   "jupyter==1.1.1",
   "jupyter_sphinx==0.5.3",
