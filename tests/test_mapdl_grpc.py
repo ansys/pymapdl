@@ -1036,6 +1036,23 @@ class TestExitMapdlRunsCloseProcessDespiteServerErrors:
         dummy._close_process.assert_called_once()
         dummy._remove_lock_file.assert_called_once()
 
+    def test_keeps_previous_pids_when_cache_pids_raises(self):
+        dummy = MagicMock(spec=MapdlGrpc)
+        dummy._log = MagicMock()
+        dummy._local = True
+        dummy._pids = [111, 222]
+
+        def _failing_cache_pids():
+            dummy._pids = []
+            raise OSError("boom")
+
+        dummy._cache_pids.side_effect = _failing_cache_pids
+
+        MapdlGrpc._exit_mapdl(dummy, "/some/path")
+
+        assert dummy._pids == [111, 222]
+        dummy._close_process.assert_called_once()
+
 
 class TestDisconnectButLeaveMapdlRunning:
     """``exit()`` always releases the client side, even when MAPDL survives.

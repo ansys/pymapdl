@@ -2134,10 +2134,12 @@ class MapdlGrpc(MapdlBase):
         if self._local:
             # The PID-based cleanup must run even if refreshing the PIDs or
             # asking the server to exit fails.
+            previous_pids = list(getattr(self, "_pids", []) or [])
             try:
                 self._cache_pids()  # Recache processes
             except Exception as e:
                 self._log.debug("Error during _cache_pids: %s", e)
+                self._pids = previous_pids
 
             try:
                 self._exit_mapdl_server()
