@@ -39,6 +39,15 @@ on:
         type: boolean
         default: true
 
+      test_dpf_backend:
+        description: |
+          If true, `mapdl.results` is tested with the DPF backend
+          (TEST_DPF_BACKEND). If false, the ansys-mapdl-reader backend is
+          tested. Independent of `test_dpf`.
+        required: false
+        type: boolean
+        default: false
+
       on-console:
         description: |
           If true, the tests will be run on console.
@@ -145,6 +154,7 @@ jobs:
       ANS_DEBUG_CRASH: 1
       DATAPROCESSING_DEBUG: /home/mapdl/dpf_logs
       HAS_DPF: ${{ inputs.test_dpf }}
+      TEST_DPF_BACKEND: ${{ inputs.test_dpf_backend }}
       OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
       OMPI_ALLOW_RUN_AS_ROOT: 1
       ON_CI: True
@@ -153,7 +163,6 @@ jobs:
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
       # Automatically enabled when the job is re-run with debug logging.
       PYMAPDL_GRPC_TRANSPORT: 'insecure'
-      PYTEST_ARGUMENTS: ""
       PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
       TESTING_MINIMAL: ${{ inputs.testing-minimal }}
 
@@ -189,8 +198,7 @@ jobs:
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
         run: |
           if [[ "${MAPDL_VERSION}" == *"cicd"* ]]; then
-            echo "CICD MAPDL version detected, testing DPF backend for results module.";
-            echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
+            echo "CICD MAPDL version detected.";
             echo "PYMAPDL_ADDITIONAL_SWITCHES=-mpi openmpi" >> $GITHUB_ENV;
           fi
 
@@ -198,19 +206,19 @@ jobs:
         shell: bash
         if: ${{ contains(inputs.mapdl-version, 'cicd') }}
         run: |
-          apt-get update && apt-get -y install gcc mono-mcs g++
+          apt-get -o Acquire::Retries=3 update && apt-get -y install gcc mono-mcs g++
 
       - name: "Installing minimal OS packages"
         shell: bash
         if: inputs.testing-minimal == true
         run: |
-          apt-get update && apt install -y libgomp1 graphviz curl git && apt-get clean
+          apt-get -o Acquire::Retries=3 update && apt install -y libgomp1 graphviz curl git && apt-get clean
 
       - name: "Installing OS packages"
         shell: bash
         if: inputs.testing-minimal == false
         run: |
-          apt-get update && apt install -y libgl1 libglx-mesa0 xvfb libgomp1 graphviz curl git && apt-get clean
+          apt-get -o Acquire::Retries=3 update && apt install -y libgl1 libglx-mesa0 xvfb libgomp1 graphviz curl git && apt-get clean
 
       - name: "Setup Python"
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 #v7.1.0
@@ -253,6 +261,7 @@ jobs:
           python -m pip install -r .ci/requirements_testing_minimal.txt
 
       - name: "Unit testing"
+        id: unit-testing
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
           file_name: ${{ inputs.file-name }}
@@ -261,7 +270,6 @@ jobs:
           ON_CONSOLE: ${{ inputs.on-console }}
           ON_MINIMAL: ${{ inputs.testing-minimal }}
           PYMAPDL_NPROC: 2
-          PYTEST_ARGUMENTS: "${{ env.PYTEST_ARGUMENTS }}"
           PYTEST_INPUT_ARGUMENTS: "${{ inputs.pytest-arguments }}"
           PYMAPDL_DEBUG_TESTING: ${{ runner.debug == '1' }}
         shell: bash
@@ -291,12 +299,11 @@ jobs:
           unset PYMAPDL_PORT
 
           $cmd ${PYTEST_INPUT_ARGUMENTS} \
-            ${PYTEST_ARGUMENTS} \
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml
 
       - name: "Strip captured output from pytest report"
-        if: always()
+        if: always() && steps.unit-testing.outcome != 'skipped'
         shell: bash
         env:
           FILE_NAME: ${{ inputs.file-name }}
