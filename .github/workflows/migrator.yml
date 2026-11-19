@@ -9,7 +9,9 @@
 #
 # Usage:
 #   - Comment "@pyansys-ci-bot migrate" or "@pyansys-ci-bot sync" on a forked PR.
-#   - Optionally specify "theirs" or "ours" to resolve merge conflicts automatically.
+#   - Optionally specify "ours" (keep the changes from 'main') or "theirs" (keep the changes
+#     from the fork branch) to resolve merge conflicts automatically. The fork branch is
+#     never modified.
 #   - Can also be triggered manually from the Actions tab with required inputs.
 #
 # Intended Output:
@@ -115,21 +117,23 @@ jobs:
 
             // Three modes of operation:
             // 1. auto - automatically resolves conflicts if possible, otherwise exits
-            // 2. theirs - resolves conflicts by taking changes from 'main'
-            // 3. ours - resolves conflicts by taking changes from the PR branch
+            // 2. theirs - resolves conflicts by taking changes from the fork branch
+            // 3. ours - resolves conflicts by taking changes from 'main'
+            // MODE holds the git checkout flag for the merge of 'main' into the PR branch,
+            // where '--ours' is the PR branch and '--theirs' is 'main'.
             let mode = '';
             if (
               commentBody.includes('pyansys-ci-bot sync theirs') ||
               commentBody.includes('pyansys-ci-bot migrate theirs')
             ) {
-              core.info("Resolving conflicts by taking 'theirs' changes");
-              mode = '--theirs';
+              core.info("Resolving conflicts by taking the changes from the fork branch");
+              mode = '--ours';
             } else if (
               commentBody.includes('pyansys-ci-bot sync ours') ||
               commentBody.includes('pyansys-ci-bot migrate ours')
             ) {
-              core.info("Resolving conflicts by taking 'ours' changes");
-              mode = '--ours';
+              core.info("Resolving conflicts by taking the changes from 'main'");
+              mode = '--theirs';
             } else {
               core.info("No specific sync mode provided, defaulting to 'auto' which will exit if there are conflicts.");
             }
@@ -346,7 +350,7 @@ jobs:
             git status
             echo ""
 
-            # '--ours' keeps the PR branch (HEAD) side, '--theirs' keeps the 'main' side.
+            # '--ours' keeps the fork branch (HEAD) side, '--theirs' keeps the 'main' side.
             echo "Resolving conflicts with 'git checkout ${MODE}'"
             git checkout ${MODE} .
             git add .
@@ -362,7 +366,7 @@ jobs:
             git commit --no-edit || { echo "::error:: Merge failed. Aborting."; exit 1; }
           elif [[ "$CONFLICTS" -gt 0 ]]; then
             git status
-            echo "::error:: Merge conflicts with 'main'. Use 'sync ours' or 'sync theirs' to resolve them."
+            echo "::error:: Merge conflicts with 'main'. Use 'sync ours' (keep 'main' changes) or 'sync theirs' (keep fork changes) to resolve them."
             exit 1
           else
             echo "No merge conflicts detected."
@@ -370,11 +374,6 @@ jobs:
 
           echo "Pushing changes to \"${PR_BASE_REPO}\" repo"
           git push origin ${PR_BASE_BRANCH} --force-with-lease || { echo "::error:: Push failed. Aborting."; exit 1; }
-
-          if [[ "${MODE}" == "--ours" ]]; then
-            echo "Sync mode is 'ours'. Pushing the merged result to ${PR_HEAD_REPO}:${PR_HEAD_BRANCH}"
-            git push head_repo HEAD:${PR_HEAD_BRANCH} || { echo "::error:: Push to ${PR_HEAD_REPO}:${PR_HEAD_BRANCH} failed. Aborting."; exit 1; }
-          fi
 
       - name: Opening PR if needed.
         if : ${{ env.CONTINUE == 'true' }}
