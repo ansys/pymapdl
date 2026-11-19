@@ -74,7 +74,7 @@ tests = [
   "matplotlib==3.11.2",
   "pandas==3.1.1",
   "pyansys-tools-report==0.9.0",
-  "pyfakefs==6.3.1",
+  "pyfakefs==6.3.2",
   "pyiges[full]==0.3.4",
   "pytest-cov==7.1.0",
   "pytest-profiling==1.8.1",
@@ -94,7 +94,7 @@ doc = [
   "ansys-sphinx-theme==1.12.1",
   "ansys-tools-visualization-interface==0.14.1",
   "grpcio==1.85.0",
-  "imageio-ffmpeg==0.8.0",
+  "imageio-ffmpeg==0.8.1",
   "imageio==2.38.1",
   "jupyter==1.1.1",
   "jupyter_sphinx==0.5.3",
@@ -125,7 +125,7 @@ doc = [
 
 [dependency-groups]
 
-tox = ["tox==4.67.2"]
+tox = ["tox==4.67.13"]
 
 [tool.flit.module]
 name = "ansys.mapdl.core"

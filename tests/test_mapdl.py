@@ -473,13 +473,13 @@ def test_multiline_fail_deprecation_warning(mapdl, cleared):
         ), "not capturing the end of the block"
 
 
-def test_input_strings_fail(mapdl, clear_at_end):
+def test_input_strings_fail(mapdl, clear_at_start_and_end):
     resp = mapdl.input_strings(CMD_BLOCK)
     assert "IS SOLID186" in resp, "not capturing the beginning of the block"
     assert "GENERATE NODES AND ELEMENTS" in resp, "not capturing the end of the block"
 
 
-def test_input_strings(mapdl, clear_at_end):
+def test_input_strings(mapdl, clear_at_start_and_end):
     assert isinstance(mapdl.input_strings(CMD_BLOCK), str)
     assert isinstance(mapdl.input_strings(CMD_BLOCK.splitlines()), str)
 
@@ -522,7 +522,7 @@ def test_basic_command(mapdl):
     assert "ROUTINE COMPLETED" in resp
 
 
-def test_allow_ignore(mapdl, clear_at_end):
+def test_allow_ignore(mapdl, clear_at_start_and_end):
     previous_ignore_errors = mapdl.ignore_errors
     try:
         with pytest.warns(DeprecationWarning):
@@ -551,7 +551,7 @@ def test_allow_ignore(mapdl, clear_at_end):
         mapdl.ignore_errors = previous_ignore_errors
 
 
-def test_chaining(mapdl, clear_at_end):
+def test_chaining(mapdl, clear_at_start_and_end):
     # test chaining with distributed only
     if mapdl._distributed:
         with pytest.raises(MapdlRuntimeError):
@@ -868,7 +868,7 @@ def test_apdl_logging(mapdl, clear_at_start_and_end, tmpdir):
     assert file_name in os.listdir(tmp_dir)
 
 
-def test_nodes(tmpdir, clear_at_end, mapdl):
+def test_nodes(tmpdir, clear_at_start_and_end, mapdl):
     mapdl.n(1, 1, 1, 1)
     mapdl.n(11, 10, 1, 1)
     mapdl.fill(1, 11, 9)
