@@ -129,14 +129,44 @@ def test_get_fallback_string(mapdl):
 
 
 def test_get_lock(mapdl):
-    previous_get_lock = mapdl._get_lock
-    try:
-        mapdl._get_lock = True
-
-        with pytest.raises(MapdlRuntimeError):
+    with mapdl._get_lock:
+        with pytest.raises(MapdlRuntimeError, match="get_lock"):
             mapdl._get(entity="NODE", entnum="1", item1="U", it1num=1, timeout=0.5)
-    finally:
-        mapdl._get_lock = previous_get_lock
+
+
+def test_vget_service_calls_never_overlap():
+    """Concurrent eager *VGET requests must reach the stub one at a time."""
+    mapdl = object.__new__(MapdlGrpc)
+    mapdl._vget_lock = threading.Lock()
+    in_flight, peak = [0], [0]
+    counter_lock = threading.Lock()
+
+    def vget2(_request):
+        with counter_lock:
+            in_flight[0] += 1
+            peak[0] = max(peak[0], in_flight[0])
+        threading.Event().wait(0.05)
+        with counter_lock:
+            in_flight[0] -= 1
+        return []
+
+    mapdl._stub = MagicMock()
+    mapdl._stub.VGet2.side_effect = vget2
+    with patch("ansys.mapdl.core._mapdl_grpc.queries.parse_chunks", return_value=[]):
+        threads = [
+            threading.Thread(
+                target=mapdl._get_array_from_service,
+                args=("NODE", 1, "U", "X", "", "", ""),
+            )
+            for _ in range(4)
+        ]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+    assert mapdl._stub.VGet2.call_count == 4
+    assert peak[0] == 1
 
 
 def test_get_invalid_response_type(mapdl):
@@ -224,6 +254,50 @@ def test_cdread_rejects_unknown_option():
 
     with pytest.raises(ValueError, match='Option "UNKNOWN" is not supported'):
         MapdlGrpc.cdread(mock_mapdl, "unknown", "model", "cdb")
+
+
+@pytest.mark.parametrize(
+    "orig_cmd,kwargs,expected",
+    [
+        ("/INP", {}, ["/INP,'model.inp'"]),
+        ("CDREAD", {"cd_read_option": "db"}, ["CDREAD,'DB','model.inp'"]),
+        (
+            "CDREAD",
+            {"cd_read_option": "all", "fnamei": "geo.iges"},
+            [
+                "/AUX15",
+                "IGESIN,'geo.iges'",
+                "FINISH",
+                "/INPUT,'model.inp'",
+                "/PREP7",
+                "/RMTMP",
+            ],
+        ),
+    ],
+)
+def test_input_queues_driver_commands_in_non_interactive(orig_cmd, kwargs, expected):
+    """In non_interactive, input queues the driver commands without the /OUT wrapper."""
+    mapdl = object.__new__(MapdlGrpc)
+    mapdl._log = MagicMock()
+    mapdl._apdl_log = None
+    mapdl._store_commands = True
+    mapdl._stored_commands = []
+    mapdl._get_file_name = lambda fname, ext: fname
+    mapdl._get_file_path = lambda fname, progress_bar: "model.inp"
+    mapdl._get_time_step_stream = lambda time_step: 100
+
+    assert mapdl._stream_input("model.inp", orig_cmd=orig_cmd, **kwargs) is None
+    assert mapdl._stored_commands == expected
+
+
+def test_input_cdread_all_requires_iges_archive():
+    mapdl = object.__new__(MapdlGrpc)
+    mapdl._log = MagicMock()
+    mapdl._get_file_name = lambda fname, ext: fname
+    mapdl._get_time_step_stream = lambda time_step: 100
+
+    with pytest.raises(ValueError, match="'fnamei'"):
+        mapdl._stream_input("model.inp", orig_cmd="CDREAD", cd_read_option="ALL")
 
 
 class TestCloseProcessPipes:
@@ -588,15 +662,16 @@ class TestSendCommand:
         """The command reaches the stub and the response is returned."""
         mock = _make_mock_mapdl()
         mock._exited = False
-        mock._stub = MagicMock()
+        # A spec'd MagicMock auto-mocks properties, so set the one _send_command reads.
+        mock._connected_stub = MagicMock()
         resp = MagicMock()
         resp.response = "OK"
-        mock._stub.SendCommand.future.return_value.result.return_value = resp
+        mock._connected_stub.SendCommand.future.return_value.result.return_value = resp
 
         result = MapdlGrpc._send_command(mock, "/PREP7")
 
         assert result == "OK"
-        mock._stub.SendCommand.future.assert_called_once()
+        mock._connected_stub.SendCommand.future.assert_called_once()
 
 
 class TestCloseGrpcChannel:
@@ -991,6 +1066,27 @@ class TestDisconnectButLeaveMapdlRunning:
         mock._release_resources.assert_called_once()
         mock._disconnect_but_leave_mapdl_running.assert_not_called()
 
+    @pytest.mark.parametrize(
+        "start_instance,force,teardown",
+        [
+            (True, False, "_release_resources"),
+            (False, False, "_disconnect_but_leave_mapdl_running"),
+            (False, True, "_release_resources"),
+        ],
+    )
+    def test_lazy_array_cleanup_error_is_raised_after_teardown(
+        self, start_instance, force, teardown
+    ):
+        """A failed lazy-array cleanup must not skip teardown, then must surface."""
+        mock = self._mock_for_exit(start_instance=start_instance)
+        mock._cleanup_lazy_array_parameters.side_effect = RuntimeError("delete failed")
+
+        with pytest.raises(RuntimeError, match="delete failed"):
+            MapdlGrpc.exit(mock, force=force)
+
+        getattr(mock, teardown).assert_called_once()
+        assert mock._exiting is False
+
     def test_closes_channel_joins_threads_and_marks_exited(self):
         """The helper releases both resources and reports the instance dead."""
         mock = _make_mock_mapdl()
@@ -1119,6 +1215,35 @@ class TestEnsureChannel:
 
         mock._ensure_channel.assert_called_once()
         mock._multi_connect.assert_called_once_with(timeout=5)
+
+
+def test_thermal_result_resets_priority_when_loading_fails():
+    """A failed thermal result load must not make later 'result' calls thermal."""
+    mapdl = object.__new__(MapdlGrpc)
+    mapdl._prioritize_thermal = False
+
+    with (
+        patch.object(
+            MapdlGrpc, "result", property(Mock(side_effect=FileNotFoundError))
+        ),
+        pytest.raises(FileNotFoundError),
+    ):
+        mapdl.thermal_result
+
+    assert mapdl._prioritize_thermal is False
+
+
+@pytest.mark.parametrize(
+    "method,rpc,arg",
+    [("Param", "GetParameter", "ARG"), ("Var", "GetVariable", 2)],
+)
+def test_param_and_var_are_deprecated_but_still_work(method, rpc, arg):
+    mapdl = object.__new__(MapdlGrpc)
+    mapdl._stub = MagicMock()
+    getattr(mapdl._stub, rpc).return_value.val = [1.5]
+
+    with pytest.warns(DeprecationWarning, match=f"'{method}' is deprecated"):
+        assert getattr(mapdl, method)(arg) == [1.5]
 
 
 # `MapdlGrpc.get_variable` now returns a `LazyArray` backed by a private,

@@ -22,6 +22,7 @@
 
 """Unit tests for lazy MAPDL array retrieval without a MAPDL instance."""
 
+import threading
 from unittest.mock import MagicMock, call
 
 import numpy as np
@@ -197,7 +198,7 @@ def _mock_grpc_mapdl():
     mapdl._log.level = "WARNING"
     mapdl._set_log_level = MagicMock()
     mapdl._store_commands = False
-    mapdl._vget_lock = False
+    mapdl._vget_lock = threading.Lock()
     mapdl._lazy_array_counter = 0
     mapdl._lazy_array_parameters = set()
     mapdl._parameters = MagicMock()
@@ -530,6 +531,20 @@ def test_get_variable_population_failure_surfaces_cleanup_error(monkeypatch):
 
     # The backing parameter remains tracked because its deletion failed.
     assert mapdl._lazy_array_parameters == {"PYMAPDL_LAZY_0000000000000001"}
+
+
+def test_get_esol_sector_is_deprecated_and_not_sent_to_esol():
+    """ESOL has no SECTOR field, so ``sector`` must not leak into its kwargs."""
+    mapdl = _mock_grpc_mapdl()
+    mapdl.esol = MagicMock()
+    mapdl.get_variable = MagicMock()
+    mapdl.get_variable.return_value.resolve.return_value = np.array([1.0])
+
+    with pytest.warns(DeprecationWarning, match="sector"):
+        result = mapdl.get_esol(1, 2, "S", "Y", sector=3)
+
+    mapdl.esol.assert_called_once_with(9, elem=1, node=2, item="S", comp="Y", name="")
+    assert result.tolist() == [1.0]
 
 
 def test_temporary_result_wrappers_remain_eager(monkeypatch):

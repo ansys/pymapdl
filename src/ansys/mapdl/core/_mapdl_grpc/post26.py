@@ -23,6 +23,7 @@
 """POST26 time-history variables returned as arrays."""
 
 from functools import wraps
+from warnings import warn
 
 import numpy as np
 from numpy.typing import NDArray
@@ -121,8 +122,7 @@ class _GrpcPost26Mixin(_GrpcMixinBase):
         >>> np.asarray(mapdl.get_variable(3, tstrt=1.0))
         array([0.34632451, 0.36126732, ..., 0.38041256])
         """
-        parameter_name = self._new_lazy_array_parameter()
-        try:
+        with self._reserved_lazy_array_parameter() as parameter_name:
             super().vget(  # type: ignore[misc]  # Resolved through MapdlGrpc's MRO.
                 par=parameter_name,
                 ir=ir,
@@ -130,19 +130,8 @@ class _GrpcPost26Mixin(_GrpcMixinBase):
                 kcplx=kcplx,
                 **kwargs,
             )
-        except Exception as error:
-            try:
-                self._delete_lazy_array_parameter(parameter_name)
-            except Exception as cleanup_error:
-                raise cleanup_error from error
-            raise
 
-        return LazyArray(
-            self,
-            parameter_name,
-            cleanup=lambda: self._delete_lazy_array_parameter(parameter_name),
-            fetch=lambda: self._read_owned_array_parameter(parameter_name),
-        )
+        return self._lazy_array(parameter_name)
 
     @wraps(MapdlBase.nsol)
     def nsol(  # numpydoc ignore=RT01
@@ -322,6 +311,10 @@ class _GrpcPost26Mixin(_GrpcMixinBase):
             concatenating the first four characters of the ``item`` and
             ``comp`` labels.
 
+        sector : int, optional
+            Deprecated and ignored. The ``ESOL`` command has no ``SECTOR``
+            field.
+
         tstrt : str, optional
             Time (or frequency) corresponding to start of IR data.  If between
             values, the nearer value is used. By default it is the first value.
@@ -379,6 +372,13 @@ class _GrpcPost26Mixin(_GrpcMixinBase):
         possible values, see Reviewing Results in ``POST1`` in the Contact
         Technology Guide.
         """
+        if sector != "":
+            warn(
+                "The 'sector' parameter of 'get_esol' is deprecated and ignored "
+                "because the ESOL command has no SECTOR field. It will be "
+                "removed in a future version.",
+                DeprecationWarning,
+            )
         self.esol(
             VAR_IR,  # type: ignore[arg-type]
             elem=elem,
@@ -386,7 +386,6 @@ class _GrpcPost26Mixin(_GrpcMixinBase):
             item=item,
             comp=comp,
             name=name,
-            sector=sector,
             **kwargs,
         )
         # Materialize the private result to preserve this method's ndarray API.

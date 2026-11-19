@@ -422,6 +422,20 @@ def test_download_from_remote_subdirectory(tmp_path):
     assert os.path.exists(tmp_path / "tmp_dir" / "file.rst")
 
 
+def test_download_from_remote_accepts_tuple(tmp_path):
+    """``download`` documents tuples; the remote path must accept them like lists."""
+    mapdl = MapdlGrpc.__new__(MapdlGrpc)
+    mapdl._local = False
+    mapdl.list_files = lambda: ["a.txt", "b.txt"]
+    downloaded = []
+    mapdl._download = lambda target, out_file_name, **_: downloaded.append(target)
+
+    result = mapdl._download_from_remote(("a.txt", "b.txt"), target_dir=str(tmp_path))
+
+    assert result == ["a.txt", "b.txt"]
+    assert downloaded == ["a.txt", "b.txt"]
+
+
 @pytest.mark.parametrize(
     "files_to_download,expected_output",
     [

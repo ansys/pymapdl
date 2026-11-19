@@ -49,14 +49,9 @@ from ansys.mapdl.core._mapdl_grpc.transport import (
 from ansys.mapdl.core.constants import DEFAULT_CHUNKSIZE
 from ansys.mapdl.core.errors import (
     MapdlExitedError,
-    MapdlRuntimeError,
     protect_grpc,
 )
-from ansys.mapdl.core.misc import (
-    last_created,
-    run_as,
-    supress_logging,
-)
+from ansys.mapdl.core.misc import run_as, supress_logging
 
 from . import _GrpcMixinBase
 
@@ -418,7 +413,7 @@ class _GrpcFileMixin(_GrpcMixinBase):
         if isinstance(files, str):
             list_files = self._validate_files(files, extension=extension)
 
-        elif isinstance(files, list):
+        elif isinstance(files, (list, tuple)):
             if not all([isinstance(each, str) for each in files]):
                 raise ValueError(
                     "The parameter `'files'` can be a list or tuple, but it should only contain strings."
@@ -579,9 +574,7 @@ class _GrpcFileMixin(_GrpcMixinBase):
             ("time_step_stream", "200"),
             ("chunk_size", str(chunk_size)),
         ]
-        if self._stub is None:
-            raise MapdlRuntimeError("MAPDL stub not initialized")
-        chunks = self._stub.DownloadFile(request, metadata=metadata)
+        chunks = self._connected_stub.DownloadFile(request, metadata=metadata)
         file_size = save_chunks_to_file(
             chunks,
             out_file_name,
@@ -623,9 +616,7 @@ class _GrpcFileMixin(_GrpcMixinBase):
         self._log.debug(f"Uploading file '{file_name}' to the MAPDL instance.")
 
         chunks_generator = get_file_chunks(file_name, progress_bar=progress_bar)
-        if self._stub is None:
-            raise MapdlRuntimeError("MAPDL stub not initialized")
-        response = self._stub.UploadFile(chunks_generator)
+        response = self._connected_stub.UploadFile(chunks_generator)
 
         if not response.length:
             raise IOError("File failed to upload")
@@ -637,16 +628,14 @@ class _GrpcFileMixin(_GrpcMixinBase):
         string without saving it to disk.
         """
         request = pb_types.DownloadFileRequest(name=target_name)
-        if self._stub is None:
-            raise MapdlRuntimeError("MAPDL stub not initialized")
-        chunks = self._stub.DownloadFile(request)
+        chunks = self._connected_stub.DownloadFile(request)
         return b"".join([chunk.payload for chunk in chunks])
 
     @protect_grpc
     def _upload_raw(self, raw, save_as):  # consider private
         """Upload a binary string as a file"""
         chunks = chunk_raw(raw, save_as)
-        response = self._stub.UploadFile(chunks)
+        response = self._connected_stub.UploadFile(chunks)
         if response.length != len(raw):
             raise IOError("Raw Bytes failed to upload")
 
@@ -722,35 +711,7 @@ class _GrpcFileMixin(_GrpcMixinBase):
 
     @property
     def _distributed_result_file(self):  # numpydoc ignore=RT01
-        """Path of the distributed result file."""
+        """Path of the distributed result file, or ``None`` when not distributed."""
         if not self._distributed:
             return
-
-        try:
-            filename = self.inquire("", "RSTFILE")
-            if not filename:
-                filename = self.jobname
-        except:
-            filename = self.jobname
-
-        # ansys decided that a jobname ended in a number needs a bonus "_"
-        if filename[-1].isnumeric():
-            filename += "_"
-
-        rth_basename = "%s0.%s" % (filename, "rth")
-        rst_basename = "%s0.%s" % (filename, "rst")
-
-        rth_file = self.directory / rth_basename
-        rst_file = self.directory / rst_basename
-
-        if self._prioritize_thermal:
-            if not os.path.isfile(rth_file):
-                raise FileNotFoundError("Thermal Result not available")
-            return rth_file
-
-        if os.path.isfile(rth_file) and os.path.isfile(rst_file):
-            return last_created([rth_file, rst_file])
-        elif os.path.isfile(rth_file):
-            return rth_file
-        elif os.path.isfile(rst_file):
-            return rst_file
+        return super()._distributed_result_file  # type: ignore[misc]  # Resolved through MapdlGrpc's MRO.
