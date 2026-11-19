@@ -295,6 +295,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
         with:
           ref: main
+          fetch-depth: 0
           persist-credentials: true # zizmor: ignore[artipacked]
 
       - name: Clone head repo and checkout branch. Resolve conflicts if needed.
@@ -382,7 +383,7 @@ jobs:
             const existingPrs = await github.rest.pulls.list({
               owner: 'ansys',
               repo: 'pymapdl',
-              base: `${prBaseBranch}`,
+              head: `ansys:${prBaseBranch}`,
               state: 'open',
             });
 
