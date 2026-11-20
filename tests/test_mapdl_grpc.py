@@ -22,6 +22,8 @@
 
 import gc
 import subprocess
+import sys
+import textwrap
 import threading
 from unittest.mock import MagicMock, Mock, patch
 import weakref
@@ -31,7 +33,11 @@ import grpc
 import pytest
 
 from ansys.mapdl.core.errors import MapdlExitedError
-from ansys.mapdl.core.mapdl_grpc import MapdlGrpc, MapdlRuntimeError
+from ansys.mapdl.core.mapdl_grpc import (
+    MapdlGrpc,
+    MapdlRuntimeError,
+    _close_grpc_channels_at_exit,
+)
 
 
 def _make_mock_mapdl():
@@ -760,6 +766,47 @@ class TestConnectivityCallbackDoesNotLeakInstance:
 
         assert dummy._channel_state == "READY"
         assert dummy._connectivity_callback is callback
+
+
+def test_interpreter_exits_when_open_channel_is_collected_at_shutdown():
+    """An instance with an open, subscribed channel must not hang Python exit (#4910).
+
+    ``__del__`` runs during interpreter finalization, when the gRPC
+    ``_poll_connectivity`` daemon thread can no longer run. Closing the
+    channel there waits for that thread forever.
+    """
+    script = textwrap.dedent("""
+        import gc, logging, threading, time
+        import grpc
+        from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+
+        mapdl = MapdlGrpc.__new__(MapdlGrpc)  # no MAPDL needed
+        mapdl._log = logging.getLogger("test-4910")
+        mapdl._current_call = None
+        mapdl._current_call_lock = threading.Lock()
+        mapdl._channel = grpc.insecure_channel("127.0.0.1:1")
+        mapdl._exited = True
+        mapdl._subscribe_to_channel()
+        time.sleep(1)  # let the poll thread start watching the channel
+        # Pending cyclic garbage: only the GC run during finalization frees it.
+        mapdl._self = mapdl
+        gc.disable()
+        del mapdl
+        """)
+    subprocess.run([sys.executable, "-c", script], timeout=60, check=True)  # nosec B603
+
+
+def test_atexit_hook_closes_every_instance_even_if_one_fails():
+    """One instance failing to close must not leave the others open at exit."""
+    failing = MagicMock(spec=MapdlGrpc)
+    failing._close_grpc_channel.side_effect = RuntimeError("channel already broken")
+    healthy = MagicMock(spec=MapdlGrpc)
+
+    with patch("ansys.mapdl.core.mapdl_grpc._SUBSCRIBED_INSTANCES", [failing, healthy]):
+        _close_grpc_channels_at_exit()
+
+    failing._close_grpc_channel.assert_called_once_with(exiting=True)
+    healthy._close_grpc_channel.assert_called_once_with(exiting=True)
 
 
 class TestConnectivityCancelsInFlightCall:

@@ -22,6 +22,7 @@
 
 """A gRPC specific class and methods for the MAPDL gRPC client"""
 
+import atexit
 from contextlib import contextmanager
 import fnmatch
 from functools import wraps
@@ -301,6 +302,29 @@ def save_chunks_to_file(
         pbar.close()
 
     return file_size
+
+
+# Instances that subscribed to a gRPC channel, closed at exit by
+# '_close_grpc_channels_at_exit'. Weak, so it never keeps an instance alive.
+_SUBSCRIBED_INSTANCES: "weakref.WeakSet[MapdlGrpc]" = weakref.WeakSet()
+
+
+@atexit.register
+def _close_grpc_channels_at_exit() -> None:
+    """Close the gRPC channel of every live instance before finalization.
+
+    Closing a subscribed channel waits for its ``_poll_connectivity`` daemon
+    thread, which can no longer run once interpreter finalization has started.
+    A channel closed or garbage-collected from :meth:`MapdlGrpc.__del__` at
+    that point hangs the interpreter forever (#4910). ``atexit`` callbacks run
+    before that, while daemon threads still run. Only the client side is
+    released: ``__del__`` still applies ``cleanup_on_exit`` to MAPDL later.
+    """
+    for mapdl in list(_SUBSCRIBED_INSTANCES):
+        try:
+            mapdl._close_grpc_channel(exiting=True)
+        except Exception:  # nosec B110 - best effort, keep closing the others
+            pass
 
 
 class MapdlGrpc(MapdlBase):
@@ -872,6 +896,7 @@ class MapdlGrpc(MapdlBase):
 
         # Subscribe to channel state changes
         self._channel.subscribe(connectivity_callback, try_to_connect=True)
+        _SUBSCRIBED_INSTANCES.add(self)
 
     def _track_call(self, call: grpc.Future) -> None:
         """Record ``call`` as the in-flight gRPC call.
