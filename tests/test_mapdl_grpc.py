@@ -33,7 +33,11 @@ import grpc
 import pytest
 
 from ansys.mapdl.core.errors import MapdlExitedError
-from ansys.mapdl.core.mapdl_grpc import MapdlGrpc, MapdlRuntimeError
+from ansys.mapdl.core.mapdl_grpc import (
+    MapdlGrpc,
+    MapdlRuntimeError,
+    _close_grpc_channels_at_exit,
+)
 
 
 def _make_mock_mapdl():
@@ -790,6 +794,19 @@ def test_interpreter_exits_when_open_channel_is_collected_at_shutdown():
         del mapdl
         """)
     subprocess.run([sys.executable, "-c", script], timeout=60, check=True)  # nosec B603
+
+
+def test_atexit_hook_closes_every_instance_even_if_one_fails():
+    """One instance failing to close must not leave the others open at exit."""
+    failing = MagicMock(spec=MapdlGrpc)
+    failing._close_grpc_channel.side_effect = RuntimeError("channel already broken")
+    healthy = MagicMock(spec=MapdlGrpc)
+
+    with patch("ansys.mapdl.core.mapdl_grpc._SUBSCRIBED_INSTANCES", [failing, healthy]):
+        _close_grpc_channels_at_exit()
+
+    failing._close_grpc_channel.assert_called_once_with(exiting=True)
+    healthy._close_grpc_channel.assert_called_once_with(exiting=True)
 
 
 class TestConnectivityCancelsInFlightCall:
