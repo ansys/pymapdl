@@ -789,7 +789,7 @@ def test_interpreter_exits_when_open_channel_is_collected_at_shutdown():
         gc.disable()
         del mapdl
         """)
-    subprocess.run([sys.executable, "-c", script], timeout=60, check=True)
+    subprocess.run([sys.executable, "-c", script], timeout=60, check=True)  # nosec B603
 
 
 class TestConnectivityCancelsInFlightCall:
