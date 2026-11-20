@@ -22,6 +22,7 @@
 
 """Small or misc tests that don't fit in other test modules"""
 
+from itertools import permutations
 import os
 import pathlib
 
@@ -141,6 +142,35 @@ def test_creation_time(tmpdir):
             fid.write("")
 
     assert last_created(files_) is not None
+
+
+@pytest.mark.parametrize(
+    "filenames", permutations(["old.rst", "middle.rst", "newest.rth"])
+)
+def test_last_created_selects_newest(filenames, monkeypatch):
+    creation_times = {"old.rst": 1.0, "middle.rst": 2.0, "newest.rth": 3.0}
+    monkeypatch.setattr(
+        "ansys.mapdl.core.misc.creation_time", creation_times.__getitem__
+    )
+    assert last_created(list(filenames)) == "newest.rth"
+
+
+@pytest.mark.parametrize(
+    "filenames, expected",
+    [
+        (["only.rst"], "only.rst"),
+        (["file.rth", "file.rst"], "file.rst"),
+        (["first.rst", "middle.rst", "last.rst"], "last.rst"),
+    ],
+)
+def test_last_created_equal_times(filenames, expected, monkeypatch):
+    monkeypatch.setattr("ansys.mapdl.core.misc.creation_time", lambda _: 1.0)
+    assert last_created(filenames) == expected
+
+
+def test_last_created_empty():
+    with pytest.raises(ValueError):
+        last_created([])
 
 
 def test_run_as_prep7(mapdl, cleared):
