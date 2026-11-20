@@ -95,7 +95,7 @@ doc = [
   "ansys-tools-visualization-interface==0.14.1",
   "grpcio==1.85.0",
   "imageio-ffmpeg==0.8.1",
-  "imageio==2.38.1",
+  "imageio==2.38.2",
   "jupyter==1.1.1",
   "jupyter_sphinx==0.5.3",
   "jupyterlab>=3.2.8",
