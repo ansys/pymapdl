@@ -1,0 +1,6 @@
+commands
+========
+
+.. currentmodule:: ansys.mapdl.core.plugin
+
+.. automethod:: ansPlugin.commands

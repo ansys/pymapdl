@@ -1,0 +1,6 @@
+﻿rpr4
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.primitives
+
+.. automethod:: Primitives.rpr4

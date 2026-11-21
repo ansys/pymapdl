@@ -1,0 +1,6 @@
+﻿vgen
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.volumes
+
+.. automethod:: Volumes.vgen

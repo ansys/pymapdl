@@ -1,0 +1,6 @@
+﻿check
+=====
+
+.. currentmodule:: ansys.mapdl.core.cli.check
+
+.. autofunction:: check

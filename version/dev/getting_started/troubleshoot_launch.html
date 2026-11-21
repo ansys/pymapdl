@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Launching issues &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/ansys-sphinx-theme.css?v=e717c1d8" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/ansys-sphinx-theme.css?v=e717c1d8" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a7c4d462" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../_static/documentation_options.js?v=5a96a97e"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
+            </script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'getting_started/troubleshoot_launch';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.23.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Connection, licensing, and runtime issues" href="troubleshoot_runtime.html" />
+    <link rel="prev" title="Issues before launching MAPDL" href="troubleshoot_before_launch.html" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.74.dev0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  <meta property="og:site_name" content="PyAnsys" />
+  <meta name="physics" content="Structures" />
+  <meta name="robots" content="noindex, follow" />
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <img src="../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="PyMAPDL - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../mapdl_commands/index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api/index.html">
+    API reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav>
+</div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i><span class="visually-hidden">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i><span class="visually-hidden">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+  
+
+  
+
+
+
+
+
+
+
+
+
+<div class="ast-announcement-wrap" role="region" aria-label="Announcement" hidden>
+    <div class="ast-announcement info">
+        <span class="ast-announcement-icon" aria-hidden="true"></span>
+        <span class="ast-announcement-text" id="ast-announcement-text"></span>
+        <!-- djlint:off H021-->
+        <!-- for inline styles -->
+        <a class="ast-announcement-details-btn" id="ast-announcement-details-btn"
+           href=""
+           data-ast-url=""
+           aria-label="View notifications"
+           style="display:none">View</a>
+        <!-- djlint:on -->
+        <!-- djlint:off H023-->
+        <!-- use entity reference for &times; -->
+        <button type="button" class="ast-announcement-close" id="ast-announcement-close" aria-label="Close announcement">&times;</button>
+        <!-- djlint:on -->
+    </div>
+</div>
+
+<!-- Modal overlay -->
+<!-- djlint:off H023-->
+<!-- use entity reference for &times; -->
+<div class="ast-announcement-overlay" id="ast-announcement-overlay" role="dialog" aria-modal="true" aria-label="Announcement details">
+    <div class="ast-announcement-modal info">
+        <div class="ast-announcement-modal-body"
+             data-ast-items='[]'>
+        </div>
+        <button type="button" class="ast-announcement-modal-close" id="ast-announcement-modal-close" aria-label="Close">&times;</button>
+    </div>
+</div>
+<!-- djlint:on -->
+
+<script src="../_static/js/announcement_banner.js"
+        data-base-url="../"></script>
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../index.html" title="PyMAPDL home">Home</a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../mapdl_commands/index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav>
+</div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+  
+</div></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i><span class="visually-hidden">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i><span class="visually-hidden">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Getting started">
+  <p class="bd-links__title" role="heading" aria-level="1">Getting started</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Basic</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/mapdl.html">PyMAPDL language and usage</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="troubleshoot.html">Troubleshooting PyMAPDL</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="troubleshoot_before_launch.html">Issues before launching MAPDL</a></li>
+<li class="toctree-l2 current active"><a aria-current="page" class="current reference internal" href="#">Launching issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshoot_runtime.html">Connection, licensing, and runtime issues</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/mesh_geometry.html">Mesh and geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/plotting.html">Interactive plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/parameters.html">Setting and retrieving parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/components.html">Managing components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/post.html">Postprocessing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Intermediate</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/cli.html">PyMAPDL command line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/convert.html">Translate scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/database.html">Access MAPDL database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/math.html">PyAnsys Math overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/pool.html">Create a pool of MAPDL instances</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Advanced</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/plugins.html">Plugin manager overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/xpl.html">File explorer overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/krylov.html">Harmonic analysis using the Krylov method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/tls.html">Securing connections with mTLS</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">High performance computing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hpc/introduction.html">Introduction to SLURM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hpc/settings.html">Setting PyMAPDL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hpc/pymapdl.html">PyMAPDL on HPC clusters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hpc/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hpc/troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="https://github.com/ansys/pymapdl/edit/main/doc/source/getting_started/troubleshoot_launch.rst" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="index.html" class="nav-link">Getting started</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="troubleshoot.html" class="nav-link">Troubleshooting PyMAPDL</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Launching issues</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+  
+
+  
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="launching-issues">
+<span id="ref-launching-issue"></span><h1>Launching issues<a class="headerlink" href="#launching-issues" title="Link to this heading">#</a></h1>
+<p>This page helps you find why MAPDL does not launch. If you do not know the
+cause, start with the debugging guide. For other problems, see
+<a class="reference internal" href="troubleshoot.html#ref-troubleshooting"><span class="std std-ref">Troubleshooting PyMAPDL</span></a>.</p>
+<section id="debug-launching-issues">
+<span id="ref-debug-launching-issues"></span><h2>Debug launching issues<a class="headerlink" href="#debug-launching-issues" title="Link to this heading">#</a></h2>
+<p>When MAPDL fails to launch, PyMAPDL usually raises a generic error such as
+<code class="docutils literal notranslate"><span class="pre">MapdlDidNotStart</span></code> or <code class="docutils literal notranslate"><span class="pre">LaunchError</span></code>. The cause is normally recorded in the
+PyMAPDL log and in the files that MAPDL writes to its working directory.
+To find it, follow these steps.</p>
+<section id="step-1-record-the-pymapdl-log">
+<h3>Step 1: Record the PyMAPDL log<a class="headerlink" href="#step-1-record-the-pymapdl-log" title="Link to this heading">#</a></h3>
+<p>Write the log at the <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code> level to a file <em>before</em> calling the
+<a class="reference internal" href="../api/_autosummary/ansys.mapdl.core.launcher.launch_mapdl.html#ansys.mapdl.core.launcher.launch_mapdl" title="ansys.mapdl.core.launcher.launch_mapdl"><code class="xref py py-func docutils literal notranslate"><span class="pre">launch_mapdl()</span></code></a> function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">LOG</span><span class="p">,</span> <span class="n">launch_mapdl</span>
+
+<span class="n">LOG</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="s2">"DEBUG"</span><span class="p">)</span>
+<span class="n">LOG</span><span class="o">.</span><span class="n">log_to_file</span><span class="p">(</span><span class="s2">"pymapdl_launch.log"</span><span class="p">)</span>
+
+<span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">(</span><span class="n">loglevel</span><span class="o">=</span><span class="s2">"DEBUG"</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The log contains the resolved configuration (executable file, version, port,
+and number of processors), the working directory, and the exact command used
+to start MAPDL.</p>
+</section>
+<section id="step-2-find-the-working-directory">
+<h3>Step 2: Find the working directory<a class="headerlink" href="#step-2-find-the-working-directory" title="Link to this heading">#</a></h3>
+<p>MAPDL writes its files, including the error and output files, to its working
+directory. By default, PyMAPDL creates a new temporary directory for each
+launch, named <code class="docutils literal notranslate"><span class="pre">ansys_</span></code> followed by a random string, and does not delete it
+on exit. You can find it in one of these ways:</p>
+<ul>
+<li><p><strong>Set it yourself.</strong> Use the <code class="docutils literal notranslate"><span class="pre">run_location</span></code> argument to launch MAPDL in a
+known directory:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">run_location</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s2">"mapdl_debug"</span><span class="p">)</span>
+<span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">(</span><span class="n">run_location</span><span class="o">=</span><span class="n">run_location</span><span class="p">,</span> <span class="n">loglevel</span><span class="o">=</span><span class="s2">"DEBUG"</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If a previous session ended abnormally, a <code class="docutils literal notranslate"><span class="pre">file.lock</span></code> file might block
+the new launch. Delete it, use a new directory, or pass <code class="docutils literal notranslate"><span class="pre">override=True</span></code>.</p>
+</li>
+<li><p><strong>Read it from the log.</strong> Search for the <code class="docutils literal notranslate"><span class="pre">Location:</span></code> entry.</p></li>
+<li><p><strong>Query it from a running session.</strong> Use the
+<a class="reference internal" href="../api/_autosummary/ansys.mapdl.core.Mapdl.directory.html#ansys.mapdl.core.Mapdl.directory" title="ansys.mapdl.core.Mapdl.directory"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Mapdl.directory</span></code></a> property.</p></li>
+<li><p><strong>Look in the system temporary directory.</strong> Find the most recently modified
+<code class="docutils literal notranslate"><span class="pre">ansys_*</span></code> directory.</p></li>
+</ul>
+</section>
+<section id="step-3-inspect-the-files-in-the-working-directory">
+<h3>Step 3: Inspect the files in the working directory<a class="headerlink" href="#step-3-inspect-the-files-in-the-working-directory" title="Link to this heading">#</a></h3>
+<p>Some files start with a dot (<code class="docutils literal notranslate"><span class="pre">.</span></code>), so they might be hidden. Use <code class="docutils literal notranslate"><span class="pre">ls</span> <span class="pre">-a</span></code> on
+Linux. The <code class="docutils literal notranslate"><span class="pre">file</span></code> prefix is the job name, which you can change with the
+<code class="docutils literal notranslate"><span class="pre">jobname</span></code> argument.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">.__tmp__.out</span></code> (Windows only): MAPDL console output. If the launch is
+successful, it contains the <code class="docutils literal notranslate"><span class="pre">START</span> <span class="pre">GRPC</span> <span class="pre">SERVER</span></code> banner described in
+<a class="reference internal" href="troubleshoot.html#ref-debug-pymapdl"><span class="std std-ref">Debug PyMAPDL</span></a>. Otherwise, it usually contains the reason for the
+failure, such as licensing or MPI errors.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.__tmp__.inp</span></code> (Windows only): Temporary input file that starts MAPDL in
+batch mode. It contains only the <code class="docutils literal notranslate"><span class="pre">FINISH</span></code> command.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">file.err</span></code> and <code class="docutils literal notranslate"><span class="pre">file0.err</span></code>: MAPDL error and warning messages. In
+distributed memory parallel (DMP) mode, each process writes its own file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">file.out</span></code> and <code class="docutils literal notranslate"><span class="pre">file0.out</span></code>: MAPDL output files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">file.lock</span></code>: Lock file that exists while MAPDL is running. If MAPDL is not
+running and the file is present, the previous session ended abnormally.</p></li>
+</ul>
+<p>Search these files for <code class="docutils literal notranslate"><span class="pre">***</span> <span class="pre">ERROR</span> <span class="pre">***</span></code> messages. If they contain
+<code class="docutils literal notranslate"><span class="pre">UDS</span> <span class="pre">socket</span> <span class="pre">file</span> <span class="pre">already</span> <span class="pre">exists</span></code>, see <a class="reference internal" href="#ref-uds-socket-file-exists"><span class="std std-ref">Error: UDS socket file already exists</span></a>.</p>
+<p>On Linux, PyMAPDL does not write the MAPDL console output to a file by
+default. To capture it, use the <code class="docutils literal notranslate"><span class="pre">mapdl_output</span></code> argument:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">(</span>
+    <span class="n">run_location</span><span class="o">=</span><span class="s2">"mapdl_debug"</span><span class="p">,</span>
+    <span class="n">mapdl_output</span><span class="o">=</span><span class="s2">"mapdl_console_output.txt"</span><span class="p">,</span>
+    <span class="n">loglevel</span><span class="o">=</span><span class="s2">"DEBUG"</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>If the working directory is empty, MAPDL probably failed before it started.
+Check the launch command in the next step.</p>
+</section>
+<section id="step-4-inspect-the-launch-command">
+<h3>Step 4: Inspect the launch command<a class="headerlink" href="#step-4-inspect-the-launch-command" title="Link to this heading">#</a></h3>
+<p>The log shows the exact command in the <code class="docutils literal notranslate"><span class="pre">Generated</span> <span class="pre">MAPDL</span> <span class="pre">command</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Command:</span></code> entries. Check that:</p>
+<ul class="simple">
+<li><p>The executable path exists and points to the expected MAPDL version. If it
+does not, see <a class="reference internal" href="troubleshoot_before_launch.html#ref-updating-mapdl-installation"><span class="std std-ref">Updating MAPDL installation</span></a>.</p></li>
+<li><p>The number of processors (<code class="docutils literal notranslate"><span class="pre">-np</span></code>), memory (<code class="docutils literal notranslate"><span class="pre">-m</span></code>), and license type
+(<code class="docutils literal notranslate"><span class="pre">-p</span></code>) are correct.</p></li>
+<li><p>The port (<code class="docutils literal notranslate"><span class="pre">-port</span></code>) is not used by another process.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">additional_switches</span></code> argument and the
+<span class="target" id="index-0"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PYMAPDL_ADDITIONAL_SWITCHES</span></code> environment variable do not conflict.</p></li>
+</ul>
+<p>To reproduce the issue outside PyMAPDL, run the command from the working
+directory. The log shows the arguments joined by spaces, without shell
+quoting, so you must quote paths that contain spaces:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="oskey" for="sd-tab-item-0">
+Windows</label><div class="sd-tab-content docutils">
+<p>In PowerShell, quote the path and use the call operator (<code class="docutils literal notranslate"><span class="pre">&amp;</span></code>):</p>
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="gp">PS C:\Users\user\AppData\Local\Temp\ansys_ymjqvmeyww&gt; </span><span class="p">&amp;</span> <span class="s2">"C:\Program Files\ANSYS Inc\v242\ansys\bin\winx64\ansys242.exe"</span> <span class="n">-j</span> <span class="n">file</span> <span class="n">-np</span> <span class="n">2</span> <span class="n">-port</span> <span class="n">50052</span> <span class="n">-grpc</span> <span class="n">-b</span> <span class="n">-i</span> <span class="p">.</span><span class="n">__tmp__</span><span class="p">.</span><span class="n">inp</span> <span class="n">-o</span> <span class="p">.</span><span class="n">__tmp__</span><span class="p">.</span><span class="n">out</span>
+</pre></div>
+</div>
+<p>In <code class="docutils literal notranslate"><span class="pre">cmd.exe</span></code>, quote the path only. The <code class="docutils literal notranslate"><span class="pre">-i</span> <span class="pre">.__tmp__.inp</span></code> argument
+requires that file in the working directory. If it does not exist,
+create it with a single <code class="docutils literal notranslate"><span class="pre">FINISH</span></code> line.</p>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="oskey" for="sd-tab-item-1">
+Linux</label><div class="sd-tab-content docutils">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:/tmp/ansys_ymjqvmeyww$ </span>/usr/ansys_inc/v242/ansys/bin/ansys242<span class="w"> </span>-j<span class="w"> </span>file<span class="w"> </span>-np<span class="w"> </span><span class="m">2</span><span class="w"> </span>-port<span class="w"> </span><span class="m">50052</span><span class="w"> </span>-grpc
+</pre></div>
+</div>
+</div>
+</div>
+<p>For more information, see <a class="reference internal" href="#ref-testing-mapdl-launching"><span class="std std-ref">Testing MAPDL launching</span></a>.</p>
+</section>
+<section id="step-5-inspect-the-environment-variables">
+<h3>Step 5: Inspect the environment variables<a class="headerlink" href="#step-5-inspect-the-environment-variables" title="Link to this heading">#</a></h3>
+<p>PyMAPDL does not log the environment variables because they might contain
+sensitive information. Depending on the arguments of the
+<a class="reference internal" href="../api/_autosummary/ansys.mapdl.core.launcher.launch_mapdl.html#ansys.mapdl.core.launcher.launch_mapdl" title="ansys.mapdl.core.launcher.launch_mapdl"><code class="xref py py-func docutils literal notranslate"><span class="pre">launch_mapdl()</span></code></a> function,
+PyMAPDL builds the MAPDL environment in one of these ways:</p>
+<ul class="simple">
+<li><p><strong>Default, or with the</strong> <code class="docutils literal notranslate"><span class="pre">add_env_vars</span></code> <strong>argument:</strong> MAPDL inherits the
+environment of the Python process. PyMAPDL then applies these changes in
+order, so later changes override earlier ones:</p>
+<ol class="arabic simple">
+<li><p>On Ubuntu, sets <code class="docutils literal notranslate"><span class="pre">I_MPI_SHM_LMT</span></code> to <code class="docutils literal notranslate"><span class="pre">shm</span></code>.</p></li>
+<li><p>Sets <code class="docutils literal notranslate"><span class="pre">ANS_CMD_NODIAG</span></code> to <code class="docutils literal notranslate"><span class="pre">TRUE</span></code>.</p></li>
+<li><p>Adds the variables in <code class="docutils literal notranslate"><span class="pre">add_env_vars</span></code>, overriding any variable with the
+same name, including the two preceding ones.</p></li>
+<li><p>With the <code class="docutils literal notranslate"><span class="pre">mtls</span></code> transport mode, sets <code class="docutils literal notranslate"><span class="pre">ANSYS_GRPC_CERTIFICATES</span></code> to the
+<code class="docutils literal notranslate"><span class="pre">certs_dir</span></code> argument. Without it, PyMAPDL keeps the existing value or
+defaults to the <code class="docutils literal notranslate"><span class="pre">certs</span></code> directory in the current directory.</p></li>
+</ol>
+</li>
+<li><p><strong>With the</strong> <code class="docutils literal notranslate"><span class="pre">replace_env_vars</span></code> <strong>argument:</strong> MAPDL receives <em>only</em> the
+variables in this argument. PyMAPDL does not set any of the preceding
+variables, so you must provide everything MAPDL needs, such as <code class="docutils literal notranslate"><span class="pre">PATH</span></code> and
+the license server variables.</p></li>
+</ul>
+<p>To print the environment, working directory, and command without starting
+MAPDL, run the following code with the same arguments you pass to the
+<a class="reference internal" href="../api/_autosummary/ansys.mapdl.core.launcher.launch_mapdl.html#ansys.mapdl.core.launcher.launch_mapdl" title="ansys.mapdl.core.launcher.launch_mapdl"><code class="xref py py-func docutils literal notranslate"><span class="pre">launch_mapdl()</span></code></a> function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core.launcher.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_launch_config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core.launcher.environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare_environment</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core.launcher.process</span><span class="w"> </span><span class="kn">import</span> <span class="n">_generate_launch_command</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">resolve_launch_config</span><span class="p">(</span><span class="n">nproc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">run_location</span><span class="o">=</span><span class="s2">"mapdl_debug"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Working directory:"</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">run_location</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Command:"</span><span class="p">,</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_generate_launch_command</span><span class="p">(</span><span class="n">config</span><span class="p">)))</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">prepare_environment</span><span class="p">(</span><span class="n">config</span><span class="p">)</span><span class="o">.</span><span class="n">variables</span>
+<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+    <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">"ANS"</span><span class="p">,</span> <span class="s2">"AWP"</span><span class="p">,</span> <span class="s2">"PYMAPDL"</span><span class="p">,</span> <span class="s2">"I_MPI"</span><span class="p">)):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>These functions are internal to PyMAPDL and might change without notice.
+Use them only for debugging.</p>
+</div>
+<p>Check, in particular, <code class="docutils literal notranslate"><span class="pre">ANSYSLMD_LICENSE_FILE</span></code> and <code class="docutils literal notranslate"><span class="pre">ANSYSLI_SERVERS</span></code>
+(see <a class="reference internal" href="troubleshoot_runtime.html#ref-licensing-issues"><span class="std std-ref">Licensing issues</span></a>), <code class="docutils literal notranslate"><span class="pre">AWP_ROOT&lt;version&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">ANSYS_LOCK</span></code>,
+the <code class="docutils literal notranslate"><span class="pre">PYMAPDL_*</span></code> variables, and the <code class="docutils literal notranslate"><span class="pre">I_MPI_*</span></code> variables
+(see <a class="reference internal" href="troubleshoot_runtime.html#ref-mpi-issues"><span class="std std-ref">Message Passing Interface (MPI) issues</span></a>). For more information, see
+<a class="reference internal" href="#ref-incorrect-env-vars"><span class="std std-ref">Incorrect environment variables</span></a>.</p>
+</section>
+<section id="step-6-share-the-information">
+<h3>Step 6: Share the information<a class="headerlink" href="#step-6-share-the-information" title="Link to this heading">#</a></h3>
+<p>If you still cannot identify the issue, open a discussion on the
+<a class="reference external" href="https://github.com/ansys/PyMAPDL/discussions">PyMAPDL Discussions</a> page or an issue on the
+<a class="reference external" href="https://github.com/ansys/pymapdl/issues">PyMAPDL Issues</a> page. Attach the PyMAPDL log and the
+<code class="docutils literal notranslate"><span class="pre">.__tmp__.out</span></code>, <code class="docutils literal notranslate"><span class="pre">file*.err</span></code>, and <code class="docutils literal notranslate"><span class="pre">file*.out</span></code> files.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Before sharing these files, remove any sensitive information, such as
+license server addresses, usernames, and paths.</p>
+</div>
+</section>
+</section>
+<section id="common-launching-issues">
+<h2>Common launching issues<a class="headerlink" href="#common-launching-issues" title="Link to this heading">#</a></h2>
+<section id="error-uds-socket-file-already-exists">
+<span id="ref-uds-socket-file-exists"></span><h3>Error: UDS socket file already exists<a class="headerlink" href="#error-uds-socket-file-already-exists" title="Link to this heading">#</a></h3>
+<p>On Linux, MAPDL can use a Unix Domain Socket (UDS) file instead of a TCP
+port to communicate with PyMAPDL. MAPDL creates this file in the UDS directory
+and names it <code class="docutils literal notranslate"><span class="pre">mapdl-&lt;PORT&gt;.sock</span></code>, where <code class="docutils literal notranslate"><span class="pre">&lt;PORT&gt;</span></code> is the port number. The
+default UDS directory is <code class="docutils literal notranslate"><span class="pre">~/.conn</span></code>. To change the UDS directory, use the
+<code class="docutils literal notranslate"><span class="pre">uds_dir</span></code> argument of the
+<a class="reference internal" href="../api/_autosummary/ansys.mapdl.core.launcher.launch_mapdl.html#ansys.mapdl.core.launcher.launch_mapdl" title="ansys.mapdl.core.launcher.launch_mapdl"><code class="xref py py-func docutils literal notranslate"><span class="pre">launch_mapdl()</span></code></a> function or the
+<span class="target" id="index-1"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">ANSYS_MAPDL_UDS_PATH</span></code> environment variable.</p>
+<p>If MAPDL does not launch and its output files (<code class="docutils literal notranslate"><span class="pre">.__tmp__.out</span></code>, <code class="docutils literal notranslate"><span class="pre">file*.out</span></code>,
+or the file set with the <code class="docutils literal notranslate"><span class="pre">mapdl_output</span></code> argument) contain an error like
+this one:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>*** ERROR ***                           ELAPSED TIME =       8.394   TIME= 11:01:03
+UDS socket file already exists at /home/user/.conn/mapdl-50052.sock.
+   Another server may already be running on this socket.  Please try
+again to start the server with a different file name by changing the
+port option.
+</pre></div>
+</div>
+<p>The socket file for that port already exists in the UDS directory. This
+happens when either of these conditions is true:</p>
+<ul class="simple">
+<li><p>Another MAPDL instance is running and using that socket file.</p></li>
+<li><p>A previous MAPDL instance crashed or was terminated abnormally and left the
+socket file behind.</p></li>
+</ul>
+<p>To check whether a process is using the socket file, run this command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>lsof<span class="w"> </span>~/.conn/mapdl-50052.sock
+</pre></div>
+</div>
+<p>If the command does not print anything, no process is using the file.</p>
+<p>To solve the issue, use one of these approaches:</p>
+<ul>
+<li><p><strong>Delete the socket file.</strong> Do this only if you are certain that no MAPDL
+instance is running or using that file:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>rm<span class="w"> </span>~/.conn/mapdl-50052.sock
+</pre></div>
+</div>
+</li>
+<li><p><strong>Use a different port.</strong> Because the socket filename includes the port
+number, MAPDL creates a new socket file, <code class="docutils literal notranslate"><span class="pre">mapdl-&lt;PORT&gt;.sock</span></code>, that does not
+conflict with the existing one:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">launch_mapdl</span>
+
+<span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="mi">50053</span><span class="p">)</span>  <span class="c1"># Uses ``~/.conn/mapdl-50053.sock``</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="connection-timeout">
+<h3>Connection timeout<a class="headerlink" href="#connection-timeout" title="Link to this heading">#</a></h3>
+<p>In some networks, MAPDL might take longer than expected to connect to the license server or to the remote instance.
+In those cases, you might see this message:</p>
+<div class="highlight-output notranslate"><div class="highlight"><pre><span></span><span class="go">PyMAPDL is taking longer than expected to connect to an MAPDL session. Checking if there are any available licenses...</span>
+</pre></div>
+</div>
+<p>To increase the starting timeout, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">launch_mapdl</span>
+
+<span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">(</span><span class="n">start_timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you are connecting to a remote instance, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapdl</span>
+
+<span class="n">mapdl</span> <span class="o">=</span> <span class="n">Mapdl</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="testing-mapdl-launching">
+<span id="ref-testing-mapdl-launching"></span><h3>Testing MAPDL launching<a class="headerlink" href="#testing-mapdl-launching" title="Link to this heading">#</a></h3>
+<p>In some cases, it may be necessary to run the launch command manually from the command line.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="oskey" for="sd-tab-item-2">
+Windows</label><div class="sd-tab-content docutils">
+<p>Open a command prompt and run the version-dependent command:</p>
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">PS C:\Users\user\pymapdl&gt; </span><span class="p">&amp;</span> <span class="s2">"C:\Program Files\ANSYS Inc\v241\ansys\bin\winx64\ANSYS241.exe"</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In PowerShell, use the call operator (<code class="docutils literal notranslate"><span class="pre">&amp;</span></code>) to run a quoted
+executable path. Keep the path in quotes when it contains spaces.</p>
+</div>
+</div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="oskey" for="sd-tab-item-3">
+Linux</label><div class="sd-tab-content docutils">
+<p>Run the version-dependent command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">user@machine:~$ </span>/usr/ansys_inc/v241/ansys/bin/ansys241
+</pre></div>
+</div>
+</div>
+</div>
+<p>You should start MAPDL in a temporary working directory because MAPDL creates
+several temporary files.</p>
+<p>You can specify a directory by launching MAPDL from the temporary directory:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="oskey" for="sd-tab-item-4">
+Windows</label><div class="sd-tab-content docutils">
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">PS C:\Users\user\pymapdl&gt; </span><span class="n">mkdir</span> <span class="n">temporary_directory</span>
+<span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">PS C:\Users\user\pymapdl&gt; </span><span class="nb">cd </span><span class="n">temporary_directory</span>
+<span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">PS C:\Users\user\pymapdl&gt; </span><span class="p">&amp;</span> <span class="s1">'C:\Program Files\ANSYS Inc\v241\ansys\bin\winx64\ANSYS241.exe'</span>
+</pre></div>
+</div>
+<p>Or, you can specify the directory using the <code class="docutils literal notranslate"><span class="pre">-dir</span></code> flag:</p>
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">PS C:\Users\user\pymapdl&gt; </span><span class="n">mkdir</span> <span class="n">temporary_directory</span>
+<span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">PS C:\Users\user\pymapdl&gt; </span><span class="p">&amp;</span> <span class="s1">'C:\Program Files\ANSYS Inc\v241\ansys\bin\winx64\ANSYS241.exe'</span> <span class="n">-dir</span> <span class="s2">"C:\ansys_job\mytest1"</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="oskey" for="sd-tab-item-5">
+Linux</label><div class="sd-tab-content docutils">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">user@machine:~$ </span>mkdir<span class="w"> </span>temporary_directory
+<span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">user@machine:~$ </span><span class="nb">cd</span><span class="w"> </span>temporary_directory
+<span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">user@machine: temporary_directory $ </span>/usr/ansys_inc/v241/ansys/bin/ansys241
+</pre></div>
+</div>
+<p>Or, you can specify the directory using the <code class="docutils literal notranslate"><span class="pre">-dir</span></code> flag:</p>
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">PS C:\Users\user\pymapdl&gt; </span><span class="n">mkdir</span> <span class="p">/</span><span class="n">tmp</span><span class="p">/</span><span class="n">ansys_tmp</span><span class="p">/</span><span class="n">job1</span>
+<span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">PS C:\Users\user\pymapdl&gt; </span><span class="p">/</span><span class="n">usr</span><span class="p">/</span><span class="n">ansys_inc</span><span class="p">/</span><span class="n">v241</span><span class="p">/</span><span class="n">ansys</span><span class="p">/</span><span class="n">bin</span><span class="p">/</span><span class="n">ansys241</span> <span class="n">-dir</span> <span class="p">/</span><span class="n">tmp</span><span class="p">/</span><span class="n">ansys_tmp</span><span class="p">/</span><span class="n">job1</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>If this command doesn’t launch MAPDL, look at the command output:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="oskey" for="sd-tab-item-6">
+Windows</label><div class="sd-tab-content docutils">
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">PS C:\Users\user\pymapdl&gt; </span><span class="p">&amp;</span> <span class="s1">'C:\Program Files\ANSYS Inc\v241\ansys\bin\winx64\ANSYS241.exe'</span>
+<span class="go">*** ERROR ***</span>
+<span class="go">Another Ansys job with the same job name (file) is already running in this</span>
+<span class="go">directory or the file.lock file has not been deleted from an abnormally</span>
+<span class="go">terminated Ansys run. To disable this check, set the ANSYS_LOCK environment</span>
+<span class="go">variable to OFF.</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="oskey" for="sd-tab-item-7">
+Linux</label><div class="sd-tab-content docutils">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">user@machine:~$ </span>/usr/ansys_inc/v241/ansys/bin/ansys241
+<span class="go">*** ERROR ***</span>
+<span class="go">Another Ansys job with the same job name (file) is already running in this</span>
+<span class="go">directory or the file.lock file has not been deleted from an abnormally</span>
+<span class="go">terminated Ansys run. To disable this check, set the ANSYS_LOCK environment</span>
+<span class="go">variable to OFF.</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="incorrect-environment-variables">
+<span id="ref-incorrect-env-vars"></span><h3>Incorrect environment variables<a class="headerlink" href="#incorrect-environment-variables" title="Link to this heading">#</a></h3>
+<p>If you are using a non-standard install, you might need to manually set the
+environment variables <code class="docutils literal notranslate"><span class="pre">ANSYSXXX_DIR</span></code>, <code class="docutils literal notranslate"><span class="pre">AWP_ROOTXXX</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">CADOE_LIBDIRXXX</span></code> to the correct location.
+The three-digit MAPDL version appears where <code class="docutils literal notranslate"><span class="pre">XXX</span></code> is
+shown. For Ansys MAPDL 2024 R2, <code class="docutils literal notranslate"><span class="pre">242</span></code> appears where <code class="docutils literal notranslate"><span class="pre">XXX</span></code> is shown.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="envvarskey" for="sd-tab-item-8">
+AWP_ROOT242</label><div class="sd-tab-content docutils">
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="go">PS echo $env:AWP_ROOT242</span>
+<span class="go">C:\Program Files\ANSYS Inc\ANSYS Student\v242</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-9" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="envvarskey" for="sd-tab-item-9">
+ANSYS242_DIR</label><div class="sd-tab-content docutils">
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="go">PS echo $env:ANSYS242_DIR</span>
+<span class="go">C:\Program Files\ANSYS Inc\ANSYS Student\v242\ANSYS</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-10" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="envvarskey" for="sd-tab-item-10">
+CADOE_LIBDIR242</label><div class="sd-tab-content docutils">
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="go">PS echo $env:CADOE_LIBDIR242</span>
+<span class="go">C:\Program Files\ANSYS Inc\ANSYS Student\v242\CommonFiles\Language\en-us</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Set these environment variables to custom values for the terminal session:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-11" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="envvarskey" for="sd-tab-item-11">
+AWP_ROOT242</label><div class="sd-tab-content docutils">
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="go">PS $env:AWP_ROOT242 = "C:\Program Files\ANSYS Inc\v242"</span>
+<span class="go">PS echo $env:AWP_ROOT242</span>
+<span class="go">C:\Program Files\ANSYS Inc\v242</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-12" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="envvarskey" for="sd-tab-item-12">
+ANSYS242_DIR</label><div class="sd-tab-content docutils">
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="go">PS $env:ANSYS242_DIR = "C:\Program Files\ANSYS Inc\v242\ANSYS"</span>
+<span class="go">PS echo $env:ANSYS242_DIR</span>
+<span class="go">C:\Program Files\ANSYS Inc\v242\ANSYS</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-13" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="envvarskey" for="sd-tab-item-13">
+CADOE_LIBDIR242</label><div class="sd-tab-content docutils">
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="go">PS $env:CADOE_LIBDIR242 = "C:\Program Files\ANSYS Inc\v242\CommonFiles\Language\en-us"</span>
+<span class="go">PS echo $env:CADOE_LIBDIR242</span>
+<span class="go">C:\Program Files\ANSYS Inc\v242\CommonFiles\Language\en-us</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>To make these changes permanent:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-14" name="sd-tab-set-6" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="envvarskey" for="sd-tab-item-14">
+AWP_ROOT242</label><div class="sd-tab-content docutils">
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="go">PS [System.Environment]::SetEnvironmentVariable('AWP_ROOT242','C:\Program Files\ANSYS Inc\v242',[System.EnvironmentVariableTarget]::User)</span>
+<span class="go">PS echo $env:AWP_ROOT242</span>
+<span class="go">C:\Program Files\ANSYS Inc\v242</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-15" name="sd-tab-set-6" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="envvarskey" for="sd-tab-item-15">
+ANSYS242_DIR</label><div class="sd-tab-content docutils">
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="go">PS [System.Environment]::SetEnvironmentVariable('ANSYS242_DIR','C:\Program Files\ANSYS Inc\v242\ANSYS',[System.EnvironmentVariableTarget]::User)</span>
+<span class="go">PS echo $env:ANSYS242_DIR</span>
+<span class="go">C:\Program Files\ANSYS Inc\v242\ANSYS</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-16" name="sd-tab-set-6" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="envvarskey" for="sd-tab-item-16">
+CADOE_LIBDIR242</label><div class="sd-tab-content docutils">
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="go">PS [System.Environment]::SetEnvironmentVariable('CADOE_LIBDIR242','C:\Program Files\ANSYS Inc\v242\CommonFiles\Language\en-us',[System.EnvironmentVariableTarget]::User)</span>
+<span class="go">PS echo $env:CADOE_LIBDIR242</span>
+<span class="go">C:\Program Files\ANSYS Inc\v242\CommonFiles\Language\en-us</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#debug-launching-issues">Debug launching issues</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-record-the-pymapdl-log">Step 1: Record the PyMAPDL log</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-find-the-working-directory">Step 2: Find the working directory</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-inspect-the-files-in-the-working-directory">Step 3: Inspect the files in the working directory</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-inspect-the-launch-command">Step 4: Inspect the launch command</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-inspect-the-environment-variables">Step 5: Inspect the environment variables</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-6-share-the-information">Step 6: Share the information</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-launching-issues">Common launching issues</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#error-uds-socket-file-already-exists">Error: UDS socket file already exists</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#connection-timeout">Connection timeout</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-mapdl-launching">Testing MAPDL launching</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#incorrect-environment-variables">Incorrect environment variables</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+
+  
+  <nav class="tocsection editthispage" aria-label="Edit this page">
+    <a href="https://github.com/ansys/pymapdl/edit/main/doc/source/getting_started/troubleshoot_launch.rst" rel="noopener noreferrer">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </nav>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"includeMatches": true, "includeScore": true, "keys": [{"name": "section", "weight": 3}, {"name": "title", "weight": 3}, {"name": "text", "weight": 1}, {"name": "objectID", "weight": 0.5}], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../_static/search.json";
+const ADVANCE_SEARCH_PATH = "../search.html";
+const EXTRA_SOURCES = JSON.parse('""');
+</script>
+
+
+<script src="../_static/js/search.js"></script>
+
+  
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.74.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.12.1. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.1.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>

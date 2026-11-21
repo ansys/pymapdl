@@ -1,0 +1,6 @@
+aux\_capabilities
+=================
+
+.. currentmodule:: ansys.mapdl.core.information
+
+.. autoproperty:: Information.aux_capabilities

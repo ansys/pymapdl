@@ -1,0 +1,6 @@
+﻿tbplot
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.data_tables
+
+.. automethod:: DataTables.tbplot

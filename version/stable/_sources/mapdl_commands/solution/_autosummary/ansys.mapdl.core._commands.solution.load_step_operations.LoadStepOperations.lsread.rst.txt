@@ -1,0 +1,6 @@
+﻿lsread
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.load_step_operations
+
+.. automethod:: LoadStepOperations.lsread

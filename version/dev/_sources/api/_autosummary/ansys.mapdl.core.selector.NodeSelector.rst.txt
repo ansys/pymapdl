@@ -1,0 +1,25 @@
+﻿NodeSelector
+============
+
+.. currentmodule:: ansys.mapdl.core.selector
+
+.. autoclass:: NodeSelector
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      
+      
+      NodeSelector.select
+      
+   
+   
+
+   
+   
+   

@@ -1,0 +1,6 @@
+﻿sph5
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.primitives
+
+.. automethod:: Primitives.sph5

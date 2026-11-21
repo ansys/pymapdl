@@ -1,0 +1,6 @@
+﻿sumtype
+=======
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.results
+
+.. automethod:: Results.sumtype

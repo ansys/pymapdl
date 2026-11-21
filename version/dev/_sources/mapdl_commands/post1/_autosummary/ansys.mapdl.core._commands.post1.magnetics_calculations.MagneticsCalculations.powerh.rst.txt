@@ -1,0 +1,6 @@
+﻿powerh
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.magnetics_calculations
+
+.. automethod:: MagneticsCalculations.powerh

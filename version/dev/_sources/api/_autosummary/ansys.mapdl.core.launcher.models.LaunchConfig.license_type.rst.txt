@@ -1,0 +1,6 @@
+license\_type
+=============
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.license_type
