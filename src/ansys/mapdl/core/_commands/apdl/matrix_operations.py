@@ -1168,6 +1168,63 @@ class MatrixOperations(CommandsBase):
         command = f"*ITENGINE,{type_},{enginename},{precondname},{matrix},{rhsvector},{solvector},{maxiter},{toler}"
         return self.run(command, **kwargs)
 
+    def kron(self, m1: str = "", m2: str = "", m3: str = "", **kwargs):
+        r"""Computes the Kronecker product of two matrices/vectors, (see command documentation
+        for equation).
+
+        Mechanical APDL Command: `\*KRON <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_KRON.html>`_
+
+        Parameters
+        ----------
+        m1 : str
+            Name of matrix (or vector) ``M1``. Must have been previously
+            specified (`\*DMAT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DMAT.html>`_,
+            `\*SMAT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SMAT.html>`_,
+            `\*VEC
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VEC.html>`_,
+            etc.)
+
+        m2 : str
+            Name of matrix (or vector) ``M2``. Must have been previously
+            specified (`\*DMAT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DMAT.html>`_,
+            `\*SMAT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SMAT.html>`_,
+            `\*VEC
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VEC.html>`_,
+            etc.)
+
+        m3 : str
+            Name (up to 32 characters) of resulting matrix (or vector)
+            ``M3``. Must be specified (no default).
+
+        Notes
+        -----
+
+        .. _a-KRON_notes:
+
+        Details of the operation are demonstrated in the example below:
+
+        (see command documentation for equation)
+
+        Input matrices (or vectors) can be any of the supported types: integer,
+        double precision real, or complex double precision.
+
+        Input matrices can be sparse or dense, and their dimensions do not have
+        to be the same.
+
+        Output matrices are always dense, regardless of the input matrices type.
+
+        Since the `\*KRON
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_KRON.html>`_\
+        command is manipulating dense matrices, it should only be used on small
+        or medium-size matrices for performances reasons.
+        """
+        command = f"*KRON,{m1},{m2},{m3}"
+        return self.run(command, **kwargs)
+
     def lsbac(
         self,
         enginename: str = "",
@@ -2216,6 +2273,138 @@ class MatrixOperations(CommandsBase):
         command = f"*SORT,{name},{sorttype},{val1},{val2}"
         return self.run(command, **kwargs)
 
+    def starxpl(self, action: str = "", val1: str = "", val2: str = "", **kwargs):
+        r"""Accesses content of a Mechanical APDL file.
+
+        Mechanical APDL Command: `\*XPL <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_XPL.html>`_
+
+        Parameters
+        ----------
+        action : str
+            Specifies the action for scanning file content (no default).
+            Valid labels are:
+
+            * ``OPEN`` - Open the specified file.
+
+            * ``CLOSE`` - Close the specified file.
+
+            * ``LIST`` - List the records at the current level in the
+              hierarchy of records.
+
+            * ``WHERE`` - Display the current location in the tree.
+
+            * ``STEP`` - Step down in the tree of records.
+
+            * ``UP`` - Go up in the tree of records.
+
+            * ``READ`` - Read a record into an APDL Math object.
+
+            * ``INFO`` - Display information from a record.
+
+            * ``GOTO`` - Move directly to a given place in the tree of
+              records (this avoids multiple calls to the STEP and UP
+              options).
+
+            * ``MARK`` - Mark a set of records of the current file; the
+              asterisk (\*) character can be used to specify multiple
+              branches/records.
+
+            * ``COPY`` - Copy the current file to a new one, ignoring the
+              marked records.
+
+            * ``SAVE`` - Save the current file, ignoring the marked records.
+
+        val1 : str
+            Additional input. The meanings of ``Val1``\ and ``Val2``\ vary
+            depending on the specified ``Action``, as described in the table
+            below.
+
+        val2 : str
+            Additional input. The meanings of ``Val1``\ and ``Val2``\ vary
+            depending on the specified ``Action``, as described in the table
+            below.
+
+        Notes
+        -----
+
+        .. _a-XPL_notes:
+
+        .. list-table::
+           :header-rows: 1
+
+           * - ``Action``\ Label
+             - ``Val1``\
+             - ``Val2``\
+           * - OPEN
+             - Name of file:sup:`[a]`\ to open (no default)
+             - (not used)
+           * - CLOSE
+             - Name of file:sup:`[a]`\ to close (default is last file
+               opened by ``Action``\ = OPEN)
+             - (not used)
+           * - LIST
+             - Number of levels in the tree of records (default = 1)
+             - (not used)
+           * - UP
+             - Number of levels in the tree of records (default = 1), or
+               TOP to go directly to the top of the tree
+             - (not used)
+           * - STEP
+             - Name of the record of interest (no default)
+             - (not used)
+           * - INFO
+             - Name of the record of interest (no default), or \* for all
+               records
+             - (not used)
+           * - READ
+             - Name of the record of interest (no default)
+             - Name of the APDL Math object to create (no default)
+           * - GOTO
+             - The complete PATH to the new location Example:
+               \*XPL,GOTO,RST::DSI::SET1
+             - (not used)
+           * - MARK
+             - The complete path to the record(s); use (\*) character to
+               select multiple records (see example in next section)
+             - (not used)
+           * - COPY
+             - Name of the new file:sup:`[a]`\
+             - If blank (default), marked records are not copied to the
+               new file. Valid inputs are:COMP - records are compressed
+               using sparsificationUNCOMP - records are uncompressed
+           * - COMP - records are compressed using sparsification
+             - -
+             - -
+           * - UNCOMP - records are uncompressed
+             - -
+             - -
+
+        The ``*XPL``\ command enables you to explore the contents of a
+        Mechanical APDL file. Use this command to traverse up and down the tree
+        structure of the specified file and review what is in the file. Files
+        that can be scanned include ``.rst``, ``.mode``, ``.full``, ``.cms``,
+        and ``.sub``\ files. For more information and examples, see `Using APDL
+        to List File Structure and Content in the Ansys Parametric Design
+        Language Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/apdlxpl.html>`_.
+
+        The command ``*XPL``,READ generates either a `\*VEC
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VEC.html>`_\
+        or a `\*DMAT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DMAT.html>`_\
+        object according to the record type. You do not have to create the APDL
+        Math object before issuing this command.
+
+        This command is valid in any processor.
+
+        .. seealso::
+
+           For the high-level Pythonic file explorer interface on gRPC sessions,
+           use :attr:`Mapdl.xpl <ansys.mapdl.core.Mapdl.xpl>`.
+        """
+        command = f"*XPL,{action},{val1},{val2}"
+        return self.run(command, **kwargs)
+
     def vec(
         self,
         vector: str = "",
@@ -2225,11 +2414,12 @@ class MatrixOperations(CommandsBase):
         val2: str = "",
         val3: str = "",
         val4: str = "",
+        val5: str = "",
         **kwargs,
     ):
         r"""Creates a vector.
 
-        Mechanical APDL Command: `\*VEC <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VEC.html>`_
+        Mechanical APDL Command: `\*VEC <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VEC.html>`_
 
         Parameters
         ----------
@@ -2250,110 +2440,253 @@ class MatrixOperations(CommandsBase):
 
             * ``ALLOC`` - Allocate space for a vector (default).
 
-            * ``RESIZE`` - Resize an existing vector to a new length. Values are kept from the original vector.
-              If the length specified by ``Val1`` is greater than the original vector length, the additional rows
-              are assigned a value of zero.
+            * ``RESIZE`` - Resize an existing vector to a new length. Values
+              are kept from the original vector. If the length specified by
+              ``Val1``\ is greater than the original vector length, the
+              additional rows are assigned a value of zero.
 
             * ``COPY`` - Copy an existing vector.
 
             * ``IMPORT`` - Import the vector from a file.
 
-            * ``LINK`` - Link to a column of an existing dense :ref:`dmat` matrix and use it in subsequent
-              vector calculations. Any changes to the vector are also made to the corresponding matrix column
-              (memory is shared).
+            * ``LINK`` - Link to a column of an existing dense `\*DMAT
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DMAT.html>`_\
+              matrix and use it in subsequent vector calculations. Any
+              changes to the vector are also made to the corresponding
+              matrix column (memory is shared).
 
         val1 : str
-            Name of the :ref:`dmat` matrix.
+            Additional input. The meaning of ``Val1``\ through ``Val5``\
+            will vary depending on the specified ``Method``. See details
+            below.
 
         val2 : str
-            Column number of the matrix to link to.
+            Additional input. The meaning of ``Val1``\ through ``Val5``\
+            will vary depending on the specified ``Method``. See details
+            below.
 
         val3 : str
-            Additional input. The meaning of ``Val1`` through ``Val5`` will vary depending on the specified
-            ``Method``. See details below.
+            Additional input. The meaning of ``Val1``\ through ``Val5``\
+            will vary depending on the specified ``Method``. See details
+            below.
 
         val4 : str
-            Additional input. The meaning of ``Val1`` through ``Val5`` will vary depending on the specified
-            ``Method``. See details below.
+            Additional input. The meaning of ``Val1``\ through ``Val5``\
+            will vary depending on the specified ``Method``. See details
+            below.
+
+        val5 : str
+            Additional input. The meaning of ``Val1``\ through ``Val5``\
+            will vary depending on the specified ``Method``. See details
+            below.
 
         Notes
         -----
 
-        .. warning::
+        .. _a-VEC_notes:
 
-           This function contains specificities regarding the argument definitions.
-           Please refer to the `command documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VEC.html>`_
-           for further explanations.
+        The following ``Valx``\ field is used with ``Method``\ = ALLOC or
+        ``Method``\ = RESIZE:
 
-        **Argument Descriptions**
+        * ``Val1`` - Number of rows in the vector.
 
-        .. _a-VEC_argdescript:
+        The following ``Valx``\ field is used with ``Method``\ = COPY:
 
-        * ``vector : str`` - Name used to identify the vector. Must be specified.
+        * ``Val1`` - Name of the vector to copy.
 
-        * ``type_ : str`` - Vector type:
-
-          * ``D`` - Double precision real values (default).
-
-          * ``Z`` - Complex double precision values.
-
-          * ``I`` - Integer values.
-
-        * ``method : str`` - Method used to create the vector:
-
-          * ``ALLOC`` - Allocate space for a vector (default).
-
-          * ``RESIZE`` - Resize an existing vector to a new length. Values are kept from the original vector.
-            If the length specified by ``Val1`` is greater than the original vector length, the additional rows
-            are assigned a value of zero.
-
-          * ``COPY`` - Copy an existing vector.
-
-          * ``IMPORT`` - Import the vector from a file.
-
-          * ``LINK`` - Link to a column of an existing dense :ref:`dmat` matrix and use it in subsequent
-            vector calculations. Any changes to the vector are also made to the corresponding matrix column
-            (memory is shared).
-
-        * ``val1, val2, val3, val4, val5 : str`` - Additional input. The meaning of ``Val1`` through
-          ``Val5`` will vary depending on the specified ``Method``. See details below.
-
-        **The following** ``Valx`` field is used with ``Method`` = ALLOC or ``Method`` = RESIZE:
-
-        * ``val1 : str`` - Number of rows in the vector.
-
-        **The following** ``Valx`` field is used with ``Method`` = COPY:
-
-        * ``val1 : str`` - Name of the vector to copy.
-
-        * ``val2 : str`` - Optional argument to specify either the real or the imaginary part of the values
-        to be copied. This
-          option only applies when copying a complex value vector to a real value vector.
+        * ``Val2`` - Optional argument to specify either the real or the
+          imaginary part of the values to be copied. This option only applies
+          when copying a complex value vector to a real value vector.
 
           * ``REAL`` - Copy the real part of the vector to the output vector.
 
-          * ``IMAG`` - Copy the imaginary part of the vector to the output vector.
+          * ``IMAG`` - Copy the imaginary part of the vector to the output
+            vector.
 
-        **The following table describes the** ``Valx`` fields used with ``Method`` = IMPORT.
+        The following table describes the ``Valx``\ fields used with ``Method``\
+        = IMPORT.
 
-        This command contains some tables and extra information which can be inspected in the original
-        documentation pointed above.
+        .. list-table::
+           :header-rows: 2
 
-        **The following** ``Valx`` fields are used with ``Method`` = LINK:
+           * - ``Method``\ = IMPORT
+             - -
+             - -
+             - -
+             - -
+             - -
+           * - ``Val1``\
+             - ``Val2``\
+             - ``Val3``\
+             - ``Val4``\
+             - ``Val5``\
+             - **Description**\
+           * - FULL
+             - File name:sup:`[a]`\
+             - RHS - Load vectorGVEC - Constraint equation constant
+               termsBACK - nodal mapping vector (internal to user)FORWARD
+               - nodal mapping vector (user to internal)
+             - (not used)
+             - (not used)
+             - Import a load vector or nodal mapping vector from an
+               existing ``FULL``\ file.
+           * - RHS - Load vector
+             - -
+             - -
+             - -
+             - -
+             - -
+           * - GVEC - Constraint equation constant terms
+             - -
+             - -
+             - -
+             - -
+             - -
+           * - BACK - nodal mapping vector (internal to user)
+             - -
+             - -
+             - -
+             - -
+             - -
+           * - FORWARD - nodal mapping vector (user to internal)
+             - -
+             - -
+             - -
+             - -
+             - -
+           * - MODE
+             - File name:sup:`[a]`\
+             - Mode number
+             - (not used)
+             - (not used)
+             - Import a mode from an existing ``MODE``\ file.
+           * - RST
+             - File name:sup:`[a]`\
+             - Data set number
+             - (not used)
+             - Result Type: NSL - Nodal Solution VSL - Transient velocity
+               solution ASL - Transient acceleration solution RF -
+               Reaction Forces
+             - Import degree of freedom results from an existing ``RST``\
+               file.
+           * - NSL - Nodal Solution
+             - -
+             - -
+             - -
+             - -
+             - -
+           * - VSL - Transient velocity solution
+             - -
+             - -
+             - -
+             - -
+             - -
+           * - ASL - Transient acceleration solution
+             - -
+             - -
+             - -
+             - -
+             - -
+           * - RF - Reaction Forces
+             - -
+             - -
+             - -
+             - -
+             - -
+           * - RFRQ
+             - File name:sup:`[a]`\
+             - FRQ - Frequencies of the modal analysis DSP - reduced
+               complex displacement
+             - \- Iteration number
+             - (not used)
+             - Import the vector of frequencies of the modal analysis.
+               Import a reduced complex displacement, at a given
+               iteration number.
+           * - ANS
+             - File name:sup:`[a]`\
+             - Loc - Location in the File
+             - Base - base pointer
+             - (not used)
+             - Import a record in an ``Ansys``\ File, specifying its
+               location. If Base is not 0, Loc is a relative value from
+               this base pointer.
+           * - DMIG
+             - File name:sup:`[a]`\
+             - \- Separator character (default=blank) - or ‘F’ means
+               formatted file (see `\*DMAT
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DMAT.html>`_\
+               `command notes
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DMAT.html#a-DMAT.notes>`_)
+             - if Val3 == 'F', length of the fields.
+             - (not used)
+             - Import a vector (typically a load vector) from an existing
+               Nastran ``DMIG``\ file.
+           * - SUB
+             - File name:sup:`[a]`\
+             - RHS - Load vector
+             - (not used)
+             - (not used)
+             - Import a load vector from an existing ``SUB``\ file.
+           * - EMAT
+             - File name:sup:`[a]`\
+             - RHS - Load vector
+             - Element number
+             - (not used)
+             - Import an element load vector from an existing ``EMAT``\
+               file.
+           * - MAT
+             - File name:sup:`[a]`\
+             - (not used)
+             - (not used)
+             - (not used)
+             - Restore from a previous `\*EXPORT
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EXPORT.html>`_\
+               (``FORMAT``\ = MAT) command.
+           * - APDL
+             - Array parameter name
+             - (not used)
+             - (not used)
+             - (not used)
+             - Import an existing array parameter.
+           * - HBMAT
+             - File name:sup:`[a]`\
+             - File format:ASCIIBINARY
+             - (not used)
+             - (not used)
+             - Import a load vector from an existing Harwell-Boeing
+               format file.
+           * - ASCII
+             - -
+             - -
+             - -
+             - -
+             - -
+           * - BINARY
+             - -
+             - -
+             - -
+             - -
+             - -
 
-        * ``val1 : str`` - Name of the :ref:`dmat` matrix.
+        The following ``Valx``\ fields are used with ``Method``\ = LINK:
 
-        * ``val2 : str`` - Column number of the matrix to link to.
+        * ``Val1`` - Name of the `\*DMAT
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DMAT.html>`_\
+          matrix.
 
-        .. _a-VEC_notes:
+        * ``Val2`` - Column number of the matrix to link to.
 
-        Use the :ref:`dmat` command to create a matrix.
+        Use the `\*DMAT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DMAT.html>`_\
+        command to create a matrix.
 
-        For more information on the BACK and FORWARD nodal mapping vectors, see in the `Ansys Parametric
-        Design Language Guide
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdlxpl.html>`_.
+        For more information on the BACK and FORWARD nodal mapping vectors, see
+        `Degree of Freedom Ordering
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/apdldofordering.html>`_
+        in the `*Ansys Parametric Design Language Guide*\
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/Hlp_P_APDLTOC.html>`_.
         """
-        command = f"*VEC,{vector},{type_},{method},{val1},{val2},{val3},{val4}"
+        command = f"*VEC,{vector},{type_},{method},{val1},{val2},{val3},{val4},{val5}"
         return self.run(command, **kwargs)
 
     def wrk(self, num: str = "", **kwargs):
