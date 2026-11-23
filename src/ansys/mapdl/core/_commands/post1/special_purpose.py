@@ -36,44 +36,53 @@ class SpecialPurpose(CommandsBase):
         kshs: int | str = "",
         tolout: str = "",
         tolhgt: str = "",
+        fmat: str = "",
         **kwargs,
     ):
         r"""Activates the body force interpolation operation.
 
-        Mechanical APDL Command: `BFINT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFINT.html>`_
+        Mechanical APDL Command: `BFINT <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFINT.html>`_
 
         Parameters
         ----------
         fname1 : str
-            File name and directory path (248 characters maximum, including directory) from which to read
-            data for interpolation. If you do not specify a directory path, it will default to your working
+            File name and directory path (248 characters maximum, including
+            directory) from which to read data for interpolation. If you do
+            not specify a directory path, it will default to your working
             directory and you can use all 248 characters for the file name.
 
-            The file name defaults to :file:`Jobname`.
+            The file name defaults to ``Jobname``.
 
         ext1 : str
-            Filename extension (eight-character maximum). The extension defaults to NODE if ``Fname1`` is
-            blank.
+            Filename extension (eight-character maximum).
+
+            The extension defaults to NODE if ``Fname1``\ is blank.
 
         fname2 : str
-            File name and directory path (248 characters maximum, including directory) to which **BF** commands are written. If you do not specify a directory path, it will default to your working
+            File name and directory path (248 characters maximum, including
+            directory) to which **BF**\ commands are written. If you do not
+            specify a directory path, it will default to your working
             directory and you can use all 248 characters for the file name.
 
-            The file name defaults to :file:`Jobname`.
+            The file name defaults to ``Jobname``.
 
         ext2 : str
-            Filename extension (eight-character maximum). The extension defaults to BFIN if ``Fname2`` is
-            blank.
+            Filename extension (eight-character maximum).
+
+            The extension defaults to BFIN if ``Fname2``\ is blank.
 
         kpos : int or str
-            Position on ``Fname2`` to write block of **BF** commands:
+            Position on ``Fname2``\ to write block of **BF**\ commands:
 
             * ``0`` - Beginning of file (overwrite existing file).
 
             * ``1`` - End of file (append to existing file).
 
         clab : str
-            Label (8 characters maximum, including the colon) for this block of **BF** commands in ``Fname2``. This label is appended to the colon (:). Defaults to BF ``n``, where ``n`` is the cumulative iteration number for the data set currently in the database.
+            Label (8 characters maximum, including the colon) for this block
+            of **BF**\ commands in ``Fname2``. This label is appended to the
+            colon (:). Defaults to BF``n``, where ``n``\ is the cumulative
+            iteration number for the data set currently in the database.
 
         kshs : int or str
             Shell-to-solid submodeling key:
@@ -83,47 +92,77 @@ class SpecialPurpose(CommandsBase):
             * ``1`` - Shell-to-solid submodel.
 
         tolout : str
-            Extrapolation tolerance about elements, based on a fraction of the element dimension. Submodel
-            nodes outside the element by more than ``TOLOUT`` are not accepted as candidates for DOF
+            Extrapolation tolerance about elements, based on a fraction of
+            the element dimension. Submodel nodes outside the element by
+            more than ``TOLOUT``\ are not accepted as candidates for DOF
             extrapolation. Defaults to 0.5 (50%).
 
         tolhgt : str
-            Height tolerance above or below shell elements, in units of length. Used only for shell-to-shell
-            submodeling ( ``KSHS`` = 0). Submodel nodes off the element surface by more than ``TOLHGT`` are not
-            accepted as candidates for DOF interpolation or extrapolation. Defaults to 0.0001 times the maximum
-            element dimension.
+            Height tolerance above or below shell elements, in units of
+            length. Used only for shell-to-shell submodeling (``KSHS``\ =
+            0). Submodel nodes off the element surface by more than
+            ``TOLHGT``\ are not accepted as candidates for DOF interpolation
+            or extrapolation. Defaults to 0.0001 times the maximum element
+            dimension.
 
             .. warning::
 
-                Relaxing this tolerance to allow submodel nodes to be found may cause poor submodel results.
+               **Caution:**\ Relaxing this tolerance to allow submodel
+               nodes to be found may cause poor submodel results.
+
+        fmat : str
+            Format of the output file (defaults to BLOCKED).
+
+            * ``BLOCKED`` - Blocked format. This format allows faster
+              reading of the file.
+
+            * ``UNBLOCKED`` - Unblocked format.
 
         Notes
         -----
 
         .. _BFINT_notes:
 
-        File ``Fname1`` should contain a node list for which body forces are to be interpolated (
-        :ref:`nwrite` ). File ``Fname2`` is created, and contains interpolated body forces written as a
-        block of nodal :ref:`bf` commands.
+        File ``Fname1``\ should contain a node list for which body forces are to
+        be interpolated (`NWRITE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NWRITE.html>`_).
+        File ``Fname2``\ is created, and contains interpolated body forces
+        written as a block of nodal `BF
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BF.html>`_\
+        commands.
 
-        Body forces are interpolated from elements having TEMP as a valid body force or degree of freedom,
-        and only the label TEMP is written on the nodal :ref:`bf` commands. Interpolation is performed for
-        all nodes on file ``Fname1`` using the results data currently in the database. For layered elements,
-        use the :ref:`layer` command to select the locations of the temperatures to be used for
-        interpolation. Default locations are the bottom of the bottom layer and the top of the top layer.
+        Body forces are interpolated from elements having TEMP as a valid body
+        force or degree of freedom, and only the label TEMP is written on the
+        nodal `BF
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BF.html>`_\
+        commands. Interpolation is performed for all nodes on file ``Fname1``\
+        using the results data currently in the database. For layered elements,
+        use the `LAYER
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_LAYER.html>`_\
+        command to select the locations of the temperatures to be used for
+        interpolation. Default locations are the bottom of the bottom layer and
+        the top of the top layer.
 
-        The block of :ref:`bf` commands begins with an identifying colon label command and ends with a
-        ``/EOF`` command. The colon label command has the form : ``Clab``. Interpolation from multiple
-        results sets can be performed by looping through the results file in a user-defined macro.
-        Additional blocks can be appended to ``Fname2`` by using ``KPOS`` and unique colon labels. Issue
-        :ref:`input`, with the appropriate colon label, to read the block of commands.
+        The block of `BF
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BF.html>`_\
+        commands begins with an identifying colon label command and ends with a
+        `/EOF
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EOF.html>`_\
+        command. The colon label command has the form:``Clab``. Interpolation
+        from multiple results sets can be performed by looping through the
+        results file in a user-defined macro. Additional blocks can be appended
+        to ``Fname2``\ by using ``KPOS``\ and unique colon labels. Issue `/INPUT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_INPUT.html>`_,
+        with the appropriate colon label, to read the block of commands.
 
-        If the model has coincident (or very close) nodes, :ref:`bfint` must be applied to each part of the
-        model separately to ensure that the mapping of the nodes is correct. For example, if nodes belonging
-        to two adjacent parts linked by springs are coincident, the operation should be performed on each
-        part of the model separately.
+        If the model has coincident (or very close) nodes, `BFINT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFINT.html>`_\
+        must be applied to each part of the model separately to ensure that the
+        mapping of the nodes is correct. For example, if nodes belonging to two
+        adjacent parts linked by springs are coincident, the operation should be
+        performed on each part of the model separately.
         """
-        command = f"BFINT,{fname1},{ext1},,{fname2},{ext2},,{kpos},{clab},{kshs},{tolout},{tolhgt}"
+        command = f"BFINT,{fname1},{ext1},,{fname2},{ext2},,{kpos},{clab},{kshs},{tolout},{tolhgt},{fmat}"
         return self.run(command, **kwargs)
 
     def cbdof(
@@ -1265,6 +1304,224 @@ class SpecialPurpose(CommandsBase):
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS5_4.html#>`_
         """
         command = f"MACOPT,{option},{value1},{value2},{value3}"
+        return self.run(command, **kwargs)
+
+    def maxcycmode(
+        self,
+        lstep1: str = "",
+        sbstep1: str = "",
+        cmp1x1: str = "",
+        lstep2: str = "",
+        sbstep2: str = "",
+        cmp1x2: str = "",
+        comp: str = "",
+        numsect: str = "",
+        **kwargs,
+    ):
+        r"""Computes the maximum results value of cyclic mode pairs at the same frequency or the
+        amplitude of a single complex mode.
+
+        Mechanical APDL Command: `MAXCYCMODE <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MAXCYCMODE.html>`_
+
+        Parameters
+        ----------
+        lstep1 : str
+            Load step for the first mode in the pair. (Set ``LSTEP1``\ and
+            ``LSTEP2``\ to the same integer value if you are using
+            `MAXCYCMODE
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MAXCYCMODE.html>`_\
+            to calculate the amplitude of a single complex mode.)
+
+        sbstep1 : str
+            Substep for the first mode in the pair. (Set ``SBSTEP1``\ and
+            ``SBSTEP2``\ to the same integer value if you are using
+            `MAXCYCMODE
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MAXCYCMODE.html>`_\
+            to calculate the amplitude of a single complex mode.)
+
+        cmp1x1 : str
+            Complex value key for the first mode in the pair.
+
+            * ``'Real'`` - Indicates the real part of the first mode
+              (default).
+
+            * ``'Imag'`` - Indicates the imaginary part of a complex mode.
+              (Used only if you are using `MAXCYCMODE
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MAXCYCMODE.html>`_\
+              to calculate the amplitude of a single complex mode.)
+
+        lstep2 : str
+            Load step for the second mode in the pair. (Set ``LSTEP1``\ and
+            ``LSTEP2``\ to the same integer value if you are using
+            MAXCYCMODE to calculate the amplitude of a single complex mode.)
+
+        sbstep2 : str
+            Substep for the second mode in the pair. (Set ``SBSTEP1``\ and
+            ``SBSTEP2``\ to the same integer value if you are using
+            MAXCYCMODE to calculate the amplitude of a single complex mode.)
+
+        cmp1x2 : str
+            Complex value key for the second mode in the pair.
+
+            * ``'Real'`` - Indicates the real part of the second mode
+              (default).
+
+            * ``'Imag'`` - Indicates the imaginary part of a complex mode.
+              (Used only if you are using `MAXCYCMODE
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MAXCYCMODE.html>`_\
+              to calculate the amplitude of a single complex mode.)
+
+        comp : str
+            Component for which a maximum value is to be obtained. Valid
+            ``Comp``\ labels and component descriptions are listed in the
+            `Notes
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MAXCYCMODE.html#MAXCYCMODE.notes>`_
+            section.
+
+        numsect : str
+            Number of sectors. This should only be used for cyclically
+            symmetric modes computed using the `CYCLIC
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CYCLIC.html>`_\
+            command.
+
+        Notes
+        -----
+
+        .. _MAXCYCMODE_notes:
+
+        There is no `command default
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CH1_3.html#aPG6vq1bamcm>`_,
+        and only ``Cmp1x1``\ and ``Cmp1x2``\ have `argument defaults
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CH1_2_3.html#ans_cmd_argDef>`_.
+        Values must be specified for all other command arguments except for
+        ``Numsect``, which is only required if the command is used for computing
+        the maximum of cyclic modes calculated in a `cyclic symmetry analysis
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cycsym/ans_cycsym.html>`_
+        using the `CYCLIC
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CYCLIC.html>`_\
+        command.
+
+        The command internally uses a `SET
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SET.html>`_\
+        command at the specified load steps (LSTEP1, LSTEP2) and substeps
+        (SBSTEP1, SBSTEP2). To visualize results displayed before a call to
+        `MAXCYCMODE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MAXCYCMODE.html>`_,
+        the `SET
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SET.html>`_\
+        command must be re-issued.
+
+        This command is valid only for mass normalized modes (`MODOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MODOPT.html>`_,,,,,,OFF).
+
+        For a model generated with the `CYCLIC
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CYCLIC.html>`_\
+        command, results are only valid when the solution coordinate system is
+        aligned with the cyclic coordinate system. Issuing `MAXCYCMODE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MAXCYCMODE.html>`_\
+        while the cyclic sector is expanded (`/CYCEXPAND
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CYCEXPAND_sl.html>`_,,ON)
+        will result in resetting the cyclic expansion back to the sector
+        (`/CYCEXPAND
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CYCEXPAND_sl.html>`_,,OFF).
+
+        This command has two different functionalities:
+
+        * To compute the `maximum results value of cyclic mode pairs at the same
+          frequency
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MAXCYCMODE.html#ans_MAXCYCMODEmaxVal>`_
+          that are computed from a cyclically symmetric system.
+
+        * To compute the `amplitude of a single complex mode
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MAXCYCMODE.html#ans_MAXCYCMODEamp>`_
+          calculated in a modal analysis using the damped eigensolver (`MODOPT
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MODOPT.html>`_,
+          DAMP).
+
+        **To compute the maximum results value of cyclic mode pairs at the same frequency**
+
+        This command can be used to compute the maximum results value of cyclic
+        mode pairs at the same frequency that are computed from a cyclically
+        symmetric system. Because two modes at the same frequency have
+        indeterminate mode shapes, the combined mode pair must be considered to
+        compare cyclic mode pairs from different solves or models. The maximum
+        values computed are an estimate of the maximum value for each of the
+        modes in the pair.
+
+        This command can be used on any mode pairs at the same frequency that
+        are computed in a modal analysis (`ANTYPE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ANTYPE.html>`_,MODAL)
+        of a cyclically symmetric system modeled in any of the following ways:
+
+        * A `cyclic symmetry
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cycsym/ans_cycsym.html>`_
+          model generated from the `CYCLIC
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CYCLIC.html>`_\
+          command
+
+        * A cyclic symmetry model generated under the `multistage approach
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_mstag/ans_mstag.html>`_
+          using the `MSOPT
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MSOPT.html>`_\
+          and `CECYCMS
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CECYCMS.html>`_\
+          commands
+
+        * A cyclic symmetry model generated using no symmetry boundary
+          conditions (full 360° model).
+
+        Set the ``Cmplx1``\ and ``Cmplx2``\ values to Real to compute the
+        maximum value of two cyclic modes at the same frequency.
+
+        Valid ``Comp``\ labels are listed in the following table. The maximum
+        values obtained are in the coordinate system defined by the `RSYS
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RSYS.html>`_\
+        command.
+
+        .. list-table::
+
+           * - Valid ``Comp``\ Labels
+             - -
+           * - ``Comp``\ Label
+             - **Description**\
+           * - UX
+             - Displacement in the X direction
+           * - UY
+             - Displacement in the Y direction
+           * - UZ
+             - Displacement in the Z direction
+           * - UCOMP
+             - Displacement in the X, Y, and Z directions
+           * - USUM
+             - Displacement vector sum
+           * - SX
+             - Stress in the X direction
+           * - SY
+             - Stress in the Y direction
+           * - SZ
+             - Stress in the Z direction
+           * - SCOMP
+             - Stress in the X, Y, and Z directions
+
+        **To compute the amplitude of a single complex mode**
+
+        An alternative functionality of this command is to compute the amplitude
+        of a single complex mode that was calculated in a modal analysis using
+        the damped eigensolver (`MODOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MODOPT.html>`_,
+        DAMP). In this case, specify the real and imaginary parts of a single
+        mode instead of only real parts of two separate modes. This is useful
+        for cyclic symmetry or multistage cyclic symmetry analyses since `SET
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SET.html>`_,,,,AMPL
+        is not supported.
+
+        **Example Usage**
+
+        `Example 3.4: MAXCYCMODE to Compute the Maximum Results Value of Cyclic
+        Mode Pairs
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cycsym/cycsym_postproc_comparing.html#cycsym_MAXCYCMODEusage>`_
+        """
+        command = f"MAXCYCMODE,{lstep1},{sbstep1},{cmp1x1},{lstep2},{sbstep2},{cmp1x2},{comp},{numsect}"
         return self.run(command, **kwargs)
 
     def nforce(self, item: str = "", **kwargs):
@@ -3507,59 +3764,116 @@ class SpecialPurpose(CommandsBase):
         command = f"PRNEAR,{lab},{opt},{kcn},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9}"
         return self.run(command, **kwargs)
 
-    def reswrite(self, fname: str = "", cflag: int | str = "", **kwargs):
+    def reswrite(
+        self, fname: str = "", cflag: int | str = "", gflag: str = "", **kwargs
+    ):
         r"""Appends results data from the database to a results file.
 
-        Mechanical APDL Command: `RESWRITE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RESWRITE.html>`_
+        Mechanical APDL Command: `RESWRITE <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RESWRITE.html>`_
 
         Parameters
         ----------
         fname : str
-            File name and directory path (248 characters maximum, including the characters needed for the
-            directory path). An unspecified directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            File name and directory path (248 characters maximum, including
+            the characters needed for the directory path). An unspecified
+            directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name.
 
             The file name extension varies as follows:
 
-            * :file:`.rst` for structural, fluid, or coupled-field analyses
-            * :file:`.rth` for thermal or electrical analyses
-            * :file:`.rmg` for magnetic analyses
+            * ``.rst``\ for structural, fluid, or coupled-field analyses
+
+            * ``.rth``\ for thermal or electrical analyses
+
+            * ``.rmg``\ for magnetic analyses
 
         cflag : int or str
-            * ``0`` - The complex results flag is set to 0 in the results file header. This is the default
-              option.
+            * ``0`` - The complex results flag is set to 0 in the results
+              file header. This is the default option.
 
-            * ``1`` - The complex results flag is set to 1 in the results file header.
+            * ``1`` - The complex results flag is set to 1 in the results
+              file header.
+
+        gflag : str
+            Flag for appending results when there is no geometry data
+            available in the results file. This flag is ignored when the
+            results file contains geometry data. See `Notes
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RESWRITE.html#RESWRITE.notes>`_.
+
+            * ``0`` - The `RESWRITE
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RESWRITE.html>`_\
+              command stops, and no results are appended. This is the
+              default option.
+
+            * ``1`` - The results are always appended to the result file,
+              whether the file contains geometry data or not.
 
         Notes
         -----
 
         .. _RESWRITE_notes:
 
-        The :ref:`reswrite` command appends a data set to the specified file by writing the results data
-        currently in the database. If the intended results file does not exist, it will be created and will
-        include the geometry records. The current load step, substep, and time (or frequency) value are
+        The `RESWRITE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RESWRITE.html>`_\
+        command appends a data set to the specified file by writing the results
+        data currently stored in the database. If the specified results file
+        does not exist, it is created and includes the geometry records. The
+        current load step, substep, and time (or frequency) value are
         maintained. All data (summable and nonsummable) are written.
 
-        When complex results are appended, ``cFlag`` must be set to 1 so that the header is consistent with
-        the results written on the file.
+        .. note::
 
-        The command is primarily intended for use in a top-down substructuring analysis, where the full
-        model is resumed and the results data read from the `use pass
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_substr/an9Auq1d6ldm.html#advobsl5jla062999>`_
-        results file ( :ref:`set` ), and subsequently from all substructure `expansion pass
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_substr/axcAuq367ldm.html#adv5note4jla062999>`_
-        results files ( :ref:`append` ). The full set of data in memory can then be written out via the
-        :ref:`reswrite` command to create a complete results file (as though you had run a nonsubstructured
-        analysis).
+           **Note:**\ All nodes are written to the specified results file
+           regardless of the node selection status.
 
-        The :ref:`reswrite` command can also be used to write a global results file for a distributed-memory
-        parallel ( DMP ) solution. This should only be necessary if the :ref:`rescombine` command was used
-        to combine results from local results files into the database. The :ref:`reswrite` command can then
-        be used to write the combined results into a new results file. This new results file will
-        essentially contain the current set of results data for the entire (that is, global) model.
+        The `RESWRITE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RESWRITE.html>`_\
+        command appends a data set to the specified file by writing the results
+        data currently in the database. If the intended results file does not
+        exist, it will be created and will include the geometry records. The
+        current load step, substep, and time (or frequency) value are
+        maintained. All data (summable and nonsummable) are written.
+
+        When complex results are appended, ``cFlag``\ must be set to 1 so that
+        the header is consistent with the results written on the file.
+
+        The command is primarily intended for use in a `top-down
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_substr/anzAuq26fldm.html>`_
+        `substructuring
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_substr/acBstq17cldm.html>`_
+        analysis, where the full model is resumed and the results data read from
+        the `use pass
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_substr/an9Auq1d6ldm.html>`_
+        results file (`SET
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SET.html>`_),
+        and subsequently from all substructure `expansion pass
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_substr/axcAuq367ldm.html>`_
+        results files (`APPEND
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_APPEND.html>`_).
+        The full set of data in memory can then be written out via the `RESWRITE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RESWRITE.html>`_\
+        command to create a complete results file (as though you had run a
+        nonsubstructured analysis).
+
+        The `RESWRITE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RESWRITE.html>`_\
+        command can also be used to write a global results file for a
+        distributed-memory parallel (DMP) solution. This should only be
+        necessary if the `RESCOMBINE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RESCOMBINE.html>`_\
+        command was used to combine results from local results files into the
+        database. The `RESWRITE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RESWRITE.html>`_\
+        command can then be used to write the combined results into a new
+        results file. This new results file will essentially contain the current
+        set of results data for the entire (that is, global) model.
+
+        Use ``gFlag``\ in cases when no geometry data is found in the results
+        file. For example, if you issue the command `/CONFIG
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CONFIG.html>`_,
+        NORSTGM,1, then no geometry data is written to the results file.
         """
-        command = f"RESWRITE,{fname},,,,{cflag}"
+        command = f"RESWRITE,{fname},,,,{cflag},{gflag}"
         return self.run(command, **kwargs)
 
     def rmflvec(self, **kwargs):

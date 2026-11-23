@@ -31,6 +31,7 @@ SpecialPurpose
    SpecialPurpose.hfang
    SpecialPurpose.hfsym
    SpecialPurpose.macopt
+   SpecialPurpose.maxcycmode
    SpecialPurpose.nforce
    SpecialPurpose.nldpost
    SpecialPurpose.plas
