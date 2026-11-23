@@ -143,6 +143,7 @@ class _CoreExecutionMixin(_CoreMixinBase):
     """Static responsibility mixin for the MAPDL core facade."""
 
     _blocked_commands: frozenset[str] = frozenset()
+    _pending_plot_output: str | None = None
 
     @property
     def blocked_commands(self) -> frozenset[str]:

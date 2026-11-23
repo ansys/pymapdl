@@ -51,10 +51,12 @@ VALID_DEVICES_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM", "CLOSE
 VALID_FILE_TYPE_FOR_PLOT = VALID_DEVICES.copy()
 VALID_FILE_TYPE_FOR_PLOT.remove("CLOSE")
 VALID_FILE_TYPE_FOR_PLOT_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM"]
-# Displays print ``WRITTEN TO FILE file000.png``; reject other devices'
-# files (``file000.tif``) and ``SAVE``'s ``WRITTEN TO FILE NAME= file.db``.
+# Displays print ``WRITTEN TO FILE file000.png`` (or blank before ``- RASTER MODE.``
+# right after switching from another device); reject other devices' files
+# (``file000.tif``) and ``SAVE``'s ``WRITTEN TO FILE NAME= file.db``.
 PNG_IS_WRITTEN_TO_FILE = re.compile(
-    r"WRITTEN TO FILE(?:\s+(?P<filename>\S+\.png)\b|\s*$)", re.IGNORECASE
+    r"WRITTEN TO FILE(?:\s+(?P<filename>\S+\.png)\b|\s+-\s+RASTER\s+MODE|\s*$)",
+    re.IGNORECASE,
 )
 PLOT_COMMANDS = [
     # Single-frame display commands captured as Server Plot Screenshots.

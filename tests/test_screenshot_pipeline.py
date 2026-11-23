@@ -114,6 +114,7 @@ def test_is_png_found_rejects_text_without_a_display_file(fake, text):
         "WRITTEN TO FILE",
         "POST1 DISPLAY WRITTEN TO FILE file002.png",
         "CUMULATIVE DISPLAY NUMBER   1 WRITTEN TO FILE file000.png  - RASTER MODE.",
+        "CUMULATIVE DISPLAY NUMBER   1 WRITTEN TO FILE                   - RASTER MODE.",
         "PREP7 DISPLAY WRITTEN TO FILE\n my_job000.png",
     ],
 )
