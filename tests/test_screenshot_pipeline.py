@@ -29,7 +29,6 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from ansys.mapdl.core._mapdl_core import plotting
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl_extended import _MapdlExtended
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
@@ -57,6 +56,7 @@ class ScriptedMapdl(_MapdlExtended):
         self.sent = []
         self.plot_index = 0
         self.blank_plots = False
+        self.plot_verbs = {"EPLOT", "/REPLOT"}
 
     @property
     def directory(self):
@@ -69,12 +69,12 @@ class ScriptedMapdl(_MapdlExtended):
     def _run(self, command, verbose=False, mute=False):
         self.sent.append(command)
         verb = command.split(",")[0].strip().upper()
-        plots = verb in ("EPLOT", "/REPLOT") and not self.blank_plots
+        plots = verb in self.plot_verbs and not self.blank_plots
         if plots and self._file_type_for_plots == "PNG":
             name = f"file{self.plot_index:03d}.png"
             (self.workdir / name).write_bytes(f"{verb} frame".encode())
             self.plot_index += 1
-            return f" PRODUCE ELEMENT PLOT\n POST1 DISPLAY WRITTEN TO FILE {name}"
+            return f" PRODUCE {verb} PLOT\n POST1 DISPLAY WRITTEN TO FILE {name}"
         return f"{verb} executed"
 
     @property
@@ -135,13 +135,6 @@ def test_plot_command_without_a_frame_warns_instead_of_returning_a_stale_png(
     assert fake.replots == []
 
 
-@pytest.fixture
-def replot_is_a_plot_command():
-    with patch.object(plotting, "PLOT_COMMANDS", plotting.PLOT_COMMANDS + ["/REP"]):
-        yield
-
-
-@pytest.mark.usefixtures("replot_is_a_plot_command")
 def test_plot_command_on_a_non_png_device_replots_once_as_png(fake, tmp_path):
     fake._file_type_for_plots = "TIFF"
     out = tmp_path / "out.png"
@@ -153,14 +146,88 @@ def test_plot_command_on_a_non_png_device_replots_once_as_png(fake, tmp_path):
     assert fake.file_type_for_plots == "TIFF"
 
 
-@pytest.mark.usefixtures("replot_is_a_plot_command")
-def test_replot_saves_its_own_png_without_recursing(fake, tmp_path):
+# Command Wrappers newly captured as Server Plot Screenshots, with their verb.
+NEWLY_CAPTURED_PLOT_CALLS = [
+    ("plcamp", (), "PLCAMP"),
+    ("plorb", (), "PLORB"),
+    ("plcrack", (), "PLCRACK"),
+    ("plcint", (), "PLCINT"),
+    ("plcksurf", (), "PLCKSURF"),
+    ("plas", (), "PLAS"),
+    ("plfar", (), "PLFAR"),
+    ("plnear", (), "PLNEAR"),
+    ("plf2d", (), "PLF2D"),
+    ("mpplot", (), "MPPLOT"),
+    ("layplot", (), "LAYPLOT"),
+    ("tbfplot", (), "TBFPLOT"),
+    ("pltrac", (), "PLTRAC"),
+    ("plgeom", (), "PLGEOM"),
+    ("plmap", (), "PLMAP"),
+    ("plzz", (), "PLZZ"),
+    ("plchist", (), "PLCHIST"),
+    ("plcfreq", (), "PLCFREQ"),
+    ("svplot", (), "SVPLOT"),
+    ("mdplot", (), "MDPLOT"),
+    ("fsplot", (), "FSPLOT"),
+    ("splot", (), "SPLOT"),
+    ("gplot", (), "GPLOT"),
+    ("replot", (), "/REPLOT"),
+    ("plmc", (), "PLMC"),
+    ("plpagm", (), "PLPAGM"),
+    ("plpath", (), "PLPATH"),
+    ("pldisp", (), "PLDISP"),
+    ("plvect", (), "PLVECT"),
+    ("plls", (), "PLLS"),
+    ("pletab", (), "PLETAB"),
+    ("plsect", (), "PLSECT"),
+    ("starvplot", (), "*VPLOT"),
+    ("supl", (), "SUPL"),
+    ("run", ("CMPLOT,MYCOMP",), "CMPLOT"),
+]
+
+
+@pytest.mark.parametrize("method,args,verb", NEWLY_CAPTURED_PLOT_CALLS)
+def test_plot_command_wrapper_saves_its_png_and_keeps_its_output(
+    fake, tmp_path, method, args, verb
+):
+    fake.plot_verbs.add(verb)
+    out = tmp_path / "out.png"
+
+    assert getattr(fake, method)(*args, savefig=str(out)) == str(out)
+
+    assert out.read_bytes() == f"{verb} frame".encode()
+    assert f"PRODUCE {verb} PLOT" in fake._response
+    # Only ``replot`` itself sends ``/REPLOT``; captured PNGs need no redraw.
+    assert len(fake.replots) == (1 if verb == "/REPLOT" else 0)
+
+
+@pytest.mark.parametrize("method,args,verb", NEWLY_CAPTURED_PLOT_CALLS)
+def test_plot_command_wrapper_without_savefig_displays_and_returns_none(
+    fake, tmp_path, method, args, verb
+):
+    fake.plot_verbs.add(verb)
+
+    with patch.object(ScriptedMapdl, "_display_plot") as display:
+        assert getattr(fake, method)(*args) is None
+
+    display.assert_called_once_with(os.path.join(tmp_path, "file000.png"))
+    assert f"PRODUCE {verb} PLOT" in fake._response
+    assert len(fake.replots) == (1 if verb == "/REPLOT" else 0)
+
+
+def test_replot_on_a_non_png_device_redraws_once_as_png_without_recursing(
+    fake, tmp_path
+):
+    fake._file_type_for_plots = "TIFF"
     out = tmp_path / "out.png"
 
     assert fake.replot(savefig=str(out)) == str(out)
 
     assert out.read_bytes() == b"/REPLOT frame"
-    assert len(fake.replots) == 1
+    # The user's ``/REPLOT`` on TIFF, then one fallback ``/REPLOT`` on PNG.
+    assert len(fake.replots) == 2
+    assert fake.file_type_for_plots == "TIFF"
+    assert fake._response == "/REPLOT executed"
 
 
 def test_direct_screenshot_replots_as_png_and_restores_the_device(fake, tmp_path):
