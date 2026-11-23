@@ -689,7 +689,17 @@ class Test_MAPDL_commands(TestClass):
         parm = inspect.signature(func).parameters
         assert "kwargs" in parm, "'kwargs' argument is missing in function signature."
 
-        args = [f"arg{i}" for i in range(len(parm) - 1)]  # 3 = self, cmd, kwargs
+        pos_args = []
+        kw_args = {}
+        for idx, (name, param) in enumerate(parm.items()):
+            if name.lower() == "self" and idx == 0:
+                continue
+            if param.kind == inspect.Parameter.VAR_KEYWORD:
+                continue
+            if param.kind == inspect.Parameter.KEYWORD_ONLY:
+                kw_args[name] = f"arg{idx}"
+            else:
+                pos_args.append(f"arg{idx}")
 
         if cmd in self.RAISE_WARNINGS:
             context = pytest.warns(UserWarning)
@@ -700,12 +710,11 @@ class Test_MAPDL_commands(TestClass):
 
         with context:
             if list(parm)[0].lower() == "self":
-                args = args[:-1]
-                post = func(mapdl, *args)
+                post = func(mapdl, *pos_args, **kw_args)
             else:
-                post = func(*args)
+                post = func(*pos_args, **kw_args)
 
-        for arg in args:
+        for arg in [*pos_args, *kw_args.values()]:
             assert arg in post
 
         # assert ",".join(args) in post.replace(",,", ",").replace(" ", "")

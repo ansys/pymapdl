@@ -18,3 +18,8 @@ RadiositySolver
    RadiositySolver.vfco
    RadiositySolver.vfquery
    RadiositySolver.vfsm
+
+.. seealso::
+
+   :meth:`~ansys.mapdl.core._commands.solution.radiosity.Radiosity.vfdi`
+   :meth:`~ansys.mapdl.core._commands.solution.radiosity.Radiosity.vfup`
