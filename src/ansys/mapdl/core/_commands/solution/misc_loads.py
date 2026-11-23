@@ -465,17 +465,19 @@ class MiscLoads(CommandsBase):
         val11: str = "",
         val12: str = "",
         val13: str = "",
+        kcn: str = "",
         **kwargs,
     ):
         r"""Specifies input data for an acoustic incident wave.
 
-        Mechanical APDL Command: `AWAVE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AWAVE.html>`_
+        Mechanical APDL Command: `AWAVE <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_AWAVE.html>`_
 
         Parameters
         ----------
         wavenum : str
-            Wave number. You specify the integer number for an acoustic incident wave inside or outside the
-            model. The number must be between 1 and 20.
+            Wave number. You specify the integer number for an acoustic
+            incident wave inside or outside the model. The number must be
+            between 1 and 20.
 
         wavetype : str
             Wave type:
@@ -490,32 +492,35 @@ class MiscLoads(CommandsBase):
 
             * ``BARE`` - Bare loudspeaker
 
-            * ``STATUS`` - Displays the status of the acoustic wave settings if ``Wavenum`` = a number between 1
-              and 20 or ALL.
+            * ``STATUS`` - Displays the status of the acoustic wave settings
+              if ``Wavenum``\ = a number between 1 and 20 or ALL.
 
-            * ``DELE`` - Deletes the acoustic wave settings if ``Wavenum`` = a number between 1 and 20 or ALL.
+            * ``DELE`` - Deletes the acoustic wave settings if ``Wavenum``\
+              = a number between 1 and 20 or ALL.
 
         opt1 : str
-            * ``PRES`` - Pressure
+            * ``PRES`` - Pressure (not valid for ``Wavetype``\ = BACK)
 
             * ``VELO`` - Velocity
 
         opt2 : str
             * ``EXT`` - Incident wave outside the model.
 
-            * ``INT`` - Incident wave inside the model. This option is only available for pure scattered
-              pressure formulation.
+            * ``INT`` - Incident wave inside the model. This option is only
+              available for pure scattered pressure formulation.
 
-            For ``Wavetype`` = PLAN, only ``Opt2`` = EXT is available.
+            For ``Wavetype``\ = PLAN, only ``Opt2``\ = EXT is available.
 
         val1 : str
-            If ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL1`` - Amplitude of pressure or normal velocity to the sphere surface.
+            * ``VAL1`` - Amplitude of pressure or normal velocity to the
+              sphere surface.
 
-            * ``VAL2`` - Phase angle of the applied pressure or velocity (in degrees). Defaults to 0 degrees.
+            * ``VAL2`` - Phase angle of the applied pressure or velocity (in
+              degrees). Defaults to 0 degrees.
 
-            If ``Wavetype`` = PLAN:
+            If ``Wavetype``\ = PLAN:
 
             * ``VAL3`` - Incident ϕ angle from x axis toward y axis.
 
@@ -523,34 +528,42 @@ class MiscLoads(CommandsBase):
 
             * ``VAL5`` - Not used.
 
-            If ``Wavetype`` = MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = MONO, DIPO, BACK, or BARE:
 
-            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source position.
+            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source
+              position.
 
-            If
-             ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL6`` - Mass density of base medium (defaults to 1.2041 kg/m3).
+            * ``VAL6`` - Mass density of base medium (defaults to 1.2041
+              kg/m3).
 
-            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24 m/s).
+            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24
+              m/s).
 
-            * ``VAL8`` - Radius of pulsating sphere (not used for ``Wavetype`` = PLAN).
+            * ``VAL8`` - Radius of pulsating sphere (not used for
+              ``Wavetype``\ = PLAN).
 
-            * ``VAL9`` - Dipole length (only available for ``Wavetype`` = DIPO, BARE).
+            * ``VAL9`` - Dipole length (only available for ``Wavetype``\ =
+              DIPO, BARE).
 
-            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the positive to the negative. Only available
-              for ``Wavetype`` = DIPO, BARE.
+            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the
+              positive to the negative. Only available for ``Wavetype``\ =
+              DIPO, BARE.
 
-            * ``VAL13`` - Port number if the incident power is required on the port
+            * ``VAL13`` - Port number if the incident power is required on
+              the port
 
         val2 : str
-            If ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL1`` - Amplitude of pressure or normal velocity to the sphere surface.
+            * ``VAL1`` - Amplitude of pressure or normal velocity to the
+              sphere surface.
 
-            * ``VAL2`` - Phase angle of the applied pressure or velocity (in degrees). Defaults to 0 degrees.
+            * ``VAL2`` - Phase angle of the applied pressure or velocity (in
+              degrees). Defaults to 0 degrees.
 
-            If ``Wavetype`` = PLAN:
+            If ``Wavetype``\ = PLAN:
 
             * ``VAL3`` - Incident ϕ angle from x axis toward y axis.
 
@@ -558,34 +571,42 @@ class MiscLoads(CommandsBase):
 
             * ``VAL5`` - Not used.
 
-            If ``Wavetype`` = MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = MONO, DIPO, BACK, or BARE:
 
-            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source position.
+            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source
+              position.
 
-            If
-             ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL6`` - Mass density of base medium (defaults to 1.2041 kg/m3).
+            * ``VAL6`` - Mass density of base medium (defaults to 1.2041
+              kg/m3).
 
-            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24 m/s).
+            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24
+              m/s).
 
-            * ``VAL8`` - Radius of pulsating sphere (not used for ``Wavetype`` = PLAN).
+            * ``VAL8`` - Radius of pulsating sphere (not used for
+              ``Wavetype``\ = PLAN).
 
-            * ``VAL9`` - Dipole length (only available for ``Wavetype`` = DIPO, BARE).
+            * ``VAL9`` - Dipole length (only available for ``Wavetype``\ =
+              DIPO, BARE).
 
-            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the positive to the negative. Only available
-              for ``Wavetype`` = DIPO, BARE.
+            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the
+              positive to the negative. Only available for ``Wavetype``\ =
+              DIPO, BARE.
 
-            * ``VAL13`` - Port number if the incident power is required on the port
+            * ``VAL13`` - Port number if the incident power is required on
+              the port
 
         val3 : str
-            If ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL1`` - Amplitude of pressure or normal velocity to the sphere surface.
+            * ``VAL1`` - Amplitude of pressure or normal velocity to the
+              sphere surface.
 
-            * ``VAL2`` - Phase angle of the applied pressure or velocity (in degrees). Defaults to 0 degrees.
+            * ``VAL2`` - Phase angle of the applied pressure or velocity (in
+              degrees). Defaults to 0 degrees.
 
-            If ``Wavetype`` = PLAN:
+            If ``Wavetype``\ = PLAN:
 
             * ``VAL3`` - Incident ϕ angle from x axis toward y axis.
 
@@ -593,34 +614,42 @@ class MiscLoads(CommandsBase):
 
             * ``VAL5`` - Not used.
 
-            If ``Wavetype`` = MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = MONO, DIPO, BACK, or BARE:
 
-            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source position.
+            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source
+              position.
 
-            If
-             ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL6`` - Mass density of base medium (defaults to 1.2041 kg/m3).
+            * ``VAL6`` - Mass density of base medium (defaults to 1.2041
+              kg/m3).
 
-            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24 m/s).
+            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24
+              m/s).
 
-            * ``VAL8`` - Radius of pulsating sphere (not used for ``Wavetype`` = PLAN).
+            * ``VAL8`` - Radius of pulsating sphere (not used for
+              ``Wavetype``\ = PLAN).
 
-            * ``VAL9`` - Dipole length (only available for ``Wavetype`` = DIPO, BARE).
+            * ``VAL9`` - Dipole length (only available for ``Wavetype``\ =
+              DIPO, BARE).
 
-            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the positive to the negative. Only available
-              for ``Wavetype`` = DIPO, BARE.
+            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the
+              positive to the negative. Only available for ``Wavetype``\ =
+              DIPO, BARE.
 
-            * ``VAL13`` - Port number if the incident power is required on the port
+            * ``VAL13`` - Port number if the incident power is required on
+              the port
 
         val4 : str
-            If ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL1`` - Amplitude of pressure or normal velocity to the sphere surface.
+            * ``VAL1`` - Amplitude of pressure or normal velocity to the
+              sphere surface.
 
-            * ``VAL2`` - Phase angle of the applied pressure or velocity (in degrees). Defaults to 0 degrees.
+            * ``VAL2`` - Phase angle of the applied pressure or velocity (in
+              degrees). Defaults to 0 degrees.
 
-            If ``Wavetype`` = PLAN:
+            If ``Wavetype``\ = PLAN:
 
             * ``VAL3`` - Incident ϕ angle from x axis toward y axis.
 
@@ -628,34 +657,42 @@ class MiscLoads(CommandsBase):
 
             * ``VAL5`` - Not used.
 
-            If ``Wavetype`` = MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = MONO, DIPO, BACK, or BARE:
 
-            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source position.
+            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source
+              position.
 
-            If
-             ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL6`` - Mass density of base medium (defaults to 1.2041 kg/m3).
+            * ``VAL6`` - Mass density of base medium (defaults to 1.2041
+              kg/m3).
 
-            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24 m/s).
+            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24
+              m/s).
 
-            * ``VAL8`` - Radius of pulsating sphere (not used for ``Wavetype`` = PLAN).
+            * ``VAL8`` - Radius of pulsating sphere (not used for
+              ``Wavetype``\ = PLAN).
 
-            * ``VAL9`` - Dipole length (only available for ``Wavetype`` = DIPO, BARE).
+            * ``VAL9`` - Dipole length (only available for ``Wavetype``\ =
+              DIPO, BARE).
 
-            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the positive to the negative. Only available
-              for ``Wavetype`` = DIPO, BARE.
+            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the
+              positive to the negative. Only available for ``Wavetype``\ =
+              DIPO, BARE.
 
-            * ``VAL13`` - Port number if the incident power is required on the port
+            * ``VAL13`` - Port number if the incident power is required on
+              the port
 
         val5 : str
-            If ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL1`` - Amplitude of pressure or normal velocity to the sphere surface.
+            * ``VAL1`` - Amplitude of pressure or normal velocity to the
+              sphere surface.
 
-            * ``VAL2`` - Phase angle of the applied pressure or velocity (in degrees). Defaults to 0 degrees.
+            * ``VAL2`` - Phase angle of the applied pressure or velocity (in
+              degrees). Defaults to 0 degrees.
 
-            If ``Wavetype`` = PLAN:
+            If ``Wavetype``\ = PLAN:
 
             * ``VAL3`` - Incident ϕ angle from x axis toward y axis.
 
@@ -663,34 +700,42 @@ class MiscLoads(CommandsBase):
 
             * ``VAL5`` - Not used.
 
-            If ``Wavetype`` = MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = MONO, DIPO, BACK, or BARE:
 
-            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source position.
+            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source
+              position.
 
-            If
-             ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL6`` - Mass density of base medium (defaults to 1.2041 kg/m3).
+            * ``VAL6`` - Mass density of base medium (defaults to 1.2041
+              kg/m3).
 
-            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24 m/s).
+            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24
+              m/s).
 
-            * ``VAL8`` - Radius of pulsating sphere (not used for ``Wavetype`` = PLAN).
+            * ``VAL8`` - Radius of pulsating sphere (not used for
+              ``Wavetype``\ = PLAN).
 
-            * ``VAL9`` - Dipole length (only available for ``Wavetype`` = DIPO, BARE).
+            * ``VAL9`` - Dipole length (only available for ``Wavetype``\ =
+              DIPO, BARE).
 
-            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the positive to the negative. Only available
-              for ``Wavetype`` = DIPO, BARE.
+            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the
+              positive to the negative. Only available for ``Wavetype``\ =
+              DIPO, BARE.
 
-            * ``VAL13`` - Port number if the incident power is required on the port
+            * ``VAL13`` - Port number if the incident power is required on
+              the port
 
         val6 : str
-            If ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL1`` - Amplitude of pressure or normal velocity to the sphere surface.
+            * ``VAL1`` - Amplitude of pressure or normal velocity to the
+              sphere surface.
 
-            * ``VAL2`` - Phase angle of the applied pressure or velocity (in degrees). Defaults to 0 degrees.
+            * ``VAL2`` - Phase angle of the applied pressure or velocity (in
+              degrees). Defaults to 0 degrees.
 
-            If ``Wavetype`` = PLAN:
+            If ``Wavetype``\ = PLAN:
 
             * ``VAL3`` - Incident ϕ angle from x axis toward y axis.
 
@@ -698,34 +743,42 @@ class MiscLoads(CommandsBase):
 
             * ``VAL5`` - Not used.
 
-            If ``Wavetype`` = MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = MONO, DIPO, BACK, or BARE:
 
-            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source position.
+            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source
+              position.
 
-            If
-             ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL6`` - Mass density of base medium (defaults to 1.2041 kg/m3).
+            * ``VAL6`` - Mass density of base medium (defaults to 1.2041
+              kg/m3).
 
-            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24 m/s).
+            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24
+              m/s).
 
-            * ``VAL8`` - Radius of pulsating sphere (not used for ``Wavetype`` = PLAN).
+            * ``VAL8`` - Radius of pulsating sphere (not used for
+              ``Wavetype``\ = PLAN).
 
-            * ``VAL9`` - Dipole length (only available for ``Wavetype`` = DIPO, BARE).
+            * ``VAL9`` - Dipole length (only available for ``Wavetype``\ =
+              DIPO, BARE).
 
-            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the positive to the negative. Only available
-              for ``Wavetype`` = DIPO, BARE.
+            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the
+              positive to the negative. Only available for ``Wavetype``\ =
+              DIPO, BARE.
 
-            * ``VAL13`` - Port number if the incident power is required on the port
+            * ``VAL13`` - Port number if the incident power is required on
+              the port
 
         val7 : str
-            If ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL1`` - Amplitude of pressure or normal velocity to the sphere surface.
+            * ``VAL1`` - Amplitude of pressure or normal velocity to the
+              sphere surface.
 
-            * ``VAL2`` - Phase angle of the applied pressure or velocity (in degrees). Defaults to 0 degrees.
+            * ``VAL2`` - Phase angle of the applied pressure or velocity (in
+              degrees). Defaults to 0 degrees.
 
-            If ``Wavetype`` = PLAN:
+            If ``Wavetype``\ = PLAN:
 
             * ``VAL3`` - Incident ϕ angle from x axis toward y axis.
 
@@ -733,34 +786,42 @@ class MiscLoads(CommandsBase):
 
             * ``VAL5`` - Not used.
 
-            If ``Wavetype`` = MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = MONO, DIPO, BACK, or BARE:
 
-            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source position.
+            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source
+              position.
 
-            If
-             ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL6`` - Mass density of base medium (defaults to 1.2041 kg/m3).
+            * ``VAL6`` - Mass density of base medium (defaults to 1.2041
+              kg/m3).
 
-            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24 m/s).
+            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24
+              m/s).
 
-            * ``VAL8`` - Radius of pulsating sphere (not used for ``Wavetype`` = PLAN).
+            * ``VAL8`` - Radius of pulsating sphere (not used for
+              ``Wavetype``\ = PLAN).
 
-            * ``VAL9`` - Dipole length (only available for ``Wavetype`` = DIPO, BARE).
+            * ``VAL9`` - Dipole length (only available for ``Wavetype``\ =
+              DIPO, BARE).
 
-            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the positive to the negative. Only available
-              for ``Wavetype`` = DIPO, BARE.
+            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the
+              positive to the negative. Only available for ``Wavetype``\ =
+              DIPO, BARE.
 
-            * ``VAL13`` - Port number if the incident power is required on the port
+            * ``VAL13`` - Port number if the incident power is required on
+              the port
 
         val8 : str
-            If ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL1`` - Amplitude of pressure or normal velocity to the sphere surface.
+            * ``VAL1`` - Amplitude of pressure or normal velocity to the
+              sphere surface.
 
-            * ``VAL2`` - Phase angle of the applied pressure or velocity (in degrees). Defaults to 0 degrees.
+            * ``VAL2`` - Phase angle of the applied pressure or velocity (in
+              degrees). Defaults to 0 degrees.
 
-            If ``Wavetype`` = PLAN:
+            If ``Wavetype``\ = PLAN:
 
             * ``VAL3`` - Incident ϕ angle from x axis toward y axis.
 
@@ -768,34 +829,42 @@ class MiscLoads(CommandsBase):
 
             * ``VAL5`` - Not used.
 
-            If ``Wavetype`` = MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = MONO, DIPO, BACK, or BARE:
 
-            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source position.
+            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source
+              position.
 
-            If
-             ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL6`` - Mass density of base medium (defaults to 1.2041 kg/m3).
+            * ``VAL6`` - Mass density of base medium (defaults to 1.2041
+              kg/m3).
 
-            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24 m/s).
+            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24
+              m/s).
 
-            * ``VAL8`` - Radius of pulsating sphere (not used for ``Wavetype`` = PLAN).
+            * ``VAL8`` - Radius of pulsating sphere (not used for
+              ``Wavetype``\ = PLAN).
 
-            * ``VAL9`` - Dipole length (only available for ``Wavetype`` = DIPO, BARE).
+            * ``VAL9`` - Dipole length (only available for ``Wavetype``\ =
+              DIPO, BARE).
 
-            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the positive to the negative. Only available
-              for ``Wavetype`` = DIPO, BARE.
+            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the
+              positive to the negative. Only available for ``Wavetype``\ =
+              DIPO, BARE.
 
-            * ``VAL13`` - Port number if the incident power is required on the port
+            * ``VAL13`` - Port number if the incident power is required on
+              the port
 
         val9 : str
-            If ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL1`` - Amplitude of pressure or normal velocity to the sphere surface.
+            * ``VAL1`` - Amplitude of pressure or normal velocity to the
+              sphere surface.
 
-            * ``VAL2`` - Phase angle of the applied pressure or velocity (in degrees). Defaults to 0 degrees.
+            * ``VAL2`` - Phase angle of the applied pressure or velocity (in
+              degrees). Defaults to 0 degrees.
 
-            If ``Wavetype`` = PLAN:
+            If ``Wavetype``\ = PLAN:
 
             * ``VAL3`` - Incident ϕ angle from x axis toward y axis.
 
@@ -803,34 +872,42 @@ class MiscLoads(CommandsBase):
 
             * ``VAL5`` - Not used.
 
-            If ``Wavetype`` = MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = MONO, DIPO, BACK, or BARE:
 
-            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source position.
+            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source
+              position.
 
-            If
-             ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL6`` - Mass density of base medium (defaults to 1.2041 kg/m3).
+            * ``VAL6`` - Mass density of base medium (defaults to 1.2041
+              kg/m3).
 
-            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24 m/s).
+            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24
+              m/s).
 
-            * ``VAL8`` - Radius of pulsating sphere (not used for ``Wavetype`` = PLAN).
+            * ``VAL8`` - Radius of pulsating sphere (not used for
+              ``Wavetype``\ = PLAN).
 
-            * ``VAL9`` - Dipole length (only available for ``Wavetype`` = DIPO, BARE).
+            * ``VAL9`` - Dipole length (only available for ``Wavetype``\ =
+              DIPO, BARE).
 
-            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the positive to the negative. Only available
-              for ``Wavetype`` = DIPO, BARE.
+            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the
+              positive to the negative. Only available for ``Wavetype``\ =
+              DIPO, BARE.
 
-            * ``VAL13`` - Port number if the incident power is required on the port
+            * ``VAL13`` - Port number if the incident power is required on
+              the port
 
         val10 : str
-            If ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL1`` - Amplitude of pressure or normal velocity to the sphere surface.
+            * ``VAL1`` - Amplitude of pressure or normal velocity to the
+              sphere surface.
 
-            * ``VAL2`` - Phase angle of the applied pressure or velocity (in degrees). Defaults to 0 degrees.
+            * ``VAL2`` - Phase angle of the applied pressure or velocity (in
+              degrees). Defaults to 0 degrees.
 
-            If ``Wavetype`` = PLAN:
+            If ``Wavetype``\ = PLAN:
 
             * ``VAL3`` - Incident ϕ angle from x axis toward y axis.
 
@@ -838,34 +915,42 @@ class MiscLoads(CommandsBase):
 
             * ``VAL5`` - Not used.
 
-            If ``Wavetype`` = MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = MONO, DIPO, BACK, or BARE:
 
-            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source position.
+            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source
+              position.
 
-            If
-             ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL6`` - Mass density of base medium (defaults to 1.2041 kg/m3).
+            * ``VAL6`` - Mass density of base medium (defaults to 1.2041
+              kg/m3).
 
-            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24 m/s).
+            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24
+              m/s).
 
-            * ``VAL8`` - Radius of pulsating sphere (not used for ``Wavetype`` = PLAN).
+            * ``VAL8`` - Radius of pulsating sphere (not used for
+              ``Wavetype``\ = PLAN).
 
-            * ``VAL9`` - Dipole length (only available for ``Wavetype`` = DIPO, BARE).
+            * ``VAL9`` - Dipole length (only available for ``Wavetype``\ =
+              DIPO, BARE).
 
-            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the positive to the negative. Only available
-              for ``Wavetype`` = DIPO, BARE.
+            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the
+              positive to the negative. Only available for ``Wavetype``\ =
+              DIPO, BARE.
 
-            * ``VAL13`` - Port number if the incident power is required on the port
+            * ``VAL13`` - Port number if the incident power is required on
+              the port
 
         val11 : str
-            If ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL1`` - Amplitude of pressure or normal velocity to the sphere surface.
+            * ``VAL1`` - Amplitude of pressure or normal velocity to the
+              sphere surface.
 
-            * ``VAL2`` - Phase angle of the applied pressure or velocity (in degrees). Defaults to 0 degrees.
+            * ``VAL2`` - Phase angle of the applied pressure or velocity (in
+              degrees). Defaults to 0 degrees.
 
-            If ``Wavetype`` = PLAN:
+            If ``Wavetype``\ = PLAN:
 
             * ``VAL3`` - Incident ϕ angle from x axis toward y axis.
 
@@ -873,34 +958,42 @@ class MiscLoads(CommandsBase):
 
             * ``VAL5`` - Not used.
 
-            If ``Wavetype`` = MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = MONO, DIPO, BACK, or BARE:
 
-            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source position.
+            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source
+              position.
 
-            If
-             ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL6`` - Mass density of base medium (defaults to 1.2041 kg/m3).
+            * ``VAL6`` - Mass density of base medium (defaults to 1.2041
+              kg/m3).
 
-            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24 m/s).
+            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24
+              m/s).
 
-            * ``VAL8`` - Radius of pulsating sphere (not used for ``Wavetype`` = PLAN).
+            * ``VAL8`` - Radius of pulsating sphere (not used for
+              ``Wavetype``\ = PLAN).
 
-            * ``VAL9`` - Dipole length (only available for ``Wavetype`` = DIPO, BARE).
+            * ``VAL9`` - Dipole length (only available for ``Wavetype``\ =
+              DIPO, BARE).
 
-            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the positive to the negative. Only available
-              for ``Wavetype`` = DIPO, BARE.
+            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the
+              positive to the negative. Only available for ``Wavetype``\ =
+              DIPO, BARE.
 
-            * ``VAL13`` - Port number if the incident power is required on the port
+            * ``VAL13`` - Port number if the incident power is required on
+              the port
 
         val12 : str
-            If ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL1`` - Amplitude of pressure or normal velocity to the sphere surface.
+            * ``VAL1`` - Amplitude of pressure or normal velocity to the
+              sphere surface.
 
-            * ``VAL2`` - Phase angle of the applied pressure or velocity (in degrees). Defaults to 0 degrees.
+            * ``VAL2`` - Phase angle of the applied pressure or velocity (in
+              degrees). Defaults to 0 degrees.
 
-            If ``Wavetype`` = PLAN:
+            If ``Wavetype``\ = PLAN:
 
             * ``VAL3`` - Incident ϕ angle from x axis toward y axis.
 
@@ -908,34 +1001,42 @@ class MiscLoads(CommandsBase):
 
             * ``VAL5`` - Not used.
 
-            If ``Wavetype`` = MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = MONO, DIPO, BACK, or BARE:
 
-            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source position.
+            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source
+              position.
 
-            If
-             ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL6`` - Mass density of base medium (defaults to 1.2041 kg/m3).
+            * ``VAL6`` - Mass density of base medium (defaults to 1.2041
+              kg/m3).
 
-            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24 m/s).
+            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24
+              m/s).
 
-            * ``VAL8`` - Radius of pulsating sphere (not used for ``Wavetype`` = PLAN).
+            * ``VAL8`` - Radius of pulsating sphere (not used for
+              ``Wavetype``\ = PLAN).
 
-            * ``VAL9`` - Dipole length (only available for ``Wavetype`` = DIPO, BARE).
+            * ``VAL9`` - Dipole length (only available for ``Wavetype``\ =
+              DIPO, BARE).
 
-            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the positive to the negative. Only available
-              for ``Wavetype`` = DIPO, BARE.
+            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the
+              positive to the negative. Only available for ``Wavetype``\ =
+              DIPO, BARE.
 
-            * ``VAL13`` - Port number if the incident power is required on the port
+            * ``VAL13`` - Port number if the incident power is required on
+              the port
 
         val13 : str
-            If ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL1`` - Amplitude of pressure or normal velocity to the sphere surface.
+            * ``VAL1`` - Amplitude of pressure or normal velocity to the
+              sphere surface.
 
-            * ``VAL2`` - Phase angle of the applied pressure or velocity (in degrees). Defaults to 0 degrees.
+            * ``VAL2`` - Phase angle of the applied pressure or velocity (in
+              degrees). Defaults to 0 degrees.
 
-            If ``Wavetype`` = PLAN:
+            If ``Wavetype``\ = PLAN:
 
             * ``VAL3`` - Incident ϕ angle from x axis toward y axis.
 
@@ -943,35 +1044,54 @@ class MiscLoads(CommandsBase):
 
             * ``VAL5`` - Not used.
 
-            If ``Wavetype`` = MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = MONO, DIPO, BACK, or BARE:
 
-            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source position.
+            * ``VAL3 - VAL5`` - Global Cartesian coordinate values of source
+              position.
 
-            If
-             ``Wavetype`` = PLAN, MONO, DIPO, BACK, or BARE:
+            If ``Wavetype``\ = PLAN, MONO, DIPO, BACK, or BARE:
 
-            * ``VAL6`` - Mass density of base medium (defaults to 1.2041 kg/m3).
+            * ``VAL6`` - Mass density of base medium (defaults to 1.2041
+              kg/m3).
 
-            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24 m/s).
+            * ``VAL7`` - Speed of sound in base medium (defaults to 343.24
+              m/s).
 
-            * ``VAL8`` - Radius of pulsating sphere (not used for ``Wavetype`` = PLAN).
+            * ``VAL8`` - Radius of pulsating sphere (not used for
+              ``Wavetype``\ = PLAN).
 
-            * ``VAL9`` - Dipole length (only available for ``Wavetype`` = DIPO, BARE).
+            * ``VAL9`` - Dipole length (only available for ``Wavetype``\ =
+              DIPO, BARE).
 
-            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the positive to the negative. Only available
-              for ``Wavetype`` = DIPO, BARE.
+            * ``VAL10 - VAL12`` - Unit vector of dipole axis from the
+              positive to the negative. Only available for ``Wavetype``\ =
+              DIPO, BARE.
 
-            * ``VAL13`` - Port number if the incident power is required on the port
+            * ``VAL13`` - Port number if the incident power is required on
+              the port
+
+        kcn : str
+            A predefined local (``KCN``\ >10) or global (``KCN``\ = 0)
+            Cartesian coordinate system number used to specify the direction
+            of normal velocity for ``Wavetype``\ = BACK. Defaults to the
+            global Cartesian coordinate system (``KCN``\ = 0). The local
+            Z-direction must be the direction of normal velocity.
 
         Notes
         -----
-        Use the :ref:`asol` command to activate the scattered field algorithm and the :ref:`ascres` command
-        for output control with the scattered field algorithm. Refer to `Acoustics
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thyacous_poroelastic.html>`_
 
+        .. _AWAVE_notes:
 
+        Use the `ASOL
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ASOL.html>`_\
+        command to activate the scattered field algorithm and the `ASCRES
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ASCRES.html>`_\
+        command for output control with the scattered field algorithm. Refer to
+        `Acoustics in the Theory Reference
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_thry/thy_acou.html>`_
+        for more information about pure scattered field formulation.
         """
-        command = f"AWAVE,{wavenum},{wavetype},{opt1},{opt2},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13}"
+        command = f"AWAVE,{wavenum},{wavetype},{opt1},{opt2},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13},{kcn}"
         return self.run(command, **kwargs)
 
     def biot(self, label: str = "", **kwargs):
@@ -1213,106 +1333,198 @@ class MiscLoads(CommandsBase):
         value2: str = "",
         nend: str = "",
         ninc: str = "",
+        lsic: str = "",
         **kwargs,
     ):
         r"""Specifies initial conditions at nodes.
 
-        Mechanical APDL Command: `IC <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_IC.html>`_
+        Mechanical APDL Command: `IC <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_IC.html>`_
 
         Parameters
         ----------
         node : str
-            Node at which initial condition is to be specified. If ALL, apply to all selected nodes (
-            :ref:`nsel` ). If ``NODE`` = P, graphical picking is enabled and all remaining command fields
-            are ignored (valid only in the GUI). A component name may be substituted for ``NODE``.
+            Node at which initial condition is to be specified. If ALL,
+            apply to all selected nodes (`NSEL
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSEL.html>`_).
+            If ``NODE``\ = P, graphical picking is enabled and all remaining
+            command fields are ignored (valid only in the GUI). A component
+            name may be substituted for ``NODE``.
 
         lab : str
-            Degree-of-freedom label for which the initial condition is to be specified. If ALL, use all
-            appropriate labels.
+            Degree-of-freedom label for which the initial condition is to be
+            specified. If ALL, use all appropriate labels.
 
-            * **Structural labels** : UX, UY, or UZ (displacements); ROTX, ROTY, or ROTZ (rotations); HDSP
-              (hydrostatic pressure); PRES (pore pressure)
-            * For structural static and transient analyses, specify translational and rotational velocities as
-              initial conditions using these labels: VELX, VELY, VELZ (translational velocities); OMGX, OMGY,
-              OMGZ (rotational velocities).
-            * For structural transient analysis, specify translational and rotational accelerations as initial
-              conditions using these labels: ACCX, ACCY, ACCZ (translational accelerations); DMGX, DMGY, DMGZ
-              (rotational accelerations).
-            * The velocity and acceleration initial conditions are not included with ``Lab`` = ALL.
-            * **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature)
-            * **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential)
-            * **Diffusion label** : CONC (concentration)
-            * **Acoustic label** : ENKE (acoustic energy density)
+            * **Structural labels**: UX, UY, or UZ (displacements); ROTX,
+              ROTY, or ROTZ (rotations); HDSP (hydrostatic pressure); PRES
+              (pore pressure)
+
+            * For structural static and transient analyses, specify
+              translational and rotational velocities as initial conditions
+              using these labels: VELX, VELY, VELZ (translational
+              velocities); OMGX, OMGY, OMGZ (rotational velocities).
+
+            * For structural transient analysis, specify translational and
+              rotational accelerations as initial conditions using these
+              labels: ACCX, ACCY, ACCZ (translational accelerations); DMGX,
+              DMGY, DMGZ (rotational accelerations).
+
+            * The velocity and acceleration initial conditions are *not*\
+              included with ``Lab``\ = ALL.
+
+            * For MSUP transient analysis, only the displacement and
+              velocity initial conditions are supported.
+
+            * **Thermal labels**: TEMP, TBOT, TE2, TE3,..., TTOP
+              (temperature)
+
+            * **Magnetic labels**: MAG (scalar magnetic potential); AZ
+              (vector magnetic potential)
+
+            * **Diffusion label**: CONC (concentration)
+
+            * **Acoustic label**: ENKE (acoustic energy density)
 
         value : str
-            Initial value of the degree of freedom. Defaults to the program default for that degree of
-            freedom (0.0 for structural analysis, :ref:`tunif` for thermal analysis, etc.). Values are in
-            the nodal coordinate system and in radians for rotational degrees of freedom.
+            Initial value of the degree of freedom. Defaults to the program
+            default for that degree of freedom (0.0 for structural analysis,
+            `TUNIF
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TUNIF.html>`_\
+            for thermal analysis, etc.). Values are in the nodal coordinate
+            system and in radians for rotational degrees of freedom.
 
         value2 : str
-            Second-order degree of freedom value, mainly used for non-structural DOF where VELX can't be
-            used. Defaults to the program default for that degree of freedom (0.0 for structural analysis).
-            Values are in the nodal coordinate system and in radians/time for rotational degrees of freedom.
+            Second-order degree of freedom value, mainly used for
+            non-structural DOF where VELX can't be used. Defaults to the
+            program default for that degree of freedom (0.0 for structural
+            analysis). Values are in the nodal coordinate system and in
+            radians/time for rotational degrees of freedom.
 
         nend : str
-            Specifies the same initial condition values at the range of nodes from ``NODE`` to ``NEND``
-            (defaults to ``NODE`` ), in steps of ``NINC`` (defaults to 1).
+            Specifies the same initial condition values at the range of
+            nodes from ``NODE``\ to ``NEND``\ (defaults to ``NODE``), in
+            steps of ``NINC``\ (defaults to 1).
 
         ninc : str
-            Specifies the same initial condition values at the range of nodes from ``NODE`` to ``NEND``
-            (defaults to ``NODE`` ), in steps of ``NINC`` (defaults to 1).
+            Specifies the same initial condition values at the range of
+            nodes from ``NODE``\ to ``NEND``\ (defaults to ``NODE``), in
+            steps of ``NINC``\ (defaults to 1).
+
+        lsic : str
+            To apply the initial condition at a load step other than the
+            first step, issue the `IC
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_IC.html>`_\
+            command at that load step. Specify ``LSIC``\ in the field at
+            that load step to tell the solver that this is a Load Step
+            Initial Condition. See `"Example Usage"
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_IC.html#IC.example>`_.
+            This option is only valid for the static and full transient
+            (`TRNOPT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TRNOPT.html>`_,FULL)
+            analysis type.
 
         Notes
         -----
 
         .. _IC_notes:
 
-        The :ref:`ic` command specifies initial conditions, which are the initial values of the specified
-        degrees of freedom. It is valid only for a static analysis and full method transient analysis (
-        :ref:`timint`,ON and :ref:`trnopt`,FULL). For the transient, the initial value is specified at the
-        beginning of the first load step, that is, at time = 0.0.
+        The `IC
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_IC.html>`_\
+        command specifies initial conditions, which are the initial values of
+        the specified degrees of freedom. This command is valid static analysis
+        (`ANTYPE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ANTYPE.html>`_,STATIC)
+        and transient analysis (`ANTYPE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ANTYPE.html>`_,TRANS).
+        However, for Mode Superposition transient (`TRNOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TRNOPT.html>`_,
+        MSUP), only the displacement and velocity fields are supported and
+        acceleration is not supported. For the transient, the initial value is
+        specified at the beginning of the first load step, that is, at time =
+        0.0.
 
-        If constraints ( :ref:`d`, :ref:`dsym`, etc.) and initial conditions are applied at the same node,
-        the constraint specification overrides. Exercise caution when specifying constraints. The degree-of-
-        freedom values start from zero, or the first value given in the table when table name is specified.
-        To match the nonzero initial condition value with the initial value for degree-of-freedom
-        constraint, use a table for the degree-of-freedom constraint.
+        If constraints (`D
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_D.html>`_,
+        `DSYM
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DSYM.html>`_,
+        etc.) and initial conditions are applied at the same node, the
+        constraint specification overrides. Exercise caution when specifying
+        constraints. The degree-of-freedom values start from zero, or the first
+        value given in the table when table name is specified. To match the
+        nonzero initial condition value with the initial value for
+        degree-of-freedom constraint, use a table for the degree-of-freedom
+        constraint.
 
-        For thermal analyses, any :ref:`tunif` specification should be applied before the :ref:`ic` command;
-        otherwise, the :ref:`tunif` specification is ignored. If the :ref:`ic` command is input before any
-        :ref:`tunif` specification, use the :ref:`icdele` command and then reissue any :ref:`tunif`
-        specification and then follow with the :ref:`ic` command.
+        For thermal analyses, any `TUNIF
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TUNIF.html>`_\
+        specification should be applied before the `IC
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_IC.html>`_\
+        command. Otherwise, the `TUNIF
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TUNIF.html>`_\
+        specification is ignored. If the `IC
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_IC.html>`_\
+        command is input before any `TUNIF
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TUNIF.html>`_\
+        specification, use the `ICDELE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ICDELE.html>`_\
+        command and then reissue any `TUNIF
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TUNIF.html>`_\
+        specification and then follow with the `IC
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_IC.html>`_\
+        command.
 
-        When issuing the :ref:`ic` command for elements ``SOLID278``  `Layered Thermal Solid
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_SOLID278.html#SOLID278L.fig.1>`_
-        and ``SOLID279``  `Layered Thermal Solid
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_SOLID279.html#SOLID279L.fig.1>`_
-        with through-the-thickness degrees of freedom (KEYOPT(3) = 2), layers are always interpolated
-        linearly based on the location of the degrees of freedom.
+        When issuing the `IC
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_IC.html>`_\
+        command for elements `SOLID278
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID278.html>`_
+        `Layered Thermal Solid
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID278.html#SOLID278L.description>`_
+        and `SOLID279
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID279.html>`_
+        `Layered Thermal Solid
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID279.html#SOLID279L.description>`_
+        with through-the-thickness degrees of freedom (KEYOPT(3) = 2), layers
+        are always interpolated linearly based on the location of the degrees of
+        freedom.
 
-        Define consistent initial conditions. For example, if you define an initial velocity at a single
-        degree of freedom, the initial velocity at every other degree of freedom will be 0.0, potentially
-        leading to conflicting initial conditions. In most cases, you should define initial conditions at
-        every unconstrained degree of freedom in your model. If you define an initial condition for any
-        degree of freedom at the pilot node of a rigid body (see `Modeling Rigid Bodies
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/ctecrigidbodies.html#strmodrigidbod>`_
-        in the `Contact Technology Guide
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/ctec_flpressexamp.html>`_ for the
-        definition of rigid body), then the same initial condition must also be
-        defined for the same degree of freedom on all other nodes of the rigid body.
+        Define consistent initial conditions. For example, if you define an
+        initial velocity at a single degree of freedom, the initial velocity at
+        every other degree of freedom will be 0.0, potentially leading to
+        conflicting initial conditions. In most cases, you should define initial
+        conditions at every unconstrained degree of freedom in your model. If
+        you define an initial condition for any degree of freedom at the pilot
+        node of a rigid body (see `Modeling Rigid Bodies
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/ctecrigidbodies.html>`_
+        in the `*Contact Technology Guide*\
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/ctectoc.html>`_
+        for the definition of rigid body), then the same initial condition must
+        also be defined for the same degree of freedom on all other nodes of the
+        rigid body.
 
-        After a solution has been performed, the specified initial conditions are overwritten by the actual
-        solution and are no longer available. You must respecify them if you want to perform a subsequent
-        analysis. You may want to keep a database file saved prior to the first solution for subsequent
-        reuse.
+        After a solution has been performed, the specified initial conditions
+        are overwritten by the actual solution and are no longer available. You
+        must respecify them if you want to perform a subsequent analysis. You
+        may want to keep a database file saved prior to the first solution for
+        subsequent reuse.
 
-        If you use the :ref:`cdwrite` command to archive your model, initial displacements, temperatures,
-        etc. specified via the :ref:`ic` command are not written to the archive file; initial velocities and
-        accelerations are written.
+        If you use the `CDWRITE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_\
+        command to archive your model, initial displacements, temperatures, etc.
+        specified via the `IC
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_IC.html>`_\
+        command are not written to the archive file. Initial velocities and
+        accelerations *are*\ written.
 
         This command is also valid in PREP7.
+
+        **Example Usage**
+
+        Use the ``LSIC``\ field to apply the initial condition at a load step
+        other than the first step. For example, if you want vely to be 500 in
+        the second load step, then issue the following command:
+
+        ``ic,nsnodes,vely,500,,,,LSIC``\
         """
-        command = f"IC,{node},{lab},{value},{value2},{nend},{ninc}"
+        command = f"IC,{node},{lab},{value},{value2},{nend},{ninc},{lsic}"
         return self.run(command, **kwargs)
 
     def icdele(self, **kwargs):
@@ -2439,6 +2651,47 @@ class MiscLoads(CommandsBase):
         This command is also valid in PREP7.
         """
         command = "SBCTRAN"
+        return self.run(command, **kwargs)
+
+    def scconnect(
+        self, hostname: str = "", portnum: str = "", solutionname: str = "", **kwargs
+    ):
+        r"""Specifies System Coupling connection parameters.
+
+        Mechanical APDL Command: `SCCONNECT <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SCCONNECT.html>`_
+
+        Parameters
+        ----------
+        hostname : str
+            Specifies the host machine on which the coupling service is
+            running (to which the co-simulation participant/solver must
+            connect) in a System Coupling analysis.
+
+        portnum : str
+            Specifies the port on the host machine upon which the coupling
+            service is listening for connections from co-simulation
+            participants in a System Coupling analysis.
+
+        solutionname : str
+            Specifies the unique name used by the co-simulation participant
+            to identify itself to the coupling service in a System Coupling
+            analysis.
+
+        Notes
+        -----
+
+        .. _SCCONNECT_notes:
+
+        Use this command to specify System Coupling connection parameters.
+        Alternatively, you can specify System Coupling connection parameters
+        using command line options (see `Starting a Mechanical APDL Session from
+        the Command Level in the Operations Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ope/Hlp_G_OPE3_1.html>`_).
+        For information on System Coupling, see `System Coupling in the
+        Mechanical User's Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/wb_sim/ds_systemcoup.html>`_.
+        """
+        command = f"SCCONNECT,{hostname},{portnum},{solutionname}"
         return self.run(command, **kwargs)
 
     def wsprings(self, **kwargs):

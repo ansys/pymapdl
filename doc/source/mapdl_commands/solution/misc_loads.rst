@@ -35,4 +35,5 @@ MiscLoads
    MiscLoads.rstcontrol
    MiscLoads.sbclist
    MiscLoads.sbctran
+   MiscLoads.scconnect
    MiscLoads.wsprings

@@ -43,3 +43,7 @@ DynamicOptions
    DynamicOptions.timint
    DynamicOptions.tintp
    DynamicOptions.trnopt
+
+.. seealso::
+
+   :meth:`~ansys.mapdl.core._commands.solution.nonlinear_options.NonlinearOptions.hbmopt`

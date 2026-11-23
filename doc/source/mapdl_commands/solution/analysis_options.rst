@@ -22,6 +22,7 @@ AnalysisOptions
    AnalysisOptions.ascres
    AnalysisOptions.asol
    AnalysisOptions.bcsoption
+   AnalysisOptions.cefilter
    AnalysisOptions.cjump
    AnalysisOptions.cload
    AnalysisOptions.cmatrix
@@ -52,6 +53,7 @@ AnalysisOptions
    AnalysisOptions.pcgopt
    AnalysisOptions.perturb
    AnalysisOptions.pivcheck
+   AnalysisOptions.prea
    AnalysisOptions.prscontrol
    AnalysisOptions.pscontrol
    AnalysisOptions.psolve

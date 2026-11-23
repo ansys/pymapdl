@@ -1476,18 +1476,21 @@ class SpectrumOptions(CommandsBase):
         nmode: str = "",
         elcalc: str = "",
         modereusekey: str = "",
+        speccum: str = "",
         **kwargs,
     ):
         r"""Selects the spectrum type and other spectrum options.
 
-        Mechanical APDL Command: `SPOPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPOPT.html>`_
+        Mechanical APDL Command: `SPOPT <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SPOPT.html>`_
 
         Parameters
         ----------
         spectype : str
             Spectrum type:
 
-            * ``SPRS`` - Single point excitation response spectrum (default). See also :ref:`svtyp`.
+            * ``SPRS`` - Single point excitation response spectrum
+              (default). See also `SVTYP
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SVTYP.html>`_.
 
             * ``MPRS`` - Multiple point excitation response spectrum.
 
@@ -1496,55 +1499,170 @@ class SpectrumOptions(CommandsBase):
             * ``PSD`` - Power spectral density.
 
         nmode : str
-            Use the first ``NMODE`` modes from the modal analysis. Defaults to all extracted modes, as
-            specified by the :ref:`modopt` and :ref:`bucopt` commands. ``NMODE`` cannot be larger than
-            10000.
+            Use the first ``NMODE``\ modes from the modal analysis. Defaults
+            to all extracted modes, as specified by the `MODOPT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MODOPT.html>`_\
+            and `BUCOPT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BUCOPT.html>`_\
+            commands. ``NMODE``\ cannot be larger than 10000.
 
         elcalc : str
             Element results calculation key:
 
-            * ``NO`` - Do not calculate element results and reaction forces (default).
+            * ``NO`` - Do not calculate element results and reaction forces
+              (default).
 
-            * ``YES`` - Calculate element results and reaction forces, as well as the nodal degree of freedom
-              solution.
+            * ``YES`` - Calculate element results and reaction forces, as
+              well as the nodal degree of freedom solution.
 
         modereusekey : str
-            Key for existing ``MODE`` file reuse when running multiple spectrum analyses:
+            Key for existing ``MODE``\ file reuse when running multiple
+            spectrum analyses:
 
-            * ``NO`` - No spectrum analysis has been performed yet (default).
+            * ``NO`` - No spectrum analysis has been performed yet
+              (default).
 
-            * ``YES`` - This is not the first spectrum analysis. The ``MODE`` file will be reused and the
-              necessary files will be cleaned up for the new spectrum analysis.
+            * ``YES`` - This is not the first spectrum analysis. The
+              ``MODE``\ file will be reused and the necessary files will be
+              cleaned up for the new spectrum analysis.
+
+        speccum : str
+            Key to cumulate all response spectra solutions in
+            ``Jobname.rst``\ when multiple response spectra are calculated
+            (only supported for SPRS and DDAM analyses with ``Elcalc``\ =
+            YES):
+
+            * ``NO`` - Do not cumulate the response spectra solutions
+              (default).
+
+            * ``YES`` - Cumulate the response spectra solutions.
 
         Notes
         -----
 
         .. _SPOPT_notes:
 
-        Valid only for a spectrum analysis ( :ref:`antype`,SPECTR). This operation must be preceded by a
-        modal solution ( :ref:`antype`,MODAL) with the appropriate files available. Both the spectrum
-        analysis and the preceding modal analysis must be performed under the same Mechanical APDL version
-        number.
+        Valid only for a spectrum analysis (`ANTYPE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ANTYPE.html>`_,SPECTR).
+        This operation must be preceded by a modal solution (`ANTYPE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ANTYPE.html>`_,MODAL)
+        with the appropriate files available. Both the spectrum analysis and the
+        preceding modal analysis must be performed under the same Mechanical
+        APDL version number.
 
-        If used in SOLUTION, this command is valid only within the first load step.
+        If used in SOLUTION, this command is valid only within the first load
+        step.
 
-        Element results are calculated ( ``Elcalc`` = YES) only if the element modal results are available
-        (written to the :file:`Jobname.mode` file with ``MSUPkey`` = YES on the :ref:`mxpand` command). For
-        ``Sptype`` = SPRS, MPRS, and DDAM, if the element results calculation is activated ( ``Elcalc`` =
-        YES) and element modal results are not available, it is deactivated automatically.
+        Element results are calculated (``Elcalc``\ = YES) only if the element
+        modal results are available (written to the ``Jobname.mode``\ file with
+        ``MSUPkey``\ = YES on the `MXPAND
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MXPAND.html>`_\
+        command). For ``Sptype``\ = SPRS, MPRS, and DDAM, if the element results
+        calculation is activated (``Elcalc``\ = YES) and element modal results
+        are not available, it is deactivated automatically.
 
-        For SPRS, DDAM or MPRS analyses, modal responses can be combined and stored directly in the
-        :file:`Jobname.rst` file during spectrum solution according to the mode combination method command
-        issued ( :ref:`srss`, :ref:`cqc`, etc.) for ``Elcalc`` = YES. This can save significant time
-        compared to the method for ``Elcalc`` = NO, which requires generating the file of POST1 commands (
-        :file:`Jobname.mcom` file) to be read in POST1 to do the mode combinations. For details and example
-        usage, see `Spectrum Analysis
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_STR6_10.html>`_, and Example:
-        Multi-Point Response Spectrum (MPRS) Analysis.
+        For SPRS, DDAM or MPRS analyses, when ``Elcalc``\ = YES, the modal
+        responses can be combined and stored directly in the ``Jobname.rst``\
+        file during spectrum solution according to the mode combination method
+        command issued (`SRSS
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SRSS.html>`_,
+        `CQC
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CQC.html>`_,
+        etc.). This can save significant time compared to the method for
+        ``Elcalc``\ = NO, which requires generating the file of POST1 commands
+        (``Jobname.mcom``\ file) to be read in POST1 to perform the mode
+        combinations. For details and example usage, see `Spectrum Analysis in
+        the Structural Analysis Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6.html>`_,
+        `Example 6.2: Calculating the Velocity Solution in Addition to the
+        Displacement Solution with Elcalc\ = YES on SPOPT\ command
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_4.html#str_specExVelElcalc>`_,
+        and `Example: Multi-Point Response Spectrum (MPRS) Analysis
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_10.html#sect3_m44_z3g_2v>`_.
+
+        When multiple response spectra solutions are calculated in SPRS or DDAM
+        analyses with ``Elcalc``\ = YES on the `SPOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SPOPT.html>`_\
+        command:
+
+        * When missing mass is disabled (`MMASS
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MMASS.html>`_):
+
+          * If ``SpecCum``\ = NO, each new response spectrum set overwrites
+            the previous one at each solve in ``Jobname.rst.``\
+
+          * If ``SpecCum``\ = YES, all response spectra are cumulated in
+            ``Jobname.rst``.
+
+        * When missing mass is activated (`MMASS
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MMASS.html>`_,ON)
+          in a SPRS analysis:
+
+          * If ``SpecCum``\ = NO, the missing mass response (loadstep 2) and
+            the response spectrum sets are cumulated in ``Jobname.rst``\ until
+            the `FINISH
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_FINISH.html>`_\
+            command is issued, which activates the deletion of any response
+            spectrum set between two missing mass response sets. Only the last
+            response spectrum set is kept in ``Jobname.rst``. See
+            `Single-Point Response Spectrum Analysis on a Piping Structure
+            with Excitation Along X, Y, and Z Directions, missing mass effect,
+            Elcalc\ = YES and SpecCum\ = NO on SPOPT\ command in the
+            Structural Analysis Guide
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_6.html#str_spec-ElcalcY-SpecCumN>`_.
 
         This command is also valid in PREP7.
+
+        **Example Usage**
+
+        `Example 6.1: Calculating the Velocity Solution in Addition to the
+        Displacement Solution
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_4.html#ans_str_mmass_exinput>`_
+
+        `Example 6.2: Calculating the Velocity Solution in Addition to the
+        Displacement Solution with Elcalc\ = YES on SPOPT\ command
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_4.html#str_specExVelElcalc>`_
+
+        `6.4.1: Single-Point Response Spectrum Analysis on a Beam Structure
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_6.html#str_spec-SPRSbeam>`_
+
+        `6.4.2: Single-Point Response Spectrum Analysis on a Piping Structure
+        with Excitation Along X, Y, and Z Directions
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_6.html#str_spec_ex_sprs_xyz>`_
+
+        `6.4.3: Single-Point Response Spectrum Analysis on a Piping Structure
+        with Excitation along X, Y, and Z Directions Separately by Reusing the
+        Existing Mode File
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_6.html#str_spec-SPRSreuseMod>`_
+
+        `6.4.4: Single-Point Response Spectrum Analysis on a Piping Structure
+        with Excitation Along X, Y, and Z Directions, missing mass effect,
+        Elcalc\ = YES and SpecCum\ = NO on SPOPT\ command
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_6.html#str_spec-ElcalcY-SpecCumN>`_
+
+        `6.4.5: Single-Point Response Spectrum Analysis on a Piping Structure
+        with Excitation Along X, Y, and Z Directions, missing mass effect,
+        Elcalc = YES and SpecCum\ = YES on SPOPT\ command: method 1
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_6.html#str_spec-ElcalcYmethod1>`_
+
+        `6.4.6: Single-Point Response Spectrum Analysis on a Piping Structure
+        with Excitation Along X, Y, and Z Directions, missing mass effect,
+        Elcalc\ = YES on SPOPT\ command: method 2
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_6.html#str_spec-ElcalcYmethod2>`_
+
+        `Example: Random Vibration (PSD) Analysis
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_8.html#aiiQxq1b2mcm>`_
+
+        `Example: DDAM Spectrum Analysis
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_9.html#str_spec_exDDAM>`_
+
+        `Example: Multi-Point Response Spectrum (MPRS) Analysis
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_10.html#spectrum_multipoint>`_
+
+        `Where to Find Other Examples
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR6_7.html>`_
         """
-        command = f"SPOPT,{spectype},{nmode},{elcalc},{modereusekey}"
+        command = f"SPOPT,{spectype},{nmode},{elcalc},{modereusekey},{speccum}"
         return self.run(command, **kwargs)
 
     def spunit(
