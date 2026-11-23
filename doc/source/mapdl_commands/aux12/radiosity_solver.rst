@@ -21,5 +21,5 @@ RadiositySolver
 
 .. seealso::
 
-   :meth:`~ansys.mapdl.core._commands.solution.radiosity.Radiosity.vfdi`
-   :meth:`~ansys.mapdl.core._commands.solution.radiosity.Radiosity.vfup`
+   :meth:`mapdl.vfdi() <ansys.mapdl.core.Mapdl.vfdi>`
+   :meth:`mapdl.vfup() <ansys.mapdl.core.Mapdl.vfup>`

@@ -520,13 +520,13 @@ class _ExtendedPrep7CommandsMixin(_ExtendedMixinBase):
                     "Cannot specify both 'value1' and deprecated 'addional_command_arg'."
                 )
             warnings.warn(
-                "'addional_command_arg' is deprecated and will be removed in a future "
-                "release; use 'value1' instead.",
+                "'addional_command_arg' is deprecated in v0.74.0 and will be removed "
+                "in v0.77.0; use 'value1' instead.",
                 DeprecationWarning,
                 stacklevel=2,
             )
             value1 = legacy_val
-        return getattr(super(), "secmodif")(
+        return super().secmodif(
             secid=secid,
             kywrd=kywrd,
             value1=value1,

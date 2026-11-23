@@ -40,4 +40,4 @@ MiscLoads
 
 .. seealso::
 
-   :meth:`~ansys.mapdl.core._commands.prep7.materials.Materials.nsmass`
+   :meth:`mapdl.nsmass() <ansys.mapdl.core.Mapdl.nsmass>`

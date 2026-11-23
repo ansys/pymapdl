@@ -46,4 +46,4 @@ DynamicOptions
 
 .. seealso::
 
-   :meth:`~ansys.mapdl.core._commands.solution.nonlinear_options.NonlinearOptions.hbmopt`
+   :meth:`mapdl.hbmopt() <ansys.mapdl.core.Mapdl.hbmopt>`
