@@ -36,3 +36,7 @@ MiscLoads
    MiscLoads.sbclist
    MiscLoads.sbctran
    MiscLoads.wsprings
+
+.. seealso::
+
+   :meth:`~ansys.mapdl.core._commands.prep7.materials.Materials.nsmass`

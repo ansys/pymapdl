@@ -54,489 +54,752 @@ class DataTables(CommandsBase):
         return self.run(command, **kwargs)
 
     def cgrow(
-        self, action: str = "", par1: str = "", par2: str = "", par3: str = "", **kwargs
+        self,
+        action: str = "",
+        par1: str = "",
+        par2: str = "",
+        par3: str = "",
+        par4: str = "",
+        **kwargs,
     ):
         r"""Specifies crack-growth options in a fracture analysis.
 
-        Mechanical APDL Command: `CGROW <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CGROW.html>`_
+        Mechanical APDL Command: `CGROW <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_
 
         Parameters
         ----------
         action : str
-            Specifies the action for defining or manipulating crack-growth data:
+            Specifies the action for defining or manipulating crack-growth
+            data:
 
-            * `Command Specification for Action= NEW
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ NEW - Initiate
-              a new set of crack-growth simulation data (default).
+            * ``NEW`` - Initiate a new set of crack-growth simulation data
+              (default).
 
-            * `Command Specification for Action= CID
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ CID - Specify
-              the crack-calculation ( :ref:`cint` ) ID for energy-release rates to be used in the fracture
+            * ``CID`` - Specify the crack-calculation (`CINT
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CINT.html>`_)
+              ID for energy-release rates to be used in the fracture
               criterion calculation.
 
-            * `Command Specification for Action= FCOPTION
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ FCOPTION -
-              Specify the fracture criterion for crack-growth/delamination.
+            * ``CGID`` - Activate an existing crack-growth ID to modify its
+              crack-growth settings via subsequent `CGROW
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_\
+              commands.
 
-            * `Command Specification for Action= CSFL
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ CSFL - Specify
-              a crack-surface load for crack-growth.
+            * ``FCOPTION`` - Specify the fracture criterion for
+              crack-growth/delamination.
 
-            * `Command Specification for Action= CPATH
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ CPATH - Specify
-              the element component for crack-growth.
+            * ``CSFL`` - Specify a crack-surface load for crack-growth.
 
-            * `Command Specification for Action= DTIME
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ DTIME - Specify
-              the initial time step for crack-growth.
+            * ``CPATH`` - Specify the element component for crack-growth.
 
-            * `Command Specification for Action= DTMIN
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ DTMIN - Specify
-              the minimum time step for crack-growth.
+            * ``DTIME`` - Specify the initial time step for crack-growth.
 
-            * `Command Specification for Action= DTMAX
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ DTMAX - Specify
-              the maximum time step for crack-growth.
+            * ``DTMIN`` - Specify the minimum time step for crack-growth.
 
-            * `Command Specification for Action= FCRAT
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ FCRAT -
-              Fracture criterion ratio ( `fc
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_STR_VCCT.html#vcctuserdeffractcrit>`_
-              c ).
+            * ``DTMAX`` - Specify the maximum time step for crack-growth.
 
-            * `Command Specification for Action= STOP
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ STOP - Stops
-              the analysis when the specified criterion ( ``Par1`` ) is reached.
+            * ``FCRAT`` - Fracture criterion ratio (`fc
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/Hlp_G_STR_VCCT.html#vcctfractcrit>`_).
 
-            * `Command Specification for Action= METHOD
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ METHOD - Define
-              the method of crack propagation.
+            * ``STOP`` - Stop the analysis when the specified criterion
+              (``Par1``) is reached.
 
-            * `Command Specification for Action= FCG
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ FCG - Specifies
-              `fatigue crack-growth
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracfcgxfem.html#fracfcgxfemexample>`_.
+            * ``METHOD`` - Define the method of crack propagation.
 
-            * `Command Specification for Action= SOPT
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ SOPT -
-              Specifies the crack-growth solution option in a multicrack analysis.
+            * ``FCG`` - Specify `fatigue crack-growth
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracfcgxfem.html>`_.
 
-            * `Command Specification for Action= RMCONT
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ RMCONT -
-              Specifies remeshing control options for mesh coarsening.
+            * ``SOPT`` - Specify crack-growth solution options.
 
-            * `Command Specification for Action= NPLOAD
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_CGROW.html#>`_ NPLOAD -
-              Specifies `nonproportional loading
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#>`_ control options
-              for fatigue crack-growth.
+            * ``RMCONT`` - Specify remeshing control options for mesh
+              coarsening.
+
+            * ``NPLOAD`` - Specify `nonproportional loading
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html#fracsmartnonpoport>`_
+              control options for fatigue crack-growth.
 
         par1 : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
+            Command argument ``PAR1``. Refer to the `CGROW command
             documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CGROW.html>`_ for further
-            information.
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_
+            for option-specific definitions.
 
         par2 : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
+            Command argument ``PAR2``. Refer to the `CGROW command
             documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CGROW.html>`_ for further
-            information.
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_
+            for option-specific definitions.
 
         par3 : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
+            Command argument ``PAR3``. Refer to the `CGROW command
             documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CGROW.html>`_ for further
-            information.
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_
+            for option-specific definitions.
+
+        par4 : str
+            Command argument ``PAR4``. Refer to the `CGROW command
+            documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_
+            for option-specific definitions.
 
         Notes
         -----
 
         .. _CGROW_notes:
 
-        When ``Action`` = NEW, the :ref:`cgrow` command initializes a crack-growth simulation set.
-        Subsequent :ref:`cgrow` commands define the parameters necessary for the simulation.
+        **Command Specification for Action = NEW**
 
-        For multiple cracks, issue multiple :ref:`cgrow`,NEW commands (and any subsequent :ref:`cgrow`
-        commands necessary to define the parameters) for each crack.
-
-        If the analysis is restarted ( :ref:`antype`,,RESTART), the :ref:`cgrow` command must be re-issued.
-
-        If the :ref:`save` command is issued after any :ref:`cgrow` commands are issued, the :ref:`cgrow`
-        commands are not saved to the database. Reissue the :ref:`cgrow` command(s) when the database is
-        resumed.
-
-        **For** `SMART
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_
-        -based crack-growth:
-
-        * ``Action`` = CPATH has no effect.
-
-        * ``Action`` = STOP affects both SMART-based `static
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#frackbasedsifs>`_
-          and `fatigue
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#fracfcgreferences>`_
-          crack-growth analyses.
-
-        * When ``Action`` = CSFL with ``Option`` = CZM, the remeshing for cracks associated with this option
-          is enforced at the end of the first load step and the first substep whether or not the crack grows
-          at this moment. On original crack surfaces (defined via :ref:`cint`,SURF), ``INTER204`` elements
-          are initialized fully damaged, as they are used for crack-closure only and do not contribute
-          bonding tractions on crack surfaces. The cohesive tractions on the new open crack surface are
-          defined via the cohesive zone material model type ( :ref:`tb`,CZM) and :ref:`cgrow`,CSFL,CZM. This
-          option can be combined with :ref:`adpci` to initialize a crack with cohesive effect.
-
-        **For** `VCCT
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_STR_VCCT.html#vcctsimassum>`_
-        -based crack-growth:
-
-        * Crack-growth element components must use the crack tip nodes as the starting nodes of the crack
-          path.
-
-        * Fracture criteria ( ``Action`` = FCOPTION) use energy-release rates calculated via VCCT technology
-          ( :ref:`cint`,TYPE,VCCT). For information about the fracture criteria available, see `Fracture
-          Criteria
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_STR_VCCT.html#vcctuserdeffractcrit>`_
-          :ref:`tb`, `CGCR -- Crack-Growth Fracture Criterion
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_TB.html#eq4d382484-99d1-41ac-82dc-5a82d9911274>`_
-          CGCR.
-
-        **For** `XFEM
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_FRACXFEM.html#fracxfemreferences>`_
-        -based crack-growth:
-
-        * The crack specification originates via the :ref:`xfenrich`, :ref:`xfdata`, or :ref:`xfcrkmesh`
-          command.
-
-        * ``Action`` = CPATH, DTMIN, or DTMAX has no effect.
-
-        * ``Action`` = STOP affects `fatigue
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracfcgxfem.html#fracfcgxfemexample>`_
-          crack-growth analysis only.
-
-        Command Specifications
-        ~~~~~~~~~~~~~~~~~~~~~~
-        **Command Specification for Action= NEW**
-
-        .. _CGROW_NEW:
+        **CGROW, NEW, Par1**
 
         * ``Par1`` - Crack-growth data set ID (integer value).
 
-        **Command Specification for Action= CID**
+        **Command Specification for Action = CID**
 
-        .. _CGROW_CID:
+        **CGROW, CID, Par1**
 
-        * ``Par1`` - Contour-integral calculation ( :ref:`cint` ) ID for energy-release rates to be used in
-          fracture criterion calculation.
+        * ``Par1`` - Contour-integral calculation (`CINT
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CINT.html>`_)
+          ID for energy-release rates to be used in fracture criterion
+          calculation.
 
-        **Command Specification for Action= FCOPTION**
+        **Command Specification for Action = CGID**
 
-        .. _CGROW_FCOPTION:
+        **CGROW, CGID, Par1**
 
-        * ``Par1`` - **MTAB** - Crack-growth fracture criterion used with the material data table (
-        :ref:`tb`, `CGCR -- Crack-Growth Fracture Criterion
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_TB.html#eq4d382484-99d1-41ac-82dc-5a82d9911274>`_
-        CGCR).
+        * ``Par1`` - Crack-growth data set ID (integer value).
 
-          **GTC** - Defines the critical energy-release rate, a simple fracture criterion used for the `VCCT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_STR_VCCT.html#vcctsimassum>`_ method.
+        **Command Specification for Action = FCOPTION**
 
-          **KIC** - Defines the `critical stress-intensity factor <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#eqa7ac21d8-c5cc-41bd-aced-f664166c2ea0>`_. Valid for the `SMART <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_ method only.
+        **CGROW, FCOPTION, Par1, Par2, Par3**
 
-          **JIC** - Defines the `critical J-integral <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#eqb5e4514c-a107-4016-847f-af649a691f2f>`_. Valid for the `SMART <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_ method only.
+        * ``Par1`` - **MTAB**\ - Crack-growth fracture criterion used with the
+          material data table (`TB
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TB.html>`_,`CGCR
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TB.html#tbcgcrspec>`_).
 
-        * ``Par2`` - For ``Par1`` = MTAB: Material ID for the material data table.
+          **GTC**\ - Define the critical energy-release rate, a simple
+          fracture criterion used for the `VCCT
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/Hlp_G_STR_VCCT.html>`_
+          method.
 
-          For I ``Par1`` = GTC: Critical energy-release rate value.
+          **KIC**\ - Define the `critical stress-intensity factor
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/franundcgrowmech.html#frackbasedsifs>`_.
+          Valid for the `SMART
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html>`_
+          method only.
 
-          For ``Par1`` = KIC: Critical stress-intensity factor value.
+          **JIC**\ - Define the `critical J-integral
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/franundcgrowmech.html#fracstaticjint>`_.
+          Valid for the `SMART
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html>`_
+          method only.
 
-          For ``Par1`` = JIC: Critical J-integral value.
+        * ``Par2`` - For ``Par1``\ = MTAB: Material ID for the material data
+          table.
 
-        * ``Par3`` - For ``Par1`` = MTAB, KIC, or JIC: Specifies the fracture-parameter contour to use for
-          `SMART
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_
+          For ``Par1``\ = GTC: Critical energy-release rate value.
+
+          For ``Par1``\ = KIC: Critical stress-intensity factor value.
+
+          For ``Par1``\ = JIC: Critical J-integral value.
+
+        * ``Par3`` - For ``Par1``\ = MTAB, KIC, or JIC: Specify the
+          fracture-parameter contour to use for `SMART
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html>`_
           crack-growth evaluation. Default = 2.
 
-        **Command Specification for Action= CSFL**
+        **Command Specification for Action = CSFL**
 
-        .. _CGROW_CSFL:
+        **CGROW, CSFL, Par1, Par2, Par3**
 
         * ``Par1`` - Crack-surface load options:
 
-          * PRES - New crack-surface pressure load.
-          * CZM - Entire crack-surface enhanced by ``INTER204`` 3D 16-node cohesive elements (generated
-            automatically during the first remeshing around the associated crack). See :ref:`CGROW_notes`.
+          * **PRES**\ - New crack-surface pressure load.
 
-        * ``Par2`` - When ``Par1`` = PRES: (blank)
+          * **CZM**\ - Entire crack-surface enhanced by `INTER204
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_INTER204.html>`_
+            3D 16-node cohesive elements (generated automatically during the
+            first remeshing around the associated crack). See `"Notes"
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html#CGROW_notes>`_.
 
-          When ``Par1`` = CZM: A valid material ID (defined via :ref:`tb`,CZM,,,,BILI, :ref:`tb`,CZM,,,,CEXP,
-          or :ref:`tb`,CZM,,,,CLIN [default]). If zero or an invalid value is specified, the program uses
-          :ref:`tb`,CZM,,,,CLIN as the default cohesive model type and sets reasonable CZM parameters based on
-          the solid elements around the crack fronts/surfaces. For more information, see `Enhancing Crack
-          Surfaces with Cohesive Zone Elements
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#eq26e3f167-5353-40f6-b6f1-8c455fe0bc00>`_
+        * ``Par2`` - When ``Par1``\ = PRES: (blank)
 
-        * ``Par3`` - New crack-surface load value, or the name of a table for specifying tabular load values
-          for crack- growth.
+          When ``Par1``\ = CZM: A valid material ID (defined via `TB
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TB.html>`_,CZM,,,,BILI,
+          `TB
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TB.html>`_,CZM,,,,CEXP,
+          or `TB
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TB.html>`_,CZM,,,,CLIN
+          [default]). If zero or an invalid value is specified, the program
+          uses `TB
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TB.html>`_,CZM,,,,CLIN
+          as the default cohesive model type and sets reasonable CZM
+          parameters based on the solid elements around the crack
+          fronts/surfaces. For more information, see `Enhancing Crack Surfaces
+          with Cohesive Zone Elements in the Fracture Analysis Guide
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html#fracparmcalcczm>`_.
 
-          The new crack-surface load is always assumed to be constant. If ``Par1`` = PRES, ``Par3`` specifies
-          a constant pressure load.
+        * ``Par3`` - When ``Par1``\ = PRES:
 
-          To specify a table ( :ref:`dim` ), enclose the table name within "%" characters (
+          * New crack-surface load value, or the name of a table for
+            specifying tabular load values for crack-growth.
 
-          .. code:: apdl
+          * The new crack-surface load is always assumed to be constant. If
+            ``Par1``\ = PRES, ``Par3``\ specifies a constant pressure load.
 
-             % tablename% ). Only one table can be specified for a crack-growth set, and time is the only
-          primary variable supported.
+          * To specify a table (`\*DIM
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_),
+            enclose the table name within "%" characters (``%tablename%``).
+            Only one table can be specified for a crack-growth set, and time
+            is the only primary variable supported.
 
-          .. code:: apdl
+          When ``Par1``\ = CZM:
 
-             % tablename% ). Only one table can be specified for a crack-growth set, and time is the only
-          primary variable supported.
+          * A valid local coordinate system (LCS) ID (`LOCAL
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_LOCAL.html>`_).
 
-        **Command Specification for Action= CPATH**
+          * If zero or an invalid value is specified, the program creates an
+            internal LCS and assigns it to the ESYS attributes of CZM elements
+            inserted on crack surfaces. This behavior applies only when the
+            material ID (``MAT_ID``) for ``Par3``\ is associated with `TB
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TB.html>`_,CZM
+            when ``TBOPT``\ = FRIC or REXP. For more information, see
+            `Enhancing Crack Surfaces with Cohesive Zone Elements in the
+            Fracture Analysis Guide
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html#fracparmcalcczm>`_.
 
-        .. _CGROW_CPATH:
+        **Command Specification for Action = CPATH**
 
-        * ``Par1`` - Interface element component for crack path ( `VCCT
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_STR_VCCT.html#vcctsimassum>`_
+        **CGROW, CPATH, Par1**
+
+        * ``Par1`` - Interface element component for crack path (`VCCT
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/Hlp_G_STR_VCCT.html>`_
           method only). (Component name must be 32 characters or less.)
 
-        **Command Specification for Action= DTIME**
+        **Command Specification for Action = DTIME**
 
-        .. _CGROW_DTIME:
+        **CGROW, DTIME, Par1**
 
         * ``Par1`` - Initial time step when crack-growth is detected.
 
-        **Command Specification for Action= DTMIN**
+        **Command Specification for Action = DTMIN**
 
-        .. _CGROW_DTMIN:
+        **CGROW, DTMIN, Par1**
 
         * ``Par1`` - Minimum time step allowed when crack-growth is detected.
 
-        **Command Specification for Action= DTMAX**
+        **Command Specification for Action = DTMAX**
 
-        .. _CGROW_DTMAX:
+        **CGROW, DTMAX, Par1**
 
         * ``Par1`` - Maximum time step allowed when crack-growth is detected.
 
-        **Command Specification for Action= FCRAT**
+        **Command Specification for Action = FCRAT**
 
-        .. _CGROW_FCRAT:
+        **CGROW, FCRAT, Par1**
 
         * ``Par1`` - `Fracture criterion ratio
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_STR_VCCT.html#vcctuserdeffractcrit>`_
-          (f:sub:`c`, where f:sub:`c` is generally around 1). The recommended ratio is 0.95 to 1.05. The
-          default is 1.00.
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/Hlp_G_STR_VCCT.html#vcctfractcrit>`_
+          (f:sub:`c`, where f:sub:`c`\ is generally around 1). The recommended
+          ratio is 0.95 to 1.05. The default is 1.00.
 
-        **Command Specification for Action= STOP**
+        **Command Specification for Action = STOP**
 
-        .. _CGROW_STOP:
+        **CGROW, STOP, Par1, Par2**
 
-        * ``Par1`` - **CEMX** - Stops the analysis when the crack extension for any crack-front node reaches
-        the maximum value
-          (specified via ``Par2`` ).
+        * ``Par1`` - **CEMX**\ - Stop the analysis when the crack extension for
+          any crack-front node reaches the maximum value (``Par2``).
 
-          **FBOU** - Stops the analysis when the crack extension reaches the free boundary. Valid only for `SMART <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_ crack-growth analysis.
+          **CNMX**\ - Stop the analysis when the maximum number of fatigue
+          cycles exceeds the specified limit (``Par2``). Valid only for `SMART
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html>`_
+          crack-growth analysis.
 
-          **KMAX** - Stops the analysis when the maximum equivalent stress-intensity factor exceeds the specified limit
-          ( ``Par2`` ). Valid only for SMART crack-growth analysis.
+          **FBOU**\ - Stop the analysis when the crack extension reaches the
+          free boundary. Valid only for `SMART
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html>`_
+          crack-growth analysis.
 
-        * ``Par2`` - When ``Par1`` = CEMX, the value of maximum crack extension allowed.
+          **KMAX**\ - Stop the analysis when the maximum equivalent
+          stress-intensity factor exceeds the specified limit (``Par2``).
+          Valid only for `SMART
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html>`_
+          crack-growth analysis.
 
-          When ``Par1`` = KMAX, the value of the maximum equivalent stress-intensity factor allowed.
+          **DN**\ - Stop the analysis when the fatigue-cycle increment number
+          is less than or equal to the specified limit (``Par2``). Valid only
+          for `SMART
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html>`_
+          crack-growth analysis.
 
-        **Command Specification for Action= METHOD**
+        * ``Par2`` - When ``Par1``\ = CEMX, the value of maximum crack extension
+          allowed.
 
-        .. _CGROW_METHOD:
+          When ``Par1``\ = CNMX, the maximum number of fatigue cycles allowed.
 
-        * ``Par1, Par2`` - **VCCT** - Use `VCCT
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_STR_VCCT.html#vcctsimassum>`_
-        to grow the crack (default).
+          When ``Par1``\ = KMAX, the value of the maximum equivalent
+          stress-intensity factor allowed.
 
-          **XFEM** - Use `XFEM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_FRACXFEM.html#fracxfemreferences>`_ to grow the crack.
+          When ``Par1``\ = DN, the minimum limit for fatigue-cycle increment.
+          Default = 0.
 
-          **SMART** - Use `SMART <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_ to grow the crack.
+        **Command Specification for Action = METHOD**
 
-        * ``Par2`` - REME - Remeshing-based `SMART
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_
-          crack-growth method (the default and only option). Valid only when ``Par1`` = SMART.
+        **CGROW, METHOD, Par1**
 
-        **Command Specification for Action= FCG**
+        * ``Par1, Par2`` - **VCCT**\ - Use `VCCT
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/Hlp_G_STR_VCCT.html>`_
+          to grow the crack (default).
 
-        .. _CGROW_FCG:
+          **XFEM**\ - Use `XFEM
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/Hlp_G_FRACXFEM.html>`_
+          to grow the crack.
 
-        * ``Par1`` - **METH** - Fatigue crack-growth method.
+          **SMART**\ - Use `SMART
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html>`_
+          to grow the crack.
 
-          **DAMX** - Maximum crack-growth increment.
+        * ``Par2`` - **REME**\ - Remeshing-based `SMART
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html>`_
+          crack-growth method (the default and only option). Valid only when
+          ``Par1``\ = SMART.
 
-          **DAMN** - Minimum crack-growth increment.
+        **Command Specification for Action = FCG**
 
-          **SRAT** - `Stress ratio <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#eq4f61610d-5010-4a2d-83de-3c60fba4be9f>`_.
+        **CGROW, FCG, Par1,Par2,Par3**
 
-          **DKTH** - Threshold value of equivalent stress-intensity-factor range (SIFS).
+        * ``Par1`` - **METH**\ - Fatigue crack-growth method.
 
-          **DN** - Incremental number of cycles.
+          **DAMX**\ - Maximum crack-growth increment (`XFEM
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/Hlp_G_FRACXFEM.html>`_
+          method only).
 
-        * ``Par2`` - ``Method`` - `LC or CBC method
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/franundcgrowmech.html#eq0a4098c5-8c81-4f2f-b279-a2fb84dff9ad>`_
-          CBCmethod. Valid only when ``Par1`` = METH.
+          **DAMN**\ - Minimum crack-growth increment (`XFEM
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/Hlp_G_FRACXFEM.html>`_
+          method only).
 
-          ``VALUE`` - Value for the specified ``Par1``. Valid only when ``Par1`` = DAMX, DAMN, SRAT, DKTH, or DN.
+          **SRAT**\ - `Stress ratio
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/franundcgrowmech.html#fracparislaw>`_.
 
-          * For ``Par1`` = SRAT or DKTH, ``Par2`` can be a constant or table. To specify a table ( :ref:`dim`
-            ), enclose the table name within "%" characters (``tablename``). Only one table can be
-            specified for a crack-growth set, and time is the only primary variable supported.
+          **DKTH**\ - Threshold value of equivalent stress-intensity-factor
+          range (SIFS).
+
+          **DN**\ - Incremental number of cycles.
+
+        * ``Par2`` - ``Method``\ - `LC or CBC method
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/franundcgrowmech.html#fracfatigcgrowcalc>`_.
+          Valid only when ``Par1``\ = METH.
+
+          ``VALUE``\ - Value for the specified ``Par1``. Valid only when
+          ``Par1``\ = DAMX, DAMN, SRAT, DKTH, or DN.
+
+          * For ``Par1``\ = SRAT or DKTH, ``Par2``\ can be a constant or
+            table. To specify a table (`\*DIM
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_),
+            enclose the table name within "%" characters (%``tablename``\ %).
+            Only one table can be specified for a crack-growth set, and time
+            is the only primary variable supported.
 
         * ``Par3`` - Valid only for `SMART
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_
-          crack-growth analysis when ``Par1`` = DKTH.
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html>`_
+          crack-growth analysis when ``Par1``\ = DKTH.
 
-          MIN or MAX or AVER or blank (default) - The minimum, maximum, or average stress-intensity-factor
-          range (ΔK), respectively. The program calculates the range over the entire crack front, then uses
-          the result to evaluate the threshold criterion. The entire crack is arrested if the specified
-          minimum, maximum, or average ΔK is below the threshold ( ``Par2`` ). Partial crack-growth does not
-          occur.
+          **MIN**\ *or*\ **MAX**\ *or*\ **AVER**\ *or*\ blank (default) - The
+          minimum, maximum, or average stress-intensity-factor range (ΔK),
+          respectively. The program calculates the range over the entire
+          crack-front, then uses the result to evaluate the threshold
+          criterion. The entire crack is arrested if the specified minimum,
+          maximum, or average ΔK is below the threshold (``Par2``). Partial
+          crack-growth does not occur.
 
-          If ``Par3`` is unspecified (default), the program evaluates threshold criterion at each crack-front
-          node individually and ensures that the crack is arrested locally at any node where ΔK is below the
-          threshold ( ``Par2`` ). If some nodes have ΔK less than the threshold and others have ΔK greater
-          than the threshold, partial crack-growth occurs at the crack front.
+          If ``Par3``\ is unspecified (default), the program evaluates
+          threshold criterion at each crack-front node individually and
+          ensures that the crack is arrested locally at any node where ΔK is
+          below the threshold (``Par2``). If some nodes have ΔK less than the
+          threshold and others have ΔK greater than the threshold, partial
+          crack-growth occurs at the crack-front.
 
-            **Example: Using
+          Example 2: Using ``CGROW,FCG,DKTH,Par2,Par3``\
 
-            .. code:: apdl
+          If ``Par3``\ = MIN, the program selects the minimum ΔK from the ΔK
+          values calculated at all crack-front nodes for the corresponding
+          crack ID. If the minimum ΔK does not exceed the threshold
+          (``Par2``), there is no crack extension at the entire crack-front.
 
-               CGROW,FCG,DKTH, Par2, Par3
+        **Command Specification for Action = SOPT**
 
-            **
+        **CGROW,SOPT,Par1,Par2,Par3,Par4**
 
-            If ``Par3`` = MIN, the program selects the minimum ΔK from the ΔK values calculated at all crack-
-            front nodes for the corresponding crack ID. If the minimum ΔK does not exceed the threshold (
-            ``Par2`` ), there is no crack extension at the entire crack front.
+        * ``Par1`` - **SCN**\ - Use a single number of cycles for all cracks in
+          a multicrack analysis (even if each crack has separate loading)
+          (default).
 
-        **Command Specification for Action= SOPT**
+          **MCN**\ - Allow a separate cycle count for *each*\ crack in a
+          multicrack analysis (available only if each crack has separate
+          loading).
 
-        .. _CGROW_SOPT:
+          **MXAN**\ - Specify the maximum limit of the crack-growth kinking
+          angle.
 
-        * ``Par1`` - SCN - Use a single number of cycles for all cracks in a multicrack analysis (even if
-          each crack has separate loading) (default).
+          **MNAN**\ - Specify the cut-off value for the minimum crack-growth
+          kinking angle.
 
-          MCN - Allow a separate cycle count for each crack in a multicrack analysis (available only if each
-          crack has separate loading).
+          **DAMX**\ - Specify the maximum limit of crack-growth increment.
 
-        **Command Specification for Action= RMCONT**
+          **DAMN**\ - Specify the minimum limit of crack-growth increment.
 
-        .. _CGROW_RMCONT:
+          **SPLO**\ - Specify spectrum fatigue loading.
+
+          **KEQV**\ - Specify the method for the equivalent stress-intensity
+          factor calculation.
+
+          **KANG**\ - Specify the method for the kink angle calculation.
+
+        * ``Par2`` - For ``Par1``\ = MXAN:
+
+          * Value (in degrees) of the maximum limit of the crack-growth
+            kinking angle. If `CGROW
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_,SOPT,MXAN,``Par2``\
+            is not issued (or ``Par2``\ is unspecified), the program uses a
+            default kinking-angle limit of 20 degrees. ``Par2``\ = 0 forces
+            mode-I crack propagation.
+
+          For ``Par1``\ = MNAN:
+
+          * Cut-off value (in degrees) for the minimum crack-growth kinking
+            angle. Default = 1.
+
+          For ``Par1``\ = DAMX:
+
+          * Value to determine the maximum crack-growth increment. Default:
+            ``da``\ max = 1.5 \* ``ESIZE``, where ``ESIZE``\ is the
+            reference-element size at the crack-front at any substep.
+
+          For ``Par1``\ = DAMN:
+
+          * Value to determine the minimum crack-growth increment. Default:
+            ``da``\ min = 0.
+
+          For ``Par1``\ = SPLO:
+
+          * **WEIG**\ - Define the damage weight average method for the
+            crack-growth direction (default).
+
+          * **DMAX**\ - Define the dominative load point (maximum damage)
+            method for the crack-growth direction.
+
+          For ``Par1``\ = KEQV:
+
+          * **MTS**\ - Maximum tangential stress criterion (default).
+
+          * **RICHARD**\ - Richard approximation function.
+
+          * **POOK**\ - Pook criterion.
+
+          * **EMPS**\ - Empirical function based on square root of sum of
+            squares.
+
+          For ``Par1``\ = KANG:
+
+          * **MTS**\ - Maximum tangential stress criterion (default).
+
+          * **RICHARD**\ - Richard approximation function.
+
+        * ``Par3`` - For ``Par1``\ = DAMX or DAMN:
+
+          * **ABSO**\ - Indicate that ``Par2``\ is the absolute value
+            (default). The corresponding limit (``da``\ max or ``da``\ min) is
+            ``Par2``.
+
+          * **MULT**\ - Indicate that ``Par2``\ is a multiplier of the
+            reference-element size (``ESIZE``) at the crack-front at any
+            substep. The corresponding limit (``da``\ max or ``da``\ min) is
+            ``Par2``\ \* ``ESIZE``.
+
+          For information about controlling the element size (``ESIZE``) at
+          the crack-front, see `CGROW
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_,RMCONT,ESIZE
+          and `CGROW
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_,RMCONT,CMULT.
+
+          For ``Par1``\ = KEQV and ``Par2``\ = RICHARD or EMPS:
+
+          * (see command documentation for equation) - multiplicative factor
+            in (see command documentation for equation) term in the
+            corresponding function for equivalent SIF.
+
+          For ``Par1``\ = KANG and ``Par2``\ = RICHARD:
+
+          * (see command documentation for equation) - coefficient of first
+            order term in the Richard function for the kink angle.
+
+        * ``Par4`` - For ``Par1``\ = DAMN:
+
+          * **0**\ - Set the crack increments (see command documentation for
+            equation) less than ``da``\ min (specified via ``Par2``) as (see
+            command documentation for equation) = ``da``\ min. It is the
+            default option if ``Par2``\ > 0.
+
+          * **1**\ - Set the crack increments (see command documentation for
+            equation) less than ``da``\ min as (see command documentation for
+            equation) = 0.
+
+          If ``Par2``\ = 0, the program sets any crack increment (see command
+          documentation for equation) less than two percent of the
+          reference-element size at the crack-front as (see command
+          documentation for equation) = 0.
+
+          For ``Par1``\ = KEQV and ``Par2``\ = RICHARD or EMPS:
+
+          * (see command documentation for equation) - multiplicative factor
+            in (see command documentation for equation) term in the
+            corresponding function for the equivalent SIF.
+
+          For ``Par1``\ = KANG and ``Par2``\ = RICHARD:
+
+          * (see command documentation for equation) - coefficient of second
+            order term in the Richard function for the kink angle.
+
+        **Command Specification for Action = RMCONT**
+
+        **CGROW,RMCONT,Par1,Par2,Par3,Par4,Par5**
 
         Valid in a `SMART
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html>`_
         crack-growth analysis only.
 
-        * ``Par1`` - COARSE - Controls `mesh-coarsening
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#>`_.
+        * ``Par1`` - **COARSE**\ - Control `mesh-coarsening
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html#fracsmartmeshcoarse>`_.
 
-          ESIZE - Controls element sizing and crack-increment size.
+          **ESIZE**\ - Control element sizing and crack-increment size.
 
-          CMULT - Controls the crack-growth increment multiplier.
+          **CMULT**\ - Control the crack-growth increment multiplier.
 
-        * ``Par2`` - For ``Par1`` = COARSE:
+        * ``Par2`` - For ``Par1``\ = COARSE:
 
-          * CONS - Remeshing occurs with conservative mesh-coarsening (default).
-          * MODE - Remeshing occurs with moderate mesh-coarsening.
-          * AGGR - Remeshing occurs with aggressive mesh-coarsening.
+          * **CONS**\ - Remeshing occurs with conservative mesh-coarsening
+            (default).
 
-          For ``Par1`` = ESIZE:
+          * **MODE**\ - Remeshing occurs with moderate mesh-coarsening.
 
-          * Crack-front reference element-size value, or the table name for specifying tabular element size
-            values as a function of solution time.
+          * **AGGR**\ - Remeshing occurs with aggressive mesh-coarsening.
 
-          For ``Par1`` = CMULT:
+          For ``Par1``\ = ESIZE:
+
+          * Crack-front reference element-size value, *or*\ the table name for
+            specifying tabular element size values as a function of solution
+            time.
+
+          For ``Par1``\ = CMULT:
 
           * Crack-front `element-size multiplier function
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#eq7e7daaf3-47a8-4bfe-8dd8-5cc5e3628ff0>`_
-            :
-          * TIME - Controls the crack-growth increment multiplier via the beginning and end of the solution
-            time.
-          * CEMX - Controls the crack-growth increment multiplier via the beginning and end of the accumulated
-            maximum crack extension.
-          * RMNU - Controls the crack-growth increment multiplier via the beginning and end of the number of
-            remeshing steps.
-          * TABLE - The name of the table for controlling the crack-growth increment multiplier.
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html#cgrowdyncarckincctrl>`_:
 
-        * ``Par3 - Par5`` - For ``Par1`` = ESIZE and ``Par2`` = ``VALUE`` or ``tablename`` and ``Par3`` =
-        COMP:
+          * **TIME**\ - Control the crack-growth increment multiplier via the
+            beginning and end of the solution time.
 
-          * ``Par4`` = Name of the node or element component (≤ 32 characters).
+          * **CEMX**\ - Control the crack-growth increment multiplier via the
+            beginning and end of the accumulated maximum crack extension.
 
-          For ``Par1`` = ESIZE and ``Par2`` = ``VALUE`` or ``tablename`` and ``Par3`` = NODE:
+          * **RMNU**\ - Control the crack-growth increment multiplier via the
+            beginning and end of the number of remeshing steps.
 
-          * ``Par4`` = Node ID.
+          * **TABLE**\ - The name of the table for controlling the
+            crack-growth increment multiplier.
 
-          For ``Par1`` = ESIZE and ``Par2`` = ``VALUE`` or ``tablename`` and ``Par3`` = ELEM:
+        * ``Par3 - Par5`` - For ``Par1``\ = ESIZE and ``Par2``\ = ``VALUE``\ or
+          %``tablename``\ % and ``Par3``\ = COMP:
 
-          * ``Par4`` = Element ID.
+          * ``Par4``\ = Name of the node or element component (≤ 32
+            characters).
 
-          For ``Par1`` = CMULT and ``Par2`` = TIME:
+          For ``Par1``\ = ESIZE and ``Par2``\ = ``VALUE``\ or %``tablename``\
+          % and ``Par3``\ = NODE:
 
-          * ``Par3`` = ``VALUE`` - Maximum value of the crack-growth multiplier value.
-          * ``Par4`` = ``VALUE`` - Time at the beginning of the crack-increment control function.
-          * ``Par5`` = ``VALUE`` - Time at the end of the crack-increment control function.
+          * ``Par4``\ = Node ID.
 
-          For ``Par1`` = CMULT and ``Par2`` = CEMX:
+          For ``Par1``\ = ESIZE and ``Par2``\ = ``VALUE``\ or %``tablename``\
+          % and ``Par3``\ = ELEM:
 
-          * ``Par3`` = ``VALUE`` - Maximum value of the crack-growth multiplier value.
-          * ``Par4`` = ``VALUE`` - Accumulated maximum crack extension at the beginning of the crack-increment
+          * ``Par4``\ = Element ID.
+
+          For ``Par1``\ = CMULT and ``Par2``\ = TIME:
+
+          * ``Par3``\ = ``VALUE``\ - Maximum value of the crack-growth
+            multiplier value.
+
+          * ``Par4``\ = ``VALUE``\ - Time at the beginning of the
+            crack-increment control function.
+
+          * ``Par5``\ = ``VALUE``\ - Time at the end of the crack-increment
             control function.
-          * ``Par5`` = ``VALUE`` - Accumulated maximum crack extension at the end of the crack-increment
-            control function.
 
-          For ``Par1`` = CMULT and ``Par2`` = RMNU:
+          For ``Par1``\ = CMULT and ``Par2``\ = CEMX:
 
-          * ``Par3`` = ``VALUE`` - Maximum value of the crack-growth multiplier value.
-          * ``Par4`` = ``VALUE`` - Remeshing number at the beginning of the crack-increment control function.
-          * ``Par5`` = ``VALUE`` - Remeshing number at the end of the crack-increment control function.
+          * ``Par3``\ = ``VALUE``\ - Maximum value of the crack-growth
+            multiplier value.
 
-          For ``Par1`` = CMULT and ``Par2`` = TABLE:
+          * ``Par4``\ = ``VALUE``\ - Accumulated maximum crack extension at
+            the beginning of the crack-increment control function.
 
-          * ``Par3`` = ``tablename`` - Controls the crack-growth increment multiplier via the tabular data
-            in the specified table.
-          * To specify a table ( :ref:`dim` ), enclose the table name ``tablename`` within % characters. You
-            can specify one table per crack-growth set, and time is the only valid variable.
+          * ``Par5``\ = ``VALUE``\ - Accumulated maximum crack extension at
+            the end of the crack-increment control function.
 
-        **Command Specification for Action= NPLOAD**
+          For ``Par1``\ = CMULT and ``Par2``\ = RMNU:
 
-        .. _CGROW_NPLOAD:
+          * ``Par3``\ = ``VALUE``\ - Maximum value of the crack-growth
+            multiplier value.
+
+          * ``Par4``\ = ``VALUE``\ - Remeshing number at the beginning of the
+            crack-increment control function.
+
+          * ``Par5``\ = ``VALUE``\ - Remeshing number at the end of the
+            crack-increment control function.
+
+          For ``Par1``\ = CMULT and ``Par2``\ = TABLE:
+
+          * ``Par3``\ = %``tablename``\ % - Control the crack-growth increment
+            multiplier via the tabular data in the specified table.
+
+          * To specify a table (`\*DIM
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_),
+            enclose the table name ``tablename``\ within % characters. You can
+            specify one table per crack-growth set, and time is the only valid
+            variable.
+
+        **Command Specification for Action = NPLOAD**
+
+        **CGROW,NPLOAD,Par1,Par2,Par3**
 
         Valid in a `SMART
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#fracsmartexample>`_
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html>`_
         fatigue crack-growth analysis using `nonproportional loading
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#>`_.
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html#fracsmartnonpoport>`_.
 
-        * ``Par1`` - METHOD - Specifies the nonproportional `solution method
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#notenostressratio>`_.
+        * ``Par1`` - **METHOD**\ - Specify the nonproportional `solution method
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html#defsfirange>`_.
 
-          DIRECTION - Specifies the nonproportional `crack-growth-direction method
-          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracSMART.html#eq16b7dac1-430d-4d50-9eaa-763f6660ab4e>`_.
+          **DIRECTION**\ - Specify the nonproportional `crack-growth-direction
+          method
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html#defcgrowdir>`_.
 
-        * ``Par2`` - For ``Par1`` = METHOD:
+        * ``Par2`` - For ``Par1``\ = METHOD:
 
-          * DKEF - Specifies the effective stress-intensity-factor range method.
-          * DKMO - Specifies the stress-intensity-factor range method based on mode separation.
-          * TKEF - Specifies the total effective stress-intensity-factor method.
-          * TKMO - Specifies the total stress-intensity-factor method based on mode separation.
+          * **DKEF**\ - Specify the effective stress-intensity-factor range
+            method.
 
-          For ``Par1`` = DIRECTION:
+          * **DKMO**\ - Specify the stress-intensity-factor range method based
+            on mode separation.
 
-          * KMAX - Specifies the maximum-load method for the crack-growth direction.
-          * KMIN - Specifies the minimum-load method for the crack-growth direction.
-          * KLOC - Specifies the local kink-tip stress-intensity-factor method.
+          * **TKEF**\ - Specify the total effective stress-intensity-factor
+            method.
 
-        * ``Par3`` - For ``Par2`` = KLOC:
+          * **TKMO**\ - Specify the total stress-intensity-factor method based
+            on mode separation.
 
-          * ``w`` - Parameter-fitting value between 0 and 1. Default = 0.5.
+          For ``Par1``\ = DIRECTION:
+
+          * **KMAX**\ - Specify the maximum-load method for the crack-growth
+            direction.
+
+          * **KMIN**\ - Specify the minimum-load method for the crack-growth
+            direction.
+
+          * **KLOC**\ - Specify the local kink-tip stress-intensity-factor
+            method.
+
+        * ``Par3`` - For ``Par2``\ = KLOC:
+
+          * ``w``\ - Parameter-fitting value between 0 and 1. Default = 0.5.
+
+        When ``Action``\ = NEW, the `CGROW
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_\
+        command initializes a crack-growth simulation set. Subsequent `CGROW
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_\
+        commands define the parameters necessary for the simulation.
+
+        For multiple cracks, issue multiple `CGROW
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_,NEW
+        commands (and any subsequent `CGROW
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_\
+        commands necessary to define the parameters) for *each crack*.
+
+        For `SMART
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracSMART.html>`_-based
+        crack-growth:
+
+        * ``Action``\ = CPATH has no effect.
+
+        * ``Action``\ = STOP affects both SMART-based `static
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/franundcgrowmech.html#staticcgrowmechanics>`_
+          and `fatigue
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/franundcgrowmech.html#fraccgrowmechanics>`_
+          crack-growth analyses.
+
+        * When ``Action``\ = CSFL with ``Option``\ = CZM, the remeshing for
+          cracks associated with this option is enforced at the end of the first
+          load step and the first substep whether or not the crack grows at this
+          moment. On original crack surfaces (defined via `CINT
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CINT.html>`_,SURF),
+          `INTER204
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_INTER204.html>`_
+          elements are initialized fully damaged, as they are used for
+          crack-closure only and do not contribute bonding tractions on crack
+          surfaces. The cohesive tractions on the new open crack surface are
+          defined via the cohesive zone material model type (`TB
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TB.html>`_,CZM)
+          and `CGROW
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_,CSFL,CZM.
+          This option can be combined with `ADPCI
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ADPCI.html>`_\
+          to initialize a crack with cohesive effect.
+
+        For `VCCT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/Hlp_G_STR_VCCT.html>`_-based
+        crack-growth:
+
+        * Crack-growth element components must use the crack tip nodes as the
+          starting nodes of the crack path.
+
+        * Fracture criteria (``Action``\ = FCOPTION) use energy-release rates
+          calculated via VCCT technology (`CINT
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CINT.html>`_,TYPE,VCCT).
+          For information about the fracture criteria available, see `Fracture
+          Criteria in the Fracture Analysis Guide
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/Hlp_G_STR_VCCT.html#vcctfractcrit>`_
+          or `TB
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TB.html>`_,`CGCR
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TB.html#tbcgcrspec>`_.
+
+        For `XFEM
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/Hlp_G_FRACXFEM.html>`_-based
+        crack-growth:
+
+        * The crack specification originates via the `XFENRICH
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_XFENRICH.html>`_,
+          `XFDATA
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_XFDATA.html>`_,
+          or `XFCRKMESH
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_XFCRKMESH.html>`_\
+          command.
+
+        * ``Action``\ = CPATH, DTMIN, or DTMAX has no effect.
+
+        * ``Action``\ = STOP affects `fatigue
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_frac/fracfcgxfem.html>`_
+          crack-growth analysis only.
+
+        **Example Usage**
+
+        See these example problems in the Technology Showcase: Example Problems:
+
+        * `VCCT-Based Crack-Growth Simulation of a Composite Laminated T-Joint
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tecvcct.html>`_
+
+        * `Adaptive Crack-Initiation and -Propagation
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/teccrackinitprop.html>`_
         """
-        command = f"CGROW,{action},{par1},{par2},{par3}"
+        command = f"CGROW,{action},{par1},{par2},{par3},{par4}"
         return self.run(command, **kwargs)
 
     def inistate(

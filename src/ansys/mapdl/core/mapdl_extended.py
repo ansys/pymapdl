@@ -45,7 +45,10 @@ from ansys.mapdl.core._mapdl_extended.plotting_commands import (
     _ExtendedPlottingCommandsMixin,
 )
 from ansys.mapdl.core._mapdl_extended.post1 import _ExtendedPostSetupMixin
-from ansys.mapdl.core._mapdl_extended.prep7 import _ExtendedExplicitCommandsMixin
+from ansys.mapdl.core._mapdl_extended.prep7 import (
+    _ExtendedExplicitCommandsMixin,
+    _ExtendedPrep7CommandsMixin,
+)
 from ansys.mapdl.core._mapdl_extended.session import (
     _ExtendedFileCommandsMixin,
     _ExtendedListControlsMixin,
@@ -115,6 +118,7 @@ class _MapdlCommandExtended(
     _ExtendedPlottingCommandsMixin,
     _ExtendedParameterCommandsMixin,
     _ExtendedExplicitCommandsMixin,
+    _ExtendedPrep7CommandsMixin,
     _ExtendedImportCommandsMixin,
     _ExtendedParsedCommandsMixin,
     _ExtendedMatrixCommandsMixin,

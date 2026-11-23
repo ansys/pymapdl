@@ -21,6 +21,7 @@ Elements
    Elements.ecpchg
    Elements.edele
    Elements.eembed
+   Elements.eens
    Elements.egen
    Elements.egid
    Elements.einfin
@@ -56,6 +57,7 @@ Elements
    Elements.swgen
    Elements.swlist
    Elements.tshap
+   Elements.tshape
    Elements.upgeom
    Elements.usrdof
    Elements.usrelem
