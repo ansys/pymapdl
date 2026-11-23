@@ -36,6 +36,7 @@ import shutil
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
 import subprocess  # nosec B404
+import sys
 import tempfile
 import threading
 import time
@@ -152,6 +153,10 @@ VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26
 DEFAULT_TIME_STEP_STREAM = None
 DEFAULT_TIME_STEP_STREAM_NT = 500
 DEFAULT_TIME_STEP_STREAM_POSIX = 100
+
+# Seconds added to the gRPC deadline of 'Ctrl("EXIT")' to get the wall-clock
+# bound enforced by 'MapdlGrpc._ctrl_exit'.
+CTRL_EXIT_HARD_TIMEOUT_BUFFER_S = 3.0
 
 # Retry policy for gRPC calls.
 SERVICE_DEFAULT_CONFIG = {
@@ -2127,9 +2132,19 @@ class MapdlGrpc(MapdlBase):
         """Exit MAPDL and remove the lock file in `path`"""
         # This cannot/should not be faked
         if self._local:
-            self._cache_pids()  # Recache processes
+            # The PID-based cleanup must run even if refreshing the PIDs or
+            # asking the server to exit fails.
+            previous_pids = list(getattr(self, "_pids", []) or [])
+            try:
+                self._cache_pids()  # Recache processes
+            except Exception as e:
+                self._log.debug("Error during _cache_pids: %s", e)
+                self._pids = previous_pids
 
-            self._exit_mapdl_server()
+            try:
+                self._exit_mapdl_server()
+            except Exception as e:
+                self._log.debug("Error during _exit_mapdl_server: %s", e)
 
             self._close_process()
 
@@ -2928,17 +2943,91 @@ class MapdlGrpc(MapdlBase):
 
         # handle socket closing upon exit
         if cmd.lower() == "exit":
-            try:
-                # this always returns an error as the connection is closed
-                self._stub.Ctrl(request, timeout=timeout)
-            except (_InactiveRpcError, _MultiThreadedRendezvous):
-                pass
+            self._ctrl_exit(request, timeout)
             return
 
         resp = self._stub.Ctrl(request, timeout=timeout)
 
         if hasattr(resp, "response"):
             return resp.response
+
+    def _ctrl_exit(self, request: Any, timeout: Optional[float]) -> None:
+        """Send ``Ctrl("EXIT")`` without letting a dead server hang the caller.
+
+        The server dies while handling this request, so the call is expected
+        to fail with a gRPC error, which is ignored. On some local transports
+        (observed with WNUA on Windows), gRPC does not honor the per-call
+        ``timeout`` once the server process dies, and the blocking call never
+        returns. To bound the wait, the call runs in a daemon thread that is
+        joined with a wall-clock timeout. If the thread is still running
+        afterward, it is abandoned and the PID-based process cleanup takes
+        over. For a remote instance there is no PID-based cleanup, so the
+        remote server might still be running.
+
+        During interpreter finalization, new threads cannot be started, so the
+        call is sent directly and is only bounded by the gRPC ``timeout``.
+
+        Parameters
+        ----------
+        request : CtrlRequest
+            The ``EXIT`` control request.
+        timeout : float, optional
+            gRPC deadline for the call. The wall-clock bound is this value
+            plus ``CTRL_EXIT_HARD_TIMEOUT_BUFFER_S``, or
+            ``CTRL_EXIT_HARD_TIMEOUT_BUFFER_S`` when ``None``.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        Exception
+            Any error from the call other than the expected gRPC errors.
+        """
+        stub = self._stub
+        if stub is None:
+            raise MapdlRuntimeError("MAPDL stub not initialized")
+
+        if sys.is_finalizing():
+            # New threads cannot be started during interpreter shutdown, which
+            # is when '__del__' may run. Fall back to the direct call.
+            try:
+                stub.Ctrl(request, timeout=timeout)
+            except (_InactiveRpcError, _MultiThreadedRendezvous):
+                pass
+            return
+
+        errors: List[BaseException] = []
+
+        def _call() -> None:
+            try:
+                stub.Ctrl(request, timeout=timeout)
+            except (_InactiveRpcError, _MultiThreadedRendezvous):
+                pass
+            except BaseException as exc:  # re-raised in the calling thread
+                errors.append(exc)
+
+        hard_timeout = (timeout or 0.0) + CTRL_EXIT_HARD_TIMEOUT_BUFFER_S
+        thread = threading.Thread(target=_call, name="pymapdl-ctrl-exit", daemon=True)
+        thread.start()
+        thread.join(hard_timeout)
+
+        if thread.is_alive():
+            if self._local:
+                consequence = "continuing with process cleanup"
+            else:
+                consequence = "the remote MAPDL server might still be running"
+            self._log.warning(
+                "Ctrl('EXIT') did not return within %.1f s. Abandoning the "
+                "call; %s.",
+                hard_timeout,
+                consequence,
+            )
+            return
+
+        if errors:
+            raise errors[0]
 
     @wraps(MapdlBase.cdread)
     def cdread(

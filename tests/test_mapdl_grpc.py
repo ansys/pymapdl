@@ -23,6 +23,7 @@
 import gc
 import subprocess
 import threading
+import time
 from unittest.mock import MagicMock, Mock, patch
 import weakref
 
@@ -31,7 +32,7 @@ import grpc
 import pytest
 
 from ansys.mapdl.core.errors import MapdlExitedError
-from ansys.mapdl.core.mapdl_grpc import MapdlGrpc, MapdlRuntimeError
+from ansys.mapdl.core.mapdl_grpc import MapdlGrpc, MapdlRuntimeError, _InactiveRpcError
 
 
 def _make_mock_mapdl():
@@ -937,6 +938,120 @@ class TestWatchedCall:
             dummy._current_call = call_b
 
         assert dummy._current_call is call_b
+
+
+class TestCtrlExitHardTimeout:
+    """``_ctrl("exit")`` must not hang when gRPC ignores its own deadline."""
+
+    class _Dummy:
+        def __init__(self, stub, local=True):
+            self._log = MagicMock()
+            self._stub = stub
+            self._local = local
+
+        _ctrl = MapdlGrpc._ctrl
+        _ctrl_raw = MapdlGrpc._ctrl_raw
+        _ctrl_exit = MapdlGrpc._ctrl_exit
+
+    @pytest.mark.parametrize("finalizing", [False, True])
+    def test_ignores_expected_grpc_error(self, finalizing):
+        stub = Mock()
+        stub.Ctrl.side_effect = _InactiveRpcError(MagicMock())
+        dummy = self._Dummy(stub)
+
+        with patch(
+            "ansys.mapdl.core.mapdl_grpc.sys.is_finalizing", return_value=finalizing
+        ):
+            dummy._ctrl("exit")
+
+        stub.Ctrl.assert_called_once()
+        dummy._log.warning.assert_not_called()
+
+    @pytest.mark.parametrize("finalizing", [False, True])
+    def test_reraises_unexpected_errors(self, finalizing):
+        stub = Mock()
+        stub.Ctrl.side_effect = ValueError("boom")
+        dummy = self._Dummy(stub)
+
+        with (
+            patch(
+                "ansys.mapdl.core.mapdl_grpc.sys.is_finalizing",
+                return_value=finalizing,
+            ),
+            pytest.raises(ValueError, match="boom"),
+        ):
+            dummy._ctrl("exit")
+
+    @pytest.mark.parametrize(
+        "local,expected",
+        [(True, "process cleanup"), (False, "remote MAPDL server might still")],
+    )
+    def test_does_not_hang_when_the_call_never_returns(self, local, expected):
+        release = threading.Event()
+        stub = Mock()
+        stub.Ctrl.side_effect = lambda *args, **kwargs: release.wait(30)
+        dummy = self._Dummy(stub, local=local)
+
+        try:
+            with patch(
+                "ansys.mapdl.core.mapdl_grpc.CTRL_EXIT_HARD_TIMEOUT_BUFFER_S", 0.1
+            ):
+                start = time.monotonic()
+                dummy._ctrl("exit", timeout=0.1)
+                elapsed = time.monotonic() - start
+        finally:
+            release.set()
+
+        assert elapsed < 5
+        dummy._log.warning.assert_called_once()
+        assert expected in dummy._log.warning.call_args.args[-1]
+
+    def test_does_not_start_a_thread_when_finalizing(self):
+        stub = Mock()
+        dummy = self._Dummy(stub)
+
+        with (
+            patch("ansys.mapdl.core.mapdl_grpc.sys.is_finalizing", return_value=True),
+            patch("ansys.mapdl.core.mapdl_grpc.threading.Thread") as mock_thread,
+        ):
+            dummy._ctrl("exit")
+
+        mock_thread.assert_not_called()
+        stub.Ctrl.assert_called_once()
+
+
+class TestExitMapdlRunsCloseProcessDespiteServerErrors:
+    """``_exit_mapdl`` must still kill the process if asking it to exit fails."""
+
+    @pytest.mark.parametrize("failing", ["_cache_pids", "_exit_mapdl_server"])
+    def test_close_process_runs_when_a_previous_step_raises(self, failing):
+        dummy = MagicMock(spec=MapdlGrpc)
+        dummy._log = MagicMock()
+        dummy._local = True
+        getattr(dummy, failing).side_effect = RuntimeError("boom")
+
+        MapdlGrpc._exit_mapdl(dummy, "/some/path")
+
+        dummy._exit_mapdl_server.assert_called_once()
+        dummy._close_process.assert_called_once()
+        dummy._remove_lock_file.assert_called_once()
+
+    def test_keeps_previous_pids_when_cache_pids_raises(self):
+        dummy = MagicMock(spec=MapdlGrpc)
+        dummy._log = MagicMock()
+        dummy._local = True
+        dummy._pids = [111, 222]
+
+        def _failing_cache_pids():
+            dummy._pids = []
+            raise OSError("boom")
+
+        dummy._cache_pids.side_effect = _failing_cache_pids
+
+        MapdlGrpc._exit_mapdl(dummy, "/some/path")
+
+        assert dummy._pids == [111, 222]
+        dummy._close_process.assert_called_once()
 
 
 class TestDisconnectButLeaveMapdlRunning:

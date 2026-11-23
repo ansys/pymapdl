@@ -48,10 +48,9 @@ from typing import (
 )
 from warnings import warn
 
-import numpy as np
-
 from ansys.mapdl.core import _HAS_PYVISTA, _HAS_VISUALIZER, LOG
 from ansys.mapdl.core.plotting import GraphicsBackend
+import numpy as np
 
 if TYPE_CHECKING:
     from ansys.mapdl.core.mapdl import MapdlBase as Mapdl
@@ -366,10 +365,10 @@ def last_created(filenames: List[str]) -> str:
     filename.
     """
     ctimes = [creation_time(filename) for filename in filenames]
-    idx = np.argmax(ctimes)
-    if len(set(ctimes)):
+    if len(set(ctimes)) == 1:
         return filenames[-1]
 
+    idx = np.argmax(ctimes)
     return filenames[idx]
 
 
