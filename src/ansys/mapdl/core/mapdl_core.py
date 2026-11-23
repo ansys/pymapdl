@@ -251,6 +251,7 @@ class _MapdlCore(
         self._store_commands: bool = False
         self._stored_commands: list[str] = []
         self._response = None
+        self._pending_plot_output: Optional[str] = None
         self._mode = start_parm.get("mode", None)
         self._mapdl_process = None
         self._launched: bool = start_parm.get("launched", False)  # type: ignore[assignment]

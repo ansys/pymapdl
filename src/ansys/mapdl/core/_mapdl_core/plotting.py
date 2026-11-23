@@ -23,7 +23,6 @@
 
 """The plotting MAPDL core responsibility mixin."""
 
-import glob
 import os
 import pathlib
 import re
@@ -52,7 +51,10 @@ VALID_DEVICES_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM", "CLOSE
 VALID_FILE_TYPE_FOR_PLOT = VALID_DEVICES.copy()
 VALID_FILE_TYPE_FOR_PLOT.remove("CLOSE")
 VALID_FILE_TYPE_FOR_PLOT_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM"]
-PNG_IS_WRITTEN_TO_FILE = re.compile("WRITTEN TO FILE")
+# ``SAVE`` prints ``WRITTEN TO FILE NAME= file.db``; displays print the PNG name.
+PNG_IS_WRITTEN_TO_FILE = re.compile(
+    r"WRITTEN TO FILE(?!\s+NAME=)(?:\s+(?P<filename>\S+\.png)\b)?", re.IGNORECASE
+)
 PLOT_COMMANDS = [
     "APLO",
     "EPLO",
@@ -382,8 +384,7 @@ class _CorePlottingMixin(_CoreMixinBase):
         return _InteractivePlottingContext(self, pixel_res)
 
     def is_png_found(self, text: str) -> bool:
-        # findall returns None if there is no match
-        return PNG_IS_WRITTEN_TO_FILE.findall(text) is not None
+        return bool(PNG_IS_WRITTEN_TO_FILE.search(text))
 
     def _restore_plot_device(
         self,
@@ -408,8 +409,8 @@ class _CorePlottingMixin(_CoreMixinBase):
             previous_device = self.file_type_for_plots
             try:
                 self.show("CLOSE", mute=True)
-                # self.show("PNG", mute=True)
-                filename = self._screenshot_path()
+                match = PNG_IS_WRITTEN_TO_FILE.search(text)
+                filename = self._screenshot_path(match and match["filename"])
             finally:
                 self._restore_plot_device(
                     previous_device,
@@ -446,18 +447,21 @@ class _CorePlottingMixin(_CoreMixinBase):
 
         self._log.debug("A screenshot file has been found.")
         img = mpimg.imread(filename)
-        plt.imshow(img)
-        plt.axis("off")
+        fig, ax = plt.subplots()
+        try:
+            ax.imshow(img)
+            ax.axis("off")
 
-        if self._show_matplotlib_figures:  # pragma: no cover
-            self._log.debug("Using Matplotlib to plot")
-            plt.show()  # consider in-line plotting
+            if self._show_matplotlib_figures:
+                self._log.debug("Using Matplotlib to plot")
+                plt.show()  # consider in-line plotting
+            elif in_ipython():
+                self._log.debug("Using ipython")
+                from IPython.display import display
 
-        if in_ipython():
-            self._log.debug("Using ipython")
-            from IPython.display import display
-
-            display(plt.gcf())
+                display(fig)
+        finally:
+            plt.close(fig)
 
     def _download_plot(
         self, filename: str, plot_name: str, default_name: str = "plot"
@@ -503,11 +507,35 @@ class _CorePlottingMixin(_CoreMixinBase):
         else:
             return os.path.basename(plot_path_)
 
-    def _screenshot_path(self):
-        """Return last filename based on the current jobname"""
-        filenames = glob.glob(str(self.directory / f"{self.jobname}*.png"))
-        filenames.sort()
-        return filenames[-1]
+    def _screenshot_path(self, target_name: Optional[str] = None) -> str:
+        """Return the local path of ``target_name`` or of the latest jobname PNG."""
+        name = self._pick_screenshot_name(os.listdir(self.directory), target_name)
+        return os.path.join(self.directory, name)
+
+    def _pick_screenshot_name(
+        self, filenames: list[str], target_name: Optional[str] = None
+    ) -> str:
+        """Pick ``target_name`` if listed, else the highest ``<jobname><digits>.png``."""
+        if target_name and os.path.basename(target_name) in filenames:
+            return os.path.basename(target_name)
+
+        jobname = self.jobname
+        candidates = [
+            name
+            for name in filenames
+            if name.startswith(jobname) and name.endswith(".png")
+        ]
+        numbered = re.compile(rf"{re.escape(jobname)}(\d+)\.png")
+        plots = [
+            (int(m[1]), m[0]) for name in candidates if (m := numbered.fullmatch(name))
+        ]
+        if plots:
+            return max(plots)[1]
+        if candidates:
+            return max(candidates)
+        raise MapdlRuntimeError(
+            f"No '{jobname}*.png' screenshot found in the MAPDL working directory."
+        )
 
     def screenshot(
         self, savefig: Optional[str] = None, default_name: str = "mapdl_screenshot"
@@ -532,16 +560,21 @@ class _CorePlottingMixin(_CoreMixinBase):
         ValueError
             If given a wrong type for the ``savefig`` parameter.
         """
-        previous_device = self.file_type_for_plots
-        try:
-            self.show("PNG")
-            out_ = self.replot()
-        finally:
-            self._restore_plot_device(
-                previous_device,
-                primary_exception=sys.exc_info()[1],
-            )
-        file_name = self._get_plot_name(out_)
+        pending_text = getattr(self, "_pending_plot_output", None)
+        if pending_text is None:
+            file_name = self._get_plot_name(self._replot_as_png())
+        else:
+            text = pending_text
+            if not self.is_png_found(text) and self.file_type_for_plots != "PNG":
+                text = self._replot_as_png()
+            if not self.is_png_found(text):
+                warn(
+                    "The plot command did not write a PNG plot. "
+                    f"The text output from MAPDL is:\n{pending_text}",
+                    UserWarning,
+                )
+                return None
+            file_name = self._get_plot_name(text)
 
         if savefig:
             return self._download_plot(file_name, savefig, default_name=default_name)
@@ -549,3 +582,19 @@ class _CorePlottingMixin(_CoreMixinBase):
             self._display_plot(file_name)
         else:
             self._log.debug("Since matplolib is not installed, images are not shown.")
+
+    def _replot_as_png(self) -> str:
+        """Redraw the last display on the ``PNG`` device and return MAPDL's output."""
+        previous_device = self.file_type_for_plots
+        try:
+            self.show("PNG")
+            # Raw ``_run`` so ``/REP`` in ``PLOT_COMMANDS`` cannot recurse here.
+            text = self._run("/REPLOT,", mute=False)
+            if not self.ignore_errors:
+                self._raise_errors(text)
+            return text
+        finally:
+            self._restore_plot_device(
+                previous_device,
+                primary_exception=sys.exc_info()[1],
+            )

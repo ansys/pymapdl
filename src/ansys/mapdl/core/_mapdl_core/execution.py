@@ -667,7 +667,13 @@ class _CoreExecutionMixin(_CoreMixinBase):
         # special returns for certain geometry commands
         if short_cmd in plotting.PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
-            return self.screenshot(savefig=savefig, default_name="plot")
+            self._pending_plot_output = text
+            try:
+                return self.screenshot(savefig=savefig, default_name="plot")
+            finally:
+                self._pending_plot_output = None
+                # ``screenshot`` runs ``/SHOW``; keep the plot command's output.
+                self._response = response
 
         return self._response
 
