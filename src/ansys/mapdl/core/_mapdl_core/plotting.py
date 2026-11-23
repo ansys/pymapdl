@@ -54,36 +54,56 @@ VALID_FILE_TYPE_FOR_PLOT.remove("CLOSE")
 VALID_FILE_TYPE_FOR_PLOT_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM"]
 PNG_IS_WRITTEN_TO_FILE = re.compile("WRITTEN TO FILE")
 PLOT_COMMANDS = [
-    "APLO",
-    "EPLO",
-    "KPLO",
-    "LPLO",
-    "NPLO",
-    "PLES",
-    "PLNS",
-    "PLVA",
-    "PSDG",
-    "SECP",
-    "SPGR",
-    "TBPL",
-    "VPLO",
-]
-
-
-PLOT_COMMANDS = [
-    "APLO",
-    "EPLO",
-    "KPLO",
-    "LPLO",
-    "NPLO",
-    "PLES",
-    "PLNS",
-    "PLVA",
-    "PSDG",
-    "SECP",
-    "SPGR",
-    "TBPL",
-    "VPLO",
+    # Single-frame display commands captured as Server Plot Screenshots.
+    # Animations (AN*), plot settings (/PLO, PLCP, PLTI) and the Removed
+    # EDFPLOT are deliberately excluded.
+    "*VPL",  # *VPLOT
+    "/REP",  # /REPLOT
+    "APLO",  # APLOT
+    "CMPL",  # CMPLOT
+    "EPLO",  # EPLOT
+    "FSPL",  # FSPLOT
+    "GPLO",  # GPLOT
+    "KPLO",  # KPLOT
+    "LAYP",  # LAYPLOT
+    "LPLO",  # LPLOT
+    "MDPL",  # MDPLOT
+    "MPPL",  # MPPLOT
+    "NPLO",  # NPLOT
+    "PLAS",  # PLAS
+    "PLCA",  # PLCAMP
+    "PLCF",  # PLCFREQ
+    "PLCH",  # PLCHIST
+    "PLCI",  # PLCINT
+    "PLCK",  # PLCKSURF
+    "PLCR",  # PLCRACK
+    "PLDI",  # PLDISP
+    "PLES",  # PLESOL
+    "PLET",  # PLETAB
+    "PLF2",  # PLF2D
+    "PLFA",  # PLFAR
+    "PLGE",  # PLGEOM
+    "PLLS",  # PLLS
+    "PLMA",  # PLMAP
+    "PLMC",  # PLMC
+    "PLNE",  # PLNEAR
+    "PLNS",  # PLNSOL
+    "PLOR",  # PLORB
+    "PLPA",  # PLPAGM, PLPATH
+    "PLSE",  # PLSECT
+    "PLTR",  # PLTRAC
+    "PLVA",  # PLVAR
+    "PLVE",  # PLVECT
+    "PLZZ",  # PLZZ
+    "PSDG",  # PSDGRAPH
+    "SECP",  # SECPLOT
+    "SPGR",  # SPGRAPH
+    "SPLO",  # SPLOT
+    "SUPL",  # SUPL
+    "SVPL",  # SVPLOT
+    "TBFP",  # TBFPLOT
+    "TBPL",  # TBPLOT
+    "VPLO",  # VPLOT
 ]
 
 

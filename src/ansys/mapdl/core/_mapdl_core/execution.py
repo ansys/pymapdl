@@ -79,7 +79,7 @@ def parse_to_short_cmd(command):
     'VPLO'
     """
     try:
-        short_cmd = command.split(",")[0]
+        short_cmd = command.split(",")[0].strip()
         return short_cmd[:4].upper()
     except Exception:  # pragma: no cover
         return
