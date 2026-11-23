@@ -299,95 +299,169 @@ class FeConstraints(CommandsBase):
         nend: str = "",
         ninc: str = "",
         rkey: str = "",
+        irstrtflag: str = "",
         **kwargs,
     ):
         r"""Deletes degree-of-freedom constraints.
 
-        Mechanical APDL Command: `DDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DDELE.html>`_
+        Mechanical APDL Command: `DDELE <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DDELE.html>`_
 
         Parameters
         ----------
         node : str
-            Node for which constraint is to be deleted. If ALL, ``NEND`` and ``NINC`` are ignored and
-            constraints for all selected nodes ( :ref:`nsel` ) are deleted. If ``NODE`` = P, graphical
-            picking is enabled and all remaining command fields are ignored (valid only in the GUI). A
-            component name may also be substituted for ``NODE``.
+            Node for which constraint is to be deleted. If ALL, ``NEND``\
+            and ``NINC``\ are ignored and constraints for all selected nodes
+            (`NSEL
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSEL.html>`_)
+            are deleted. If ``NODE``\ = P, graphical picking is enabled and
+            all remaining command fields are ignored (valid only in the
+            GUI). A component name may also be substituted for ``NODE``.
 
         lab : str
-            Valid degree of freedom label. If ALL, use all selected labels ( :ref:`dofsel` ). Structural
-            labels: UX, UY, or UZ (displacements); ROTX, ROTY, or ROTZ (rotations); WARP (warping). Thermal
-            labels: TEMP, TBOT, TE2, TE3,..., TTOP (temperature). Acoustic labels: PRES (pressure); UX, UY,
-            or UZ (displacements for FSI coupled elements). Electric label: VOLT (voltage). Magnetic labels:
-            MAG (scalar magnetic potential); AZ (vector magnetic potential). Diffusion label: CONC
-            (concentration).
+            Valid degree of freedom label. If ALL, use all selected labels
+            (`DOFSEL
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DOFSEL.html>`_).
+            Structural labels: UX, UY, or UZ (displacements); ROTX, ROTY, or
+            ROTZ (rotations); WARP (warping). Thermal labels: TEMP, TBOT,
+            TE2, TE3,..., TTOP (temperature). Acoustic labels: PRES
+            (pressure); UX, UY, or UZ (displacements for FSI coupled
+            elements). Electric label: VOLT (voltage). Magnetic labels: MAG
+            (scalar magnetic potential); AZ (vector magnetic potential).
+            Diffusion label: CONC (concentration).
 
-            In structural analyses, the following velocity and acceleration load labels are also valid:
-            VELX, VELY, VELZ (translational velocities); OMGX, OMGY, OMGZ (rotational velocities); ACCX,
-            ACCY, ACCZ (translational accelerations); DMGX, DMGY, DMGZ (rotational accelerations).
+            In structural analyses, the following velocity and acceleration
+            load labels are also valid: VELX, VELY, VELZ (translational
+            velocities); OMGX, OMGY, OMGZ (rotational velocities); ACCX,
+            ACCY, ACCZ (translational accelerations); DMGX, DMGY, DMGZ
+            (rotational accelerations).
 
-            In structural analyses, HDSP (hydrostatic pressure) is also valid.
+            In structural analyses, HDSP (hydrostatic pressure) is also
+            valid.
 
-            If the node is connected to an ``ELBOW290`` element, the following pipe cross-section degree of
-            freedom labels are also valid: SE, SO, SW, SRA, and SRT. (For details, see the ``ELBOW290``
-            documentation.) The degrees of freedom are not included when ``Lab`` = ALL. To constrain all
-            cross- section degrees of freedom, specify ``Lab`` = SECT.
+            If the node is connected to an `ELBOW290
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ELBOW290.html>`_
+            element, the following pipe cross-section degree of freedom
+            labels are also valid: SE, SO, SW, SRA, and SRT. (For details,
+            see the `ELBOW290
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ELBOW290.html>`_
+            documentation.) The degrees of freedom are *not*\ included when
+            ``Lab``\ = ALL. To constrain *all*\ cross-section degrees of
+            freedom, specify ``Lab``\ = SECT.
 
         nend : str
-            Delete constraints from ``NODE`` to ``NEND`` (defaults to ``NODE`` ) in steps of ``NINC``
-            (defaults to 1).
+            Delete constraints from ``NODE``\ to ``NEND``\ (defaults to
+            ``NODE``) in steps of ``NINC``\ (defaults to 1).
 
         ninc : str
-            Delete constraints from ``NODE`` to ``NEND`` (defaults to ``NODE`` ) in steps of ``NINC``
-            (defaults to 1).
+            Delete constraints from ``NODE``\ to ``NEND``\ (defaults to
+            ``NODE``) in steps of ``NINC``\ (defaults to 1).
 
         rkey : str
             Ramping option:
 
             * ``OFF`` - Loads are step-removed (default).
 
-            * ``ON or FORCE`` - Forces on the specified degrees of freedom ( ``Lab`` ) are ramped during the
-              next load step. The forces are ramped from the reaction forces of the previous load step, regardless
-              of whether or not a constraint was present. If the specified node(s) and degree(s) of freedom has a
-              force value currently defined, the force is ramped from the reaction force value to the currently
-              applied force value. If no force is currently applied, the force is ramped from the reaction force
-              value to zero. The ramping behavior is not in effect if the subsequent force is applied in tabular
-              format.
+            * ``ON or FORCE`` - Forces on the specified degrees of freedom
+              (``Lab``) are ramped during the next load step. The forces are
+              ramped from the reaction forces of the previous load step,
+              regardless of whether or not a constraint was present. If the
+              specified node(s) and degree(s) of freedom has a force value
+              currently defined, the force is ramped from the reaction-force
+              value to the currently applied force value. If no force is
+              currently applied, the force is ramped from the reaction-force
+              value to zero. The ramping behavior is not in effect if the
+              subsequent force is applied in tabular format.
 
-              For degrees of freedom other than structural and TEMP, UX, UY, YZ, ROTX, ROTY, and ROTZ
+              This option only works when reaction forces are written in
+              the ``RST``\ file (`OUTRES
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_OUTRES.html>`_,RSOL).
 
-               when performing a restart at an intermediate point during a load step, Not at the beginning or end
-              of a load step.
+              For degrees of freedom other than structural and
+              TEMP,:sup:`[1]`\ when performing a restart at an
+              intermediate point during a load step,:sup:`[2]`\ the
+              reaction-force data is not available. Therefore, the force
+              is ramped from zero to the currently applied force value (if
+              it exists) for the specified node(s) and degree(s) of
+              freedom.
 
-               the reaction-force data is not available. Therefore, the force is ramped from zero to the currently
-              applied force value (if it exists) for the specified node(s) and degree(s) of freedom.
+              For structural and TEMP degrees of freedom,:sup:`[1]`\
+              during a restart from an intermediate point during a load
+              step,:sup:`[2]`\ the reaction-force data is available.
+              Therefore, it is ramped down during this restart step if no
+              other loads are applied. See `"Notes"
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DDELE.html#DDELE.notes>`_
+              for more information about the behavior of this option.
 
-              For structural and TEMP degrees of freedom, during a restart from an intermediate point during a
-              load step, the reaction-force data is available. Therefore, it is ramped down during this restart
-              step if no other loads are applied. See :ref:`DDELE_notes` for more information about the behavior
-              of this option.
+        irstrtflag : str
+            Command argument ``IRSTRTFLAG``. Refer to the `DDELE command
+            documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DDELE.html>`_
+            for option-specific definitions.
 
         Notes
         -----
 
         .. _DDELE_notes:
 
-        Deleting a constraint is not the same as setting it to zero (which fixes the degree of freedom to a
-        zero value). Deleting a constraint has the same effect as deactivating, releasing, or setting the
-        constraint free. The node and the degree of freedom label must be selected ( :ref:`nsel`,
-        :ref:`dofsel` ).
+        * ``IRSTRTFLAG`` - Controls how the `DDELE
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DDELE.html>`_\
+          information is used during a `restart analysis
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_bas/Hlp_G_BAS3_12.html>`_.
 
-        For structural degrees of freedom, the following limitation exists when the analysis is restarted:
+          * ``0`` - Retain the `DDELE
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DDELE.html>`_\
+            information for subsequent restart analysis (default).
 
-        * If a new force is applied ( :ref:`f` ) upon restart of the load step during which :ref:`ddele`,
-          ``NODE``, ``DofLabel``,,,RFORCE (or ON) was issued, the force will show a jump to the current
-          value at the time of restart before being ramped to its final value.
+          * ``1`` - Ignore the `DDELE
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DDELE.html>`_\
+            information for subsequent restart analysis.
 
-        Upon restart, it is good practice is to allow the reaction force to ramp down to zero in a load
-        step, then to apply new loads in the next load step.
+          See `"Notes"
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DDELE.html#DDELE.notes>`_
+          for more information about this argument.
+
+        Deleting a constraint is not the same as setting it to zero (which fixes
+        the degree of freedom to a zero value). Deleting a constraint has the
+        same effect as deactivating, releasing, or setting the constraint free.
+        The node and the degree-of-freedom label must be selected (`NSEL
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSEL.html>`_,
+        `DOFSEL
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DOFSEL.html>`_).
+
+        For structural degrees of freedom,:sup:`[1]`\ the following limitation
+        exists when the analysis is restarted:
+
+        * If a new force is applied (`F
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_F.html>`_)
+          upon restart of the load step during which `DDELE
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DDELE.html>`_,``NODE``,``DofLabel``,,,RFORCE
+          (or ON) was issued (and ``IRSTRTFLAG``\ = 0), the force shows a jump
+          to the current value at the time of restart before being ramped to its
+          final value.
+
+        Upon restart, it is good practice to allow the reaction force to ramp
+        down to zero in a load step, then to apply new loads in the next load
+        step.
+
+        If you determine that a restart analysis is unnecessary, you can set
+        ``IRSTRTFLAG``\ = 1 to avoid the storage overhead associated with `DDELE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DDELE.html>`_\
+        information. This flag is especially useful in an analysis involving a
+        large model where `DDELE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DDELE.html>`_\
+        may be specified on many nodes and degrees of freedom, but where a
+        restart analysis will not occur.
+
+        For a node attached to a `SHELL294
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL294.html>`_
+        element type with `SECOFFSET
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECOFFSET.html>`_,MID
+        or USER, ramping forces from previous load step on deleted constraints
+        (``Rkey``\ = ON or FORCE) is not supported.
 
         This command is also valid in PREP7.
         """
-        command = f"DDELE,{node},{lab},{nend},{ninc},{rkey}"
+        command = f"DDELE,{node},{lab},{nend},{ninc},{rkey},{irstrtflag}"
         return self.run(command, **kwargs)
 
     def dflx(

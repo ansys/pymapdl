@@ -23,3 +23,4 @@ FeForces
    FeForces.fjlist
    FeForces.flist
    FeForces.fscale
+   FeForces.fval

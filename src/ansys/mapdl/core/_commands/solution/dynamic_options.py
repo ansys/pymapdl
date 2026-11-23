@@ -25,35 +25,103 @@ from ansys.mapdl.core._commands import CommandsBase
 
 class DynamicOptions(CommandsBase):
 
-    def alphad(self, value: str = "", **kwargs):
+    def alphad(
+        self, value: str = "", auto_adjust: str = "", energy_ratio: str = "", **kwargs
+    ):
         r"""Defines the mass matrix multiplier for damping.
 
-        Mechanical APDL Command: `ALPHAD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ALPHAD.html>`_
+        Mechanical APDL Command: `ALPHAD <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ALPHAD.html>`_
 
         Parameters
         ----------
         value : str
-            Mass matrix multiplier for damping.
+            Mass matrix multiplier for damping. This also serves as the
+            intial multiplier if ``Auto-adjust``\ is used.
+
+        auto_adjust : str
+            Set this field to ``Auto``\ to enable the software to
+            automatically vary the mass matrix multiplier for damping to aid
+            in convergence (adaptive mass proportional damping).. When this
+            field is set to ``Auto``, the value in field 2 serves as the
+            initial multiplier with a default of 1000. See the `Notes
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ALPHAD.html#ALPHAD.notes>`_
+            section for details.
+
+        energy_ratio : str
+            Provide a maximum damping energy to potential energy ratio that
+            the software will try to maintain while auto-adjusting the
+            damping multiplier. This field is only valid if automatic
+            adjustment is activated. Defaults to 0.01.
 
         Notes
         -----
 
         .. _ALPHAD_notes:
 
-        This command defines the mass matrix multiplier :math:`equation not available`  used to form the
-        viscous damping matrix  :math:`equation not available`, where  :math:`equation not available`  is
-        the mass matrix.
+        This command defines the mass matrix multiplier (see command
+        documentation for equation) used to form the viscous damping matrix (see
+        command documentation for equation), where (see command documentation
+        for equation) is the mass matrix.
 
-        Values of :math:`equation not available`  can also be input as a material property ( :ref:`mp`,ALPD
-        or :ref:`tb`,SDAMP,,,,ALPD). If ALPD in either form is included, the ALPD value is added to the
-        :ref:`alphad` value as appropriate. (See `Material Damping
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/mat_matdamping.html#>`_  `Damping
-        Matrices <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_tool3.html#>`_
-        :ref:`antype`,STATIC) or buckling ( :ref:`antype`,BUCKLE) analyses.
+        Values of (see command documentation for equation) can also be input as
+        a material property (`MP
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MP.html>`_,ALPD
+        or `TB
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TB.html>`_,SDAMP,,,,ALPD).
+        If ALPD in either form is included, the ALPD value is added to the
+        `ALPHAD
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ALPHAD.html>`_\
+        value as appropriate. (See `Material Damping in the Material Reference
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_mat/mat_matdamping.html>`_
+        and `Damping Matrices in the Theory Reference
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_thry/thy_tool3.html>`_.)
+        Damping is not used in static (`ANTYPE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ANTYPE.html>`_,STATIC)
+        or buckling (`ANTYPE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ANTYPE.html>`_,BUCKLE)
+        analyses.
+
+        Use auto-adjustment of mass matrix multiplier for damping to help with
+        convergence in difficult to converge non-linear problems that use the
+        quasi-static (`TINTP
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TINTP.html>`_,QUASI)
+        or static to transient (`SOLOPTION
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SOLO.html>`_,STOT)
+        methods to aid in convergence. Adaptive mass proportional damping is
+        expected to benefit problems that involve:
+
+        * local buckling
+
+        * under or unconstrained models
+
+        * contacts where contact might be getting lost during the solution
+
+        At the beginning of every substep, the damping is adjusted to be high
+        enough to provide some stability but low enough that damping energy is a
+        small fraction of the potential energy of the system. This ensures an
+        accurate solution.
+
+        The initial value specified in the command is used to determine an upper
+        and lower value for the damping while adjusting. Adjustment is based on
+        the damping and potential energy ratio of the system. If you specify a
+        damping to potential energy ratio, that ratio is only used as a guide
+        during the automatic adjustment. The ratio is not strictly enforced.
 
         This command is also valid in PREP7.
+
+        **Example Usage**
+
+        See these example problems:
+
+        * `Dynamic Simulation of a Nuclear Piping System Using RSA Methods in
+          the Technology Showcase: Example Problems
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tecmissingmass.html>`_
+
+        * `Underconstrained Coil Spring Under Compression in the Technology
+          Showcase: Example Problems
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/teccoilspring.html>`_
         """
-        command = f"ALPHAD,{value}"
+        command = f"ALPHAD,{value},{auto_adjust},{energy_ratio}"
         return self.run(command, **kwargs)
 
     def betad(self, value: str = "", **kwargs):
@@ -706,35 +774,63 @@ class DynamicOptions(CommandsBase):
         command = f"HROUT,{reimky},{clust},{mcont},{engcalc}"
         return self.run(command, **kwargs)
 
-    def kryopt(self, maxdim: str = "", restol: str = "", **kwargs):
+    def kryopt(self, maxdim: str = "", restol: str = "", orthtol: str = "", **kwargs):
         r"""Specifies solution options for a Krylov method harmonic analysis.
 
-        Mechanical APDL Command: `KRYOPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KRYOPT.html>`_
+        Mechanical APDL Command: `KRYOPT <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_KRYOPT.html>`_
+
+        **Command default:**
+
+        The default values listed for each argument above are used.
 
         Parameters
         ----------
         maxdim : str
-            Maximum dimension of subspace. The default size is automatically determined by the program
-            (ranges around 50).
+            Maximum dimension of subspace. The default size is automatically
+            determined by the program (ranges around 50).
 
         restol : str
-            Tolerance used to verify the L-2 norm values of calculated residuals and issue a warning if
-            ``RESTOL`` is exceeded throughout the entire frequency range. Default = 0.05.
+            Tolerance used to verify the L-2 norm values of calculated
+            residuals and issue a warning if ``RESTOL``\ is exceeded
+            throughout the entire frequency range. Default = 0.05.
+
+        orthtol : str
+            Tolerance that controls the orthonormality check of the Krylov
+            subspace vectors. Valid values range from 0 to 1. The default is
+            1E-8.
 
         Notes
         -----
 
         .. _KRYOPT_notes:
 
-        This command is used to specify solution options for a harmonic analysis solved with the Krylov
-        method ( ``Method`` = KRYLOV on :ref:`hropt`, see also `Frequency-Sweep Harmonic Analysis via the
-        Krylov Method
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/str_Krysweep.html#str_Krylov_macros>`_
+        This command is used to specify solution options for a harmonic analysis
+        solved with the Krylov method (``Method``\ = KRYLOV on `HROPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HROPT.html>`_,
+        see also `Frequency-Sweep Harmonic Analysis via the Krylov Method in the
+        Structural Analysis Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/str_Krysweep.html>`_).
 
-        Increasing subspace size ( ``MAXDIM`` ) improves solution accuracy with the trade-off of increased
-        computational cost and additional memory requirements.
+        Increasing subspace size (``MAXDIM``) improves solution accuracy with
+        the trade-off of increased computational cost and additional memory
+        requirements.
+
+        The ``RESTOL``\ and ``OrthTol``\ options do not affect the accuracy of
+        the solution. They simply control the output of messages displayed
+        regarding the accuracy of the final computed solution or orthonormality
+        of the computed subspace.
+
+        The program computes the condition number of a matrix created based on
+        the dot products of the Krylov subspace vectors with each other. When
+        the condition number of this matrix is closer to 1, it means the
+        subspace vectors are orthonormal. When it is closer to 0, that means the
+        subspace vectors are not orthonormal. The ``OrthTol``\ value is used in
+        the following formula to determine the orthonormality of the computed
+        Krylov subspace: (see command documentation for equation). When this
+        condition is true, the Krylov subspace is determined to be sufficiently
+        orthonormal, and vice versa.
         """
-        command = f"KRYOPT,{maxdim},,,{restol}"
+        command = f"KRYOPT,{maxdim},,,{restol},{orthtol}"
         return self.run(command, **kwargs)
 
     def lvscale(self, fact: str = "", ldstep: str = "", **kwargs):
@@ -1865,21 +1961,36 @@ class DynamicOptions(CommandsBase):
         avsmooth: int | str = "",
         alphaf: str = "",
         alpham: str = "",
+        *,
+        oslm2: str = "",
         **kwargs,
     ):
         r"""Defines transient integration parameters.
 
-        Mechanical APDL Command: `TINTP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TINTP.html>`_
+        Mechanical APDL Command: `TINTP <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TINTP.html>`_
+
+        **Command default:**
+
+        ``GAMMA``\ defaults to 0.005, which is the same as choosing the High
+        Speed application (``GAMMA``\ = HISP). All other fields default as
+        described above.
 
         Parameters
         ----------
         gamma : str
-            Amplitude decay factor for 2nd order transient integration, for example, structural dynamics (used
-            only if ``ALPHA``, ``DELTA``, ``ALPHAF``, and ``ALPHAM`` are blank). Defaults to 0.005.
+            Amplitude decay factor for 2nd order transient integration, for
+            example, structural dynamics (used only if ``ALPHA``, ``DELTA``,
+            ``ALPHAF``, and ``ALPHAM``\ are blank, see `"Notes"
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TINTP.html#TINTP.notes>`_).
+            Defaults to 0.005.
 
-            Alternatively, you can input the application type for the analysis using one of the following
-            labels. In this case, the program automatically sets the transient dynamic solver algorithm and
-            settings based on the intended application. For more information, see.
+            Alternatively, you can input the application type for the
+            analysis using one of the following labels. In this case, the
+            program automatically sets the transient dynamic solver
+            algorithm and settings based on the intended application. For
+            more information, see `Transient Dynamic Analysis Settings Based
+            on Application in the Structural Analysis Guide
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR5_12.html#str_transapplication>`_.
 
             * ``IMPA`` - Impact application.
 
@@ -1892,17 +2003,21 @@ class DynamicOptions(CommandsBase):
             * ``QUAS`` - Quasi-static application.
 
         alpha : str
-            2nd order transient integration parameter (used only if ``GAMMA`` is blank). Defaults to 0.2525.
+            2nd order transient integration parameter (used only if
+            ``GAMMA``\ is blank). Defaults to 0.2525.
 
         delta : str
-            2nd order transient integration parameter (used only if ``GAMMA`` is blank). Defaults to 0.5050.
+            2nd order transient integration parameter (used only if
+            ``GAMMA``\ is blank). Defaults to 0.5050.
 
         theta : str
-            1st order transient (for example, thermal transient) integration parameter. Defaults to 1.0
+            1st order transient (for example, thermal transient) integration
+            parameter. Defaults to 1.0.
 
         oslm : str
-            Specifies the oscillation limit criterion for automatic time stepping of 1st order transients
-            (for example, thermal transients). Defaults to 0.5 with a tolerance of ``TOL``.
+            Specifies the oscillation limit criterion for automatic time
+            stepping of 1st order transients (for example, thermal
+            transients). Defaults to 0.5 with a tolerance of ``TOL``.
 
         tol : str
             Tolerance applied to ``OSLM``. Defaults to 0.0.
@@ -1910,40 +2025,67 @@ class DynamicOptions(CommandsBase):
         avsmooth : int or str
             Smoothing flag option:
 
-            * ``0`` - Include smoothing of the velocity (1st order system) or the acceleration (2nd order
-              system) (default).
+            * ``0`` - Include smoothing of the velocity (1st order system)
+              or the acceleration (2nd order system) (default).
 
             * ``1`` - Do not include smoothing.
 
         alphaf : str
-            Interpolation factor in HHT algorithm for force and damping terms (used only if ``GAMMA`` is
-            blank). Defaults to 0.005.
+            Interpolation factor in HHT algorithm for force and damping
+            terms (used only if ``GAMMA``\ is blank). Defaults to 0.005.
 
         alpham : str
-            Interpolation factor in HHT algorithm for inertial term (used only if ``GAMMA`` is blank).
-            Defaults to 0.0.
+            Interpolation factor in HHT algorithm for inertial term (used
+            only if ``GAMMA``\ is blank). Defaults to 0.0.
+
+        oslm2 : str
+            Specifies the oscillation limit for automatic time stepping of
+            second order transients (for example, structural transients).
+            The automatic time stepping algorithm will adjust to have
+            approximately the specified number of points per cycle. You can
+            specify a negative number (for example, -1) to define a time
+            increment that is independent of the oscillation limit.
 
         Notes
         -----
 
         .. _TINTP_notes:
 
-        Used to define the transient integration parameters. For more information on transient integration
-        parameters, refer to `Transient Analysis
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_anproc2.html#anpdescp1order>`_
+        Used to define the transient integration parameters. For more
+        information on transient integration parameters, refer to `Transient
+        Analysis in the Theory Reference
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_thry/thy_anproc2.html>`_.
 
-        For structural transient analyses, you may choose between the Newmark and HHT time integration
-        methods (see the :ref:`trnopt` command). In this case, if ``GAMMA`` is input and the integration
-        parameters ``ALPHA``, ``DELTA``, ``ALPHAF``, and ``ALPHAM`` are left blank, the program will
-        calculate the integration parameters. Alternatively, you can input these integration parameters
-        directly on this command. However, for the unconditional stability and second order accuracy of the
-        time integration, these parameters should satisfy a specific relationship, as described in
-        `Description of Structural and Other Second Order Systems
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_anproc2.html#anpsolu>`_
+        For a full structural transient analysis, you may choose between the
+        Newmark and HHT time integration methods (see the `TRNOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TRNOPT.html>`_\
+        command). In this case, if ``GAMMA``\ is input and the integration
+        parameters ``ALPHA``, ``DELTA``, ``ALPHAF``, and ``ALPHAM``\ are left
+        blank, the program calculates the integration parameters, according to
+        `Equation 15-14
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_thry/thy_anproc2.html#thyeq9systemsnov2001>`_
+        and `Equation 15-18
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_thry/thy_anproc2.html#fourparameters>`_.
+        Alternatively, you can input these integration parameters directly on
+        this command. However, for the unconditional stability and second order
+        accuracy of the time integration, these parameters should satisfy a
+        specific relationship, as described in `Description of Structural and
+        Other Second Order Systems
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_thry/thy_anproc2.html#anpdes2ndord>`_
+        of the `*Mechanical APDL Theory Reference*\
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_thry/ans_thry.html>`_.
+
+        For mode-superposition transient analysis, the integration parameters
+        ``ALPHA``\ and ``DELTA``\ are always calculated by the program from the
+        ``GAMMA``\ value, according to `Equation 15-14
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_thry/thy_anproc2.html#thyeq9systemsnov2001>`_.
+        If an ``ALPHA``, ``DELTA``\ pair has been specified with ``GAMMA``\ left
+        blank, the input values are ignored, and integration parameters
+        ``ALPHA``, ``DELTA``\ are calculated with ``GAMMA``\ = 0.
 
         This command is also valid in PREP7.
         """
-        command = f"TINTP,{gamma},{alpha},{delta},{theta},{oslm},{tol},,,{avsmooth},{alphaf},{alpham}"
+        command = f"TINTP,{gamma},{alpha},{delta},{theta},{oslm},{tol},{oslm2},,{avsmooth},{alphaf},{alpham}"
         return self.run(command, **kwargs)
 
     def trnopt(

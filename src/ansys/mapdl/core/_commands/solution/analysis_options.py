@@ -506,6 +506,50 @@ class AnalysisOptions(CommandsBase):
         command = f"BCSOPTION,,{memory_option},{memory_size},,,{solve_info}"
         return self.run(command, **kwargs)
 
+    def cefilter(self, termkey: str = "", **kwargs):
+        r"""Controls the automatic solution termination of models having constraint equations
+        with too many terms.
+
+        Mechanical APDL Command: `CEFILTER <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CEFILTER.html>`_
+
+        Parameters
+        ----------
+        termkey : str
+            Enables or disables the solution termination if a model has
+            constraint equations with too many terms:
+
+            * ``ON`` - Automatically terminates the simulation with an error
+              message (see Notes) upon encountering a model that has
+              constraint equations with too many terms (default).
+
+            * ``OFF`` - Disables automatic termination, and instead allows
+              the solution to continue even if a model has constraint
+              equations with too many terms.
+
+        Notes
+        -----
+
+        .. _CEFILTER_notes:
+
+        A model with one or more constraint equations with too many terms is
+        ill-posed, requires excessive memory allocation and solution times, and
+        may never converge. By default, the program automatically terminates the
+        simulation of such models with an error message stating that there were
+        too many constraint equation terms. One reason this can occur is the
+        misuse of `Remote Points
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/wb_sim/ds_remote_point.html>`_
+        in the Mechanical application, which create MPC equations. Best practice
+        is to revise your model to have constraint equations with less terms.
+
+        If, instead, you wish to allow the solution to continue with increased
+        solution time and memory requirements without changing your model, issue
+        `CEFILTER
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CEFILTER.html>`_,OFF
+        to bypass the automatic termination.
+        """
+        command = f"CEFILTER,{termkey}"
+        return self.run(command, **kwargs)
+
     def cjump(
         self,
         option: str = "",
@@ -2966,69 +3010,92 @@ class AnalysisOptions(CommandsBase):
     ):
         r"""Controls PCG solver options.
 
-        Mechanical APDL Command: `PCGOPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PCGOPT.html>`_
+        Mechanical APDL Command: `PCGOPT <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PCGOPT.html>`_
 
         Parameters
         ----------
         lev_diff : str
-            Indicates the level of difficulty of the analysis. Valid settings are AUTO or 0 (default), 1, 2, 3,
-            4, or 5. This option applies to both the PCG solver when used in static and full transient analyses
-            and to the PCG Lanczos method in modal analyses.
+            Indicates the level of difficulty of the analysis. Valid
+            settings are AUTO or 0 (default), 1, 2, 3, 4, or 5. This option
+            applies to:
 
-            * Specify AUTO to allow Mechanical APDL to select the proper level of difficulty for the model.
-            * Lower values (1 or 2) generally provide the best performance for well-conditioned problems.
-            * Values of 3 or 4 generally provide the best performance for ill-conditioned problems; however,
-              higher values may increase the solution time for well-conditioned problems. Higher level-of-
-              difficulty values typically require more memory.
-            * The highest value of 5 essentially performs a factorization of the global matrix (similar to the
-              sparse solver) and may require a very large amount of memory. This level is generally recommended
-              for small- to medium-sized problems when using the PCG Lanczos mode-extraction method.
+            * The PCG solver in static, full transient, and full harmonic
+              analyses
 
-            For example, models containing elongated elements (that is, elements with high aspect ratios) and
-            models containing contact elements can lead to ill-conditioned problems. To determine if your
-            problem is ill-conditioned, view the :file:`Jobname.PCS` file to see the number of PCG iterations
-            needed to reach a converged solution. Generally, static or full transient solutions that require
-            more than 1500 iterations are considered to be ill-conditioned for the PCG solver.
+            * The PCG Lanczos and PCG Block Lanczos methods in modal
+              analyses
+
+            * Specify AUTO to allow Mechanical APDL to select the proper
+              level of difficulty for the model. For most single-field
+              structural analyses, AUTO sets ``Lev_Diff``\ = 3.
+
+            * Lower values (1 or 2) generally provide the best performance
+              for well-conditioned problems.
+
+            * Values of 4 or 5 generally provide the best performance for
+              ill-conditioned problems; however, higher values may increase
+              the solution time for well-conditioned problems. Higher
+              level-of-difficulty values typically require more memory.
+
+            For example, models containing elongated elements (that is,
+            elements with high aspect ratios) and models containing contact
+            elements can lead to ill-conditioned problems. To determine if
+            your problem is ill-conditioned, view the ``Jobname.PCS``\ file
+            to see the number of PCG iterations needed to reach a converged
+            solution. Generally, static, full transient, or full harmonic
+            solutions that require more than 1500 iterations are considered
+            to be ill-conditioned for the PCG solver.
 
         fallback : str
-            Controls whether Mechanical APDL switches to the sparse direct solver automatically ( :ref:`eqslv`,SPARSE)
-            under certain conditions. (The criteria are listed below.) When Mechanical APDL switched the equation
-            solver, the simulation attempts to continue without interruption.
+            Controls whether Mechanical APDL switches to the sparse direct
+            solver automatically (`EQSLV
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EQSLV.html>`_,SPARSE)
+            under certain conditions. (The criteria are listed below.) When
+            Mechanical APDL switched the equation solver, the simulation
+            attempts to continue without interruption.
 
-            * ``AUTO`` - Automatically switch to the sparse solver when one of the following conditions apply (default):
-
-              * The assembled matrix is detected to be indefinite.
-
-              * The PCG solver requires more than 2000 iterations to reach convergence.
-
-              * The PCG solver fails to converge.
-
-            * ``ON`` - More aggressive fallback criteria. Automatically switch to the sparse solver when one of the
-              following conditions apply:
+            * ``AUTO`` - Automatically switch to the sparse solver when one
+              of the following conditions apply (default):
 
               * The assembled matrix is detected to be indefinite.
 
-              * The PCG solver requires more than 1500 iterations to reach convergence.
+              * The PCG solver requires more than 2000 iterations to reach
+                convergence.
 
               * The PCG solver fails to converge.
 
-            * ``OFF`` - Disables the fallback logic so that there is no automatic switching, and only the PCG
-              solver is used to solve the equations for this simulation.
+            * ``ON`` - More aggressive fallback criteria. Automatically
+              switch to the sparse solver when one of the following
+              conditions apply:
 
-            After switching to the sparse solver, the program reverts back to the PCG solver under certain
-            conditions. See the :ref:`Notes section for details. <PCGOPT_Notes_revertAfterFallback>`
+              * The assembled matrix is detected to be indefinite.
+
+              * The PCG solver requires more than 1500 iterations to reach
+                convergence.
+
+              * The PCG solver fails to converge.
+
+            * ``OFF`` - Disables the fallback logic so that there is no
+              automatic switching, and only the PCG solver is used to solve
+              the equations for this simulation.
+
+            After switching to the sparse solver, the program reverts back
+            to the PCG solver under certain conditions. See the `Notes
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PCGOPT.html#PCGOPT_Notes_revertAfterFallback>`_
+            section for details and limitations.
 
         reduceio : str
-            Controls whether the PCG solver will attempt to reduce I/O performed during equation solution:
+            Controls whether the PCG solver will attempt to reduce I/O
+            performed during equation solution:
 
-            * ``AUTO`` - Automatically chooses whether to reduce I/O or not (default).
+            * ``AUTO`` - Automatically chooses whether to reduce I/O or not
+              (default).
 
-            * ``YES`` - Reduces I/O performed during equation solution in order to reduce total solver time.
+            * ``YES`` - Reduces I/O performed during equation solution in
+              order to reduce total solver time.
 
-            * ``NO`` - Does NOT reduce I/O performed during equation solution.
-
-            This option applies to both the PCG solver when used in static and full transient analyses and to
-            the PCG Lanczos method in modal analyses.
+            * ``NO`` - Does NOT reduce I/O performed during equation
+              solution.
 
         strmck : str
             Controls whether or not a Sturm sequence check is performed:
@@ -3037,126 +3104,200 @@ class AnalysisOptions(CommandsBase):
 
             * ``ON`` - Performs Sturm sequence check
 
-            This option applies only when using the PCG Lanczos method in modal analyses. When using this
-            option, a factorization must be performed and will require a very large amount of memory for extra
-            computations. This option is generally recommended for small- to medium-sized problems. If the Sturm
-            sequence check takes a large amount of computing time, use the :file:`Jobname.ABT` file to abort the
-            Sturm check, or press the STOP button if in interactive mode.
+            This option is not available for the PCG Block Lanczos method.
+            It applies only when using the PCG Lanczos method in modal
+            analyses. When using this option, a factorization must be
+            performed and will require a very large amount of memory for
+            extra computations. This option is generally recommended for
+            small- to medium-sized problems. If the Sturm sequence check
+            takes a large amount of computing time, use the ``Jobname.ABT``\
+            file to abort the Sturm check, or press the **STOP**\ button if
+            in interactive mode.
 
         wrtfull : str
-            Controls whether or not the :file:`.FULL` file is written.
+            Controls whether or not the ``.full``\ file is written.
 
-            * ``ON`` - Write :file:`.FULL` file (default)
+            * ``ON`` - Write ``.full``\ file (default)
 
-            * ``OFF`` - Do not write :file:`.FULL` file.
+            * ``OFF`` - Do not write ``.full``\ file.
 
-            This option applies only when using the PCG Lanczos method in modal analyses because the
-            :file:`.FULL` file is never written when using the PCG solver in static or full transient analyses.
+            This option applies only when using the PCG Lanczos method in
+            modal analyses because the ``.full``\ file is never written when
+            using the PCG solver in static, full transient, or harmonic
+            analyses.
 
-            If using :ref:`msave`,ON and conditions for the :ref:`msave` command are met, a complete
-            :file:`.FULL` file is never written regardless of this option.
+            If constraint equations are present in the model, a ``.full``\
+            file is always written regardless of this option.
 
-            If constraint equations are present in the model, a :file:`.FULL` file is always written regardless
-            of this option.
+            This option is useful in a distributed-memory parallel
+            processing analysis because assembling the global stiffness and
+            mass matrices on the head compute node before writing the
+            ``.full``\ file can take a considerable amount of memory. By
+            setting ``Wrtfull``\ = OFF, this assembly process is skipped on
+            the head compute node, decreasing the amount of memory required
+            to compute the modes and mode shapes. ``Wrtfull``\ = OFF does
+            not affect the results for the modes and mode shapes. However,
+            without a ``.full``\ file, the participation factor table
+            computations do not occur.
 
-            This option is useful in a distributed-memory parallel processing analysis because assembling the
-            global stiffness and mass matrices on the head compute node before writing the :file:`.FULL` file
-            can take a considerable amount of memory. By setting ``Wrtfull`` = OFF, this assembly process is
-            skipped on the head compute node, decreasing the amount of memory required to compute the modes and
-            mode shapes. ``Wrtfull`` = OFF does not affect the results for the modes and mode shapes. However,
-            without a :file:`.FULL` file, the participation factor table computations do not occur.
-
-            To generate the :file:`.FULL` file, such as for a harmonic, transient mode-superposition, or
-            spectrum analysis, rerun the modal analysis with ``Wrtfull`` = ON, or use the :ref:`wrfull` command.
+            To generate the ``.full``\ file to be used in a downstream
+            harmonic, transient mode-superposition, or spectrum analysis,
+            rerun the modal analysis with ``Wrtfull``\ = ON, or use the
+            `WRFULL
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_WRFULL.html>`_\
+            command.
 
         lm_key : str
-            Controls use of the PCG solver for ``MPC184``  elements that involve the Lagrange multiplier method.
-            This option applies only to the PCG solver when used in static analyses, full transient analyses,
-            and modal analyses that use the PCG Lanczos mode-extraction method ( :ref:`modopt`,LANPCG).
+            Controls use of the PCG solver for `MPC184
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184.html>`_
+            elements that involve the mixed u-P (Lagrange multiplier)
+            method.
 
-            * ``ON`` - Allow use of the PCG solver with certain ``MPC184`` element types that use the Lagrange
-              multiplier method. (default)
+            By default (``LM_KEY``\ = OFF), the PCG solver will
+            automatically detect mixed u-P element types (`PLANE182
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE182.html>`_,
+            `PLANE183
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE183.html>`_,
+            `MPC184
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184.html>`_,
+            `SOLID185
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID185.html>`_,
+            `SOLID186
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID186.html>`_,
+            and `SOLID187
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID187.html>`_)
+            and enable the analysis to use the PCG solver. This default
+            option only supports static and full transient analyses.
 
-            * ``OFF`` - Do not use the PCG solver with any ``MPC184`` element types that use the Lagrange
-              multiplier method.
+            The alternative option (``LM_KEY``\ = ON) invokes the PCG solver
+            for models with `MPC184
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184.html>`_
+            as the only elements formulated with Lagrange multipliers. This
+            option applies only to the PCG solver when used in static
+            analyses, full transient analyses, and modal analyses that use
+            the PCG Lanczos mode-extraction method (`MODOPT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MODOPT.html>`_,LANPCG).
 
-            The Lagrange multiplier method used by ``MPC184`` elements transfers the Lagrange multipliers into
-            multiple point constraints and, hence, can be solved by the PCG solver. The current ``MPC184``
+            * ``ON`` - Allow use of the PCG solver with certain `MPC184
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184.html>`_
+              element types that use the Lagrange multiplier method. This
+              option does not support models with any other mixed u-P
+              element types.
+
+            * ``OFF`` - Use the PCG solver with any `MPC184
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184.html>`_
+              element types that use the mixed u-P (Lagrange multiplier)
+              method (default).
+
+            The alternative Lagrange multiplier method (``LM_KEY``\ = ON)
+            used by `MPC184
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184.html>`_
+            elements transfers the Lagrange multipliers into multiple point
+            constraints and, hence, can be solved by the PCG solver. The
+            current `MPC184
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184.html>`_
             element types supported are: `rigid beam
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_MPC184link.html#mpc184linkprores>`_,
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184link.html>`_,
             `rigid link
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_MPC184link.html#mpc184linkprores>`_,
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184link.html>`_,
             `slider
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_MPC184slid.html#mpc184slidprores>`_,
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184slid.html>`_,
             `revolute joint
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_MPC184revo.html#mpc184revoprores>`_,
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184revo.html>`_,
             `universal joint
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_MPC184univ.html#mpc184univprores>`_,
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184univ.html>`_,
             `translational joint
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_MPC184tran.html#mpc184transprores>`_,
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184tran.html>`_,
             `cylindrical joint
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_MPC184cyl.html#mpc184cylinprores>`_,
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184cyl.html>`_,
             `weld joint
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_MPC184weld.html#mpc184weldprores>`_,
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184weld.html>`_,
             `spherical joint
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_MPC184sphe.html#mpc184spherprores>`_,
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184sphe.html>`_,
             and `general joint
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_MPC184gen.html#mpc184generprores>`_
-            . For all other ``MPC184`` element types, the PCG solver cannot be used, and the equation solver
-            automatically switches to the sparse solver regardless of the ``LM_Key`` setting on :ref:`pcgopt`.
-            The :ref:`msave` command does not support the ``LM_Key`` = ON option.
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184gen.html>`_.
+            However, if the Lagrange multiplier constraint equations for
+            these element types involve degrees of freedom that are already
+            constrained by other equations, the PCG solver cannot be used.
+            In this case, the sparse solver is called instead. For all other
+            `MPC184
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184.html>`_
+            element types, the PCG solver cannot be used, and the equation
+            solver automatically switches to the sparse solver regardless of
+            the ``LM_Key``\ setting on `PCGOPT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PCGOPT.html>`_.
 
         Notes
         -----
-        ``ReduceIO`` works independently of the :ref:`msave` command in the PCG solver. Setting ``ReduceIO``
-        to YES can significantly increase the memory usage in the PCG solver.
 
-        To minimize the memory used by the PCG solver with respect to the ``Lev_Diff`` option only, set
-        ``Lev_Diff`` = 1 if you do not have sufficient memory to run the PCG solver with ``Lev_Diff`` =
-        AUTO.
+        .. _PCGOPT_notes:
 
-        The :ref:`msave`,ON command is not valid in these circumstances:
+        Setting ``ReduceIO``\ to YES can significantly increase the memory usage
+        in the PCG solver.
 
-        * when ``Lev_Diff`` = 5; in this case, the ``Lev_Diff`` value will automatically be reset to 2.
+        To minimize the memory used by the PCG solver with respect to the
+        ``Lev_Diff``\ option only, set ``Lev_Diff``\ = 1 if you do not have
+        sufficient memory to run the PCG solver with ``Lev_Diff``\ = AUTO.
 
-        * with the ``StrmCk`` option; in this case, ``StrmCk`` will be set to OFF.
+        For Lagrange-formulation contact methods and mixed u-P formulations, the
+        PCG solver cannot be used, and the sparse solver is required.
 
-        * when the ``Fallback`` option is enabled (set to AUTO or ON); in this case, ``Fallback`` will
-          automatically be reset to OFF.
+        ``Fallback``\ logic is automatically disabled (``Fallback``\ = OFF) in
+        these circumstances:
 
-        For Lagrange-formulation contact methods and mixed u-P formulations, the PCG solver cannot be used,
-        and the sparse solver is required.
+        * for analyses that include `MPC184
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184.html>`_
+          elements using the alternative Lagrange multiplier method (``LM_KEY``\
+          = ON) to impose kinematic constraints
 
-        ``Fallback`` logic is automatically disabled ( ``Fallback`` = OFF) in these circumstances:
+        * for thermal analyses that use the quasi-static (`THOPT
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_THOPT.html>`_,QUASI)
+          option.
 
-        * for analyses that include ``MPC184`` elements using the Lagrange multiplier method to impose
-          kinematic constraints
+        * for modal analyses that use the PCG Lanczos or PCG Block Lanczos
+          methods
 
-        * for thermal analyses that use the quasi-static ( :ref:`thopt`,QUASI) option.
+        **Reverting to the PCG Solver After an Automatic Switch to the Sparse
+        Solver**\
 
-        **Reverting to the PCG Solver After an Automatic Switch to the Sparse Solver**
+        **Linear Analysis (involving symmetric or unsymmetric matrices):**\ When
+        fallback logic is enabled (``Fallback``\ = AUTO or ON) and the program
+        switches to the sparse direct solver during a linear analysis, the
+        sparse solver is used for the remainder of the simulation unless the
+        solver choice is changed by issuing the `EQSLV
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EQSLV.html>`_\
+        command between load steps.
 
-        **Linear Analysis:** When fallback logic is enabled ( ``Fallback`` = AUTO or ON) and the program
-        switches to the sparse direct solver during a linear analysis, the sparse solver is used for the
-        remainder of the simulation unless the solver choice is changed by issuing the :ref:`eqslv` command
-        between load steps.
+        **Nonlinear Analysis (involving symmetric or unsymmetric matrices):**\
+        If the program switches to the sparse direct solver during a nonlinear
+        analysis, the sparse solver is used for the remaining equilibrium
+        iterations of the current substep. The program reverts back to the PCG
+        solver at the end of the current substep unless one of the following
+        conditions apply:
 
-        **Nonlinear Analysis:** If the program switches to the sparse direct solver during a nonlinear
-        analysis, the sparse solver
-        is used for the remaining equilibrium iterations of the current substep. The program reverts back to
-        the PCG solver at the end of the current substep unless one of the following conditions apply:
+        * The previous call to the sparse solver involved an indefinite or
+          near-singular matrix.
 
-        * The previous call to the sparse solver involved an indefinite or near-singular matrix.
+        * The last equilibrium iteration of the current substep using the sparse
+          solver was faster than the last successful equilibrium iteration using
+          the PCG solver.
 
-        * The last equilibrium iteration of the current substep using the sparse solver was faster than the
-          last successful equilibrium iteration using the PCG solver.
+        * Three consecutive fallback switches between the sparse and the PCG
+          solvers have occurred.
 
-        * Three consecutive fallback switches between the sparse and the PCG solvers have occurred.
-
-        For both linear and nonlinear analyses, the solver choice can be changed using the :ref:`eqslv`
+        For both linear and nonlinear analyses, the solver choice can be changed
+        using the `EQSLV
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EQSLV.html>`_\
         command between any subsequent load steps.
+
+        **Full-Harmonic Analysis:**\ If the program switches to the sparse
+        direct solver during a full-harmonic analysis, the sparse solver is used
+        for the current harmonic substep. The program reverts back to the PCG
+        solver at the next continuing substep.
         """
-        command = f"PCGOPT,{lev_diff},{fallback},{reduceio},{strmck},{wrtfull},{lm_key}"
+        command = (
+            f"PCGOPT,{lev_diff},{fallback},{reduceio},{strmck},{wrtfull},,{lm_key}"
+        )
         return self.run(command, **kwargs)
 
     def perturb(
@@ -3561,6 +3702,124 @@ class AnalysisOptions(CommandsBase):
         This command is also valid in PREP7.
         """
         command = f"PIVCHECK,{key},{prntcntrl}"
+        return self.run(command, **kwargs)
+
+    def prea(self, **kwargs):
+        r"""Activates resource prediction for supported analysis and solver types.
+
+        Mechanical APDL Command: `PREA <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PREA.html>`_
+
+        Notes
+        -----
+
+        .. _PREA_notes:
+
+        .. note::
+
+           **Note:**\ The `PREA
+           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PREA.html>`_\
+           command requires both an Ansys Mechanical Enterprise license
+           *and*\ a Structures AI+ license.
+
+        Use the `PREA
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PREA.html>`_\
+        command to begin resource prediction for the current load step, analysis
+        type, solver type, and core count. This command estimates the following:
+
+        * Solution elapsed time
+
+        * Total memory usage
+
+        * Total disk space usage
+
+        * GPU recommendation
+
+        **Usage**\
+
+        Issue `PREA
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PREA.html>`_\
+        after you set the analysis type and solver type to ensure accurate
+        prediction.
+
+        A successful prediction **does not guarantee**\ a successful solution.
+        For example, resource prediction cannot determine convergence for
+        nonlinear static analyses or PCG iterative solvers.
+
+        Predictions apply only to solutions using distributed-memory parallel
+        (DMP) processing. Results **do not**\ reflect hybrid parallel usage.
+
+        The resource prediction feature generates two charts:
+
+        * **First chart**: Shows predictions for the core count specified with
+          the ``-np``\ option. This chart can include any number of cores. For
+          core counts above 128, `PREA
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PREA.html>`_\
+          still generates predictions, but accuracy diminishes.
+
+        * **Second chart**: Shows predictions for a range of core counts from 4
+          to 128.
+
+        **Supported Analysis and Solver Types**\
+
+        Predictions for solution time, memory, and disk usage:
+
+        * Static analysis with sparse direct equation solver
+
+        * Static analysis with PCG iterative solver
+
+        * Modal analysis with Block Lanczos solver using sparse direct equation
+          solver
+
+        * Modal analysis with PCG Lanczos solver
+
+        * Harmonic analysis using the Full method with frequency or mesh
+          decomposition
+
+        * Harmonic analysis using the VT method with frequency or mesh
+          decomposition
+
+        Predictions for GPU recommendation:
+
+        * Static linear and nonlinear analysis with direct or iterative solver
+
+        * Modal analysis with LANB or LANPCG solver
+
+        * Harmonic analysis using the full method (FULL) with mesh decomposition
+
+        **Predicted Metrics and Output Format**\
+
+        .. list-table::
+           :header-rows: 1
+
+           * - Metric
+             - Output Format
+           * - Solution Elapsed Time
+             - Displayed as a table in the output
+           * - Total Memory Used
+             - Displayed as a table in the output
+           * - Total Disk Space Used
+             - Displayed as a table in the output
+           * - GPU Recommendation
+             - Displayed as a table in the output
+
+        **GPU Accelerator Requirements**\
+
+        To maximize GPU accelerator performance, see `Requirements for the GPU
+        Accelerator in the Mechanical APDL Application
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/installation/unix_gpureqt.html>`_
+        (Linux) and `Requirements for the GPU Accelerator in the Mechanical APDL
+        Application in the Ansys, Inc. Installation Guides
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/installation/win_gpureqt.html>`_
+        (Windows).
+
+        **Resource Prediction in the Mechanical Application**\
+
+        For information on using resource prediction in the Mechanical
+        application, see `Understanding Resource Prediction for the Solution in
+        the Mechanical User's Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/wb_sim/ds_Resource_Prediction.html>`_.
+        """
+        command = "PREA"
         return self.run(command, **kwargs)
 
     def prscontrol(self, key: str = "", **kwargs):
@@ -4001,31 +4260,37 @@ class AnalysisOptions(CommandsBase):
         expmth: str = "",
         seoclvl: str = "",
         lpnamekey: str = "",
+        seedgekey: str = "",
         **kwargs,
     ):
         r"""Specifies substructure analysis options.
 
-        Mechanical APDL Command: `SEOPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SEOPT.html>`_
+        Mechanical APDL Command: `SEOPT <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SEOPT.html>`_
 
         Parameters
         ----------
         sename : str
-            The name (case-sensitive, 32-character maximum) assigned to the :file:`.sub` superelement matrix
-            file. This field defaults to ``Fname`` on the :ref:`filname` command.
+            The name (case-sensitive, 32-character maximum) assigned to the
+            ``.sub``\ superelement matrix file. If not specified, the name
+            defaults to ``Fname``\ on the `/FILNAME
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_FILNAME.html>`_\
+            command.
 
         sematr : int or str
             Matrix generation key:
 
             * ``1`` - Generate stiffness (or conductivity) matrix (default).
 
-            * ``2`` - Generate stiffness and mass (or conductivity and specific heat) matrices.
+            * ``2`` - Generate stiffness and mass (or conductivity and
+              specific heat) matrices.
 
             * ``3`` - Generate stiffness, mass and damping matrices.
 
         sepr : int or str
             Print key:
 
-            * ``0`` - Do not print superelement matrices or load vectors.
+            * ``0`` - Do not print superelement matrices or load vectors
+              (default).
 
             * ``1`` - Print both load vectors and superelement matrices.
 
@@ -4034,85 +4299,175 @@ class AnalysisOptions(CommandsBase):
         sesst : int or str
             Stress-stiffening key:
 
-            * ``0`` - Do not save space for stress stiffening in a later run.
+            * ``0`` - Do not save space for stress stiffening in a later
+              run.
 
-            * ``1`` - Save space for the stress stiffening matrix (calculated in a subsequent generation run
-              after the expansion pass).
+            * ``1`` - Save space for the stress stiffening matrix
+              (calculated in a subsequent generation run after the expansion
+              pass).
 
         expmth : str
             Expansion method for expansion pass:
 
-            * ``BACKSUB`` - Save necessary factorized matrix files (for example, the :file:`.LN22` file) for
-              backsubstitution during the subsequent expansion passes (default). This normally results in a large
-              usage of disk space.
+            * ``BACKSUB`` - Save necessary factorized matrix files (for
+              example, the ``.LN22``\ file) for backsubstitution during the
+              subsequent expansion passes (default). This normally results
+              in a large usage of disk space.
 
-            * ``MODDIR`` - This is the same expansion method as BACKSUB, except that the static correction
-              vectors (see the first term of in the `Mechanical APDL Theory Reference <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_biblio.html>`_) are stored on the :file:`.bclv` file instead of
-              the :file:`.LN22` file. This option is required when remote read-only file usage is used during the
-              first solution of the first restart of a generation pass (see the :ref:`moddir` command).
+            * ``MODDIR`` - This is the same expansion method as BACKSUB,
+              except that the static correction vectors (see the first term
+              of `Equation 15-136
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_thry/thy_anproc6.html#thyeq17staticsnov2101>`_
+              in the `*Mechanical APDL Theory Reference*\
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_thry/ans_thry.html>`_)
+              are stored on the ``.bclv``\ file instead of the ``.LN22``\
+              file. This option is required when remote read-only file usage
+              is used during the first solution of the first restart of a
+              generation pass (see the `MODDIR
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MODDIR.html>`_\
+              command).
 
-            * ``RESOLVE`` - Do not save factorized matrix files. Global stiffness matrix will be reformed during
-              expansion pass. This option provides an effective way to save disk space usage. This option cannot
-              be used if the use pass uses large deflections ( :ref:`nlgeom`,ON).
+            * ``RESOLVE`` - Do not save factorized matrix files. Global
+              stiffness matrix will be reformed during expansion pass. This
+              option provides an effective way to save disk space usage.
+              This option cannot be used if the use pass uses large
+              deflections (`NLGEOM
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLGEOM.html>`_,ON).
 
-            * ``NONE`` - Do not save factorized matrix files. With this option, the expansion pass is not
-              possible when factorized matrix files are required.
+            * ``NONE`` - Do not save factorized matrix files. With this
+              option, the expansion pass is not possible when factorized
+              matrix files are required.
 
-            * ``BCLV`` - Do not save factorized matrix files. The static correction vectors (see the first term
-              of ) are stored in the :file:`.bclv` file. With this option, the expansion pass is not possible when
-              factorized matrix files are required.
+            * ``BCLV`` - Do not save factorized matrix files. The static
+              correction vectors (see the first term of `Equation 15-136 in
+              the Theory Reference
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_thry/thy_anproc6.html#thyeq17staticsnov2101>`_)
+              are stored in the ``.bclv``\ file. With this option, the
+              expansion pass is not possible when factorized matrix files
+              are required.
 
         seoclvl : str
-            For the added-mass calculation, the ocean level to use when ocean waves ( :ref:`octype`,,WAVE) are present:
-
-            * ``ATP`` - The ocean level at this point in time (default).
-
-            * ``MSL`` - The mean ocean level.
+            Command argument ``SEOCLVL``. Refer to the `SEOPT command
+            documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SEOPT.html>`_
+            for option-specific definitions.
 
         lpnamekey : str
+            Command argument ``LPNAMEKEY``. Refer to the `SEOPT command
+            documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SEOPT.html>`_
+            for option-specific definitions.
 
-            * ``ON`` - All files created during the generation pass are named using ``Sename``.
-
-            * ``OFF`` - All files created during the generation pass are named using the :file:`Jobname` defined
-              for the analysis (see :ref:`filname` command) except for the :file:`.sub` file, which uses
-              ``Sename`` if specified (default).
+        seedgekey : str
+            Command argument ``SEEDGEKEY``. Refer to the `SEOPT command
+            documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SEOPT.html>`_
+            for option-specific definitions.
 
         Notes
         -----
 
         .. _SEOPT_notes:
 
-        :ref:`seopt` specifies substructure analysis options ( :ref:`antype`,SUBSTR). If used during
-        solution, the command is valid only within the first load step.
+        * ``SeOcLvL`` - For the added-mass calculation, the ocean level to use
+          when ocean waves (`OCTYPE
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_OCTYPE.html>`_,,WAVE)
+          are present:
 
-        When ocean waves ( :ref:`octype`,,WAVE) are present, the ``SeOcLvL`` argument specifies the ocean
-        height or level to use for the added-mass calculation, as the use-run analysis type is unknown
-        during the generation run.
+          * ``ATP`` - The ocean level at this point in time (default).
 
-        The expansion pass method RESOLVE is not supported with component mode synthesis analysis (
-        :ref:`cmsopt` ). ``ExpMth`` is automatically set to BACKSUB for CMS analysis. The RESOLVE method
-        invalidates the use of the :ref:`numexp` command. The RESOLVE method does not allow the restarting
-        of the substructure generation pass and the computation of results based on nodal velocity and nodal
-        acceleration (damping force, inertial force, kinetic energy, etc.) in the substructure expansion
-        pass.
+          * ``MSL`` - The mean ocean level.
 
-        If ``ExpMth`` = NONE or BCLV in a substructure analysis or component mode synthesis (CMS) analysis (
-        :ref:`cmsopt` ) using the fixed-interface ( :ref:`cmsopt`,FIX) or free-interface ( :ref:`cmsopt`
-        ,FREE) methods, you cannot restart the generation pass or perform the expansion pass. (In CMS
-        analyses using those methods, however, the expansion pass is possible when element-results
-        calculation is activated in the generation pass ( ``ELCALC`` = YES on :ref:`cmsopt` )). The
-        ``ExpMth`` argument is not required for CMS analysis using the residual-flexible free-interface
-        method ( :ref:`cmsopt`,RFFB).
+        * Unused field.
 
-        For linear perturbation substructure generation pass with multiple substructures, set ``LPnameKey``
-        = ON to avoid copying files at the end of each generation pass with the :ref:`copy` command. For an
-        example with CMS analysis using the fixed-interface method, see.
+        * ``LPnameKey``
+
+          * ``ON`` - All files created during the generation pass are named
+            using ``Sename``.
+
+          * ``OFF`` - All files created during the generation pass are named
+            using the ``Jobname``\ defined for the analysis (see `/FILNAME
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_FILNAME.html>`_\
+            command) except for the ``.sub``\ file, which uses ``Sename``\ if
+            specified (default).
+
+        * ``SeEdgeKey`` - Key to control confidentiality of the shape of the
+          substructure finite element model:
+
+          * ``ON`` - Substructure edges are written to the ``.sub``\ file and
+            can be viewed as an edge outline in graphics displays in the use
+            pass by issuing `EPLOT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EPLOT.html>`_\
+            (default).
+
+          * ``OFF`` - Substructure edges are not written to the ``.sub``\ file
+            and cannot be viewed as an edge outline in graphics displays in
+            the use pass.
+
+        `SEOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SEOPT.html>`_\
+        specifies substructure analysis options (`ANTYPE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ANTYPE.html>`_,SUBSTR).
+        If used during solution, the command is valid only within the first load
+        step.
+
+        When ocean waves (`OCTYPE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_OCTYPE.html>`_,,WAVE)
+        are present, the ``SeOcLvL``\ argument specifies the ocean height or
+        level to use for the added-mass calculation, as the use-run analysis
+        type is unknown during the generation run.
+
+        The expansion pass method RESOLVE is not supported with component mode
+        synthesis analysis (`CMSOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CMSOPT.html>`_).
+        ``ExpMth``\ is automatically set to BACKSUB for CMS analysis. The
+        RESOLVE method invalidates the use of the `NUMEXP
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NUMEXP.html>`_\
+        command. The RESOLVE method does not allow the restarting of the
+        substructure generation pass and the computation of results based on
+        nodal velocity and nodal acceleration (damping force, inertial force,
+        kinetic energy, etc.) in the substructure expansion pass.
+
+        If ``ExpMth``\ = NONE or BCLV in a substructure analysis or component
+        mode synthesis (CMS) analysis (`CMSOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CMSOPT.html>`_)
+        using the fixed-interface (`CMSOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CMSOPT.html>`_,FIX)
+        or free-interface (`CMSOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CMSOPT.html>`_,FREE)
+        methods, you cannot restart the generation pass or perform the expansion
+        pass. (In CMS analyses using those methods, however, the expansion pass
+        is possible when element-results calculation is activated in the
+        generation pass (``Elcalc``\ = YES on `CMSOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CMSOPT.html>`_)).
+        The ``ExpMth``\ argument is not required for CMS analysis using the
+        residual-flexible free-interface method (`CMSOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CMSOPT.html>`_,RFFB).
+
+        For linear perturbation substructure generation pass with multiple
+        substructures, set ``LPnameKey``\ = ON to avoid copying files at the end
+        of each generation pass with the `/COPY
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_COPY.html>`_\
+        command. For an example with CMS analysis using the fixed-interface
+        method, see `Linear Perturbation Substructure with Two Generation
+        Passes, Use Pass, and Two Expansion Passes in the Structural Analysis
+        Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/strlinpertinputs.html#linpert2genpass>`_.
+
+        To verify superelement location as an edge outline in graphics displays
+        in the use pass by issuing `EPLOT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EPLOT.html>`_,
+        ``SeEdgeKey``\ must be set to ON. To keep the shape of the substructure
+        finite element model confidential and prohibit visualization of the
+        superelement and any transformed superelements created with the `SETRAN
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SETRAN.html>`_\
+        or `SESYMM
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SESYMM.html>`_\
+        commands, set ``SeEdgeKey``\ to OFF.
 
         This command is also valid in PREP7.
         """
-        command = (
-            f"SEOPT,{sename},{sematr},{sepr},{sesst},{expmth},{seoclvl},,{lpnamekey}"
-        )
+        command = f"SEOPT,{sename},{sematr},{sepr},{sesst},{expmth},{seoclvl},,{lpnamekey},{seedgekey}"
         return self.run(command, **kwargs)
 
     def snoption(

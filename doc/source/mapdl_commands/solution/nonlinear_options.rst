@@ -20,6 +20,7 @@ NonlinearOptions
    NonlinearOptions.bucopt
    NonlinearOptions.cnvtol
    NonlinearOptions.gst
+   NonlinearOptions.hbmopt
    NonlinearOptions.lnsrch
    NonlinearOptions.ncnv
    NonlinearOptions.neqit
@@ -35,3 +36,4 @@ NonlinearOptions
    NonlinearOptions.soloption
    NonlinearOptions.ssopt
    NonlinearOptions.sstif
+   NonlinearOptions.wksp

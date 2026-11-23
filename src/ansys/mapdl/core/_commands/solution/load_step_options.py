@@ -136,66 +136,121 @@ class LoadStepOptions(CommandsBase):
         dtmin: str = "",
         dtmax: str = "",
         carry: str = "",
+        forcekey: str = "",
         **kwargs,
     ):
         r"""Specifies the time step sizes to be used for the current load step.
 
-        Mechanical APDL Command: `DELTIM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DELTIM.html>`_
+        Mechanical APDL Command: `DELTIM <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DELTIM.html>`_
 
         Parameters
         ----------
         dtime : str
-            Time step size for this step. If automatic time stepping is used ( :ref:`autots` ), ``DTIME`` is
-            the starting time substep.
+            Time step size for this step. If automatic time stepping is used
+            (`AUTOTS
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_AUTOTS.html>`_),
+            ``DTIME``\ is the starting time substep.
 
-            If contact elements ( ``TARGE169``, ``TARGE170``, ``CONTA172``, ``CONTA174``, ``CONTA175``, or
-            ``CONTA177`` ) are used, defaults to ``TIME`` or ``TIME`` /20 (where ``TIME`` is the time at the
-            end of the load step as set on the :ref:`time` command), depending on the physics of the model.
-            If none of these contact elements are used, defaults to ``TIME``.
+            If contact elements (`TARGE169
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE169.html>`_,
+            `TARGE170
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_,
+            `CONTA172
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA172.html>`_,
+            `CONTA174
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_,
+            `CONTA175
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA175.html>`_,
+            or `CONTA177
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA177.html>`_)
+            are used, defaults to ``TIME``\ or ``TIME``\ /20 (where
+            ``TIME``\ is the time at the end of the load step as set on the
+            `TIME
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TIME.html>`_\
+            command), depending on the physics of the model. If none of
+            these contact elements are used, defaults to ``TIME``.
 
         dtmin : str
-            Minimum time step (if automatic time stepping is used). The program automatically determines the
-            default based on the physics of the model.
+            Minimum time step (if automatic time stepping is used). The
+            program automatically determines the default based on the
+            physics of the model.
 
         dtmax : str
-            Maximum time step (if automatic time stepping is used). The program automatically determines the
-            default based on the physics of the model.
+            Maximum time step (if automatic time stepping is used). The
+            program automatically determines the default based on the
+            physics of the model.
 
         carry : str
             Time step carry over key:
 
-            * ``OFF`` - Use ``DTIME`` as time step at start of each load step.
+            * ``OFF`` - Use ``DTIME``\ as time step at start of each load
+              step.
 
-            * ``ON`` - Use final time step from previous load step as the starting time step (if automatic time
-              stepping is used).
+            * ``ON`` - Use final time step from previous load step as the
+              starting time step (if automatic time stepping is used).
 
-            The program automatically determines the default based on the physics of the model.
+            The program automatically determines the default based on the
+            physics of the model.
+
+        forcekey : str
+            Command argument ``FORCEKEY``. Refer to the `DELTIM command
+            documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DELTIM.html>`_
+            for option-specific definitions.
 
         Notes
         -----
 
         .. _DELTIM_notes:
 
-        See :ref:`nsubst` for an alternative input.
+        * ``ForceKey`` - Force the time increments at the beginning and end of a
+          load step to adhere to user-defined time increments. This option is
+          valid when automatic time incrementation is activated (`AUTOTS
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_AUTOTS.html>`_,ON).
 
-        Use consistent values for ``DTIME`` and ``TIME`` ( :ref:`time` ). For example, using 0.9 for
-        ``DTIME`` and 1.0 for ``TIME`` results in one time step because 1.0 ( ``TIME`` ) is divisible by.9
-        ( ``DTIME`` ) at most once. If you intend to load in 10 increments over a time span of 1.0, use 0.1
-        for ``DTIME`` and 1.0 for ``TIME``.
+          * ``OFF`` - (Default.) Can adjust the beginning and end of load step
+            time increment.
 
-        The program calculates the initial incremental time so that ( ``EndingTime`` - ``StartingTime`` )/
-        ``DTIME`` is an integer, which may affect the initial incremental time that you specify. For
-        example, if the starting time is 0, the ending time is 1, and the initial incremental time is 0.4,
-        the program rounds to the nearest integer and adjusts the time to 0.33333.
+          * ``FORCE`` - Strictly adhere to user-specified time incrementation
+            until the last substep of the load step. At this point, the
+            remaining time specified for the load step is used as the time
+            increment (even if it is smaller than the minimum time increment).
+
+        See `NSUBST
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSUBST.html>`_\
+        for an alternative input.
+
+        Use consistent values for ``DTIME``\ and ``TIME``\ (`TIME
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TIME.html>`_).
+        For example, using 0.9 for ``DTIME``\ and 1.0 for ``TIME``\ results in
+        one time step because 1.0 (``TIME``) is divisible by.9 (``DTIME``) at
+        most once. If you intend to load in 10 increments over a time span of
+        1.0, use 0.1 for ``DTIME``\ and 1.0 for ``TIME``.
+
+        The program calculates the initial incremental time so that
+        (``EndingTime``\ - ``StartingTime``)/``DTIME``\ is an integer, which may
+        affect the initial incremental time that you specify. For example, if
+        the starting time is 0, the ending time is 1, and the initial
+        incremental time is 0.4, the program rounds to the nearest integer and
+        adjusts the time to 0.33333.
+
+        If you do not want the program to adjust the initial time increment and
+        instead prefer to use the time increment you initially specified, use
+        ``ForceKey``\ to enforce strict adherence to your time step. If
+        ``ForceKey``\ is set to FORCE, the program continues to adhere to the
+        user specified time increment limit until the last substep. At this
+        point, the remaining time specified for the load step is used as the
+        time increment.
 
         For solution efficiency, specify values for all fields of this command.
 
-        Changing the time step size upon restarting an analysis during a load step is not recommended. You
-        should only change the time step size between load steps.
+        Changing the time step size upon restarting an analysis during a load
+        step is not recommended. You should only change the time step size
+        between load steps.
 
         This command is also valid in PREP7.
         """
-        command = f"DELTIM,{dtime},{dtmin},{dtmax},{carry}"
+        command = f"DELTIM,{dtime},{dtmin},{dtmax},{carry},{forcekey}"
         return self.run(command, **kwargs)
 
     def expsol(
