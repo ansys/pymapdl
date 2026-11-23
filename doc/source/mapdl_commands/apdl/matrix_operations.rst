@@ -26,6 +26,7 @@ MatrixOperations
    MatrixOperations.hprod
    MatrixOperations.init
    MatrixOperations.itengine
+   MatrixOperations.kron
    MatrixOperations.lsbac
    MatrixOperations.lsdump
    MatrixOperations.lsengine
@@ -41,5 +42,6 @@ MatrixOperations
    MatrixOperations.starprint
    MatrixOperations.starrename
    MatrixOperations.starsort
+   MatrixOperations.starxpl
    MatrixOperations.vec
    MatrixOperations.wrk
