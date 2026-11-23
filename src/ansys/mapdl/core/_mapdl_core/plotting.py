@@ -51,9 +51,10 @@ VALID_DEVICES_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM", "CLOSE
 VALID_FILE_TYPE_FOR_PLOT = VALID_DEVICES.copy()
 VALID_FILE_TYPE_FOR_PLOT.remove("CLOSE")
 VALID_FILE_TYPE_FOR_PLOT_LITERAL: TypeAlias = Literal["PNG", "TIFF", "VRML", "TERM"]
-# ``SAVE`` prints ``WRITTEN TO FILE NAME= file.db``; displays print the PNG name.
+# Displays print ``WRITTEN TO FILE file000.png``; reject other devices'
+# files (``file000.tif``) and ``SAVE``'s ``WRITTEN TO FILE NAME= file.db``.
 PNG_IS_WRITTEN_TO_FILE = re.compile(
-    r"WRITTEN TO FILE(?!\s+NAME=)(?:\s+(?P<filename>\S+\.png)\b)?", re.IGNORECASE
+    r"WRITTEN TO FILE(?:\s+(?P<filename>\S+\.png)\b|\s*$)", re.IGNORECASE
 )
 PLOT_COMMANDS = [
     # Single-frame display commands captured as Server Plot Screenshots.
@@ -421,41 +422,30 @@ class _CorePlottingMixin(_CoreMixinBase):
         )
 
     def _get_plot_name(self, text: str) -> str:
-        """Obtain the plot filename."""
+        """Return the local path of the PNG that MAPDL reported in ``text``."""
         self._log.debug(f"Output from terminal used to find plot name: {text}")
 
-        if self.is_png_found(text):
-            # flush graphics writer
-            previous_device = self.file_type_for_plots
-            try:
-                self.show("CLOSE", mute=True)
-                match = PNG_IS_WRITTEN_TO_FILE.search(text)
-                filename = self._screenshot_path(match and match["filename"])
-            finally:
-                self._restore_plot_device(
-                    previous_device,
-                    primary_exception=sys.exc_info()[1],
-                )
-            self._log.debug(f"Screenshot at: {filename}")
-
-            if os.path.isfile(filename):
-                return filename
-            else:  # pragma: no cover
-                raise MapdlRuntimeError(f"Unable to find screenshot at {filename}")
-        else:
-            raise MapdlRuntimeError(
-                "Unable to find plotted file in MAPDL command output. "
-                "One possible reason is that the graphics device is not correct. "
-                "Please check you are using FULL graphics device. "
-                "For example:\n"
-                ">>> mapdl.graphics('FULL')"
-                f"\nThe text output from MAPDL is:\n{text}"
+        match = PNG_IS_WRITTEN_TO_FILE.search(text)
+        # flush graphics writer
+        previous_device = self.file_type_for_plots
+        try:
+            self.show("CLOSE", mute=True)
+            filename = self._screenshot_path(match and match["filename"])
+        finally:
+            self._restore_plot_device(
+                previous_device,
+                primary_exception=sys.exc_info()[1],
             )
+        self._log.debug(f"Screenshot at: {filename}")
+
+        if os.path.isfile(filename):
+            return filename
+        else:  # pragma: no cover
+            raise MapdlRuntimeError(f"Unable to find screenshot at {filename}")
 
     def _display_plot(self, filename: str) -> None:
         """Display the last generated plot (*.png) from MAPDL"""
         import matplotlib.image as mpimg
-        import matplotlib.pyplot as plt
 
         def in_ipython():
             # from scooby.in_ipython
@@ -467,21 +457,28 @@ class _CorePlottingMixin(_CoreMixinBase):
 
         self._log.debug("A screenshot file has been found.")
         img = mpimg.imread(filename)
-        fig, ax = plt.subplots()
-        try:
+        if self._show_matplotlib_figures:
+            import matplotlib.pyplot as plt
+
+            self._log.debug("Using Matplotlib to plot")
+            fig, ax = plt.subplots()
+            try:
+                ax.imshow(img)
+                ax.axis("off")
+                plt.show()  # consider in-line plotting
+            finally:
+                plt.close(fig)
+        elif in_ipython():
+            from IPython.display import display
+            from matplotlib.figure import Figure
+
+            self._log.debug("Using ipython")
+            # A pyplot-free ``Figure`` never starts a GUI backend such as TkAgg.
+            fig = Figure()
+            ax = fig.subplots()
             ax.imshow(img)
             ax.axis("off")
-
-            if self._show_matplotlib_figures:
-                self._log.debug("Using Matplotlib to plot")
-                plt.show()  # consider in-line plotting
-            elif in_ipython():
-                self._log.debug("Using ipython")
-                from IPython.display import display
-
-                display(fig)
-        finally:
-            plt.close(fig)
+            display(fig)
 
     def _download_plot(
         self, filename: str, plot_name: str, default_name: str = "plot"
@@ -533,7 +530,7 @@ class _CorePlottingMixin(_CoreMixinBase):
         return os.path.join(self.directory, name)
 
     def _pick_screenshot_name(
-        self, filenames: list[str], target_name: Optional[str] = None
+        self, filenames: list[str], target_name: Optional[str]
     ) -> str:
         """Pick ``target_name`` if listed, else the highest ``<jobname><digits>.png``."""
         if target_name and os.path.basename(target_name) in filenames:
@@ -546,11 +543,11 @@ class _CorePlottingMixin(_CoreMixinBase):
             if name.startswith(jobname) and name.endswith(".png")
         ]
         numbered = re.compile(rf"{re.escape(jobname)}(\d+)\.png")
-        plots = [
+        numbered_pngs = [
             (int(m[1]), m[0]) for name in candidates if (m := numbered.fullmatch(name))
         ]
-        if plots:
-            return max(plots)[1]
+        if numbered_pngs:
+            return max(numbered_pngs)[1]
         if candidates:
             return max(candidates)
         raise MapdlRuntimeError(
@@ -562,11 +559,18 @@ class _CorePlottingMixin(_CoreMixinBase):
     ) -> str | None:
         """Take an MAPDL screenshot and show it in a popup window.
 
+        Redraws the last display on the ``PNG`` device with ``/REPLOT``.
+        Plot commands call this method to capture the PNG they wrote.
+
         Parameters
         ----------
-        savefig : Optional[str], optional
+        savefig : str, optional
             Name of or path to the screenshot file.
-            The default is ``None``.
+            The default is ``None``, in which case the screenshot is displayed
+            instead of saved.
+        default_name : str, optional
+            File stem used when ``savefig`` is ``True`` or a directory.
+            The default is ``"mapdl_screenshot"``.
 
         Returns
         -------
@@ -575,26 +579,52 @@ class _CorePlottingMixin(_CoreMixinBase):
 
         Raises
         ------
+        MapdlRuntimeError
+            If MAPDL does not report writing a PNG file, for example because
+            the graphics device is not ``FULL``.
         FileNotFoundError
             If the path given in the ``savefig`` parameter is not found or is not consistent.
         ValueError
             If given a wrong type for the ``savefig`` parameter.
+
+        Warns
+        -----
+        UserWarning
+            If the preceding plot command did not write a PNG file.
+
+        Examples
+        --------
+        Save the current display to a PNG file.
+
+        >>> mapdl.eplot(graphics_backend=GraphicsBackend.MAPDL)
+        >>> path = mapdl.screenshot(savefig="elements.png")
         """
         pending_text = getattr(self, "_pending_plot_output", None)
         if pending_text is None:
-            file_name = self._get_plot_name(self._replot_as_png())
+            text = self._replot_as_png()
+            if not self.is_png_found(text):
+                raise MapdlRuntimeError(
+                    "Unable to find plotted file in MAPDL command output. "
+                    "One possible reason is that the graphics device is not correct. "
+                    "Please check you are using FULL graphics device. "
+                    "For example:\n"
+                    ">>> mapdl.graphics('FULL')"
+                    f"\nThe text output from MAPDL is:\n{text}"
+                )
         else:
             text = pending_text
-            if not self.is_png_found(text) and self.file_type_for_plots != "PNG":
+            found = self.is_png_found(text)
+            if not found and self.file_type_for_plots != "PNG":
                 text = self._replot_as_png()
-            if not self.is_png_found(text):
+                found = self.is_png_found(text)
+            if not found:
                 warn(
                     "The plot command did not write a PNG plot. "
                     f"The text output from MAPDL is:\n{pending_text}",
                     UserWarning,
                 )
                 return None
-            file_name = self._get_plot_name(text)
+        file_name = self._get_plot_name(text)
 
         if savefig:
             return self._download_plot(file_name, savefig, default_name=default_name)
@@ -604,7 +634,12 @@ class _CorePlottingMixin(_CoreMixinBase):
             self._log.debug("Since matplolib is not installed, images are not shown.")
 
     def _replot_as_png(self) -> str:
-        """Redraw the last display on the ``PNG`` device and return MAPDL's output."""
+        """Redraw the last display on the ``PNG`` device and return MAPDL's output.
+
+        MAPDL errors from ``/REPLOT`` (for example, nothing plotted yet) are
+        raised unless ``ignore_errors`` is set; the caller decides whether a
+        missing PNG is an error or a warning.
+        """
         previous_device = self.file_type_for_plots
         try:
             self.show("PNG")

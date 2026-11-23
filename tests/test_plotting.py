@@ -1414,6 +1414,7 @@ def _prepare_replot(mapdl):
 
 
 @requires("grpc")
+@requires("matplotlib")
 @pytest.mark.parametrize(
     "prepare,needs_solution",
     [

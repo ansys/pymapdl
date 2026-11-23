@@ -32,6 +32,7 @@ import pytest
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl_extended import _MapdlExtended
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+from conftest import requires
 
 
 class ScriptedMapdl(_MapdlExtended):
@@ -75,6 +76,12 @@ class ScriptedMapdl(_MapdlExtended):
             (self.workdir / name).write_bytes(f"{verb} frame".encode())
             self.plot_index += 1
             return f" PRODUCE {verb} PLOT\n POST1 DISPLAY WRITTEN TO FILE {name}"
+        if plots and self._file_type_for_plots == "TIFF":
+            # Real MAPDL 26.1 ``/SHOW,TIFF`` output.
+            return (
+                f" PRODUCE {verb} PLOT\n CUMULATIVE DISPLAY NUMBER   1 "
+                "WRITTEN TO FILE file000.tif       - RASTER MODE."
+            )
         return f"{verb} executed"
 
     @property
@@ -93,6 +100,8 @@ def fake(tmp_path):
         "",
         "PRODUCE NODAL PLOT IN DSYS=      0",
         "ALL CURRENT ANSYS DATA WRITTEN TO FILE NAME= file.db",
+        "CUMULATIVE DISPLAY NUMBER   1 WRITTEN TO FILE file000.tif  - RASTER MODE.",
+        "PUT VPLO DISPLAY ON VRML FILE file00.wrl - RASTER MODE.",
     ],
 )
 def test_is_png_found_rejects_text_without_a_display_file(fake, text):
@@ -104,6 +113,7 @@ def test_is_png_found_rejects_text_without_a_display_file(fake, text):
     [
         "WRITTEN TO FILE",
         "POST1 DISPLAY WRITTEN TO FILE file002.png",
+        "CUMULATIVE DISPLAY NUMBER   1 WRITTEN TO FILE file000.png  - RASTER MODE.",
         "PREP7 DISPLAY WRITTEN TO FILE\n my_job000.png",
     ],
 )
@@ -142,6 +152,20 @@ def test_plot_command_on_a_non_png_device_replots_once_as_png(fake, tmp_path):
     assert fake.run("EPLOT", savefig=str(out)) == str(out)
 
     assert out.read_bytes() == b"/REPLOT frame"
+    assert len(fake.replots) == 1
+    assert fake.file_type_for_plots == "TIFF"
+
+
+def test_plot_command_on_tiff_replots_instead_of_returning_a_stale_png(fake, tmp_path):
+    (tmp_path / "file000.png").write_bytes(b"stale frame")
+    fake.plot_index = 1
+    fake._file_type_for_plots = "TIFF"
+    out = tmp_path / "out.png"
+
+    assert fake.run("EPLOT", savefig=str(out)) == str(out)
+
+    assert out.read_bytes() == b"/REPLOT frame"
+    assert (tmp_path / "file001.png").exists()
     assert len(fake.replots) == 1
     assert fake.file_type_for_plots == "TIFF"
 
@@ -227,7 +251,7 @@ def test_replot_on_a_non_png_device_redraws_once_as_png_without_recursing(
     # The user's ``/REPLOT`` on TIFF, then one fallback ``/REPLOT`` on PNG.
     assert len(fake.replots) == 2
     assert fake.file_type_for_plots == "TIFF"
-    assert fake._response == "/REPLOT executed"
+    assert "file000.tif" in fake._response
 
 
 def test_direct_screenshot_replots_as_png_and_restores_the_device(fake, tmp_path):
@@ -331,7 +355,8 @@ def test_remote_screenshot_path_without_png_raises(tmp_path):
 
 @pytest.fixture
 def frame_png(tmp_path):
-    plt = pytest.importorskip("matplotlib.pyplot")
+    import matplotlib.pyplot as plt
+
     plt.switch_backend("Agg")  # headless: no GUI toolkit needed
     path = tmp_path / "frame.png"
     plt.imsave(path, np.zeros((4, 4, 3)))
@@ -347,6 +372,7 @@ def user_axes():
     plt.close(fig)
 
 
+@requires("matplotlib")
 def test_display_plot_leaves_user_figures_untouched(fake, frame_png, user_axes):
     import matplotlib.pyplot as plt
 
@@ -357,6 +383,7 @@ def test_display_plot_leaves_user_figures_untouched(fake, frame_png, user_axes):
     assert len(user_axes.images) == 0
 
 
+@requires("matplotlib")
 def test_display_plot_shows_then_closes_its_figure(fake, frame_png):
     import matplotlib.pyplot as plt
 
@@ -368,14 +395,22 @@ def test_display_plot_shows_then_closes_its_figure(fake, frame_png):
     assert plt.get_fignums() == []
 
 
-def test_display_plot_hands_its_figure_to_ipython(fake, frame_png, monkeypatch):
-    pytest.importorskip("IPython")
+@requires("matplotlib")
+@requires("IPython")
+def test_display_plot_hands_its_figure_to_ipython_without_a_gui(
+    fake, frame_png, monkeypatch
+):
     import builtins
 
     import matplotlib.pyplot as plt
 
     monkeypatch.setattr(builtins, "__IPYTHON__", True, raising=False)
-    with patch("IPython.display.display") as display:
+    no_gui = RuntimeError("no GUI display")
+    with (
+        patch.object(plt, "subplots", side_effect=no_gui),
+        patch.object(plt, "figure", side_effect=no_gui),
+        patch("IPython.display.display") as display,
+    ):
         fake._display_plot(frame_png)
 
     (fig,), _ = display.call_args
