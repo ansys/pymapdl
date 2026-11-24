@@ -23,7 +23,9 @@
 
 """Offline tests for ``Mapdl.load_mesh`` over an ``Archive``-backed MAPDL double."""
 
+import copy
 from pathlib import Path
+import sys
 from types import SimpleNamespace
 
 from ansys.mapdl.reader import Archive
@@ -281,7 +283,11 @@ def test_load_mesh_maps_element_types_per_topology():
     grid = tet10.merge([hexa, tri], merge_points=False)
     mapdl = _ArchiveMapdl(etypes={7: 278})
 
-    mesh = mapdl.load_mesh(grid, etype={"tetra10": "SOLID227", CellType.HEXAHEDRON: 7})
+    mesh = mapdl.load_mesh(
+        grid,
+        etype={"tetra10": "SOLID227", CellType.HEXAHEDRON: 7},
+        keep_boundary_elements=True,
+    )
 
     assert sorted(map(tuple, mesh.ekey.tolist())) == [(7, 278), (8, 227), (9, 181)]
     np.testing.assert_array_equal(mesh.et_id, [8, 7, 9])
@@ -550,3 +556,362 @@ def test_load_mesh_writes_multi_line_component_blocks():
     mesh = _ArchiveMapdl().load_mesh(grid, components={"ODD": every_other})
 
     assert mesh.node_components["ODD"].tolist() == every_other
+
+
+def _hexes_with_boundary_quad():
+    hexes = _two_hexes()
+    grid = pv.UnstructuredGrid(
+        np.hstack([hexes.cells, [4, 0, 3, 9, 6]]),
+        np.hstack([hexes.celltypes, [CellType.QUAD]]),
+        np.array(hexes.points),
+    )
+    grid.cell_data["FIXED"] = np.array([False, False, True])
+    grid.cell_data["CORE"] = np.array([True, False, False])
+    return grid
+
+
+def test_load_mesh_converts_boundary_cell_groups_into_node_components():
+    grid = _hexes_with_boundary_quad()
+    grid.point_data["tip"] = grid.points[:, 0] == 2
+
+    mesh = _ArchiveMapdl().load_mesh(grid, mat=[5, 6, 7], elem_ids=[10, 20, 30])
+
+    np.testing.assert_array_equal(mesh.ekey, [[1, 185]])
+    np.testing.assert_array_equal(mesh.enum, [10, 20])
+    np.testing.assert_array_equal(mesh.material_type, [5, 6])
+    np.testing.assert_array_equal(mesh.nnum, np.arange(1, 13))
+    assert {k: v.tolist() for k, v in mesh.node_components.items()} == {
+        "FIXED": [1, 4, 7, 10],
+        "TIP": [3, 6, 9, 12],
+    }
+    assert {k: v.tolist() for k, v in mesh.element_components.items()} == {"CORE": [10]}
+
+
+def test_load_mesh_keeps_boundary_elements_on_request():
+    mesh = _ArchiveMapdl().load_mesh(
+        _hexes_with_boundary_quad(), keep_boundary_elements=True, mat=[5, 6, 7]
+    )
+
+    assert sorted(map(tuple, mesh.ekey.tolist())) == [(1, 185), (2, 181)]
+    np.testing.assert_array_equal(mesh.material_type, [5, 6, 7])
+    assert mesh.element_components["FIXED"].tolist() == [3]
+
+
+def test_load_mesh_keeps_boundary_cell_types_mapped_in_etype():
+    mesh = _ArchiveMapdl().load_mesh(
+        _hexes_with_boundary_quad(), etype={"quad": "SURF154"}
+    )
+
+    np.testing.assert_array_equal(mesh.et_id, [1, 1, 2])
+    assert sorted(map(tuple, mesh.ekey.tolist())) == [(1, 185), (2, 154)]
+    assert mesh.element_components["FIXED"].tolist() == [3]
+
+
+def test_load_mesh_rejects_groups_spanning_kept_and_boundary_cells():
+    grid = _hexes_with_boundary_quad()
+    grid.cell_data["MIXED"] = np.array([True, False, True])
+
+    with pytest.raises(ValueError, match="'MIXED' contains both"):
+        _ArchiveMapdl().load_mesh(grid)
+    assert _ArchiveMapdl().load_mesh(grid, include_components=False).n_elem == 2
+
+
+def test_load_mesh_keeps_mixed_dimensions_carried_by_element_type_metadata():
+    grid = _hexes_with_boundary_quad()
+    grid.cell_data["ansys_etype"] = [1, 1, 2]
+    grid.cell_data["ansys_elem_type_num"] = [185, 185, 181]
+
+    mesh = _ArchiveMapdl().load_mesh(grid)
+
+    assert mesh.n_elem == 3
+    assert mesh.element_components["FIXED"].tolist() == [3]
+
+
+class _MeshioMesh:
+    """Duck-typed ``meshio.Mesh``."""
+
+    def __init__(self, points, cells, **attributes):
+        self.points = np.asarray(points, float)
+        self.cells = [
+            SimpleNamespace(type=kind, data=np.asarray(data)) for kind, data in cells
+        ]
+        self.point_data = {}
+        self.cell_data = {}
+        self.field_data = {}
+        self.point_sets = {}
+        self.cell_sets = {}
+        self.__dict__.update(attributes)
+
+    def cell_sets_to_data(self):
+        raise AssertionError("load_mesh must not move cell sets into cell data")
+
+
+def _gmsh_tet_mesh():
+    return _MeshioMesh(
+        np.random.default_rng(0).random((7, 3)),
+        [
+            ("tetra", [[0, 1, 2, 3]]),
+            ("pyramid", [[1, 2, 3, 4, 5]]),
+            ("triangle", [[0, 1, 2]]),
+            ("line", [[5, 6]]),
+        ],
+        cell_data={"gmsh:physical": [np.array([1]), [1], [1], [2]]},
+        field_data={
+            "VOLUME": np.array([1, 3]),
+            "FIXED": np.array([1, 2]),
+            "EDGE": np.array([2, 1]),
+        },
+    )
+
+
+def test_load_mesh_converts_gmsh_boundary_physical_groups_into_node_components():
+    mesh = _gmsh_tet_mesh()
+    before = copy.deepcopy(mesh.__dict__)
+
+    loaded = _ArchiveMapdl().load_mesh(mesh)
+
+    np.testing.assert_array_equal(loaded.nnum, np.arange(1, 8))
+    np.testing.assert_allclose(loaded.nodes, mesh.points, rtol=0, atol=1e-12)
+    np.testing.assert_array_equal(loaded.ekey, [[1, 185]])
+    assert loaded.grid.celltypes.tolist() == [CellType.TETRA, CellType.PYRAMID]
+    assert {k: v.tolist() for k, v in loaded.node_components.items()} == {
+        "FIXED": [1, 2, 3],
+        "EDGE": [6, 7],
+    }
+    assert {k: v.tolist() for k, v in loaded.element_components.items()} == {
+        "VOLUME": [1, 2]
+    }
+    assert mesh.__dict__.keys() == before.keys()
+    assert mesh.cell_data.keys() == before["cell_data"].keys()
+    assert mesh.cell_sets == before["cell_sets"]
+
+
+def test_load_mesh_keeps_gmsh_boundary_elements_on_request():
+    loaded = _ArchiveMapdl().load_mesh(_gmsh_tet_mesh(), keep_boundary_elements=True)
+
+    assert sorted(map(tuple, loaded.ekey.tolist())) == [(1, 185), (2, 181), (3, 188)]
+    assert {k: v.tolist() for k, v in loaded.element_components.items()} == {
+        "VOLUME": [1, 2],
+        "FIXED": [3],
+        "EDGE": [4],
+    }
+
+
+def test_load_mesh_reads_meshio_sets_on_2d_points():
+    mesh = _MeshioMesh(
+        [[0, 0], [1, 0], [2, 0], [0, 1], [1, 1], [2, 1]],
+        [
+            ("quad", [[0, 1, 4, 3]]),
+            ("triangle", [[1, 2, 5]]),
+            ("quad", [[1, 2, 5, 4]]),
+        ],
+        point_sets={"origin": np.array([0])},
+        cell_sets={
+            "left": [np.array([0]), np.array([], int), np.array([], int)],
+            "right": {"quad": np.array([1]), "triangle": np.array([0])},
+        },
+    )
+
+    loaded = _ArchiveMapdl().load_mesh(
+        mesh, etype="PLANE182", node_ids=range(10, 16), elem_ids=[7, 8, 9]
+    )
+
+    np.testing.assert_array_equal(loaded.ekey, [[1, 182]])
+    np.testing.assert_array_equal(loaded.nnum, np.arange(10, 16))
+    np.testing.assert_allclose(loaded.nodes[:, :2], mesh.points, rtol=0, atol=1e-12)
+    np.testing.assert_array_equal(loaded.nodes[:, 2], 0)
+    assert loaded.node_components["ORIGIN"].tolist() == [10]
+    assert {k: v.tolist() for k, v in loaded.element_components.items()} == {
+        "LEFT": [7],
+        "RIGHT": [8, 9],
+    }
+
+
+def test_load_mesh_rejects_unsupported_meshio_cell_types():
+    mesh = _MeshioMesh(np.zeros((5, 3)), [("polygon", [[0, 1, 2, 3, 4]])])
+
+    with pytest.raises(ValueError, match="Unsupported meshio cell type 'polygon'"):
+        _ArchiveMapdl().load_mesh(mesh)
+
+
+def test_load_mesh_reads_raw_2d_nodes_and_uniform_elements():
+    nodes = [[0, 0], [1, 0], [2, 0], [0, 1], [1, 1], [2, 1]]
+    elements = np.array([[0, 1, 4, 3], [1, 2, 5, 4]])
+
+    mesh = _ArchiveMapdl().load_mesh(
+        (nodes, elements),
+        etype="PLANE182",
+        node_ids=[10, 20, 30, 40, 50, 60],
+        elem_ids=[5, 3],
+        components={"BOTTOM": [10, 20, 30]},
+    )
+
+    np.testing.assert_array_equal(mesh.ekey, [[1, 182]])
+    assert mesh.grid.celltypes.tolist() == [CellType.QUAD, CellType.QUAD]
+    np.testing.assert_array_equal(mesh.nnum, [10, 20, 30, 40, 50, 60])
+    np.testing.assert_allclose(mesh.nodes[:, :2], nodes, rtol=0, atol=0)
+    np.testing.assert_array_equal(mesh.nodes[:, 2], 0)
+    np.testing.assert_array_equal(mesh.enum, [5, 3])
+    assert _cell_nodes(mesh, 1) == [20, 30, 60, 50]
+    assert mesh.node_components["BOTTOM"].tolist() == [10, 20, 30]
+
+
+def test_load_mesh_infers_unambiguous_raw_element_shapes():
+    nodes = np.random.default_rng(0).random((30, 3))
+    elements = [np.arange(10), np.arange(10, 30)]
+
+    mesh = _ArchiveMapdl().load_mesh((nodes, elements))
+
+    assert sorted(map(tuple, mesh.ekey.tolist())) == [(1, 187), (2, 186)]
+    assert mesh.grid.celltypes.tolist() == [
+        CellType.QUADRATIC_TETRA,
+        CellType.QUADRATIC_HEXAHEDRON,
+    ]
+
+
+@pytest.mark.parametrize(
+    "n_nodes,etype,celltype",
+    [
+        (3, "BEAM189", CellType.QUADRATIC_EDGE),
+        (3, "SHELL181", CellType.TRIANGLE),
+        (4, "SHELL181", CellType.QUAD),
+        (4, "SOLID185", CellType.TETRA),
+        (6, "SHELL281", CellType.QUADRATIC_TRIANGLE),
+        (6, "SOLID185", CellType.WEDGE),
+        (8, "SHELL281", CellType.QUADRATIC_QUAD),
+        (8, "SOLID185", CellType.HEXAHEDRON),
+        (4, {"tetra": "SOLID185"}, CellType.TETRA),
+    ],
+)
+def test_load_mesh_resolves_ambiguous_raw_shapes_from_etype(n_nodes, etype, celltype):
+    nodes = np.random.default_rng(0).random((n_nodes, 3))
+
+    mesh = _ArchiveMapdl().load_mesh((nodes, [np.arange(n_nodes)]), etype=etype)
+
+    assert mesh.grid.celltypes.tolist() == [celltype]
+
+
+@pytest.mark.parametrize(
+    "nodes,elements,kwargs,match",
+    [
+        (np.zeros((4, 3)), [[0, 1, 2, 3]], {}, "4-node elements are ambiguous"),
+        (np.zeros((8, 3)), [range(8)], {}, "8-node elements are ambiguous"),
+        (np.zeros((4, 3)), [[0, 1, 2, 4]], {"etype": "SOLID185"}, "outside"),
+        (np.zeros((4, 3)), [[0, 1, -1, 2]], {"etype": "SOLID185"}, "outside"),
+        (np.zeros((4, 3)), [[0, 1, 1, 2]], {"etype": "SOLID185"}, "repeats"),
+        (np.zeros((4, 3)), [[0, 1], []], {}, "non-empty"),
+        (np.zeros((4, 3)), [[0, 1.5]], {}, "integer"),
+        (np.zeros((4, 3)), [], {}, "at least one element"),
+        (np.zeros((7, 3)), [range(7)], {}, "7-node elements"),
+        (np.zeros((4, 3)), [[0, 1, 2]], {"etype": "SOLID185"}, "3-node elements"),
+        (np.zeros((4, 4)), [[0, 1]], {}, r"shape \(N, 2\) or \(N, 3\)"),
+        (np.zeros((2, 3)), [[0, 1]], {"node_ids": [1, 1]}, "`node_ids` must"),
+        (np.zeros((2, 3)), [[0, 1]], {"node_ids": [0, 1]}, "`node_ids` must"),
+        (np.zeros((2, 3)), [[0, 1]], {"node_ids": [1, 2, 3]}, "`node_ids` must"),
+        (np.zeros((2, 3)), [[0, 1]], {"elem_ids": [1, 2]}, "`elem_ids` must"),
+    ],
+)
+def test_load_mesh_rejects_invalid_raw_arrays(nodes, elements, kwargs, match):
+    mapdl = _ArchiveMapdl()
+
+    with pytest.raises(ValueError, match=match):
+        mapdl.load_mesh((nodes, elements), **kwargs)
+    assert mapdl.calls == []
+
+
+_CDWRITE_26_1 = Path(__file__).parent / "test_files" / "mesh_bridge_cdwrite_26_1.cdb"
+
+
+@pytest.mark.parametrize(
+    "name,dataset",
+    [
+        ("mesh.vtu", _two_hexes),
+        ("mesh.vtk", _two_hexes),
+        ("mesh.vtp", lambda: pv.Plane(i_resolution=2, j_resolution=1)),
+    ],
+)
+def test_load_mesh_reads_vtk_files(tmp_path, name, dataset):
+    grid = dataset()
+    grid.point_data["fixed"] = grid.points[:, 0] == grid.points[:, 0].min()
+    grid.save(tmp_path / name)
+
+    mesh = _ArchiveMapdl().load_mesh(str(tmp_path / name))
+
+    assert mesh.n_elem == grid.n_cells
+    np.testing.assert_allclose(mesh.nodes, grid.points, rtol=0, atol=1e-6)
+    np.testing.assert_array_equal(
+        mesh.node_components["FIXED"], np.flatnonzero(grid["fixed"]) + 1
+    )
+
+
+def test_load_mesh_reads_mapdl_cdwrite_file_with_etblock():
+    mesh = _ArchiveMapdl().load_mesh(_CDWRITE_26_1)
+
+    np.testing.assert_array_equal(mesh.ekey, [[1, 186], [3, 181]])
+    assert mesh.key_option == {1: [[2, 1]], 3: [[3, 2], [8, 2]]}
+    np.testing.assert_array_equal(mesh.et_id, [1, 1, 3])
+    np.testing.assert_array_equal(mesh.nnum, np.arange(1, 33))
+    np.testing.assert_array_equal(mesh.section, [1, 1, 1])
+    assert mesh.node_components["FIXED"].tolist() == [1, 2, 3, 14, 21, 25, 27, 31]
+    assert mesh.element_components["SKIN"].tolist() == [3]
+
+
+def test_load_mesh_appends_mapdl_cdwrite_file_above_existing_ids():
+    mapdl = _ArchiveMapdl(node_max=100, elem_max=10, etypes={1: 185})
+
+    mesh = mapdl.load_mesh(_CDWRITE_26_1, on_conflict="append", mat=4)
+
+    assert "ETBLOCK" not in mapdl.cdb and "NUMOFF" not in mapdl.cdb
+    np.testing.assert_array_equal(mesh.ekey, [[1, 185], [2, 186], [4, 181]])
+    assert mesh.key_option == {2: [[2, 1]], 4: [[3, 2], [8, 2]]}
+    np.testing.assert_array_equal(mesh.nnum, np.arange(101, 133))
+    np.testing.assert_array_equal(mesh.enum, [11, 12, 13])
+    np.testing.assert_array_equal(mesh.material_type, [4, 4, 4])
+    assert mesh.element_components["SKIN"].tolist() == [13]
+
+
+def test_load_mesh_reads_mesh_archive_inp_file(tmp_path):
+    source = _ArchiveMapdl()
+    source.load_mesh(_two_hexes(), components={"CORE": ("ELEM", [2])}, esys=11)
+    path = tmp_path / "mesh.inp"
+    path.write_text(source.cdb)
+
+    mesh = _ArchiveMapdl().load_mesh(path, real=3)
+
+    np.testing.assert_array_equal(mesh.ekey, [[1, 185]])
+    np.testing.assert_array_equal(mesh.elem_real_constant, [3, 3])
+    np.testing.assert_array_equal(mesh.element_coord_system(), [11, 11])
+    assert mesh.element_components["CORE"].tolist() == [2]
+    assert _cell_nodes(mesh) == _cell_nodes(source.archive)
+
+
+def test_load_mesh_rejects_missing_files(tmp_path):
+    mapdl = _ArchiveMapdl()
+
+    with pytest.raises(FileNotFoundError, match="missing.cdb"):
+        mapdl.load_mesh(tmp_path / "missing.cdb")
+    assert mapdl.calls == []
+
+
+def test_load_mesh_reads_other_formats_with_meshio(tmp_path, monkeypatch):
+    path = tmp_path / "mesh.msh"
+    path.touch()
+    read = []
+    fake_meshio = SimpleNamespace(read=lambda p: read.append(p) or _gmsh_tet_mesh())
+    monkeypatch.setitem(sys.modules, "meshio", fake_meshio)
+
+    mesh = _ArchiveMapdl().load_mesh(path)
+
+    assert read == [path]
+    assert mesh.element_components["VOLUME"].tolist() == [1, 2]
+
+
+def test_load_mesh_requires_meshio_for_other_formats(tmp_path, monkeypatch):
+    path = tmp_path / "mesh.msh"
+    path.touch()
+    monkeypatch.setitem(sys.modules, "meshio", None)
+
+    with pytest.raises(
+        ImportError, match="Reading '.msh' meshes requires the optional"
+    ):
+        _ArchiveMapdl().load_mesh(path)

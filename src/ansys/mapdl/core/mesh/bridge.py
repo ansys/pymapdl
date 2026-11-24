@@ -24,8 +24,10 @@
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+import os
 from pathlib import Path
 import re
+import tempfile
 from typing import Any
 
 import numpy as np
@@ -139,6 +141,43 @@ _CORNER_SLOTS = {
     "tet10": 4,
 }
 
+_LAYOUT_DIMENSIONS = {
+    "point": 0,
+    "line": 1,
+    "line3": 1,
+    "shell": 2,
+    "shell8": 2,
+    "brick": 3,
+    "brick20": 3,
+    "tet10": 3,
+}
+_CELL_DIMENSIONS = {
+    celltype: _LAYOUT_DIMENSIONS[layout]
+    for layout, cells in _LAYOUTS.items()
+    for celltype in cells
+}
+_CELL_POINTS = {
+    celltype: max(slots) + 1
+    for cells in _LAYOUTS.values()
+    for celltype, slots in cells.items()
+}
+# Raw element node counts that identify one cell shape, and those that need ``etype``.
+_RAW_CELL_TYPES = {
+    1: CellType.VERTEX,
+    2: CellType.LINE,
+    5: CellType.PYRAMID,
+    10: CellType.QUADRATIC_TETRA,
+    13: CellType.QUADRATIC_PYRAMID,
+    15: CellType.QUADRATIC_WEDGE,
+    20: CellType.QUADRATIC_HEXAHEDRON,
+}
+_AMBIGUOUS_SIZES = {
+    3: "QUADRATIC_EDGE or TRIANGLE",
+    4: "QUAD or TETRA",
+    6: "QUADRATIC_TRIANGLE or WEDGE",
+    8: "QUADRATIC_QUAD or HEXAHEDRON",
+}
+
 _ELEMENTS: dict[int, tuple[str, str]] = {
     21: ("MASS21", "point"),
     14: ("COMBIN14", "line"),
@@ -205,6 +244,8 @@ _MESHIO_CELL_TYPES: dict[str, CellType] = {
     "wedge15": CellType.QUADRATIC_WEDGE,
     "hexahedron": CellType.HEXAHEDRON,
     "hexahedron20": CellType.QUADRATIC_HEXAHEDRON,
+    "voxel": CellType.VOXEL,
+    "pixel": CellType.PIXEL,
 }
 
 _COMPONENT_KINDS = {
@@ -300,6 +341,350 @@ def _valid_ids(values: Any, allow_synthetic: bool) -> NDArray[np.int64] | None:
     return np.where(ids == -1, 0, ids)
 
 
+def _stored_etypes(
+    grid: pv.UnstructuredGrid,
+) -> tuple[NDArray[np.int64], NDArray[np.int64]] | None:
+    """Return valid ``ansys_etype`` and ``ansys_elem_type_num`` cell arrays, if any."""
+    arrays = [grid.cell_data.get(key) for key in ("ansys_etype", "ansys_elem_type_num")]
+    for arr in arrays:
+        if (
+            arr is None
+            or np.shape(arr) != (grid.n_cells,)
+            or not np.array_equal(arr, np.round(arr))
+            or (np.asarray(arr) <= 0).any()
+        ):
+            return None
+    return np.asarray(arrays[0], np.int64), np.asarray(arrays[1], np.int64)
+
+
+def _id_argument(values: Any, count: int, name: str) -> NDArray[np.int64]:
+    arr = np.asarray(values)
+    if (
+        arr.shape != (count,)
+        or not np.issubdtype(arr.dtype, np.integer)
+        or (arr <= 0).any()
+        or np.unique(arr).size != count
+    ):
+        raise ValueError(f"`{name}` must contain {count} unique positive integers.")
+    return arr.astype(np.int64)
+
+
+def _kept(value: Any, keep: NDArray[np.bool_]) -> Any:
+    """Slice a per-cell argument given for every input cell down to the kept cells."""
+    if value is None or np.ndim(value) != 1 or len(value) != keep.size:
+        return value
+    return np.asarray(value)[keep]
+
+
+def _vtk_cells(sizes: NDArray[np.int64], connectivity: Any) -> NDArray[np.int64]:
+    """Return the legacy VTK cell array ``[n0, p..., n1, p..., ...]``."""
+    return np.insert(
+        np.asarray(connectivity, np.int64), np.cumsum(sizes) - sizes, sizes
+    )
+
+
+def _cell_sizes(grid: pv.UnstructuredGrid) -> NDArray[np.int64]:
+    return np.diff(pv.convert_array(grid.GetCells().GetOffsetsArray())).astype(np.int64)
+
+
+def _drop_boundary_cells(
+    grid: pv.UnstructuredGrid,
+    etype: Any,
+    keep_boundary_elements: bool,
+    include_components: bool,
+) -> tuple[pv.UnstructuredGrid, NDArray[np.bool_]]:
+    """Drop lower-dimensional cells, turning their cell masks into point masks.
+
+    Returns the grid holding the kept cells (with every input point) and the kept-cell mask.
+    """
+    celltypes = np.asarray(grid.celltypes, np.int64)
+    unique, inverse = np.unique(celltypes, return_inverse=True)
+    # Unsupported cell types count as 3D so that their validation error still surfaces.
+    dims = np.array([_CELL_DIMENSIONS.get(c, 3) for c in unique.tolist()])[inverse]
+    keep = dims == dims.max(initial=0)
+    if keep_boundary_elements or (etype is None and _stored_etypes(grid) is not None):
+        keep[:] = True
+    elif isinstance(etype, Mapping):
+        keep |= np.isin(celltypes, [_cell_type(key) for key in etype])
+    if keep.all():
+        return grid, keep
+
+    sizes = _cell_sizes(grid)
+    connectivity = np.asarray(grid.cell_connectivity, np.int64)
+    # Copy VTK-backed arrays: sharing them between datasets corrupts the heap.
+    kept = pv.UnstructuredGrid(
+        _vtk_cells(sizes[keep], connectivity[np.repeat(keep, sizes)]),
+        celltypes[keep],
+        np.array(grid.points),
+    )
+    for key in grid.point_data.keys():
+        kept.point_data[key] = np.array(grid.point_data[key])
+    for key in grid.field_data.keys():
+        kept.field_data[key] = np.array(grid.field_data[key])
+    for key in grid.cell_data.keys():
+        arr = np.asarray(grid.cell_data[key])
+        is_group = include_components and _is_mask(arr)
+        dropped = arr.astype(bool) & ~keep if is_group else None
+        if _INTERNAL_ARRAY.fullmatch(key) or dropped is None or not dropped.any():
+            kept.cell_data[key] = arr[keep]
+            continue
+        if (arr.astype(bool) & keep).any():
+            raise ValueError(
+                f"Mesh Component {key!r} contains both elements and lower-dimensional "
+                "boundary cells, which become a NODE component; Mechanical APDL shares "
+                "one component namespace. Pass `keep_boundary_elements=True` or split "
+                "the group."
+            )
+        points = np.zeros(grid.n_points, bool)
+        points[connectivity[np.repeat(dropped, sizes)]] = True
+        if key in kept.point_data:
+            points |= np.asarray(kept.point_data[key]).astype(bool)
+        kept.point_data[key] = points
+    return kept, keep
+
+
+def _coordinates(points: Any) -> NDArray[np.float64]:
+    """Return a copy of ``(N, 2)`` or ``(N, 3)`` coordinates as ``(N, 3)``."""
+    coords = np.array(points, np.float64)
+    if coords.ndim != 2 or coords.shape[1] not in (2, 3):
+        raise ValueError(
+            f"Node coordinates must have shape (N, 2) or (N, 3), not {coords.shape}."
+        )
+    if coords.shape[1] == 2:
+        return np.column_stack([coords, np.zeros(len(coords))])
+    return coords
+
+
+def _grid_from_meshio(mesh: Any) -> pv.UnstructuredGrid:
+    """Convert a duck-typed ``meshio.Mesh`` without modifying it.
+
+    Point sets become point masks. Cell sets and named Gmsh physical groups
+    (``field_data`` ``name -> (tag, dim)`` with ``gmsh:physical`` cell tags)
+    become cell masks.
+    """
+    celltypes, dims, sizes, connectivity = [], [], [], []
+    block_cells: list[NDArray[np.int64]] = []
+    type_blocks: dict[str, list[NDArray[np.int64]]] = {}
+    for block in mesh.cells:
+        if block.type not in _MESHIO_CELL_TYPES:
+            raise ValueError(f"Unsupported meshio cell type {block.type!r}.")
+        data = np.asarray(block.data, np.int64)
+        start = sum(cells.size for cells in block_cells)
+        block_cells.append(np.arange(start, start + len(data)))
+        type_blocks.setdefault(block.type, []).append(block_cells[-1])
+        celltypes.append(np.full(len(data), _MESHIO_CELL_TYPES[block.type]))
+        dims.append(
+            np.full(len(data), _CELL_DIMENSIONS[_MESHIO_CELL_TYPES[block.type]])
+        )
+        sizes.append(np.full(len(data), data.shape[1]))
+        connectivity.append(data.ravel())
+    if not block_cells:
+        raise ValueError("The meshio mesh has no cells.")
+    type_cells = {kind: np.concatenate(blocks) for kind, blocks in type_blocks.items()}
+
+    def by_cell(per_block: Any) -> list[tuple[NDArray[np.int64], NDArray[Any]]]:
+        """Pair block-aligned or cell-type-keyed values with their global cell indices."""
+        if isinstance(per_block, Mapping):
+            pairs = [(type_cells[kind], v) for kind, v in per_block.items()]
+        else:
+            pairs = list(zip(block_cells, per_block))
+        return [(cells, np.ravel(v)) for cells, v in pairs if v is not None]
+
+    grid = pv.UnstructuredGrid(
+        _vtk_cells(np.concatenate(sizes), np.concatenate(connectivity)),
+        np.concatenate(celltypes),
+        _coordinates(mesh.points),
+    )
+    for name, indices in (getattr(mesh, "point_sets", None) or {}).items():
+        points = np.zeros(grid.n_points, bool)
+        points[np.asarray(indices, np.int64)] = True
+        grid.point_data[str(name)] = points
+
+    masks: dict[str, NDArray[np.bool_]] = {}
+    for name, per_block in (getattr(mesh, "cell_sets", None) or {}).items():
+        for cells, local in by_cell(per_block):
+            masks.setdefault(str(name), np.zeros(grid.n_cells, bool))[
+                cells[local.astype(np.int64)]
+            ] = True
+    tags = (getattr(mesh, "cell_data", None) or {}).get("gmsh:physical")
+    if tags is None:
+        tags = (getattr(mesh, "cell_data_dict", None) or {}).get("gmsh:physical")
+    if tags is not None:
+        physical = np.zeros(grid.n_cells, np.int64)
+        for cells, local in by_cell(tags):
+            physical[cells] = local
+        cell_dims = np.concatenate(dims)
+        for name, value in (getattr(mesh, "field_data", None) or {}).items():
+            tag_dim = np.ravel(value)
+            if tag_dim.size == 2:
+                group = (physical == tag_dim[0]) & (cell_dims == tag_dim[1])
+                masks[str(name)] = masks.get(str(name), group) | group
+    for name, mask in masks.items():
+        grid.cell_data[name] = mask
+    return grid
+
+
+def _raw_cell_type(
+    size: int, etype: Any, existing_etypes: Mapping[int, int]
+) -> CellType:
+    """Return the cell type of raw ``size``-node elements, using ``etype`` if ambiguous."""
+    if size in _RAW_CELL_TYPES:
+        return _RAW_CELL_TYPES[size]
+    if size not in _AMBIGUOUS_SIZES:
+        raise ValueError(f"{size}-node elements are not supported.")
+    if etype is None:
+        raise ValueError(
+            f"{size}-node elements are ambiguous ({_AMBIGUOUS_SIZES[size]}); "
+            "pass `etype` to choose the element type."
+        )
+    if isinstance(etype, Mapping):
+        candidates = list(dict.fromkeys(_cell_type(key) for key in etype))
+    else:
+        number = existing_etypes[int(etype)] if _is_int(etype) else etype
+        candidates = list(_LAYOUTS[_ELEMENTS[_element_number(number)][1]])
+    matches = [c for c in candidates if _CELL_POINTS.get(c) == size]
+    if not matches:
+        raise ValueError(
+            f"Element type {etype!r} does not support {size}-node elements."
+        )
+    return matches[0]
+
+
+def _grid_from_arrays(
+    nodes: Any, elements: Any, etype: Any, existing_etypes: Mapping[int, int]
+) -> pv.UnstructuredGrid:
+    """Build a grid from coordinates and 0-based element node indices."""
+    points = _coordinates(nodes)
+    if isinstance(elements, np.ndarray) and elements.ndim == 2:
+        sizes = np.full(len(elements), elements.shape[1], np.int64)
+        connectivity = elements.ravel()
+    else:
+        cells = [np.asarray(cell) for cell in elements]
+        if any(cell.ndim != 1 for cell in cells):
+            raise ValueError(
+                "`elements` must be a 2D array or a sequence of 1D node index arrays."
+            )
+        sizes = np.array([cell.size for cell in cells], np.int64)
+        connectivity = np.concatenate(cells) if cells else np.empty(0, np.int64)
+    if not sizes.size:
+        raise ValueError("`elements` must contain at least one element.")
+    if (sizes == 0).any():
+        raise ValueError("Every element must be a non-empty sequence of node indices.")
+    if not np.issubdtype(connectivity.dtype, np.integer):
+        raise ValueError("Element node indices must be integers.")
+
+    owner = np.repeat(np.arange(sizes.size), sizes)
+    outside = (connectivity < 0) | (connectivity >= len(points))
+    if outside.any():
+        raise ValueError(
+            f"Element {owner[outside][0]} references node indices outside "
+            f"[0, {len(points)})."
+        )
+    order = np.lexsort((connectivity, owner))
+    repeated = (np.diff(connectivity[order]) == 0) & (np.diff(owner[order]) == 0)
+    if repeated.any():
+        raise ValueError(
+            f"Element {owner[order][1:][repeated][0]} repeats node indices."
+        )
+
+    unique, inverse = np.unique(sizes, return_inverse=True)
+    celltypes = np.array(
+        [_raw_cell_type(int(size), etype, existing_etypes) for size in unique]
+    )[inverse]
+    return pv.UnstructuredGrid(_vtk_cells(sizes, connectivity), celltypes, points)
+
+
+def _expand_etblock(text: str) -> str:
+    """Rewrite ``ETBLOCK`` blocks (MAPDL 2026 R1 ``CDWRITE``) as ``ET`` and ``KEYOPT``.
+
+    ``ansys.mapdl.reader.Archive`` does not parse ``ETBLOCK``. Each row holds
+    the ET ID, the element number, and KEYOPT(1) to KEYOPT(18).
+    """
+    lines = iter(text.splitlines())
+    out = []
+    for line in lines:
+        if not line.upper().startswith("ETBLOCK"):
+            out.append(line)
+            continue
+        next(lines)  # Format line.
+        for row in lines:
+            fields = [int(field) for field in row.split()]
+            if fields[0] == -1:
+                break
+            et_id, number, *keyopts = fields
+            out.append(f"ET,{et_id},{number}")
+            out.extend(
+                f"KEYOPT,{et_id},{knum},{value}"
+                for knum, value in enumerate(keyopts[:18], 1)
+                if value
+            )
+    return "\n".join(out) + "\n"
+
+
+def _grid_from_cdb(path: Path) -> pv.UnstructuredGrid:
+    """Read a ``.cdb`` file with its ET, KEYOPT, SECNUM, and ESYS metadata."""
+    from ansys.mapdl.reader import Archive
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        clean = Path(tmpdir) / "mesh.cdb"
+        clean.write_text(
+            _expand_etblock(path.read_text(encoding="latin-1")),
+            encoding="latin-1",
+            newline="\n",
+        )
+        archive = Archive(clean, force_linear=False)
+    grid = archive.grid
+    grid.cell_data["ansys_secnum"] = archive.section
+    grid.cell_data["ansys_esys"] = archive.element_coord_system()
+    keyopts = [
+        [et_id, knum, value]
+        for et_id, options in archive.key_option.items()
+        for knum, value in options
+    ]
+    if keyopts:
+        grid.field_data["ansys_keyopt"] = np.array(keyopts, np.int32)
+    return grid
+
+
+def _read_mesh_file(path: Path) -> Any:
+    """Read a mesh file into a PyVista dataset or a ``meshio.Mesh``."""
+    if not path.is_file():
+        raise FileNotFoundError(f"Mesh file '{path}' does not exist.")
+    suffix = path.suffix.lower()
+    if suffix in (".cdb", ".inp"):
+        return _grid_from_cdb(path)
+    if suffix in (".vtk", ".vtu", ".vtp", ".pvtu"):
+        return pv.read(path)
+    try:
+        import meshio
+    except ImportError as err:
+        raise ImportError(
+            f"Reading '{suffix}' meshes requires the optional 'meshio' package. "
+            "Install it with `pip install meshio`."
+        ) from err
+    return meshio.read(path)
+
+
+def _as_grid(
+    mesh: Any, etype: Any, existing_etypes: Mapping[int, int]
+) -> pv.UnstructuredGrid:
+    """Convert any supported ``load_mesh`` input into an unstructured grid."""
+    if isinstance(mesh, (str, os.PathLike)):
+        mesh = _read_mesh_file(Path(mesh))
+    if isinstance(mesh, pv.UnstructuredGrid):
+        return mesh
+    if isinstance(mesh, pv.DataSet):
+        return mesh.cast_to_unstructured_grid()
+    if isinstance(mesh, tuple) and len(mesh) == 2:
+        return _grid_from_arrays(*mesh, etype, existing_etypes)
+    if hasattr(mesh, "points") and hasattr(mesh, "cells"):
+        return _grid_from_meshio(mesh)
+    raise TypeError(
+        "`mesh` must be a PyVista dataset, a meshio.Mesh, a (nodes, elements) "
+        f"tuple, or a mesh file path, not {type(mesh).__name__}."
+    )
+
+
 def _cell_attribute(
     grid: pv.UnstructuredGrid,
     value: Any,
@@ -347,13 +732,11 @@ def _resolve_element_types(
 ]:
     """Return per-cell ET IDs, element numbers, new ET definitions, and their KEYOPTs."""
     celltypes = np.asarray(grid.celltypes, np.int64)
-    stored_ids = _valid_ids(grid.cell_data.get("ansys_etype"), allow_synthetic=False)
-    stored_nums = _valid_ids(
-        grid.cell_data.get("ansys_elem_type_num"), allow_synthetic=False
-    )
+    stored = _stored_etypes(grid) if etype is None else None
     keyopts: dict[int, dict[int, int]] = {}
 
-    if etype is None and stored_ids is not None and stored_nums is not None:
+    if stored is not None:
+        stored_ids, stored_nums = stored
         pairs = np.unique(np.column_stack([stored_ids, stored_nums]), axis=0)
         if np.unique(pairs[:, 0]).size != len(pairs):
             raise ValueError("`ansys_etype` maps one ET ID to several element types.")
@@ -542,15 +925,34 @@ def _mesh_data_from_grid(
     keyopt: Mapping[int, int] | None = None,
     components: Mapping[str, Any] | None = None,
     include_components: bool = True,
+    keep_boundary_elements: bool = False,
     sanitize_names: bool = False,
+    node_ids: Any = None,
+    elem_ids: Any = None,
 ) -> _MeshData:
     """Normalize a PyVista unstructured grid into a Mesh Archive representation."""
-    point_ids = _valid_ids(grid.point_data.get("ansys_node_num"), allow_synthetic=True)
-    if point_ids is None:
-        point_ids = np.arange(1, grid.n_points + 1, dtype=np.int64)
-    elem_ids = _valid_ids(grid.cell_data.get("ansys_elem_num"), allow_synthetic=False)
-    if elem_ids is None:
-        elem_ids = np.arange(1, grid.n_cells + 1, dtype=np.int64)
+    grid, keep = _drop_boundary_cells(
+        grid, etype, keep_boundary_elements, include_components
+    )
+    mat, real, secnum, esys, elem_ids = (
+        _kept(value, keep) for value in (mat, real, secnum, esys, elem_ids)
+    )
+    if node_ids is not None:
+        point_ids = _id_argument(node_ids, grid.n_points, "node_ids")
+    else:
+        point_ids = _valid_ids(
+            grid.point_data.get("ansys_node_num"), allow_synthetic=True
+        )
+        if point_ids is None:
+            point_ids = np.arange(1, grid.n_points + 1, dtype=np.int64)
+    if elem_ids is not None:
+        elem_ids = _id_argument(elem_ids, grid.n_cells, "elem_ids")
+    else:
+        elem_ids = _valid_ids(
+            grid.cell_data.get("ansys_elem_num"), allow_synthetic=False
+        )
+        if elem_ids is None:
+            elem_ids = np.arange(1, grid.n_cells + 1, dtype=np.int64)
 
     etype_ids, numbers, et_defs, keyopts = _resolve_element_types(
         grid, etype, existing_etypes or {}, et_offset, keyopt
