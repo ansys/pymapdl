@@ -22,6 +22,7 @@
 
 import inspect
 import logging
+import types
 from unittest.mock import MagicMock
 
 import pytest
@@ -116,7 +117,7 @@ def test_reflection_runner_handles_keyword_only_parameters(fake_mapdl: FakeMapdl
     def sample(self, a: str = "", b: str = "", *, mid: str = "", **kwargs):
         return self.run(f"SAMPLE,{a},{mid},{b}", **kwargs)
 
-    fake_mapdl.sample = sample.__get__(fake_mapdl, type(fake_mapdl))  # type: ignore[attr-defined]
+    fake_mapdl.sample = types.MethodType(sample, fake_mapdl)  # type: ignore[attr-defined]
     runner = test_commands.Test_MAPDL_commands()
     runner.test_command(fake_mapdl, "sample")
     assert fake_mapdl.sent_commands == ["SAMPLE,arg0,arg2,arg1"]
