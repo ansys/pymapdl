@@ -306,11 +306,9 @@ class _ExtendedFileCommandsMixin(_ExtendedMixinBase):
 
         # remove extra grpc /OUT commands
         REMOVE_LINES = ("/OUT",)
-        # Matches "/OUT,anstmp" with or without trailing arguments, such as
-        # "/OUT,anstmp,,,,FILE" (MAPDL 27.2+).
-        REMOVE_LINES_REGEX = re.compile(
-            r"^/OUT,\s*anstmp(\s*,[\s,]*(FILE)?\s*)?$", re.IGNORECASE
-        )
+        # Matches "/OUT,anstmp" followed by nothing or by any arguments, such as
+        # "/OUT,anstmp,,,,FILE" (MAPDL 27.2+), but not "/OUT,anstmp_other".
+        REMOVE_LINES_REGEX = re.compile(r"^/OUT,\s*anstmp\s*(,.*)?$", re.IGNORECASE)
         REMOVE_LINES_STARTING = (
             "*SET,__PYMAPDL_SESSION_ID__",
             "! *STATUS,__PYMAPDL_SESSION_ID__",
