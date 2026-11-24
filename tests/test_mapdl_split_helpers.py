@@ -421,7 +421,7 @@ def test_flush_stored_writes_and_reads_real_temporary_files(tmp_path):
     def send_input(input_file, write_to_log):
         command_file = Path(input_file)
         commands = command_file.read_text()
-        output_file = Path(commands.splitlines()[0].split(", ", 1)[1])
+        output_file = Path(commands.splitlines()[0].split(", ", 1)[1].split(",")[0])
         output_file.write_text("MAPDL response\nsecond line")
         assert write_to_log is False
         return "input accepted"
@@ -444,7 +444,7 @@ def test_flush_stored_writes_and_reads_real_temporary_files(tmp_path):
         _CoreExecutionMixin._flush_stored(client)
 
     expected_commands = (
-        f"/OUTPUT, {tmp_path / 'tmp_output.out'}\n/PREP7\nN,1,0,0,0\n/OUTPUT"
+        f"/OUTPUT, {tmp_path / 'tmp_output.out'},,,,FILE\n/PREP7\nN,1,0,0,0\n/OUTPUT"
     )
     assert (tmp_path / "tmp_input.inp").read_text() == expected_commands
     assert apdl_log_path.read_text() == expected_commands + "\n"
