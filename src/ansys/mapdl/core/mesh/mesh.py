@@ -189,6 +189,13 @@ def _parse_vtk(
     grid.cell_data["ansys_material_type"] = mesh.material_type
     grid.cell_data["ansys_etype"] = mesh._ans_etype
     grid.cell_data["ansys_elem_type_num"] = mesh.etype
+    for key, attr in (
+        ("ansys_secnum", "section"),
+        ("ansys_esys", "element_coord_system"),
+    ):
+        values = getattr(mesh, attr, None)
+        if values is not None:
+            grid.cell_data[key] = values
 
     # store node angles
     if angles is not None and angles.shape[1] == 3:
@@ -206,6 +213,14 @@ def _parse_vtk(
     ind = np.arange(grid.n_points)
     grid.point_data["origid"] = ind
     grid.point_data["VTKorigID"] = ind
+
+    keyopt = [
+        (et_id, knum, value)
+        for et_id, options in getattr(mesh, "key_option", {}).items()
+        for knum, value in options
+    ]
+    if keyopt:
+        grid.field_data["ansys_keyopt"] = np.array(keyopt, np.int32)
     return grid
 
 

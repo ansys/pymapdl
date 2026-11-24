@@ -22,11 +22,13 @@
 
 """Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
 
+from contextlib import nullcontext
 from functools import wraps
 import os
 import re
 import threading
 import time
+from typing import TYPE_CHECKING
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
@@ -37,7 +39,12 @@ from ansys.mapdl.core.constants import DEFAULT_CHUNKSIZE
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from ansys.mapdl.core.misc import requires_package, supress_logging
 
+if TYPE_CHECKING:
+    import pyvista as pv
+
 TMP_NODE_CM = "__NODE__"
+# Temporary components such as the ``save_selection`` ones (``__cmp_node<id>__``).
+_INTERNAL_COMPONENT = re.compile(r"__.*__")
 
 
 def requires_model(output=None):
@@ -105,7 +112,7 @@ class MeshGrpc:
     def _surf(self):
         """External surface"""
         if self._surf_cache is None:
-            self._surf_cache = self._grid.extract_surface()
+            self._surf_cache = self._grid.linear_copy().extract_surface()
         return self._surf_cache
 
     @property
@@ -765,12 +772,80 @@ class MeshGrpc:
     def _grid(self):
         if self._grid_cache is None:
             self._update_cache()
-            self._grid_cache = self._parse_vtk(force_linear=True)
+            self._grid_cache = self._parse_vtk(force_linear=False)
         return self._grid_cache
 
     @_grid.setter
     def _grid(self, value):
         self._grid_cache = value
+
+    @requires_package("pyvista")
+    def to_pyvista(
+        self,
+        *,
+        include_components: bool = True,
+        selected_only: bool = False,
+        force_linear: bool = False,
+    ) -> "pv.UnstructuredGrid":
+        """Convert the mesh to a PyVista unstructured grid with Mesh Components.
+
+        By default, the whole model is converted, including nodes, elements,
+        and Mesh Components that are currently unselected. The active
+        ``KP``, ``LINE``, ``AREA``, ``VOLU``, ``NODE``, ``ELEM``, and
+        ``CMSEL`` selection is restored afterwards.
+
+        Parameters
+        ----------
+        include_components : bool, default: True
+            Whether to add one boolean ``point_data`` mask per ``NODE`` Mesh
+            Component and one boolean ``cell_data`` mask per ``ELEM`` Mesh
+            Component, named after the component.
+        selected_only : bool, default: False
+            Whether to convert only the currently selected nodes, elements, and
+            Mesh Components instead of the whole model.
+        force_linear : bool, default: False
+            Whether to convert quadratic elements into linear cells. By
+            default, quadratic cell types such as ``QUADRATIC_TETRA`` are kept.
+
+        Returns
+        -------
+        pyvista.UnstructuredGrid
+            Grid carrying the ``ansys_*`` node and element metadata and the
+            Mesh Component masks. The grid is empty when the model has no
+            nodes or no elements.
+
+        Examples
+        --------
+        Export the whole model, even if the ``FIXED`` component is unselected.
+
+        >>> mapdl.cmsel("U", "FIXED")
+        >>> grid = mapdl.mesh.to_pyvista()
+        >>> grid.point_data["ansys_node_num"][grid.point_data["FIXED"]]
+        pyvista_ndarray([1, 2, 3], dtype=int32)
+
+        Export only the selected elements and components as linear cells.
+
+        >>> mapdl.esel("S", "MAT", "", 1)
+        >>> grid = mapdl.mesh.to_pyvista(selected_only=True, force_linear=True)
+        >>> grid.save("selection.vtu")
+        """
+        with nullcontext() if selected_only else self._mapdl.save_selection:
+            if not selected_only:
+                self._mapdl.allsel(mute=True)
+                self._mapdl.cmsel("ALL", mute=True)
+            # The MAPDL queries below do not change the selection, so the
+            # cache stays valid while reading; leaving save_selection resets it.
+            with self.ignore_cache_reset:
+                grid = self._parse_vtk(force_linear=force_linear)
+                if include_components and grid.n_points:
+                    for data, key, components in (
+                        (grid.point_data, "ansys_node_num", self.node_components),
+                        (grid.cell_data, "ansys_elem_num", self.element_components),
+                    ):
+                        for name, ids in components.items():
+                            if not _INTERNAL_COMPONENT.fullmatch(name):
+                                data[name] = np.isin(data[key], ids)
+        return grid
 
     def save(
         self,
