@@ -38,6 +38,7 @@ from ansys.mapdl.core._mapdl_extended.database import (
     _ExtendedDatabaseSetupMixin,
     _ExtendedSelectionCommandsMixin,
 )
+from ansys.mapdl.core._mapdl_extended.mesh_bridge import _ExtendedMeshBridgeMixin
 from ansys.mapdl.core._mapdl_extended.parsed_commands import (
     _ExtendedParsedCommandsMixin,
 )
@@ -146,6 +147,7 @@ class _MapdlExtended(
     _ExtendedArrayMixin,
     _ExtendedAnalysisMixin,
     _ExtendedValueMixin,
+    _ExtendedMeshBridgeMixin,
     _ExtendedLoopContextMixin,
     _MapdlCommandExtended,
 ):
