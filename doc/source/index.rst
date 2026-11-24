@@ -58,25 +58,32 @@
         start with :ref:`ref_pymapdl_course`.
 
     .. grid-item-card:: :fa:`terminal` Get started quickly
-        :link: ref_getting_started
-        :link-type: ref
+        :link: getting_started/index
+        :link-type: doc
 
         If you want to install MAPDL, install PyMAPDL, or launch PyMAPDL,
         see :ref:`ref_getting_started`.
 
     .. grid-item-card:: :fa:`gears` Explore PyMAPDL examples
-        :link: ref_examples
-        :link-type: ref
+        :link: examples/index
+        :link-type: doc
 
         If you want to explore a great collection of PyMAPDL examples, see
         :ref:`ref_examples`.
 
     .. grid-item-card:: :fa:`book-open-reader` Use PyMAPDL modules
-        :link: ref_user_guide
-        :link-type: ref
+        :link: user_guide/index
+        :link-type: doc
 
         If you want to use PyMAPDL modules for basic, intermediate, advanced,
         or high-performance workflows, see :ref:`ref_user_guide`.
+
+    .. grid-item-card:: :fa:`code` Browse the API reference
+        :link: api/index
+        :link-type: doc
+
+        Find the public PyMAPDL classes, functions, and attributes in the
+        :doc:`API reference <api/index>`.
 
     .. grid-item-card:: :fa:`question` Troubleshoot PyMAPDL
         :link: ref_troubleshooting
@@ -86,8 +93,8 @@
         see :ref:`ref_troubleshooting`.
 
     .. grid-item-card:: :fa:`users` Contribute to PyMAPDL
-        :link: ref_contributing
-        :link-type: ref
+        :link: getting_started/contribution
+        :link-type: doc
 
         If you want to contribute to PyMAPDL, see
         :ref:`ref_contributing`.
@@ -105,3 +112,9 @@
 
         If you want to fix a bug or build a new feature, see
         :ref:`developing_pymapdl`.
+
+    .. grid-item-card:: :fa:`clock-rotate-left` Read the release notes
+        :link: changelog
+        :link-type: doc
+
+        Review changes and fixes in the PyMAPDL :doc:`release notes <changelog>`.

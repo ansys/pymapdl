@@ -7,12 +7,20 @@ updates:
       - "/.github/actions/*"
     schedule:
       interval: "weekly"
+      day: "friday"
+      time: "00:00"
+      timezone: "Etc/UTC"
+    target-branch: "main"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
     labels:
       - "maintenance"
+    assignees:
+      - "germa89"
     commit-message:
-      prefix: "ci"
+      prefix: "build(actions)"
     cooldown:
-      default-days: 10
+      default-days: 7
       include:
         - "*"  # Include all dependencies in cooldown
       exclude:
@@ -22,35 +30,53 @@ updates:
           patterns:
             - "*"
 
-  - directory: ".github/actions/launch-mapdl-docker"
+  - directories:
+      - "/.github/actions/launch-mapdl-docker"
     package-ecosystem: "npm"
     schedule:
       interval: "weekly"
       day: "friday"
       time: "00:00"
+      timezone: "Etc/UTC"
+    target-branch: "main"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
     labels:
       - "maintenance"
       - "dependencies"
+    assignees:
+      - "germa89"
     commit-message:
-      prefix: "build"
+      prefix: "build(deps)"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
     cooldown:
       default-days: 7
       include:
         - "*"  # Include all dependencies in cooldown
 
-  - directory: "/" # Location of package manifests
+  - directories:
+      - "/" # Location of package manifests
     package-ecosystem: "pip" # See documentation for possible values
     schedule:
       interval: "weekly"
       day: "friday"
       time: "00:00"
+      timezone: "Etc/UTC"
+    target-branch: "main"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
     labels:
       - "maintenance"
       - "dependencies"
+    assignees:
+      - "germa89"
     commit-message:
-      prefix: "build"
+      prefix: "build(deps)"
     cooldown:
-      default-days: 10
+      default-days: 7
       semver-patch-days: 3
       include:
         - "*"  # Include all dependencies in cooldown
@@ -114,38 +140,83 @@ updates:
           patterns:
             - "ipywidgets"
 
-  - directory: "doc/source/examples/extended_examples/gui"
+       remaining:
+          patterns:
+            - "*"
+
+  - directories:
+      - "/doc/source/examples/extended_examples/gui"
     package-ecosystem: "pip"
     exclude-paths:
       - "doc/source/examples/extended_examples/gui/**"
       - "doc/source/examples/extended_examples/hpc/**"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 0
+      day: "friday"
+      time: "00:00"
+      timezone: "Etc/UTC"
+    target-branch: "main"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
+    labels:
+      - "maintenance"
+      - "dependencies"
+    assignees:
+      - "germa89"
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
     cooldown:
-      default-days: 10
+      default-days: 7
       semver-patch-days: 3
       include:
         - "*"  # Include all dependencies in cooldown
 
-  - directory: "doc/source/examples/extended_examples/hpc"
+  - directories:
+      - "/doc/source/examples/extended_examples/hpc"
     package-ecosystem: "pip"
     exclude-paths:
       - "doc/source/examples/extended_examples/gui/**"
       - "doc/source/examples/extended_examples/hpc/**"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 0
+      day: "friday"
+      time: "00:00"
+      timezone: "Etc/UTC"
+    target-branch: "main"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
+    labels:
+      - "maintenance"
+      - "dependencies"
+    assignees:
+      - "germa89"
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
     cooldown:
-      default-days: 10
+      default-days: 7
       semver-patch-days: 3
       include:
         - "*"  # Include all dependencies in cooldown
 
   - package-ecosystem: "pre-commit"
-    directory: "/"
+    directories:
+      - "/"
     schedule:
       interval: "weekly"
+      day: "friday"
+      time: "00:00"
+      timezone: "Etc/UTC"
+    target-branch: "main"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
     cooldown:
       default-days: 7
       exclude:
@@ -153,7 +224,7 @@ updates:
     labels:
       - "maintenance"
     commit-message:
-      prefix: "ci"
+      prefix: "build(pre-commit)"
     groups:
       pre-commit-hooks:
         patterns:
