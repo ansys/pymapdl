@@ -1270,26 +1270,23 @@ class Materials(CommandsBase):
         Parameters
         ----------
         elem : str
-            Element on which to apply nonstructural mass. If ALL, the
-            command applies nonstructural mass to *all*\ selected elements
-            (`ESEL
+            Element on which to apply nonstructural mass. If ALL, the command applies
+            nonstructural mass to *all*\ selected elements (`ESEL
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ESEL.html>`_).
             A component or component group name is also valid.
 
         action : str
             Command action requested:
 
-            * ADD - Add nonstructural mass to the specified element or
-              elements.
+            * ADD - Add nonstructural mass to the specified element or elements.
 
-            * DEL - Delete all previously defined nonstructural mass from
-              selected element(s).
+            * DEL - Delete all previously defined nonstructural mass from selected
+              element(s).
 
-            * LIST - List the input value of nonstructural mass. If multiple
-              `NSMASS
+            * LIST - List the input value of nonstructural mass. If multiple `NSMASS
               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSMASS.html>`_\
-              commands are issued, this option lists the total accumulated
-              nonstructural mass.
+              commands are issued, this option lists the total accumulated nonstructural
+              mass.
 
         unit : str
             Unit of the input value of nonstructural mass:
@@ -1303,13 +1300,12 @@ class Materials(CommandsBase):
             * 3 - Mass per unit length.
 
         val : str
-            Input value of the nonstructural mass. A positive value
-            increases (accumulates) the total nonstructural mass. A negative
-            value reduces the total nonstructural mass.
+            Input value of the nonstructural mass. A positive value increases
+            (accumulates) the total nonstructural mass. A negative value reduces the
+            total nonstructural mass.
 
         distrb : str
-            Nonstructural mass distribution method. Valid only when
-            ``UNIT``\ = 0.
+            Nonstructural mass distribution method. Valid only when ``UNIT``\ = 0.
 
             * 0 - Mass proportional distribution (default).
 
@@ -1403,20 +1399,20 @@ class Materials(CommandsBase):
         * `Direct input of nonstructural mass density
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSMASS.html#applynsmassmethod2>`_
 
-        For consecutive accumulation or reduction of total nonstructural mass to
-        the same elements, you can issue multiple `NSMASS
+        For consecutive accumulation or reduction of total nonstructural mass to the same
+        elements, you can issue multiple `NSMASS
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSMASS.html>`_\
-        commands, each specifying a different unit (``UNIT``) or distribution
-        method (``DISTRB``).
+        commands, each specifying a different unit (``UNIT``) or distribution method
+        (``DISTRB``).
 
-        Use care when selecting the unit and distribution method to ensure
-        compatibility with the selected elements.
+        Use care when selecting the unit and distribution method to ensure compatibility
+        with the selected elements.
 
         **Distribution of Total Nonstructural Mass (UNIT = 0)**
 
-        Specify ``UNIT``\ = 0 to distribute the total nonstructural mass over
-        all selected elements proportionally to the mass, volume, area, or
-        length (``DISTRB``\ = 0, 1, 2, or 3, respectively):
+        Specify ``UNIT``\ = 0 to distribute the total nonstructural mass over all selected
+        elements proportionally to the mass, volume, area, or length (``DISTRB``\ = 0, 1, 2,
+        or 3, respectively):
 
         .. list-table:: Table 220: Supported Total Mass Distribution Methods
            :header-rows: 1
@@ -1424,14 +1420,12 @@ class Materials(CommandsBase):
            * - ``DISTRB``\
              - Applicable Element Types
            * - 0, 1
-             - Supports all element types listed in `Table 219: Supported
-               Elements
+             - Supports all element types listed in `Table 219: Supported Elements
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSMASS.html#NSMASSelemsupport>`_
                with the exception of `SURF156
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SURF156.html>`_.
            * - 2
-             - Supports these structural shell and surface-effect
-               elements: `SHELL208
+             - Supports these structural shell and surface-effect elements: `SHELL208
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL208.html>`_,
                `SHELL209
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL209.html>`_,
@@ -1444,16 +1438,16 @@ class Materials(CommandsBase):
                and `SURF154
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SURF154.html>`_.
            * - 3
-             - Supports structural link, beam, pipe, and elbow elements,
-               and the `SURF156
+             - Supports structural link, beam, pipe, and elbow elements, and the
+               `SURF156
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SURF156.html>`_
                structural surface line-load-effect element.
 
         **Direct Input of Nonstructural Mass Density (UNIT = 1, 2, or 3)**
 
-        The nonstructural mass is applied directly to the selected element in
-        one form of mass densities: mass per unit volume (``UNIT``\ = 1), mass
-        per unit area (``UNIT``\ = 2), or mass per unit length (``UNIT``\ = 3):
+        The nonstructural mass is applied directly to the selected element in one form of
+        mass densities: mass per unit volume (``UNIT``\ = 1), mass per unit area (``UNIT``\
+        = 2), or mass per unit length (``UNIT``\ = 3):
 
         .. list-table:: Table 221: Supported Units for Direct Input of Mass Density
            :header-rows: 1
@@ -1461,14 +1455,12 @@ class Materials(CommandsBase):
            * - ``DISTRB``\
              - Applicable Element Types
            * - 1
-             - Supports all element types listed in `Table 219: Supported
-               Elements
+             - Supports all element types listed in `Table 219: Supported Elements
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSMASS.html#NSMASSelemsupport>`_
                with the exception of `SURF156
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SURF156.html>`_.
            * - 2
-             - Supports these structural shell and surface-effect
-               elements: `SHELL208
+             - Supports these structural shell and surface-effect elements: `SHELL208
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL208.html>`_,
                `SHELL209
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL209.html>`_,
@@ -1481,8 +1473,8 @@ class Materials(CommandsBase):
                and `SURF154
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SURF154.html>`_.
            * - 3
-             - Supports structural link, beam, pipe, and elbow elements,
-               and the `SURF156
+             - Supports structural link, beam, pipe, and elbow elements, and the
+               `SURF156
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SURF156.html>`_
                structural surface line-load-effect element.
 
@@ -1492,62 +1484,55 @@ class Materials(CommandsBase):
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSMASS.html>`_\
         accounts for two behaviors of the nonstructural mass:
 
-        * **The nonstructural mass is applied uniformly to the entire volume of
-          the element (that is, the saturated nonstructural mass).**\
+        * **The nonstructural mass is applied uniformly to the entire volume of the element
+          (that is, the saturated nonstructural mass).**\
 
-          *Example*: The moisture content in a structure can be simulated with
-          the saturated nonstructural mass.
+          *Example*: The moisture content in a structure can be simulated with the
+          saturated nonstructural mass.
 
-          This behavior of the nonstructural mass can be defined via a mass-
-          or volume-proportional distribution of total nonstructural mass
-          (``DISTRB``\ = 0 or 1), or direct input of mass density (``UNIT``\ =
-          1).
+          This behavior of the nonstructural mass can be defined via a mass- or
+          volume-proportional distribution of total nonstructural mass (``DISTRB``\ = 0 or
+          1), or direct input of mass density (``UNIT``\ = 1).
 
-        * **The nonstructural mass is attached to the element at the location
-          where element nodes are defined (that is, at the attached
-          nonstructural mass).**\
+        * **The nonstructural mass is attached to the element at the location where element
+          nodes are defined (that is, at the attached nonstructural mass).**\
 
-          *Example*: The thin exterior insulation on a pipe can be simulated
-          with the attached nonstructural mass.
+          *Example*: The thin exterior insulation on a pipe can be simulated with the
+          attached nonstructural mass.
 
-          This behavior of the nonstructural mass can be defined via area or
-          length proportional distribution of total nonstructural mass
-          (``DISTRB``\ = 2 or 3), or via direct input of mass density
-          (``UNIT``\ = 2 or 3).
+          This behavior of the nonstructural mass can be defined via area or length
+          proportional distribution of total nonstructural mass (``DISTRB``\ = 2 or 3), or
+          via direct input of mass density (``UNIT``\ = 2 or 3).
 
-          The attached nonstructural mass is assumed to have a negligible
-          thickness or cross-sectional area. Therefore, for structural
-          elements with rotational degrees of freedom, element rotational
-          inertia is not affected by the attached nonstructural mass. To
-          properly account for the attached nonstructural mass on these
-          elements, position the element nodes (`SECOFFSET
+          The attached nonstructural mass is assumed to have a negligible thickness or
+          cross-sectional area. Therefore, for structural elements with rotational degrees
+          of freedom, element rotational inertia is not affected by the attached
+          nonstructural mass. To properly account for the attached nonstructural mass on
+          these elements, position the element nodes (`SECOFFSET
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECOFFSET.html>`_)
-          at the locations where the nonstructural mass is applied (for
-          example, at the top surface of a shell element).
+          at the locations where the nonstructural mass is applied (for example, at the
+          top surface of a shell element).
 
         **Assumptions and Limitations**
 
-        * Elements with inhomogeneous materials (such as a structural shell with
-          a composite section) are not supported for mass proportional
-          distribution (``DISTRIB``\ = 0).
+        * Elements with inhomogeneous materials (such as a structural shell with a composite
+          section) are not supported for mass proportional distribution (``DISTRIB``\ = 0).
 
-        * Elements with a TAPER, GENB, COMB, or GENS section type are not
-          supported.
+        * Elements with a TAPER, GENB, COMB, or GENS section type are not supported.
 
-        * The element volume, area, or length used for total nonstructural mass
-          distribution (``DISTRIB``\ = 0, 1, 2, or 3 respectively) are
-          calculated using the undeformed element geometry.
+        * The element volume, area, or length used for total nonstructural mass distribution
+          (``DISTRIB``\ = 0, 1, 2, or 3 respectively) are calculated using the undeformed
+          element geometry.
 
-        * The element mass used for total nonstructural mass distribution
-          (``DISTRB``\ = 0) is calculated using undeformed element geometry and
-          mass density at the reference temperature. The program excludes
-          elements with zero or unspecified density from the distribution and
-          issues a warning message for the excluded elements.
+        * The element mass used for total nonstructural mass distribution (``DISTRB``\ = 0)
+          is calculated using undeformed element geometry and mass density at the reference
+          temperature. The program excludes elements with zero or unspecified density from
+          the distribution and issues a warning message for the excluded elements.
 
         * `NSMASS
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSMASS.html>`_\
-          does not account for subsequent modifications made to the selected
-          elements. Issue `NSMASS
+          does not account for subsequent modifications made to the selected elements. Issue
+          `NSMASS
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSMASS.html>`_\
           only *after*\ defining the selected elements.
         """

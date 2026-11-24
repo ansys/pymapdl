@@ -440,16 +440,16 @@ class FeForces(CommandsBase):
             Node number at which the LM force is specified.
 
         flab : str
-            Structural force labels that specify the type and direction of
-            the LM force. Valid structural force labels are listed below.
+            Structural force labels that specify the type and direction of the LM force.
+            Valid structural force labels are listed below.
 
             * Force: ``Fx``, ``Fy``, ``Fz``\
 
             * Moment: ``Mx``, ``My``, ``Mz``\
 
         inplab : str
-            Label indicating whether the enforced data is a displacement,
-            velocity, or acceleration input.
+            Label indicating whether the enforced data is a displacement, velocity, or
+            acceleration input.
 
             * ``U`` - Displacement
 
@@ -458,9 +458,9 @@ class FeForces(CommandsBase):
             * ``ACC`` - Acceleration
 
         value : str
-            The value of the LM force or a table name reference for tabular
-            input. To specify a table, enclose the table name in percent
-            (``%``) signs. Use the `\*DIM
+            The value of the LM force or a table name reference for tabular input. To
+            specify a table, enclose the table name in percent (``%``) signs. Use the
+            `\*DIM
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_\
             command to define a table.
 
@@ -471,12 +471,11 @@ class FeForces(CommandsBase):
 
         The `FVAL
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_FVAL.html>`_\
-        command applies a Large Mass (LM) force to the specified node. The
-        command takes displacement, velocity, or acceleration as the input
-        (``InpLab``) and converts them to a force that is applied as specified
-        by ``FLab``. To compute the LM force, it first converts the displacement
-        and velocity time history into acceleration. It then multiplies the
-        nodal acceleration by the large mass defined at that node with the
+        command applies a Large Mass (LM) force to the specified node. The command takes
+        displacement, velocity, or acceleration as the input (``InpLab``) and converts them
+        to a force that is applied as specified by ``FLab``. To compute the LM force, it
+        first converts the displacement and velocity time history into acceleration. It then
+        multiplies the nodal acceleration by the large mass defined at that node with the
         `MASS21
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MASS21.html>`_
         element. This applies a LM force to the node.
@@ -487,26 +486,26 @@ class FeForces(CommandsBase):
 
         `FVAL
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_FVAL.html>`_\
-        applies to a single node. However, you can issue this command multiple
-        times to apply an LM force to more than one node.
+        applies to a single node. However, you can issue this command multiple times to
+        apply an LM force to more than one node.
 
-        If a velocity initial condition (IC) is specified at the node and the
-        degree of freedom (DOF) at which `FVAL
+        If a velocity initial condition (IC) is specified at the node and the degree of
+        freedom (DOF) at which `FVAL
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_FVAL.html>`_\
-        is issued, the velocity IC is used to calculate force. If multiple loads
-        are specified for the same node and DOF, the last `FVAL
+        is issued, the velocity IC is used to calculate force. If multiple loads are
+        specified for the same node and DOF, the last `FVAL
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_FVAL.html>`_\
         that you issue overrides the previous ones. A step-applied `FVAL
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_FVAL.html>`_\
-        with ``Value``\ = 0 (or a tabular input with zero (0) entries) deletes
-        an existing LM force at that node and DOF.
+        with ``Value``\ = 0 (or a tabular input with zero (0) entries) deletes an existing
+        LM force at that node and DOF.
 
         Do not use the residual vector method (`RESVEC
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RESVEC.html>`_\
         command) with `FVAL
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_FVAL.html>`_.
-        The rigid body mode present due to the specified large mass will
-        restrict the residual vector calculation.
+        The rigid body mode present due to the specified large mass will restrict the
+        residual vector calculation.
         """
         command = f"FVAL,{node},{flab},{inplab},{value}"
         return self.run(command, **kwargs)

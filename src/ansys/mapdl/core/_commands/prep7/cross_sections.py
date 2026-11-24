@@ -838,1461 +838,636 @@ class CrossSections(CommandsBase):
         Parameters
         ----------
         val1 : str
-            Values, such as thickness or the length of a side or the numbers
-            of cells along the width, that describe the geometry of a
-            section. The terms ``VAL1``, ``VAL2``, etc. are specialized for
-            each type of cross-section.
+            Values, such as thickness or the length of a side or the numbers of cells along the width, that
+            describe the geometry of a section. The terms ``VAL1``, ``VAL2``, etc. are specialized for each
+            type of cross-section.
 
         val2 : str
-            Values, such as thickness or the length of a side or the numbers
-            of cells along the width, that describe the geometry of a
-            section. The terms ``VAL1``, ``VAL2``, etc. are specialized for
-            each type of cross-section.
+            Values, such as thickness or the length of a side or the numbers of cells along the width, that
+            describe the geometry of a section. The terms ``VAL1``, ``VAL2``, etc. are specialized for each
+            type of cross-section.
 
         val3 : str
-            Values, such as thickness or the length of a side or the numbers
-            of cells along the width, that describe the geometry of a
-            section. The terms ``VAL1``, ``VAL2``, etc. are specialized for
-            each type of cross-section.
+            Values, such as thickness or the length of a side or the numbers of cells along the width, that
+            describe the geometry of a section. The terms ``VAL1``, ``VAL2``, etc. are specialized for each
+            type of cross-section.
 
         val4 : str
-            Values, such as thickness or the length of a side or the numbers
-            of cells along the width, that describe the geometry of a
-            section. The terms ``VAL1``, ``VAL2``, etc. are specialized for
-            each type of cross-section.
+            Values, such as thickness or the length of a side or the numbers of cells along the width, that
+            describe the geometry of a section. The terms ``VAL1``, ``VAL2``, etc. are specialized for each
+            type of cross-section.
 
         val5 : str
-            Values, such as thickness or the length of a side or the numbers
-            of cells along the width, that describe the geometry of a
-            section. The terms ``VAL1``, ``VAL2``, etc. are specialized for
-            each type of cross-section.
+            Values, such as thickness or the length of a side or the numbers of cells along the width, that
+            describe the geometry of a section. The terms ``VAL1``, ``VAL2``, etc. are specialized for each
+            type of cross-section.
 
         val6 : str
-            Values, such as thickness or the length of a side or the numbers
-            of cells along the width, that describe the geometry of a
-            section. The terms ``VAL1``, ``VAL2``, etc. are specialized for
-            each type of cross-section.
+            Values, such as thickness or the length of a side or the numbers of cells along the width, that
+            describe the geometry of a section. The terms ``VAL1``, ``VAL2``, etc. are specialized for each
+            type of cross-section.
 
         val7 : str
-            Values, such as thickness or the length of a side or the numbers
-            of cells along the width, that describe the geometry of a
-            section. The terms ``VAL1``, ``VAL2``, etc. are specialized for
-            each type of cross-section.
+            Values, such as thickness or the length of a side or the numbers of cells along the width, that
+            describe the geometry of a section. The terms ``VAL1``, ``VAL2``, etc. are specialized for each
+            type of cross-section.
 
         val8 : str
-            Values, such as thickness or the length of a side or the numbers
-            of cells along the width, that describe the geometry of a
-            section. The terms ``VAL1``, ``VAL2``, etc. are specialized for
-            each type of cross-section.
+            Values, such as thickness or the length of a side or the numbers of cells along the width, that
+            describe the geometry of a section. The terms ``VAL1``, ``VAL2``, etc. are specialized for each
+            type of cross-section.
 
         val9 : str
-            Values, such as thickness or the length of a side or the numbers
-            of cells along the width, that describe the geometry of a
-            section. The terms ``VAL1``, ``VAL2``, etc. are specialized for
-            each type of cross-section.
+            Values, such as thickness or the length of a side or the numbers of cells along the width, that
+            describe the geometry of a section. The terms ``VAL1``, ``VAL2``, etc. are specialized for each
+            type of cross-section.
 
         val10 : str
-            Values, such as thickness or the length of a side or the numbers
-            of cells along the width, that describe the geometry of a
-            section. The terms ``VAL1``, ``VAL2``, etc. are specialized for
-            each type of cross-section.
+            Values, such as thickness or the length of a side or the numbers of cells along the width, that
+            describe the geometry of a section. The terms ``VAL1``, ``VAL2``, etc. are specialized for each
+            type of cross-section.
 
         val11 : str
-            Values, such as thickness or the length of a side or the numbers
-            of cells along the width, that describe the geometry of a
-            section. The terms ``VAL1``, ``VAL2``, etc. are specialized for
-            each type of cross-section.
+            Values, such as thickness or the length of a side or the numbers of cells along the width, that
+            describe the geometry of a section. The terms ``VAL1``, ``VAL2``, etc. are specialized for each
+            type of cross-section.
 
         val12 : str
-            Values, such as thickness or the length of a side or the numbers
-            of cells along the width, that describe the geometry of a
-            section. The terms ``VAL1``, ``VAL2``, etc. are specialized for
-            each type of cross-section.
+            Values, such as thickness or the length of a side or the numbers of cells along the width, that
+            describe the geometry of a section. The terms ``VAL1``, ``VAL2``, etc. are specialized for each
+            type of cross-section.
 
-        val13 : str
-            Values, such as thickness or the length of a side or the numbers
-            of cells along the width, that describe the geometry of a
-            section. The terms ``VAL1``, ``VAL2``, etc. are specialized for
-            each type of cross-section.
-
-        val14 : str
-            Values, such as thickness or the length of a side or the numbers
-            of cells along the width, that describe the geometry of a
-            section. The terms ``VAL1``, ``VAL2``, etc. are specialized for
-            each type of cross-section.
+        val13, val14 : str
+            Values, such as thickness or the length of a side or the numbers of cells
+            along the width, that describe the geometry of a section. The terms
+            ``VAL1``, ``VAL2``, etc. are specialized for each type of cross-section.
 
         Notes
         -----
 
         .. _SECDATA_notes:
 
-        The `SECDATA
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html>`_\
-        command defines the data describing the geometry of a section. The
-        command is divided into these section types: `Beams
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html#SECDATA.beams>`_,
-        `Contact
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html#SECDATA.contact>`_,
-        `General Axisymmetric
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html#SECDATA.axisy>`_,
-        `Joints
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html#SECDATA.joints>`_,
-        `Links
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html#SECDATA.links>`_,
-        `Pipes
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html#SECDATA.pipes>`_,
-        `Pretension
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html#SECDATA.pretension>`_,
-        `Reinforcing
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html#SECDATA.reinforcement>`_,
-        `Shells
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html#SECDATA.shells>`_,
-        `Supports
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html#SECDATA.supports>`_,
-        and `Taper
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html#SECDATA.taper>`_.
+        The :ref:`secdata` command defines the data describing the geometry of a section. The command is
+        divided into these section types: `Beams
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SECDATA.html#SECDATA.fig.11>`_
+        Beams, :ref:`Contact, <SECDATA_contact>` :ref:`General Axisymmetric, <SECDATA_axisy>` :ref:`Joints,
+        <SECDATA_joints>` :ref:`Links, <SECDATA_links>` `Pipes
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SECDATA.html#eq148b7566-f562-4fe0-8ce3-f61c6b455f70>`_
+        Pipes, :ref:`Pretension, <SECDATA_pretension>` :ref:`Reinforcing, <SECDATA_reinforcement>`
+        :ref:`Shells, <SECDATA_shells>` :ref:`Supports, and <SECDATA_supports>` :ref:`Taper.
+        <SECDATA_taper>`
 
-        The data input on the `SECDATA
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html>`_\
-        command is interpreted based on the most recently issued `SECTYPE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECTYPE.html>`_\
-        command. The data required is determined by the section type and
-        subtype, and is different for each one.
+        The data input on the :ref:`secdata` command is interpreted based on the most recently issued
+        :ref:`sectype` command. The data required is determined by the section type and subtype, and is
+        different for each one.
 
-        **Beams**
+        .. _SECDATA_beams:
 
-        **Type: BEAM**
+        Type: BEAM
+        ^^^^^^^^^^
 
-        Beam sections are referenced by `BEAM188
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_BEAM188.html>`_
-        and `BEAM189
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_BEAM189.html>`_
-        elements. Not all `SECOFFSET
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECOFFSET.html>`_\
+        Beam sections are referenced by ``BEAM188`` and ``BEAM189`` elements. Not all :ref:`secoffset`
         location values are valid for each subtype.
 
-        .. list-table::
+        This command contains some tables and extra information which can be inspected in the original
+        documentation pointed above.
 
-           * - **Type: BEAM, Subtype: RECT**\ Data to provide in the
-               value fields: ``B``, ``H``, ``Nb``, ``Nh``\ where: ``B``\
-               = Width ``H``\ = Height ``Nb``\ = Number of cells along
-               width; default = 2 ``Nh``\ = Number of cells along height;
-               default = 2 ``Nb``\ \*``Nh``\
-             - **Type: BEAM, Subtype: QUAD**\ Data to provide in the
-               value fields: ``yI``, ``zI``, ``yJ``, ``zJ``, ``yK``,
-               ``zK``, ``yL``, ``zL``, ``Ng``, ``Nh``\ ``yI``, ``zI``,
-               ``yJ``, ``zJ``, ``yK``, ``zK``, ``yL``, ``zL``\ =
-               Coordinate location of various points ``Ng``\ = Number of
-               cells along *g*; default = 2 ``Nh``\ = Number of cells
-               along *h*; default = 2 ``Ng``\ \*``Nh``\ Degeneration to
-               triangle is permitted by specifying the same coordinates
-               for cells along an edge.
-           * - Data to provide in the value fields:
-             - -
-           * - ``B``, ``H``, ``Nb``, ``Nh``\
-             - -
-           * - where:
-             - -
-           * - ``B``\ = Width
-             - -
-           * - ``H``\ = Height
-             - -
-           * - ``Nb``\ = Number of cells along width; default = 2
-             - -
-           * - ``Nh``\ = Number of cells along height; default = 2
-             - -
-           * - ``Nb``\ \*``Nh``\
-             - -
-           * - Data to provide in the value fields:
-             - -
-           * - ``yI``, ``zI``, ``yJ``, ``zJ``, ``yK``, ``zK``, ``yL``,
-               ``zL``, ``Ng``, ``Nh``\
-             - -
-           * - ``yI``, ``zI``, ``yJ``, ``zJ``, ``yK``, ``zK``, ``yL``,
-               ``zL``\ = Coordinate location of various points
-             - -
-           * - ``Ng``\ = Number of cells along *g*; default = 2
-             - -
-           * - ``Nh``\ = Number of cells along *h*; default = 2
-             - -
-           * - ``Ng``\ \*``Nh``\
-             - -
-           * - **Type: BEAM, Subtype: CSOLID**\ Data to provide in the
-               value fields: ``R``, ``N``, ``T``\ where: ``R``\ = Radius
-               ``N``\ = Number of divisions around the circumference; 8
-               (see command documentation for equation) ``N``\ (see
-               command documentation for equation) 120 (where a greater
-               value improves accuracy slightly); default = 8 ``T``\ =
-               Number of divisions through the radius; default = 2
-             - **Type: BEAM, Subtype: CTUBE**\ Data to provide in the
-               value fields: ``Ri``, ``Ro``, ``N``\ where: ``Ri``\ =
-               Inner radius of the tube ``Ro``\ = Outer radius of the
-               tube ``N``\ = Number of cells around the circumference; N
-               (see command documentation for equation) 8 (where a
-               greater value improves accuracy slightly); default = 8
-               This subtype is similar to type `PIPE
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html#SECDATA.pipes>`_.
-               However, elements using PIPE account for internal or
-               external pressures, whereas elements using CTUBE do not.
-           * - Data to provide in the value fields:
-             - -
-           * - ``R``, ``N``, ``T``\
-             - -
-           * - where:
-             - -
-           * - ``R``\ = Radius
-             - -
-           * - ``N``\ = Number of divisions around the circumference; 8
-               (see command documentation for equation) ``N``\ (see
-               command documentation for equation) 120 (where a greater
-               value improves accuracy slightly); default = 8
-             - -
-           * - ``T``\ = Number of divisions through the radius; default =
-               2
-             - -
-           * - Data to provide in the value fields:
-             - -
-           * - ``Ri``, ``Ro``, ``N``\
-             - -
-           * - where:
-             - -
-           * - ``Ri``\ = Inner radius of the tube
-             - -
-           * - ``Ro``\ = Outer radius of the tube
-             - -
-           * - ``N``\ = Number of cells around the circumference; N (see
-               command documentation for equation) 8 (where a greater
-               value improves accuracy slightly); default = 8
-             - -
-           * - **Type: BEAM, Subtype: CHAN**\ Data to provide in the
-               value fields: ``W1``, ``W2``, ``W3``, ``t1``, ``t2``,
-               ``t3``\ where: ``W1``, ``W2``\ = Lengths of the flanges
-               ``W3``\ = Overall depth ``t1``, ``t2``\ = Flange
-               thicknesses ``t3``\ = Web thicknesses
-             - **Type: BEAM, Subtype: I**\ Data to provide in the value
-               fields: ``W1``, ``W2``, ``W3``, ``t1``, ``t2``, ``t3``\
-               where: ``W1``, ``W2``\ = Width of the top and bottom
-               flanges ``W3``\ = Overall depth ``t1``, ``t2``\ = Flange
-               thicknesses ``t3``\ = Web thicknesses
-           * - Data to provide in the value fields:
-             - -
-           * - ``W1``, ``W2``, ``W3``, ``t1``, ``t2``, ``t3``\
-             - -
-           * - where:
-             - -
-           * - ``W1``, ``W2``\ = Lengths of the flanges
-             - -
-           * - ``W3``\ = Overall depth
-             - -
-           * - ``t1``, ``t2``\ = Flange thicknesses
-             - -
-           * - ``t3``\ = Web thicknesses
-             - -
-           * - Data to provide in the value fields:
-             - -
-           * - ``W1``, ``W2``, ``W3``, ``t1``, ``t2``, ``t3``\
-             - -
-           * - where:
-             - -
-           * - ``W1``, ``W2``\ = Width of the top and bottom flanges
-             - -
-           * - ``W3``\ = Overall depth
-             - -
-           * - ``t1``, ``t2``\ = Flange thicknesses
-             - -
-           * - ``t3``\ = Web thicknesses
-             - -
-           * - **Type: BEAM, Subtype: Z**\ Data to provide in the value
-               fields: ``W1``, ``W2``, ``W3``, ``t1``, ``t2``, ``t3``\
-               where: ``W1``, ``W2``\ = Flange lengths ``W3``\ = Overall
-               depth ``t1``, ``t2``\ = Flange thicknesses ``t3``\ = Stem
-               thicknesses
-             - **Type: BEAM, Subtype: L**\ Data to provide in the value
-               fields: ``W1``, ``W2``, ``t1``, ``t2``\ where: ``W1``,
-               ``W2``\ = Leg lengths ``t1``, ``t2``\ = Leg thicknesses If
-               ``W2``\ is a negative value, the section will be flipped.
-           * - Data to provide in the value fields:
-             - -
-           * - ``W1``, ``W2``, ``W3``, ``t1``, ``t2``, ``t3``\
-             - -
-           * - where:
-             - -
-           * - ``W1``, ``W2``\ = Flange lengths
-             - -
-           * - ``W3``\ = Overall depth
-             - -
-           * - ``t1``, ``t2``\ = Flange thicknesses
-             - -
-           * - ``t3``\ = Stem thicknesses
-             - -
-           * - Data to provide in the value fields:
-             - -
-           * - ``W1``, ``W2``, ``t1``, ``t2``\
-             - -
-           * - where:
-             - -
-           * - ``W1``, ``W2``\ = Leg lengths
-             - -
-           * - ``t1``, ``t2``\ = Leg thicknesses
-             - -
-           * - **Type: BEAM, Subtype: T**\ Data to provide in the value
-               fields: ``W1``, ``W2``, ``t1``, ``t2``\ where: ``W1``\ =
-               Flange width ``W2``\ = Overall depth ``t1``\ = Flange
-               thicknesses ``t2``\ = Stem thicknesses If ``W2``\ is a
-               negative value, the section will be flipped.
-             - **Type: BEAM, Subtype: HATS**\ Data to provide in the
-               value fields: ``W1``, ``W2``, ``W3``, ``W4``, ``t1``,
-               ``t2``, ``t3``, ``t4``, ``t5``\ where: ``W1``, ``W2``\ =
-               Width of the brim ``W3``\ = Width of the top of the hat
-               ``W4``\ = Overall depth ``t1``, ``t2``\ = Thickness of the
-               brim ``t3``\ = Thickness of the top of the hat ``t4``,
-               ``t5``\ = Web thicknesses
-           * - Data to provide in the value fields:
-             - -
-           * - ``W1``, ``W2``, ``t1``, ``t2``\
-             - -
-           * - where:
-             - -
-           * - ``W1``\ = Flange width
-             - -
-           * - ``W2``\ = Overall depth
-             - -
-           * - ``t1``\ = Flange thicknesses
-             - -
-           * - ``t2``\ = Stem thicknesses
-             - -
-           * - Data to provide in the value fields:
-             - -
-           * - ``W1``, ``W2``, ``W3``, ``W4``, ``t1``, ``t2``, ``t3``,
-               ``t4``, ``t5``\
-             - -
-           * - where:
-             - -
-           * - ``W1``, ``W2``\ = Width of the brim
-             - -
-           * - ``W3``\ = Width of the top of the hat
-             - -
-           * - ``W4``\ = Overall depth
-             - -
-           * - ``t1``, ``t2``\ = Thickness of the brim
-             - -
-           * - ``t3``\ = Thickness of the top of the hat
-             - -
-           * - ``t4``, ``t5``\ = Web thicknesses
-             - -
-           * - **Type: BEAM, Subtype: HREC**\ Data to provide in the
-               value fields: ``W1``, ``W2``, ``t1``, ``t2``, ``t3``,
-               ``t4``\ where: ``W1``\ = Outer width of the box ``W2``\ =
-               Outer height of the box ``t1``, ``t2``, ``t3``, ``t4``\ =
-               Wall thickness
-             - **Type: BEAM, Subtype: ASEC**\ Arbitrary: User-supplied
-               integrated section properties instead of basic geometry
-               data.Data to provide in the value fields: ``A``, ``Iyy``,
-               ``Iyz``, ``Izz``, ``Iw``, ``J``, ``CGy``, ``CGz``,
-               ``SHy``, ``SHz, TKz, TKy, TSxz, TSxy``\ where: ``A``\ =
-               Area of section ``Iyy``\ = Moment of inertia about the y
-               axis ``Iyz``\ = Product of inertia ``Izz``\ = Moment of
-               inertia about the z axis ``Iw``\ = Warping constant ``J``\
-               = Torsional constant ``CGy``\ = y coordinate of centroid
-               ``CGz``\ = z coordinate of centroid ``SHy``\ = y
-               coordinate of shear center ``SHz``\ = z coordinate of
-               shear center ``TKz``\ = Thickness along Z axis (maximum
-               height) ``TKy``\ = Thickness along Y axis (maximum width)
-               ``TSxz``\ = Shear-correction factor for component xz
-               ``TSxy``\ = Shear-correction factor for component xy
-               `SECPLOT
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECPLOT.html>`_\
-               cannot display an ASEC plot.
-           * - Data to provide in the value fields:
-             - -
-           * - ``W1``, ``W2``, ``t1``, ``t2``, ``t3``, ``t4``\
-             - -
-           * - where:
-             - -
-           * - ``W1``\ = Outer width of the box
-             - -
-           * - ``W2``\ = Outer height of the box
-             - -
-           * - ``t1``, ``t2``, ``t3``, ``t4``\ = Wall thickness
-             - -
-           * - Arbitrary: User-supplied integrated section properties
-               instead of basic geometry data.
-             - -
-           * - Data to provide in the value fields:
-             - -
-           * - ``A``, ``Iyy``, ``Iyz``, ``Izz``, ``Iw``, ``J``, ``CGy``,
-               ``CGz``, ``SHy``, ``SHz, TKz, TKy, TSxz, TSxy``\
-             - -
-           * - where:
-             - -
-           * - ``A``\ = Area of section
-             - -
-           * - ``Iyy``\ = Moment of inertia about the y axis
-             - -
-           * - ``Iyz``\ = Product of inertia
-             - -
-           * - ``Izz``\ = Moment of inertia about the z axis
-             - -
-           * - ``Iw``\ = Warping constant
-             - -
-           * - ``J``\ = Torsional constant
-             - -
-           * - ``CGy``\ = y coordinate of centroid
-             - -
-           * - ``CGz``\ = z coordinate of centroid
-             - -
-           * - ``SHy``\ = y coordinate of shear center
-             - -
-           * - ``SHz``\ = z coordinate of shear center
-             - -
-           * - ``TKz``\ = Thickness along Z axis (maximum height)
-             - -
-           * - ``TKy``\ = Thickness along Y axis (maximum width)
-             - -
-           * - ``TSxz``\ = Shear-correction factor for component xz
-             - -
-           * - ``TSxy``\ = Shear-correction factor for component xy
-             - -
-           * - **Type: BEAM, Subtype: MESH**\ User-defined mesh.Data
-               required is created by the `SECWRITE
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECWRITE.html>`_\
-               command and is read in by the `SECREAD
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECREAD.html>`_\
-               command. When a user mesh is input via `SECREAD
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECREAD.html>`_,
-               the program calculates the area, second moments of
-               inertia, centroid, torsion constant, warping rigidity, and
-               shear center.If you redefine a material for a composite
-               cross-section after creating the section, reissue the
-               `SECREAD
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECREAD.html>`_\
-               command.
-             - -
-           * - User-defined mesh.
-             - -
-           * - Data required is created by the `SECWRITE
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECWRITE.html>`_\
-               command and is read in by the `SECREAD
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECREAD.html>`_\
-               command.
-             - -
-           * - When a user mesh is input via `SECREAD
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECREAD.html>`_,
-               the program calculates the area, second moments of
-               inertia, centroid, torsion constant, warping rigidity, and
-               shear center.
-             - -
-           * - If you redefine a material for a composite cross-section
-               after creating the section, reissue the `SECREAD
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECREAD.html>`_\
-               command.
-             - -
+        .. _SECDATA_contact:
 
-        **CONTACT**
+        Type: CONTACT
+        ^^^^^^^^^^^^^
 
-        **Type: CONTACT**
+        Geometry Correction Contact sections for geometry correction ( ``Subtype`` = CIRCLE, SPHERE, or
+        CYLINDER) are referenced
+        by the following elements: ``TARGE169``, ``TARGE170``, ``CONTA172``, and ``CONTA174``. This geometry
+        correction applies to cases where the original meshes of contact elements or target elements are
+        located on a portion of a circular, spherical, or revolute surface.
 
-        **Geometry Correction --**\ Contact sections for geometry correction
-        (``Subtype``\ = CIRCLE, SPHERE, or CYLINDER) are referenced by the
-        following elements: `TARGE169
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE169.html>`_,
-        `TARGE170
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_,
-        `CONTA172
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA172.html>`_,
-        and `CONTA174
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_.
-        This geometry correction applies to cases where the original meshes of
-        contact elements or target elements are located on a portion of a
-        circular, spherical, or revolute surface.
+        **Type: CONTACT, Subtype: CIRCLE**
 
-        **Type: CONTACT, Subtype: CIRCLE**\
+        * Data to provide in the value fields for ``Subtype`` = CIRCLE:
+        * ``X0``, ``Y0`` (circle center location in Global Cartesian coordinates - XY plane)
 
-        * Data to provide in the value fields for ``Subtype``\ = CIRCLE:
+        **Type: CONTACT, Subtype: SPHERE**
 
-        * ``X0``, ``Y0``\ (circle center location in Global Cartesian
-          coordinates - XY plane)
+        * Data to provide in the value fields for ``Subtype`` = SPHERE:
+        * ``X0``, ``Y0``, ``Z0`` (sphere center location in Global Cartesian coordinates)
 
-        **Type: CONTACT, Subtype: SPHERE**\
+        **Type: CONTACT, Subtype: CYLINDER**
 
-        * Data to provide in the value fields for ``Subtype``\ = SPHERE:
-
-        * ``X0``, ``Y0``, ``Z0``\ (sphere center location in Global Cartesian
+        * Data to provide in the value fields for ``Subtype`` = CYLINDER:
+        * ``X1``, ``Y1``, ``Z1``, ``X2``, ``Y2``, ``Z2`` (two ends of cylindrical axis in Global Cartesian
           coordinates)
 
-        **Type: CONTACT, Subtype: CYLINDER**\
+        User-Defined Contact Surface Normal The contact section for a user-defined contact surface normal (
+        ``Subtype`` = NORMAL) is referenced
+        by the following elements: ``CONTA172``, ``CONTA174``, and ``CONTA175``. This geometry correction is
+        used to define a `shift direction for interference fit
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/ctecgeomcor.html#>`_ solutions.
 
-        * Data to provide in the value fields for ``Subtype``\ = CYLINDER:
+        **Type: CONTACT, Subtype: NORMAL**
 
-        * ``X1``, ``Y1``, ``Z1``, ``X2``, ``Y2``, ``Z2``\ (two ends of
-          cylindrical axis in Global Cartesian coordinates)
-
-        **User-Defined Contact Surface Normal --**\ The contact section for a
-        user-defined contact surface normal (``Subtype``\ = NORMAL) is
-        referenced by the following elements: `CONTA172
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA172.html>`_,
-        `CONTA174
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_,
-        and `CONTA175
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA175.html>`_.
-        This geometry correction is used to define a `shift direction for
-        interference fit
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/ctecgeomcor.html#ctec_usernormal>`_
-        solutions.
-
-        **Type: CONTACT, Subtype: NORMAL**\
-
-        * Data to provide in the value fields for ``Subtype``\ = NORMAL:
-
-        * ``CSYS``, ``NX``, ``NY``, ``NZ``\
-
+        * Data to provide in the value fields for ``Subtype`` = NORMAL:
+        * ``CSYS``, ``NX``, ``NY``, ``NZ``
         * where:
+        * ``CSYS`` = Local coordinate system number (defaults to global Cartesian).
+        * ``NX``, ``NY``, ``NZ`` = Direction cosines with respect to ``CSYS.``
 
-        * ``CSYS``\ = Local coordinate system number (defaults to global
-          Cartesian).
+        Radius values associated with contact or target elements The radius contact section ( ``Subtype`` =
+        RADIUS) is referenced by contact or target elements in a general contact definition under the
+        following circumstances:
 
-        * ``NX``, ``NY``, ``NZ``\ = Direction cosines with respect to ``CSYS.``\
+        * **Equivalent 3D contact radius for beam-to-beam contact** - The contact section for a user-defined
+          equivalent contact radius ( ``Subtype`` = RADIUS) is referenced by the element type ``CONTA177``
+          within a general contact definition. 3D beam-to-beam contact (or edge-to-edge contact) modeled by
+          this line contact element assumes that its surface is a cylindrical surface.
 
-        **Radius values associated with contact or target elements --**\ The
-        radius contact section (``Subtype``\ = RADIUS) is referenced by contact
-        or target elements in a general contact definition under the following
-        circumstances:
+        * **Radius (or radii) of rigid target segments** - The contact section for rigid target segment
+          radii is referenced by target elements ``TARGE169`` (circle segment type) and ``TARGE170`` (line,
+          parabola, cylinder, sphere, or cone segment type) in a general contact definition.
 
-        * **Equivalent 3D contact radius for beam-to-beam contact**\ - The
-          contact section for a user-defined equivalent contact radius
-          (``Subtype``\ = RADIUS) is referenced by the element type `CONTA177
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA177.html>`_
-          within a general contact definition. 3D beam-to-beam contact (or
-          edge-to-edge contact) modeled by this line contact element assumes
-          that its surface is a cylindrical surface.
+        **Type: CONTACT, Subtype: RADIUS**
 
-        * **Radius (or radii) of rigid target segments**\ - The contact section
-          for rigid target segment radii is referenced by target elements
-          `TARGE169
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE169.html>`_
-          (circle segment type) and `TARGE170
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_
-          (line, parabola, cylinder, sphere, or cone segment type) in a general
-          contact definition.
+        * Data to provide in the value fields for ``Subtype`` = RADIUS if the section is used as an
+          equivalent contact radius for 3D beam-to-beam contact:
+        * ``VAL1`` = Equivalent radius - outer radius
+        * ``VAL2`` = Equivalent radius - inner radius (internal beam-to-beam contact)
+        * ``VAL3`` : Set to 1 for internal beam-to-beam contact. Defaults to external beam-to-beam contact.
 
-        **Type: CONTACT, Subtype: RADIUS**\
+        * Data to provide in the value fields for ``Subtype`` = RADIUS if the section is used for 2D or 3D
+          rigid target segments:
+        * ``VAL1`` = First radius of the target segment (used for circle, line, parabola, cylinder, sphere,
+          and cone segment types)
+        * ``VAL2`` = Second radius of the target segment (used only for the cone segment type)
 
-        * Data to provide in the value fields for ``Subtype``\ = RADIUS if the
-          section is used as an equivalent contact radius for 3D beam-to-beam
-          contact:
+        Simplified Bolt Thread Modeling The contact section for bolt-thread modeling ( ``Subtype`` = BOLT)
+        is referenced by the following
+        elements: ``CONTA172``, ``CONTA174``, and ``CONTA175``. It applies to cases where the original
+        meshes of contact elements are located on a portion of a bolt-thread surface. This feature allows
+        you to include the behavior of bolt threads without having to add the geometric detail of the
+        threads. Calculations are performed internally to approximate the behavior of the bolt-thread
+        connections.
 
-        * ``VAL1``\ = Equivalent radius - outer radius
+        **Type: CONTACT, Subtype: BOLT**
 
-        * ``VAL2``\ = Equivalent radius - inner radius (internal beam-to-beam
-          contact)
-
-        * ``VAL3``: Set to 1 for internal beam-to-beam contact. Defaults to
-          external beam-to-beam contact.
-
-        * Data to provide in the value fields for ``Subtype``\ = RADIUS if the
-          section is used for 2D or 3D rigid target segments:
-
-        * ``VAL1``\ = First radius of the target segment (used for circle, line,
-          parabola, cylinder, sphere, and cone segment types)
-
-        * ``VAL2``\ = Second radius of the target segment (used only for the
-          cone segment type)
-
-        **Simplified Bolt Thread Modeling --**\ The contact section for
-        bolt-thread modeling (``Subtype``\ = BOLT) is referenced by the
-        following elements: `CONTA172
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA172.html>`_,
-        `CONTA174
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_,
-        and `CONTA175
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA175.html>`_.
-        It applies to cases where the original meshes of contact elements are
-        located on a portion of a bolt-thread surface. This feature allows you
-        to include the behavior of bolt threads without having to add the
-        geometric detail of the threads. Calculations are performed internally
-        to approximate the behavior of the bolt-thread connections.
-
-        **Type: CONTACT, Subtype: BOLT**\
-
-        * Data to provide in the value fields for ``Subtype``\ = BOLT:
-
-        * ``Dm``, ``P``, ``ALPHA``, ``N``, ``X1``, ``Y1``, ``Z1``, ``X2``,
-          ``Y2``, ``Z2``\
-
+        * Data to provide in the value fields for ``Subtype`` = BOLT:
+        * ``D`` m, ``P``, ``ALPHA``, ``N``, ``X1``, ``Y1``, ``Z1``, ``X2``, ``Y2``, ``Z2``
         * where:
+        * ``D`` m = Pitch diameter, d :sub:`m`.
+        * ``P`` = Pitch distance, p.
+        * ``ALPHA`` = Half-thread angle, α (defaults to 30 degrees).
+        * ``N`` = Number of starts (defaults to 1).
+        * ``X1``, ``Y1``, ``Z1``, ``X2``, ``Y2``, ``Z2`` = Two end points of the bolt axis in global
+          Cartesian coordinates.
 
-        * ``Dm``\ = Pitch diameter, d:sub:`m`.
+        .. _SECDATA_axisy:
 
-        * ``P``\ = Pitch distance, p.
+        Type: AXIS
+        ^^^^^^^^^^
 
-        * ``ALPHA``\ = Half-thread angle, α (defaults to 30 degrees).
-
-        * ``N``\ = Number of starts (defaults to 1).
-
-        * ``X1``, ``Y1``, ``Z1``, ``X2``, ``Y2``, ``Z2``\ = Two end points of
-          the bolt axis in global Cartesian coordinates.
-
-        **General Axisymmetric**
-
-        **Type: AXIS**
-
-        General axisymmetric sections are referenced by the `SURF159
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SURF159.html>`_,
-        `SOLID272
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID272.html>`_,
-        and `SOLID273
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID273.html>`_
+        General axisymmetric sections are referenced by the ``SURF159``, ``SOLID272``, and ``SOLID273``
         elements. Use this command to locate the axisymmetric axis.
 
         * Data to provide in the value fields:
+        * **Pattern 1 (two points):**
+        * 1, ``X1``, ``Y1``, ``Z1``, ``X2``, ``Y2``, ``Z2``
+        * where ``X1``, ``Y1``, ``Z1``, ``X2``, ``Y2``, ``Z2`` are global Cartesian coordinates.
+        * **Pattern 2 (coordinate system number plus axis [1 = x, 2 = y, 3 = z] ):**
+        * 2, ``csys``, ``axis``
+        * where ``csys`` is a Cartesian coordinate system.
+        * **Pattern 3 (origin plus direction):**
+        * 3, ``XO``, ``YO``, ``ZO``, ``xdir``, ``ydir``, ``zdir``
+        * where ``XO``, ``YO``, ``ZO``  ``are global Cartesian coordinates and xdir``, ``ydir``, and
+          ``zdir`` are direction cosines.
 
-        * **Pattern 1 (two points):**\
+        .. _SECDATA_joints:
 
-        * 1, ``X1``, ``Y1``, ``Z1``, ``X2``, ``Y2``, ``Z2``\
+        Type: JOINT
+        ^^^^^^^^^^^
 
-        * where ``X1``, ``Y1``, ``Z1``, ``X2``, ``Y2``, ``Z2``\ are global
-          Cartesian coordinates.
-
-        * **Pattern 2 (coordinate system number plus axis [1 = x, 2 = y, 3 =
-          z]):**\
-
-        * 2, ``csys``, ``axis``\
-
-        * where ``csys``\ is a Cartesian coordinate system.
-
-        * **Pattern 3 (origin plus direction):**\
-
-        * 3, ``XO``, ``YO``, ``ZO``, ``xdir``, ``ydir``, ``zdir``\
-
-        * where ``XO``, ``YO``, ``ZO``\ ``are global Cartesian coordinates and
-          xdir``, ``ydir``, and ``zdir``\ are direction cosines.
-
-        **Joints**
-
-        **Type: JOINT**
-
-        Joint sections are referenced by `MPC184
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184.html>`_
-        joint elements.
+        Joint sections are referenced by ``MPC184`` joint elements.
 
         * Data to provide in the value fields:
-
-        * ``length1``, ``length2``, ``length3``, ``angle1``, ``angle2``,
-          ``angle3``\
-
+        * ``length1``, ``length2``, ``length3``, ``angle1``, ``angle2``, ``angle3``
         * where:
+        * ``length1-3`` = Reference lengths used in the constitutive calculations.
+        * ``angle1-3`` = Reference angles used in the constitutive calculations.
 
-        * ``length1-3``\ = Reference lengths used in the constitutive
-          calculations.
+        The following table shows the lengths and angles to be specified for different kinds of joints.
 
-        * ``angle1-3``\ = Reference angles used in the constitutive
-          calculations.
+        This command contains some tables and extra information which can be inspected in the original
+        documentation pointed above.
 
-        The following table shows the lengths and angles to be specified for
-        different kinds of joints.
+        The reference length and angle specifications correspond to the free relative degrees of freedom in
+        a joint element for which constitutive calculations are performed. These values are used when
+        stiffness and/or damping are specified for the joint elements.
 
-        .. list-table::
-           :header-rows: 1
+        If the reference lengths and angles are not specified, they are calculated from the default or
+        starting configuration for the element.
 
-           * - Joint
-             - Subtype
-             - Reference lengths and angles
-           * - `Revolute
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184revo.html>`_
-             - REVO
-             - angle1 for x-axis revolute joint angle3 for z-axis
-               revolute joint
-           * - `Universal
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184univ.html>`_
-             - UNIV
-             - angle1 and angle3
-           * - `Slot
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184slot.html>`_
-             - SLOT
-             - length1
-           * - `Point-in-plane
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184poin.html>`_
-             - PINP
-             - length2 and length3,
-           * - `Revolute
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184revo.html>`_
-               `Translational
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184tran.html>`_
-             - PRIS
-             - length1
-           * - `Cylindrical
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184cyl.html>`_
-             - CYLI
-             - length1 and angle1 for x-axis cylindrical joint length3
-               and angle3 for z-axis cylindrical joint
-           * - `Planar
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184plan.html>`_
-             - PLAN
-             - length2, length3, and angle1 for x-axis planar joint
-               length1, length2, and angle3 for z-axis planar joint
-           * - `Weld
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184weld.html>`_
-             - WELD
-             - (not used)
-           * - `Orient
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184orie.html>`_
-             - ORIE
-             - (not used)
-           * - `Spherical
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184sphe.html>`_
-             - SPHE
-             - angle1, angle2, and angle3 (not used in friction
-               calculations)
-           * - `General
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184gen.html>`_
-             - GENE
-             - length1, length2, length3, angle1, angle2, angle3 --
-               `Depends upon which "unconstrained" relative degrees of
-               freedom are available
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_mul/Hlp_G_MULMODCOMPJT.html>`_.
-           * - `Screw
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184scr.html>`_
-             - SCRE
-             - length3 and angle3
-           * - `Spotweld
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184spwd.html>`_
-             - SPWE
-             - (not used)
-           * - `Genb
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184genb.html>`_
-             - GENB
-             - length1, length2, length3, angle1, angle2, angle3 --
-               `Depends upon which "unconstrained" relative degrees of
-               freedom are available
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_mul/Hlp_G_MULMODCOMPJT.html>`_.
+        See ``MPC184`` or the individual joint element descriptions for more information on joint element
+        constitutive calculations.
 
-        The reference length and angle specifications correspond to the free
-        relative degrees of freedom in a joint element for which constitutive
-        calculations are performed. These values are used when stiffness and/or
-        damping are specified for the joint elements.
+        .. _SECDATA_links:
 
-        If the reference lengths and angles are not specified, they are
-        calculated from the default or starting configuration for the element.
+        Type: LINK
+        ^^^^^^^^^^
 
-        See `MPC184
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MPC184.html>`_
-        or the individual joint element descriptions for more information on
-        joint element constitutive calculations.
-
-        **Links**
-
-        **Type: LINK**
-
-        Link sections are referenced by the `LINK33
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_LINK33.html>`_,
-        `LINK180
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_LINK180.html>`_,
-        `LINK228
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_LINK228.html>`_,
-        and `CABLE280
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CABLE280.html>`_
-        elements.
+        Link sections are referenced by the ``LINK33``, ``LINK180`` and ``CABLE280`` elements.
 
         * Data to provide in the value fields:
+        * ``VAL1`` = Area
 
-        * ``VAL1``\ = Area
+        .. _SECDATA_pipes:
 
-        **Pipes**
+        Type: PIPE
+        ^^^^^^^^^^
 
-        **Type: PIPE**
-
-        Pipe sections are referenced by the `PIPE288
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PIPE288.html>`_,
-        `PIPE289
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PIPE289.html>`_,
-        and `ELBOW290
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ELBOW290.html>`_
-        elements.
+        Pipe sections are referenced by the ``PIPE288``, ``PIPE289``, and ``ELBOW290`` elements.
 
         * Data to provide in the value fields:
-
-        * ``D``\ :sub:`o`, ``T``\ :sub:`w`, ``N``\ :sub:`c`, ``S``\ :sub:`s`,
-          ``N``\ :sub:`t`, ``M``\ :sub:`int`, ``M``\ :sub:`ins`, ``T``\
-          :sub:`ins`\
-
+        * ``D``  :sub:`o`, ``T``  :sub:`w`, ``N``  :sub:`c`, ``S``  :sub:`s`, ``N``  :sub:`t`, ``M``
+          :sub:`int`, ``M``  :sub:`ins`, ``T``  :sub:`ins`
         * where:
-
-        * ``D``\ :sub:`o`\ = Outside diameter of pipe. Use a constant value for
-          a circular pipe and an array for a noncircular pipe. (Noncircular pipe
-          sections are referenced by the `ELBOW290
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ELBOW290.html>`_
-          element only. See `Defining a Noncircular Pipe
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR15_4.html#strnoncircpipedef>`_
-          in the `*Structural Analysis Guide*\
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_StrTOC.html>`_.)
-
-        * ``T``\ :sub:`w`\ = Wall thickness. Default = ``Do``\ / 2, or “solid”
-          pipe. ("Solid" pipe is not applicable to `ELBOW290
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ELBOW290.html>`_;
-          for that element, a thickness less than ``Do``\ / 4 is recommended.)
-
-        * ``N``\ :sub:`c`\ = Number of cells around the circumference (8 (see
-          command documentation for equation) ``N``\ :sub:`c`\ (see command
-          documentation for equation) 120, where a greater value improves
-          accuracy slightly; default = 8).
-
-        * ``S``\ :sub:`s`\ = Section number of the shell representing the pipe
-          wall. Valid with `ELBOW290
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ELBOW290.html>`_
-          only. (Total thickness of the section is scaled to ``T``\ :sub:`w`.
-          The program considers the innermost layer inside of the pipe to be the
-          first layer.)
-
-        * ``N``\ :sub:`t`\ = Number of cells through the pipe wall. Valid values
-          are 1 (default), 3, 5, 7, and 9. Cells are graded such that they are
-          thinner on the inner and outer surfaces. Valid with `PIPE288
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PIPE288.html>`_
-          and `PIPE289
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PIPE289.html>`_
-          only.
-
-        * ``M``\ :sub:`int`\ = Material number of fluid inside of the pipe. The
-          default value is 0 (no fluid). This value is used to input the density
-          of the internal fluid. The fluid inside the pipe element is ignored
-          unless the free surface in a global X-Y plane is added as face 3 (`SFE
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SFE.html>`_)
+        * ``D``  :sub:`o` = Outside diameter of pipe. Use a constant value for a circular pipe and an array
+          for a noncircular pipe. (Noncircular pipe sections are referenced by the ``ELBOW290`` element
+          only. See `Defining a Noncircular Pipe
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_STR15_4.html#eq250dbbf7-3095-46cc-b4f3-1beb47c75a9c>`_
+        * ``T``  :sub:`w` = Wall thickness. Default = ``D`` o / 2, or “solid” pipe. ("Solid" pipe is not
+          applicable to ``ELBOW290`` ; for that element, a thickness less than ``D`` o / 4 is recommended.)
+        * ``N``  :sub:`c` = Number of cells around the circumference (8 :math:`equation not available`
+          ``N``  :sub:`c`  :math:`equation not available`  120, where a greater value improves accuracy
+          slightly; default =      8).
+        * ``S``  :sub:`s` = Section number of the shell representing the pipe wall. Valid with ``ELBOW290``
+          only. (Total thickness of the section is scaled to ``T``  :sub:`w`. The program considers the
+          innermost layer inside of the pipe to be the first layer.)
+        * ``N``  :sub:`t` = Number of cells through the pipe wall. Valid values are 1 (default), 3, 5, 7,
+          and 9. Cells are graded such that they are thinner on the inner and outer surfaces. Valid with
+          ``PIPE288`` and ``PIPE289`` only.
+        * ``M``  :sub:`int` = Material number of fluid inside of the pipe. The default value is 0 (no
+          fluid). This value is used to input the density of the internal fluid. The fluid inside the pipe
+          element is ignored unless the free surface in a global X-Y plane is added as face 3 ( :ref:`sfe` )
           and is high enough to include at least one end node of the element.
+        * ``M``  :sub:`ins` = Material number of material external to the pipe (such as insulation or
+          armoring). The default value is 0 (no external material). This value is used to input the density
+          of the external material. (External material adds mass and increases hydraulic diameter, but does
+          not add to stiffness.)
+        * ``T``  :sub:`ins` = Thickness of material external to the pipe, such as insulation. The default
+          value is 0 (no external material).
 
-        * ``M``\ :sub:`ins`\ = Material number of material external to the pipe
-          (such as insulation or armoring). The default value is 0 (no external
-          material). This value is used to input the density of the external
-          material. (External material adds mass and increases hydraulic
-          diameter, but does not add to stiffness.)
+        The accuracy of the ovalization value (OVAL) output by ``ELBOW290`` ( `Structural Elbow
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_ELBOW290.html#elem290coordsys>`_
+        form only) improves as the specified number of cells around the circumference ( ``N`` :sub:`c` ) is
+        increased.
 
-        * ``T``\ :sub:`ins`\ = Thickness of material external to the pipe, such
-          as insulation. The default value is 0 (no external material).
+        External material ( ``M`` :sub:`ins` ) adds mass and increases hydraulic diameter, but does not add
+        to stiffness.
 
-        The accuracy of the ovalization value (OVAL) output by `ELBOW290
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ELBOW290.html>`_
-        (`Structural Elbow
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ELBOW290.html#elbow290a_elemdescr>`_
-        form only) improves as the specified number of cells around the
-        circumference (``N``:sub:`c`) is increased.
+        .. figure:: ../../../images/_commands/gSECD_pipe.svg
 
-        External material (``M``:sub:`ins`) adds mass and increases hydraulic
-        diameter, but does not add to stiffness.
+        .. _SECDATA_pretension:
 
-        **Pretension**
+        Type: PRETENSION
+        ^^^^^^^^^^^^^^^^
 
-        **Type: PRETENSION**
-
-        Pretension sections are referenced by the `PRETS179
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PRETS179.html>`_
-        element.
+        Pretension sections are referenced by the ``PRETS179`` element.
 
         * Data to provide in the value fields:
-
-        * ``node``, ``nx``, ``ny``, ``nz``\
-
+        * ``node``, ``nx``, ``ny``, ``nz``
         * where:
-
-        * ``node``\ = Pretension node number.
-
-        * ``nx``\ = Orientation in global Cartesian x direction.
-
-        * ``ny``\ = Orientation in global Cartesian y direction.
-
-        * ``nz``\ = Orientation in global Cartesian z direction.
+        * ``node`` = Pretension node number.
+        * ``nx`` = Orientation in global Cartesian x direction.
+        * ``ny`` = Orientation in global Cartesian y direction.
+        * ``nz`` = Orientation in global Cartesian z direction.
 
         The following usage is typical:
 
         * SECTYPE, 1, PRETENSION
-
         * SECDATA, 13184, 0.000, 0.000, 1.000
-
         * SECMODIF, 1, NAME, example
-
         * SLOAD, 1, PL01, TINY, FORC, 100.00, 1, 2
 
-        The ``PRETENSION``\ section options of `SECTYPE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECTYPE.html>`_\
-        and `SECDATA
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html>`_\
-        are documented mainly to aid in the understanding of data written by
-        `CDWRITE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_.
-        Ansys, Inc. recommends that you generate pretension sections using
-        `PSMESH
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PSMESH.html>`_.
+        The ``PRETENSION`` section options of :ref:`sectype` and :ref:`secdata` are documented mainly to aid
+        in the understanding of data written by :ref:`cdwrite`. Ansys, Inc. recommends that you
+        generate pretension sections using :ref:`psmesh`.
 
-        **Reinforcing**
+        .. _SECDATA_reinforcement:
 
-        **Type: REINF**
+        Type: REINF
+        ^^^^^^^^^^^
 
-        Each `SECDATA
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html>`_\
-        command defines the material, geometry, and orientation (if Subtype =
-        SMEAR) of one reinforcing member (discrete fiber or smeared surface) in
-        the section. The reinforcing section can be referenced by reinforcing
-        elements (`REINF263
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF263.html>`_,
-        `REINF264
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF264.html>`_,
-        and `REINF265
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF265.html>`_),
-        or `MESH200
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-        elements when used for temporarily representing reinforcing members.
-        Only one `SECDATA
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html>`_\
-        command is allowed per section when referenced by `MESH200
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-        elements. For more information, see `Reinforcing and Direct Element
-        Embedding in the Advanced Analysis Guide
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_adv/Hlp_G_ADVREINF.html>`_.
+        Each :ref:`secdata` command defines the material, geometry, and orientation (if Subtype = SMEAR) of
+        one reinforcing member (discrete fiber or smeared surface) in the section. The reinforcing section
+        can be referenced by reinforcing elements ( ``REINF263``, ``REINF264``, and ``REINF265`` ), or
+        ``MESH200`` elements when used for temporarily representing reinforcing members. Only one
+        :ref:`secdata` command is allowed per section when referenced by ``MESH200`` elements. For more
+        information, see `Element Embedding
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/str_compreinfdirectemb.html>`_
 
         - - - - - - - - - - - - - - - - - - - - -
 
-        **Type: REINF, Subtype: DISCRETE**\
+        **Type: REINF, Subtype: DISCRETE**
 
-        Defines discrete reinforcing fibers with arbitrary orientations. For the
-        MESH input pattern, reinforcing section data is referenced by `MESH200
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-        elements. For other patterns, issue separate `SECDATA
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html>`_\
-        commands to define each reinforcing fiber.
+        Defines discrete reinforcing fibers with arbitrary orientations. For the MESH input pattern,
+        reinforcing section data is referenced by ``MESH200`` elements. For other patterns, issue separate
+        :ref:`secdata` commands to define each reinforcing fiber.
 
         * Data to provide in the value fields:
+        * ``MAT, A, PATT, V1, V2, V3, V4, V5``
+        * ``MAT`` = Material ID for the fiber. (See ``REINF264`` for valid material models.) When the
+          reinforcing section is referenced by a ``MESH200`` element, the default is the ``MESH200`` element
+          material ID ( :ref:`mat` ). When the section is referenced by reinforcing elements, the material
+          ID is required for all fibers, and no default for this value is available.
+        * ``A`` = Cross-section area of the reinforcing fiber.
+        * ``PATT`` = Input pattern code (described below) indicating how the location of this fiber is
+          defined. Available input patterns are MESH (when the section is referenced by a ``MESH200``
+          element), and LAYN, EDGO, and BEAM (when the section is referenced by a reinforcing element).
+        * ``V1, V2, V3, V4, V5`` = Values to define the location of the reinforcing fiber (depending on the
+          ``PATT`` pattern code used), as shown:
 
-        * ``MAT, A, PATT, V1, V2, V3, V4, V5``\
+        **PATT: MESH**
 
-        * ``MAT``\ = Material ID for the fiber. (See `REINF264
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF264.html>`_
-          for valid material models.) When the reinforcing section is referenced
-          by a `MESH200
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-          element, the default is the `MESH200
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-          element material ID (`MAT
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MAT.html>`_).
-          When the section is referenced by reinforcing elements, the material
-          ID is required for all fibers, and no default for this value is
-          available.
+        **Description:** The locations of reinforcing fibers are defined directly via ``MESH200`` element
+        connectivity.
 
-        * ``A``\ = Cross-section area of the reinforcing fiber.
+        **Required input:**None.
 
-        * ``PATT``\ = Input pattern code (described below) indicating how the
-          location of this fiber is defined. Available input patterns are MESH
-          (when the section is referenced by a `MESH200
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-          element), and LAYN, EDGO, and BEAM (when the section is referenced by
-          a reinforcing element).
+        **PATT: LAYN**
 
-        * ``V1, V2, V3, V4, V5``\ = Values to define the location of the
-          reinforcing fiber (depending on the ``PATT``\ pattern code used), as
-          shown:
-
-        ``PATT``: MESH
-
-        **Description:**\ The locations of reinforcing fibers are defined
-        directly via `MESH200
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-        element connectivity.
-
-        **Required input:**\ None.
-
-        ``PATT``: LAYN
-
-        **Description:**\ The discrete reinforcing fiber is placed in the middle
-        of a layer in a layered base element. The orientation of the fiber
-        within the layer is adjustable via offsets with respect to a specified
+        **Description:** The discrete reinforcing fiber is placed in the middle of a layer in a layered base
+        element. The
+        orientation of the fiber within the layer is adjustable via offsets with respect to a specified
         element edge.
 
-        **Required input:**\
+        **Required input:**
 
-        * ``V1``\ (or ``N``) -- The number of the layer in the base element on
-          which to apply the reinforcing fiber. The default value is 1.
-
-        * ``V2``\ (or ``e``) -- The number to indicate the element edge to which
-          the offsets are measured. The default value is 1.
-
-        * ``V3``\ and ``V4``\ (or ``Y1``\ and ``Y2``) -- The normalized
-          distances from the fiber to the two ends of the specified element
-          edge. Valid values for ``Y1``\ and ``Y2``\ are 0.0 through 1.0. The
-          default value of ``Y1``\ is 0.5. The default value of ``Y2``\ is
-          ``Y1``.
+        * ``V1`` (or ``N`` ) -- The number of the layer in the base element on which to apply the
+          reinforcing fiber. The default value is 1.
+        * ``V2`` (or ``e`` ) -- The number to indicate the element edge to which the offsets are measured.
+          The default value is 1.
+        * ``V3`` and ``V4`` (or ``Y1`` and ``Y2`` ) -- The normalized distances from the fiber to the two
+          ends of the specified element edge. Valid values for ``Y1`` and ``Y2`` are 0.0 through 1.0. The
+          default value of ``Y1`` is 0.5. The default value of ``Y2`` is ``Y1``.
 
         When applied to 8-node or 20-node layered solid elements:
 
+        .. figure:: ../../../images/_commands/gSECD18.svg
+
+        .. figure:: ../../../images/_commands/gSECD19.svg
+
         When applied to 4-node or 8-node layered shell elements:
 
-        ``PATT``: EDGO
+        .. figure:: ../../../images/_commands/gSECD20.svg
 
-        **Description:**\ The orientation of the discrete reinforcing fiber is
-        similar to one of the specified element edges. The fiber orientation can
-        be further adjusted via offsets with respect to the specified element
+        .. figure:: ../../../images/_commands/gSECD21.svg
+
+        **PATT: EDGO**
+
+        **Description:** The orientation of the discrete reinforcing fiber is similar to one of the
+        specified element edges.
+        The fiber orientation can be further adjusted via offsets with respect to the specified element
         edge.
 
-        **Required input:**\
+        **Required input:**
 
-        * ``V1``\ (or ``O``) -- The number to indicate the element edge to which
-          the offsets are measured. The default value is 1.
+        * ``V1`` (or ``O`` ) -- The number to indicate the element edge to which the offsets are measured.
+          The default value is 1.
+        * ``V2`` and ``V3`` (or ``Y1`` and ``Z1`` ) -- The normalized distances from the fiber to the first
+          end of the specified element edge. Valid values for ``Y1`` and ``Z1`` are 0.0 through 1.0. The
+          default value for ``Y1`` and ``Z1`` is 0.5.
+        * ``V4`` and ``V5`` (or ``Y2`` and ``Z2`` ) - The normalized distances from the fiber to the second
+          end of the specified element edge. Value values for ``Y2`` and ``Z2`` are 0.0 through 1.0. The
+          default value for ``Y2`` is ``Y1``, and the default value for ``Z2`` is ``Z1``.
 
-        * ``V2``\ and ``V3``\ (or ``Y1``\ and ``Z1``) -- The normalized
-          distances from the fiber to the first end of the specified element
-          edge. Valid values for ``Y1``\ and ``Z1``\ are 0.0 through 1.0. The
-          default value for ``Y1``\ and ``Z1``\ is 0.5.
-
-        * ``V4``\ and ``V5``\ (or ``Y2``\ and ``Z2``) - The normalized distances
-          from the fiber to the second end of the specified element edge. Value
-          values for ``Y2``\ and ``Z2``\ are 0.0 through 1.0. The default value
-          for ``Y2``\ is ``Y1``, and the default value for ``Z2``\ is ``Z1``.
-
-        If the base element is a beam or link, the program ignores values
-        ``V2``\ through ``V5``\ and instead places the reinforcing in the center
-        of the beam or link.
+        If the base element is a beam or link, the program ignores values ``V2`` through ``V5`` and instead
+        places the reinforcing in the center of the beam or link.
 
         When applied to 8-node or 20-node solid elements:
 
+        .. figure:: ../../../images/_commands/gSECD22.svg
+
+        .. figure:: ../../../images/_commands/gSECD22b.svg
+
+        .. figure:: ../../../images/_commands/gSECD22c.svg
+
         When applied to tetrahedral elements:
 
+          This command contains some tables and extra information which can be inspected in the original
+        documentation pointed above.
+
         When applied to 3D shell elements:
+
+        .. figure:: ../../../images/_commands/gSECD28.svg
+
+        .. figure:: ../../../images/_commands/gSECD29.svg
 
         When applied to beam or link elements:
 
-        ``PATT``: BEAM
+        .. figure:: ../../../images/_commands/gSECD30.svg
 
-        **Description:**\ Use this specialized input pattern for defining
-        reinforcing in regular constant and tapered beams.
+        **PATT: BEAM**
 
-        **Required input:**\
+        **Description:** Use this specialized input pattern for defining reinforcing in regular constant and
+        tapered beams.
 
-        * ``V1``\ and ``V2``\ (or ``Y1``\ and ``Z1``) -- Y and Z offsets with
-          respect to the section origin in the first beam section referenced by
-          the base beam element. The default value for Y1 and Z1 is 0.0.
+        **Required input:**
 
-        * ``V3``\ and ``V4``\ (or ``Y2``\ and ``Z2``) -- Y and Z offsets with
-          respect to the section origin in the second beam section referenced by
-          the base beam element. The default value for ``Y2``\ is ``Y1``, and
-          the default value for ``Z2``\ is ``Z1``. (Because ``V3``\ and ``V4``\
-          values apply only to tapered beams, the program ignores them if the
-          base beam has a constant section.)
+        * ``V1`` and ``V2`` (or ``Y1`` and ``Z1`` ) -- Y and Z offsets with respect to the section origin in
+          the first beam section referenced by the base beam element. The default value for Y1 and Z1 is
+          0.0.
+        * ``V3`` and ``V4`` (or ``Y2`` and ``Z2`` ) -- Y and Z offsets with respect to the section origin in
+          the second beam section referenced by the base beam element. The default value for ``Y2`` is
+          ``Y1``, and the default value for ``Z2`` is ``Z1``. (Because ``V3`` and ``V4`` values apply only
+          to tapered beams, the program ignores them if the base beam has a constant section.)
+
+        .. figure:: ../../../images/_commands/gSECD31.svg
 
         - - - - - - - - - - - - - - - - - - - - -
 
-        **Type: REINF, Subtype: SMEAR**\
+        **Type: REINF, Subtype: SMEAR**
 
-        Suitable for layers of reinforcing fibers with uniform cross-section
-        area and spacing. Each `SECDATA
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html>`_\
-        command defines the one reinforcing layer in the section. When
-        referenced by a `MESH200
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-        element, only one `SECDATA
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html>`_\
-        command per section is allowed. When referenced by reinforcing elements
-        (`REINF263
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF263.html>`_
-        and `REINF265
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF265.html>`_),
-        this limitation does not apply.
+        Suitable for layers of reinforcing fibers with uniform cross-section area and spacing. Each
+        :ref:`secdata` command defines the one reinforcing layer in the section. When referenced by a
+        ``MESH200`` element, only one :ref:`secdata` command per section is allowed. When referenced by
+        reinforcing elements ( ``REINF263`` and ``REINF265`` ), this limitation does not apply.
 
         * Data to provide in the value fields:
-
-        * ``MAT, A, S, KCN, THETA, PATT, V1, V2, V3, V4, V5``\
-
+        * ``MAT, A, S, KCN, THETA, PATT, V1, V2, V3, V4, V5``
         * where:
-
-        * ``MAT``\ = Material ID for layer. (See `REINF263
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF263.html>`_
-          or `REINF265
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF265.html>`_
-          for available material models.) When the section is referenced by a
-          `MESH200
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-          element, the default is the `MESH200
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-          element material ID (`MAT
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MAT.html>`_).
-          When the section is referenced by reinforcing elements, the material
-          ID is required for all fibers, and no default for this value is
-          available.
-
-        * ``A``\ = Cross-section area of a single reinforcing fiber (*or*\ the
-          thickness of the reinforcing layer for homogeneous reinforcing
+        * ``MAT`` = Material ID for layer. (See ``REINF263`` or ``REINF265`` for available material models.)
+          When the section is referenced by a ``MESH200`` element, the default is the ``MESH200`` element
+          material ID ( :ref:`mat` ). When the section is referenced by reinforcing elements, the material
+          ID is required for all fibers, and no default for this value is available.
+        * ``A`` = Cross-section area of a single reinforcing fiber ( or the thickness of the reinforcing
+          layer for homogeneous reinforcing membranes).
+        * ``S`` = Distance between two adjacent reinforcing fibers (ignored for homogeneous reinforcing
           membranes).
+        * **Note:** If the section is used to model the reinforcing layers with a uniaxial stress state (
+          :ref:`seccontrol`,,,0), the equivalent thickness h of the reinforcing layer is determined by h =
+          ``A`` / ``S``, where ``A`` is the cross-section area of a single fiber and ``S`` is the distance
+          between two adjacent fibers. If the section is used to model homogeneous reinforcing membranes (
+          :ref:`seccontrol`,,,1), the cross-section area input ``A`` is the thickness of the reinforcing
+          layer and the distance input ``S`` is ignored.
+        * ``KCN`` = Local coordinate system reference number for this layer. (See :ref:`local` for more
+          information.) When the section is referenced by a ``MESH200`` element, the default ``KCN`` value
+          is the ``MESH200`` element coordinate system ID ( :ref:`esys` ). For the 2D smeared reinforcing
+          element ``REINF263``, ``KCN`` input is not required. When ``KCN`` is not specified, the program
+          uses a default layer coordinate system (described in ``REINF263`` and ``REINF265`` ).
+        * ``THETA`` = Angle (in degrees) of the final layer coordinate system with respect to the default
+          layer system or the layer system specified in the ``KCN`` field. This value is ignored for
+          ``REINF263`` when that element is embedded in 2D plane strain or plane stress base elements.
+        * ``PATT`` = Input pattern code (described below) indicating how the location of this fiber is
+          defined. Available input patterns are MESH (when the section is referenced by a ``MESH200``
+          element), and LAYN, EDGO, and BEAM (when the section is referenced by a reinforcing element).
+        * ``V1, V2, V3, V4, V5`` = Values to define the location of the reinforcing layer, as shown:
 
-        * ``S``\ = Distance between two adjacent reinforcing fibers (ignored for
-          homogeneous reinforcing membranes).
+        **PATT: MESH**
 
-        * **Note:**\ If the section is used to model the reinforcing layers with
-          a uniaxial stress state (`SECCONTROL
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECCONTROL.html>`_,,,0),
-          the equivalent thickness h of the reinforcing layer is determined by h
-          = ``A``\ / ``S``, where ``A``\ is the cross-section area of a single
-          fiber and ``S``\ is the distance between two adjacent fibers. If the
-          section is used to model homogeneous reinforcing membranes
-          (`SECCONTROL
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECCONTROL.html>`_,,,1),
-          the cross-section area input ``A``\ is the thickness of the
-          reinforcing layer and the distance input ``S``\ is ignored.
+        **Description:** The locations of reinforcing fibers are defined directly via ``MESH200`` element
+        connectivity.
 
-        * ``KCN``\ = Local coordinate system reference number for this layer.
-          (See `LOCAL
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_LOCAL.html>`_\
-          for more information.) When the section is referenced by a `MESH200
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-          element, the default ``KCN``\ value is the `MESH200
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-          element coordinate system ID (`ESYS
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ESYS.html>`_).
-          For the 2D smeared reinforcing element `REINF263
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF263.html>`_,
-          ``KCN``\ input is not required. When ``KCN``\ is not specified, the
-          program uses a default layer coordinate system (described in `REINF263
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF263.html>`_
-          and `REINF265
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF265.html>`_).
+        **Required input:**None.
 
-        * ``THETA``\ = Angle (in degrees) of the final layer coordinate system
-          with respect to the default layer system or the layer system specified
-          in the ``KCN``\ field. This value is ignored for `REINF263
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF263.html>`_
-          when that element is embedded in 2D plane strain or plane stress base
-          elements.
+        **PATT: LAYN**
 
-        * ``PATT``\ = Input pattern code (described below) indicating how the
-          location of this fiber is defined. Available input patterns are MESH
-          (when the section is referenced by a `MESH200
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-          element), and LAYN, EDGO, and BEAM (when the section is referenced by
-          a reinforcing element).
+        **Description:** The smeared reinforcing layer is placed in the middle of a layer in a layered base
+        element.
 
-        * ``V1, V2, V3, V4, V5``\ = Values to define the location of the
-          reinforcing layer, as shown:
+        **Required input:**``V1`` (or ``n`` ) -- The number of the layer in the base element on which to apply the reinforcing layer. The default value is 1.
 
-        ``PATT``: MESH
+        This command contains some tables and extra information which can be inspected in the original
+        documentation pointed above.
 
-        **Description:**\ The locations of reinforcing fibers are defined
-        directly via `MESH200
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-        element connectivity.
+        **PATT: EDGO**
 
-        **Required input:**\ None.
+        **Description:** This pattern applies only to 2D smeared reinforcing element ``REINF263``. The
+        smeared reinforcing layer is represented by a line in 2D. The orientation of the 2D smeared
+        reinforcing layer is similar to one of the specified element edges. The fiber orientation can be
+        further adjusted via offsets with respect to the specified element edge.
 
-        ``PATT``: LAYN
+        **Required input:**
 
-        **Description:**\ The smeared reinforcing layer is placed in the middle
-        of a layer in a layered base element.
-
-        **Required input:**\ ``V1``\ (or ``n``) -- The number of the layer in
-        the base element on which to apply the reinforcing layer. The default
-        value is 1.
-
-        .. list-table::
-
-           * - When applied to layered solid elements:
-             - -
-           * - When applied to 2D axisymmetric shells:
-             - When applied to 3D layered shells:
-
-        ``PATT``: EDGO
-
-        **Description:**\ This pattern applies only to 2D smeared reinforcing
-        element `REINF263
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF263.html>`_.
-        The smeared reinforcing layer is represented by a line in 2D. The
-        orientation of the 2D smeared reinforcing layer is similar to one of the
-        specified element edges. The fiber orientation can be further adjusted
-        via offsets with respect to the specified element edge.
-
-        **Required input:**\
-
-        * ``V1``\ (or ``O``) -- The number to indicate the element edge to which
-          the offsets are measured. The default value is 1.
-
-        * ``V2``\ (or ``Y1``) -- The normalized distances from the reinforcing
-          layer to the first end of the specified element edge. Valid values for
-          Y1 are 0.0 through 1.0. The default value for ``Y1``\ is 0.5. ``V3``\
-          (or ``Z1``) input is ignored.
-
-        * ``V4``\ (or ``Y2``) -- The normalized distances from the reinforcing
-          layer to the second end of the specified element edge. Valid value
-          values for ``Y2``\ are 0.0 through 1.0. The default value for ``Y2``\
-          is ``Y1``. ``V4``\ (or ``Y2``) is ignored for axisymmetric shell
-          elements. ``V5``\ (or ``Z2```) input is ignored.
-
-        .. list-table::
-
-           * - When applied to 2D 4-node or 8-node solid elements:
-           * - When applied to 2D 3-node or 6-node triangular solid
-               elements:
-           * - When applied to 2-node or 3-node axisymmetric shell
-               elements:
-
-        ``PATT``: ELEF
-
-        **Description:**\ The smeared reinforcing layer is oriented parallel to
-        one of three adjacent element faces. (This pattern does not apply to 2D
-        smeared reinforcing element `REINF263
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF263.html>`_.)
-
-        **Required input:**\
-
-        * ``V1``\ (or ``F``) -- The number to indicate the base element face.
+        * ``V1`` (or ``O`` ) -- The number to indicate the element edge to which the offsets are measured.
           The default value is 1.
+        * ``V2`` (or ``Y1`` ) -- The normalized distances from the reinforcing layer to the first end of the
+          specified element edge. Valid values for Y1 are 0.0 through 1.0. The default value for ``Y1`` is
+          0.5. ``V3`` (or ``Z1`` ) input is ignored.
+        * ``V4`` (or ``Y2`` ) -- The normalized distances from the reinforcing layer to the second end of
+          the specified element edge. Valid value values for ``Y2`` are 0.0 through 1.0. The default value
+          for ``Y2`` is ``Y1``. ``V4`` (or ``Y2`` ) is ignored for axisymmetric shell elements. ``V5`` (or
+          ``Z2``` ) input is ignored.
 
-        * ``V2``\ (or ``d1``) -- The normalized distance from the layer to the
-          specified base element face. Valid values for ``d1``\ are 0.0 through
-          1.0. The default value is 0.5.
+        This command contains some tables and extra information which can be inspected in the original
+        documentation pointed above.
 
-        * ``V3``\ (or ``d2``) -- The normalized distance from corners JJ and KK
-          of the layer to the specified base element face (applicable to 8-node
-          or 20-node solid elements only). Valid values for ``d2``\ are 0.0
-          through 1.0. The default value is ``d1``.
+        **PATT: ELEF**
+
+        **Description:** The smeared reinforcing layer is oriented parallel to one of three adjacent element
+        faces. (This
+        pattern does not apply to 2D smeared reinforcing element ``REINF263``.)
+
+        **Required input:**
+
+        * ``V1`` (or ``F`` ) -- The number to indicate the base element face. The default value is 1.
+        * ``V2`` (or ``d1`` ) -- The normalized distance from the layer to the specified base element face.
+          Valid values for ``d1`` are 0.0 through 1.0. The default value is 0.5.
+        * ``V3`` (or ``d2`` ) -- The normalized distance from corners JJ and KK of the layer to the
+          specified base element face (applicable to 8-node or 20-node solid elements only). Valid values
+          for ``d2`` are 0.0 through 1.0. The default value is ``d1``.
 
         When applied to 8-node or 20-node solid elements:
 
-        .. list-table::
-
-           * - -
-             - where: ``d1``\ = distance II and LL ``d2``\ = distance JJ
-               and KK
-           * - ``d1``\ = distance II and LL
-             - -
-           * - ``d2``\ = distance JJ and KK
-             - -
+          This command contains some tables and extra information which can be inspected in the original
+        documentation pointed above.
 
         When applied to tetrahedral elements:
 
+        This command contains some tables and extra information which can be inspected in the original
+        documentation pointed above.
+
         When applied to 3D shell elements:
 
-        **Shells**
+        .. figure:: ../../../images/_commands/gSECD16.svg
 
-        **Type: SHELL**
+        .. _SECDATA_shells:
 
-        Shell sections are referenced by the `SHELL131
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL131.html>`_,
-        `SHELL132
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL132.html>`_,
-        `SHELL229
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL229.html>`_,
-        `SHELL294
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL294.html>`_,
-        `SHELL181
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_,
-        `SOLID185
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID185.html>`_
-        Layered Solid, `SOLID186
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID186.html>`_
-        Layered Solid, `SOLSH190
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLSH190.html>`_,
-        `SHELL208
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL208.html>`_,
-        `SHELL209
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL209.html>`_,
-        `SOLID278
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID278.html>`_
-        Layered Solid, `SOLID279
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID279.html>`_
-        Layered Solid, and `SHELL281
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL281.html>`_
-        elements.
+        Type: SHELL
+        ^^^^^^^^^^^
+
+        Shell sections are referenced by the ``SHELL131``, ``SHELL132``, ``SHELL181``, ``SOLID185`` Layered
+        Solid, ``SOLID186`` Layered Solid, ``SOLSH190``, ``SHELL208``, ``SHELL209``, ``SOLID278`` Layered
+        Solid, ``SOLID279`` Layered Solid, and ``SHELL281`` elements.
 
         * Data to provide in the value fields:
-
-        * ``TK``, ``MAT``, ``THETA``, ``NUMPT``, ``LayerName``\
-
+        * ``TK``, ``MAT``, ``THETA``, ``NUMPT``, ``LayerName``
         * where:
+        * ``TK`` = Thickness of shell layer. Zero thickness (not valid for ``SHELL131`` and ``SHELL132`` )
+          indicates a dropped layer. The sum of all layer thicknesses must be greater than zero. The total
+          thickness can be tapered via the :ref:`secfunction` command.
+        * ``MAT`` = Material ID for layer (any current-technology material model is available for
+          ``SHELL181``, ``SOLID185`` Layered Solid, ``SOLID186`` Layered Solid, ``SOLSH190``, ``SHELL208``,
+          ``SHELL209``, ``SOLID278`` Layered Solid and ``SOLID279`` Layered Solid [including `UserMat
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_prog/Z7K4r1e5lcd.html#>`_ ], and
+          ``SHELL281`` ). ``MAT`` is required for a composite (multi-layered) laminate. For a homogeneous
+          (single-layered) shell, the default is the `element material attribute
+          <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD7_2.html#ad77wq1a7lcd>`_.
+          You can also address multiple reference temperatures ( :ref:`tref` and/or :ref:`mp`,REFT).
 
-        * ``TK``\ = Thickness of shell layer. Zero thickness (not valid for
-          `SHELL131
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL131.html>`_,
-          `SHELL132
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL132.html>`_,
-          `SHELL229
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL229.html>`_,
-          and `SHELL294
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL294.html>`_)
-          indicates a dropped layer. The sum of all layer thicknesses must be
-          greater than zero. The total thickness can be tapered via the
-          `SECFUNCTION
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECFUNCTION.html>`_\
-          command (not supported for, `SHELL229
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL229.html>`_
-          and `SHELL294
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL294.html>`_).
+        * ``THETA`` = Angle (in degrees) of layer element coordinate system with respect to element
+          coordinate system (ESYS).
+        * ``NUMPT`` = Number of integration points in layer. The user interface offers 1, 3 (default), 5, 7,
+          or 9 points; however, you can specify a higher number on the :ref:`secdata` command. The
+          integration rule used is Simpson's Rule. ( ``NUMPT`` is not used by ``SHELL131`` and
+          ``SHELL132``.)
 
-        * ``MAT``\ = Material ID for layer (any current-technology material
-          model is available for `SHELL181
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_,
-          `SOLID185
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID185.html>`_
-          Layered Solid, `SOLID186
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID186.html>`_
-          Layered Solid, `SOLSH190
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLSH190.html>`_,
-          `SHELL208
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL208.html>`_,
-          `SHELL209
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL209.html>`_,`SOLID278
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID278.html>`_
-          Layered Solid and `SOLID279
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID279.html>`_
-          Layered Solid [including `UserMat\
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Z7K4r1e5lcd.html#UPFusermatjwf032800403>`_],
-          `SHELL229
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL229.html>`_,
-          and `SHELL281
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL281.html>`_).
-          ``MAT``\ is required for a composite (multi-layered) laminate. For a
-          homogeneous (single-layered) shell, the default is the `element
-          material attribute
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_mod/Hlp_G_MOD7_2.html>`_.
-          You can also address multiple reference temperatures (`TREF
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TREF.html>`_\
-          and/or `MP
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MP.html>`_,REFT).
+        .. _SECDATA_supports:
 
-        * ``THETA``\ = Angle (in degrees) of layer element coordinate system
-          with respect to element coordinate system (ESYS).
+        Type: SUPPORT
+        ^^^^^^^^^^^^^
 
-        * ``NUMPT``\ = Number of integration points in layer. The user interface
-          offers 1, 3 (default), 5, 7, or 9 points; however, you can specify a
-          higher number on the `SECDATA
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html>`_\
-          command. The integration rule used is Simpson's Rule. (``NUMPT``\ is
-          not used by `SHELL131
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL131.html>`_
-          and `SHELL132
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL132.html>`_.)
+        Support sections are referenced by ``SOLID185`` and ``SOLID186`` elements.
 
-        * ``LayerName``\ = Layer name up to 32 characters.
+        **Type: SUPPORT, Subtype: BLOCK**
 
-        **Supports**
-
-        **Type: SUPPORT**
-
-        Support sections are referenced by `SOLID185
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID185.html>`_
-        and `SOLID186
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID186.html>`_
-        elements.
-
-        **Type: SUPPORT, Subtype: BLOCK**\
-
-        * Data to provide in the value fields for ``Subtype``\ = BLOCK:
-
-        * ``T``, ``L``\
-
+        * Data to provide in the value fields for ``Subtype`` = BLOCK:
+        * ``T``, ``L``
         * where:
+        * ``T`` = Thickness of the block wall.
+        * ``L`` = Spacing distance of the block walls.
 
-        * ``T``\ = Thickness of the block wall.
+        **Type: SUPPORT, Subtype: ASEC**
 
-        * ``L``\ = Spacing distance of the block walls.
+        * Data to provide in the value fields for ``Subtype`` = ASEC:
 
-        **Type: SUPPORT, Subtype: ASEC**\
+        This command contains some tables and extra information which can be inspected in the original
+        documentation pointed above.
 
-        * Data to provide in the value fields for ``Subtype``\ = ASEC:
-
-        .. list-table::
-           :header-rows: 1
-
-           * - **Thermal**\
-             - **Structural**\
-           * - ``VAL1``\ = Multiplication factor for KXX ``VAL2``\ =
-               Multiplication factor for KYY ``VAL3``\ = Multiplication
-               factor for KZZ ``VAL4``\ = Multiplication factor for DENS
-             - ``VAL1``\ = Multiplication factor for EX ``VAL2``\ =
-               Multiplication factor for EY ``VAL3``\ = Multiplication
-               factor for EZ ``VAL4``\ = Multiplication factor for GXY
-               ``VAL5``\ = Multiplication factor for GYZ ``VAL6``\ =
-               Multiplication factor for GXZ ``VAL7``\ = Multiplication
-               factor for ALPX ``VAL8``\ = Multiplication factor for DENS
-
-        * The multiplication factors are homogenization factors, and in each
-          direction reflect the ratio of the support area projected onto the
-          area of a fully solid support.
-
+        * The multiplication factors are homogenization factors, and in each direction reflect the ratio of
+          the support area projected onto the area of a fully solid support.
         * Values default to 1.0.
-
         * Y and Z values default to X values.
-
         * GXY value defaults to EX value, GYZ to EY, and GXZ to EZ.
 
-        **Taper**
+        .. _SECDATA_taper:
 
-        **Type: TAPER**
+        Type: TAPER
+        ^^^^^^^^^^^
 
-        Tapered sections are referenced by `BEAM188
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_BEAM188.html>`_,
-        `BEAM189
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_BEAM189.html>`_
-        and `ELBOW290
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ELBOW290.html>`_
-        elements. After specifying the tapered section type (`SECTYPE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECTYPE.html>`_,,TAPER),
-        issue separate `SECDATA
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html>`_\
-        commands to define each end of the tapered beam or pipe.
+        Tapered sections are referenced by ``BEAM188``, ``BEAM189`` and ``ELBOW290`` elements. After
+        specifying the tapered section type ( :ref:`sectype`,,TAPER), issue separate :ref:`secdata` commands
+        to define each end of the tapered beam or pipe.
 
         * Data to provide in the value fields:
-
-        * ``Sec_IDn``, ``XLOC``, ``YLOC``, ``ZLOC``\
+        * ``Sec_IDn``, ``XLOC``, ``YLOC``, ``ZLOC``
 
         * where:
+        * ``Sec_IDn`` = Previously defined beam or pipe section at ends 1 and 2.
+        * ``XLOC``, ``YLOC``, ``ZLOC`` = The location of Sec_ID n in the global Cartesian coordinate system.
 
-        * ``Sec_IDn``\ = Previously defined beam or pipe section at ends 1 and
-          2.
+        For more information about tapered beams and pipes, including assumptions and example command input,
+        see `Defining a Tapered Beam or Pipe
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_STR15_4.html#>`_
 
-        * ``XLOC``, ``YLOC``, ``ZLOC``\ = The location of Sec_ID*n*\ in the
-          global Cartesian coordinate system.
-
-        For more information about tapered beams and pipes, including
-        assumptions and example command input, see `Defining a Tapered Beam or
-        Pipe
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR15_4.html#taperbeam>`_
-        in the `*Structural Analysis Guide*\
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_StrTOC.html>`_.
-
-        **Example Usage**
-
-        See these example problems in the Technology Showcase: Example Problems:
-
-        * `Delamination of a Stiffened Composite Panel Under a Compressive Load
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tecdelam.html>`_
-
-        * `Nonlinear Transient Analysis of a Camshaft Assembly
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/teccamshaft.html>`_
-
-        * `Nuclear Piping System Under Seismic Loading
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tecnuclearpipe.html>`_
-
-        * `Rocket Nozzle Extension Simulation: Fabrication
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tecnozFab.html>`_
-
-        * `Dynamic Simulation of a Nuclear Piping System Using RSA Methods
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tecmissingmass.html>`_
-
-        * `Rotordynamics of a Shaft Assembly Based on a Representative Model of
-          Nelson-Vaugh Rotor
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tecrotordyn.html>`_
-
-        * `Transient Dynamic Analysis of a Digger-Arm Assembly
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tecdiggerarm.html>`_
-
-        * `Modal Analysis of a Wind Turbine Blade Using Beam Elements
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tecwindturbine.html>`_
-
-        * `Hydrostatic Fluid Analysis of an Inflating and Rolling Tire
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tectire.html>`_
-
-        * `Rocket Nozzle Extension Simulation: Operation
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tecnozOpe.html>`_
-
-        * `Bolt Thread
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tecboltthread.html>`_
-
-        * `Load-Limit Analysis of a Reinforced Concrete Slab
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tecdynardo.html>`_
-
-        * `Tire Performance Simulation
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tectireperf.html>`_
         """
         command = f"SECDATA,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13},{val14}"
         return self.run(command, **kwargs)
@@ -2781,470 +1956,39 @@ class CrossSections(CommandsBase):
         value4: str = "",
         **kwargs,
     ):
-        r"""Modifies section properties based on ``Keyword``.
+        r"""Modifies a pretension section
 
         Mechanical APDL Command: `SECMODIF <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_
 
         Parameters
         ----------
         secid : str
-            Unique section number.
+            Unique section number. This number must already be assigned to a section.
 
         kywrd : str
-            The section properties to modify. Possible ``Keyword``\ settings
-            are:
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECMODIF.html>`_ for
+            further information.
 
-            * ``NORM`` - Modify the pretension section normal direction. See
-              `Pretension
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.pretension>`_
-              for more information.
-
-            * ``NAME`` - Change the name of the specified pretension
-              section. See `Pretension
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.pretension>`_
-              for more information.
-
-            * ``JOINT`` - Set command actions to apply to joint sections
-              only. See `Joints
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.joints>`_
-              for more information.
-
-            * ``SHELL`` - Modify a property of previously defined shell
-              sections based on ``Item``\ and ``Value``. See `Shells
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.shells>`_
-              for more information.
-
-            * ``BEAM`` - Modify a property of previously defined beam
-              sections based on ``Item``\ and ``Value``. See `Beams
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.beams>`_
-              for more information.
-
-            * ``PIPE`` - Modify a property of previously defined pipe
-              sections based on ``Item``\ and ``Value``. See `Pipes
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.pipes>`_
-              for more information.
-
-            * ``LINK`` - Modify a property of previously defined link
-              sections based on ``Item``\ and ``Value``. See `Links
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.links>`_
-              for more information.
-
-            * ``REINF`` - Modify a property of previously defined
-              reinforcing sections based on ``Item``\ and ``Value``. See
-              `Reinforcing
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.reinf>`_
-              for more information.
-
-        value1 : str
-            The semantic labels for ``Value1``, ``Value2``, ``Value3``\ and
-            ``Value4``\ as well as their descriptions and default/range
-            values depend on the ``Keyword``\ setting.
-
-        value2 : str
-            The semantic labels for ``Value1``, ``Value2``, ``Value3``\ and
-            ``Value4``\ as well as their descriptions and default/range
-            values depend on the ``Keyword``\ setting.
-
-        value3 : str
-            The semantic labels for ``Value1``, ``Value2``, ``Value3``\ and
-            ``Value4``\ as well as their descriptions and default/range
-            values depend on the ``Keyword``\ setting.
-
-        value4 : str
-            The semantic labels for ``Value1``, ``Value2``, ``Value3``\ and
-            ``Value4``\ as well as their descriptions and default/range
-            values depend on the ``Keyword``\ setting.
+        value1, value2, value3, value4 : str
+            The semantic labels for ``Value1``, ``Value2``, ``Value3``\ and ``Value4``\
+            as well as their descriptions and default/range values depend on the
+            ``Keyword``\ setting.
 
         Notes
         -----
 
+        .. warning::
+
+           This function contains specificities regarding the argument definitions.
+           Please refer to the `command documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECMODIF.html>`_
+           for further explanations.
+
         .. _SECMODIF_notes:
 
-        The `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_\
-        command is divided into these types: `Pretension
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.pretension>`_,
-        `Joints
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.joints>`_,
-        `Shells
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.shells>`_,
-        `Beams
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.beams>`_,
-        `Pipes
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.pipes>`_,
-        `Links
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.links>`_,
-        and `Reinforcing
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#SECMODIF.reinf>`_.
-
-        For a specified pretension section, `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_\
-        either modifies the normal, or changes the name of the surface.
-
-        For joint sections associated with *penalty-based joint elements*,
-        `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_\
-        modifies the penalty factors of a previously defined joint section.
-
-        For shell, beam, pipe, link, and reinforcing sections, `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_\
-        modifies a property of previously defined sections based on ``Item``\
-        and ``Value``. The ``Value``\ field does not allow blank input. Input 0
-        for zero value.
-
-        The `SECOFFSET
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECOFFSET.html>`_\
-        and `SECCONTROL
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECCONTROL.html>`_\
-        commands include limitations for specific element types and the
-        `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_\
-        command must not be used for this unsupported section data. See
-        `SECOFFSET
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECOFFSET.html>`_\
-        and `SECCONTROL
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECCONTROL.html>`_\
-        for more details.
-
-        **Pretension**
-
-        If ``Keyword``\ = NORM, command format is:
-
-        `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_,``SECID``,
-        ``NORM``, ``NX``, ``NY``, ``NZ``, ``KCN``\
-
-        * ``SECID`` - Unique section number. This number must already be
-          assigned to a section.
-
-        * ``NORM`` - Modify the pretension section normal direction.
-
-        * ``NX, NY, NZ`` - The individual normal components to modify.
-
-        * ``KCN`` - Coordinate system number: 0 = global Cartesian, 1 = global
-          cylindrical), 2 = global spherical, 4 = working plane), 5 = global Y
-          axis cylindrical, or ``n``\ = an arbitrary reference number assigned
-          to a coordinate system.
-
-        If ``Keyword``\ = NAME, the command format is:
-
-        `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_,``SECID``,
-        ``NAME``, ``Name``\
-
-        * ``SECID`` - Unique section number. This number must already be
-          assigned to a section.
-
-        * ``NAME`` - Change the name of the specified pretension section.
-
-        * ``Name`` - The new name to be assigned to the pretension section.
-
-        **Joints**
-
-        If ``Keyword``\ = JOINT, the command format is:
-
-        `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_,``SECID``,
-        ``JOINT``, ``Option``, ``dispPnltVal``, ``RotPnltVal``\
-
-        * ``SECID`` - Unique section number (which must already be assigned to a
-          section), or unspecified. If no section number is specified, the
-          penalty factors are applied to all joint sections associated with
-          penalty-based joint elements only.
-
-        * ``JOINT`` - Set command actions to apply to joint sections only.
-
-        * ``Option`` - PNLT -- Modify penalty factors for the specified section.
-
-        * ``dispPnltVal`` - Penalty value for displacement-based constraints:
-
-          * > 0 -- The number is used as a scaling factor to scale the
-            internally calculated penalty values.
-
-          * < 0 -- The absolute value of the number is used as the penalty
-            factor in calculations.
-
-        * ``RotPnltVal`` - Penalty value for rotation-based constraints.
-
-          * > 0 -- The number is used as a scaling factor to scale the
-            internally calculated penalty values.
-
-          * < 0 -- The absolute value of the number is used as the penalty
-            factor in calculations.
-
-        **Shells**
-
-        If ``Keyword``\ = SHELL, the command format is:
-
-        `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_,
-        ``SECID``, ``SHELL``, ``Item``, ``Value``\
-
-        * ``SECID`` - Unique section number. This number must already be
-          assigned to a section if it is an integer value. If ``SECID``\ = ALL,
-          the input value is applied to all defined shell sections. A table name
-          (%tablename%) is valid for multiple sections. Only an array-type table
-          is valid.
-
-        * ``SHELL`` - Modify a property of previously defined shell sections
-          based on ``Item``\ and ``Value``.
-
-        * ``Item`` - Label identifying data to modify. For details, see `Table
-          245: Valid Item and Values for Selected Shell Sections
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#tbl_shell>`_.
-
-        * ``Value`` - Input value for ``Item``. For details, see `Table 245:
-          Valid Item and Values for Selected Shell Sections
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#tbl_shell>`_.
-
-        .. list-table:: Table 245: Valid Item and Values for Selected Shell Sections
-           :header-rows: 1
-
-           * - Item:sup:`[a]`\
-             - Value
-             - Related Command
-           * - TK, MAT, THETA, NUMP
-             - Numeric value
-             - SECDATA:sup:`[b]`\
-           * - LNAME
-             - Up to 32 characters
-             - -
-           * - E11, E22, E12, ADDMAS, HMEMSCF, HBENSCF, DRLSTIF, BENSTIF
-             - Numeric Value
-             - SECCONTROL:sup:`[c]`\
-           * - OFFSET
-             - TOP, MID, BOT:sup:`[d]`\ Numeric Value:sup:`[e]`\
-             - SECOFFSET:sup:`[c]`\
-           * - TABL, NODE, NOD2
-             - %tablename%
-             - SECFUNCTION:sup:`[c]`\
-
-        **Beams**
-
-        If ``Keyword``\ = BEAM, the command format is:
-
-        `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_,
-        ``SECID``, ``BEAM``, ``SubType``, ``Item``, ``Value``\
-
-        * ``SECID`` - Unique section number. This number must already be
-          assigned to a section if it is an integer value. If ``SECID``\ = ALL,
-          the input value is applied to all defined beam sections with a valid
-          subtype. A table name (%tablename%) is valid for multiple sections.
-          Only an array-type table is valid.
-
-        * ``BEAM`` - Modify a property of previously defined beam sections based
-          on ``Item``\ and ``Value``.
-
-        * ``SubType`` - Label identifying section subtype. Valid subtypes are
-          RECT, QUAD, CSOL, CTUB, CHAN, I, Z, L, T, HATS, HREC and ASEC.
-
-        * ``Item`` - Label identifying data to modify. For details, see `Table
-          246: Valid Item and Values for Selected Beam Sections
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#tbl_beam>`_.
-
-        * ``Value`` - Input value for ``Item``. For details, see `Table 246:
-          Valid Item and Values for Selected Beam Sections
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#tbl_beam>`_.
-
-        .. list-table:: Table 246: Valid Item and Values for Selected Beam Sections
-           :header-rows: 1
-
-           * - Subtype
-             - Item
-             - Value
-             - Related Command
-           * - RECT
-             - B, H, NB, NH
-             - Numeric value
-             - SECDATA
-           * - QUAD
-             - YI, ZI, YJ, YK, ZK, YL, ZL, NG, NH
-             - -
-             - -
-           * - CSOLID
-             - R, N, T
-             - -
-             - -
-           * - CTUBE
-             - RI, RO, N
-             - -
-             - -
-           * - CHAN, I, Z
-             - W1, W2, W3, T1, T2, T3
-             - -
-             - -
-           * - L, T
-             - W1, W2, T1, T2
-             - -
-             - -
-           * - HATS
-             - W1, W2, W3, W4, T1, T2, T3, T4, T5
-             - -
-             - -
-           * - HREC
-             - W1, W2, T1, T2, T3, T4
-             - -
-             - -
-           * - ASEC
-             - A, IYY, IYZ, IZZ, IW, J, CGY, CGZ, SHY, SHZ, TKZ, TKY,
-               TSXZ, TSXY
-             - -
-             - -
-           * - -
-             - TXZ, TXY, ADDM
-             - Numeric Value
-             - SECCONTROL
-           * - -
-             - OFFSET
-             - CENT, SHRC, ORIG
-             - SECOFFSET
-           * - OFFY, OFFZ:sup:`[a]`\ CGY, CGZ, SHY, SHZ:sup:`[b]`\
-             - Numeric Value
-             - -
-             - -
-
-        **Pipes**
-
-        If ``Keyword``\ = PIPE, the command format is:
-
-        `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_,
-        ``SECID``, ``PIPE``, ``Item``, ``Value``\
-
-        * ``SECID`` - Unique section number. This number must already be
-          assigned to a section if it is an integer value. If ``SECID``\ = ALL,
-          the input value is applied to all defined pipe sections. A table name
-          (%tablename%) is valid for multiple sections. Only an array-type table
-          is valid.
-
-        * ``PIPE`` - Modify a property of previously defined pipe sections based
-          on ``Item``\ and ``Value``.
-
-        * ``Item`` - Label identifying data to modify. For details, see `Table
-          247: Valid Item and Values for Selected Pipe Sections
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#tbl_pipe>`_.
-
-        * ``Value`` - Input value for ``Item``. For details, see `Table 247:
-          Valid Item and Values for Selected Pipe Sections
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#tbl_pipe>`_.
-
-        .. list-table:: Table 247: Valid Item and Values for Selected Pipe Sections
-           :header-rows: 1
-
-           * - Item
-             - Value
-             - Related Command
-           * - DO, TW, NC, SS, NT, MINT, MINS, TINS
-             - Numeric Value
-             - SECDATA
-           * - ADDM
-             - Numeric Value
-             - SECCONTROL
-           * - OFFY, OFFZ
-             - Numeric Value
-             - SECOFFSET
-
-        **Links**
-
-        If ``Keyword``\ = LINK, the command format is:
-
-        `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_,
-        ``SECID``, ``LINK``, ``Item``, ``Value``\
-
-        * ``SECID`` - Unique section number. This number must already be
-          assigned to a section if it is an integer value. If ``SECID``\ = ALL,
-          the input value is applied to all defined link sections. A table name
-          (%tablename%) is valid for multiple sections. Only an array-type table
-          is valid.
-
-        * ``LINK`` - Modify a property of previously defined link sections based
-          on ``Item``\ and ``Value``.
-
-        * ``Item`` - Label identifying data to modify. For details, see `Table
-          248: Valid Item and Values for Selected Link Sections
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#tbl_link>`_.
-
-        * ``Value`` - Input value for ``Item``. For details, see `Table 248:
-          Valid Item and Values for Selected Link Sections
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#tbl_link>`_.
-
-        .. list-table:: Table 248: Valid Item and Values for Selected Link Sections
-           :header-rows: 1
-
-           * - Item
-             - Value
-             - Related Command
-           * - AREA
-             - Numeric Value
-             - SECDATA
-           * - ADDMAS, TENSKEY, CV1, CV2, CV3, CV4
-             - Numeric Value
-             - SECCONTROL
-
-        **Reinforcing**
-
-        If ``Keyword``\ = REINF, the command format is:
-
-        `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_,
-        ``SECID``, ``REINF``, ``Subtype``, ``Item``, ``Value``\
-
-        * ``SECID`` - Unique section number. This number must already be
-          assigned to a section if it is an integer value. If ``SECID``\ = ALL,
-          the input value is applied to all defined reinforcing sections with a
-          valid subtype. A table name (%tablename%) is valid for multiple
-          sections. Only an array-type table is valid.
-
-        * ``REINF`` - Modifiy a property of previously defined reinforcing
-          sections based on ``Item``\ and ``Value``.
-
-        * ``Subtype`` - Label identifying section subtype. Valid subtypes are
-          DISC and SMEA.
-
-        * ``Item`` - Label identifying data to modify. For details, see `Table
-          249: Valid Item and Values for Selected Reinforcing Sections
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#tbl_reinf>`_.
-
-        * ``Value`` - Input value for ``Item``. For details, see `Table 249:
-          Valid Item and Values for Selected Reinforcing Sections
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html#tbl_reinf>`_.
-
-        .. list-table:: Table 249: Valid Item and Values for Selected Reinforcing Sections
-           :header-rows: 1
-
-           * - Subtype
-             - Item
-             - Value
-             - Related Command
-           * - DISC
-             - MAT, AREA
-             - Numeric value
-             - SECDATA
-           * - SMEA
-             - MAT, AREA, SPACE, KCN, THETA
-             - -
-             - -
-           * - -
-             - TENSKEY, REMBASE, STSSTATE
-             - SECCONTROL
-             - -
-
-        Only reinforcing sections for the mesh-independent method are valid
-        (``PATT``\ = MESH in the `SECDATA
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html>`_\
-        command). Issue the `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_\
-        command before issuing the `EREINF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EREINF.html>`_\
-        command. If `SECMODIF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_\
-        is issued after `EREINF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EREINF.html>`_,
-        updated properties are not transferred to the reinforcing sections
-        generated by `EREINF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EREINF.html>`_.
+        The :ref:`secmodif` command either modifies the normal for a specified pretension section, or
+        changes the name of the specified pretension surface.
         """
         command = f"SECMODIF,{secid},{kywrd},{value1},{value2},{value3},{value4}"
         return self.run(command, **kwargs)

@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Tests for Mechanical APDL 2026 R1 command wrappers."""
-
 import inspect
 import logging
 from unittest.mock import MagicMock
@@ -36,11 +34,7 @@ import test_commands
 
 
 class FakeMapdl(_MapdlExtended):
-    """Lightweight offline ``Mapdl`` double inheriting the full command MRO.
-
-    Bypasses ``_MapdlCore.__init__`` (no live or gRPC connection required) and
-    records every ``(command, kwargs)`` pair passed to ``run()``.
-    """
+    """Offline ``Mapdl`` double bypassing ``_MapdlCore.__init__``."""
 
     def __init__(self) -> None:
         self._do_loop_level = 0
@@ -62,12 +56,10 @@ class FakeMapdl(_MapdlExtended):
 
 @pytest.fixture
 def fake_mapdl() -> FakeMapdl:
-    """Return a fresh offline ``FakeMapdl`` instance."""
     return FakeMapdl()
 
 
 ALL_2026R1_COMMANDS: tuple[str, ...] = (
-    # 19 new 2026 R1 command wrappers
     "vfdi",
     "vfup",
     "cntgen",
@@ -87,7 +79,6 @@ ALL_2026R1_COMMANDS: tuple[str, ...] = (
     "kron",
     "starxpl",
     "maxcycmode",
-    # 30 updated 2026 R1 command wrappers
     "rsurf",
     "radopt",
     "rsymm",
@@ -122,8 +113,6 @@ ALL_2026R1_COMMANDS: tuple[str, ...] = (
 
 
 def test_reflection_runner_handles_keyword_only_parameters(fake_mapdl: FakeMapdl):
-    """Test_MAPDL_commands.test_command passes keyword-only args by keyword."""
-
     def sample(self, a: str = "", b: str = "", *, mid: str = "", **kwargs):
         return self.run(f"SAMPLE,{a},{mid},{b}", **kwargs)
 
@@ -135,13 +124,11 @@ def test_reflection_runner_handles_keyword_only_parameters(fake_mapdl: FakeMapdl
 
 @pytest.mark.parametrize("cmd", ALL_2026R1_COMMANDS)
 def test_commands_2026r1_pass_reflection_runner(fake_mapdl: FakeMapdl, cmd: str):
-    """All 49 new and updated 2026 R1 wrappers pass Test_MAPDL_commands.test_command."""
     runner = test_commands.Test_MAPDL_commands()
     runner.test_command(fake_mapdl, cmd)
 
 
 NEW_COMMAND_CASES: tuple[tuple[str, tuple, dict, str, dict], ...] = (
-    # Radiosity
     ("vfup", (), {}, "VFUP,,,,,", {}),
     (
         "vfup",
@@ -166,7 +153,6 @@ NEW_COMMAND_CASES: tuple[tuple[str, tuple, dict, str, dict], ...] = (
         {"write_to_log": False},
     ),
     ("vfdi", (), {"opt": "STAT", "enclosure": 2}, "VFDI,STAT,2,,,", {}),
-    # PREP7
     ("cntgen", (), {}, "CNTGEN,,,,,,,", {}),
     (
         "cntgen",
@@ -235,7 +221,6 @@ NEW_COMMAND_CASES: tuple[tuple[str, tuple, dict, str, dict], ...] = (
     ),
     ("tshape", (), {}, "TSHAPE,", {}),
     ("tshape", ("QUAD",), {"mute": True}, "TSHAPE,QUAD", {"mute": True}),
-    # SOLUTION
     ("cefilter", (), {}, "CEFILTER,", {}),
     ("cefilter", ("OFF",), {"mute": True}, "CEFILTER,OFF", {"mute": True}),
     ("cefilter", (), {"termkey": "ON"}, "CEFILTER,ON", {}),
@@ -289,7 +274,6 @@ NEW_COMMAND_CASES: tuple[tuple[str, tuple, dict, str, dict], ...] = (
     ("wksp", (), {}, "WKSP,", {}),
     ("wksp", (-100.0,), {"write_to_log": True}, "WKSP,-100.0", {"write_to_log": True}),
     ("wksp", (), {"value": 1.5}, "WKSP,1.5", {}),
-    # APDL & POST1
     ("kron", (), {}, "*KRON,,,", {}),
     (
         "kron",
@@ -352,7 +336,6 @@ def test_new_commands_2026r1(
     expected_cmd: str,
     expected_kwargs: dict,
 ):
-    """All 19 new 2026 R1 command wrappers emit exact APDL strings and forward kwargs."""
     method = getattr(fake_mapdl, method_name)
     result = method(*args, **kwargs)
     assert result == f"OUT:{expected_cmd}"
@@ -360,7 +343,6 @@ def test_new_commands_2026r1(
 
 
 UPDATED_COMMAND_CASES: tuple[tuple[str, tuple, dict, str, dict], ...] = (
-    # Radiosity / AUX12
     ("rsurf", (), {}, "RSURF,,,,", {}),
     (
         "rsurf",
@@ -403,7 +385,6 @@ UPDATED_COMMAND_CASES: tuple[tuple[str, tuple, dict, str, dict], ...] = (
         {"mute": False},
     ),
     ("vfquery", (), {"wropt": 1}, "VFQUERY,,,,1", {}),
-    # PREP7
     ("cdwrite", (), {}, "CDWRITE,,'',,,,,,,", {}),
     (
         "cdwrite",
@@ -491,7 +472,6 @@ UPDATED_COMMAND_CASES: tuple[tuple[str, tuple, dict, str, dict], ...] = (
         "SECMODIF,ALL,BEAM,RECT,B,2.5,",
         {"write_to_log": False},
     ),
-    # SOLUTION
     ("alphad", (), {}, "ALPHAD,,,", {}),
     (
         "alphad",
@@ -639,7 +619,6 @@ UPDATED_COMMAND_CASES: tuple[tuple[str, tuple, dict, str, dict], ...] = (
         {"write_to_log": False},
     ),
     ("pcgopt", (), {"lm_key": "OFF"}, "PCGOPT,,,,,,,OFF", {}),
-    # APDL & POST1
     ("vec", (), {}, "*VEC,,,,,,,,", {}),
     (
         "vec",
@@ -682,7 +661,6 @@ def test_updated_commands_2026r1(
     expected_cmd: str,
     expected_kwargs: dict,
 ):
-    """All 30 updated 2026 R1 command wrappers emit exact APDL strings and forward kwargs."""
     method = getattr(fake_mapdl, method_name)
     result = method(*args, **kwargs)
     assert result == f"OUT:{expected_cmd}"
@@ -690,7 +668,6 @@ def test_updated_commands_2026r1(
 
 
 def test_explicit_1based_apdl_comma_slots(fake_mapdl: FakeMapdl):
-    """Verify exact 1-based APDL comma-slot indices for commands with unused ``--`` fields."""
     assert fake_mapdl.eens("ALL", "fn", 1).removeprefix("OUT:").split(",") == [
         "EENS",
         "ALL",
@@ -809,7 +786,6 @@ def test_explicit_1based_apdl_comma_slots(fake_mapdl: FakeMapdl):
 
 
 def test_keyword_only_mid_slot_compatibility_emsel_and_tintp(fake_mapdl: FakeMapdl):
-    """emsel and tintp preserve legacy positional signatures while rejecting excess positional args."""
     with pytest.raises(TypeError):
         fake_mapdl.emsel("S", "LAYER", "NUM", 1, 10, 1)
 
@@ -829,7 +805,6 @@ def test_keyword_only_mid_slot_compatibility_emsel_and_tintp(fake_mapdl: FakeMap
 def test_secmodif_legacy_addional_command_arg_deprecation_and_conflict(
     fake_mapdl: FakeMapdl,
 ):
-    """secmodif warns with v0.77.0 removal version for addional_command_arg and rejects conflicts."""
     with pytest.deprecated_call(match=r"0\.77\.0"):
         result = fake_mapdl.secmodif(1, "NAME", addional_command_arg="PRET1", mute=True)
     assert result == "OUT:SECMODIF,1,NAME,PRET1,,,"
@@ -850,7 +825,6 @@ def test_secmodif_legacy_addional_command_arg_deprecation_and_conflict(
 def test_tshap_archived_command_remains_active_without_deprecation(
     fake_mapdl: FakeMapdl,
 ):
-    """Legacy archived command tshap() stays active on 26.1 alongside tshape()."""
     fake_mapdl._version = 26.1
     assert fake_mapdl.version == 26.1
     result = fake_mapdl.tshap("PILO", mute=True)
@@ -859,7 +833,6 @@ def test_tshap_archived_command_remains_active_without_deprecation(
 
 
 def test_starxpl_does_not_shadow_mapdl_grpc_xpl_property(fake_mapdl: FakeMapdl):
-    """MapdlGrpc.xpl remains a property descriptor while starxpl wraps APDL *XPL."""
     assert isinstance(inspect.getattr_static(MapdlGrpc, "xpl"), property)
     assert callable(getattr(_MapdlExtended, "starxpl", None))
     assert callable(getattr(MapdlGrpc, "starxpl", None))
@@ -891,12 +864,10 @@ _NEW_2026R1_LIVE_CASES: tuple[tuple[str, str, tuple], ...] = (
 
 @requires("local")
 def test_live_2026r1_commands_recognized(mapdl, cleared):
-    """Verify live Mechanical APDL 26.1+ exposes and recognizes all 19 new 2026 R1 commands."""
     assert len(_NEW_2026R1_LIVE_CASES) == 19
     for method_name, _, _ in _NEW_2026R1_LIVE_CASES:
         assert hasattr(mapdl, method_name), f"Missing {method_name} on Mapdl"
 
-    # Connected instance is older than 2026 R1 (26.1); wrapper existence is verified above.
     if mapdl.version < 26.1:
         return
 

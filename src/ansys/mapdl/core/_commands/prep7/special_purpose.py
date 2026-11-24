@@ -1593,8 +1593,7 @@ class SpecialPurpose(CommandsBase):
         return self.run(command, **kwargs)
 
     def fgrad(self, matid: str = "", option: str = "", pert_size: str = "", **kwargs):
-        r"""Directs the solver to include the effects of field-dependent gradients in the
-        solution.
+        r"""Directs the solver to include the effects of field-dependent gradients in the solution.
 
         Mechanical APDL Command: `FGRAD <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_FGRAD.html>`_
 
@@ -1606,8 +1605,7 @@ class SpecialPurpose(CommandsBase):
         option : str
             Field dependent gradient option to define:
 
-            * ``STTE`` - Gradient of structural components with respect to
-              temperature.
+            * ``STTE`` - Gradient of structural components with respect to temperature.
 
         pert_size : str
             Perturbation size for numerical derivatives (defaults to 1e-8).
@@ -1619,11 +1617,10 @@ class SpecialPurpose(CommandsBase):
 
         The `FGRAD
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_FGRAD.html>`_\
-        command specifies the consideration of field-dependent gradients in
-        coupled-field analyses.
+        command specifies the consideration of field-dependent gradients in coupled-field
+        analyses.
 
-        When the derivatives are calculated numerically, the perturbation size
-        is used.
+        When the derivatives are calculated numerically, the perturbation size is used.
 
         For more information see:
 

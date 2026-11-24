@@ -1242,594 +1242,287 @@ class FeBodyLoads(CommandsBase):
         Parameters
         ----------
         elem : str
-            The element to which body load applies. If ALL, apply to all
-            selected elements (`ESEL
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ESEL.html>`_).
+            The element to which body load applies. If ALL, apply to all selected elements ( :ref:`esel` ).
             A component name may also be substituted for ``Elem``.
 
         lab : str
-            Valid body load label. Valid labels are also listed for each
-            element type in the `*Element Reference*\
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ElemTOC.html>`_
+            Valid body load label. Valid labels are also listed for each element type in the `Element
+            Reference <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_
             under "Body Loads" in the input table.
 
-            .. list-table::
-               :header-rows: 1
-
-               * - Discipline
-                 - Body Load Label
-                 - Label Description
-               * - Structural
-                 - TEMP
-                 - Temperature
-               * - FREQ
-                 - Frequency (harmonic analyses only)
-                 - -
-               * - FLUE
-                 - Fluence
-                 - -
-               * - FORC
-                 - Body-force density
-                 - -
-               * - Thermal
-                 - HGEN
-                 - Heat generation rate (updated by volume changes
-                   when large-deflection effects are included
-                   (`NLGEOM
-                   <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLGEOM.html>`_,ON))
-               * - Magnetic
-                 - EF
-                 - Electric field
-               * - TEMP
-                 - Temperature
-                 - -
-               * - JS
-                 - Current density
-                 - -
-               * - MVDI
-                 - Magnetic virtual displacements flag
-                 - -
-               * - Electric
-                 - TEMP
-                 - Temperature
-               * - CHRGD
-                 - Charge density
-                 - -
-               * - Acoustics
-                 - DIVT
-                 - Divergence of Lighthill's tensor
-               * - Field volume interface
-                 - FVIN
-                 - Field volume interface flag
-               * - Poromechanics
-                 - FSOU
-                 - Fluid flow source
-               * - Diffusion
-                 - TEMP
-                 - Temperature
-               * - DGEN
-                 - Diffusing substance generation rate
-                 - -
+            This command contains some tables and extra information which can be inspected in the original
+            documentation pointed above.
 
         stloc : str
-            Starting location for entering ``VAL``\ data, below. For
-            example, if ``STLOC``\ = 1, data input in the ``VAL1``\ field
-            applies to the first element body load item available for the
-            element type, ``VAL2``\ applies to the second element item, etc.
-            If ``STLOC``\ = 5, data input in the ``VAL1``\ field applies to
-            the fifth element item, etc. Defaults to 1.
+            Starting location for entering ``VAL`` data, below. For example, if ``STLOC`` = 1, data input in
+            the ``VAL1`` field applies to the first element body load item available for the element type,
+            ``VAL2`` applies to the second element item, etc. If ``STLOC`` = 5, data input in the ``VAL1``
+            field applies to the fifth element item, etc. Defaults to 1.
 
         val1 : str
-            For ``Lab``\ = TEMP, FLUE, DGEN, HGEN, and CHRGD, ``VAL1``\
-            --``VAL4``\ represent body load values at the starting location
-            and subsequent locations (usually nodes) in the element.
-            ``VAL1``\ can also represent a table name for use with tabular
-            boundary conditions. Enter only ``VAL1``\ for a uniform body
-            load across the element. For nonuniform loads, the values must
-            be input in the same order as shown in the input table for the
-            element type. Values initially default to the `BFUNIF
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFUNIF.html>`_\
-            value (except for CHRGD which defaults to zero). For subsequent
-            specifications, a blank leaves a previously specified value
-            unchanged; if the value was not previously specified, the
-            default value as described in the `*Element Reference*\
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ElemTOC.html>`_
-            is used.
+            For ``Lab`` = TEMP, FLUE, DGEN, HGEN, and CHRGD, ``VAL1`` -- ``VAL4`` represent body load values
+            at the starting location and subsequent locations (usually nodes) in the element. ``VAL1`` can
+            also represent a table name for use with tabular boundary conditions. Enter only ``VAL1`` for a
+            uniform body load across the element. For nonuniform loads, the values must be input in the same
+            order as shown in the input table for the element type. Values initially default to the
+            :ref:`bfunif` value (except for CHRGD which defaults to zero). For subsequent specifications, a
+            blank leaves a previously specified value unchanged; if the value was not previously specified,
+            the default value as described in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_ is used.
 
-            For ``Lab``\ = JS and ``STLOC``\ = 1, ``VAL1``, ``VAL2``\ and
-            ``VAL3``\ are the X, Y, and Z components of current density (in
-            the element coordinate system), and ``VAL4``\ is the phase
+            For ``Lab`` = JS and ``STLOC`` = 1, ``VAL1``, ``VAL2`` and ``VAL3`` are the X, Y, and Z
+            components of current density (in the element coordinate system), and ``VAL4`` is the phase
             angle.
 
-            For ``Lab``\ = EF and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the X, Y, and Z components of electric field (in
-            the global Cartesian coordinate system).
+            For ``Lab`` = EF and ``STLOC`` = 1, ``VAL1``, ``VAL2``, and ``VAL3`` are the X, Y, and Z
+            components of electric field (in the global Cartesian coordinate system).
 
-            If ``Lab``\ = FVIN in a unidirectional Mechanical APDL to Ansys
-            CFX analysis, ``VAL2``\ is the volume interface number (not
-            available from within the GUI), and ``VAL1``, ``VAL3``, and
-            ``VAL4``\ are not used.
+            If ``Lab`` = FVIN in a unidirectional Mechanical APDL to Ansys CFX analysis, ``VAL2`` is the
+            volume interface number (not available from within the GUI), and ``VAL1``, ``VAL3``, and
+            ``VAL4`` are not used.
 
-            For ``Lab``\ = FORC and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the real X, Y, and Z components of force density
-            (in the global Cartesian coordinate system).
+            For ``Lab`` = FORC and ``STLOC`` = 1, ``VAL1``, ``VAL2``, and ``VAL3`` are the real X, Y, and Z
+            components of force density (in the global Cartesian coordinate system).
 
-            For ``Lab``\ = DIVT and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the X, Y, and Z components of the real part of
-            divergence of Lighthill's tensor (in the element coordinate
-            system), and ``VAL4``, ``VAL5``, and ``VAL6``\ are the X, Y, and
-            Z components of the imaginary part of divergence of Lighthill's
-            tensor (in the element coordinate system).
-
-            For analyses that allow complex input, if ``Lab``\ = FORC and
-            ``STLOC``\ = 4, ``VAL1``, ``VAL2``, and ``VAL3``\ are the
-            imaginary X, Y, and Z components of force density (in the global
-            Cartesian coordinate system).
+            For analyses that allow complex input, if ``Lab`` = FORC and ``STLOC`` = 4, ``VAL1``, ``VAL2``,
+            and ``VAL3`` are the imaginary X, Y, and Z components of force density (in the global Cartesian
+            coordinate system).
 
         val2 : str
-            For ``Lab``\ = TEMP, FLUE, DGEN, HGEN, and CHRGD, ``VAL1``\
-            --``VAL4``\ represent body load values at the starting location
-            and subsequent locations (usually nodes) in the element.
-            ``VAL1``\ can also represent a table name for use with tabular
-            boundary conditions. Enter only ``VAL1``\ for a uniform body
-            load across the element. For nonuniform loads, the values must
-            be input in the same order as shown in the input table for the
-            element type. Values initially default to the `BFUNIF
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFUNIF.html>`_\
-            value (except for CHRGD which defaults to zero). For subsequent
-            specifications, a blank leaves a previously specified value
-            unchanged; if the value was not previously specified, the
-            default value as described in the `*Element Reference*\
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ElemTOC.html>`_
-            is used.
+            For ``Lab`` = TEMP, FLUE, DGEN, HGEN, and CHRGD, ``VAL1`` -- ``VAL4`` represent body load values
+            at the starting location and subsequent locations (usually nodes) in the element. ``VAL1`` can
+            also represent a table name for use with tabular boundary conditions. Enter only ``VAL1`` for a
+            uniform body load across the element. For nonuniform loads, the values must be input in the same
+            order as shown in the input table for the element type. Values initially default to the
+            :ref:`bfunif` value (except for CHRGD which defaults to zero). For subsequent specifications, a
+            blank leaves a previously specified value unchanged; if the value was not previously specified,
+            the default value as described in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_ is used.
 
-            For ``Lab``\ = JS and ``STLOC``\ = 1, ``VAL1``, ``VAL2``\ and
-            ``VAL3``\ are the X, Y, and Z components of current density (in
-            the element coordinate system), and ``VAL4``\ is the phase
+            For ``Lab`` = JS and ``STLOC`` = 1, ``VAL1``, ``VAL2`` and ``VAL3`` are the X, Y, and Z
+            components of current density (in the element coordinate system), and ``VAL4`` is the phase
             angle.
 
-            For ``Lab``\ = EF and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the X, Y, and Z components of electric field (in
-            the global Cartesian coordinate system).
+            For ``Lab`` = EF and ``STLOC`` = 1, ``VAL1``, ``VAL2``, and ``VAL3`` are the X, Y, and Z
+            components of electric field (in the global Cartesian coordinate system).
 
-            If ``Lab``\ = FVIN in a unidirectional Mechanical APDL to Ansys
-            CFX analysis, ``VAL2``\ is the volume interface number (not
-            available from within the GUI), and ``VAL1``, ``VAL3``, and
-            ``VAL4``\ are not used.
+            If ``Lab`` = FVIN in a unidirectional Mechanical APDL to Ansys CFX analysis, ``VAL2`` is the
+            volume interface number (not available from within the GUI), and ``VAL1``, ``VAL3``, and
+            ``VAL4`` are not used.
 
-            For ``Lab``\ = FORC and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the real X, Y, and Z components of force density
-            (in the global Cartesian coordinate system).
+            For ``Lab`` = FORC and ``STLOC`` = 1, ``VAL1``, ``VAL2``, and ``VAL3`` are the real X, Y, and Z
+            components of force density (in the global Cartesian coordinate system).
 
-            For ``Lab``\ = DIVT and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the X, Y, and Z components of the real part of
-            divergence of Lighthill's tensor (in the element coordinate
-            system), and ``VAL4``, ``VAL5``, and ``VAL6``\ are the X, Y, and
-            Z components of the imaginary part of divergence of Lighthill's
-            tensor (in the element coordinate system).
-
-            For analyses that allow complex input, if ``Lab``\ = FORC and
-            ``STLOC``\ = 4, ``VAL1``, ``VAL2``, and ``VAL3``\ are the
-            imaginary X, Y, and Z components of force density (in the global
-            Cartesian coordinate system).
+            For analyses that allow complex input, if ``Lab`` = FORC and ``STLOC`` = 4, ``VAL1``, ``VAL2``,
+            and ``VAL3`` are the imaginary X, Y, and Z components of force density (in the global Cartesian
+            coordinate system).
 
         val3 : str
-            For ``Lab``\ = TEMP, FLUE, DGEN, HGEN, and CHRGD, ``VAL1``\
-            --``VAL4``\ represent body load values at the starting location
-            and subsequent locations (usually nodes) in the element.
-            ``VAL1``\ can also represent a table name for use with tabular
-            boundary conditions. Enter only ``VAL1``\ for a uniform body
-            load across the element. For nonuniform loads, the values must
-            be input in the same order as shown in the input table for the
-            element type. Values initially default to the `BFUNIF
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFUNIF.html>`_\
-            value (except for CHRGD which defaults to zero). For subsequent
-            specifications, a blank leaves a previously specified value
-            unchanged; if the value was not previously specified, the
-            default value as described in the `*Element Reference*\
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ElemTOC.html>`_
-            is used.
+            For ``Lab`` = TEMP, FLUE, DGEN, HGEN, and CHRGD, ``VAL1`` -- ``VAL4`` represent body load values
+            at the starting location and subsequent locations (usually nodes) in the element. ``VAL1`` can
+            also represent a table name for use with tabular boundary conditions. Enter only ``VAL1`` for a
+            uniform body load across the element. For nonuniform loads, the values must be input in the same
+            order as shown in the input table for the element type. Values initially default to the
+            :ref:`bfunif` value (except for CHRGD which defaults to zero). For subsequent specifications, a
+            blank leaves a previously specified value unchanged; if the value was not previously specified,
+            the default value as described in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_ is used.
 
-            For ``Lab``\ = JS and ``STLOC``\ = 1, ``VAL1``, ``VAL2``\ and
-            ``VAL3``\ are the X, Y, and Z components of current density (in
-            the element coordinate system), and ``VAL4``\ is the phase
+            For ``Lab`` = JS and ``STLOC`` = 1, ``VAL1``, ``VAL2`` and ``VAL3`` are the X, Y, and Z
+            components of current density (in the element coordinate system), and ``VAL4`` is the phase
             angle.
 
-            For ``Lab``\ = EF and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the X, Y, and Z components of electric field (in
-            the global Cartesian coordinate system).
+            For ``Lab`` = EF and ``STLOC`` = 1, ``VAL1``, ``VAL2``, and ``VAL3`` are the X, Y, and Z
+            components of electric field (in the global Cartesian coordinate system).
 
-            If ``Lab``\ = FVIN in a unidirectional Mechanical APDL to Ansys
-            CFX analysis, ``VAL2``\ is the volume interface number (not
-            available from within the GUI), and ``VAL1``, ``VAL3``, and
-            ``VAL4``\ are not used.
+            If ``Lab`` = FVIN in a unidirectional Mechanical APDL to Ansys CFX analysis, ``VAL2`` is the
+            volume interface number (not available from within the GUI), and ``VAL1``, ``VAL3``, and
+            ``VAL4`` are not used.
 
-            For ``Lab``\ = FORC and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the real X, Y, and Z components of force density
-            (in the global Cartesian coordinate system).
+            For ``Lab`` = FORC and ``STLOC`` = 1, ``VAL1``, ``VAL2``, and ``VAL3`` are the real X, Y, and Z
+            components of force density (in the global Cartesian coordinate system).
 
-            For ``Lab``\ = DIVT and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the X, Y, and Z components of the real part of
-            divergence of Lighthill's tensor (in the element coordinate
-            system), and ``VAL4``, ``VAL5``, and ``VAL6``\ are the X, Y, and
-            Z components of the imaginary part of divergence of Lighthill's
-            tensor (in the element coordinate system).
-
-            For analyses that allow complex input, if ``Lab``\ = FORC and
-            ``STLOC``\ = 4, ``VAL1``, ``VAL2``, and ``VAL3``\ are the
-            imaginary X, Y, and Z components of force density (in the global
-            Cartesian coordinate system).
+            For analyses that allow complex input, if ``Lab`` = FORC and ``STLOC`` = 4, ``VAL1``, ``VAL2``,
+            and ``VAL3`` are the imaginary X, Y, and Z components of force density (in the global Cartesian
+            coordinate system).
 
         val4 : str
-            For ``Lab``\ = TEMP, FLUE, DGEN, HGEN, and CHRGD, ``VAL1``\
-            --``VAL4``\ represent body load values at the starting location
-            and subsequent locations (usually nodes) in the element.
-            ``VAL1``\ can also represent a table name for use with tabular
-            boundary conditions. Enter only ``VAL1``\ for a uniform body
-            load across the element. For nonuniform loads, the values must
-            be input in the same order as shown in the input table for the
-            element type. Values initially default to the `BFUNIF
+            For ``Lab`` = TEMP, FLUE, DGEN, HGEN, and CHRGD, ``VAL1`` -- ``VAL4`` represent body load values
+            at the starting location and subsequent locations (usually nodes) in the element. ``VAL1`` can
+            also represent a table name for use with tabular boundary conditions. Enter only ``VAL1`` for a
+            uniform body load across the element. For nonuniform loads, the values must be input in the same
+            order as shown in the input table for the element type. Values initially default to the
+            :ref:`bfunif` value (except for CHRGD which defaults to zero). For subsequent specifications, a
+            blank leaves a previously specified value unchanged; if the value was not previously specified,
+            the default value as described in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_ is used.
+
+            For ``Lab`` = JS and ``STLOC`` = 1, ``VAL1``, ``VAL2`` and ``VAL3`` are the X, Y, and Z
+            components of current density (in the element coordinate system), and ``VAL4`` is the phase
+            angle.
+
+            For ``Lab`` = EF and ``STLOC`` = 1, ``VAL1``, ``VAL2``, and ``VAL3`` are the X, Y, and Z
+            components of electric field (in the global Cartesian coordinate system).
+
+            If ``Lab`` = FVIN in a unidirectional Mechanical APDL to Ansys CFX analysis, ``VAL2`` is the
+            volume interface number (not available from within the GUI), and ``VAL1``, ``VAL3``, and
+            ``VAL4`` are not used.
+
+            For ``Lab`` = FORC and ``STLOC`` = 1, ``VAL1``, ``VAL2``, and ``VAL3`` are the real X, Y, and Z
+            components of force density (in the global Cartesian coordinate system).
+
+            For analyses that allow complex input, if ``Lab`` = FORC and ``STLOC`` = 4, ``VAL1``, ``VAL2``,
+            and ``VAL3`` are the imaginary X, Y, and Z components of force density (in the global Cartesian
+            coordinate system).
+
+        val5, val6 : str
+            For ``Lab``\ = TEMP, FLUE, DGEN, HGEN, and CHRGD, ``VAL1``\ --``VAL4``\
+            represent body load values at the starting location and subsequent locations
+            (usually nodes) in the element. ``VAL1``\ can also represent a table name
+            for use with tabular boundary conditions. Enter only ``VAL1``\ for a uniform
+            body load across the element. For nonuniform loads, the values must be input
+            in the same order as shown in the input table for the element type. Values
+            initially default to the `BFUNIF
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFUNIF.html>`_\
             value (except for CHRGD which defaults to zero). For subsequent
-            specifications, a blank leaves a previously specified value
-            unchanged; if the value was not previously specified, the
-            default value as described in the `*Element Reference*\
+            specifications, a blank leaves a previously specified value unchanged; if
+            the value was not previously specified, the default value as described in
+            the `*Element Reference*\
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ElemTOC.html>`_
             is used.
 
-            For ``Lab``\ = JS and ``STLOC``\ = 1, ``VAL1``, ``VAL2``\ and
-            ``VAL3``\ are the X, Y, and Z components of current density (in
-            the element coordinate system), and ``VAL4``\ is the phase
-            angle.
+            For ``Lab``\ = JS and ``STLOC``\ = 1, ``VAL1``, ``VAL2``\ and ``VAL3``\ are
+            the X, Y, and Z components of current density (in the element coordinate
+            system), and ``VAL4``\ is the phase angle.
 
-            For ``Lab``\ = EF and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the X, Y, and Z components of electric field (in
-            the global Cartesian coordinate system).
+            For ``Lab``\ = EF and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and ``VAL3``\ are
+            the X, Y, and Z components of electric field (in the global Cartesian
+            coordinate system).
 
-            If ``Lab``\ = FVIN in a unidirectional Mechanical APDL to Ansys
-            CFX analysis, ``VAL2``\ is the volume interface number (not
-            available from within the GUI), and ``VAL1``, ``VAL3``, and
-            ``VAL4``\ are not used.
+            If ``Lab``\ = FVIN in a unidirectional Mechanical APDL to Ansys CFX
+            analysis, ``VAL2``\ is the volume interface number (not available from
+            within the GUI), and ``VAL1``, ``VAL3``, and ``VAL4``\ are not used.
 
-            For ``Lab``\ = FORC and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the real X, Y, and Z components of force density
-            (in the global Cartesian coordinate system).
-
-            For ``Lab``\ = DIVT and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the X, Y, and Z components of the real part of
-            divergence of Lighthill's tensor (in the element coordinate
-            system), and ``VAL4``, ``VAL5``, and ``VAL6``\ are the X, Y, and
-            Z components of the imaginary part of divergence of Lighthill's
-            tensor (in the element coordinate system).
-
-            For analyses that allow complex input, if ``Lab``\ = FORC and
-            ``STLOC``\ = 4, ``VAL1``, ``VAL2``, and ``VAL3``\ are the
-            imaginary X, Y, and Z components of force density (in the global
+            For ``Lab``\ = FORC and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and ``VAL3``\
+            are the real X, Y, and Z components of force density (in the global
             Cartesian coordinate system).
 
-        val5 : str
-            For ``Lab``\ = TEMP, FLUE, DGEN, HGEN, and CHRGD, ``VAL1``\
-            --``VAL4``\ represent body load values at the starting location
-            and subsequent locations (usually nodes) in the element.
-            ``VAL1``\ can also represent a table name for use with tabular
-            boundary conditions. Enter only ``VAL1``\ for a uniform body
-            load across the element. For nonuniform loads, the values must
-            be input in the same order as shown in the input table for the
-            element type. Values initially default to the `BFUNIF
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFUNIF.html>`_\
-            value (except for CHRGD which defaults to zero). For subsequent
-            specifications, a blank leaves a previously specified value
-            unchanged; if the value was not previously specified, the
-            default value as described in the `*Element Reference*\
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ElemTOC.html>`_
-            is used.
+            For ``Lab``\ = DIVT and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and ``VAL3``\
+            are the X, Y, and Z components of the real part of divergence of Lighthill's
+            tensor (in the element coordinate system), and ``VAL4``, ``VAL5``, and
+            ``VAL6``\ are the X, Y, and Z components of the imaginary part of divergence
+            of Lighthill's tensor (in the element coordinate system).
 
-            For ``Lab``\ = JS and ``STLOC``\ = 1, ``VAL1``, ``VAL2``\ and
-            ``VAL3``\ are the X, Y, and Z components of current density (in
-            the element coordinate system), and ``VAL4``\ is the phase
-            angle.
-
-            For ``Lab``\ = EF and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the X, Y, and Z components of electric field (in
-            the global Cartesian coordinate system).
-
-            If ``Lab``\ = FVIN in a unidirectional Mechanical APDL to Ansys
-            CFX analysis, ``VAL2``\ is the volume interface number (not
-            available from within the GUI), and ``VAL1``, ``VAL3``, and
-            ``VAL4``\ are not used.
-
-            For ``Lab``\ = FORC and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the real X, Y, and Z components of force density
-            (in the global Cartesian coordinate system).
-
-            For ``Lab``\ = DIVT and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the X, Y, and Z components of the real part of
-            divergence of Lighthill's tensor (in the element coordinate
-            system), and ``VAL4``, ``VAL5``, and ``VAL6``\ are the X, Y, and
-            Z components of the imaginary part of divergence of Lighthill's
-            tensor (in the element coordinate system).
-
-            For analyses that allow complex input, if ``Lab``\ = FORC and
-            ``STLOC``\ = 4, ``VAL1``, ``VAL2``, and ``VAL3``\ are the
-            imaginary X, Y, and Z components of force density (in the global
-            Cartesian coordinate system).
-
-        val6 : str
-            For ``Lab``\ = TEMP, FLUE, DGEN, HGEN, and CHRGD, ``VAL1``\
-            --``VAL4``\ represent body load values at the starting location
-            and subsequent locations (usually nodes) in the element.
-            ``VAL1``\ can also represent a table name for use with tabular
-            boundary conditions. Enter only ``VAL1``\ for a uniform body
-            load across the element. For nonuniform loads, the values must
-            be input in the same order as shown in the input table for the
-            element type. Values initially default to the `BFUNIF
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFUNIF.html>`_\
-            value (except for CHRGD which defaults to zero). For subsequent
-            specifications, a blank leaves a previously specified value
-            unchanged; if the value was not previously specified, the
-            default value as described in the `*Element Reference*\
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ElemTOC.html>`_
-            is used.
-
-            For ``Lab``\ = JS and ``STLOC``\ = 1, ``VAL1``, ``VAL2``\ and
-            ``VAL3``\ are the X, Y, and Z components of current density (in
-            the element coordinate system), and ``VAL4``\ is the phase
-            angle.
-
-            For ``Lab``\ = EF and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the X, Y, and Z components of electric field (in
-            the global Cartesian coordinate system).
-
-            If ``Lab``\ = FVIN in a unidirectional Mechanical APDL to Ansys
-            CFX analysis, ``VAL2``\ is the volume interface number (not
-            available from within the GUI), and ``VAL1``, ``VAL3``, and
-            ``VAL4``\ are not used.
-
-            For ``Lab``\ = FORC and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the real X, Y, and Z components of force density
-            (in the global Cartesian coordinate system).
-
-            For ``Lab``\ = DIVT and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and
-            ``VAL3``\ are the X, Y, and Z components of the real part of
-            divergence of Lighthill's tensor (in the element coordinate
-            system), and ``VAL4``, ``VAL5``, and ``VAL6``\ are the X, Y, and
-            Z components of the imaginary part of divergence of Lighthill's
-            tensor (in the element coordinate system).
-
-            For analyses that allow complex input, if ``Lab``\ = FORC and
-            ``STLOC``\ = 4, ``VAL1``, ``VAL2``, and ``VAL3``\ are the
-            imaginary X, Y, and Z components of force density (in the global
-            Cartesian coordinate system).
+            For analyses that allow complex input, if ``Lab``\ = FORC and ``STLOC``\ =
+            4, ``VAL1``, ``VAL2``, and ``VAL3``\ are the imaginary X, Y, and Z
+            components of force density (in the global Cartesian coordinate system).
 
         Notes
         -----
 
         .. _BFE_notes:
 
-        Defines an element body-force load (such as the temperature in a
-        structural analysis or the heat-generation rate in a thermal analysis).
-        Body loads and element specific defaults are described for each element
-        type in the `*Element Reference*\
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ElemTOC.html>`_.
-        If both the `BF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BF.html>`_\
-        and `BFE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_\
-        commands are used to apply a body-force load to an element, the `BFE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_\
-        command takes precedence.
+        Defines an element body-force load (such as the temperature in a structural analysis or the heat-
+        generation rate in a thermal analysis). Body loads and element specific defaults are described for
+        each element type in the `Element Reference
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_. If both the
+        :ref:`bf` and :ref:`bfe` commands are used to apply a
+        body-force load to an element, the :ref:`bfe` command takes precedence.
 
-        **Body-Force Density (FORC)**
+        Imaginary values for FORC loading via :ref:`bfe` is supported by current-technology solid elements (
+        ``PLANE182``, ``PLANE183``, ``SOLID185``, ``SOLID186``, ``SOLID187``, and ``SOLID285`` ) and
+        reinforcing elements ( ``REINF263``, ``REINF264``, and ``REINF265`` ). Use only for modal or
+        harmonic analyses. Large-deflection effects must be disabled ( :ref:`nlgeom`,OFF).
 
-        Imaginary values for FORC loading via `BFE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_\
-        is supported by current-technology solid elements (`PLANE182
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE182.html>`_,
-        `PLANE183
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE183.html>`_,
-        `SOLID185
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID185.html>`_,
-        `SOLID186
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID186.html>`_,
-        `SOLID187
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID187.html>`_,
-        and `SOLID285
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID285.html>`_)
-        and reinforcing elements (`REINF263
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF263.html>`_,
-        `REINF264
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF264.html>`_,
-        and `REINF265
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF265.html>`_).
-        Use only for modal or harmonic analyses. Large-deflection effects must
-        be disabled (`NLGEOM
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLGEOM.html>`_,OFF).
+        The following topics for applying HGEN loading via the :ref:`bfe` command are available:
 
-        **Heat-Generation Loading (HGEN)**
+        For HGEN loading on layered thermal solid elements ``SOLID278`` / ``SOLID279`` (KEYOPT(3) = 1 or 2),
+        or layered thermal shell elements ``SHELL131`` / ``SHELL132`` (KEYOPT(3) = 1), ``STLOC`` refers to
+        the layer number (not the node). In such cases, specify ``VAL1`` through ``VAL4`` to specify the
+        heat-generation values for the appropriate layers. Heat generation is constant over the layer.
 
-        The following topics for applying HGEN loading via the `BFE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_\
-        command are available:
+        For HGEN loading on `reinforcing
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/str_compreinfdirectemb.html>`_
+        elements ``REINF263``, ``REINF264``, and ``REINF265``, ``STLOC`` refers to the corner locations of
+        the reinforcing members (individual reinforcings):
 
-        **On Layered Thermal Solid Elements**
+        * ``REINF263`` and ``REINF264`` : Specify ``VAL1`` and ``VAL2`` for each member. For tables, specify
+          ``VAL1`` only.
 
-        For HGEN loading on layered thermal solid elements, `SOLID278
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID278.html>`_
-        / `SOLID279
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID279.html>`_
-        (KEYOPT(3) = 1 or 2), layered thermal shell elements, `SHELL131
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL131.html>`_
-        / `SHELL132
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL132.html>`_
-        (KEYOPT(3) = 1), `SHELL294
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL294.html>`_,
-        and the coupled-field shell element, `SHELL229
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL229.html>`_
-        with temperature DOF, ``STLOC``\ refers to the *layer*\ number (not the
-        node). In such cases, specify ``VAL1``\ through ``VAL4``\ to specify the
-        heat-generation values for the appropriate layers. Heat generation is
-        constant over the layer.
+        * ``REINF265`` : Specify ``VAL1``, ``VAL2``, ``VAL3``, and ``VAL4`` for each member. For tables,
+          specify ``VAL1`` only.
 
-        **On Reinforcing Elements**
-
-        For HGEN and TEMP loadings on `reinforcing
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_adv/Hlp_G_ADVREINF.html>`_
-        elements `REINF263
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF263.html>`_,
-        `REINF264
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF264.html>`_,
-        and `REINF265
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF265.html>`_,
-        ``STLOC``\ refers to the corner locations of the reinforcing members
-        (individual reinforcings):
-
-        * `REINF263
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF263.html>`_
-          and `REINF264
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF264.html>`_:
-          Specify ``VAL1``\ and ``VAL2``\ for each member. For tables, specify
-          ``VAL1``\ only.
-
-        * `REINF265
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF265.html>`_:
-          Specify ``VAL1``, ``VAL2``, ``VAL3``, and ``VAL4``\ for each member.
-          For tables, specify ``VAL1``\ only.
-
-        For FORC loading on reinforcing elements, ``STLOC``\ refers to real
-        (``STLOC``\ = 1) or imaginary (``STLOC``\ = 4) components.
+        For FORC loading on reinforcing elements, ``STLOC`` refers to real ( ``STLOC`` = 1) or imaginary (
+        ``STLOC`` = 4) components.
 
         When using the `standard method
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_adv/strreinfworkflow.html#reinfstandardmethod>`_
-        for defining reinforcing, this is the only way to apply a body load
-        (HGEN, FORC, or TEMP) on the reinforcing members created after
-        generating the REINF``nnn``\ reinforcing elements (`EREINF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EREINF.html>`_).
-        If applying FORC loading, the program applies a uniform load to all
-        reinforcing members if there are multiple members in selected elements.
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/strreinfworkflow.html#>`_ for
+        defining reinforcing, this is the only way to apply a body load (HGEN or FORC) on the reinforcing
+        members created after generating the REINF ``nnn`` reinforcing elements ( :ref:`ereinf` ). If
+        applying FORC loading, Mechanical APDL applies a uniform load to all reinforcing members if there
+        are
+        multiple members in selected elements.
 
         When using the `mesh-independent method
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_adv/strreinfworkflow.html#reinfmeshinddmethod>`_
-        for defining reinforcing, you can apply a body load on the reinforcing
-        members in the same way. The *preferred*\ method, however, is to apply
-        loads on the `MESH200
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-        elements (via `BFE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_\
-        or `BF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BF.html>`_\
-        for HGEN or TEMP, `BFE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_\
-        for FORC) *before*\ generating the REINF``nnn``\ reinforcing elements
-        (`EREINF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EREINF.html>`_).
-        The program maps the loads from the `MESH200
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-        elements to the newly generated REINF``nnn``\ reinforcing elements
-        automatically. For TEMP element loading, specify temperature loads at
-        all corner nodes of `MESH200
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-        elements. `MESH200
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-        elements with unspecified or partially specified TEMP loads (`BFE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_\
-        or `BF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BF.html>`_)
-        are excluded. If you specify TEMP loads with both `BFE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_\
-        and `BF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BF.html>`_\
-        commands on a `MESH200
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-        element, the `BFE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_\
-        command input is used for the load mapping.
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/strreinfworkflow.html#>`_ for
+        defining reinforcing, you can apply a body load on the reinforcing members in the same way. The
+        preferred method, however, is to apply loads on the ``MESH200`` elements (via :ref:`bfe` or
+        :ref:`bf` for HGEN, BFE for FORC) before generating the REINF ``nnn`` reinforcing elements (
+        :ref:`ereinf` ). Mechanical APDL maps the loads from the ``MESH200`` elements to the newly generated
+        REINF
+        ``nnn`` reinforcing elements automatically. If you need to apply the loads after generating the
+        reinforcing elements, apply them to ``MESH200`` elements and issue :ref:`bfport` to transfer the
+        loads to the reinforcing members.
 
-        If you need to apply the loads *after*\ generating the reinforcing
-        elements, apply them to `MESH200
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-        elements and issue `BFPORT
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFPORT.html>`_\
-        to transfer the loads to the reinforcing members.
+        You can specify a table name ( ``VAL1`` ) when using temperature (TEMP), diffusing substance
+        generation rate (DGEN), heat generation rate (HGEN), and current density (JS) body load labels.
 
-        **Specifying a Table**
+        For the body-force-density label (FORC), you can specify a table for any of the ``VAL1`` through
+        ``VAL3`` arguments. Both 1D and 2D tables are valid; however, only 1D tables are valid in mode-
+        superposition harmonic and mode-superposition transient analyses.
 
-        You can specify a table name (``VAL1``) when using temperature (TEMP),
-        diffusing substance generation rate (DGEN), heat generation rate (HGEN),
-        and current density (JS) body load labels.
+        Enclose the table name ( ``tabname`` ) in percent signs (%), for example :
 
-        For the body-force-density label (FORC), you can specify a table for any
-        of the ``VAL1``\ through ``VAL3``\ arguments. Both 1D and 2D tables are
-        valid; however, only 1D tables are valid in mode-superposition harmonic
-        and mode-superposition transient analyses.
+        :ref:`bfe`, ``Elem``, ``Lab``, ``STLOC``,``tabname``
 
-        Enclose the table name (``tabname``) in percent signs (%), for example:
+        Use the :ref:`dim` command to define a table. For information on primary variables for each load
+        type, see `Applying Loads Using Tabular Input
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS2_6.html#gbas5dexample>`_
 
-        `BFE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_,``Elem``,
-        ``Lab``,``STLOC``,%``tabname``\ %
+        For ``Lab`` = TEMP, each table defines ``NTEMP`` temperatures, as follows:
 
-        Use the `\*DIM
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_\
-        command to define a table. For information on primary variables for each
-        load type, see `Applying Loads Using Tabular Input in the Basic Analysis
-        Guide
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_bas/Hlp_G_BAS2_6.html#apoQxq21cmcm>`_.
+        * For layered elements, ``NTEMP`` is the number of layer interface corners that allow temperature
+          input.
 
-        For ``Lab``\ = TEMP, each table defines ``NTEMP``\ temperatures, as
-        follows:
+        * For non-layered elements, ``NTEMP`` is the number of corner nodes.
 
-        * For layered elements, ``NTEMP``\ is the number of layer interface
-          corners that allow temperature input.
+        The temperatures apply to element items with a starting location of ``STLOC`` + ``n``, where n is
+        the value field location ( ``VALn`` ) of the table name input.
 
-        * For non-layered elements, ``NTEMP``\ is the number of corner nodes.
+        For layered elements, a single :ref:`bfe` command returns temperatures for one layer interface.
+        Multiple :ref:`bfe` commands are necessary for defining all layered temperatures.
 
-        The temperatures apply to element items with a starting location of
-        ``STLOC``\ + ``n``, where n is the value field location (``VALn``) of
-        the table name input.
+        For beam, pipe and elbow elements that allow multiple temperature inputs per node, define the
+        tabular load for the first node only (Node I), as loads on the remaining nodes are applied
+        automatically. For example, to specify a tabular temperature load on a ``PIPE288`` element with the
+        through-wall-gradient option (KEYOPT(1) = 0), the :ref:`bfe` command looks like this:
 
-        For layered elements, a single `BFE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_\
-        command returns temperatures for one layer interface. Multiple `BFE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_\
-        commands are necessary for defining all layered temperatures.
+        :ref:`bfe`, ``Elem``,TEMP,1,``tabOut``, ``tabIn%``
 
-        For beam, pipe and elbow elements that allow multiple temperature inputs
-        per node, define the tabular load for the first node only (Node I), as
-        loads on the remaining nodes are applied automatically. For example, to
-        specify a tabular temperature load on a `PIPE288
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PIPE288.html>`_
-        element with the through-wall-gradient option (KEYOPT(1) = 0), the `BFE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_\
-        command looks like this:
+        where %
 
-        `BFE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_,``Elem``,TEMP,1,%``tabOut``\
-        %, %``tabIn%``\
+         ``tabOut`` and ``tabIn`` and are the tables applied to the outer and inner surfaces of the pipe
+        wall, respectively.
 
-        where %``tabOut``\ % and %``tabIn``\ % and are the tables applied to the
-        outer and inner surfaces of the pipe wall, respectively.
+        When a tabular function load is applied to an element, the load does not vary according to the
+        positioning of the element in space.
 
-        When a tabular function load is applied to an element, the load does not
-        vary according to the positioning of the element in space.
-
-        In a mode-superposition harmonic or transient analysis, you must apply
-        the load in the modal portion of the analysis. Mechanical APDL
-        calculates a load vector and writes it to the ``MODE``\ file, which you
-        can apply via the `LVSCALE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_LVSCALE.html>`_\
-        command.
-
-        **Other Information**
-
-        Graphical picking is available only via the listed menu paths.
+        In a mode-superposition harmonic or transient analysis, you must apply the load in the modal portion
+        of the analysis. Mechanical APDL calculates a load vector and writes it to the :file:`MODE` file,
+        which you
+        can apply via the :ref:`lvscale` command.
 
         This command is also valid in PREP7.
-
-        **Example Usage**
-
-        See this example problem `Reliability Study of a Composite Overwrapped
-        Pressure Vessel in the Technology Showcase: Example Problems
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tecpressurevessel.html>`_.
         """
         command = f"BFE,{elem},{lab},{stloc},{val1},{val2},{val3},{val4},{val5},{val6}"
         return self.run(command, **kwargs)

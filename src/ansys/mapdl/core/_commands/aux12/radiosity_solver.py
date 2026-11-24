@@ -100,72 +100,39 @@ class RadiositySolver(CommandsBase):
         Parameters
         ----------
         srcelem : str
-            Elements representing the source radiating surfaces used to
-            query the view factor at the target element(s). If ``SRCELEM``\
-            = P, graphical picking is enabled (valid only in the GUI). If
-            ``SRCELEM``\ = ALL, all selected elements will have their view
-            factors queried. A component name may also be substituted for
-            ``SRCELEM``. Selected elements must be flagged for surface to
-            surface radiation in order to query view factors (`SF
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SF.html>`_,
-            `SFA
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SFA.html>`_,
-            or `SFE
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SFE.html>`_\
-            with Lab = RDSF). The view factors must have been previously
-            computed.
+            Elements representing the source radiating surfaces used to query the view factor at the target
+            element(s). If ``SRCELEM`` = P, graphical picking is enabled (valid only in the GUI). If
+            ``SRCELEM`` = ALL, all selected elements will have their view factors queried. A component name
+            may also be substituted for ``SRCELEM``. Selected elements must be flagged for surface to
+            surface radiation in order to query view factors ( :ref:`sf`, :ref:`sfa`, or :ref:`sfe` with Lab
+            = RDSF). The view factors must have been previously computed.
 
         tarelem : str
-            Element for view factor query. If ``TARELEM``\ = P, graphical
-            picking is enabled (valid only in the GUI). If ``TARELEM``\ =
-            ALL, all selected elements will have their view factors queried.
-            A component name may also be substituted for ``TARELEM``.
-            Selected elements must be flagged for surface to surface
-            radiation in order to query view factors (`SF
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SF.html>`_,
-            `SFA
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SFA.html>`_,
-            or `SFE
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SFE.html>`_\
-            with Lab = RDSF). The view factors must have been previously
-            computed.
+            Element for view factor query. If ``TARELEM`` = P, graphical picking is enabled (valid only in
+            the GUI). If ``TARELEM`` = ALL, all selected elements will have their view factors queried. A
+            component name may also be substituted for ``TARELEM``. Selected elements must be flagged for
+            surface to surface radiation in order to query view factors ( :ref:`sf`, :ref:`sfa`, or
+            :ref:`sfe` with Lab = RDSF). The view factors must have been previously computed.
 
         wropt : str
-            Option to write view factors to the output file
-            (``Jobname.out``).
+            Option to write view factors to the output file (``Jobname.out``).
 
             * ``WON`` - Write view factors to the output file (default).
 
-            * ``WOFF`` - Do not write view factors to the output file. This
-              is useful for reducing the size of the output file.
+            * ``WOFF`` - Do not write view factors to the output file. This is useful
+              for reducing the size of the output file.
 
         Notes
         -----
 
         .. _VFQUERY_notes:
 
-        This is an action command that:
+        View factors for each target element will be printed.
 
-        * Queries the view factors for the interactions between each selected
-          source element with each selected target element and computes the
-          average view factor.
+        An average view factor for all target elements will be computed. (Use :ref:`get` to retrieve the
+        average value).
 
-        * Writes the view factors for the interactions between each source
-          element with each target element to the output file if ``WrOpt``\ =
-          WON.
-
-        To retrieve the calculated average view factor, issue `\*GET
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_GET.html>`_,``Par``,RAD,,VFAVG.
-
-        If you are only interested in the average view factor, set ``WrOpt``\ =
-        WOFF, and issue `\*GET
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_GET.html>`_\
-        to reduce the size of the output file and save time.
-
-        When resuming a database, issue the command `VFOPT
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VFOPT.html>`_,READ
-        before issuing the `VFQUERY
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VFQUERY.html>`_\
+        When resuming a database, issue the command :ref:`vfopt`,READ before issuing the :ref:`vfquery`
         command.
         """
         command = f"VFQUERY,{srcelem},{tarelem},,{wropt}"

@@ -183,291 +183,241 @@ class Database(CommandsBase):
 
         Parameters
         ----------
-        option : str
+            option
             Selects which data to write:
 
-            * ``ALL`` - Write all appropriate geometry, material property,
-              load, and component data (default). Two files will be
-              produced. ``Fname.Ext``\ will contain all data items mentioned
-              in `"Notes"
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html#CDWRITE.notes>`_,
-              except the solid model data. ``Fnamei.Exti``\ will contain the
-              solid model geometry and solid model loads data in the form of
-              IGES commands. This option is not valid when `CDOPT
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDOPT.html>`_,ANF
-              is active.
+            ALL
+            Write all appropriate geometry, material property,
+            load, and component data (default). Two files will
+            be produced. ``Fname.Ext`` will contain all data items
+            mentioned in "Notes", except the solid model
+            data. ``Fnamei.Exti`` will contain the solid model
+            geometry and solid model loads data in the form of
+            ``IGES`` commands. This option is not valid when
+            ``CDOPT,ANF`` is active.
 
-            * ``COMB`` - Write all data mentioned, but to a single file,
-              ``Fname.Ext``. Solid model geometry data will be written in
-              either IGES or ANF format as specified in the `CDOPT
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDOPT.html>`_\
-              command, followed by the remainder of the data in the form of
-              Mechanical APDL commands. More information on these (IGES/ANF)
-              file formats is provided in `"Notes"
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html#CDWRITE.notes>`_.
+            COMB
+            Write all data mentioned, but to a single file,
+            ``Fname.Ext``. Solid model geometry data will be
+            written in either ``IGES`` or ``ANF`` format as specified
+            in the ``CDOPT`` command, followed by the remainder of
+            the data in the form of ANSYS commands. More
+            information on these (IGES/ANF) file formats is
+            provided in "Notes".
 
-            * ``DB`` - Write all database information except the solid model
-              and solid model loads to ``Fname.Ext``\ in the form of
-              Mechanical APDL commands. This option is not valid when `CDOPT
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDOPT.html>`_,ANF
-              is active.
+            DB
+            Write all database information except the solid model
+            and solid model loads to ``Fname.Ext`` in the form of
+            ANSYS commands. This option is not valid when
+            ``CDOPT,ANF`` is active.
 
-            * ``SOLID`` - Write only the solid model geometry and solid
-              model load data. This output will be in IGES or ANF format, as
-              specified in the `CDOPT
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDOPT.html>`_\
-              command. More information on these (IGES/ANF) file formats is
-              provided in `"Notes"
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html#CDWRITE.notes>`_.
+            SOLID
+            Write only the solid model geometry and solid
+            model load data. This output will be in IGES or
+            ANF format, as specified in the ``CDOPT``
+            command. More information on these (``IGES/ANF``) file
+            formats is provided in "Notes".
 
-            * ``GEOM`` - Write only element and nodal geometry data. Neither
-              solid model geometry nor element attribute data will be
-              written. One file, ``Fname.Ext``, will be produced. Use
-              `CDREAD
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDREAD.html>`_,DB
-              to read in a file written with this option. Element types (`ET
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ET.html>`_)
-              compatible with the connectivity of the elements on the file
-              must first be defined before reading the file in with `CDREAD
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDREAD.html>`_,DB.
+            GEOM
+            Write only element and nodal geometry data. Neither
+            solid model geometry nor element attribute data
+            will be written. One file, ``Fname.Ext``, will be
+            produced. Use ``CDREAD,DB`` to read in a file written
+            with this option. Element types [``ET``] compatible
+            with the connectivity of the elements on the file
+            must first be defined before reading the file in
+            with ``CDREAD,DB``.
 
-            * ``CM`` - Write only node and element component and geometry
-              data to ``Fname.Ext``.
+            CM
+            Write only node and element component and geometry
+            data to ``Fname.Ext``.
 
-            * ``MAT`` - Write only material property data (both linear and
-              nonlinear) to ``Fname.Ext``.
+            MAT
+            Write only material property data (both linear and
+            nonlinear) to ``Fname.Ext``.
 
-            * ``LOAD`` - Write only loads for current load step to
-              ``Fname.Ext``.
+            LOAD
+            Write only loads for current load step to
+            ``Fname.Ext``.
 
-            * ``SECT`` - Write only section data to ``Fname.Ext``.
-              Pretension sections are not included.
+            SECT
+            Write only section data to ``Fname.Ext``. Pretension
+            sections are not included.
 
-        fname : str
-            File name and directory path (248 characters maximum, including
-            the characters needed for the directory path). An unspecified
-            directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name.
+            fname
+            File name and directory path (248 characters maximum,
+            including the characters needed for the directory path).
+            An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters
+            for the file name.
 
-        ext : str
+            ext
             Filename extension (eight-character maximum).
 
-            The extension defaults to CDB if ``Fname``\ is blank.
+            fnamei
+            Name of the IGES file and its directory path (248
+            characters maximum, including directory). If you do not
+            specify a directory path, it will default to your working
+            directory and you can use all 248 characters for the file
+            name.
 
-        fnamei : str
-            Name of the IGES file and its directory path (248 characters
-            maximum, including directory). If you do not specify a directory
-            path, it will default to your working directory and you can use
-            all 248 characters for the file name.
-
-            The file name defaults to ``Fname``. Used only if ``Option``\ =
-            ALL or SOLID. Previous data on this file, if any, is
-            overwritten.
-
-        exti : str
+            exti
             Filename extension (eight-character maximum).
 
-            The extension defaults to IGES in all cases, except when `CDOPT
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDOPT.html>`_,ANF
-            is active and `CDWRITE
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_,``Option``\
-            = SOLID. In this case ``Exti``\ = ANF.
-
-        fmat : str
+            fmat
             Format of the output file (defaults to BLOCKED).
 
-            * ``BLOCKED`` - Blocked format. This format allows faster
-              reading of the output file. The time savings is most
-              significant when BLOCKED is used to read ``.cdb``\ files
-              associated with very large models.
+            BLOCKED
+            Blocked format. This format allows faster
+            reading of the output file. The time savings is
+            most significant when BLOCKED is used to read
+            .cdb files associated with very large models.
 
-            * ``UNBLOCKED`` - Unblocked format.
+            UNBLOCKED
+            Unblocked format.
 
-            * ``BINARY`` - Binary format. This format writes the nodes and
-              elements into a binary file when applicable, which reduces the
-              size of ``.cdb``\ files. Otherwise, the blocked format is
-              used.
+        Returns
+        -------
+        str
+            Mapdl command output.
 
         key : str
-            Command argument ``KEY``. Refer to the `CDWRITE command
-            documentation
+            Option-specific command argument. Refer to the `CDWRITE command documentation
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_
-            for option-specific definitions.
+            for details.
 
         Notes
         -----
 
         .. _CDWRITE_notes:
 
-        * ``Key`` - Format key required for `Multistage
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_mstag/ans_mstag_intro.html>`_
-          workflow in Workbench.
-
-          * ``DUPL`` - Ensures the correct numbering offsets are applied when
-            writing a ``.cdb``\ file for automatic sector mesh duplication.
-
-        Load data includes the current load step only. Loads applied to the
-        solid model (if any) are automatically transferred to the finite element
-        model when this command is issued. `CDWRITE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_\
-        writes out solid model loads for meshed models only. If the model is not
-        meshed, the solid model loads cannot be saved. Component data include
-        component definitions, but not assembly definitions. Appropriate `NUMOFF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NUMOFF.html>`_\
-        commands are included at the beginning of the file; this is to avoid
+        Load data includes the current load step only. Loads applied to the solid model (if any) are
+        automatically transferred to the finite element model when this command is issued. :ref:`cdwrite`
+        writes out solid model loads for meshed models only. If the model is not meshed, the solid model
+        loads cannot be saved. Component data include component definitions, but not assembly definitions.
+        Appropriate :ref:`numoff` commands are included at the beginning of the file; this is to avoid
         overlap of an existing database when the file is read in.
 
-        Solution control commands are typically not written to the file unless
-        you specifically change a default solution setting.
+        Solution control commands are typically not written to the file unless you specifically change a
+        default solution setting.
 
-        `CDWRITE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_\
-        does not support the `GSBDATA
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_GSBDATA.html>`_\
-        and `GSGDATA
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_GSGDATA.html>`_\
-        commands, and these commands are not written to the file.
+        :ref:`cdwrite` does not support the :ref:`gsbdata` and :ref:`gsgdata` commands, and these commands
+        are not written to the file.
 
-        The data may be reread (on a different machine, for example) with the
-        `CDREAD
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDREAD.html>`_\
-        command. Caution: When the file is read in, the `NUMOFF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NUMOFF.html>`_,MAT
-        command may cause a mismatch between material definitions and material
-        numbers referenced by certain loads and element real constants. See
-        `NUMOFF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NUMOFF.html>`_\
-        for details. Also, be aware that the files created by the `CDWRITE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_\
-        command explicitly set the active coordinate system to Cartesian (`CSYS
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CSYS.html>`_,0).
+        The data may be reread (on a different machine, for example) with the :ref:`cdread` command.
+        Caution: When the file is read in, the :ref:`numoff`,MAT command may cause a mismatch between
+        material definitions and material numbers referenced by certain loads and element real constants.
+        See :ref:`numoff` for details. Also, be aware that the files created by the :ref:`cdwrite` command
+        explicitly set the active coordinate system to Cartesian ( :ref:`csys`,0).
 
-        You should generally use the blocked format (``Fmat``\ = BLOCKED) when
-        writing out model data with `CDWRITE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_.
-        This is a compressed data format that greatly reduces the time required
-        to read large models through the `CDREAD
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDREAD.html>`_\
-        command. The blocked and unblocked formats are described in `The CDWRITE
-        (CDB) File Format in the Programmer's Reference
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Hlp_P_INT3.html>`_.
+        You should generally use the blocked format ( ``Fmat`` = BLOCKED) when writing out model data with
+        :ref:`cdwrite`. This is a compressed data format that greatly reduces the time required to read
+        large models through the :ref:`cdread` command. The blocked and unblocked formats are described in
+        `The CDWRITE (CDB) File Format
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_prog/Hlp_P_INT3_3.html>`_
 
-        If you use `CDWRITE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_\
-        in any of the derived products (Ansys Mechanical Pro, Ansys Mechanical
-        Premium), then before reading the file, you must edit the
-        ``Jobname.cdb``\ file to remove commands that are not available in the
+        If you use :ref:`cdwrite` in any of the derived products (Ansys Mechanical Pro, Ansys Mechanical
+        Premium), then before reading the
+        file, you must edit the :file:`Jobname.cdb` file to remove commands that are not available in the
         respective component product.
 
-        The `CDWRITE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_\
-        command does not support (for beam meshing) any line operation that
-        relies on solid model associativity. For example, meshing the areas
-        adjacent to the meshed line, plotting the line that contains the
-        orientation nodes, or clearing the mesh from the line that contains
-        orientation nodes may not work as expected. For more information about
-        beam meshing, see `Meshing Your Solid Model
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_mod/Hlp_G_MOD7.html>`_
-        in the `*Modeling and Meshing Guide*\
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_mod/Hlp_G_ModTOC.html>`_.
+        The :ref:`cdwrite` command does not support (for beam meshing) any line operation that relies on
+        solid model associativity. For example, meshing the areas adjacent to the meshed line, plotting the
+        line that contains the orientation nodes, or clearing the mesh from the line that contains
+        orientation nodes may not work as expected. For more information about beam meshing, see `Meshing
+        Your Solid Model
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD7_8.html>`_ in the
+        `Modeling and Meshing Guide
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_.
 
-        If you issue `CDWRITE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_\
-        to write a ``.cdb``\ file containing a user-defined element, manually
-        insert `USRELEM
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_USRELEM.html>`_\
-        and `USRDOF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_USRDOF.html>`_\
-        commands in the ``.cdb``\ file to provide the user-defined element
-        characteristics. Insert the two commands *after*\ the `ET
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ET.html>`_\
-        command (defining the user-defined element) and *before*\ the `EBLOCK
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Hlp_P_INT3_3.html#dLN4r34clcd>`_
-        command. (If multiple element types are defined in the ``.cdb``\ file,
-        insert the `TYPE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TYPE.html>`_\
-        command to select the user-defined element. Place it *before*\ `USRELEM
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_USRELEM.html>`_\
-        and `USRDOF
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_USRDOF.html>`_.)
+        If you issue :ref:`cdwrite` to write a :file:`.cdb` file containing a user-defined element, manually
+        insert :ref:`usrelem` and :ref:`usrdof` commands in the :file:`.cdb` file to provide the user-
+        defined element characteristics. Insert the two commands after the :ref:`et` command (defining the
+        user-defined element) and before the ``EBLOCK``  command. (If multiple element types are defined in
+        the :file:`.cdb` file, insert the :ref:`type` command to select the user-defined element. Place it
+        before  :ref:`usrelem` and :ref:`usrdof`.)
 
-        If radiosity surface elements (`SURF251
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SURF251.html>`_
-        or `SURF252
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SURF252.html>`_)
-        are present in the model, a radiosity mapping data file, ``Fname.RSM,``\
-        is also saved when the `CDWRITE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_\
-        command is issued. For more information, see `Advanced Radiosity Options
-        in the Thermal Analysis Guide
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_the/Hlp_G_THEadvrad.html>`_.
+        If radiosity surface elements ( ``SURF251`` or ``SURF252`` ) are present in the model, a radiosity
+        mapping data file, :file:`Fname.RSM,` is also saved when the :ref:`cdwrite` command is issued. For
+        more information, see `Advanced Radiosity Options
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_the/Hlp_G_THEadvrad.html#themultrsymm>`_
 
-        **IGES and ANF File Formats for Solid Model Geometry Information**\
+        *\*IGES and ANF File Formats for Solid Model Geometry Information**
 
-        The format used for solid model geometry information is determined by
-        the current `CDOPT
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDOPT.html>`_\
+        The format used for solid model geometry information is determined by the current :ref:`cdopt`
         command setting. The default format is IGES.
 
-        IGES option (default) to write solid model information (`CDOPT
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDOPT.html>`_,
-        IGS):
+        IGES option (default) to write solid model information ( :ref:`cdopt`, IGS):
 
-        * Before writing solid model entities, select all corresponding lower
-          level entities (`ALLSEL
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ALLSEL.html>`_,BELOW,ALL).
+        * Before writing solid model entities, select all corresponding lower level entities (
+          :ref:`allsel`,BELOW,ALL).
 
-        * Section properties assigned to areas, lines and other solid model
-          entities are not maintained when the model is exported.
+        * Section properties assigned to areas, lines and other solid model entities are not maintained when
+          the model is exported.
 
-        * If you issue `CDWRITE
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_\
-          after generating a beam mesh with orientation nodes, the database file
-          will contain all of the nodes for every beam element, including the
-          orientation nodes; however, the orientation keypoints that were
-          specified for the line (`LATT
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_LATT.html>`_)
-          are no longer associated with the line and won't be written out to the
-          geometry file. All associativity between the line and the orientation
-          keypoints is lost.
+        * If you issue :ref:`cdwrite` after generating a beam mesh with orientation nodes, the database file
+          will contain all of the nodes for every beam element, including the orientation nodes; however,
+          the orientation keypoints that were specified for the line ( :ref:`latt` ) are no longer
+          associated with the line and won't be written out to the geometry file. All associativity between
+          the line and the orientation keypoints is lost.
 
-        * For beam meshing, this option does not support any line operation that
-          relies on solid model associativity. For example, meshing the areas
-          adjacent to the meshed line, plotting the line that contains the
-          orientation nodes, or clearing the mesh from the line that contains
-          orientation nodes may not work as expected.
+        * For beam meshing, this option does not support any line operation that relies on solid model
+          associativity. For example, meshing the areas adjacent to the meshed line, plotting the line that
+          contains the orientation nodes, or clearing the mesh from the line that contains orientation nodes
+          may not work as expected.
 
-        * Concatenated lines are not written. The line segments that make up the
-          concatenated lines are written; however, if the command encounters an
-          area that contains a concatenated line, the write operation halts
-          (that area cannot be recreated during the read operation). If your
-          model has areas that contain concatenated lines, you must first list
-          these and then unconcatenate them before issuing the `CDWRITE
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_\
-          command. Similarly, hardpoint information cannot be written.
+        * Concatenated lines are not written. The line segments that make up the concatenated lines are
+          written; however, if the command encounters an area that contains a concatenated line, the write
+          operation halts (that area cannot be recreated during the read operation). If your model has areas
+          that contain concatenated lines, you must first list these and then unconcatenate them before
+          issuing the :ref:`cdwrite` command. Similarly, hardpoint information cannot be written.
 
-        ANF option to write solid model information (`CDOPT
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDOPT.html>`_,
-        ANF):
+        ANF option to write solid model information ( :ref:`cdopt`, ANF):
 
-        * Writes all model information in the database (regardless of select
-          status) to the archive file; however, when you restore the database
-          using this archived file, the select status of entities is also
-          restored.
+        * Writes all model information in the database (regardless of select status) to the archive file;
+          however, when you restore the database using this archived file, the select status of entities is
+          also restored.
 
-        * Restores all line attributes, including orientation keypoints. It also
-          writes out any components (not assemblies) that consist of solid model
-          entities.
+        * Restores all line attributes, including orientation keypoints. It also writes out any components
+          (not assemblies) that consist of solid model entities.
 
-        * Halts `CDWRITE
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_\
-          when a concatenated line or an area that contains a concatenated line
-          is detected. You must delete the concatenated lines before issuing
-          `CDWRITE
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_.
-          Similarly, hardpoint information cannot be written.
+        * Halts :ref:`cdwrite` when a concatenated line or an area that contains a concatenated line is
+          detected. You must delete the concatenated lines before issuing :ref:`cdwrite`. Similarly,
+          hardpoint information cannot be written.
 
         This command is also valid in SOLUTION.
+
+        Examples
+        --------
+        Create a basic block and save it to disk.
+
+        >>> mapdl.prep7()
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.et(1, 186)
+        >>> mapdl.esize(0.25)
+        >>> mapdl.vmesh('ALL')
+        >>> mapdl.cdwrite('DB', '/tmp/mesh.cdb')
+        TITLE =
+        NUMBER OF ELEMENT TYPES =      1
+        64 ELEMENTS CURRENTLY SELECTED.  MAX ELEMENT NUMBER =   64
+        425 NODES CURRENTLY SELECTED.     MAX NODE NUMBER =     425
+        8 KEYPOINTS CURRENTLY SELECTED. MAX KEYPOINT NUMBER =   8
+        12 LINES CURRENTLY SELECTED.     MAX LINE NUMBER =      12
+        6 AREAS CURRENTLY SELECTED.     MAX AREA NUMBER =       6
+        1 VOLUMES CURRENTLY SELECTED.   MAX VOL. NUMBER =       1
+        WRITE ANSYS DATABASE AS AN ANSYS INPUT FILE: /tmp/mesh.cdb
+
+        Optionally load the mesh into Python using the archive reader.
+
+        >>> from ansys.mapdl import reader as pymapdl_reader
+        >>> mesh = pymapdl_reader.Archive('/tmp/mesh.cdb')
+        >>> mesh
+        ANSYS Archive File mesh.cdb
+        Number of Nodes:              425
+        Number of Elements:           64
+        Number of Element Types:      1
+        Number of Node Components:    0
+        Number of Element Components: 0
         """
         command = f"CDWRITE,{option},'{fname}',{ext},,{fnamei},{exti},{fmat},,{key}"
         return self.run(command, **kwargs)

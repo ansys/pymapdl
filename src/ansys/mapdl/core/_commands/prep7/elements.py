@@ -372,23 +372,15 @@ class Elements(CommandsBase):
         Parameters
         ----------
         elem : str
-            Element to be included in the evaluation. If ALL, the command
-            evaluates the element solutions for *all*\ selected elements
-            (`ESEL
+            Element to be included in the evaluation. If ALL, the command evaluates the
+            element solutions for *all*\ selected elements (`ESEL
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ESEL.html>`_).
             A component name is also valid.
 
-        fname : str
-            Command argument ``FNAME``. Refer to the `EENS command
-            documentation
+        fname, kout : str
+            Option-specific command argument. Refer to the `EENS command documentation
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EENS.html>`_
-            for option-specific definitions.
-
-        kout : str
-            Command argument ``KOUT``. Refer to the `EENS command
-            documentation
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EENS.html>`_
-            for option-specific definitions.
+            for details.
 
         Notes
         -----
@@ -397,31 +389,29 @@ class Elements(CommandsBase):
 
         * ``Fname`` - Result file name..
 
-          File name and directory path (248 characters maximum, including the
-          characters needed for the directory path). An unspecified directory
-          path defaults to the working directory; in this case, you can use
-          all 248 characters for the file name.
+          File name and directory path (248 characters maximum, including the characters
+          needed for the directory path). An unspecified directory path defaults to the
+          working directory; in this case, you can use all 248 characters for the file
+          name.
 
-          The file name defaults to ``Jobname``. Applicable only when
-          evaluated element results are output to a result file (``KOut``\ = 0
-          or blank).
+          The file name defaults to ``Jobname``. Applicable only when evaluated element
+          results are output to a result file (``KOut``\ = 0 or blank).
 
         * Unused field.
 
         * ``KOUT`` - Definition of KOut
 
-          * ``0`` - Or blank. Evaluated element results are saved in the
-            result file (default).
+          * ``0`` - Or blank. Evaluated element results are saved in the result file
+            (default).
 
-          * ``1`` - Evaluated element results are converted to initial-state
-            data at the integration points.
+          * ``1`` - Evaluated element results are converted to initial-state data at the
+            integration points.
 
-        This action command calculates element results (such as strains and
-        stresses) based on the curvature that is caused by bending or twisting.
-        Membrane deformation is ignored. This command can be used to evaluate
-        element solutions without running a regular finite element simulation,
-        which may be useful during the design phase of a product that requires
-        frequent shape changes.
+        This action command calculates element results (such as strains and stresses) based
+        on the curvature that is caused by bending or twisting. Membrane deformation is
+        ignored. This command can be used to evaluate element solutions without running a
+        regular finite element simulation, which may be useful during the design phase of a
+        product that requires frequent shape changes.
 
         `EENS
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EENS.html>`_\
@@ -433,30 +423,27 @@ class Elements(CommandsBase):
 
         `EENS
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EENS.html>`_\
-        evaluates element results based on the element definition and assumed
-        element deformation. The assumptions are:
+        evaluates element results based on the element definition and assumed element
+        deformation. The assumptions are:
 
         * The selected elements are part of a slender structure with a large
           span-to-thickness ratio.
 
-        * The structure is initially flat and subjected predominantly to bending
-          and twisting deformation. The membrane and transverse deformations are
-          negligible.
+        * The structure is initially flat and subjected predominantly to bending and
+          twisting deformation. The membrane and transverse deformations are negligible.
 
         * Material behaviors are mostly linear.
 
-        With these assumptions, the element deformation can be adequately
-        represented with the curvature of the element. For a `SHELL281
+        With these assumptions, the element deformation can be adequately represented with
+        the curvature of the element. For a `SHELL281
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL281.html>`_
-        element, the element curvature is computed directly with element
-        geometry. For `SHELL181
+        element, the element curvature is computed directly with element geometry. For
+        `SHELL181
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_
-        elements, the curvature is computed from the surface normal of a slender
-        structure.
+        elements, the curvature is computed from the surface normal of a slender structure.
 
-        The recovered element results can be output in one of two forms, either
-        saved to the result (RST) file or converted to initial-state data,
-        controlled with ``KOut``.
+        The recovered element results can be output in one of two forms, either saved to the
+        result (RST) file or converted to initial-state data, controlled with ``KOut``.
 
         `EENS
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EENS.html>`_\
@@ -464,23 +451,23 @@ class Elements(CommandsBase):
 
         * When ``KOut``\ = 0, the newly issued `EENS
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EENS.html>`_\
-          command overwrites the previously generated result file if ``Fname``\
-          is not specified or if the same ``Fname``\ is used. Multiple result
-          files can be generated by specifying a new ``Fname``\ for each `EENS
+          command overwrites the previously generated result file if ``Fname``\ is not
+          specified or if the same ``Fname``\ is used. Multiple result files can be
+          generated by specifying a new ``Fname``\ for each `EENS
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EENS.html>`_\
           command.
 
         * When ``KOut``\ = 1, the newly issued `EENS
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EENS.html>`_\
-          command causes the *accumulation*\ of initial state data for the same
-          elements as in the previous `EENS
+          command causes the *accumulation*\ of initial state data for the same elements as
+          in the previous `EENS
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EENS.html>`_\
           command.
 
         Element outputs to the result file (``KOut``\ = 0)
 
-        The following table shows the element outputs saved in the result file.
-        The items are available for both printing (`PRESOL
+        The following table shows the element outputs saved in the result file. The items
+        are available for both printing (`PRESOL
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PRESOL.html>`_)
         and plotting (`PLESOL
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PLESOL.html>`_)
@@ -508,16 +495,15 @@ class Elements(CommandsBase):
 
         Conversion of the evaluated result to initial-state data (``KOut``\ = 1)
 
-        The stresses at the integration points can be converted to the
-        initial-state data under the following conditions:
+        The stresses at the integration points can be converted to the initial-state data
+        under the following conditions:
 
         * Stresses are in the element solution coordinate systems.
 
         * Initial-state data are at the element integration points.
 
-        The converted data is saved in the database and can be used in a
-        subsequent analysis with additional user defined solution controls,
-        loads, and boundary conditions.
+        The converted data is saved in the database and can be used in a subsequent analysis
+        with additional user defined solution controls, loads, and boundary conditions.
 
         The `INISTATE
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_INISTATE.html>`_\
@@ -527,35 +513,32 @@ class Elements(CommandsBase):
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EENS.html>`_\
         apply:
 
-        * To obtain detailed element results in both in-plane and thickness
-          directions, consider using advanced layer data storage option
-          (KEYOPT(8) = 1 or 2) and full integration option (KEYOPT(3) = 2) for
-          `SHELL181
+        * To obtain detailed element results in both in-plane and thickness directions,
+          consider using advanced layer data storage option (KEYOPT(8) = 1 or 2) and full
+          integration option (KEYOPT(3) = 2) for `SHELL181
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_.
 
         * When meshed with `SHELL181
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_
-          elements, the surface normal directions are approximated by averaging
-          the element normal directions at the shared nodes. The advanced
-          curved-shell formulation (KEYOPT(5) = 1) is required to incorporate
-          the computation of surface normal directions. A refined `SHELL181
+          elements, the surface normal directions are approximated by averaging the element
+          normal directions at the shared nodes. The advanced curved-shell formulation
+          (KEYOPT(5) = 1) is required to incorporate the computation of surface normal
+          directions. A refined `SHELL181
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_
           mesh may be required at the high curvature regions.
 
         * The recovered curvatures at a `SHELL181
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_
-          element with degenerated triangular shape may not be accurate,
-          especially when these elements are located at the structure's
-          boundaries.
+          element with degenerated triangular shape may not be accurate, especially when
+          these elements are located at the structure's boundaries.
 
-        * The stresses are computed with elastic material properties. If
-          nonlinear materials are defined, only the linear material behaviors
-          are accounted for in the `EENS
+        * The stresses are computed with elastic material properties. If nonlinear materials
+          are defined, only the linear material behaviors are accounted for in the `EENS
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EENS.html>`_\
           command.
 
-        * Both isotropic and orthotropic materials are supported. See the
-          Element Reference for more details on the `element coordinate systems
+        * Both isotropic and orthotropic materials are supported. See the Element Reference
+          for more details on the `element coordinate systems
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CH2_3.html>`_
           in which the material properties are evaluated.
 
@@ -1617,390 +1600,81 @@ class Elements(CommandsBase):
         comp: str = "",
         **kwargs,
     ):
-        r"""Specifies conditions for selecting `reinforcing
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_adv/Hlp_G_ADVREINF.html>`_
-        members or layers of shell sections.
+        r"""Selects a group of `reinforcing
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/str_compreinfdirectemb.html>`_
+        members via a predefined global identifier.
 
         Mechanical APDL Command: `EMSEL <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_
 
         Parameters
         ----------
         type_ : str
-            Label identifying the type of specification:
+            Specifies the selection type for the reinforcing elements:
 
-            * S - Specify a new set of conditions (default).
+            * S - Select a new set (default).
+            * A - Select an additional set and add it to the current set.
+            * U - Unselect a set from the current set.
+            * ALL - Restore the full set.
+            * STAT - Display the current selection status.
 
-            * A - Specify an additional set of conditions and add it to the
-              current set.
-
-            * U - Remove specified condition(s) from the current set. If the
-              condition is not included in the current set, a warning
-              message is issued, and the command is ignored.
-
-            * ALL - Set a condition to select all reinforcing members or
-              shell layers.
-
-            * CLEAR - Remove the current set of conditions.
-
-            * STAT - Display the status of the current set of conditions.
-
-            * LIST - Display selected reinforcing members or shell layers
-              based on the current set of conditions.
+            The following arguments are valid only when ``Type`` = S, A, or U:
 
         vmin : str
-            Command argument ``VMIN``. Refer to the `EMSEL command
-            documentation
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_
-            for option-specific definitions.
+            Minimum value of a group-identifier range.
 
         vmax : str
-            Command argument ``VMAX``. Refer to the `EMSEL command
-            documentation
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_
-            for option-specific definitions.
+            Maximum value of global identifier range. Default = VMIN for input values.
 
         vinc : str
-            Command argument ``VINC``. Refer to the `EMSEL command
-            documentation
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_
-            for option-specific definitions.
+            Value increment within the specified range. Default = 1.
 
         item : str
-            Label identifying the selection item. See `Table 122: EMSEL -
-            Valid Type, Item and Component Labels
+            Label identifying the selection item. See `Table 122: EMSEL - Valid Type,
+            Item and Component Labels
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html#emsel.tab.1>`_.
 
             * ``Item``\ defaults to REINF when ``Type``\ = S, A, or U.
 
-            * ``Item``\ defaults to ALL when ``Type``\ = ALL, CLEAR, STAT,
-              or LIST.
+            * ``Item``\ defaults to ALL when ``Type``\ = ALL, CLEAR, STAT, or LIST.
 
             For more information, see `"Notes"
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html#emsel_notes>`_.
 
         comp : str
-            Command argument ``COMP``. Refer to the `EMSEL command
-            documentation
+            Option-specific command argument. Refer to the `EMSEL command documentation
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_
-            for option-specific definitions.
+            for details.
 
         Notes
         -----
+        Understanding Reinforcing Member Groups When using the `mesh-independent method
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/strreinfworkflow.html#>`_ for
+        defining reinforcing, the global identifier for a set of ``MESH200`` elements (specified via
+        :ref:`egid` ) is transferred from the ``MESH200`` elements to the reinforcing members (individual
+        reinforcings) when the reinforcing elements (REINF ``nnn`` ) are generated ( :ref:`ereinf` ).
 
-        .. _EMSEL_notes:
+        The :ref:`emsel` command selects groups of reinforcing members (individual reinforcings) via
+        specified global identifiers.
 
-        * ``Comp`` - Component label for selection and listing when ``Type``\ =
-          S, A, U, or LIST. See `Table 122: EMSEL - Valid Type, Item and
-          Component Labels
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html#emsel.tab.1>`_.
+          **Example: Selecting Reinforcing Member Groups**
 
-          For more information, see `"Notes"
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html#emsel_notes>`_.
+          The following command selects a new group of reinforcing members based on global identifiers 1
+          through 7:
 
-        * ``VAL1, VAL2, VAL3`` - Input values on ``Item``\ and ``Comp``\ when
-          ``Type``\ = S, A, or U. See `Table 123: EMSEL - Valid Input Values for
-          a Component Label
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html#emsel.tab.2>`_.
+          .. code:: apdl
 
-        .. list-table:: Table 122: EMSEL - Valid Type, Item and Component Labels
-           :header-rows: 2
+             EMSEL,S,,,1,7
 
-           * - -
-             - General Type, Item and Component Labels
-             - -
-             - -
-           * - Type
-             - Item
-             - Comp
-             - Description
-           * - S, A, U
-             - REINF (default)
-             - NUM (default):sup:`[a]`\
-             - Global identifier (`EGID
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EGID.html>`_)
-           * - LAYER
-             - NUM (default):sup:`[a]`\
-             - Layer number
-             - -
-           * - NAME
-             - Layer name
-             - -
-             - -
-           * - LAST:sup:`[b]`\
-             - Last layer
-             - -
-             - -
-           * - MAX:sup:`[c]`\
-             - Maximum value of an element output
-             - -
-             - -
-           * - LIST:sup:`[d]`\
-             - ALL (default), REINF, LAYER
-             - SEL (default)
-             - Displays the list of selected members or
-               layers.:sup:`[e]`\
-           * - LAYER
-             - STO:sup:`[f]`\
-             - Displays the list of stored layers (selected layers in
-               SOLUTION (`/SOLU
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SOLU_sl.html>`_))
-               for shell elements.
-             - -
-           * - STAT
-             - ALL (default), REINF, LAYER
-             - -
-             - Displays the status of current conditions to be used for
-               selecting reinforcing members or shell layers.
+        ``VMIN``, ``VMAX``, and ``VINC`` are positive integer values.
 
-        .. list-table:: Table 123: EMSEL - Valid Input Values for a Component Label
-           :header-rows: 1
+        This command is valid in PREP7 and POST1.
 
-           * - Comp
-             - ``VAL1``\
-             - ``VAL2``\
-             - ``VAL3``\
-           * - NUM
-             - Minimum value of selection range
-             - Maximum value of selection range
-             - Value increment within the specified range. Defaults to 1.
-               ``VAL3``\ cannot be negative.
-           * - NAME
-             - String up to 32 characters
-             - -
-             - -
-           * - LAST
-             - -
-             - -
-             - -
-           * - MAX:sup:`[a]`\
-             - S, EPEL, EPPL:sup:`[b]`\
-             - EQV:sup:`[b]`\
-             - -
-           * - S, EPEL, EPPL, EPCR, EPTH, EPTO, EPTT, FC:sup:`[c]`\
-             - X, Y, Z, XY, YZ, ZX, EQV:sup:`[c]`\
-             - -
-             - -
+        For more information about using this command in a mesh-independent reinforcing analysis, see
+        `Selecting and Displaying Groups of Reinforcing Members
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/strreinfworkflow.html#>`_
 
-        The `EMSEL
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_\
-        command manages a set of specified conditions to select a group of
-        reinforcing members or layers of shell sections. The actual selection
-        status is determined by the action commands for plotting (`EPLOT
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EPLOT.html>`_,
-        `PLESOL
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PLESOL.html>`_\
-        and `PLNSOL
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PLNSOL.html>`_),
-        printing (`PRESOL
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PRESOL.html>`_\
-        and `PRNSOL
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PRNSOL.html>`_),
-        or solution output (`SOLVE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SOLVE.html>`_)
-        that follow the `EMSEL
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_\
-        command.
-
-        **Example 16: Plotting a set of reinforcing members**\
-
-        The following command plots a set of reinforcing members based on global
-        identifiers 1 through 3:
-
-        .. code-block:: text
-
-           EMSEL,S,REINF,NUM,1,3
-           EPLOT
-
-        **Example 17: Plotting a set of shell layers**\
-
-        The following set of commands plots a set of shell layers based on layer
-        numbers 1 through 7:
-
-        .. code-block:: text
-
-           EMSEL,S,LAYER,NUM,1,7
-           EPLOT
-
-        For ``Item``\ = REINF:
-
-        * `EMSEL
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_\
-          is valid only for the reinforcing elements generated via the
-          `mesh-independent method
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_adv/strreinfworkflow.html#reinfmeshinddmethod>`_
-          for defining reinforcing members in PREP7 (`/PREP7
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PREP7.html>`_)
-          and POST1 (`REINF263
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF263.html>`_,
-          `REINF264
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF264.html>`_,
-          and `REINF265
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_REINF265.html>`_).
-
-        * For the standard method, you can use the `LAYER
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_LAYER.html>`_\
-          command to select a reinforcing member in POST1. (`LAYER
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_LAYER.html>`_\
-          is not valid in PREP7).
-
-        * When using the mesh-independent method for defining reinforcing, the
-          global identifier for a set of `MESH200
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-          elements (`EGID
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EGID.html>`_)
-          is transferred from the `MESH200
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
-          elements to the reinforcing members (individual reinforcings) while
-          the reinforcing elements (REINF``nnn``) are generated (`EREINF
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EREINF.html>`_).
-
-        * For more information about using this command in a mesh-independent
-          reinforcing analysis, see `Selecting and Displaying Groups of
-          Reinforcing Members in the Advanced Analysis Guide
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_adv/strreinfworkflow.html#reinfgroups>`_.
-
-        For ``Item``\ = LAYER:
-
-        * `EMSEL
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_\
-          is valid in PREP7, SOLUTION, and POST1 for shell sections.
-
-        * In PREP7, the `EMSEL
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_\
-          command can be used in conjunction with the `SECMODIF
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_\
-          command to modify the properties of shell sections. Issue the `EPLOT
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EPLOT.html>`_\
-          command in Power Graphics (`/ESHAPE
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ESHAPE.html>`_,1)
-          to display the selected layers for 3D structural shell elements
-          (`SHELL181
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_
-          and `SHELL281
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL281.html>`_).
-
-        * In POST1, `EMSEL
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_\
-          can be used to review element outputs in the selected layers for 3D
-          structural shell elements (`SHELL181
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_
-          and `SHELL281
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL281.html>`_).
-
-          * The last `EMSEL
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_\
-            or `LAYER
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_LAYER.html>`_\
-            command takes precedence for post-processing.
-
-          * When ``Comp``\ = MAX, the maximum value in the current coordinate
-            system (`RSYS
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RSYS.html>`_)
-            is selected. If the maximum value is included in two or more
-            layers, the lowest layer is selected.
-
-          * When the `EMSEL
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_\
-            command is used to process the nodal solution outputs and multiple
-            layers are selected, the layer with lowest layer number is used
-            for nodal averaging or element output, such as:
-
-            * the plotting of shell element in plane shape (Full Graphics or
-              Power Graphics with `/ESHAPE
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ESHAPE.html>`_,0)
-
-            * the printing of nodal solutions.
-
-          * If the `LAYER
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_LAYER.html>`_\
-            command is issued prior to resetting the conditions (either
-            through `ALLSEL
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ALLSEL.html>`_\
-            or `EMSEL
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_,
-            CLEAR), the output of subsequent post-processing commands is
-            determined by the last `LAYER
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_LAYER.html>`_\
-            command. If `LAYER
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_LAYER.html>`_\
-            was not issued prior to `EMSEL
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_,
-            the default state (`LAYER
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_LAYER.html>`_,0)
-            is applied to the subsequent post-processing commands.
-
-          * When displaying a contour plot for shell elements with stored
-            layers in SOLUTION, any layers that are not stored are shown in a
-            solid color with zero values for elements with KEYOPT(8) = 1 or 2.
-            Issue the `EMSEL
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_\
-            command to hide the layers that are not stored. Elements with
-            KEYOPT(8) = 0 display a single layer with total thickness, where
-            the solution output from the stored layer is applied onto it.
-
-        * `Figure 5: Select and display layers in PREP7 and POST1
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html#emsel_fig1>`_
-          shows how to select layers and display the selected layers using the
-          `EMSEL
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_\
-          and `EPLOT
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EPLOT.html>`_\
-          commands in PREP7 and POST1.
-
-          *Figure 5: Select and display layers in PREP7 and POST1*
-
-        * `Figure 6: Selecting layers in PREP7 and POST1
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html#emsel_fig2>`_
-          shows how to select (or reselect) all layers with two different
-          options in PREP7 and POST1.
-
-          *Figure 6: Selecting layers in PREP7 and POST1*
-
-        * In SOLUTION, `EMSEL
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_\
-          can be used to store element outputs at specified layers for 3D
-          structural shell elements (`SHELL181
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_
-          and `SHELL281
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL281.html>`_).
-
-          * When KEYOPT(8) = 0, you can store element outputs for a specific
-            layer, instead of the default output locations (See `SHELL181
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_
-            and `SHELL281
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL281.html>`_
-            for default output locations). If multiple conditions are
-            specified, the outputs for the layer with the lowest layer number
-            are stored (even if all layers are specified).
-
-          * When KEYOPT(8) = 1 or 2, you can store element outputs for
-            selected layers using combined conditions (Comp = NUM, NAME, LAST
-            and MAX), instead of the default output locations.
-
-          * `EMSEL
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_\
-            retains the predefined conditions even when the `ALLSEL
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ALLSEL.html>`_,
-            ALL command is issued. Issue `EMSEL
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_,CLEAR
-            to remove the current set of selection conditions.
-
-          * Static and transient analyses are supported, including multiple
-            load steps and restart options. Analysis types that require
-            downstream analysis or mode expansion are not supported.
-
-        **Assumptions and Limitations**
-
-        * In PREP7 and POST1, `ALLSEL
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ALLSEL.html>`_\
-          resets the selection conditions specified by the `EMSEL
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_\
-          command.
-
-        * Any conditions specified by `EMSEL
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EMSEL.html>`_\
-          are not transferred to other processors. Issue the command in each
-          processor (PREP7, SOLUTION, or POST1), if necessary.
+        This command contains some tables and extra information which can be inspected in the original
+        documentation pointed above.
         """
         command = f"EMSEL,{type_},{item},{comp},{vmin},{vmax},{vinc}"
         return self.run(command, **kwargs)
@@ -3868,92 +3542,50 @@ class Elements(CommandsBase):
         Parameters
         ----------
         ecomp : str
-            Name to identify the new spot weld, used for the element
-            component containing the new contact, target, and beam elements
-            generated for the spot weld set.
-
-            * ``START`` - Initiate the spot weld generation process.
-
-            * ``END`` - Finish the spot weld generation process.
-
-            When using ``Ecomp``\ to define the component name of the spot
-            weld element, do not begin the name with ``STAR``\ or ``END``.
-            Those values are reserved for starting and finishing a block of
-            multiple `SWGEN
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_\
-            commands.
+            Name to identify the new spot weld, used for the element component containing the new contact,
+            target, and beam elements generated for the spot weld set.
 
         swrd : str
             Spot weld radius.
 
         ncm1 : str
-            Name of a component containing nodes on the first spot weld
-            surface, a meshed area number for the surface, or the name of a
-            component group containing nodal components of multiple surfaces
-            to be weld.
+            Name of a component containing nodes on the first spot weld surface, or a meshed area number for
+            the surface.
 
         ncm2 : str
-            Name of a component containing nodes on the second spot weld
-            surface, or a meshed area number for the surface.
+            Name of a component containing nodes on the second spot weld surface, or a meshed area number
+            for the surface.
 
         snd1 : str
-            Node number of the first spot weld node corresponding to the
-            first surface (``NCM1``). This node can be on or close to the
-            first surface. For this use of ``SND1``, you must also input a
-            node number for ``SND2``.
+            Node number of the first spot weld node corresponding to the first surface ( ``NCM1`` ). This
+            node can be on or close to the first surface.
 
-            To define multiple spot welds between two surfaces, use the
-            ``SND1``\ field in one of these ways:
-
-            * To input the name of a table array parameter containing the
-              node information for each spot weld. The node information
-              should be presented as node numbers, geometric coordinates, or
-              both. The table name must be enclosed in "%" signs (for
-              example, %``tabname``\ %).
-
-            * To input the name of a nodal component group of predefined
-              nodes. This use is only supported for node-to-surface
-              configuration of spot welds.
-
-            * To input the name of an element component group of predefined
-              joints or beam elements. This use is only supported for
-              node-to-surface configuration of spot welds.
-
-            When generating multiple spot welds, ``SND2``\ is ignored.
+            To define multiple spot welds between two surfaces, input the name of a table array parameter
+            containing the node information for each spot weld. The table name must be enclosed in % signs
+            (for example, ``tabname``). If ``SND1`` is defined by tabular input, ``SND2`` is ignored.
 
         snd2 : str
-            Node number of the second spot weld node corresponding to the
-            second surface (``NCM2``). This node can be on or close to the
-            second surface. Mechanical APDL creates the node if not
+            Node number of the second spot weld node corresponding to the second surface ( ``NCM2`` ). This
+            node can be on or close to the second surface. Mechanical APDL creates the node if not
             specified.
 
         shrd : str
-            Search radius. Defaults to 4 times the spot weld radius
-            ``SWRD``.
+            Search radius. Defaults to 4 times the spot weld radius ``SWRD``.
 
         dirx : str
-            Spot weld projection direction in terms of normal X, Y, and Z
-            components.
+            Spot weld projection direction in terms of normal X, Y, and Z components.
 
         diry : str
-            Spot weld projection direction in terms of normal X, Y, and Z
-            components.
+            Spot weld projection direction in terms of normal X, Y, and Z components.
 
         dirz : str
-            Spot weld projection direction in terms of normal X, Y, and Z
-            components.
+            Spot weld projection direction in terms of normal X, Y, and Z components.
 
         itty : str
             Target element type ID.
 
         icty : str
             Contact element type ID.
-
-            * ``NTOS`` - Generate the node-to-surface configuration of the
-              spot welds with force-distributed constraints.
-
-            * ``NTS2`` - Generate the node-to-surface configuration of the
-              spot welds with rigid surface constraints.
 
         algo : str
             Contact element algorithm.
@@ -3968,131 +3600,42 @@ class Elements(CommandsBase):
 
         Notes
         -----
+        This command creates a new spot weld set. You can add more surfaces to the set using :ref:`swadd`
+        after the initial :ref:`swgen` command. However, the maximum number of allowable surfaces (including
+        the two surfaces used for the original set) for each spot weld set is 11.
 
-        .. _SWGEN_notes:
+        ``Ecomp``, ``SWRD``, ``NCM1``, ``NCM2``, and ``SND1`` must be specified. ``SND2``, ``SHRD``,
+        ``DIRX``, ``DIRY``, ``DIRZ``, ``ITTY``, ``ICTY`` are optional inputs. If the second spot weld node (
+        ``SND2`` ) is specified, that node is used to determine the spot weld projection direction, and
+        ``DIRX``, ``DIRY`` and ``DIRZ`` are ignored.
 
-        This command creates a new spot weld set. You can add more surfaces to
-        the set using `SWADD
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWADD.html>`_\
-        after the initial `SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_\
-        command. However, the maximum number of allowable surfaces (including
-        the two surfaces used for the original set) for each spot weld set is
-        11.
+        If ``ITTY`` (target element ID) is specified, the following corresponding target element key option
+        must be set: KEYOPT(2) = 1.
 
-        ``Ecomp``, ``SWRD``, ``NCM1``, ``NCM2``, and ``SND1``\ must be
-        specified. ``SND2``, ``SHRD``, ``DIRX``, ``DIRY``, ``DIRZ``, ``ITTY``,
-        ``ICTY``\ are optional inputs. If the second spot weld node (``SND2``)
-        is specified, that node is used to determine the spot weld projection
-        direction, and ``DIRX``, ``DIRY``\ and ``DIRZ``\ are ignored.
-
-        To reduce the spot weld generation time of large assembly models where
-        multiple `SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_\
-        commands are issued, define the multiple `SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_\
-        commands within a block initiated with `SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_,``START``\
-        and finished with `SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_,``END``.
-        The block must be ended with `SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_,``END``\
-        if it is started with `SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_,``START``.
-        Do not use any commands other than `SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_\
-        and `CMGRP
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CMGRP.html>`_\
-        within the block. Select all elements and nodes, and create all
-        components prior to the `SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_,``START``\
-        command.
-
-        If ``NCM1``\ is defined as a component group name to add multiple
-        surfaces to the node-to-surface configuration of the spot weld, no
-        `SWADD
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWADD.html>`_\
-        command is needed. ``NCM2``\ is ignored. The component group of multiple
-        surfaces must be defined using the `CMGRP
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CMGRP.html>`_\
-        command prior to the `SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_.
-        The maximum allowed number of surfaces for each spot weld set is 8.
-        Using `SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_\
-        to generate multiple spot welds is only supported for node-to-surface
-        configuration of spot welds
-
-        If ``ITTY``\ (target element ID) is specified, the following
-        corresponding target element key option must be set: KEYOPT(2) = 1.
-
-        If ``ICTY``\ (contact element ID) is specified (only valid for pilot
-        node configuration), the following corresponding contact element key
+        If ``ICTY`` (contact element ID) is specified, the following corresponding contact element key
         options must be set: KEYOPT(2) = 2, KEYOPT(4) = 1, KEYOPT(12) = 5.
 
-        If ``ICTY``\ (contact element ID) is specified as ``NTOS``\ or ``NTS2``,
-        node-to-surface configuration of spot-welds is defined. In this
-        configuration, each spot weld consists of a beam element and two
-        node-to-surface MPC contact pairs. Each contact pair has contact element
-        (`CONTA175
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA175.html>`_)
-        which is defined by the associated spot-weld node. The target elements
-        (`TARGE170
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_)
-        are formed by a group of surface nodes lying within the region of the
-        search radius on the spot weld surfaces. The program creates real
-        constant IDs for each layer, and proper contact and target element type
-        IDs. The following corresponding contact element key options are set:
-        KEYOPT(2) = 2, KEYOPT(12) = 5. For ``ICTY``\ =``NTOS``, target elements
-        KEYOPT(5) = 4 is set for defining the force-distributed constraint type.
-        For ``ICTY``\ =``NTS2``, target elements KEYOPT(5) = 7 is set for
-        defining the rigid surface constraint type.
+        After ``SND1`` and ``SND2`` are projected onto surface 1 and surface 2, respectively, two new pilot
+        nodes (which represent the spot weld nodes) are generated at the locations of ``SND1`` and ``SND2``
+        and meshed with ``TARGE170`` target elements ( :ref:`tshap`,PILO).
 
-        After ``SND1``\ and ``SND2``\ are projected onto surface 1 and surface
-        2, respectively, two new pilot-nodes (which represent the spot weld
-        nodes) are generated at the locations of ``SND1``\ and ``SND2``\ and
-        meshed with `TARGE170
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_
-        target elements (`TSHAPE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TSHAPE.html>`_,PILO).
+        By default, the contact pair created at each spot weld surface is an MPC-based `force-distributed
+        constraint
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_surfcon.html#strbeamso1703>`_.
+        To use force-distributed constraints based on the Lagrange multiplier method, you must set KEYOPT(2)
+        = 3 for the contact elements after :ref:`swgen` is issued.
 
-        By default, the contact pair created at each spot weld surface is an
-        MPC-based `force-distributed constraint
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/Hlp_ctec_surfcon.html>`_.
-        To use force-distributed constraints based on the Lagrange multiplier
-        method, you must set KEYOPT(2) = 3 for the contact elements after `SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_\
-        is issued. To use rigid constraints instead of force-distributed
-        constraints, you must set KEYOPT(4) = 0 for the contact elements after
-        `SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_\
-        is issued.
+        To automatically define multiple spot welds between two surfaces, use tabular input in the ``SND1``
+        field. The table array that you input must be a 2D array parameter. For more information, see
+        `Automatic Generation of Multiple Spot Welds
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/ctecautogenmultisw.html#>`_
 
-        To automatically define multiple spot welds between two surfaces, use
-        tabular input in the ``SND1``\ field. The table array that you input
-        must be a 2D array parameter. For more information, see `Generation of
-        Multiple Spot Welds in the Contact Technology Guide
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/ctecautogenmultisw.html>`_.
+        To use the relaxation method to eliminate overconstraint, you must set KEYOPT(11) = 1 for the target
+        elements after :ref:`swgen` is issued.
 
-        To use the `relaxation method
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/ctecovercon.html#ctec_relaxation>`_
-        to eliminate overconstraint, you must set KEYOPT(11) = 1 for the target
-        elements after `SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWGEN.html>`_\
-        is issued.
-
-        Issue `SWLIST
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWLIST.html>`_\
-        and `SWDEL
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWDEL.html>`_\
-        to list or delete spot welds, respectively. `SWLIST
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWLIST.html>`_\
-        and `SWDEL
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SWDEL.html>`_\
-        are not supported for node-to-surface configuration. For more
-        information about defining spot welds, see `Creating a Basic Spot Weld
-        Set with SWGEN
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/Hlp_ctec_spwdset.html#ctecbasswset>`_.
+        Issue :ref:`swlist` and :ref:`swdel` to list or delete spot welds, respectively. For more
+        information about defining spot welds, see `Creating a Basic Spot Weld Set with SWGEN
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_spwdset.html#ctecswsrchrad>`_
         """
         command = f"SWGEN,{ecomp},{swrd},{ncm1},{ncm2},{snd1},{snd2},{shrd},{dirx},{diry},{dirz},{itty},{icty},{algo}"
         return self.run(command, **kwargs)
@@ -4181,8 +3724,7 @@ class Elements(CommandsBase):
         Parameters
         ----------
         shape : str
-            Specifies the geometric shapes for target segment elements
-            `TARGE169
+            Specifies the geometric shapes for target segment elements `TARGE169
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE169.html>`_
             and `TARGE170
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_.
@@ -4220,8 +3762,8 @@ class Elements(CommandsBase):
 
         .. _TSHAPE_notes:
 
-        Use this command to specify the target segment shapes for the rigid
-        target surface associated with surface-to-surface contact (`TARGE169
+        Use this command to specify the target segment shapes for the rigid target surface
+        associated with surface-to-surface contact (`TARGE169
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE169.html>`_,
         `CONTA172
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA172.html>`_
@@ -4239,8 +3781,8 @@ class Elements(CommandsBase):
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA177.html>`_).
         Once you issue `TSHAPE
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TSHAPE.html>`_,
-        all subsequent target elements generated via the direct element
-        generation technique will have the same shape, until you issue `TSHAPE
+        all subsequent target elements generated via the direct element generation technique
+        will have the same shape, until you issue `TSHAPE
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TSHAPE.html>`_\
         again with a different ``Shape``\ value.
 
@@ -4251,8 +3793,8 @@ class Elements(CommandsBase):
         * `Nonlinear Transient Analysis of a Camshaft Assembly
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/teccamshaft.html>`_
 
-        * `Rotordynamics of a Shaft Assembly Based on a Representative Model of
-          Nelson-Vaugh Rotor
+        * `Rotordynamics of a Shaft Assembly Based on a Representative Model of Nelson-Vaugh
+          Rotor
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_tec/tecrotordyn.html>`_
 
         * `Transient Dynamic Analysis of a Digger-Arm Assembly

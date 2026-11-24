@@ -462,93 +462,60 @@ class NonlinearOptions(CommandsBase):
         Parameters
         ----------
         option : str
-            Harmonic balance method analysis option. There is no default.
-            The semantic labels for ``Value1``, ``Value2``, ``Value3``,
-            ``Value4``, and ``Value5``\ as well as their descriptions and
-            default/range values depend on the option setting. See the
-            command specifications for each option for details. Possible
-            ``Option``\ settings are:
+            Harmonic balance method analysis option. There is no default. The semantic
+            labels for ``Value1``, ``Value2``, ``Value3``, ``Value4``, and ``Value5``\
+            as well as their descriptions and default/range values depend on the option
+            setting. See the command specifications for each option for details.
+            Possible ``Option``\ settings are:
 
-            * ``AFT`` - Specify alternate frequency-time (AFT) procedure
-              options. This command is optional. See `Command Specification
-              for Option\ = AFT
+            * ``AFT`` - Specify alternate frequency-time (AFT) procedure options. This
+              command is optional. See `Command Specification for Option\ = AFT
               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_AFTspec>`_
 
-            * ``CONTLIST`` - List all continuation parameters. This command
-              is optional. ``Value1``.. ``Value5``\ are Unused fields.
+            * ``CONTLIST`` - List all continuation parameters. This command is optional.
+              ``Value1``.. ``Value5``\ are Unused fields.
 
-            * ``CONTSET`` - Required settings for a numerical continuation
-              solution. You must issue this command to properly set up an
-              HBM analysis. See `Command Specification for Option\ = CONTSET
+            * ``CONTSET`` - Required settings for a numerical continuation solution. You
+              must issue this command to properly set up an HBM analysis. See `Command
+              Specification for Option\ = CONTSET
               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_CONTSETspec>`_.
 
-            * ``CONTTERM`` - Specify termination criteria when continuation
-              is on. This command is optional. See `Command Specification
-              for Option\ = CONTTERM
+            * ``CONTTERM`` - Specify termination criteria when continuation is on. This
+              command is optional. See `Command Specification for Option\ = CONTTERM
               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_CONTTERMspec>`_.
 
-            * ``CYCLIC`` - Activate an HBM cyclic analysis and specify
-              parameters. This command is optional. See `Command
-              Specification for Option\ = CYCLIC
+            * ``CYCLIC`` - Activate an HBM cyclic analysis and specify parameters. This
+              command is optional. See `Command Specification for Option\ = CYCLIC
               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_CYCLICspec>`_.
 
-            * ``LINEAR`` - Specify if nonlinearities are considered. This
-              command is optional. See `Command Specification for Option\ =
-              LINEAR
+            * ``LINEAR`` - Specify if nonlinearities are considered. This command is
+              optional. See `Command Specification for Option\ = LINEAR
               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_LINEARspec>`_.
 
-            * ``LIST`` - List all continuation parameters (except
-              continuation). This command is optional. ``Value1``..
-              ``Value5``\ are Unused fields.
+            * ``LIST`` - List all continuation parameters (except continuation). This
+              command is optional. ``Value1``.. ``Value5``\ are Unused fields.
 
-            * ``NR`` - Specify Newton-Raphson controls. This command is
-              optional. See `Command Specification for Option\ = NR
+            * ``NR`` - Specify Newton-Raphson controls. This command is optional. See
+              `Command Specification for Option\ = NR
               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_NRspec>`_.
 
-            * ``SCAL`` - Linearly scale the solution vector to improve the
-              convergence rate. See `Command Specification for Option\ =
-              SCAL
+            * ``SCAL`` - Linearly scale the solution vector to improve the convergence
+              rate. See `Command Specification for Option\ = SCAL
               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_SCALspec>`_.
 
-            * ``TRTOL`` - Specify trust-region solver tolerances. This
-              command is optional. See `Command Specification forOption\ =
-              TRTOL
+            * ``TRTOL`` - Specify trust-region solver tolerances. This command is
+              optional. See `Command Specification forOption\ = TRTOL
               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_TRTOLspec>`_.
 
-            * ``UINIT`` - Specify a solution guess at the beginning
-              frequency of the solution. This command is optional. See
-              `Command Specification for Option\ = UINIT
+            * ``UINIT`` - Specify a solution guess at the beginning frequency of the
+              solution. This command is optional. See `Command Specification for Option\
+              = UINIT
               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_UINITspec>`_.
 
-        value1 : str
-            Command argument ``VALUE1``. Refer to the `HBMOPT command
-            documentation
+        value1, value2, value3, value4, value5 : str
+            Option-specific command argument. Refer to the `HBMOPT command documentation
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_
-            for option-specific definitions.
-
-        value2 : str
-            Command argument ``VALUE2``. Refer to the `HBMOPT command
-            documentation
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_
-            for option-specific definitions.
-
-        value3 : str
-            Command argument ``VALUE3``. Refer to the `HBMOPT command
-            documentation
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_
-            for option-specific definitions.
-
-        value4 : str
-            Command argument ``VALUE4``. Refer to the `HBMOPT command
-            documentation
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_
-            for option-specific definitions.
-
-        value5 : str
-            Command argument ``VALUE5``. Refer to the `HBMOPT command
-            documentation
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_
-            for option-specific definitions.
+            for details.
 
         Notes
         -----
@@ -569,17 +536,16 @@ class NonlinearOptions(CommandsBase):
              - **Default Value**\
              - **Range**\
            * - ``Value1``\
-             - ``NP``\ **Maximum number of time periods**\ ``NP``\ must
-               be a positive integer. Note that the effective number of
-               time periods may be smaller than ``NP``\ as the AFT
-               transient is stopped when periodic convergence is reached.
+             - ``NP``\ **Maximum number of time periods**\ ``NP``\ must be a positive
+               integer. Note that the effective number of time periods may be smaller
+               than ``NP``\ as the AFT transient is stopped when periodic convergence
+               is reached.
              - 4
              - ``NP``\ > 0
            * - ``Value2``\
-             - ``NT``\ **Number of time points per period**\ ``NT``\
-               cannot be less than 2\*NH+1, where NH is the number of
-               harmonics:sup:`[a]`. The value of NT is automatically
-               adjusted if this criterion is not met.
+             - ``NT``\ **Number of time points per period**\ ``NT``\ cannot be less
+               than 2\*NH+1, where NH is the number of harmonics:sup:`[a]`. The value
+               of NT is automatically adjusted if this criterion is not met.
              - 128
              - 16 ≤ ``NT``\ ≤ 16384 (= 2:sup:`14`)
            * - ``Value3``, … ``Value5``\
@@ -600,24 +566,22 @@ class NonlinearOptions(CommandsBase):
              - Label and description
              - -
            * - ``Value1``\
-             - ``CorrMeth``\ **Corrector method**\ Specify the corrector
-               type or alternative continuation method. The solver uses
-               natural continuation for the first step for all
-               continuation methods. (See `notes
+             - ``CorrMeth``\ **Corrector method**\ Specify the corrector type or
+               alternative continuation method. The solver uses natural continuation
+               for the first step for all continuation methods. (See `notes
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT.notes>`_
                for details.)
-             - Possible ``CorrMeth``\ settings are: **OFF**\ - No
-               continuation. Similar to natural continuation except there
-               is no heuristic step adjustment, and the maximum number of
-               allowed nonconverged steps is 1. **ARC (default)**\ -
-               Arc-length corrector **ORT**\ - Orthogonal corrector
-               **NAT**\ - Natural continuation. No continuation method is
+             - Possible ``CorrMeth``\ settings are: **OFF**\ - No continuation.
+               Similar to natural continuation except there is no heuristic step
+               adjustment, and the maximum number of allowed nonconverged steps is 1.
+               **ARC (default)**\ - Arc-length corrector **ORT**\ - Orthogonal
+               corrector **NAT**\ - Natural continuation. No continuation method is
                used.
            * - **OFF**\
              - -
-             - No continuation. Similar to natural continuation except
-               there is no heuristic step adjustment, and the maximum
-               number of allowed nonconverged steps is 1.
+             - No continuation. Similar to natural continuation except there is no
+               heuristic step adjustment, and the maximum number of allowed
+               nonconverged steps is 1.
            * - **ARC (default)**\
              - -
              - Arc-length corrector
@@ -628,32 +592,27 @@ class NonlinearOptions(CommandsBase):
              - -
              - Natural continuation. No continuation method is used.
            * - ``Value2``\
-             - ``DS``\ **Initial step size**\ Step size for the first
-               substep. In the continuation process, the step size
-               determines the size of the tangent prediction. Because it
-               fully determines the predicted point, it also influences
-               the correction, depending on the corrector method as
-               listed below. From the predicted point, corrections occur:
-               **OFF**\ or **NAT**\ - along the frequency direction
-               **ARC**\ - along the sphere of radius ``DS``. **ORT**\ -
-               in the plane orthogonal to the tangent direction. See
-               `notes
+             - ``DS``\ **Initial step size**\ Step size for the first substep. In the
+               continuation process, the step size determines the size of the tangent
+               prediction. Because it fully determines the predicted point, it also
+               influences the correction, depending on the corrector method as listed
+               below. From the predicted point, corrections occur: **OFF**\ or
+               **NAT**\ - along the frequency direction **ARC**\ - along the sphere
+               of radius ``DS``. **ORT**\ - in the plane orthogonal to the tangent
+               direction. See `notes
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT.notes>`_
                for details on the choice of step size.
-             - No default value **Note:**\ You must always specify a
-               ``DS``\ value except when ``CorrMeth``\ = OFF. **Range:**\
-               ``DSMIN``\ ≤ ``DS``\ ≤ ``DSMAX``\
-           * - ``Value3``\
-             - ``DSMIN``\ :sup:`[a]`\ **Minimum step size**\ If the step
-               size equals the minimum step size during solution and the
-               nonlinear equation solver fails to converge, the solver
-               will exit.
-             - **Default:**\ ``DS``\ /50 **Range:**\ 0 < ``DSMIN``\ <
+             - No default value **Note:**\ You must always specify a ``DS``\ value
+               except when ``CorrMeth``\ = OFF. **Range:**\ ``DSMIN``\ ≤ ``DS``\ ≤
                ``DSMAX``\
+           * - ``Value3``\
+             - ``DSMIN``\ :sup:`[a]`\ **Minimum step size**\ If the step size equals
+               the minimum step size during solution and the nonlinear equation
+               solver fails to converge, the solver will exit.
+             - **Default:**\ ``DS``\ /50 **Range:**\ 0 < ``DSMIN``\ < ``DSMAX``\
            * - ``Value4``\
              - ``DSMAX``\ :sup:`[a]`\ **Maximum step size**\
-             - **Default:**\ 5\*``DS``\ **Range:**\ ``DSMAX``\ >
-               ``DSMIN``\
+             - **Default:**\ 5\*``DS``\ **Range:**\ ``DSMAX``\ > ``DSMIN``\
            * - ``Value5``\
              - Unused field
              - -
@@ -677,13 +636,13 @@ class NonlinearOptions(CommandsBase):
              - 10000
              - ``MAXSTEPS``\ ≥ 0
            * - ``Value2``\
-             - ``FREQMIN``\ **Minimum frequency**\ During continuation,
-               if the frequency is below this value, the solver exits.
+             - ``FREQMIN``\ **Minimum frequency**\ During continuation, if the
+               frequency is below this value, the solver exits.
              - MIN(``FREQB``, ``FREQE``):sup:`[b]`\
              - ``FREQMIN``\ ≤ MIN(``FREQB``, ``FREQE``):sup:`[b]`\
            * - ``Value3``\
-             - ``FREQMAX``\ **Maximum frequency**\ During continuation,
-               if the frequency exceeds this value, the solver exits.
+             - ``FREQMAX``\ **Maximum frequency**\ During continuation, if the
+               frequency exceeds this value, the solver exits.
              - MAX(``FREQB``, ``FREQE``):sup:`[b]`\
              - ``FREQMAX``\ ≥ MAX(``FREQB``, ``FREQE``):sup:`[b]`\
            * - ``Value4``, ``Value5``\
@@ -704,11 +663,11 @@ class NonlinearOptions(CommandsBase):
              - Label and description
              - -
            * - ``Value1``\
-             - ``CYCkey``\ **Key to activate an HBM cyclic analysis.**\
-               Used to solve for spatial harmonic indices greater than 0.
-             - Possible ``CYCkey``\ settings are: **0 or OFF (default)**\
-               - Do not activate an HBM cyclic analysis. **1 or ON**\ -
-               Activate an HBM cyclic analysis.
+             - ``CYCkey``\ **Key to activate an HBM cyclic analysis.**\ Used to solve
+               for spatial harmonic indices greater than 0.
+             - Possible ``CYCkey``\ settings are: **0 or OFF (default)**\ - Do not
+               activate an HBM cyclic analysis. **1 or ON**\ - Activate an HBM cyclic
+               analysis.
            * - **0 or OFF (default)**\
              - -
              - Do not activate an HBM cyclic analysis.
@@ -719,14 +678,12 @@ class NonlinearOptions(CommandsBase):
              - ``EO``\ **Fundamental engine order (EO).**\
              - Any integer value. Can be negative. No default value.
            * - ``Value3``\
-             - ``SEPrefix``\ **Prefix for all single stage superelement
-               names.**\ An alphanumeric name used to identify the
-               superelement. ``SEPrefix`` may be up to 26 characters,
-               beginning with a letter and containing only letters,
-               numbers, and underscores. Names beginning with an
-               underscore (for example, _LOOP) are reserved for use by
-               Mechanical APDL and should be avoided. The component name
-               ALL is not permitted
+             - ``SEPrefix``\ **Prefix for all single stage superelement names.**\ An
+               alphanumeric name used to identify the superelement. ``SEPrefix`` may
+               be up to 26 characters, beginning with a letter and containing only
+               letters, numbers, and underscores. Names beginning with an underscore
+               (for example, _LOOP) are reserved for use by Mechanical APDL and
+               should be avoided. The component name ALL is not permitted
              - No default value.
            * - ``Value4``, ``Value5``\
              - Unused fields
@@ -746,9 +703,9 @@ class NonlinearOptions(CommandsBase):
              - -
            * - ``Value1``\
              - ``AFTkey``\ **Key to ignore nonlinearities (no AFT)**\
-             - Possible ``AFTkey``\ settings are: **0 or OFF (default)**\
-               - Do not ignore nonlinearities **1 or ON**\ - Ignore
-               nonlinearities (valid only in the first loadstep).
+             - Possible ``AFTkey``\ settings are: **0 or OFF (default)**\ - Do not
+               ignore nonlinearities **1 or ON**\ - Ignore nonlinearities (valid only
+               in the first loadstep).
            * - **0 or OFF (default)**\
              - -
              - Do not ignore nonlinearities
@@ -773,16 +730,15 @@ class NonlinearOptions(CommandsBase):
              - **Default Value**\
              - **Range**\
            * - ``Value1``\
-             - ``MAXITER``\ **Maximum number of iterations at a frequency
-               point**\
-             - 25 in most cases. 100 if continuation is turned off or
-               natural continuation is selected by issuing `HBMOPT
+             - ``MAXITER``\ **Maximum number of iterations at a frequency point**\
+             - 25 in most cases. 100 if continuation is turned off or natural
+               continuation is selected by issuing `HBMOPT
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,CONTSET
                with ``CorrMeth``\ = OFF or NAT.
              - ``MAXITER``\ ≥ 0
            * - ``Value2``\
-             - ``MAXINITITER``\ **Maximum number of iterations at initial
-               solution, irrespective of continuation settings**\
+             - ``MAXINITITER``\ **Maximum number of iterations at initial solution,
+               irrespective of continuation settings**\
              - 500
              - ``MAXINITITER``\ ≥ 0
            * - ``Value3``, … ``Value5``\
@@ -803,48 +759,45 @@ class NonlinearOptions(CommandsBase):
              - Label and description
              - -
            * - ``Value1``\
-             - ``Type``\ Scale the solution vector by the selected
-               scaling factor type and specification on ``UScal``.
-               **Note:**\ See scaling equations in `Equation Solution
+             - ``Type``\ Scale the solution vector by the selected scaling factor
+               type and specification on ``UScal``. **Note:**\ See scaling equations
+               in `Equation Solution
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/hbm_equations.html#ans_hbm_eqnTRtol>`_
-               and example usage of HBMOPT,SCAL in `Scaling the solution
-               vector in the Harmonic Balance Method Analysis Guide
+               and example usage of HBMOPT,SCAL in `Scaling the solution vector in
+               the Harmonic Balance Method Analysis Guide
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/ans_hbm_cmsEx.html#hbm_ex3_Scal>`_.
-             - Possible ``Type``\ settings are: **0 or NONE (default)**\
-               - No scaling.:sup:`[a]`\ **1 or APDL**\ - Scaling factors
-               contained in a user-defined APDL array whose name is
-               specified by ``UScal``\ are used. **2 or VALU**\ - Scalar
-               value specified for ``UScal``\ is used.
+             - Possible ``Type``\ settings are: **0 or NONE (default)**\ - No
+               scaling.:sup:`[a]`\ **1 or APDL**\ - Scaling factors contained in a
+               user-defined APDL array whose name is specified by ``UScal``\ are
+               used. **2 or VALU**\ - Scalar value specified for ``UScal``\ is used.
            * - **0 or NONE (default)**\
              - -
              - No scaling.:sup:`[a]`\
            * - **1 or APDL**\
              - -
-             - Scaling factors contained in a user-defined APDL array
-               whose name is specified by ``UScal``\ are used.
+             - Scaling factors contained in a user-defined APDL array whose name is
+               specified by ``UScal``\ are used.
            * - **2 or VALU**\
              - -
              - Scalar value specified for ``UScal``\ is used.
            * - ``Value2``\
-             - ``UScal``\ Name of the user-defined APDL array (if
-               ``Type``\ = 1 or APDL) or scalar value (if ``Type``\ = 2
-               or VALU) used to scale the solution vector to improve
-               convergence behavior.
-             - ``UScal``\ setting depends on ``Type``\ specification as
-               follows: For ``Type``\ = 1 or APDL - ``UScal``\ is the
-               name (up to 32 characters) of a previously defined APDL
-               array that contains scaling factors. It must be a 1D array
-               (`\*DIM
+             - ``UScal``\ Name of the user-defined APDL array (if ``Type``\ = 1 or
+               APDL) or scalar value (if ``Type``\ = 2 or VALU) used to scale the
+               solution vector to improve convergence behavior.
+             - ``UScal``\ setting depends on ``Type``\ specification as follows: For
+               ``Type``\ = 1 or APDL - ``UScal``\ is the name (up to 32 characters)
+               of a previously defined APDL array that contains scaling factors. It
+               must be a 1D array (`\*DIM
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_,
                `\*VEC
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VEC.html>`_,
-               etc.) with size equal to the size of the solution vector.
-               For ``TYPE``\ = 2 or VALU - ``UScal``\ is a scalar value.
+               etc.) with size equal to the size of the solution vector. For
+               ``TYPE``\ = 2 or VALU - ``UScal``\ is a scalar value.
            * - For ``Type``\ = 1 or APDL
              - -
-             - ``UScal``\ is the name (up to 32 characters) of a
-               previously defined APDL array that contains scaling
-               factors. It must be a 1D array (`\*DIM
+             - ``UScal``\ is the name (up to 32 characters) of a previously defined
+               APDL array that contains scaling factors. It must be a 1D array
+               (`\*DIM
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_,
                `\*VEC
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VEC.html>`_,
@@ -853,54 +806,49 @@ class NonlinearOptions(CommandsBase):
              - -
              - ``UScal``\ is a scalar value.
            * - ``Value3``\
-             - ``FSCAL``\ **Scaling value for the circular frequency
-               (ω).**\ ``FSCAL``\ is only valid for ``Type``\ = 1 (or
-               APDL) or 2 (or VALU)
+             - ``FSCAL``\ **Scaling value for the circular frequency (ω).**\
+               ``FSCAL``\ is only valid for ``Type``\ = 1 (or APDL) or 2 (or VALU)
              - **Default:**\ 1.0 **Range:**\ ``FSCAL``\ > 0.0
            * - ``Value4``\
-             - ``DoF``\ Degree of freedom numbering of the user-defined
-               scaling vector (``UScal``) Optional. If ``Type``\ = 1 or
-               APDL, this indicates the `degree of freedom ordering
+             - ``DoF``\ Degree of freedom numbering of the user-defined scaling
+               vector (``UScal``) Optional. If ``Type``\ = 1 or APDL, this indicates
+               the `degree of freedom ordering
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/apdldofordering.html>`_
                of the user-defined scaling vector.
-             - Possible ``DoF``\ settings are: **INT (default)**\ -
-               Internal Ansys DOFs. Length N:sub:`DOF`\ = numdof\*lenbac
-               (See `FULL File Format in the Programmer's Reference
+             - Possible ``DoF``\ settings are: **INT (default)**\ - Internal Ansys
+               DOFs. Length N:sub:`DOF`\ = numdof\*lenbac (See `FULL File Format in
+               the Programmer's Reference
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Hlp_P_INT1_10.html#int_full_format>`_)
-               **SOLU**\ - HBM solution DOFs. Length N:sub:`DOF`\ =
-               number of multiharmonic equations/(2NH+1)
+               **SOLU**\ - HBM solution DOFs. Length N:sub:`DOF`\ = number of
+               multiharmonic equations/(2NH+1)
            * - **INT (default)**\
              - -
-             - Internal Ansys DOFs. Length N:sub:`DOF`\ = numdof\*lenbac
-               (See `FULL File Format in the Programmer's Reference
+             - Internal Ansys DOFs. Length N:sub:`DOF`\ = numdof\*lenbac (See `FULL
+               File Format in the Programmer's Reference
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Hlp_P_INT1_10.html#int_full_format>`_)
            * - **SOLU**\
              - -
-             - HBM solution DOFs. Length N:sub:`DOF`\ = number of
-               multiharmonic equations/(2NH+1)
+             - HBM solution DOFs. Length N:sub:`DOF`\ = number of multiharmonic
+               equations/(2NH+1)
            * - ``Value5``\
-             - ``Back``\ APDL array name for the `back nodal mapping
-               vector
+             - ``Back``\ APDL array name for the `back nodal mapping vector
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/apdldofordering.html>`_
-               corresponding to the user-defined scaling vector Optional.
-               ``Back``\ is used to specify a back nodal mapping vector
-               corresponding to the user-defined scaling vector,
-               ``UScal``. It must be a 1D array (`\*DIM
+               corresponding to the user-defined scaling vector Optional. ``Back``\
+               is used to specify a back nodal mapping vector corresponding to the
+               user-defined scaling vector, ``UScal``. It must be a 1D array (`\*DIM
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_)
-               with size equal to the number of Ansys internal nodes.
-               ``Back``\ is used to reorder the user-defined scaling
-               vector to match the internal node ordering at the time of
-               solution. If it is not provided and ``DoF``\ = *INT*, it
-               is assumed that the user-defined scaling vector
-               corresponds to the internal DOF ordering at the time of
-               solution. **Note:**\ When using `HBMOPT
+               with size equal to the number of Ansys internal nodes. ``Back``\ is
+               used to reorder the user-defined scaling vector to match the internal
+               node ordering at the time of solution. If it is not provided and
+               ``DoF``\ = *INT*, it is assumed that the user-defined scaling vector
+               corresponds to the internal DOF ordering at the time of solution.
+               **Note:**\ When using `HBMOPT
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,SCAL,APDL,``UScal``,``FSCAL``,INT
-               to specify a user-defined scaling vector ``UScal``\ in
-               internal DOFs, it is recommended that you provide a
-               ``Back``\ vector to avoid any inconsistency between the
-               array provided and the internal node ordering. For example
-               usage, see `Scaling the solution vector in the Harmonic
-               Balance Method Analysis Guide
+               to specify a user-defined scaling vector ``UScal``\ in internal DOFs,
+               it is recommended that you provide a ``Back``\ vector to avoid any
+               inconsistency between the array provided and the internal node
+               ordering. For example usage, see `Scaling the solution vector in the
+               Harmonic Balance Method Analysis Guide
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/ans_hbm_cmsEx.html#hbm_ex3_Scal>`_.
              - No default value. ``Back``\ is limited to 32 characters.
 
@@ -918,8 +866,8 @@ class NonlinearOptions(CommandsBase):
              - **Default Value**\
              - **Range**\
            * - ``Value1``\
-             - ``UTOL``\ **Tolerance on the solution step size at any
-               given iteration**\
+             - ``UTOL``\ **Tolerance on the solution step size at any given
+               iteration**\
              - 1e-15
              - ``UTOL``\ > 0
            * - ``Value2``\
@@ -949,10 +897,9 @@ class NonlinearOptions(CommandsBase):
              - -
            * - ``Value1``\
              - ``U0Flag``\ **Initial solution guess**\
-             - Possible ``U0Flag``\ settings are: **0 or ZERO
-               (default)**\ - Use zero nodal solution as the initial
-               guess. **1 or APDL**\ - Use a user-defined APDL array as
-               the initial guess.
+             - Possible ``U0Flag``\ settings are: **0 or ZERO (default)**\ - Use zero
+               nodal solution as the initial guess. **1 or APDL**\ - Use a
+               user-defined APDL array as the initial guess.
            * - **0 or ZERO (default)**\
              - -
              - Use zero nodal solution as the initial guess.
@@ -960,77 +907,70 @@ class NonlinearOptions(CommandsBase):
              - -
              - Use a user-defined APDL array as the initial guess.
            * - ``Value2``\
-             - ``U0name``\ **Name of the APDL array for the initial
-               solution guess**\ Optional. If ``U0Flag``\ = 1 or APDL,
-               this APDL array is used to specify the initial solution
-               guess. It must be a 1D array (`\*DIM
+             - ``U0name``\ **Name of the APDL array for the initial solution guess**\
+               Optional. If ``U0Flag``\ = 1 or APDL, this APDL array is used to
+               specify the initial solution guess. It must be a 1D array (`\*DIM
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_)
-               containing the multiharmonic solution guess. The array
-               size is (2\*NH+1)\*N:sub:`DOF`\ where NH is the number of
-               harmonics specified by `HROPT
+               containing the multiharmonic solution guess. The array size is
+               (2\*NH+1)\*N:sub:`DOF`\ where NH is the number of harmonics specified
+               by `HROPT
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HROPT.html>`_,HBM,``NH``\
-               and N:sub:`DOF`\ is the number of degrees of freedom,
-               which depends on ``U0dof``.
+               and N:sub:`DOF`\ is the number of degrees of freedom, which depends on
+               ``U0dof``.
              - No default value ``U0name``\ is limited to 32 characters.
            * - ``Value3``\
-             - ``U0dof``\ **Degree of freedom numbering of the initial
-               solution guess**\ Optional. If ``U0Flag``\ = APDL, this
-               indicates the `degree of freedom ordering
+             - ``U0dof``\ **Degree of freedom numbering of the initial solution
+               guess**\ Optional. If ``U0Flag``\ = APDL, this indicates the `degree
+               of freedom ordering
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/apdldofordering.html>`_
                of the initial guess.
-             - Possible ``U0dof``\ settings are: **INT (default)**\ -
-               Internal Ansys DOFs. Length N:sub:`DOF`\ = numdof\*lenbac
-               (See `FULL File Format in the Programmer's Reference
+             - Possible ``U0dof``\ settings are: **INT (default)**\ - Internal Ansys
+               DOFs. Length N:sub:`DOF`\ = numdof\*lenbac (See `FULL File Format in
+               the Programmer's Reference
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Hlp_P_INT1_10.html#int_full_format>`_)
-               **SOLU**\ - HBM solution DOFs. Length N:sub:`DOF`\ =
-               number of multiharmonic equations/(2NH+1)
+               **SOLU**\ - HBM solution DOFs. Length N:sub:`DOF`\ = number of
+               multiharmonic equations/(2NH+1)
            * - **INT (default)**\
              - -
-             - Internal Ansys DOFs. Length N:sub:`DOF`\ = numdof\*lenbac
-               (See `FULL File Format in the Programmer's Reference
+             - Internal Ansys DOFs. Length N:sub:`DOF`\ = numdof\*lenbac (See `FULL
+               File Format in the Programmer's Reference
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Hlp_P_INT1_10.html#int_full_format>`_)
            * - **SOLU**\
              - -
-             - HBM solution DOFs. Length N:sub:`DOF`\ = number of
-               multiharmonic equations/(2NH+1)
+             - HBM solution DOFs. Length N:sub:`DOF`\ = number of multiharmonic
+               equations/(2NH+1)
            * - ``Value4``\
-             - ``U0BackName``\ APDL array name for the `back nodal
-               mapping vector
+             - ``U0BackName``\ APDL array name for the `back nodal mapping vector
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/apdldofordering.html>`_
-               corresponding to the initial guess Optional. If ``Uodof``\
-               = INT, the DOF ordering at the time of solution (see
-               `Degree of Freedom Ordering in the Ansys Parametric Design
-               Language Guide
+               corresponding to the initial guess Optional. If ``Uodof``\ = INT, the
+               DOF ordering at the time of solution (see `Degree of Freedom Ordering
+               in the Ansys Parametric Design Language Guide
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/apdldofordering.html>`_)
-               may be different from the intended DOF ordering
-               corresponding to the initial solution guess (``U0Name``).
-               To address this, ``U0BackName``\ is used to specify a back
-               nodal mapping vector corresponding to ``U0Name``. It must
-               be a 1D array (`\*DIM
+               may be different from the intended DOF ordering corresponding to the
+               initial solution guess (``U0Name``). To address this, ``U0BackName``\
+               is used to specify a back nodal mapping vector corresponding to
+               ``U0Name``. It must be a 1D array (`\*DIM
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_)
-               with size equal to the number of Ansys internal nodes.
-               ``U0BackName``\ is used to reorder the initial solution
-               guess to match the internal node ordering at the time of
-               solution. If it is not provided and ``U0dof``\ = *INT*, it
-               is assumed that the initial solution guess corresponds to
-               the internal DOF ordering at the time of solution.
+               with size equal to the number of Ansys internal nodes. ``U0BackName``\
+               is used to reorder the initial solution guess to match the internal
+               node ordering at the time of solution. If it is not provided and
+               ``U0dof``\ = *INT*, it is assumed that the initial solution guess
+               corresponds to the internal DOF ordering at the time of solution.
                **Note:**\ When using `HBMOPT
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,UINIT,APDL,*U0Name*,INT
-               to specify the initial solution guess *U0Name*\ in
-               internal DOFs, it is recommended that you provide a
-               ``U0BackName``\ vector to avoid any inconsistency between
-               the array provided and the internal node ordering. For
-               example usage, see `Example 3: Two Jointed Beams with
+               to specify the initial solution guess *U0Name*\ in internal DOFs, it
+               is recommended that you provide a ``U0BackName``\ vector to avoid any
+               inconsistency between the array provided and the internal node
+               ordering. For example usage, see `Example 3: Two Jointed Beams with
                Frictional Contact Interface
                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/ans_hbm_cmsEx.html>`_.
-             - No default value ``U0BackName``\ is limited to 32
-               characters.
+             - No default value ``U0BackName``\ is limited to 32 characters.
            * - ``Value5``\
              - Unused field
              - -
 
-        This command is used to specify solution options for a harmonic balance
-        method analysis (see `Harmonic Balance Method Analysis Guide
+        This command is used to specify solution options for a harmonic balance method
+        analysis (see `Harmonic Balance Method Analysis Guide
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/ans_hbm.html>`_).
 
         There is no `command default
@@ -1045,27 +985,27 @@ class NonlinearOptions(CommandsBase):
 
         * `HBMOPT
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,
-          CONTSET, ``CorrMeth``, ``DS``\ where ``CorrMeth``\ is blank or any
-          setting except OFF.
+          CONTSET, ``CorrMeth``, ``DS``\ where ``CorrMeth``\ is blank or any setting except
+          OFF.
 
         To estimate the proper step size, consider the following guidelines:
 
-        * Although the step size is dimensionless, it can be correlated with the
-          desired frequency increment expressed in radians per second.
+        * Although the step size is dimensionless, it can be correlated with the desired
+          frequency increment expressed in radians per second.
 
-        * Default values are provided for DSMIN and DSMAX, but if you want to
-          change them, keep the following points in mind:
+        * Default values are provided for DSMIN and DSMAX, but if you want to change them,
+          keep the following points in mind:
 
-          * Set the minimum step size DSMIN value orders of magnitude lower
-            than the initial step size, as it is a stopping criterion.
+          * Set the minimum step size DSMIN value orders of magnitude lower than the
+            initial step size, as it is a stopping criterion.
 
-          * The maximum step size DSMAX is not a stopping criterion, but
-            rather a setting that acts on the frequency resolution.
+          * The maximum step size DSMAX is not a stopping criterion, but rather a setting
+            that acts on the frequency resolution.
 
-        * To determine an appropriate step size, use a linear harmonic analysis
-          as a reference near the peak of interest. To capture sufficient
-          detail, a practical guideline is to set the maximum step size so that
-          the resonance peak bandwidth contains approximately 5 to 10 steps.
+        * To determine an appropriate step size, use a linear harmonic analysis as a
+          reference near the peak of interest. To capture sufficient detail, a practical
+          guideline is to set the maximum step size so that the resonance peak bandwidth
+          contains approximately 5 to 10 steps.
 
         **No continuation solver options**\
 
@@ -1075,11 +1015,10 @@ class NonlinearOptions(CommandsBase):
 
         * `NSUBST
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSUBST.html>`_\
-          is used to specify the number of substeps and calculate the fixed
-          frequency step. The first substep is at ``FREQB``\ + (``FREQE``\ -
-          ``FREQB``)/``NSBSTP``\ as in other harmonic analyses, where ``FREQB``\
-          and ``FREQE``\ are the beginning and ending frequencies of a solution
-          specified with the `HARFRQ
+          is used to specify the number of substeps and calculate the fixed frequency step.
+          The first substep is at ``FREQB``\ + (``FREQE``\ - ``FREQB``)/``NSBSTP``\ as in
+          other harmonic analyses, where ``FREQB``\ and ``FREQE``\ are the beginning and
+          ending frequencies of a solution specified with the `HARFRQ
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HARFRQ.html>`_\
           command.
 
@@ -1091,39 +1030,36 @@ class NonlinearOptions(CommandsBase):
 
         **Alternating frequency-time options**\
 
-        The alternating frequency-time (AFT) procedure and derivation of
-        relevant Jacobians for a general nonlinearity is described in
-        `Alternating Frequency-Time Procedure in the Harmonic Balance Method
-        Analysis Guide
+        The alternating frequency-time (AFT) procedure and derivation of relevant Jacobians
+        for a general nonlinearity is described in `Alternating Frequency-Time Procedure in
+        the Harmonic Balance Method Analysis Guide
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/hbm_equations.html#ans_hbm_AFTeqns>`_.
 
         **Trust-region solver options**\
 
-        An iterative process is used to solve the HBM nonlinear equations using
-        a trust-region nonlinear equation solver as detailed in `Equation
-        Solution in the Harmonic Balance Method Analysis Guide
+        An iterative process is used to solve the HBM nonlinear equations using a
+        trust-region nonlinear equation solver as detailed in `Equation Solution in the
+        Harmonic Balance Method Analysis Guide
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/hbm_equations.html#ans_hbm_eqnTRtol>`_.
         All tolerances (``UTOL``, ``RTOL``, and ``GTOL``\ specified by `HBMOPT
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,TRTOL)
-        are also stopping criteria. The only required convergence criteria is
-        the tolerance on the functional residual norm (`HBMOPT
+        are also stopping criteria. The only required convergence criteria is the tolerance
+        on the functional residual norm (`HBMOPT
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,TRTOL,,``RTOL``).
-        The other tolerances on the gradient norm and the step size are
-        additional convergence criteria that indicate stronger convergence if
-        satisfied.
+        The other tolerances on the gradient norm and the step size are additional
+        convergence criteria that indicate stronger convergence if satisfied.
 
         **Example Usage**
 
-        `Example 1: 1-DOF Duffing Oscillator in the Harmonic Balance Method
-        Analysis Guide
+        `Example 1: 1-DOF Duffing Oscillator in the Harmonic Balance Method Analysis Guide
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/hbm_DuffOsc.html>`_
 
-        `Example 2: Two Cantilever Beams with Frictionless Gap Contact in the
-        Harmonic Balance Method Analysis Guide
+        `Example 2: Two Cantilever Beams with Frictionless Gap Contact in the Harmonic
+        Balance Method Analysis Guide
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/hbm_CantBeamsContact.html>`_
 
-        `Example 3: Two Jointed Beams with Frictional Contact Interface in the
-        Harmonic Balance Method Analysis Guide
+        `Example 3: Two Jointed Beams with Frictional Contact Interface in the Harmonic
+        Balance Method Analysis Guide
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/ans_hbm_cmsEx.html>`_
 
         `Example 4: Cyclic Spring-Mass System with Cubic Nonlinearity
@@ -1297,19 +1233,16 @@ class NonlinearOptions(CommandsBase):
         val7: str = "",
         **kwargs,
     ):
-        r"""Defines the criteria under which the mesh is refined or modified during a nonlinear
-        solution.
+        r"""Defines the criteria under which the mesh is refined or modified during a nonlinear solution.
 
         Mechanical APDL Command: `NLADAPTIVE <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_
 
         Parameters
         ----------
         component : str
-            Specifies the element component upon which this command should
-            act:
+            Specifies the element component upon which this command should act:
 
-            * ``ALL`` - All selected components, or all selected elements if
-              no component is selected (default).
+            * ``ALL`` - All selected components, or all selected elements if no component is selected (default).
 
             * ``Name`` - Component name.
 
@@ -1318,499 +1251,213 @@ class NonlinearOptions(CommandsBase):
 
             * ``ADD`` - Add a criterion to the database.
 
-            * ``LIST`` - List the criteria defined for the specified
-              component(s).
+            * ``LIST`` - List the criteria defined for the specified component(s).
 
-            * ``DELETE`` - Delete the criteria defined for the specified
-              component(s).
+            * ``OCTREE`` - Enable adaptive mesh coarsening for additive manufacturing process simulation using
+              the AM octree method.
 
-            * ``ON`` - Enable the defined criteria for the specified
-              component(s) and specify how frequently and when to check them
-              (via ON,,,``VAL1``,``VAL2``,``VAL3``):
+            * ``DELETE`` - Delete the criteria defined for the specified component(s).
 
-              ``VAL1``\ -- Checking frequency. If > 0, check criteria at
-              every ``VAL1``\ substeps. If < 0, check criteria at each of
-              the ``VAL1``\ points (approximately equally spaced) between
-              ``VAL2``\ and ``VAL3``. (Default = -1.)
+            * ``ON`` - Enable the defined criteria for the specified component(s) and specify how frequently and
+              when to check them (via ON, ``VAL1``, ``VAL2``, ``VAL3`` ):
 
-              ``VAL2``\ -- Checking start time, where ``VAL2``\ <
-              ``VAL3``. (Default = Start time of load step.)
+              ``VAL1`` -- Checking frequency. If > 0, check criteria at every ``VAL1`` substeps. If < 0, check
+              criteria at each of the ``VAL1`` points (approximately equally spaced) between ``VAL2`` and
+              ``VAL3``. (Default = -1.)
 
-              ``VAL3``\ -- Checking end time, where ``VAL3``\ > ``VAL2``.
-              (Default = End time of load step.)
+              ``VAL2`` -- Checking start time, where ``VAL2`` < ``VAL3``. (Default = Start time of load step.)
 
-              ``VAL4``\ -- `SOLID187
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID187.html>`_
-              element type ID (defined prior to issuing this command).
-              Valid only for `SOLID185
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID185.html>`_
-              or `SOLID186
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID186.html>`_
-              components in a `NLAD-ETCHG analysis
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/ans_nlad_etchg.html>`_.
+              ``VAL3`` -- Checking end time, where ``VAL3`` > ``VAL2``. (Default = End time of load step.)
 
-            * ``OFF`` - Disable the defined criteria for the specified
-              component(s).
+              ``VAL4`` -- ``SOLID187`` element type ID (defined prior to issuing this command). Valid only for
+              ``SOLID185`` or ``SOLID186`` components in a `NLAD-ETCHG analysis
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/nladetchgexample.html>`_.
+
+            * ``OFF`` - Disable the defined criteria for the specified component(s).
 
         criterion : str
             Type of criterion to apply to the selected component(s):
 
-            * ``CONTACT`` - Contact-based. Valid only for ``Action``\ = ADD,
-              ``Action``\ = LIST, or ``Action``\ = DELETE.
-
-            * ``ENERGY`` - Energy-based. Valid only for ``Action``\ = ADD,
-              ``Action``\ = LIST, or ``Action``\ = DELETE.
-
-            * ``BOX`` - A position-based criterion, defined by a box. Valid
-              only for ``Action``\ = ADD, ``Action``\ = LIST, or ``Action``\
-              = DELETE.
-
-            * ``MESH`` - A mesh-quality-based criterion. Valid only for
-              ``Action``\ = ADD, ``Action``\ = LIST, or ``Action``\ =
+            * ``CONTACT`` - Contact-based. Valid only for ``Action`` = ADD, ``Action`` = LIST, or ``Action`` =
               DELETE.
 
-            * ``AM`` - Criterion used with Additive Manufacturing analyses.
-              Valid only for ``Action``\ = ADD, ``Action``\ = LIST, or
-              ``Action``\ = DELETE.
-
-            * ``REMELM`` - An element-removal-based criterion. Valid only
-              for ``Action``\ = ADD, ``Action``\ = LIST, or ``Action``\ =
+            * ``ENERGY`` - Energy-based. Valid only for ``Action`` = ADD, ``Action`` = LIST, or ``Action`` =
               DELETE.
 
-            * ``REMMAT`` - A material-removal-based criterion. Valid only
-              for ``Action``\ = ADD, ``Action``\ = LIST, or ``Action``\ =
-              DELETE.
+            * ``BOX`` - A position-based criterion, defined by a box. Valid only for ``Action`` = ADD,
+              ``Action`` = LIST, or ``Action`` = DELETE.
 
-            * ``ALL`` - All criteria and options. Valid only for ``Action``\
-              = LIST or ``Action``\ = DELETE. ``Option``\ and all subsequent
-              arguments are ignored.
+            * ``MESH`` - A mesh-quality-based criterion. Valid only for ``Action`` = ADD, ``Action`` = LIST, or
+              ``Action`` = DELETE.
+
+            * ``ALL`` - All criteria and options. Valid only for ``Action`` = LIST or ``Action`` = DELETE.
+              ``Option`` and all subsequent arguments are ignored.
 
         option : str
             Criterion option to apply to the selected component(s):
 
-            * ``NUMELEM`` - For target elements only, defines the minimum
-              number of contact elements to contact with each target
-              element. If this criterion is not satisfied, the program
-              refines the contact elements and the associated solid
-              elements. For this option, ``VAL1``\ must be a positive
-              integer.
+            * ``NUMELEM`` - For target elements only, defines the minimum number of contact elements to contact
+              with each target element. If this criterion is not satisfied, the program refines the contact
+              elements and the associated solid elements. For this option, ``VAL1`` must be a positive integer.
 
-              Valid only for ``Criterion``\ = CONTACT and ``Action``\ =
-              ADD, LIST, or DELETE.
+              Valid only for ``Criterion`` = CONTACT and ``Action`` = ADD, LIST, or DELETE.
 
-            * ``MEAN`` - Checks the strain energy of any element that is
-              part of the defined component for two possible conditions:
+            * ``MEAN`` - Checks the strain energy of any element that is part of the defined component for the condition E:sub:`e` ≥ c:sub:`1` * E:sub:`total` / ``NUME`` (where c:sub:`1` = ``VAL1``, E:sub:`total` is the total strain energy of the component, and ``NUME`` is the number of elements of the component). If this criterion is satisfied at an element, the program refines the element. ``VAL1`` must be non-negative. Default = 1.
 
-              E:sub:`e`\ ≥ c:sub:`1`\ \* E:sub:`total`\ / ``NUME``\ (where
-              c:sub:`1`\ = ``VAL1``, E:sub:`total`\ is the total strain
-              energy of the component, and ``NUME``\ is the number of
-              elements of the component). If this criterion is satisfied
-              at an element, the program refines the element. A negative
-              ``VAL1``\ ignores this option. Default = 1.
+              Valid only for ``Criterion`` = ENERGY and ``Action`` = ADD, LIST, or DELETE.
 
-              E:sub:`e`\ < c:sub:`2`\ \* E:sub:`total`\ / ``NUME``\ (where
-              c:sub:`2`\ = ``VAL2``, E:sub:`total`\ is the total strain
-              energy of the component, and ``NUME``\ is the number of
-              elements of the component). If this criterion is satisfied
-              at an element, the program coarsens the element. A negative
-              ``VAL2``\ ignores this option. Default = Option ignored.
+            * ``XYZRANGE`` - Defines the location box in which all elements within are to be split or refined.
+              Up to six values following the ``Option`` argument (representing the x1, x2, y1, y2, z1, and z2
+              coordinates) are allowed. An unspecified coordinate is not checked.
 
-              Both conditions can be applied together provided that
-              ``VAL1``\ > ``VAL2``; otherwise, the command is ignored.
+              Valid only for ``Criterion`` = BOX and ``Action`` = ADD, LIST, or DELETE.
 
-              Valid only for ``Criterion``\ = ENERGY and ``Action``\ =
-              ADD, LIST, or DELETE.
+            * ``LAYER`` - Sets layer options for AM octree adaptive meshing for additive simulations.
 
-            * ``XYZRANGE`` - Defines the location box in which all elements
-              within are to be split, or refined / coarsened. Up to seven
-              values are allowed following the ``Option``\ argument, the
-              seventh being an optional coarsening flag.
+              * ``VAL1`` - Number of layers to keep at fine mesh resolution between the current, top layer and the
+                layers to be remeshed. Default = 2.
+              * ``VAL2`` - Number of buffer elements to keep at fine mesh resolution between the part edges and
+                the remeshed elements. Default = 2.
 
-              * ``VAL1``,..., ``VAL6``\ - The x1, x2, y1, y2, z1, and z2
-                box coordinates. An unspecified coordinate is not checked.
+              Valid only for ``Action`` = OCTREE.
 
-              * ``VAL7``\ - Coarsening flag. Specify coarsening by setting
-                this value to COAR. If not specified, the default behavior
-                is refining.
+            * ``SKEWNESS`` - Mesh-quality-control threshold for elements ``SOLID187``, ``SOLID285``, and ``SOLID227`` :
 
-              Valid only for ``Criterion``\ = BOX and ``Action``\ = ADD,
-              LIST, or DELETE.
-
-            * ``OCTREE`` - Sets octree options for AM octree adaptive
-              meshing for additive simulations.
-
-              * ``VAL1``\ - Number of layers to keep at fine mesh
-                resolution between the current, top layer and the layers
-                to be remeshed. Default = 2.
-
-              * ``VAL2``\ - Number of buffer elements to keep at fine mesh
-                resolution between the part edges and the remeshed
-                elements. Default = 2.
-
-              Valid only for ``Criterion``\ = AM and ``Action``\ = ADD,
-              LIST, or DELETE.
-
-            * ``SKEWNESS`` - Mesh-quality-control threshold for elements
-              `SOLID187
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID187.html>`_,
-              `SOLID285
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID285.html>`_,
-              and `SOLID227
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID227.html>`_:
-
-              * ``VAL1``\ - Defines skewness. Valid values: 0.0 through
-                1.0. Default = 0.9.
-
-              * ``VAL2``\ - Maximum Jacobian ratio at element integration
-                points (`SOLID187
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID187.html>`_
-                and `SOLID227
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID227.html>`_
+              * ``VAL1`` - Defines skewness. Valid values: 0.0 through 1.0. Default = 0.9.
+              * ``VAL2`` - Maximum Jacobian ratio at element integration points ( ``SOLID187`` and ``SOLID227``
                 only). Valid values: 0.0 to 1.0. Default = 0.1.
 
-              Valid only for ``Criterion``\ = MESH and ``Action``\ = ADD,
-              LIST, or DELETE.
+              Valid only for ``Criterion`` = MESH and ``Action`` = ADD, LIST, or DELETE.
 
-            * ``SHAPE`` - Mesh-quality control threshold for elements
-              `PLANE182
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE182.html>`_
-              and `PLANE222
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE222.html>`_.
-              Also applies to `SOLID185
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID185.html>`_
-              and `SOLID186
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID186.html>`_
-              in a `NLAD-ETCHG analysis
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/ans_nlad_etchg.html>`_.
+            * ``SHAPE`` - Mesh-quality control threshold for elements ``PLANE182`` and ``PLANE222``. Also
+              applies to ``SOLID185`` and ``SOLID186`` in a `NLAD-ETCHG analysis
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/nladetchgexample.html>`_.
 
-              ``VAL1``\ -- Maximum corner angle of an element in degrees.
-              Valid values are 0 through 180. Default = 160 (2D analysis)
-              or 155 (3D analysis). An element is remeshed when any of its
-              corner angles reach the specified value.
+              ``VAL1`` -- Maximum corner angle of an element in degrees. Valid values are 0 through 180. Default =
+              160 (2D analysis) or 155 (3D analysis). An element is remeshed when any of its corner angles reach
+              the specified value.
 
-              Valid only for ``Criterion``\ = MESH and ``Action``\ = ADD,
-              LIST, or DELETE.
+              Valid only for ``Criterion`` = MESH and ``Action`` = ADD, LIST, or DELETE.
 
-            * ``WEAR`` - For contact elements having surface wear specified
-              (`TB
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TB.html>`_,WEAR)
-              only, defines ``VAL1``\ as a critical ratio of magnitude of
-              wear to the average depth of the solid element underlying the
-              contact element. Once this critical ratio is reached for any
-              element, the program morphs the mesh to improve the quality of
-              the elements. ``VAL1``\ must be positive.
+            * ``WEAR`` - For contact elements having surface wear specified ( :ref:`tb`,WEAR) only, defines
+              ``VAL1`` as a critical ratio of magnitude of wear to the average depth of the solid element
+              underlying the contact element. Once this critical ratio is reached for any element, the program
+              morphs the mesh to improve the quality of the elements. ``VAL1`` must be a positive integer.
 
-              Valid only for ``Criterion``\ = CONTACT and ``Action``\ =
-              ADD, ``Action``\ = LIST, or ``Action``\ = DELETE. Cannot be
-              combined with any other option during solution.
+              Valid only for ``Criterion`` = CONTACT and ``Action`` = ADD, ``Action`` = LIST, or ``Action`` =
+              DELETE. Cannot be combined with any other option during solution.
 
             * ``CZM`` - For contact elements with `cohesive zone material
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnacriteria.html#advczmcriterion>`_
-              (`TB
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TB.html>`_,CZM)
-              only, defines ``VAL1``\ as a critical value of change in
-              released energy due to debonding between reference and current
-              substep, and ``VAL2``\ as the critical value for the change in
-              the damage parameter between neighboring elements. Both values
-              can be applied separately or together.
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnacriteria.html#nladrefsubstep>`_
+              ( :ref:`tb`,CZM) only, defines ``VAL1`` as a critical value of change in released energy due to
+              debonding between reference and current substep, and ``VAL2`` as the critical value for the change
+              in the damage parameter between neighboring elements. Both values can be applied separately or
+              together.
 
-              When the critical value is reached (for either of the
-              defined options) for one contact element, the solid elements
-              underlying that contact element and the corresponding
-              deformable target element are selected as candidates for
-              remeshing.
+              When the critical value is reached (for either of the defined options) for one contact element, the
+              solid elements underlying that contact element and the corresponding deformable target element are
+              selected as candidates for remeshing.
 
-              Required: ``VAL1``\ or ``VAL2``, where ``VAL1``\ > 0, and 0
-              < ``VAL2``\ < 1. No default.
+              ``VAL1`` must be > 0. ``VAL2`` must be > 0 and < 1. No default.
 
-              If issuing `NLMESH
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLMESH.html>`_,,,``VAL3``\
-              where ``VAL3``\ > 1.0, the criterion also checks for
-              coarsening of solid elements underlying the debonded contact
-              element and the corresponding deformable target element.
-
-              Valid only for ``Criterion``\ = CONTACT and ``Action``\ =
-              ADD, LIST, or DELETE. Combining the CZM criterion with
-              `mesh-quality-based
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnacriteria.html#advmnaqualitybased>`_
+              Valid only for ``Criterion`` = CONTACT and ``Action`` = ADD, LIST, or DELETE. Combing the CZM
+              criterion with `mesh-quality-based
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnacriteria.html#advmnlaskewnessopt>`_
               criteria may be necessary to improve distorted elements.
 
-            * ``ESTN`` - For element-removal-based criterion (``Criterion``\
-              = REMELM) and material-removal-based criterion (``Criterion``\
-              = REMMAT) for `PLANE182
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE182.html>`_
-              elements only. Indicates that the maximum equivalent strain
-              measure is used to determine if the removal of an element or
-              material is required.
-
-              * ``VAL1``\ - Lower bound check of the maximum equivalent
-                strain. Default = -1, indicating that if not specified,
-                the lower bound check of the maximum equivalent strain is
-                ignored.
-
-              * ``VAL2``\ - Upper bound check of the maximum equivalent
-                strain. Default = -1, indicating that if not specified,
-                the upper bound check of the maximum equivalent strain is
-                ignored.
-
-              * ``VAL1``\ < ``VAL2``. If both are specified, the element
-                is a candidate for material removal, if ``VAL1``\ <= S <=
-                ``VAL2``, where S = the maximum equivalent strain at that
-                integration point. If only ``VAL1``\ is specified, the
-                element or material is a candidate for removal, if S >=
-                ``VAL1``. If only ``VAL2``\ is specified, the element or
-                material is a candidate for removal (if S <= ``VAL2``).
-
-              * ``VAL3``\ - Flag for variant of void creation. The default
-                value is 0, for multiple void creations per substep. For
-                single void per substep based on the maximum error
-                element, ``VAL3``\ = 1.
-
-              * ``VAL4``\ to ``VAL7``\ - For material-removal-based
-                criterion only. Optional controls for the void shape, size
-                and discretization, independent of the option for the
-                error indicator.
-
-              * ``VAL4``\ - Minimum Void Size Ratio (MNVSR), for a
-                computed void size ratio (VSR) smaller than ``VAL4``, the
-                VSR is set to the user input value ``VAL4``. The allowable
-                range is 0 < ``VAL4``\ ≤ 1. No default value.
-
-              * ``VAL5``\ - Maximum Void Size Ratio (MXVSR), for a
-                computed void size ratio (VSR) greater than ``VAL5``, the
-                VSR is set to the user input value ``VAL5``. The allowable
-                range is 0 < ``VAL5``\ ≤ 1. No default value.
-
-              * ``VAL4 <= VAL5``. If both are specified, the void size
-                ratio for generating the ellipse is ``VAL4``\ ≤ VSR ≤
-                ``VAL5``. If ``VAL4``\ and ``VAL5``\ are not specified,
-                the void size ratio will be the value calculated based on
-                the major and minor axe directions of the selected
-                elements.
-
-              * ``VAL6``\ - Unused.
-
-              * ``VAL7``\ - Number of Layers of Selected Damaged Elements
-                (NLSE) for single void per substep variant (``VAL3``\ =
-                1). Defines the number of adjacent layers around the
-                selected seed element, which will be checked for an error
-                indicator value E > 0. Once the criterion is met, the
-                elements are selected for the void creation (may influence
-                size and orientation). The default value is 1. Not used
-                for multiple voids per substep.
-
-            * ``PSTN`` - For element-removal-based criterion (``Criterion``\
-              = REMELM) and material-removal-based criterion (``Criterion``\
-              = REMMAT) for `PLANE182
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE182.html>`_
-              elements only. Indicates that the maximum principal strain
-              measure is used to determine if an element or material can be
-              removed.
-
-              * ``VAL1``\ - Lower bound check of the maximum principal
-                strain. Default = -1, indicating that if not specified,
-                the lower bound check of the maximum principal strain is
-                ignored.
-
-              * ``VAL2``\ - Upper bound check of the maximum principal
-                strain. Default = -1, indicating that if not specified,
-                the upper bound check of the maximum principal strain is
-                ignored.
-
-              * ``VAL1``\ < ``VAL2``. If both are specified, the element
-                is a candidate for material removal, if ``VAL1``\ <= P <=
-                ``VAL2``, where P = the maximum principal strain at that
-                integration point. If only ``VAL1``\ is specified, the
-                element or material is a candidate for removal, if P >=
-                ``VAL1``. If only ``VAL2``\ is specified, the element or
-                material is a candidate for removal (if P <= ``VAL2``).
-
-              * ``VAL3``\ - Flag for variant of void creation. The default
-                value is 0, for multiple void creations per substep. For
-                single void per substep based on the maximum error
-                element, ``VAL3``\ = 1.
-
-              * ``VAL4 to VAL7``\ - For material-removal-based criterion
-                only. Optional controls for the void shape, size and
-                discretization, independent of the option for the error
-                indicator.
-
-              * ``VAL4``\ - Minimum Void Size Ratio (MNVSR), for a
-                computed void size ratio (VSR) smaller than ``VAL4``, the
-                VSR is set to the user input value ``VAL4``. The allowable
-                range is 0 < ``VAL4``\ ≤ 1. No default value.
-
-              * ``VAL5``\ - Maximum Void Size Ratio (MXVSR), for a
-                computed void size ratio (VSR) greater than ``VAL5``, the
-                VSR is set to the user input value ``VAL5``. The allowable
-                range is 0 < ``VAL5``\ ≤ 1. No default value.
-
-              * ``VAL4 <= VAL5``. If both are specified, the void size
-                ratio for generating the ellipse is ``VAL4``\ ≤ VSR ≤
-                ``VAL5``. If ``VAL4``\ and ``VAL5``\ are not specified,
-                the void size ratio will be the value calculated based on
-                the major and minor axe directions of the selected
-                elements.
-
-              * ``VAL6``\ - Unused.
-
-              * ``VAL7``\ - Number of Layers of Selected Damaged Elements
-                (NLSE) for single void per substep variant (*VAL3*\ = 1).
-                Defines the number of adjacent layers around the selected
-                seed element, which will be checked for an error indicator
-                value E > 0. Once the criterion is met, the elements are
-                selected for the void creation (may influence size and
-                orientation). The default value is 1. Not used for
-                multiple voids per substep.
-
-            * ``MANUAL`` - For element-removal-based criterion
-              (``Criterion``\ = REMELM) for `PLANE182
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE182.html>`_
-              elements only. Indicates that all element defined in the
-              relevant component are candidates for removal and the removal
-              will happen in a specific substep.
-
-            * ``ALL`` - All options. Valid only for ``Action``\ = LIST or
-              ``Action``\ = DELETE. All subsequent arguments are ignored.
+            * ``ALL`` - All options. Valid only for ``Action`` = LIST or ``Action`` = DELETE. All subsequent
+              arguments are ignored.
 
         val1 : str
-            Command argument ``VAL1``. Refer to the `NLADAPTIVE command
+            The description of the argument is missing in the Python function. Please, refer to the `command
             documentation
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_
-            for option-specific definitions.
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NLADAPTIVE.html>`_ for
+            further information.
 
         val2 : str
-            Command argument ``VAL2``. Refer to the `NLADAPTIVE command
+            The description of the argument is missing in the Python function. Please, refer to the `command
             documentation
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_
-            for option-specific definitions.
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NLADAPTIVE.html>`_ for
+            further information.
 
         val3 : str
-            Command argument ``VAL3``. Refer to the `NLADAPTIVE command
+            The description of the argument is missing in the Python function. Please, refer to the `command
             documentation
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_
-            for option-specific definitions.
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NLADAPTIVE.html>`_ for
+            further information.
 
         val4 : str
-            Command argument ``VAL4``. Refer to the `NLADAPTIVE command
+            The description of the argument is missing in the Python function. Please, refer to the `command
             documentation
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_
-            for option-specific definitions.
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NLADAPTIVE.html>`_ for
+            further information.
 
-        val5 : str
-            Command argument ``VAL5``. Refer to the `NLADAPTIVE command
-            documentation
+        val5, val6, val7 : str
+            Option-specific command argument. Refer to the `NLADAPTIVE command documentation
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_
-            for option-specific definitions.
-
-        val6 : str
-            Command argument ``VAL6``. Refer to the `NLADAPTIVE command
-            documentation
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_
-            for option-specific definitions.
-
-        val7 : str
-            Command argument ``VAL7``. Refer to the `NLADAPTIVE command
-            documentation
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_
-            for option-specific definitions.
+            for details.
 
         Notes
         -----
 
         .. _NLADAPTIVE_notes:
 
-        If a specified component (``Component``) is an assembly, the defined
-        criterion applies to all element components included in the assembly.
+        If a specified component ( ``Component`` ) is an assembly, the defined criterion applies to all
+        element components included in the assembly.
 
-        All components must be defined and selected *before*\ the first solve
-        (`SOLVE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SOLVE.html>`_),
-        although their nonlinear adaptivity criteria can be modified from load
-        step to load step, and upon restart. For nonlinear adaptivity to work
-        properly, ensure that all components are selected before each solve.
+        All components must be defined and selected before the first solve ( :ref:`solve` ), although their
+        nonlinear adaptivity criteria can be modified from load step to load step, and upon restart. For
+        nonlinear adaptivity to work properly, ensure that all components are selected before each solve.
 
-        After issuing this command to define a new criterion, the new criterion
-        becomes active. The program checks the new criterion once per load step,
-        roughly in mid-loading (unless this behavior is changed via ``Action``\
-        = ON).
+        After issuing this command to define a new criterion, the new criterion becomes active. The program
+        checks the new criterion once per load step, roughly in mid-loading (unless this behavior is changed
+        via ``Action`` = ON).
 
-        When a criterion is defined, it overwrites a previously defined
-        criterion (if one exists) through the same component, or through the
-        component assembly that includes the specified component.
+        When a criterion is defined, it overwrites a previously defined criterion (if one exists) through
+        the same component, or through the component assembly that includes the specified component.
 
-        During solution, the same criteria defined for an element through
-        different components are combined, and the tightest criteria and action
-        control (``Action``,ON,,,``VAL1``) are used. If an ON action is defined
-        by a positive ``VAL1``\ value through one component and a negative
-        ``VAL1``\ value through another, the program uses the positive value.
+        During solution, the same criteria defined for an element through different components are combined,
+        and the tightest criteria and action control ( ``Action``,ON, ``VAL1`` ) are used. If an ON action
+        is defined by a positive ``VAL1`` value through one component and a negative ``VAL1`` value through
+        another, the program uses the positive value.
 
-        When the AM octree option is specified (``Action``\ = ADD,
-        ``Criterion``\ = AM, ``Option``\ = OCTREE), the checking frequency
-        (``Action``,ON,,,``VAL1``), checking start time
-        (``Action``,ON,,,``VAL2``), and checking end time
-        (``Action``,ON,,,``VAL3``) control the checking layer frequency, start
-        layer, and end layer respectively. If start and end layers are not
-        specified, the start layer will default to the checking frequency, and
-        the end layer will default to the final layer of the AM simulation.
+        When the AM octree option is specified ( ``Action`` = OCTREE), the checking frequency ( Action,ON,,
+        VAL1 ), checking start time ( Action,ON, VAL2 ), and checking end time ( Action,ON, VAL3 )
+        control the checking layer frequency, start layer, and end layer respectively. If start and end
+        layers are not specified, the start layer will default to the checking frequency, and the end layer
+        will default to the final layer of the AM simulation.
 
-        **Action = ON**
+        If ``VAL1`` < 0, the program checks ``VAL1`` points between ``VAL2`` and ``VAL3``. The time interval
+        between each check points is determined by ( ``VAL3`` - ``VAL2`` ) / ( ``VAL1`` + 1), with the first
+        check point as close to ``VAL2`` + ( ``VAL3`` - ``VAL2`` ) / ( ``VAL1`` + 1) as possible. Fewer
+        check points can be used if the number of substeps during solution is insufficient (as the program
+        can only check at the end of a substep).
 
-        If ``VAL1``\ < 0, the program checks ``VAL1``\ points between ``VAL2``\
-        and ``VAL3``. The time interval between each check points is determined
-        by (``VAL3``\ - ``VAL2``) / (``VAL1``\ + 1), with the first check point
-        as close to ``VAL2``\ + (``VAL3``\ - ``VAL2``) / (``VAL1``\ + 1) as
-        possible. Fewer check points can be used if the number of substeps
-        during solution is insufficient (as the program can only check at the
-        *end*\ of a substep).
+        If ``VAL2`` (start time) and/or ``VAL3`` (end time) are unspecified or invalid, the program uses the
+        start and/or end time (respectively) of the load step.
 
-        If ``VAL2``\ (start time) and/or ``VAL3``\ (end time) are unspecified or
-        invalid, the program uses the start and/or end time (respectively) of
-        the load step.
+        ``VAL1`` applies to tetrahedral elements ``SOLID187``, ``SOLID227``, and ``SOLID285``. When the
+        skewness of an element is >= ``VAL1``, the element is used as the core (seed) element of the
+        remeshed region(s). The most desirable skewness value is 0, applicable when the element is a
+        standard tetrahedral element; the highest value is 1, applicable when the element becomes flat with
+        zero volume. To bypass skewness checking (not recommended), set ``VAL1`` = 0.
 
-        **Option = SKEWNESS**
+        ``VAL2`` represents the Jacobian ratio and is required for tetrahedral elements ``SOLID187`` and
+        ``SOLID227``. When the maximum Jacobian ratio of an element is <= ``VAL2``, the element is used as
+        the core (seed) element of the remeshed region(s). The most desirable maximum Jacobian ratio is 1,
+        when the element is a standard tetrahedral element; the lowest reported value is -1, when the
+        element is turned inside out. To bypass maximum Jacobian ratio checking (not recommended), set
+        ``VAL2`` = 0.
 
-        ``VAL1``\ applies to tetrahedral elements `SOLID187
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID187.html>`_,
-        `SOLID227
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID227.html>`_,
-        and `SOLID285
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID285.html>`_.
-        When the skewness of an element is >= ``VAL1``, the element is used as
-        the core (seed) element of the remeshed region(s). The most desirable
-        skewness value is 0, applicable when the element is a standard
-        tetrahedral element; the highest value is 1, applicable when the element
-        becomes flat with zero volume. To bypass skewness checking (not
-        recommended), set ``VAL1``\ = 0.
+        If this criterion is used with any other criteria defined for the same component, and a mesh change
+        is requested at the same substep, all criteria defined are considered together. For more information
+        about this special case, see `Simultaneous Quality- and Refinement-Based Remeshing
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnanewmesh.html#>`_
 
-        ``VAL2``\ represents the Jacobian ratio and is required for tetrahedral
-        elements `SOLID187
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID187.html>`_
-        and `SOLID227
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID227.html>`_.
-        When the maximum Jacobian ratio of an element is <= ``VAL2``, the
-        element is used as the core (seed) element of the remeshed region(s).
-        The most desirable maximum Jacobian ratio is 1, when the element is a
-        standard tetrahedral element; the lowest reported value is -1, when the
-        element is turned inside out. To bypass maximum Jacobian ratio checking
-        (not recommended), set ``VAL2``\ = 0.
+        For more information about skewness, maximum Jacobian ratio, and remeshing, see `Nonlinear Mesh
+        Adaptivity <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnaexample.html>`_
 
-        If this criterion is used with any other criteria defined for the same
-        component, and a mesh change is requested at the same substep, *all*\
-        criteria defined are considered together. For more information about
-        this special case, see `Simultaneous Quality- and Refinement-Based
-        Remeshing in the Nonlinear Adaptivity Analysis Guide
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnanewmesh.html#nladsimultaneous>`_.
-
-        **Resources**
-
-        For more information about skewness, maximum Jacobian ratio, and
-        remeshing, see `Nonlinear Mesh Adaptivity in the Nonlinear Adaptivity
-        Analysis Guide
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/adv_meshnonlinadapt.html>`_.
-
-        For more granular control of the source mesh geometry, see `NLMESH
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLMESH.html>`_.
+        For more granular control of the source mesh geometry, see :ref:`nlmesh`.
         """
         command = f"NLADAPTIVE,{component},{action},{criterion},{option},{val1},{val2},{val3},{val4},{val5},{val6},{val7}"
         return self.run(command, **kwargs)
@@ -2150,96 +1797,69 @@ class NonlinearOptions(CommandsBase):
             * ``GCN`` - Contact data (for general contact).
 
             * ``RSEC`` - `Result section
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/str_resultsec.html>`_
-              data.
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/str_resultsec.html#>`_ data.
 
             * ``STAT`` - Displays a list of items to track.
 
-            * ``OFF or 0`` - Deactivates tracking of all variables. This
-              value is the default.
+            * ``OFF or 0`` - Deactivates tracking of all variables. This value is the default.
 
-            * ``ON or 1`` - Activates tracking of all variables. Tracking
-              also activates whenever any specification changes.
+            * ``ON or 1`` - Activates tracking of all variables. Tracking also activates whenever any
+              specification changes.
 
-            * ``DEL`` - Removes the specified variable from the set of
-              result items to track. If ``Name``\ = ALL (default), all
-              specifications are removed.
+            * ``DEL`` - Removes the specified variable from the set of result items to track. If ``Name`` = ALL
+              (default), all specifications are removed.
 
         name : str
             The 32-character user-specified name.
 
         item : str
-            Predetermined output item and component label for valid
-            elements. See the `*Element Reference*\
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ElemTOC.html>`_
-            for more information.
+            Predetermined output item and component label for valid elements. See the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_ for more
+            information.
 
         comp : str
-            Predetermined output item and component label for valid
-            elements. See the `*Element Reference*\
-            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ElemTOC.html>`_
-            for more information.
+            Predetermined output item and component label for valid elements. See the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_ for more
+            information.
 
         node : str
             Number identifying one of the following:
 
-            * Valid node number (if ``Key``\ = NSOL or ESOL).
-
-            * Valid real constant set number identifying a contact pair (if
-              ``Key``\ = PAIR).
-
-            * Valid section ID number identifying a surface of a general
-              contact definition (if ``Key``\ = GCN).
-
-            * Valid real constant set number identifying a result section
-              (if ``Key``\ = RSEC).
-
-            ``NODE``\ is required input when ``Key``\ = NSOL, ESOL, PAIR,
-            GCN, or RSEC.
+            * Valid node number (if ``Key`` = NSOL or ESOL).
+            * Valid real constant set number identifying a contact pair (if ``Key`` = PAIR).
+            * Valid section ID number identifying a surface of a general contact definition (if ``Key`` = GCN).
+            * Valid real constant set number identifying a result section (if ``Key`` = RSEC).
+             ``NODE`` is required input when ``Key`` = NSOL, ESOL, PAIR, GCN, or RSEC.
 
         elem : str
-            Valid element number for element results. Used for ESOL items.
-            If ``ELEM``\ is specified, then a node number that belongs to
-            the element must also be specified in the ``NODE``\ field.
+            Valid element number for element results. Used for ESOL items. If ``ELEM`` is specified, then a
+            node number that belongs to the element must also be specified in the ``NODE`` field.
 
         shell : str
-            Valid labels are TOP, MID or BOT. This field can specify the
-            location on shell elements for which to retrieve data. Used only
-            for element nodal data (ESOL).
+            Valid labels are TOP, MID or BOT. This field can specify the location on shell elements for
+            which to retrieve data. Used only for element nodal data (ESOL).
 
         layer : str
-            Layer number (for layered elements only). Used only for element
-            nodal data (ESOL).
+            Layer number (for layered elements only). Used only for element nodal data (ESOL).
 
         stop_value : str
-            Critical value of the tracked variable. This value is used to
-            determine if the analysis should be terminated.
+            Critical value of the tracked variable. This value is used to determine if the analysis should
+            be terminated.
 
         stop_cond : int or str
-            Specifies the conditional relationship between the variable
-            being tracked and the values for ``STOP_VALUE``\ and
-            ``STOP_TOL``\ upon which the analysis is terminated:
+            Specifies the conditional relationship between the variable being tracked and the ``STOP_VALUE`` upon which the analysis will be terminated:
 
-            * ``-1`` - Terminate the analysis when the tracked variable is
-              less than or equal to ``STOP_VALUE``\ (within the percentage
-              tolerance defined by ``STOP_TOL``).
+            * ``-1`` - Terminate the analysis when the tracked variable is less than or equal to ``STOP_VALUE``.
 
-            * ``0`` - Terminate the analysis when the tracked variable
-              equals ``STOP_VALUE``\ (within the percentage tolerance
-              defined by ``STOP_TOL``). If you do not specify a
-              ``STOP_COND``, the `NLHIST
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html>`_\
-              command uses this value.
+            * ``0`` - Terminate the analysis when the tracked variable equals ``STOP_VALUE``.
 
-            * ``1`` - Terminate the analysis when the tracked variable is
-              greater than or equal to ``STOP_VALUE``\ (within the
-              percentage tolerance defined by ``STOP_TOL``).
+            * ``1`` - Terminate the analysis when the tracked variable is greater than or equal to
+              ``STOP_VALUE``.
 
         stop_tol : str
-            Stops the analysis when the tracked variable is within the
-            specified percentage tolerance of ``STOP_VALUE``, entered as a
-            decimal value. If you do not specify a value for ``STOP_TOL``,
-            the `NLHIST
+            Stops the analysis when the tracked variable is within the specified
+            percentage tolerance of ``STOP_VALUE``, entered as a decimal value. If you
+            do not specify a value for ``STOP_TOL``, the `NLHIST
             <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html>`_\
             command uses the default value of 0.025 (2.5%).
 
@@ -2248,29 +1868,18 @@ class NonlinearOptions(CommandsBase):
 
         .. _NLHIST_notes:
 
-        The `NLHIST
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html>`_\
-        command is a `nonlinear diagnostics
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/Hlp_G_STR8_12.html#strnonlindiag>`_
-        tool that enables you to monitor diagnostics results of interest in real
-        time during a solution.
+        The :ref:`nlhist` command is a nonlinear diagnostics tool that enables you to monitor diagnostics
+        results of interest in real time during a solution.
 
-        You can track a maximum of 50 variables during solution. The specified
-        result quantities are written to the file ``Jobname.nlh``. Nodal results
-        and contact results are written for every converged substep
-        (irrespective of the `OUTRES
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_OUTRES.html>`_\
-        command setting), while element results are written only at time points
-        specified via the `OUTRES
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_OUTRES.html>`_\
-        command. Result section data is written only at time points specified
-        via the `OUTPR
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_OUTPR.html>`_,RSO,``Freq``\
-        command.
+        You can track a maximum of 50 variables during solution. The specified result quantities are written
+        to the file :file:`Jobname.nlh`. Nodal results and contact results are written for every converged
+        substep (irrespective of the :ref:`outres` command setting), while element results are written only
+        at time points specified via the :ref:`outres` command. Result section data is written only at time
+        points specified via the :ref:`outpr`,RSO, ``Freq`` command.
 
-        For time points where element results data is not available, a very
-        small number is written instead. If the conditions for contact to be
-        established are not satisfied, 0.0 will be written for contact results.
+        For time points where element results data is not available, a very small number is written instead.
+        If the conditions for contact to be established are not satisfied, 0.0 will be written for contact
+        results.
 
         Results tracking is available for:
 
@@ -2282,97 +1891,51 @@ class NonlinearOptions(CommandsBase):
 
         * nonlinear coupled structural-thermal analyses (static or transient)
 
-        All results are tracked in the Solution Coordinate System (that is,
-        nodal results are in the nodal coordinate system and element results are
-        in the element coordinate system).
+        All results are tracked in the Solution Coordinate System (that is, nodal results are in the nodal
+        coordinate system and element results are in the element coordinate system).
 
-        Contact results can be tracked for elements `CONTA172
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA172.html>`_,
-        `CONTA174
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_,
-        `CONTA175
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA175.html>`_,
-        and `CONTA177
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA177.html>`_;
-        they cannot be tracked for `CONTA178
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA178.html>`_.
+        Contact results can be tracked for elements ``CONTA172``, ``CONTA174``, ``CONTA175``, and
+        ``CONTA177`` ; they cannot be tracked for ``CONTA178``.
 
         `Result section
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_str/str_resultsec.html>`_
-        data can be tracked for elements `CONTA172
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA172.html>`_
-        and `CONTA174
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_.
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/str_resultsec.html#>`_ data can be
+        tracked for elements ``CONTA172`` and ``CONTA174``.
 
-        When contact results (``Key``\ = PAIR or GCN) or result section data
-        (``Key``\ = RSEC) are tracked, the user-specified name (``Name``\
-        argument) is used to create a user-defined parameter. This enables you
-        to monitor the parameter during solution. As an example, you can use a
-        named parameter to easily convert the contact stiffness units from
-        FORCE/LENGTH:sup:`3`\ to FORCE/LENGTH based on the initial contact area
-        CAREA. Be sure to specify ``Name``\ using the `APDL parameter naming
+        When contact results ( ``Key`` = PAIR or GCN) or result section data ( ``Key`` = RSEC) are tracked,
+        the user-specified name ( ``Name`` argument) is used to create a user-defined parameter. This
+        enables you to monitor the parameter during solution. As an example, you can use a named parameter
+        to easily convert the contact stiffness units from FORCE/LENGTH :sup:`3` to FORCE/LENGTH based on
+        the initial contact area CAREA. Be sure to specify ``Name`` using the `APDL parameter naming
         convention
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/Hlp_P_APDL3_2.html>`_.
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/Hlp_P_APDL3_2.html#apdlhidparmtlm8599>`_.
 
-        Results of the first section corner node are tracked for the following
-        elements: `BEAM188
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_BEAM188.html>`_,
-        `BEAM189
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_BEAM189.html>`_,
-        `PIPE288
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PIPE288.html>`_,
-        `PIPE289
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PIPE289.html>`_,
-        and `ELBOW290
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ELBOW290.html>`_.
-        The location and number of section corner nodes can be visualized with
-        `SECPLOT
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECPLOT.html>`_,,6.
+        The ``STOP_VALUE`` and ``STOP_COND`` arguments enable you to automatically terminate the analysis
+        when a desired value for a tracked contact result or section result has been reached. This
+        capability is only available for contact variables ( ``Key`` = PAIR or GCN) and result section
+        variables ( ``Key`` = RSEC ).
 
-        You can specify a smart stop criterion via the ``STOP_COND``,
-        ``STOP_VALUE``, and ``STOP_TOL``\ arguments. This automatically stops
-        the solution when a tracked contact result or section result reaches the
-        desired value or is within the specified percentage tolerance of the
-        desired value. By default, ``STOP_COND``\ is set to 0 and ``STOP_TOL``\
-        to 0.025 (2.5%). To accurately control the solution, request a smart
-        stop criterion at each sub-step.
+        The :file:`Jobname.nlh` file is an ASCII file that lists each time point at which a converged
+        solution occurs along with the values of the relevant result quantities.
 
-        Smart stop is intended for nonlinear analyses. Auto time stepping must
-        be activated via the `AUTOTS
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_AUTOTS.html>`_,``ON``\
-        command. To use smart stop for linear analyses, issue the `NROPT
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NROPT.html>`_,``FULL``\
-        command to force Mechanical APDL to generate a nonlinear solution using
-        the full Newton-Raphson method.
+        The GUI option Solution> Results tracking provides an interface to define the result items to be
+        tracked. The GUI also allows you to graph one or more variables against time or against other
+        variables during solution. You can use the interface to graph or list variables from any
+        :file:`.nlh` file generated by Mechanical APDL.
 
-        Use the `NSUBST
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSUBST.html>`_\
-        and/or `DELTIM
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DELTIM.html>`_\
-        commands with a sufficiently low minimum time step size to accurately
-        stop the solution as desired.
+        You can also track results during batch runs. Either access the `launcher
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/install_misc/launcherhelp.html#laumenuopts>`_
+        and select ``Run Results Tracker Utility`` from the Tools menu, or type
+        :file:`nlhist232` at the command line. Use the supplied file browser to
+        navigate to your :file:`Jobname.nlh` file, and click on it to invoke the tracking utility. You can
+        use this utility to read the file at any time, even after the solution is complete (the data in the
+        file must be formatted correctly).
 
-        The ``Jobname.nlh``\ file is an ASCII file that lists each time point at
-        which a converged solution occurs along with the values of the relevant
-        result quantities.
+        .. _nlhist_nsol_tab:
 
-        The GUI option **Solution> Results tracking**\ provides an interface to
-        define the result items to be tracked. The GUI also allows you to graph
-        one or more variables against time or against other variables during
-        solution. You can use the interface to graph or list variables from any
-        ``.nlh``\ file generated by Mechanical APDL.
+        NLHIST - Valid NSOL Item and Component Labels
+        *********************************************
 
-        You can also track results during batch runs. Either access the
-        `launcher
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ope/launcherhelp.html>`_
-        and select **Run Results Tracker Utility**\ from the **Tools**\ menu, or
-        type ``nlhist261``\ at the command line. Use the supplied file browser
-        to navigate to your ``Jobname.nlh``\ file, and click the file name to
-        invoke the tracking utility. You can use this utility to read the file
-        at any time, even after the solution is complete (the data in the file
-        must be formatted correctly).
-
-        .. list-table:: Table 212: NLHIST - Valid NSOL Item and Component Labels
+        .. flat-table::
            :header-rows: 1
 
            * - Item
@@ -2390,33 +1953,32 @@ class NonlinearOptions(CommandsBase):
            * - M
              - X, Y, Z
              - X, Y, or Z structural reaction moment.
-           * - TEMP [`1
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.nsol.tabnote1>`_]
+           * - TEMP [ :ref:`nlhist_nsol_tabnote1` ]
              - -
              - Temperature.
            * - TEMP
              - MAX, MIN
              - Maximum or minimum temperature in the model.
-           * - HEAT [`2
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.nsol.tabnote2>`_]
+           * - HEAT [ :ref:`nlhist_nsol_tabnote2` ]
              - -
              - Reaction heat flow.
 
-        * For `SHELL131
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL131.html>`_
-          and `SHELL132
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL132.html>`_
-          elements with KEYOPT(3) = 0 or 1, use the labels TBOT, TE2, TE3,...,
-          TTOP instead of TEMP.
+        .. _nlhist_nsol_tabnote1:
 
-        * For `SHELL131
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL131.html>`_
-          and `SHELL132
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL132.html>`_
-          elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3,...,
-          HTOP instead of HEAT.
+        For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use the labels TBOT, TE2, TE3,.
+        .., TTOP instead of TEMP.
 
-        .. list-table:: Table 213: NLHIST - Valid ESOL Item and Component Labels
+        .. _nlhist_nsol_tabnote2:
+
+        For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3,.
+        .., HTOP instead of HEAT.
+
+        .. _nlhist_tab_1:
+
+        NLHIST - Valid ESOL Item and Component Labels
+        *********************************************
+
+        .. flat-table::
            :header-rows: 1
 
            * - Item
@@ -2494,34 +2056,6 @@ class NonlinearOptions(CommandsBase):
            * - "
              - EQV
              - Diffusion equivalent strain.
-           * - EPTO [`1
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.esol.tabnote1>`_]
-             - X, Y, Z, XY, YZ, XZ
-             - Component of total mechanical strain (Elastic + Plastic +
-               Creep).
-           * - "
-             - 1, 2, 3
-             - Principal total mechanical strain.
-           * - "
-             - INT
-             - Total mechanical strain intensity.
-           * - "
-             - EQV
-             - Total mechanical equivalent strain.
-           * - EPTT [`1
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.esol.tabnote1>`_]
-             - X, Y, Z, XY, YZ, XZ
-             - Component of total strain (EPTO + Thermal + Swelling +
-               Diffusion).
-           * - "
-             - 1, 2, 3
-             - Principal total strain.
-           * - "
-             - INT
-             - Total strain intensity.
-           * - "
-             - EQV
-             - Total equivalent strain.
            * - NL
              - SEPL
              - Equivalent stress (from stress-strain curve).
@@ -2550,34 +2084,20 @@ class NonlinearOptions(CommandsBase):
              - X, Y, Z, SUM
              - Component thermal flux or vector sum.
 
-        * Structural elements (`SHELL181
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_,
-          `SHELL281
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL281.html>`_,
-          `SHELL208
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL208.html>`_,
-          `BEAM188
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_BEAM188.html>`_,
-          `BEAM189
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_BEAM189.html>`_,
-          and `ELBOW290
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ELBOW290.html>`_)
-          and layered solid elements are not supported.
+        ETABLE items are not supported for :ref:`esol` items.
 
-        ETABLE items are not supported for `ESOL
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ESOL.html>`_\
-        items.
+        PAIR solution quantities are output on a per contact pair basis. GCN solution quantities are output
+        on a “per general contact section” basis. (See `Comparison of Pair-Based Contact and General Contact
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/ctec_comppairgen.html#gcfeatnotsup>`_
+        :file:`Jobname.nlh` file represent a minimum or a maximum over the associated contact pair or
+        general contact surface, as detailed in the table below.
 
-        PAIR solution quantities are output on a "per contact pair" basis. GCN
-        solution quantities are output on a “per general contact section” basis.
-        (See `Comparison of Pair-Based Contact and General Contact
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/ctec_comppairgen.html>`_.)
-        As a consequence, the corresponding values listed in the
-        ``Jobname.nlh``\ file represent a minimum or a maximum over the
-        associated contact pair or general contact surface, as detailed in the
-        table below.
+        .. _nlhist_tab_2:
 
-        .. list-table:: Table 214: NLHIST - Valid Contact (PAIR or GCN) Item and Component Labels
+        NLHIST - Valid Contact (PAIR or GCN) Item and Component Labels
+        **************************************************************
+
+        .. flat-table::
            :header-rows: 1
 
            * - Item
@@ -2585,27 +2105,7 @@ class NonlinearOptions(CommandsBase):
              - Description
            * - CONT
              - ELCN
-             - If >0, number of contact elements in contact. Other values
-               are interpreted as follows:0 indicates the contact pair
-               (or GCN surface) is in near-field contact status.-1
-               indicates the contact pair (or GCN surface) is in
-               far-field contact status.-2 indicates that the contact
-               pair (or GCN surface) is inactive (`symmetric to
-               asymmetric contact
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/Hlp_ctec_dessurf.html#usekeyopt8>`_).
-           * - 0 indicates the contact pair (or GCN surface) is in
-               near-field contact status.
-             - -
-             - -
-           * - -1 indicates the contact pair (or GCN surface) is in
-               far-field contact status.
-             - -
-             - -
-           * - -2 indicates that the contact pair (or GCN surface) is
-               inactive (`symmetric to asymmetric contact
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/Hlp_ctec_dessurf.html#usekeyopt8>`_).
-             - -
-             - -
+             - If >0, number of contact elements in contact. Other values are interpreted as follows:   * 0 indicates the contact pair (or GCN surface) is in near-field contact status. * -1 indicates the contact pair (or GCN surface) is in far-field contact status. * -2 indicates that the contact pair (or GCN surface) is inactive ( symmetric to asymmetric contact   ).
            * - "
              - ELST
              - Number of contact elements in sticking contact status
@@ -2614,8 +2114,7 @@ class NonlinearOptions(CommandsBase):
              - Maximum chattering level
            * - "
              - PENE
-             - Maximum penetration (or minimum gap) [`1
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.tab2note1>`_]
+             - Maximum penetration (or minimum gap) [ :ref:`nlhist_tab2note1` ]
            * - "
              - CLGP
              - Maximum geometric gap
@@ -2624,8 +2123,7 @@ class NonlinearOptions(CommandsBase):
              - Maximum total sliding distance (algebraic sum)
            * - "
              - SLMX
-             - Maximum total sliding distance for closed contact in the
-               current substep
+             - Maximum total sliding distance for closed contact in the current substep
            * - "
              - ESLI
              - Maximum elastic slip distance
@@ -2670,141 +2168,103 @@ class NonlinearOptions(CommandsBase):
              - Maximum tangential contact damping stress
            * - "
              - GSMX
-             - Maximum total sliding distance (`GSLID
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/Hlp_ctec_revresu.html#ctecpostslide>`_),
-               including near-field
+             - Maximum total sliding distance ( GSLID ), including near-field
            * - "
              - GSMN
-             - Minimum total sliding distance (`GSLID
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/Hlp_ctec_revresu.html#ctecpostslide>`_),
-               including near-field
+             - Minimum total sliding distance ( GSLID ), including near-field
            * - "
              - FPSC
-             - Maximum normal fluid penetration pressure on contact
-               surface
+             - Maximum normal fluid penetration pressure on contact surface
            * - "
              - FPST
-             - Maximum normal fluid penetration pressure on target
-               surface
+             - Maximum normal fluid penetration pressure on target surface
            * - "
              - WEAR
-             - Total volume lost due to wear for the contact pair (not
-               available for general contact, ``Key``\ = GCN)
+             - Total volume lost due to wear for the contact pair (not available for general contact, ``Key`` = GCN )
            * - "
              - CTEN
-             - Total strain energy due to contact constraint [`2
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.tab2note2>`_]
+             - Total strain energy due to contact constraint [ :ref:`nlhist_tab2note2` ]
            * - "
              - CFEN
-             - Total frictional dissipation energy [`2
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.tab2note2>`_]
+             - Total frictional dissipation energy [ :ref:`nlhist_tab2note2` ]
            * - "
              - CDEN
-             - Total contact stabilization energy [`2
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.tab2note2>`_]
+             - Total contact stabilization energy [ :ref:`nlhist_tab2note2` ]
            * - "
              - CFNX
-             - Total force due to contact pressure - X component [`4
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.tab2note4>`_]
+             - Total force due to contact pressure - X component [ :ref:`nlhist_tab2note4` ]
            * - "
              - CFNY
-             - Total force due to contact pressure - Y component [`4
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.tab2note4>`_]
+             - Total force due to contact pressure - Y component [ :ref:`nlhist_tab2note4` ]
            * - "
              - CFNZ
-             - Total force due to contact pressure - Z component [`4
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.tab2note4>`_]
-               [`5
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.tab2note5>`_]
+             - Total force due to contact pressure - Z component [ :ref:`nlhist_tab2note4` ] [ :ref:`nlhist_tab2note5` ]
            * - "
              - CFSX
-             - Total force due to tangential stress - X component [`4
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.tab2note4>`_]
+             - Total force due to tangential stress - X component [ :ref:`nlhist_tab2note4` ]
            * - "
              - CFSY
-             - Total force due to tangential stress - Y component [`4
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.tab2note4>`_]
+             - Total force due to tangential stress - Y component [ :ref:`nlhist_tab2note4` ]
            * - "
              - CFSZ
-             - Total force due to tangential stress - Z component [`4
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.tab2note4>`_]
-               [`5
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.tab2note5>`_]
+             - Total force due to tangential stress - Z component [ :ref:`nlhist_tab2note4` ] [ :ref:`nlhist_tab2note5` ]
            * - "
              - CTRQ
              - Maximum torque in an axisymmetric analysis with MU = 1.0
            * - "
              - LGSL
-             - Number of contact points having too much sliding for
-               `small sliding contact
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/Hlp_ctec_realkey.html#ctec_smallsliding>`_
+             - Number of contact points having too much sliding for small sliding contact
            * - "
              - NORM
-             - Pair-based force convergence norm [`3
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.tab2note3>`_]
+             - Pair-based force convergence norm [ :ref:`nlhist_tab2note3` ]
            * - "
              - CRIT
-             - Pair-based force convergence criterion [`3
-               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html#nlhist.tab2note3>`_]
+             - Pair-based force convergence criterion [ :ref:`nlhist_tab2note3` ]
            * - "
              - FPTC
-             - Maximum tangential fluid penetration pressure on contact
-               surface
+             - Maximum tangential fluid penetration pressure on contact surface
            * - "
              - FPTT
-             - Maximum tangential fluid penetration pressure on target
-               surface
-           * - "
-             - PHTM
-             - Physical time for the scaled wear analysis
+             - Maximum tangential fluid penetration pressure on target surface
 
-        * For PENE, a positive value indicates a penetration, and a negative
-          value indicates a gap. If the contact pair (or GCN surface) has a
-          far-field contact status, penetration and gap are not available, and
-          the value stored for PENE is the current pinball radius.
+        .. _nlhist_tab2note1:
 
-        * The pair-based dissipation energy (CFEN) and stabilization energy
-          (CDEN) do not include contributions from contact elements that are in
-          far-field. The pair-based strain energy (CTEN) does not include the
-          frictional dissipation energy and stabilization energy. It only
-          contains an elastic recovery energy when the contact status changes
-          from closed to open.
+        For PENE, a positive value indicates a penetration, and a negative value indicates a gap. If the
+        contact pair (or GCN surface) has a far-field contact status, penetration and gap are not available,
+        and the value stored for PENE is the current pinball radius.
 
-        * The program uses a default tolerance value of 0.1 to calculate the
-          *pair-based force convergence norm*\ and *pair-based force convergence
-          criterion*. This is not a check for local convergence. It is for
-          monitoring purposes only and is useful for nonlinear contact
-          diagnostics.
+        .. _nlhist_tab2note2:
 
-        * If the specified contact pair is a `rigid surface or force-distributed
-          constraint
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/Hlp_ctec_surfcon.html>`_
-          that includes stress stiffening effects, this quantity represents a
-          total constraint force or moment at the pilot node as shown below:
+        The pair-based dissipation energy (CFEN) and stabilization energy (CDEN) do not include
+        contributions from contact elements that are in far-field. The pair-based strain energy (CTEN) does
+        not include the frictional dissipation energy and stabilization energy; it only contains an elastic
+        recovery energy when the contact status changes from closed to open.
 
-          .. list-table::
+        .. _nlhist_tab2note3:
 
-             * - CFNX
-               - Total constraint force - X component
-             * - CFNY
-               - Total constraint force - Y component
-             * - CFNZ
-               - Total constraint force - Z component
-             * - CFSX
-               - Total constraint moment - X component
-             * - CFSY
-               - Total constraint moment - Y component
-             * - CFSZ
-               - Total constraint moment - Z component
+        The program uses a default tolerance value of 0.1 to calculate the pair-based force convergence norm
+        and pair-based force convergence criterion. This is not a check for local convergence. It is for
+        monitoring purposes only and is useful for nonlinear contact diagnostics.
 
-        * For the case of `2D axisymmetric with torsion
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/Hlp_ctec_realkey.html#ctec_2daxisymtorsion>`_
-          (`CONTA172
-          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA172.html>`_
-          with a ROTY DOF), CFNZ and CFSZ represent moments along the Y
-          direction.
+        .. _nlhist_tab2note4:
 
-        .. list-table:: Table 215: NLHIST - Valid Result Section (RSEC) Item and Component Labels
+        If the specified contact pair is a `rigid surface or force-distributed constraint
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_surfcon.html#strbeamso1703>`_
+        that includes stress stiffening effects, this quantity represents a total constraint force or moment
+        at the pilot node as shown below:
+
+        This command contains some tables and extra information which can be inspected in the original
+        documentation pointed above.
+
+        .. _nlhist_tab2note5:
+
+        For the case of 2D axisymmetric with torsion ( ``CONTA172`` with a ROTY DOF), CFNZ and CFSZ
+        represent moments along the Y direction.
+
+        NLHIST - Valid Result Section (RSEC) Item and Component Labels
+        **************************************************************
+
+        .. flat-table::
            :header-rows: 1
 
            * - Item
@@ -2840,6 +2300,7 @@ class NonlinearOptions(CommandsBase):
            * - "
              - THZX
              - Rotation about local y
+
         """
         command = f"NLHIST,{key},{name},{item},{comp},{node},{elem},{shell},{layer},{stop_value},{stop_cond},{stop_tol}"
         return self.run(command, **kwargs)
@@ -2853,7 +2314,7 @@ class NonlinearOptions(CommandsBase):
         **kwargs,
     ):
         r"""Controls remeshing in `nonlinear adaptivity
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/ans_nlad.html>`_.
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/Hlp_G_ADVREZ.html>`_.
 
         Mechanical APDL Command: `NLMESH <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLMESH.html>`_
 
@@ -2862,453 +2323,227 @@ class NonlinearOptions(CommandsBase):
         control : str
             The mesh-quality control to adjust:
 
-            * ``NLAY`` - The *sculpting layer*\ adjustment:
+            * ``NLAY`` - The sculpting layer adjustment:
 
-              ``VAL1``\ - The number of sculpting layers, beginning with
-              detected seed elements. Valid for 2D and 3D analysis.
+              ``VAL1`` - The number of sculpting layers, beginning with detected seed elements. Valid for 2D and
+              3D analysis.
 
-              * Default = 10 for 2D analysis, 2 for 3D analysis.
-
-              * For local (partial) remeshing, this option helps the
-                remesher to detect remeshing regions from the whole
-                deformed model.
-
-              * Generally, a larger ``VAL1``\ leads to larger remeshing
-                regions and tends to unite isolated multiple regions. A
-                larger value also tends to result in better remeshing
-                quality (and increases mapping and solution overhead
-                accordingly).
-
-              * Only elements with the same element and material
-                properties as seed elements are included into the
+              * Default: ``VAL1`` = 10 for 2D analysis, ``VAL1`` = 2 for 3D analysis.
+              * For local (partial) remeshing, this option helps the remesher to detect remeshing regions from the
+                whole deformed model.
+              * Generally, a larger ``VAL1`` leads to larger remeshing regions and tends to unite isolated
+                multiple regions. A larger value also tends to result in better remeshing quality (and increases
+                mapping and solution overhead accordingly).
+              * Only elements with the same element and material properties as seed elements are included into the
                 remeshing regions.
+              * ``VAL1`` = 0 is not valid, as the remeshing regions would contain only the detected seed elements,
+                resulting in many small cavities within remeshing regions (especially if the specified mesh-
+                quality metric threshold ( :ref:`nladaptive` ) is relatively large).
 
-              * ``VAL1``\ = 0 is not valid, as the remeshing regions would
-                contain only the detected seed elements, resulting in many
-                small cavities within remeshing regions (especially if the
-                specified mesh-quality metric threshold (`NLADAPTIVE
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_)
-                is relatively large).
-
-              ``VAL2``\ - Same as ``VAL1``, except that ``VAL1``\ controls
-              remeshing to remove distortion and ``VAL2``\ controls
-              element refinement. Default = 1 for 2D analysis, 2 for 3D
+              ``VAL2`` - Same as ``VAL1``, except that ``VAL1`` controls remeshing to remove distortion and
+              ``VAL2`` controls element refinement. Default: ``VAL2`` = 1 for 2D analysis, ``VAL2`` = 2 for 3D
               analysis.
 
               Not used in a `NLAD-ETCHG analysis
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/ans_nlad_etchg.html>`_.
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/nladetchgexample.html>`_.
 
-              For more information about this control, see `Sculpting
-              Layers Control in the Nonlinear Adaptivity Analysis Guide
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnanewmesh.html#advmnlasculptlayers>`_.
+              For more information about this control, see `Sculpting Layers Control
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnanewmesh.html#>`_
 
-            * ``BDRA`` - The *boundary angle threshold*\ in degrees. Use
-              this adjustment to retain geometry features of the original
-              (source) mesh. Valid for both 2D and 3D analysis.
+            * ``BDRA`` - The boundary angle threshold in degrees. Use this adjustment to retain geometry
+              features of the original (source) mesh. Valid for both 2D and 3D analysis.
 
-              In a 3D analysis, this value is the dihedral angle (the
-              angle between the normal vectors from two neighboring
-              surface facets). In a 2D analysis, this value is the 2D
-              patch boundary edge normal angle. If the edge angle or
-              dihedral angle is larger than the specified threshold, the
-              node shared by 2D edges or edges shared by 3D facets are
-              retained during remeshing.
+              In a 3D analysis, this value is the dihedral angle (the angle between the normal vectors from two
+              neighboring surface facets). In a 2D analysis, this value is the 2D patch boundary edge normal
+              angle. If the edge angle or dihedral angle is larger than the specified threshold, the node shared
+              by 2D edges or edges shared by 3D facets are retained during remeshing.
 
-              Valid values: 0 < ``VAL1``\ < 80.
+              Valid values: 0 < ``VAL1`` < 80.
 
-              Default = 10 for 2D analysis, 15 for 3D analysis.
+              Default for 2D analysis: ``VAL1`` = 10. Default for 3D analysis: ``VAL1`` = 15.
 
-              Generally, a larger ``VAL1``\ improves the quality of the
-              new mesh (and may even repair local tiny edges or facets of
-              poor quality). Too large a value, however, may also smooth
-              out some geometric features, leading to slightly different
-              results and possibly causing convergence issues in the
+              Generally, a larger ``VAL1`` improves the quality of the new mesh (and may even repair local tiny
+              edges or facets of poor quality). Too large a value, however, may also smooth out some geometric
+              features, leading to slightly different results and possibly causing convergence issues in the
               substeps immediately following remeshing.
 
-              For more information about this control, see `Boundary-Angle
-              and Edge-Angle Control in the Nonlinear Adaptivity Analysis
-              Guide
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnanewmesh.html#advmnlaboundedgecont>`_.
+              For more information about this control, see `Boundary-Angle and Edge-Angle Control
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnanewmesh.html#>`_
 
-            * ``AEDG`` - The *edge angle threshold*\ in degrees. Valid for
-              3D analysis only.
+            * ``AEDG`` - The edge angle threshold in degrees. Valid for 3D analysis only.
 
-              Use this control to split 3D patch segments. The edge angle
-              is the angle between adjacent surface segment edges sharing
-              a node. If the edge angle is larger than the specified
-              threshold (``VAL1``), the segment splits and the node is
-              automatically treated as a node to be retained.
+              Use this control to split 3D patch segments. The edge angle is the angle between adjacent surface
+              segment edges sharing a node. If the edge angle is larger than the specified threshold (VAL1), the
+              segment splits and the node is automatically treated as a node to be retained.
 
-              Default = 10.
+              Default: ``VAL1`` = 10.
 
-              Generally, a larger ``VAL1``\ improves the quality of the
-              new mesh, but may result in loss of feature nodes. The
-              effect is similar to that of boundary angles (``Control``\ =
-              BDRA).
+              Generally, a larger ``VAL1`` improves the quality of the new mesh, but may result in loss of feature
+              nodes. The effect is similar to that of boundary angles ( ``Control`` = BDRA).
 
-              For more information about this control, see `Boundary-Angle
-              and Edge-Angle Control in the Nonlinear Adaptivity Analysis
-              Guide
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnanewmesh.html#advmnlaboundedgecont>`_.
+              For more information about this control, see `Boundary-Angle and Edge-Angle Control
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnanewmesh.html#>`_
 
-            * ``SRAT`` - The *global sizing ratio*. Valid for 2D and 3D
+            * ``SRAT`` - The global sizing ratio. Valid for 2D and 3D analysis.
+
+              ``VAL1`` - The global sizing ratio for remeshing.
+
+              * Default: ``VAL1`` = 1.0. The default value results in the new mesh having a size similar to that
+                of the original mesh.
+              * Generally, set the value ( ``VAL1`` ) to >= 0.7. The model can be refined (< 1.0) or coarsened (>
+                1.0) up to 3x depending on the mesh-sizing gradient and number of 3D elements, and approximately
+                2x for 2D elements.
+
+              ``VAL2`` - Same as ``VAL1``, except that ``VAL1`` controls remeshing to remove distortion and
+              ``VAL2`` controls element refinement. Default: ``VAL2`` = 0.75.
+
+              Not used in a `NLAD-ETCHG analysis
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/nladetchgexample.html>`_.
+
+              For more information about this control, see `Global Sizing Control
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnanewmesh.html#>`_
+
+            * ``GRAD`` - Adjusts the new mesh-sizing gradient during remeshing. Valid for 2D and 3D analysis.
+
+              Valid values: ``VAL1`` = 0, 1, 2, or 3. Default: ``VAL1`` = 2 for 2D analysis, ``VAL1`` = 3 for 3D
               analysis.
 
-              ``VAL1``\ - Global sizing ratio for remeshing.
+              * ``VAL1`` = 0 -- The mesh-sizing gradient is not retained. The new mesh is uniform and has an
+                approximate average size on the entire remeshed domain(s), even if the original mesh has sizing
+                gradients.
+              * ``VAL1`` = 1 -- The new mesh follows the original mesh-sizing gradient to retain the element
+                averaged-edge length. This value tends to coarsen the mesh in the location of the distorted
+                elements during remeshing.
+              * ``VAL1`` = 2 -- The new mesh follows the sizing gradient of the original mesh, with additional
+                sizing compensation based on the element size change due to deformation during solution. This
+                value tends to refine the mesh at the location of the distorted elements, where the distortion may
+                have originated from deformation during solution.
+              * ``VAL1`` = 3 -- Similar to ``VAL1`` = 2, but assumes that perfect mesh quality is not required,
+                thus avoiding over-refinement of minor distorted regions. Valid for 3D analysis only.
 
-              * This value controls remeshing to remove mesh distortion.
-                Default = 1.0. The default value results in the new mesh
-                having a size similar to that of the original mesh.
+              For more information about this control, see.
 
-              * Generally, set ``VAL1``\ ≥ 0.7. The model can be refined
-                (< 1.0) or coarsened (> 1.0) up to 3x depending on the
-                mesh-sizing gradient and number of 3D elements, and
-                approximately 2x for 2D elements.
+            * ``QTOL`` - The new mesh-acceptance tolerance ( ``PLANE182``, ``PLANE222``, ``SOLID187``,
+              ``SOLID227``, and ``SOLID285`` ).
 
-              ``VAL2``\ - Similar to ``VAL1``, but controls element
-              refinement. Default = 0.75.
+              ``VAL1`` - Controls remeshing to remove distortion. Default: 0.05.
 
-              ``VAL3``\ - Equivalent element-size expansion ratio.
-              Controls remeshing via element coarsening.
+              ``VAL2`` - Controls element refinement. Default: 0.5.
 
-              * For criteria with the coarsening option (for example,
-                `NLADAPTIVE
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_,,,BOX
-                and `NLADAPTIVE
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_,,,ENERGY,MEAN),
-                ``VAL3``\ > 1.0. Default = 1.5.
+              For ``PLANE182`` and ``PLANE222``, ``VAL2`` is the only valid option (for mesh refinement), and the
+              new mesh is accepted when ( MaxCornerAngleNew - MaxCornerAngleOld ) / MaxCornerAngleOld <= ``QTOL``.
 
-              * For target element components with `cohesive zone material
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnacriteria.html#advczmcriterion>`_
-                and `NLADAPTIVE
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_,,,CONTACT,CZM
-                defined, ``VAL3``\ > 1.0 activates mesh coarsening in
-                regions of debonding. Default: No coarsening.
-
-              * **Recommendation:**\ For most common mode I or mode II
-                delamination problems, 1.5 < ``VAL3``\ < 2 for 2D and 3D
-                analysis. For complex models (such as mixed-mode,
-                nonplanar delamination surfaces, and models with multiple
-                surfaces close to each other), you must determine the most
-                appropriate ``VAL3``. Remeshing frequency and the quality
-                of the starting mesh also affect your choice of ``VAL3``.
-
-              Not used in an `NLAD-ETCHG analysis
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/ans_nlad_etchg.html>`_.
-
-              For more information about this control, see `Global Sizing
-              Control in the Nonlinear Adaptivity Analysis Guide
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnanewmesh.html#advmnlaglobsiz>`_.
-
-            * ``GRAD`` - Adjusts the *new mesh-sizing gradient*\ during
-              remeshing. Valid for 2D and 3D analysis.
-
-              Valid values: ``VAL1``\ = 0, 1, 2, or 3. Default = 2 for 2D
-              analysis, 3 for 3D analysis.
-
-              * ``VAL1``\ = 0 -- The mesh-sizing gradient is not retained.
-                The new mesh is uniform and has an approximate average
-                size on the entire remeshed domain(s), even if the
-                original mesh has sizing gradients.
-
-              * ``VAL1``\ = 1 -- The new mesh follows the original
-                mesh-sizing gradient to retain the element averaged-edge
-                length. This value tends to coarsen the mesh in the
-                location of the distorted elements during remeshing.
-
-              * ``VAL1``\ = 2 -- The new mesh follows the sizing gradient
-                of the original mesh, with additional sizing compensation
-                based on the element size change due to deformation during
-                solution. This value tends to refine the mesh at the
-                location of the distorted elements, where the distortion
-                may have originated from deformation during solution.
-
-              * ``VAL1``\ = 3 -- Similar to ``VAL1``\ = 2, but assumes
-                that perfect mesh quality is not required, thus avoiding
-                over-refinement of minor distorted regions. Valid for 3D
-                analysis only.
-
-              For more information about this control, see `Gradient
-              Control in the Nonlinear Adaptivity Analysis Guide
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnanewmesh.html#advmnlalocsizgrad>`_.
-
-            * ``QTOL`` - The new *mesh-acceptance tolerance*\ (`PLANE182
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE182.html>`_,
-              `PLANE222
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE222.html>`_,
-              `SOLID187
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID187.html>`_,
-              `SOLID227
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID227.html>`_,
-              and `SOLID285
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID285.html>`_).
-
-              ``VAL1``\ - Controls remeshing to remove distortion. Default
-              = 0.05.
-
-              ``VAL2``\ - Controls element refinement. Default = 0.5.
-
-              For `PLANE182
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE182.html>`_,
-              ``VAL1``\ is valid only after the first successful remesh
-              due to `element-removal-based criteria
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnacriteria.html#advmlnremovalbased>`_.
-              For all other cases with `PLANE182
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE182.html>`_
-              and `PLANE222
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE222.html>`_,
-              ``VAL2``\ is the only valid option (for mesh refinement).
-              The new mesh is accepted when (*MaxCornerAngleNew*\ -
-              *MaxCornerAngleOld*) / *MaxCornerAngleOld*\ <= ``QTOL``.
-
-              For `SOLID285
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID285.html>`_,
-              the new mesh is accepted when (*SkewnessNew*\ -
-              *SkewnessOld*) / *SkewnessOld*\ <= ``QTOL``.
-
-              For `SOLID187
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID187.html>`_
-              and `SOLID227
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID227.html>`_,
-              the new mesh is accepted when, in addition to skewness,
-              (*JacobianOld*\ - *JacobianNew*) / *JacobianOld*\ <=
+              For ``SOLID285``, the new mesh is accepted when ( SkewnessNew - SkewnessOld ) / SkewnessOld <=
               ``QTOL``.
 
-              The program uses both tolerance and mesh-quality parameters
-              to determine whether or not a new mesh is accepted.
+              For ``SOLID187`` and ``SOLID227``, the new mesh is accepted when, in addition to skewness, (
+              JacobianOld - JacobianNew ) / JacobianOld <= ``QTOL``.
+
+              The program uses both tolerance and mesh-quality parameters to determine whether or not a new mesh
+              is accepted.
 
               Not used in a `NLAD-ETCHG analysis
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/ans_nlad_etchg.html>`_.
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/nladetchgexample.html>`_.
 
-            * ``REFA`` - The *refinement algorithm*\ adjustment (`PLANE182
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE182.html>`_,
-              `PLANE222
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE222.html>`_,
-              and `SOLID285
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID285.html>`_).
-              Valid for 2D and 3D analysis.
+            * ``REFA`` - The refinement algorithm adjustment ( ``PLANE182``, ``PLANE222``, and ``SOLID285`` ). Valid for 2D
+              and 3D analysis.
 
-              ``VAL1``\ -
+              ``VAL1`` -
 
               * SPLIT - Use mesh `splitting
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnanewmesh.html#advsplitmorphgenmesh>`_
-                instead of general remeshing. This is the only valid
-                value.
+                <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnanewmesh.html#>`_ instead of
+                general remeshing. This is the only valid value.
 
-              If not specified, mesh refinement occurs via general
-              remeshing (except for `PLANE183
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE183.html>`_).
+              If not specified, mesh refinement occurs via general remeshing (except for ``PLANE183`` ).
 
               Not used in a `NLAD-ETCHG analysis
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/ans_nlad_etchg.html>`_.
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/nladetchgexample.html>`_.
 
-            * ``TCOR`` - Coordinate truncation adjustments for nodal
-              locations of the meshes during remeshing. Valid for 2D and 3D
-              analysis.
+            * ``TCOR`` - Coordinate truncation adjustments for nodal locations of the meshes during remeshing. Valid for 2D
+              and 3D analysis.
 
-              ``VAL1``\ -
+              ``VAL1`` -
 
-              * ON - Truncates the decimal value after the seventh
-                position. Default behavior for `PLANE182
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE182.html>`_,
-                `PLANE222
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE222.html>`_,
-                and `SOLID285
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID285.html>`_
-                (augmented Lagrange and penalty contact formulations
-                only).
+              * ON - Truncates the decimal value after the seventh position. Default behavior for ``PLANE182``,
+                ``PLANE222``, and ``SOLID285`` (augmented Lagrange and penalty contact formulations only).
+              * OFF - No truncation occurs on the decimal value. Default behavior for ``SOLID187`` and
+                ``SOLID227`` (all contact formulations), and ``PLANE182`` and ``PLANE222`` (Lagrange multiplier
+                contact formulation only).
+            * ``AGGR`` - Aggressive remeshing. Creates meshes with improved shape metrics. May change some global remeshing
+              control parameters applied by other :ref:`nlmesh` commands, and may increase remeshing time. Valid
+              for both 2D and 3D nonlinear adaptivity analysis.
 
-              * OFF - No truncation occurs on the decimal value. Default
-                behavior for `SOLID187
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID187.html>`_
-                and `SOLID227
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID227.html>`_
-                (all contact formulations), and `PLANE182
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE182.html>`_
-                and `PLANE222
-                <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_PLANE222.html>`_
-                (Lagrange multiplier contact formulation only).
-
-            * ``AGGR`` - Aggressive remeshing. Creates meshes with improved
-              shape metrics. May change some global remeshing control
-              parameters applied by other `NLMESH
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLMESH.html>`_\
-              commands, and may increase remeshing time. Valid for both 2D
-              and 3D nonlinear adaptivity analysis.
-
-              ``VAL1``\ -
+              ``VAL1`` -
 
               * ON - Enable aggressive remeshing.
-
               * OFF - Disable aggressive remeshing (default).
+            * ``ELSZ`` - Reduces the set of remeshable (seed) elements used for remeshing by filtering out
+              elements based on their size, preventing over- or under-refinement in the remeshing regions. Valid
+              only in `general remeshing
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnanewmesh.html#nladsimultaneous>`_
+              using an energy -, position-, or `contact
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnacriteria.html#advczmcriterion>`_
+              -based refinement criterion.
 
-            * ``ELSZ`` - Reduces the set of remeshable (seed) elements used
-              for remeshing by filtering out elements based on their size,
-              preventing over- or under-refinement in the remeshing regions.
-              Valid only in `general remeshing
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnanewmesh.html#advgenremeshing>`_
-              using an `energy
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnacriteria.html#advenerbasedcrit>`_-,
-              `position-
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnacriteria.html#advposbasedcrit>`_,
-              or `contact
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnacriteria.html#advcontbasedcrit>`_-based
-              refinement criterion.
+              ``Val1`` is a user-defined lower bound of the element size, and ``Val2`` is a user-defined upper
+              bound of the element size. If both are specified, seed elements selected via the specified criterion
+              are filtered out if their size is < ``Val1`` or > ``Val2``. If ``Val1`` is unspecified, only the
+              size check with ``Val2`` occurs. If ``Val2`` is unspecified, only the size check with ``Val1``
+              occurs.
 
-              ``Val1``\ is a user-defined lower bound of the element size,
-              and ``Val2``\ is a user-defined upper bound of the element
-              size. If both are specified, seed elements selected via the
-              specified criterion are filtered out if their size is
-              <``Val1``\ or >``Val2``. If ``Val1``\ is unspecified, only
-              the size check with ``Val2``\ occurs. If ``Val2``\ is
-              unspecified, only the size check with ``Val1``\ occurs.
+            * ``NSTR`` - Reduces the set of remeshable (seed) elements used for remeshing by filtering out elements based on
+              their (maximum) equivalent stress level, preventing over- or under-refinement in the remeshing
+              regions based on the stress state. Valid only in `general remeshing
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnanewmesh.html#nladsimultaneous>`_
+              using an energy -, position-, or `contact
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnacriteria.html#advczmcriterion>`_
+              -based refinement criterion.
 
-            * ``NSTR`` - Reduces the set of remeshable (seed) elements used
-              for remeshing by filtering out elements based on their
-              (maximum) equivalent stress level, preventing over- or
-              under-refinement in the remeshing regions based on the stress
-              state. Valid only in `general remeshing
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnanewmesh.html#advgenremeshing>`_
-              using an `energy
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnacriteria.html#advenerbasedcrit>`_-,
-              `position-
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnacriteria.html#advposbasedcrit>`_,
-              or `contact
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnacriteria.html#advcontbasedcrit>`_-based
-              refinement criterion.
+              ``Val1`` is a user-defined lower bound of element equivalent stress, and ``Val2`` is a user-defined
+              upper bound of the element equivalent stress. If both are specified, seed elements selected by the
+              specified criterion are filtered out if their (maximum) equivalent stress is < ``Val1`` or >
+              ``Val2``. If ``Val1`` is unspecified, only the equivalent stress check with ``Val2`` occurs. If
+              ``Val2`` is unspecified, only the equivalent stress check with ``Val1`` occurs.
 
-              ``Val1``\ is a user-defined lower bound of element
-              equivalent stress, and ``Val2``\ is a user-defined upper
-              bound of the element equivalent stress. If both are
-              specified, seed elements selected by the specified criterion
-              are filtered out if their (maximum) equivalent stress is
-              <``Val1``\ or >``Val2``. If ``Val1``\ is unspecified, only
-              the equivalent stress check with ``Val2``\ occurs. If
-              ``Val2``\ is unspecified, only the equivalent stress check
-              with ``Val1``\ occurs.
+              **Important:** Before specifying this option, copy the integration-point results to the nodes ( :ref:`eresx`,NO).
 
-              **Important:**\ Before specifying this option, copy the
-              integration-point results to the nodes (`ERESX
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ERESX.html>`_,NO).
+            * ``NSTN`` - Reduces the set of remeshable (seed) elements used for remeshing by filtering out elements based on
+              their (maximum) equivalent strain level, preventing over- or under-refinement in the remeshing
+              regions based on the strain state. Valid only in `general remeshing
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnanewmesh.html#nladsimultaneous>`_
+              using an energy -, position-, or `contact
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnacriteria.html#advczmcriterion>`_
+              -based refinement criterion.
 
-            * ``NSTN`` - Reduces the set of remeshable (seed) elements used
-              for remeshing by filtering out elements based on their
-              (maximum) equivalent strain level, preventing over- or
-              under-refinement in the remeshing regions based on the strain
-              state. Valid only in `general remeshing
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnanewmesh.html#advgenremeshing>`_
-              using an `energy
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnacriteria.html#advenerbasedcrit>`_-,
-              `position-
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnacriteria.html#advposbasedcrit>`_,
-              or `contact
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/advmnacriteria.html#advcontbasedcrit>`_-based
-              refinement criterion.
+              ``Val1`` is a user-defined lower bound of the element equivalent strain, and ``Val2`` is a user-
+              defined upper bound of the element equivalent strain. If both are specified, seed elements selected
+              by the specified criterion are filtered out if their (maximum) equivalent strain is < ``Val1`` or >
+              ``Val2``. If ``Val1`` is unspecified, only the equivalent strain check with ``Val2`` occurs. If
+              ``Val2`` is unspecified then only the equivalent strain check with ``Val1`` occurs.
 
-              ``Val1``\ is a user-defined lower bound of the element
-              equivalent strain, and ``Val2``\ is a user-defined upper
-              bound of the element equivalent strain. If both are
-              specified, seed elements selected by the specified criterion
-              are filtered out if their (maximum) equivalent strain is
-              <``Val1``\ or >``Val2``. If ``Val1``\ is unspecified, only
-              the equivalent strain check with ``Val2``\ occurs. If
-              ``Val2``\ is unspecified then only the equivalent strain
-              check with ``Val1``\ occurs.
-
-              **Important:**\ Before specifying this option, copy the
-              integration-point results to the nodes (`ERESX
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ERESX.html>`_,NO).
-
-            * ``DCON`` - Applicable only to the element-removal-based
-              criterion (`NLADAPTIVE
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_,,,REMELM)
-              and material-removal-based criterion (`NLADAPTIVE
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_,,,REMMAT).
-              When the command is issued before the solution starts, contact
-              and target elements in newly created gap/void surfaces are
-              automatically generated after remeshing to prevent
-              interpenetration through establishment of self-contact if the
-              gap or void closes under additional loads as the analysis
-              continues.
-
-              * ``Val1``\ - Starting real ID of the contact/target pair in
-                the first gap (or void). As more gaps or voids are
-                generated, this real ID is incremented, so the
-                self-contact pairs in each gap are unique. This prevents
-                the chance of spurious contact for gaps or voids that are
-                generated very close together.
-
-              * ``Val2``\ - Element type ID of the contact elements.
-
-              * ``Val3``\ - Element type ID of the target elements.
-
-              The contact and target element type must be defined prior to
-              the solution.
-
-            * ``VBND`` - Option to include or exclude loaded boundary
-              elements for void creation in the multiple voids per substep
-              variant (`NLADAPTIVE
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_,,REMMAT).
-
-              ``VAL1``\ -
-
-              * 0 - Exclude loaded boundary elements for void creation
-                (default).
-
-              * 1 - Include loaded boundary elements for void creation.
+              **Important:** Before specifying this option, copy the integration-point results to the nodes ( :ref:`eresx`,NO).
 
             * ``LIST`` - Lists all mesh-quality control parameters.
 
-              If ``VAL1``\ has been specified for a given mesh control,
-              the most recently specified value is listed. If a value was
-              not explicitly specified, the default value is listed
-              (assuming that the problem has been solved at least once).
-
-            * ``ISLD`` - Option to remove all orphaned elements or element
-              patches (islands) after an `NLADAPTIVE
-              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_,,REMELM
-              (element removal) operation. An orphaned element or element
-              patch is defined as a single element/patch of elements,
-              topologically isolated from the rest of the model or connected
-              only through node(s) and not faces or edges. Elements or
-              element patches with applied loads or boundary conditions are
-              not removed. The removal of these islands may often assist in
-              the stabilization of the solution by reducing the chance of
-              rigid body motion characterized by small-value pivots in the
-              stiffness matrix. By default, no generated islands are
-              removed.
-
-              ``VAL1``\ -
-
-              * 0 - No island removal (default).
-
-              * 1 - Standard removal of islands. Only remove islands that
-                are generated in a single substep.
-
-              * 2 - Aggressive removal of islands. Remove islands that are
-                generated in a single substep and continue developing
-                through multiple element removal substeps.
-
-              ``VAL2``\ - Unused.
+              If ``VAL1`` has been specified for a given mesh control, the most recently specified value is
+              listed. If a value was not explicitly specified, the default value is listed (assuming that the
+              problem has been solved at least once).
 
         val1 : str
-            Numerical input value that varies according to the specified
-            ``Control``\ option.
+            Numerical input value that varies according to the specified ``Control`` option.
 
-            Valid for all ``Control``\ options. Can be used when controlling
-            remeshing for both distortion removal and for element
-            refinement.
+            Valid for all ``Control`` options. Can be used when controlling remeshing for both distortion
+            removal and for element refinement.
 
         val2 : str
-            Numerical input value that varies according to the specified
-            ``Control``\ option.
+            Numerical input value that varies according to the specified ``Control`` option.
 
-            Valid only for these ``Control``\ options: NLAY, SRAT, and QTOL.
-            Also used for controlling remeshing for element refinement.
+            Valid only for these ``Control`` options: NLAY, SRAT, and QTOL. Also used for controlling
+            remeshing for element refinement.
 
         val3 : str
-            Numerical input value that varies according to the specified
-            ``Control``\ option.
+            Numerical input value that varies according to the specified ``Control``\
+            option.
 
             Valid only for this ``Control``\ option: SRAT.
 
@@ -3317,25 +2552,17 @@ class NonlinearOptions(CommandsBase):
 
         .. _NLMESH_notes:
 
-        `NLMESH
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLMESH.html>`_\
-        is a global control command enabling mesh-quality adjustments for
-        remeshing in `nonlinear adaptivity
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_nlad/adv_meshnonlinadapt.html>`_.
-        The command can be used when components are associated with mesh-quality
-        criteria (`NLADAPTIVE
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_\
-        with ``Criterion``\ = MESH, or another criterion with mesh change
-        through general refinement).
+        :ref:`nlmesh` is a global control command enabling mesh-quality adjustments for remeshing in
+        `nonlinear adaptivity
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnaexample.html>`_. The command
+        can be used when components are associated with mesh-quality criteria ( :ref:`nladaptive` with
+        ``Criterion`` = MESH, or another criterion with mesh change through general refinement).
 
-        Issue the `NLMESH
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLMESH.html>`_\
-        command only in cases where advanced mesh-quality control is desirable
-        for remeshing in nonlinear adaptivity. The control values specified
-        apply to all components having mesh-quality-based criteria defined, or
-        components having mesh change through general refinement, and can be
-        modified at every load step during the nonlinear adaptive solution or
-        when performing a restart analysis.
+        Issue the :ref:`nlmesh` command only in cases where advanced mesh-quality control is desirable for
+        remeshing in nonlinear adaptivity. The control values specified apply to all components having mesh-
+        quality-based criteria defined, or components having mesh change through general refinement, and can
+        be modified at every load step during the nonlinear adaptive solution or when performing a restart
+        analysis.
         """
         command = f"NLMESH,{control},{val1},{val2},{val3}"
         return self.run(command, **kwargs)
@@ -3786,8 +3013,8 @@ class NonlinearOptions(CommandsBase):
         return self.run(command, **kwargs)
 
     def wksp(self, value: str = "", **kwargs):
-        r"""Automatically adds weak springs at the nodes of degrees of freedom with small or
-        near-zero pivots during solution.
+        r"""Automatically adds weak springs at the nodes of degrees of freedom with small or near-zero
+        pivots during solution.
 
         Mechanical APDL Command: `WKSP <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_WKSP.html>`_
 
@@ -3796,60 +3023,56 @@ class NonlinearOptions(CommandsBase):
         value : str
             Spring constant, can be one of the following:
 
-            * ``(blank)`` - Default. Spring constant is internally
-              calculated based on the underlying elements.
+            * ``(blank)`` - Default. Spring constant is internally calculated based on
+              the underlying elements.
 
-            * ``If positive (>0)`` - number entered acts as a scaling
-              factor. Spring constant is internally calculated and then
-              multiplied by the specified scaling factor.
+            * ``If positive (>0)`` - number entered acts as a scaling factor. Spring
+              constant is internally calculated and then multiplied by the specified
+              scaling factor.
 
-            * ``If negative (<0)`` - User-defined spring constant. Absolute
-              value of the specified value is used as the spring constant.
+            * ``If negative (<0)`` - User-defined spring constant. Absolute value of the
+              specified value is used as the spring constant.
 
         Notes
         -----
 
         .. _WKSP_notes:
 
-        This is an action command that does the following for a non-linear
-        anslysis that fails in the very first iteration due to a near-zero pivot
-        error (indicating an under-constrained model):
+        This is an action command that does the following for a non-linear anslysis that
+        fails in the very first iteration due to a near-zero pivot error (indicating an
+        under-constrained model):
 
         * Automatically creates weak springs using `COMBIN14
           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_COMBIN14.html>`_
-          elements at the nodes of degrees of freedom (DOFs) with near-zero or
-          small pivots.
+          elements at the nodes of degrees of freedom (DOFs) with near-zero or small pivots.
 
-        * Retries the slution with the added springs, enhancing numerical
-          stability and aiding convergence.
+        * Retries the slution with the added springs, enhancing numerical stability and
+          aiding convergence.
 
-        The program internally calculates a small stiffness constant (real
-        constant 1 of `COMBIN14
-        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_COMBIN14.html>`_
-        element) for these springs based on the average of the stiffness values
-        of underlying elements. If you specify a positive number for ``VALUE``,
-        it is used as a scaling factor, and the program multiplies the
-        internally calculated spring constant by the specified factor. If
-        negative, the program uses the absolute value of ``VALUE``\ as a
-        customized user-defined stiffness constant. The command creates one
+        The program internally calculates a small stiffness constant (real constant 1 of
         `COMBIN14
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_COMBIN14.html>`_
-        element for each translational/rotational DOF of a node where a
-        near-zero pivot was detected by the solver in the previous failed solve.
+        element) for these springs based on the average of the stiffness values of
+        underlying elements. If you specify a positive number for ``VALUE``, it is used as a
+        scaling factor, and the program multiplies the internally calculated spring constant
+        by the specified factor. If negative, the program uses the absolute value of
+        ``VALUE``\ as a customized user-defined stiffness constant. The command creates one
+        `COMBIN14
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_COMBIN14.html>`_
+        element for each translational/rotational DOF of a node where a near-zero pivot was
+        detected by the solver in the previous failed solve.
 
         The `WKSP
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_WKSP.html>`_\
-        command does not automatically activate if the solver issues a small
-        pivot warning and continues attempting the solution. To ensure that
-        `WKSP
+        command does not automatically activate if the solver issues a small pivot warning
+        and continues attempting the solution. To ensure that `WKSP
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_WKSP.html>`_\
         functions in this scenario, issue the `PIVCHECK
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PIVCHECK.html>`_,ERROR
-        command. This forces the solver to treat any small pivot as a fatal
-        error and terminate the solution so that the `WKSP
+        command. This forces the solver to treat any small pivot as a fatal error and
+        terminate the solution so that the `WKSP
         <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_WKSP.html>`_\
-        command activates, inserts weak springs, and reattempts the stable
-        solve.
+        command activates, inserts weak springs, and reattempts the stable solve.
 
         This command is only valid when using sparse solver.
         """
