@@ -194,6 +194,8 @@ def _parse_vtk(
         ("ansys_esys", "element_coord_system"),
     ):
         values = getattr(mesh, attr, None)
+        if callable(values):  # ``Archive.element_coord_system`` is a method.
+            values = values()
         if values is not None:
             grid.cell_data[key] = values
 

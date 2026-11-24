@@ -25,6 +25,7 @@
 from contextlib import nullcontext
 from functools import wraps
 import os
+from pathlib import Path
 import re
 import threading
 import time
@@ -43,8 +44,6 @@ if TYPE_CHECKING:
     import pyvista as pv
 
 TMP_NODE_CM = "__NODE__"
-# Temporary components such as the ``save_selection`` ones (``__cmp_node<id>__``).
-_INTERNAL_COMPONENT = re.compile(r"__.*__")
 
 
 def requires_model(output=None):
@@ -829,6 +828,8 @@ class MeshGrpc:
         >>> grid = mapdl.mesh.to_pyvista(selected_only=True, force_linear=True)
         >>> grid.save("selection.vtu")
         """
+        from ansys.mapdl.core.mesh.bridge import _add_component_masks
+
         with nullcontext() if selected_only else self._mapdl.save_selection:
             if not selected_only:
                 self._mapdl.allsel(mute=True)
@@ -838,14 +839,68 @@ class MeshGrpc:
             with self.ignore_cache_reset:
                 grid = self._parse_vtk(force_linear=force_linear)
                 if include_components and grid.n_points:
-                    for data, key, components in (
-                        (grid.point_data, "ansys_node_num", self.node_components),
-                        (grid.cell_data, "ansys_elem_num", self.element_components),
-                    ):
-                        for name, ids in components.items():
-                            if not _INTERNAL_COMPONENT.fullmatch(name):
-                                data[name] = np.isin(data[key], ids)
+                    _add_component_masks(grid, self)
         return grid
+
+    def export(
+        self,
+        filename: str | Path,
+        *,
+        include_components: bool = True,
+        selected_only: bool = False,
+        force_linear: bool = False,
+        binary: bool = True,
+    ) -> Path:
+        """Export the mesh and its Mesh Components to a file.
+
+        This method is equivalent to :meth:`Mapdl.export_mesh
+        <ansys.mapdl.core.Mapdl.export_mesh>`. The format is chosen from the
+        file extension: ``.cdb`` writes a Mechanical APDL Mesh Archive,
+        ``.vtk`` and ``.vtu`` write a PyVista unstructured grid, and other
+        extensions are written with the optional ``meshio`` package.
+
+        Parameters
+        ----------
+        filename : str or pathlib.Path
+            Path of the output file.
+        include_components : bool, default: True
+            Whether to export the ``NODE`` and ``ELEM`` Mesh Components.
+        selected_only : bool, default: False
+            Whether to export only the currently selected nodes, elements, and
+            Mesh Components instead of the whole model.
+        force_linear : bool, default: False
+            Whether to export quadratic elements as linear cells.
+        binary : bool, default: True
+            Whether to write ``.vtk`` and ``.vtu`` files in binary instead of
+            ASCII format.
+
+        Returns
+        -------
+        pathlib.Path
+            Absolute path of the written file.
+
+        Raises
+        ------
+        ValueError
+            If the mesh to export has no elements.
+        ImportError
+            If the file extension requires ``meshio`` and it is not installed.
+
+        Examples
+        --------
+        Export the whole model, including unselected Mesh Components, as a
+        Mesh Archive.
+
+        >>> mapdl.mesh.export("model.cdb")
+        WindowsPath('C:/Users/user/model.cdb')
+        """
+        return self._mapdl.export_mesh(
+            filename,
+            include_components=include_components,
+            selected_only=selected_only,
+            force_linear=force_linear,
+            binary=binary,
+        )
 
     def save(
         self,

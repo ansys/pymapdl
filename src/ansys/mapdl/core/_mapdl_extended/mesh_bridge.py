@@ -23,6 +23,7 @@
 """The mesh bridge MAPDL extended mixin."""
 
 from collections.abc import Mapping, Sequence
+from contextlib import nullcontext
 from pathlib import Path
 import tempfile
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias
@@ -230,7 +231,7 @@ class _ExtendedMeshBridgeMixin(_ExtendedMixinBase):
 
         Load quadratic tetrahedra as ``SOLID187`` elements with material 2.
 
-        >>> tet10 = pv.examples.cells.QuadraticTetra()
+        >>> tet10 = pv.examples.cells.QuadraticTetrahedron()
         >>> mapdl.load_mesh(tet10, etype="SOLID187", mat=2, on_conflict="replace")
 
         Append a second mesh that uses an element type already defined.
@@ -324,3 +325,128 @@ class _ExtendedMeshBridgeMixin(_ExtendedMixinBase):
             self.cdread("DB", str(cdb_path))
         self._reset_cache()
         return self.mesh
+
+    def export_mesh(
+        self,
+        filename: str | Path,
+        *,
+        include_components: bool = True,
+        selected_only: bool = False,
+        force_linear: bool = False,
+        binary: bool = True,
+    ) -> Path:
+        """Export the mesh and its Mesh Components to a file.
+
+        By default, the whole model is exported, including nodes, elements,
+        and ``NODE`` and ``ELEM`` Mesh Components that are currently
+        unselected. The active ``KP``, ``LINE``, ``AREA``, ``VOLU``, ``NODE``,
+        ``ELEM``, and ``CMSEL`` selection is restored afterwards. Loads,
+        materials, sections, and other non-mesh data are not exported; use
+        ``mapdl.cdwrite("DB", ...)`` for a full database dump.
+
+        The format is chosen from the case-insensitive file extension:
+
+        * ``.cdb``: Mechanical APDL Mesh Archive with ``ET``, ``KEYOPT``,
+          ``NBLOCK``, ``EBLOCK``, and ``CMBLOCK`` blocks, readable with
+          ``CDREAD,DB`` and :meth:`Mapdl.load_mesh
+          <ansys.mapdl.core.Mapdl.load_mesh>`. Node and element IDs, element
+          types, ``KEYOPT`` values, element attributes, and the element node
+          lists, including omitted midside nodes, are kept unchanged.
+        * ``.vtk`` and ``.vtu``: PyVista unstructured grid with the
+          ``ansys_*`` node and element arrays and one boolean mask per Mesh
+          Component, as returned by :meth:`MeshGrpc.to_pyvista
+          <ansys.mapdl.core.mesh_grpc.MeshGrpc.to_pyvista>`.
+        * Other extensions, such as ``.msh``, ``.xdmf``, or ``.med``: written
+          with the optional ``meshio`` package. ``NODE`` Mesh Components become
+          point sets, ``ELEM`` Mesh Components become cell sets, and the
+          ``ansys_*`` element arrays become cell data.
+
+        This method works with local and remote sessions, and with gRPC and
+        console sessions.
+
+        Parameters
+        ----------
+        filename : str or pathlib.Path
+            Path of the output file.
+        include_components : bool, default: True
+            Whether to export the ``NODE`` and ``ELEM`` Mesh Components.
+        selected_only : bool, default: False
+            Whether to export only the currently selected nodes, elements, and
+            Mesh Components instead of the whole model.
+        force_linear : bool, default: False
+            Whether to export quadratic elements as linear cells. Mesh
+            Archives written this way use the default ``load_mesh`` element
+            type of each linear cell type, such as ``SOLID185``.
+        binary : bool, default: True
+            Whether to write ``.vtk`` and ``.vtu`` files in binary instead of
+            ASCII format.
+
+        Returns
+        -------
+        pathlib.Path
+            Absolute path of the written file.
+
+        Raises
+        ------
+        ValueError
+            If the mesh to export has no elements, or if ``selected_only=True``
+            and selected elements use unselected nodes.
+        ImportError
+            If the file extension requires ``meshio`` and it is not installed.
+
+        Examples
+        --------
+        Export the whole model as a Mesh Archive and load it in another
+        session.
+
+        >>> path = mapdl.export_mesh("model.cdb")
+        >>> other_mapdl.load_mesh(path)
+
+        Export the selected elements to ParaView.
+
+        >>> mapdl.esel("S", "MAT", "", 1)
+        >>> mapdl.nsle("S")
+        >>> mapdl.export_mesh("material_1.vtu", selected_only=True)
+
+        Export the mesh to Gmsh with ``meshio``.
+
+        >>> mapdl.export_mesh("model.msh")
+        """
+        from ansys.mapdl.core.mesh.bridge import (
+            _mesh_data_from_grid,
+            _mesh_data_from_mesh,
+            _mesh_grid,
+            _write_meshio,
+            write_mesh_archive,
+        )
+
+        path = Path(filename)
+        suffix = path.suffix.lower()
+        raw = suffix == ".cdb" and not force_linear
+        with nullcontext() if selected_only else self.save_selection:
+            if not selected_only:
+                self.allsel(mute=True)
+                self.cmsel("ALL", mute=True)
+            mesh = self.mesh
+            with getattr(mesh, "ignore_cache_reset", nullcontext()):
+                if raw:
+                    data = _mesh_data_from_mesh(mesh, include_components)
+                else:
+                    grid = _mesh_grid(mesh, include_components, force_linear)
+
+        if suffix == ".cdb":
+            if not raw:
+                # Linear cells get the default element type of their topology.
+                grid.cell_data.pop("ansys_etype", None)
+                grid.cell_data.pop("ansys_elem_type_num", None)
+                data = _mesh_data_from_grid(
+                    grid,
+                    include_components=include_components,
+                    keep_boundary_elements=True,
+                )
+            write_mesh_archive(data, path)
+        elif suffix in (".vtk", ".vtu"):
+            grid.save(str(path), binary=binary)
+        else:
+            _write_meshio(grid, path)
+        return path.resolve()

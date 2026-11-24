@@ -26,6 +26,7 @@
    Mapdl.exit
    Mapdl.exited
    Mapdl.exiting
+   Mapdl.export_mesh
    Mapdl.file_type_for_plots
    Mapdl.finish_job_on_exit
    Mapdl.force_output
@@ -57,6 +58,7 @@
    Mapdl.list_error_file
    Mapdl.list_files
    Mapdl.load_array
+   Mapdl.load_mesh
    Mapdl.load_table
    Mapdl.locked
    Mapdl.logger

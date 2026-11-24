@@ -804,9 +804,10 @@ def _connectivity(
         layout = _ELEMENTS[int(number)][1]
         perm = np.array(_LAYOUTS[layout][CellType(int(celltype))])
         idx = np.flatnonzero((celltypes == celltype) & (numbers == number))
-        if (offsets[idx + 1] - offsets[idx] != perm.max() + 1).any():
+        # ``linear_copy()`` keeps the midside point IDs after the corner ones.
+        if (offsets[idx + 1] - offsets[idx] < perm.max() + 1).any():
             raise ValueError(
-                f"{CellType(int(celltype)).name} cells must have {perm.max() + 1} points."
+                f"{CellType(int(celltype)).name} cells must have at least {perm.max() + 1} points."
             )
         connectivity[idx, : perm.size] = point_ids[
             cell_points[offsets[idx][:, None] + perm]
@@ -994,6 +995,153 @@ def _offset_ids(data: _MeshData, node_offset: int, elem_offset: int) -> None:
         name: (kind, ids + (node_offset if kind == "NODE" else elem_offset))
         for name, (kind, ids) in data.components.items()
     }
+
+
+def _mesh_components(mesh: Any) -> dict[str, tuple[str, NDArray[np.int64]]]:
+    """Return the NODE and ELEM Mesh Components of a ``MeshGrpc`` or ``Archive`` mesh."""
+    components = {}
+    for kind, items in (
+        ("NODE", mesh.node_components),
+        ("ELEM", mesh.element_components),
+    ):
+        for name, ids in items.items():
+            # Hidden ``_`` names include temporaries such as the ``save_selection`` ones.
+            if not name.startswith("_"):
+                components[name] = (kind, np.asarray(ids, np.int64))
+    return components
+
+
+def _add_component_masks(grid: pv.UnstructuredGrid, mesh: Any) -> None:
+    """Add one boolean mask per NODE and ELEM Mesh Component of ``mesh`` to ``grid``."""
+    for name, (kind, ids) in _mesh_components(mesh).items():
+        if kind == "NODE":
+            grid.point_data[name] = np.isin(grid.point_data["ansys_node_num"], ids)
+        else:
+            grid.cell_data[name] = np.isin(grid.cell_data["ansys_elem_num"], ids)
+
+
+def _mesh_grid(
+    mesh: Any, include_components: bool, force_linear: bool
+) -> pv.UnstructuredGrid:
+    """Convert the selected part of a ``MeshGrpc`` or ``Archive`` mesh into a grid."""
+    if hasattr(mesh, "to_pyvista"):
+        grid = mesh.to_pyvista(
+            include_components=include_components,
+            selected_only=True,
+            force_linear=force_linear,
+        )
+    else:
+        from ansys.mapdl.core.mesh.mesh import _parse_vtk
+
+        grid = _parse_vtk(mesh, force_linear=force_linear)
+        if include_components and grid.n_points:
+            _add_component_masks(grid, mesh)
+    if not grid.n_cells:
+        raise ValueError("The mesh is empty, hence no file has been written.")
+    return grid
+
+
+def _write_meshio(grid: pv.UnstructuredGrid, path: Path) -> None:
+    """Write ``grid`` with ``meshio``, as point sets, cell sets, and ``ansys_*`` cell data."""
+    try:
+        import meshio
+    except ImportError as err:
+        raise ImportError(
+            f"Exporting '{path.suffix.lower()}' meshes requires the optional 'meshio' "
+            "package. Install it with `pip install meshio`."
+        ) from err
+    names = {celltype: name for name, celltype in _MESHIO_CELL_TYPES.items()}
+    celltypes = np.asarray(grid.celltypes)
+    offsets = pv.convert_array(grid.GetCells().GetOffsetsArray()).astype(np.int64)
+    connectivity = np.asarray(grid.cell_connectivity, np.int64)
+    _, first = np.unique(celltypes, return_index=True)
+    blocks, cells = [], []
+    for celltype in celltypes[np.sort(first)]:
+        if celltype not in names:
+            raise ValueError(
+                f"{CellType(celltype).name} cells cannot be exported with meshio."
+            )
+        idx = np.flatnonzero(celltypes == celltype)
+        size = _CELL_POINTS[celltype]  # ``linear_copy()`` cells keep extra point IDs.
+        blocks.append(idx)
+        cells.append(
+            (names[celltype], connectivity[offsets[idx][:, None] + np.arange(size)])
+        )
+
+    point_sets, cell_sets, cell_data = {}, {}, {}
+    for key in grid.point_data.keys():
+        arr = np.asarray(grid.point_data[key])
+        if not _INTERNAL_ARRAY.fullmatch(key) and _is_mask(arr):
+            point_sets[key] = np.flatnonzero(arr)
+    for key in grid.cell_data.keys():
+        arr = np.asarray(grid.cell_data[key])
+        if key.startswith("ansys_"):
+            cell_data[key] = [arr[idx] for idx in blocks]
+        elif not _INTERNAL_ARRAY.fullmatch(key) and _is_mask(arr):
+            cell_sets[key] = [np.flatnonzero(arr[idx]) for idx in blocks]
+    mesh = meshio.Mesh(
+        np.asarray(grid.points, np.float64),
+        cells,
+        point_sets=point_sets,
+        cell_sets=cell_sets,
+        cell_data=cell_data,
+    )
+    meshio.write(str(path), mesh)
+
+
+def _mesh_data_from_mesh(mesh: Any, include_components: bool) -> _MeshData:
+    """Normalize the raw records of a ``MeshGrpc`` or ``Archive`` mesh losslessly."""
+    records = [np.asarray(record, np.int64) for record in mesh.elem]
+    if not records:
+        raise ValueError("The mesh is empty, hence no file has been written.")
+    header = np.array([record[:10] for record in records])
+    # Trailing omitted (``0``) node slots are dropped, as ``CDWRITE`` does.
+    cell_nodes = [np.trim_zeros(record[10:], "b") for record in records]
+    nnodes = np.array([ids.size for ids in cell_nodes], np.int64)
+    if nnodes.max() > 20:
+        raise ValueError("Elements with more than 20 nodes cannot be exported.")
+    connectivity = np.zeros((len(records), 20), np.int64)
+    for row, ids in zip(connectivity, cell_nodes):
+        row[: ids.size] = ids
+
+    node_ids = np.asarray(mesh.nnum, np.int64)
+    if not np.isin(connectivity[connectivity > 0], node_ids).all():
+        raise ValueError(
+            "The selected elements use unselected nodes. Select them with "
+            "`mapdl.nsle('A')` or pass `selected_only=False`."
+        )
+    elem_ids = header[:, 8]
+    angles = getattr(mesh, "node_angles", None)
+    if angles is not None and (
+        np.shape(angles) != (node_ids.size, 3) or not np.any(angles)
+    ):
+        angles = None
+
+    components = {}
+    if include_components:
+        for name, (kind, ids) in _mesh_components(mesh).items():
+            ids = np.intersect1d(ids, node_ids if kind == "NODE" else elem_ids)
+            if ids.size:
+                components[name] = (kind, ids)
+    return _MeshData(
+        node_ids=node_ids,
+        nodes=np.asarray(mesh.nodes, np.float64).reshape(-1, 3),
+        node_angles=angles,
+        elem_ids=elem_ids,
+        etype_ids=header[:, 1],
+        mat_ids=header[:, 0],
+        real_ids=header[:, 2],
+        sec_ids=header[:, 3],
+        esys_ids=header[:, 4],
+        connectivity=connectivity,
+        nnodes=nnodes,
+        et_defs={int(et_id): int(number) for et_id, number in mesh.ekey},
+        keyopts={
+            int(et_id): {int(knum): int(value) for knum, value in options}
+            for et_id, options in mesh.key_option.items()
+        },
+        components=components,
+    )
 
 
 def _compress_ids(ids: NDArray[np.int64]) -> NDArray[np.int64]:
