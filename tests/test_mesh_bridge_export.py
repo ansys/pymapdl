@@ -31,8 +31,7 @@ from unittest.mock import MagicMock
 from ansys.mapdl.reader import Archive
 import numpy as np
 import pytest
-
-pv = pytest.importorskip("pyvista")
+import pyvista as pv
 
 from ansys.mapdl.core.mapdl_console import MapdlConsole
 from test_mesh_bridge_grid import (

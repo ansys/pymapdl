@@ -36,7 +36,10 @@ from ansys.mapdl.core.misc import random_string
 from . import _ExtendedMixinBase
 
 if TYPE_CHECKING:
+    from ansys.mapdl.reader.archive import Archive
     import pyvista as pv
+
+    from ansys.mapdl.core.mesh_grpc import MeshGrpc
 
 _IntAttribute: TypeAlias = int | Sequence[int] | NDArray[np.integer] | None
 
@@ -61,7 +64,7 @@ class _ExtendedMeshBridgeMixin(_ExtendedMixinBase):
         on_conflict: Literal["error", "replace", "append"] = "error",
         node_ids: Sequence[int] | NDArray[np.integer] | None = None,
         elem_ids: Sequence[int] | NDArray[np.integer] | None = None,
-    ) -> Any:
+    ) -> "MeshGrpc | Archive":
         """Load an external finite-element mesh and its Mesh Components.
 
         The mesh is converted into a standalone Mesh Archive (``ET``,
@@ -107,9 +110,15 @@ class _ExtendedMeshBridgeMixin(_ExtendedMixinBase):
             * File path: ``.cdb`` and ``.inp`` files, including files written
               by ``CDWRITE``, are read with their element types, ``KEYOPT``
               values, attributes, and Mesh Components, and only their mesh is
-              loaded. ``.vtk``, ``.vtu``, ``.vtp``, and ``.pvtu`` files are read
-              with PyVista. Other formats, such as ``.msh``, ``.xdmf``, or
-              ``.med``, are read with the optional ``meshio`` package.
+              loaded. Files with element types that ``etype`` does not support,
+              such as ``CONTA174`` or ``TARGE170``, are read as is, including
+              any non-mesh data, with ``CDREAD,DB`` without offsetting existing
+              entities, unless an argument requires rewriting the mesh.
+              ``.vtk``, ``.vtu``, ``.vtp``, and ``.pvtu`` files are read with
+              PyVista. Other formats, such as ``.msh``, ``.xdmf``, or ``.med``,
+              are read with the optional ``meshio`` package. Gmsh and other
+              ``meshio`` metadata sets, such as ``gmsh:bounding_entities``,
+              are ignored.
 
         etype : str, int, or Mapping, optional
             Element type of the new elements.
@@ -144,7 +153,8 @@ class _ExtendedMeshBridgeMixin(_ExtendedMixinBase):
 
         keyopt : Mapping[int, int], optional
             ``KEYOPT`` values, keyed by key option number (1 to 18), applied
-            to every new element type.
+            to every element type of the loaded elements, including ``int``
+            element types already defined in the database.
 
         components : Mapping[str, Any], optional
             Additional Mesh Components. Each value is either a sequence of node
@@ -259,7 +269,7 @@ class _ExtendedMeshBridgeMixin(_ExtendedMixinBase):
             _existing_etype_ids,
             _mesh_data_from_grid,
             _offset_ids,
-            write_mesh_archive,
+            _write_mesh_archive,
         )
 
         if on_conflict not in ("error", "replace", "append"):
@@ -277,7 +287,25 @@ class _ExtendedMeshBridgeMixin(_ExtendedMixinBase):
                 "`mapdl.et` or pass an element name such as 'SOLID187'."
             )
         existing_etypes = {et_id: defined[et_id] for et_id in wanted}
-        grid = _as_grid(mesh, etype, existing_etypes)
+        rewrite = (
+            on_conflict == "append"
+            or not include_components
+            or any(
+                value is not None
+                for value in (
+                    etype,
+                    mat,
+                    real,
+                    secnum,
+                    esys,
+                    keyopt,
+                    components,
+                    node_ids,
+                    elem_ids,
+                )
+            )
+        )
+        grid = _as_grid(mesh, etype, existing_etypes, passthrough=not rewrite)
 
         # ``NUM,MAXD`` is the highest ID defined, independent of the selection.
         node_max = int(self.get_value("NODE", 0, "NUM", "MAXD"))
@@ -289,25 +317,26 @@ class _ExtendedMeshBridgeMixin(_ExtendedMixinBase):
                 "`on_conflict='append'` to add the new mesh after them."
             )
 
-        data = _mesh_data_from_grid(
-            grid,
-            etype=etype,
-            existing_etypes=existing_etypes,
-            et_offset=int(self.get_value("ETYP", 0, "NUM", "MAX")),
-            mat=mat,
-            real=real,
-            secnum=secnum,
-            esys=esys,
-            keyopt=keyopt,
-            components=components,
-            include_components=include_components,
-            keep_boundary_elements=keep_boundary_elements,
-            sanitize_names=sanitize_names,
-            node_ids=node_ids,
-            elem_ids=elem_ids,
-        )
-        if on_conflict == "append":
-            _offset_ids(data, node_max, elem_max)
+        if not isinstance(grid, Path):
+            data = _mesh_data_from_grid(
+                grid,
+                etype=etype,
+                existing_etypes=existing_etypes,
+                et_offset=int(self.get_value("ETYP", 0, "NUM", "MAX")),
+                mat=mat,
+                real=real,
+                secnum=secnum,
+                esys=esys,
+                keyopt=keyopt,
+                components=components,
+                include_components=include_components,
+                keep_boundary_elements=keep_boundary_elements,
+                sanitize_names=sanitize_names,
+                node_ids=node_ids,
+                elem_ids=elem_ids,
+            )
+            if on_conflict == "append":
+                _offset_ids(data, node_max, elem_max)
 
         self.prep7(mute=True)
         if on_conflict == "replace" and (node_max or elem_max):
@@ -319,10 +348,16 @@ class _ExtendedMeshBridgeMixin(_ExtendedMixinBase):
             self.edele("ALL", mute=True)
             self.ndele("ALL", mute=True)
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            cdb_path = Path(tmpdir) / f"_load_mesh_{random_string()}.cdb"
-            write_mesh_archive(data, cdb_path)
-            self.cdread("DB", str(cdb_path))
+        if isinstance(grid, Path):
+            # ``CDWRITE`` files skip their ``NUMOFF`` block when ``_CDRDOFF`` is 1.
+            self.run("*SET,_CDRDOFF,1", mute=True)
+            self.cdread("DB", str(grid.resolve()))
+            self.run("*SET,_CDRDOFF", mute=True)
+        else:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                cdb_path = Path(tmpdir) / f"_load_mesh_{random_string()}.cdb"
+                _write_mesh_archive(data, cdb_path)
+                self.cdread("DB", str(cdb_path))
         self._reset_cache()
         return self.mesh
 
@@ -416,8 +451,8 @@ class _ExtendedMeshBridgeMixin(_ExtendedMixinBase):
             _mesh_data_from_grid,
             _mesh_data_from_mesh,
             _mesh_grid,
+            _write_mesh_archive,
             _write_meshio,
-            write_mesh_archive,
         )
 
         path = Path(filename)
@@ -444,7 +479,7 @@ class _ExtendedMeshBridgeMixin(_ExtendedMixinBase):
                     include_components=include_components,
                     keep_boundary_elements=True,
                 )
-            write_mesh_archive(data, path)
+            _write_mesh_archive(data, path)
         elif suffix in (".vtk", ".vtu"):
             grid.save(str(path), binary=binary)
         else:

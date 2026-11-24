@@ -882,7 +882,8 @@ class MeshGrpc:
         Raises
         ------
         ValueError
-            If the mesh to export has no elements.
+            If the mesh to export has no elements, or if ``selected_only=True``
+            and selected elements use unselected nodes.
         ImportError
             If the file extension requires ``meshio`` and it is not installed.
 

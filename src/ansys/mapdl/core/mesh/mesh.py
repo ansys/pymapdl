@@ -216,14 +216,20 @@ def _parse_vtk(
     grid.point_data["origid"] = ind
     grid.point_data["VTKorigID"] = ind
 
-    keyopt = [
+    keyopt = _pack_keyopt_array(getattr(mesh, "key_option", {}))
+    if keyopt.size:
+        grid.field_data["ansys_keyopt"] = keyopt
+    return grid
+
+
+def _pack_keyopt_array(key_option: dict) -> np.ndarray:
+    """Pack ``{et_id: [[knum, value], ...]}`` as ``(K, 3)`` ``ansys_keyopt`` rows."""
+    rows = [
         (et_id, knum, value)
-        for et_id, options in getattr(mesh, "key_option", {}).items()
+        for et_id, options in key_option.items()
         for knum, value in options
     ]
-    if keyopt:
-        grid.field_data["ansys_keyopt"] = np.array(keyopt, np.int32)
-    return grid
+    return np.array(rows, np.int32).reshape(-1, 3)
 
 
 def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):

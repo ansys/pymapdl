@@ -28,8 +28,7 @@ from unittest.mock import MagicMock
 import grpc
 import numpy as np
 import pytest
-
-pv = pytest.importorskip("pyvista")
+import pyvista as pv
 
 from ansys.mapdl.core.component import ComponentManager
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc

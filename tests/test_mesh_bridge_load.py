@@ -26,6 +26,7 @@
 import copy
 from pathlib import Path
 import sys
+import tempfile
 from types import SimpleNamespace
 
 from ansys.mapdl.reader import Archive
@@ -80,14 +81,18 @@ class _ArchiveMapdl(_ExtendedMeshBridgeMixin):
     def ndele(self, node1, **kwargs):
         self.calls.append(("NDELE", node1))
 
+    def run(self, command, **kwargs):
+        self.calls.append(("RUN", command))
+
     def cdread(self, option, fname):
         self.calls.append(("CDREAD", option))
         self.cdb = Path(fname).read_text()
         # Element types already in the database are visible to the reader too.
-        database = Path(fname).with_name("database.cdb")
         predefined = "".join(f"ET,{i},{n}\n" for i, n in self.etypes.items())
-        database.write_text(predefined + self.cdb, newline="\n")
-        self.archive = Archive(database, force_linear=False)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            database = Path(tmpdir) / "database.cdb"
+            database.write_text(predefined + self.cdb, newline="\n")
+            self.archive = Archive(database, force_linear=False)
 
     def _reset_cache(self):
         self.calls.append(("RESET",))
@@ -144,6 +149,8 @@ def test_load_mesh_hexahedron_round_trips_through_mesh_archive():
         (CellType.QUADRATIC_EDGE, 3, None, 189, CellType.QUADRATIC_EDGE, None),
         (CellType.TRIANGLE, 3, None, 181, CellType.TRIANGLE, None),
         (CellType.TRIANGLE, 3, "PLANE182", 182, CellType.TRIANGLE, None),
+        (CellType.TRIANGLE, 3, "SURF154", 154, CellType.TRIANGLE, None),
+        (CellType.QUAD, 4, "SURF154", 154, CellType.QUAD, None),
         (CellType.QUAD, 4, None, 181, CellType.QUAD, None),
         (CellType.PIXEL, 4, None, 181, CellType.QUAD, [0, 1, 3, 2]),
         (CellType.QUADRATIC_TRIANGLE, 6, None, 281, CellType.QUADRATIC_TRIANGLE, None),
@@ -261,6 +268,16 @@ def test_load_mesh_references_existing_element_type_id():
     assert "\nET," not in mapdl.cdb
     np.testing.assert_array_equal(mesh.ekey, [[4, 185]])
     np.testing.assert_array_equal(mesh.et_id, [4, 4])
+
+
+@pytest.mark.parametrize("etype", [10, {CellType.VOXEL: 10}])
+def test_load_mesh_applies_keyopt_to_existing_element_type_id(etype):
+    mapdl = _ArchiveMapdl(etypes={10: 185})
+
+    mesh = mapdl.load_mesh(_two_hexes(), etype=etype, keyopt={3: 1})
+
+    assert "KEYOPT,10,3,1\n" in mapdl.cdb
+    assert mesh.key_option == {10: [[3, 1]]}
 
 
 def test_load_mesh_rejects_undefined_element_type_id():
@@ -697,6 +714,24 @@ def test_load_mesh_keeps_gmsh_boundary_elements_on_request():
     }
 
 
+def test_load_mesh_ignores_meshio_internal_sets():
+    mesh = _gmsh_tet_mesh()
+    every_block = [np.array([0])] * 4
+    mesh.point_sets = {"gmsh:dim_tags": np.array([0])}
+    mesh.cell_sets = {
+        "gmsh:bounding_entities": every_block,
+        "CORE": [np.array([0]), np.array([], int), None, None],
+    }
+
+    loaded = _ArchiveMapdl().load_mesh(mesh)
+
+    assert loaded.node_components.keys() == {"FIXED", "EDGE"}
+    assert {k: v.tolist() for k, v in loaded.element_components.items()} == {
+        "VOLUME": [1, 2],
+        "CORE": [1],
+    }
+
+
 def test_load_mesh_reads_meshio_sets_on_2d_points():
     mesh = _MeshioMesh(
         [[0, 0], [1, 0], [2, 0], [0, 1], [1, 1], [2, 1]],
@@ -868,6 +903,35 @@ def test_load_mesh_appends_mapdl_cdwrite_file_above_existing_ids():
     np.testing.assert_array_equal(mesh.enum, [11, 12, 13])
     np.testing.assert_array_equal(mesh.material_type, [4, 4, 4])
     assert mesh.element_components["SKIN"].tolist() == [13]
+
+
+_CONTACT_CDB = Path(__file__).parent / "test_files" / "mesh_bridge_contact.cdb"
+
+
+def test_load_mesh_passes_cdb_with_unsupported_element_types_to_cdread():
+    mapdl = _ArchiveMapdl()
+
+    mesh = mapdl.load_mesh(_CONTACT_CDB)
+
+    assert mapdl.cdb == _CONTACT_CDB.read_text()
+    # ``_CDRDOFF=1`` makes the file skip its ``NUMOFF`` block.
+    assert mapdl.calls.index(("RUN", "*SET,_CDRDOFF,1")) < mapdl.calls.index(
+        ("CDREAD", "DB")
+    )
+    np.testing.assert_array_equal(mesh.ekey, [[1, 185], [2, 174], [3, 170]])
+    np.testing.assert_array_equal(mesh.enum, [1, 2, 3])
+    assert mesh.element_components["TOP"].tolist() == [1]
+
+
+@pytest.mark.parametrize(
+    "kwargs", [{"mat": 2}, {"on_conflict": "append"}, {"include_components": False}]
+)
+def test_load_mesh_rejects_unsupported_cdb_element_types_when_rewriting(kwargs):
+    mapdl = _ArchiveMapdl()
+
+    with pytest.raises(ValueError, match="Unsupported element type 170"):
+        mapdl.load_mesh(_CONTACT_CDB, **kwargs)
+    assert mapdl.calls == []
 
 
 def test_load_mesh_reads_mesh_archive_inp_file(tmp_path):

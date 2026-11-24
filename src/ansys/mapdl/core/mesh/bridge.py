@@ -35,6 +35,8 @@ from numpy.typing import NDArray
 import pyvista as pv
 from pyvista import CellType
 
+from ansys.mapdl.core.mesh.mesh import _pack_keyopt_array
+
 # VTK point index written to each Mechanical APDL EBLOCK node slot, per layout.
 _LAYOUTS: dict[str, dict[CellType, tuple[int, ...]]] = {
     "point": {CellType.VERTEX: (0,)},
@@ -259,6 +261,8 @@ _COMPONENT_KINDS = {
 # Names starting with ``_`` are hidden from ``CMLIST`` and ``mapdl.components``.
 _COMPONENT_NAME = re.compile(r"[A-Z][A-Z0-9_]{0,31}")
 _INTERNAL_ARRAY = re.compile(r"origid|vtkorigid|vtk.*|ansys_.*", re.IGNORECASE)
+# ``meshio`` readers store metadata such as ``gmsh:bounding_entities`` as sets.
+_MESHIO_METADATA = ("gmsh:", "medit:", "ansys:")
 
 
 @dataclass(slots=True)
@@ -393,10 +397,7 @@ def _drop_boundary_cells(
     keep_boundary_elements: bool,
     include_components: bool,
 ) -> tuple[pv.UnstructuredGrid, NDArray[np.bool_]]:
-    """Drop lower-dimensional cells, turning their cell masks into point masks.
-
-    Returns the grid holding the kept cells (with every input point) and the kept-cell mask.
-    """
+    """Drop lower-dimensional cells, turning their cell masks into point masks."""
     celltypes = np.asarray(grid.celltypes, np.int64)
     unique, inverse = np.unique(celltypes, return_inverse=True)
     # Unsupported cell types count as 3D so that their validation error still surfaces.
@@ -456,12 +457,7 @@ def _coordinates(points: Any) -> NDArray[np.float64]:
 
 
 def _grid_from_meshio(mesh: Any) -> pv.UnstructuredGrid:
-    """Convert a duck-typed ``meshio.Mesh`` without modifying it.
-
-    Point sets become point masks. Cell sets and named Gmsh physical groups
-    (``field_data`` ``name -> (tag, dim)`` with ``gmsh:physical`` cell tags)
-    become cell masks.
-    """
+    """Convert a duck-typed ``meshio.Mesh`` without modifying it."""
     celltypes, dims, sizes, connectivity = [], [], [], []
     block_cells: list[NDArray[np.int64]] = []
     type_blocks: dict[str, list[NDArray[np.int64]]] = {}
@@ -496,12 +492,16 @@ def _grid_from_meshio(mesh: Any) -> pv.UnstructuredGrid:
         _coordinates(mesh.points),
     )
     for name, indices in (getattr(mesh, "point_sets", None) or {}).items():
+        if str(name).startswith(_MESHIO_METADATA):
+            continue
         points = np.zeros(grid.n_points, bool)
         points[np.asarray(indices, np.int64)] = True
         grid.point_data[str(name)] = points
 
     masks: dict[str, NDArray[np.bool_]] = {}
     for name, per_block in (getattr(mesh, "cell_sets", None) or {}).items():
+        if str(name).startswith(_MESHIO_METADATA):
+            continue
         for cells, local in by_cell(per_block):
             masks.setdefault(str(name), np.zeros(grid.n_cells, bool))[
                 cells[local.astype(np.int64)]
@@ -595,11 +595,7 @@ def _grid_from_arrays(
 
 
 def _expand_etblock(text: str) -> str:
-    """Rewrite ``ETBLOCK`` blocks (MAPDL 2026 R1 ``CDWRITE``) as ``ET`` and ``KEYOPT``.
-
-    ``ansys.mapdl.reader.Archive`` does not parse ``ETBLOCK``. Each row holds
-    the ET ID, the element number, and KEYOPT(1) to KEYOPT(18).
-    """
+    """Rewrite ``ETBLOCK`` rows, which ``Archive`` cannot parse, as ``ET`` and ``KEYOPT``."""
     lines = iter(text.splitlines())
     out = []
     for line in lines:
@@ -621,8 +617,8 @@ def _expand_etblock(text: str) -> str:
     return "\n".join(out) + "\n"
 
 
-def _grid_from_cdb(path: Path) -> pv.UnstructuredGrid:
-    """Read a ``.cdb`` file with its ET, KEYOPT, SECNUM, and ESYS metadata."""
+def _grid_from_cdb(path: Path, passthrough: bool) -> pv.UnstructuredGrid | Path:
+    """Read a ``.cdb`` file with its metadata, or return ``path`` to ``CDREAD`` it as is."""
     from ansys.mapdl.reader import Archive
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -633,45 +629,50 @@ def _grid_from_cdb(path: Path) -> pv.UnstructuredGrid:
             newline="\n",
         )
         archive = Archive(clean, force_linear=False)
+    numbers = set(np.asarray(archive.ekey, np.int64).reshape(-1, 2)[:, 1].tolist())
+    if passthrough and not numbers <= _ELEMENTS.keys():
+        return path
+    for number in sorted(numbers):
+        _element_number(number)
     grid = archive.grid
     grid.cell_data["ansys_secnum"] = archive.section
     grid.cell_data["ansys_esys"] = archive.element_coord_system()
-    keyopts = [
-        [et_id, knum, value]
-        for et_id, options in archive.key_option.items()
-        for knum, value in options
-    ]
-    if keyopts:
-        grid.field_data["ansys_keyopt"] = np.array(keyopts, np.int32)
+    keyopts = _pack_keyopt_array(archive.key_option)
+    if keyopts.size:
+        grid.field_data["ansys_keyopt"] = keyopts
     return grid
 
 
-def _read_mesh_file(path: Path) -> Any:
-    """Read a mesh file into a PyVista dataset or a ``meshio.Mesh``."""
-    if not path.is_file():
-        raise FileNotFoundError(f"Mesh file '{path}' does not exist.")
-    suffix = path.suffix.lower()
-    if suffix in (".cdb", ".inp"):
-        return _grid_from_cdb(path)
-    if suffix in (".vtk", ".vtu", ".vtp", ".pvtu"):
-        return pv.read(path)
+def _require_meshio(action: str, suffix: str) -> Any:
     try:
         import meshio
     except ImportError as err:
         raise ImportError(
-            f"Reading '{suffix}' meshes requires the optional 'meshio' package. "
+            f"{action} '{suffix}' meshes requires the optional 'meshio' package. "
             "Install it with `pip install meshio`."
         ) from err
-    return meshio.read(path)
+    return meshio
+
+
+def _read_mesh_file(path: Path, passthrough: bool) -> Any:
+    """Read a mesh file into a PyVista dataset, a ``meshio.Mesh``, or a passthrough path."""
+    if not path.is_file():
+        raise FileNotFoundError(f"Mesh file '{path}' does not exist.")
+    suffix = path.suffix.lower()
+    if suffix in (".cdb", ".inp"):
+        return _grid_from_cdb(path, passthrough)
+    if suffix in (".vtk", ".vtu", ".vtp", ".pvtu"):
+        return pv.read(path)
+    return _require_meshio("Reading", suffix).read(path)
 
 
 def _as_grid(
-    mesh: Any, etype: Any, existing_etypes: Mapping[int, int]
-) -> pv.UnstructuredGrid:
-    """Convert any supported ``load_mesh`` input into an unstructured grid."""
+    mesh: Any, etype: Any, existing_etypes: Mapping[int, int], passthrough: bool
+) -> pv.UnstructuredGrid | Path:
+    """Convert a ``load_mesh`` input into a grid, or a ``.cdb`` path to read as is."""
     if isinstance(mesh, (str, os.PathLike)):
-        mesh = _read_mesh_file(Path(mesh))
-    if isinstance(mesh, pv.UnstructuredGrid):
+        mesh = _read_mesh_file(Path(mesh), passthrough)
+    if isinstance(mesh, (pv.UnstructuredGrid, Path)):
         return mesh
     if isinstance(mesh, pv.DataSet):
         return mesh.cast_to_unstructured_grid()
@@ -787,7 +788,7 @@ def _resolve_element_types(
             raise ValueError(
                 "`keyopt` must map KEYOPT numbers (1 to 18) to integer values."
             )
-        for et_id in et_defs:
+        for et_id in np.unique(etype_ids).tolist():
             keyopts.setdefault(et_id, {})[int(knum)] = int(val)
     return etype_ids, numbers, et_defs, keyopts
 
@@ -1043,13 +1044,7 @@ def _mesh_grid(
 
 def _write_meshio(grid: pv.UnstructuredGrid, path: Path) -> None:
     """Write ``grid`` with ``meshio``, as point sets, cell sets, and ``ansys_*`` cell data."""
-    try:
-        import meshio
-    except ImportError as err:
-        raise ImportError(
-            f"Exporting '{path.suffix.lower()}' meshes requires the optional 'meshio' "
-            "package. Install it with `pip install meshio`."
-        ) from err
+    meshio = _require_meshio("Exporting", path.suffix.lower())
     names = {celltype: name for name, celltype in _MESHIO_CELL_TYPES.items()}
     celltypes = np.asarray(grid.celltypes)
     offsets = pv.convert_array(grid.GetCells().GetOffsetsArray()).astype(np.int64)
@@ -1154,7 +1149,7 @@ def _compress_ids(ids: NDArray[np.int64]) -> NDArray[np.int64]:
     return np.column_stack([starts, -ends]).ravel()[keep]
 
 
-def write_mesh_archive(data: _MeshData, path: str | Path) -> None:
+def _write_mesh_archive(data: _MeshData, path: str | Path) -> None:
     """Write ``data`` as a Mesh Archive readable by ``CDREAD,DB``."""
     largest = max(data.node_ids.max(initial=0), data.elem_ids.max(initial=0))
     width = max(10, len(str(largest)) + 1)
