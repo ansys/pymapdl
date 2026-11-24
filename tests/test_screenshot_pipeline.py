@@ -232,12 +232,28 @@ def test_plot_command_wrapper_without_savefig_displays_and_returns_none(
 ):
     fake.plot_verbs.add(verb)
 
-    with patch.object(ScriptedMapdl, "_display_plot") as display:
+    with (
+        patch.object(ScriptedMapdl, "_has_matplotlib", True),
+        patch.object(ScriptedMapdl, "_display_plot") as display,
+    ):
         assert getattr(fake, method)(*args) is None
 
     display.assert_called_once_with(os.path.join(tmp_path, "file000.png"))
     assert f"PRODUCE {verb} PLOT" in fake._response
     assert len(fake.replots) == (1 if verb == "/REPLOT" else 0)
+
+
+def test_plot_command_without_savefig_skips_display_without_matplotlib(fake):
+    fake.plot_verbs.add("PLCAMP")
+
+    with (
+        patch.object(ScriptedMapdl, "_has_matplotlib", False),
+        patch.object(ScriptedMapdl, "_display_plot") as display,
+    ):
+        assert fake.plcamp() is None
+
+    display.assert_not_called()
+    assert "PRODUCE PLCAMP PLOT" in fake._response
 
 
 def test_replot_on_a_non_png_device_redraws_once_as_png_without_recursing(
