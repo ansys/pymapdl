@@ -62,53 +62,53 @@ PLOT_COMMANDS = [
     # Single-frame display commands captured as Server Plot Screenshots.
     # Animations (AN*), plot settings (/PLO, PLCP, PLTI) and the Removed
     # EDFPLOT are deliberately excluded.
-    "*VPL",  # *VPLOT
-    "/REP",  # /REPLOT
-    "APLO",  # APLOT
-    "CMPL",  # CMPLOT
-    "EPLO",  # EPLOT
-    "FSPL",  # FSPLOT
-    "GPLO",  # GPLOT
-    "KPLO",  # KPLOT
-    "LAYP",  # LAYPLOT
-    "LPLO",  # LPLOT
-    "MDPL",  # MDPLOT
-    "MPPL",  # MPPLOT
-    "NPLO",  # NPLOT
-    "PLAS",  # PLAS
-    "PLCA",  # PLCAMP
-    "PLCF",  # PLCFREQ
-    "PLCH",  # PLCHIST
-    "PLCI",  # PLCINT
-    "PLCK",  # PLCKSURF
-    "PLCR",  # PLCRACK
-    "PLDI",  # PLDISP
-    "PLES",  # PLESOL
-    "PLET",  # PLETAB
-    "PLF2",  # PLF2D
-    "PLFA",  # PLFAR
-    "PLGE",  # PLGEOM
-    "PLLS",  # PLLS
-    "PLMA",  # PLMAP
-    "PLMC",  # PLMC
-    "PLNE",  # PLNEAR
-    "PLNS",  # PLNSOL
-    "PLOR",  # PLORB
+    "*VPL",
+    "/REP",
+    "APLO",
+    "CMPL",
+    "EPLO",
+    "FSPL",
+    "GPLO",
+    "KPLO",
+    "LAYP",
+    "LPLO",
+    "MDPL",
+    "MPPL",
+    "NPLO",
+    "PLAS",
+    "PLCA",
+    "PLCF",
+    "PLCH",
+    "PLCI",
+    "PLCK",
+    "PLCR",
+    "PLDI",
+    "PLES",
+    "PLET",
+    "PLF2",
+    "PLFA",
+    "PLGE",
+    "PLLS",
+    "PLMA",
+    "PLMC",
+    "PLNE",
+    "PLNS",
+    "PLOR",
     "PLPA",  # PLPAGM, PLPATH
-    "PLSE",  # PLSECT
-    "PLTR",  # PLTRAC
-    "PLVA",  # PLVAR
-    "PLVE",  # PLVECT
-    "PLZZ",  # PLZZ
-    "PSDG",  # PSDGRAPH
-    "SECP",  # SECPLOT
-    "SPGR",  # SPGRAPH
-    "SPLO",  # SPLOT
-    "SUPL",  # SUPL
-    "SVPL",  # SVPLOT
-    "TBFP",  # TBFPLOT
-    "TBPL",  # TBPLOT
-    "VPLO",  # VPLOT
+    "PLSE",
+    "PLTR",
+    "PLVA",
+    "PLVE",
+    "PLZZ",
+    "PSDG",
+    "SECP",
+    "SPGR",
+    "SPLO",
+    "SUPL",
+    "SVPL",
+    "TBFP",
+    "TBPL",
+    "VPLO",
 ]
 
 
@@ -561,9 +561,6 @@ class _CorePlottingMixin(_CoreMixinBase):
     ) -> str | None:
         """Take an MAPDL screenshot and show it in a popup window.
 
-        Redraws the last display on the ``PNG`` device with ``/REPLOT``.
-        Plot commands call this method to capture the PNG they wrote.
-
         Parameters
         ----------
         savefig : str, optional
@@ -636,12 +633,7 @@ class _CorePlottingMixin(_CoreMixinBase):
             self._log.debug("Since matplolib is not installed, images are not shown.")
 
     def _replot_as_png(self) -> str:
-        """Redraw the last display on the ``PNG`` device and return MAPDL's output.
-
-        MAPDL errors from ``/REPLOT`` (for example, nothing plotted yet) are
-        raised unless ``ignore_errors`` is set; the caller decides whether a
-        missing PNG is an error or a warning.
-        """
+        """Redraw the last display on the ``PNG`` device and return MAPDL's output."""
         previous_device = self.file_type_for_plots
         try:
             self.show("PNG")
