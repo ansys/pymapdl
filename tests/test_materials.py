@@ -30,7 +30,10 @@ import pytest
 from ansys.mapdl.core._materials import _parse_cdwrite_mat
 from conftest import requires
 
-MP_ONLY_CDB = Path(__file__).parent / "test_files" / "materials_mp_only.cdb"
+TEST_FILES = Path(__file__).parent / "test_files"
+MP_ONLY_CDB = TEST_FILES / "materials_mp_only.cdb"
+LEGACY_TABLES_CDB = TEST_FILES / "materials_legacy_tables.cdb"
+BISO2_CDB = TEST_FILES / "materials_biso2.cdb"
 
 
 @pytest.fixture(scope="module")
@@ -84,16 +87,130 @@ def test_snapshot_is_immutable(parsed):
         ex.temperatures[0] = 0.0
 
 
+@pytest.fixture(scope="module")
+def legacy():
+    return _parse_cdwrite_mat(LEGACY_TABLES_CDB.read_text())
+
+
+def test_biso_at_two_temperatures():
+    material = _parse_cdwrite_mat(BISO2_CDB.read_text())[1]
+    (biso,) = material.tables
+    assert (biso.label, biso.tbopt) == ("BISO", "")
+    np.testing.assert_array_equal(biso.temperatures, [20.0, 200.0])
+    np.testing.assert_array_equal(biso.constants[0], [250e6, 2e9])
+    np.testing.assert_array_equal(biso.constants[1], [200e6, 1.5e9])
+    assert biso.points == []
+    assert biso.fields == {}
+    np.testing.assert_array_equal(material.properties["EX"].values, [2.1e11, 1.9e11])
+
+
+def test_miso_points_per_temperature(legacy):
+    (miso,) = legacy[1].tables
+    assert (miso.label, miso.tbopt, miso.constants) == ("MISO", "", [])
+    np.testing.assert_array_equal(miso.temperatures, [20.0, 200.0])
+    np.testing.assert_array_equal(
+        miso.points[0], [[1.25e-3, 250e6], [1e-2, 300e6], [5e-2, 350e6]]
+    )
+    np.testing.assert_array_equal(
+        miso.points[1], [[1e-3, 200e6], [1e-2, 240e6], [5e-2, 280e6]]
+    )
+    assert sorted(legacy[1].properties) == ["DENS", "EX", "PRXY"]
+
+
+def test_anel_21_constants_in_order(legacy):
+    (anel,) = legacy[3].tables
+    assert (anel.label, anel.tbopt, anel.points) == ("ANEL", "0", [])
+    np.testing.assert_array_equal(anel.temperatures, [20.0])
+    np.testing.assert_array_equal(
+        anel.constants[0],
+        [1e11, 2e10, 3e10, 4e10, 5e10, 6e10, 1.1e11, 2.1e10, 3.1e10, 4.1e10, 5.1e10]
+        + [1.2e11, 2.2e10, 3.2e10, 4.2e10, 1.3e11, 2.3e10, 3.3e10, 1.4e11, 2.4e10]
+        + [1.5e11],
+    )
+
+
+def test_constants_land_by_start_index_across_gaps():
+    text = LEGACY_TABLES_CDB.read_text()
+    gap = "TBDAT,      4, 4.000000000E+10, 5.000000000E+10, 6.000000000E+10\n"
+    anel = _parse_cdwrite_mat(text.replace(gap, ""))[3].tables[0]
+    assert len(anel.constants[0]) == 21
+    np.testing.assert_array_equal(
+        anel.constants[0][:7], [1e11, 2e10, 3e10, 0, 0, 0, 1.1e11]
+    )
+
+
+def test_material_with_only_a_data_table(legacy):
+    biso = legacy[4].tables[0]
+    np.testing.assert_array_equal(biso.temperatures, [0.0])
+    np.testing.assert_array_equal(biso.constants[0], [250e6, 2e9])
+    assert list(legacy[4].properties) == ["EX"]
+    assert legacy[2].tables == []
+
+
+def test_two_data_tables_on_one_material():
+    text = LEGACY_TABLES_CDB.read_text().replace("TB,BISO,       4", "TB,BISO,       1")
+    tables = _parse_cdwrite_mat(text)[1].tables
+    assert [table.label for table in tables] == ["MISO", "BISO"]
+    np.testing.assert_array_equal(tables[1].constants[0], [250e6, 2e9])
+
+
+def test_data_table_without_tbtemp_is_at_zero():
+    text = BISO2_CDB.read_text().replace(
+        "TB,BISO,       1,   2", "TB,BISO,       1,   1"
+    )
+    text = text.split("TBTEM,  200.000000")[0].replace(
+        "TBTEM,  20.0000000    ,   1\n", ""
+    )
+    (biso,) = _parse_cdwrite_mat(text + "/GO\n")[1].tables
+    np.testing.assert_array_equal(biso.temperatures, [0.0])
+    np.testing.assert_array_equal(biso.constants[0], [250e6, 2e9])
+
+
+def test_temperature_count_mismatch_raises():
+    text = BISO2_CDB.read_text().replace(
+        "TB,BISO,       1,   2", "TB,BISO,       1,   3"
+    )
+    with pytest.raises(ValueError, match=r"BISO.*Material 1.*3 temperatures.*has 2"):
+        _parse_cdwrite_mat(text)
+
+
+def test_data_table_is_immutable(legacy):
+    miso = legacy[1].tables[0]
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        miso.label = "BISO"
+    with pytest.raises(ValueError, match="read-only"):
+        miso.points[0][0, 0] = 0.0
+    with pytest.raises(ValueError, match="read-only"):
+        miso.temperatures[0] = 0.0
+    with pytest.raises(ValueError, match="read-only"):
+        legacy[3].tables[0].constants[0][0] = 0.0
+
+
 @pytest.mark.parametrize(
     "line",
     [
-        "TB,BISO,       4,   1",
-        "TBTEM,  0.00000000    ,   1",
-        "TBDAT,      1,  250000000.    , 2.000000000E+09,",
+        "TBFIELD,Temps,20.000000",
+        "TBDATA,1,2.100000e+11,3.000000e-01",
+        "TBPT,DEFI,0.000000e+00,1.000000e+08",
+        "TBIN,NORM,1",
         "/SOLU",
     ],
 )
 def test_unknown_line_raises_quoting_it(line):
+    text = LEGACY_TABLES_CDB.read_text().replace("/GO", f"{line}\n/GO")
+    with pytest.raises(ValueError, match=re.escape(line)):
+        _parse_cdwrite_mat(text)
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "TBTEM,  0.00000000    ,   1",
+        "TBDAT,      1,  250000000.    , 2.000000000E+09,",
+        "TBPT,, 1.000000000E-03,  200000000.",
+    ],
+)
+def test_data_table_line_without_tb_header_raises(line):
     text = MP_ONLY_CDB.read_text().replace("/GO", f"{line}\n/GO")
     with pytest.raises(ValueError, match=re.escape(line)):
         _parse_cdwrite_mat(text)
@@ -153,3 +270,37 @@ def test_materials_leaves_no_file_behind(mapdl, steel):
 @requires("grpc")
 def test_materials_empty_session(mapdl, cleared):
     assert len(mapdl.materials) == 0
+
+
+@requires("grpc")
+def test_materials_legacy_data_tables_round_trip(mapdl, cleared):
+    mapdl.tb("BISO", 1, 2)
+    mapdl.tbtemp(20)
+    mapdl.tbdata(1, 250e6, 2e9)
+    mapdl.tbtemp(200)
+    mapdl.tbdata(1, 200e6, 1.5e9)
+    mapdl.tb("MISO", 2, 2, 3)
+    mapdl.tbtemp(20)
+    mapdl.tbpt("DEFI", 0.00125, 250e6)
+    mapdl.tbpt("DEFI", 0.01, 300e6)
+    mapdl.tbpt("DEFI", 0.05, 350e6)
+    mapdl.tbtemp(200)
+    mapdl.tbpt("DEFI", 0.001, 200e6)
+    mapdl.tbpt("DEFI", 0.01, 240e6)
+    mapdl.tbpt("DEFI", 0.05, 280e6)
+
+    materials = mapdl.materials
+    (biso,) = materials[1].tables
+    assert biso.label == "BISO"
+    np.testing.assert_array_equal(biso.temperatures, [20.0, 200.0])
+    np.testing.assert_array_equal(biso.constants[0], [250e6, 2e9])
+    np.testing.assert_array_equal(biso.constants[1], [200e6, 1.5e9])
+    (miso,) = materials[2].tables
+    assert miso.label == "MISO"
+    np.testing.assert_array_equal(miso.temperatures, [20.0, 200.0])
+    np.testing.assert_array_equal(
+        miso.points[0], [[0.00125, 250e6], [0.01, 300e6], [0.05, 350e6]]
+    )
+    np.testing.assert_array_equal(
+        miso.points[1], [[0.001, 200e6], [0.01, 240e6], [0.05, 280e6]]
+    )
