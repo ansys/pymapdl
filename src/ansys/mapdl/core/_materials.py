@@ -24,11 +24,16 @@
 
 from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
-from typing import Any, Dict, List, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
 import numpy as np
 
+from ansys.mapdl.core import _HAS_PANDAS
+from ansys.mapdl.core.commands import MSG_NOT_PANDAS
 from ansys.mapdl.core.misc import random_string
+
+if TYPE_CHECKING:
+    import pandas
 
 
 def _read_only(values: List[float]) -> np.ndarray:
@@ -171,6 +176,43 @@ class MaterialsSnapshot(Mapping[int, Material]):
 
     def __repr__(self) -> str:
         return f"MaterialsSnapshot(ids={list(self._materials)})"
+
+    def to_dataframe(self) -> "pandas.DataFrame":
+        """Return the Material Properties as a long-format pandas DataFrame.
+
+        The DataFrame has one row per temperature point of every Material
+        Property. Data Tables are not included because their shapes vary.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Columns ``material``, ``label``, ``temperature`` and ``value``.
+
+        Raises
+        ------
+        ModuleNotFoundError
+            If pandas is not installed.
+
+        Examples
+        --------
+        >>> df = mapdl.materials.to_dataframe()
+        >>> df[df.label == "EX"].pivot(
+        ...     index="temperature", columns="material", values="value"
+        ... )
+        """
+        if not _HAS_PANDAS:
+            raise ModuleNotFoundError(MSG_NOT_PANDAS)
+        import pandas
+
+        rows = [
+            (material.id, label, temperature, value)
+            for material in self._materials.values()
+            for label, table in material.properties.items()
+            for temperature, value in zip(table.temperatures, table.values)
+        ]
+        return pandas.DataFrame(
+            rows, columns=["material", "label", "temperature", "value"]
+        )
 
 
 def _read_materials(mapdl: Any) -> MaterialsSnapshot:
