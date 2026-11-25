@@ -24,6 +24,7 @@
 
 from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
 import numpy as np
@@ -35,6 +36,8 @@ from ansys.mapdl.core.misc import random_string
 
 if TYPE_CHECKING:
     import pandas
+
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
 
 def _read_only(values: Sequence[Any]) -> np.ndarray:
@@ -71,7 +74,7 @@ class PropertyTable:
 class DataTable:
     """Raw content of one Data Table, without interpretation.
 
-    A Data Table fills either ``constants`` or ``points``; the other list is
+    A Data Table fills either ``constants`` or ``points``; the other tuple is
     empty.
 
     Parameters
@@ -83,17 +86,18 @@ class DataTable:
     temperatures : numpy.ndarray
         Read-only temperatures. A table defined without ``TBTEMP`` is at
         temperature ``0.0``.
-    constants : list[numpy.ndarray]
-        Read-only constants, one array for each temperature.
-    points : list[numpy.ndarray]
+    constants : tuple[numpy.ndarray, ...]
+        Read-only constants, one array for each temperature. A constant slot
+        that MAPDL does not write is ``nan``.
+    points : tuple[numpy.ndarray, ...]
         Read-only ``(n, 2)`` points, one array for each temperature.
-    fields : dict[str, numpy.ndarray]
+    fields : Mapping[str, numpy.ndarray]
         Read-only field values other than temperature, aligned with
         ``temperatures``. Empty for Data Tables without fields.
-    options : dict[str, tuple[str, ...]]
-        Raw ``TBIN`` arguments keyed by option name, such as
-        ``{"NORM": ("1",)}``. A repeated option appends its arguments in file
-        order. Empty for legacy-format Data Tables.
+    options : Mapping[str, tuple[tuple[str, ...], ...]]
+        Raw ``TBIN`` arguments keyed by option name, one inner tuple for each
+        ``TBIN`` line of that option in file order, such as
+        ``{"NORM": (("1",),)}``. Empty for legacy-format Data Tables.
 
     Examples
     --------
@@ -105,10 +109,10 @@ class DataTable:
     label: str
     tbopt: str
     temperatures: np.ndarray
-    constants: List[np.ndarray]
-    points: List[np.ndarray]
-    fields: Dict[str, np.ndarray]
-    options: Dict[str, Tuple[str, ...]]
+    constants: Tuple[np.ndarray, ...]
+    points: Tuple[np.ndarray, ...]
+    fields: Mapping[str, np.ndarray]
+    options: Mapping[str, Tuple[Tuple[str, ...], ...]]
 
 
 @dataclass(frozen=True)
@@ -119,9 +123,10 @@ class Material:
     ----------
     id : int
         Material ID.
-    properties : dict[str, PropertyTable]
-        Material Properties keyed by their ``MP`` label, such as ``"EX"``.
-    tables : list[DataTable]
+    properties : Mapping[str, PropertyTable]
+        Read-only Material Properties keyed by their ``MP`` label, such as
+        ``"EX"``.
+    tables : tuple[DataTable, ...]
         Data Tables in the order MAPDL writes them.
 
     Examples
@@ -132,8 +137,8 @@ class Material:
     """
 
     id: int
-    properties: Dict[str, PropertyTable]
-    tables: List[DataTable]
+    properties: Mapping[str, PropertyTable]
+    tables: Tuple[DataTable, ...]
 
 
 _IGNORED_COMMANDS = {"", "/COM", "/NOP", "/GO"}
@@ -142,16 +147,44 @@ _IGNORED_COMMANDS = {"", "/COM", "/NOP", "/GO"}
 class _DataTableBuilder:
     """Collect the lines of one Data Table, in either dialect."""
 
-    def __init__(self, fields: List[str]) -> None:
-        self.label = fields[1]
-        self.mat_id = int(fields[2])
-        self.ntemp = int(fields[3])
-        self.tbopt = fields[5] if len(fields) > 5 else ""
+    def __init__(self, args: List[str]) -> None:
+        self.label = args[1]
+        self.mat_id = int(args[2])
+        self.ntemp = int(args[3])
+        self.tbopt = args[5] if len(args) > 5 else ""
         self.temperatures: List[float] = []
         self.constants: List[Dict[int, float]] = []
         self.points: List[List[Tuple[float, float]]] = []
         self.field_points: List[Dict[str, float]] = []
-        self.options: Dict[str, Tuple[str, ...]] = {}
+        self.options: Dict[str, List[Tuple[str, ...]]] = {}
+
+    def start_point(self, temperature: float) -> None:
+        self.temperatures.append(temperature)
+        self.constants.append({})
+        self.points.append([])
+
+    def _current_point(self) -> None:
+        if not self.temperatures:
+            self.start_point(0.0)
+
+    def add_field(self, name: str, value: float) -> None:
+        if not self.field_points or name in self.field_points[-1]:
+            self.start_point(0.0)
+            self.field_points.append({})
+        self.field_points[-1][name] = value
+        if name.upper() == "TEMPS":
+            self.temperatures[-1] = value
+
+    def add_constants(self, start: int, values: List[float]) -> None:
+        self._current_point()
+        self.constants[-1].update(enumerate(values, start - 1))
+
+    def add_point(self, x: float, y: float) -> None:
+        self._current_point()
+        self.points[-1].append((x, y))
+
+    def add_option(self, name: str, args: Tuple[str, ...]) -> None:
+        self.options.setdefault(name, []).append(args)
 
     def build(self) -> DataTable:
         if len(self.temperatures) != self.ntemp:
@@ -166,7 +199,7 @@ class _DataTableBuilder:
         )
         constants = []
         for slots in self.constants:
-            values = np.zeros(max(slots, default=-1) + 1)
+            values = np.full(max(slots, default=-1) + 1, np.nan)
             values[list(slots)] = list(slots.values())
             constants.append(_read_only(values))
         points = [_read_only(rows).reshape(-1, 2) for rows in self.points]
@@ -174,13 +207,17 @@ class _DataTableBuilder:
             self.label,
             self.tbopt,
             _read_only(self.temperatures),
-            constants if any(self.constants) else [],
-            points if any(self.points) else [],
-            {
-                name: _read_only([row[name] for row in self.field_points])
-                for name in names
-            },
-            self.options,
+            tuple(constants) if any(self.constants) else (),
+            tuple(points) if any(self.points) else (),
+            MappingProxyType(
+                {
+                    name: _read_only([row[name] for row in self.field_points])
+                    for name in names
+                }
+            ),
+            MappingProxyType(
+                {name: tuple(lines) for name, lines in self.options.items()}
+            ),
         )
 
 
@@ -203,86 +240,55 @@ class _CdwriteMatParser:
         }
 
     def feed(self, line: str) -> None:
-        fields = [field.strip() for field in line.split(",")]
-        command = fields[0][:4].upper()
+        args = [arg.strip() for arg in line.split(",")]
+        command = args[0][:4].upper()
         if command in _IGNORED_COMMANDS:
             return
         handler = self._handlers.get(command)
-        if handler is None or not handler(fields):
+        if handler is None:
             raise ValueError(f"Unknown line in CDWRITE,MAT output: {line!r}")
+        try:
+            handler(args)
+        except (ValueError, IndexError) as err:
+            raise ValueError(f"Cannot parse CDWRITE,MAT line {line!r}: {err}") from err
 
-    def _mptemp(self, fields: List[str]) -> bool:
-        start = int(fields[3])
+    def _table(self) -> _DataTableBuilder:
+        if not self._tables:
+            raise ValueError("Data Table line without a preceding TB header.")
+        return self._tables[-1]
+
+    def _mptemp(self, args: List[str]) -> None:
+        start = int(args[3])
         if start == 1:
             self._temperatures = []
-        self._temperatures[start - 1 :] = [float(f) for f in fields[4:] if f]
-        return True
+        self._temperatures[start - 1 :] = [float(a) for a in args[4:] if a]
 
-    def _mpdata(self, fields: List[str]) -> bool:
-        table = self._properties.setdefault((int(fields[4]), fields[3].upper()), {})
-        values = [float(f) for f in fields[6:] if f]
-        for slot, value in enumerate(values, int(fields[5]) - 1):
+    def _mpdata(self, args: List[str]) -> None:
+        table = self._properties.setdefault((int(args[4]), args[3].upper()), {})
+        values = [float(a) for a in args[6:] if a]
+        for slot, value in enumerate(values, int(args[5]) - 1):
             table[slot] = (self._temperatures[slot], value)
-        return True
 
-    def _tb(self, fields: List[str]) -> bool:
-        self._tables.append(_DataTableBuilder(fields))
-        return True
+    def _tb(self, args: List[str]) -> None:
+        self._tables.append(_DataTableBuilder(args))
 
-    def _current_table(self) -> _DataTableBuilder | None:
-        if not self._tables:
-            return None
-        table = self._tables[-1]
-        if not table.temperatures:
-            self._start_temperature(table, 0.0)
-        return table
+    def _tbtemp(self, args: List[str]) -> None:
+        self._table().start_point(float(args[1]))
 
-    @staticmethod
-    def _start_temperature(table: _DataTableBuilder, temperature: float) -> None:
-        table.temperatures.append(temperature)
-        table.constants.append({})
-        table.points.append([])
+    def _tbfield(self, args: List[str]) -> None:
+        self._table().add_field(args[1], float(args[2]))
 
-    def _tbtemp(self, fields: List[str]) -> bool:
-        if not self._tables:
-            return False
-        self._start_temperature(self._tables[-1], float(fields[1]))
-        return True
+    def _tbdata(self, args: List[str]) -> None:
+        self._table().add_constants(int(args[1]), [float(a) for a in args[2:] if a])
 
-    def _tbfield(self, fields: List[str]) -> bool:
-        if not self._tables:
-            return False
-        table = self._tables[-1]
-        name, value = fields[1], float(fields[2])
-        if not table.field_points or name in table.field_points[-1]:
-            self._start_temperature(table, 0.0)
-            table.field_points.append({})
-        table.field_points[-1][name] = value
-        if name.upper() == "TEMPS":
-            table.temperatures[-1] = value
-        return True
+    def _tbpt(self, args: List[str]) -> None:
+        table = self._table()
+        if args[1].upper() not in ("", "DEFI"):
+            raise ValueError(f"Unsupported TBPT option {args[1]!r}.")
+        table.add_point(float(args[2]), float(args[3]))
 
-    def _tbdata(self, fields: List[str]) -> bool:
-        table = self._current_table()
-        if table is None:
-            return False
-        values = [float(f) for f in fields[2:] if f]
-        table.constants[-1].update(enumerate(values, int(fields[1]) - 1))
-        return True
-
-    def _tbpt(self, fields: List[str]) -> bool:
-        table = self._current_table()
-        if table is None or fields[1].upper() not in ("", "DEFI"):
-            return False
-        table.points[-1].append((float(fields[2]), float(fields[3])))
-        return True
-
-    def _tbin(self, fields: List[str]) -> bool:
-        if not self._tables:
-            return False
-        options = self._tables[-1].options
-        options[fields[1]] = options.get(fields[1], ()) + tuple(fields[2:])
-        return True
+    def _tbin(self, args: List[str]) -> None:
+        self._table().add_option(args[1], tuple(args[2:]))
 
     def materials(self) -> Dict[int, Material]:
         properties: Dict[int, Dict[str, PropertyTable]] = {}
@@ -295,7 +301,11 @@ class _CdwriteMatParser:
         for builder in self._tables:
             tables.setdefault(builder.mat_id, []).append(builder.build())
         return {
-            mat_id: Material(mat_id, properties.get(mat_id, {}), tables.get(mat_id, []))
+            mat_id: Material(
+                mat_id,
+                MappingProxyType(properties.get(mat_id, {})),
+                tuple(tables.get(mat_id, ())),
+            )
             for mat_id in sorted(properties.keys() | tables.keys())
         }
 
@@ -383,8 +393,13 @@ class MaterialsSnapshot(Mapping[int, Material]):
         )
 
 
-def _read_materials(mapdl: Any) -> MaterialsSnapshot:
+def _read_materials(mapdl: "MapdlGrpc") -> MaterialsSnapshot:
     """Write ``CDWRITE,MAT`` to a unique server file, read it, and delete it."""
+    if not hasattr(mapdl, "_download_as_raw"):
+        raise MapdlRuntimeError(
+            "`mapdl.materials` needs a gRPC session to read the CDWRITE,MAT "
+            "file back. It is not available in this session type."
+        )
     if mapdl._store_commands:
         raise MapdlRuntimeError(
             "Cannot use `mapdl.materials` to retrieve materials when in "

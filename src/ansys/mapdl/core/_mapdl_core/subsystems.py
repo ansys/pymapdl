@@ -44,9 +44,9 @@ from ansys.mapdl.core.misc import (
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.reader import Archive
 
-    from ansys.mapdl.core._materials import MaterialsSnapshot
     from ansys.mapdl.core.component import ComponentManager
     from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
+    from ansys.mapdl.core.materials import MaterialsSnapshot
     from ansys.mapdl.core.parameters import Parameters
     from ansys.mapdl.core.plugin import ansPlugin
     from ansys.mapdl.core.solution import Solution
@@ -210,13 +210,14 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
 
         Returns
         -------
-        :class:`MaterialsSnapshot <ansys.mapdl.core._materials.MaterialsSnapshot>`
+        :class:`MaterialsSnapshot <ansys.mapdl.core.materials.MaterialsSnapshot>`
             Materials keyed by material ID.
 
         Raises
         ------
         MapdlRuntimeError
-            When accessed inside ``mapdl.non_interactive``.
+            When accessed inside ``mapdl.non_interactive``, or on a session
+            that is not a gRPC session, such as a console session.
 
         Examples
         --------
