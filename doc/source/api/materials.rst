@@ -8,7 +8,7 @@ Materials
 .. autosummary::
    :toctree: _autosummary
 
-   _materials.MaterialsSnapshot
-   _materials.Material
-   _materials.PropertyTable
-   _materials.DataTable
+   materials.MaterialsSnapshot
+   materials.Material
+   materials.PropertyTable
+   materials.DataTable
