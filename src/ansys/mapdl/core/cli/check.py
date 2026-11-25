@@ -34,7 +34,6 @@ from ansys.mapdl.core.cli.constants import (
 )
 from ansys.mapdl.core.cli.helpers import connect_to_instance
 
-# Width of the key column of the human-readable report.
 _KEY_WIDTH = 24
 
 
@@ -163,11 +162,6 @@ def _row(key: str, value: Any, indent: int = 2) -> str:
         The formatted line.
     """
     return f"{' ' * indent}{key.ljust(_KEY_WIDTH)}{value}"
-
-
-# ---------------------------------------------------------------------------
-# Click wrapper
-# ---------------------------------------------------------------------------
 
 
 @click.command(

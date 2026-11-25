@@ -165,28 +165,6 @@ class DbElems:
         self._itelm = result.inum
         return self._itelm
 
-    ###########################################################################
-    # broken on server-side as of 2022R2 (server v0.5.1)
-    # def next_defined(self):
-    #     """get the number of the next defined elem
-    #     You first have to call first)_
-
-    #     Returns
-    #     -------
-    #     next_defined : int
-    #     The next defined elem number
-    #     = 0 - no more elems
-    #     """
-
-    #     if self._itelm == -1:
-    #         raise TypeError("``elems.next`` you first have to call first function")
-
-    #     request = mapdl_db_pb2.ElmRequest(next=self._itelm)
-    #     result = self._db._stub.ElmNextDefined(request)
-    #     self._itelm = result.inum
-    #     return self._itelm
-    ###########################################################################
-
     @check_mapdl_db_is_alive
     def info(self, ielm, ikey):
         """
@@ -392,9 +370,9 @@ class DbElems:
         if len(elmdat) != 10:
             raise ValueError("`elmdat` must be length 10")
         request = mapdl_db_pb2.putelmRequest(
-            ielem=ielm,  # int32
-            elmdat=elmdat,  # repeated int32
-            nnod=len(nodes),  # int32
-            nodes=nodes,  # repeated int32
+            ielem=ielm,
+            elmdat=elmdat,
+            nnod=len(nodes),
+            nodes=nodes,
         )
         self._db._stub.putElm(request)

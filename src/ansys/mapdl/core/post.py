@@ -137,7 +137,6 @@ class PostProcessing:
         info = "PyMAPDL PostProcessing Instance\n"
         info += f"\tActive Result File:    {self.filename}\n"
 
-        # If there is no result file, this fails.
         try:
             nsets = int(self.nsets)
         except MapdlRuntimeError as error:
@@ -340,7 +339,6 @@ class PostProcessing:
         Please reference your Ansys help manual ``*VGET`` command tables
         for all the available ``*VGET`` values.
         """
-        # using _ndof_rst instead of get_array because it is wrapped to check the rst.
         values = self._ndof_rst(item=item, it1num=comp)
         mask = self.selected_nodes
         try:
@@ -645,15 +643,13 @@ class PostProcessing:
             all_scalars = np.zeros(mask.size)
             all_scalars[mask] = scalars
 
-            # we can directly the node numbers as the array of selected
-            # nodes will be a mask sized to the highest node index - 1
-            surf = self._mapdl.mesh._surf  # problem here
+            surf = self._mapdl.mesh._surf
             node_id = surf["ansys_node_num"].astype(np.int32) - 1
             all_scalars = all_scalars[node_id]
 
             meshes = [
                 {
-                    "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
+                    "mesh": surf.copy(deep=False),
                     "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
                     "scalars": all_scalars,
                 }
@@ -684,64 +680,26 @@ class PostProcessing:
             # Select nodes to avoid segfault
             self._mapdl.nsle("s", "all")
 
-            # Getting mesh
             surf = self._mapdl.mesh._surf
 
-            # as ``disp`` returns the result for all nodes/elems, we need all node/elem numbers
-            # and to index to the output node numbers
             if hasattr(self._mapdl.mesh, "enum_all"):
                 enum = self._mapdl.mesh.enum_all
             else:
                 enum = self._all_enum
 
-            #######################################################################
-            # Bool operations
-            # ===============
-            # I'm going to explain this clearly because it can be confusing for the
-            # future developers (me).
-            # This explanation is based in scalars (`element_values`) NOT having the
-            # full elements (selected and not selected) size.
-            #
             # First, it's possible that there are duplicated element numbers,
             # in the surf object returned by Pyvista.
             # Therefore we need to get the unique values and a reverse index, to
             # later convert the MAPDL values to Pyvista values.
             uni, ridx = np.unique(surf["ansys_elem_num"], return_inverse=True)
-            # which means that, uni is the id of mapdl elements in the polydata
-            # object. These elements does not need to be in order, and there can be
-            # duplicated!
-            # Hence:
-            # uni[ridx] = surf["ansys_elem_num"]
-            #
-            # Let's notice that:
-            # * enum[self.selected_elements] is mapdl selected elements ids in MAPDL notation.
-            #
-            # Theoretical approach
-            # --------------------
-            # The theoretical approach will be using an intermediate array of the
-            # size of the MAPDL total number of elements (we do not care about selected).
-            #
             values = np.zeros(enum.shape)
-            #
-            # Then assign the MAPDL values for the selected element (scalars)
-            #
             values[self.selected_elements] = scalars
-            #
-            # Because values are in order, but with python notation, then we can do:
-            #
-            surf_values = values[
-                uni - 1
-            ]  # -1 to set MAPDL element indexing to python indexing
-            #
-            # Then to account for the original Pyvista object:
-            #
+            surf_values = values[uni - 1]
             surf_values = surf_values[ridx]
-            #
-            #######################################################################
 
             meshes = [
                 {
-                    "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
+                    "mesh": surf.copy(deep=False),
                     "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
                     "scalars": surf_values,
                 }
@@ -766,7 +724,6 @@ class PostProcessing:
             self._mapdl.allsel()
             enum = self._mapdl.get_array("ELEM", item1="ELIST")
 
-            # rerun if encountered weird edge case of negative first index.
             if enum[0] == -1:
                 enum = self._mapdl.get_array("ELEM", item1="ELIST")
 

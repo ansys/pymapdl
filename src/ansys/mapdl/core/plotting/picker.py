@@ -44,7 +44,6 @@ def _format_picked_entities(picked_entities) -> str:
     if not picked_entities:
         return ""
 
-    # Reverse picked order, exclude the brackets, and limit the length.
     text = str(picked_entities[::-1])[1:-1]
     if len(text) > _MAX_PICKED_TEXT_LENGTH:
         text = text[:_MAX_PICKED_TEXT_LENGTH]
@@ -86,7 +85,7 @@ class MapdlPicker:
 
     def pick(self, entity, pl, type_, previous_picked_entities, **kwargs):
         """Show a plot and get the selected entity."""
-        _debug = kwargs.pop("_debug", False)  # for testing purposes
+        _debug = kwargs.pop("_debug", False)
         previous_picked_entities = set(previous_picked_entities)
 
         picking_using_left_clicking = False
@@ -95,7 +94,6 @@ class MapdlPicker:
         picked_ids: list = []
         entity = entity.lower()
 
-        # adding selection inversor
         pl.scene._inver_mouse_click_selection = False
 
         def gen_text(picked_entities=None):
@@ -106,14 +104,12 @@ class MapdlPicker:
 
         def callback_points(mesh, id_):
             point = mesh.points[id_]
-            # This only returns one node. Fine for now.
             node_id = getattr(self.queries, entity)(point[0], point[1], point[2])
 
             adding = not pl.scene._inver_mouse_click_selection
             _update_membership(picked_entities, node_id, adding)
             _update_membership(picked_ids, id_, adding)
 
-            # remove title and update text
             pl.scene.remove_actor("title")
             pl.scene._picking_text = pl.scene.add_text(
                 gen_text(picked_entities),
@@ -126,7 +122,6 @@ class MapdlPicker:
         def callback_mesh(mesh):
             mesh_id = self._entity_number(mesh)
 
-            # Getting meshes with that entity_num.
             meshes = [
                 each
                 for each in pl.get_meshes_from_plotter()
@@ -138,7 +133,6 @@ class MapdlPicker:
             else:
                 self._remove_picked_mesh(pl, picked_entities, mesh_id, meshes)
 
-            # Removing only-first time actors
             pl.scene.remove_actor("title")
             pl.scene.remove_actor("_point_picking_message")
 
@@ -156,7 +150,6 @@ class MapdlPicker:
                 pl, callback_points, gen_text(), picking_using_left_clicking, kwargs
             )
         else:
-            # Picking meshes
             pl.scene.enable_mesh_picking(
                 callback=callback_mesh,
                 use_mesh=True,
@@ -167,7 +160,6 @@ class MapdlPicker:
             )
 
         def callback_u():
-            # inverting bool
             pl.scene._inver_mouse_click_selection = (
                 not pl.scene._inver_mouse_click_selection
             )
@@ -186,7 +178,6 @@ class MapdlPicker:
         else:
             _debug(pl)
 
-        # removing duplicates (although there should be none)
         return list(
             _combine_selection(type_, previous_picked_entities, set(picked_entities))
         )

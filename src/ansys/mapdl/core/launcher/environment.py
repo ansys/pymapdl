@@ -66,7 +66,6 @@ def is_wsl() -> bool:
     if os.name != "posix":
         return False
 
-    # Check WSL-specific environment variables
     return bool(os.environ.get("WSL_DISTRO_NAME") or os.environ.get("WSL_INTEROP"))
 
 
@@ -100,7 +99,6 @@ def is_ubuntu() -> bool:
     if os.name != "posix":
         return False
 
-    # Check via lsb_release module
     try:
         import lsb_release
 
@@ -109,7 +107,6 @@ def is_ubuntu() -> bool:
     except (ImportError, AttributeError):
         pass
 
-    # Check platform string
     platform_str = platform.platform().lower()
     return "ubuntu" in platform_str
 
@@ -160,27 +157,18 @@ def prepare_environment(config: LaunchConfig) -> EnvironmentConfig:
       environment; user-provided keys override existing system values.
     """
     if config.env_vars:
-        # replace_env_vars mode: user takes full control of the environment.
-        # System env vars are NOT inherited — the caller must inject any
-        # required MPI, license, or PATH variables manually.
         LOG.debug("Using replace-mode environment variables (replace_all=True)")
         return EnvironmentConfig(variables=dict(config.env_vars), replace_all=True)
 
-    # Start with system environment (covers both add_env_vars and default modes)
     env = os.environ.copy()
 
-    # Apply platform-specific settings
     if is_ubuntu():
         env["I_MPI_SHM_LMT"] = "shm"
         LOG.debug("Applied Ubuntu-specific MPI settings")
 
-    # Apply MAPDL-specific settings
     env["ANS_CMD_NODIAG"] = "TRUE"
 
     if config.add_env_vars:
-        # add_env_vars mode: overlay user-provided variables on top of the
-        # system environment.  Existing keys are overwritten; everything else
-        # is preserved (MPI paths, license servers, PATH, etc.).
         LOG.debug("Extending system environment with user-provided variables")
         env.update(config.add_env_vars)
 
@@ -191,7 +179,6 @@ def prepare_environment(config: LaunchConfig) -> EnvironmentConfig:
 
     is_mtls = config.transport_mode == TransportMode.MTLS
     if is_mtls:
-        # Prefer explicit certs_dir, then existing environment var, then cwd/certs
         if config.certs_dir:
             env["ANSYS_GRPC_CERTIFICATES"] = str(config.certs_dir)
         else:
@@ -244,7 +231,6 @@ def get_windows_host_ip() -> Optional[str]:
         return None
 
     try:
-        # Run ip route command to get default gateway
         result = subprocess.run(  # nosec B603, B607
             ["ip", "route"],
             capture_output=True,

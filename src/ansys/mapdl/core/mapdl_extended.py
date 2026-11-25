@@ -77,8 +77,6 @@ from ansys.mapdl.core.misc import (
 )
 from ansys.mapdl.core.plotting import GraphicsBackend
 
-# Names re-exported for backward compatibility with code that imported them
-# from this module before the responsibility split.
 __all__ = [
     "_MapdlCommandExtended",
     "_MapdlExtended",
@@ -137,8 +135,6 @@ class _MapdlCommandExtended(
         """
         super().__init__(*args, **kwargs)
         self._graphics_backend = GraphicsBackend.PYVISTA
-        # Number of currently nested ``*DO``/``*DOWHILE`` loops opened
-        # through :meth:`do` or :meth:`dowhile`.
         self._do_loop_level: int = 0
 
 

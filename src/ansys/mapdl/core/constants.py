@@ -30,7 +30,6 @@ from platformdirs import user_data_dir
 
 USER_DATA_PATH: str = user_data_dir(appname="ansys_mapdl_core", appauthor="Ansys")
 
-# In descending order.
 SUPPORTED_ANSYS_VERSIONS: Dict[int, str] = {
     271: "2027R1",
     261: "2026R1",
@@ -53,7 +52,7 @@ SUPPORTED_ANSYS_VERSIONS: Dict[int, str] = {
     191: "19.1",
 }
 
-DEFAULT_CHUNKSIZE: int = 256 * 1024  # 256 kB
+DEFAULT_CHUNKSIZE: int = 256 * 1024
 ANSYS_VALUE_TYPE: Dict[int, Optional[np.typing.DTypeLike]] = {
     0: None,  # UNKNOWN
     1: np.int32,  # INTEGER

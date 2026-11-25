@@ -36,11 +36,9 @@ if _HAS_ATC:
 
 
 def check_directory_exist(directory: str) -> Callable:
-    # Wrapping LISTING FUNCTIONS.
     def wrap_function(func):
         @wraps(func)
         def inner_wrapper(*args, **kwargs):
-            # Check if folder exists
             if not os.path.exists(directory):
                 os.makedirs(directory)
 
@@ -81,17 +79,11 @@ def _get_file_url(filename: str, directory: Optional[str] = None) -> str:
 
 @check_directory_exist(pymapdl.EXAMPLES_PATH)
 def _retrieve_file(filename: str, directory: Optional[str] = None) -> str:
-    # First check if file has already been downloaded (and, if applicable,
-    # already decompressed), so we avoid hitting the network again.
     local_path = os.path.join(pymapdl.EXAMPLES_PATH, os.path.basename(filename))
     local_path_no_zip = local_path.replace(".zip", "")
     if os.path.isfile(local_path_no_zip) or os.path.isdir(local_path_no_zip):
         return local_path_no_zip
 
-    # Delegate the actual download (with retries and caching) to the shared
-    # ``ansys-tools-common`` example downloader, storing files in PyMAPDL's
-    # own persistent cache directory instead of the library's default temp
-    # directory.
     local_path = download_manager.download_file(
         filename=os.path.basename(filename),
         directory=directory or "",

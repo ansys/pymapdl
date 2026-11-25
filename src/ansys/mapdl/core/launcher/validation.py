@@ -91,7 +91,6 @@ def validate_config(config: LaunchConfig) -> ValidationResult:
     """
     result = ValidationResult(valid=True)
 
-    # Run all validation checks
     _validate_version_mode_compatibility(config, result)
     _validate_resource_availability(config, result)
     _validate_port_availability(config, result)
@@ -144,7 +143,6 @@ def _validate_version_mode_compatibility(
     - gRPC requires version >= 211 (MAPDL 2021R1)
     """
     if config.mode == LaunchMode.GRPC and config.version:
-        # Check version is in the list of allowable versions
         ALLOWABLE_VERSION_INT = tuple(SUPPORTED_ANSYS_VERSIONS.keys())
         if config.version not in ALLOWABLE_VERSION_INT:
             result.add_error(
@@ -152,7 +150,7 @@ def _validate_version_mode_compatibility(
                 f"{list(ALLOWABLE_VERSION_INT)}. "
                 f"Current version: {config.version}."
             )
-            return  # No need to check further
+            return
 
         if config.version < 211:
             result.add_error(
@@ -206,20 +204,16 @@ def _validate_resource_availability(
     - Soft limits apply to RAM
     """
     if not config.start_instance:
-        # No need to check resources if not starting instance
         return
 
-    # Check CPU availability
     try:
         available_cpus = psutil.cpu_count(logical=False) or psutil.cpu_count() or 1
 
-        # Hard limit: error if excessively high (> 2x available)
         if config.nproc > available_cpus * 2:
             result.add_error(
                 f"Requested {config.nproc} processors but only {available_cpus} "
                 f"physical CPUs available. This is excessive and will likely fail."
             )
-        # Soft limit: warn if requesting more than available
         elif config.nproc > available_cpus:
             result.add_warning(
                 f"Requested {config.nproc} processors but only {available_cpus} "
@@ -228,7 +222,6 @@ def _validate_resource_availability(
     except Exception as e:
         LOG.debug(f"Could not check CPU availability: {e}")
 
-    # Check RAM availability
     if config.ram:
         try:
             available_ram_mb = psutil.virtual_memory().available // (1024**2)
@@ -285,11 +278,8 @@ def _validate_port_availability(config: LaunchConfig, result: ValidationResult) 
     - Exceptions from network module handled gracefully
     """
     if not config.start_instance:
-        # If not starting instance, port validation is less critical
-        # We'll still check if we can connect, but that's done elsewhere
         return
 
-    # Import here to avoid circular dependency
     from .network import check_port_status
 
     try:
@@ -298,8 +288,6 @@ def _validate_port_availability(config: LaunchConfig, result: ValidationResult) 
         if not status.available:
             if status.used_by_mapdl:
                 if config.override:
-                    # override=True means the caller wants to stop the existing
-                    # MAPDL process and start a fresh one — this is expected.
                     LOG.debug(
                         f"Port {config.port} is in use by MAPDL but override=True; "
                         f"the existing instance will be stopped before launch."
@@ -431,17 +419,13 @@ def _validate_file_permissions(config: LaunchConfig, result: ValidationResult) -
     - Checks parent directory if run_location doesn't exist yet
     """
     if not config.start_instance or config.launch_on_hpc:
-        # For HPC launches the executable resides on the remote cluster, so local
-        # file-system checks are not applicable.
         return
 
-    # Check exec_file exists and is executable
     if config.exec_file:
         if not os.path.isfile(config.exec_file):
             result.add_error(f"MAPDL executable not found: {config.exec_file}")
         else:
             if os.name == "posix":
-                # On POSIX, require executable permission bit
                 if not os.access(config.exec_file, os.X_OK):
                     result.add_error(
                         f"MAPDL executable is not executable: {config.exec_file}"
@@ -457,10 +441,8 @@ def _validate_file_permissions(config: LaunchConfig, result: ValidationResult) -
                         f"{config.exec_file}"
                     )
 
-    # Check run_location is writable
     if config.run_location:
         if not os.path.exists(config.run_location):
-            # Will be created, check parent directory
             parent = os.path.dirname(config.run_location)
             if parent and not os.access(parent, os.W_OK):
                 result.add_error(
@@ -518,7 +500,6 @@ def _validate_conflicting_options(
     - Offers suggestions for resolution in error messages
     - Checks IP conflicts separately for WSL, HPC, and local modes
     """
-    # start_instance + ip conflict (except on WSL or localhost)
     if config.start_instance and config.ip not in ("127.0.0.1", "localhost"):
         if not is_wsl():
             result.add_error(
@@ -527,14 +508,12 @@ def _validate_conflicting_options(
                 "or remove ip argument to launch locally."
             )
 
-    # HPC + ip conflict
     if config.launch_on_hpc and config.ip not in ("127.0.0.1", "localhost", ""):
         result.add_error(
             "Cannot specify custom 'ip' when launching on HPC. "
             "IP will be determined from HPC job allocation."
         )
 
-    # HPC + exec_file on Windows
     if config.launch_on_hpc and os.name == "nt":
         result.add_error(
             "HPC launch is not supported on Windows. "
@@ -590,19 +569,15 @@ def _validate_platform_compatibility(
     - Platform checks performed via os.name (nt=Windows, posix=Linux)
     - Specific error messages for each platform incompatibility
     """
-    # Console mode only on Linux
     if config.mode == LaunchMode.CONSOLE and os.name == "nt":
         result.add_error("Console mode is only supported on Linux.")
 
-    # Transport modes validation
     if config.transport_mode:
-        # UDS only on Linux
         from .models import TransportMode
 
         if config.transport_mode == TransportMode.UDS and os.name == "nt":
             result.add_error("Unix domain socket transport is only supported on Linux.")
 
-        # mTLS requires certificates
         if config.transport_mode == TransportMode.MTLS and not config.certs_dir:
             result.add_error(
                 "mTLS transport mode requires 'certs_dir' to be specified."

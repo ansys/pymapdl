@@ -25,7 +25,5 @@ from ansys.mapdl.core.examples.downloads import (
     download_cfx_mapping_example_data,
     download_manifold_example_data,
 )
-
-# Canonical Examples
 from ansys.mapdl.core.examples.examples import *
 from ansys.mapdl.core.examples.verif_files import vmfiles

@@ -39,11 +39,6 @@ except ImportError:
 from pyvista.core.utilities.helpers import wrap
 from pyvista.core.utilities.misc import _NoNewAttrMixin
 
-# I dont want to have to fix a very recent lower bound for pyvista.
-# Hence I'm copying what I need from there.
-# copied from pyvista source code:
-# https://github.com/pyvista/pyvista/blob/35396c2e7645a6b57ad30d25ac1893f2141aab95/pyvista/core/utilities/geometric_sources.py#L2254
-
 
 class ArrowSource(_vtk.vtkArrowSource, _NoNewAttrMixin):
     def __init__(
@@ -74,7 +69,6 @@ class ArrowSource(_vtk.vtkArrowSource, _NoNewAttrMixin):
         return wrap(self.GetOutput())
 
 
-# Symbols for constrains
 class DefaultSymbol:
     # Class to store the symbols because of https://github.com/ansys/pymapdl/issues/2872
     # To solve that issue, we avoid having to load the pyvista attributes when the module is load.

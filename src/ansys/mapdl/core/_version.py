@@ -35,6 +35,4 @@ from ansys.mapdl.core.constants import (  # noqa: F401  # pylint: disable=unused
     SUPPORTED_ANSYS_VERSIONS,
 )
 
-# Read from the pyproject.toml
-# major, minor, patch
 __version__: str = importlib_metadata.version("ansys-mapdl-core")

@@ -32,7 +32,6 @@ import click
 
 from ansys.mapdl.core.cli.constants import GLOBAL_UNSUPPORTED, SUPPORTED_ENVS
 
-# Directories inside a skill that are never installed.
 _EXCLUDED_DIRECTORIES = ("evals", "workspace")
 
 _INCOMPLETE_PLAN_ERROR = (
@@ -595,11 +594,6 @@ def _append_if_missing(
             fh.write("\n")
         fh.write(payload + "\n")
     return True
-
-
-# ---------------------------------------------------------------------------
-# Click wrappers
-# ---------------------------------------------------------------------------
 
 
 @click.group(short_help="Manage and install PyMAPDL AI skills.")

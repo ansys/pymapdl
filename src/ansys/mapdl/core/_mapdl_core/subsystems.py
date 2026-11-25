@@ -24,9 +24,6 @@
 """The services MAPDL core responsibility mixin."""
 
 import os
-
-# Subprocess is needed to start the backend. But
-# the input is controlled by the library. Excluding bandit check.
 import tempfile
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
@@ -416,7 +413,6 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
             from ansys.mapdl.core.reader import DPFResult
 
             if self._dpf_result is None:
-                # create a DPFResult object
                 self._dpf_result = DPFResult(
                     rst_file=None, mapdl=self, logger=self._log
                 )
@@ -427,7 +423,6 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
         from ansys.mapdl.reader.rst import Result
 
         if not self._local:
-            # download to temporary directory
             save_path = tempfile.mkdtemp(suffix=f"ansys_tmp_{random_string()}")
             result_path = self.download_result(save_path)
         else:
@@ -437,13 +432,12 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
                 if result._is_cyclic:
                     result_path = self._result_file
                 else:  # pragma: no cover
-                    # return the file with the last access time
                     filenames = [
                         self._distributed_result_file,
                         self._result_file,
                     ]
                     result_path = last_created(filenames)
-                    if result_path is None:  # if same return result_file
+                    if result_path is None:
                         result_path = self._result_file
 
             elif self._distributed_result_file:
@@ -508,7 +502,6 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
         from ansys.mapdl.reader import Archive
 
         if self._archive_cache is None:  # type: ignore[has-type]  # Set by _MapdlCore.__init__.
-            # write database to an archive file
             arch_filename = self.directory / "_tmp.cdb"
             nblock_filename = self.directory / "nblock.cdb"
 
@@ -529,14 +522,12 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
             grid = self._archive_cache._parse_vtk(additional_checking=True)
             self._archive_cache._grid = grid
 
-            # rare bug
             if grid is not None:
                 if grid.n_node != self._archive_cache.n_node:
                     self._archive_cache = Archive(
                         arch_filename, parse_vtk=True, name="Mesh"
                     )
 
-            # overwrite nodes in archive
             nblock = Archive(nblock_filename, parse_vtk=False)
             self._archive_cache._nodes = nblock._nodes
             self._archive_cache._nnum = nblock._nnum
@@ -561,7 +552,6 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
 
         if self._local:
             if ext == "":
-                # Case where there is RST extension because it is thermal for example
                 filename = self.jobname
 
                 rth_file = self.directory / f"{filename}.rth"

@@ -62,7 +62,13 @@ Supported Python: 3.12 - 3.14.
       do_something()
   ```
 
-- Comment only what needs clarification. Docstrings carry the explanation.
+- No new code comments in `src/ansys/mapdl/core/` (enforced by the
+  `no-new-comments` pre-commit hook, a ratchet over
+  `.ci/no_comments_baseline.json`). Make the code say it, put the explanation
+  in a docstring, or record the decision as an ADR in `docs/adr/`. Allowed:
+  tool directives (`noqa`, `type: ignore`, `numpydoc ignore`, ...) and
+  `#:` attribute doc comments. After deleting comments, run
+  `python .ci/check_no_comments.py --update`.
 
 ## Docstrings
 

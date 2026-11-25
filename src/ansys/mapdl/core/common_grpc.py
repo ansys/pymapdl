@@ -35,8 +35,7 @@ from ansys.mapdl.core.constants import (  # noqa: F401  # pylint: disable=unused
 )
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlRuntimeError
 
-# Chunk size for file streaming.
-DEFAULT_FILE_CHUNK_SIZE: int = 1024 * 1024  # 1MB
+DEFAULT_FILE_CHUNK_SIZE: int = 1024 * 1024
 
 
 VGET_ENTITY_TYPES_TYPING = Literal[
@@ -194,9 +193,9 @@ def parse_chunks(
     np.ndarray
         Deserialized numpy array.
     """
-    timeout = 3  # seconds
+    timeout = 3
     time_step = 0.01
-    time_max = timeout + time.time()  # seconds
+    time_max = timeout + time.time()
 
     while not chunks.is_active() and time.time() < time_max:
         time.sleep(time_step)

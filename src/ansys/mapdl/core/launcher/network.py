@@ -85,10 +85,8 @@ def check_port_status(port: int, host: str = "127.0.0.1") -> PortStatus:
     - psutil may require elevated permissions for full process info
     - MAPDL process identification checks for ansys/mapdl name and -grpc flag
     """
-    # Try socket binding
     socket_available = _check_port_socket(port, host)
 
-    # Check via psutil
     process = get_process_at_port(port)
 
     if process:
@@ -249,12 +247,10 @@ def get_process_at_port(port: int) -> Optional[psutil.Process]:
     """
     for proc in psutil.process_iter():
         try:
-            # Check if we can access the process connections
             connections = proc.net_connections()
         except (psutil.AccessDenied, psutil.NoSuchProcess):
             continue
 
-        # Check if any connection uses the port
         for conn in connections:
             if conn.laddr.port == port:
                 return proc
@@ -279,7 +275,6 @@ def get_ansys_process_from_port(port: int) -> Optional[psutil.Process]:
     Optional[psutil.Process]
         The matching process, or ``None`` if none is found.
     """
-    # Filter by name first
     potential_procs = []
     for proc in psutil.process_iter(attrs=["name"]):
         name = proc.info["name"]
@@ -294,7 +289,6 @@ def get_ansys_process_from_port(port: int) -> Optional[psutil.Process]:
             cmdline = proc.cmdline()
             if "-grpc" not in cmdline:
                 continue
-            # Check port from cmdline arguments
             try:
                 port_index = cmdline.index("-port")
                 proc_port = int(cmdline[port_index + 1])
@@ -329,14 +323,12 @@ def can_access_process(proc: psutil.Process) -> bool:
     import platform
 
     try:
-        # Check if we can access basic process info and if it belongs to current user
         current_user = getpass.getuser()
         process_user = proc.username()
         if platform.system() == "Windows" and "\\" in process_user:
             return current_user == process_user.split("\\")[-1]
         return process_user == current_user
     except (psutil.AccessDenied, psutil.NoSuchProcess):
-        # Cannot access process or process doesn't exist
         return False
 
 
@@ -396,7 +388,6 @@ def _is_mapdl_process(process: psutil.Process) -> bool:
         name = process.name().lower()
         cmdline = process.cmdline()
 
-        # Check if it's an ANSYS/MAPDL process with gRPC flag
         is_ansys_name = name.startswith(("ansys", "mapdl"))
         has_grpc_flag = "-grpc" in cmdline
 

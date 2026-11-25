@@ -30,7 +30,6 @@ import numpy as np
 from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
 
-# Residual algorithm options - single source of truth
 RESIDUAL_ALGORITHM: List[str] = [
     "l-inf",
     "linf",
@@ -40,7 +39,6 @@ RESIDUAL_ALGORITHM: List[str] = [
     "l2",
 ]
 
-# Type alias derived from the list above
 RESIDUAL_ALGORITHM_LITERAL: TypeAlias = Literal[
     "l-inf", "linf", "l-1", "l1", "l-2", "l2"
 ]
@@ -101,7 +99,6 @@ class KrylovSolver:
         self.jobname = self._mapdl.jobname
         self.logger = self._mapdl._log
 
-        # run flags
         self._run_gensubspace = False
         self._run_solve = False
 
@@ -117,13 +114,11 @@ class KrylovSolver:
     def _check_full_file_exists(self, full_file: Optional[str] = None) -> None:
         """Check full file exists."""
         current_dir = self._mapdl.directory
-        # Check if full file exists
         if not full_file:
             self.full_file = self._mapdl.jobname + ".full"
         else:
             self.full_file = full_file
 
-        # Checking if the full file exists.
         if self._mapdl._local:
             if not os.path.exists(os.path.join(current_dir, self.full_file)):
                 raise FileNotFoundError(
@@ -154,7 +149,6 @@ class KrylovSolver:
     ):
         """Validate the inputs to the ``gensubspace`` method."""
 
-        # Check for illegal input values by the user
         if not isinstance(max_dim_q, int) or max_dim_q <= 0:
             raise ValueError(
                 "The maximum size of the Krylov subspace must be greater than 0."
@@ -246,7 +240,6 @@ class KrylovSolver:
         """Check Orthonormality of vectors"""
 
         if self.orthogonality is not None:
-            # Using previously calculated (if any)
             return self.orthogonality
 
         orthogonality = np.zeros(shape=(num_q, num_q))
@@ -315,31 +308,24 @@ class KrylovSolver:
         two_pi = 2.0 * np.pi
         omega_zero = frequency * two_pi
         ccf = -(omega_zero**2)
-        init_val = 2  # Initialized as no damping
+        init_val = 2
         zero_c = 0
 
-        # Check full file exists
         self._check_full_file_exists(full_file)
 
-        # Check the inputs
         self._check_input_gensubspace(max_dim_q, frequency, check_orthogonality)
 
-        # Get matrices from full file
         self._get_data_from_full_file()
 
-        # Get the force vector from the defined AnsVec
         fz = self.mm.vec(name="fz")
 
-        # Create subspace
         self.Qz = self.mm.zeros(self._ndof, max_dim_q, dtype=np.cdouble)
 
-        # Form az = (K-w0*w0*M,i*w0*C)
         self._mapdl.smat("az", "Z", "COPY", self._mat_k.id)
         az = self.mm.mat(name="az")
         az.axpy(self._mat_m, ccf, 1.0)
         self._mapdl.axpy(0.0, omega_zero, self._mat_c.id, 1.0, 0.0, az.id)
 
-        # Form cz=(C+i*2*w0*M)
         self._mapdl.smat("cz", "Z", "COPY", self._mat_c.id)
         cz = self.mm.mat(name="cz")
         self._mapdl.axpy(0.0, 2 * omega_zero, self._mat_m.id, 1.0, 0.0, cz.id)
@@ -349,11 +335,8 @@ class KrylovSolver:
         if not norm_c:
             zero_c = 1
 
-        # Solve for the 1st vector of subspace[Q]
-        # Create solver system of [az]
-        s = self.mm.factorize(az)  # Factor [az]
+        s = self.mm.factorize(az)
 
-        # {uz1} linked to Qz[1]
         self._mapdl.vec("uz1", "Z", "LINK", self.Qz.id, 1)
         uz1 = self.mm.vec(name="uz1")
 
@@ -364,58 +347,46 @@ class KrylovSolver:
             init_val = 3
             self._mapdl.vec("uz2", "Z", "LINK", self.Qz.id, 2)
             uz2 = self.mm.vec(name="uz2")
-            fz.zeros()  # {fz}=0
+            fz.zeros()
 
-            # {fz}={fz}+[cz]{uz1}
             fz = cz.dot(uz1)
-            fz *= -1  # {fz}=-{fz}
+            fz *= -1
             norm_u = self._mapdl.nrm(fz.id, "NRM2", "normU", "YES")
 
-            uz2 = s.solve(fz, uz2)  # back solved:{uz2}=[az]^-1*{fz}
+            uz2 = s.solve(fz, uz2)
 
-            # {uz2}*{v1} = ccon
             self._mapdl.dot(uz1.id, uz2.id, "ccon_real", "ccon_imag")
-            # {uz2}={uz2}-ccon*{uz1}
             self._mapdl.axpy("-ccon_real", "-ccon_imag", uz1.id, 1.0, 0.0, uz2.id)
-            # {uz2} normalized
             norm_u = self._mapdl.nrm(uz2.id, "NRM2", "normU", "YES")
 
-        # Build Subspace Vectors with MGS (2nd Order)
         for dim_q in range(init_val, max_dim_q + 1):
             self.dim_q = dim_q
             if norm_u == 0:
-                num_q = dim_q - 1  # exhausted at dim_q
+                num_q = dim_q - 1
             else:
-                num_q = max_dim_q  # may reach to the maximum
+                num_q = max_dim_q
 
-            if num_q >= max_dim_q:  # make next vector
+            if num_q >= max_dim_q:
                 fz.zeros()
-                if zero_c == 0:  # [cz]!=0 case
+                if zero_c == 0:
                     next_uz_one = dim_q - 2
                     next_uz_two = dim_q - 1
-                    # {uz1} to [Qz](dim_q-2)
                     self._mapdl.vec(uz1.id, "Z", "LINK", self.Qz.id, next_uz_one)
-                    # {uz2} to [Qz](dim_q-1)
                     self._mapdl.vec(uz2.id, "Z", "LINK", self.Qz.id, next_uz_two)
-                    # {uz} to [Qz](dim_q)
                     self._mapdl.vec("uz", "Z", "LINK", self.Qz.id, dim_q)
                     uz = self.mm.vec(name="uz")
-                    # [cz]{uz2} -> {uz}
                     uz += cz.dot(uz2)
 
-                else:  # [cz]=0 case
+                else:
                     next_uz_one = dim_q - 1
                     self._mapdl.vec(uz1.id, "Z", "LINK", self.Qz.id, next_uz_one)
-                    # {uz} to [Qz](dim_q)
                     self._mapdl.vec(uz2.id, "Z", "LINK", self.Qz.id, dim_q)
                     uz.zeros()
 
-                # [MatM]{uz1} -> {fz}
                 self._mapdl.mult(m1=self._mat_m.id, t1="", m2=uz1.id, t2="", m3=fz.id)
-                fz.axpy(uz, -1.0, -1.0)  # {fz} = -{fz}-{uz}
-                uz = s.solve(fz, uz)  # [az]^-1{fz} -> {uz}
+                fz.axpy(uz, -1.0, -1.0)
+                uz = s.solve(fz, uz)
 
-                # Make subspace vectors orthonormal
                 for j in range(1, dim_q):
                     self._mapdl.vec("V1", "Z", "LINK", self.Qz.id, j)
                     V1 = self.mm.vec(name="V1")
@@ -424,7 +395,6 @@ class KrylovSolver:
 
                 norm_u = self._mapdl.nrm(uz.id, "NRM2", "normU", "YES")
 
-        # Optional check on Orthonormality of vectors
         if check_orthogonality:
             self._calculate_orthogonality(uz, num_q)
 
@@ -463,17 +433,13 @@ class KrylovSolver:
         Distributed Ansys.
         """
 
-        # Check we ran gensubspace method before
         if not self._run_gensubspace:
             raise MapdlRuntimeError(
                 "The method 'gensubspace' should be executed first."
             )
 
-        # Check inputs before executing the method
         self._check_input_solve(freq_start, freq_end, freq_steps, ramped_load)
 
-        # Execute macro if no errors raised
-        # Store input arguments from user
         self.freq_start = freq_start
         self.freq_steps = freq_steps
         self.ramped_load = ramped_load
@@ -483,59 +449,43 @@ class KrylovSolver:
         ndof = self._ndof
         dim_q = self.dim_q
 
-        # Define solution variables
         QtF = self.mm.zeros(dim_q, dtype=np.cdouble)
-        QtAQ = self.mm.zeros(dim_q, dim_q, dtype=np.cdouble)  # [QtAQ], reduced matrix
-        self.Yz = self.mm.zeros(
-            dim_q, self.freq_steps, dtype=np.cdouble
-        )  # [Yz], reduced solution over range
-        self.DzV = self.mm.zeros(
-            ndof, self.freq_steps, dtype=np.cdouble
-        )  # {DzV}, displacement vector
+        QtAQ = self.mm.zeros(dim_q, dim_q, dtype=np.cdouble)
+        self.Yz = self.mm.zeros(dim_q, self.freq_steps, dtype=np.cdouble)
+        self.DzV = self.mm.zeros(ndof, self.freq_steps, dtype=np.cdouble)
         self.iRHS = self.mm.zeros(ndof, dtype=np.cdouble)
 
-        # Loop over frequency range
         omega = self.freq_start * 2 * np.pi
         self.intV = (self.freq_end - self.freq_start) / self.freq_steps  # type: ignore[operator]
 
         for iFreq in range(1, self.freq_steps + 1):  # type: ignore[operator]
-            # form RHS at the i-th frequency point
             self.iRHS.zeros()
             if self.ramped_load == 0:
-                # apply ramped loading
                 ratio = 2 * iFreq / self.freq_steps  # type: ignore[operator]
                 if self.freq_steps == 1:
                     ratio = 1.00
             else:
-                # Apply stepped loading
                 ratio = 1.00
 
-            self.iRHS.axpy(self.fz0, ratio, 1.0)  # Get {iRHS} at iFreq
-            QtF = self.Qz.T.dot(self.iRHS)  # Reduce [Qz]^t{iRHS} -> {QtF}
+            self.iRHS.axpy(self.fz0, ratio, 1.0)
+            QtF = self.Qz.T.dot(self.iRHS)
 
-            # link iY to Yz(iFreq)
             self._mapdl.vec("iY", "Z", "LINK", self.Yz.id, iFreq)
             self.iY = self.mm.vec(name="iY")
 
-            # Reduced system at omega
-            omega = omega + self.intV * 2 * np.pi  # defined frequency value
+            omega = omega + self.intV * 2 * np.pi
             ccf = -omega * omega
 
-            # modified K:[az]=[MatK]
             self._mapdl.smat("az", "Z", "COPY", self._mat_k.id)
             az = self.mm.mat(name="az")
 
-            # [az]=(1,0)*[az]+(ccf,0)*[MatM]
             az.axpy(self._mat_m, ccf, 1.0)
-            # [az]=(1,0)*[az]-(0,omega)*[mat_C]
             self._mapdl.axpy(0.0, omega, self._mat_c.id, 1.0, 0.0, az.id)
 
-            AQ = az.dot(self.Qz)  # [AQ]=[az][Qz]
-            QtAQ = self.Qz.T.dot(AQ)  # [QtAQ]=[Q^t][AQ]
+            AQ = az.dot(self.Qz)
+            QtAQ = self.Qz.T.dot(AQ)
 
-            # create reduced system of equations
             s = self.mm.factorize(QtAQ)
-            # back solve for {iY}=Yz[iFreq]
             self.iY = s.solve(QtF, self.iY)
 
         self._run_solve = True
@@ -588,17 +538,14 @@ class KrylovSolver:
         Distributed Ansys restriction: This command is not supported in
         Distributed Ansys.
         """
-        # Check we ran solve method before
         if not self._run_solve:
             raise MapdlRuntimeError("The method 'solve' should be executed first.")
 
         if residual_algorithm is not None:
-            # To avoid having to set residual computation.
             residual_computation = True
         elif residual_algorithm is None:
             residual_algorithm = "L-Inf"  # type: ignore[assignment]
 
-        # Check inputs before executing the method
         self._check_input_expand(
             return_solution, residual_computation, residual_algorithm
         )
@@ -607,7 +554,6 @@ class KrylovSolver:
 
         RzV = self.mm.zeros(self._ndof, 1, dtype=np.cdouble)
 
-        # Build mapping vectors
         self._mapdl.vec("MapForward", "I", "IMPORT", "FULL", self.full_file, "FORWARD")
         self._map_forward = self.mm.vec(name="MapForward")
 
@@ -617,33 +563,28 @@ class KrylovSolver:
         self._max_node = self._map_forward.size
         self._num_node = map_back.size
 
-        # Expand reduced solution
-        omega = self.freq_start * 2 * np.pi  # circular frequency at starting point
+        omega = self.freq_start * 2 * np.pi
         xii_usr_ordered = []
 
         for iFreq in range(1, self.freq_steps + 1):  # type: ignore[operator]
             self._mapdl.vec(self.iY.id, "Z", "LINK", self.Yz.id, iFreq)
-            # vector of solution in solver space
             self._mapdl.vec("Xi", "Z", "LINK", self.DzV.id, iFreq)
             Xi = self.mm.vec(name="Xi")
 
             Xi.zeros()
-            # collect each vector's contribution
             for jVect in range(1, self.dim_q + 1):
                 self._mapdl.vec("Qzj", "Z", "LINK", self.Qz.id, jVect)
                 Qzj = self.mm.vec(name="Qzj")
 
                 iY_a = self.iY.asarray()
-                yrj = iY_a[jVect - 1].real  # real part of reduced solution
-                yij = iY_a[jVect - 1].imag  # imaginary part of reduced solution
+                yrj = iY_a[jVect - 1].real
+                yij = iY_a[jVect - 1].imag
                 self._mapdl.axpy(yrj, yij, Qzj.id, 1.0, 0.0, Xi.id)
 
-            # Output solution vectors (if requested)
             if compute_solution_vectors:
                 dof_each_freq = self._compute_solution_vector(Xi)
                 xii_usr_ordered.append(dof_each_freq)
 
-            # Compute residual norm (if requested)
             if residual_computation or (
                 residual_algorithm
                 and residual_algorithm.lower()
@@ -658,7 +599,6 @@ class KrylovSolver:
 
                 self.residuals.append([iFreq, norm_rz, norm_fz])  # type: ignore[attr-defined]
 
-        # Storing solution in class
         if compute_solution_vectors:
             self.solution_vectors = np.array(
                 xii_usr_ordered,
@@ -672,32 +612,25 @@ class KrylovSolver:
         self, iFreq: int, RzV: AnsMath, Xi: AnsMath, omega: float
     ) -> Tuple[float]:
         """Compute residuals of the matrices"""
-        # form {iRHS}
         self.iRHS.zeros()
         if self.ramped_load:
-            # apply ramped loading
             ratio = 2 * iFreq / self.freq_steps  # type: ignore[operator]
             if self.freq_steps == 1:
                 ratio = 1.0
         else:
-            # Apply stepped loading
             ratio = 1.0
 
-        self.iRHS.axpy(self.fz0, ratio, 1.0)  # get {iRHS} at iFreq
+        self.iRHS.axpy(self.fz0, ratio, 1.0)
 
-        # Form az
-        omega = omega + self.intV * 2 * np.pi  # defined frequency value
+        omega = omega + self.intV * 2 * np.pi
         ccf = -omega * omega
 
-        self._mapdl.smat("az", "Z", "COPY", self._mat_k.id)  # modified K:[az]=[MatK]
+        self._mapdl.smat("az", "Z", "COPY", self._mat_k.id)
         az = self.mm.mat(name="az")
 
-        # [az]=(1,0)*[az]+(ccf,0)*[MatM]
         az.axpy(self._mat_m, ccf, 1.0)
-        # [az]=(1,0)*[az]-(0,omega)*[mat_C]
         self._mapdl.axpy(0.0, omega, self._mat_c.id, 1.0, 0.0, az.id)
 
-        # Compute {Rz}={iRHS}-[az]*{Xi}
         self._mapdl.vec("Rzi", "Z", "LINK", RzV.id, 1)
         Rzi = self.mm.vec(name="Rzi")
 
@@ -705,13 +638,12 @@ class KrylovSolver:
         Rzi = az.dot(Xi)
         Rzi.axpy(self.iRHS, 1.0, -1.0)
 
-        # Output norms of residual vector
         norm_rz = 0.0
 
         if self._residual_algorithm and self._residual_algorithm.lower() in [
             "l-inf",
             "linf",
-        ]:  # L-inf norm
+        ]:
             norm_rz = Rzi.norm("NRMINF")
             norm_fz = self.iRHS.norm("NRMINF")
             if norm_fz != 0.0:
@@ -744,14 +676,11 @@ class KrylovSolver:
     def _compute_solution_vector(
         self, Xi: AnsMath
     ) -> List[Tuple[Union[int, int, complex]]]:
-        self._mapdl.mult(
-            m1=self.Nod2Solv.id, t1="TRANS", m2=Xi.id, t2="", m3="Xii"
-        )  # Map {Xi} to internal (ANSYS) order
+        self._mapdl.mult(m1=self.Nod2Solv.id, t1="TRANS", m2=Xi.id, t2="", m3="Xii")
         Xii = self.mm.vec(name="Xii")
         dof_each_freq = []
 
-        # Map {Xii} to user ordering
-        num_eqn = Xii.size  # dim 1
+        num_eqn = Xii.size
         numdof = int(num_eqn / self._num_node)
 
         for extnode in range(1, self._max_node + 1):
@@ -762,8 +691,8 @@ class KrylovSolver:
             extEqn = int((extnode - 1) * numdof)
 
             for idof in range(1, numdof + 1):
-                Xii_real = Xii.asarray()[intEqn + idof - 1].real  # Real value
-                Xii_imag = Xii.asarray()[intEqn + idof - 1].imag  # Imag value
+                Xii_real = Xii.asarray()[intEqn + idof - 1].real
+                Xii_imag = Xii.asarray()[intEqn + idof - 1].imag
 
                 dof_each_freq.append(
                     (int(extnode), int(extEqn + idof), Xii_real + Xii_imag * 1j)

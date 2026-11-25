@@ -87,20 +87,15 @@ def launch_on_hpc(config: LaunchConfig, env_vars: Dict[str, str]) -> ProcessInfo
     - The returned ProcessInfo has process=None since it's remote
     - Timeout applies to waiting for job to reach RUNNING state
     """
-    # Generate base MAPDL command
     mapdl_cmd = _generate_mapdl_command(config)
 
-    # Wrap in sbatch command
     sbatch_cmd = _generate_sbatch_command(mapdl_cmd, config.scheduler_options)
 
-    # Add SLURM-specific environment variables
     env_vars["ANS_MULTIPLE_NODES"] = "1"
     env_vars["HYDRA_BOOTSTRAP"] = "slurm"
 
-    # Submit job
     jobid = _submit_job(sbatch_cmd, env_vars=env_vars)
 
-    # Wait for job to start and get host info
     try:
         job_info = _wait_for_job_ready(jobid, config.timeout)
     except BaseException:
@@ -113,7 +108,7 @@ def launch_on_hpc(config: LaunchConfig, env_vars: Dict[str, str]) -> ProcessInfo
     )
 
     return ProcessInfo(
-        process=None,  # No local process handle
+        process=None,
         port=config.port,
         ip=job_info.ip,
         pid=None,
@@ -191,11 +186,9 @@ def resolve_slurm_resources(config: LaunchConfig) -> LaunchConfig:
     - Only updates fields where SLURM provides values
     - Returns original config unchanged if not in SLURM environment
     """
-    # Get SLURM resources
     slurm_nproc = _calculate_slurm_nproc()
     slurm_ram = _calculate_slurm_ram()
 
-    # Create updated config (immutable, so must create new)
     if slurm_nproc is not None and slurm_ram is not None:
         LOG.info(f"Using SLURM allocated CPUs: {slurm_nproc}")
         LOG.info(f"Using SLURM allocated RAM: {slurm_ram} MB")
@@ -250,24 +243,20 @@ def _generate_mapdl_command(config: LaunchConfig) -> List[str]:
     """
     cmd = [config.exec_file]
 
-    # Core arguments
     cmd.extend(["-j", config.jobname])
     cmd.extend(["-np", str(config.nproc)])
     cmd.extend(["-port", str(config.port)])
     cmd.append("-grpc")
 
-    # Resource arguments
     if config.ram:
         cmd.extend(["-m", str(config.ram)])
 
-    # Additional switches
     if config.additional_switches:
         add_sw = config.additional_switches
         if "-dis " not in add_sw and not add_sw.endswith("-dis"):
             add_sw += " -dis"
         cmd.extend(shlex.split(add_sw))
     else:
-        # Always ensure -dis flag for HPC mode
         cmd.append("-dis")
 
     return cmd
@@ -320,7 +309,6 @@ def _generate_sbatch_command(
     """
     cmd = ["sbatch"]
 
-    # Add scheduler options
     if options:
         for key, value in options.items():
             if key.lower() == "wrap":
@@ -328,7 +316,6 @@ def _generate_sbatch_command(
                     "The 'wrap' option is reserved by PyMAPDL. Please remove it."
                 )
 
-            # Format option with proper dashes
             if not key.startswith("-"):
                 if len(key) == 1:
                     key = f"-{key}"
@@ -337,9 +324,6 @@ def _generate_sbatch_command(
 
             cmd.append(f"{key}={value}")
 
-    # Add wrapped command with proper escaping
-    # Use shlex.quote() on each component to safely handle special characters
-    # (e.g., single quotes in jobname or exec_file)
     quoted_mapdl_cmd = [shlex.quote(component) for component in mapdl_cmd]
     mapdl_cmd_str = " ".join(quoted_mapdl_cmd)
     cmd.extend(["--wrap", mapdl_cmd_str])
@@ -489,7 +473,6 @@ def _wait_for_job_ready(jobid: int, timeout: int, time_step: int = 1) -> HPCJobI
     last_state = "UNKNOWN"
 
     while time.time() - start_time < timeout:
-        # Query job status
         try:
             result = subprocess.run(  # nosec B603, B607
                 ["scontrol", "show", "jobid", "-dd", str(jobid)],
@@ -501,21 +484,17 @@ def _wait_for_job_ready(jobid: int, timeout: int, time_step: int = 1) -> HPCJobI
 
             output = result.stdout
 
-            # Parse state
             state = _parse_job_state(output)
             if state != last_state:
                 LOG.debug(f"Job {jobid} state: {state}")
                 last_state = state
 
-            # Check if running
             if state == "RUNNING":
-                # Extract hostname and IP
                 hostname = _parse_batch_host(output)
                 ip = socket.gethostbyname(hostname)
 
                 return HPCJobInfo(jobid=jobid, state=state, hostname=hostname, ip=ip)
 
-            # Check for failed states
             if state in ("FAILED", "CANCELLED", "TIMEOUT", "NODE_FAIL"):
                 raise MapdlDidNotStart(
                     f"HPC job {jobid} failed with state: {state}. "
@@ -529,7 +508,6 @@ def _wait_for_job_ready(jobid: int, timeout: int, time_step: int = 1) -> HPCJobI
 
         time.sleep(time_step)
 
-    # Timeout reached
     raise MapdlDidNotStart(
         f"HPC job {jobid} did not start within {timeout} seconds. "
         f"Last known state: {last_state}. "
@@ -708,13 +686,11 @@ def _calculate_slurm_ram() -> Optional[int]:
     if not mem:
         return None
 
-    # Parse memory with unit (e.g., "8G", "4096M")
     try:
         if mem[-1].isalpha():
             unit = mem[-1].upper()
             value = int(mem[:-1])
 
-            # Convert to MB
             if unit == "T":
                 return value * 1024 * 1024
             elif unit == "G":

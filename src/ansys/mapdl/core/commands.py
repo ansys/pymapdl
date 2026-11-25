@@ -51,11 +51,10 @@ from ._commands import (
     solution,
 )
 
-# compiled regular expressions used for parsing tablular outputs
-REG_LETTERS: re.Pattern[str] = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e
+REG_LETTERS: re.Pattern[str] = re.compile(r"[a-df-zA-DF-Z]+")
 REG_FLOAT_INT: re.Pattern[str] = re.compile(
     r"[+-]?[0-9]*[.]?[0-9]*[Ee]?[+-]?[0-9]+|\s[0-9]+\s"
-)  # match number groups
+)
 BC_REGREP: re.Pattern[str] = re.compile(
     r"^\s*([0-9]+)\s*([A-Za-z]+)"
     r"(\s+(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)"
@@ -76,14 +75,8 @@ so it cannot be converted to Numpy Array.
 Please use 'to_list' or 'to_dataframe' instead."""
 
 
-# Identify where the data start in the output
 GROUP_DATA_START: List[str] = ["NODE", "ELEM"]
 
-# Allowed commands to get output as array or dataframe.
-# In theory, these commands should follow the same format.
-# Some of them are not documented (already deprecated?)
-# So they are not in the Mapdl class,
-# so they won't be wrapped.
 CMD_RESULT_LISTING: List[str] = [
     "NLIN",  # not documented
     "PRCI",
@@ -120,9 +113,6 @@ CMD_BC_LISTING: List[str] = [
     "FKLI",
     "FLIS",
     "SFLL",
-    # "SFAL",   Define two integers before label (regex)
-    # "SFLI",   Use two lines to define each BC in the list
-    # "SFEL",   Use two lines to define each BC in the list
     "BFKL",
     "BFLL",
     "BFAL",
@@ -143,18 +133,12 @@ COLNAMES_BC_LISTING: Dict[str, List[str]] = {
 
 CMD_ENTITY_LISTING: List[str] = [
     "NLIS",
-    # "ELIS", # To be implemented later
-    # "KLIS",
-    # "LLIS",
-    # "ALIS",
-    # "VLIS",
 ]
 
 CMD_LISTING: List[str] = []
 CMD_LISTING.extend(CMD_ENTITY_LISTING)
 CMD_LISTING.extend(CMD_RESULT_LISTING)
 
-# Adding empty lines to match current format.
 CMD_DOCSTRING_INJECTION: str = r"""
 Returns
 -------
@@ -263,27 +247,21 @@ def inject_docs(docstring: str, docstring_injection: Optional[str] = None) -> st
     return_header = r"Returns\n\s*-*"
 
     if docstring_injection.splitlines()[-2].strip() in docstring:
-        # In case the docstring already has the injection.
         return docstring
     elif re.search(return_header, docstring):
-        # There is a return block already, probably it should not.
         indentation = get_section_indentation("Returns", docstring)
         indented_doc_inject = indent_text(indentation, docstring_injection)
         return inject_after_return_section(indented_doc_inject, docstring)
     else:
-        # There is not returns header
-        # find sections
         sections = get_sections(docstring)
 
         if "parameters" in sections:
             ind = sections.index("parameters")
             if ind == len(sections) - 1:
-                # The parameters is the last bit. Just append it.
                 indentation = get_section_indentation("Parameters", docstring)
                 indented_doc_inject = indent_text(indentation, docstring_injection)
                 return docstring + "\n" + indented_doc_inject
             else:
-                # inject it right before the section after 'parameter'
                 sect_after_parameter = sections[ind + 1]
                 indentation = get_section_indentation(sect_after_parameter, docstring)
                 indented_doc_inject = indent_text(indentation, docstring_injection)
@@ -311,9 +289,7 @@ def check_valid_output(func: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
     def func_wrapper(self, *args: Any, **kwargs: dict[Any, Any]):
         output: str = self.__str__()
-        if (
-            "*** WARNING ***" in output or "*** ERROR ***" in output
-        ):  # Error should be caught in mapdl.run.
+        if "*** WARNING ***" in output or "*** ERROR ***" in output:
             err_type = re.findall(r"*** (.*) ***", output)[0]
             msg = f"Unable to parse because of next {err_type.title()}" + "\n".join(
                 output.splitlines()[-2:]
@@ -540,11 +516,6 @@ class CommandOutput(str):
     * :attr:`command() <ansys.mapdl.core.commands.CommandOutput.command>`
     """
 
-    ## References:
-    # - https://stackoverflow.com/questions/7255655/how-to-subclass-str-in-python
-    # - https://docs.python.org/3/library/collections.html#userstring-objects
-    # - Source code of UserString
-
     _cmd: str | None
 
     def __new__(cls, content: str, cmd=None):
@@ -618,7 +589,6 @@ class CommandListingOutput(CommandOutput):
         if not magicwords:
             magicwords = self._magicwords or GROUP_DATA_START
 
-        # Checking if we are supplying a custom start function.
         if self.custom_data_start(line) is not None:  # type: ignore
             return self.custom_data_start(line)  # type: ignore # function should be overloaded
 
@@ -634,7 +604,6 @@ class CommandListingOutput(CommandOutput):
     def _is_data_end(self, line: str) -> bool:
         """Check if line is the end of a data group."""
 
-        # Checking if we are supplying a custom start function.
         if self.custom_data_end(line) is not None:  # type: ignore
             return self.custom_data_end(line)  # type: ignore # function should be overloaded
         else:
@@ -674,16 +643,13 @@ class CommandListingOutput(CommandOutput):
         It removes the maximum absolute values tail part and makes sure there is
         separation between columns.
         """
-        # Doing some formatting of the string
         body = self._format().splitlines()
 
         if not trail_header:
             trail_header = ["MAXIMUM ABSOLUTE VALUES", "TOTAL VALUES"]
 
-        # Removing parts matching trail_header
         for each_trail_header in trail_header:
             if each_trail_header in self.__str__():
-                # starting to check from the bottom.
                 for i in range(len(body) - 1, -1, -1):
                     if each_trail_header in body[i]:
                         break
@@ -700,7 +666,6 @@ class CommandListingOutput(CommandOutput):
         else:
             shift = 0
 
-        # Getting pairs of starting end
         start_idxs = [
             ind
             for ind, each in enumerate(body)
@@ -745,7 +710,6 @@ class CommandListingOutput(CommandOutput):
         """
         parsed_lines: list[list[str]] = []
         for line in self.splitlines():
-            # exclude any line containing characters [A-Z] except for E
             if line.strip() and not REG_LETTERS.search(line):
                 items = REG_FLOAT_INT.findall(line)
                 if items:
@@ -864,19 +828,15 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
         _entity = [i for i in entity if i in title]
 
         if _bcType and _entity:
-
             key_bc = bc_type[_bcType[0]] + entity[_entity[0]] + "LIST"
             key_bc = key_bc[:4]
 
             if key_bc in COLNAMES_BC_LISTING.keys():
-
                 _cols = COLNAMES_BC_LISTING[key_bc]
 
-                # Check num columns in data
                 ldata = []
                 for line in self.splitlines():
                     line = line.strip()
-                    # exclude any line containing characters [A-Z] except for E
                     if line:
                         items = BC_REGREP.findall(line)
                         if items:
@@ -919,7 +879,6 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
         parsed_lines: List[list[str]] = []
         for line in self.splitlines():
             line = line.strip()
-            # exclude any line containing characters [A-Z] except for E
             if line:
                 items = BC_REGREP.findall(line)
                 if items:
@@ -990,7 +949,6 @@ class ComponentListing(CommandListingOutput):
     def _parsed(self) -> np.ndarray[Any, Any]:
         from ansys.mapdl.core.component import _parse_cmlist  # type: ignore
 
-        # To keep same API as commands
         return np.array(list(_parse_cmlist(self)[0].keys()))
 
 

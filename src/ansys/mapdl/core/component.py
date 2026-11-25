@@ -49,12 +49,10 @@ from ansys.mapdl.core.misc import is_float
 if TYPE_CHECKING:  # pragma: no cover
     import logging
 
-# Entity type options - single source of truth
 ENTITIES_TYP: TypeAlias = Literal[
     "NODE", "NODES", "ELEM", "ELEMS", "ELEMENTS", "VOLU", "AREA", "LINE", "KP"
 ]
 
-# Runtime list derived from the type alias above
 VALID_ENTITIES: List[str] = list(get_args(ENTITIES_TYP))
 
 SELECTOR_FUNCTION: List[str] = [
@@ -156,7 +154,6 @@ class Component(tuple):
             raise ValueError(
                 f"The value '{type_}' is not allowed for 'type' definition."
             )
-        # Convert to tuple if needed
         if isinstance(items_, Component):
             items_ = tuple(items_)
         elif isinstance(items_, (list, np.ndarray)):
@@ -164,15 +161,11 @@ class Component(tuple):
         elif items_ is None:
             items_ = tuple()
         elif isinstance(items_, (int, str)):
-            # Handle single values.
-            # For assembly types (LVL*) the single item is a component name
-            # string; for all entity types numeric strings must be cast to int.
             if isinstance(items_, str) and re.match(r"LVL\d+$", type_, re.IGNORECASE):
                 items_ = (items_,)
             else:
                 items_ = (int(items_),)
         elif not isinstance(items_, tuple):
-            # Fallback for any iterable
             try:
                 items_ = tuple(items_)  # type: ignore[arg-type]
             except (TypeError, ValueError):
@@ -286,9 +279,7 @@ class ComponentManager:
         self.__comp: UNDERLYING_DICT = {}
         self._subcomponents: Dict[str, List[str]] = {}
         self._update_always: bool = True
-        self._autoselect_components: bool = (
-            False  # if True, PyMAPDL will try to select the CM first if it does not appear in the CMLIST output.
-        )
+        self._autoselect_components: bool = False
 
         self._default_entity: ENTITIES_TYP = "NODES"
         self._default_entity_warning: bool = True
@@ -354,14 +345,12 @@ class ComponentManager:
 
         try:
             cmtype_raw = self._comp[key.upper()]
-            # cmtype can be a string (just type) or a list [selection, type]
             cmtype: str = cmtype_raw[1] if isinstance(cmtype_raw, list) else cmtype_raw  # type: ignore[assignment]
         except KeyError:
             # testing if the CM exists or not
             # it seems you can use `*get` with components which are not selected.
             # It will return 0 if it does not exists.
             if self._mapdl.get_value("COMP", key, "type"):
-                # the component exits, but it might not be selected
                 raise ComponentIsNotSelected(
                     f"The component named '{key}' is not selected. Use 'mapdl.cmsel' to select it."
                 )
@@ -371,8 +360,6 @@ class ComponentManager:
                 )
 
         if re.match(r"LVL\d+$", cmtype, re.IGNORECASE):
-            # Assembly: subcomponent names were already collected during the
-            # initial _parse_cmlist pass — no extra MAPDL call needed.
             subcomp_names = self._subcomponents.get(key.upper(), [])
             if forced_to_select:
                 self._mapdl.cmsel("U", key)
@@ -380,7 +367,6 @@ class ComponentManager:
 
         output: List[int] = self._mapdl._parse_cmlist_indiv(key, cmtype)
         if forced_to_select:
-            # Unselect to keep the state of the things as before calling this method.
             self._mapdl.cmsel("U", key)
 
         return Component(cmtype, output)  # type: ignore[arg-type]
@@ -394,7 +380,6 @@ class ComponentManager:
         cmitems: Union[Component, List[int], Tuple[int, ...], NDArray[Any]]
 
         if isinstance(value, Component):
-            # Allowing to use a component object to be set.
             cmname = key
             cmtype = value.type
             cmitems = value
@@ -418,7 +403,6 @@ class ComponentManager:
                 cmitems = value[1]
 
             else:
-                # Asumng default entity
                 if self.default_entity_warning:
                     warnings.warn(
                         WARNING_ENTITY.format(
@@ -434,7 +418,6 @@ class ComponentManager:
                 cmitems = value  # type: ignore[assignment]
 
         elif isinstance(value, str):
-            # create a component with the already selected elements
             if value.upper() not in VALID_ENTITIES:
                 raise ValueError(
                     f"The value '{value}' is not allowed for 'type' definition."
@@ -445,10 +428,9 @@ class ComponentManager:
 
             self._mapdl.cm(cmname, cmtype)
 
-            return  # Early exit
+            return
 
         elif isinstance(value, (list, np.ndarray)):
-            # Assuming we are defining a CM with nodes
             if self.default_entity_warning:
                 warnings.warn(
                     WARNING_ENTITY.format(
@@ -468,16 +450,12 @@ class ComponentManager:
 
         _check_valid_pyobj_to_entities(cmitems)
 
-        # Using context manager to proper save the selections (including CM)
         with self._mapdl.save_selection:
-            # Select the cmitems entities
             func = getattr(self._mapdl, ENTITIES_MAPPING[cmtype].lower())
             func(type_="S", vmin=cmitems)
 
-            # create component
             self._mapdl.cm(cmname, cmtype)
 
-        # adding newly created selection
         self._mapdl.cmsel("A", cmname)
 
     def __repr__(self) -> str:
@@ -600,7 +578,6 @@ class ComponentManager:
 def _parse_cmlist_indiv(
     cmname: str, cmtype: str, cmlist: Optional[str] = None
 ) -> List[int]:
-    # Capturing blocks
     if cmlist and "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
         header = r"NAME\s+TYPE\s+SUBCOMPONENTS"
 
@@ -610,16 +587,14 @@ def _parse_cmlist_indiv(
     cmlist = "\n\n".join(
         re.findall(
             r"(?s)" + header + r"\s+(.*?)\s*(?=\n\s*\n|\Z)",
-            cmlist or "",  # Handle None case
+            cmlist or "",
             flags=re.DOTALL,
         )
     )
 
-    # Capturing items in each block
     rg = cmname.upper() + r"\s+" + cmtype.upper() + r"\s+(.*?)\s*(?=\n\s*\n|\Z)"
     items = "\n".join(re.findall(rg, cmlist, flags=re.DOTALL))
 
-    # Joining them together and giving them format.
     items_raw: List[str] = items.replace("\n", "  ").split()
     items_int: List[int] = [int(each) for each in items_raw if is_float(each)]
 
@@ -643,8 +618,6 @@ def _parse_cmlist(
     if cmlist is None:
         return {}, {}
     if re.search(r"NAME\s+TYPE\s+SUBCOMPONENTS", cmlist):
-        # header
-        #  "NAME                            TYPE      SUBCOMPONENTS"
         blocks = re.findall(
             r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\*\*\*\*\*|\Z)",
             cmlist,
@@ -656,14 +629,12 @@ def _parse_cmlist(
             cmlist,
             flags=re.DOTALL,
         )
-        # Using `cmlist,all` which also includes selection
         include_selection = True
     elif "LIST ALL SELECTED COMPONENTS" in cmlist:
         blocks = cmlist.splitlines()[1:]
     else:
         raise ValueError("The format of the CMLIST output is not recognized.")
 
-    # Index of the TYPE token (0-based within split tokens of a component line)
     type_idx = 2 if include_selection else 1
 
     comp_dict: Dict[str, Any] = {}
@@ -676,7 +647,6 @@ def _parse_cmlist(
             current_assembly = None
             continue
         if len(parts) >= 2:
-            # Regular component line or assembly header line
             name = parts[0]
             value: Any = [parts[1], parts[2]] if include_selection else parts[1]
             comp_dict[name] = value

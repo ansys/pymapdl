@@ -222,7 +222,6 @@ def _launch_mapdl_common(
     Returns:
         Tuple of (config, process_info) where process_info is None if not launching a new instance
     """
-    # Step 1: Resolve configuration from arguments, env vars, and defaults
     try:
         config = resolve_launch_config(
             exec_file=exec_file,
@@ -265,7 +264,6 @@ def _launch_mapdl_common(
         LOG.error(f"Configuration error: {e}")
         raise LaunchError(f"Invalid launch configuration: {e}") from e
 
-    # Step 2: Validate configuration
     try:
         validation_result = validate_config(config)
         if not validation_result.valid:
@@ -278,7 +276,6 @@ def _launch_mapdl_common(
             LOG.error(full_message)
             raise LaunchError(full_message)
 
-        # Log warnings
         for warning in validation_result.warnings:
             LOG.warning(warning)
 
@@ -288,11 +285,9 @@ def _launch_mapdl_common(
         LOG.error(f"Validation error: {e}")
         raise LaunchError(f"Configuration validation error: {e}") from e
 
-    # Step 3: Handle connection to existing instance (if applicable)
     if not config.start_instance:
         return config, None
 
-    # Step 4: Prepare environment
     try:
         env_config = prepare_environment(config)
         process_env = env_config.variables
@@ -312,19 +307,15 @@ def _launch_mapdl_common(
         process_env.setdefault("ANSYS_MAPDL_UDS_PATH", str(config.uds_dir))
         LOG.debug(f"UDS transport: setting ANSYS_MAPDL_UDS_PATH={config.uds_dir}")
 
-    # Step 5: Launch MAPDL process (local or HPC)
     process_info = None
     try:
         if config.launch_on_hpc:
-            # Resolve SLURM resources if available
             if detect_slurm_environment():
                 config = resolve_slurm_resources(config)
 
-            # Launch on HPC
             LOG.info("Launching MAPDL on HPC cluster...")
             process_info = _launch_on_hpc_fn(config, process_env)
         else:
-            # Launch locally
             LOG.info("Launching MAPDL locally...")
             process_info = _launch_mapdl_process(config, process_env)
 
@@ -729,7 +720,6 @@ def launch_mapdl(
     """
     import warnings
 
-    # Warn about any remaining unknown keyword arguments
     if kwargs:
         warnings.warn(
             f"Unknown arguments ignored: {list(kwargs.keys())}",
@@ -774,7 +764,6 @@ def launch_mapdl(
         channel=channel,
     )
 
-    # Handle connection to existing instance
     if process_info is None:
         LOG.info(f"Connecting to existing MAPDL instance at {config.ip}:{config.port}")
         try:
@@ -783,7 +772,6 @@ def launch_mapdl(
             LOG.error(f"Failed to connect to existing instance: {e}")
             raise
 
-    # Create and return client
     try:
         if config.mode == LaunchMode.CONSOLE:
             LOG.debug("Creating MapdlConsole client")
@@ -1077,7 +1065,6 @@ def launch_mapdl_process(
             stacklevel=2,
         )
 
-    # Use common launch logic
     _, process_info = _launch_mapdl_common(
         exec_file=exec_file,
         run_location=run_location,
@@ -1115,12 +1102,10 @@ def launch_mapdl_process(
         start_timeout=start_timeout,
     )
 
-    # For process-only launching, ensure we're starting a new instance
     if process_info is None:
         raise LaunchError(
             "launch_mapdl_process() requires start_instance=True. "
             "Use launch_mapdl() to connect to existing instances."
         )
 
-    # Return connection info tuple (ip, port, pid)
     return (process_info.ip, process_info.port, process_info.pid)

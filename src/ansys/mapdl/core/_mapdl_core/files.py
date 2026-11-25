@@ -25,9 +25,6 @@
 
 import os
 import pathlib
-
-# Subprocess is needed to start the backend. But
-# the input is controlled by the library. Excluding bandit check.
 from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 from warnings import warn
 
@@ -56,7 +53,6 @@ class _CoreFileMixin(_CoreMixinBase):
 
     def _wrap_directory(self, path: Union[str, pathlib.Path]) -> pathlib.PurePath:
         if self.platform is None:
-            # MAPDL is not initialized yet so returning the path as is.
             return pathlib.PurePath(path)
 
         if self.platform == "windows":
@@ -64,15 +60,11 @@ class _CoreFileMixin(_CoreMixinBase):
         elif self.platform == "linux":
             return _MapdlPurePosixPath(path, mapdl=self)
         else:
-            # Other OS path
             warn(
                 f"MAPDL is running on an unknown OS '{self.platform}'. "
                 "Using PurePosixPath as default.",
                 UserWarning,
             )
-            # Default to PurePosixPath
-            # This is a fallback, it should not happen.
-            # If it does, it is probably a bug.
             return _MapdlPurePosixPath(path, mapdl=self)
 
     @property
@@ -105,18 +97,14 @@ class _CoreFileMixin(_CoreMixinBase):
 
         >>> mapdl.directory = "C:/temp_directory/"
         """
-        # Inside inquire there is already a retry mechanisim
         path = None
         try:
             path = self.inquire("", "DIRECTORY")
         except MapdlExitedError:
-            # Let's return the cached path
             pass
 
-        # os independent path format
         if path:  # self.inquire might return ''.
             path = path.replace("\\", "/")
-            # new line to fix path issue, see #416
             path = repr(path)[1:-1]
             self._path = self._wrap_directory(path)
 
@@ -178,8 +166,6 @@ class _CoreFileMixin(_CoreMixinBase):
         fpath = os.path.dirname(fname)
         fname = fPath.name
 
-        # if there is no dirname, we are assuming the file is
-        # in the python working directory.
         if not fpath:
             fpath = os.getcwd()
 
@@ -190,32 +176,23 @@ class _CoreFileMixin(_CoreMixinBase):
 
         if self._local:
             if os.path.isfile(fname):
-                # And it exists
                 filename = os.path.join(os.getcwd(), fname)
             elif not self._store_commands and fname in self.list_files():
-                # It exists in the Mapdl working directory
                 filename = self.directory / fname
             elif self._store_commands:
-                # Assuming that in non_interactive we have uploaded the file
-                # manually.
                 filename = self.directory / fname
             else:
-                # Finally
                 raise FileNotFoundError(f"Unable to locate filename '{fname}'")
 
-        else:  # Non-local
-            # upload the file if it exists locally
+        else:
             if os.path.isfile(ffullpath):
                 self.upload(ffullpath, progress_bar=progress_bar)
                 filename = fname
 
             elif not self._store_commands and fname in self.list_files():
-                # It exists in the Mapdl working directory
                 filename = fname
 
             elif self._store_commands:
-                # Assuming that in non_interactive, the file exists already in
-                # the Mapdl working directory
                 filename = fname
 
             else:
@@ -245,12 +222,9 @@ class _CoreFileMixin(_CoreMixinBase):
             Default filename extension. The default is None.
         """
 
-        # the old behaviour is to supplied the name and the extension separately.
-        # to make it easier let's going to allow names with extensions
         if not isinstance(fname, str):
             fname = str(fname)
 
-        # Sanitizing ext
         while ext and ext[0] == ".":
             ext = ext[1:]
 
@@ -260,7 +234,6 @@ class _CoreFileMixin(_CoreMixinBase):
             basename = os.path.basename(fname)
 
             if len(basename.split(".")) == 1 and default_extension:
-                # there is no extension in the main name.
                 fname = fname + "." + default_extension
 
         return fname
@@ -293,7 +266,7 @@ class _CoreFileMixin(_CoreMixinBase):
         file1.out
         file1.page
         """
-        if self._local:  # simply return a python list of files
+        if self._local:
             if refresh_cache:
                 local_path = self.directory
             else:

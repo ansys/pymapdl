@@ -224,11 +224,6 @@ def _stdin_has_data() -> bool:
         return True
 
 
-# ---------------------------------------------------------------------------
-# Click wrapper
-# ---------------------------------------------------------------------------
-
-
 @click.command(
     short_help="Execute MAPDL commands on a running instance.",
     help="""Send MAPDL commands to a running MAPDL instance and print the output.
@@ -351,7 +346,6 @@ def exec_cli(
     from ansys.mapdl.core.cli.helpers import silence_logging
     from ansys.mapdl.core.errors import MapdlRuntimeError
 
-    # Keep stdout clean so that the MAPDL output can be piped.
     silence_logging()
 
     try:

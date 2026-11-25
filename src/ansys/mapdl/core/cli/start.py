@@ -125,11 +125,6 @@ def start(
     )
 
 
-# ---------------------------------------------------------------------------
-# Click wrapper
-# ---------------------------------------------------------------------------
-
-
 @click.command(
     short_help="Launch MAPDL instances.",
     help="""This command aims to replicate the behavior of :func:`ansys.mapdl.core.launcher.launch_mapdl`
@@ -277,23 +272,23 @@ def start_cli(
     jobname: str,
     nproc: int,
     ram: Optional[int],
-    mode: Optional[str],  # ignored
+    mode: Optional[str],
     override: bool,
     loglevel: str,
     additional_switches: str,
     start_timeout: int,
     port: Optional[int],
-    cleanup_on_exit: Optional[bool],  # ignored
-    start_instance: Optional[bool],  # ignored
-    ip: Optional[str],  # ignored
-    clear_on_connect: Optional[bool],  # ignored
-    log_apdl: Optional[str],  # ignored
-    remove_temp_dir_on_exit: Optional[bool],  # ignored
-    license_server_check: Optional[bool],  # ignored
+    cleanup_on_exit: Optional[bool],
+    start_instance: Optional[bool],
+    ip: Optional[str],
+    clear_on_connect: Optional[bool],
+    log_apdl: Optional[str],
+    remove_temp_dir_on_exit: Optional[bool],
+    license_server_check: Optional[bool],
     license_type: Optional[str],
-    print_com: Optional[bool],  # ignored
-    add_env_vars: Optional[Dict[str, str]],  # ignored
-    replace_env_vars: Optional[Dict[str, str]],  # ignored
+    print_com: Optional[bool],
+    add_env_vars: Optional[Dict[str, str]],
+    replace_env_vars: Optional[Dict[str, str]],
     version: Optional[str],
 ) -> None:
     """Launch an MAPDL instance and print its connection information.
@@ -350,8 +345,6 @@ def start_cli(
     """
     from ansys.mapdl.core.cli.helpers import silence_logging
 
-    # Arguments accepted for parity with ``launch_mapdl`` that the CLI cannot
-    # honour, because it only starts the MAPDL process, it never builds a client.
     ignored_arguments = {
         "mode": mode,
         "cleanup_on_exit": cleanup_on_exit,

@@ -182,41 +182,32 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
             continue
 
         try:
-            # Check if alive
             status = proc.status()
             if not is_alive_status(status):
                 continue
 
-            # Try to get cmdline
             try:
                 cmdline = proc.cmdline()
             except (psutil.AccessDenied, PermissionError):
-                # Can't access cmdline - check if it's our process
                 if not can_access_process(proc):
-                    # Not our process, skip it
                     continue
-                # Our process but can't get cmdline - skip (can't verify if gRPC)
                 continue
 
-            # Check if it's a gRPC process
             if "-grpc" not in cmdline:
                 continue
 
-            # Get port from cmdline
             try:
                 port_index = cmdline.index("-port")
                 port = int(cmdline[port_index + 1])
             except (ValueError, IndexError):
                 continue
 
-            # Get number of children (for is_instance flag)
             try:
                 children = proc.children(recursive=True)
                 is_instance = len(children) >= 2
             except (psutil.AccessDenied, PermissionError):
                 is_instance = False
 
-            # Get working directory (with fallback to empty string on permission issues)
             try:
                 cwd = proc.cwd()
             except (psutil.AccessDenied, PermissionError):
@@ -235,11 +226,9 @@ def get_mapdl_instances() -> List[Dict[str, Any]]:
             )
 
         except (psutil.NoSuchProcess, psutil.ZombieProcess):
-            # Process disappeared or is zombie, skip it
             continue
 
         except (psutil.AccessDenied, PermissionError):
-            # We don't have permission to access this process, skip it
             continue
 
     return instances

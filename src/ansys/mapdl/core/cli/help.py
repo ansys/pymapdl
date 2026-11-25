@@ -29,27 +29,12 @@ import sys
 
 import click
 
-# ---------------------------------------------------------------------------
-# Regex patterns
-# ---------------------------------------------------------------------------
-
-# Matches the MAPDL command name in a docstring line such as:
-#   Mechanical APDL Command: `\*VGET <url>`_
-#   Mechanical APDL Command: `/PREP7 <url>`_
-#   Mechanical APDL Command: `K <url>`_
-# The leading ``\`` is the RST escape for ``*``; the capture group includes it.
 _MAPDL_CMD_RE = re.compile(r"Mechanical APDL Command: `(\\?\*?/?[^\s<`]+)")
 
-# Detects an ansyshelp.ansys.com URL anywhere in the docstring.
 _ANSYS_HELP_URL_RE = re.compile(r"ansyshelp\.ansys\.com")
 
-# Matches the start of the first numpydoc section heading, i.e. a non-blank
-# line immediately followed by a line of three or more dashes.
 _FIRST_SECTION_RE = re.compile(r"^\S[^\n]*\n-{3,}", re.MULTILINE)
 
-# Sphinx role patterns used to strip custom roles before rich-rst sees them:
-#   :role:`display text <target>`  →  display text
-#   :role:`text`                   →  text
 _SPHINX_ROLE_WITH_TARGET_RE = re.compile(r":\w[\w.:-]*:`([^`<>]+)\s*<[^>]*>`")
 _SPHINX_ROLE_SIMPLE_RE = re.compile(r":\w[\w.:-]*:`([^`]+)`")
 
@@ -57,11 +42,6 @@ MISSING_RICH_RST_ERROR = (
     "The 'rich-rst' package is required to use the 'help' command.\n"
     "Install it via 'pip install rich-rst' and try again."
 )
-
-
-# ---------------------------------------------------------------------------
-# Public entry point
-# ---------------------------------------------------------------------------
 
 
 def help_command(command: str) -> str:
@@ -119,11 +99,6 @@ def help_command(command: str) -> str:
     return _format_rst_for_terminal(doc)
 
 
-# ---------------------------------------------------------------------------
-# RST → terminal formatter
-# ---------------------------------------------------------------------------
-
-
 def _preprocess_rst(text: str) -> str:
     """Collapse multi-line hyperlinks and strip unsupported Sphinx roles.
 
@@ -137,8 +112,6 @@ def _preprocess_rst(text: str) -> str:
     str
         Pre-processed RST ready for :class:`rich_rst.RestructuredText`.
     """
-    # Collapse multi-line RST hyperlinks so docutils can parse them.
-    # Matches: `display text\n    <url>`_
     text = re.sub(
         r"`([^`<\n]+?)\s*\n\s*<([^>]+)>`(_+)",
         r"`\1 <\2>`\3",
@@ -224,11 +197,6 @@ def _format_rst_for_terminal(text: str) -> str:
     return result
 
 
-# ---------------------------------------------------------------------------
-# Command-map helpers
-# ---------------------------------------------------------------------------
-
-
 def _cmd_to_key(raw_cmd: str) -> str:
     """Convert a raw MAPDL command name (as found in a docstring) to a lookup key.
 
@@ -249,7 +217,7 @@ def _cmd_to_key(raw_cmd: str) -> str:
     str
         Uppercase lookup key, e.g. ``STARVGET``, ``SLASHPREP7``, or ``K``.
     """
-    cmd = raw_cmd.lstrip("\\")  # drop RST escape backslash
+    cmd = raw_cmd.lstrip("\\")
     if cmd.startswith("*"):
         return "STAR" + cmd[1:].upper()
     if cmd.startswith("/"):
@@ -335,11 +303,6 @@ def _normalise_user_input(command: str) -> str:
 
     """
     return _cmd_to_key(command)
-
-
-# ---------------------------------------------------------------------------
-# Click wrapper
-# ---------------------------------------------------------------------------
 
 
 @click.command(

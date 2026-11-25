@@ -35,7 +35,6 @@ from ansys.mapdl.core.plotting.picker import MapdlPicker
 
 from . import _CoreMixinBase
 
-# XSEL command -> (owner attribute, ID attribute) of the selected entities.
 _XSEL_OUTPUT = {
     "NSEL": ("mesh", "nnum"),
     "ESEL": ("mesh", "enum"),
@@ -73,14 +72,11 @@ class _CoreSelectionMixin(_CoreMixinBase):
         return self._save_selection_obj
 
     def _wrap_xsel_commands(self):
-        # Wrapping XSEL commands.
         if self.is_console:
             return
 
         for name in dir(self):
-            if name[0:4].upper() in CMD_XSEL and name in dir(
-                Commands
-            ):  # avoid matching Mapdl properties which starts with same letters as MAPDL commands.
+            if name[0:4].upper() in CMD_XSEL and name in dir(Commands):
                 method = self.__getattribute__(name)
                 setattr(self, name, self._wrap_xsel_function(method))
 
@@ -95,9 +91,7 @@ class _CoreSelectionMixin(_CoreMixinBase):
 
         @wraps(func)
         def inner_wrapper(*args, **kwargs):
-            # in interactive mode (item='p'), the output is not suppressed
             if self._store_commands:
-                # In non-interactive mode, execute the wrapped function and return its result.
                 return func(*args, **kwargs)
 
             return_mapdl_output = kwargs.pop(
@@ -116,7 +110,6 @@ class _CoreSelectionMixin(_CoreMixinBase):
     def _xsel_selected_ids(self, method):
         """Return the IDs selected by an XSEL command."""
         if not self.geometry:
-            # Cases where the geometry module is not loaded
             return None
 
         source, attribute = _XSEL_OUTPUT.get(
@@ -161,11 +154,9 @@ class _CoreSelectionMixin(_CoreMixinBase):
         self, entity, selection_function, type_, item, comp, vmin, kabs
     ):
         """Select entities using CM, and the supplied selection function."""
-        # Getting new selection
         for id_, each_ in enumerate(vmin):
             if type_ == "S" or not type_:
                 type__ = "S" if id_ == 0 else "A"
-            # R is an issue, because first iteration will clean up the rest.
             elif type_ == "R":
                 raise NotImplementedError("Mode R is not supported.")
             else:

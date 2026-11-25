@@ -76,10 +76,7 @@ class Plain_Report:
         if os.name == "posix":
             self.core.extend(["pexpect"])
 
-        # Information about the GPU - bare except in case there is a rendering
-        # bug that the user is trying to report.
         if self.kwargs.get("gpu", False) and _HAS_PYVISTA:
-
             try:
                 from pyvista.report import GPUInfo
             except ImportError:
@@ -149,9 +146,7 @@ class Plain_Report:
 
     def mapdl_info(self):
         """Return information regarding the ansys environment and installation."""
-        # this is here to avoid circular imports
 
-        # List installed Ansys
         lines = ["", "Ansys Environment Report", "-" * 79]
         lines = ["\n", "Ansys Installation", "******************"]
         if _HAS_ATC:
@@ -188,8 +183,6 @@ class Plain_Report:
         return install_info + env_info
 
 
-# Determine which type of report will be used (depending on the
-# available packages)
 if _HAS_PYANSYS_REPORT:
     base_report_class: Type[pyansys_report.Report] = pyansys_report.Report
 else:  # pragma: no cover
@@ -241,20 +234,18 @@ class Report(base_report_class):  # type: ignore[misc]
             (e.g. {"MyLib" : "v1.2", ...}). Defaults to ``None``. Only used for
             the `pyansys-tools-report` package.
         """
-        # Mandatory packages
         core = [
             "ansys.mapdl.core",
             "numpy",
             "platformdirs",
             "scipy",
-            "grpc",  # grpcio
-            "ansys.api.mapdl.v0",  # ansys-api-mapdl-v0
-            "ansys.mapdl.reader",  # ansys-mapdl-reader
-            "google.protobuf",  # protobuf library
+            "grpc",
+            "ansys.api.mapdl.v0",
+            "ansys.mapdl.reader",
+            "google.protobuf",
             "ansys-math-core",
         ]
 
-        # Optional packages
         optional = [
             "matplotlib",
             "pyvista",
@@ -265,12 +256,10 @@ class Report(base_report_class):  # type: ignore[misc]
         ]
 
         if _HAS_PYANSYS_REPORT:
-            #  Combine all packages into one
             all_mapdl_packages = core + optional
             if additional is not None:
                 all_mapdl_packages += additional
 
-            # Call the pyansys_report.Report constructor
             super().__init__(
                 additional=all_mapdl_packages,
                 ncol=ncol,
@@ -281,7 +270,6 @@ class Report(base_report_class):  # type: ignore[misc]
                 ansys_libs=ansys_libs,
             )
         else:
-            # Call the PlainReport constructor
             super().__init__(
                 additional=additional,
                 core=core,

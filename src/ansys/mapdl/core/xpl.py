@@ -499,7 +499,6 @@ class ansXpl:
         if dtype is None:
             raise ValueError("Unknown MAPDL data type")
 
-        # return either vector or matrix type
         mm = AnsMath(self._mapdl)
         if data_info.objtype == mapdl_pb2.DataType.VEC:
             out = mm.vec(dtype=dtype, name=rand_name)

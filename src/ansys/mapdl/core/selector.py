@@ -310,8 +310,6 @@ class NodeSelector:
                 "select() requires at least one of 'x', 'y' or 'z' criteria."
             )
 
-        # Normalize and validate every axis before issuing a MAPDL command so
-        # an invalid later axis never leaves a partial selection behind.
         normalized: Dict[str, _AxisSelection] = {
             axis: _normalize_axis_criterion(axis, value)
             for axis, value in criteria.items()
@@ -324,8 +322,6 @@ class NodeSelector:
         """Translate normalized criteria into MAPDL commands and return the result."""
         mapdl = self._mapdl
 
-        # Multi-value axes go first (the stable sort keeps x, y, z order within
-        # each group) so that single-command axes can narrow the result with NSEL,R.
         ordered = sorted(normalized.items(), key=lambda item: item[1].single_command)
 
         with mapdl.save_selection:

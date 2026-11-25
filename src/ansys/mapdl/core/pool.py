@@ -236,7 +236,6 @@ class MapdlPool:
         self._exiting_i: int = 0
         self._override = override
 
-        # Getting IP from env var
         ip_env_var = os.environ.get("PYMAPDL_IP", "")
         if ip_env_var != "":
             if ip:
@@ -247,12 +246,9 @@ class MapdlPool:
             ip = ip_env_var
             LOG.debug(f"An IP ({ip}) has been set using 'PYMAPDL_IP' env var.")
 
-        ip = None if ip == "" else ip  # Making sure the variable is not empty
+        ip = None if ip == "" else ip
 
-        # Getting "start_instance" using "True" as default.
         if (ip is not None) and (start_instance is None):
-            # An IP has been supplied. By default, 'start_instance' is equal
-            # false, unless it is set through the env vars.
             start_instance = resolve_start_instance(False, None)
         else:
             start_instance = resolve_start_instance(start_instance, None)
@@ -264,7 +260,6 @@ class MapdlPool:
             n_instances, ip, port
         )
 
-        # Update _n_instances with the resolved value
         self._n_instances = n_instances
 
         self._ips = ips
@@ -283,13 +278,12 @@ class MapdlPool:
                 "Only strings or functions are allowed in the argument 'name'."
             )
 
-        # verify executable
         exec_file = os.getenv("PYMAPDL_MAPDL_EXEC", exec_file)
 
         if start_instance:
             exec_file = kwargs.get("exec_file", exec_file)
 
-            if not exec_file:  # get default executable
+            if not exec_file:
                 if _HAS_ATC:
                     exec_file = get_mapdl_path()
                 else:
@@ -305,7 +299,6 @@ class MapdlPool:
                         "exec_file=<path to executable>"
                     )
 
-            # Checking version
             if _HAS_ATC:
                 if version_from_path("mapdl", exec_file) < 211:
                     raise VersionError("MapdlPool requires MAPDL 2021R1 or later.")
@@ -320,7 +313,7 @@ class MapdlPool:
             os.makedirs(self._root_dir)
 
         self._instances = []
-        self._active = True  # used by pool monitor
+        self._active = True
 
         pbar = None
         if wait and progress_bar:
@@ -332,12 +325,10 @@ class MapdlPool:
 
             pbar = tqdm(total=n_instances, desc="Creating Pool")
 
-        # initialize a list of dummy instances
         self._instances = [None for _ in range(n_instances)]
 
-        # Converting ip or hostname to ip
         self._ips = [socket.gethostbyname(each) for each in self._ips]
-        _ = [check_valid_ip(each) for each in self._ips]  # double check
+        _ = [check_valid_ip(each) for each in self._ips]
 
         threads = [
             self._spawn_mapdl(
@@ -353,20 +344,17 @@ class MapdlPool:
             for i, (ip, port) in enumerate(zip(ips, ports))
         ]
 
-        # Storing threads
         self._threads = threads
 
         if wait:
             [thread.join() for thread in self._threads]
 
-            # make sure everything is ready
             n_instances_ready = 0
             time_end = time.time() + timeout
             while time_end > time.time():
                 n_instances_ready = sum([each is not None for each in self._instances])
 
                 if n_instances_ready == n_instances:
-                    # Loaded
                     break
                 time.sleep(0.1)
             else:
@@ -377,9 +365,7 @@ class MapdlPool:
             if pbar is not None:
                 pbar.close()
 
-        # monitor pool if requested
         if restart_failed:
-            # This name is using the wrapped to specify the thread name
             self._pool_monitor_thread = self._monitor_pool(
                 refresh=self._monitor_refresh, thread_name="Monitoring_Thread"
             )
@@ -389,16 +375,12 @@ class MapdlPool:
     @property
     def _spawning(self) -> bool:
         """Return true if spawning new MAPDL instance"""
-        # Because spawning is threaded, we need to make sure we are approaching this
-        # with counters instead of a bool.
 
         return self._spawning_i != 0
 
     @property
     def _exiting(self) -> bool:
         """Return true if exiting a MAPDL instance"""
-        # Because exiting is threaded, we need to make sure we are approaching this
-        # with counters instead of a bool.
 
         return self._exiting_i != 0
 
@@ -504,9 +486,7 @@ class MapdlPool:
          'Begin level']
         """
 
-        # check if any instances are available
         if not len(self):
-            # instances could still be spawning...
             if not all(v is None for v in self._instances):
                 raise MapdlRuntimeError("No MAPDL instances available.")
 
@@ -527,13 +507,11 @@ class MapdlPool:
 
             pbar = tqdm(total=n, desc="MAPDL Running")
 
-        # monitor thread
         @threaded_daemon
         def func_wrapper(obj, func, timeout, args=None):
             """Expect obj to be an instance of Mapdl"""
             complete = [False]
 
-            # execution thread.
             @threaded_daemon
             def run():
                 if args is not None:
@@ -564,9 +542,7 @@ class MapdlPool:
                     except MapdlRuntimeError:
                         LOG.warning(f"Unable to delete the object {obj}")
 
-                    # ensure that the directory is cleaned up
                     if obj._cleanup:
-                        # allow MAPDL to die
                         time.sleep(5)
                         if os.path.isdir(obj.directory):
                             try:
@@ -582,19 +558,16 @@ class MapdlPool:
 
         threads = []
         if iterable is None:
-            # simply apply to all
             for instance in self._instances:
                 if instance:
                     threads.append(func_wrapper(instance, func, timeout))
 
-            # wait for all threads to complete
             if wait:
                 [thread.join() for thread in threads]
 
         else:
             threads = []
             for args in iterable:
-                # grab the next available instance of mapdl
                 instance = self.next_available()
                 instance.locked = True
                 threads.append(
@@ -604,9 +577,7 @@ class MapdlPool:
                 )
 
             if close_when_finished:
-                # start closing any instances that are not in execution
                 while not all(v is None for v in self._instances):
-                    # grab the next available instance of mapdl and close it
                     instance, i = self.next_available(return_index=True)
                     self._instances[i] = None
 
@@ -620,7 +591,6 @@ class MapdlPool:
                         self._exiting_i -= 1
 
             else:
-                # wait for all threads to complete
                 if wait:
                     [thread.join() for thread in threads]
 
@@ -688,7 +658,6 @@ class MapdlPool:
         >>> len(outputs)
         20
         """
-        # check all files exist before running
         for filename in files:
             if not os.path.isfile(filename):
                 raise FileNotFoundError("Unable to locate file %s" % filename)
@@ -791,17 +760,13 @@ class MapdlPool:
             return self._next_available(return_index)
 
     def _next_available(self, return_index: bool = False):
-        # loop until the next instance is available
         while True:
             for i, instance in enumerate(self._instances):
-                if not instance:  # if encounter placeholder
+                if not instance:
                     continue
 
                 if not instance.locked and not instance._exited:
-                    # any instance that is not running or exited
-                    # should be available
                     if not instance.busy:
-                        # double check that this instance is alive:
                         try:
                             instance.inquire("", "JOBNAME")
                         except:
@@ -829,8 +794,8 @@ class MapdlPool:
         --------
         >>> pool.exit()
         """
-        self._active = False  # kills any active instance restart
-        self._spawning_i = 0  # Avoid respawning
+        self._active = False
+        self._spawning_i = 0
 
         @threaded
         def threaded_exit(index, instance):
@@ -879,7 +844,6 @@ class MapdlPool:
         if n < 1:
             raise ValueError(f"Must add at least 1 instance. Got n={n}")
 
-        # Runtime check for pool initialization (also helps mypy)
         if self._n_instances is None:
             raise RuntimeError("Pool must be initialized before calling increase()")
 
@@ -891,17 +855,12 @@ class MapdlPool:
 
         LOG.debug("Increasing pool size by {n} instances")
 
-        # Determine starting index for new instances
         current_count = self._n_instances
 
-        # Extend the instances list with None placeholders
         self._instances.extend([None for _ in range(n)])
 
-        # Update the total count
         self._n_instances += n
 
-        # Get available ports for new instances
-        # Find the highest current port and start from there
         current_ports = [inst._port for inst in self if inst is not None]
         if current_ports:
             starting_port = max(current_ports) + 1
@@ -910,7 +869,6 @@ class MapdlPool:
 
         new_ports = available_ports(n, starting_port)
 
-        # Spawn new instances
         threads = []
         for i in range(n):
             index = current_count + i
@@ -928,7 +886,6 @@ class MapdlPool:
             )
             threads.append(thread)
 
-        # Wait for all threads to complete
         for thread in threads:
             thread.join()
 
@@ -960,7 +917,6 @@ class MapdlPool:
         if n < 1:
             raise ValueError(f"Must remove at least 1 instance. Got n={n}")
 
-        # Runtime check for pool initialization (also helps mypy)
         if self._n_instances is None:
             raise RuntimeError("Pool must be initialized before calling reduce()")
 
@@ -972,14 +928,12 @@ class MapdlPool:
 
         LOG.debug(f"Reducing pool size by {n} instances")
 
-        # Exit the last n instances
         instances_to_exit: List[tuple] = []
         for i in range(self._n_instances - 1, self._n_instances - n - 1, -1):
             instance = self._instances[i]
             if instance is not None:
                 instances_to_exit.append((i, instance))
 
-        # Exit instances in threads
         @threaded
         def threaded_exit(index, instance):
             self._exiting_i += 1
@@ -997,14 +951,11 @@ class MapdlPool:
         for index, instance in instances_to_exit:
             threads.append(threaded_exit(index, instance))
 
-        # Wait for all exits to complete
         for thread in threads:
             thread.join()
 
-        # Remove the last n entries from instances list
         self._instances = self._instances[:-n]
 
-        # Update the total count
         self._n_instances -= n
 
         LOG.debug(f"Successfully reduced pool size to {self._n_instances} instances")
@@ -1034,19 +985,15 @@ class MapdlPool:
         if mapdl._exited:
             raise ValueError("Cannot add an exited MAPDL instance to the pool")
 
-        # Runtime check for pool initialization (also helps mypy)
         if self._n_instances is None:
             raise RuntimeError("Pool must be initialized before calling add()")
 
         LOG.debug("Adding existing MAPDL instance to pool")
 
-        # Add to instances list
         self._instances.append(mapdl)
 
-        # Update the total count
         self._n_instances += 1
 
-        # Mark instance as part of pool
         mapdl.on_pool = True
 
         LOG.debug(f"Successfully added instance. Pool size now: {self._n_instances}")
@@ -1062,21 +1009,14 @@ class MapdlPool:
     def __getitem__(self, key: int):
         """Return an instance by an index"""
 
-        # Regarding issue 2173.
-        # there are two options here:
-        # * the MAPDL instance hasn't be created yet. It is threaded.
-        # * it died and it hasn't been relaunched.
-        # Because we are seeing some random errors, I would bet on the first
         time0 = time.time()
-        timeout = 10  # seconds
+        timeout = 10
         while (
             self._instances[key] is None
             and time.time() < (time0 + timeout)
             and self._spawning
         ):
             time.sleep(0.1)
-            # We could respawn an instance here, but later at some parts of the code,
-            # we do check if the instance is None.
 
         return self._instances[key]
 
@@ -1100,7 +1040,6 @@ class MapdlPool:
         run_location: Optional[str] = None,
     ):
         """Spawn a mapdl instance at an index"""
-        # create a new temporary directory for each instance
         self._spawning_i += 1
 
         if not run_location:
@@ -1117,8 +1056,6 @@ class MapdlPool:
             **self._spawn_kwargs,
         )
 
-        # Waiting for the instance being fully initialized.
-        # This is introduce to mitigate #2173
         timeout_end = time.time() + timeout
 
         while timeout_end > time.time():
@@ -1131,7 +1068,6 @@ class MapdlPool:
                     f"The instance running at {ip}:{port} could not be started."
                 )
 
-        # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
             pbar.update(1)  # type: ignore[attr-defined]
 
@@ -1155,7 +1091,7 @@ class MapdlPool:
         while self._active:
             for index, instance in enumerate(self._instances):
                 name = self._names(index)
-                if not instance:  # encountered placeholder
+                if not instance:
                     continue
 
                 if instance._exited:
@@ -1210,10 +1146,8 @@ class MapdlPool:
                     )
 
             elif isinstance(ip, str):
-                # only one IP
                 ips = [ip]
                 if isinstance(port, list):
-
                     if len(port) > 0:
                         n_instances = len(port)
                         ports = port
@@ -1263,7 +1197,6 @@ class MapdlPool:
                 )
 
         else:
-
             if not isinstance(n_instances, int):
                 raise TypeError("Only integers are allowed for 'n_instances' argument.")
 

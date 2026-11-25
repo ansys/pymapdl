@@ -206,7 +206,6 @@ class LaunchConfig:
     - Different fields apply depending on mode and launch location
     """
 
-    # Core parameters
     exec_file: str
     run_location: str
     jobname: str
@@ -217,42 +216,34 @@ class LaunchConfig:
     version: Optional[int]
     start_instance: bool
 
-    # Resource parameters
     ram: Optional[int]
     timeout: int
 
-    # Behavior flags
     cleanup_on_exit: bool
     clear_on_connect: bool
     override: bool
     remove_temp_dir_on_exit: bool
     set_no_abort: bool
 
-    # Switches and options
     additional_switches: str
     license_type: Optional[str]
 
-    # HPC parameters
     launch_on_hpc: bool
     running_on_hpc: bool
     scheduler_options: Optional[Dict[str, Any]]
 
-    # Logging and output
     loglevel: str
     log_apdl: Optional[str]
     print_com: bool
     mapdl_output: Optional[str]
 
-    # Transport configuration
     transport_mode: Optional[TransportMode]
     uds_dir: Optional[str]
     certs_dir: Optional[str]
 
-    # Environment
     env_vars: Dict[str, str] = field(default_factory=dict)
     add_env_vars: Dict[str, str] = field(default_factory=dict)
 
-    # Advanced/debug
     license_server_check: bool = False
     force_intel: bool = False
     graphics_backend: Optional[str] = None
@@ -481,7 +472,7 @@ class PortStatus:
     port: int
     available: bool
     used_by_mapdl: bool
-    process: Optional[Any] = None  # psutil.Process
+    process: Optional[Any] = None
 
 
 @dataclass(frozen=True)

@@ -102,18 +102,5 @@ class DPFResultPlotting(DPFResultCore):
 
         >>> rst.plot_nodal_stress(0, comp='x', show_displacement=True)
         """
-        # if not comp:
-        #     comp = "X"
-
-        # ind = COMPONENTS.index(comp)
-
-        # op = self._get_nodes_result(
-        #     rnum,
-        #     "stress",
-        #     nodes=node_components,
-        #     in_nodal_coord_sys=False,
-        #     return_operator=True,
-        # )
-        # fc = op.outputs.fields_as_fields_container()[0]
 
         raise NotImplementedError("WIP")

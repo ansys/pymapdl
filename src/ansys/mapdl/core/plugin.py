@@ -200,7 +200,6 @@ class ansPlugin:
             each_command = each_command.replace("*", "star").replace("/", "slash")
 
             if hasattr(mapdl, each_command):
-                # We are allowing to overwrite existing commands
                 warn(f"Command '{each_command}' already exists in the MAPDL instance.")
 
             setattr(
@@ -356,13 +355,11 @@ class ansPlugin:
         if response and "error" in response.lower():
             raise PluginError("Failed to retrieve the list of loaded plugins.")
 
-        # Try to extract names from the server response
         server_names = []
         for line in response.strip().splitlines():
             line = line.strip()
             if not line:
                 continue
-            # Skip separator lines and MAPDL informational lines
             # (e.g. "*PLUG command : Open The lib..." or " : continuation...")
             if re.match(r"^[-=*]+$", line) or re.match(
                 r"(\*PLUG\s+command|\s*:|\s*>>)", line, re.IGNORECASE
@@ -375,7 +372,6 @@ class ansPlugin:
         if server_names:
             return server_names
 
-        # Fall back to internal state when server returns nothing
         return list(self._plugins.keys())
 
     def commands(self, plugin_name: str) -> List[str]:

@@ -88,7 +88,6 @@ class DPFResultData(DPFResultCore):
          array([2, 1, 3], dtype=int32),
          array([30., 20., 40.]))
         """
-        # To be done later
         raise NotImplementedInDPFBackend(method="nodal_input_force")
 
     def element_solution_data(
@@ -221,7 +220,6 @@ class DPFResultData(DPFResultCore):
         >>> rst.result_dof(0)
         ['UX', 'UY', 'UZ']
         """
-        # To be done later
         raise NotImplementedInDPFBackend(method="result_dof")
 
     def cs_4x4(self, cs_cord: int, as_vtk_matrix: bool = False) -> None:
@@ -519,7 +517,6 @@ class DPFResultData(DPFResultCore):
                 "Argument 'solution type' must be either 'NSL', " "'VEL', or 'ACC'"
             )
 
-        # size based on the first result
         nnum, sol = func(0, in_nodal_coord_sys=in_nodal_coord_sys)
         data = np.empty((self.nsets, sol.shape[0], sol.shape[1]), np.float64)
         data[0] = sol
