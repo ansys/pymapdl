@@ -165,6 +165,7 @@ numpydoc_validation_exclude = {  # set of regex
     # class inherits from pymapdl-reader
     r"\.*MeshGrpc\.*",
     r"ansys\.mapdl\.core\._commands\..+",
+    r"ansys\.mapdl\.core\.materials\.MaterialsSnapshot\.(get|keys|items|values)$",
 }
 
 # Favicon

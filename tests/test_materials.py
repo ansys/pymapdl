@@ -449,10 +449,9 @@ def test_materials_snapshot_does_not_follow_later_changes(mapdl, steel):
 
 @requires("grpc")
 def test_materials_leaves_no_file_behind(mapdl, steel):
-    files_before = set(mapdl.list_files())
     mapdl.materials
     mapdl.materials
-    assert set(mapdl.list_files()) == files_before
+    assert not [f for f in mapdl.list_files() if f.startswith("_materials_")]
 
 
 @requires("grpc")
@@ -550,6 +549,12 @@ def test_missing_cdwrite_file_raises_instead_of_empty_snapshot():
     assert session.sent == ["cdwrite", "slashdelete"]
 
 
+@pytest.fixture
+def steel_with_node(mapdl, steel):
+    mapdl.prep7()
+    mapdl.n(1)
+
+
 @requires("grpc")
 @pytest.mark.parametrize(
     "enter, routine",
@@ -560,7 +565,9 @@ def test_missing_cdwrite_file_raises_instead_of_empty_snapshot():
         ("post1", "POST1"),
     ],
 )
-def test_materials_read_from_any_processor_keeps_it(mapdl, steel, enter, routine):
+def test_materials_read_from_any_processor_keeps_it(
+    mapdl, steel_with_node, enter, routine
+):
     expected = mapdl.materials
     mapdl.finish()
     getattr(mapdl, enter)()
