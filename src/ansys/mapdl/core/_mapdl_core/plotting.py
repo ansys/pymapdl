@@ -135,9 +135,7 @@ class _CorePlottingMixin(_CoreMixinBase):
     def file_type_for_plots(self, value: VALID_DEVICES_LITERAL):
         """Modify the current file type for plotting."""
         if isinstance(value, str) and value.upper() in VALID_DEVICES:
-            self._run(
-                f"/show, {value.upper()}"
-            )  # To avoid recursion we need to use _run.
+            self._run(f"/show, {value.upper()}")
             self._file_type_for_plots = value.upper()  # type: ignore[assignment]
         else:
             raise ValueError(f"'{value}' is not allowed as file output for plots.")
@@ -222,24 +220,19 @@ class _CorePlottingMixin(_CoreMixinBase):
         if os.path.isfile(database_file) and not inplace:
             os.remove(database_file)
 
-        # cache result file, version, and routine before closing
         resultfile = self._result_file
         version = self.version
         self._cache_routine()
 
-        # finish, save and exit the server
         self.finish(mute=True)
         self.save(database_file, mute=True)
 
-        # Exit and do not remove the temporary directory. This is backwards
-        # compatible with CONSOLE and CORBA modes.
         remove_tmp = False
         if hasattr(self, "_remove_tmp"):
             remove_tmp = self._remove_tmp  # type: ignore[has-type]  # Set by _MapdlCore.__init__.
         self._remove_tmp = False
         self.exit()
 
-        # copy result file to temp directory
         if (
             not inplace
             and include_result
@@ -250,7 +243,6 @@ class _CorePlottingMixin(_CoreMixinBase):
 
         start_files = self._write_gui_start_files(run_dir, version)
 
-        # issue system command to run ansys in GUI mode
         cwd = os.getcwd()
         os.chdir(run_dir)
 
@@ -266,7 +258,6 @@ class _CorePlottingMixin(_CoreMixinBase):
             )
         add_sw = add_sw.split()
 
-        # Ensure exec_file is a file
         try:
             pathlib.Path(exec_file).is_file()
         except FileNotFoundError:
@@ -282,25 +273,20 @@ class _CorePlottingMixin(_CoreMixinBase):
             *add_sw,
         ]
 
-        # exec_array is controlled by the library. Excluding bandit check.
         call(
             exec_array,
             stdout=DEVNULL,
             cwd=run_dir,
         )  # nosec B603
 
-        # Going back
         os.chdir(cwd)
 
-        # Clearing
         for start_file in start_files:
             os.remove(start_file)
 
-        # reattach to a new session and reload database
         self._launch(self._start_parm)
         self.resume(database_file, mute=True)
 
-        # restore remove tmp state
         self._remove_tmp = remove_tmp
 
     @staticmethod
@@ -325,7 +311,6 @@ class _CorePlottingMixin(_CoreMixinBase):
 
         run_dir = os.path.join(tempfile.gettempdir(), f"ansys_{random_string(10)}")
 
-        # Sanity checks
         if os.path.isdir(run_dir):
             rmtree(run_dir)
         os.mkdir(run_dir)
@@ -346,7 +331,6 @@ class _CorePlottingMixin(_CoreMixinBase):
 
     def _resolve_gui_exec_file(self, exec_file: str | None) -> str:
         """Return the MAPDL executable used to open the GUI."""
-        # lazy load here to avoid circular import
         from ansys.mapdl.core import _HAS_ATC
 
         if not exec_file:
@@ -382,7 +366,6 @@ class _CorePlottingMixin(_CoreMixinBase):
         return _InteractivePlottingContext(self, pixel_res)
 
     def is_png_found(self, text: str) -> bool:
-        # findall returns None if there is no match
         return PNG_IS_WRITTEN_TO_FILE.findall(text) is not None
 
     def _restore_plot_device(
@@ -404,11 +387,9 @@ class _CorePlottingMixin(_CoreMixinBase):
         self._log.debug(f"Output from terminal used to find plot name: {text}")
 
         if self.is_png_found(text):
-            # flush graphics writer
             previous_device = self.file_type_for_plots
             try:
                 self.show("CLOSE", mute=True)
-                # self.show("PNG", mute=True)
                 filename = self._screenshot_path()
             finally:
                 self._restore_plot_device(
@@ -451,7 +432,7 @@ class _CorePlottingMixin(_CoreMixinBase):
 
         if self._show_matplotlib_figures:  # pragma: no cover
             self._log.debug("Using Matplotlib to plot")
-            plt.show()  # consider in-line plotting
+            plt.show()
 
         if in_ipython():
             self._log.debug("Using ipython")

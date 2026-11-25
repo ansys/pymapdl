@@ -62,7 +62,13 @@ Supported Python: 3.12 - 3.14.
       do_something()
   ```
 
-- Comment only what needs clarification. Docstrings carry the explanation.
+- No new code comments in `src/ansys/mapdl/core/` (enforced by the
+  `no-new-comments` pre-commit hook, a ratchet over
+  `.ci/no_comments_baseline.json`). Make the code say it, put the explanation
+  in a docstring, or record the decision as an ADR in `docs/adr/`. Allowed:
+  tool directives (`noqa`, `type: ignore`, `numpydoc ignore`, ...) and
+  `#:` attribute doc comments. After deleting comments, run
+  `python .ci/check_no_comments.py --update`.
 
 ## Docstrings
 
@@ -201,10 +207,14 @@ Writing one by hand causes duplicates and conflicts.
 
 ## Branches, commits, and pull requests
 
-Branches use `prefix/`, commits and pull request titles use `prefix:`. Allowed
-prefixes: `build`, `ci`, `docs`, `feat`, `fix`, `maint`, `perf`, `refactor`,
-`release`, `revert`, `testing` (plus `chore:` for commits and `junk/` for
-throwaway branches).
+Pull request titles and commits use a conventional-commit `type:` prefix. CI
+(`ansys/actions/check-pr-title` and `doc-changelog`) accepts only: `build`,
+`chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`,
+`test`. Anything else (for example `maint:` or `testing:`) fails the changelog
+job; use `chore:` for maintenance and `test:` for tests.
+
+Branches use `prefix/`: the same types, plus `maint/`, `testing/`, `release/`,
+and `junk/` for throwaway branches.
 
 ## Specialized agents
 

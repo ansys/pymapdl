@@ -37,7 +37,6 @@ from typing import (
 )
 import weakref
 
-# from ansys.dpf import post
 import numpy as np
 
 from ansys.mapdl.core import _HAS_DPF, _HAS_PYVISTA, LOG, Logger, Mapdl  # type: ignore
@@ -232,10 +231,9 @@ class DPFResultCore:
             )
 
         self._mapdl_weakref: weakref.ref["Mapdl"] | None = None
-        self._server_file_path: str | None = None  # In case DPF is remote.
+        self._server_file_path: str | None = None
         self._logger: Logger | None = logger
 
-        # RST parameters
         self.__rst_directory: str | None = None
         self.__rst_name: str | None = None
         self._mode_rst: bool
@@ -246,7 +244,6 @@ class DPFResultCore:
             )
 
         elif rst_file is not None:
-            # Using RST file only allows for one RST file at the time.
             if not rst_is_on_remote and not os.path.exists(rst_file):
                 raise FileNotFoundError(
                     f"The RST file '{rst_file}' could not be found."
@@ -261,7 +258,6 @@ class DPFResultCore:
             self.__rst_name = os.path.basename(rst_file)
 
         elif mapdl is not None:
-            # Using MAPDL instance allows to switch between RST files.
             if not isinstance(mapdl, Mapdl):  # pragma: no cover # type: ignore
                 raise TypeError("Must be initialized using Mapdl instance")
 
@@ -274,29 +270,16 @@ class DPFResultCore:
                 "One of the following kwargs must be supplied: 'rst_file' or 'mapdl'"
             )
 
-        # dpf
-        # If True, it triggers a update on the RST file
         self._update_required: bool = False
         self._loaded: bool = False
         self._cached_dpf_model: "dpf.Model" | None = None
         self._connected: bool = False
         self._server: dpf.server_types.BaseServer | None = None
-        self._tmp_dir: str | None = (
-            None  # Temporary directory to store the RST file locally
-        )
-        self.__mapdl_and_dpf_on_same_machine: bool | None = (
-            None  # True if the DPF server is running on the same machine as MAPDL
-        )
-        self._dpf_is_remote: bool | None = None  # Whether DPF is remote or not
+        self._tmp_dir: str | None = None
+        self.__mapdl_and_dpf_on_same_machine: bool | None = None
+        self._dpf_is_remote: bool | None = None
         self._dpf_ip: str | None = None
         self._rst_is_on_remote: bool = rst_is_on_remote
-
-        # old attributes
-        # ELEMENT_INDEX_TABLE_KEY = None  # todo: To fix
-        # ELEMENT_RESULT_NCOMP = None  # todo: to fix
-
-        # Let's try to delay the loading of the RST file until the first access
-        # self._update() # Loads the RST file and sets the dpf model
 
     def _get_is_remote(self) -> bool:
         """Check if the DPF server is running on a remote machine.
@@ -341,7 +324,6 @@ class DPFResultCore:
         mapdl_ip = None
         for cmd in cmds:
             if output := mapdl._sys(cmd):
-                # If the command returns an IP address, it means MAPDL is running on a local machine.
                 mapdl_ip = parse_ip_route(output)
                 if check_valid_ip(mapdl_ip):
                     break
@@ -352,7 +334,6 @@ class DPFResultCore:
         self._mapdl_ip = mapdl_ip or mapdl.ip
         self.logger.debug(f"Using MAPDL IP address: {self._mapdl_ip}")
 
-        # Get DPF server IP
         dpf_ip = self.dpf_ip
 
         if mapdl_ip != dpf_ip:
@@ -361,8 +342,7 @@ class DPFResultCore:
             )
             return False
 
-        # Check MAPDL can find the route
-        mapdl_version = str(mapdl.version).replace(".", "")  # Version as 252
+        mapdl_version = str(mapdl.version).replace(".", "")
         awp_root = (
             mapdl.inquire("", "env", f"AWP_ROOT{mapdl_version}")
             or f"/ansys_inc/v{mapdl_version}"
@@ -393,8 +373,6 @@ class DPFResultCore:
         elif mode not in ("InProcess", "LocalGrpc", "RemoteGrpc"):
             raise ValueError(f"Unknown DPF connection mode: {mode}")
 
-        # The garbage collector is disabled while the DPF client API is being
-        # loaded. See the `_gc_disabled` context manager for the rationale.
         with _gc_disabled():
             if mode == "InProcess":
                 dpf.server.set_server_configuration(
@@ -516,7 +494,6 @@ class DPFResultCore:
             self._try_connect_remote_grpc(ip, port)
 
         else:
-            # any connection method is supported because the file local.
             self.logger.debug("Attempting any connection method")
             self._iterate_connections(ip, port)
 
@@ -556,7 +533,6 @@ class DPFResultCore:
 
         ip, port = self._get_dpf_env_vars(ip, port)
 
-        # resolve ip
         ip = socket.gethostbyname(ip)
 
         check_valid_ip(ip)
@@ -697,7 +673,6 @@ class DPFResultCore:
 
     @property
     def _is_distributed(self) -> bool:
-        # raise NotImplementedError("To be implemented by DPF")
         return False  # Hardcoded until DPF exposure
 
     @property
@@ -721,7 +696,6 @@ class DPFResultCore:
     @property
     def _rst(self) -> str:
         if self.mode_mapdl:
-            # because it might be remote
             return self.mapdl.result_file
 
         else:
@@ -749,7 +723,6 @@ class DPFResultCore:
     @property
     def _rst_name(self) -> str:
         if self.mapdl:
-            # update always
             self.__rst_name = os.path.basename(self.mapdl.result_file)
         return self.__rst_name
 
@@ -774,17 +747,13 @@ class DPFResultCore:
         if self.mode_mapdl:
             self._update_rst(progress_bar=progress_bar, chunk_size=chunk_size)
 
-            # Upload it to DPF if we are not in local
             if self.dpf_is_remote and not self._mapdl_dpf_on_same_machine:
                 self._upload_to_dpf()
         elif self.dpf_is_remote and not self.rst_is_on_remote:
-            # If the RST is not on the remote server, we need to upload it
             self._upload_to_dpf()
 
-        # Updating model
         self._build_dpf_object()
 
-        # Resetting flag
         self._loaded = True
         self._update_required = False
 
@@ -798,7 +767,6 @@ class DPFResultCore:
             self._server_file_path = self._rst
         else:
             # Upload to DPF is broken on Ubuntu: https://github.com/ansys/pydpf-core/issues/2254
-            # self._server_file_path = dpf.upload_file_in_tmp_folder(self._rst)
             raise NotImplementedError(
                 "Uploading to DPF is not implemented yet. "
                 "Please use the local mode for now."
@@ -823,7 +791,6 @@ class DPFResultCore:
         save
             Whether save the model or not before update the RST file
         """
-        # Saving model
         if save:
             self.mapdl.save()  # type: ignore
 
@@ -839,7 +806,6 @@ class DPFResultCore:
 
         if self.mapdl_is_local is False and self._mapdl_dpf_on_same_machine is False:
             self._log.debug("Updating the local copy of remote RST file.")
-            # download file
             self._tmp_dir = tempfile.gettempdir()
             self.mapdl.download(  # type: ignore
                 self._rst,
@@ -893,7 +859,6 @@ class DPFResultCore:
         dpf.MeshedRegion
             Mesh from result file.
         """
-        # TODO: this should be a class equivalent to reader.mesh class.
         return self.model.metadata.meshed_region
 
     @property
@@ -940,7 +905,7 @@ class DPFResultCore:
                 "The argument 'entity_type' can only be 'Nodal' or 'Elemental'. "
             )
         else:
-            entity_type_ = entity_type.title()  # Sanity check
+            entity_type_ = entity_type.title()
 
         if entities is None:
             return None
@@ -952,7 +917,6 @@ class DPFResultCore:
             if all([isinstance(each, (int, float)) for each in entities]):
                 return entities  # type: ignore
             elif all([isinstance(each, str) for each in entities]):
-                # Need to map the components to the ids.
                 pass
             else:
                 raise ValueError("Strings and numbers are not allowed together.")
@@ -962,7 +926,6 @@ class DPFResultCore:
                 "Only ints, floats, strings or iterable of the previous ones are allowed."
             )
 
-        # For components selections:
         entities_: list[int] = []
         available_ns: list[str] = self.mesh.available_named_selections
 
@@ -983,13 +946,10 @@ class DPFResultCore:
         return entities_
 
     def _get_principal(self, op: "dpf.Operator") -> np.ndarray[Any, Any]:
-        fc: dpf.FieldsContainer = op.outputs.fields_as_fields_container()[
-            0
-        ]  # This index 0 is the step indexing.
+        fc: dpf.FieldsContainer = op.outputs.fields_as_fields_container()[0]
 
         op1 = dpf.operators.invariant.principal_invariants()
         op1.inputs.field.connect(fc)
-        # Get output data
         result_field_eig_1 = op.outputs.field_eig_1()
         result_field_eig_2 = op.outputs.field_eig_2()
         result_field_eig_3 = op.outputs.field_eig_3()
@@ -997,10 +957,8 @@ class DPFResultCore:
         op2 = dpf.operators.invariant.invariants()
         op2.inputs.field.connect(fc)
 
-        # Get output data
         result_field_int = op.outputs.field_int()
         result_field_eqv = op.outputs.field_eqv()
-        # result_field_max_shear = op.outputs.field_max_shear()
 
         return np.hstack(
             (
@@ -1013,9 +971,7 @@ class DPFResultCore:
         )
 
     def _extract_data(self, op: "dpf.Operator") -> ReturnData:
-        fc: dpf.Field = op.outputs.fields_as_fields_container()[  # type: ignore
-            0
-        ]  # This index 0 is the step indexing.
+        fc: dpf.Field = op.outputs.fields_as_fields_container()[0]  # type: ignore
 
         # When we destroy the operator, we might lose access to the array, that is why we copy.
         ids = fc.scoping.ids.copy()
@@ -1037,7 +993,6 @@ class DPFResultCore:
         requested_location: EntityType,
         scope_ids: Iterable[int | float] | None = None,
     ):
-
         scop = dpf.Scoping()
         requested_location = requested_location.lower()  # type: ignore
 
@@ -1065,7 +1020,6 @@ class DPFResultCore:
         return scop.ids
 
     def _set_element_results(self, op: "dpf.Operator", mesh: "dpf.MeshedRegion"):
-
         fc = op.outputs.fields_container()
 
         op2 = dpf.operators.averaging.to_elemental_fc(collapse_shell_layers=True)
@@ -1075,7 +1029,6 @@ class DPFResultCore:
         return op2
 
     def _set_input_timestep_scope(self, op: "dpf.Operator", rnum: Rnum):
-
         if not rnum:
             rnum = [int(1)]
         elif isinstance(rnum, (int, float)):
@@ -1086,7 +1039,7 @@ class DPFResultCore:
             raise TypeError("Only 'int' and 'float' are supported to define the steps.")
 
         my_time_scoping = dpf.Scoping()
-        my_time_scoping.location = "time_freq_steps"  # "time_freq"
+        my_time_scoping.location = "time_freq_steps"
         my_time_scoping.ids = rnum
 
         op.inputs.time_scoping.connect(my_time_scoping)
@@ -1101,7 +1054,6 @@ class DPFResultCore:
                 f"The current results are:\n    {list_results}"
             )
 
-        # Getting field
         return getattr(self.model.results, result_field)()
 
     def _get_nodes_result(
@@ -1214,7 +1166,6 @@ class DPFResultCore:
             Component input selection is still not supported.
         """
 
-        # todo: accepts components in nodes.
         mesh: dpf.MeshedRegion = self.metadata.meshed_region  # type: ignore
 
         if isinstance(scope_ids, np.ndarray):
@@ -1222,27 +1173,20 @@ class DPFResultCore:
 
         op = self._get_operator(result_field)
 
-        # CS output
         if not result_in_entity_cs:
             op.inputs.bool_rotate_to_global.connect(True)
         else:
             op.inputs.bool_rotate_to_global.connect(False)
 
-        # Setting time steps
         self._set_input_timestep_scope(op, rnum)
 
-        # getting the ids of the entities scope
         scope_ids_ = self._get_entities_ids(scope_ids, requested_location)
 
-        # Set type of return
         ids = self._set_mesh_scoping(op, mesh, requested_location, scope_ids_)  # type: ignore
 
         if requested_location.lower() == "elemental":
-            op = self._set_element_results(
-                op, mesh
-            )  # overwrite op to be the elemental results OP
+            op = self._set_element_results(op, mesh)
 
-        # Applying rescope to make sure the order is right
         if not isinstance(ids, list):
             ids = ids.astype(int).tolist()
 
@@ -1272,7 +1216,7 @@ class DPFResultCore:
         str
             The string form of the filename.
         """
-        return self._rst  # in the reader, this contains the complete path.
+        return self._rst
 
     @property
     def pathlib_filename(self) -> pathlib.Path:
@@ -1312,9 +1256,7 @@ class DPFResultCore:
             The cumulative index corresponding to the input.
         """
         if isinstance(user_input, int):
-            return self.metadata.time_freq_support.get_cumulative_index(
-                user_input
-            )  # 0 based indexing
+            return self.metadata.time_freq_support.get_cumulative_index(user_input)
 
         elif isinstance(user_input, (list, tuple)):
             return self.metadata.time_freq_support.get_cumulative_index(
@@ -1411,7 +1353,6 @@ class DPFResultCore:
             rst_info = ["PyMAPDL Result"]
 
         rst_info.append("{:<12s}: {:s}".format("title".capitalize(), self.title))
-        # rst_info.append("{:<12s}: {:s}".format("subtitle".capitalize(), self.subtitle)) #TODO: subtitle is not implemented in DPF.
         rst_info.append("{:<12s}: {:s}".format("units".capitalize(), self.units))
 
         rst_info.append("{:<12s}: {}".format("Version", self.version))
@@ -1468,7 +1409,7 @@ class DPFResultCore:
         """
         text = "Available Results:\n"
         for each_available_result in self.model.metadata.result_info.available_results:
-            text += (  # TODO: Missing label data NSL, VSL, etc
+            text += (
                 each_available_result.native_location
                 + " "
                 + each_available_result.physical_name
@@ -1614,12 +1555,10 @@ class DPFResultCore:
         mat_prop.inputs.data_sources.connect(self.model)
         prop_field = mat_prop.outputs.properties_value.get_data()
 
-        # Obtaining materials ids
         mat_ids: set[int] = set()
         for prop in prop_field:
             mat_ids = mat_ids.union(prop.scoping.ids.tolist())
 
-        # Building dictionary of materials
         mats = {}
         for mat_id in mat_ids:
             mats[mat_id] = {}

@@ -46,14 +46,11 @@ ready_items = [
     rb"AUX3:",
     rb"AUX12:",
     rb"AUX15:",
-    # continue
     rb"YES,NO OR CONTINUOUS\)\=",
     rb"executed\?",
-    # errors
     rb"SHOULD INPUT PROCESSING BE SUSPENDED\?",
     rb"ANSYS Traceback",
     rb"eMPIChildJob",
-    # prompts
     rb"ENTER FORMAT for",
 ]
 
@@ -95,10 +92,10 @@ def launch_pexpect(
 
     try:
         index = process.expect(["BEGIN:", "CONTINUE"], timeout=start_timeout)
-    except Exception as err:  # capture failure
+    except Exception as err:
         raise RuntimeError(process.before.decode("utf-8") or err)
 
-    if index:  # received ... press enter to continue
+    if index:
         process.sendline("")
         process.expect("BEGIN:", timeout=start_timeout)
 
@@ -163,11 +160,9 @@ class MapdlConsole(MapdlBase):
             else:
                 self._output = ""
 
-        # send the command
         self._log.debug("Sending command %s", command)
         self._process.sendline(command)
 
-        # do not expect
         if "/MENU" in command:
             self._log.info("Enabling GUI")
             self._process.sendline(command)
@@ -179,7 +174,6 @@ class MapdlConsole(MapdlBase):
             response = self._process.before.decode("utf-8")
 
             if self.clean_response:
-                # Cleaning up responses
                 response = response.strip().splitlines()
                 if (
                     isinstance(response, list)
@@ -191,7 +185,7 @@ class MapdlConsole(MapdlBase):
                 response = "\n".join(response)
 
             full_response += response
-            if i >= CONTINUE_IDX and i < WARNING_IDX:  # continue
+            if i >= CONTINUE_IDX and i < WARNING_IDX:
                 self._log.debug(
                     "Continue: Response index %i.  Matched %s",
                     i,
@@ -204,7 +198,7 @@ class MapdlConsole(MapdlBase):
                     user_input = input("Response: ")
                 self._process.sendline(user_input)
 
-            elif i >= WARNING_IDX and i < ERROR_IDX:  # warning
+            elif i >= WARNING_IDX and i < ERROR_IDX:
                 self._log.debug(
                     "Prompt: Response index %i.  Matched %s",
                     i,
@@ -217,7 +211,7 @@ class MapdlConsole(MapdlBase):
                     user_input = input("Response: ")
                 self._process.sendline(user_input)
 
-            elif i >= ERROR_IDX and i < PROMPT_IDX:  # error
+            elif i >= ERROR_IDX and i < PROMPT_IDX:
                 self._log.debug(
                     "Error index %i.  Matched %s",
                     i,
@@ -227,7 +221,7 @@ class MapdlConsole(MapdlBase):
                 response += ready_items[i].decode("utf-8")
                 raise Exception(response)
 
-            elif i >= PROMPT_IDX:  # prompt
+            elif i >= PROMPT_IDX:
                 self._log.debug(
                     "Prompt index %i.  Matched %s",
                     i,
@@ -237,7 +231,7 @@ class MapdlConsole(MapdlBase):
                 raise MapdlRuntimeError(
                     "User input expected.  Try using ``with mapdl.non_interactive``"
                 )
-            else:  # continue item
+            else:
                 self._log.debug(
                     "continue index %i.  Matched %s",
                     i,
@@ -245,7 +239,6 @@ class MapdlConsole(MapdlBase):
                 )
                 break
 
-        # return last response and all preceding responses
         return full_response
 
     @property

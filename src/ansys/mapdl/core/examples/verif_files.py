@@ -48,5 +48,4 @@ def load_vmfiles() -> Dict[str, str]:
     return vmfiles
 
 
-# save the module from failing if the verification files are unavailable.
 vmfiles: Dict[str, str] = load_vmfiles()

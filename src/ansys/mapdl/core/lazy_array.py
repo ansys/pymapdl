@@ -116,8 +116,6 @@ class LazyArray(NDArrayOperatorsMixin):
         if self._cached is None:
             value = self._download()
             self._cached = np.ravel(value) if self._flatten else value
-        # If cleanup failed after a successful download, retry it on the next
-        # access rather than silently retaining the server-side parameter.
         self._release_parameter()
         return self._cached
 

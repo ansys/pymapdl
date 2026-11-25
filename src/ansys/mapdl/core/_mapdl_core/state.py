@@ -23,8 +23,6 @@
 
 """The state MAPDL core responsibility mixin."""
 
-# Subprocess is needed to start the backend. But
-# the input is controlled by the library. Excluding bandit check.
 from typing import TYPE_CHECKING
 from uuid import uuid4
 from warnings import warn
@@ -300,7 +298,6 @@ class _CoreStateMixin(_CoreMixinBase):
 
     def _check_on_docker(self):
         """Check if MAPDL is running on docker."""
-        # self.get_mapdl_envvar("ON_DOCKER") # for later
         if not self.is_grpc:  # pragma: no cover
             return False
 
@@ -309,7 +306,7 @@ class _CoreStateMixin(_CoreMixinBase):
                 r"if grep -sq 'docker\|lxc' /proc/1/cgroup; then echo 'true' > __outputcmd__.txt; else echo 'false' > __outputcmd__.txt;fi;"
             )
         elif self.platform == "windows":  # pragma: no cover
-            return False  # TODO: check if it is running a windows docker container. So far it is not supported.
+            return False
 
         if not self.is_local:
             sys_output = self._download_as_raw("__outputcmd__.txt").decode().strip()
@@ -320,7 +317,7 @@ class _CoreStateMixin(_CoreMixinBase):
                 sys_output = f.read().strip()
 
         self._log.debug(f"The output of sys command is: '{sys_output}'.")
-        self.slashdelete("__outputcmd__.txt")  # cleaning
+        self.slashdelete("__outputcmd__.txt")
         return sys_output == "true"
 
     def _create_session(self):
@@ -338,12 +335,10 @@ class _CoreStateMixin(_CoreMixinBase):
     def _check_session_id(self):
         """Verify that the local session ID matches the remote MAPDL session ID."""
         if self._checking_session_id_ or not self._strict_session_id_check:
-            # To avoid recursion error
             return
 
         pymapdl_session_id = self._session_id
         if not pymapdl_session_id:
-            # We return early if pymapdl_session is not fixed yet.
             return
 
         self._checking_session_id_ = True

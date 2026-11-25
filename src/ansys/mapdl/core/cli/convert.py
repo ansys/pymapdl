@@ -193,11 +193,6 @@ def resolve_graphics_backend(
     )
 
 
-# ---------------------------------------------------------------------------
-# Click wrapper
-# ---------------------------------------------------------------------------
-
-
 @click.command(
     short_help="Convert APDL code to PyMAPDL code.",
     help="""PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.

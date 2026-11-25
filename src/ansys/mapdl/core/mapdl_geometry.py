@@ -51,14 +51,14 @@ from ansys.mapdl.core.mapdl_core import (
 )
 
 FLST_LOOKUP = {
-    "NODE": 1,  # node numbers
-    "ELEM": 2,  # element numbers
-    "KP": 3,  # keypoint numbers
-    "LINE": 4,  # line numbers
-    "AREA": 5,  # area numbers
-    "VOLU": 6,  # volume numbers
-    "TRACE": 7,  # trace points
-    "COORD": 8,  # coordinate locations
+    "NODE": 1,
+    "ELEM": 2,
+    "KP": 3,
+    "LINE": 4,
+    "AREA": 5,
+    "VOLU": 6,
+    "TRACE": 7,
+    "COORD": 8,
 }
 
 VALID_TYPE_MSG = """- 'S' : Select a new set (default)
@@ -93,7 +93,6 @@ if _HAS_PYVISTA:
     def merge_polydata(items: Iterable["pv.PolyData"]) -> "pv.PolyData":
         """Merge list of polydata or unstructured grids"""
 
-        # lazy import here for faster module loading
         from vtkmodules.vtkFiltersCore import vtkAppendPolyData
 
         afilter = vtkAppendPolyData()
@@ -138,8 +137,6 @@ class Geometry:
     @requires_package("pyiges")
     def _load_iges(self) -> "Iges":
         """Loads the iges file from MAPDL as a pyiges class"""
-        # Lazy import here for speed and stability
-        # possible to exclude this import in the future
         try:
             from pyiges import Iges
         except ImportError:
@@ -233,7 +230,6 @@ class Geometry:
         ...
         """
         mb = Multiblock(self.get_keypoints(return_as_list=True))
-        # Setting names
         for ind, each_block in enumerate(mb):
             mapdl_index = int(each_block["entity_num"][0])
             mb.set_block_name(index=ind, name=f"kp {mapdl_index}")
@@ -413,7 +409,6 @@ class Geometry:
         ...
         """
         mb = Multiblock(self._lines)
-        # Setting names
         for ind, each_block in enumerate(mb):
             mapdl_index = int(each_block["entity_num"][0])
             mb.set_block_name(index=ind, name=f"line {mapdl_index}")
@@ -528,7 +523,6 @@ class Geometry:
         ...
         """
         mb = Multiblock(self.get_areas(return_as_list=True))
-        # Setting names
         for ind, each_block in enumerate(mb):
             mapdl_index = int(each_block["entity_num"][0])
             mb.set_block_name(index=ind, name=f"area {mapdl_index}")
@@ -641,7 +635,6 @@ class Geometry:
         with self._mapdl.save_selection:
             orig_anum = self.anum
 
-            # reselect from existing selection to mimic APDL behavior
             if amin or amax:
                 amax = amax or amin
                 amin = amin or 1
@@ -656,8 +649,6 @@ class Geometry:
                     return_mapdl_output=True,
                 )
 
-            ## Duplication
-            # duplicate areas to avoid affecting existing areas
             a_num = None
             a_max = None
             areas_duplicated = False
@@ -671,16 +662,12 @@ class Geometry:
             mesh_attempted = False
 
             try:
-                # Getting the maximum area ID
                 a_num = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
-                # Setting the new areas ID starting number
                 numstr_changed = True
                 self._mapdl.numstr("AREA", a_num, mute=True)
-                # Generating new areas
                 areas_duplicated = True
                 self._mapdl.agen(2, "ALL", noelem=1, mute=True)
 
-                # Getting the new maximum area ID
                 a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
                 self._mapdl.asel(
                     "S",
@@ -694,7 +681,6 @@ class Geometry:
                 # necessary to reset element/area meshing association
                 self._mapdl.aatt(mute=True)
 
-                # create a temporary etype
                 etype_max = int(
                     self._mapdl.get(entity="ETYP", item1="NUM", it1num="MAX")
                 )
@@ -715,7 +701,6 @@ class Geometry:
                 if old_routine != "PREP7":
                     self._mapdl.prep7(mute=True)
 
-                # Mesh and get the number of elements per area
                 mesh_attempted = True
                 resp = self._mapdl.amesh("all")
                 elements_per_area = self.get_elements_per_area()
@@ -724,9 +709,6 @@ class Geometry:
                 grid = self._mapdl.mesh._grid.linear_copy()
                 pd = pv.PolyData(grid.points, grid.cells)
 
-                # pd['ansys_node_num'] = grid['ansys_node_num']
-                # pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']
-                # pd.clean(inplace=True)  # OPTIONAL
             finally:
                 primary_exception = sys.exc_info()[1]
                 cleanup_errors = []
@@ -778,14 +760,10 @@ class Geometry:
                             exc_info=(type(error), error, error.__traceback__),
                         )
 
-        # store the area number used for each element
         entity_num = np.empty(grid.n_cells, dtype=np.int32)
         if grid and len(elements_per_area) != 0:
-            # add anum info
             i = 0
             for index, (anum, nelem) in enumerate(elements_per_area):
-                # have to use original area numbering here as the
-                # duplicated areas numbers are inaccurate
                 entity_num[i : i + nelem] = orig_anum[index]
                 i += nelem
         else:
@@ -873,11 +851,9 @@ class Geometry:
         >>> mapdl.lnum
         array([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12], dtype=int32)
         """
-        # For clean exit when there is no lines.
         if self._mapdl.geometry.n_line == 0:
             return np.array([], dtype=np.int32)
 
-        # this (weirdly) sometimes fails
         for _ in range(5):
             lnum = self._mapdl.get_array("LINES", item1="LLIST")
             if lnum.size == self.n_line:
@@ -894,7 +870,6 @@ class Geometry:
         >>> mapdl.anum
         array([1, 2, 3, 4, 5, 6], dtype=int32)
         """
-        # Clean exit
         if self._mapdl.geometry.n_area == 0:
             return np.array([], dtype=np.int32)
 
@@ -920,7 +895,6 @@ class Geometry:
     @requires_package("pyiges")
     def _load_lines(self) -> List["pv.PolyData"]:
         """Load lines from MAPDL using IGES"""
-        # ignore volumes
         with self._mapdl.save_selection:
             self._mapdl.ksel("ALL", mute=True, return_mapdl_output=True)
             self._mapdl.lsel("ALL", mute=True, return_mapdl_output=True)
@@ -933,7 +907,6 @@ class Geometry:
         lines = []
         entity_nums = []
         for bspline in iges.bsplines():
-            # allow only 10001 as others appear to be construction entities
             if bspline.d["status_number"] in [1, 10001]:
                 entity_num = int(bspline.d["entity_subs_num"])
                 if entity_num not in entity_nums and entity_num in selected_lnum:
@@ -981,7 +954,6 @@ class Geometry:
     @requires_package("pyiges")
     def _load_keypoints(self) -> Tuple[NDArray, NDArray]:
         """Load keypoints from MAPDL using IGES."""
-        # write only keypoints
         with self._mapdl.save_selection:
             self._mapdl.vsel("NONE", mute=True, return_mapdl_output=True)
             self._mapdl.asel("NONE", mute=True, return_mapdl_output=True)
@@ -1070,7 +1042,6 @@ class Geometry:
         if isinstance(items, str):
             items = items.upper()
 
-        # special cases
         if items is None or items == "NONE":
             self._mapdl.ksel("NONE")
             return
@@ -1151,7 +1122,6 @@ class Geometry:
         if isinstance(items, str):
             items = items.upper()
 
-        # special cases
         if items is None or items == "NONE":
             self._mapdl.lsel("NONE")
             return
@@ -1232,7 +1202,6 @@ class Geometry:
         if isinstance(items, str):
             items = items.upper()
 
-        # special cases
         if items is None or items == "NONE":
             self._mapdl.asel("NONE")
             return
@@ -1312,9 +1281,6 @@ class Geometry:
         ...
         """
         mb = Multiblock(self.get_volumes(return_as_list=True))
-        # Setting names
-        # Because the volume mapping is made through the areas, the default
-        # "entity_num" field is not applicable here.
         for ind, each_block in enumerate(mb):
             mapdl_index = int(each_block.entity_num)
             mb.set_block_name(index=ind, name=f"volume {mapdl_index}")
@@ -1386,7 +1352,6 @@ class Geometry:
         if not return_as_list:
             return surf
 
-        # Cache current selection
         with self._mapdl.save_selection:
             area_num = surf["entity_num"].astype(int)
 
@@ -1464,7 +1429,6 @@ class Geometry:
         if isinstance(items, str):
             items = items.upper()
 
-        # special cases
         if items is None or items == "NONE":
             self._mapdl.vsel("NONE")
             return
@@ -1523,13 +1487,11 @@ class Geometry:
                 f"Use one of the following:\n{VALID_TYPE_MSG}"
             )
 
-        # convert to a flat array as it's easier for type checking
         items = np.asarray(items)
         if not np.issubdtype(items.dtype, np.number):
             raise TypeError("Item numbers must be a numeric type")
         items = items.ravel().astype(np.int_, copy=False)
 
-        # We can use list or arrays for vmin
         if item_type == "NODE":
             self._mapdl.nsel(sel_type, vmin=items, return_mapdl_output=True)
         elif item_type == "ELEM":

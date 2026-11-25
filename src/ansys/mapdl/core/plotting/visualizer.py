@@ -51,7 +51,6 @@ if _HAS_VISUALIZER:
 
 
 def _first_use():
-    # Run first time we use the visualizer
     global _FIRST_USE_RUN
     if _FIRST_USE_RUN is True:
         return
@@ -215,8 +214,6 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
             Additional keyword arguments passed to
             :meth:`pyvista.Plotter.add_points`.
         """
-        # Use setdefault so a caller-supplied ``point_size`` in kwargs takes
-        # precedence and avoids a duplicate-keyword TypeError.
         kwargs.setdefault("point_size", size)
         return self.scene.add_points(np.array(points), color=color, **kwargs)
 
@@ -346,11 +343,8 @@ class MapdlPlotter(Plotter):
                     f"Please use any combination of the following:\n{BCS}"
                 )
 
-            bc_labels = [
-                each.upper() for each in set(bc_labels)
-            ]  # Removing duplicates too
+            bc_labels = [each.upper() for each in set(bc_labels)]
 
-        # Replacing field by equivalent fields.
         for each_field in FIELDS:
             if each_field in bc_labels:
                 bc_labels.remove(each_field)
@@ -478,7 +472,6 @@ class MapdlPlotter(Plotter):
         show_bounds=False,
         show_axes=True,
         background=None,
-        # add_mesh kwargs:
         style=None,
         color="w",
         show_edges=None,
@@ -498,7 +491,6 @@ class MapdlPlotter(Plotter):
         feature_angle=30.0,
         show_scalar_bar=None,
         split_sharp_edges=None,
-        # labels kwargs
         font_size=None,
         font_family=None,
         text_color=None,
@@ -536,7 +528,6 @@ class MapdlPlotter(Plotter):
         else:
             self.scene.set_background("paraview")
 
-        # Making sure that labels are visible in dark backgrounds
         if not text_color and background:
             bg = self.scene.background_color.float_rgb
             # from: https://graphicdesign.stackexchange.com/a/77747/113009
@@ -555,7 +546,6 @@ class MapdlPlotter(Plotter):
         for point in points:
             self.add_points(
                 point["points"],
-                # scalars=point.get("scalars", None),
                 color=color,
                 show_edges=show_edges,
                 edge_color=edge_color,
@@ -585,10 +575,8 @@ class MapdlPlotter(Plotter):
                     and scalars.ndim == 2
                     and (scalars.shape[1] == 3 or scalars.shape[1] == 4)
                 ):
-                    # for the case we are using scalars for plotting
                     rgb = True
 
-                # To avoid index error.
                 mesh_ = mesh["mesh"]
                 if not isinstance(mesh_, list):
                     mesh_ = [mesh_]
@@ -689,23 +677,16 @@ class MapdlPlotter(Plotter):
         if bc_target:
             bc_target = self._bc_target_checker(bc_target)
         else:
-            bc_target = ["NODES"]  # bc_target_default()
+            bc_target = ["NODES"]
 
-        # We need to scale the glyphs, otherwise, they will be plot sized 1.
-        # We are going to calculate the distance between the closest points,
-        # so we will scaled to a percentage of this distance.
-        # This might create very small points in cases there are a concentration of points.
-        #
-        # Later can find a way to plot them and keep their size constant independent of the zoom.
-
-        ratio = 0.075  # Because a glyph of 1 is too big.
+        ratio = 0.075
         if bc_glyph_size is None:
             bc_glyph_size = get_bounding_box(mapdl.mesh.nodes)
             bc_glyph_size = bc_glyph_size[bc_glyph_size != 0]
 
             if bc_glyph_size.size != 0:
                 bc_glyph_size = bc_glyph_size.mean() * ratio
-            else:  # Case were there is only one node
+            else:
                 bc_glyph_size = ratio
 
         if not isinstance(bc_glyph_size, (int, float)):
@@ -723,7 +704,6 @@ class MapdlPlotter(Plotter):
                 bc_labels_font_size=bc_labels_font_size,
             )
 
-        # Add next things
         if "ELEM" in bc_target:
             pass
 
@@ -752,7 +732,7 @@ class MapdlPlotter(Plotter):
             else:
                 raise Exception(f"The label '{each_label}' is not supported.")
 
-            if bc.size == 0:  # There is no nodes with such label
+            if bc.size == 0:
                 return
 
             bc_num = bc[:, 0].astype(int)
@@ -763,33 +743,23 @@ class MapdlPlotter(Plotter):
             if bc_scale.max() != bc_scale.min():
                 bc_scale = (bc_scale - bc_scale.min()) / (
                     bc_scale.max() - bc_scale.min()
-                ) + 0.5  # Normalization around 0.5
+                ) + 0.5
             else:
-                bc_scale = (
-                    np.ones(bc_scale.shape) * 0.5
-                )  # In case all the values are the same
+                bc_scale = np.ones(bc_scale.shape) * 0.5
 
             pcloud = pv.PolyData(bc_nodes)
             pcloud["scale"] = bc_scale * bc_glyph_size
 
-            # Specify tolerance in terms of fraction of bounding box length.
-            # Float value is between 0 and 1. Default is None.
-            # If absolute is True then the tolerance can be an absolute distance.
-            # If None, points merging as a preprocessing step is disabled.
             glyphs = pcloud.glyph(
                 orient=False,
                 scale="scale",
-                # tolerance=0.05,
                 geom=self.bc_settings(each_label)["glyph"],
             )
             name_ = f"{each_label}"
             self.scene.add_mesh(
                 glyphs,
-                # name_filter=None,
                 color=self.bc_settings(each_label)["color"],
                 style="surface",
-                # style='wireframe',
-                # line_width=3,
                 name=name_,
                 label=name_,
                 opacity=0.40,
@@ -817,24 +787,17 @@ class MapdlPlotter(Plotter):
                 pcloud["labels"],
                 shape_opacity=0.25,
                 font_size=bc_labels_font_size,
-                # There is a conflict here. See
-                # To do not hide the labels, even when the underlying nodes
-                # are hidden, we set "always_visible"
                 always_visible=True,
-                show_points=False,  # to not have node duplicity
+                show_points=False,
                 font_family="arial",
             )
 
         if plot_bc_legend:
-            # Reorder labels to keep a consistent order
             sorted_dict = OrderedDict()
             labels_ = self.scene.renderer._labels.copy()
 
-            # sorting the keys
             for symbol in FIELDS_ORDERED_LABELS:
                 for key, value in labels_.items():
-                    # taking advantage and overriding the legend glyph with
-                    # something it can be seen properly in the legend
                     label_ = value[1]
                     if "U" in label_:
                         value = [self.bc_settings("UY")["glyph"], label_, value[2]]
@@ -846,12 +809,10 @@ class MapdlPlotter(Plotter):
                     if symbol == value[1]:
                         sorted_dict[key] = value
 
-            # moving the not added labels (just in case)
             for key, value in labels_.items():
                 if label_ not in FIELDS_ORDERED_LABELS:
                     sorted_dict[key] = value
 
-            # overwriting labels
             self.scene.renderer._labels = sorted_dict
             self.scene.theme.font.family = "arial"
             self.scene.add_legend(bcolor=None)
@@ -867,7 +828,6 @@ class MapdlPlotter(Plotter):
         show_bounds=False,
         show_axes=True,
         background=None,
-        # add_mesh kwargs:
         style=None,
         color="w",
         show_edges=None,
@@ -886,7 +846,6 @@ class MapdlPlotter(Plotter):
         smooth_shading=None,
         show_scalar_bar=None,
         split_sharp_edges=None,
-        # labels kwargs
         font_size=None,
         font_family=None,
         text_color=None,
@@ -917,7 +876,6 @@ class MapdlPlotter(Plotter):
             Filter to apply to the object. The default is ``None``.
         """
 
-        # Getting the plotter
         self.add_mesh(
             meshes,
             points,
@@ -926,7 +884,6 @@ class MapdlPlotter(Plotter):
             show_bounds=show_bounds,
             show_axes=show_axes,
             background=background,
-            # add_mesh kwargs:
             style=style,
             color=color,
             show_edges=show_edges,
@@ -945,7 +902,6 @@ class MapdlPlotter(Plotter):
             smooth_shading=smooth_shading,
             show_scalar_bar=show_scalar_bar,
             split_sharp_edges=split_sharp_edges,
-            # labels kwargs
             font_size=font_size,
             font_family=font_family,
             text_color=text_color,
@@ -973,7 +929,7 @@ class MapdlPlotter(Plotter):
                 bc_labels_font_size=bc_labels_font_size,
             )
 
-        if title:  # Added here to avoid labels overlapping title
+        if title:
             self.scene.add_title(
                 title, color=text_color, font=self.scene.theme.font.family
             )
@@ -1041,7 +997,6 @@ class MapdlPlotter(Plotter):
         if self._off_screen is not None:
             kwargs.setdefault("off_screen", self._off_screen)
 
-        # permit user to save the figure as a screenshot
         if self._savefig or savefig:
             self._backend.show(
                 auto_close=False,
@@ -1051,11 +1006,9 @@ class MapdlPlotter(Plotter):
             )
             self.scene.screenshot(self._savefig)
 
-            # return unclosed plotter
             if return_plotter:
                 return self
 
-            # if plotter.scene.set_background("paraview") not returning plotter, close right away
             self.scene.close()
 
         else:

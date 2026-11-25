@@ -23,6 +23,7 @@
 """Tests comparing results of krylov pymadl function with apdl macro"""
 
 import os
+from unittest.mock import MagicMock
 
 from ansys.tools.common.versioning import server_meets_version
 import numpy as np
@@ -333,3 +334,81 @@ def test_check_full_file_exist(mapdl, cleared):
 
     with pytest.raises(FileNotFoundError):
         kk._check_full_file_exists()
+
+
+@pytest.mark.parametrize(
+    "norm_c,norm_u,check_ortho,ramped_load",
+    [(1.0, 1.0, True, False), (0.0, 0.0, False, True)],
+)
+def test_krylov_solver_workflow_unit(
+    tmp_path, norm_c, norm_u, check_ortho, ramped_load
+):
+    from ansys.mapdl.core import Mapdl
+    from ansys.mapdl.core.krylov import KrylovSolver
+
+    (tmp_path / "job.full").write_bytes(b"full")
+    mapdl = MagicMock(spec=Mapdl)
+    mapdl.directory = str(tmp_path)
+    mapdl.jobname = "job"
+    mapdl._local = True
+    mapdl._log = MagicMock()
+    mapdl.nrm.side_effect = lambda name, *args: norm_c if name == "cz" else norm_u
+
+    vecs: dict[str, MagicMock] = {}
+
+    def get_vec(name):
+        if name not in vecs:
+            v = MagicMock()
+            v.id = name
+            if name == "MapForward":
+                arr = np.array([1, -1], dtype=np.int32)
+            elif name == "MapBack":
+                arr = np.array([1], dtype=np.int32)
+            else:
+                arr = np.array([1.0 + 2.0j, 3.0 - 1.0j, 0.5 + 0.0j], dtype=np.cdouble)
+            v.size = arr.size
+            v.asarray.return_value = arr
+            v.__getitem__.side_effect = lambda idx, a=arr: a[idx]
+            v.__imul__.return_value = v
+            v.__iadd__.return_value = v
+            v.norm.return_value = 2.0
+            vecs[name] = v
+        return vecs[name]
+
+    def make_mat(name="m"):
+        m = MagicMock()
+        m.id = name
+        m.shape = (2, 2)
+        m.dot.side_effect = lambda other: get_vec("dot")
+        m.T.dot.side_effect = lambda other: get_vec("tdot")
+        return m
+
+    mm = MagicMock()
+    mm.stiff.return_value = make_mat("k")
+    mm.mass.return_value = make_mat("m")
+    mm.damp.return_value = make_mat("c")
+    mm.mat.side_effect = lambda name="m": make_mat(name)
+    mm.vec.side_effect = lambda name="v": get_vec(name)
+    mm.zeros.side_effect = lambda *args, **kwargs: make_mat("zeros")
+    solver_sys = MagicMock()
+    solver_sys.solve.side_effect = lambda rhs, out: out
+    mm.factorize.return_value = solver_sys
+    mapdl.math = mm
+
+    ks = KrylovSolver(mapdl)
+    qz = ks.gensubspace(max_dim_q=3, frequency=10, check_orthogonality=check_ortho)
+    assert qz is ks.Qz
+    assert ks._run_gensubspace is True
+
+    yz = ks.solve(freq_start=10, freq_end=20, freq_steps=2, ramped_load=ramped_load)
+    assert yz is ks.Yz
+    assert ks._run_solve is True
+
+    sol = ks.expand(
+        residual_computation=True,
+        residual_algorithm="l-inf",
+        compute_solution_vectors=True,
+        return_solution=True,
+    )
+    assert sol.shape == (2, 3)
+    assert len(ks.residuals) == 2

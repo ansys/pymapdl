@@ -326,7 +326,6 @@ class Parameters:
     def _parm(self):
         """Current MAPDL parameters"""
         if self._mapdl._store_commands:
-            # in interactive mode
             return {}
 
         params = interp_star_status(
@@ -390,15 +389,14 @@ class Parameters:
                 raise IndexError("%s not a valid parameter_name" % key)
 
         parm = parameters[key]
-        if parm["type"] in ["ARRAY", "TABLE"]:  # Array case
+        if parm["type"] in ["ARRAY", "TABLE"]:
             try:
                 return self._get_parameter_array(key, parm["shape"])
             except ValueError:
-                # allow a second attempt
                 return self._get_parameter_array(key, parm["shape"])
         else:
             if "grpc" in self._mapdl.name.lower() and parm["type"] not in ["CHARACTER"]:
-                return self._mapdl.scalar_param(key)  # Only works with numbers
+                return self._mapdl.scalar_param(key)
             else:
                 return parm["value"]
 
@@ -406,7 +404,6 @@ class Parameters:
         """Set a parameter"""
         self._mapdl._check_parameter_name(key)
 
-        # parameters = self._parm  # check parameter exists
         if isinstance(value, (np.ndarray, list)):
             self._set_parameter_array(key, value)
         else:
@@ -512,7 +509,6 @@ class Parameters:
                 f"Length of ``name`` must be {MAX_PARAM_CHARS} characters or less"
             )
 
-        # delete the parameter if it exists as an array
         parm = self._parm
         if name in parm and parm[name]["type"] == "ARRAY":
             self._mapdl.starset(name, mute=True)
@@ -609,7 +605,6 @@ class Parameters:
         >>> mapdl_arrays['MYARR']
         array([10., -1.,  8.,  4., 10.])
         """
-        # type checks
         arr = np.array(arr)
         if not np.issubdtype(arr.dtype, np.number):
             raise TypeError("Only numerical arrays or lists are supported")
@@ -629,13 +624,9 @@ class Parameters:
         if arr.ndim == 3:
             kdim = arr.shape[2]
 
-        # 2021R1 and earlier has stability issues.  Directly stream
-        # results for improved performance and stability, but up to a
-        # size limit.
         if arr.size < 1000:
             return self._set_array_chain(name, arr, idim, jdim, kdim)
 
-        # write array from numpy to disk
         filename = "_tmp.dat"
         self._write_numpy_array(filename, arr)
 
@@ -681,7 +672,7 @@ class Parameters:
         parameter = parameter.upper()
         if parameter in self:
             self._parm.__delitem__(parameter)
-            self._mapdl.run(f"{parameter}=")  # Deleting parameter in MAPDL.
+            self._mapdl.run(f"{parameter}=")
         else:
             raise KeyError(f"The parameter '{parameter}' does not exist.")
 
@@ -702,7 +693,6 @@ class Parameters:
                 self._parent().show_trailing_underscore_parameters
             )
 
-            # Getting full output.
             self._parent().show_leading_underscore_parameters = True
             self._parent().show_trailing_underscore_parameters = True
 
@@ -760,14 +750,11 @@ def interp_star_status(status: str) -> dict[str, str]:
     parameters : dict
         Dictionary of parameters.
     """
-    # Exiting if there is no parameters
     if "no parameters defined" in status or (
         "Parameter name" in status and "command is undefined" in status
     ):
         return {}
 
-    # If there is a general call to *STATUS (no arguments), the output has some extra
-    # text that we don't want to include in the output.
     ind = find_parameter_listing_line(status)
     status = "\n".join(status.splitlines()[ind:])
 
@@ -780,23 +767,19 @@ def interp_star_status(status: str) -> dict[str, str]:
     is_string_array = False
     name_ = ""
     if is_parameter_listing(status):
-        # Works for one parameter or general listing
         header = "NAME                              VALUE"
         incr = 80
     elif is_math_listing(status):
-        # listing of math parameters
         header = "  Name                   Type"
         incr = 84
     elif is_array_listing(status):
-        # listing of one array parameter
         header = "LOCATION                VALUE"
         incr = 30
         match = re.search(r"STATUS-(.*)[^\(]\(", status)
         name_ = match.group(1).strip() if match else ""
     else:
-        # listing of a string array
         is_string_array = True
-        header = ""  # no header. Find will return 0.
+        header = ""
         incr = sum([len(each) for each in status.splitlines()[0:2]]) + 1
         match = re.search(r"STATUS-(.*)[^\(]\(", status)
         name_ = match.group(1).strip() if match else ""
@@ -822,7 +805,6 @@ def interp_star_status(status: str) -> dict[str, str]:
             continue
 
         value: Optional[Union[float, str]] = None
-        # line will contain either a character, scalar, or array
         name = items[0]
         if len(items) == 2 or "CHARACTER" in items[-1].upper():
             name = line[:MAX_PARAM_CHARS].strip()
@@ -836,7 +818,6 @@ def interp_star_status(status: str) -> dict[str, str]:
                 value = items[1]
             parameters[name] = {"type": items[2], "value": value}  # type: ignore[dict-item]
         elif len(items) == 4:
-            # it is an array or string array
             if is_array_listing(status):
                 myarray[int(items[0]) - 1, int(items[1]) - 1, int(items[2]) - 1] = (
                     float(items[3])

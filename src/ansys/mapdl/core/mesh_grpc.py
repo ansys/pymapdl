@@ -111,8 +111,6 @@ class MeshGrpc:
     @property
     def _has_nodes(self):
         """Returns True when has nodes"""
-        # if isinstance(self._nodes, np.ndarray):
-        # return bool(self._nodes.size)
         return self.nodes.size != 0
 
     @property
@@ -134,26 +132,26 @@ class MeshGrpc:
             self._cache_elem_off = None
             self._cache_element_desc = None
             self._cache_nnum = None
-            self._cached_elements = None  # cached list of elements
+            self._cached_elements = None
             self._chunk_size = None
             self._elem = None
             self._elem_off = None
-            self._enum = None  # cached element numbering
-            self._esys = None  # cached element coordinate system
+            self._enum = None
+            self._esys = None
             self._etype = None
-            self._etype_cache = None  # cached ansys element type numbering
-            self._etype_id = None  # cached element type id
+            self._etype_cache = None
+            self._etype_id = None
             self._grid = None
             self._grid_cache = None
             self._keyopt = {}
-            self._mtype = None  # cached ansys material type
+            self._mtype = None
             self._nnum = None
-            self._node_angles = None  # cached node angles
-            self._node_coord = None  # cached node coordinates
-            self._rcon = None  # cached ansys element real constant
+            self._node_angles = None
+            self._node_coord = None
+            self._rcon = None
             self._rdat = None
             self._rnum = None
-            self._secnum = None  # cached section number
+            self._secnum = None
             self._surf_cache = None
             self._tshape = None
             self._tshape_key = None
@@ -175,20 +173,14 @@ class MeshGrpc:
             with self._mapdl.save_selection:
                 self._mapdl.nsle("S", mute=True, return_mapdl_output=True)
 
-                # '_update_cache_elem' runs first and alone: it is not
-                # guarded by '_thread_lock_grpc' and must finish before the
-                # calls below start, otherwise it could race with them.
                 self._update_cache_elem()
                 self._update_cache_element_desc()
                 self._update_cache_nnum()
                 self._update_node_coord()
 
-                # somehow requesting path seems to help windows avoid an
-                # outright segfault prior to running CMSEL
                 if os.name == "nt":
                     _ = self._mapdl.path
 
-                # TODO: flaky
                 time.sleep(0.05)
         else:
             self.logger.debug("Ignoring cache reset.")
@@ -225,7 +217,6 @@ class MeshGrpc:
         """Element key description"""
         self._update_cache_element_desc()
 
-        # convert to ekey format
         if self._cache_element_desc:
             ekey = []
             for einfo in self._cache_element_desc:
@@ -282,7 +273,6 @@ class MeshGrpc:
     @requires_model()
     def material_type(self):
         """Material type index of each element in the archive."""
-        # FIELD 0 : material reference number
         if self._mtype is None:
             self._mtype = self._elem[self._elem_off[:-1]]
         return self._mtype
@@ -312,7 +302,7 @@ class MeshGrpc:
     def section(self):
         """Section number"""
         if self._secnum is None:
-            self._secnum = self._elem[self._elem_off[:-1] + 3]  # FIELD 3
+            self._secnum = self._elem[self._elem_off[:-1] + 3]
         return self._secnum
 
     @property
@@ -320,7 +310,7 @@ class MeshGrpc:
     def element_coord_system(self):
         """Element coordinate system number"""
         if self._esys is None:
-            self._esys = self._elem[self._elem_off[:-1] + 4]  # FIELD 4
+            self._esys = self._elem[self._elem_off[:-1] + 4]
         return self._esys
 
     @property
@@ -375,7 +365,6 @@ class MeshGrpc:
         Use the data within ``rlblock`` and ``rlblock_num`` to get the
         real constant datat for each element.
         """
-        # FIELD 2 : real constant reference number
         if self._rcon is None:
             self._rcon = self._elem[self._elem_off[:-1] + 2]
         return self._rcon
@@ -504,7 +493,6 @@ class MeshGrpc:
         for einfo in self._cache_element_desc:
             keyopt = einfo[2:20]
             if keyopt.any():
-                # convert to fortran/ANSYS format
                 valid_keyopt = keyopt[keyopt.astype(np.bool_)]
                 ans_keyopt = np.vstack((np.nonzero(keyopt)[0] + 1, valid_keyopt))
                 key_opt[einfo[0]] = ans_keyopt.T.tolist()
@@ -542,7 +530,6 @@ class MeshGrpc:
         if CS_id == 0:
             return self.nodes
         else:
-            # self._mapdl.parameters["__node_loc__"] = self.nodes
             self._mapdl.get("__nnodes__", entity="NODE", entnum="0", item1="COUNT")
             self._mapdl.dim(
                 par="__node_loc_cs__", type_="ARRAY", imax="__nnodes__", jmax=3
@@ -672,19 +659,17 @@ class MeshGrpc:
         chunks = self._mapdl._stub.LoadElements(request)
         elem_raw = parse_chunks(chunks, np.int32)
 
-        if len(elem_raw) == 0:  # for empty mesh.
+        if len(elem_raw) == 0:
             return np.array([]), np.array([])
         n_elem = elem_raw[0]
 
-        # ignore zeros
         elem_off_raw = elem_raw[:n_elem]
         elem_off_raw = elem_off_raw[elem_off_raw != 0]
         # TODO: arrays from gRPC interface should include size of the elem array
         lst_value = np.array(elem_raw.size - n_elem, np.int32)
         offset = np.hstack((elem_off_raw - n_elem, lst_value))
 
-        # overwriting the last column to include element numbers
-        elems_ = elem_raw.copy()  # elem_raw is only-read
+        elems_ = elem_raw.copy()
         elems_ = elems_[n_elem:]
         indx_elem = offset[:-1] + 8
         elems_[indx_elem] = self.enum
@@ -711,7 +696,6 @@ class MeshGrpc:
         data = parse_chunks(chunks, np.int32)
         n_items = data[0]
         split_ind = data[1 : 1 + n_items]
-        # empty items sometimes...
         split_ind = split_ind[split_ind != 0]
         return np.split(data, split_ind)[1:]
 
@@ -842,8 +826,6 @@ class MeshGrpc:
                 additional_checking,
             )
         except ValueError:
-            # In case we fail to detect/apply midside nodes in cuadratic
-            # elements
             return _parse_vtk(
                 self,
                 allowable_types,
@@ -854,11 +836,9 @@ class MeshGrpc:
             )
 
     def _parse_rlist(self) -> dict[int, list[int | float]]:
-        # mapdl.rmore(*list)
         with self._mapdl.force_output:
             rlist = self._mapdl.rlist()
 
-        # removing ueless part
         rlist = rlist.replace(
             """   *****MAPDL VERIFICATION RUN ONLY*****
      DO NOT USE RESULTS FOR PRODUCTION

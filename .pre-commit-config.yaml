@@ -110,3 +110,13 @@ repos:
     - id: bandit
       args: ['-c', 'pyproject.toml']
       additional_dependencies: ['bandit[toml]']
+
+# Ratchet: no new code comments in src/ (see docs/adr/0022-ban-code-comments-with-a-ratchet.md)
+- repo: local
+  hooks:
+    - id: no-new-comments
+      name: no new code comments
+      entry: python .ci/check_no_comments.py
+      language: python
+      pass_filenames: false
+      files: ^(src/ansys/mapdl/core/.*\.py|\.ci/no_comments_baseline\.json)$

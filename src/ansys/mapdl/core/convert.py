@@ -32,9 +32,6 @@ from ansys.mapdl.core.commands import Commands
 from ansys.mapdl.core.misc import is_float
 from ansys.mapdl.core.plotting import GraphicsBackend
 
-# Because the APDL version has empty arguments, whereas the PyMAPDL
-# doesn't have them. Hence the order of arguments is messed up.
-
 FORMAT_OPTIONS: Dict[str, Any] = {
     "select": "W191,W291,W293,W391,E115,E117,E122,E124,E125,E225,E231,E301,E303,F401,F403",
     "max-line-length": 100,
@@ -58,74 +55,71 @@ CLEAR_AT_START_DEFAULT: bool = False
 CHECK_PARAMETER_NAMES_DEFAULT: bool = True
 
 
-# This commands have "--" as one or some arguments
 COMMANDS_WITH_EMPTY_ARGS: Dict[str, Tuple[Any, ...]] = {
-    "/CMA": (),  # "/CMAP,
-    "/NER": (),  # "/NERR,
-    "/PBF": (),  # "/PBF,
-    "/PMO": (),  # "/PMORE,
-    "ADD": (),  # "ADD"
-    "ANTY": (),  # ANTYPE,
-    "ASBL": (),  # ASBL,
-    "ATAN": (),  # ATAN,
-    "BCSO": (),  # BCSOPTION,
-    "CDRE": (),  # CDREAD
-    "CLOG": (),  # CLOG,
-    "CONJ": (),  # CONJUG,
-    "CORI": (),  # CORIOLIS
-    "DERI": (),  # DERIV,
-    "DSPO": (),  # DSPOPTION,
-    "ENER": (),  # ENERSOL,
-    "ENSY": (),  # ENSYM,
-    "EQSL": (),  # EQSLV
-    "ESYM": (),  # ESYM,
-    "EXP": (),  # EXP,
-    "EXPA": (),  # EXPAND,
-    "FCLI": (),  # FCLIST,
-    "FILE": (),  # FILEAUX2,
-    "FLUR": (),  # FLUREAD,
-    "GMAT": (),  # GMATRIX,
-    "IMAG": (),  # IMAGIN,
-    "INT1": (),  # INT1,
-    "LARG": (),  # LARGE,
-    "LATT": (),  # LATT,
-    "MAP": (),  # MAP,
-    "MORP": (),  # MORPH,
-    "MPCO": (),  # MPCOPY,
-    "NLOG": (),  # NLOG,
-    "PLMA": (),  # PLMAP,
-    "PRED": (),  # PRED,
-    "PROD": (),  # PROD,
-    "QRDO": (),  # QRDOPT,
-    "QUOT": (),  # QUOT,
-    "RACE": (),  # RACE,
-    "RDEC": (),  # RDEC
-    "REAL": (),  # REALVAR,
-    "REME": (),  # REMESH,
-    "RPSD": (),  # RPSD
-    "SECR": (),  # SECREAD
-    "SECW": (),  # SECWRITE
-    "SESY": (),  # SESYMM,
-    "SETF": (),  # SETFGAP,
-    "SETR": (),  # SETRAN,
-    "SMAL": (),  # SMALL,
-    "SNOP": (),  # SNOPTION,
-    "SQRT": (),  # SQRT
-    "SURE": (),  # SURESU,
-    "THOP": (),  # THOPT,
-    "TINT": (),  # TINTP,
-    "XFDA": (),  # XFDATA
+    "/CMA": (),
+    "/NER": (),
+    "/PBF": (),
+    "/PMO": (),
+    "ADD": (),
+    "ANTY": (),
+    "ASBL": (),
+    "ATAN": (),
+    "BCSO": (),
+    "CDRE": (),
+    "CLOG": (),
+    "CONJ": (),
+    "CORI": (),
+    "DERI": (),
+    "DSPO": (),
+    "ENER": (),
+    "ENSY": (),
+    "EQSL": (),
+    "ESYM": (),
+    "EXP": (),
+    "EXPA": (),
+    "FCLI": (),
+    "FILE": (),
+    "FLUR": (),
+    "GMAT": (),
+    "IMAG": (),
+    "INT1": (),
+    "LARG": (),
+    "LATT": (),
+    "MAP": (),
+    "MORP": (),
+    "MPCO": (),
+    "NLOG": (),
+    "PLMA": (),
+    "PRED": (),
+    "PROD": (),
+    "QRDO": (),
+    "QUOT": (),
+    "RACE": (),
+    "RDEC": (),
+    "REAL": (),
+    "REME": (),
+    "RPSD": (),
+    "SECR": (),
+    "SECW": (),
+    "SESY": (),
+    "SETF": (),
+    "SETR": (),
+    "SMAL": (),
+    "SNOP": (),
+    "SQRT": (),
+    "SURE": (),
+    "THOP": (),
+    "TINT": (),
+    "XFDA": (),
 }
 
 
 COMMANDS_TO_NOT_BE_CONVERTED: List[str] = [
-    "CMPL",  # CMPLOT default behaviour does not match the `mapdl.cmplot`'s at the moemnt
-    # CDREAD # commented above
+    "CMPL",
 ]
 
 FORCED_MAPPING: Dict[str, str] = {
-    # Forced mapping between MAPDL and PyMAPDL
-    "SECT": "sectype",  # Because it is shadowed by `sectinqr`
+    "SECT": "sectype",
 }
 
 
@@ -446,7 +440,6 @@ class Lines(UserList[str]):
         super().__init__((each for each in args), **kwargs)
 
     def append(self, item: Any, mute: bool = True) -> None:
-        # append the item to itself (the list)
         if not self._mute and item:
             stripped_msg = item.replace("\n", "\\n")
             self._log.info(msg=f"Converted: '{stripped_msg}'")
@@ -516,11 +509,11 @@ class FileTranslator:
             "BFEB": "BFEBLOCK",
             "PREA": "PREAD",
             "SFEB": "SFEBLOCK",
-        }  # Way out: '-1' , 'END PREAD'
+        }
 
         self._enum_block_commands = {
             "CMBL": "CMBLOCK",
-        }  # Commands where you need to count the number of lines.
+        }
 
         _NON_INTERACTIVE_COMMANDS = {
             "*VWR": "*VWRITE",
@@ -584,7 +577,6 @@ class FileTranslator:
                 self.lines = autopep8.fix_code(text).splitlines()  # type: ignore
 
             else:  # pragma: no cover
-                # for development purposes
                 return autopep8.fix_code(text)
 
     def save(self, filename: str) -> None:
@@ -598,17 +590,13 @@ class FileTranslator:
         if os.path.isfile(filename):
             os.remove(filename)
 
-        # Making sure we write python string with double slash.
-        # We are not expecting other type of unicode symbols.
         _lines = Lines()
 
-        # Lines() class does not have comprenhension list
         for each_line in self.lines:
             _lines.append(each_line.replace("\\", "\\\\"))
 
         self.lines = _lines
 
-        # Try to format the file using AutoPEP8
         self.format_using_autopep8()
 
         with open(filename, "w") as f:
@@ -624,7 +612,7 @@ class FileTranslator:
         exec_file : str, optional
             Path to the ANSYS executable file.
         """
-        core_module = "ansys.mapdl.core"  # shouldn't change
+        core_module = "ansys.mapdl.core"
         self.lines.append(f"from {core_module} import launch_mapdl")
 
         mapdl_arguments = [f'loglevel="{loglevel}"']
@@ -674,7 +662,6 @@ class FileTranslator:
         """
 
         if "$" in line:
-            # these are chained commands.
             lines = line.split("$")
             self.start_chained_commands()
             for each_line in lines:
@@ -684,9 +671,6 @@ class FileTranslator:
             return
 
         self.comment = ""
-        original_line = line.replace("\r\n", "").replace(
-            "\n", ""
-        )  # It is needed for the nblock, eblock since they have spaces before the numbers
         line = line.strip()
         line = line.replace('"', "'")
 
@@ -703,38 +687,34 @@ class FileTranslator:
             self._block_count = 0
             self._block_current_cmd = None
 
-        # check if line contains a comment
         if "!" in line:
             if "'!'" in line or '"!"' in line:
                 pass
-            elif line[0] == "!":  # entire line is a comment
+            elif line[0] == "!":
                 self.comment = line.replace("!", "").strip()
                 self.store_comment()
                 return
-            else:  # command and in-line comment
+            else:
                 split_line = line.split("!")
                 line = split_line[0]
                 self.comment = " ".join(split_line[1:])
                 self.comment = self.comment.lstrip()
 
         if not line:
-            # Keeping empty lines
             self.lines.append("")
             return
 
-        # Cleaning ending empty arguments.
         # Because of an extra comma added to toffst command when generating ds.dat.
-        line_ = line.split(",")[::-1]  # inverting order
+        line_ = line.split(",")[::-1]
 
         for ind, each in enumerate(line_):
-            if each.strip():  # strip to remove spaces in empty arguments
+            if each.strip():
                 break
 
         line = ",".join(line_[ind:][::-1])
 
         line_with_trailing_commas = line
 
-        # remove trailing comma
         line = line[:-1] if line[-1] == "," else line
         line_upper = line.upper()
 
@@ -755,12 +735,10 @@ class FileTranslator:
             self.verification_example = True
 
         if cmd_caps_short == "/COM":
-            # It is a comment
             self.store_command("com", [line[5:]])
             return
 
         if cmd_caps_short == "C***":
-            # It is an old style comment
             self.store_command("com", [line[5:]])
             return
 
@@ -788,7 +766,7 @@ class FileTranslator:
 
         if self.output_to_default(line):
             self.store_run_command(line)
-            self.store_run_command("/GOPR")  # Adding gopr to ensure printing out
+            self.store_run_command("/GOPR")
             self.end_non_interactive()
             return
 
@@ -801,17 +779,12 @@ class FileTranslator:
             if not self.non_interactive:
                 prev_cmd = self.lines.pop(-1)
                 self.start_non_interactive()
-                new_prev_cmd = (
-                    self.indent + prev_cmd
-                )  # Since we are writing in self.lines we need to add the indentation by ourselves.
+                new_prev_cmd = self.indent + prev_cmd
                 self.lines.append(new_prev_cmd)
-                self.store_run_command(
-                    line
-                )  # Using run but it could be `store_command`
+                self.store_run_command(line)
                 self.end_non_interactive()
                 return
 
-        # Skipping conversion if command has empty arguments and there is ",," in the call
         if (
             cmd_caps_short in COMMANDS_WITH_EMPTY_ARGS
             and ",," in line_with_trailing_commas.replace(" ", "")
@@ -819,24 +792,23 @@ class FileTranslator:
             self.store_run_command(line.strip())
             return
 
-        # Skipping commands to not be converted
         if cmd_caps_short in COMMANDS_TO_NOT_BE_CONVERTED:
             self.store_run_command(line.strip())
             return
 
-        if cmd_caps_short == "/TIT":  # /TITLE
+        if cmd_caps_short == "/TIT":
             parameters = line.split(",")[1:]
             self.store_command("title", [",".join(parameters).strip()])
             return
 
-        if cmd_caps_short == "/AXL":  # /AXLAB
+        if cmd_caps_short == "/AXL":
             parameters = line.split(",")[1:]
             parameters_ = [parameters[0], ",".join(parameters[1:])]
             self.store_command("axlab", parameters_)
             return
 
         if cmd_caps_short == "*GET":
-            if self.non_interactive:  # gives error
+            if self.non_interactive:
                 self.store_run_command(line)
                 return
             else:
@@ -851,7 +823,7 @@ class FileTranslator:
             self.store_under_scored_run_command(line)
             return
 
-        if cmd_caps_short == "*CRE":  # creating a function
+        if cmd_caps_short == "*CRE":
             self.macros_names.append(items[1])
             if self.macros_as_functions:
                 self.start_function(items[1].strip())
@@ -859,9 +831,7 @@ class FileTranslator:
             else:
                 self.start_non_interactive()
 
-        ## Treating functions
         if items[0] in self.macros_names and self.macros_as_functions:
-            # We are calling the function/macro created before.
             func_name = items[0].strip()
 
             args = self._parse_arguments(items[1:])
@@ -894,13 +864,11 @@ class FileTranslator:
                     self.end_non_interactive()
                 return
 
-        # check for if statement
         if cmd_caps[:3] == "*IF" or "*IF" in line_upper:
             self.start_non_interactive()
             self.store_run_command(line)
             return
 
-        # check if line ends non-interactive
         if line[0] == "(":
             if not self.non_interactive:
                 warn(
@@ -911,8 +879,7 @@ class FileTranslator:
             self.store_run_command(line)
             return
 
-        # check if a line is setting a variable
-        if "=" in items[0]:  # line sets a variable:
+        if "=" in items[0]:
             self.store_run_command(line)
             return
 
@@ -922,13 +889,12 @@ class FileTranslator:
             self.store_empty_line()
             return
 
-        if line == "-1" or line_upper == "END PREAD":  # End of block commands
+        if line == "-1" or line_upper == "END PREAD":
             self.store_run_command(line)
             self._in_block = False
             self.end_non_interactive()
             return
 
-        # check valid command
         if (
             self._pymapdl_command(command) not in self._valid_commands
             and cmd_caps_short in self._non_interactive_commands
@@ -941,7 +907,7 @@ class FileTranslator:
             elif cmd_caps_short in self._enum_block_commands:
                 self._in_block = True
                 self._block_count = 0
-                if cmd_caps_short == "CMBL":  # In cmblock
+                if cmd_caps_short == "CMBL":
                     # CMBLOCK,Cname,Entity,NUMITEMS,,,,,KOPT
                     numitems = int(line.split(",")[3])
                     _block_count_target = (
@@ -956,13 +922,10 @@ class FileTranslator:
             self.store_run_command(line.strip())
 
         elif self.use_function_names:
-            # Takign into account the leading characters
             if command.upper() in FORCED_MAPPING:
-                # Checking exceptions/forced mapping
                 command = FORCED_MAPPING[command.upper()]
 
             else:
-                # Looking for a suitable candidate.
                 if command[0] == "/":
                     slash_command = f"slash{command[1:4]}"
                     if slash_command in self._valid_commands:
@@ -982,10 +945,9 @@ class FileTranslator:
                 if command not in dir(Mapdl):
                     command = self.find_match(command)
 
-            # Storing
             if command:
                 self.store_command(command, parameters)
-            else:  # find_match can return None
+            else:
                 self.store_run_command(line.strip())
 
         else:
@@ -1038,7 +1000,6 @@ class FileTranslator:
         else:
             underscore = ""
 
-        # Removing trailing/leading spaces
         command = command.strip()
 
         if self._infunction and "ARG" in command:
@@ -1097,7 +1058,6 @@ class FileTranslator:
             elif "ARG" in parameter and self._infunction:
                 parsed_parameters.append("%s" % parameter)
             else:
-                # Removing strings '' and "" because they are going to be added by the converter module.
                 if parameter.startswith("'") and parameter.endswith("'"):
                     parameter = parameter[1:-1]
                 if parameter.startswith('"') and parameter.endswith('"'):
@@ -1179,27 +1139,21 @@ class FileTranslator:
             True if redirecting to a file, False otherwise.
         """
         if line[:4].upper() == "/OUT":
-            # We are redirecting the output to somewhere, probably a file.
             # Because of the problem with the ansys output, we need to execute
             # this in non_interactive mode.
             output_cmd = line.strip().upper().split(",")
             if len(output_cmd) > 1:
                 opt1 = output_cmd[1].strip().upper()
                 if opt1 != "TERM":
-                    # A file is supplied.
                     return True
 
-        if (
-            line[:4].upper() == "*CFO"
-        ):  # any([each[0:4] in '*CFOPEN' for each in dir(Commands)])
-            # We might not need going into interactive mode for *CFOPEN/*CFCLOSE
+        if line[:4].upper() == "*CFO":
             return True
 
         return False
 
     def output_to_default(self, line: str) -> bool:
         if line[:4].upper() == "/OUT":
-            # We are redirecting the output to somewhere, probably a file.
             # Because of the problem with the ansys output, we need to execute
             # this in non_interactive mode.
             output_cmd = line.strip().upper().split(",")
@@ -1208,10 +1162,8 @@ class FileTranslator:
             elif len(output_cmd) > 1:
                 opt1 = output_cmd[1].strip().upper()
                 if opt1 == "TERM":
-                    # A file is supplied.
                     return True
         if line[:4].upper() in "*CFCLOSE":
-            # We might not need going into interactive mode for *CFOPEN/*CFCLOSE
             return True
 
         return False
@@ -1243,7 +1195,7 @@ class FileTranslator:
                 items.append(line_[begining_substring:ind])
                 begining_substring = ind + 1
 
-            if ind == len(line_) - 1:  # reaching ending of line
+            if ind == len(line_) - 1:
                 items.append(line_[begining_substring : ind + 1])
 
             if each_char in [")", "]", "}"]:
@@ -1316,8 +1268,6 @@ def _convert(
     )
 
     if isinstance(apdl_strings, str):
-        # os.linesep does not work well, so we are making sure
-        # the line separation is appropriate.
         regx = f"[^\\r]({translator.line_ending})"
         if not re.search(regx, apdl_strings):
             if "\r\n" in apdl_strings:

@@ -102,22 +102,18 @@ class _ExtendedFileCommandsMixin(_ExtendedMixinBase):
 
         base_name = os.path.basename(name)
 
-        # Check if it is a file local
         if os.path.exists(name):
             self.upload(name)
 
         elif base_name in self.list_files():
-            # the file exists in the MAPDL working directory, so do nothing.
             pass
 
         else:
             if os.path.dirname(name):
-                # It seems you provided a path (or something like that)
                 raise FileNotFoundError(
                     f"The name supplied to 'mapdl.use' ('{name}') is not a file in the Python "
                     "working directory, nor in the MAPDL working directory. "
                 )
-            # Preferring logger.warning over warn (from warnings), since it is less intrusive.
             self._log.warning(
                 f"The name supplied to 'mapdl.use' ('{name}') is not a file in the Python "
                 "working directory, nor in the MAPDL working directory. "
@@ -126,13 +122,12 @@ class _ExtendedFileCommandsMixin(_ExtendedMixinBase):
             )
             # If MAPDL cannot find named macro file, it will throw a runtime error.
 
-        # Update arg because the path is no longer needed
         args = (base_name, *args[1:])
 
         with self.non_interactive:
             super().use(*args, **kwargs)
 
-        return self._response  # returning last response
+        return self._response
 
     @wraps(_MapdlCore.mpwrite)
     def mpwrite(
@@ -222,7 +217,6 @@ class _ExtendedFileCommandsMixin(_ExtendedMixinBase):
         with self.non_interactive:
             # Use not interactive to avoid gRPC issues. See #975
             if self._local:
-                # If local, we can use the full path
                 super().mpread(fname=path_ / file_, ext=ext_, lib=lib, **kwargs)
             else:
                 super().mpread(fname=file_, ext=ext_, lib=lib, **kwargs)
@@ -243,12 +237,12 @@ class _ExtendedFileCommandsMixin(_ExtendedMixinBase):
         except MapdlCommandIgnoredError as e:
             raise IncorrectWorkingDirectory(e.args[0])
 
-        self._path = self._wrap_directory(args[0])  # caching
+        self._path = self._wrap_directory(args[0])
         return output
 
     @wraps(_MapdlCore.list)
     def list(self, filename, ext=""):
-        if hasattr(self, "_local"):  # gRPC
+        if hasattr(self, "_local"):
             if not self._local:
                 return self._download_as_raw(filename).decode()
 
@@ -270,7 +264,6 @@ class _ExtendedFileCommandsMixin(_ExtendedMixinBase):
             fname=fname, ext=ext, default_extension="parm"
         )  # Although documentation says `PARM`
 
-        # Getting the path for local/remote
         filename = self._get_file_path(fname, progress_bar=False)
 
         return self.input(filename)
@@ -289,10 +282,8 @@ class _ExtendedFileCommandsMixin(_ExtendedMixinBase):
             file_, ext_, _ = self._decompose_fname(fname)
             fname_ = self._get_file_name(fname=file_, ext=ext_)
 
-        # generate the log and download if necessary
         output = super().lgwrite(fname=fname_, ext="", kedit=kedit, **kwargs)
 
-        # Let's download the file to the location
         if self.is_local:
             src = pathlib.Path(self.directory / fname_)
             dst = pathlib.Path(fname).resolve()
@@ -301,9 +292,8 @@ class _ExtendedFileCommandsMixin(_ExtendedMixinBase):
                 shutil.copy(src, fname)
         else:
             self._download(fname_, fname)
-        fname_ = fname  # Update path
+        fname_ = fname
 
-        # remove extra grpc /OUT commands
         REMOVE_LINES = ("/OUT", "/OUT,anstmp")
         REMOVE_LINES_STARTING = (
             "*SET,__PYMAPDL_SESSION_ID__",
@@ -353,7 +343,6 @@ class _ExtendedFileCommandsMixin(_ExtendedMixinBase):
     ):
         """Wrapping *VWRITE"""
 
-        # cannot be run in interactive mode
         if not self._store_commands:
             raise MapdlRuntimeError(
                 "*VWRITE cannot run interactively.  \n\nPlease use "
@@ -389,7 +378,6 @@ class _ExtendedFileCommandsMixin(_ExtendedMixinBase):
     ):
         """Wrapping *MWRITE"""
 
-        # cannot be run in interactive mode
         if not self._store_commands:
             raise MapdlRuntimeError(
                 "*MWRITE cannot run interactively.  \n\nPlease use "

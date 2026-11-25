@@ -98,7 +98,6 @@ class _ExtendedImportCommandsMixin(_ExtendedMixinBase):
         fname = self._get_file_name(fname=fname, ext=ext)
         filename = self._get_file_path(fname, progress_bar=False)
 
-        # Entering aux15 preprocessor
         self.aux15()
 
         if " " not in fname:
@@ -115,7 +114,7 @@ class _ExtendedImportCommandsMixin(_ExtendedMixinBase):
         self.input_strings(cmd)
 
         out = super().igesin(fname="__iges_file__(1)", **kwargs)
-        self.run("__iges_file__ =")  # cleaning array.
+        self.run("__iges_file__ =")
         self.run("! Ending \\IGESIN whitespace patch.")
         return out
 

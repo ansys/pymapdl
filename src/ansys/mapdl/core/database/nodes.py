@@ -186,27 +186,6 @@ class DbNodes:
         self._itnod = result.inum
         return self._itnod
 
-    # def next_defined(self):
-    #     """get the number of the next defined node
-    #     You first have to call first)_
-
-    #     Returns
-    #     -------
-    #     next_defined : int
-    #     The next defined node number
-    #     = 0 - no more nodes
-    #     """
-
-    #     if self._itnod == -1:
-    #         raise TypeError(
-    #             "``db.next_node`` you first have to call first_node function"
-    #         )
-    #     breakpoint()
-    #     request = mapdl_db_pb2.NodRequest(next=self._itnod)
-    #     result = self._db._stub.NodNextDefined(request)
-    #     self._itnod = result.inum
-    #     return self._itnod
-
     @check_mapdl_db_is_alive
     def info(self, inod, ikey):
         """
@@ -429,13 +408,9 @@ class DbNodes:
 
         # each "chunk" from MAPDL is organized as:
         # n_nodes, node, node ... last_node
-        #
         # where each node is
         # INT32, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE
 
-        # first, just interpret as int32 and extract node numbering
-        # ignore the first int as this is n_nodes
-        # data = parse_chunks(chunks, np.int32)
         c = 0
         for chunk in chunks:
             parsed_chunk = np.frombuffer(chunk.payload, np.int32)
@@ -518,89 +493,3 @@ class DbNodes:
             request.vctn.extend([zang])
 
         self._db._stub.putNod(request)
-
-    ###############################################################################
-    # unimplemented
-
-    # def _select(self, inod, sel=1):
-    #     """Select, unselect, or delete a node in the database.
-
-    #     Parameters
-    #     ----------
-    #     inod : int
-    #         Node number.
-    #     sel : int
-    #         Action to take. One of the following:
-
-    #         * ``0`` - Delete the node.
-    #         * ``1`` - Select a node.
-    #         * ``-1`` - Unselect a node.
-    #         * ``2`` - Switch the exist select status.
-
-    #     """
-    #     request = mapdl_db_pb2.NodSelRequest(inum=inod, ksel=sel)
-    #     self._db._stub.NodSel(request)
-
-    # def delete(self, inod):
-    #     """Delete a node from the database.
-
-    #     Parameters
-    #     ----------
-    #     inod : int
-    #         Node number.
-
-    #     Examples
-    #     --------
-    #     Push and then delete a node.
-
-    #     >>> nodes = mapdl.db.nodes
-    #     >>> nodes.push(1, 10, 20, 30)
-    #     >>> sel, coord = nodes.coord(1)
-    #     >>> nodes.delete(1)
-
-    #     """
-    #     return self._select(inod, 0)
-
-    # def select(self, inod):
-    #     """select a node in the database.
-
-    #     Parameters
-    #     ----------
-    #     inod : int
-    #         Node number.
-
-    #     Examples
-    #     --------
-
-    #     """
-    #     self._select(inod, 1)
-
-    # def unselect(self, inod):
-    #     """Unselect a node in the database.
-
-    #     Parameters
-    #     ----------
-    #     inod : int
-    #         Node number.
-
-    #     Examples
-    #     --------
-
-    #     """
-    #     self._select(inod, -1)
-
-    # def invselect(self, inod):
-    #     """Inverse the select status of a node in the database.
-
-    #     Parameters
-    #     ----------
-    #     inod : int
-    #         Node number.
-
-    #     Examples
-    #     --------
-
-    #     """
-    #     self._select(inod, 2)
-
-    ###############################################################################

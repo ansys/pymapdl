@@ -113,14 +113,11 @@ if TYPE_CHECKING:  # pragma: no cover
     if _HAS_DPF:
         from ansys.mapdl.core.reader import DPFResult
 
-# Names re-exported for backward compatibility with code that imported them
-# from this module before the responsibility split.
 __all__ = [
     "_MapdlCore",
     "_MapdlPurePosixPath",
     "_MapdlPureWindowsPath",
     "_sanitize_start_parm",
-    # Constants
     "_PERMITTED_ERRORS",
     "_TMP_COMP",
     "DEBUG_LEVELS",
@@ -142,11 +139,9 @@ __all__ = [
     "VALID_SELECTION_ENTITY_TP",
     "VALID_SELECTION_TYPE_TP",
     "VWRITE_MWRITE_REPLACEMENT",
-    # Helpers
     "_find_blocked_command",
     "parse_to_short_cmd",
     "setup_logger",
-    # Commands
     "CMD_BC_LISTING",
     "CMD_LISTING",
     "CMD_XSEL",
@@ -156,7 +151,6 @@ __all__ = [
     "Commands",
     "StringWithLiteralRepr",
     "inject_docs",
-    # Errors
     "ComponentNoData",
     "MapdlCommandBlockedError",
     "MapdlCommandIgnoredError",
@@ -164,7 +158,6 @@ __all__ = [
     "MapdlFileNotFoundError",
     "MapdlInvalidRoutineError",
     "MapdlRuntimeError",
-    # Misc
     "GraphicsBackend",
     "Information",
     "MapdlFloat",
@@ -243,7 +236,7 @@ class _MapdlCore(
         **start_parm: dict[str, Any],
     ):
         """Initialize connection with MAPDL."""
-        self._show_matplotlib_figures = True  # for testing
+        self._show_matplotlib_figures = True
         self._query = None
         self.__exited: bool = False
         self._ignore_errors: bool = False
@@ -262,7 +255,7 @@ class _MapdlCore(
         self._default_file_type_for_plots: VALID_FILE_TYPE_FOR_PLOT_LITERAL = (
             file_type_for_plots
         )
-        self._version = None  # cached version
+        self._version = None
         self._mute = False
         self._save_selection_obj = None
         self._use_reader_backend: bool = start_parm.pop("use_reader_backend", True)  # type: ignore[assignment]
@@ -291,24 +284,17 @@ class _MapdlCore(
         self._krylov = None
         self._on_docker = None
         self._platform = None
-        self._print_com: bool = print_com  # print the command /COM input.
+        self._print_com: bool = print_com
 
-        # Start_parameters
         _sanitize_start_parm(start_parm)
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")  # type: ignore[assignment]
-        self._path: str | pathlib.PurePath | None = (
-            None  # start_parm.get("run_location", None)
-        )
+        self._path: str | pathlib.PurePath | None = None
         self._check_parameter_names: bool = start_parm.get(
             "check_parameter_names", True
         )  # type: ignore[assignment]
 
-        # Setting up loggers
-        self._log: logger = logger.add_instance_logger(
-            self.name, self, level=loglevel
-        )  # instance logger
-        # adding a file handler to the logger
+        self._log: logger = logger.add_instance_logger(self.name, self, level=loglevel)
         if log_file:
             if not isinstance(log_file, str):
                 log_file = "instance.log"
@@ -316,7 +302,6 @@ class _MapdlCore(
 
         self._log.debug("Logging set to %s", loglevel)
 
-        # Modules
         from ansys.mapdl.core.parameters import Parameters
 
         self._parameters: Parameters = Parameters(self)
@@ -325,9 +310,9 @@ class _MapdlCore(
 
         self._solution: Solution = Solution(self)
 
-        self._xpl: Optional[ansXpl] = None  # Initialized in mapdl_grpc
+        self._xpl: Optional[ansXpl] = None
 
-        self._plugin: Optional[ansPlugin] = None  # Initialized in mapdl_grpc
+        self._plugin: Optional[ansPlugin] = None
 
         from ansys.mapdl.core.component import ComponentManager
 
@@ -339,17 +324,13 @@ class _MapdlCore(
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
 
-        # Empty object that will store the `PostProcessing` object
         self._post_object = None
 
-        # Wrapping listing functions for "to_array" methods
         self._wrap_listing_functions()
 
-        # Wrapping XSEL commands to return ids.
         self._xsel_mapdl_output = False
         self._wrap_xsel_commands()
 
         self._info = Information(self)
 
-        # DPF
         self._dpf_result: "DPFResult | None" = None

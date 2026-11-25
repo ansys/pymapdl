@@ -161,9 +161,6 @@ class MapdlDb:
             self._mapdl.run(f"/DBS,SERVER,START,{port}")
 
         if not port:
-            # We do not know which port has started with
-            # Scan the DBServer.info file to get the Port Number
-
             self._mapdl._log.debug("Downloading 'DBServer' file.")
             tstart = time.time()
             timeout = 1
@@ -209,7 +206,6 @@ class MapdlDb:
         --------
         >>> mapdl.db.start()
         """
-        # checking MAPDL API
         from ansys.api.mapdl import __version__ as api_version
 
         api_version = tuple(int(each) for each in api_version.split("."))
@@ -220,7 +216,6 @@ class MapdlDb:
                 "You can use 'pip install ansys-api-mapdl --upgrade"
             )
 
-        ## Checking MAPDL versions
         mapdl_version = str(self._mapdl.version)
         if (
             not server_meets_version(mapdl_version, MINIMUM_MAPDL_VERSION)
@@ -242,13 +237,11 @@ class MapdlDb:
                 "Please check the online documentation at 'mapdl.docs.pyansys.com' "
             )
 
-        # only start if not already running
         is_running = self.active
         self._mapdl._log.debug("MAPDL DB server running: %s", str(is_running))
         if is_running:
             return
 
-        # permit overriding db_port via env var for CI
         if not port:
             env_port = os.environ.get("PYMAPDL_DB_PORT")
             if (
@@ -283,7 +276,6 @@ class MapdlDb:
         self._state = grpc.channel_ready_future(self._channel)
         self._stub = mapdl_db_pb2_grpc.MapdlDbServiceStub(self._channel)
 
-        # wait until the channel matures
         tstart = time.time()
         while ((time.time() - tstart) < timeout) and not self._state._matured:
             time.sleep(0.01)
@@ -333,7 +325,6 @@ class MapdlDb:
 
          DB Server is NOT currently running ..
         """
-        # Need to use the health check here
         with self._mapdl.run_as_routine("Begin level"):
             return self._mapdl.run("/DBS,SERVER,STATUS")
 
@@ -453,7 +444,7 @@ class MapdlDb:
                [0., 0., 0.]])
         """
         if self._nodes is None:
-            from .nodes import DbNodes  # here to avoid circular import
+            from .nodes import DbNodes
 
             self._nodes = DbNodes(self)
         return self._nodes
@@ -497,7 +488,7 @@ class MapdlDb:
         [1, 1, 1, 1, 0, 0, 14, 0, 0, 0]
         """
         if self._elems is None:
-            from .elems import DbElems  # here to avoid circular import
+            from .elems import DbElems
 
             self._elems = DbElems(self)
         return self._elems

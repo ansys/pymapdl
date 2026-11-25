@@ -48,14 +48,14 @@ from typing import (
 )
 from warnings import warn
 
+import numpy as np
+
 from ansys.mapdl.core import _HAS_PYVISTA, _HAS_VISUALIZER, LOG
 from ansys.mapdl.core.plotting import GraphicsBackend
-import numpy as np
 
 if TYPE_CHECKING:
     from ansys.mapdl.core.mapdl import MapdlBase as Mapdl
 
-# path of this module
 _frame = inspect.currentframe()
 MODULE_PATH = (
     os.path.dirname(inspect.getfile(_frame))
@@ -102,7 +102,6 @@ def check_valid_routine(routine: Union[str, ROUTINES]) -> bool:
     ValueError
         Raised when a routine is invalid.
     """
-    # Convert ROUTINES enum to string if necessary
     if isinstance(routine, ROUTINES):
         return True
 
@@ -258,7 +257,6 @@ def supress_logging(func: Callable[P, R]) -> Callable[P, R]:
 
         mapdl = args[0]
         if not issubclass(type(mapdl), (MapdlBase)):
-            # Assuming we are on a module object.
             mapdl = mapdl._mapdl  # type: ignore[attr-defined]
             if not issubclass(type(mapdl), (MapdlBase)):
                 raise Exception("This wrapper cannot access MAPDL object")
@@ -286,7 +284,6 @@ def run_as(routine: Union[str, ROUTINES]):
 
             mapdl = self
             if not issubclass(type(mapdl), (MapdlBase)):
-                # Assuming we are on a module object.
                 mapdl = mapdl._mapdl
                 if not issubclass(type(mapdl), (MapdlBase)):
                     raise Exception("This wrapper cannot access MAPDL object")
@@ -377,7 +374,6 @@ def create_temp_dir(tmpdir: Optional[str] = None, name: Optional[str] = None) ->
     if tmpdir is None:
         tmpdir = tempfile.gettempdir()
 
-    # Possible letters
     letters_ = string.ascii_lowercase.replace("n", "")
 
     def get_name():
@@ -387,7 +383,6 @@ def create_temp_dir(tmpdir: Optional[str] = None, name: Optional[str] = None) ->
     while os.path.exists(os.path.join(tmpdir, name)):
         name = get_name()
 
-    # create dir:
     path = os.path.join(tmpdir, name)
 
     if not os.path.isdir(path):
@@ -485,7 +480,6 @@ def load_file(
     elif not os.path.exists(fname) and base_fname in mapdl.list_files():
         mapdl._log.debug("File is already in the MAPDL working directory")
 
-    # Simplifying name for MAPDL reads it.
     return os.path.basename(fname)
 
 
@@ -594,7 +588,6 @@ def requires_package(package_name: str, softerror: bool = False) -> Callable:
     def decorator(function):
         @wraps(function)
         def wrapper(self, *args, **kwargs):
-
             if is_package_installed_cached(package_name):
                 return function(self, *args, **kwargs)
 
@@ -654,12 +647,11 @@ def allow_pickable_entities(
 
                 previous_picked_entities = set(self._get_selected_(entity))
 
-                if type_ in ["S", "A"]:  # selecting all the entities
+                if type_ in ["S", "A"]:
                     orig_entity_sel_function(self, "all")
 
                 plotting_function = getattr(self, plot_function)
                 if entity == "area":
-                    # To overwrite the quality argument
                     pl = plotting_function(return_plotter=True, quality=1)
                 elif entity in ["node", "nodes", "kp"]:
                     pl = plotting_function(return_plotter=True, point_size=POINT_SIZE)
@@ -671,7 +663,6 @@ def allow_pickable_entities(
                 )
 
                 if len(vmin) == 0:
-                    # aborted picking
                     orig_entity_sel_function(
                         self, "S", entity, "", previous_picked_entities, **kwargs
                     )
@@ -680,7 +671,6 @@ def allow_pickable_entities(
                 item = entity
                 comp = ""
 
-                # to make return the array of entity when using P
                 kwargs["Used_P"] = True
 
                 return orig_entity_sel_function(
@@ -717,15 +707,11 @@ def allow_iterables_vmin(entity: str = "node") -> Callable:
                 if kwargs.get("Used_P", False) and (
                     (isinstance(vmin, np.ndarray) and vmin.size != 0) or len(vmin) == 0
                 ):
-                    # edge case where during the picking we have selected nothing.
-                    # In that case, we just silently quit NSEL command. We do **not**
-                    # want to unselect everything (case in scripting where
-                    # ``mapdl.nsel("S","node", "", [])`` unselect everything).
                     return
 
                 self.run(
                     f"/com, Selecting {entity}s from an iterable (i.e. set, list, tuple, or array)"
-                )  # To have a clue in the apdl log file
+                )
 
                 if vmax or vinc:
                     raise ValueError(
@@ -734,16 +720,14 @@ def allow_iterables_vmin(entity: str = "node") -> Callable:
                     )
 
                 if len(vmin) == 0 and type_ == "S":
-                    # assuming you want to select nothing because you supplied an empty list/tuple/array
                     return original_sel_func(self, "none")
 
-                with self.non_interactive:  # to speed up
+                with self.non_interactive:
                     self._perform_entity_list_selection(
                         entity, original_sel_func, type_, item, comp, vmin, kabs
                     )
 
                 if kwargs.pop("Used_P", False):
-                    # we want to return the
                     return np.array(vmin)
                 else:
                     return
@@ -784,18 +768,15 @@ def stack(*decorators: Iterable[Callable]) -> Callable:
 def get_ip_hostname(ip: str) -> Tuple[str, str]:
     """Get ip and hostname"""
     if not only_numbers_and_dots(ip):
-        # it is a hostname
         hostname = ip
         ip = socket.gethostbyname(ip)
     else:
-        # it is an IP
         if ip in ["127.0.0.1", "127.0.1.1", "localhost"]:
             hostname = "localhost"
         else:
             try:
                 hostname = socket.gethostbyaddr(ip)[0]
             except OSError:
-                # If the IP address does not resolve to a hostname, use the IP
                 hostname = ip
 
     return ip, hostname

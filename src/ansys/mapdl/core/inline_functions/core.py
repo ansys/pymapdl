@@ -78,17 +78,14 @@ class SelectionStatus(IntEnum):
 
 class _QueryExecution:
     def _run_query(self, command: str, integer: bool) -> Union[int, float]:
-        # import here to avoid circular import
         from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
-        # non_interactive mode won't work with these commands
         if self._mapdl._store_commands:  # type: ignore[attr-defined]
             raise MapdlRuntimeError(
                 "Inline MAPDL functions are incompatible with the "
                 "non_interactive mode."
             )
 
-        # use the underlying gRPC method if available to avoid parsing the string
         resp = self._mapdl._run(f"{QUERY_NAME}={command}")  # type: ignore[attr-defined]
         if isinstance(self._mapdl, MapdlGrpc):  # type: ignore[attr-defined]
             value = self._mapdl.scalar_param(QUERY_NAME)  # type: ignore[attr-defined]

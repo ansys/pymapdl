@@ -24,27 +24,16 @@ import logging
 import os
 from typing import Dict, List, Tuple
 
-# Apply NumPy compatibility patches for dependencies
 from ansys.mapdl.core import _numpy_compat  # noqa: F401
 from ansys.mapdl.core.constants import SUPPORTED_ANSYS_VERSIONS, USER_DATA_PATH
-
-###############################################################################
-# Logging
-# =======
-#
 from ansys.mapdl.core.logging import Logger
 
 LOG: Logger = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
 LOG.debug("Loaded logging module as LOG")
 
-###############################################################################
-# Globals
-# =======
-#
 from ansys.mapdl.core._version import __version__
 from ansys.mapdl.core.helpers import is_installed, run_every_import, run_first_time
 
-# A dictionary relating PyMAPDL server versions with the unified install ones
 VERSION_MAP: Dict[Tuple[int, int, int], str] = {
     (0, 0, 0): "2020R2",
     (0, 3, 0): "2021R1",
@@ -59,9 +48,8 @@ BUILDING_GALLERY: bool = False
 DEPRECATING_MINIMUM_PYTHON_VERSION: bool = False
 MINIMUM_PYTHON_VERSION: Tuple[int, int] = (3, 12)
 
-# Import related globals
 _HAS_ATC: bool = is_installed("ansys.tools.common")
-_HAS_ATP: bool = _HAS_ATC  # Backward compatibility alias
+_HAS_ATP: bool = _HAS_ATC
 _HAS_CLICK: bool = is_installed("click")
 _HAS_DPF: bool = is_installed("ansys.dpf.core")
 _HAS_MATPLOTLIB: bool = is_installed("matplotlib")
@@ -76,33 +64,14 @@ _HAS_VISUALIZER: bool = (
 )
 
 
-# Setup directories
 EXAMPLES_PATH: str = os.path.join(USER_DATA_PATH, "examples")
 
-# Store ports occupied by local instances
 _LOCAL_PORTS: List[int] = []
 
-###############################################################################
-# First time
-# ==========
-#
-# This function runs only the first time PyMAPDL is importad after it is installed.
-# It creates the required directories and raise Python version related warnings.
-#
 run_first_time()
 
-###############################################################################
-# Runs every time
-# ===============
-#
-# This function runs every time that PyMAPDL is imported.
-#
 run_every_import()
 
-###############################################################################
-# Library imports
-# ===============
-#
 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
 from ansys.mapdl.core.launcher import close_all_local_instances
 from ansys.mapdl.core.launcher import stop as stop_mapdl
@@ -119,11 +88,6 @@ from ansys.mapdl.core.misc import check_has_mapdl
 from ansys.mapdl.core.pool import MapdlPool
 from ansys.mapdl.core.report import Report
 
-###############################################################################
-# Convenient imports
-# ==================
-#
-# For compatibility with other versions or for convenience
 if _HAS_ATC:
     from ansys.tools.common.path import (
         change_default_ansys_path,

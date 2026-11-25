@@ -131,11 +131,6 @@ def _process_row(
     return row
 
 
-# ---------------------------------------------------------------------------
-# Click wrapper
-# ---------------------------------------------------------------------------
-
-
 @click.command(
     short_help="List MAPDL running instances.",
     help="""This command lists MAPDL instances.""",

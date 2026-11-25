@@ -32,9 +32,6 @@ import os
 from pathlib import Path, PurePath, PurePosixPath
 import re
 import shutil
-
-# Subprocess is needed to start the backend. But
-# the input is controlled by the library. Excluding bandit check.
 import subprocess  # nosec B404
 import sys
 import tempfile
@@ -106,8 +103,6 @@ from ansys.mapdl.core.misc import (
     supress_logging,
 )
 
-# Checking if tqdm is installed.
-# If it is, the default value for progress_bar is true.
 if _HAS_TQDM:
     from tqdm import tqdm
 
@@ -147,24 +142,20 @@ def _drain_queue(queue) -> str:
     return "".join(lines)
 
 
-VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26)
+VAR_IR = 9
 
 
 DEFAULT_TIME_STEP_STREAM = None
 DEFAULT_TIME_STEP_STREAM_NT = 500
 DEFAULT_TIME_STEP_STREAM_POSIX = 100
 
-# Seconds added to the gRPC deadline of 'Ctrl("EXIT")' to get the wall-clock
-# bound enforced by 'MapdlGrpc._ctrl_exit'.
 CTRL_EXIT_HARD_TIMEOUT_BUFFER_S = 3.0
 
-# Retry policy for gRPC calls.
 SERVICE_DEFAULT_CONFIG = {
     # see https://github.com/grpc/proposal/blob/master/A6-client-retries.md#retry-policy-capabilities
     "methodConfig": [
         {
             # Match all packages and services.
-            # Otherwise: "name": [{"service": "<package>.<service>"}],
             "name": [{}],
             "retryPolicy": {
                 "maxAttempts": 5,
@@ -190,13 +181,6 @@ KEEPALIVE_TIME_MS = 330_000
 DEFAULT_GRPC_OPTIONS = [
     ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
     ("grpc.service_config", json.dumps(SERVICE_DEFAULT_CONFIG)),
-    # HTTP/2 keepalive pings: detect a peer that stopped answering (crashed,
-    # network partition, silently dropped connection) even while no RPC is
-    # exchanging data, without bounding how long any individual call (such as
-    # 'SOLVE') is allowed to run. A dead peer flips 'channel_state' to
-    # 'TRANSIENT_FAILURE' within roughly 'keepalive_time_ms' +
-    # 'keepalive_timeout_ms', instead of relying on the OS to eventually
-    # notice the broken TCP connection.
     ("grpc.keepalive_time_ms", KEEPALIVE_TIME_MS),
     ("grpc.keepalive_timeout_ms", 10_000),
     ("grpc.keepalive_permit_without_calls", 1),
@@ -410,7 +394,6 @@ class MapdlGrpc(MapdlBase):
     >>> mapdl = pymapdl.Mapdl(channel=channel)
     """
 
-    # Required by `_name` method to be defined before __init__ be
     _ip: Optional[str] = None
     _port: Optional[int] = None
     _lazy_array_prefix = "PYMAPDL_LAZY_"
@@ -442,9 +425,7 @@ class MapdlGrpc(MapdlBase):
         self._checking_session_id_: bool = False
         self.__distributed: Optional[bool] = None
         self._remote_instance: Optional["PIM_Instance"] = remote_instance
-        self._strict_session_id_check: bool = (
-            False  # bool to force to check the session id matches in client and server
-        )
+        self._strict_session_id_check: bool = False
 
         self.transport_mode = transport_mode
         if uds_dir is not None:
@@ -457,7 +438,6 @@ class MapdlGrpc(MapdlBase):
 
         self.certs_dir: Path | None = Path(certs_dir) if certs_dir is not None else None
         self.grpc_options = start_parm.pop("grpc_options", DEFAULT_GRPC_OPTIONS)
-        # Transport configuration will be finalized after base init
 
         if channel is not None:
             if ip is not None or port is not None:
@@ -467,14 +447,12 @@ class MapdlGrpc(MapdlBase):
         if ip is None:
             ip = start_parm.pop("ip", None) or "127.0.0.1"  # type: ignore[assignment]
 
-        # setting hostname and ip
         ip, hostname = get_ip_hostname(ip)
         self._hostname: str = hostname
 
         check_valid_ip(ip)
         self._ip = ip  # type: ignore[misc]
 
-        # port and ip are needed to setup the log
         if port is None:
             port = MAPDL_DEFAULT_PORT
 
@@ -489,31 +467,27 @@ class MapdlGrpc(MapdlBase):
             mode="grpc",
             **start_parm,
         )
-        # Finalize transport specifics now that logging and port are set
         self._configure_transport(ip=ip, port=port)
         self._mode: Literal["grpc"] = "grpc"
 
-        # gRPC request locks and lazy result bookkeeping.
         self._get_lock: bool = False
         self._vget_lock: bool = False
         self._lazy_array_counter: int = 0
         self._lazy_array_parameters: set[str] = set()
 
         self._prioritize_thermal: bool = False
-        self._locked: bool = False  # being used within MapdlPool
+        self._locked: bool = False
         self._stub: Optional[mapdl_grpc.MapdlServiceStub] = None
         self._cleanup: bool = cleanup_on_exit
         self.remove_temp_dir_on_exit: bool = remove_temp_dir_on_exit
         self._jobname: str = start_parm.get("jobname", "file")  # type: ignore[assignment]
-        self._path: Optional[str] = (
-            None  # self._wrap_directory(start_parm.get("run_location"))
-        )
+        self._path: Optional[str] = None
         self._start_instance: Optional[str] = (
             start_parm.get("start_instance") or get_start_instance()  # type: ignore[assignment]
         )
-        self._busy: bool = False  # used to check if running a command on the server
+        self._busy: bool = False
         self._local: bool = start_parm.get("local", True)  # type: ignore[assignment]
-        self._xpl = None  # ansXpl instance, initialized on first access
+        self._xpl = None
         self._launched: bool = start_parm.get("launched", False)  # type: ignore[assignment]
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
@@ -530,12 +504,6 @@ class MapdlGrpc(MapdlBase):
         )
         self._time_step_stream: Optional[int] = None
         self._connectivity_callback: Optional[Callable[[Any], None]] = None
-        # Handle to the gRPC call currently in flight (if any), so a
-        # connectivity-state watchdog can cancel it promptly when the
-        # transport is confirmed dead, instead of waiting for it to time out
-        # or hang forever. Guarded by '_current_call_lock' because it is
-        # written from the calling thread and read/cancelled from the gRPC
-        # connectivity callback thread.
         self._current_call: Optional[grpc.Future] = None
         self._current_call_lock: threading.Lock = threading.Lock()
 
@@ -546,62 +514,48 @@ class MapdlGrpc(MapdlBase):
             self._log.debug("Using provided channel")
             self._channel = channel  # type: ignore[misc]
 
-        # Subscribe to channel for channel state updates
         self._subscribe_to_channel()
 
-        # connect and validate to the channel
         self._mapdl_process: Optional[subprocess.Popen] = start_parm.pop(
             "process", None
         )  # type: ignore[assignment]
 
-        # saving for later use (for example open_gui)
         self._start_parm: Dict[str, Any] = start_parm
 
-        # Storing HPC related stuff
         self._jobid: int = start_parm.get("jobid")  # type: ignore[assignment]
         self._mapdl_on_hpc: bool = bool(self._jobid)
         self.finish_job_on_exit: bool = start_parm.get("finish_job_on_exit", True)  # type: ignore[assignment]
 
-        # Queueing the stds
         if not self._mapdl_on_hpc and self._mapdl_process:
             self._create_process_stds_queue()
 
         self.reconnect_to_mapdl()
 
-        # Avoiding muting when connecting to the session
-        # It might trigger some errors later on if not.
         self._run("/gopr")
 
-        # initialize mesh, post processing, and file explorer interfaces
         self._mesh_rep: Optional["MeshGrpc"] = None
 
         from ansys.mapdl.core.mesh_grpc import MeshGrpc
 
         self._mesh_rep = MeshGrpc(self)
 
-        # Run at connect
         if not disable_run_at_connect:
             self._run_at_connect()
 
-        # HOUSEKEEPING:
         # Set to not abort after encountering errors.  Otherwise, many
         # failures in a row will cause MAPDL to exit without returning
         # anything useful.  Also avoids abort in batch mode if set.
         if set_no_abort is None or set_no_abort:
             self._set_no_abort()
 
-        # double check we have access to the local path if not
-        # explicitly specified
         if "local" not in start_parm:
             self._verify_local()
 
-        # only cache process IDs if launched locally
         if self._local and self._launched:
             self._cache_pids()
 
         self._create_session()
 
-        # Caching platform.
         self._log.info(
             f"Connected to MAPDL server running at {self._hostname} on {self.ip}:{self.port} on {self.platform} OS"
         )
@@ -614,7 +568,6 @@ class MapdlGrpc(MapdlBase):
         when called after `super().__init__()` the attributes `self._port`
         and `self._log` are available.
         """
-        # Determine transport mode if not provided
         if self.transport_mode is None:
             self.transport_mode = os.environ.get(
                 "PYMAPDL_GRPC_TRANSPORT"
@@ -630,7 +583,6 @@ class MapdlGrpc(MapdlBase):
                     warn("Unknown platform, defaulting to 'insecure' transport mode.")
                     self.transport_mode = "insecure"
 
-        # Configure transport-specific settings
         if self.transport_mode == "uds":
             if os.name == "nt":
                 raise ValueError("UDS transport mode is not supported on Windows.")
@@ -647,7 +599,6 @@ class MapdlGrpc(MapdlBase):
         elif self.transport_mode == "mtls":
             self.configure_mtls()
 
-        # Validate transport mode compatibility using external helper
         try:
             from ansys.tools.common.cyberchannel import verify_transport_mode
 
@@ -658,8 +609,6 @@ class MapdlGrpc(MapdlBase):
                 "Install ansys-tools-common or set transport_mode to 'insecure'."
             )
 
-        # Transport compatibility checks for remote IPs. Allow loopback/local
-        # addresses (e.g., 127.0.0.1) to use local-only transports.
         self._check_remote(ip)
 
         if self.transport_mode == "wnua":
@@ -685,7 +634,6 @@ class MapdlGrpc(MapdlBase):
 
                 is_remote = not ipaddress.ip_address(str(ip)).is_loopback
             except Exception:
-                # If ip cannot be parsed, conservatively treat as not remote
                 is_remote = False
 
         if is_remote and self.transport_mode in ["wnua", "uds"]:
@@ -705,24 +653,20 @@ class MapdlGrpc(MapdlBase):
 
     def configure_insecure(self) -> None:
         """Configure insecure transport-specific settings."""
-        # No specific configuration needed for insecure transport
         pass
 
     def configure_wnua(self) -> None:
         """Configure WNUA transport-specific settings."""
-        # No specific configuration needed for WNUA transport
         pass
 
     def _after_run(self, command: str) -> None:
         if command[:4].upper() == "/CLE":
-            # We have reset the database, so we need to create a new session id
             self._create_session()
 
     def _before_run(self, _command: str) -> None:
         if self._session_id is not None:
             self._check_session_id()
         else:
-            # For some reason the session hasn't been created
             self._create_session()
 
     def _ensure_channel(self) -> None:
@@ -770,7 +714,7 @@ class MapdlGrpc(MapdlBase):
                 "The error wasn't caught by the post-mortem checks.\nThe stdout is printed now:"
             )
             self._log.debug(self._stdout)
-            raise err  # Raise original error if we couldn't catch it in post-mortem analysis
+            raise err
         else:
             self._log.debug("Connection established")
 
@@ -796,11 +740,11 @@ class MapdlGrpc(MapdlBase):
             timeout = self._timeout
 
         self._connect_to_mapdl(timeout)
-        self._exited = False  # Reset the exited state
+        self._exited = False
 
     def _create_process_stds_queue(self, process=None):
         from ansys.mapdl.core.launcher import (
-            _create_queue_for_std,  # Avoid circular import error
+            _create_queue_for_std,
         )
 
         if not process:
@@ -827,7 +771,6 @@ class MapdlGrpc(MapdlBase):
         """
         from ansys.tools.common.cyberchannel import create_channel
 
-        # open the channel
         channel_str = f"{ip}:{port}"
         self._log.debug(f"Opening channel at {channel_str}")
         return create_channel(
@@ -844,24 +787,13 @@ class MapdlGrpc(MapdlBase):
     def _subscribe_to_channel(self):
         """Subscribe to channel status and store the value in 'mapdl._channel_state'"""
 
-        # A weak reference is used so that the gRPC ``_poll_connectivity``
-        # daemon thread, which keeps the callback alive for as long as the
-        # subscription lasts, does not keep this instance alive too.  A strong
-        # reference here creates an uncollectable cycle
-        # (thread -> state -> callback -> mapdl -> channel -> state) that
-        # prevents ``__del__`` from ever running, leaking both the instance and
-        # the polling thread.
         self_ref = weakref.ref(self)
 
-        # States in which the transport is confirmed unusable: a call blocked
-        # on a connection that has reached one of these will never complete on
-        # its own.
         dead_states = (
             grpc.ChannelConnectivity.TRANSIENT_FAILURE,
             grpc.ChannelConnectivity.SHUTDOWN,
         )
 
-        # Callback function to monitor state changes
         def connectivity_callback(connectivity):
             mapdl = self_ref()
             if mapdl is None:
@@ -872,10 +804,8 @@ class MapdlGrpc(MapdlBase):
             if connectivity in dead_states:
                 mapdl._cancel_call_if_pending(connectivity)
 
-        # Keep a handle so the callback can be unsubscribed on teardown
         self._connectivity_callback = connectivity_callback
 
-        # Subscribe to channel state changes
         self._channel.subscribe(connectivity_callback, try_to_connect=True)
 
     def _track_call(self, call: grpc.Future) -> None:
@@ -1005,7 +935,6 @@ class MapdlGrpc(MapdlBase):
         """
         import concurrent.futures
 
-        # Use the public API to wait for channel readiness.
         state_future = grpc.channel_ready_future(self._channel)
         try:
             state_future.result(timeout=timeout)
@@ -1038,7 +967,6 @@ class MapdlGrpc(MapdlBase):
         connected = False
         attempt_timeout = int(timeout / n_attempts)
 
-        # Shared state between the main thread and the monitor thread.
         monitor_stop_event = threading.Event()
         monitor_exception: dict = {"error": None}
 
@@ -1081,7 +1009,6 @@ class MapdlGrpc(MapdlBase):
                 monitor_exception["error"] = exc
                 monitor_stop_event.set()
 
-        # Only start monitoring for local instances with a process handle and path.
         monitor_thread = None
         if self._local and self._mapdl_process and self._path:
             monitor_thread = threading.Thread(target=monitor_mapdl_alive, daemon=True)
@@ -1092,7 +1019,6 @@ class MapdlGrpc(MapdlBase):
             max_time = time.time() + timeout
             i = 1
             while time.time() < max_time and i <= n_attempts:
-                # Propagate any exception raised by the monitor thread.
                 if monitor_exception["error"] is not None:
                     self._log.debug(
                         "Monitor detected MAPDL process issue, "
@@ -1110,7 +1036,6 @@ class MapdlGrpc(MapdlBase):
                     break
 
             else:
-                # Exhausted attempts / timeout — build an informative message.
                 msg = (
                     f"Unable to connect to MAPDL gRPC instance at "
                     f"{self._channel_str}.\nReached either maximum amount of "
@@ -1125,7 +1050,6 @@ class MapdlGrpc(MapdlBase):
                         " but PyMAPDL cannot connect to it."
                     )
 
-                # Double-check using cached _pids.
                 cached_proc = self._find_processes_from_cached_pids()
                 cached_pid = cached_proc[0].pid if cached_proc else None
 
@@ -1144,8 +1068,6 @@ class MapdlGrpc(MapdlBase):
                         msg + f" The MAPDL process has died{pid_msg}."
                     )
 
-            # Raise any deferred monitor exception (e.g. when the loop broke
-            # early because check_process_is_alive failed inline).
             if monitor_exception["error"] is not None:
                 raise monitor_exception["error"]
 
@@ -1210,7 +1132,6 @@ class MapdlGrpc(MapdlBase):
         if proc_status is not None:
             return proc_status
 
-        # Unknown handle type — fall back to PID existence check.
         pid = getattr(self._mapdl_process, "pid", None)
         if pid is None:
             return None
@@ -1327,21 +1248,18 @@ class MapdlGrpc(MapdlBase):
         for p in psutil.process_iter(["pid", "name", "cmdline", "cwd"]):
             try:
                 info = p.info
-                # Match by working directory.
                 if cwd_to_match and info.get("cwd"):
                     if os.path.abspath(str(info["cwd"])).startswith(cwd_to_match):
                         if p.is_running():
                             found.append(p)
                             continue
 
-                # Match by jobname in command line.
                 cmdline = info.get("cmdline") or []
                 if jobname and any(jobname in str(x) for x in cmdline):
                     if p.is_running():
                         found.append(p)
                         continue
 
-                # Fallback: ANSYS/MAPDL process name heuristic.
                 if _is_mapdl_process(p) and p.is_running():
                     found.append(p)
 
@@ -1398,21 +1316,18 @@ class MapdlGrpc(MapdlBase):
 
         returncode = process.poll()
         if returncode is None or returncode >= 0:
-            # Still running, or exited normally/with a non-signal error code.
             return None
 
         return -returncode
 
     def _post_mortem_checks(self, process=None):
         """Check possible reasons for not having a successful connection."""
-        # Check early exit
         if process is None:
             process = self._mapdl_process
 
         if process is None or not self.is_grpc:
             return
 
-        # check the stdout for any errors
         self._read_stds()
 
         self._check_stds()
@@ -1458,7 +1373,6 @@ class MapdlGrpc(MapdlBase):
         if errs:
             self._log.debug("MAPDL exited with errors in stderr.")
 
-            # Custom errors
             self._raise_custom_stds_errors(errs)
 
     def _parse_stdout(self, stdout=None):
@@ -1470,12 +1384,9 @@ class MapdlGrpc(MapdlBase):
         if errs:
             self._log.debug("MAPDL exited with errors in stdout.")
 
-            # Custom errors
             self._raise_custom_stds_errors(errs)
 
     def _parse_std(self, std):
-        # check for errors in stderr
-        # split the stderr into groups
         if isinstance(std, list):
             std = "\n".join(std)
             std = std.replace("\n\n", "\n")
@@ -1537,7 +1448,6 @@ class MapdlGrpc(MapdlBase):
 
     def _verify_local(self):
         """Check if Python is local to the MAPDL instance."""
-        # Verify if python has assess to the MAPDL directory.
         if self._local:
             directory = self.directory
 
@@ -1611,11 +1521,10 @@ class MapdlGrpc(MapdlBase):
         self._state = grpc.channel_ready_future(self._channel)
         self._stub = mapdl_grpc.MapdlServiceStub(self._channel)
 
-        # verify connection
         tstart = time.time()
         while ((time.time() - tstart) < timeout) and not self._state._matured:
             if stop_event is not None and stop_event.is_set():
-                return False  # Monitor signalled process death — bail immediately
+                return False
             time.sleep(0.01)
 
         if not self._state._matured:  # pragma: no cover
@@ -1640,7 +1549,6 @@ class MapdlGrpc(MapdlBase):
 
         Uses cached ``__server_version`` to avoid unnecessary communication.
         """
-        # check cache
         if self.__server_version is None:
             self.__server_version = self._get_server_version()  # type: ignore[assignment]
         return self.__server_version
@@ -1685,7 +1593,7 @@ class MapdlGrpc(MapdlBase):
             _start_subprocess,
         )
 
-        self._exited = False  # reset exit state
+        self._exited = False
 
         args = start_parm or self._start_parm
         config = LaunchConfig(
@@ -1729,7 +1637,6 @@ class MapdlGrpc(MapdlBase):
 
         self._connect()
 
-        # may need to wait for viable connection in open_gui case
         timeout_value = timeout if timeout is not None else 10
         tmax = time.time() + timeout_value
         success = False
@@ -1745,7 +1652,6 @@ class MapdlGrpc(MapdlBase):
         if not success:
             raise MapdlConnectionError("Unable to reconnect to MAPDL")
 
-        # Update process
         self._mapdl_process = process
 
     @supress_logging
@@ -1758,16 +1664,14 @@ class MapdlGrpc(MapdlBase):
 
     def _run_at_connect(self):
         """Run house-keeping commands when initially connecting to MAPDL."""
-        # increase the number of variables allowed in POST26 to the maximum
         with self.run_as_routine("POST26"):
             self.numvar(200, mute=True)
 
-        # Caching directory
         self.directory
 
         self.show(self._file_type_for_plots)
-        self.version  # Caching version
-        self.file_type_for_plots  # Setting /show,png and caching it.
+        self.version
+        self.file_type_for_plots
 
     def _reset_cache(self):
         """Reset cached items."""
@@ -1819,12 +1723,6 @@ class MapdlGrpc(MapdlBase):
         if mute is None:
             mute = self._mute
 
-        # Cheap, purely local liveness check: 'channel_state' reads the value
-        # cached by the connectivity callback, whereas 'is_alive' would issue a
-        # '_ctrl("VERSION")' round-trip on every single command. Only
-        # 'SHUTDOWN' (channel closed) and 'TRANSIENT_FAILURE' (channel could
-        # not connect) are treated as dead; 'CONNECTING' is a normal
-        # transient and must not permanently mark the instance as exited.
         if self._channel is not None and self.channel_state in (
             "SHUTDOWN",
             "TRANSIENT_FAILURE",
@@ -1839,7 +1737,6 @@ class MapdlGrpc(MapdlBase):
                 f"The MAPDL instance has been exited before running the command: {cmd}"
             )
 
-        # don't allow empty commands
         if not cmd.strip():
             raise ValueError("Empty commands not allowed")
 
@@ -1853,9 +1750,6 @@ class MapdlGrpc(MapdlBase):
             else:
                 response = self._send_command(cmd, mute=mute)
         finally:
-            # '_busy' must be cleared even when the command raises, otherwise
-            # 'is_alive' short-circuits on it forever and the liveness guard
-            # above is permanently disabled.
             self._busy = False
 
         return response.strip()
@@ -1946,10 +1840,9 @@ class MapdlGrpc(MapdlBase):
         """Send a MAPDL command and return the response as a string"""
         opt = ""
         if mute:
-            opt = "MUTE"  # suppress any output
+            opt = "MUTE"
 
         request = pb_types.CmdRequest(command=cmd, opt=opt)
-        # TODO: Capture keyboard exception and place this in a thread
         if self._stub is None:
             raise MapdlRuntimeError("MAPDL stub not initialized")
         future = self._stub.SendCommand.future(request)
@@ -1980,8 +1873,6 @@ class MapdlGrpc(MapdlBase):
 
         return "".join(response)
 
-    # Placing logging in the exit method raises exceptions when
-    # this is triggered by "__del__"
     @protect_from(ValueError, "I/O operation on closed file.")
     @protect_from(AttributeError, "'MapdlGrpc' object has no attribute '_log'")
     def exit(self, save=False, force=False, **kwargs):
@@ -2031,10 +1922,6 @@ class MapdlGrpc(MapdlBase):
 
             if self.exited:
                 self._log.debug("Already exited")
-                # '_exited' is also set by the gRPC error handlers when MAPDL
-                # crashes, with no cleanup performed. The helper is
-                # idempotent, so calling it again on a regular repeated exit
-                # costs nothing.
                 self._disconnect_but_leave_mapdl_running()
                 return
 
@@ -2042,8 +1929,6 @@ class MapdlGrpc(MapdlBase):
             try:
                 self._cleanup_lazy_array_parameters()
             except Exception as error:
-                # Continue tearing down the connection, then report the
-                # cleanup failure to the caller.
                 cleanup_error = error
 
             if save:
@@ -2051,7 +1936,6 @@ class MapdlGrpc(MapdlBase):
                 self.save()
 
             if not force:
-                # Ignore this method if PYMAPDL_START_INSTANCE=False
                 if not self._start_instance or not self._launched:
                     self._log.info(
                         "Ignoring exit due to PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't launch the instance."
@@ -2061,7 +1945,6 @@ class MapdlGrpc(MapdlBase):
                         raise cleanup_error
                     return
 
-                # or building the gallery
                 if pymapdl.BUILDING_GALLERY:
                     self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
                     self._disconnect_but_leave_mapdl_running()
@@ -2069,7 +1952,6 @@ class MapdlGrpc(MapdlBase):
                         raise cleanup_error
                     return
 
-            # Step 3 of '_release_resources' closes the gRPC channel.
             self._release_resources(path=self._path)
             if cleanup_error is not None:
                 raise cleanup_error
@@ -2130,13 +2012,10 @@ class MapdlGrpc(MapdlBase):
 
     def _exit_mapdl(self, path: Optional[str] = None) -> None:
         """Exit MAPDL and remove the lock file in `path`"""
-        # This cannot/should not be faked
         if self._local:
-            # The PID-based cleanup must run even if refreshing the PIDs or
-            # asking the server to exit fails.
             previous_pids = list(getattr(self, "_pids", []) or [])
             try:
-                self._cache_pids()  # Recache processes
+                self._cache_pids()
             except Exception as e:
                 self._log.debug("Error during _cache_pids: %s", e)
                 self._pids = previous_pids
@@ -2237,17 +2116,10 @@ class MapdlGrpc(MapdlBase):
 
         path = path or getattr(self, "_path", None)
 
-        # ``cleanup_loggers`` is False only when called from ``__del__``, so
-        # it doubles here as a proxy for "this is best-effort, GC-driven
-        # teardown, where logging may be unreliable" (see the ``exiting``
-        # parameters of ``_join_pipe_drainer_threads`` and
-        # ``_close_grpc_channel``).
         exiting = not cleanup_loggers
 
-        # 1. Kill MAPDL process + remove lock file
         try:
             if exiting and self._local:
-                # GC may interrupt gRPC itself; use cached process data, not RPCs.
                 self._close_process()
                 if path:
                     self._remove_lock_file(path, use_cached=True)
@@ -2257,22 +2129,18 @@ class MapdlGrpc(MapdlBase):
             if not exiting:
                 self._log.debug("Error during _exit_mapdl: %s", e)
 
-        # 2. Ensure PIPE-drainer threads (stdout/stderr/startup) are joined so
-        # that background reader threads do not leak after teardown.
         try:
             self._join_pipe_drainer_threads(exiting=exiting)
         except Exception as e:
             if not exiting:
                 self._log.debug("Error joining pipe-drainer threads: %s", e)
 
-        # 3. Close gRPC channel
         try:
             self._close_grpc_channel(exiting=exiting)
         except Exception as e:
             if not exiting:
                 self._log.debug("Error closing gRPC channel: %s", e)
 
-        # 4. Remove UDS socket file
         try:
             if getattr(self, "transport_mode", None) == "uds":
                 socket_path = os.path.join(self.uds_dir, f"mapdl-{self.port}.sock")
@@ -2282,7 +2150,6 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error removing UDS socket: %s", e)
 
-        # 5. Deregister port from global registry
         try:
             from ansys.mapdl import core as pymapdl
 
@@ -2291,7 +2158,6 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error removing port from _LOCAL_PORTS: %s", e)
 
-        # 6. Cancel HPC job
         try:
             if self._mapdl_on_hpc and self.finish_job_on_exit:
                 self.kill_job(self.jobid)
@@ -2299,29 +2165,19 @@ class MapdlGrpc(MapdlBase):
         except Exception as e:
             self._log.debug("Error cancelling HPC job: %s", e)
 
-        # 7. Delete remote PyMAPDL server instance
         try:
             if self._remote_instance:  # pragma: no cover
                 self._remote_instance.delete()
         except Exception as e:
             self._log.debug("Error deleting remote instance: %s", e)
 
-        # 8. Mark exited — before the temp dir removal, so that the 'directory'
-        # fallback in '_remove_temp_dir_on_exit' cannot query the dead server
         self._exited = True
 
-        # 9. Remove temporary working directory
         try:
             self._remove_temp_dir_on_exit(path)
         except Exception as e:
             self._log.debug("Error removing temp dir: %s", e)
 
-        # 10. Clean up logger handlers.
-        # Skipped when called from ``__del__`` (``cleanup_loggers=False``):
-        # the logger and its handlers are shared, process-wide state, and
-        # tearing them down from non-deterministic, GC-driven code can race
-        # with another still-alive ``Mapdl`` instance logging through the
-        # same handler. See the ``cleanup_loggers`` parameter documentation.
         if cleanup_loggers:
             try:
                 self._cleanup_loggers()
@@ -2484,10 +2340,6 @@ class MapdlGrpc(MapdlBase):
             except subprocess.TimeoutExpired:
                 self._log.debug("Process did not exit after SIGKILL")
 
-        # Close the PIPEs on a daemon watchdog thread bounded to 5 seconds,
-        # instead of calling '_close_process_pipes' directly, so a close that
-        # unexpectedly blocks (for example, an untracked grandchild process
-        # still holding the write end open) cannot hang this thread forever.
         closer = threading.Thread(
             target=self._close_process_pipes, args=(process,), daemon=True
         )
@@ -2554,7 +2406,7 @@ class MapdlGrpc(MapdlBase):
 
     def _kill_child_processes(self, timeout=2):
         pids = self._pids.copy()
-        pids.reverse()  # First pid is the parent, therefore start by the children (end)
+        pids.reverse()
 
         for pid in pids:
             self._kill_child_process(pid, timeout=timeout)
@@ -2596,18 +2448,8 @@ class MapdlGrpc(MapdlBase):
         """
         self._log.debug("Closing processes")
         if self._local:
-            # Kill child processes *before* the main process. Child/grandchild
-            # processes (for example, MAPDL's distributed/MPI workers) can
-            # inherit the stdout/stderr PIPE write ends. If they are still
-            # alive when '_kill_process' closes those PIPEs, the
-            # PIPE-drainer threads blocked in 'readline()' never see EOF, and
-            # 'stream.close()' deadlocks waiting on the same internal lock
-            # the reader thread holds. Killing every descendant first
-            # guarantees no process still holds the write end open, so
-            # closing the PIPEs cannot hang.
             self._kill_child_processes(timeout=timeout)
 
-            # killing main process (subprocess)
             self._kill_process()
 
         if self.is_alive:
@@ -2626,7 +2468,7 @@ class MapdlGrpc(MapdlBase):
         self._pids = []
 
         for filename in self.list_files():
-            if "cleanup" in filename:  # Linux does not seem to generate this file?
+            if "cleanup" in filename:
                 script = self.directory / filename
                 with open(script) as f:
                     raw = f.read()
@@ -2643,8 +2485,6 @@ class MapdlGrpc(MapdlBase):
             )
             return
         elif not self._pids:
-            # For the cases where the cleanup file is not generated,
-            # we relay on the process.
             parent_pid = self._mapdl_process.pid
             try:
                 parent = psutil.Process(parent_pid)
@@ -2726,13 +2566,12 @@ class MapdlGrpc(MapdlBase):
         PyMAPDL internals call this directly so that they keep working when
         ``/SYS`` is in ``blocked_commands``. Only ``sys()`` checks the block.
         """
-        # always redirect system output to a temporary file
         tmp_file = f"__tmp_sys_out_{random_string()}__"
         if check_blocked:
             super().sys(f"{cmd} > {tmp_file}", **kwargs)
         else:
             self._run(f"/SYS,{cmd} > {tmp_file}")
-        if self._local:  # no need to download when local
+        if self._local:
             with open(self.directory / tmp_file) as fobj:
                 obj = fobj.read()
         else:
@@ -2740,7 +2579,6 @@ class MapdlGrpc(MapdlBase):
 
         self.slashdelete(tmp_file)
 
-        # Remove trailing newline character if present and only once
         return obj[:-1] if (len(obj) > 0 and obj[-1] == "\n") else obj
 
     def download_result(
@@ -2777,7 +2615,7 @@ class MapdlGrpc(MapdlBase):
         >>> import os
         >>> mapdl.download_result(os.getcwd())
         """
-        if path is None:  # if not path seems to not work in same cases.
+        if path is None:
             path = os.getcwd()
 
         def _download(targets: List[str]) -> None:
@@ -2789,7 +2627,6 @@ class MapdlGrpc(MapdlBase):
             if preference not in ["rst", "rth"]:
                 raise ValueError("``preference`` must be either 'rst' or 'rth'")
 
-        # result file basename is the jobname
         jobname = self.jobname
         rth_basename = "%s.%s" % (jobname, "rth")
         rst_basename = "%s.%s" % (jobname, "rst")
@@ -2809,12 +2646,11 @@ class MapdlGrpc(MapdlBase):
         elif rth_basename in remote_files:
             result_file = rth_basename
 
-        if result_file:  # found non-distributed result
+        if result_file:
             save_name = os.path.join(path, result_file)
             self._download(result_file, save_name, progress_bar=progress_bar)
             return save_name
 
-        # otherwise, download all the distributed result files
         if jobname[-1].isnumeric():
             jobname += "_"
 
@@ -2941,7 +2777,6 @@ class MapdlGrpc(MapdlBase):
         if self._stub is None:
             raise MapdlRuntimeError("MAPDL stub not initialized")
 
-        # handle socket closing upon exit
         if cmd.lower() == "exit":
             self._ctrl_exit(request, timeout)
             return
@@ -3005,7 +2840,7 @@ class MapdlGrpc(MapdlBase):
                 stub.Ctrl(request, timeout=timeout)
             except (_InactiveRpcError, _MultiThreadedRendezvous):
                 pass
-            except BaseException as exc:  # re-raised in the calling thread
+            except BaseException as exc:
                 errors.append(exc)
 
         hard_timeout = (timeout or 0.0) + CTRL_EXIT_HARD_TIMEOUT_BUFFER_S
@@ -3087,16 +2922,15 @@ class MapdlGrpc(MapdlBase):
             filename = os.path.join(option4, fname)
 
             fname = self._get_file_name(fname=option2, ext=option3)
-            if option4:  # if directory is supplied
+            if option4:
                 fname = os.path.join(option4, fname)
 
             filename = self._get_file_path(fname, progress_bar=False)
 
-            # since we upload the file, we dont need the full path: not in option2 nor option4.
             if not self._local:
                 extra_info = f"PyMAPDL has upload the file {option2} to the MAPDL instance, hence the options for 'TBFT' command have changed."
                 option2 = filename
-                option3 = ""  # the extension is now included in filename
+                option3 = ""
                 option4 = ""
 
         if extra_info:
@@ -3274,17 +3108,6 @@ class MapdlGrpc(MapdlBase):
         write_to_log=True,
         **kwargs,
     ):
-        # Checking compatibility
-        # Checking the user is not reusing old api:
-        #
-        # fname,
-        # verbose=False,
-        # progress_bar=False,
-        # time_step_stream=None,
-        # chunk_size=512,
-        # orig_cmd="/INP",
-        # write_to_log=True,
-
         msg_compat = "\nThe 'mapdl.input' method API changed in v0.65. Please check the documentation for information about the new arguments."
 
         if log:
@@ -3302,7 +3125,6 @@ class MapdlGrpc(MapdlBase):
                 "Only strings are allowed in 'dir_' argument.\n" + msg_compat
             )
 
-        # Getting arguments rights
         if not fname and ext:
             fname = self.jobname
 
@@ -3328,7 +3150,6 @@ class MapdlGrpc(MapdlBase):
                 )
 
         if line != 0:
-            # Trimming file
             tmp_modified_file = os.path.join(
                 tempfile.gettempdir(), os.path.basename(fname)
             )
@@ -3337,16 +3158,11 @@ class MapdlGrpc(MapdlBase):
 
             fname = tmp_modified_file
 
-        # Running method
-        #
         is_cdread = "CDRE" in orig_cmd.upper()
         cd_read_option = kwargs.get("cd_read_option", "COMB").upper()
         is_cdread_all = is_cdread and cd_read_option == "ALL"
 
         if is_cdread:
-            # CDREAD already uploads the file, and since the priority in
-            # `_get_file_path` is for the files in the python working directory,
-            # we skip that function here.
             self._log.debug(
                 f"Avoid uploading the file {fname} because `CDREAD` should have upload it already."
             )
@@ -3375,15 +3191,10 @@ class MapdlGrpc(MapdlBase):
             responses = []
             for strout in strouts:
                 lines = strout.cmdout
-                # print out input as it is being run
                 print("\n".join(lines))
                 responses.extend(lines)
             response = "\n".join(responses)
             return response.strip()
-
-        ##
-        # Otherwise, not verbose (or 'CDREAD,ALL', which always needs the
-        # multi-command driver file below, even when 'verbose' is requested)
 
         # since we can't directly run /INPUT, we have to write a
         # temporary input file that tells MAPDL to read the input
@@ -3424,14 +3235,12 @@ class MapdlGrpc(MapdlBase):
             delete_uploaded_files = False
 
         elif is_cdread:
-            # Using CDREAD
             tmp_dat = (
                 f"/OUT,{tmp_out}\n{orig_cmd},'{cd_read_option}','{filename}'\n/OUT,"
             )
             delete_uploaded_files = False
 
         else:
-            # Using default INPUT
             tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n/OUT,"
             delete_uploaded_files = True
 
@@ -3439,13 +3248,7 @@ class MapdlGrpc(MapdlBase):
             if not self._apdl_log.closed:
                 self._apdl_log.write(tmp_dat)
 
-        # Escaping early if inside non_interactive context. The commands are
-        # executed when the context exits, so there is no need to write or
-        # upload a temporary input file.
         if self._store_commands:
-            # Excludes the leading and trailing '/OUT' redirection lines,
-            # keeping every command in between (a single one for 'DB',
-            # 'SOLID', 'COMB', and plain '/INPUT'; several for 'ALL').
             self._stored_commands.extend(tmp_dat.splitlines()[1:-1])
             return None
 
@@ -3463,15 +3266,13 @@ class MapdlGrpc(MapdlBase):
         # need to check.  otherwise, since inputfile is
         # non-blocking, we could corrupt the service
         chunks = self._stub.InputFileS(request, metadata=metadata)
-        _ = [chunk.cmdout for chunk in chunks]  # unstable
+        _ = [chunk.cmdout for chunk in chunks]
 
-        # all output (unless redirected) has been written to a temp output
         if self._local:
             tmp_out_path = os.path.join(local_path, tmp_out)
             with open(tmp_out_path) as f:
                 output = f.read()
 
-            # delete the files to avoid overwriting:
             try:
                 os.remove(tmp_name_path)
             except OSError:
@@ -3482,20 +3283,15 @@ class MapdlGrpc(MapdlBase):
             except OSError:
                 pass
 
-        # otherwise, read remote file
         else:
             output = self._download_as_raw(tmp_out).decode("latin-1")
 
-            # Deleting the previous files
             self.slashdelete(tmp_name)
             self.slashdelete(tmp_out)
             if filename in self.list_files() and delete_uploaded_files:
                 self.slashdelete(filename)
 
         if verbose:
-            # 'CDREAD,ALL' redirects its output to a file (see 'tmp_dat'
-            # above) instead of streaming it, so it cannot be printed line by
-            # line as it runs. Print it once fully captured instead.
             print(output)
 
         return output
@@ -3549,11 +3345,9 @@ class MapdlGrpc(MapdlBase):
             commands,
         )
 
-        # write to a temporary input file
         def build_rand_tmp():
             return os.path.join(tempfile.gettempdir(), f"tmp_{random_string()}.inp")
 
-        # rare case of duplicated tmpfile (birthday problem)
         tmp_filename = build_rand_tmp()
         while os.path.isfile(tmp_filename):
             tmp_filename = build_rand_tmp()
@@ -3564,8 +3358,6 @@ class MapdlGrpc(MapdlBase):
         self._store_commands = False
         self._stored_commands = []
 
-        # run the stored commands
-        # already checked by run() and input_strings() when stored
         out = self._stream_input(
             tmp_filename,
             write_to_log=False,
@@ -3573,7 +3365,6 @@ class MapdlGrpc(MapdlBase):
             chunk_size=DEFAULT_CHUNKSIZE,
             progress_bar=False,
         )
-        # skip the first line as it simply states that it's reading an input file
         self._response = out[out.find("LINE=       0") + 13 :]
         response_ = "\n".join(self._response.splitlines()[:20])
         self._log.info(response_)
@@ -3581,7 +3372,6 @@ class MapdlGrpc(MapdlBase):
         if not self._ignore_errors:
             self._raise_errors(self._response)
 
-        # try/except here because MAPDL might have not closed the temp file
         try:
             os.remove(tmp_filename)
         except:
@@ -3621,7 +3411,6 @@ class MapdlGrpc(MapdlBase):
 
         cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}, {it3num}, {item4}, {it4num}"
 
-        # not threadsafe; don't allow multiple get commands
         timeout_ = kwargs.pop("timeout", 2)
         timeout = time.time() + timeout_
         while self._get_lock:
@@ -3799,7 +3588,7 @@ class MapdlGrpc(MapdlBase):
         if chunk_size is None:
             chunk_size = DEFAULT_CHUNKSIZE
 
-        if chunk_size > 4 * 1024 * 1024:  # 4MB
+        if chunk_size > 4 * 1024 * 1024:
             raise ValueError(
                 f"Chunk sizes bigger than 4 MB can generate unstable behaviour in PyMAPDL. "
                 "Please decrease ``chunk_size`` value."
@@ -3818,7 +3607,7 @@ class MapdlGrpc(MapdlBase):
                 files, target_dir=target_dir, extension=extension, recursive=recursive
             )
 
-        else:  # remote session
+        else:
             if recursive:
                 warn(
                     "The 'recursive' parameter is ignored if the session is non-local."
@@ -3869,18 +3658,16 @@ class MapdlGrpc(MapdlBase):
 
         return_list_files: list[str] = []
         for file in list_files:
-            # file is a complete path
             basename = os.path.basename(file)
             destination = os.path.join(target_dir, basename)
             if os.path.isfile(destination):
                 os.remove(destination)
-                # the file might have been already downloaded.
                 warn(
                     f"The file {file} has been updated in the current working directory."
                 )
 
             if os.path.isdir(self.directory / file):
-                if recursive:  # only copy the directory if recursive is true.
+                if recursive:
                     shutil.copytree(
                         self.directory / file,
                         target_dir,
@@ -3930,8 +3717,6 @@ class MapdlGrpc(MapdlBase):
         for each_file in list_files:
             safe_relative_file = self._validate_remote_relative_path(each_file)
             out_file_name = os.path.join(target_dir, safe_relative_file)
-            # 'each_file' might include subdirectories (relative to the
-            # MAPDL working directory), which might not exist yet locally.
             os.makedirs(os.path.dirname(out_file_name) or ".", exist_ok=True)
             self._download(
                 safe_relative_file,
@@ -3981,42 +3766,26 @@ class MapdlGrpc(MapdlBase):
         else:
             extension = ""
 
-        # A glob pattern (with '*', '?' or '[') requires listing the
-        # directory content to filter against.
         is_glob = bool(re.search(r"[*?\[]", file))
-        # A path with a directory component (for example
-        # ``tmp_dir/file.rst``) points inside a subdirectory of the working
-        # directory.
         has_subdir = bool(os.path.dirname(file))
 
         if self.is_local:
-            # filtering with glob (accepting *)
             if not os.path.isabs(file):
-                # Relative paths (including ones with subdirectories) are
-                # resolved against the MAPDL working directory.
                 file = str(self.directory / file)
             list_files = glob.glob(file + extension, recursive=recursive)
 
         elif is_glob or not has_subdir:
-            # Either a glob pattern, or a plain filename in the top level of
-            # the working directory: both can be validated against
-            # ``list_files``.
             base_name = os.path.basename(file + extension)
             self_files = self.list_files()
 
             list_files = fnmatch.filter(self_files, base_name)
 
         else:
-            # Literal file path inside a subdirectory of the working
-            # directory. ``list_files`` only returns the top level of the
-            # working directory, so it cannot be used to validate files in
-            # subdirectories.
             file_to_check = self._validate_remote_relative_path(file + extension)
             list_files = (
                 [file_to_check] if self.inquire("", "EXIST", file_to_check) else []
             )
 
-        # filtering by extension
         list_files = [file for file in list_files if file.endswith(extension)]
 
         if len(list_files) == 0:
@@ -4264,7 +4033,6 @@ class MapdlGrpc(MapdlBase):
             return True
 
         if self._exiting:
-            # It should be exiting so we should not issue gRPC calls
             self._log.debug("MAPDL instance is expected to be exiting")
             return False
 
@@ -4273,8 +4041,6 @@ class MapdlGrpc(MapdlBase):
             return False
 
         try:
-            # Not '_ctrl': 'protect_grpc' calls 'is_alive' while retrying, so a
-            # retried probe would recurse until 'RecursionError'.
             check = bool(self._ctrl_raw("VERSION"))
             if check:
                 self._log.debug(
@@ -4366,20 +4132,18 @@ class MapdlGrpc(MapdlBase):
             return float(presponse.val[0])
 
     @protect_grpc
-    def _upload_raw(self, raw, save_as):  # consider private
+    def _upload_raw(self, raw, save_as):
         """Upload a binary string as a file"""
         chunks = chunk_raw(raw, save_as)
         response = self._stub.UploadFile(chunks)
         if response.length != len(raw):
             raise IOError("Raw Bytes failed to upload")
 
-    # TODO: not fully tested/implemented
     @protect_grpc
     def Param(self, pname):
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name=pname))
         return presponse.val
 
-    # TODO: not fully tested/implemented
     @protect_grpc
     def Var(self, num):
         presponse = self._stub.GetVariable(pb_types.VariableRequest(inum=num))
@@ -4520,7 +4284,7 @@ class MapdlGrpc(MapdlBase):
             indptr = self._vec_data(pname + "::ROWS")
             indices = self._vec_data(pname + "::COLS")
             vals = self._vec_data(pname + "::VALS")
-            if raw:  # for debug
+            if raw:
                 return vals, indices, indptr, shape
             else:
                 return sparse.csr_matrix(
@@ -4683,8 +4447,6 @@ class MapdlGrpc(MapdlBase):
             self._response = self._download_as_raw("cmatrix.out").decode()
             return self._response
 
-        # otherwise, simply run cmatrix as we're already in
-        # non-interactive and there's no output to return
         super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)
 
     @MapdlBase.name.getter
@@ -4720,8 +4482,6 @@ class MapdlGrpc(MapdlBase):
             if len(candidate) > MAX_PARAM_CHARS:  # pragma: no cover
                 raise MapdlRuntimeError("Unable to generate a valid lazy-array name.")
 
-            # Include parameters hidden by display settings while checking so
-            # a user parameter cannot be overwritten.
             with self.parameters.full_parameters_output:
                 if candidate not in self.parameters:
                     self._lazy_array_parameters.add(candidate)
@@ -5105,7 +4865,6 @@ class MapdlGrpc(MapdlBase):
             sector=sector,
             **kwargs,
         )
-        # Materialize the private result to preserve this method's ndarray API.
         return self.get_variable(VAR_IR, tstrt=tstrt, kcplx=kcplx).resolve()
 
     def kill_job(self, jobid: int) -> None:
@@ -5119,7 +4878,6 @@ class MapdlGrpc(MapdlBase):
             Job ID.
         """
         cmd = ["scancel", f"{jobid}"]
-        # to ensure the job is stopped properly, let's issue the scancel twice.
         subprocess.Popen(cmd)  # nosec B603
 
     def configure_mtls(self) -> None:
@@ -5133,10 +4891,8 @@ class MapdlGrpc(MapdlBase):
         the directory is absent; this matches historical behavior relied on by
         the test-suite and callers that defer validation later.
         """
-        # Track whether caller provided certs_dir
         provided = self.certs_dir is not None
 
-        # Resolve certs_dir if not provided
         if not provided:
             self.certs_dir = Path(
                 os.environ.get(
@@ -5144,18 +4900,14 @@ class MapdlGrpc(MapdlBase):
                 )
             )
         else:
-            # Accept string or Path
-            # Ensure a str is passed to Path to satisfy type checkers
             self.certs_dir = Path(str(self.certs_dir))
 
-        # If caller provided certs_dir, ensure it exists and is a directory
         if provided and (not self.certs_dir.exists() or not self.certs_dir.is_dir()):
             raise FileNotFoundError(
                 f"mTLS certificate directory not found: '{self.certs_dir}'. "
                 "Provide a valid certs_dir or set ANSYS_GRPC_CERTIFICATES environment variable."
             )
 
-        # If the directory exists (whether provided or resolved), validate required files
         if self.certs_dir.exists() and self.certs_dir.is_dir():
             required_client_files = ["client.crt", "client.key", "ca.crt"]
             missing = [
@@ -5188,7 +4940,6 @@ class MapdlGrpc(MapdlBase):
         ``_poll_connectivity`` daemon thread and the stdout/stderr/startup
         reader threads) that outlive this object otherwise.
         """
-        # Check early exit conditions.
         if (
             getattr(self, "_exited", False)
             or not getattr(self, "_cleanup", True)

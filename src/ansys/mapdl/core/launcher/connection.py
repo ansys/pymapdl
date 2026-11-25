@@ -49,7 +49,6 @@ _PROCESS_OK_STATUS = (
     psutil.STATUS_IDLE,  # Linux, macOS and FreeBSD
 )
 
-# Seconds to wait for a process to disappear after it has been killed.
 _TERMINATION_TIMEOUT = 5.0
 
 
@@ -104,7 +103,6 @@ def create_grpc_client(
     - The timeout from config applies to the connection attempt
     - Additional gRPC channel parameters can be configured via the config object
     """
-    # Determine IP and port
     if process_info:
         ip = process_info.ip
         port = process_info.port
@@ -114,7 +112,6 @@ def create_grpc_client(
 
     LOG.info(f"Connecting to MAPDL gRPC server at {ip}:{port}")
 
-    # Create client
     client = MapdlGrpc(
         ip=ip,
         port=port,
@@ -137,7 +134,6 @@ def create_grpc_client(
         certs_dir=(str(config.certs_dir) if config.certs_dir else None),
     )
 
-    # Clear database if requested
     if config.clear_on_connect:
         LOG.debug("Clearing MAPDL database")
         client.clear()

@@ -28,8 +28,6 @@ except ImportError:  # pragma: no cover
     _HAS_CLICK = False
 
 if _HAS_CLICK:
-    ###################################
-    # PyMAPDL CLI
 
     class _AliasedGroup(click.Group):
         """Click Group that resolves command aliases without showing them in help.

@@ -105,12 +105,6 @@ class UnitsDict(dict):
 
             # Match lines like "LENGTH        (l)  = METER (M)"
             # or "TOFFSET            = 273.0"
-            # Pattern explanation:
-            # - [A-Z](?:[A-Z\s]*)? matches one uppercase letter, optionally followed by
-            #   zero or more uppercase letters or spaces
-            # - (?:\(([a-zA-Z])\))? optionally matches the short name in parentheses
-            # - \s*=\s* matches equals sign with optional whitespace
-            # - (.+) matches the value
             match = re.match(
                 r"^([A-Z](?:[A-Z\s]*)?)\s*(?:\(([a-zA-Z])\))?\s*=\s*(.+)$", line
             )
@@ -120,24 +114,17 @@ class UnitsDict(dict):
                 short_name = match.group(2)
                 value = match.group(3).strip()
 
-                # Extract the first word before parentheses as the base unit value
-                # For "METER (M)", extract "METER"
-                # For numeric values like "273.0", keep them as-is
                 unit_match = re.match(r"^([A-Z]+)", value)
                 if unit_match:
                     base_value = unit_match.group(1).lower()
                 else:
-                    # For numeric values or other formats
                     base_value = (
                         value.split()[0].lower() if value.split() else value.lower()
                     )
 
-                # Store with full name (case-insensitive key)
                 full_name_key = full_name.lower()
                 self[full_name_key] = base_value
 
-                # Store with short name if available (only if not already set)
-                # Use super().__contains__() to check the actual dict without case conversion
                 if short_name:
                     short_name_key = short_name.lower()
                     if not super().__contains__(short_name_key):
@@ -231,7 +218,7 @@ class Information:
         TypeError
             If the provided `mapdl` object is not an instance of `MapdlBase`.
         """
-        from ansys.mapdl.core.mapdl import MapdlBase  # lazy import to avoid circular
+        from ansys.mapdl.core.mapdl import MapdlBase
 
         if not isinstance(mapdl, MapdlBase):  # pragma: no cover
             raise TypeError("Must be implemented from MAPDL class")
@@ -491,7 +478,6 @@ class Information:
     @stitles.setter
     def stitles(self, stitle: str | list[str] | None, i: int | None = None) -> None:
         if stitle is None:
-            # Case to empty
             stitle = ["", "", "", ""]
 
         if not isinstance(stitle, (str, list)):
@@ -717,7 +703,6 @@ class Information:
         for i in range(1, 5):
             match = re.search(f"SUBTITLE  {i}=(.*)", titles)
             if not match or not match.groups(1):
-                # If the subtitle is not found, return an empty string
                 continue
 
             stitles.append(
@@ -867,9 +852,6 @@ def get_mapdl_info(mapdl: "Mapdl") -> dict[str, Any]:
     """
     info: dict[str, Any] = {}
 
-    # ------------------------------------------------------------------ #
-    # Connection                                                          #
-    # ------------------------------------------------------------------ #
     connection: dict[str, Any] = {}
     try:
         connection["name"] = mapdl.name
@@ -885,9 +867,6 @@ def get_mapdl_info(mapdl: "Mapdl") -> dict[str, Any]:
         connection["error"] = str(e)
     info["connection"] = connection
 
-    # ------------------------------------------------------------------ #
-    # Information (product / version)                                     #
-    # ------------------------------------------------------------------ #
     information: dict[str, Any] = {}
     try:
         information["product"] = mapdl.info.product
@@ -901,9 +880,6 @@ def get_mapdl_info(mapdl: "Mapdl") -> dict[str, Any]:
         information["error"] = str(e)
     info["information"] = information
 
-    # ------------------------------------------------------------------ #
-    # Geometry                                                            #
-    # ------------------------------------------------------------------ #
     geometry: dict[str, Any] = {}
     try:
         geometry["n_keypoint"] = mapdl.geometry.n_keypoint
@@ -914,9 +890,6 @@ def get_mapdl_info(mapdl: "Mapdl") -> dict[str, Any]:
         geometry["error"] = str(e)
     info["geometry"] = geometry
 
-    # ------------------------------------------------------------------ #
-    # Mesh                                                                #
-    # ------------------------------------------------------------------ #
     mesh: dict[str, Any] = {}
     try:
         mesh["n_node"] = mapdl.mesh.n_node
@@ -925,9 +898,6 @@ def get_mapdl_info(mapdl: "Mapdl") -> dict[str, Any]:
         mesh["error"] = str(e)
     info["mesh"] = mesh
 
-    # ------------------------------------------------------------------ #
-    # Post-processing                                                     #
-    # ------------------------------------------------------------------ #
     post_processing: dict[str, Any] = {}
     try:
         post_processing["available"] = hasattr(mapdl, "post_processing")

@@ -126,7 +126,6 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
             pl.plot([], points, labels, **kwargs)
             return pl.show(**kwargs)
 
-        # otherwise, use the legacy plotter
         if graphics_backend is GraphicsBackend.MAPDL:
             with self._enable_interactive_plotting():
                 return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
@@ -216,29 +215,15 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
 
             if color_lines:
                 size_ = len(lines)
-                # Because this is only going to be used for plotting
-                # purposes, we don't need to allocate
-                # a huge vector with random numbers (colours).
-                # By default `pyvista.DataSetMapper.set_scalars` `n_colors`
-                # argument is set to 256, so let do here the same.
-                # We will limit the number of randoms values (colours)
-                # to 256.
-                #
                 # Link: https://docs.pyvista.org/api/plotting/_autosummary/pyvista.DataSetMapper.set_scalars.html#pyvista.DataSetMapper.set_scalars
                 size_ = min([256, size_])
-                # Generating a colour array,
-                # Size = number of areas.
-                # Values are random between 0 and min(256, number_areas)
                 colors = get_ansys_colors(size_)
 
-                # Creating a mapping of colors
                 ent_num = []
                 for line in lines:
                     ent_num.append(int(np.unique(line["entity_num"])[0]))
                 ent_num.sort()
 
-                # expand color array until matching the number of areas.
-                # In this case we start to repeat colors in the same order.
                 colors = np.resize(colors, (len(ent_num), 4))
 
                 for line, color in zip(lines, colors):
@@ -401,8 +386,7 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
             surfs = self.geometry.get_areas(return_as_list=True, quality=quality)
             labels = []
 
-            # anums = np.unique(surf["entity_num"])
-            anums = self.geometry.anum  # This might need double check
+            anums = self.geometry.anum
 
             meshes = self._aplot_area_meshes(surfs, anums, color_areas, kwargs)
 
@@ -430,16 +414,10 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
         from ansys.mapdl.core.plotting.theme import get_ansys_colors
 
         if isinstance(color_areas, bool):
-            # Because this is only used for plotting purposes, there is no
-            # need to allocate a huge vector with random colors. By default,
-            # the ``n_colors`` argument of ``pyvista.DataSetMapper.set_scalars``
-            # is 256, so limit the number of colors to 256 here too.
-            #
             # Link: https://docs.pyvista.org/api/plotting/_autosummary/pyvista.DataSetMapper.set_scalars.html#pyvista.DataSetMapper.set_scalars
             return get_ansys_colors(min([256, len(anums)]))
 
         if isinstance(color_areas, str):
-            # A color is provided as a string
             return np.atleast_2d(to_rgba(color_areas))
 
         if len(anums) != len(color_areas):
@@ -456,8 +434,6 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
 
     def _aplot_area_meshes(self, surfs, anums, color_areas, kwargs) -> list:
         """Return the area meshes to plot, colored as requested."""
-        # individual surface isolation is quite slow, so just
-        # color individual areas
         use_area_colors = (
             isinstance(color_areas, np.ndarray) and len(color_areas) > 1
         ) or (not isinstance(color_areas, np.ndarray) and color_areas)
@@ -468,8 +444,6 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
 
         colors = self._aplot_area_colors(anums, color_areas)
 
-        # Expand the color array until it matches the number of areas.
-        # In this case, colors are repeated in the same order.
         colors = np.resize(colors, (len(surfs), 3))
         return [{"mesh": surf, "color": color} for surf, color in zip(surfs, colors)]
 
@@ -482,7 +456,7 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
             if len(anum) != 1:
                 raise RuntimeError(
                     f"The pv.Unstructured from the entity {anum[0]} contains entities"
-                    f"from other entities {anum}"  # Sanity check
+                    f"from other entities {anum}"
                 )
 
             area = surf.extract_cells(surf["entity_num"] == anum)
@@ -496,7 +470,6 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
         """Add the lines of the plotted areas, and their numbers, to ``aplot``."""
         kwargs.setdefault("line_width", 2)
 
-        # subselect lines belonging to the current areas
         with self.save_selection:
             self.lsla("S", mute=True)
             lines = self.geometry.get_lines()
@@ -604,7 +577,6 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
                 pl.plot([], [], [], **kwargs)
                 return pl.show(**kwargs)
 
-            # Storing entities selection
             with self.save_selection:
                 volumes = self.geometry.vnum
                 meshes = []
@@ -616,7 +588,7 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
 
                 for each_volu in volumes:
                     self.vsel("S", vmin=each_volu, return_mapdl_output=True)
-                    self.aslv("S", mute=True)  # select areas attached to active volumes
+                    self.aslv("S", mute=True)
 
                     pl_aplot = self.aplot(
                         graphics_backend=GraphicsBackend.PYVISTA,
@@ -802,7 +774,6 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
             return pl.show(**kwargs)
 
         elif graphics_backend is GraphicsBackend.MAPDL:
-            # otherwise, use the built-in nplot
             if isinstance(nnum, bool):
                 nnum = int(nnum)
 
@@ -928,11 +899,9 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
                 pl.plot([], [], [], mapdl=self, **kwargs)
                 return pl.show(**kwargs)
 
-            # TODO: Consider caching the surface
             esurf = self.mesh._grid.linear_copy().extract_surface().clean()
             kwargs.setdefault("show_edges", True)
 
-            # if show_node_numbering:
             labels = []
             if show_node_numbering:
                 labels = [
@@ -951,7 +920,6 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
             )
             return pl.show(**kwargs)
         elif graphics_backend is GraphicsBackend.MAPDL:
-            # otherwise, use MAPDL plotter
             with self._enable_interactive_plotting():
                 return self.run("EPLOT", **kwargs)
 
@@ -988,7 +956,6 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
                     )
 
         if label and not entity:
-            # supposing entity
             entity = self.components[label].type
 
         if entity[:4] not in ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]:
@@ -1014,7 +981,6 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
         kwargs.setdefault("title", "PyMAPDL CMPLOT")
         output = func(**kwargs)
 
-        # returning to previous selection
         self.cmsel("s", "__tmp_cm__", entity=entity)
         self.components.select(cmps_names)
         return output

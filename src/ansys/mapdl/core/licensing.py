@@ -24,9 +24,6 @@
 
 import os
 import socket
-
-# Subprocess is needed to start the backend. But
-# the input is controlled by the library. Excluding bandit check.
 import subprocess  # nosec B404
 import time
 from typing import Any, Iterator, Literal, Optional, Union
@@ -43,7 +40,7 @@ if _HAS_ATC:
 
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
 LIC_FILE_ENVAR = "ANSYSLMD_LICENSE_FILE"
-APP_NAME = "FEAT_ANSYS"  # TODO: We need to make sure this is the type of feature we need to checkout.
+APP_NAME = "FEAT_ANSYS"
 LIC_TO_CHECK = ["mech_1"]
 
 LICENSES = {
@@ -55,17 +52,6 @@ LICENSES = {
 }
 ALLOWABLE_LICENSES = list(LICENSES)
 Allowable_licenses = Literal["ansys", "meba", "mech_2", "mech_1", "preppost"]
-
-## Regarding license checking.
-# The available licenses we can check against are (in order of
-# complete/comprehensiveness):
-# 1. ``Ansys`` Enterprise license (the most complete)
-# 2. ``meba`` Mechanical Enterprise license
-# 3. ``mech_2`` Premium license
-# 4. ``mech_1`` Pro license` (the most limited)
-# To keep very general, and since we need just to be able to solve, we are going to check against the lower license (``mech_1``).
-
-# TODO: Implement a warning for insufficient license rights.
 
 
 class LicenseChecker:
@@ -286,8 +272,7 @@ class LicenseChecker:
                 LOG.debug(f"Output from {licdebug_file}:\n{msg}")
 
             if "DENIED" in msg:
-                # read to the end of the file
-                time.sleep(0.05)  # permit flush
+                time.sleep(0.05)
                 messages = [msg]
                 while True:
                     msg = next(file_iterator).strip()
@@ -298,7 +283,6 @@ class LicenseChecker:
                 raise LicenseServerConnectionError("\n".join(messages))
 
             if "CHECKOUT" in msg:
-                # successful license checkout
                 return True
 
         raise TimeoutError(
@@ -343,15 +327,12 @@ class LicenseChecker:
                 f"{ansysli_util_path}"
             )
 
-        # allow the specification of ip and port
         env = os.environ.copy()
         if host is not None and port is not None:  # pragma: no cover
             env["ANSYSLI_SERVERS"] = f"{host}:{port}"
             env["ANS_FLEXLM_DISABLE_DEFLICPATH"] = "TRUE"
 
         tstart = time.time()
-        # ansysli_util_path is controlled by the library.
-        # Excluding bandit check.
         process = subprocess.Popen(
             [f'"{ansysli_util_path}"', "-checkout", f"{lic}"],
             stdout=subprocess.PIPE,
@@ -444,7 +425,6 @@ def get_ansys_license_debug_file_tail(
     msg : str
         Message formatted as a single string.
     """
-    # wait until file exists
     max_time = time.time() + start_timeout
     while not os.path.isfile(licdebug_file):  # pragma: no cover
         time.sleep(0.01)
@@ -455,7 +435,6 @@ def get_ansys_license_debug_file_tail(
             )
 
     with open(licdebug_file) as fid:
-        # Going to the end of the file.
         if not debug:  # pragma: no cover
             fid.seek(0, 2)
         while True:
@@ -471,17 +450,14 @@ def get_ansys_license_directory() -> str:  # pragma: no cover
     str
         The path to the Ansys license directory.
     """
-    # it's possible the user has specified the license as an env var
     ansyslic_dir = None
     if LIC_FILE_ENVAR in os.environ:
         ansyslmd_var = os.environ[LIC_FILE_ENVAR]
         if not os.path.isfile(ansyslmd_var):
-            # likely license info
             ansyslic_dir = None
     else:
         ansyslic_dir = os.getenv(LIC_PATH_ENVAR)
 
-    # env var may not be specified, check in the usual location
     if ansyslic_dir is None:
         if os.name == "nt":  # pragma: no cover
             ansyslic_dir = os.path.join(
@@ -519,14 +495,10 @@ def get_ansys_license_debug_file_name() -> str:  # pragma: no cover
     str
         licdebug log file complete name.
     """
-    # Licdebug name convention:
-    # - For version 22.1 and above: `licdebug.$hostname.$appname.$version.out`
-    # - For version 21.2 and below: `licdebug.$appname.$version.out`
 
     name = "licdebug"
     hostname = socket.gethostname()
     appname = APP_NAME
-    # This is the type of license my client requests (Windows 10, 2021R2)
     version: int = version_from_path("mapdl", get_mapdl_path(allow_input=False))
     ending = "out"
 

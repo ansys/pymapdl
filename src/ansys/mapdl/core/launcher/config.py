@@ -49,7 +49,6 @@ from ansys.mapdl.core.constants import LOCALHOST, MAPDL_DEFAULT_PORT
 from .errors import ConfigurationError
 from .models import LaunchConfig, LaunchMode, TransportMode
 
-# Constants
 DEFAULT_TIMEOUT = 45
 
 
@@ -353,7 +352,6 @@ def resolve_launch_config(
     >>> config.launch_on_hpc
     True
     """
-    # Handle deprecated start_timeout parameter
     if start_timeout is not None:
         warnings.warn(
             "The 'start_timeout' parameter is deprecated and will be removed in a future version. "
@@ -361,40 +359,28 @@ def resolve_launch_config(
             DeprecationWarning,
             stacklevel=3,
         )
-        # Use start_timeout if timeout is not explicitly provided
         if timeout is None:
             timeout = start_timeout
 
-    # Resolve scheduler_options (validates that nproc is set when scheduler_options given)
     resolved_scheduler_options = resolve_scheduler_options(scheduler_options, nproc)
 
-    # Resolve channel (validates mutual exclusivity with port/ip)
     resolved_channel = resolve_channel(channel, port, ip)
 
-    # When a channel is provided, force start_instance=False and skip
-    # exec_file auto-detection (no local process is needed).
     if resolved_channel is not None:
         start_instance = False
 
-    # Resolve start_instance first (affects other resolution)
     resolved_start_instance = resolve_start_instance(
         start_instance, ip, launch_on_hpc=launch_on_hpc
     )
 
-    # Resolve version early (needed for mode resolution)
     resolved_exec_file = resolve_exec_file(
         exec_file, version, resolved_start_instance, launch_on_hpc=launch_on_hpc
     )
     resolved_version = resolve_version(version, resolved_exec_file)
 
-    # Resolve core parameters
     resolved_run_location = resolve_run_location(run_location)
     resolved_port = resolve_port(port)
 
-    # When starting a new instance and the user did not explicitly request a
-    # specific port (neither via the argument nor PYMAPDL_PORT env var),
-    # automatically find the next available port if the default is already
-    # occupied.
     _port_explicitly_set = port is not None or bool(os.getenv("PYMAPDL_PORT"))
     if resolved_start_instance and not _port_explicitly_set:
         try:
@@ -413,25 +399,18 @@ def resolve_launch_config(
     resolved_mode = resolve_mode(mode, resolved_version)
     resolved_nproc = resolve_nproc(nproc)
 
-    # Resolve resource parameters
     resolved_ram = resolve_ram(ram)
     resolved_timeout = resolve_timeout(timeout, launch_on_hpc)
 
-    # Resolve transport mode
     resolved_transport_mode = resolve_transport_mode(transport_mode)
 
-    # If user provided certs_dir but did not explicitly set transport_mode,
-    # silently infer mTLS transport.
     if resolved_transport_mode is None and certs_dir is not None:
         from .models import TransportMode
 
         resolved_transport_mode = TransportMode.MTLS
 
-    # Resolve additional switches (explicit arg + PYMAPDL_ADDITIONAL_SWITCHES env var)
     resolved_additional_switches = resolve_additional_switches(additional_switches)
 
-    # Resolve environment variables — keep the two modes separate so
-    # prepare_environment can decide whether to extend or replace.
     resolved_replace_env_vars: Dict[str, str] = {}
     resolved_add_env_vars: Dict[str, str] = {}
     if replace_env_vars is not None:
@@ -575,20 +554,15 @@ def resolve_exec_file(
     Raises:
         ConfigurationError: If executable cannot be found or is invalid
     """
-    # Cannot specify both exec_file and version simultaneously
     if exec_file and version:
         raise ConfigurationError("Cannot specify both 'exec_file' and 'version'.")
 
-    # If not starting instance, exec_file not needed
     if not start_instance:
         return exec_file or ""
 
-    # Priority 1: Explicit argument
     if exec_file:
         if not os.path.isfile(exec_file):
             if launch_on_hpc:
-                # For HPC launches the executable lives on the remote cluster, not
-                # locally.  Emit a warning so the caller is aware, but do NOT raise.
                 warnings.warn(
                     f"PyMAPDL could not find the ANSYS executable at '{exec_file}'. "
                     "This is acceptable for HPC launches where the executable resides "
@@ -602,7 +576,6 @@ def resolve_exec_file(
             )
         return os.path.abspath(exec_file)
 
-    # Priority 2: Environment variable
     env_exec = os.getenv("PYMAPDL_MAPDL_EXEC")
     if env_exec:
         if not os.path.isfile(env_exec):
@@ -612,7 +585,6 @@ def resolve_exec_file(
             )
         return os.path.abspath(env_exec)
 
-    # Priority 3: Auto-detect
     if not _HAS_ATC:
         raise ConfigurationError(
             "Cannot auto-detect MAPDL executable. Please either:\n"
@@ -656,7 +628,6 @@ def resolve_port(port: Optional[int]) -> int:
     Raises:
         ConfigurationError: If port is invalid (<1 or >65535)
     """
-    # Priority 1: Explicit argument
     if port is not None:
         if not isinstance(port, int):
             try:
@@ -671,7 +642,6 @@ def resolve_port(port: Optional[int]) -> int:
             )
         return port
 
-    # Priority 2: Environment variable
     env_port = os.getenv("PYMAPDL_PORT")
     if env_port:
         try:
@@ -688,7 +658,6 @@ def resolve_port(port: Optional[int]) -> int:
                 f"Invalid port from PYMAPDL_PORT: '{env_port}'. Must be an integer."
             )
 
-    # Priority 3: Default
     LOG.debug(f"Using default port: {MAPDL_DEFAULT_PORT}")
     return MAPDL_DEFAULT_PORT
 
@@ -717,24 +686,20 @@ def resolve_ip(
     Raises:
         ConfigurationError: If IP is invalid, conflicts with HPC launch, or cannot be resolved
     """
-    # Cannot specify a non-local IP when launching on HPC
     if launch_on_hpc and ip and ip not in ("127.0.0.1", "localhost"):
         raise ConfigurationError(
             "PyMAPDL cannot ensure a specific IP will be used when launching "
             "MAPDL on a cluster. Please remove the 'ip' argument."
         )
 
-    # Priority 1: Explicit argument
     if ip:
         try:
-            # Convert hostname to IP if needed
             resolved_ip = socket.gethostbyname(ip)
             LOG.debug(f"Using explicit IP: {resolved_ip}")
             return resolved_ip
         except socket.gaierror:
             raise ConfigurationError(f"Cannot resolve hostname or IP: {ip}")
 
-    # Priority 2: Environment variable
     env_ip = os.getenv("PYMAPDL_IP", "").strip()
     if env_ip:
         try:
@@ -752,7 +717,6 @@ def resolve_ip(
             )
             return env_ip
 
-    # Priority 3: WSL host detection
     from .environment import get_windows_host_ip, is_wsl
 
     if is_wsl() and start_instance:
@@ -768,7 +732,6 @@ def resolve_ip(
             )
             return LOCALHOST
 
-    # Priority 4: Default localhost
     LOG.debug(f"Using default IP: {LOCALHOST}")
     return LOCALHOST
 
@@ -788,13 +751,11 @@ def resolve_mode(mode: Optional[str], version: Optional[int]) -> LaunchMode:
     Raises:
         ConfigurationError: If mode incompatible with version/platform
     """
-    # Explicit mode
     if mode:
         mode_lower = mode.lower()
         if mode_lower == "grpc":
             return LaunchMode.GRPC
         elif mode_lower == "console":
-            # Console mode only on Linux
             if os.name == "nt":
                 raise ConfigurationError(
                     "Console mode is only supported on Linux. Use mode='grpc' on Windows."
@@ -805,9 +766,7 @@ def resolve_mode(mode: Optional[str], version: Optional[int]) -> LaunchMode:
                 f"Invalid mode: '{mode}'. Must be 'grpc' or 'console'."
             )
 
-    # Auto-detect based on version
     if version and version < 211:
-        # Old version, use console if on Linux
         if os.name == "posix":
             LOG.debug("Auto-selected console mode for older MAPDL version on Linux")
             return LaunchMode.CONSOLE
@@ -817,7 +776,6 @@ def resolve_mode(mode: Optional[str], version: Optional[int]) -> LaunchMode:
                 f"Please use version 211 (2021R1) or newer."
             )
 
-    # Default to gRPC (modern mode)
     LOG.debug("Auto-selected gRPC mode")
     return LaunchMode.GRPC
 
@@ -839,13 +797,11 @@ def resolve_nproc(nproc: Optional[int]) -> int:
     Raises:
         ConfigurationError: If nproc invalid
     """
-    # Priority 1: Explicit argument
     if nproc is not None:
         if nproc < 1:
             raise ConfigurationError(f"Invalid nproc: {nproc}. Must be at least 1.")
         return nproc
 
-    # Priority 2: Environment variable
     env_nproc = os.getenv("PYMAPDL_NPROC")
     if env_nproc:
         try:
@@ -861,7 +817,6 @@ def resolve_nproc(nproc: Optional[int]) -> int:
                 f"Invalid nproc from PYMAPDL_NPROC: '{env_nproc}'. Must be an integer."
             )
 
-    # Priority 3: Default
     default_nproc = 2
     LOG.debug(f"Using default nproc: {default_nproc}")
     return default_nproc
@@ -882,11 +837,9 @@ def resolve_version(version: Optional[int], exec_file: str) -> Optional[int]:
     Returns:
         Version in XYZ format (e.g., 222) or None
     """
-    # Priority 1: Explicit argument
     if version is not None:
         return version
 
-    # Priority 2: Environment variable
     env_version = os.getenv("PYMAPDL_MAPDL_VERSION")
     if env_version:
         try:
@@ -901,7 +854,6 @@ def resolve_version(version: Optional[int], exec_file: str) -> Optional[int]:
                 f"Attempting to extract from executable path."
             )
 
-    # Priority 3: Extract from exec_file
     if exec_file and _HAS_ATC:
         try:
             from ansys.tools.common.path import version_from_path
@@ -913,7 +865,6 @@ def resolve_version(version: Optional[int], exec_file: str) -> Optional[int]:
         except Exception as e:
             LOG.debug(f"Could not extract version from executable path: {e}")
 
-    # Could not determine version
     LOG.debug("MAPDL version could not be determined")
     return None
 
@@ -935,7 +886,6 @@ def resolve_run_location(run_location: Optional[str]) -> str:
         ConfigurationError: If directory cannot be created
     """
     if run_location:
-        # Ensure directory exists
         if not os.path.exists(run_location):
             try:
                 os.makedirs(run_location, exist_ok=True)
@@ -946,7 +896,6 @@ def resolve_run_location(run_location: Optional[str]) -> str:
                 )
         return os.path.abspath(run_location)
 
-    # Create temporary directory
     try:
         temp_dir = tempfile.mkdtemp(prefix="ansys_")
         LOG.debug(f"Created temporary run location: {temp_dir}")
@@ -991,7 +940,6 @@ def resolve_timeout(timeout: Optional[int], launch_on_hpc: bool) -> int:
             )
         return timeout
 
-    # HPC launches take longer
     if launch_on_hpc:
         return DEFAULT_TIMEOUT * 2
 
@@ -1023,10 +971,7 @@ def resolve_start_instance(
     Returns:
         Whether to start new instance
     """
-    # Priority 1: Explicit argument
     if start_instance is not None:
-        # Cannot start a local instance while also targeting a remote IP —
-        # unless we are launching on HPC where MAPDL starts on a cluster node.
         if start_instance is True and ip and not launch_on_hpc:
             raise ConfigurationError(
                 "When providing a value for the argument 'ip', the argument "
@@ -1037,7 +982,6 @@ def resolve_start_instance(
             LOG.warning(
                 "Both start_instance and ip are specified. start_instance will take precedence."
             )
-        # Warn when explicit start_instance=True conflicts with the env var
         if start_instance is True:
             env_start = os.getenv("PYMAPDL_START_INSTANCE", "").strip().lower()
             if env_start:
@@ -1050,10 +994,6 @@ def resolve_start_instance(
                 )
         return start_instance
 
-    # Priority 2: PYMAPDL_START_INSTANCE environment variable.
-    # This takes precedence over IP-based inference so that explicitly setting
-    # PYMAPDL_START_INSTANCE=True is not silently overridden when PYMAPDL_IP is
-    # also present in the environment.
     env_start = os.getenv("PYMAPDL_START_INSTANCE", "").strip().lower()
     if env_start:
         if env_start in ("true", "1", "yes"):
@@ -1063,13 +1003,11 @@ def resolve_start_instance(
             LOG.debug("Using start_instance=False from PYMAPDL_START_INSTANCE env var")
             return False
 
-    # Priority 3: Infer from explicit ip argument or PYMAPDL_IP env var.
     env_ip = os.getenv("PYMAPDL_IP", "").strip()
     if ip or env_ip:
         LOG.debug("IP specified, defaulting start_instance to False")
         return False
 
-    # Priority 4: Default to True
     LOG.debug("Defaulting start_instance to True")
     return True
 
@@ -1087,13 +1025,11 @@ def resolve_transport_mode(transport_mode: Optional[str]) -> Optional[TransportM
         ConfigurationError: If transport mode is invalid
     """
     if transport_mode is None:
-        # Fall back to environment variables in precedence order
         env_val = os.environ.get("PYMAPDL_GRPC_TRANSPORT") or os.environ.get(
             "ANSYS_MAPDL_GRPC_TRANSPORT"
         )
         if env_val is None:
             return None
-        # Validate the env var value through the same mapping logic
         transport_mode = env_val
 
     mode_lower = transport_mode.lower()

@@ -49,7 +49,7 @@ def _apply_numpy_compatibility_patches():
     as compatibility shims when needed.
     """
     if not hasattr(np, "in1d"):
-        # Monkey-patch numpy to restore in1d as an alias to isin
+
         def _in1d_compat(ar1, ar2, assume_unique=False, invert=False):
             """
             Compatibility wrapper for deprecated numpy.in1d function.
@@ -77,5 +77,4 @@ def _apply_numpy_compatibility_patches():
         np.in1d = _in1d_compat
 
 
-# Apply compatibility patches on module import
 _apply_numpy_compatibility_patches()

@@ -69,14 +69,11 @@ def run_first_time() -> None:
 
     first_time_file: str = os.path.join(USER_DATA_PATH, ".firstime")
 
-    # Run the first time only
     if not os.path.exists(first_time_file):  # pragma: no cover
 
-        # Create USER_DATA_PATH directory
         if not os.path.exists(USER_DATA_PATH):  # pragma: no cover
             os.makedirs(USER_DATA_PATH)
 
-        # Show warning about Python compatibility
         version_info = get_python_version()
 
         py_ver = f"{version_info[0]}.{version_info[1]}"
@@ -104,5 +101,4 @@ def run_first_time() -> None:
 
 
 def run_every_import() -> None:
-    # Run every time we import PyMAPDL
     pass

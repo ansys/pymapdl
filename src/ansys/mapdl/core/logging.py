@@ -152,18 +152,15 @@ import weakref
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl import MapdlBase
 
-## Default configuration
 LOG_LEVEL = logging.DEBUG
 FILE_NAME = "pymapdl.log"
 
-# For convenience
 DEBUG = logging.DEBUG
 INFO = logging.INFO
 WARN = logging.WARN
 ERROR = logging.ERROR
 CRITICAL = logging.CRITICAL
 
-## Formatting
 
 STDOUT_MSG_FORMAT = (
     "%(levelname)s - %(instance_name)s -  %(module)s - %(funcName)s - %(message)s"
@@ -205,7 +202,7 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
     to once.
     """
 
-    level = None  # This is maintained for compatibility with ``supress_logging``, but it does nothing.
+    level = None
     file_handler: Optional[logging.FileHandler] = None
     std_out_handler: Optional[logging.StreamHandler] = None
 
@@ -220,7 +217,6 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
 
     def process(self, msg: str, kwargs: MutableMapping[str, Dict[str, str]]):
         kwargs["extra"] = {}
-        # This are the extra parameters sent to log
         if self.extra is not None:
             kwargs["extra"]["instance_name"] = self.extra.name  # type: ignore[union-attr,attr-defined]
         return msg, kwargs
@@ -277,14 +273,6 @@ class PymapdlPercentStyle(logging.PercentStyle):
         else:
             values = record.__dict__
 
-        # We can do here any changes we want in record, for example adding a key.
-
-        # We could create an if here if we want conditional formatting, and even
-        # change the record.__dict__.
-        # Since now we don't want to create conditional fields, it is fine to keep
-        # the same MSG_FORMAT for all of them.
-
-        # For the case of logging exceptions to the logger.
         values.setdefault("instance_name", "")
 
         return STDOUT_MSG_FORMAT % values
@@ -304,9 +292,8 @@ class PymapdlFormatter(logging.Formatter):
         if sys.version_info[1] < 8:
             super().__init__(fmt, datefmt, style)
         else:
-            # 3.8: The validate parameter was added
             super().__init__(fmt, datefmt, style, validate)
-        self._style = PymapdlPercentStyle(fmt, defaults=defaults)  # overwriting
+        self._style = PymapdlPercentStyle(fmt, defaults=defaults)
 
 
 class InstanceFilter(logging.Filter):
@@ -386,7 +373,6 @@ class Logger:
             Name of the output file. By default ``pymapdl.log``.
         """
 
-        # create default main logger
         self.logger: logging.Logger = logging.getLogger("pymapdl_global")
         self.logger.addFilter(InstanceFilter())
         if isinstance(level, str):
@@ -394,9 +380,8 @@ class Logger:
 
         self.logger.setLevel(level)
         self.logger.propagate = True
-        self.level = self.logger.level  # TODO: TO REMOVE
+        self.level = self.logger.level
 
-        # Writing logging methods.
         self.debug = self.logger.debug
         self.info = self.logger.info
         self.warning = self.logger.warning
@@ -405,13 +390,11 @@ class Logger:
         self.log = self.logger.log
 
         if to_file:
-            # We record to file
             self.log_to_file(filename=filename, level=level)
 
         if to_stdout:
             self.log_to_stdout(level=level)
 
-        # Using logger to record unhandled exceptions
         if catch_all_exceptions:
             self.add_handling_uncaught_expections(self.logger)
 
@@ -481,9 +464,6 @@ class Logger:
                     logger.std_out_handler = new_handler  # type: ignore[attr-defined]
 
                 if level:
-                    # The logger handlers are copied and changed the loglevel is
-                    # the specified log level is lower than the one of the
-                    # global.
                     if isinstance(level, str):
                         new_loglevel = string_to_loglevel[
                             cast(LOG_LEVEL_STRING_TYPE, level.upper())
@@ -651,7 +631,6 @@ def _copy_handler(handler: logging.Handler) -> logging.Handler:
         new_handler.createLock()
         new_handler.mode = new_handler.mode.replace("w", "a")
         if handler.stream is None:  # type: ignore[attr-defined]
-            # Delayed handler: let ``logging`` open the stream when needed.
             new_handler.stream = None  # type: ignore[assignment]
         else:
             new_handler.stream = new_handler._open()

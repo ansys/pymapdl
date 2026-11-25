@@ -42,7 +42,6 @@ MAX_MEM: int = 256
 
 def check_manager() -> None:
     try:
-        # response = manager.ping()
         manager.ping()
     except:
         raise RuntimeError("Unable to connect to scheduler")
@@ -104,10 +103,8 @@ def launch_mapdl_on_cluster(
 
     >>> mapdl = launch_mapdl(memory=16, nproc=8)
     """
-    # attempt to connect to the remote scheduler
     check_manager()
 
-    # check additional_switches args
     if "-m " in additional_switches:
         raise ValueError(
             'Memory option "-m" not permitted when launching from the '
@@ -119,7 +116,6 @@ def launch_mapdl_on_cluster(
             "kubernetes cluster and is set with the ``nproc`` parameter"
         )
 
-    # check resources
     nproc = int(nproc)
     if nproc < 0:
         raise ValueError("Requested CPUs ``nproc`` must be greater than 0")
@@ -131,7 +127,6 @@ def launch_mapdl_on_cluster(
     if memory > MAX_MEM:
         raise ValueError(f"Requested memory ``mem`` must be less than than {MAX_MEM}")
 
-    # # convert memory from GB to Mi
     memory *= 1024
 
     if "-smp" in additional_switches:
@@ -150,7 +145,6 @@ def launch_mapdl_on_cluster(
         start_timeout=start_timeout,
     )
 
-    # connect to the pod instance
     from ansys.mapdl.core import Mapdl
 
     mapdl = Mapdl(ip, loglevel=loglevel)

@@ -26,7 +26,6 @@ from typing import Any, Iterable, Literal, ParamSpec, TypeAlias, Union
 
 import numpy as np
 
-## Types
 Rnum: TypeAlias = Union[int, float, Iterable[int], Iterable[float], None]
 Ids: TypeAlias = Union[int, Iterable[int], None]
 Locations: TypeAlias = Literal["Nodal", "Elemental"]
@@ -34,7 +33,7 @@ Locations: TypeAlias = Literal["Nodal", "Elemental"]
 Entities: TypeAlias = str | int | Iterable[str | int] | None
 EntityType: TypeAlias = Literal["Nodal", "Elemental", "ElementalNodal"]
 
-ResultField: TypeAlias = str  # To be defined later.. Eg "displacement" etc...
+ResultField: TypeAlias = str
 SolutionType: TypeAlias = str
 ComponentsDirections: TypeAlias = Literal["X", "Y", "Z", "XY", "YZ", "XZ"]
 

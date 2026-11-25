@@ -26,9 +26,6 @@
 from functools import wraps
 import os
 import re
-
-# Subprocess is needed to start the backend. But
-# the input is controlled by the library. Excluding bandit check.
 import tempfile
 import time
 from typing import TYPE_CHECKING, Iterable, Optional
@@ -110,7 +107,6 @@ def _find_blocked_command(text: str, blocked: frozenset[str]) -> str | None:
 
 # MAPDL crashes or writes to a mangled path past this length (issue #4849).
 MAX_FNAME_LENGTH = 248
-# Command prefix -> indexes of its comma fields that hold a file name or directory.
 _FNAME_FIELDS = {
     "SAVE": (1,),
     "RESU": (1,),
@@ -219,9 +215,7 @@ class _CoreExecutionMixin(_CoreMixinBase):
             )
 
     def _wrap_listing_functions(self):
-        # Wrapping LISTING FUNCTIONS.
         def wrap_listing_function(func):
-            # Injecting doc string modification
             if hasattr(func, "__func__"):
                 func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
             else:  # pragma: no cover
@@ -234,7 +228,6 @@ class _CoreExecutionMixin(_CoreMixinBase):
             return inner_wrapper
 
         def wrap_bc_listing_function(func):
-            # Injecting doc string modification
             if hasattr(func, "__func__"):
                 func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
             else:  # pragma: no cover
@@ -247,9 +240,7 @@ class _CoreExecutionMixin(_CoreMixinBase):
             return inner_wrapper
 
         for name in dir(self):
-            if name[0:4].upper() in CMD_LISTING and name in dir(
-                Commands
-            ):  # avoid matching Mapdl properties which starts with same letters as MAPDL commands.
+            if name[0:4].upper() in CMD_LISTING and name in dir(Commands):
                 func = self.__getattribute__(name)
                 setattr(self, name, wrap_listing_function(func))
 
@@ -297,7 +288,6 @@ class _CoreExecutionMixin(_CoreMixinBase):
         self._store_commands = False
         self._stored_commands = []
 
-        # write to a temporary input file
         self._log.debug(
             "Writing the following commands to a temporary apdl input file:\n%s",
             commands,
@@ -307,10 +297,9 @@ class _CoreExecutionMixin(_CoreMixinBase):
         with open(tmp_inp, "w") as f:
             f.writelines(commands)
 
-        # interactive result
         _ = self.input(tmp_inp, write_to_log=False)
 
-        time.sleep(0.1)  # allow MAPDL to close the file
+        time.sleep(0.1)
         if os.path.isfile(tmp_out):
             self._response = "\n" + open(tmp_out).read()
 
@@ -522,41 +511,34 @@ class _CoreExecutionMixin(_CoreMixinBase):
                 f"The MAPDL instance has been exited before running the command: {command}"
             )
 
-        # check if multiline
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
 
         self._check_blocked_commands(command)
         _check_fname_length(command)
 
-        if len(command) > 639:  # CMD_MAX_LENGTH
-            # If using mapdl_grpc, this check is redundant on purpose.
-            # Console probably do not have this limitation, but I'm not certain.
+        if len(command) > 639:
             raise ValueError("Maximum command length must be less than 640 characters")
 
         verbose, savefig, avoid_non_interactive = self._pop_run_kwargs(kwargs)
 
-        # Early exit if on non-interactive.
         if self._store_commands and not avoid_non_interactive:
             # If you are using NBLOCK on input, you should not strip the string
             self._stored_commands.append(command)
             return
 
         if mute is None:
-            # ``mute`` only exists on gRPC instances.
             mute = getattr(self, "mute", False)
 
         command = command.strip()
         is_comment = command.startswith("!") or command.upper().startswith("/COM")
         cmd_ = command.split(",")[0].upper()
 
-        # always reset the cache
         self._reset_cache()
 
         command = self._preprocess_command(command, write_to_log)
 
         if command[:4].upper() == "/LIS":
-            # simply return the contents of the file
             return self.list(*command.split(",")[1:])
 
         if "=" in command and not is_comment:
@@ -581,16 +563,10 @@ class _CoreExecutionMixin(_CoreMixinBase):
         verbose = kwargs.pop("verbose", False)
         savefig = kwargs.pop("savefig", False)
 
-        # Check if you want to avoid the current non-interactive context.
         avoid_non_interactive = kwargs.pop("avoid_non_interactive", False)
 
-        # XSEL wrapper option; reaches here unwrapped on console and non-interactive.
         kwargs.pop("return_mapdl_output", None)
 
-        # Check if there is an unused keyword argument. If there is, it
-        # might be because you wrote a wrong argument name.
-        #
-        # Remove empty string kwargs
         for key, value in list(kwargs.items()):
             if value == "":
                 kwargs.pop(key)
@@ -612,18 +588,14 @@ class _CoreExecutionMixin(_CoreMixinBase):
             # https://github.com/ansys/pymapdl/issues/380
             command = "/CLE,NOSTART"
 
-        # Tracking output device
         if command[:4].upper() == "/SHO" and "," in command:
             self._file_type_for_plots = command.split(",")[1].upper()  # type: ignore[assignment]
 
-        # Invalid commands silently ignored.
         cmd_ = command.split(",")[0].upper()
         if cmd_ in INVAL_COMMANDS_SILENT:
             msg = f"{cmd_} is ignored: {INVAL_COMMANDS_SILENT[cmd_]}."
             self._log.info(msg)
 
-            # This, very likely, won't be recorded anywhere.
-            # But just in case, I'm adding info as /com
             command = (
                 f"/com, PyMAPDL: {msg}"  # Using '!' makes the output of '_run' empty
             )
@@ -643,11 +615,9 @@ class _CoreExecutionMixin(_CoreMixinBase):
 
     def _check_parameter_assignment(self, command: str, cmd_: str) -> None:
         """Validate the parameter name of an ``NAME=VALUE`` command."""
-        # We are storing a parameter.
         param_name = command.split("=")[0].strip()
 
         if cmd_[:4].upper() not in ["/COM", "/TIT", "/SYS"]:
-            # Edge case. `\title, 'par=1234' `
             self._check_parameter_name(param_name)
 
     def _process_run_response(self, text: str, short_cmd, savefig):
@@ -664,7 +634,6 @@ class _CoreExecutionMixin(_CoreMixinBase):
         if not self.ignore_errors:
             self._raise_errors(text)
 
-        # special returns for certain geometry commands
         if short_cmd in plotting.PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
             return self.screenshot(savefig=savefig, default_name="plot")
@@ -682,7 +651,6 @@ class _CoreExecutionMixin(_CoreMixinBase):
         raise NotImplementedError("Implemented by child class")
 
     def _raise_errors(self, text):
-        # to make sure the following error messages are caught even if a breakline is in between.
         flat_text = " ".join([each.strip() for each in text.splitlines()])
         base_error_msg = "\n\nIgnore these messages by setting 'ignore_errors'=True.\n"
 
@@ -724,10 +692,8 @@ class _CoreExecutionMixin(_CoreMixinBase):
                 raise MapdlCommandIgnoredError(text)
 
         if "Cannot create another with the same name" in flat_text:
-            # When overriding constitutive models. See 'test_tbft'
             warn(text, UserWarning)
 
-        # flag errors
         if "*** ERROR ***" in flat_text:
             self._raise_output_errors(text)
 
@@ -744,15 +710,10 @@ class _CoreExecutionMixin(_CoreMixinBase):
         MapdlRuntimeError
             For most of the errors.
         """
-        # The logic is to iterate for each line. If the error header is found,
-        # we analyse the following 'lines_number' in other to get the full error method.
-        # Then with regex, we collect the error message, and raise it.
         for index, each_line in enumerate(response.splitlines()):
             if "*** ERROR ***" in each_line:
                 error_is_fine = False
 
-                # Extracting only the first 'lines_number' lines.
-                # This is important. Regex has problems parsing long messages.
                 lines_number = 20
                 if len(response.splitlines()) <= lines_number:
                     partial_output = response
@@ -761,30 +722,24 @@ class _CoreExecutionMixin(_CoreMixinBase):
                         response.splitlines()[index : (index + lines_number)]
                     )
 
-                # Find the error message.
-                # Either ends with the beginning of another error message or with double empty line.
                 error_message = re.search(
-                    r"(\*\*\* ERROR \*\*\*.*?).*(?=\*\*\*|.*\n\n)",  # we might consider to use only one \n.
+                    r"(\*\*\* ERROR \*\*\*.*?).*(?=\*\*\*|.*\n\n)",
                     partial_output,
                     re.DOTALL,
                 )
 
                 if not error_message:
-                    # Since we couldn't find an error message, the full partial message (10 lines) is analysed
                     self._log.debug(
                         f"PyMAPDL could not identify the error message, the full partial message ({lines_number} lines) is analysed"
                     )
                     error_message = partial_output
                 else:
-                    # Catching only the first error.
                     error_message = error_message.group(0)
 
-                # Trimming empty lines
                 error_message = "\n".join(
                     [each for each in error_message.splitlines() if each]
                 )
 
-                # Checking for permitted error.
                 for each_error in _PERMITTED_ERRORS:
                     permited_error_message = re.search(each_error, error_message)
 
@@ -792,17 +747,12 @@ class _CoreExecutionMixin(_CoreMixinBase):
                         error_is_fine = True
                         break
 
-                # Raising errors
                 if error_is_fine:
                     self._log.warning(
                         "PERMITTED ERROR: " + permited_error_message.string
                     )
                     continue
                 else:
-                    # We don't need to log exception because they already included in the main logger.
-                    # logger.error(response)
-                    # However, exceptions are recorded in the global logger which do not record
-                    # information of the instances name, hence we edit the error message.
                     raise MapdlRuntimeError(
                         f"\n\nError in instance {self.name}\n\n" + error_message
                     )
@@ -836,29 +786,23 @@ class _CoreExecutionMixin(_CoreMixinBase):
                     "If using parenthesis (indexing), you cannot use any character after the closing parenthesis."
                 )
 
-            # Check recursively the parameter name without parenthesis.
             # This is the real parameter name, however it must already exists to not raise an error.
             sub_param_name = re.findall(r"^(.*)\(", param_name)
             if sub_param_name:
                 self._check_parameter_name(sub_param_name[0])
-                return  # Following checks should not run against the parenthesis
+                return
 
-        # Using leading underscored parameters
         match_reserved_leading_underscored_parameter_name = (
             r"^_[a-zA-Z\d_\(\),\s_]{1," + f"{MAX_PARAM_CHARS}" + r"}[a-zA-Z\d\(\),\s]$"
         )
-        # If it also ends in underscore, this won't be triggered.
         if re.search(match_reserved_leading_underscored_parameter_name, param_name):
             raise ValueError(
                 "It is discouraged the use of parameters starting with underscore ('_'). "
                 "This convention is reserved for parameters used by the GUI and/or Mechanical APDL-provided macros."
             )
 
-        # invalid parameter (using ARGXX or ARXX)
         match_reserved_arg_parameter_name = r"^(AR|ARG)(\d{1,3})$"
-        if re.search(
-            match_reserved_arg_parameter_name, param_name
-        ):  # invalid parameter (using ARGXX or ARXX)
+        if re.search(match_reserved_arg_parameter_name, param_name):
             raise ValueError(
                 "The parameters 'ARGXX' and 'ARXX' where 'XX' are integers, are reserved for functions and macros local parameters."
                 "Hence its use is not recommended outside them."

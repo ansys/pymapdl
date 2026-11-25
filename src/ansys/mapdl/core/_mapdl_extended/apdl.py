@@ -67,7 +67,7 @@ class _ExtendedParameterCommandsMixin(_ExtendedMixinBase):
         csysid="",
         **kwargs,
     ):
-        self._check_parameter_name(par)  # parameter name check
+        self._check_parameter_name(par)
         if "(" in par or ")" in par:
             raise ValueError(
                 "Parenthesis are not allowed as parameter name in 'mapdl.dim'."
@@ -111,7 +111,6 @@ class _ExtendedParameterCommandsMixin(_ExtendedMixinBase):
         ]
 
         if strarray.upper() in func_options and func.upper() not in func_options:
-            # Likely you are using the old ``_Mapdl.inquire`` implementation.
             raise ValueError(
                 "Arguments of this method have changed. `Mapdl.inquire` now includes the optional `strarray` parameter "
                 f"as the first argument. Either use `inquire(func={strarray})`, or `inquire("
@@ -139,13 +138,12 @@ class _ExtendedParameterCommandsMixin(_ExtendedMixinBase):
             if not self._store_commands:
                 raise MapdlRuntimeError("/INQUIRE command didn't return a response.")
             else:
-                # Exit since we are in non-interactive mode
                 return None
 
         if func.upper() in [
             "ENV",
             "TITLE",
-        ]:  # the output is multiline, we just need the last line.
+        ]:
             response = response.splitlines()[-1]
 
         response = response.split("=")[1].strip()
@@ -159,8 +157,6 @@ class _ExtendedParameterCommandsMixin(_ExtendedMixinBase):
                 "the environment variables on Linux."
             )
 
-        # Check if the function is to check existence
-        # so it makes sense to return a boolean
         if func.upper() in ["EXIST", "WRITE", "READ", "EXEC"]:
             if "1.0" in response:
                 return True
@@ -218,12 +214,10 @@ class _ExtendedParameterCommandsMixin(_ExtendedMixinBase):
         response = self.run(command, **kwargs)
 
         if not response:
-            # If no response is received, re-run the command with force_output to ensure output is captured.
             with self.force_output:
                 response = self.run(command, **kwargs)
 
         if self._store_commands:
-            # Return early in non_interactive
             return
 
         value = response.split("=")[-1].strip()
@@ -234,7 +228,7 @@ class _ExtendedParameterCommandsMixin(_ExtendedMixinBase):
                 )
             value = value.splitlines()[0]
 
-        try:  # always either a float or string
+        try:
             return float(value)
         except ValueError:
             return value

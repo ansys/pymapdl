@@ -123,17 +123,13 @@ def launch_mapdl_process(config: LaunchConfig, env_vars: Dict[str, str]) -> Proc
     - Uses background thread to monitor stdout without blocking
     - On Windows, MAPDL runs in batch mode with temporary input/output files
     """
-    # Handle stale lock file before launching
     _handle_lock_file(config)
 
-    # Generate command
     cmd = _generate_launch_command(config)
 
-    # Create temp input file (Windows only)
     if os.name == "nt" and not config.launch_on_hpc:
         _create_temp_input_file(config.run_location)
 
-    # Launch process
     process = _start_subprocess(
         cmd=cmd,
         cwd=config.run_location,
@@ -141,7 +137,6 @@ def launch_mapdl_process(config: LaunchConfig, env_vars: Dict[str, str]) -> Proc
         output_file=config.mapdl_output,
     )
 
-    # Wait for ready
     wait_for_process_ready(
         process=process,
         run_location=config.run_location,
@@ -212,9 +207,6 @@ def _handle_lock_file(config: LaunchConfig) -> None:
                 f"Another MAPDL instance may still be running at '{config.run_location}'."
             ) from exc
         except FileNotFoundError:
-            # The file disappear between the isfile check and the remove call, which means
-            # another process may have just started and removed it.
-            # In this case, we can ignore the error.
             LOG.debug(f"Lock file '{lockfile}' disappeared before it could be removed.")
     else:
         raise LockFileException(
@@ -276,20 +268,15 @@ def wait_for_process_ready(
     """
     LOG.debug("Checking MAPDL process startup")
 
-    # Set up stdout monitoring
     stdout_queue, stdout_monitor_thread = _monitor_stdout(process.stdout)
     process._startup_stdout_thread = stdout_monitor_thread  # type: ignore[attr-defined]
 
-    # Check process alive
     check_process_is_alive(process, run_location)
 
-    # Wait for the directory to be ready (handles potential delays in file system availability)
     _wait_directory_ready(run_location, timeout)
 
-    # Check error file created
     _wait_for_error_file(run_location, timeout)
 
-    # Linux: Check gRPC server message
     if os.name == "posix" and not is_wsl() and stdout_queue is not None:
         _check_grpc_server_ready(stdout_queue, timeout)
 
@@ -342,29 +329,23 @@ def _generate_launch_command(config: LaunchConfig) -> List[str]:
     """
     cmd = [config.exec_file]
 
-    # Core arguments
     cmd.extend(["-j", config.jobname])
     cmd.extend(["-np", str(config.nproc)])
     cmd.extend(["-port", str(config.port)])
     cmd.append("-grpc")
 
-    # Add transport mode flag when explicitly configured
     if config.transport_mode is not None:
         cmd.extend(["-transport", config.transport_mode.value])
 
-    # Resource arguments
     if config.ram:
         cmd.extend(["-m", str(config.ram)])
 
-    # License type
     if config.license_type:
         cmd.extend(["-p", str(config.license_type)])
 
-    # Additional switches
     if config.additional_switches:
         cmd.extend(shlex.split(config.additional_switches))
 
-    # Windows-specific temp file arguments
     if os.name == "nt":
         cmd.extend(["-b", "-i", ".__tmp__.inp", "-o", ".__tmp__.out"])
 
@@ -428,7 +409,6 @@ def _start_subprocess(
     - Command is logged at INFO level
     - Process PID is logged at DEBUG level
     """
-    # Set up output redirection
     stdout_arg: Union[int, IO[bytes]]
     stderr_arg: int
 
@@ -449,7 +429,6 @@ def _start_subprocess(
         "============"
     )
 
-    # Launch process
     try:
         process = subprocess.Popen(
             cmd,
@@ -465,8 +444,6 @@ def _start_subprocess(
             try:
                 stdout_file_handle.close()
             except OSError:
-                # Preserve the original Popen failure even if closing the
-                # handle itself raises (e.g. a flush/IO error).
                 pass
         raise
 
@@ -574,7 +551,6 @@ def _monitor_stdout(
                 queue.put(line)
             stdout.close()  # type: ignore
         except (ValueError, AttributeError):
-            # Process terminated
             pass
 
     thread = threading.Thread(target=reader, daemon=True)
@@ -746,10 +722,8 @@ def _check_grpc_server_ready(stdout_queue: Queue, timeout: int) -> None:
             elif isinstance(line, str):
                 output += line
         except Empty:
-            # No new stdout available within the short timeout; this is expected during polling.
             pass
 
-        # Check for server ready message
         if "GRPC SERVER" in output and "Server listening on" in output:
             LOG.debug("MAPDL gRPC server confirmed ready")
             return
