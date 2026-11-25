@@ -51,8 +51,8 @@ Material Properties
 -------------------
 
 The ``properties`` attribute of a
-:class:`Material <ansys.mapdl.core._materials.Material>` maps each ``MP``
-label to a :class:`PropertyTable <ansys.mapdl.core._materials.PropertyTable>`
+:class:`Material <ansys.mapdl.core.materials.Material>` maps each ``MP``
+label to a :class:`PropertyTable <ansys.mapdl.core.materials.PropertyTable>`
 with ``temperatures`` and ``values`` arrays. A constant set with the
 :meth:`Mapdl.mp() <ansys.mapdl.core.Mapdl.mp>` method is a one-point table at
 temperature ``0.0``:
@@ -71,7 +71,7 @@ Data Tables
 -----------
 
 The ``tables`` attribute lists each
-:class:`DataTable <ansys.mapdl.core._materials.DataTable>` in the order MAPDL
+:class:`DataTable <ansys.mapdl.core.materials.DataTable>` in the order MAPDL
 writes them. A Data Table keeps its label and ``TBOPT`` value exactly as MAPDL
 writes them, and fills either ``constants`` or ``points`` with one array for
 each temperature:
@@ -82,18 +82,25 @@ each temperature:
    >>> biso.label, biso.temperatures
    ('BISO', array([ 20., 200.]))
    >>> biso.constants
-   [array([2.5e+08, 2.0e+09]), array([2.0e+08, 1.5e+09])]
+   (array([2.5e+08, 2.0e+09]), array([2.0e+08, 1.5e+09]))
+
+A constant slot that MAPDL does not write is ``nan``.
 
 Data Tables defined with ``TBPT``, such as ``MISO``, return ``(n, 2)`` arrays
 in ``points``. Data Tables written in the newer format, such as
 ``TB,PLAS,,,,MISO``, also expose their raw ``TBIN`` settings in ``options``
-and any ``TBFIELD`` values other than temperature in ``fields``.
+and any ``TBFIELD`` values other than temperature in ``fields``. Each option
+maps to one tuple of arguments for each ``TBIN`` line, such as
+``(('1',),)`` for ``TBIN,NORM,1``.
+
+Every container in a snapshot is read only: mappings can't be changed and
+sequences are tuples.
 
 
 Compare Materials in pandas
 ---------------------------
 
-The :meth:`to_dataframe() <ansys.mapdl.core._materials.MaterialsSnapshot.to_dataframe>`
+The :meth:`to_dataframe() <ansys.mapdl.core.materials.MaterialsSnapshot.to_dataframe>`
 method returns the Material Properties of every Material as a long-format
 pandas DataFrame, with one row for each temperature point. Data Tables are not
 included because their shapes vary. This method requires pandas.
@@ -119,6 +126,8 @@ Snapshots and limits
   nothing, and leaves no file in the MAPDL working directory.
 - The read is not available inside
   :func:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`.
+- The read needs a gRPC session and raises ``MapdlRuntimeError`` on a
+  console session.
 - The attribute is read only. To define Materials, use the existing methods,
   such as :meth:`Mapdl.mp() <ansys.mapdl.core.Mapdl.mp>` and
   :meth:`Mapdl.tb() <ansys.mapdl.core.Mapdl.tb>`.
