@@ -361,10 +361,12 @@ class MaterialsSnapshot(Mapping[int, Material]):
 
         Examples
         --------
-        >>> df = mapdl.materials.to_dataframe()
-        >>> df[df.label == "EX"].pivot(
-        ...     index="temperature", columns="material", values="value"
-        ... )
+        >>> mapdl.materials.to_dataframe()
+           material label  temperature         value
+        0         1    EX         20.0  2.100000e+11
+        1         1    EX        100.0  2.000000e+11
+        2         1  PRXY          0.0  3.000000e-01
+        3         4    EX          0.0  7.000000e+10
         """
         if not _HAS_PANDAS:
             raise ModuleNotFoundError(MSG_NOT_PANDAS)

@@ -18,6 +18,7 @@
 .. _pyansys_math: https://math.docs.pyansys.com/version/stable/
 .. _pyansys_math_api: https://math.docs.pyansys.com/version/stable/api/index.html
 .. _pytwin_docs: https://twin.docs.pyansys.com
+.. _materials_manager_docs: https://manager.materials.docs.pyansys.com
 
 .. #PyAnsys Developer Guide
 .. _dev_guide_pyansys: https://dev.docs.pyansys.com
