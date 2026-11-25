@@ -28,6 +28,7 @@ from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import random_string
 
 
@@ -175,6 +176,12 @@ class MaterialsSnapshot(Mapping[int, Material]):
 
 def _read_materials(mapdl: Any) -> MaterialsSnapshot:
     """Write ``CDWRITE,MAT`` to a unique server file, read it, and delete it."""
+    if mapdl._store_commands:
+        raise MapdlRuntimeError(
+            "Cannot use `mapdl.materials` to retrieve materials when in "
+            "`non_interactive` mode. "
+            "Exit `non_interactive` mode before using this method."
+        )
     fname = f"_materials_{random_string()}"
     try:
         mapdl.cdwrite("MAT", fname, "cdb", mute=True)

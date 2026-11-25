@@ -205,10 +205,18 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
         mapping keyed by material ID. Nothing is cached, so read
         ``mapdl.materials`` again to see later changes.
 
+        The read works from any processor, does not change the active
+        processor, and prints nothing.
+
         Returns
         -------
         :class:`MaterialsSnapshot <ansys.mapdl.core._materials.MaterialsSnapshot>`
             Materials keyed by material ID.
+
+        Raises
+        ------
+        MapdlRuntimeError
+            When accessed inside ``mapdl.non_interactive``.
 
         Examples
         --------
