@@ -40,6 +40,8 @@ TEST_FILES = Path(__file__).parent / "test_files"
 MP_ONLY_CDB = TEST_FILES / "materials_mp_only.cdb"
 LEGACY_TABLES_CDB = TEST_FILES / "materials_legacy_tables.cdb"
 BISO2_CDB = TEST_FILES / "materials_biso2.cdb"
+NEWER_TABLES_CDB = TEST_FILES / "materials_newer_tables.cdb"
+TBFIELD_CDB = TEST_FILES / "materials_tbfield.cdb"
 
 
 @pytest.fixture(scope="module")
@@ -192,16 +194,122 @@ def test_data_table_is_immutable(legacy):
         legacy[3].tables[0].constants[0][0] = 0.0
 
 
+@pytest.fixture(scope="module")
+def newer():
+    return _parse_cdwrite_mat(NEWER_TABLES_CDB.read_text())
+
+
+def test_newer_elas_constants_per_temperature(newer):
+    (elas,) = newer[5].tables
+    assert (elas.label, elas.tbopt, elas.points, elas.fields) == (
+        "ELAS",
+        "ISOT",
+        [],
+        {},
+    )
+    np.testing.assert_array_equal(elas.temperatures, [20.0, 200.0])
+    np.testing.assert_array_equal(elas.constants[0], [2.1e11, 0.3])
+    np.testing.assert_array_equal(elas.constants[1], [1.9e11, 0.3])
+
+
+def test_newer_plas_points_and_raw_tbin_options(newer):
+    (plas,) = newer[2].tables
+    assert (plas.label, plas.tbopt, plas.constants, plas.fields) == (
+        "PLAS",
+        "MISO",
+        [],
+        {},
+    )
+    np.testing.assert_array_equal(plas.temperatures, [20.0])
+    np.testing.assert_array_equal(
+        plas.points[0], [[0.0, 1e8], [2e-2, 1.5e8], [1e-1, 1.8e8]]
+    )
+    assert plas.options == {
+        "NORM": ("1",),
+        "CACH": ("0",),  # codespell-ignore
+        "QUAN": ("0",),
+        "DEFA": ("temp", "0.00000e+00"),
+        "XRES": ("temp", "1"),
+    }
+
+
+def test_newer_creep_label_and_tbopt_as_written(newer):
+    biso, cree = newer[4].tables
+    assert (biso.label, biso.options) == ("BISO", {})
+    assert (cree.label, cree.tbopt) == ("CREE", "10")
+    np.testing.assert_array_equal(cree.temperatures, [0.0])
+    np.testing.assert_array_equal(cree.constants[0], [1e-20, 5.0, 0.0])
+
+
+def test_legacy_tables_unchanged_in_newer_fixture(newer, legacy):
+    for mat_id in (1, 3):
+        (old,) = legacy[mat_id].tables
+        (new,) = newer[mat_id].tables
+        assert (new.label, new.tbopt, new.fields, new.options) == (
+            old.label,
+            old.tbopt,
+            {},
+            {},
+        )
+        np.testing.assert_array_equal(new.temperatures, old.temperatures)
+
+
+@pytest.fixture(scope="module")
+def tbfield():
+    return _parse_cdwrite_mat(TBFIELD_CDB.read_text())
+
+
 @pytest.mark.parametrize(
-    "line",
-    [
-        "TBFIELD,Temps,20.000000",
-        "TBDATA,1,2.100000e+11,3.000000e-01",
-        "TBPT,DEFI,0.000000e+00,1.000000e+08",
-        "TBIN,NORM,1",
-        "/SOLU",
-    ],
+    "mat_id, name, values, tbopt",
+    [(1, "freq", [10.0, 100.0], "ISOT"), (2, "UF01", [0.0, 1.0], "ISOT")],
 )
+def test_non_temperature_field_points_at_zero_temperature(
+    tbfield, mat_id, name, values, tbopt
+):
+    (elas,) = tbfield[mat_id].tables
+    assert (elas.label, elas.tbopt, list(elas.fields)) == ("ELAS", tbopt, [name])
+    np.testing.assert_array_equal(elas.fields[name], values)
+    np.testing.assert_array_equal(elas.temperatures, [0.0, 0.0])
+    assert len(elas.constants) == 2
+    assert elas.options["DEFA"] == (name.lower(), "0.00000e+00")
+
+
+def test_temperature_and_time_field_tuples(tbfield):
+    (elas,) = tbfield[3].tables
+    np.testing.assert_array_equal(elas.temperatures, [20.0, 20.0, 200.0, 200.0])
+    assert list(elas.fields) == ["time"]
+    np.testing.assert_array_equal(elas.fields["time"], [0.0, 10.0, 0.0, 10.0])
+    np.testing.assert_array_equal(
+        elas.constants,
+        [[2.1e11, 0.3], [2.05e11, 0.3], [1.9e11, 0.3], [1.85e11, 0.3]],
+    )
+    assert elas.options["DEFA"] == ("temp", "0.00000e+00", "time", "0.00000e+00")
+    assert elas.options["XRES"] == ("temp", "1", "time", "1")
+
+
+def test_plastic_strain_rate_field_with_points(tbfield):
+    (plas,) = tbfield[4].tables
+    assert (plas.label, plas.tbopt) == ("PLAS", "MISO")
+    np.testing.assert_array_equal(plas.fields["plsr"], [0.001, 1.0])
+    np.testing.assert_array_equal(plas.temperatures, [0.0, 0.0])
+    np.testing.assert_array_equal(plas.points[0], [[0.0, 2.5e8], [5e-2, 3e8]])
+    np.testing.assert_array_equal(plas.points[1], [[0.0, 2.8e8], [5e-2, 3.4e8]])
+
+
+def test_field_point_count_mismatch_raises():
+    text = TBFIELD_CDB.read_text().replace(
+        "TB,ELAS,       3,   4", "TB,ELAS,       3,   2"
+    )
+    with pytest.raises(ValueError, match=r"ELAS.*Material 3.*2 field points.*has 4"):
+        _parse_cdwrite_mat(text)
+
+
+def test_fields_are_read_only(tbfield):
+    with pytest.raises(ValueError, match="read-only"):
+        tbfield[1].tables[0].fields["freq"][0] = 0.0
+
+
+@pytest.mark.parametrize("line", ["/SOLU", "TBFT,FADD,1,HYPER,MOONEY,3"])
 def test_unknown_line_raises_quoting_it(line):
     text = LEGACY_TABLES_CDB.read_text().replace("/GO", f"{line}\n/GO")
     with pytest.raises(ValueError, match=re.escape(line)):
@@ -214,6 +322,8 @@ def test_unknown_line_raises_quoting_it(line):
         "TBTEM,  0.00000000    ,   1",
         "TBDAT,      1,  250000000.    , 2.000000000E+09,",
         "TBPT,, 1.000000000E-03,  200000000.",
+        "TBFIELD,Temps,20.000000",
+        "TBIN,NORM,1",
     ],
 )
 def test_data_table_line_without_tb_header_raises(line):
@@ -337,6 +447,30 @@ def test_materials_legacy_data_tables_round_trip(mapdl, cleared):
     np.testing.assert_array_equal(
         miso.points[1], [[0.001, 200e6], [0.01, 240e6], [0.05, 280e6]]
     )
+
+
+@requires("grpc")
+def test_materials_newer_data_tables_round_trip(mapdl, cleared):
+    mapdl.tb("PLAS", 1, "", "", "MISO")
+    mapdl.tbtemp(20)
+    mapdl.tbpt("DEFI", 0.0, 1e8)
+    mapdl.tbpt("DEFI", 0.02, 1.5e8)
+    mapdl.tb("ELAS", 2, 2, "", "ISOT")
+    mapdl.tbtemp(20)
+    mapdl.tbdata(1, 2.1e11, 0.3)
+    mapdl.tbtemp(200)
+    mapdl.tbdata(1, 1.9e11, 0.3)
+
+    materials = mapdl.materials
+    (plas,) = materials[1].tables
+    assert (plas.label, plas.tbopt, plas.fields) == ("PLAS", "MISO", {})
+    np.testing.assert_array_equal(plas.temperatures, [20.0])
+    np.testing.assert_array_equal(plas.points[0], [[0.0, 1e8], [0.02, 1.5e8]])
+    assert plas.options["NORM"] == ("1",)
+    (elas,) = materials[2].tables
+    assert (elas.label, elas.tbopt) == ("ELAS", "ISOT")
+    np.testing.assert_array_equal(elas.temperatures, [20.0, 200.0])
+    np.testing.assert_array_equal(elas.constants, [[2.1e11, 0.3], [1.9e11, 0.3]])
 
 
 def test_read_in_non_interactive_raises_before_sending_commands():

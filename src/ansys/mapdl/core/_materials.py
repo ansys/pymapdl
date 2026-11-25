@@ -90,6 +90,10 @@ class DataTable:
     fields : dict[str, numpy.ndarray]
         Read-only field values other than temperature, aligned with
         ``temperatures``. Empty for Data Tables without fields.
+    options : dict[str, tuple[str, ...]]
+        Raw ``TBIN`` arguments keyed by option name, such as
+        ``{"NORM": ("1",)}``. A repeated option appends its arguments in file
+        order. Empty for legacy-format Data Tables.
 
     Examples
     --------
@@ -104,6 +108,7 @@ class DataTable:
     constants: List[np.ndarray]
     points: List[np.ndarray]
     fields: Dict[str, np.ndarray]
+    options: Dict[str, Tuple[str, ...]]
 
 
 @dataclass(frozen=True)
@@ -135,7 +140,7 @@ _IGNORED_COMMANDS = {"", "/COM", "/NOP", "/GO"}
 
 
 class _DataTableBuilder:
-    """Collect the lines of one legacy-format Data Table."""
+    """Collect the lines of one Data Table, in either dialect."""
 
     def __init__(self, fields: List[str]) -> None:
         self.label = fields[1]
@@ -145,14 +150,20 @@ class _DataTableBuilder:
         self.temperatures: List[float] = []
         self.constants: List[Dict[int, float]] = []
         self.points: List[List[Tuple[float, float]]] = []
+        self.field_points: List[Dict[str, float]] = []
+        self.options: Dict[str, Tuple[str, ...]] = {}
 
     def build(self) -> DataTable:
         if len(self.temperatures) != self.ntemp:
+            unit = "field points" if self.field_points else "temperatures"
             raise ValueError(
                 f"Data Table {self.label} of Material {self.mat_id}: TB header "
-                f"gives {self.ntemp} temperatures, CDWRITE,MAT output has "
+                f"gives {self.ntemp} {unit}, CDWRITE,MAT output has "
                 f"{len(self.temperatures)}."
             )
+        names = dict.fromkeys(
+            name for row in self.field_points for name in row if name.upper() != "TEMPS"
+        )
         constants = []
         for slots in self.constants:
             values = np.zeros(max(slots, default=-1) + 1)
@@ -165,7 +176,11 @@ class _DataTableBuilder:
             _read_only(self.temperatures),
             constants if any(self.constants) else [],
             points if any(self.points) else [],
-            {},
+            {
+                name: _read_only([row[name] for row in self.field_points])
+                for name in names
+            },
+            self.options,
         )
 
 
@@ -181,8 +196,10 @@ class _CdwriteMatParser:
             "MPDA": self._mpdata,
             "TB": self._tb,
             "TBTE": self._tbtemp,
+            "TBFI": self._tbfield,
             "TBDA": self._tbdata,
             "TBPT": self._tbpt,
+            "TBIN": self._tbin,
         }
 
     def feed(self, line: str) -> None:
@@ -232,9 +249,22 @@ class _CdwriteMatParser:
         self._start_temperature(self._tables[-1], float(fields[1]))
         return True
 
+    def _tbfield(self, fields: List[str]) -> bool:
+        if not self._tables:
+            return False
+        table = self._tables[-1]
+        name, value = fields[1], float(fields[2])
+        if not table.field_points or name in table.field_points[-1]:
+            self._start_temperature(table, 0.0)
+            table.field_points.append({})
+        table.field_points[-1][name] = value
+        if name.upper() == "TEMPS":
+            table.temperatures[-1] = value
+        return True
+
     def _tbdata(self, fields: List[str]) -> bool:
         table = self._current_table()
-        if table is None or fields[0].upper() == "TBDATA":
+        if table is None:
             return False
         values = [float(f) for f in fields[2:] if f]
         table.constants[-1].update(enumerate(values, int(fields[1]) - 1))
@@ -242,9 +272,16 @@ class _CdwriteMatParser:
 
     def _tbpt(self, fields: List[str]) -> bool:
         table = self._current_table()
-        if table is None or fields[1]:
+        if table is None or fields[1].upper() not in ("", "DEFI"):
             return False
         table.points[-1].append((float(fields[2]), float(fields[3])))
+        return True
+
+    def _tbin(self, fields: List[str]) -> bool:
+        if not self._tables:
+            return False
+        options = self._tables[-1].options
+        options[fields[1]] = options.get(fields[1], ()) + tuple(fields[2:])
         return True
 
     def materials(self) -> Dict[int, Material]:
