@@ -23,11 +23,12 @@
 import dataclasses
 from pathlib import Path
 import re
+from unittest.mock import patch
 
 import numpy as np
 import pytest
 
-from ansys.mapdl.core._materials import _parse_cdwrite_mat
+from ansys.mapdl.core._materials import MaterialsSnapshot, _parse_cdwrite_mat
 from conftest import requires
 
 MP_ONLY_CDB = Path(__file__).parent / "test_files" / "materials_mp_only.cdb"
@@ -97,6 +98,33 @@ def test_unknown_line_raises_quoting_it(line):
     text = MP_ONLY_CDB.read_text().replace("/GO", f"{line}\n/GO")
     with pytest.raises(ValueError, match=re.escape(line)):
         _parse_cdwrite_mat(text)
+
+
+@requires("pandas")
+def test_to_dataframe_has_one_row_per_temperature_point(parsed):
+    df = MaterialsSnapshot(parsed).to_dataframe()
+    assert list(df.columns) == ["material", "label", "temperature", "value"]
+    assert df.to_records(index=False).tolist() == [
+        (1, "EX", 20.0, 2.1e11),
+        (1, "EX", 50.0, 2.08e11),
+        (1, "EX", 100.0, 2.05e11),
+        (1, "EX", 150.0, 2.0e11),
+        (1, "EX", 200.0, 1.95e11),
+        (1, "EX", 250.0, 1.9e11),
+        (1, "DENS", 0.0, 7850.0),
+        (1, "PRXY", 0.0, 0.3),
+        (2, "EX", 0.0, 7e10),
+        (4, "EX", 0.0, 2e11),
+        (10, "EX", 0.0, 1e9),
+    ]
+
+
+def test_to_dataframe_without_pandas_raises_install_error(parsed):
+    with (
+        patch("ansys.mapdl.core._materials._HAS_PANDAS", False),
+        pytest.raises(ModuleNotFoundError, match="pip install pandas"),
+    ):
+        MaterialsSnapshot(parsed).to_dataframe()
 
 
 @pytest.fixture
