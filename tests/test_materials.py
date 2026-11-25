@@ -23,12 +23,17 @@
 import dataclasses
 from pathlib import Path
 import re
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 import pytest
 
-from ansys.mapdl.core._materials import MaterialsSnapshot, _parse_cdwrite_mat
+from ansys.mapdl.core._materials import (
+    MaterialsSnapshot,
+    _parse_cdwrite_mat,
+    _read_materials,
+)
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from conftest import requires
 
 TEST_FILES = Path(__file__).parent / "test_files"
@@ -332,3 +337,64 @@ def test_materials_legacy_data_tables_round_trip(mapdl, cleared):
     np.testing.assert_array_equal(
         miso.points[1], [[0.001, 200e6], [0.01, 240e6], [0.05, 280e6]]
     )
+
+
+def test_read_in_non_interactive_raises_before_sending_commands():
+    mapdl = Mock(_store_commands=True)
+    with pytest.raises(MapdlRuntimeError, match="non_interactive"):
+        _read_materials(mapdl)
+    mapdl.cdwrite.assert_not_called()
+
+
+def test_read_mutes_every_command_it_sends():
+    mapdl = Mock(_store_commands=False)
+    mapdl._download_as_raw.return_value = MP_ONLY_CDB.read_bytes()
+    assert list(_read_materials(mapdl)) == [1, 2, 4, 10]
+    sent = [c for c in mapdl.method_calls if c[0] != "_download_as_raw"]
+    assert [name for name, _, _ in sent] == ["cdwrite", "slashdelete"]
+    assert all(kwargs.get("mute") is True for _, _, kwargs in sent)
+
+
+@requires("grpc")
+@pytest.mark.parametrize(
+    "enter, routine",
+    [
+        ("finish", "Begin level"),
+        ("prep7", "PREP7"),
+        ("slashsolu", "SOLUTION"),
+        ("post1", "POST1"),
+    ],
+)
+def test_materials_read_from_any_processor_keeps_it(mapdl, steel, enter, routine):
+    expected = mapdl.materials
+    mapdl.finish()
+    getattr(mapdl, enter)()
+    assert mapdl.parameters.routine == routine
+    materials = mapdl.materials
+    assert mapdl.parameters.routine == routine
+    assert list(materials) == list(expected) == [1, 4]
+    for mat_id in expected:
+        assert sorted(materials[mat_id].properties) == sorted(
+            expected[mat_id].properties
+        )
+        for label, table in expected[mat_id].properties.items():
+            np.testing.assert_array_equal(
+                materials[mat_id].properties[label].values, table.values
+            )
+    mapdl.finish()
+    mapdl.prep7()
+
+
+@requires("grpc")
+def test_materials_read_prints_nothing(mapdl, steel, capsys):
+    capsys.readouterr()
+    mapdl.materials
+    assert capsys.readouterr() == ("", "")
+
+
+@requires("grpc")
+def test_materials_in_non_interactive_raises(mapdl, steel):
+    with pytest.raises(MapdlRuntimeError, match="non_interactive"):
+        with mapdl.non_interactive:
+            mapdl.materials
+    assert list(mapdl.materials) == [1, 4]
