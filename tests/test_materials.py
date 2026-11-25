@@ -538,6 +538,18 @@ def test_read_on_session_without_grpc_raises_before_sending_commands():
     assert session.sent == []
 
 
+class _UnwrittenFileSession(_ConsoleSession):
+    def _download_as_raw(self, name):
+        return b""
+
+
+def test_missing_cdwrite_file_raises_instead_of_empty_snapshot():
+    session = _UnwrittenFileSession()
+    with pytest.raises(MapdlRuntimeError, match="did not write"):
+        _read_materials(session)
+    assert session.sent == ["cdwrite", "slashdelete"]
+
+
 @requires("grpc")
 @pytest.mark.parametrize(
     "enter, routine",

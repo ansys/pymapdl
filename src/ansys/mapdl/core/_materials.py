@@ -412,4 +412,9 @@ def _read_materials(mapdl: "MapdlGrpc") -> MaterialsSnapshot:
         text = mapdl._download_as_raw(f"{fname}.cdb").decode()
     finally:
         mapdl.slashdelete(fname, "cdb", mute=True)
+    if not text:
+        raise MapdlRuntimeError(
+            f"MAPDL did not write the CDWRITE,MAT file '{fname}.cdb'. "
+            "Check that the MAPDL working directory is writable."
+        )
     return MaterialsSnapshot(_parse_cdwrite_mat(text))
