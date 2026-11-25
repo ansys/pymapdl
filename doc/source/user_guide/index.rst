@@ -22,6 +22,7 @@ This section provides a general overview of PyMAPDL and how you use it.
    plotting
    parameters
    components
+   materials
    post
 
 

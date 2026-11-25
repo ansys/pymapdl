@@ -30,6 +30,7 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
    launcher
    logging
    mapdl
+   materials
    mesh
    parameters
    plotting
