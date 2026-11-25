@@ -671,7 +671,6 @@ class FileTranslator:
             return
 
         self.comment = ""
-        original_line = line.replace("\r\n", "").replace("\n", "")
         line = line.strip()
         line = line.replace('"', "'")
 
