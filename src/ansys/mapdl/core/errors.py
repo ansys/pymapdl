@@ -24,6 +24,8 @@
 
 from enum import Enum
 from functools import cache, wraps
+import os
+import pathlib
 import re
 import signal
 import sys
@@ -51,6 +53,15 @@ _SIGKILL: int = getattr(signal, "SIGKILL", 9)
 N_ATTEMPTS = 5
 INITIAL_BACKOFF = 0.1
 MULTIPLIER_BACKOFF = 2
+
+# How much of the MAPDL error file is shown when the MAPDL process dies. The file
+# can grow to tens of megabytes, so only its end is read.
+ERROR_FILE_TAIL_BYTES = 4096
+ERROR_FILE_TAIL_LINES = 20
+# In distributed mode, at most this many 'JOBNAMEx.err' files (x > 0) are shown.
+ERROR_FILE_MAX_WORKER_FILES = 3
+# Headers of the messages that make a 'JOBNAMEx.err' file (x > 0) worth showing.
+ERROR_FILE_HEADERS = ("*** FATAL ***", "*** ERROR ***")
 
 
 LOCKFILE_MSG: str = """
@@ -480,11 +491,32 @@ def protect_grpc(func: Callable) -> Callable:
                     "The in-flight gRPC call was cancelled because the "
                     f"channel became '{channel_state}'."
                 )
-                raise MapdlConnectionError(
+                msg = (
                     "The in-flight gRPC call was cancelled because the channel "
-                    f"connectivity became '{channel_state}'. MAPDL might have died "
-                    "or stopped answering."
-                ) from error
+                    f"connectivity became '{channel_state}'."
+                )
+                # A dead channel does not mean that MAPDL died, so its process
+                # is checked before showing its error file.
+                try:
+                    process_exited = mapdl._wait_for_process_exit()
+                except Exception:  # The message must still be raised.
+                    process_exited = None
+
+                if process_exited is False:
+                    msg += (
+                        " The MAPDL process is still running, but it stopped "
+                        "answering."
+                    )
+                else:
+                    if process_exited:
+                        msg += " The MAPDL process has exited."
+                    else:
+                        msg += " MAPDL might have died or stopped answering."
+                    # If MAPDL died, the reason is often only in its error file.
+                    error_file_tail = _get_error_file_tail(mapdl)
+                    if error_file_tail:
+                        msg = f"{msg}\n{error_file_tail}"
+                raise MapdlConnectionError(msg) from error
 
             except grpc.RpcError as error:
                 mapdl = retrieve_mapdl_from_args(args)
@@ -655,6 +687,115 @@ def retrieve_mapdl_from_args(args: tuple[Any, ...]) -> "MapdlGrpc":
     return mapdl
 
 
+def _read_error_file_tail(
+    path: pathlib.Path, max_bytes: int, max_lines: int
+) -> List[str]:
+    """Return the last non-empty lines of an error file, or an empty list if it cannot be read."""
+    try:
+        with open(path, "rb") as fid:
+            fid.seek(0, os.SEEK_END)
+            size = fid.tell()
+            fid.seek(max(0, size - max_bytes))
+            content = fid.read()
+    except OSError:
+        return []
+
+    lines = content.decode("latin-1").splitlines()
+    if size > max_bytes and lines:
+        lines = lines[1:]  # The first line is probably incomplete.
+    return [line.rstrip() for line in lines if line.strip()][-max_lines:]
+
+
+def _get_error_file_tail(
+    mapdl: "MapdlGrpc",
+    max_bytes: int = ERROR_FILE_TAIL_BYTES,
+    max_lines: int = ERROR_FILE_TAIL_LINES,
+    max_worker_files: int = ERROR_FILE_MAX_WORKER_FILES,
+) -> str:
+    """Return the last lines of the MAPDL error files of a local instance.
+
+    When the MAPDL process dies, the reason is often written only to its error
+    file, for example a license limit exceeded while meshing. This function
+    reads the end of that file so the reason can be added to the exception
+    message.
+
+    The main error file is ``JOBNAME.err``, or ``JOBNAME0.err`` in distributed
+    mode (the most recent one if both exist). In distributed mode, each process
+    also writes its own ``JOBNAMEx.err`` file, where ``x`` is the process
+    number, and an error in one of them might not reach ``JOBNAME0.err``.
+    Those files are shown too, but only if their end contains an error or a
+    fatal error. Files with a fatal error are shown first.
+
+    The files are found with :meth:`MapdlGrpc._error_files`, which only uses
+    cached attributes of the instance, because the MAPDL process cannot be
+    queried once it has died.
+
+    Parameters
+    ----------
+    mapdl : MapdlGrpc
+        MAPDL instance whose process has died.
+    max_bytes : int, default: 4096
+        Number of bytes read from the end of each error file.
+    max_lines : int, default: 20
+        Maximum number of non-empty lines shown from each error file.
+    max_worker_files : int, default: 3
+        Maximum number of ``JOBNAMEx.err`` files (``x`` > 0) shown. The names of
+        the remaining files with errors are listed.
+
+    Returns
+    -------
+    str
+        A message with the last lines of the error files, or an empty string
+        if the instance is remote or no error file can be read.
+
+    Examples
+    --------
+    >>> from ansys.mapdl.core.errors import _get_error_file_tail
+    >>> print(_get_error_file_tail(mapdl))
+    Last lines of the MAPDL error file 'C:/work/file.err':
+      *** FATAL ***
+      ...
+    """
+    if not getattr(mapdl, "_local", False):
+        return ""
+
+    try:
+        main_file, worker_paths = mapdl._error_files()
+    except Exception:  # The message must still be raised if this fails.
+        return ""
+    worker_files = list(enumerate(worker_paths, start=1))
+
+    sections = []
+    if main_file is not None:
+        lines = _read_error_file_tail(main_file, max_bytes, max_lines)
+        if lines:
+            sections.append((main_file, lines))
+
+    failed_workers = []
+    for rank, path in worker_files:
+        lines = _read_error_file_tail(path, max_bytes, max_lines)
+        has_fatal = any("*** FATAL ***" in line for line in lines)
+        if has_fatal or any(
+            header in line for line in lines for header in ERROR_FILE_HEADERS
+        ):
+            failed_workers.append((not has_fatal, rank, path, lines))
+    # Fatal errors first, then by process number.
+    failed_workers.sort(key=lambda item: item[:2])
+    sections.extend(
+        (path, lines) for _, _, path, lines in failed_workers[:max_worker_files]
+    )
+
+    message = ""
+    for path, lines in sections:
+        body = "\n".join(f"  {line}" for line in lines)
+        message += f"Last lines of the MAPDL error file '{path.as_posix()}':\n{body}\n"
+
+    not_shown = [path.name for _, _, path, _ in failed_workers[max_worker_files:]]
+    if not_shown:
+        message += "Other MAPDL error files with errors: " + ", ".join(not_shown) + "\n"
+    return message
+
+
 def handle_generic_grpc_error(
     error: grpc.RpcError,
     func: Callable[..., Any],
@@ -702,6 +843,12 @@ def handle_generic_grpc_error(
         raise MapdlRuntimeError(msg)
 
     else:
+        # The reason why MAPDL died is often only in its error file. Read it
+        # before exiting, which might remove the working directory.
+        error_file_tail = _get_error_file_tail(mapdl)
+        if error_file_tail:
+            msg = f"{msg}\n{error_file_tail}"
+
         # Making sure we do not keep executing gRPC calls.
         # Must close unfinished processes
         mapdl.exit()

@@ -1361,6 +1361,44 @@ class MapdlGrpc(MapdlBase):
         """
         return self._is_alive_subprocess()
 
+    def _wait_for_process_exit(
+        self, timeout: float = 2.0, interval: float = 0.1
+    ) -> bool | None:
+        """Check whether the MAPDL process has exited, waiting a little for it.
+
+        When MAPDL aborts, the gRPC channel can break slightly before its
+        process ends, so a process that is still running is checked again
+        until ``timeout``. The process counts as exited when the stored
+        process handle and the cached process IDs (see :meth:`_cache_pids`)
+        are no longer running. Neither the MAPDL server nor the gRPC channel
+        is queried.
+
+        Parameters
+        ----------
+        timeout : float, default: 2.0
+            Maximum time in seconds to wait for a running process to exit.
+        interval : float, default: 0.1
+            Time in seconds between checks.
+
+        Returns
+        -------
+        bool or None
+            ``True`` if the MAPDL process has exited, ``False`` if it is still
+            running after ``timeout``, and ``None`` if PyMAPDL has no process
+            handle or process ID to check (for example, when it connected to
+            an instance that it did not launch).
+        """
+        deadline = time.time() + timeout
+        while True:
+            handle_alive = self._is_alive_subprocess()
+            if handle_alive is None and not self._pids:
+                return None
+            if not handle_alive and not self._find_processes_from_cached_pids():
+                return True
+            if time.time() >= deadline:
+                return False
+            time.sleep(interval)
+
     def _get_process_exit_signal(self) -> Optional[int]:
         """Return the POSIX signal number that terminated the MAPDL process.
 
@@ -1546,14 +1584,88 @@ class MapdlGrpc(MapdlBase):
             else:
                 jobname = self._jobname
 
-            lockfile = directory / (jobname + ".err")
-            lockfile0 = directory / (jobname + "0.err")
+            main_file, _ = self._error_files(directory=directory, jobname=jobname)
+            if main_file is None:
+                self._local = False
 
-            if os.path.isfile(lockfile):
-                return
-            if os.path.isfile(lockfile0):
-                return
-            self._local = False
+    def _error_files(
+        self,
+        directory: str | PurePath | None = None,
+        jobname: str | None = None,
+    ) -> tuple[Path | PurePosixPath | None, list[Path | PurePosixPath]]:
+        """Return the MAPDL error files of the current job.
+
+        MAPDL writes its errors to ``JOBNAME.err`` (shared-memory mode) or to
+        ``JOBNAME0.err`` (distributed mode). In distributed mode, each worker
+        process also writes its own ``JOBNAMEx.err`` file, where ``x`` > 0 is
+        the process number.
+
+        For a local instance, the working directory is read directly, so this
+        works after the MAPDL process has died. If ``directory`` or
+        ``jobname`` are not given, the cached values are used and MAPDL is not
+        queried. For a remote instance, the files are listed through gRPC, so
+        MAPDL must be alive.
+
+        Parameters
+        ----------
+        directory : str or pathlib.PurePath, optional
+            Working directory of MAPDL. Defaults to the cached path. Only used
+            for local instances.
+        jobname : str, optional
+            MAPDL job name. Defaults to the cached job name, or ``"file"``.
+
+        Returns
+        -------
+        tuple
+            The main error file (``None`` if there is none) and the worker
+            error files, sorted by process number. For a local instance, they
+            are absolute paths. For a remote instance, they are file names in
+            the MAPDL working directory.
+
+        Notes
+        -----
+        If both ``JOBNAME.err`` and ``JOBNAME0.err`` exist (for example, when
+        a directory is reused after changing the mode), the main file is the
+        most recently modified one for a local instance, and ``JOBNAME.err``
+        for a remote instance, whose modification times are not available.
+        """
+        if jobname is None:
+            jobname = self._jobname or "file"
+        pattern = re.compile(rf"{re.escape(jobname)}(\d*)\.err")
+
+        # Each file with the value used to choose the main file: the
+        # modification time for a local instance; for a remote one, whether it
+        # is 'JOBNAME.err'.
+        files: dict[Path | PurePosixPath, float] = {}
+        if self._local:
+            if directory is None:
+                directory = self._path or (self._start_parm or {}).get("run_location")
+            if not directory:
+                return None, []
+            try:
+                for path in Path(str(directory)).iterdir():
+                    if pattern.fullmatch(path.name) and path.is_file():
+                        files[path] = path.stat().st_mtime
+            except OSError:
+                return None, []
+        else:
+            for name in self.list_files():
+                if pattern.fullmatch(name):
+                    files[PurePosixPath(name)] = float(name == f"{jobname}.err")
+
+        main_files = []
+        worker_files = []
+        for error_file in files:
+            match = pattern.fullmatch(error_file.name)
+            rank = int(match.group(1) or 0) if match else 0
+            if rank == 0:
+                main_files.append(error_file)
+            else:
+                worker_files.append((rank, error_file))
+
+        main_file = max(main_files, key=files.__getitem__, default=None)
+        worker_files.sort(key=lambda item: item[0])
+        return main_file, [path for _, path in worker_files]
 
     @property
     def mute(self):
@@ -4642,25 +4754,23 @@ class MapdlGrpc(MapdlBase):
         str
             Contents of the error file or None if not found.
         """
-        files = self.list_files()
-        jobname = self.jobname
-        error_file = None
-        for test_file in [f"{jobname}.err", f"{jobname}0.err"]:
-            if test_file in files:
-                error_file = test_file
-                break
-
-        if not error_file:
-            return None
-
         if self._local:
-            return open(self.directory / error_file).read()
+            error_file, _ = self._error_files(
+                directory=self.directory, jobname=self.jobname
+            )
+            if error_file is None:
+                return None
+            with open(error_file, encoding="latin-1") as fid:
+                return fid.read()
         elif self._exited:
             raise MapdlExitedError(
                 "Cannot list error file when MAPDL Service has exited"
             )
 
-        return self._download_as_raw(error_file).decode("latin-1")
+        error_file, _ = self._error_files(jobname=self.jobname)
+        if error_file is None:
+            return None
+        return self._download_as_raw(error_file.name).decode("latin-1")
 
     @wraps(MapdlBase.cmatrix)
     def cmatrix(  # numpydoc ignore=RT01

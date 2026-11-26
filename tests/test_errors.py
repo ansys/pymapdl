@@ -20,12 +20,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os
 import signal
-from unittest.mock import MagicMock
+import subprocess  # nosec B404
+import sys
+from types import MethodType
+from unittest.mock import MagicMock, patch
 
 import grpc
 import pytest
 
+from ansys.mapdl.core import errors
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
     MapdlConnectionError,
@@ -35,6 +40,8 @@ from ansys.mapdl.core.errors import (
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
     _build_unavailable_suggestion,
+    _get_error_file_tail,
+    handle_generic_grpc_error,
     protect_from,
     protect_grpc,
 )
@@ -321,6 +328,64 @@ def test_protect_grpc_translates_future_cancelled_error():
         raising(mock_mapdl)
 
 
+@pytest.mark.parametrize(
+    "process_exited,expected",
+    [
+        (True, "The MAPDL process has exited."),
+        # PyMAPDL did not launch MAPDL, so it cannot check its process.
+        (None, "MAPDL might have died"),
+    ],
+)
+def test_protect_grpc_future_cancelled_error_adds_error_file(
+    tmp_path, process_exited, expected
+):
+    """When the channel dies during a call and the MAPDL process is not
+    running (or cannot be checked), the end of the MAPDL error file is added
+    to the 'MapdlConnectionError' message (local instances only)."""
+    (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+    mock_mapdl = _dead_mapdl(tmp_path)
+    mock_mapdl._log = MagicMock()
+    mock_mapdl._exited = False
+    mock_mapdl.exited = False
+    mock_mapdl.channel_state = "TRANSIENT_FAILURE"
+    mock_mapdl._wait_for_process_exit.return_value = process_exited
+
+    @protect_grpc
+    def raising(self):
+        raise grpc.FutureCancelledError()
+
+    with pytest.raises(MapdlConnectionError) as excinfo:
+        raising(mock_mapdl)
+
+    assert "TRANSIENT_FAILURE" in str(excinfo.value)
+    assert expected in str(excinfo.value)
+    assert "supports (128000) has been exceeded." in str(excinfo.value)
+
+
+def test_protect_grpc_future_cancelled_error_alive_process_skips_error_file(
+    tmp_path,
+):
+    """If the MAPDL process is still running when the channel dies, its error
+    file is not shown, because it does not explain a lost connection."""
+    (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+    mock_mapdl = _dead_mapdl(tmp_path)
+    mock_mapdl._log = MagicMock()
+    mock_mapdl._exited = False
+    mock_mapdl.exited = False
+    mock_mapdl.channel_state = "TRANSIENT_FAILURE"
+    mock_mapdl._wait_for_process_exit.return_value = False
+
+    @protect_grpc
+    def raising(self):
+        raise grpc.FutureCancelledError()
+
+    with pytest.raises(MapdlConnectionError) as excinfo:
+        raising(mock_mapdl)
+
+    assert "The MAPDL process is still running" in str(excinfo.value)
+    assert "128000" not in str(excinfo.value)
+
+
 class _FakeRpcError(grpc.RpcError):
     """Minimal 'grpc.RpcError' double exposing 'code()'/'details()'."""
 
@@ -377,3 +442,427 @@ def test_protect_grpc_translates_resource_exhausted_error(details, expected_limi
 
     assert f"PYMAPDL_MAX_MESSAGE_LENGTH={expected_limit}" in str(excinfo.value)
     assert len(attempts) == 1
+
+
+# The error that Ansys Student writes to 'file.err' before aborting when a mesh
+# exceeds its node limit. PyMAPDL only sees the gRPC connection closing.
+NODE_LIMIT_ERROR = (
+    " *** FATAL ***                           CP =      43.375   TIME= 23:25:01\n"
+    " The maximum number of nodes that this version of Mechanical APDL\n"
+    " supports (128000) has been exceeded.\n"
+)
+
+
+def _dead_mapdl(path, local=True, jobname="file"):
+    """Mock of a MAPDL instance whose process has died."""
+    mapdl = MagicMock(spec=MapdlGrpc)
+    mapdl._local = local
+    mapdl._path = path
+    mapdl._jobname = jobname
+    mapdl._start_parm = {}
+    mapdl.is_alive = False
+    mapdl.ip = "127.0.0.1"
+    mapdl.port = 50052
+    # The error files are found with the real method.
+    mapdl._error_files = MethodType(MapdlGrpc._error_files, mapdl)
+    mapdl._wait_for_process_exit.return_value = True
+    return mapdl
+
+
+class TestGetErrorFileTail:
+    """Tests for _get_error_file_tail."""
+
+    def test_reads_only_the_end_of_a_large_file(self, tmp_path):
+        """Only the last lines of a large error file are returned."""
+        content = b" old warning\n" * 50_000 + NODE_LIMIT_ERROR.encode("latin-1")
+        (tmp_path / "file.err").write_bytes(content)
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path))
+
+        assert "supports (128000) has been exceeded." in tail
+        assert "file.err" in tail
+        body = tail.splitlines()[1:]
+        assert len(body) == errors.ERROR_FILE_TAIL_LINES
+        assert body[-1].strip() == "supports (128000) has been exceeded."
+
+    def test_short_file_is_returned_whole(self, tmp_path):
+        """A file shorter than the limit is returned without dropping its first line."""
+        (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path))
+
+        assert "*** FATAL ***" in tail
+
+    def test_remote_instance_returns_empty_string(self, tmp_path):
+        """The file system of a remote instance is not accessible."""
+        (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        assert _get_error_file_tail(_dead_mapdl(tmp_path, local=False)) == ""
+
+    def test_missing_file_returns_empty_string(self, tmp_path):
+        """No error file, no message."""
+        assert _get_error_file_tail(_dead_mapdl(tmp_path)) == ""
+
+    def test_empty_file_returns_empty_string(self, tmp_path):
+        """An error file with only blank lines adds nothing."""
+        (tmp_path / "file.err").write_text("\n \n", encoding="latin-1")
+
+        assert _get_error_file_tail(_dead_mapdl(tmp_path)) == ""
+
+    def test_most_recent_file_is_used_in_distributed_mode(self, tmp_path):
+        """With 'file.err' and 'file0.err', the most recently modified one is read."""
+        old = tmp_path / "file.err"
+        old.write_text(" old run\n", encoding="latin-1")
+        os.utime(old, (1_000_000, 1_000_000))
+        (tmp_path / "file0.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path))
+
+        assert "file0.err" in tail
+        assert "old run" not in tail
+
+    def test_custom_jobname(self, tmp_path):
+        """The cached jobname is used to find the file."""
+        (tmp_path / "myjob.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path, jobname="myjob"))
+
+        assert "myjob.err" in tail
+
+    def test_run_location_is_used_when_directory_is_not_cached(self, tmp_path):
+        """Without a cached directory, the launch 'run_location' is used."""
+        (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+        mapdl = _dead_mapdl(None)
+        mapdl._start_parm = {"run_location": str(tmp_path)}
+
+        assert "128000" in _get_error_file_tail(mapdl)
+
+    def test_no_directory_returns_empty_string(self):
+        """Without a cached directory or run location, nothing is read."""
+        assert _get_error_file_tail(_dead_mapdl(None)) == ""
+
+    def test_unreadable_file_returns_empty_string(self, tmp_path):
+        """An OSError while reading the file does not hide the original error."""
+        (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        with patch("builtins.open", side_effect=PermissionError("locked")):
+            assert _get_error_file_tail(_dead_mapdl(tmp_path)) == ""
+
+    def test_unreadable_directory_returns_empty_string(self, tmp_path):
+        """An OSError while listing the directory does not hide the original error."""
+        (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        with patch("pathlib.Path.iterdir", side_effect=PermissionError("denied")):
+            assert _get_error_file_tail(_dead_mapdl(tmp_path)) == ""
+
+    def test_worker_file_with_fatal_error_is_shown(self, tmp_path):
+        """In distributed mode, a fatal error written only by another process is shown."""
+        (tmp_path / "file0.err").write_text(
+            " *** WARNING ***\n note\n", encoding="latin-1"
+        )
+        (tmp_path / "file1.err").write_text(" nothing to report\n", encoding="latin-1")
+        (tmp_path / "file2.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path))
+
+        assert "file0.err" in tail
+        assert "file2.err" in tail
+        assert "supports (128000) has been exceeded." in tail
+        assert "file1.err" not in tail
+        assert "nothing to report" not in tail
+        assert tail.index("file0.err") < tail.index("file2.err")
+
+    def test_worker_file_without_main_file(self, tmp_path):
+        """A fatal error in a worker file is shown even without 'JOBNAME0.err'."""
+        (tmp_path / "file3.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path))
+
+        assert "file3.err" in tail
+        assert "128000" in tail
+
+    def test_number_of_worker_files_is_limited(self, tmp_path):
+        """Only the first worker files are shown; the others are listed by name."""
+        for rank in (1, 2, 10, 11):
+            (tmp_path / f"file{rank}.err").write_text(
+                NODE_LIMIT_ERROR, encoding="latin-1"
+            )
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path), max_worker_files=2)
+
+        assert tail.count("Last lines of the MAPDL error file") == 2
+        assert "file1.err':" in tail
+        assert "file2.err':" in tail
+        assert "Other MAPDL error files with errors: file10.err, file11.err" in tail
+
+    def test_worker_file_with_error_is_shown(self, tmp_path):
+        """A worker file with an error, but no fatal error, is shown too."""
+        (tmp_path / "file1.err").write_text(
+            " *** ERROR ***                           CP =       1.000\n"
+            " Element 12 has a negative Jacobian.\n",
+            encoding="latin-1",
+        )
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path))
+
+        assert "file1.err" in tail
+        assert "negative Jacobian" in tail
+
+    def test_worker_files_with_fatal_error_are_shown_first(self, tmp_path):
+        """When the number of files is limited, those with a fatal error are kept."""
+        for rank in (1, 2):
+            (tmp_path / f"file{rank}.err").write_text(
+                " *** ERROR ***\n The VSWE command is ignored.\n", encoding="latin-1"
+            )
+        (tmp_path / "file7.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        tail = _get_error_file_tail(_dead_mapdl(tmp_path), max_worker_files=2)
+
+        assert "file7.err':" in tail
+        assert "file1.err':" in tail
+        assert tail.index("file7.err") < tail.index("file1.err")
+        assert "Other MAPDL error files with errors: file2.err" in tail
+
+    def test_other_jobnames_are_ignored(self, tmp_path):
+        """Files of other jobs in the same directory are not read."""
+        for name in ("file_old.err", "other0.err", "file1.err.bak"):
+            (tmp_path / name).write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+
+        assert _get_error_file_tail(_dead_mapdl(tmp_path)) == ""
+
+
+def _grpc_error():
+    error = MagicMock()
+    error.details.return_value = "Socket closed"
+    return error
+
+
+def test_handle_generic_grpc_error_adds_error_file_when_mapdl_died(tmp_path):
+    """If MAPDL died, the end of its error file is part of the exception message."""
+    (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+    mapdl = _dead_mapdl(tmp_path)
+
+    def run():
+        """Function that raised the gRPC error."""
+
+    with pytest.raises(MapdlExitedError) as excinfo:
+        handle_generic_grpc_error(_grpc_error(), run, (mapdl, "VSWEEP,3"), {})
+
+    assert "supports (128000) has been exceeded." in str(excinfo.value)
+    assert "VSWEEP,3" in str(excinfo.value)
+    mapdl.exit.assert_called_once()
+
+
+def test_handle_generic_grpc_error_without_error_file_keeps_message(tmp_path):
+    """Without an error file, the message is the same as before."""
+    mapdl = _dead_mapdl(tmp_path)
+
+    def run():
+        """Function that raised the gRPC error."""
+
+    with pytest.raises(MapdlExitedError) as excinfo:
+        handle_generic_grpc_error(_grpc_error(), run, (mapdl, "VSWEEP,3"), {})
+
+    assert "error file" not in str(excinfo.value)
+
+
+def test_handle_generic_grpc_error_alive_mapdl_does_not_read_error_file(tmp_path):
+    """While MAPDL is alive, the error file is not read."""
+    (tmp_path / "file.err").write_text(NODE_LIMIT_ERROR, encoding="latin-1")
+    mapdl = _dead_mapdl(tmp_path)
+    mapdl.is_alive = True
+
+    def run():
+        """Function that raised the gRPC error."""
+
+    with pytest.raises(MapdlRuntimeError) as excinfo:
+        handle_generic_grpc_error(_grpc_error(), run, (mapdl, "VSWEEP,3"), {})
+
+    assert "128000" not in str(excinfo.value)
+    mapdl.exit.assert_not_called()
+
+
+def _local_mapdl(path, jobname="file"):
+    """Mock of a local MAPDL instance using the real '_error_files'."""
+    mapdl = MagicMock(spec=MapdlGrpc)
+    mapdl._local = True
+    mapdl._path = path
+    mapdl._jobname = jobname
+    mapdl._start_parm = {}
+    mapdl._error_files = MethodType(MapdlGrpc._error_files, mapdl)
+    return mapdl
+
+
+class TestErrorFiles:
+    """Tests for 'MapdlGrpc._error_files', the single place that finds the
+    MAPDL error files."""
+
+    def test_main_and_worker_files(self, tmp_path):
+        """Worker files are sorted by process number, not by name."""
+        for name in ("file0.err", "file10.err", "file2.err", "file1.err"):
+            (tmp_path / name).write_text("", encoding="latin-1")
+
+        main, workers = _local_mapdl(tmp_path)._error_files()
+
+        assert main == tmp_path / "file0.err"
+        assert [path.name for path in workers] == [
+            "file1.err",
+            "file2.err",
+            "file10.err",
+        ]
+
+    def test_most_recent_main_file(self, tmp_path):
+        """With 'file.err' and 'file0.err', the most recently modified one is
+        the main file."""
+        old = tmp_path / "file.err"
+        old.write_text("", encoding="latin-1")
+        os.utime(old, (1_000_000, 1_000_000))
+        (tmp_path / "file0.err").write_text("", encoding="latin-1")
+
+        main, workers = _local_mapdl(tmp_path)._error_files()
+
+        assert main == tmp_path / "file0.err"
+        assert workers == []
+
+    def test_explicit_directory_and_jobname(self, tmp_path):
+        """The directory and jobname given override the cached ones."""
+        (tmp_path / "myjob.err").write_text("", encoding="latin-1")
+
+        main, _ = _local_mapdl(None)._error_files(directory=tmp_path, jobname="myjob")
+
+        assert main == tmp_path / "myjob.err"
+
+    def test_missing_directory(self, tmp_path):
+        """A directory that does not exist locally has no error files."""
+        main, workers = _local_mapdl(tmp_path / "missing")._error_files()
+
+        assert main is None
+        assert workers == []
+
+    def test_remote_instance_lists_files_through_mapdl(self):
+        """For a remote instance, the files are listed by MAPDL and, without
+        modification times, 'JOBNAME.err' is preferred."""
+        mapdl = _local_mapdl(None)
+        mapdl._local = False
+        mapdl.list_files.return_value = [
+            "file0.err",
+            "file.err",
+            "file1.err",
+            "file.log",
+        ]
+
+        main, workers = mapdl._error_files()
+
+        assert main.name == "file.err"
+        assert [path.name for path in workers] == ["file1.err"]
+
+
+class TestListErrorFile:
+    """'list_error_file' uses '_error_files'."""
+
+    def test_local_reads_most_recent_main_file(self, tmp_path):
+        old = tmp_path / "file.err"
+        old.write_text("old run", encoding="latin-1")
+        os.utime(old, (1_000_000, 1_000_000))
+        (tmp_path / "file0.err").write_text("new run", encoding="latin-1")
+        mapdl = _local_mapdl(tmp_path)
+        mapdl.directory = tmp_path
+        mapdl.jobname = "file"
+
+        assert MapdlGrpc.list_error_file(mapdl) == "new run"
+
+    def test_local_without_error_file(self, tmp_path):
+        mapdl = _local_mapdl(tmp_path)
+        mapdl.directory = tmp_path
+        mapdl.jobname = "file"
+
+        assert MapdlGrpc.list_error_file(mapdl) is None
+
+    def test_remote_downloads_main_file(self):
+        mapdl = _local_mapdl(None)
+        mapdl._local = False
+        mapdl._exited = False
+        mapdl.jobname = "file"
+        mapdl.list_files.return_value = ["file0.err", "file1.err"]
+        mapdl._download_as_raw.return_value = b"remote error"
+
+        assert MapdlGrpc.list_error_file(mapdl) == "remote error"
+        mapdl._download_as_raw.assert_called_once_with("file0.err")
+
+
+@pytest.mark.parametrize("names,local", [(["file0.err"], True), ([], False)])
+def test_verify_local_uses_error_files(tmp_path, names, local):
+    """The instance is local only if its main error file is visible."""
+    for name in names:
+        (tmp_path / name).write_text("", encoding="latin-1")
+    mapdl = _local_mapdl(tmp_path)
+    mapdl.directory = tmp_path
+    mapdl._jobname = None
+    mapdl.jobname = "file"
+
+    MapdlGrpc._verify_local(mapdl)
+
+    assert mapdl._local is local
+
+
+class TestWaitForProcessExit:
+    """Tests for 'MapdlGrpc._wait_for_process_exit'."""
+
+    @staticmethod
+    def _mapdl(process=None, pids=()):
+        mapdl = MagicMock(spec=MapdlGrpc)
+        mapdl._mapdl_process = process
+        mapdl._pids = list(pids)
+        for name in (
+            "_is_alive_subprocess",
+            "_find_processes_from_cached_pids",
+            "_wait_for_process_exit",
+        ):
+            setattr(mapdl, name, MethodType(getattr(MapdlGrpc, name), mapdl))
+        mapdl._check_process_handle = MapdlGrpc._check_process_handle
+        return mapdl
+
+    def test_unknown_without_handle_or_pids(self):
+        assert self._mapdl()._wait_for_process_exit(timeout=0) is None
+
+    def test_exited_process(self):
+        process = subprocess.Popen([sys.executable, "-c", "pass"])  # nosec B603
+        process.wait()
+        mapdl = self._mapdl(process, pids=[process.pid])
+
+        assert mapdl._wait_for_process_exit(timeout=0) is True
+
+    def test_waits_for_a_process_that_is_exiting(self):
+        """A process that ends shortly after the channel breaks counts as exited."""
+        process = subprocess.Popen(  # nosec B603
+            [sys.executable, "-c", "import time; time.sleep(0.3)"]
+        )
+        mapdl = self._mapdl(process)
+
+        assert mapdl._wait_for_process_exit(timeout=10, interval=0.05) is True
+
+    def test_running_process(self):
+        process = subprocess.Popen(  # nosec B603
+            [sys.executable, "-c", "import time; time.sleep(30)"]
+        )
+        try:
+            mapdl = self._mapdl(process)
+            assert mapdl._wait_for_process_exit(timeout=0.2, interval=0.05) is False
+        finally:
+            process.kill()
+            process.wait()
+
+    def test_running_cached_pid(self):
+        """On Windows, the stored handle may be a launcher that already
+        exited while MAPDL, in the cached process IDs, keeps running."""
+        launcher = subprocess.Popen([sys.executable, "-c", "pass"])  # nosec B603
+        launcher.wait()
+        process = subprocess.Popen(  # nosec B603
+            [sys.executable, "-c", "import time; time.sleep(30)"]
+        )
+        try:
+            mapdl = self._mapdl(launcher, pids=[process.pid])
+            assert mapdl._wait_for_process_exit(timeout=0.2, interval=0.05) is False
+        finally:
+            process.kill()
+            process.wait()
