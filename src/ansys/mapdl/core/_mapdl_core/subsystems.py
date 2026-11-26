@@ -507,6 +507,8 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
         """
         from ansys.mapdl.reader import Archive
 
+        from ansys.mapdl.core.mesh.bridge import _expand_etblock
+
         if self._archive_cache is None:  # type: ignore[has-type]  # Set by _MapdlCore.__init__.
             # write database to an archive file
             arch_filename = self.directory / "_tmp.cdb"
@@ -516,6 +518,11 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
             self.cm("__NODE__", "NODE", mute=True)
             self.nsle("S", mute=True)
             self.cdwrite("db", arch_filename, mute=True)
+            # The archive reader cannot parse the ``ETBLOCK`` that MAPDL 2026 R1 writes.
+            with open(arch_filename, encoding="latin-1") as fid:
+                text = _expand_etblock(fid.read())
+            with open(arch_filename, "w", encoding="latin-1", newline="\n") as fid:
+                fid.write(text)
             self.cmsel("S", "__NODE__", "NODE", mute=True)
 
             self.cm("__ELEM__", "ELEM", mute=True)
@@ -531,7 +538,7 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
 
             # rare bug
             if grid is not None:
-                if grid.n_node != self._archive_cache.n_node:
+                if grid.n_points != self._archive_cache.n_node:
                     self._archive_cache = Archive(
                         arch_filename, parse_vtk=True, name="Mesh"
                     )
@@ -541,6 +548,7 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
             self._archive_cache._nodes = nblock._nodes
             self._archive_cache._nnum = nblock._nnum
             self._archive_cache._node_coord = None
+            self._archive_cache._node_angles = None
 
         return self._archive_cache
 

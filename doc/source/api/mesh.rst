@@ -9,3 +9,5 @@ Mesh
    :toctree: _autosummary
 
    mesh_grpc.MeshGrpc
+   mesh_grpc.MeshGrpc.to_pyvista
+   mesh_grpc.MeshGrpc.export

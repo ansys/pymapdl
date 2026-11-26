@@ -189,6 +189,15 @@ def _parse_vtk(
     grid.cell_data["ansys_material_type"] = mesh.material_type
     grid.cell_data["ansys_etype"] = mesh._ans_etype
     grid.cell_data["ansys_elem_type_num"] = mesh.etype
+    for key, attr in (
+        ("ansys_secnum", "section"),
+        ("ansys_esys", "element_coord_system"),
+    ):
+        values = getattr(mesh, attr, None)
+        if callable(values):  # ``Archive.element_coord_system`` is a method.
+            values = values()
+        if values is not None:
+            grid.cell_data[key] = values
 
     # store node angles
     if angles is not None and angles.shape[1] == 3:
@@ -206,7 +215,21 @@ def _parse_vtk(
     ind = np.arange(grid.n_points)
     grid.point_data["origid"] = ind
     grid.point_data["VTKorigID"] = ind
+
+    keyopt = _pack_keyopt_array(getattr(mesh, "key_option", {}))
+    if keyopt.size:
+        grid.field_data["ansys_keyopt"] = keyopt
     return grid
+
+
+def _pack_keyopt_array(key_option: dict) -> np.ndarray:
+    """Pack ``{et_id: [[knum, value], ...]}`` as ``(K, 3)`` ``ansys_keyopt`` rows."""
+    rows = [
+        (et_id, knum, value)
+        for et_id, options in key_option.items()
+        for knum, value in options
+    ]
+    return np.array(rows, np.int32).reshape(-1, 3)
 
 
 def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):

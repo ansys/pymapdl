@@ -32,10 +32,6 @@ Run a modal analysis on a mesh generated from pyvista within MAPDL.
 
 # sphinx_gallery_thumbnail_number = 2
 
-import os
-import tempfile
-
-from ansys.mapdl.reader import save_as_archive
 import pyvista as pv
 
 from ansys.mapdl.core import launch_mapdl
@@ -48,19 +44,14 @@ mesh = pv.Plane(i_resolution=100, j_resolution=100)
 mesh.plot(color="w", show_edges=True)
 
 ###############################################################################
-# Write the mesh to a temporary file
-archive_filename = os.path.join(tempfile.gettempdir(), "tmp.cdb")
-save_as_archive(archive_filename, mesh)
-
-# Read in the archive file
-response = mapdl.cdread("db", archive_filename)
-mapdl.prep7()
+# Load the mesh into MAPDL as ``SHELL181`` elements. Every element uses
+# material 1 and section 1 by default.
+mapdl.load_mesh(mesh, etype="SHELL181")
 print(mapdl.shpp("SUMM"))
 
 # specify shell thickness
 mapdl.sectype(1, "shell")
 mapdl.secdata(0.01)
-mapdl.emodif("ALL", "SECNUM", 1)
 
 # specify material properties
 # using approximated values for AISI 5000 Series Steel
@@ -69,7 +60,6 @@ mapdl.units("SI")  # not necessary, but helpful for book keeping
 mapdl.mp("EX", 1, 200e9)  # Elastic moduli in Pa (kg/(m*s**2))
 mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
 mapdl.mp("NUXY", 1, 0.3)  # Poissons Ratio
-mapdl.emodif("ALL", "MAT", 1)
 
 # Run an unconstrained modal analysis
 # for the first 20 modes above 1 Hz
