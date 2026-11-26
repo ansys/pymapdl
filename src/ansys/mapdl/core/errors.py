@@ -493,13 +493,29 @@ def protect_grpc(func: Callable) -> Callable:
                 )
                 msg = (
                     "The in-flight gRPC call was cancelled because the channel "
-                    f"connectivity became '{channel_state}'. MAPDL might have died "
-                    "or stopped answering."
+                    f"connectivity became '{channel_state}'."
                 )
-                # If MAPDL died, the reason is often only in its error file.
-                error_file_tail = _get_error_file_tail(mapdl)
-                if error_file_tail:
-                    msg = f"{msg}\n{error_file_tail}"
+                # A dead channel does not mean that MAPDL died, so its process
+                # is checked before showing its error file.
+                try:
+                    process_exited = mapdl._wait_for_process_exit()
+                except Exception:  # The message must still be raised.
+                    process_exited = None
+
+                if process_exited is False:
+                    msg += (
+                        " The MAPDL process is still running, but it stopped "
+                        "answering."
+                    )
+                else:
+                    if process_exited:
+                        msg += " The MAPDL process has exited."
+                    else:
+                        msg += " MAPDL might have died or stopped answering."
+                    # If MAPDL died, the reason is often only in its error file.
+                    error_file_tail = _get_error_file_tail(mapdl)
+                    if error_file_tail:
+                        msg = f"{msg}\n{error_file_tail}"
                 raise MapdlConnectionError(msg) from error
 
             except grpc.RpcError as error:
@@ -710,8 +726,9 @@ def _get_error_file_tail(
     Those files are shown too, but only if their end contains an error or a
     fatal error. Files with a fatal error are shown first.
 
-    Only cached attributes of the instance are used, because the MAPDL process
-    cannot be queried once it has died.
+    The files are found with :meth:`MapdlGrpc._error_files`, which only uses
+    cached attributes of the instance, because the MAPDL process cannot be
+    queried once it has died.
 
     Parameters
     ----------
@@ -742,31 +759,11 @@ def _get_error_file_tail(
     if not getattr(mapdl, "_local", False):
         return ""
 
-    directory = getattr(mapdl, "_path", None)
-    if not directory:
-        start_parm = getattr(mapdl, "_start_parm", None) or {}
-        directory = start_parm.get("run_location")
-    if not directory:
-        return ""
-
-    jobname = getattr(mapdl, "_jobname", None) or "file"
-    pattern = re.compile(rf"{re.escape(jobname)}(\d*)\.err")
-    main_files: List[pathlib.Path] = []
-    worker_files: List[Tuple[int, pathlib.Path]] = []
     try:
-        for path in pathlib.Path(str(directory)).iterdir():
-            match = pattern.fullmatch(path.name)
-            if not match or not path.is_file():
-                continue
-            rank = int(match.group(1) or 0)
-            if rank == 0:
-                main_files.append(path)
-            else:
-                worker_files.append((rank, path))
-        # 'JOBNAME.err' and 'JOBNAME0.err' can both exist; the most recent one is the relevant one.
-        main_file = max(main_files, key=lambda path: path.stat().st_mtime, default=None)
-    except OSError:
+        main_file, worker_paths = mapdl._error_files()
+    except Exception:  # The message must still be raised if this fails.
         return ""
+    worker_files = list(enumerate(worker_paths, start=1))
 
     sections = []
     if main_file is not None:
