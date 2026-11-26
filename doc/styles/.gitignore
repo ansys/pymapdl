@@ -1,6 +1,4 @@
 *
 !config
 !config/**
-!**/ANSYS/accept.txt
-!**/ANSYS/reject.txt
 !.gitignore

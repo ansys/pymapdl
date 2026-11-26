@@ -156,7 +156,7 @@ updates:
       time: "00:00"
       timezone: "Etc/UTC"
     target-branch: "main"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     rebase-strategy: "auto"
     labels:
       - "maintenance"
@@ -187,7 +187,7 @@ updates:
       time: "00:00"
       timezone: "Etc/UTC"
     target-branch: "main"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     rebase-strategy: "auto"
     labels:
       - "maintenance"
