@@ -46,6 +46,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from ansys.mapdl.core.component import ComponentManager
     from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
+    from ansys.mapdl.core.materials import MaterialsSnapshot
     from ansys.mapdl.core.parameters import Parameters
     from ansys.mapdl.core.plugin import ansPlugin
     from ansys.mapdl.core.solution import Solution
@@ -195,6 +196,42 @@ class _CoreSubsystemsMixin(_CoreMixinBase):
         >>> mapdl.mesh.grid
         """
         return self._mesh
+
+    @property
+    def materials(self) -> "MaterialsSnapshot":
+        """Snapshot of every Material defined in MAPDL.
+
+        Each access runs one ``CDWRITE,MAT`` and returns a new read-only
+        mapping keyed by material ID. Nothing is cached, so read
+        ``mapdl.materials`` again to see later changes.
+
+        The read works from any processor, does not change the active
+        processor, and prints nothing.
+
+        Returns
+        -------
+        :class:`MaterialsSnapshot <ansys.mapdl.core.materials.MaterialsSnapshot>`
+            Materials keyed by material ID.
+
+        Raises
+        ------
+        MapdlRuntimeError
+            When accessed inside ``mapdl.non_interactive``, or on a session
+            that is not a gRPC session, such as a console session.
+
+        Examples
+        --------
+        Read back a temperature-dependent Material Property.
+
+        >>> mapdl.mptemp(1, 20, 100)
+        >>> mapdl.mpdata("EX", 1, 1, 2.1e11, 2.0e11)
+        >>> ex = mapdl.materials[1].properties["EX"]
+        >>> ex.temperatures, ex.values
+        (array([ 20., 100.]), array([2.1e+11, 2.0e+11]))
+        """
+        from ansys.mapdl.core._materials import _read_materials
+
+        return _read_materials(self)
 
     @property
     def parameters(self) -> "Parameters":
