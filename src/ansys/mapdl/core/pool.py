@@ -613,7 +613,7 @@ class MapdlPool:
                     try:
                         self._exiting_i += 1
                         instance.exit()
-                    except Exception:
+                    except Exception as e:
                         LOG.error(
                             f"Failed to close instance due to:\n{e}", exc_info=True
                         )
