@@ -1011,7 +1011,9 @@ class _ExtendedPlottingCommandsMixin(_ExtendedMixinBase):
         }
         func = mapping[entity]
 
-        kwargs.setdefault("title", "PyMAPDL CMPLOT")
+        graphics_backend = kwargs.get("graphics_backend") or self._graphics_backend
+        if graphics_backend is GraphicsBackend.PYVISTA:
+            kwargs.setdefault("title", "PyMAPDL CMPLOT")
         output = func(**kwargs)
 
         # returning to previous selection

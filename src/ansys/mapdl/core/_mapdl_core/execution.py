@@ -79,7 +79,7 @@ def parse_to_short_cmd(command):
     'VPLO'
     """
     try:
-        short_cmd = command.split(",")[0]
+        short_cmd = command.split(",")[0].strip()
         return short_cmd[:4].upper()
     except Exception:  # pragma: no cover
         return
@@ -143,6 +143,7 @@ class _CoreExecutionMixin(_CoreMixinBase):
     """Static responsibility mixin for the MAPDL core facade."""
 
     _blocked_commands: frozenset[str] = frozenset()
+    _pending_plot_output: str | None = None
 
     @property
     def blocked_commands(self) -> frozenset[str]:
@@ -667,7 +668,13 @@ class _CoreExecutionMixin(_CoreMixinBase):
         # special returns for certain geometry commands
         if short_cmd in plotting.PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
-            return self.screenshot(savefig=savefig, default_name="plot")
+            self._pending_plot_output = text
+            try:
+                return self.screenshot(savefig=savefig, default_name="plot")
+            finally:
+                self._pending_plot_output = None
+                # ``screenshot`` runs ``/SHOW``; keep the plot command's output.
+                self._response = response
 
         return self._response
 

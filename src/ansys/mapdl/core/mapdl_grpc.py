@@ -4205,22 +4205,23 @@ class MapdlGrpc(MapdlBase):
             flatten=True,
         )
 
-    def _screenshot_path(self):  # numpydoc ignore=RT01
+    def _screenshot_path(
+        self, target_name: Optional[str] = None
+    ):  # numpydoc ignore=RT01
         """Returns the local path of the MAPDL generated screenshot.
 
         If necessary, downloads the remotely rendered file.
+
+        Parameters
+        ----------
+        target_name : str, optional
+            PNG name reported by MAPDL. Defaults to the highest numbered
+            ``<jobname><digits>.png`` file.
         """
         if self._local:
-            return super()._screenshot_path()
+            return super()._screenshot_path(target_name)
 
-        jobname = self.jobname
-        filenames = [
-            filename
-            for filename in self.list_files()
-            if filename.endswith(".png") and filename.startswith(jobname)
-        ]
-        filenames.sort()
-        filename = os.path.basename(filenames[-1])
+        filename = self._pick_screenshot_name(self.list_files(), target_name)
 
         temp_dir = tempfile.gettempdir()
         save_name = os.path.join(temp_dir, "tmp.png")

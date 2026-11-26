@@ -125,6 +125,7 @@ requires_on_cicd = pytest.mark.skipif(
 
 def requires(requirement: str):
     """Check requirements"""
+    dependency = requirement  # import names are case-sensitive (``IPython``)
     requirement = requirement.lower()
 
     if "grpc" == requirement:
@@ -167,7 +168,7 @@ def requires(requirement: str):
         return pytest.mark.gui
 
     else:
-        return requires_dependency(requirement)
+        return requires_dependency(dependency)
 
 
 def requires_dependency(dependency: str):

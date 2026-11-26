@@ -1258,14 +1258,19 @@ def test_aplot_quality_fail(mapdl, make_block, quality):
 
 
 @patch("ansys.mapdl.core.Mapdl.is_png_found", lambda *args, **kwargs: False)
-def test_plot_path(mapdl, tmpdir):
+def test_plot_path(mapdl):
     mapdl.graphics("POWER")
+    try:
+        with pytest.raises(
+            MapdlRuntimeError,
+            match="One possible reason is that the graphics device is not correct",
+        ):
+            mapdl.screenshot()
 
-    with pytest.raises(
-        MapdlRuntimeError,
-        match="One possible reason is that the graphics device is not correct",
-    ):
-        mapdl.eplot(graphics_backend=GraphicsBackend.MAPDL)
+        with pytest.warns(UserWarning, match="did not write a PNG plot"):
+            assert mapdl.eplot(graphics_backend=GraphicsBackend.MAPDL) is None
+    finally:
+        mapdl.graphics("FULL")
 
 
 def test_add_mesh():
@@ -1363,16 +1368,74 @@ def test_plotter_show_returns(savefig, verify_image_cache):
 
 def test_plot_path_screenshoot(mapdl, cleared, tmpdir):
     mapdl.graphics("POWER")
-    # mapdl.screenshot is not affected by the device.
-    # It should not raise exceptions
-    scheenshot_path = os.path.join(tmpdir, "screenshot.png")
-    mapdl.screenshot(scheenshot_path)
+    try:
+        # ``screenshot`` redraws the last display, so render one first.
+        mapdl.prep7()
+        mapdl.block(0, 1, 0, 1, 0, 1)
+        mapdl.vplot(
+            graphics_backend=GraphicsBackend.MAPDL,
+            savefig=os.path.join(tmpdir, "vplot.png"),
+        )
 
-    assert os.path.exists(scheenshot_path)
-    assert os.path.getsize(scheenshot_path) > 100  # check if it is not empty
+        # mapdl.screenshot is not affected by the device.
+        scheenshot_path = os.path.join(tmpdir, "screenshot.png")
+        mapdl.screenshot(scheenshot_path)
 
-    # Returning to previous state.
-    mapdl.graphics("FULL")
+        assert os.path.exists(scheenshot_path)
+        assert os.path.getsize(scheenshot_path) > 100  # check if it is not empty
+    finally:
+        mapdl.graphics("FULL")
+
+
+def _prepare_mpplot(mapdl):
+    mapdl.prep7()
+    mapdl.mptemp(1, 0, 100)
+    mapdl.mpdata("EX", 2, 1, 2e11, 1.9e11)
+    return lambda **kwargs: mapdl.mpplot("EX", 2, **kwargs)
+
+
+def _prepare_pldisp(mapdl):
+    mapdl.post1()
+    mapdl.set(1, 1)
+    return mapdl.pldisp
+
+
+def _prepare_starvplot(mapdl):
+    mapdl.dim("XARR", "ARRAY", 2)
+    mapdl.dim("YARR", "ARRAY", 2)
+    mapdl.vfill("XARR(1)", "RAMP", 0, 1)
+    mapdl.vfill("YARR(1)", "RAMP", 1, 1)
+    return lambda **kwargs: mapdl.starvplot("XARR(1)", "YARR(1)", **kwargs)
+
+
+def _prepare_replot(mapdl):
+    _prepare_pldisp(mapdl)()  # ``/REPLOT`` redraws the last display.
+    return mapdl.replot
+
+
+@requires("grpc")
+@requires("matplotlib")
+@pytest.mark.parametrize(
+    "prepare,needs_solution",
+    [
+        (_prepare_mpplot, True),
+        (_prepare_pldisp, True),
+        (_prepare_starvplot, False),
+        (_prepare_replot, True),
+    ],
+    ids=["mpplot", "pldisp", "starvplot", "replot"],
+)
+def test_newly_captured_plot_command_returns_server_screenshot(
+    mapdl, cleared, request, tmpdir, prepare, needs_solution
+):
+    if needs_solution:
+        request.getfixturevalue("cube_solve")
+    plot = prepare(mapdl)
+    savefig = os.path.join(tmpdir, "plot.png")
+
+    assert plot(savefig=savefig) == savefig
+    assert os.path.getsize(savefig) > 100  # check if it is not empty
+    assert plot() is None
 
 
 def test_deprecated_params(mapdl, make_block):
