@@ -42,6 +42,17 @@ Here's a quick demo of PyMAPDL within Visual Studio Code:
 PyMAPDL works within Jupyter Notebooks, the standard Python console,
 or in batch mode on Windows, Linux, and even macOS.
 
+## Installation
+
+Install the latest release from PyPI with:
+
+```bash
+pip install ansys-mapdl-core
+```
+
+For detailed installation instructions, see the
+[PyMAPDL installation guide](https://mapdl.docs.pyansys.com/version/stable/getting_started/install_pymapdl.html).
+
 ## Documentation and issues
 
 Documentation for the latest stable release of PyMAPDL is hosted at
