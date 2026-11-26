@@ -25,4 +25,6 @@ Radiosity
    Radiosity.spcnod
    Radiosity.spctemp
    Radiosity.v2dopt
+   Radiosity.vfdi
    Radiosity.vfopt
+   Radiosity.vfup

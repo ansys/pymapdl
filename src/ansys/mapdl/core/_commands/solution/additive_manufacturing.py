@@ -25,16 +25,23 @@ from ansys.mapdl.core._commands import CommandsBase
 
 class AdditiveManufacturing(CommandsBase):
 
-    def ambeam(self, numbeams: str = "", **kwargs):
+    def ambeam(
+        self, numbeams: str = "", power: str = "", absorptivity: str = "", **kwargs
+    ):
         r"""For multiple-beam printers, specifies the number of beams in an `additive manufacturing
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/add_ag/add_ag_cal.html>`_ analysis.
 
-        Mechanical APDL Command: `AMBEAM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AMBEAM.html>`_
+        Mechanical APDL Command: `AMBEAM <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_AMBEAM.html>`_
 
         Parameters
         ----------
         numbeams : str
             Number of beams used in the build process. Default = 1.
+
+        power, absorptivity : str
+            Option-specific command argument. Refer to the `AMBEAM command documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_AMBEAM.html>`_
+            for details.
 
         Notes
         -----
@@ -47,7 +54,7 @@ class AdditiveManufacturing(CommandsBase):
         manufacturing analysis, see `AM Process Simulation in Workbench Additive
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/add_ag/add_ag_AM_in_WB.html#add_ag_load_addon>`_
         """
-        command = f"AMBEAM,{numbeams}"
+        command = f"AMBEAM,{numbeams},{power},{absorptivity}"
         return self.run(command, **kwargs)
 
     def ambuild(
@@ -57,12 +64,14 @@ class AdditiveManufacturing(CommandsBase):
         val2: str = "",
         val3: str = "",
         val4: str = "",
+        val5: str = "",
+        val6: str = "",
         **kwargs,
     ):
         r"""Specifies printer parameters for the build and other options in an `additive manufacturing
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/add_ag/add_ag_cal.html>`_ analysis.
 
-        Mechanical APDL Command: `AMBUILD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AMBUILD.html>`_
+        Mechanical APDL Command: `AMBUILD <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_AMBUILD.html>`_
 
         Parameters
         ----------
@@ -122,6 +131,11 @@ class AdditiveManufacturing(CommandsBase):
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AMBUILD.html>`_ for
             further information.
 
+        val5, val6 : str
+            Option-specific command argument. Refer to the `AMBUILD command documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_AMBUILD.html>`_
+            for details.
+
         Notes
         -----
 
@@ -166,14 +180,22 @@ class AdditiveManufacturing(CommandsBase):
         manufacturing analysis, see `AM Process Simulation in Workbench Additive
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/add_ag/add_ag_AM_in_WB.html#add_ag_load_addon>`_
         """
-        command = f"AMBUILD,{option},{val1},{val2},{val3},{val4}"
+        command = f"AMBUILD,{option},{val1},{val2},{val3},{val4},{val5},{val6}"
         return self.run(command, **kwargs)
 
-    def amenv(self, tgas: str = "", hgas: str = "", **kwargs):
+    def amenv(
+        self,
+        tgas: str = "",
+        hgas: str = "",
+        radopt: str = "",
+        emis: str = "",
+        sbc: str = "",
+        **kwargs,
+    ):
         r"""Specifies the build-environment thermal boundary conditions in an `additive manufacturing
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/add_ag/add_ag_cal.html>`_ analysis.
 
-        Mechanical APDL Command: `AMENV <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AMENV.html>`_
+        Mechanical APDL Command: `AMENV <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_AMENV.html>`_
 
         Parameters
         ----------
@@ -182,6 +204,45 @@ class AdditiveManufacturing(CommandsBase):
 
         hgas : str
             Convection coefficient from the part to the enclosure gas.
+
+        radopt : str
+            Flag to enable radiation losses from the part to the enclosure. Allowed
+            values: 0 (No radiation, default), 1 (Enabled).
+
+        emis : str
+            Surface emissivity value for radiation losses. This value must be between 0
+            (no radiation) and 1 (perfect blackbody emitter). A value is required if
+            radiation is enabled.
+
+        sbc : str
+            Stefan-Boltzmann constant in consistent unit system. If the value is not
+            provided, the solver unit system (defined with `/UNITS
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_UNITS.html>`_)
+            is used to define the constant in consistent units. The value defaults to a
+            number in the following table, depending on your unit system. The value must
+            be supplied if using a custom `/UNITS
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_UNITS.html>`_,USER
+            unit system.
+
+            .. list-table::
+               :header-rows: 2
+
+               * - Stefan-Boltzmann constant default values
+                 - -
+               * - Unit system
+                 - Default value
+               * - MKS or SI units
+                 - (see command documentation for equation)
+               * - CGS units
+                 - (see command documentation for equation)
+               * - MPA units
+                 - (see command documentation for equation)
+               * - µMKS units
+                 - (see command documentation for equation)
+               * - BFT units
+                 - (see command documentation for equation)
+               * - BIN units
+                 - (see command documentation for equation)
 
         Notes
         -----
@@ -203,7 +264,7 @@ class AdditiveManufacturing(CommandsBase):
         manufacturing analysis, see `AM Process Simulation in Workbench Additive
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/add_ag/add_ag_AM_in_WB.html#add_ag_load_addon>`_
         """
-        command = f"AMENV,{tgas},{hgas}"
+        command = f"AMENV,{tgas},{hgas},{radopt},{emis},{sbc}"
         return self.run(command, **kwargs)
 
     def ammat(self, matpart: str = "", tmelt: str = "", trelax: str = "", **kwargs):

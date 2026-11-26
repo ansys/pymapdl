@@ -136,11 +136,12 @@ class LoadStepOptions(CommandsBase):
         dtmin: str = "",
         dtmax: str = "",
         carry: str = "",
+        forcekey: str = "",
         **kwargs,
     ):
         r"""Specifies the time step sizes to be used for the current load step.
 
-        Mechanical APDL Command: `DELTIM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DELTIM.html>`_
+        Mechanical APDL Command: `DELTIM <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DELTIM.html>`_
 
         Parameters
         ----------
@@ -171,6 +172,11 @@ class LoadStepOptions(CommandsBase):
 
             The program automatically determines the default based on the physics of the model.
 
+        forcekey : str
+            Option-specific command argument. Refer to the `DELTIM command documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DELTIM.html>`_
+            for details.
+
         Notes
         -----
 
@@ -195,7 +201,7 @@ class LoadStepOptions(CommandsBase):
 
         This command is also valid in PREP7.
         """
-        command = f"DELTIM,{dtime},{dtmin},{dtmax},{carry}"
+        command = f"DELTIM,{dtime},{dtmin},{dtmax},{carry},{forcekey}"
         return self.run(command, **kwargs)
 
     def expsol(

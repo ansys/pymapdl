@@ -465,11 +465,12 @@ class MiscLoads(CommandsBase):
         val11: str = "",
         val12: str = "",
         val13: str = "",
+        kcn: str = "",
         **kwargs,
     ):
         r"""Specifies input data for an acoustic incident wave.
 
-        Mechanical APDL Command: `AWAVE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AWAVE.html>`_
+        Mechanical APDL Command: `AWAVE <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_AWAVE.html>`_
 
         Parameters
         ----------
@@ -963,6 +964,13 @@ class MiscLoads(CommandsBase):
 
             * ``VAL13`` - Port number if the incident power is required on the port
 
+        kcn : str
+            A predefined local (``KCN``\ >10) or global (``KCN``\ = 0) Cartesian
+            coordinate system number used to specify the direction of normal velocity
+            for ``Wavetype``\ = BACK. Defaults to the global Cartesian coordinate system
+            (``KCN``\ = 0). The local Z-direction must be the direction of normal
+            velocity.
+
         Notes
         -----
         Use the :ref:`asol` command to activate the scattered field algorithm and the :ref:`ascres` command
@@ -971,7 +979,7 @@ class MiscLoads(CommandsBase):
 
 
         """
-        command = f"AWAVE,{wavenum},{wavetype},{opt1},{opt2},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13}"
+        command = f"AWAVE,{wavenum},{wavetype},{opt1},{opt2},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13},{kcn}"
         return self.run(command, **kwargs)
 
     def biot(self, label: str = "", **kwargs):
@@ -1213,11 +1221,12 @@ class MiscLoads(CommandsBase):
         value2: str = "",
         nend: str = "",
         ninc: str = "",
+        lsic: str = "",
         **kwargs,
     ):
         r"""Specifies initial conditions at nodes.
 
-        Mechanical APDL Command: `IC <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_IC.html>`_
+        Mechanical APDL Command: `IC <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_IC.html>`_
 
         Parameters
         ----------
@@ -1261,6 +1270,18 @@ class MiscLoads(CommandsBase):
         ninc : str
             Specifies the same initial condition values at the range of nodes from ``NODE`` to ``NEND``
             (defaults to ``NODE`` ), in steps of ``NINC`` (defaults to 1).
+
+        lsic : str
+            To apply the initial condition at a load step other than the first step,
+            issue the `IC
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_IC.html>`_\
+            command at that load step. Specify ``LSIC``\ in the field at that load step
+            to tell the solver that this is a Load Step Initial Condition. See `"Example
+            Usage"
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_IC.html#IC.example>`_.
+            This option is only valid for the static and full transient (`TRNOPT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TRNOPT.html>`_,FULL)
+            analysis type.
 
         Notes
         -----
@@ -1312,7 +1333,7 @@ class MiscLoads(CommandsBase):
 
         This command is also valid in PREP7.
         """
-        command = f"IC,{node},{lab},{value},{value2},{nend},{ninc}"
+        command = f"IC,{node},{lab},{value},{value2},{nend},{ninc},{lsic}"
         return self.run(command, **kwargs)
 
     def icdele(self, **kwargs):
@@ -2439,6 +2460,46 @@ class MiscLoads(CommandsBase):
         This command is also valid in PREP7.
         """
         command = "SBCTRAN"
+        return self.run(command, **kwargs)
+
+    def scconnect(
+        self, hostname: str = "", portnum: str = "", solutionname: str = "", **kwargs
+    ):
+        r"""Specifies System Coupling connection parameters.
+
+        Mechanical APDL Command: `SCCONNECT <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SCCONNECT.html>`_
+
+        Parameters
+        ----------
+        hostname : str
+            Specifies the host machine on which the coupling service is running (to
+            which the co-simulation participant/solver must connect) in a System
+            Coupling analysis.
+
+        portnum : str
+            Specifies the port on the host machine upon which the coupling service is
+            listening for connections from co-simulation participants in a System
+            Coupling analysis.
+
+        solutionname : str
+            Specifies the unique name used by the co-simulation participant to identify
+            itself to the coupling service in a System Coupling analysis.
+
+        Notes
+        -----
+
+        .. _SCCONNECT_notes:
+
+        Use this command to specify System Coupling connection parameters. Alternatively,
+        you can specify System Coupling connection parameters using command line options
+        (see `Starting a Mechanical APDL Session from the Command Level in the Operations
+        Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ope/Hlp_G_OPE3_1.html>`_).
+        For information on System Coupling, see `System Coupling in the Mechanical User's
+        Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/wb_sim/ds_systemcoup.html>`_.
+        """
+        command = f"SCCONNECT,{hostname},{portnum},{solutionname}"
         return self.run(command, **kwargs)
 
     def wsprings(self, **kwargs):

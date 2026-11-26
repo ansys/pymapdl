@@ -43,3 +43,7 @@ DynamicOptions
    DynamicOptions.timint
    DynamicOptions.tintp
    DynamicOptions.trnopt
+
+.. seealso::
+
+   :meth:`mapdl.hbmopt() <ansys.mapdl.core.Mapdl.hbmopt>`

@@ -299,11 +299,12 @@ class FeConstraints(CommandsBase):
         nend: str = "",
         ninc: str = "",
         rkey: str = "",
+        irstrtflag: str = "",
         **kwargs,
     ):
         r"""Deletes degree-of-freedom constraints.
 
-        Mechanical APDL Command: `DDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DDELE.html>`_
+        Mechanical APDL Command: `DDELE <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DDELE.html>`_
 
         Parameters
         ----------
@@ -366,6 +367,11 @@ class FeConstraints(CommandsBase):
               step if no other loads are applied. See :ref:`DDELE_notes` for more information about the behavior
               of this option.
 
+        irstrtflag : str
+            Option-specific command argument. Refer to the `DDELE command documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DDELE.html>`_
+            for details.
+
         Notes
         -----
 
@@ -387,7 +393,7 @@ class FeConstraints(CommandsBase):
 
         This command is also valid in PREP7.
         """
-        command = f"DDELE,{node},{lab},{nend},{ninc},{rkey}"
+        command = f"DDELE,{node},{lab},{nend},{ninc},{rkey},{irstrtflag}"
         return self.run(command, **kwargs)
 
     def dflx(

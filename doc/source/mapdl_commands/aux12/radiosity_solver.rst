@@ -18,3 +18,8 @@ RadiositySolver
    RadiositySolver.vfco
    RadiositySolver.vfquery
    RadiositySolver.vfsm
+
+.. seealso::
+
+   :meth:`mapdl.vfdi() <ansys.mapdl.core.Mapdl.vfdi>`
+   :meth:`mapdl.vfup() <ansys.mapdl.core.Mapdl.vfup>`

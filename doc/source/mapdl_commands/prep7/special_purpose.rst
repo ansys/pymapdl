@@ -23,6 +23,7 @@ SpecialPurpose
    SpecialPurpose.cyclic
    SpecialPurpose.cycopt
    SpecialPurpose.emsym
+   SpecialPurpose.fgrad
    SpecialPurpose.msopt
    SpecialPurpose.mstole
    SpecialPurpose.perbc2d

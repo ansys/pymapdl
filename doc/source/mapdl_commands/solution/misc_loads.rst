@@ -35,4 +35,9 @@ MiscLoads
    MiscLoads.rstcontrol
    MiscLoads.sbclist
    MiscLoads.sbctran
+   MiscLoads.scconnect
    MiscLoads.wsprings
+
+.. seealso::
+
+   :meth:`mapdl.nsmass() <ansys.mapdl.core.Mapdl.nsmass>`

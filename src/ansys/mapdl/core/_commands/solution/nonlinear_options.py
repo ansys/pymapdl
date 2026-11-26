@@ -443,6 +443,640 @@ class NonlinearOptions(CommandsBase):
         command = f"/GST,{lab},{runtrack}"
         return self.run(command, **kwargs)
 
+    def hbmopt(
+        self,
+        option: str = "",
+        value1: str = "",
+        value2: str = "",
+        value3: str = "",
+        value4: str = "",
+        value5: str = "",
+        **kwargs,
+    ):
+        r"""Specifies solution options for a `harmonic balance method (HBM)
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/ans_hbm.html>`_
+        analysis.
+
+        Mechanical APDL Command: `HBMOPT <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_
+
+        Parameters
+        ----------
+        option : str
+            Harmonic balance method analysis option. There is no default. The semantic
+            labels for ``Value1``, ``Value2``, ``Value3``, ``Value4``, and ``Value5``\
+            as well as their descriptions and default/range values depend on the option
+            setting. See the command specifications for each option for details.
+            Possible ``Option``\ settings are:
+
+            * ``AFT`` - Specify alternate frequency-time (AFT) procedure options. This
+              command is optional. See `Command Specification for Option\ = AFT
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_AFTspec>`_
+
+            * ``CONTLIST`` - List all continuation parameters. This command is optional.
+              ``Value1``.. ``Value5``\ are Unused fields.
+
+            * ``CONTSET`` - Required settings for a numerical continuation solution. You
+              must issue this command to properly set up an HBM analysis. See `Command
+              Specification for Option\ = CONTSET
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_CONTSETspec>`_.
+
+            * ``CONTTERM`` - Specify termination criteria when continuation is on. This
+              command is optional. See `Command Specification for Option\ = CONTTERM
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_CONTTERMspec>`_.
+
+            * ``CYCLIC`` - Activate an HBM cyclic analysis and specify parameters. This
+              command is optional. See `Command Specification for Option\ = CYCLIC
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_CYCLICspec>`_.
+
+            * ``LINEAR`` - Specify if nonlinearities are considered. This command is
+              optional. See `Command Specification for Option\ = LINEAR
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_LINEARspec>`_.
+
+            * ``LIST`` - List all continuation parameters (except continuation). This
+              command is optional. ``Value1``.. ``Value5``\ are Unused fields.
+
+            * ``NR`` - Specify Newton-Raphson controls. This command is optional. See
+              `Command Specification for Option\ = NR
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_NRspec>`_.
+
+            * ``SCAL`` - Linearly scale the solution vector to improve the convergence
+              rate. See `Command Specification for Option\ = SCAL
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_SCALspec>`_.
+
+            * ``TRTOL`` - Specify trust-region solver tolerances. This command is
+              optional. See `Command Specification forOption\ = TRTOL
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_TRTOLspec>`_.
+
+            * ``UINIT`` - Specify a solution guess at the beginning frequency of the
+              solution. This command is optional. See `Command Specification for Option\
+              = UINIT
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT_UINITspec>`_.
+
+        value1, value2, value3, value4, value5 : str
+            Option-specific command argument. Refer to the `HBMOPT command documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_
+            for details.
+
+        Notes
+        -----
+
+        .. _HBMOPT_notes:
+
+        **Command Specification for Option = AFT**
+
+        `HBMOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,
+        AFT, ``NP``, ``NT``, ``--``, ``--``, ``--``\
+
+        .. list-table:: Table 195: Semantic labels and definitions of Value1, ... Value5 for Option = AFT
+           :header-rows: 1
+
+           * - ``Value``\
+             - Label and description
+             - **Default Value**\
+             - **Range**\
+           * - ``Value1``\
+             - ``NP``\ **Maximum number of time periods**\ ``NP``\ must be a positive
+               integer. Note that the effective number of time periods may be smaller
+               than ``NP``\ as the AFT transient is stopped when periodic convergence
+               is reached.
+             - 4
+             - ``NP``\ > 0
+           * - ``Value2``\
+             - ``NT``\ **Number of time points per period**\ ``NT``\ cannot be less
+               than 2\*NH+1, where NH is the number of harmonics:sup:`[a]`. The value
+               of NT is automatically adjusted if this criterion is not met.
+             - 128
+             - 16 ≤ ``NT``\ ≤ 16384 (= 2:sup:`14`)
+           * - ``Value3``, … ``Value5``\
+             - Unused fields
+             - -
+             - -
+
+        **Command Specification for Option = CONTSET**
+
+        `HBMOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,
+        CONTSET, ``CorrMeth``, ``DS``, ``DSMIN``, ``DSMAX``, ``--``\
+
+        .. list-table:: Table 196: Semantic labels and definitions of Value1, ... Value5 for Option = CONTSET
+           :header-rows: 1
+
+           * - ``Value``\
+             - Label and description
+             - -
+           * - ``Value1``\
+             - ``CorrMeth``\ **Corrector method**\ Specify the corrector type or
+               alternative continuation method. The solver uses natural continuation
+               for the first step for all continuation methods. (See `notes
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT.notes>`_
+               for details.)
+             - Possible ``CorrMeth``\ settings are: **OFF**\ - No continuation.
+               Similar to natural continuation except there is no heuristic step
+               adjustment, and the maximum number of allowed nonconverged steps is 1.
+               **ARC (default)**\ - Arc-length corrector **ORT**\ - Orthogonal
+               corrector **NAT**\ - Natural continuation. No continuation method is
+               used.
+           * - **OFF**\
+             - -
+             - No continuation. Similar to natural continuation except there is no
+               heuristic step adjustment, and the maximum number of allowed
+               nonconverged steps is 1.
+           * - **ARC (default)**\
+             - -
+             - Arc-length corrector
+           * - **ORT**\
+             - -
+             - Orthogonal corrector
+           * - **NAT**\
+             - -
+             - Natural continuation. No continuation method is used.
+           * - ``Value2``\
+             - ``DS``\ **Initial step size**\ Step size for the first substep. In the
+               continuation process, the step size determines the size of the tangent
+               prediction. Because it fully determines the predicted point, it also
+               influences the correction, depending on the corrector method as listed
+               below. From the predicted point, corrections occur: **OFF**\ or
+               **NAT**\ - along the frequency direction **ARC**\ - along the sphere
+               of radius ``DS``. **ORT**\ - in the plane orthogonal to the tangent
+               direction. See `notes
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html#HBMOPT.notes>`_
+               for details on the choice of step size.
+             - No default value **Note:**\ You must always specify a ``DS``\ value
+               except when ``CorrMeth``\ = OFF. **Range:**\ ``DSMIN``\ ≤ ``DS``\ ≤
+               ``DSMAX``\
+           * - ``Value3``\
+             - ``DSMIN``\ :sup:`[a]`\ **Minimum step size**\ If the step size equals
+               the minimum step size during solution and the nonlinear equation
+               solver fails to converge, the solver will exit.
+             - **Default:**\ ``DS``\ /50 **Range:**\ 0 < ``DSMIN``\ < ``DSMAX``\
+           * - ``Value4``\
+             - ``DSMAX``\ :sup:`[a]`\ **Maximum step size**\
+             - **Default:**\ 5\*``DS``\ **Range:**\ ``DSMAX``\ > ``DSMIN``\
+           * - ``Value5``\
+             - Unused field
+             - -
+
+        **Command Specification for Option = CONTTERM**
+
+        `HBMOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,
+        CONTTERM, ``MAXSTEPS``, ``FREQMIN``, ``FREQMAX``, ``--``, ``--``\
+
+        .. list-table:: Table 197: Semantic labels and definitions of Value1, ... Value5 for Option = CONTTERM
+           :header-rows: 1
+
+           * - ``Value``\
+             - Label and description
+             - **Default Value**\
+             - **Range**\
+           * - ``Value1``\
+             - ``MAXSTEPS``\ Maximum number of successful continuation
+               steps:sup:`[a]`\ If exceeded, the solver exits.
+             - 10000
+             - ``MAXSTEPS``\ ≥ 0
+           * - ``Value2``\
+             - ``FREQMIN``\ **Minimum frequency**\ During continuation, if the
+               frequency is below this value, the solver exits.
+             - MIN(``FREQB``, ``FREQE``):sup:`[b]`\
+             - ``FREQMIN``\ ≤ MIN(``FREQB``, ``FREQE``):sup:`[b]`\
+           * - ``Value3``\
+             - ``FREQMAX``\ **Maximum frequency**\ During continuation, if the
+               frequency exceeds this value, the solver exits.
+             - MAX(``FREQB``, ``FREQE``):sup:`[b]`\
+             - ``FREQMAX``\ ≥ MAX(``FREQB``, ``FREQE``):sup:`[b]`\
+           * - ``Value4``, ``Value5``\
+             - Unused fields
+             - -
+             - -
+
+        **Command Specification for Option = CYCLIC**
+
+        `HBMOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,
+        CYCLIC, ``CYCkey``, ``EO``, ``SEPrefix``, ``--``, ``--``\
+
+        .. list-table:: Table 198: Semantic labels and definitions of Value1, ... Value5 for Option = CYCLIC
+           :header-rows: 1
+
+           * - ``Value``\
+             - Label and description
+             - -
+           * - ``Value1``\
+             - ``CYCkey``\ **Key to activate an HBM cyclic analysis.**\ Used to solve
+               for spatial harmonic indices greater than 0.
+             - Possible ``CYCkey``\ settings are: **0 or OFF (default)**\ - Do not
+               activate an HBM cyclic analysis. **1 or ON**\ - Activate an HBM cyclic
+               analysis.
+           * - **0 or OFF (default)**\
+             - -
+             - Do not activate an HBM cyclic analysis.
+           * - **1 or ON**\
+             - -
+             - Activate an HBM cyclic analysis.
+           * - ``Value2``\
+             - ``EO``\ **Fundamental engine order (EO).**\
+             - Any integer value. Can be negative. No default value.
+           * - ``Value3``\
+             - ``SEPrefix``\ **Prefix for all single stage superelement names.**\ An
+               alphanumeric name used to identify the superelement. ``SEPrefix`` may
+               be up to 26 characters, beginning with a letter and containing only
+               letters, numbers, and underscores. Names beginning with an underscore
+               (for example, _LOOP) are reserved for use by Mechanical APDL and
+               should be avoided. The component name ALL is not permitted
+             - No default value.
+           * - ``Value4``, ``Value5``\
+             - Unused fields
+             - -
+
+        **Command Specification for Option = LINEAR**
+
+        `HBMOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,
+        LINEAR, ``AFTkey``, ``--``, ``--``, ``--``, ``--``\
+
+        .. list-table:: Table 199: Semantic labels and definitions of Value1, ... Value5 for Option = LINEAR
+           :header-rows: 1
+
+           * - ``Value``\
+             - Label and description
+             - -
+           * - ``Value1``\
+             - ``AFTkey``\ **Key to ignore nonlinearities (no AFT)**\
+             - Possible ``AFTkey``\ settings are: **0 or OFF (default)**\ - Do not
+               ignore nonlinearities **1 or ON**\ - Ignore nonlinearities (valid only
+               in the first loadstep).
+           * - **0 or OFF (default)**\
+             - -
+             - Do not ignore nonlinearities
+           * - **1 or ON**\
+             - -
+             - Ignore nonlinearities (valid only in the first loadstep).
+           * - ``Value2``, … ``Value5``\
+             - Unused fields
+             - -
+
+        **Command Specification for Option = NR**
+
+        `HBMOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,
+        NR, ``MAXITER``, ``MAXINITITER``, ``--``, ``--``, ``--``\
+
+        .. list-table:: Table 200: Semantic labels and definitions of Value1, ... Value5 for Option = NR
+           :header-rows: 1
+
+           * - ``Value``\
+             - Label and description
+             - **Default Value**\
+             - **Range**\
+           * - ``Value1``\
+             - ``MAXITER``\ **Maximum number of iterations at a frequency point**\
+             - 25 in most cases. 100 if continuation is turned off or natural
+               continuation is selected by issuing `HBMOPT
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,CONTSET
+               with ``CorrMeth``\ = OFF or NAT.
+             - ``MAXITER``\ ≥ 0
+           * - ``Value2``\
+             - ``MAXINITITER``\ **Maximum number of iterations at initial solution,
+               irrespective of continuation settings**\
+             - 500
+             - ``MAXINITITER``\ ≥ 0
+           * - ``Value3``, … ``Value5``\
+             - Unused fields
+             - -
+             - -
+
+        **Command Specification for Option = SCAL**
+
+        `HBMOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,
+        SCAL, ``Type``, ``UScal``, ``FSCAL``, ``DoF``, ``Back``\
+
+        .. list-table:: Table 201: Semantic labels and definitions of Value1, ... Value5 for Option = SCAL
+           :header-rows: 1
+
+           * - ``Value``\
+             - Label and description
+             - -
+           * - ``Value1``\
+             - ``Type``\ Scale the solution vector by the selected scaling factor
+               type and specification on ``UScal``. **Note:**\ See scaling equations
+               in `Equation Solution
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/hbm_equations.html#ans_hbm_eqnTRtol>`_
+               and example usage of HBMOPT,SCAL in `Scaling the solution vector in
+               the Harmonic Balance Method Analysis Guide
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/ans_hbm_cmsEx.html#hbm_ex3_Scal>`_.
+             - Possible ``Type``\ settings are: **0 or NONE (default)**\ - No
+               scaling.:sup:`[a]`\ **1 or APDL**\ - Scaling factors contained in a
+               user-defined APDL array whose name is specified by ``UScal``\ are
+               used. **2 or VALU**\ - Scalar value specified for ``UScal``\ is used.
+           * - **0 or NONE (default)**\
+             - -
+             - No scaling.:sup:`[a]`\
+           * - **1 or APDL**\
+             - -
+             - Scaling factors contained in a user-defined APDL array whose name is
+               specified by ``UScal``\ are used.
+           * - **2 or VALU**\
+             - -
+             - Scalar value specified for ``UScal``\ is used.
+           * - ``Value2``\
+             - ``UScal``\ Name of the user-defined APDL array (if ``Type``\ = 1 or
+               APDL) or scalar value (if ``Type``\ = 2 or VALU) used to scale the
+               solution vector to improve convergence behavior.
+             - ``UScal``\ setting depends on ``Type``\ specification as follows: For
+               ``Type``\ = 1 or APDL - ``UScal``\ is the name (up to 32 characters)
+               of a previously defined APDL array that contains scaling factors. It
+               must be a 1D array (`\*DIM
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_,
+               `\*VEC
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VEC.html>`_,
+               etc.) with size equal to the size of the solution vector. For
+               ``TYPE``\ = 2 or VALU - ``UScal``\ is a scalar value.
+           * - For ``Type``\ = 1 or APDL
+             - -
+             - ``UScal``\ is the name (up to 32 characters) of a previously defined
+               APDL array that contains scaling factors. It must be a 1D array
+               (`\*DIM
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_,
+               `\*VEC
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VEC.html>`_,
+               etc.) with size equal to the size of the solution vector.
+           * - For ``TYPE``\ = 2 or VALU
+             - -
+             - ``UScal``\ is a scalar value.
+           * - ``Value3``\
+             - ``FSCAL``\ **Scaling value for the circular frequency (ω).**\
+               ``FSCAL``\ is only valid for ``Type``\ = 1 (or APDL) or 2 (or VALU)
+             - **Default:**\ 1.0 **Range:**\ ``FSCAL``\ > 0.0
+           * - ``Value4``\
+             - ``DoF``\ Degree of freedom numbering of the user-defined scaling
+               vector (``UScal``) Optional. If ``Type``\ = 1 or APDL, this indicates
+               the `degree of freedom ordering
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/apdldofordering.html>`_
+               of the user-defined scaling vector.
+             - Possible ``DoF``\ settings are: **INT (default)**\ - Internal Ansys
+               DOFs. Length N:sub:`DOF`\ = numdof\*lenbac (See `FULL File Format in
+               the Programmer's Reference
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Hlp_P_INT1_10.html#int_full_format>`_)
+               **SOLU**\ - HBM solution DOFs. Length N:sub:`DOF`\ = number of
+               multiharmonic equations/(2NH+1)
+           * - **INT (default)**\
+             - -
+             - Internal Ansys DOFs. Length N:sub:`DOF`\ = numdof\*lenbac (See `FULL
+               File Format in the Programmer's Reference
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Hlp_P_INT1_10.html#int_full_format>`_)
+           * - **SOLU**\
+             - -
+             - HBM solution DOFs. Length N:sub:`DOF`\ = number of multiharmonic
+               equations/(2NH+1)
+           * - ``Value5``\
+             - ``Back``\ APDL array name for the `back nodal mapping vector
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/apdldofordering.html>`_
+               corresponding to the user-defined scaling vector Optional. ``Back``\
+               is used to specify a back nodal mapping vector corresponding to the
+               user-defined scaling vector, ``UScal``. It must be a 1D array (`\*DIM
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_)
+               with size equal to the number of Ansys internal nodes. ``Back``\ is
+               used to reorder the user-defined scaling vector to match the internal
+               node ordering at the time of solution. If it is not provided and
+               ``DoF``\ = *INT*, it is assumed that the user-defined scaling vector
+               corresponds to the internal DOF ordering at the time of solution.
+               **Note:**\ When using `HBMOPT
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,SCAL,APDL,``UScal``,``FSCAL``,INT
+               to specify a user-defined scaling vector ``UScal``\ in internal DOFs,
+               it is recommended that you provide a ``Back``\ vector to avoid any
+               inconsistency between the array provided and the internal node
+               ordering. For example usage, see `Scaling the solution vector in the
+               Harmonic Balance Method Analysis Guide
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/ans_hbm_cmsEx.html#hbm_ex3_Scal>`_.
+             - No default value. ``Back``\ is limited to 32 characters.
+
+        **Command Specification forOption = TRTOL**
+
+        `HBMOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,
+        TRTOL, ``UTOL``, ``RTOL``, ``GTOL``, ``--``, ``--``\
+
+        .. list-table:: Table 202: Semantic labels and definitions of Value1, ... Value5 for Option = TRTOL
+           :header-rows: 1
+
+           * - ``Value``\
+             - Label and description
+             - **Default Value**\
+             - **Range**\
+           * - ``Value1``\
+             - ``UTOL``\ **Tolerance on the solution step size at any given
+               iteration**\
+             - 1e-15
+             - ``UTOL``\ > 0
+           * - ``Value2``\
+             - ``RTOL``\ **Tolerance on the function residual norm**\
+             - 1e-6
+             - ``RTOL``\ > 0
+           * - ``Value3``\
+             - ``GTOL``\ **Tolerance on the gradient norm**\
+             - 1e-12
+             - ``GTOL``\ > 0
+           * - ``Value4``, ``Value5``\
+             - Unused fields
+             - -
+             - -
+
+        **Command Specification for Option = UINIT**
+
+        `HBMOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,
+        UINIT, ``U0Flag``, ``U0Name``, ``U0dof``, ``U0BackName``, ``--``\
+
+        .. list-table:: Table 203: Semantic labels and definitions of Value1, ... Value5 for Option = UINIT
+           :header-rows: 1
+
+           * - ``Value``\
+             - Label and description
+             - -
+           * - ``Value1``\
+             - ``U0Flag``\ **Initial solution guess**\
+             - Possible ``U0Flag``\ settings are: **0 or ZERO (default)**\ - Use zero
+               nodal solution as the initial guess. **1 or APDL**\ - Use a
+               user-defined APDL array as the initial guess.
+           * - **0 or ZERO (default)**\
+             - -
+             - Use zero nodal solution as the initial guess.
+           * - **1 or APDL**\
+             - -
+             - Use a user-defined APDL array as the initial guess.
+           * - ``Value2``\
+             - ``U0name``\ **Name of the APDL array for the initial solution guess**\
+               Optional. If ``U0Flag``\ = 1 or APDL, this APDL array is used to
+               specify the initial solution guess. It must be a 1D array (`\*DIM
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_)
+               containing the multiharmonic solution guess. The array size is
+               (2\*NH+1)\*N:sub:`DOF`\ where NH is the number of harmonics specified
+               by `HROPT
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HROPT.html>`_,HBM,``NH``\
+               and N:sub:`DOF`\ is the number of degrees of freedom, which depends on
+               ``U0dof``.
+             - No default value ``U0name``\ is limited to 32 characters.
+           * - ``Value3``\
+             - ``U0dof``\ **Degree of freedom numbering of the initial solution
+               guess**\ Optional. If ``U0Flag``\ = APDL, this indicates the `degree
+               of freedom ordering
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/apdldofordering.html>`_
+               of the initial guess.
+             - Possible ``U0dof``\ settings are: **INT (default)**\ - Internal Ansys
+               DOFs. Length N:sub:`DOF`\ = numdof\*lenbac (See `FULL File Format in
+               the Programmer's Reference
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Hlp_P_INT1_10.html#int_full_format>`_)
+               **SOLU**\ - HBM solution DOFs. Length N:sub:`DOF`\ = number of
+               multiharmonic equations/(2NH+1)
+           * - **INT (default)**\
+             - -
+             - Internal Ansys DOFs. Length N:sub:`DOF`\ = numdof\*lenbac (See `FULL
+               File Format in the Programmer's Reference
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Hlp_P_INT1_10.html#int_full_format>`_)
+           * - **SOLU**\
+             - -
+             - HBM solution DOFs. Length N:sub:`DOF`\ = number of multiharmonic
+               equations/(2NH+1)
+           * - ``Value4``\
+             - ``U0BackName``\ APDL array name for the `back nodal mapping vector
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/apdldofordering.html>`_
+               corresponding to the initial guess Optional. If ``Uodof``\ = INT, the
+               DOF ordering at the time of solution (see `Degree of Freedom Ordering
+               in the Ansys Parametric Design Language Guide
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/apdldofordering.html>`_)
+               may be different from the intended DOF ordering corresponding to the
+               initial solution guess (``U0Name``). To address this, ``U0BackName``\
+               is used to specify a back nodal mapping vector corresponding to
+               ``U0Name``. It must be a 1D array (`\*DIM
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DIM.html>`_)
+               with size equal to the number of Ansys internal nodes. ``U0BackName``\
+               is used to reorder the initial solution guess to match the internal
+               node ordering at the time of solution. If it is not provided and
+               ``U0dof``\ = *INT*, it is assumed that the initial solution guess
+               corresponds to the internal DOF ordering at the time of solution.
+               **Note:**\ When using `HBMOPT
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,UINIT,APDL,*U0Name*,INT
+               to specify the initial solution guess *U0Name*\ in internal DOFs, it
+               is recommended that you provide a ``U0BackName``\ vector to avoid any
+               inconsistency between the array provided and the internal node
+               ordering. For example usage, see `Example 3: Two Jointed Beams with
+               Frictional Contact Interface
+               <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/ans_hbm_cmsEx.html>`_.
+             - No default value ``U0BackName``\ is limited to 32 characters.
+           * - ``Value5``\
+             - Unused field
+             - -
+
+        This command is used to specify solution options for a harmonic balance method
+        analysis (see `Harmonic Balance Method Analysis Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/ans_hbm.html>`_).
+
+        There is no `command default
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CH1_3.html#aPG6vq1bamcm>`_.
+        For an HBM analysis (``Method``\ = HBM on `HROPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HROPT.html>`_),
+        you must issue at least one of the following:
+
+        * `HBMOPT
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,
+          CONTSET, OFF
+
+        * `HBMOPT
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,
+          CONTSET, ``CorrMeth``, ``DS``\ where ``CorrMeth``\ is blank or any setting except
+          OFF.
+
+        To estimate the proper step size, consider the following guidelines:
+
+        * Although the step size is dimensionless, it can be correlated with the desired
+          frequency increment expressed in radians per second.
+
+        * Default values are provided for DSMIN and DSMAX, but if you want to change them,
+          keep the following points in mind:
+
+          * Set the minimum step size DSMIN value orders of magnitude lower than the
+            initial step size, as it is a stopping criterion.
+
+          * The maximum step size DSMAX is not a stopping criterion, but rather a setting
+            that acts on the frequency resolution.
+
+        * To determine an appropriate step size, use a linear harmonic analysis as a
+          reference near the peak of interest. To capture sufficient detail, a practical
+          guideline is to set the maximum step size so that the resonance peak bandwidth
+          contains approximately 5 to 10 steps.
+
+        **No continuation solver options**\
+
+        For `HBMOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,
+        CONTSET, OFF:
+
+        * `NSUBST
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NSUBST.html>`_\
+          is used to specify the number of substeps and calculate the fixed frequency step.
+          The first substep is at ``FREQB``\ + (``FREQE``\ - ``FREQB``)/``NSBSTP``\ as in
+          other harmonic analyses, where ``FREQB``\ and ``FREQE``\ are the beginning and
+          ending frequencies of a solution specified with the `HARFRQ
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HARFRQ.html>`_\
+          command.
+
+        * ``FREQB``\ ≤ ``FREQE``\ is enforced.
+
+        * Values prescribed for the minimum and maximum frequency (via `HBMOPT
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,CONTTERM,,,,``FREQMIN``,``FREQMAX``)
+          for the continuation simulation are ignored.
+
+        **Alternating frequency-time options**\
+
+        The alternating frequency-time (AFT) procedure and derivation of relevant Jacobians
+        for a general nonlinearity is described in `Alternating Frequency-Time Procedure in
+        the Harmonic Balance Method Analysis Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/hbm_equations.html#ans_hbm_AFTeqns>`_.
+
+        **Trust-region solver options**\
+
+        An iterative process is used to solve the HBM nonlinear equations using a
+        trust-region nonlinear equation solver as detailed in `Equation Solution in the
+        Harmonic Balance Method Analysis Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/hbm_equations.html#ans_hbm_eqnTRtol>`_.
+        All tolerances (``UTOL``, ``RTOL``, and ``GTOL``\ specified by `HBMOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,TRTOL)
+        are also stopping criteria. The only required convergence criteria is the tolerance
+        on the functional residual norm (`HBMOPT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_HBMOPT.html>`_,TRTOL,,``RTOL``).
+        The other tolerances on the gradient norm and the step size are additional
+        convergence criteria that indicate stronger convergence if satisfied.
+
+        **Example Usage**
+
+        `Example 1: 1-DOF Duffing Oscillator in the Harmonic Balance Method Analysis Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/hbm_DuffOsc.html>`_
+
+        `Example 2: Two Cantilever Beams with Frictionless Gap Contact in the Harmonic
+        Balance Method Analysis Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/hbm_CantBeamsContact.html>`_
+
+        `Example 3: Two Jointed Beams with Frictional Contact Interface in the Harmonic
+        Balance Method Analysis Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/ans_hbm_cmsEx.html>`_
+
+        `Example 4: Cyclic Spring-Mass System with Cubic Nonlinearity
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/ans_hbm_cyc_proc_expl.html>`_
+
+        `Example 5: Cyclic Model with Solid Elements and Frictional Contact
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_hbm/ans_hbm_cyc_frict.html>`_
+
+        `VM319: Nonlinear Harmonic Analysis of a Cyclic Chain of Oscillators
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_vm/Hlp_V_VM319.html>`_
+
+        `VM320: Nonlinear Harmonic Analysis of a Frictional Damper
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_vm/Hlp_V_VM320.html>`_
+        """
+        command = f"HBMOPT,{option},{value1},{value2},{value3},{value4},{value5}"
+        return self.run(command, **kwargs)
+
     def lnsrch(self, key: str = "", lstol: str = "", lstrun: str = "", **kwargs):
         r"""Activates a line search to be used with Newton-Raphson.
 
@@ -594,11 +1228,14 @@ class NonlinearOptions(CommandsBase):
         val2: str = "",
         val3: str = "",
         val4: str = "",
+        val5: str = "",
+        val6: str = "",
+        val7: str = "",
         **kwargs,
     ):
         r"""Defines the criteria under which the mesh is refined or modified during a nonlinear solution.
 
-        Mechanical APDL Command: `NLADAPTIVE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NLADAPTIVE.html>`_
+        Mechanical APDL Command: `NLADAPTIVE <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_
 
         Parameters
         ----------
@@ -755,6 +1392,11 @@ class NonlinearOptions(CommandsBase):
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NLADAPTIVE.html>`_ for
             further information.
 
+        val5, val6, val7 : str
+            Option-specific command argument. Refer to the `NLADAPTIVE command documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLADAPTIVE.html>`_
+            for details.
+
         Notes
         -----
 
@@ -817,7 +1459,7 @@ class NonlinearOptions(CommandsBase):
 
         For more granular control of the source mesh geometry, see :ref:`nlmesh`.
         """
-        command = f"NLADAPTIVE,{component},{action},{criterion},{option},{val1},{val2},{val3},{val4}"
+        command = f"NLADAPTIVE,{component},{action},{criterion},{option},{val1},{val2},{val3},{val4},{val5},{val6},{val7}"
         return self.run(command, **kwargs)
 
     def nldiag(self, label: str = "", key: str = "", maxfile: str = "", **kwargs):
@@ -1134,11 +1776,12 @@ class NonlinearOptions(CommandsBase):
         layer: str = "",
         stop_value: str = "",
         stop_cond: int | str = "",
+        stop_tol: str = "",
         **kwargs,
     ):
         r"""Specify results items to track during solution.
 
-        Mechanical APDL Command: `NLHIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NLHIST.html>`_
+        Mechanical APDL Command: `NLHIST <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html>`_
 
         Parameters
         ----------
@@ -1212,6 +1855,13 @@ class NonlinearOptions(CommandsBase):
 
             * ``1`` - Terminate the analysis when the tracked variable is greater than or equal to
               ``STOP_VALUE``.
+
+        stop_tol : str
+            Stops the analysis when the tracked variable is within the specified
+            percentage tolerance of ``STOP_VALUE``, entered as a decimal value. If you
+            do not specify a value for ``STOP_TOL``, the `NLHIST
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLHIST.html>`_\
+            command uses the default value of 0.025 (2.5%).
 
         Notes
         -----
@@ -1652,14 +2302,21 @@ class NonlinearOptions(CommandsBase):
              - Rotation about local y
 
         """
-        command = f"NLHIST,{key},{name},{item},{comp},{node},{elem},{shell},{layer},{stop_value},{stop_cond}"
+        command = f"NLHIST,{key},{name},{item},{comp},{node},{elem},{shell},{layer},{stop_value},{stop_cond},{stop_tol}"
         return self.run(command, **kwargs)
 
-    def nlmesh(self, control: str = "", val1: str = "", val2: str = "", **kwargs):
+    def nlmesh(
+        self,
+        control: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        **kwargs,
+    ):
         r"""Controls remeshing in `nonlinear adaptivity
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/Hlp_G_ADVREZ.html>`_.
 
-        Mechanical APDL Command: `NLMESH <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NLMESH.html>`_
+        Mechanical APDL Command: `NLMESH <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_NLMESH.html>`_
 
         Parameters
         ----------
@@ -1884,6 +2541,12 @@ class NonlinearOptions(CommandsBase):
             Valid only for these ``Control`` options: NLAY, SRAT, and QTOL. Also used for controlling
             remeshing for element refinement.
 
+        val3 : str
+            Numerical input value that varies according to the specified ``Control``\
+            option.
+
+            Valid only for this ``Control``\ option: SRAT.
+
         Notes
         -----
 
@@ -1901,7 +2564,7 @@ class NonlinearOptions(CommandsBase):
         be modified at every load step during the nonlinear adaptive solution or when performing a restart
         analysis.
         """
-        command = f"NLMESH,{control},{val1},{val2}"
+        command = f"NLMESH,{control},{val1},{val2},{val3}"
         return self.run(command, **kwargs)
 
     def nropt(self, option1: str = "", option2: str = "", optval: str = "", **kwargs):
@@ -2347,4 +3010,71 @@ class NonlinearOptions(CommandsBase):
 
         """
         command = f"SSTIF,{key}"
+        return self.run(command, **kwargs)
+
+    def wksp(self, value: str = "", **kwargs):
+        r"""Automatically adds weak springs at the nodes of degrees of freedom with small or near-zero
+        pivots during solution.
+
+        Mechanical APDL Command: `WKSP <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_WKSP.html>`_
+
+        Parameters
+        ----------
+        value : str
+            Spring constant, can be one of the following:
+
+            * ``(blank)`` - Default. Spring constant is internally calculated based on
+              the underlying elements.
+
+            * ``If positive (>0)`` - number entered acts as a scaling factor. Spring
+              constant is internally calculated and then multiplied by the specified
+              scaling factor.
+
+            * ``If negative (<0)`` - User-defined spring constant. Absolute value of the
+              specified value is used as the spring constant.
+
+        Notes
+        -----
+
+        .. _WKSP_notes:
+
+        This is an action command that does the following for a non-linear anslysis that
+        fails in the very first iteration due to a near-zero pivot error (indicating an
+        under-constrained model):
+
+        * Automatically creates weak springs using `COMBIN14
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_COMBIN14.html>`_
+          elements at the nodes of degrees of freedom (DOFs) with near-zero or small pivots.
+
+        * Retries the slution with the added springs, enhancing numerical stability and
+          aiding convergence.
+
+        The program internally calculates a small stiffness constant (real constant 1 of
+        `COMBIN14
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_COMBIN14.html>`_
+        element) for these springs based on the average of the stiffness values of
+        underlying elements. If you specify a positive number for ``VALUE``, it is used as a
+        scaling factor, and the program multiplies the internally calculated spring constant
+        by the specified factor. If negative, the program uses the absolute value of
+        ``VALUE``\ as a customized user-defined stiffness constant. The command creates one
+        `COMBIN14
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_COMBIN14.html>`_
+        element for each translational/rotational DOF of a node where a near-zero pivot was
+        detected by the solver in the previous failed solve.
+
+        The `WKSP
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_WKSP.html>`_\
+        command does not automatically activate if the solver issues a small pivot warning
+        and continues attempting the solution. To ensure that `WKSP
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_WKSP.html>`_\
+        functions in this scenario, issue the `PIVCHECK
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PIVCHECK.html>`_,ERROR
+        command. This forces the solver to treat any small pivot as a fatal error and
+        terminate the solution so that the `WKSP
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_WKSP.html>`_\
+        command activates, inserts weak springs, and reattempts the stable solve.
+
+        This command is only valid when using sparse solver.
+        """
+        command = f"WKSP,{value}"
         return self.run(command, **kwargs)

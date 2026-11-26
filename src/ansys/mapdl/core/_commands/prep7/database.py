@@ -174,11 +174,12 @@ class Database(CommandsBase):
         fnamei: str = "",
         exti: str = "",
         fmat: str = "",
+        key: str = "",
         **kwargs,
     ):
         r"""Writes geometry and load database items to a file.
 
-        Mechanical APDL Command: `CDWRITE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CDWRITE.html>`_
+        Mechanical APDL Command: `CDWRITE <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_
 
         Parameters
         ----------
@@ -279,6 +280,11 @@ class Database(CommandsBase):
         -------
         str
             Mapdl command output.
+
+        key : str
+            Option-specific command argument. Refer to the `CDWRITE command documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CDWRITE.html>`_
+            for details.
 
         Notes
         -----
@@ -413,7 +419,7 @@ class Database(CommandsBase):
         Number of Node Components:    0
         Number of Element Components: 0
         """
-        command = f"CDWRITE,{option},'{fname}',{ext},,{fnamei},{exti},{fmat}"
+        command = f"CDWRITE,{option},'{fname}',{ext},,{fnamei},{exti},{fmat},,{key}"
         return self.run(command, **kwargs)
 
     def cecheck(self, itemlab: str = "", tolerance: str = "", dof: str = "", **kwargs):

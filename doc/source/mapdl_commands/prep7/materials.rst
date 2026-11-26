@@ -35,6 +35,7 @@ Materials
    Materials.mptgen
    Materials.mptres
    Materials.mpwrite
+   Materials.nsmass
    Materials.tbfplot
    Materials.tbft
    Materials.uimp

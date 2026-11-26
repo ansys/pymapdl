@@ -827,11 +827,13 @@ class CrossSections(CommandsBase):
         val10: str = "",
         val11: str = "",
         val12: str = "",
+        val13: str = "",
+        val14: str = "",
         **kwargs,
     ):
         r"""Describes the geometry of a section.
 
-        Mechanical APDL Command: `SECDATA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECDATA.html>`_
+        Mechanical APDL Command: `SECDATA <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECDATA.html>`_
 
         Parameters
         ----------
@@ -894,6 +896,11 @@ class CrossSections(CommandsBase):
             Values, such as thickness or the length of a side or the numbers of cells along the width, that
             describe the geometry of a section. The terms ``VAL1``, ``VAL2``, etc. are specialized for each
             type of cross-section.
+
+        val13, val14 : str
+            Values, such as thickness or the length of a side or the numbers of cells
+            along the width, that describe the geometry of a section. The terms
+            ``VAL1``, ``VAL2``, etc. are specialized for each type of cross-section.
 
         Notes
         -----
@@ -1462,7 +1469,7 @@ class CrossSections(CommandsBase):
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_str/Hlp_G_STR15_4.html#>`_
 
         """
-        command = f"SECDATA,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12}"
+        command = f"SECDATA,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13},{val14}"
         return self.run(command, **kwargs)
 
     def secfunction(self, table: str = "", pattern: str = "", **kwargs):
@@ -1940,11 +1947,18 @@ class CrossSections(CommandsBase):
         return self.run(command, **kwargs)
 
     def secmodif(
-        self, secid: str = "", kywrd: str = "", addional_command_arg: str = "", **kwargs
+        self,
+        secid: str = "",
+        kywrd: str = "",
+        value1: str = "",
+        value2: str = "",
+        value3: str = "",
+        value4: str = "",
+        **kwargs,
     ):
         r"""Modifies a pretension section
 
-        Mechanical APDL Command: `SECMODIF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECMODIF.html>`_
+        Mechanical APDL Command: `SECMODIF <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SECMODIF.html>`_
 
         Parameters
         ----------
@@ -1957,11 +1971,10 @@ class CrossSections(CommandsBase):
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECMODIF.html>`_ for
             further information.
 
-        addional_command_arg : str
-            Additional arguments can be passed to the initial command. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SECMODIF.html>`_ for
-            further information.
+        value1, value2, value3, value4 : str
+            The semantic labels for ``Value1``, ``Value2``, ``Value3``\ and ``Value4``\
+            as well as their descriptions and default/range values depend on the
+            ``Keyword``\ setting.
 
         Notes
         -----
@@ -1977,7 +1990,7 @@ class CrossSections(CommandsBase):
         The :ref:`secmodif` command either modifies the normal for a specified pretension section, or
         changes the name of the specified pretension surface.
         """
-        command = f"SECMODIF,{secid},{kywrd},{addional_command_arg}"
+        command = f"SECMODIF,{secid},{kywrd},{value1},{value2},{value3},{value4}"
         return self.run(command, **kwargs)
 
     def secnum(self, secid: str = "", **kwargs):

@@ -1168,6 +1168,63 @@ class MatrixOperations(CommandsBase):
         command = f"*ITENGINE,{type_},{enginename},{precondname},{matrix},{rhsvector},{solvector},{maxiter},{toler}"
         return self.run(command, **kwargs)
 
+    def kron(self, m1: str = "", m2: str = "", m3: str = "", **kwargs):
+        r"""Computes the Kronecker product of two matrices/vectors, (see command documentation for
+        equation).
+
+        Mechanical APDL Command: `\*KRON <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_KRON.html>`_
+
+        Parameters
+        ----------
+        m1 : str
+            Name of matrix (or vector) ``M1``. Must have been previously specified
+            (`\*DMAT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DMAT.html>`_,
+            `\*SMAT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SMAT.html>`_,
+            `\*VEC
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VEC.html>`_,
+            etc.)
+
+        m2 : str
+            Name of matrix (or vector) ``M2``. Must have been previously specified
+            (`\*DMAT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DMAT.html>`_,
+            `\*SMAT
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SMAT.html>`_,
+            `\*VEC
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VEC.html>`_,
+            etc.)
+
+        m3 : str
+            Name (up to 32 characters) of resulting matrix (or vector) ``M3``. Must be
+            specified (no default).
+
+        Notes
+        -----
+
+        .. _a-KRON_notes:
+
+        Details of the operation are demonstrated in the example below:
+
+        (see command documentation for equation)
+
+        Input matrices (or vectors) can be any of the supported types: integer, double
+        precision real, or complex double precision.
+
+        Input matrices can be sparse or dense, and their dimensions do not have to be the
+        same.
+
+        Output matrices are always dense, regardless of the input matrices type.
+
+        Since the `\*KRON
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_KRON.html>`_\
+        command is manipulating dense matrices, it should only be used on small or
+        medium-size matrices for performances reasons.
+        """
+        command = f"*KRON,{m1},{m2},{m3}"
+        return self.run(command, **kwargs)
+
     def lsbac(
         self,
         enginename: str = "",
@@ -2216,6 +2273,128 @@ class MatrixOperations(CommandsBase):
         command = f"*SORT,{name},{sorttype},{val1},{val2}"
         return self.run(command, **kwargs)
 
+    def starxpl(self, action: str = "", val1: str = "", val2: str = "", **kwargs):
+        r"""Accesses content of a Mechanical APDL file.
+
+        Mechanical APDL Command: `\*XPL <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_XPL.html>`_
+
+        Parameters
+        ----------
+        action : str
+            Specifies the action for scanning file content (no default). Valid labels
+            are:
+
+            * ``OPEN`` - Open the specified file.
+
+            * ``CLOSE`` - Close the specified file.
+
+            * ``LIST`` - List the records at the current level in the hierarchy of
+              records.
+
+            * ``WHERE`` - Display the current location in the tree.
+
+            * ``STEP`` - Step down in the tree of records.
+
+            * ``UP`` - Go up in the tree of records.
+
+            * ``READ`` - Read a record into an APDL Math object.
+
+            * ``INFO`` - Display information from a record.
+
+            * ``GOTO`` - Move directly to a given place in the tree of records (this
+              avoids multiple calls to the STEP and UP options).
+
+            * ``MARK`` - Mark a set of records of the current file; the asterisk (\*)
+              character can be used to specify multiple branches/records.
+
+            * ``COPY`` - Copy the current file to a new one, ignoring the marked
+              records.
+
+            * ``SAVE`` - Save the current file, ignoring the marked records.
+
+        val1, val2 : str
+            Additional input. The meanings of ``Val1``\ and ``Val2``\ vary depending on
+            the specified ``Action``, as described in the table below.
+
+        Notes
+        -----
+
+        .. _a-XPL_notes:
+
+        .. list-table::
+           :header-rows: 1
+
+           * - ``Action``\ Label
+             - ``Val1``\
+             - ``Val2``\
+           * - OPEN
+             - Name of file:sup:`[a]`\ to open (no default)
+             - (not used)
+           * - CLOSE
+             - Name of file:sup:`[a]`\ to close (default is last file opened by
+               ``Action``\ = OPEN)
+             - (not used)
+           * - LIST
+             - Number of levels in the tree of records (default = 1)
+             - (not used)
+           * - UP
+             - Number of levels in the tree of records (default = 1), or TOP to go
+               directly to the top of the tree
+             - (not used)
+           * - STEP
+             - Name of the record of interest (no default)
+             - (not used)
+           * - INFO
+             - Name of the record of interest (no default), or \* for all records
+             - (not used)
+           * - READ
+             - Name of the record of interest (no default)
+             - Name of the APDL Math object to create (no default)
+           * - GOTO
+             - The complete PATH to the new location Example:
+               \*XPL,GOTO,RST::DSI::SET1
+             - (not used)
+           * - MARK
+             - The complete path to the record(s); use (\*) character to select
+               multiple records (see example in next section)
+             - (not used)
+           * - COPY
+             - Name of the new file:sup:`[a]`\
+             - If blank (default), marked records are not copied to the new file.
+               Valid inputs are:COMP - records are compressed using
+               sparsificationUNCOMP - records are uncompressed
+           * - COMP - records are compressed using sparsification
+             - -
+             - -
+           * - UNCOMP - records are uncompressed
+             - -
+             - -
+
+        The ``*XPL``\ command enables you to explore the contents of a Mechanical APDL file.
+        Use this command to traverse up and down the tree structure of the specified file
+        and review what is in the file. Files that can be scanned include ``.rst``,
+        ``.mode``, ``.full``, ``.cms``, and ``.sub``\ files. For more information and
+        examples, see `Using APDL to List File Structure and Content in the Ansys Parametric
+        Design Language Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_apdl/apdlxpl.html>`_.
+
+        The command ``*XPL``,READ generates either a `\*VEC
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VEC.html>`_\
+        or a `\*DMAT
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_DMAT.html>`_\
+        object according to the record type. You do not have to create the APDL Math object
+        before issuing this command.
+
+        This command is valid in any processor.
+
+        .. seealso::
+
+           For the high-level Pythonic file explorer interface on gRPC sessions,
+           use :attr:`Mapdl.xpl <ansys.mapdl.core.Mapdl.xpl>`.
+        """
+        command = f"*XPL,{action},{val1},{val2}"
+        return self.run(command, **kwargs)
+
     def vec(
         self,
         vector: str = "",
@@ -2225,11 +2404,12 @@ class MatrixOperations(CommandsBase):
         val2: str = "",
         val3: str = "",
         val4: str = "",
+        val5: str = "",
         **kwargs,
     ):
         r"""Creates a vector.
 
-        Mechanical APDL Command: `\*VEC <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VEC.html>`_
+        Mechanical APDL Command: `\*VEC <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VEC.html>`_
 
         Parameters
         ----------
@@ -2275,6 +2455,10 @@ class MatrixOperations(CommandsBase):
         val4 : str
             Additional input. The meaning of ``Val1`` through ``Val5`` will vary depending on the specified
             ``Method``. See details below.
+
+        val5 : str
+            Additional input. The meaning of ``Val1``\ through ``Val5``\ will vary
+            depending on the specified ``Method``. See details below.
 
         Notes
         -----
@@ -2353,7 +2537,7 @@ class MatrixOperations(CommandsBase):
         Design Language Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdlxpl.html>`_.
         """
-        command = f"*VEC,{vector},{type_},{method},{val1},{val2},{val3},{val4}"
+        command = f"*VEC,{vector},{type_},{method},{val1},{val2},{val3},{val4},{val5}"
         return self.run(command, **kwargs)
 
     def wrk(self, num: str = "", **kwargs):

@@ -506,6 +506,47 @@ class AnalysisOptions(CommandsBase):
         command = f"BCSOPTION,,{memory_option},{memory_size},,,{solve_info}"
         return self.run(command, **kwargs)
 
+    def cefilter(self, termkey: str = "", **kwargs):
+        r"""Controls the automatic solution termination of models having constraint equations with too
+        many terms.
+
+        Mechanical APDL Command: `CEFILTER <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CEFILTER.html>`_
+
+        Parameters
+        ----------
+        termkey : str
+            Enables or disables the solution termination if a model has constraint
+            equations with too many terms:
+
+            * ``ON`` - Automatically terminates the simulation with an error message
+              (see Notes) upon encountering a model that has constraint equations with
+              too many terms (default).
+
+            * ``OFF`` - Disables automatic termination, and instead allows the solution
+              to continue even if a model has constraint equations with too many terms.
+
+        Notes
+        -----
+
+        .. _CEFILTER_notes:
+
+        A model with one or more constraint equations with too many terms is ill-posed,
+        requires excessive memory allocation and solution times, and may never converge. By
+        default, the program automatically terminates the simulation of such models with an
+        error message stating that there were too many constraint equation terms. One reason
+        this can occur is the misuse of `Remote Points
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/wb_sim/ds_remote_point.html>`_
+        in the Mechanical application, which create MPC equations. Best practice is to
+        revise your model to have constraint equations with less terms.
+
+        If, instead, you wish to allow the solution to continue with increased solution time
+        and memory requirements without changing your model, issue `CEFILTER
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CEFILTER.html>`_,OFF
+        to bypass the automatic termination.
+        """
+        command = f"CEFILTER,{termkey}"
+        return self.run(command, **kwargs)
+
     def cjump(
         self,
         option: str = "",
@@ -2966,7 +3007,7 @@ class AnalysisOptions(CommandsBase):
     ):
         r"""Controls PCG solver options.
 
-        Mechanical APDL Command: `PCGOPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PCGOPT.html>`_
+        Mechanical APDL Command: `PCGOPT <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PCGOPT.html>`_
 
         Parameters
         ----------
@@ -3156,7 +3197,9 @@ class AnalysisOptions(CommandsBase):
         For both linear and nonlinear analyses, the solver choice can be changed using the :ref:`eqslv`
         command between any subsequent load steps.
         """
-        command = f"PCGOPT,{lev_diff},{fallback},{reduceio},{strmck},{wrtfull},{lm_key}"
+        command = (
+            f"PCGOPT,{lev_diff},{fallback},{reduceio},{strmck},{wrtfull},,{lm_key}"
+        )
         return self.run(command, **kwargs)
 
     def perturb(
@@ -3561,6 +3604,118 @@ class AnalysisOptions(CommandsBase):
         This command is also valid in PREP7.
         """
         command = f"PIVCHECK,{key},{prntcntrl}"
+        return self.run(command, **kwargs)
+
+    def prea(self, **kwargs):
+        r"""Activates resource prediction for supported analysis and solver types.
+
+        Mechanical APDL Command: `PREA <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PREA.html>`_
+
+        Notes
+        -----
+
+        .. _PREA_notes:
+
+        .. note::
+
+           \ The `PREA
+           <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PREA.html>`_\
+           command requires both an Ansys Mechanical Enterprise license *and*\ a
+           Structures AI+ license.
+
+        Use the `PREA
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PREA.html>`_\
+        command to begin resource prediction for the current load step, analysis type,
+        solver type, and core count. This command estimates the following:
+
+        * Solution elapsed time
+
+        * Total memory usage
+
+        * Total disk space usage
+
+        * GPU recommendation
+
+        **Usage**\
+
+        Issue `PREA
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PREA.html>`_\
+        after you set the analysis type and solver type to ensure accurate prediction.
+
+        A successful prediction **does not guarantee**\ a successful solution. For example,
+        resource prediction cannot determine convergence for nonlinear static analyses or
+        PCG iterative solvers.
+
+        Predictions apply only to solutions using distributed-memory parallel (DMP)
+        processing. Results **do not**\ reflect hybrid parallel usage.
+
+        The resource prediction feature generates two charts:
+
+        * **First chart**: Shows predictions for the core count specified with the ``-np``\
+          option. This chart can include any number of cores. For core counts above 128,
+          `PREA
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_PREA.html>`_\
+          still generates predictions, but accuracy diminishes.
+
+        * **Second chart**: Shows predictions for a range of core counts from 4 to 128.
+
+        **Supported Analysis and Solver Types**\
+
+        Predictions for solution time, memory, and disk usage:
+
+        * Static analysis with sparse direct equation solver
+
+        * Static analysis with PCG iterative solver
+
+        * Modal analysis with Block Lanczos solver using sparse direct equation solver
+
+        * Modal analysis with PCG Lanczos solver
+
+        * Harmonic analysis using the Full method with frequency or mesh decomposition
+
+        * Harmonic analysis using the VT method with frequency or mesh decomposition
+
+        Predictions for GPU recommendation:
+
+        * Static linear and nonlinear analysis with direct or iterative solver
+
+        * Modal analysis with LANB or LANPCG solver
+
+        * Harmonic analysis using the full method (FULL) with mesh decomposition
+
+        **Predicted Metrics and Output Format**\
+
+        .. list-table::
+           :header-rows: 1
+
+           * - Metric
+             - Output Format
+           * - Solution Elapsed Time
+             - Displayed as a table in the output
+           * - Total Memory Used
+             - Displayed as a table in the output
+           * - Total Disk Space Used
+             - Displayed as a table in the output
+           * - GPU Recommendation
+             - Displayed as a table in the output
+
+        **GPU Accelerator Requirements**\
+
+        To maximize GPU accelerator performance, see `Requirements for the GPU Accelerator
+        in the Mechanical APDL Application
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/installation/unix_gpureqt.html>`_
+        (Linux) and `Requirements for the GPU Accelerator in the Mechanical APDL Application
+        in the Ansys, Inc. Installation Guides
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/installation/win_gpureqt.html>`_
+        (Windows).
+
+        **Resource Prediction in the Mechanical Application**\
+
+        For information on using resource prediction in the Mechanical application, see
+        `Understanding Resource Prediction for the Solution in the Mechanical User's Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/wb_sim/ds_Resource_Prediction.html>`_.
+        """
+        command = "PREA"
         return self.run(command, **kwargs)
 
     def prscontrol(self, key: str = "", **kwargs):
@@ -4001,11 +4156,12 @@ class AnalysisOptions(CommandsBase):
         expmth: str = "",
         seoclvl: str = "",
         lpnamekey: str = "",
+        seedgekey: str = "",
         **kwargs,
     ):
         r"""Specifies substructure analysis options.
 
-        Mechanical APDL Command: `SEOPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SEOPT.html>`_
+        Mechanical APDL Command: `SEOPT <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SEOPT.html>`_
 
         Parameters
         ----------
@@ -4077,6 +4233,11 @@ class AnalysisOptions(CommandsBase):
               for the analysis (see :ref:`filname` command) except for the :file:`.sub` file, which uses
               ``Sename`` if specified (default).
 
+        seedgekey : str
+            Option-specific command argument. Refer to the `SEOPT command documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SEOPT.html>`_
+            for details.
+
         Notes
         -----
 
@@ -4110,9 +4271,7 @@ class AnalysisOptions(CommandsBase):
 
         This command is also valid in PREP7.
         """
-        command = (
-            f"SEOPT,{sename},{sematr},{sepr},{sesst},{expmth},{seoclvl},,{lpnamekey}"
-        )
+        command = f"SEOPT,{sename},{sematr},{sepr},{sesst},{expmth},{seoclvl},,{lpnamekey},{seedgekey}"
         return self.run(command, **kwargs)
 
     def snoption(

@@ -23,6 +23,7 @@
 """The explicit commands MAPDL extended mixin."""
 
 from functools import wraps
+import warnings
 
 from ansys.mapdl.core.errors import CommandDeprecated
 from ansys.mapdl.core.mapdl_core import _MapdlCore
@@ -496,3 +497,41 @@ class _ExtendedExplicitCommandsMixin(_ExtendedMixinBase):
                 "The command 'Mapdl.rexport()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().rexport(*args, **kwargs)
+
+
+class _ExtendedPrep7CommandsMixin(_ExtendedMixinBase):
+    """Extended PREP7 command overrides."""
+
+    @wraps(_MapdlCore.secmodif)
+    def secmodif(
+        self,
+        secid="",
+        kywrd="",
+        value1="",
+        value2="",
+        value3="",
+        value4="",
+        **kwargs,
+    ):
+        if "addional_command_arg" in kwargs:
+            legacy_val = kwargs.pop("addional_command_arg")
+            if value1 != "":
+                raise TypeError(
+                    "Cannot specify both 'value1' and deprecated 'addional_command_arg'."
+                )
+            warnings.warn(
+                "'addional_command_arg' is deprecated in v0.74.0 and will be removed "
+                "in v0.77.0; use 'value1' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            value1 = legacy_val
+        return super().secmodif(
+            secid=secid,
+            kywrd=kywrd,
+            value1=value1,
+            value2=value2,
+            value3=value3,
+            value4=value4,
+            **kwargs,
+        )

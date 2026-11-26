@@ -471,6 +471,119 @@ class Meshing(CommandsBase):
         command = "CLRMSHLN"
         return self.run(command, **kwargs)
 
+    def cntgen(
+        self,
+        option: str = "",
+        compc: str = "",
+        compt: str = "",
+        icty: str = "",
+        itty: str = "",
+        rid: str = "",
+        matid: str = "",
+        **kwargs,
+    ):
+        r"""Generates a contact pair based on components.
+
+        Mechanical APDL Command: `CNTGEN <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CNTGEN.html>`_
+
+        Parameters
+        ----------
+        option : str
+            Specifies the type of contact pair to be generated.
+
+            * ``ASYM`` - Generates an asymmetric contact pair.
+
+            * ``AUTO`` - The program internally selects which asymmetric contact pair is
+              used at the solution stage. For details, see KEYOPT(8) of `CONTA172
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA172.html>`_,
+              `CONTA174
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_,
+              `CONTA175
+              <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA175.html>`_.
+
+            * ``SYMM`` - Generates a symmetric contact pair.
+
+        compc : str
+            The name of the element component used with a face ID or nodal component to
+            generate the contact surface.
+
+        compt : str
+            The name of the element component used with a face ID/ or nodal component to
+            generate the target surface.
+
+        icty : str
+            Contact element type ID. If ``ICTY``\ is not specified, the program selects
+            the next available contact type ID number.
+
+        itty : str
+            Target element type ID. If ``ITTY``\ is not specified, the program selects
+            the next available contact type ID number.
+
+        rid : str
+            Unique real constant ID number. If ``RID``\ is not specified, the program
+            selects the next available real constant ID number.
+
+        matid : str
+            Unique material ID number. If ``MATID``\ is not specified, the program
+            selects the next available material ID number.
+
+        Notes
+        -----
+
+        .. _CNTGEN_notes:
+
+        The `CNTGEN
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CNTGEN.html>`_\
+        command creates a contact pair based on element components with face ID (EFACE
+        component(s) via the `CMBLOCK
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Hlp_P_INT3_3.html#GintrCMBLtwr991230>`_
+        command) or nodal components provided for the contact surface and the target
+        surface. It generates contact elements `CONTA174
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_
+        and target elements `TARGE170
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_
+        over the given face of the exterior of a body meshed by 3D solid and shell elements.
+
+        If you specify element components with face ID (EFACE component(s) via the `CMBLOCK
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Hlp_P_INT3_3.html#GintrCMBLtwr991230>`_
+        command), the command generates contact elements `CONTA174
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_
+        and target elements `TARGE170
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_
+        over the given face of the body meshed by 3D solid, shell, gasket, and interface
+        elements.
+
+        If you specify an element face ID of 0 or provide a nodal component, the command
+        generates contact and target elements on the exterior faces of the body meshed by 3D
+        solid, shell, gasket, and interface elements.
+
+        If the user-defined contact element type is `CONTA175
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA175.html>`_,
+        the node-to-surface contact is defined by generating `CONTA175
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA175.html>`_
+        elements on the faces of the body meshed by 3D solid, 2D plane, shell, gasket, and
+        interface elements.
+
+        If Nodal components are provided for the contact surface and the target surface, the
+        command generates:
+
+        * Contact elements `CONTA172
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA172.html>`_
+          and target elements `TARGE169
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE169.html>`_
+          over the surfaces formed by the nodal components of a body meshed by 2D Plane
+          elements. ​
+
+        * Contact elements `CONTA174
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_
+          and target elements `TARGE170
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_
+          over the surfaces formed by the nodal components of a body meshed by 3D solid and
+          shell elements, gasket, and interface elements.
+        """
+        command = f"CNTGEN,{option},{compc},{compt},{icty},{itty},{rid},{matid}"
+        return self.run(command, **kwargs)
+
     def cpcyc(
         self,
         lab: str = "",
@@ -2399,6 +2512,178 @@ class Meshing(CommandsBase):
         command = f"MSHMID,{key}"
         return self.run(command, **kwargs)
 
+    def mshoptim(self, level: str = "", **kwargs):
+        r"""Optimizes a selected mesh based on predefined finite element specifications.
+
+        Mechanical APDL Command: `MSHOPTIM <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MSHOPT.html>`_
+
+        Parameters
+        ----------
+        level : str
+            Level of mesh optimization.
+
+            * ``-1`` - Conservative.
+
+            * ``0`` - Standard (default).
+
+            * ``1`` - Aggressive.
+
+        Notes
+        -----
+
+        .. _MSHOPTIM_notes:
+
+        This action command tries to generate an optimum base mesh in the selected mesh
+        region based on the cross-sectional sizes of intersecting embedded elements,
+        excluding `SHELL181
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_
+        and `SHELL281
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL281.html>`_
+        elements. The cross-sectional area of line embedded elements and the thickness of
+        surface embedded elements define the cross-section sizes. For `SHELL181
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_
+        and `SHELL281
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL281.html>`_
+        elements, the base mesh is optimized based on the discretization of the embedded
+        mesh. Use the ``Level``\ field in the command to control the level of mesh
+        optimization.
+
+        The optimized base mesh can be used in subsequent `reinforcing or direct element
+        embedding
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_adv/Hlp_G_ADVREINF.html>`_
+        modeling approaches to overcome simulation accuracy issues. In a reinforcing and
+        direct embedding modeling approach, the base material and enclosed materials in a
+        composite part can be independently discretized to produce separate base and
+        embedded element meshes. Without proper meshing controls at the locations where the
+        base and enclosed materials intersect (embedding regions), the simulation accuracy
+        can be affected due to:
+
+        * Base mesh overloading - The base mesh in embedding regions is overly refined. (For
+          more details, see the `EREINF
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EREINF.html>`_\
+          command).
+
+        * Base mesh underloading - The base mesh in embedding regions is insufficiently
+          refined to accurately capture the high solution gradients often present at
+          material discontinuities. (For more details, see the `EEMBED
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EEMBED.html>`_\
+          command.)
+
+        Supported element types for the base mesh include:
+
+        * `SOLID285
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID285.html>`_:
+          3D 4-Node Tetrahedral Structural Solid
+
+        * `SOLID187
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID187.html>`_:
+          3D 10-Node Tetrahedral Structural Solid
+
+        * `SOLID227
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID227.html>`_:
+          3D 10-Node Coupled-Field Solid
+
+        * `SOLID291
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SOLID291.html>`_:
+          3D 10-Node Tetrahedral Thermal Solid
+
+        Supported line and surface element types for the embedded mesh include:
+
+        * `MESH200
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
+          as a lower-order line element (KEYOPT(1) = 2) with a discrete reinforcing section
+          specified.
+
+        * `MESH200
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
+          as a lower-order triangle element (KEYOPT(1) = 4) with a smeared reinforcing
+          section specified.
+
+        * `LINK33
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_LINK33.html>`_/`LINK180
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_LINK180.html>`_/`LINK228
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_LINK228.html>`_
+          with a “LINK” section specified. Higher-order elements `LINK33
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_LINK33.html>`_/`LINK228
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_LINK228.html>`_
+          (KEYOPT (4) = 1) are not supported.
+
+        * `BEAM188
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_BEAM188.html>`_
+          with a “BEAM” section specified.
+
+        * `SHELL181
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL181.html>`_/`SHELL281
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_SHELL281.html>`_
+          with a “SHELL” section specified.
+
+        **Example Usage**
+
+        To use the `MSHOPTIM
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MSHOPT.html>`_\
+        command:
+
+        * Select the base mesh.
+
+        * Select the line or surface elements that are partially or entirely enclosed in the
+          base mesh. A cross section of these line or surface elements should be defined
+          through section data.
+
+        * Issue the`MSHOPTIM
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MSHOPT.html>`_\
+          command.
+
+        **Example 1: Coarsening of the base mesh in a simple printed circuit board (PCB)
+        model**\
+
+        The following figure shows a very simplified printed circuit board (PCB) model where
+        the homogeneous dielectric board is modeled as 3D Tetrahedral solid elements (the
+        base mesh) and the enclosed metal traces are modeled as `MESH200
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
+        elements with a discrete `EREINF
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EREINF.html>`_\
+        section (the embedded mesh). The `MSHOPTIM
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MSHOPT.html>`_\
+        command is used with different values for ``Level``\ and the new meshes are shown
+        for each ``Level``\ option.
+
+        Example 2: Refinement of the base mesh based on selected `MESH200
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
+        elements with smeared `EREINF
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EREINF.html>`_\
+        section
+
+        The following figure shows a simple block model that is modeled as 3D Tetrahedral
+        solid elements. It also has four surfaces meshed with `MESH200
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_
+        elements (KEYOPT (1) = 4) with a smeared `EREINF
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_EREINF.html>`_\
+        section. The `MSHOPTIM
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MSHOPT.html>`_\
+        command is used with different values for ``Level``\ and the new meshes are shown
+        for each ``Level``\ option.
+
+        **Limitations**
+
+        When the `MSHOPTIM
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MSHOPT.html>`_\
+        command successfully optimizes the base mesh, it releases any associativity between
+        the current solid model and the finite element model. This means that if the
+        original finite element model was previously attached to any underlying geometry, it
+        will no longer be so once the `MSHOPTIM
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MSHOPT.html>`_\
+        command successfully updates the base mesh. As a result, you will no longer be able
+        to select, define, or clear finite element model items in terms of the detached
+        solid model. This is the same as the `MODMSH
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_MODMSH.html>`_,DETACH
+        command.
+
+        Loads, boundary conditions, connections, components, and so on, applied on the
+        original base mesh are not transferred to the new base mesh.
+        """
+        command = f"MSHOPTIM,,,{level}"
+        return self.run(command, **kwargs)
+
     def mshpattern(self, key: int | str = "", **kwargs):
         r"""Specifies pattern to be used for mapped triangle meshing.
 
@@ -2765,6 +3050,104 @@ class Meshing(CommandsBase):
         command = f"PSMESH,{secid},{name},{p0},{egroup},{num},{kcn},{kdir},{value},{ndplane},{pstol},{pstype},{ecomp},{ncomp}"
         return self.run(command, **kwargs)
 
+    def rbgen(
+        self,
+        p0: str = "",
+        elset: str = "",
+        ndset: str = "",
+        itty: str = "",
+        rid: str = "",
+        meshopt: str = "",
+        massopt: str = "",
+        ecomp: str = "",
+        **kwargs,
+    ):
+        r"""Generates a rigid body.
+
+        Mechanical APDL Command: `RBGEN <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RBGEN.html>`_
+
+        Parameters
+        ----------
+        p0 : str
+            Pilot node number for a rigid body. If not specified or if the defined pilot
+            node number does not exist, Mechanical APDL creates the pilot node.
+
+        elset : str
+            The name of component that is composed of the elements that will be defined
+            as the rigid body.
+
+        ndset : str
+            The name of component that is composed of the nodes that will be added to
+            the rigid body and defined as Pin-type/Tie-type node.
+
+        itty : str
+            The type ID of the target element.
+
+        rid : str
+            Unique real constant ID number. This ID must not be assigned to any other
+            elements. If ``RID``\ is not specified, the program selects the next
+            available real constant ID number.
+
+        meshopt : str
+            0 - Delete the underlying elements.
+
+            1 - Convert the underlying elements to `MESH200
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MESH200.html>`_.
+
+        massopt : str
+            0 - Don't generate `MASS21
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MASS21.html>`_
+            element at pilot node.
+
+            1 - Generate `MASS21
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MASS21.html>`_
+            element at pilot node.
+
+        ecomp : str
+            If specified, the name of a new component to be composed of new rigid target
+            elements generated by the `RBGEN
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RBGEN.html>`_\
+            command.
+
+        Notes
+        -----
+
+        .. _RBGEN_notes:
+
+        This command creates rigid bodies from pre-meshed element components. It generates
+        target elements (`TARGE169
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE169.html>`_
+        for 2D or `TARGE170
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_
+        for 3D) on the exterior of a pre-meshed body discretized by solid, shell, and beam
+        elements (called underlying elements), along with a pilot node. You may also add
+        nodes to the rigid body as pin-type or tie-type nodes, defined as target element
+        ``POINT``\ segments (`TSHAPE
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TSHAPE.html>`_,``POINT``).The
+        associated target elements use the same real constant ID.
+
+        See `Defining a Pre-meshed Body as a Rigid Body with RBGEN
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_mul/Hlp_G_MULMODRIGBOD.html#mulrbgen>`_
+        for more information on how to use this command.
+
+        Only one pilot node should be associated with a rigid body. Similar element
+        components and nodal components should not be associated with multiple rigid bodies
+        and should not be used for multiple `RBGEN
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RBGEN.html>`_\
+        commands.
+
+        Generating a `MASS21
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_MASS21.html>`_
+        element at the pilot node (``MASSOPT``\ = 1) is not supported for generalized plain
+        strain and the axisymmetric case.
+
+        Use the ``ECOMP``\ option to specify the name of a new component that includes the
+        newly-generated rigid target elements. This makes it easier to list, plot, and debug
+        these elements.
+        """
+        command = f"RBGEN,{p0},{elset},{ndset},{itty},{rid},{meshopt},{massopt},{ecomp}"
+        return self.run(command, **kwargs)
+
     def real(self, nset: str = "", **kwargs):
         r"""Sets the element real constant set attribute pointer.
 
@@ -2867,6 +3250,160 @@ class Meshing(CommandsBase):
         target element.
         """
         command = f"RSMESH,{p0},{rid},{kcn},{kdir},{value},{ndplane},{pstol},{ecomp}"
+        return self.run(command, **kwargs)
+
+    def sfcgen(
+        self,
+        option: str = "",
+        p0: str = "",
+        compc: str = "",
+        csys: str = "",
+        dof: str = "",
+        wtfact: str = "",
+        icty: str = "",
+        itty: str = "",
+        rid: str = "",
+        radius: str = "",
+        **kwargs,
+    ):
+        r"""Generates MPC surface-based constraints based on components.
+
+        Mechanical APDL Command: `SFCGEN <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SFCGEN.html>`_
+
+        Parameters
+        ----------
+        option : str
+            Specifies the type of constraint to be generated.
+
+            * ``1 or FORCE`` - Force distributed constraint
+
+            * ``2 or RIGID`` - Rigid surface constraint.
+
+            * ``3 or Coupling`` - Coupling constraint.
+
+        p0 : str
+            Pilot node number for a surface-based constraint.
+
+        compc : str
+            The name of the element component with Face ID (EFACE component(s) via the
+            `CMBLOCK
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Hlp_P_INT3_3.html#GintrCMBLtwr991230>`_
+            command) to define the contact surface with `CONTA174
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_
+            and NODAL components, or the node number to generate `CONTA175
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA175.html>`_
+            as contact elements.
+
+        csys : str
+            The number of the coordinate system used to specify surface-based
+            constraints in the local coordinate system.
+
+        dof : str
+            The degrees of freedom of the surface-based constraints. Specify a six-digit
+            value similar to KEYOPT(4) of the target element `TARGE169
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE169.html>`_,
+            `TARGE170
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_.
+
+        wtfact : str
+            Table name (input as ``%TableName%``) of weighting factors for
+            force-distributed constraints. See notes.
+
+        icty : str
+            Contact element type ID. If ``ICTY``\ is not specified, the program selects
+            the next available contact type ID number.
+
+        itty : str
+            Target element type ID. If ``ITTY``\ is not specified, the program selects
+            the next available contact type ID number.
+
+        rid : str
+            Unique real constant ID number. If ``RID``\ is not specified, the program
+            selects the next available real constant ID number.
+
+        radius : str
+            Radius of influence range specified as the real constant PINB.
+
+        Notes
+        -----
+
+        .. _SFCGEN_notes:
+
+        The `SFCGEN
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SFCGEN.html>`_\
+        creates surface-based multi-point constraints (MPC) that contain one pilot node, a
+        target segment meshed with the target elements `TARGE169
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE169.html>`_,
+        `TARGE170
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_,
+        and a contact surface meshed with `CONTA172
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA172.html>`_,
+        `CONTA174
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_
+        or `CONTA175
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA175.html>`_.
+        The makeup of the constraint depends on how you specify ``COMPC``:
+
+        * If ``COMPC``\ is element components with face ID (EFACE component(s) via the
+          `CMBLOCK
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_prog/Hlp_P_INT3_3.html#GintrCMBLtwr991230>`_
+          command), the command generates contact surface elements `CONTA174
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_
+          on the faces of base elements.
+
+        * If ``COMPC``\ is a nodal component or node number, by detault the command
+          generates `CONTA175
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA175.html>`_
+          as contact elements. It generates contact elements `CONTA172
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA172.html>`_
+          or `CONTA174
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_
+          on nodal surface based on the user-defined contact element type (``ICTY``).
+
+        * The command generates contact elements `CONTA172
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA172.html>`_
+          over the surfaces formed by the nodal components of a body meshed by 2D Plane
+          elements along with Pilot node meshed by `TARGE169
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE169.html>`_,
+          `TSHAPE
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TSHAPE.html>`_,PILO.
+
+        * The command generates contact elements `CONTA174
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_CONTA174.html>`_
+          over the surfaces formed by the nodal components of a body meshed by 3D solid and
+          shell elements, gasket, and interface elements along with Pilot node meshed by
+          `TARGE170
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_,
+          `TSHAPE
+          <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TSHAPE.html>`_,PILO.
+
+        If ``ITTY``\ (target element type ID) and ``ICTY``\ (contact element type ID) are
+        specified, the appropriate and corresponding contact key options (KEYOPT (2), KEYOPT
+        (4), KEYOPT (12)) and target element key options (KEYOPT (2)=1) must be set for the
+        MPC surface based constraint. For more information, see `Multipoint Constraints and
+        Assemblies in the Contact Technology Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/Hlp_ctec_mpcassm.html>`_.
+
+        You can specify user-defined weighting factors in `tabular format
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/Hlp_ctec_realkey.html#ctecrealtabular>`_
+        (specify ``Wtfact``\ as %Table Name%) with node number as the primary variable. The
+        program internally sets KEYOPT(7) = 2 on the target element (`TARGE169
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE169.html>`_
+        or `TARGE170
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_).
+        By default, the program computes weighting factors automatically by summing the
+        contact area of each contact node. When you set KEYOPT(7) = 1 on the target element
+        (`TARGE169
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE169.html>`_
+        or `TARGE170
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_TARGE170.html>`_),
+        the program uses a constant weighting factor of 1.0 for each contact node (similar
+        to the default behavior of ``Wtfact``\ on `RBE3
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_RBE3.html>`_).
+        For more information, see `Surface-Based Constraints in the Contact Technology Guide
+        <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_ctec/Hlp_ctec_surfcon.html>`_.
+        """
+        command = f"SFCGEN,{option},{p0},{compc},{csys},{dof},{wtfact},{icty},{itty},{rid},{radius}"
         return self.run(command, **kwargs)
 
     def shpp(self, lab: str = "", value1: str = "", value2: str = "", **kwargs):

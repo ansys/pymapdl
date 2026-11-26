@@ -1476,11 +1476,12 @@ class SpectrumOptions(CommandsBase):
         nmode: str = "",
         elcalc: str = "",
         modereusekey: str = "",
+        speccum: str = "",
         **kwargs,
     ):
         r"""Selects the spectrum type and other spectrum options.
 
-        Mechanical APDL Command: `SPOPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPOPT.html>`_
+        Mechanical APDL Command: `SPOPT <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_SPOPT.html>`_
 
         Parameters
         ----------
@@ -1516,6 +1517,15 @@ class SpectrumOptions(CommandsBase):
             * ``YES`` - This is not the first spectrum analysis. The ``MODE`` file will be reused and the
               necessary files will be cleaned up for the new spectrum analysis.
 
+        speccum : str
+            Key to cumulate all response spectra solutions in ``Jobname.rst``\ when
+            multiple response spectra are calculated (only supported for SPRS and DDAM
+            analyses with ``Elcalc``\ = YES):
+
+            * ``NO`` - Do not cumulate the response spectra solutions (default).
+
+            * ``YES`` - Cumulate the response spectra solutions.
+
         Notes
         -----
 
@@ -1544,7 +1554,7 @@ class SpectrumOptions(CommandsBase):
 
         This command is also valid in PREP7.
         """
-        command = f"SPOPT,{spectype},{nmode},{elcalc},{modereusekey}"
+        command = f"SPOPT,{spectype},{nmode},{elcalc},{modereusekey},{speccum}"
         return self.run(command, **kwargs)
 
     def spunit(

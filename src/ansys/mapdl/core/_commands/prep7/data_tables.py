@@ -54,11 +54,17 @@ class DataTables(CommandsBase):
         return self.run(command, **kwargs)
 
     def cgrow(
-        self, action: str = "", par1: str = "", par2: str = "", par3: str = "", **kwargs
+        self,
+        action: str = "",
+        par1: str = "",
+        par2: str = "",
+        par3: str = "",
+        par4: str = "",
+        **kwargs,
     ):
         r"""Specifies crack-growth options in a fracture analysis.
 
-        Mechanical APDL Command: `CGROW <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CGROW.html>`_
+        Mechanical APDL Command: `CGROW <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_
 
         Parameters
         ----------
@@ -148,6 +154,11 @@ class DataTables(CommandsBase):
             documentation
             <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CGROW.html>`_ for further
             information.
+
+        par4 : str
+            Option-specific command argument. Refer to the `CGROW command documentation
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_CGROW.html>`_
+            for details.
 
         Notes
         -----
@@ -536,7 +547,7 @@ class DataTables(CommandsBase):
 
           * ``w`` - Parameter-fitting value between 0 and 1. Default = 0.5.
         """
-        command = f"CGROW,{action},{par1},{par2},{par3}"
+        command = f"CGROW,{action},{par1},{par2},{par3},{par4}"
         return self.run(command, **kwargs)
 
     def inistate(

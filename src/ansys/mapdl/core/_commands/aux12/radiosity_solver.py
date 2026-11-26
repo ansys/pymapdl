@@ -92,10 +92,10 @@ class RadiositySolver(CommandsBase):
         command = f"VFCO,{action},{encl},{level}"
         return self.run(command, **kwargs)
 
-    def vfquery(self, srcelem: str = "", tarelem: str = "", **kwargs):
+    def vfquery(self, srcelem: str = "", tarelem: str = "", wropt: str = "", **kwargs):
         r"""Queries and prints element Hemicube view factors and average view factor.
 
-        Mechanical APDL Command: `VFQUERY <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VFQUERY.html>`_
+        Mechanical APDL Command: `VFQUERY <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_VFQUERY.html>`_
 
         Parameters
         ----------
@@ -114,6 +114,14 @@ class RadiositySolver(CommandsBase):
             surface to surface radiation in order to query view factors ( :ref:`sf`, :ref:`sfa`, or
             :ref:`sfe` with Lab = RDSF). The view factors must have been previously computed.
 
+        wropt : str
+            Option to write view factors to the output file (``Jobname.out``).
+
+            * ``WON`` - Write view factors to the output file (default).
+
+            * ``WOFF`` - Do not write view factors to the output file. This is useful
+              for reducing the size of the output file.
+
         Notes
         -----
 
@@ -127,7 +135,7 @@ class RadiositySolver(CommandsBase):
         When resuming a database, issue the command :ref:`vfopt`,READ before issuing the :ref:`vfquery`
         command.
         """
-        command = f"VFQUERY,{srcelem},{tarelem}"
+        command = f"VFQUERY,{srcelem},{tarelem},,{wropt}"
         return self.run(command, **kwargs)
 
     def vfsm(

@@ -25,15 +25,31 @@ from ansys.mapdl.core._commands import CommandsBase
 
 class DynamicOptions(CommandsBase):
 
-    def alphad(self, value: str = "", **kwargs):
+    def alphad(
+        self, value: str = "", auto_adjust: str = "", energy_ratio: str = "", **kwargs
+    ):
         r"""Defines the mass matrix multiplier for damping.
 
-        Mechanical APDL Command: `ALPHAD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ALPHAD.html>`_
+        Mechanical APDL Command: `ALPHAD <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ALPHAD.html>`_
 
         Parameters
         ----------
         value : str
             Mass matrix multiplier for damping.
+
+        auto_adjust : str
+            Set this field to ``Auto``\ to enable the software to automatically vary the
+            mass matrix multiplier for damping to aid in convergence (adaptive mass
+            proportional damping).. When this field is set to ``Auto``, the value in
+            field 2 serves as the initial multiplier with a default of 1000. See the
+            `Notes
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_ALPHAD.html#ALPHAD.notes>`_
+            section for details.
+
+        energy_ratio : str
+            Provide a maximum damping energy to potential energy ratio that the software
+            will try to maintain while auto-adjusting the damping multiplier. This field
+            is only valid if automatic adjustment is activated. Defaults to 0.01.
 
         Notes
         -----
@@ -53,7 +69,7 @@ class DynamicOptions(CommandsBase):
 
         This command is also valid in PREP7.
         """
-        command = f"ALPHAD,{value}"
+        command = f"ALPHAD,{value},{auto_adjust},{energy_ratio}"
         return self.run(command, **kwargs)
 
     def betad(self, value: str = "", **kwargs):
@@ -706,10 +722,10 @@ class DynamicOptions(CommandsBase):
         command = f"HROUT,{reimky},{clust},{mcont},{engcalc}"
         return self.run(command, **kwargs)
 
-    def kryopt(self, maxdim: str = "", restol: str = "", **kwargs):
+    def kryopt(self, maxdim: str = "", restol: str = "", orthtol: str = "", **kwargs):
         r"""Specifies solution options for a Krylov method harmonic analysis.
 
-        Mechanical APDL Command: `KRYOPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KRYOPT.html>`_
+        Mechanical APDL Command: `KRYOPT <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_KRYOPT.html>`_
 
         Parameters
         ----------
@@ -720,6 +736,10 @@ class DynamicOptions(CommandsBase):
         restol : str
             Tolerance used to verify the L-2 norm values of calculated residuals and issue a warning if
             ``RESTOL`` is exceeded throughout the entire frequency range. Default = 0.05.
+
+        orthtol : str
+            Tolerance that controls the orthonormality check of the Krylov subspace
+            vectors. Valid values range from 0 to 1. The default is 1E-8.
 
         Notes
         -----
@@ -734,7 +754,7 @@ class DynamicOptions(CommandsBase):
         Increasing subspace size ( ``MAXDIM`` ) improves solution accuracy with the trade-off of increased
         computational cost and additional memory requirements.
         """
-        command = f"KRYOPT,{maxdim},,,{restol}"
+        command = f"KRYOPT,{maxdim},,,{restol},{orthtol}"
         return self.run(command, **kwargs)
 
     def lvscale(self, fact: str = "", ldstep: str = "", **kwargs):
@@ -1865,11 +1885,13 @@ class DynamicOptions(CommandsBase):
         avsmooth: int | str = "",
         alphaf: str = "",
         alpham: str = "",
+        *,
+        oslm2: str = "",
         **kwargs,
     ):
         r"""Defines transient integration parameters.
 
-        Mechanical APDL Command: `TINTP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TINTP.html>`_
+        Mechanical APDL Command: `TINTP <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_TINTP.html>`_
 
         Parameters
         ----------
@@ -1923,6 +1945,13 @@ class DynamicOptions(CommandsBase):
             Interpolation factor in HHT algorithm for inertial term (used only if ``GAMMA`` is blank).
             Defaults to 0.0.
 
+        oslm2 : str
+            Specifies the oscillation limit for automatic time stepping of second order
+            transients (for example, structural transients). The automatic time stepping
+            algorithm will adjust to have approximately the specified number of points
+            per cycle. You can specify a negative number (for example, -1) to define a
+            time increment that is independent of the oscillation limit.
+
         Notes
         -----
 
@@ -1943,7 +1972,7 @@ class DynamicOptions(CommandsBase):
 
         This command is also valid in PREP7.
         """
-        command = f"TINTP,{gamma},{alpha},{delta},{theta},{oslm},{tol},,,{avsmooth},{alphaf},{alpham}"
+        command = f"TINTP,{gamma},{alpha},{delta},{theta},{oslm},{tol},{oslm2},,{avsmooth},{alphaf},{alpham}"
         return self.run(command, **kwargs)
 
     def trnopt(

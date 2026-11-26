@@ -1231,11 +1231,13 @@ class FeBodyLoads(CommandsBase):
         val2: str = "",
         val3: str = "",
         val4: str = "",
+        val5: str = "",
+        val6: str = "",
         **kwargs,
     ):
         r"""Defines an element body-force load.
 
-        Mechanical APDL Command: `BFE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFE.html>`_
+        Mechanical APDL Command: `BFE <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFE.html>`_
 
         Parameters
         ----------
@@ -1373,6 +1375,48 @@ class FeBodyLoads(CommandsBase):
             and ``VAL3`` are the imaginary X, Y, and Z components of force density (in the global Cartesian
             coordinate system).
 
+        val5, val6 : str
+            For ``Lab``\ = TEMP, FLUE, DGEN, HGEN, and CHRGD, ``VAL1``\ --``VAL4``\
+            represent body load values at the starting location and subsequent locations
+            (usually nodes) in the element. ``VAL1``\ can also represent a table name
+            for use with tabular boundary conditions. Enter only ``VAL1``\ for a uniform
+            body load across the element. For nonuniform loads, the values must be input
+            in the same order as shown in the input table for the element type. Values
+            initially default to the `BFUNIF
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_cmd/Hlp_C_BFUNIF.html>`_\
+            value (except for CHRGD which defaults to zero). For subsequent
+            specifications, a blank leaves a previously specified value unchanged; if
+            the value was not previously specified, the default value as described in
+            the `*Element Reference*\
+            <https://ansyshelp.ansys.com/public/Views/Secured/corp/v261/en/ans_elem/Hlp_E_ElemTOC.html>`_
+            is used.
+
+            For ``Lab``\ = JS and ``STLOC``\ = 1, ``VAL1``, ``VAL2``\ and ``VAL3``\ are
+            the X, Y, and Z components of current density (in the element coordinate
+            system), and ``VAL4``\ is the phase angle.
+
+            For ``Lab``\ = EF and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and ``VAL3``\ are
+            the X, Y, and Z components of electric field (in the global Cartesian
+            coordinate system).
+
+            If ``Lab``\ = FVIN in a unidirectional Mechanical APDL to Ansys CFX
+            analysis, ``VAL2``\ is the volume interface number (not available from
+            within the GUI), and ``VAL1``, ``VAL3``, and ``VAL4``\ are not used.
+
+            For ``Lab``\ = FORC and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and ``VAL3``\
+            are the real X, Y, and Z components of force density (in the global
+            Cartesian coordinate system).
+
+            For ``Lab``\ = DIVT and ``STLOC``\ = 1, ``VAL1``, ``VAL2``, and ``VAL3``\
+            are the X, Y, and Z components of the real part of divergence of Lighthill's
+            tensor (in the element coordinate system), and ``VAL4``, ``VAL5``, and
+            ``VAL6``\ are the X, Y, and Z components of the imaginary part of divergence
+            of Lighthill's tensor (in the element coordinate system).
+
+            For analyses that allow complex input, if ``Lab``\ = FORC and ``STLOC``\ =
+            4, ``VAL1``, ``VAL2``, and ``VAL3``\ are the imaginary X, Y, and Z
+            components of force density (in the global Cartesian coordinate system).
+
         Notes
         -----
 
@@ -1480,7 +1524,7 @@ class FeBodyLoads(CommandsBase):
 
         This command is also valid in PREP7.
         """
-        command = f"BFE,{elem},{lab},{stloc},{val1},{val2},{val3},{val4}"
+        command = f"BFE,{elem},{lab},{stloc},{val1},{val2},{val3},{val4},{val5},{val6}"
         return self.run(command, **kwargs)
 
     def bfecum(

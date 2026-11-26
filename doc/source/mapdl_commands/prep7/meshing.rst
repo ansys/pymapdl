@@ -24,6 +24,7 @@ Meshing
    Meshing.arefine
    Meshing.chkmsh
    Meshing.clrmshln
+   Meshing.cntgen
    Meshing.cpcyc
    Meshing.czdel
    Meshing.czmesh
@@ -55,11 +56,14 @@ Meshing
    Meshing.mshcopy
    Meshing.mshkey
    Meshing.mshmid
+   Meshing.mshoptim
    Meshing.mshpattern
    Meshing.nrefine
    Meshing.psmesh
+   Meshing.rbgen
    Meshing.real
    Meshing.rsmesh
+   Meshing.sfcgen
    Meshing.shpp
    Meshing.smrtsize
    Meshing.tchg
