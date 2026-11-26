@@ -421,7 +421,7 @@ def test_flush_stored_writes_and_reads_real_temporary_files(tmp_path):
     def send_input(input_file, write_to_log):
         command_file = Path(input_file)
         commands = command_file.read_text()
-        output_file = Path(commands.splitlines()[0].split(", ", 1)[1])
+        output_file = Path(commands.splitlines()[0].split(", ", 1)[1].split(",")[0])
         output_file.write_text("MAPDL response\nsecond line")
         assert write_to_log is False
         return "input accepted"
@@ -444,7 +444,7 @@ def test_flush_stored_writes_and_reads_real_temporary_files(tmp_path):
         _CoreExecutionMixin._flush_stored(client)
 
     expected_commands = (
-        f"/OUTPUT, {tmp_path / 'tmp_output.out'}\n/PREP7\nN,1,0,0,0\n/OUTPUT"
+        f"/OUTPUT, {tmp_path / 'tmp_output.out'},,,,FILE\n/PREP7\nN,1,0,0,0\n/OUTPUT"
     )
     assert (tmp_path / "tmp_input.inp").read_text() == expected_commands
     assert apdl_log_path.read_text() == expected_commands + "\n"
@@ -700,3 +700,40 @@ def test_result_reads_selected_file_or_reports_missing_results(
     else:
         assert _CoreSubsystemsMixin.result.fget(client) == f"parsed {expected}"
         read_binary.assert_called_once_with(tmp_path / expected)
+
+
+@pytest.mark.parametrize(
+    "line,removed",
+    [
+        ("/OUT", True),
+        ("/OUT,anstmp", True),
+        ("/OUT,anstmp,,,,FILE", True),
+        ("/OUT,anstmp,,,,FILE,", True),
+        ("/OUT,anstmp,,,APPEND,FILE", True),
+        ("/out,ANSTMP,,,,file", True),
+        ("/OUT,anstmp_other", False),
+        ("/OUT,anstmp_other,,,,FILE", False),
+        ("N,1,0,0,0", False),
+    ],
+)
+def test_lgwrite_removes_grpc_out_redirects(tmp_path, line, removed):
+    from ansys.mapdl.core._mapdl_extended.session import _ExtendedFileCommandsMixin
+
+    class Base:
+        def lgwrite(self, fname="", ext="", kedit="", **kwargs):
+            Path(fname).write_text(f"{line}\nN,1,0,0,0\n")
+
+    class Client(_ExtendedFileCommandsMixin, Base):
+        is_local = True
+        is_grpc = True
+        directory = tmp_path
+        jobname = "file"
+
+        def _get_file_name(self, fname="", ext="", default_extension=None):
+            return str(tmp_path / "log.lgw")
+
+    Client().lgwrite("log", remove_grpc_extra=True)
+
+    lines = (tmp_path / "log.lgw").read_text().splitlines()
+    assert (line in lines) is not removed
+    assert "N,1,0,0,0" in lines

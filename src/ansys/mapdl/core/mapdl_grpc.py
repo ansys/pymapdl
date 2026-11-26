@@ -3412,7 +3412,7 @@ class MapdlGrpc(MapdlBase):
                     "supplied when using 'CDREAD' with the 'ALL' option."
                 )
             tmp_dat = (
-                f"/OUT,{tmp_out}\n"
+                f"/OUT,{tmp_out},,,,FILE\n"
                 "/AUX15\n"
                 f"IGESIN,'{fnamei}'\n"
                 "FINISH\n"
@@ -3425,14 +3425,12 @@ class MapdlGrpc(MapdlBase):
 
         elif is_cdread:
             # Using CDREAD
-            tmp_dat = (
-                f"/OUT,{tmp_out}\n{orig_cmd},'{cd_read_option}','{filename}'\n/OUT,"
-            )
+            tmp_dat = f"/OUT,{tmp_out},,,,FILE\n{orig_cmd},'{cd_read_option}','{filename}'\n/OUT,"
             delete_uploaded_files = False
 
         else:
             # Using default INPUT
-            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n/OUT,"
+            tmp_dat = f"/OUT,{tmp_out},,,,FILE\n{orig_cmd},'{filename}'\n/OUT,"
             delete_uploaded_files = True
 
         if write_to_log and self._apdl_log is not None:

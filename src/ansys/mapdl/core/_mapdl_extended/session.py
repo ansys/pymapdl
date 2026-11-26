@@ -25,6 +25,7 @@
 from functools import wraps
 import os
 import pathlib
+import re
 import shutil
 
 from ansys.mapdl.core.errors import (
@@ -304,7 +305,10 @@ class _ExtendedFileCommandsMixin(_ExtendedMixinBase):
         fname_ = fname  # Update path
 
         # remove extra grpc /OUT commands
-        REMOVE_LINES = ("/OUT", "/OUT,anstmp")
+        REMOVE_LINES = ("/OUT",)
+        # Matches "/OUT,anstmp" followed by nothing or by any arguments, such as
+        # "/OUT,anstmp,,,,FILE" (MAPDL 27.2+), but not "/OUT,anstmp_other".
+        REMOVE_LINES_REGEX = re.compile(r"^/OUT,\s*anstmp\s*(,.*)?$", re.IGNORECASE)
         REMOVE_LINES_STARTING = (
             "*SET,__PYMAPDL_SESSION_ID__",
             "! *STATUS,__PYMAPDL_SESSION_ID__",
@@ -318,6 +322,7 @@ class _ExtendedFileCommandsMixin(_ExtendedMixinBase):
                     for line in fid
                     if (
                         line.strip() not in REMOVE_LINES
+                        and not REMOVE_LINES_REGEX.match(line.strip())
                         and not line.startswith(REMOVE_LINES_STARTING)
                     )
                 ]
