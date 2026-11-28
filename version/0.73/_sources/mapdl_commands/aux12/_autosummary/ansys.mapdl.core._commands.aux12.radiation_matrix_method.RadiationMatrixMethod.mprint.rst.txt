@@ -1,0 +1,6 @@
+﻿mprint
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.aux12.radiation_matrix_method
+
+.. automethod:: RadiationMatrixMethod.mprint

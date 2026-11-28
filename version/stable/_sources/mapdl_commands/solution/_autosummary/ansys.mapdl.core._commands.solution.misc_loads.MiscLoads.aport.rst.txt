@@ -1,0 +1,6 @@
+﻿aport
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.misc_loads
+
+.. automethod:: MiscLoads.aport

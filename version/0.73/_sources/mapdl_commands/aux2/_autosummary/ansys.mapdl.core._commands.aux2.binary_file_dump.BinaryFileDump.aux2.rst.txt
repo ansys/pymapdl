@@ -1,0 +1,6 @@
+﻿aux2
+====
+
+.. currentmodule:: ansys.mapdl.core._commands.aux2.binary_file_dump
+
+.. automethod:: BinaryFileDump.aux2

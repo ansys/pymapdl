@@ -1,0 +1,6 @@
+﻿rsurf
+=====
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.radiosity
+
+.. automethod:: Radiosity.rsurf

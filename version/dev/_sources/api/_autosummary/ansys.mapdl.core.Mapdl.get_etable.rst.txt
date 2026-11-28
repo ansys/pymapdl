@@ -1,0 +1,6 @@
+﻿get\_etable
+===========
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.get_etable

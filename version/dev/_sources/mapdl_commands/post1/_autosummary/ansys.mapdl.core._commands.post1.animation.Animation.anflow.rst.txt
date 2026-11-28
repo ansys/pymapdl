@@ -1,0 +1,6 @@
+﻿anflow
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.animation
+
+.. automethod:: Animation.anflow

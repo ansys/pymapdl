@@ -1,0 +1,6 @@
+animate
+=======
+
+.. currentmodule:: ansys.mapdl.core.plotting.visualizer
+
+.. automethod:: MapdlPlotter.animate

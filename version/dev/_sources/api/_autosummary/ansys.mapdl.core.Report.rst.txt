@@ -1,0 +1,28 @@
+﻿Report
+======
+
+.. currentmodule:: ansys.mapdl.core
+
+.. autoclass:: Report
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      
+      
+      Report.get_version
+      
+      
+      Report.mapdl_info
+      
+   
+   
+
+   
+   
+   

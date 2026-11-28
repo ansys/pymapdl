@@ -1,0 +1,6 @@
+force\_intel
+============
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.force_intel

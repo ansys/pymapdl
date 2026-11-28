@@ -1,0 +1,6 @@
+﻿help\_command
+=============
+
+.. currentmodule:: ansys.mapdl.core.cli.help
+
+.. autofunction:: help_command

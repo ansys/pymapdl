@@ -1,0 +1,6 @@
+uds\_dir
+========
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.uds_dir

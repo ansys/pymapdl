@@ -1,0 +1,6 @@
+graphics\_backend
+=================
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.graphics_backend

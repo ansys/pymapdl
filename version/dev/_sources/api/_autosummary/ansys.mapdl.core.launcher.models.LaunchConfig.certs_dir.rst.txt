@@ -1,0 +1,6 @@
+certs\_dir
+==========
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoattribute:: LaunchConfig.certs_dir

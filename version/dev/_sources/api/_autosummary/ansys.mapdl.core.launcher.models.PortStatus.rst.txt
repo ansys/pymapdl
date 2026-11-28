@@ -1,0 +1,32 @@
+﻿PortStatus
+==========
+
+.. currentmodule:: ansys.mapdl.core.launcher.models
+
+.. autoclass:: PortStatus
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      PortStatus.process
+      PortStatus.port
+      PortStatus.available
+      PortStatus.used_by_mapdl
+   
+   

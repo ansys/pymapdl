@@ -1,0 +1,6 @@
+﻿plvect
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.results
+
+.. automethod:: Results.plvect

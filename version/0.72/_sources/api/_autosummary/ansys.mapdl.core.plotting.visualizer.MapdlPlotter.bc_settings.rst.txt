@@ -1,0 +1,6 @@
+bc\_settings
+============
+
+.. currentmodule:: ansys.mapdl.core.plotting.visualizer
+
+.. autoproperty:: MapdlPlotter.bc_settings

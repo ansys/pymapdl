@@ -1,0 +1,6 @@
+﻿modopt
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.dynamic_options
+
+.. automethod:: DynamicOptions.modopt
